@@ -1,0 +1,63 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+enum Invalid1 {
+	Unknown,
+	Closed = 1,
+	Open = 'open',
+}
+
+function getInvalidValue() {
+	return 0
+}
+
+enum Invalid2 {
+	Unknown = getInvalidValue(),
+	Closed = "closed",
+	Open = getInvalidValue(),
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:5:2 lint/nursery/useConsistentEnumValueType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Inconsistent enum value type.
+  
+    3 │ 	Unknown,
+    4 │ 	Closed = 1,
+  > 5 │ 	Open = 'open',
+      │ 	^^^^^^^^^^^^^
+    6 │ }
+    7 │ 
+  
+  i Mixing number and string enums can be confusing. Make sure to use a consistent value type within your enum.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:14:2 lint/nursery/useConsistentEnumValueType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Inconsistent enum value type.
+  
+    12 │ enum Invalid2 {
+    13 │ 	Unknown = getInvalidValue(),
+  > 14 │ 	Closed = "closed",
+       │ 	^^^^^^^^^^^^^^^^^
+    15 │ 	Open = getInvalidValue(),
+    16 │ }
+  
+  i Mixing number and string enums can be confusing. Make sure to use a consistent value type within your enum.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

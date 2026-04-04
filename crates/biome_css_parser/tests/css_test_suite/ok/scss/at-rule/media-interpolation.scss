@@ -1,0 +1,47 @@
+@media (#{$feature}) {
+  .box {
+    color: red;
+  }
+}
+
+@media (#{$feature}: #{$value}) {
+  .box {
+    color: red;
+  }
+}
+
+@media (#{$min} <= width <= #{$max}) {
+  .box {
+    color: red;
+  }
+}
+
+@media (#{$min} <= width) {
+  .box {
+    color: red;
+  }
+}
+
+@media (min-width: #{$value}px) {
+  .box {
+    color: red;
+  }
+}
+
+@media (#{$min}px <= width) {
+  .box {
+    color: red;
+  }
+}
+
+@container (#{$feature}: #{$value}) {
+  .box {
+    color: red;
+  }
+}
+
+@container (min-width: #{$value}px) {
+  .box {
+    color: red;
+  }
+}

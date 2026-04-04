@@ -1,0 +1,190 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div class:active>Shorthand</div>
+<div class:cool class:lame={!cool}>Multiple shorthand</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteClassDirective {
+                        class_token: CLASS_KW@5..10 "class" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@10..11 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@11..17 "active" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: missing (optional),
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@17..18 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@18..27 "Shorthand" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@27..28 "<" [] [],
+                slash_token: SLASH@28..29 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@29..32 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@32..33 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@33..35 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@35..39 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteClassDirective {
+                        class_token: CLASS_KW@39..44 "class" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@44..45 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@45..50 "cool" [] [Whitespace(" ")],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: missing (optional),
+                        },
+                    },
+                    SvelteClassDirective {
+                        class_token: CLASS_KW@50..55 "class" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@55..56 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@56..60 "lame" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@60..61 "=" [] [],
+                                value: HtmlAttributeSingleTextExpression {
+                                    l_curly_token: L_CURLY@61..62 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@62..67 "!cool" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@67..68 "}" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@68..69 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@69..87 "Multiple shorthand" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@87..88 "<" [] [],
+                slash_token: SLASH@88..89 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@89..92 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@92..93 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@93..94 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..94
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..93
+    0: HTML_ELEMENT@0..33
+      0: HTML_OPENING_ELEMENT@0..18
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..17
+          0: SVELTE_CLASS_DIRECTIVE@5..17
+            0: CLASS_KW@5..10 "class" [] []
+            1: SVELTE_DIRECTIVE_VALUE@10..17
+              0: COLON@10..11 ":" [] []
+              1: SVELTE_LITERAL@11..17
+                0: HTML_LITERAL@11..17 "active" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@17..17
+              3: (empty)
+        3: R_ANGLE@17..18 ">" [] []
+      1: HTML_ELEMENT_LIST@18..27
+        0: HTML_CONTENT@18..27
+          0: HTML_LITERAL@18..27 "Shorthand" [] []
+      2: HTML_CLOSING_ELEMENT@27..33
+        0: L_ANGLE@27..28 "<" [] []
+        1: SLASH@28..29 "/" [] []
+        2: HTML_TAG_NAME@29..32
+          0: HTML_LITERAL@29..32 "div" [] []
+        3: R_ANGLE@32..33 ">" [] []
+    1: HTML_ELEMENT@33..93
+      0: HTML_OPENING_ELEMENT@33..69
+        0: L_ANGLE@33..35 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@35..39
+          0: HTML_LITERAL@35..39 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@39..68
+          0: SVELTE_CLASS_DIRECTIVE@39..50
+            0: CLASS_KW@39..44 "class" [] []
+            1: SVELTE_DIRECTIVE_VALUE@44..50
+              0: COLON@44..45 ":" [] []
+              1: SVELTE_LITERAL@45..50
+                0: HTML_LITERAL@45..50 "cool" [] [Whitespace(" ")]
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@50..50
+              3: (empty)
+          1: SVELTE_CLASS_DIRECTIVE@50..68
+            0: CLASS_KW@50..55 "class" [] []
+            1: SVELTE_DIRECTIVE_VALUE@55..68
+              0: COLON@55..56 ":" [] []
+              1: SVELTE_LITERAL@56..60
+                0: HTML_LITERAL@56..60 "lame" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@60..60
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@60..68
+                0: EQ@60..61 "=" [] []
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@61..68
+                  0: L_CURLY@61..62 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@62..67
+                    0: HTML_LITERAL@62..67 "!cool" [] []
+                  2: R_CURLY@67..68 "}" [] []
+        3: R_ANGLE@68..69 ">" [] []
+      1: HTML_ELEMENT_LIST@69..87
+        0: HTML_CONTENT@69..87
+          0: HTML_LITERAL@69..87 "Multiple shorthand" [] []
+      2: HTML_CLOSING_ELEMENT@87..93
+        0: L_ANGLE@87..88 "<" [] []
+        1: SLASH@88..89 "/" [] []
+        2: HTML_TAG_NAME@89..92
+          0: HTML_LITERAL@89..92 "div" [] []
+        3: R_ANGLE@92..93 ">" [] []
+  4: EOF@93..94 "" [Newline("\n")] []
+
+```

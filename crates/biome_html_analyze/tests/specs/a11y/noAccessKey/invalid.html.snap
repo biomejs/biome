@@ -1,0 +1,74 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<input type="submit" accesskey="s" value="Submit" />
+<a href="https://webaim.org/" accesskey="w">WebAIM.org</a>
+<button accesskey="n">Next</button>
+
+```
+
+# Diagnostics
+```
+invalid.html:2:22 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the accesskey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard commands.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <input type="submit" accesskey="s" value="Submit" />
+      │                      ^^^^^^^^^^^^^
+    3 │ <a href="https://webaim.org/" accesskey="w">WebAIM.org</a>
+    4 │ <button accesskey="n">Next</button>
+  
+  i Assigning keyboard shortcuts using the accesskey attribute leads to inconsistent keyboard actions across applications.
+  
+  i Unsafe fix: Remove the accesskey attribute.
+  
+    2 │ <input·type="submit"·accesskey="s"·value="Submit"·/>
+      │                      --------------                 
+
+```
+
+```
+invalid.html:3:31 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the accesskey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard commands.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <input type="submit" accesskey="s" value="Submit" />
+  > 3 │ <a href="https://webaim.org/" accesskey="w">WebAIM.org</a>
+      │                               ^^^^^^^^^^^^^
+    4 │ <button accesskey="n">Next</button>
+    5 │ 
+  
+  i Assigning keyboard shortcuts using the accesskey attribute leads to inconsistent keyboard actions across applications.
+  
+  i Unsafe fix: Remove the accesskey attribute.
+  
+    3 │ <a·href="https://webaim.org/"·accesskey="w">WebAIM.org</a>
+      │                               -------------               
+
+```
+
+```
+invalid.html:4:9 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the accesskey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard commands.
+  
+    2 │ <input type="submit" accesskey="s" value="Submit" />
+    3 │ <a href="https://webaim.org/" accesskey="w">WebAIM.org</a>
+  > 4 │ <button accesskey="n">Next</button>
+      │         ^^^^^^^^^^^^^
+    5 │ 
+  
+  i Assigning keyboard shortcuts using the accesskey attribute leads to inconsistent keyboard actions across applications.
+  
+  i Unsafe fix: Remove the accesskey attribute.
+  
+    4 │ <button·accesskey="n">Next</button>
+      │         -------------              
+
+```

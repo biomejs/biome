@@ -16,7 +16,7 @@ _Note: The parser emitted 4 diagnostics which are not shown here._
 ```
 issue4567.js:3:24 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This hook specifies more dependencies than necessary: w
+  × This hook specifies more dependencies than necessary: w.
   
     1 │ import {useCallback,utte } from"react";
     2 │ function{
@@ -31,6 +31,10 @@ issue4567.js:3:24 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━
   > 3 │   const [width,(dh]  = useCallback(() =>{ width) }, [w
       │                                                      ^
     4 │ 
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Specifying more dependencies than required can lead to unnecessary re-rendering
+    and degraded performance.
   
   i Unsafe fix: Remove the extra dependencies from the list.
   

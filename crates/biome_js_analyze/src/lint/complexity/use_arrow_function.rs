@@ -28,6 +28,8 @@ declare_lint_rule! {
     ///
     /// This rule proposes turning all function expressions that are not generators (`function*`) and don't use `this` into arrow functions.
     ///
+    /// This rule does not modify top-level function declarations ([discuss here](https://github.com/biomejs/biome/discussions/7108)).
+    ///
     /// ## Examples
     ///
     /// ### Invalid

@@ -1,0 +1,29 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: component-frameworks/large-self-closing.svelte
+---
+
+# Input
+
+```svelte
+<Button
+	label="test button"
+	variant="primary"
+	size="lg"
+	class="text-2xl bg-amber-600 font-bold"
+/>
+
+```
+
+
+# Formatted
+
+```svelte
+<Button
+	label="test button"
+	variant="primary"
+	size="lg"
+	class="text-2xl bg-amber-600 font-bold"
+/>
+
+```

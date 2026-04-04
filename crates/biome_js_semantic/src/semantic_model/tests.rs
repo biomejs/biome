@@ -272,4 +272,63 @@ mod test {
         assert!(globals[0].is_read());
         assert_eq!(globals[0].syntax().text_trimmed(), "console");
     }
+
+    #[test]
+    pub fn ok_semantic_model_ts_construct_signature_member() {
+        let r = biome_js_parser::parse(
+            "export interface TypedEventConstructor<T, I> { new(): Event & TypedEvent; }",
+            JsFileSource::ts(),
+            JsParserOptions::default(),
+        );
+        let _model = semantic_model(&r.tree(), SemanticModelOptions::default());
+    }
+
+    #[test]
+    pub fn ok_semantic_model_ambient_module_type_alias_and_class() {
+        let r = biome_js_parser::parse(
+            r#"
+declare module "jsoneditor" {
+  export type JSONEditorOptions = {
+    mode?: string;
+    [key: string]: unknown;
+  };
+
+  export class JSONEditor {
+    constructor(container: HTMLElement, options?: JSONEditorOptions);
+    get options(): JSONEditorOptions;
+    set options(options: JSONEditorOptions);
+  }
+}
+"#,
+            JsFileSource::d_ts(),
+            JsParserOptions::default(),
+        );
+        let model = semantic_model(&r.tree(), SemanticModelOptions::default());
+        let mut missing_scopes = Vec::new();
+
+        for scope in model.global_scope().descendents() {
+            let range = scope.range();
+            if !scope.data.scope_node_by_range.contains_key(&range) {
+                let matching_kinds = r
+                    .syntax()
+                    .descendants()
+                    .filter(|node| node.text_trimmed_range() == range)
+                    .map(|node| format!("{:?}", node.kind()))
+                    .collect::<Vec<_>>();
+
+                missing_scopes.push(format!(
+                    "scope #{:?} range {:?} missing node, matching kinds: {:?}",
+                    scope.id(),
+                    range,
+                    matching_kinds
+                ));
+            }
+        }
+
+        assert!(
+            missing_scopes.is_empty(),
+            "missing scope nodes:\n{}",
+            missing_scopes.join("\n")
+        );
+    }
 }

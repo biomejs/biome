@@ -1,0 +1,68 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+Paragraph followed by empty plus bullet.
++
+
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..40 "Paragraph followed by empty plus bullet." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@40..41 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@41..42 "+" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@42..43 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@43..44 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@44..44 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..44
+  0: (empty)
+  1: MD_BLOCK_LIST@0..44
+    0: MD_PARAGRAPH@0..43
+      0: MD_INLINE_ITEM_LIST@0..43
+        0: MD_TEXTUAL@0..40
+          0: MD_TEXTUAL_LITERAL@0..40 "Paragraph followed by empty plus bullet." [] []
+        1: MD_TEXTUAL@40..41
+          0: MD_TEXTUAL_LITERAL@40..41 "\n" [] []
+        2: MD_TEXTUAL@41..42
+          0: MD_TEXTUAL_LITERAL@41..42 "+" [] []
+        3: MD_TEXTUAL@42..43
+          0: MD_TEXTUAL_LITERAL@42..43 "\n" [] []
+      1: (empty)
+    1: MD_NEWLINE@43..44
+      0: NEWLINE@43..44 "\n" [] []
+  2: EOF@44..44 "" [] []
+
+```

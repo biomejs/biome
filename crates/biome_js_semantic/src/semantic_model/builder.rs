@@ -1,5 +1,6 @@
 use super::*;
 use biome_js_syntax::{AnyJsRoot, JsSyntaxNode, TextRange, TsConditionalType, TsTypeParameterName};
+use biome_rowan::SyntaxNodePtr;
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::collections::hash_map::Entry;
 
@@ -66,6 +67,7 @@ impl SemanticModelBuilder {
             // Accessible from scopes, closures
             JS_MODULE
             | JS_SCRIPT
+            | JS_EXPRESSION_TEMPLATE_ROOT
             | TS_DECLARATION_MODULE
             | JS_FUNCTION_DECLARATION
             | JS_FUNCTION_EXPRESSION
@@ -91,8 +93,12 @@ impl SemanticModelBuilder {
             | TS_DECLARE_FUNCTION_DECLARATION
             | TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION
             | TS_CALL_SIGNATURE_TYPE_MEMBER
+            | TS_CONSTRUCT_SIGNATURE_TYPE_MEMBER
+            | TS_CONSTRUCTOR_SIGNATURE_CLASS_MEMBER
             | TS_METHOD_SIGNATURE_CLASS_MEMBER
             | TS_METHOD_SIGNATURE_TYPE_MEMBER
+            | TS_GETTER_SIGNATURE_CLASS_MEMBER
+            | TS_SETTER_SIGNATURE_CLASS_MEMBER
             | TS_INDEX_SIGNATURE_CLASS_MEMBER
             | TS_INDEX_SIGNATURE_TYPE_MEMBER
             | JS_BLOCK_STATEMENT
@@ -166,6 +172,7 @@ impl SemanticModelBuilder {
                 range,
                 scope_id,
                 hoisted_scope_id,
+                declaration_kind,
             } => {
                 let binding_scope_id = hoisted_scope_id.unwrap_or(scope_id);
 
@@ -178,6 +185,7 @@ impl SemanticModelBuilder {
                     range,
                     references: Vec::new(),
                     export_by_start: smallvec::SmallVec::new(),
+                    declaration_kind,
                 });
                 self.bindings_by_start.insert(range.start(), binding_id);
 
@@ -186,21 +194,30 @@ impl SemanticModelBuilder {
                 scope.bindings.push(binding_id);
                 // Handle bindings with a bogus name
                 if let Some(node) = self.binding_node_by_start.get(&range.start()) {
-                    if let Some(node) = JsIdentifierBinding::cast_ref(node) {
-                        if let Ok(name_token) = node.name_token() {
-                            let name = name_token.token_text_trimmed();
-                            scope.bindings_by_name.insert(name, binding_id);
-                        }
+                    let name = if let Some(node) = JsIdentifierBinding::cast_ref(node) {
+                        node.name_token().ok().map(|t| t.token_text_trimmed())
                     } else if let Some(node) = TsIdentifierBinding::cast_ref(node) {
-                        if let Ok(name_token) = node.name_token() {
-                            let name = name_token.token_text_trimmed();
-                            scope.bindings_by_name.insert(name, binding_id);
-                        }
-                    } else if let Some(node) = TsTypeParameterName::cast_ref(node)
-                        && let Ok(ident_token) = node.ident_token()
-                    {
-                        let name = ident_token.token_text_trimmed();
-                        scope.bindings_by_name.insert(name, binding_id);
+                        node.name_token().ok().map(|t| t.token_text_trimmed())
+                    } else if let Some(node) = TsTypeParameterName::cast_ref(node) {
+                        node.ident_token().ok().map(|t| t.token_text_trimmed())
+                    } else {
+                        None
+                    };
+
+                    if let Some(name) = name {
+                        let binding_reference =
+                            TsBindingReference::from_binding_and_declaration_kind(
+                                binding_id,
+                                declaration_kind,
+                            );
+
+                        scope
+                            .bindings_by_name
+                            .entry(name)
+                            .and_modify(|existing| {
+                                *existing = existing.union_with(binding_reference);
+                            })
+                            .or_insert(binding_reference);
                     }
                 }
 
@@ -336,7 +353,7 @@ impl SemanticModelBuilder {
     #[inline]
     pub fn build(self) -> SemanticModel {
         let data = SemanticModelData {
-            root: self.root,
+            root: self.root.syntax().as_send().expect("To be a root node"),
             scopes: self.scopes,
             scope_by_range: Lapper::new(
                 self.scope_range_by_start
@@ -346,8 +363,16 @@ impl SemanticModelBuilder {
                     .collect(),
             ),
             scope_hoisted_to_by_range: self.scope_hoisted_to_by_range,
-            binding_node_by_start: self.binding_node_by_start,
-            scope_node_by_range: self.scope_node_by_range,
+            binding_node_by_start: self
+                .binding_node_by_start
+                .into_iter()
+                .map(|(pos, node)| (pos, SyntaxNodePtr::new(&node)))
+                .collect(),
+            scope_node_by_range: self
+                .scope_node_by_range
+                .into_iter()
+                .map(|(pos, node)| (pos, SyntaxNodePtr::new(&node)))
+                .collect(),
             bindings: self.bindings,
             bindings_by_start: self.bindings_by_start,
             declared_at_by_start: self.declared_at_by_start,

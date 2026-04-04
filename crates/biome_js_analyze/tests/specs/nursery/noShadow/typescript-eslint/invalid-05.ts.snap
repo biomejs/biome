@@ -15,7 +15,7 @@ const x = 1;
 ```
 invalid-05.ts:3:8 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable shadows another variable with the same name in the outer scope.
+  ! This variable shadows another variable with the same name in the outer scope.
   
     1 │ const x = 1;
     2 │ {
@@ -32,6 +32,8 @@ invalid-05.ts:3:8 lint/nursery/noShadow ━━━━━━━━━━━━━�
     3 │   type x = string;
   
   i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

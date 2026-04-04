@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: unsorted_export_chunk.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -17,6 +16,7 @@ export * as S from "s";
 export { R } from "r";
 function f() {}
 export { A } from "a";
+export { X }
 
 ```
 
@@ -57,7 +57,7 @@ unsorted_export_chunk.js:2:1 assist/source/organizeImports  FIXABLE  ━━━�
     11 14 │   function f() {}
        15 │ + 
     12 16 │   export { A } from "a";
-    13 17 │   
+    13 17 │   export { X }
   
 
 ```

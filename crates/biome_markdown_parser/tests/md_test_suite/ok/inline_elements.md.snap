@@ -1,0 +1,296 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+This has `inline code` in it.
+
+This is *italic* and this is **bold**.
+
+This is _also italic_ and __also bold__.
+
+Here is a [link](https://example.com) and an ![image](image.png).
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..9 "This has " [] [],
+                },
+                MdInlineCode {
+                    l_tick_token: BACKTICK@9..10 "`" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@10..21 "inline code" [] [],
+                        },
+                    ],
+                    r_tick_token: BACKTICK@21..22 "`" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@22..29 " in it." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@29..30 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@30..31 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@31..39 "This is " [] [],
+                },
+                MdInlineItalic {
+                    l_fence: STAR@39..40 "*" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@40..46 "italic" [] [],
+                        },
+                    ],
+                    r_fence: STAR@46..47 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@47..60 " and this is " [] [],
+                },
+                MdInlineEmphasis {
+                    l_fence: DOUBLE_STAR@60..62 "**" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@62..66 "bold" [] [],
+                        },
+                    ],
+                    r_fence: DOUBLE_STAR@66..68 "**" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@68..69 "." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@69..70 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@70..71 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@71..79 "This is " [] [],
+                },
+                MdInlineItalic {
+                    l_fence: UNDERSCORE@79..80 "_" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@80..91 "also italic" [] [],
+                        },
+                    ],
+                    r_fence: UNDERSCORE@91..92 "_" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@92..97 " and " [] [],
+                },
+                MdInlineEmphasis {
+                    l_fence: DOUBLE_UNDERSCORE@97..99 "__" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@99..108 "also bold" [] [],
+                        },
+                    ],
+                    r_fence: DOUBLE_UNDERSCORE@108..110 "__" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@110..111 "." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@111..112 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@112..113 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@113..123 "Here is a " [] [],
+                },
+                MdInlineLink {
+                    l_brack_token: L_BRACK@123..124 "[" [] [],
+                    text: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@124..128 "link" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@128..129 "]" [] [],
+                    l_paren_token: L_PAREN@129..130 "(" [] [],
+                    destination: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@130..149 "https://example.com" [] [],
+                        },
+                    ],
+                    title: missing (optional),
+                    r_paren_token: R_PAREN@149..150 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@150..158 " and an " [] [],
+                },
+                MdInlineImage {
+                    excl_token: BANG@158..159 "!" [] [],
+                    l_brack_token: L_BRACK@159..160 "[" [] [],
+                    alt: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@160..165 "image" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@165..166 "]" [] [],
+                    l_paren_token: L_PAREN@166..167 "(" [] [],
+                    destination: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@167..176 "image.png" [] [],
+                        },
+                    ],
+                    title: missing (optional),
+                    r_paren_token: R_PAREN@176..177 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@177..178 "." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@178..179 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+    ],
+    eof_token: EOF@179..179 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..179
+  0: (empty)
+  1: MD_BLOCK_LIST@0..179
+    0: MD_PARAGRAPH@0..30
+      0: MD_INLINE_ITEM_LIST@0..30
+        0: MD_TEXTUAL@0..9
+          0: MD_TEXTUAL_LITERAL@0..9 "This has " [] []
+        1: MD_INLINE_CODE@9..22
+          0: BACKTICK@9..10 "`" [] []
+          1: MD_INLINE_ITEM_LIST@10..21
+            0: MD_TEXTUAL@10..21
+              0: MD_TEXTUAL_LITERAL@10..21 "inline code" [] []
+          2: BACKTICK@21..22 "`" [] []
+        2: MD_TEXTUAL@22..29
+          0: MD_TEXTUAL_LITERAL@22..29 " in it." [] []
+        3: MD_TEXTUAL@29..30
+          0: MD_TEXTUAL_LITERAL@29..30 "\n" [] []
+      1: (empty)
+    1: MD_NEWLINE@30..31
+      0: NEWLINE@30..31 "\n" [] []
+    2: MD_PARAGRAPH@31..70
+      0: MD_INLINE_ITEM_LIST@31..70
+        0: MD_TEXTUAL@31..39
+          0: MD_TEXTUAL_LITERAL@31..39 "This is " [] []
+        1: MD_INLINE_ITALIC@39..47
+          0: STAR@39..40 "*" [] []
+          1: MD_INLINE_ITEM_LIST@40..46
+            0: MD_TEXTUAL@40..46
+              0: MD_TEXTUAL_LITERAL@40..46 "italic" [] []
+          2: STAR@46..47 "*" [] []
+        2: MD_TEXTUAL@47..60
+          0: MD_TEXTUAL_LITERAL@47..60 " and this is " [] []
+        3: MD_INLINE_EMPHASIS@60..68
+          0: DOUBLE_STAR@60..62 "**" [] []
+          1: MD_INLINE_ITEM_LIST@62..66
+            0: MD_TEXTUAL@62..66
+              0: MD_TEXTUAL_LITERAL@62..66 "bold" [] []
+          2: DOUBLE_STAR@66..68 "**" [] []
+        4: MD_TEXTUAL@68..69
+          0: MD_TEXTUAL_LITERAL@68..69 "." [] []
+        5: MD_TEXTUAL@69..70
+          0: MD_TEXTUAL_LITERAL@69..70 "\n" [] []
+      1: (empty)
+    3: MD_NEWLINE@70..71
+      0: NEWLINE@70..71 "\n" [] []
+    4: MD_PARAGRAPH@71..112
+      0: MD_INLINE_ITEM_LIST@71..112
+        0: MD_TEXTUAL@71..79
+          0: MD_TEXTUAL_LITERAL@71..79 "This is " [] []
+        1: MD_INLINE_ITALIC@79..92
+          0: UNDERSCORE@79..80 "_" [] []
+          1: MD_INLINE_ITEM_LIST@80..91
+            0: MD_TEXTUAL@80..91
+              0: MD_TEXTUAL_LITERAL@80..91 "also italic" [] []
+          2: UNDERSCORE@91..92 "_" [] []
+        2: MD_TEXTUAL@92..97
+          0: MD_TEXTUAL_LITERAL@92..97 " and " [] []
+        3: MD_INLINE_EMPHASIS@97..110
+          0: DOUBLE_UNDERSCORE@97..99 "__" [] []
+          1: MD_INLINE_ITEM_LIST@99..108
+            0: MD_TEXTUAL@99..108
+              0: MD_TEXTUAL_LITERAL@99..108 "also bold" [] []
+          2: DOUBLE_UNDERSCORE@108..110 "__" [] []
+        4: MD_TEXTUAL@110..111
+          0: MD_TEXTUAL_LITERAL@110..111 "." [] []
+        5: MD_TEXTUAL@111..112
+          0: MD_TEXTUAL_LITERAL@111..112 "\n" [] []
+      1: (empty)
+    5: MD_NEWLINE@112..113
+      0: NEWLINE@112..113 "\n" [] []
+    6: MD_PARAGRAPH@113..179
+      0: MD_INLINE_ITEM_LIST@113..179
+        0: MD_TEXTUAL@113..123
+          0: MD_TEXTUAL_LITERAL@113..123 "Here is a " [] []
+        1: MD_INLINE_LINK@123..150
+          0: L_BRACK@123..124 "[" [] []
+          1: MD_INLINE_ITEM_LIST@124..128
+            0: MD_TEXTUAL@124..128
+              0: MD_TEXTUAL_LITERAL@124..128 "link" [] []
+          2: R_BRACK@128..129 "]" [] []
+          3: L_PAREN@129..130 "(" [] []
+          4: MD_INLINE_ITEM_LIST@130..149
+            0: MD_TEXTUAL@130..149
+              0: MD_TEXTUAL_LITERAL@130..149 "https://example.com" [] []
+          5: (empty)
+          6: R_PAREN@149..150 ")" [] []
+        2: MD_TEXTUAL@150..158
+          0: MD_TEXTUAL_LITERAL@150..158 " and an " [] []
+        3: MD_INLINE_IMAGE@158..177
+          0: BANG@158..159 "!" [] []
+          1: L_BRACK@159..160 "[" [] []
+          2: MD_INLINE_ITEM_LIST@160..165
+            0: MD_TEXTUAL@160..165
+              0: MD_TEXTUAL_LITERAL@160..165 "image" [] []
+          3: R_BRACK@165..166 "]" [] []
+          4: L_PAREN@166..167 "(" [] []
+          5: MD_INLINE_ITEM_LIST@167..176
+            0: MD_TEXTUAL@167..176
+              0: MD_TEXTUAL_LITERAL@167..176 "image.png" [] []
+          6: (empty)
+          7: R_PAREN@176..177 ")" [] []
+        4: MD_TEXTUAL@177..178
+          0: MD_TEXTUAL_LITERAL@177..178 "." [] []
+        5: MD_TEXTUAL@178..179
+          0: MD_TEXTUAL_LITERAL@178..179 "\n" [] []
+      1: (empty)
+  2: EOF@179..179 "" [] []
+
+```

@@ -1,0 +1,20 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/component.vue
+---
+
+# Input
+
+```vue
+<Base title="500">
+</Base>
+
+```
+
+
+# Formatted
+
+```vue
+<Base title="500"> </Base>
+
+```

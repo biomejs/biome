@@ -1,0 +1,31 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/snippet_nested.svelte
+---
+
+# Input
+
+```svelte
+{#snippet outer()}
+<div>
+{#snippet inner()}
+<p>Inner content</p>
+{/snippet}
+</div>
+{/snippet}
+
+```
+
+
+# Formatted
+
+```svelte
+{#snippet outer()}
+	<div>
+		{#snippet inner()}
+			<p>Inner content</p>
+		{/snippet}
+	</div>
+{/snippet}
+
+```

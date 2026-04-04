@@ -1,0 +1,20 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+<img alt="foo" />
+<img alt="picture of me taking a photo of an image" aria-hidden />
+<img aria-hidden alt="photo of image" />
+<img aria-hidden="true" alt="photo of image" />
+<img ALt="foo" />
+<a />
+<img />
+<IMG />
+<img aria-hidden="false" alt="Doing cool things." />
+<ux-Layout>test</ux-Layout>
+<img alt />
+
+```

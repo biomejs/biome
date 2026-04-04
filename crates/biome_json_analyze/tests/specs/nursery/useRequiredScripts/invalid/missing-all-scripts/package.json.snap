@@ -31,5 +31,7 @@ package.json:3:3 lint/nursery/useRequiredScripts ━━━━━━━━━━�
   
   i Consistent scripts across packages ensure that each can be run reliably from the root of our project. Add the missing scripts to your package.json.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```

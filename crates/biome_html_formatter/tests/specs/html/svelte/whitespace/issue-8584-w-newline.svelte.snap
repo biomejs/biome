@@ -1,0 +1,31 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/whitespace/issue-8584-w-newline.svelte
+---
+
+# Input
+
+```svelte
+<script>
+	const framework = "Astro";
+</script>
+
+<h1>
+	Hello, {framework}
+	and Svelte!
+</h1>
+
+```
+
+
+# Formatted
+
+```svelte
+<script></script>
+
+<h1>
+	Hello, {framework}
+	and Svelte!
+</h1>
+
+```

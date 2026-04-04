@@ -1,0 +1,149 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<input autofocus />
+<input autofocus="true" />
+<textarea autofocus>content</textarea>
+<button autofocus>Submit</button>
+<select autofocus><option>a</option></select>
+
+<!-- autofocus on dialog/popover container itself is invalid -->
+<dialog autofocus>content</dialog>
+<div popover autofocus>content</div>
+
+```
+
+# Diagnostics
+```
+invalid.html:2:8 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the autofocus attribute.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <input autofocus />
+      │        ^^^^^^^^^
+    3 │ <input autofocus="true" />
+    4 │ <textarea autofocus>content</textarea>
+  
+  i Unsafe fix: Remove the autofocus attribute.
+  
+    2 │ <input·autofocus·/>
+      │        ----------  
+
+```
+
+```
+invalid.html:3:8 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the autofocus attribute.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <input autofocus />
+  > 3 │ <input autofocus="true" />
+      │        ^^^^^^^^^^^^^^^^
+    4 │ <textarea autofocus>content</textarea>
+    5 │ <button autofocus>Submit</button>
+  
+  i Unsafe fix: Remove the autofocus attribute.
+  
+    3 │ <input·autofocus="true"·/>
+      │        -----------------  
+
+```
+
+```
+invalid.html:4:11 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the autofocus attribute.
+  
+    2 │ <input autofocus />
+    3 │ <input autofocus="true" />
+  > 4 │ <textarea autofocus>content</textarea>
+      │           ^^^^^^^^^
+    5 │ <button autofocus>Submit</button>
+    6 │ <select autofocus><option>a</option></select>
+  
+  i Unsafe fix: Remove the autofocus attribute.
+  
+    4 │ <textarea·autofocus>content</textarea>
+      │           ---------                   
+
+```
+
+```
+invalid.html:5:9 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the autofocus attribute.
+  
+    3 │ <input autofocus="true" />
+    4 │ <textarea autofocus>content</textarea>
+  > 5 │ <button autofocus>Submit</button>
+      │         ^^^^^^^^^
+    6 │ <select autofocus><option>a</option></select>
+    7 │ 
+  
+  i Unsafe fix: Remove the autofocus attribute.
+  
+    5 │ <button·autofocus>Submit</button>
+      │         ---------                
+
+```
+
+```
+invalid.html:6:9 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the autofocus attribute.
+  
+    4 │ <textarea autofocus>content</textarea>
+    5 │ <button autofocus>Submit</button>
+  > 6 │ <select autofocus><option>a</option></select>
+      │         ^^^^^^^^^
+    7 │ 
+    8 │ <!-- autofocus on dialog/popover container itself is invalid -->
+  
+  i Unsafe fix: Remove the autofocus attribute.
+  
+    6 │ <select·autofocus><option>a</option></select>
+      │         ---------                            
+
+```
+
+```
+invalid.html:9:9 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the autofocus attribute.
+  
+     8 │ <!-- autofocus on dialog/popover container itself is invalid -->
+   > 9 │ <dialog autofocus>content</dialog>
+       │         ^^^^^^^^^
+    10 │ <div popover autofocus>content</div>
+    11 │ 
+  
+  i Unsafe fix: Remove the autofocus attribute.
+  
+    9 │ <dialog·autofocus>content</dialog>
+      │         ---------                 
+
+```
+
+```
+invalid.html:10:14 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the autofocus attribute.
+  
+     8 │ <!-- autofocus on dialog/popover container itself is invalid -->
+     9 │ <dialog autofocus>content</dialog>
+  > 10 │ <div popover autofocus>content</div>
+       │              ^^^^^^^^^
+    11 │ 
+  
+  i Unsafe fix: Remove the autofocus attribute.
+  
+    10 │ <div·popover·autofocus>content</div>
+       │              ---------              
+
+```

@@ -1,15 +1,15 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Biome's shared infrastructure to implement reporting pretty error and diagnostics"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_diagnostics"
-publish              = true
-repository.workspace = true
 version              = "0.5.7"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Biome's shared infrastructure to implement reporting pretty error and diagnostics"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
 
 [[example]]
 name = "cli"
@@ -45,16 +45,16 @@ termcolor                    = { workspace = true }
 terminal_size                = { workspace = true }
 unicode-width                = { workspace = true }
 
-[features]
-bpaf   = ["dep:bpaf"]
-camino = ["dep:camino"]
-schema = ["dep:schemars", "biome_text_edit/schema", "biome_diagnostics_categories/schema", "biome_console/schema"]
-std    = []
-
 [dev-dependencies]
 insta      = { workspace = true }
 serde_json = { workspace = true }
 trybuild   = "=1.0.114"
+
+[features]
+bpaf   = ["dep:bpaf"]
+camino = ["dep:camino"]
+schema = ["biome_console/schema", "biome_diagnostics_categories/schema", "biome_text_edit/schema", "dep:schemars"]
+std    = []
 
 [lints]
 workspace = true

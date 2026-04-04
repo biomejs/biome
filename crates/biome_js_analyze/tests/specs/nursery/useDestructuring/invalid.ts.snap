@@ -1,0 +1,63 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// No type annotation — should still suggest destructuring
+{
+	const foo = object.foo;
+}
+{
+	let foo = array[0];
+}
+{
+	var foo = object['foo'];
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:5:8 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use object destructuring instead of accessing object properties.
+  
+    3 │ // No type annotation — should still suggest destructuring
+    4 │ {
+  > 5 │ 	const foo = object.foo;
+      │ 	      ^^^^^^^^^^^^^^^^
+    6 │ }
+    7 │ {
+  
+  i Object destructuring is more readable and expressive than accessing individual properties.
+  
+  i Replace the property access with object destructuring syntax.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:8:6 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use array destructuring instead of accessing array elements by index.
+  
+     6 │ }
+     7 │ {
+   > 8 │ 	let foo = array[0];
+       │ 	    ^^^^^^^^^^^^^^
+     9 │ }
+    10 │ {
+  
+  i Array destructuring is more readable and expressive than accessing individual elements by index.
+  
+  i Replace the array index access with array destructuring syntax.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

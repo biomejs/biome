@@ -1,0 +1,93 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+Paragraph followed by bullet list.
+- item one
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..34 "Paragraph followed by bullet list." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@34..35 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@35..36 "-" [] [],
+                        post_marker_space_token: missing (optional),
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@36..45 " item one" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@45..46 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@46..46 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..46
+  0: (empty)
+  1: MD_BLOCK_LIST@0..46
+    0: MD_PARAGRAPH@0..35
+      0: MD_INLINE_ITEM_LIST@0..35
+        0: MD_TEXTUAL@0..34
+          0: MD_TEXTUAL_LITERAL@0..34 "Paragraph followed by bullet list." [] []
+        1: MD_TEXTUAL@34..35
+          0: MD_TEXTUAL_LITERAL@34..35 "\n" [] []
+      1: (empty)
+    1: MD_BULLET_LIST_ITEM@35..46
+      0: MD_BULLET_LIST@35..46
+        0: MD_BULLET@35..46
+          0: MD_LIST_MARKER_PREFIX@35..36
+            0: MD_INDENT_TOKEN_LIST@35..35
+            1: MINUS@35..36 "-" [] []
+            2: (empty)
+            3: MD_INDENT_TOKEN_LIST@36..36
+          1: MD_BLOCK_LIST@36..46
+            0: MD_PARAGRAPH@36..46
+              0: MD_INLINE_ITEM_LIST@36..46
+                0: MD_TEXTUAL@36..45
+                  0: MD_TEXTUAL_LITERAL@36..45 " item one" [] []
+                1: MD_TEXTUAL@45..46
+                  0: MD_TEXTUAL_LITERAL@45..46 "\n" [] []
+              1: (empty)
+  2: EOF@46..46 "" [] []
+
+```

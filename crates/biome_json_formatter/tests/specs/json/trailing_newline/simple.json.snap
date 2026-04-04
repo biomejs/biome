@@ -1,0 +1,37 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: json/trailing_newline/simple.json
+---
+
+# Input
+
+```json
+{
+  "name": "test",
+  "version": "1.0.0"
+}
+
+```
+
+
+# Options
+
+```json
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "json": {
+    "formatter": {
+      "trailingNewline": false
+    }
+  }
+}
+```
+
+# Formatted
+
+```json
+{
+	"name": "test",
+	"version": "1.0.0"
+}
+```

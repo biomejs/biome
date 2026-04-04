@@ -1,0 +1,11 @@
+@forward "theme";
+
+@forward "theme" show $color, button;
+
+@forward "theme" hide $private, internal-mixin;
+
+@forward "theme" as theme-*;
+
+@forward "theme" with ($spacing: 4px !default);
+
+@forward "theme" as theme-* show $color, button with ($spacing: 4px);

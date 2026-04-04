@@ -2,6 +2,7 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```css
@@ -69,7 +70,7 @@ img {
 ```
 CssRoot {
     bom_token: missing (optional),
-    rules: CssRuleList [
+    items: CssRootItemList [
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
             rule: CssScopeAtRule {
@@ -645,34 +646,28 @@ CssRoot {
                                                                         },
                                                                         l_paren_token: L_PAREN@540..541 "(" [] [],
                                                                         items: CssParameterList [
-                                                                            CssParameter {
-                                                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                                                    css_component_value_list: CssComponentValueList [
-                                                                                        CssNumber {
-                                                                                            value_token: CSS_NUMBER_LITERAL@541..542 "0" [] [],
-                                                                                        },
-                                                                                    ],
-                                                                                },
+                                                                            CssListOfComponentValuesExpression {
+                                                                                css_component_value_list: CssComponentValueList [
+                                                                                    CssNumber {
+                                                                                        value_token: CSS_NUMBER_LITERAL@541..542 "0" [] [],
+                                                                                    },
+                                                                                ],
                                                                             },
                                                                             COMMA@542..544 "," [] [Whitespace(" ")],
-                                                                            CssParameter {
-                                                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                                                    css_component_value_list: CssComponentValueList [
-                                                                                        CssNumber {
-                                                                                            value_token: CSS_NUMBER_LITERAL@544..545 "0" [] [],
-                                                                                        },
-                                                                                    ],
-                                                                                },
+                                                                            CssListOfComponentValuesExpression {
+                                                                                css_component_value_list: CssComponentValueList [
+                                                                                    CssNumber {
+                                                                                        value_token: CSS_NUMBER_LITERAL@544..545 "0" [] [],
+                                                                                    },
+                                                                                ],
                                                                             },
                                                                             COMMA@545..547 "," [] [Whitespace(" ")],
-                                                                            CssParameter {
-                                                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                                                    css_component_value_list: CssComponentValueList [
-                                                                                        CssNumber {
-                                                                                            value_token: CSS_NUMBER_LITERAL@547..550 "255" [] [],
-                                                                                        },
-                                                                                    ],
-                                                                                },
+                                                                            CssListOfComponentValuesExpression {
+                                                                                css_component_value_list: CssComponentValueList [
+                                                                                    CssNumber {
+                                                                                        value_token: CSS_NUMBER_LITERAL@547..550 "255" [] [],
+                                                                                    },
+                                                                                ],
                                                                             },
                                                                         ],
                                                                         r_paren_token: R_PAREN@550..551 ")" [] [],
@@ -805,7 +800,7 @@ CssRoot {
 ```
 0: CSS_ROOT@0..625
   0: (empty)
-  1: CSS_RULE_LIST@0..624
+  1: CSS_ROOT_ITEM_LIST@0..624
     0: CSS_AT_RULE@0..87
       0: AT@0..1 "@" [] []
       1: CSS_SCOPE_AT_RULE@1..87
@@ -1193,23 +1188,20 @@ CssRoot {
                                       0: IDENT@537..540 "rgb" [] []
                                     1: L_PAREN@540..541 "(" [] []
                                     2: CSS_PARAMETER_LIST@541..550
-                                      0: CSS_PARAMETER@541..542
-                                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@541..542
-                                          0: CSS_COMPONENT_VALUE_LIST@541..542
-                                            0: CSS_NUMBER@541..542
-                                              0: CSS_NUMBER_LITERAL@541..542 "0" [] []
+                                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@541..542
+                                        0: CSS_COMPONENT_VALUE_LIST@541..542
+                                          0: CSS_NUMBER@541..542
+                                            0: CSS_NUMBER_LITERAL@541..542 "0" [] []
                                       1: COMMA@542..544 "," [] [Whitespace(" ")]
-                                      2: CSS_PARAMETER@544..545
-                                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@544..545
-                                          0: CSS_COMPONENT_VALUE_LIST@544..545
-                                            0: CSS_NUMBER@544..545
-                                              0: CSS_NUMBER_LITERAL@544..545 "0" [] []
+                                      2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@544..545
+                                        0: CSS_COMPONENT_VALUE_LIST@544..545
+                                          0: CSS_NUMBER@544..545
+                                            0: CSS_NUMBER_LITERAL@544..545 "0" [] []
                                       3: COMMA@545..547 "," [] [Whitespace(" ")]
-                                      4: CSS_PARAMETER@547..550
-                                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@547..550
-                                          0: CSS_COMPONENT_VALUE_LIST@547..550
-                                            0: CSS_NUMBER@547..550
-                                              0: CSS_NUMBER_LITERAL@547..550 "255" [] []
+                                      4: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@547..550
+                                        0: CSS_COMPONENT_VALUE_LIST@547..550
+                                          0: CSS_NUMBER@547..550
+                                            0: CSS_NUMBER_LITERAL@547..550 "255" [] []
                                     3: R_PAREN@550..551 ")" [] []
                               1: (empty)
                             1: SEMICOLON@551..552 ";" [] []

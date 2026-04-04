@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/string/quotePreserve/parameter_quotes.ts
 ---
+
 # Input
 
 ```ts
@@ -44,87 +45,20 @@ const Y = {
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
------
-
-```ts
-import * as f from "f";
-
-type X = {
-	member: string;
-	// you stay like this
-	"member-member": number;
-	"4": number;
-	with_underscore: number;
-	"0197": number;
-	"3n": number;
-	"3p": number;
-	p9: number;
-	_$_ff$_morning_not_quotes: number;
-	"_$_ff$_morning_yes_quotes_@": number;
-};
-
-interface Y {
-	member: string;
-	// you stay like this
-	"member-member": number;
-	"4": number;
-	with_underscore: number;
-	"0197": number;
-	"3n": number;
-	"3p": number;
-	p9: number;
-	_$_ff$_morning_not_quotes: number;
-	"_$_ff$_morning_yes_quotes_@": number;
+```json
+{
+  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "javascript": {
+    "formatter": {
+      "quoteProperties": "preserve"
+    }
+  }
 }
-
-const Y = {
-	"123": false,
-	"3n": false,
-	12334: false,
-};
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: Preserve
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
------
+# Formatted
 
 ```ts
 import * as f from "f";
@@ -162,4 +96,5 @@ const Y = {
 	"3n": false,
 	12334: false,
 };
+
 ```

@@ -1,0 +1,118 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: not-function.js
+---
+# Input
+```js
+/* should generate diagnostics */
+describe('suite', 'not a function');
+test.describe('suite', 123);
+test.describe.only('suite', {});
+test.describe.skip('suite', null);
+test.describe.parallel('suite', []);
+
+```
+
+# Diagnostics
+```
+not-function.js:2:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback must be a function.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ describe('suite', 'not a function');
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ test.describe('suite', 123);
+    4 │ test.describe.only('suite', {});
+  
+  i The second argument to describe must be a function, not a string, number, object, or other type.
+  
+  i Replace the callback with a function expression or arrow function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+not-function.js:3:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback must be a function.
+  
+    1 │ /* should generate diagnostics */
+    2 │ describe('suite', 'not a function');
+  > 3 │ test.describe('suite', 123);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ test.describe.only('suite', {});
+    5 │ test.describe.skip('suite', null);
+  
+  i The second argument to describe must be a function, not a string, number, object, or other type.
+  
+  i Replace the callback with a function expression or arrow function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+not-function.js:4:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback must be a function.
+  
+    2 │ describe('suite', 'not a function');
+    3 │ test.describe('suite', 123);
+  > 4 │ test.describe.only('suite', {});
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ test.describe.skip('suite', null);
+    6 │ test.describe.parallel('suite', []);
+  
+  i The second argument to describe must be a function, not a string, number, object, or other type.
+  
+  i Replace the callback with a function expression or arrow function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+not-function.js:5:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback must be a function.
+  
+    3 │ test.describe('suite', 123);
+    4 │ test.describe.only('suite', {});
+  > 5 │ test.describe.skip('suite', null);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ test.describe.parallel('suite', []);
+    7 │ 
+  
+  i The second argument to describe must be a function, not a string, number, object, or other type.
+  
+  i Replace the callback with a function expression or arrow function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+not-function.js:6:1 lint/nursery/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback must be a function.
+  
+    4 │ test.describe.only('suite', {});
+    5 │ test.describe.skip('suite', null);
+  > 6 │ test.describe.parallel('suite', []);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+  
+  i The second argument to describe must be a function, not a string, number, object, or other type.
+  
+  i Replace the callback with a function expression or arrow function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,37 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: interpolation/interpolation.html
+---
+
+# Input
+
+```html
+<div>
+	{{ $interpolation }}
+</div>
+
+```
+
+
+# Options
+
+```json
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "html": {
+    "parser": {
+      "interpolation": true
+    },
+    "formatter": {
+      "enabled": true
+    }
+  }
+}
+```
+
+# Formatted
+
+```html
+<div>{{ $interpolation }}</div>
+
+```

@@ -1,0 +1,25 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/await_one_liner.svelte
+---
+
+# Input
+
+```svelte
+{#await expression} <p></p> {:then name} <p></p> {:catch name} <p></p> {/await}
+
+```
+
+
+# Formatted
+
+```svelte
+{#await expression}
+	<p></p>
+{:then name}
+	<p></p>
+{:catch name}
+	<p></p>
+{/await}
+
+```

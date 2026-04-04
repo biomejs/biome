@@ -1,0 +1,123 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: expect-poll-sync-matchers.js
+---
+# Input
+```js
+/* should generate diagnostics */
+// expect.poll with synchronous matchers should still require await
+test('toBe matcher', async () => {
+    expect.poll(() => getValue()).toBe(42);
+});
+
+test('toEqual matcher', async () => {
+    expect.poll(() => getObject()).toEqual({ foo: 'bar' });
+});
+
+test('toMatch matcher', async () => {
+    expect.poll(() => getString()).toMatch(/pattern/);
+});
+
+test('toStrictEqual matcher', async () => {
+    expect.poll(() => getData()).toStrictEqual({ a: 1 });
+});
+
+```
+
+# Diagnostics
+```
+expect-poll-sync-matchers.js:4:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  i expect.poll must be awaited or returned.
+  
+    2 │ // expect.poll with synchronous matchers should still require await
+    3 │ test('toBe matcher', async () => {
+  > 4 │     expect.poll(() => getValue()).toBe(42);
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ });
+    6 │ 
+  
+  i The expect.poll method converts any synchronous expect to an asynchronous polling one.
+  
+  i Add await before the expression or return it from the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await before the call.
+  
+    4 │ ····await·expect.poll(()·=>·getValue()).toBe(42);
+      │     ++++++                                       
+
+```
+
+```
+expect-poll-sync-matchers.js:8:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  i expect.poll must be awaited or returned.
+  
+     7 │ test('toEqual matcher', async () => {
+   > 8 │     expect.poll(() => getObject()).toEqual({ foo: 'bar' });
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ });
+    10 │ 
+  
+  i The expect.poll method converts any synchronous expect to an asynchronous polling one.
+  
+  i Add await before the expression or return it from the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await before the call.
+  
+    8 │ ····await·expect.poll(()·=>·getObject()).toEqual({·foo:·'bar'·});
+      │     ++++++                                                       
+
+```
+
+```
+expect-poll-sync-matchers.js:12:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  i expect.poll must be awaited or returned.
+  
+    11 │ test('toMatch matcher', async () => {
+  > 12 │     expect.poll(() => getString()).toMatch(/pattern/);
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ });
+    14 │ 
+  
+  i The expect.poll method converts any synchronous expect to an asynchronous polling one.
+  
+  i Add await before the expression or return it from the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await before the call.
+  
+    12 │ ····await·expect.poll(()·=>·getString()).toMatch(/pattern/);
+       │     ++++++                                                  
+
+```
+
+```
+expect-poll-sync-matchers.js:16:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  i expect.poll must be awaited or returned.
+  
+    15 │ test('toStrictEqual matcher', async () => {
+  > 16 │     expect.poll(() => getData()).toStrictEqual({ a: 1 });
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ });
+    18 │ 
+  
+  i The expect.poll method converts any synchronous expect to an asynchronous polling one.
+  
+  i Add await before the expression or return it from the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await before the call.
+  
+    16 │ ····await·expect.poll(()·=>·getData()).toStrictEqual({·a:·1·});
+       │     ++++++                                                     
+
+```

@@ -17,11 +17,11 @@ pub(crate) type HtmlLosslessTreeSink<'source> =
 pub(crate) struct HtmlParser<'source> {
     context: ParserContext<HtmlSyntaxKind>,
     source: HtmlTokenSource<'source>,
-    options: HtmlParseOptions,
+    options: HtmlParserOptions,
 }
 
 impl<'source> HtmlParser<'source> {
-    pub fn new(source: &'source str, options: HtmlParseOptions) -> Self {
+    pub fn new(source: &'source str, options: HtmlParserOptions) -> Self {
         Self {
             context: ParserContext::default(),
             source: HtmlTokenSource::from_str(source),
@@ -29,7 +29,7 @@ impl<'source> HtmlParser<'source> {
         }
     }
 
-    pub(crate) fn options(&self) -> &HtmlParseOptions {
+    pub(crate) fn options(&self) -> &HtmlParserOptions {
         &self.options
     }
 
@@ -73,6 +73,13 @@ impl<'source> HtmlParser<'source> {
     pub fn re_lex(&mut self, context: HtmlReLexContext) -> HtmlSyntaxKind {
         self.source_mut().re_lex(context)
     }
+
+    /// Signals to the lexer that the frontmatter decision has been made.
+    /// After this call, `---` in the `Regular` context is treated as plain
+    /// HTML text rather than a `FENCE` token.
+    pub(crate) fn set_after_frontmatter(&mut self, value: bool) {
+        self.source.set_after_frontmatter(value);
+    }
 }
 
 pub struct HtmlParserCheckpoint {
@@ -105,13 +112,15 @@ impl<'src> Parser for HtmlParser<'src> {
 }
 
 #[derive(Default, Debug)]
-pub struct HtmlParseOptions {
+pub struct HtmlParserOptions {
     pub(crate) frontmatter: bool,
     pub(crate) text_expression: Option<TextExpressionKind>,
     pub(crate) vue: bool,
+    pub(crate) svelte: bool,
+    pub(crate) is_html: bool,
 }
 
-impl HtmlParseOptions {
+impl HtmlParserOptions {
     pub fn with_single_text_expression(mut self) -> Self {
         self.text_expression = Some(TextExpressionKind::Single);
         self
@@ -131,7 +140,7 @@ impl HtmlParseOptions {
     ///
     /// When `value` is `true`, enables [`TextExpressionKind::Double`].
     /// When `false`, disables text expressions entirely (`None`).
-    /// Use [`HtmlParseOptions::with_single_text_expression`] to enable single-quoted mode.
+    /// Use [`HtmlParserOptions::with_single_text_expression`] to enable single-quoted mode.
     pub fn set_double_text_expression(&mut self, value: bool) {
         match value {
             true => self.text_expression = Some(TextExpressionKind::Double),
@@ -143,9 +152,18 @@ impl HtmlParseOptions {
         self.vue = true;
         self
     }
+
+    pub fn with_svelte(mut self) -> Self {
+        self.svelte = true;
+        self
+    }
+
+    pub fn is_html(&self) -> bool {
+        self.is_html
+    }
 }
 
-impl From<&HtmlFileSource> for HtmlParseOptions {
+impl From<&HtmlFileSource> for HtmlParserOptions {
     fn from(file_source: &HtmlFileSource) -> Self {
         let mut options = Self::default();
 
@@ -157,7 +175,7 @@ impl From<&HtmlFileSource> for HtmlParseOptions {
                 HtmlTextExpressions::Double => {
                     options = options.with_double_text_expression();
                 }
-                HtmlTextExpressions::None => {}
+                HtmlTextExpressions::None => options.is_html = true,
             },
             HtmlVariant::Astro => {
                 options = options.with_single_text_expression().with_frontmatter();
@@ -166,7 +184,7 @@ impl From<&HtmlFileSource> for HtmlParseOptions {
                 options = options.with_double_text_expression().with_vue();
             }
             HtmlVariant::Svelte => {
-                options = options.with_single_text_expression();
+                options = options.with_single_text_expression().with_svelte();
             }
         }
 

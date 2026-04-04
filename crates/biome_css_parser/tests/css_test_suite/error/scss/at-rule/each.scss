@@ -1,0 +1,15 @@
+@each in $list {
+  color: red;
+}
+
+@each $item $list {
+  color: red;
+}
+
+@each $item in {
+  color: red;
+}
+
+@each $key, in $map {
+  color: red;
+}

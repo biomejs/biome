@@ -43,6 +43,7 @@ fn close_modified_file_from_client_before_watcher() {
             },
             document_file_source: None,
             persist_node_cache: true,
+            inline_config: None,
         })
         .expect("can open from client");
 
@@ -56,6 +57,7 @@ fn close_modified_file_from_client_before_watcher() {
             path: BiomePath::new(&file_path),
             content: FILE_CONTENT_MODIFIED.to_string(),
             version: 2,
+            inline_config: None,
         })
         .expect("can change file");
 
@@ -76,7 +78,11 @@ fn close_modified_file_from_client_before_watcher() {
         module_graph
             .data
             .get(file_path.as_str())
-            .map(|module_info| module_info.static_import_paths.clone()),
+            .map(|module_info| module_info
+                .as_js_module_info()
+                .unwrap()
+                .static_import_paths
+                .clone()),
         Some(BTreeMap::from([("fooo".to_string(), "fooo".to_string())])),
         "index should've updated to the client state"
     );
@@ -108,7 +114,11 @@ fn close_modified_file_from_client_before_watcher() {
         module_graph
             .data
             .get(file_path.as_str())
-            .map(|module_info| module_info.static_import_paths.clone()),
+            .map(|module_info| module_info
+                .as_js_module_info()
+                .unwrap()
+                .static_import_paths
+                .clone()),
         Some(BTreeMap::from([("foo".to_string(), "foo".to_string())])),
         "index should've reverted to the filesystem state"
     );

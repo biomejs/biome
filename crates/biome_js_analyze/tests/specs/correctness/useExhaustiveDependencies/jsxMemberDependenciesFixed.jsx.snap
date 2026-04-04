@@ -1,0 +1,21 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: jsxMemberDependenciesFixed.jsx
+---
+# Input
+```jsx
+// should not generate diagnostics
+
+import { useCallback } from "react";
+
+const MyNS = {
+  MyComponent: () => null,
+};
+
+export function Component() {
+  const render = useCallback(() => <MyNS.MyComponent />, []);
+  return render();
+}
+
+
+```

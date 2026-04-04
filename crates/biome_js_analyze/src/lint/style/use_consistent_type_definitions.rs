@@ -23,6 +23,9 @@ declare_lint_rule! {
     /// Consistent type definition styles, aside from improving code readability, help minimize cognitive load when developers
     /// switch between different codebases or within a large codebase.
     ///
+    /// Empty object type declarations will be left as-is and will not be converted to interfaces,
+    /// as it will conflict with the `noEmptyInterface` rule.
+    ///
     /// ## Example
     ///
     /// ### Invalid
@@ -38,6 +41,10 @@ declare_lint_rule! {
     ///   x: number;
     ///   y: number;
     /// }
+    /// ```
+    ///
+    /// ```ts
+    /// type AnyObject = {};
     /// ```
     ///
     /// ## Options
@@ -180,8 +187,16 @@ fn can_convert_interface_to_type(interface_decl: &TsInterfaceDeclaration) -> boo
 fn can_convert_type_to_interface(type_alias: &TsTypeAliasDeclaration) -> bool {
     // Check if the type alias has type parameters
     // Type aliases with complex types cannot be converted to interfaces
+    let Ok(AnyTsType::TsObjectType(ty)) = type_alias.ty() else {
+        return false;
+    };
 
-    matches!(type_alias.ty(), Ok(AnyTsType::TsObjectType(_)))
+    // Converting empty types into interfaces will conflict with the `noEmptyInterface` rule
+    if ty.members().is_empty() {
+        return false;
+    }
+
+    true
 }
 
 fn convert_interface_to_type_alias(

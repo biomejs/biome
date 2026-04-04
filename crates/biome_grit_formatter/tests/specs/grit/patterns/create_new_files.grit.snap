@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: grit/patterns/create_new_files.grit
 ---
+
 # Input
 
 ```grit
@@ -9,19 +10,7 @@ info: grit/patterns/create_new_files.grit
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Attribute Position: Auto
------
+# Formatted
 
 ```grit
 `function $functionName($_) {$_}` as $f where {
@@ -30,4 +19,5 @@ Attribute Position: Auto
 	$new_file_name = `$functionName.test.js`,
 	$new_files += file(name=$new_file_name, body=$f)
 }
+
 ```

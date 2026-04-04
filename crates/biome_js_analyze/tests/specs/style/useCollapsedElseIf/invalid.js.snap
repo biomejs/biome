@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -129,11 +128,11 @@ invalid.js:7:9 lint/style/useCollapsedElseIf  FIXABLE  ━━━━━━━━�
   i Safe fix: Use collapsed else if instead.
   
       5   5 │   if (condition) {
-      6   6 │   	// ...
+      6   6 │     // ...
       7     │ - }·else·{
       8     │ - → if·(anotherCondition)·{
           7 │ + }·else·if·(anotherCondition)·{
-      9   8 │   		// ...
+      9   8 │       // ...
      10     │ - → }
      11     │ - }
           9 │ + → }
@@ -164,13 +163,13 @@ invalid.js:15:9 lint/style/useCollapsedElseIf  FIXABLE  ━━━━━━━━
   i Safe fix: Use collapsed else if instead.
   
      13  13 │   if (condition) {
-     14  14 │   	// ...
+     14  14 │     // ...
      15     │ - }·else·{
      16     │ - → if·(anotherCondition)·{
          15 │ + }·else·if·(anotherCondition)·{
-     17  16 │   		// ...
-     18  17 │   	} else {
-     19  18 │   		// ...
+     17  16 │       // ...
+     18  17 │     } else {
+     19  18 │       // ...
      20     │ - → }
      21     │ - }
          19 │ + → }

@@ -15,7 +15,7 @@ use biome_service::workspace::{
 };
 use biome_service::{WorkspaceError, extension_error};
 use std::ops::Sub;
-use tower_lsp_server::lsp_types::*;
+use tower_lsp_server::ls_types::*;
 
 #[tracing::instrument(level = "debug", skip(session), err)]
 pub(crate) fn format(
@@ -32,12 +32,16 @@ pub(crate) fn format(
     }
 
     let features = FeaturesBuilder::new().with_formatter().build();
+
     let FileFeaturesResult {
         features_supported: file_features,
     } = session.workspace.file_features(SupportsFeatureParams {
         project_key: doc.project_key,
         path: path.clone(),
         features,
+        inline_config: session.inline_config(),
+        skip_ignore_check: false,
+        not_requested_features: FeaturesBuilder::new().with_search().build(),
     })?;
     if !file_features.supports_format() {
         return notify_user(file_features, path);
@@ -54,6 +58,7 @@ pub(crate) fn format(
     let printed = session.workspace.format_file(FormatFileParams {
         project_key: doc.project_key,
         path: path.clone(),
+        inline_config: session.inline_config(),
     })?;
 
     let mut output = printed.into_code();
@@ -107,6 +112,9 @@ pub(crate) fn format_range(
         project_key: doc.project_key,
         path: path.clone(),
         features,
+        inline_config: session.inline_config(),
+        skip_ignore_check: false,
+        not_requested_features: FeaturesBuilder::new().with_search().build(),
     })?;
     if !file_features.supports_format() {
         return notify_user(file_features, path);
@@ -157,6 +165,7 @@ pub(crate) fn format_range(
         project_key: doc.project_key,
         path: path.clone(),
         range: format_range,
+        inline_config: session.inline_config(),
     })?;
 
     let formatted_range = formatted
@@ -199,6 +208,9 @@ pub(crate) fn format_on_type(
         project_key: doc.project_key,
         path: path.clone(),
         features,
+        inline_config: session.inline_config(),
+        skip_ignore_check: false,
+        not_requested_features: FeaturesBuilder::new().with_search().build(),
     })?;
     if !file_features.supports_format() {
         return notify_user(file_features, path);
@@ -225,6 +237,7 @@ pub(crate) fn format_on_type(
         project_key: doc.project_key,
         path: path.clone(),
         offset,
+        inline_config: session.inline_config(),
     })?;
 
     let content = session.workspace.get_file_content(GetFileContentParams {

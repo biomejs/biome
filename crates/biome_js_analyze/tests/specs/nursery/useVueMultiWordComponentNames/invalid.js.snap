@@ -37,6 +37,8 @@ invalid.js:5:8 lint/nursery/useVueMultiWordComponentNames ━━━━━━━�
   
   i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -54,6 +56,8 @@ invalid.js:13:19 lint/nursery/useVueMultiWordComponentNames ━━━━━━�
   i Single-word component names can collide with HTML elements and are less descriptive.
   
   i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

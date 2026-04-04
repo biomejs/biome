@@ -1,7 +1,9 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
 expression: snapshot
 ---
+
 ## Input
 
 ```css
@@ -23,7 +25,7 @@ expression: snapshot
 ```
 CssRoot {
     bom_token: missing (optional),
-    rules: CssRuleList [
+    items: CssRootItemList [
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
@@ -358,11 +360,6 @@ CssRoot {
                                             ],
                                         },
                                     ],
-                                    CssBogus {
-                                        items: [
-                                            CSS_SPACE_LITERAL@148..149 "\n" [] [],
-                                        ],
-                                    },
                                 ],
                             },
                         },
@@ -374,7 +371,7 @@ CssRoot {
             },
         },
     ],
-    eof_token: EOF@149..149 "" [] [],
+    eof_token: EOF@148..149 "" [Newline("\n")] [],
 }
 ```
 
@@ -383,7 +380,7 @@ CssRoot {
 ```
 0: CSS_ROOT@0..149
   0: (empty)
-  1: CSS_RULE_LIST@0..149
+  1: CSS_ROOT_ITEM_LIST@0..148
     0: CSS_QUALIFIED_RULE@0..9
       0: CSS_SELECTOR_LIST@0..7
         0: CSS_COMPOUND_SELECTOR@0..7
@@ -575,15 +572,15 @@ CssRoot {
         0: L_CURLY@135..136 "{" [] []
         1: CSS_DECLARATION_OR_RULE_LIST@136..136
         2: R_CURLY@136..137 "}" [] []
-    8: CSS_QUALIFIED_RULE@137..149
-      0: CSS_SELECTOR_LIST@137..149
-        0: CSS_COMPOUND_SELECTOR@137..149
+    8: CSS_QUALIFIED_RULE@137..148
+      0: CSS_SELECTOR_LIST@137..148
+        0: CSS_COMPOUND_SELECTOR@137..148
           0: CSS_NESTED_SELECTOR_LIST@137..137
           1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@137..149
-            0: CSS_PSEUDO_CLASS_SELECTOR@137..149
+          2: CSS_SUB_SELECTOR_LIST@137..148
+            0: CSS_PSEUDO_CLASS_SELECTOR@137..148
               0: COLON@137..139 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@139..149
+              1: CSS_BOGUS_PSEUDO_CLASS@139..148
                 0: CSS_IDENTIFIER@139..143
                   0: IDENT@139..143 "past" [] []
                 1: L_PAREN@143..144 "(" [] []
@@ -596,10 +593,8 @@ CssRoot {
                         0: DOT@144..145 "." [] []
                         1: CSS_CUSTOM_IDENTIFIER@145..148
                           0: IDENT@145..148 "div" [] []
-                3: CSS_BOGUS@148..149
-                  0: CSS_SPACE_LITERAL@148..149 "\n" [] []
-      1: CSS_BOGUS_BLOCK@149..149
-  2: EOF@149..149 "" [] []
+      1: CSS_BOGUS_BLOCK@148..148
+  2: EOF@148..149 "" [Newline("\n")] []
 
 ```
 
@@ -817,42 +812,6 @@ pseudo_class_function_compound_selector_list.css:8:12 parse ━━━━━━�
     10 │ 
   
   i Remove {
-  
-pseudo_class_function_compound_selector_list.css:9:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `
-    `
-  
-     7 │ :past(.div .class {}
-     8 │ :past(.div {}
-   > 9 │ :past(.div
-       │           
-  > 10 │ 
-       │ 
-  
-  i Remove 
-  
-  
-pseudo_class_function_compound_selector_list.css:9:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a compound selector but instead found '.div
-    '.
-  
-     7 │ :past(.div .class {}
-     8 │ :past(.div {}
-   > 9 │ :past(.div
-       │       ^^^^
-  > 10 │ 
-       │ 
-  
-  i Expected a compound selector here.
-  
-     7 │ :past(.div .class {}
-     8 │ :past(.div {}
-   > 9 │ :past(.div
-       │       ^^^^
-  > 10 │ 
-       │ 
   
 pseudo_class_function_compound_selector_list.css:10:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

@@ -921,7 +921,7 @@ impl JsExportAsClause {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_exported_name(self, element: JsLiteralExportName) -> Self {
+    pub fn with_exported_name(self, element: AnyJsLiteralExportName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -1101,7 +1101,7 @@ impl JsExportNamedFromSpecifier {
                 .splice_slots(0usize..=0usize, once(element.map(|element| element.into()))),
         )
     }
-    pub fn with_source_name(self, element: JsLiteralExportName) -> Self {
+    pub fn with_source_name(self, element: AnyJsLiteralExportName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -1147,14 +1147,14 @@ impl JsExportNamedSpecifier {
                 .splice_slots(2usize..=2usize, once(Some(element.into()))),
         )
     }
-    pub fn with_exported_name(self, element: JsLiteralExportName) -> Self {
+    pub fn with_exported_name(self, element: AnyJsLiteralExportName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
-impl JsExpressionSnipped {
+impl JsExpressionSnippet {
     pub fn with_expression(self, element: AnyJsExpression) -> Self {
         Self::unwrap_cast(
             self.syntax
@@ -1179,6 +1179,20 @@ impl JsExpressionStatement {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(element.map(|element| element.into()))),
+        )
+    }
+}
+impl JsExpressionTemplateRoot {
+    pub fn with_expression(self, element: AnyJsExpression) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_eof_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
 }
@@ -2291,7 +2305,7 @@ impl JsNamedImportSpecifier {
                 .splice_slots(0usize..=0usize, once(element.map(|element| element.into()))),
         )
     }
-    pub fn with_name(self, element: JsLiteralExportName) -> Self {
+    pub fn with_name(self, element: AnyJsLiteralExportName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),

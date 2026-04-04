@@ -3,8 +3,8 @@ use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    JsAssignmentExpression, JsExpressionStatement, JsForStatement, JsParenthesizedExpression,
-    JsSequenceExpression,
+    AnyJsFunctionBody, JsArrowFunctionExpression, JsAssignmentExpression, JsExpressionStatement,
+    JsFileSource, JsForStatement, JsParenthesizedExpression, JsSequenceExpression,
 };
 use biome_rowan::AstNode;
 use biome_rule_options::no_assign_in_expressions::NoAssignInExpressionsOptions;
@@ -43,6 +43,11 @@ declare_lint_rule! {
     /// let a;
     /// a = 1;
     /// ```
+    ///
+    /// ```ts
+    /// let a = 0;
+    /// const f = b => a += b;
+    /// ```
     pub NoAssignInExpressions {
         version: "1.0.0",
         name: "noAssignInExpressions",
@@ -60,6 +65,13 @@ impl Rule for NoAssignInExpressions {
     type Options = NoAssignInExpressionsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        // Skip assignments in Vue event handlers (v-on directives)
+        // These are idiomatic Vue patterns, not accidental assignments
+        let file_source = ctx.source_type::<JsFileSource>();
+        if file_source.is_vue_event_handler() {
+            return None;
+        }
+
         let assign = ctx.query();
         let mut ancestor = assign
             .syntax()
@@ -79,13 +91,22 @@ impl Rule for NoAssignInExpressions {
         }
         if JsExpressionStatement::can_cast(ancestor.kind()) {
             None
-        } else if let Some(for_stmt) = JsForStatement::cast(ancestor) {
+        } else if let Some(for_stmt) = JsForStatement::cast_ref(&ancestor) {
             if let Some(for_test) = for_stmt.test() {
                 // Disallow assignment in test part of a `for`
                 (for_test.syntax() == &prev_ancestor).then_some(())
             } else {
                 // Allow assignment in initializer and update parts of a `for`
                 None
+            }
+        } else if let Some(arrow) = JsArrowFunctionExpression::cast(ancestor) {
+            // Allow assignment as the expression body of an arrow function
+            // e.g., `const f = b => a += b`
+            if matches!(arrow.body(), Ok(AnyJsFunctionBody::AnyJsExpression(expr)) if expr.syntax() == &prev_ancestor)
+            {
+                None
+            } else {
+                Some(())
             }
         } else {
             Some(())

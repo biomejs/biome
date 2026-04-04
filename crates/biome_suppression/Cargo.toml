@@ -1,16 +1,15 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Utilities to suppress diagnostics"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_suppression"
-publish              = true
-repository.workspace = true
 version              = "0.5.7"
-
+authors.workspace    = true
+edition.workspace    = true
+description          = "Utilities to suppress diagnostics"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
 
 [dependencies]
 biome_console     = { workspace = true }

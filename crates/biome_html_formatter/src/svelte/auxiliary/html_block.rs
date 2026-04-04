@@ -17,6 +17,7 @@ impl FormatNodeRule<SvelteHtmlBlock> for FormatSvelteHtmlBlock {
             [
                 sv_curly_at_token.format(),
                 html_token.format(),
+                space(),
                 expression.format(),
                 r_curly_token.format()
             ]

@@ -3,7 +3,7 @@
 #![deny(clippy::use_self)]
 
 use biome_line_index::WideEncoding;
-use tower_lsp_server::lsp_types::{ClientCapabilities, PositionEncodingKind};
+use tower_lsp_server::ls_types::{ClientCapabilities, PositionEncodingKind};
 
 pub mod from_proto;
 pub mod to_proto;
@@ -35,11 +35,11 @@ pub enum PositionEncoding {
 #[cfg(test)]
 mod tests {
     use crate::PositionEncoding;
-    use crate::from_proto::offset;
+    use crate::from_proto::{offset, text_range};
     use crate::to_proto::position;
     use biome_line_index::{LineIndex, WideEncoding::Utf16};
     use biome_text_size::TextSize;
-    use tower_lsp_server::lsp_types::Position;
+    use tower_lsp_server::ls_types::{Position, Range};
 
     macro_rules! check_conversion {
         ($line_index:ident : $position:expr => $text_size:expr ) => {
@@ -70,6 +70,30 @@ mod tests {
     fn line_end() {
         let line_index = LineIndex::new("abc\ndef\nghi");
         check_conversion!(line_index: Position { line: 1, character: 3 } => TextSize::from(7));
+    }
+
+    #[test]
+    fn inverted_range_returns_error() {
+        let line_index = LineIndex::new("abc\ndef\nghi");
+        let position_encoding = PositionEncoding::Wide(Utf16);
+
+        // start (line 1, col 3) is after end (line 0, col 0) in byte offsets
+        let range = Range {
+            start: Position {
+                line: 1,
+                character: 3,
+            },
+            end: Position {
+                line: 0,
+                character: 0,
+            },
+        };
+
+        let result = text_range(&line_index, range, position_encoding);
+        assert!(
+            result.is_err(),
+            "inverted range should return Err, not panic"
+        );
     }
 
     #[test]

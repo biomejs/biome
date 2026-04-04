@@ -1,0 +1,37 @@
+/* should not generate diagnostics */
+
+// Valid cases for non-Vue contexts that should be ignored
+
+// Non-setup function should be ignored
+export default {
+  notSetup({ foo }) {
+    return () => h('div', foo)
+  }
+}
+
+// Regular object (not Vue component) should be ignored
+const regularObject = {
+  setup({ foo }) {
+    return () => h('div', foo)
+  }
+};
+
+// Function not in Vue component context
+function regularFunction({ foo }) {
+  const { bar } = foo;
+  return bar;
+}
+
+// Class method
+class MyClass {
+  setup({ foo }) {
+    const { bar } = foo;
+    return bar;
+  }
+}
+
+// Standalone arrow function
+const myFunc = ({ foo }) => {
+  const { bar } = foo;
+  return bar;
+};

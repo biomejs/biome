@@ -18,8 +18,8 @@
   [ci-url]: https://github.com/biomejs/biome/actions/workflows/main.yml
   [discord-badge]: https://badgen.net/discord/online-members/BypW39g6Yc?icon=discord&label=discord&color=60a5fa
   [discord-url]: https://biomejs.dev/chat
-  [npm-badge]: https://badgen.net/npm/v/@biomejs/biome?icon=npm&color=60a5fa&label=%40biomejs%2Fbiome
-  [npm-url]: https://www.npmjs.com/package/@biomejs/biome/v/latest
+  [npm-badge]: https://npmx.dev/api/registry/badge/version/@biomejs/biome?color=60a5fa&style=shieldsio&label=%40biomejs%2Fbiome
+  [npm-url]: https://npmx.dev/package/@biomejs/biome
   [vscode-badge]: https://img.shields.io/visual-studio-marketplace/v/biomejs.biome?label=Visual%20Studio%20Marketplace&labelColor=374151&color=60a5fa
   [vscode-url]: https://marketplace.visualstudio.com/items?itemName=biomejs.biome
   [open-vsx-badge]: https://img.shields.io/visual-studio-marketplace/v/biomejs.biome?label=Open%20VSX%20Registry&logo=data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2aWV3Qm94PSI0LjYgNSA5Ni4yIDEyMi43IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogIDxwYXRoIGQ9Ik0zMCA0NC4yTDUyLjYgNUg3LjN6TTQuNiA4OC41aDQ1LjNMMjcuMiA0OS40em01MSAwbDIyLjYgMzkuMiAyMi42LTM5LjJ6IiBmaWxsPSIjYzE2MGVmIi8+CiAgPHBhdGggZD0iTTUyLjYgNUwzMCA0NC4yaDQ1LjJ6TTI3LjIgNDkuNGwyMi43IDM5LjEgMjIuNi0zOS4xem01MSAwTDU1LjYgODguNWg0NS4yeiIgZmlsbD0iI2E2MGVlNSIvPgo8L3N2Zz4=&labelColor=374151&color=60a5fa
@@ -114,7 +114,7 @@ Biome एक सरल प्रायोजन[^37] कार्यक्रम
 
 ## प्रायोजक[^37]
 
-### स्वर्ण प्रायोजक[^42]
+### प्लैटिनम प्रायोजक[^42]
 
 <table>
   <tbody>
@@ -124,7 +124,7 @@ Biome एक सरल प्रायोजन[^37] कार्यक्रम
           <picture>
             <source media="(prefers-color-scheme: light)" srcset="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" />
             <source media="(prefers-color-scheme: dark)" srcset="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-dark@3x.png" />
-            <img src="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" width="400" alt="Depot" />
+            <img src="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" width="600" alt="Depot" />
           </picture>
         </a>
       </td>
@@ -138,12 +138,6 @@ Biome एक सरल प्रायोजन[^37] कार्यक्रम
   <tbody>
     <tr>
       <td align="center" valign="middle">
-        <a href="https://l2beat.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://images.opencollective.com/l2beat/c2b2a27/logo/256.png" height="100" alt="L2BEAT logo"></a>
-      </td>
-      <td align="center" valign="middle">
-        <a href="https://www.phoenixlabs.dev/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://images.opencollective.com/phoenix-labs/2824ed4/logo/100.png?height=100" height="100" alt="Phoenix Labs logo"></a>
-      </td>
-      <td align="center" valign="middle">
         <a href="https://lokalise.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/14294501?s=200&v=4" height="100" alt="Lokalise logo"></a>
       </td>
     </tr>
@@ -155,9 +149,6 @@ Biome एक सरल प्रायोजन[^37] कार्यक्रम
 <table>
   <tbody>
     <tr>
-      <td align="center" valign="middle">
-        <a href="https://nanabit.dev/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://images.opencollective.com/nanabit/d15fd98/logo/256.png?height=80" width="80" alt="Nanabit logo"></a>
-      </td>
       <td align="center" valign="middle">
         <a href="https://vital.io/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/25357309?s=200" width="80" alt="Vital logo"></a>
       </td>
@@ -181,6 +172,12 @@ Biome एक सरल प्रायोजन[^37] कार्यक्रम
       </td>
       <td align="center" valign="middle">
         <a href="https://www.convex.dev/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/81530787?s=200&v=4" width="80" alt="Convex logo"></a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://graphite.dev/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/61942612?s=200&v=4" width="80" alt="Graphite logo"></a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://kraken.tech/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/105941848?s=200&v=4" width="80" alt="Kraken Tech logo"></a>
       </td>
     </tr>
   </tbody>
@@ -236,6 +233,6 @@ Biome एक सरल प्रायोजन[^37] कार्यक्रम
 [^39]: विशिष्ट - specific
 [^40]: *वोट* - vote
 [^41]: बकाया_कार्य - backlog
-[^42]: स्वर्ण_प्रायोजक - Gold Sponsor
+[^42]: प्लैटिनम_प्रायोजक - Platinum Sponsor
 [^43]: रजत_प्रायोजक - Silver Sponsor
 [^44]: कांस्य_प्रायोजक - Bronze Sponsor

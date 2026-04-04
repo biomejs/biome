@@ -17,7 +17,7 @@ expression: snapshot
 ```
 CssRoot {
     bom_token: missing (optional),
-    rules: CssRuleList [
+    items: CssRootItemList [
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
             rule: CssCharsetAtRule {
@@ -48,7 +48,7 @@ CssRoot {
 ```
 0: CSS_ROOT@0..42
   0: (empty)
-  1: CSS_RULE_LIST@0..41
+  1: CSS_ROOT_ITEM_LIST@0..41
     0: CSS_AT_RULE@0..17
       0: AT@0..1 "@" [] []
       1: CSS_CHARSET_AT_RULE@1..17
@@ -66,5 +66,3 @@ CssRoot {
   2: EOF@41..42 "" [Newline("\n")] []
 
 ```
-
-

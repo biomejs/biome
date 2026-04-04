@@ -1,7 +1,7 @@
 mod spec_test;
 
 use biome_html_factory::syntax::HtmlElement;
-use biome_html_parser::{HtmlParseOptions, parse_html};
+use biome_html_parser::{HtmlParserOptions, parse_html};
 use biome_html_syntax::ScriptType;
 use biome_rowan::AstNode;
 
@@ -19,7 +19,7 @@ fn test_is_javascript_tag() {
         <script type="text/javascript">
         </script>
         "#;
-    let syntax = parse_html(html, HtmlParseOptions::default());
+    let syntax = parse_html(html, HtmlParserOptions::default());
     let element = syntax
         .tree()
         .syntax()
@@ -33,7 +33,7 @@ fn test_is_javascript_tag() {
         <script type="application/javascript">
         </script>
         "#;
-    let syntax = parse_html(html, HtmlParseOptions::default());
+    let syntax = parse_html(html, HtmlParserOptions::default());
     let element = syntax
         .tree()
         .syntax()
@@ -48,7 +48,7 @@ fn test_is_javascript_tag() {
         <script type="application/ecmascript">
         </script>
         "#;
-    let syntax = parse_html(html, HtmlParseOptions::default());
+    let syntax = parse_html(html, HtmlParserOptions::default());
     let element = syntax
         .tree()
         .syntax()
@@ -63,7 +63,7 @@ fn test_is_javascript_tag() {
         <script type="module">
         </script>
         "#;
-    let syntax = parse_html(html, HtmlParseOptions::default());
+    let syntax = parse_html(html, HtmlParserOptions::default());
     let element = syntax
         .tree()
         .syntax()
@@ -78,7 +78,7 @@ fn test_is_javascript_tag() {
     //let html = r#"
     //    <script type=module></script>
     //    "#;
-    //let syntax = parse_html(html, HtmlParseOptions::default());
+    //let syntax = parse_html(html, HtmlParserOptions::default());
     //let element = syntax
     //    .tree()
     //    .syntax()
@@ -92,7 +92,7 @@ fn test_is_javascript_tag() {
     let html = r#"
         <script></script>
         "#;
-    let syntax = parse_html(html, HtmlParseOptions::default());
+    let syntax = parse_html(html, HtmlParserOptions::default());
     let element = syntax
         .tree()
         .syntax()
@@ -106,7 +106,7 @@ fn test_is_javascript_tag() {
     let html = r#"
         <script type="importmap"></script>
         "#;
-    let syntax = parse_html(html, HtmlParseOptions::default());
+    let syntax = parse_html(html, HtmlParserOptions::default());
     let element = syntax
         .tree()
         .syntax()

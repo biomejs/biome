@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/value_one_group_per_line.css
 ---
+
 # Input
 
 ```css
@@ -40,19 +41,7 @@ body {
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
------
+# Formatted
 
 ```css
 body {
@@ -87,4 +76,5 @@ body {
 		0 0 0 3.2px red,
 		0 0 0 3.2px rgba(89, 89, 235, 0.25);
 }
+
 ```

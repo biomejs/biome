@@ -1,0 +1,438 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<button
+  // single-line comment
+  onclick={doTheThing}
+>click me</button>
+
+<div
+  /* block comment */
+  class="foo"
+>text</div>
+
+<input
+  /* multi-line
+     block comment */
+  type="text"
+/>
+
+<span
+  // comment before attr
+  data-test="value"
+  /* comment between attrs */
+  id="my-span"
+>content</span>
+
+
+<button
+  // single-line comment
+  onclick={doTheThing}
+  // comment after attr
+  {type}
+  // comment after shorthand
+>click me</button>
+
+<div /* block comment */ class="foo" /* block comment */>text</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..7 "button" [] [],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@7..42 "onclick" [Newline("\n"), Whitespace("  "), Comments("// single-line comment"), Newline("\n"), Whitespace("  ")] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@42..43 "=" [] [],
+                            value: HtmlAttributeSingleTextExpression {
+                                l_curly_token: L_CURLY@43..44 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@44..54 "doTheThing" [] [],
+                                },
+                                r_curly_token: R_CURLY@54..55 "}" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@55..57 ">" [Newline("\n")] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@57..65 "click me" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@65..66 "<" [] [],
+                slash_token: SLASH@66..67 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@67..73 "button" [] [],
+                },
+                r_angle_token: R_ANGLE@73..74 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@74..77 "<" [Newline("\n"), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@77..80 "div" [] [],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@80..110 "class" [Newline("\n"), Whitespace("  "), Comments("/* block comment */"), Newline("\n"), Whitespace("  ")] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@110..111 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@111..116 "\"foo\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@116..118 ">" [Newline("\n")] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@118..122 "text" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@122..123 "<" [] [],
+                slash_token: SLASH@123..124 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@124..127 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@127..128 ">" [] [],
+            },
+        },
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@128..131 "<" [Newline("\n"), Newline("\n")] [],
+            name: HtmlTagName {
+                value_token: HTML_LITERAL@131..136 "input" [] [],
+            },
+            attributes: HtmlAttributeList [
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@136..181 "type" [Newline("\n"), Whitespace("  "), Comments("/* multi-line\n     bl ..."), Newline("\n"), Whitespace("  ")] [],
+                    },
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@181..182 "=" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@182..188 "\"text\"" [] [],
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@188..190 "/" [Newline("\n")] [],
+            r_angle_token: R_ANGLE@190..191 ">" [] [],
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@191..194 "<" [Newline("\n"), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@194..198 "span" [] [],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@198..235 "data-test" [Newline("\n"), Whitespace("  "), Comments("// comment before attr"), Newline("\n"), Whitespace("  ")] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@235..236 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@236..243 "\"value\"" [] [],
+                            },
+                        },
+                    },
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@243..278 "id" [Newline("\n"), Whitespace("  "), Comments("/* comment between at ..."), Newline("\n"), Whitespace("  ")] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@278..279 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@279..288 "\"my-span\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@288..290 ">" [Newline("\n")] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@290..297 "content" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@297..298 "<" [] [],
+                slash_token: SLASH@298..299 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@299..303 "span" [] [],
+                },
+                r_angle_token: R_ANGLE@303..304 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@304..308 "<" [Newline("\n"), Newline("\n"), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@308..314 "button" [] [],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@314..349 "onclick" [Newline("\n"), Whitespace("  "), Comments("// single-line comment"), Newline("\n"), Whitespace("  ")] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@349..350 "=" [] [],
+                            value: HtmlAttributeSingleTextExpression {
+                                l_curly_token: L_CURLY@350..351 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@351..361 "doTheThing" [] [],
+                                },
+                                r_curly_token: R_CURLY@361..362 "}" [] [],
+                            },
+                        },
+                    },
+                    HtmlAttributeSingleTextExpression {
+                        l_curly_token: L_CURLY@362..390 "{" [Newline("\n"), Whitespace("  "), Comments("// comment after attr"), Newline("\n"), Whitespace("  ")] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@390..394 "type" [] [],
+                        },
+                        r_curly_token: R_CURLY@394..395 "}" [] [],
+                    },
+                ],
+                r_angle_token: R_ANGLE@395..426 ">" [Newline("\n"), Whitespace("  "), Comments("// comment after shor ..."), Newline("\n")] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@426..434 "click me" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@434..435 "<" [] [],
+                slash_token: SLASH@435..436 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@436..442 "button" [] [],
+                },
+                r_angle_token: R_ANGLE@442..443 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@443..446 "<" [Newline("\n"), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@446..470 "div" [] [Whitespace(" "), Comments("/* block comment */"), Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@470..475 "class" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@475..476 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@476..501 "\"foo\"" [] [Whitespace(" "), Comments("/* block comment */")],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@501..502 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@502..506 "text" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@506..507 "<" [] [],
+                slash_token: SLASH@507..508 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@508..511 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@511..512 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@512..513 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..513
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..512
+    0: HTML_ELEMENT@0..74
+      0: HTML_OPENING_ELEMENT@0..57
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..7
+          0: HTML_LITERAL@1..7 "button" [] []
+        2: HTML_ATTRIBUTE_LIST@7..55
+          0: HTML_ATTRIBUTE@7..55
+            0: HTML_ATTRIBUTE_NAME@7..42
+              0: HTML_LITERAL@7..42 "onclick" [Newline("\n"), Whitespace("  "), Comments("// single-line comment"), Newline("\n"), Whitespace("  ")] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@42..55
+              0: EQ@42..43 "=" [] []
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@43..55
+                0: L_CURLY@43..44 "{" [] []
+                1: HTML_TEXT_EXPRESSION@44..54
+                  0: HTML_LITERAL@44..54 "doTheThing" [] []
+                2: R_CURLY@54..55 "}" [] []
+        3: R_ANGLE@55..57 ">" [Newline("\n")] []
+      1: HTML_ELEMENT_LIST@57..65
+        0: HTML_CONTENT@57..65
+          0: HTML_LITERAL@57..65 "click me" [] []
+      2: HTML_CLOSING_ELEMENT@65..74
+        0: L_ANGLE@65..66 "<" [] []
+        1: SLASH@66..67 "/" [] []
+        2: HTML_TAG_NAME@67..73
+          0: HTML_LITERAL@67..73 "button" [] []
+        3: R_ANGLE@73..74 ">" [] []
+    1: HTML_ELEMENT@74..128
+      0: HTML_OPENING_ELEMENT@74..118
+        0: L_ANGLE@74..77 "<" [Newline("\n"), Newline("\n")] []
+        1: HTML_TAG_NAME@77..80
+          0: HTML_LITERAL@77..80 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@80..116
+          0: HTML_ATTRIBUTE@80..116
+            0: HTML_ATTRIBUTE_NAME@80..110
+              0: HTML_LITERAL@80..110 "class" [Newline("\n"), Whitespace("  "), Comments("/* block comment */"), Newline("\n"), Whitespace("  ")] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@110..116
+              0: EQ@110..111 "=" [] []
+              1: HTML_STRING@111..116
+                0: HTML_STRING_LITERAL@111..116 "\"foo\"" [] []
+        3: R_ANGLE@116..118 ">" [Newline("\n")] []
+      1: HTML_ELEMENT_LIST@118..122
+        0: HTML_CONTENT@118..122
+          0: HTML_LITERAL@118..122 "text" [] []
+      2: HTML_CLOSING_ELEMENT@122..128
+        0: L_ANGLE@122..123 "<" [] []
+        1: SLASH@123..124 "/" [] []
+        2: HTML_TAG_NAME@124..127
+          0: HTML_LITERAL@124..127 "div" [] []
+        3: R_ANGLE@127..128 ">" [] []
+    2: HTML_SELF_CLOSING_ELEMENT@128..191
+      0: L_ANGLE@128..131 "<" [Newline("\n"), Newline("\n")] []
+      1: HTML_TAG_NAME@131..136
+        0: HTML_LITERAL@131..136 "input" [] []
+      2: HTML_ATTRIBUTE_LIST@136..188
+        0: HTML_ATTRIBUTE@136..188
+          0: HTML_ATTRIBUTE_NAME@136..181
+            0: HTML_LITERAL@136..181 "type" [Newline("\n"), Whitespace("  "), Comments("/* multi-line\n     bl ..."), Newline("\n"), Whitespace("  ")] []
+          1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@181..188
+            0: EQ@181..182 "=" [] []
+            1: HTML_STRING@182..188
+              0: HTML_STRING_LITERAL@182..188 "\"text\"" [] []
+      3: SLASH@188..190 "/" [Newline("\n")] []
+      4: R_ANGLE@190..191 ">" [] []
+    3: HTML_ELEMENT@191..304
+      0: HTML_OPENING_ELEMENT@191..290
+        0: L_ANGLE@191..194 "<" [Newline("\n"), Newline("\n")] []
+        1: HTML_TAG_NAME@194..198
+          0: HTML_LITERAL@194..198 "span" [] []
+        2: HTML_ATTRIBUTE_LIST@198..288
+          0: HTML_ATTRIBUTE@198..243
+            0: HTML_ATTRIBUTE_NAME@198..235
+              0: HTML_LITERAL@198..235 "data-test" [Newline("\n"), Whitespace("  "), Comments("// comment before attr"), Newline("\n"), Whitespace("  ")] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@235..243
+              0: EQ@235..236 "=" [] []
+              1: HTML_STRING@236..243
+                0: HTML_STRING_LITERAL@236..243 "\"value\"" [] []
+          1: HTML_ATTRIBUTE@243..288
+            0: HTML_ATTRIBUTE_NAME@243..278
+              0: HTML_LITERAL@243..278 "id" [Newline("\n"), Whitespace("  "), Comments("/* comment between at ..."), Newline("\n"), Whitespace("  ")] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@278..288
+              0: EQ@278..279 "=" [] []
+              1: HTML_STRING@279..288
+                0: HTML_STRING_LITERAL@279..288 "\"my-span\"" [] []
+        3: R_ANGLE@288..290 ">" [Newline("\n")] []
+      1: HTML_ELEMENT_LIST@290..297
+        0: HTML_CONTENT@290..297
+          0: HTML_LITERAL@290..297 "content" [] []
+      2: HTML_CLOSING_ELEMENT@297..304
+        0: L_ANGLE@297..298 "<" [] []
+        1: SLASH@298..299 "/" [] []
+        2: HTML_TAG_NAME@299..303
+          0: HTML_LITERAL@299..303 "span" [] []
+        3: R_ANGLE@303..304 ">" [] []
+    4: HTML_ELEMENT@304..443
+      0: HTML_OPENING_ELEMENT@304..426
+        0: L_ANGLE@304..308 "<" [Newline("\n"), Newline("\n"), Newline("\n")] []
+        1: HTML_TAG_NAME@308..314
+          0: HTML_LITERAL@308..314 "button" [] []
+        2: HTML_ATTRIBUTE_LIST@314..395
+          0: HTML_ATTRIBUTE@314..362
+            0: HTML_ATTRIBUTE_NAME@314..349
+              0: HTML_LITERAL@314..349 "onclick" [Newline("\n"), Whitespace("  "), Comments("// single-line comment"), Newline("\n"), Whitespace("  ")] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@349..362
+              0: EQ@349..350 "=" [] []
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@350..362
+                0: L_CURLY@350..351 "{" [] []
+                1: HTML_TEXT_EXPRESSION@351..361
+                  0: HTML_LITERAL@351..361 "doTheThing" [] []
+                2: R_CURLY@361..362 "}" [] []
+          1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@362..395
+            0: L_CURLY@362..390 "{" [Newline("\n"), Whitespace("  "), Comments("// comment after attr"), Newline("\n"), Whitespace("  ")] []
+            1: HTML_TEXT_EXPRESSION@390..394
+              0: HTML_LITERAL@390..394 "type" [] []
+            2: R_CURLY@394..395 "}" [] []
+        3: R_ANGLE@395..426 ">" [Newline("\n"), Whitespace("  "), Comments("// comment after shor ..."), Newline("\n")] []
+      1: HTML_ELEMENT_LIST@426..434
+        0: HTML_CONTENT@426..434
+          0: HTML_LITERAL@426..434 "click me" [] []
+      2: HTML_CLOSING_ELEMENT@434..443
+        0: L_ANGLE@434..435 "<" [] []
+        1: SLASH@435..436 "/" [] []
+        2: HTML_TAG_NAME@436..442
+          0: HTML_LITERAL@436..442 "button" [] []
+        3: R_ANGLE@442..443 ">" [] []
+    5: HTML_ELEMENT@443..512
+      0: HTML_OPENING_ELEMENT@443..502
+        0: L_ANGLE@443..446 "<" [Newline("\n"), Newline("\n")] []
+        1: HTML_TAG_NAME@446..470
+          0: HTML_LITERAL@446..470 "div" [] [Whitespace(" "), Comments("/* block comment */"), Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@470..501
+          0: HTML_ATTRIBUTE@470..501
+            0: HTML_ATTRIBUTE_NAME@470..475
+              0: HTML_LITERAL@470..475 "class" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@475..501
+              0: EQ@475..476 "=" [] []
+              1: HTML_STRING@476..501
+                0: HTML_STRING_LITERAL@476..501 "\"foo\"" [] [Whitespace(" "), Comments("/* block comment */")]
+        3: R_ANGLE@501..502 ">" [] []
+      1: HTML_ELEMENT_LIST@502..506
+        0: HTML_CONTENT@502..506
+          0: HTML_LITERAL@502..506 "text" [] []
+      2: HTML_CLOSING_ELEMENT@506..512
+        0: L_ANGLE@506..507 "<" [] []
+        1: SLASH@507..508 "/" [] []
+        2: HTML_TAG_NAME@508..511
+          0: HTML_LITERAL@508..511 "div" [] []
+        3: R_ANGLE@511..512 ">" [] []
+  4: EOF@512..513 "" [Newline("\n")] []
+
+```

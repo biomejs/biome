@@ -1,16 +1,21 @@
-use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
+use biome_analyze::{ActionFilter, AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
+use biome_configuration::{ConfigurationSource, ExtendedConfigurations};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
+use biome_json_analyze::{ExtendedConfigurationProvider, JsonAnalyzeServices};
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
+use biome_package::PackageJson;
+use biome_project_layout::ProjectLayout;
 use biome_rowan::AstNode;
 use biome_test_utils::{
     CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
     code_fix_to_string, create_analyzer_options, diagnostic_to_string,
-    has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker,
-    write_analyzer_snapshot,
+    has_bogus_nodes_or_empty_slots, load_configuration_source, parse_test_path,
+    register_leak_checker, write_analyzer_snapshot,
 };
-use camino::Utf8Path;
+use camino::{Utf8Path, Utf8PathBuf};
 use std::ops::Deref;
+use std::sync::Arc;
 use std::{fs::read_to_string, slice};
 
 tests_macros::gen_tests! {"tests/specs/**/*.{json,jsonc}", crate::run_test, "module"}
@@ -23,7 +28,14 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     let file_name = input_file.file_name().unwrap();
 
     // We should skip running test for .options.json as input_file
-    if file_name.ends_with(".options.json") || file_name.ends_with(".options.jsonc") {
+    // Also skip files inside node_modules (used as test fixtures, not test inputs)
+    if file_name.ends_with(".options.json")
+        || file_name.ends_with(".options.jsonc")
+        || file_name.starts_with("_ignore")
+        || input_file
+            .components()
+            .any(|c| c.as_str() == "node_modules")
+    {
         return;
     }
 
@@ -136,6 +148,37 @@ fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &str) {
     });
 }
 
+/// Build a `ProjectLayout` for a test file by scanning `node_modules`
+/// directories adjacent to the test file (in the same directory).
+fn project_layout_for_json_test(input_file: &Utf8Path) -> Option<Arc<ProjectLayout>> {
+    let test_dir = input_file.parent()?;
+    let node_modules_dir = test_dir.join("node_modules");
+
+    if !std::path::Path::new(node_modules_dir.as_str()).is_dir() {
+        return None;
+    }
+
+    let project_layout = ProjectLayout::default();
+
+    for entry in std::fs::read_dir(node_modules_dir.as_str()).ok()?.flatten() {
+        let pkg_dir = Utf8PathBuf::try_from(entry.path()).ok()?;
+        let manifest_path = pkg_dir.join("package.json");
+        if let Ok(content) = std::fs::read_to_string(&manifest_path) {
+            let deserialized: biome_deserialize::Deserialized<PackageJson> =
+                biome_deserialize::json::deserialize_from_json_str(
+                    &content,
+                    biome_json_parser::JsonParserOptions::default(),
+                    "",
+                );
+            if let Some(manifest) = deserialized.into_deserialized() {
+                project_layout.insert_node_manifest(pkg_dir, manifest);
+            }
+        }
+    }
+
+    Some(Arc::new(project_layout))
+}
+
 #[expect(clippy::too_many_arguments)]
 pub(crate) fn analyze_and_snap(
     snapshot: &mut String,
@@ -158,35 +201,47 @@ pub(crate) fn analyze_and_snap(
     let root = parsed.tree();
 
     let mut code_fixes = Vec::new();
+    let configuration_source = load_configuration_source(input_file);
     let options = create_analyzer_options::<JsonLanguage>(input_file, &mut diagnostics);
-
-    let (_, errors) = biome_json_analyze::analyze(&root, filter, &options, file_source, |event| {
-        if let Some(mut diag) = event.diagnostic() {
-            for action in event.actions() {
-                if action.is_suppression() {
-                    if action_type.is_suppression() {
+    let project_layout = project_layout_for_json_test(input_file);
+    let services = JsonAnalyzeServices {
+        file_source,
+        configuration_provider: configuration_source.map(|(config, list)| {
+            Arc::new(ConfigurationSource {
+                source: Some((config, Some(input_file.to_path_buf()))),
+                extended_configurations: ExtendedConfigurations::from(list),
+            }) as Arc<dyn ExtendedConfigurationProvider>
+        }),
+        project_layout,
+    };
+    let (_, errors) =
+        biome_json_analyze::analyze(&root, filter, &options, services, &[], |event| {
+            if let Some(mut diag) = event.diagnostic() {
+                for action in event.actions(ActionFilter::all()) {
+                    if action.is_suppression() {
+                        if action_type.is_suppression() {
+                            check_code_action(input_file, input_code, &action, parser_options);
+                            diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
+                        }
+                    } else if !action.is_suppression() {
                         check_code_action(input_file, input_code, &action, parser_options);
                         diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                     }
-                } else if !action.is_suppression() {
+                }
+
+                diagnostics.push(diagnostic_to_string(file_name, input_code, diag.into()));
+                return ControlFlow::Continue(());
+            }
+
+            for action in event.actions(ActionFilter::all()) {
+                if !action.is_suppression() {
                     check_code_action(input_file, input_code, &action, parser_options);
-                    diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
+                    code_fixes.push(code_fix_to_string(input_code, action));
                 }
             }
 
-            diagnostics.push(diagnostic_to_string(file_name, input_code, diag.into()));
-            return ControlFlow::Continue(());
-        }
-
-        for action in event.actions() {
-            if !action.is_suppression() {
-                check_code_action(input_file, input_code, &action, parser_options);
-                code_fixes.push(code_fix_to_string(input_code, action));
-            }
-        }
-
-        ControlFlow::<Never>::Continue(())
-    });
+            ControlFlow::<Never>::Continue(())
+        });
 
     for error in errors {
         diagnostics.push(diagnostic_to_string(file_name, input_code, error));

@@ -1,0 +1,194 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// Undeclared environment variables should trigger diagnostics
+const myCustomVar = process.env.MY_CUSTOM_VAR;
+const anotherVar = process.env.ANOTHER_UNDECLARED_VAR;
+const acmeSecret = process.env.ACME_SECRET;
+
+// Also invalid with import.meta.env
+const importMetaVar = import.meta.env.CUSTOM_META_VAR;
+
+// Bracket notation with string literals should also be checked
+const bracketVar = process.env["BRACKET_VAR"];
+const bracketMeta = import.meta.env["BRACKET_META_VAR"];
+
+// Bun.env should also be checked
+const bunVar = Bun.env.BUN_CUSTOM_VAR;
+const bunBracketVar = Bun.env["BUN_BRACKET_VAR"];
+
+// Deno.env.get should also be checked
+const denoVar = Deno.env.get("DENO_CUSTOM_VAR");
+const denoVar2 = Deno.env.get("ANOTHER_DENO_VAR");
+
+```
+
+# Diagnostics
+```
+invalid.js:4:21 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The environment variable MY_CUSTOM_VAR is not listed as a dependency in turbo.json. Add this environment variable a task's 'env'/'passThroughEnv', or to 'globalEnv', 'globalPassThroughEnv', in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
+  
+    3 │ // Undeclared environment variables should trigger diagnostics
+  > 4 │ const myCustomVar = process.env.MY_CUSTOM_VAR;
+      │                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ const anotherVar = process.env.ANOTHER_UNDECLARED_VAR;
+    6 │ const acmeSecret = process.env.ACME_SECRET;
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:20 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The environment variable ANOTHER_UNDECLARED_VAR is not listed as a dependency in turbo.json. Add this environment variable a task's 'env'/'passThroughEnv', or to 'globalEnv', 'globalPassThroughEnv', in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
+  
+    3 │ // Undeclared environment variables should trigger diagnostics
+    4 │ const myCustomVar = process.env.MY_CUSTOM_VAR;
+  > 5 │ const anotherVar = process.env.ANOTHER_UNDECLARED_VAR;
+      │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ const acmeSecret = process.env.ACME_SECRET;
+    7 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:20 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The environment variable ACME_SECRET is not listed as a dependency in turbo.json. Add this environment variable a task's 'env'/'passThroughEnv', or to 'globalEnv', 'globalPassThroughEnv', in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
+  
+    4 │ const myCustomVar = process.env.MY_CUSTOM_VAR;
+    5 │ const anotherVar = process.env.ANOTHER_UNDECLARED_VAR;
+  > 6 │ const acmeSecret = process.env.ACME_SECRET;
+      │                    ^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ // Also invalid with import.meta.env
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:23 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The environment variable CUSTOM_META_VAR is not listed as a dependency in turbo.json. Add this environment variable a task's 'env'/'passThroughEnv', or to 'globalEnv', 'globalPassThroughEnv', in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
+  
+     8 │ // Also invalid with import.meta.env
+   > 9 │ const importMetaVar = import.meta.env.CUSTOM_META_VAR;
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ // Bracket notation with string literals should also be checked
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:20 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The environment variable BRACKET_VAR is not listed as a dependency in turbo.json. Add this environment variable a task's 'env'/'passThroughEnv', or to 'globalEnv', 'globalPassThroughEnv', in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
+  
+    11 │ // Bracket notation with string literals should also be checked
+  > 12 │ const bracketVar = process.env["BRACKET_VAR"];
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ const bracketMeta = import.meta.env["BRACKET_META_VAR"];
+    14 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:21 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The environment variable BRACKET_META_VAR is not listed as a dependency in turbo.json. Add this environment variable a task's 'env'/'passThroughEnv', or to 'globalEnv', 'globalPassThroughEnv', in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
+  
+    11 │ // Bracket notation with string literals should also be checked
+    12 │ const bracketVar = process.env["BRACKET_VAR"];
+  > 13 │ const bracketMeta = import.meta.env["BRACKET_META_VAR"];
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ // Bun.env should also be checked
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:16 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The environment variable BUN_CUSTOM_VAR is not listed as a dependency in turbo.json. Add this environment variable a task's 'env'/'passThroughEnv', or to 'globalEnv', 'globalPassThroughEnv', in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
+  
+    15 │ // Bun.env should also be checked
+  > 16 │ const bunVar = Bun.env.BUN_CUSTOM_VAR;
+       │                ^^^^^^^^^^^^^^^^^^^^^^
+    17 │ const bunBracketVar = Bun.env["BUN_BRACKET_VAR"];
+    18 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:23 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The environment variable BUN_BRACKET_VAR is not listed as a dependency in turbo.json. Add this environment variable a task's 'env'/'passThroughEnv', or to 'globalEnv', 'globalPassThroughEnv', in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
+  
+    15 │ // Bun.env should also be checked
+    16 │ const bunVar = Bun.env.BUN_CUSTOM_VAR;
+  > 17 │ const bunBracketVar = Bun.env["BUN_BRACKET_VAR"];
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 
+    19 │ // Deno.env.get should also be checked
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:17 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The environment variable DENO_CUSTOM_VAR is not listed as a dependency in turbo.json. Add this environment variable a task's 'env'/'passThroughEnv', or to 'globalEnv', 'globalPassThroughEnv', in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
+  
+    19 │ // Deno.env.get should also be checked
+  > 20 │ const denoVar = Deno.env.get("DENO_CUSTOM_VAR");
+       │                 ^^^^^^^^^^^^
+    21 │ const denoVar2 = Deno.env.get("ANOTHER_DENO_VAR");
+    22 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:18 lint/nursery/noUndeclaredEnvVars ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The environment variable ANOTHER_DENO_VAR is not listed as a dependency in turbo.json. Add this environment variable a task's 'env'/'passThroughEnv', or to 'globalEnv', 'globalPassThroughEnv', in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo.
+  
+    19 │ // Deno.env.get should also be checked
+    20 │ const denoVar = Deno.env.get("DENO_CUSTOM_VAR");
+  > 21 │ const denoVar2 = Deno.env.get("ANOTHER_DENO_VAR");
+       │                  ^^^^^^^^^^^^
+    22 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,18 @@
+# should generate diagnostics
+type SomeObject {
+	foo: String
+	bar: String
+	foo: String
+}
+
+interface SomeInterface {
+	foo: String
+	bar: String
+	foo: String
+}
+
+input SomeInputObject {
+	foo: String
+	bar: String
+	foo: String
+}

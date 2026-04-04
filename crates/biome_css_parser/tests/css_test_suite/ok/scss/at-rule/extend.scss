@@ -1,0 +1,25 @@
+%toolbelt {
+  border: 1px solid black;
+}
+
+.message {
+  color: red;
+}
+
+.action-buttons {
+  @extend %toolbelt !optional;
+}
+
+.alert {
+  @extend .message;
+  @extend .message, .info;
+  @extend a:hover;
+}
+
+@extend .message;
+
+@extend .icon-#{$name};
+
+@include themed-button {
+  @extend .message;
+}

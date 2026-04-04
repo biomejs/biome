@@ -1,0 +1,49 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/fenced_code_block.md
+---
+
+# Input
+
+```md
+``````````
+
+```js
+console.log("hello world!");
+```
+
+``````````
+
+~~~~~~~~~~~
+
+~~~python
+def hello():
+    pass
+~~~
+
+~~~~~~~~~~~
+
+```
+
+
+# Formatted
+
+```md
+````
+
+```js
+console.log("hello world!");
+```
+
+````
+
+~~~~
+
+~~~python
+def hello():
+    pass
+~~~
+
+~~~~
+
+```

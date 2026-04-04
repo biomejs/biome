@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::hash::{Hash, Hasher};
 
 use biome_rowan::Text;
@@ -6,9 +7,9 @@ use rustc_hash::FxHasher;
 
 use crate::{
     CallArgumentType, DestructureField, Function, FunctionParameter, Literal, MAX_FLATTEN_DEPTH,
-    Resolvable, ResolvedTypeData, ResolvedTypeMember, ResolverId, TypeData, TypeMember,
-    TypeReference, TypeResolver, TypeofCallExpression, TypeofDestructureExpression,
-    TypeofExpression, TypeofStaticMemberExpression,
+    Resolvable, ResolvedTypeData, ResolvedTypeId, ResolvedTypeMember, ResolverId, TypeData,
+    TypeMember, TypeReference, TypeResolver, TypeofCallExpression, TypeofDestructureExpression,
+    TypeofExpression,
     conditionals::{
         ConditionalType, reference_to_falsy_subset_of, reference_to_non_nullish_subset_of,
         reference_to_truthy_subset_of,
@@ -265,26 +266,45 @@ pub(super) fn flattened_expression(
                 }
 
                 TypeData::Union(_) => {
-                    let types: Vec<_> = object
-                        .flattened_union_variants(resolver)
-                        .filter(|variant| *variant != GLOBAL_UNDEFINED_ID.into())
-                        .collect();
-                    let types = types
-                        .into_iter()
-                        .map(|variant| {
-                            // Resolve and flatten the type member for each variant.
-                            let variant = TypeData::TypeofExpression(Box::new(
-                                TypeofExpression::StaticMember(TypeofStaticMemberExpression {
-                                    object: variant,
-                                    member: expr.member.clone(),
-                                }),
-                            ));
+                    // Resolve the requested member across union variants directly.
+                    // Avoid distributing `obj.member` into nested inferred expressions, which can
+                    // cause runaway type growth for patterns like `node = node.parent`.
+                    let mut types = Vec::new();
+                    for variant in object.flattened_union_variants(resolver) {
+                        if variant == GLOBAL_UNDEFINED_ID.into() {
+                            continue;
+                        }
 
-                            resolver.reference_to_owned_data(variant)
-                        })
-                        .collect();
+                        let Some(resolved) = resolver.resolve_and_get(&variant) else {
+                            types.push(TypeReference::unknown());
+                            continue;
+                        };
 
-                    Some(TypeData::union_of(resolver, types))
+                        if matches!(resolved.as_raw_data(), TypeData::TypeofExpression(_)) {
+                            return None;
+                        }
+
+                        if matches!(resolved.as_raw_data(), TypeData::Unknown) {
+                            types.push(TypeReference::unknown());
+                            continue;
+                        }
+
+                        let Some(member) = resolved
+                            .find_member(resolver, |member| member.has_name(&expr.member))
+                            .or_else(|| {
+                                resolved.find_index_signature_with_ty(resolver, |ty| ty.is_string())
+                            })
+                        else {
+                            continue;
+                        };
+                        types.push(member.deref_ty(resolver).into_owned());
+                    }
+
+                    if types.is_empty() {
+                        Some(TypeData::unknown())
+                    } else {
+                        Some(TypeData::union_of(resolver, types.into_boxed_slice()))
+                    }
                 }
 
                 _ => {
@@ -329,17 +349,19 @@ pub(super) fn flattened_expression(
     }
 }
 
-fn flattened_call(
-    expr: &TypeofCallExpression,
+/// Resolves a callee type through layers of indirection (`InstanceOf`,
+/// `Interface`, `Object`) until a `Function` is found, bounded by
+/// [`MAX_FLATTEN_DEPTH`] iterations.
+///
+/// Returns `None` if no function can be reached.
+fn resolve_callee_to_function(
     callee: TypeData,
     resolver: &mut dyn TypeResolver,
-) -> Option<TypeData> {
+) -> Option<Box<Function>> {
     let mut callee = callee;
     for _ in 0..MAX_FLATTEN_DEPTH {
         match callee {
-            TypeData::Function(function) => {
-                return flattened_function_call(expr, &function, resolver);
-            }
+            TypeData::Function(function) => return Some(function),
             TypeData::InstanceOf(instance) => {
                 let instance_callee = resolver.resolve_and_get(&instance.ty)?;
                 callee = if instance_callee.is_function() {
@@ -363,8 +385,62 @@ fn flattened_call(
             _ => break,
         }
     }
-
     None
+}
+
+fn flattened_call(
+    expr: &TypeofCallExpression,
+    callee: TypeData,
+    resolver: &mut dyn TypeResolver,
+) -> Option<TypeData> {
+    match callee {
+        TypeData::Union(union) => {
+            // When calling a union-typed callee (e.g. `(() => Promise<void>) | undefined`),
+            // resolve the call on each callable variant and collect return types.
+            let mut return_types = Vec::new();
+            for variant in union.types() {
+                let Some(resolved) = resolver.resolve_and_get(variant) else {
+                    continue;
+                };
+                match resolved.as_raw_data() {
+                    // Optional call (`?.`): an `undefined` or `null` callee
+                    // short-circuits to `undefined`, so preserve it in the
+                    // result union instead of silently dropping it.
+                    TypeData::Undefined | TypeData::Null => {
+                        return_types.push(TypeData::Undefined);
+                        continue;
+                    }
+                    TypeData::Unknown | TypeData::TypeofExpression(_) => {
+                        continue;
+                    }
+                    _ => {}
+                }
+                if let Some(function) = resolve_callee_to_function(resolved.to_data(), resolver)
+                    && let Some(result) = flattened_function_call(expr, &function, resolver)
+                {
+                    return_types.push(result);
+                }
+            }
+            match return_types.len() {
+                0 => None,
+                1 => Some(return_types.into_iter().next().unwrap()),
+                _ => {
+                    let refs: Vec<_> = return_types
+                        .into_iter()
+                        .map(|ty| {
+                            let id = resolver.register_type(Cow::Owned(ty));
+                            TypeReference::from(ResolvedTypeId::new(resolver.level(), id))
+                        })
+                        .collect();
+                    Some(TypeData::union_of(resolver, refs.into_boxed_slice()))
+                }
+            }
+        }
+        callee => {
+            let function = resolve_callee_to_function(callee, resolver)?;
+            flattened_function_call(expr, &function, resolver)
+        }
+    }
 }
 
 fn flattened_destructure(

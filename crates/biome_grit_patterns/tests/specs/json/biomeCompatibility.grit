@@ -1,0 +1,11 @@
+engine biome(1.0)
+language json
+
+or {
+  JsonObjectValue(),
+  JsonArrayValue(),
+  JsonStringValue(),
+  JsonNumberValue(),
+  JsonBooleanValue(),
+  JsonNullValue()
+}

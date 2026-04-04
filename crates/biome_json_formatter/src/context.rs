@@ -5,7 +5,7 @@ use biome_formatter::separated::TrailingSeparator;
 use biome_formatter::{BracketSpacing, Expand, IndentWidth, prelude::*};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
-    TransformSourceMap,
+    TrailingNewline, TransformSourceMap,
 };
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use std::default::Default;
@@ -68,6 +68,8 @@ pub struct JsonFormatOptions {
     trailing_commas: TrailingCommas,
     expand: Expand,
     bracket_spacing: BracketSpacing,
+    /// Whether to add a trailing newline at the end of the file. Defaults to true.
+    trailing_newline: TrailingNewline,
     /// The kind of file
     _file_source: JsonFileSource,
 }
@@ -126,6 +128,7 @@ impl JsonFormatOptions {
     pub fn new(file_source: JsonFileSource) -> Self {
         Self {
             _file_source: file_source,
+            trailing_newline: TrailingNewline::default(),
             ..Default::default()
         }
     }
@@ -165,6 +168,11 @@ impl JsonFormatOptions {
         self
     }
 
+    pub fn with_trailing_newline(mut self, trailing_newline: TrailingNewline) -> Self {
+        self.trailing_newline = trailing_newline;
+        self
+    }
+
     pub fn set_indent_style(&mut self, indent_style: IndentStyle) {
         self.indent_style = indent_style;
     }
@@ -194,12 +202,20 @@ impl JsonFormatOptions {
         self.expand = expand;
     }
 
+    pub fn set_trailing_newline(&mut self, trailing_newline: TrailingNewline) {
+        self.trailing_newline = trailing_newline;
+    }
+
     pub fn bracket_spacing(&self) -> BracketSpacing {
         self.bracket_spacing
     }
 
     pub fn expand(&self) -> Expand {
         self.expand
+    }
+
+    pub fn trailing_newline(&self) -> TrailingNewline {
+        self.trailing_newline
     }
 
     pub(crate) fn to_trailing_separator(&self) -> TrailingSeparator {
@@ -227,6 +243,10 @@ impl FormatOptions for JsonFormatOptions {
         self.line_ending
     }
 
+    fn trailing_newline(&self) -> TrailingNewline {
+        self.trailing_newline
+    }
+
     fn as_print_options(&self) -> PrinterOptions {
         PrinterOptions::from(self)
     }
@@ -241,7 +261,6 @@ impl fmt::Display for JsonFormatOptions {
         writeln!(f, "Trailing commas: {}", self.trailing_commas)?;
         writeln!(f, "Expand: {}", self.expand)?;
         writeln!(f, "Bracket spacing: {}", self.bracket_spacing.value())?;
-
-        Ok(())
+        writeln!(f, "Trailing newline: {}", self.trailing_newline.value())
     }
 }

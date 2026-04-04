@@ -5,6 +5,84 @@ use biome_grit_patterns::{
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::JsFileSource;
 
+// Test explicit file pattern with $filename binding - this SHOULD work
+#[test]
+fn test_explicit_file_pattern() {
+    let parse_grit_result = parse_grit(
+        r#"file(name=$filename, body=contains `console.log($message)`) where {
+            $filename <: r".*\.ts$"
+        }"#,
+    );
+    if !parse_grit_result.diagnostics().is_empty() {
+        panic!("Cannot parse query:\n{:?}", parse_grit_result.diagnostics());
+    }
+
+    let query = GritQuery::from_node(
+        parse_grit_result.tree(),
+        None,
+        GritTargetLanguage::JsTargetLanguage(JsTargetLanguage),
+        Vec::new(),
+    )
+    .expect("could not construct query");
+
+    let body = r#"console.log("Hello");"#;
+    let parsed = parse(body, JsFileSource::ts(), JsParserOptions::default());
+
+    let file = GritTargetFile::new("test.ts", parsed.into());
+    let GritQueryResult { effects, logs, .. } =
+        query.execute(file).expect("could not execute query");
+
+    dbg!(&logs);
+    dbg!(&effects);
+
+    // Should have a match since the filename ends with .ts
+    assert!(
+        !effects.is_empty(),
+        "Expected matches with explicit file pattern"
+    );
+}
+
+// Test that $filename is properly bound in where clauses (auto-wrapped)
+// This tests the pattern that gets auto-wrapped by the query compiler
+#[test]
+fn test_filename_binding() {
+    // This is the original failing pattern - simple code snippet with where clause
+    let parse_grit_result = parse_grit(
+        r#"`console.log($message)` where {
+            $filename <: r".*\.ts$"
+        }"#,
+    );
+    if !parse_grit_result.diagnostics().is_empty() {
+        panic!("Cannot parse query:\n{:?}", parse_grit_result.diagnostics());
+    }
+
+    let query = GritQuery::from_node(
+        parse_grit_result.tree(),
+        None,
+        GritTargetLanguage::JsTargetLanguage(JsTargetLanguage),
+        Vec::new(),
+    )
+    .expect("could not construct query");
+
+    println!("Compiled pattern: {:?}", query.pattern);
+
+    let body = r#"console.log("Hello");"#;
+    let parsed = parse(body, JsFileSource::ts(), JsParserOptions::default());
+
+    let file = GritTargetFile::new("test.ts", parsed.into());
+    let GritQueryResult { effects, logs, .. } =
+        query.execute(file).expect("could not execute query");
+
+    dbg!(&logs);
+    dbg!(&effects);
+
+    // Should have a match since the filename ends with .ts
+    assert!(
+        !effects.is_empty(),
+        "Expected matches since filename is test.ts"
+    );
+}
+
 // Use this test to quickly execute a Grit query against a source snippet.
 #[ignore]
 #[test]

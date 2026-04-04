@@ -1,6 +1,7 @@
-#![expect(clippy::mutable_key_type)]
 use anyhow::{Context, Result, ensure};
-use biome_analyze::ActionCategory;
+use biome_analyze::{
+    ActionCategory, SUPPRESSION_INLINE_ACTION_CATEGORY, SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY,
+};
 use biome_console::fmt::Termcolor;
 use biome_console::fmt::{self, Formatter};
 use biome_console::{MarkupBuf, markup};
@@ -22,8 +23,7 @@ use std::ops::{Add, Range};
 use std::str::FromStr;
 use std::{io, mem};
 use tower_lsp_server::jsonrpc::Error as LspError;
-use tower_lsp_server::lsp_types;
-use tower_lsp_server::lsp_types::{self as lsp, CodeDescription, Uri};
+use tower_lsp_server::ls_types::{self as lsp, CodeDescription, Uri};
 use tracing::error;
 
 pub(crate) fn text_edit(
@@ -100,7 +100,7 @@ pub(crate) fn code_fix_to_lsp(
     position_encoding: PositionEncoding,
     diagnostics: &[lsp::Diagnostic],
     action: CodeAction,
-) -> Result<lsp::CodeAction> {
+) -> Result<Option<lsp::CodeAction>> {
     // Mark diagnostics emitted by the same rule as resolved by this action
     let diagnostics: Vec<_> = action
         .rule_name
@@ -131,38 +131,96 @@ pub(crate) fn code_fix_to_lsp(
         .unwrap_or_default();
 
     let kind = action.category.to_str().into_owned();
-    let suggestion = action.suggestion;
 
-    let mut changes = HashMap::new();
-    let offset = action.offset.map(u32::from);
-    let edits = text_edit(line_index, suggestion.suggestion, position_encoding, offset)?;
+    if let Some(suggestion) = action.suggestion {
+        let mut changes = HashMap::new();
+        let offset = action.offset.map(u32::from);
+        let edits = text_edit(line_index, suggestion.suggestion, position_encoding, offset)?;
 
-    changes.insert(url.clone(), edits);
+        changes.insert(url.clone(), edits);
 
-    let edit = lsp::WorkspaceEdit {
-        changes: Some(changes),
-        document_changes: None,
-        change_annotations: None,
-    };
+        let edit = lsp::WorkspaceEdit {
+            changes: Some(changes),
+            document_changes: None,
+            change_annotations: None,
+        };
 
-    let is_preferred = matches!(action.category, ActionCategory::Source(_))
-        || matches!(suggestion.applicability, Applicability::Always)
-            && !action.category.matches("quickfix.suppressRule");
+        let is_preferred = matches!(action.category, ActionCategory::Source(_))
+            || matches!(suggestion.applicability, Applicability::Always)
+                && !action.category.matches("quickfix.suppressRule");
 
-    Ok(lsp::CodeAction {
-        title: print_markup(&suggestion.msg),
-        kind: Some(lsp::CodeActionKind::from(kind)),
-        diagnostics: if !diagnostics.is_empty() {
-            Some(diagnostics)
+        Ok(Some(lsp::CodeAction {
+            title: print_markup(&suggestion.msg),
+            kind: Some(lsp::CodeActionKind::from(kind)),
+            diagnostics: if !diagnostics.is_empty() {
+                Some(diagnostics)
+            } else {
+                None
+            },
+            edit: Some(edit),
+            command: None,
+            is_preferred: is_preferred.then_some(true),
+            disabled: None,
+            data: None,
+        }))
+    } else {
+        // Unresolved action — no edit computed yet (for codeAction/resolve).
+        // Build a title using the same patterns as rule.rs suppression messages.
+        let (message_kind, rule_category) = match &action.rule_name {
+            Some((group, rule)) => {
+                // Use the group name to determine if this is an assist or lint rule.
+                // The action category can be "quickfix.suppressRule.*" for suppressions,
+                // which doesn't tell us the rule type.
+                let is_assist = *group == "source";
+                let prefix = if is_assist { "assist" } else { "lint" };
+                let kind_label = if is_assist { "action" } else { "rule" };
+                (kind_label, format!("{prefix}/{group}/{rule}"))
+            }
+            None => ("rule", String::new()),
+        };
+        let title = if action.category.matches(SUPPRESSION_INLINE_ACTION_CATEGORY) {
+            format!("Suppress {message_kind} {rule_category} for this line.")
+        } else if action
+            .category
+            .matches(SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY)
+        {
+            format!("Suppress {message_kind} {rule_category} for the whole file.")
         } else {
-            None
-        },
-        edit: Some(edit),
-        command: None,
-        is_preferred: is_preferred.then_some(true),
-        disabled: None,
-        data: None,
-    })
+            // For rule fixes, we can't get the exact action message without
+            // running R::action(). Use the applicability to distinguish safe/unsafe.
+            let fix_label = match action.applicability {
+                Some(applicability) => match applicability {
+                    Applicability::Always => "Apply safe fix",
+                    Applicability::MaybeIncorrect => "Apply unsafe fix",
+                },
+                // An action that doesn't have applicability can't emit a code action to the LSP
+                None => return Ok(None),
+            };
+            match &action.rule_name {
+                Some((_group, rule)) => format!("{fix_label} for {rule}"),
+                None => kind.clone(),
+            }
+        };
+
+        let is_preferred = matches!(action.category, ActionCategory::Source(_))
+            || matches!(action.applicability, Some(Applicability::Always))
+                && !action.category.matches("quickfix.suppressRule");
+
+        Ok(Some(lsp::CodeAction {
+            title,
+            kind: Some(lsp::CodeActionKind::from(kind)),
+            diagnostics: if !diagnostics.is_empty() {
+                Some(diagnostics)
+            } else {
+                None
+            },
+            edit: None,
+            command: None,
+            is_preferred: is_preferred.then_some(true),
+            disabled: None,
+            data: None,
+        }))
+    }
 }
 
 /// Convert an [biome_diagnostics::Diagnostic] to a [lsp::Diagnostic], using the span
@@ -361,7 +419,7 @@ pub(crate) fn panic_to_lsp_error(err: Box<dyn Any + Send>) -> LspError {
 pub(crate) fn apply_document_changes(
     position_encoding: PositionEncoding,
     current_content: String,
-    mut content_changes: Vec<lsp_types::TextDocumentContentChangeEvent>,
+    mut content_changes: Vec<lsp::TextDocumentContentChangeEvent>,
 ) -> String {
     // Skip to the last full document change, as it invalidates all previous changes anyways.
     let mut start = content_changes
@@ -372,7 +430,7 @@ pub(crate) fn apply_document_changes(
 
     let mut text: String = match content_changes.get_mut(start) {
         // peek at the first content change as an optimization
-        Some(lsp_types::TextDocumentContentChangeEvent {
+        Some(lsp::TextDocumentContentChangeEvent {
             range: None, text, ..
         }) => {
             let text = mem::take(text);
@@ -396,7 +454,7 @@ pub(crate) fn apply_document_changes(
     // Some clients (e.g. Code) sort the ranges in reverse. As an optimization, we
     // remember the last valid line in the index and only rebuild it if needed.
     let mut index_valid = u32::MAX;
-    for change in content_changes {
+    for change in content_changes.into_iter().skip(start) {
         // The None case can't happen as we have handled it above already
         if let Some(range) = change.range {
             if index_valid <= range.end.line {
@@ -417,8 +475,9 @@ mod tests {
     use biome_line_index::{LineIndex, WideEncoding};
     use biome_lsp_converters::PositionEncoding;
     use biome_text_edit::TextEdit;
-    use tower_lsp_server::lsp_types as lsp;
-    use tower_lsp_server::lsp_types::{Position, Range, TextDocumentContentChangeEvent};
+    use tower_lsp_server::ls_types::{
+        self as lsp, Position, Range, TextDocumentContentChangeEvent,
+    };
 
     #[test]
     fn test_diff_1() {
@@ -546,5 +605,70 @@ line 7 new";
         let expected = "(\"Jan 1, 2018\u{2009}–\u{2009}Jan 1, 2019\");(\"Jan 1, 2018\u{2009}–\u{2009}Jan 1, 2019\");\nisSpreadAssignment;\n";
 
         assert_eq!(output, expected);
+    }
+
+    /// Regression test for https://github.com/biomejs/biome/issues/9341
+    ///
+    /// When content_changes contains incremental changes before a full document
+    /// change, the loop incorrectly applies those stale changes to the new
+    /// document text. This can cause byte offsets to land on non-char-boundaries
+    /// in multi-byte UTF-8 text, triggering a panic in `replace_range`.
+    #[test]
+    fn test_apply_changes_skips_changes_before_full_doc_replacement() {
+        let encoding = PositionEncoding::Wide(WideEncoding::Utf16);
+
+        let input = "old content\nwith\u{2009}multibyte\n".to_string();
+
+        let changes = vec![
+            // Change 0: incremental change referencing the OLD document
+            TextDocumentContentChangeEvent {
+                range: Some(Range::new(Position::new(0, 0), Position::new(0, 3))),
+                range_length: None,
+                text: String::from("new"),
+            },
+            // Change 1: full document replacement (invalidates all previous)
+            TextDocumentContentChangeEvent {
+                range: None,
+                range_length: None,
+                text: String::from("completely\u{2009}different\ntext\n"),
+            },
+            // Change 2: incremental change referencing the NEW document
+            TextDocumentContentChangeEvent {
+                range: Some(Range::new(Position::new(0, 11), Position::new(0, 20))),
+                range_length: None,
+                text: String::from("replaced"),
+            },
+        ];
+
+        let output = apply_document_changes(encoding, input, changes);
+
+        // Only the full doc change + subsequent incremental changes should apply.
+        // Change 0 must be skipped since it references the old document.
+        let expected = "completely\u{2009}replaced\ntext\n";
+        assert_eq!(output, expected);
+    }
+
+    /// Regression test: an inverted LSP range (start after end) must not panic.
+    ///
+    /// Some editors may emit ranges where start > end due to encoding or
+    /// batching issues. `apply_document_changes` should skip the invalid change
+    /// gracefully instead of panicking inside `TextRange::new`.
+    #[test]
+    fn test_apply_changes_inverted_range_does_not_panic() {
+        let encoding = PositionEncoding::Wide(WideEncoding::Utf16);
+        let input = "abc\ndef\nghi".to_string();
+
+        let changes = vec![
+            // Inverted range: start (line 1) is after end (line 0)
+            TextDocumentContentChangeEvent {
+                range: Some(Range::new(Position::new(1, 3), Position::new(0, 0))),
+                range_length: None,
+                text: String::from("replaced"),
+            },
+        ];
+
+        // Must not panic — the invalid change is skipped, text is unchanged
+        let output = apply_document_changes(encoding, input, changes);
+        assert_eq!(output, "abc\ndef\nghi");
     }
 }

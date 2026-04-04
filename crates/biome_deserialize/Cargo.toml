@@ -1,15 +1,18 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Utilities to deserialize values"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_deserialize"
-publish              = true
-repository.workspace = true
 version              = "0.6.0"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Utilities to deserialize values"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
+
+[package.metadata.cargo-udeps.ignore]
+development = ["biome_deserialize_macros"]
 
 [dependencies]
 biome_console     = { workspace = true }
@@ -25,16 +28,13 @@ serde_json        = { workspace = true, optional = true }
 smallvec          = { workspace = true, optional = true }
 
 [dev-dependencies]
-biome_deserialize_macros = { workspace = true }
+biome_deserialize_macros = { path = "../biome_deserialize_macros" }
 
 [features]
 camino   = ["dep:camino"]
 indexmap = ["dep:indexmap"]
 serde    = ["dep:serde", "dep:serde_json"]
 smallvec = ["dep:smallvec"]
-
-[package.metadata.cargo-udeps.ignore]
-development = ["biome_deserialize_macros"]
 
 [lints]
 workspace = true

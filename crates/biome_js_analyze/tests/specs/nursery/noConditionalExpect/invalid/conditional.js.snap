@@ -1,0 +1,437 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: conditional.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+test("if statement", async ({ page }) => {
+    if (someCondition) {
+        await expect(page).toHaveTitle("Title");
+    }
+});
+
+test("ternary", async ({ page }) => {
+    someCondition ? await expect(page).toHaveTitle("Title") : null;
+});
+
+test("logical and", async ({ page }) => {
+    someCondition && await expect(page).toHaveTitle("Title");
+});
+
+test("logical or", async ({ page }) => {
+    someCondition || await expect(page).toHaveTitle("Title");
+});
+
+test("nullish coalescing", async ({ page }) => {
+    someValue ?? await expect(page).toHaveTitle("Title");
+});
+
+test("switch case", async ({ page }) => {
+    switch (value) {
+        case "a":
+            await expect(page).toHaveTitle("Title");
+            break;
+    }
+});
+
+test("if with .not modifier", async ({ page }) => {
+    if (someCondition) {
+        await expect(page).not.toHaveTitle("Title");
+    }
+});
+
+test("ternary with .not modifier", async ({ page }) => {
+    someCondition ? await expect(page).not.toBeVisible() : null;
+});
+
+// .resolves modifier
+test("if with .resolves", async ({ page }) => {
+    if (someCondition) {
+        await expect(fetchData()).resolves.toBeTruthy();
+    }
+});
+
+// .rejects modifier
+test("ternary with .rejects", async ({ page }) => {
+    someCondition ? await expect(badRequest()).rejects.toThrow() : null;
+});
+
+// .poll() modifier
+test("logical and with expect.poll", async ({ page }) => {
+    someCondition && await expect.poll(() => getValue()).toBe(true);
+});
+
+// .soft() modifier
+test("switch with expect.soft", async ({ page }) => {
+    switch (value) {
+        case "a":
+            await expect.soft(page.locator("h1")).toBeVisible();
+            break;
+    }
+});
+
+// Chained modifiers: .resolves.not
+test("if with .resolves.not", async ({ page }) => {
+    if (someCondition) {
+        await expect(fetchData()).resolves.not.toBeNull();
+    }
+});
+
+// Chained modifiers: .rejects.not
+test("ternary with .rejects.not", async ({ page }) => {
+    someCondition ? await expect(badRequest()).rejects.not.toBeUndefined() : null;
+});
+
+// Chained modifiers: .soft().not
+test("switch with expect.soft and .not", async ({ page }) => {
+    switch (value) {
+        case "a":
+            await expect.soft(element).not.toBeHidden();
+            break;
+    }
+});
+
+// Catch clause
+test("catch clause", async ({ page }) => {
+    try {
+        await page.click("button");
+    } catch (e) {
+        await expect(page).toHaveTitle("Title");
+    }
+});
+
+```
+
+# Diagnostics
+```
+conditional.js:5:15 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected conditional expect() call.
+  
+    3 │ test("if statement", async ({ page }) => {
+    4 │     if (someCondition) {
+  > 5 │         await expect(page).toHaveTitle("Title");
+      │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │     }
+    7 │ });
+  
+  i This expect() is inside a if statement, which means it may not always run.
+  
+  i Consider using test.skip() to conditionally skip the test, or restructure to avoid conditional expectations.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+conditional.js:10:27 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected conditional expect() call.
+  
+     9 │ test("ternary", async ({ page }) => {
+  > 10 │     someCondition ? await expect(page).toHaveTitle("Title") : null;
+       │                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ });
+    12 │ 
+  
+  i This expect() is inside a ternary expression, which means it may not always run.
+  
+  i Consider using test.skip() to conditionally skip the test, or restructure to avoid conditional expectations.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+conditional.js:14:28 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected conditional expect() call.
+  
+    13 │ test("logical and", async ({ page }) => {
+  > 14 │     someCondition && await expect(page).toHaveTitle("Title");
+       │                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ });
+    16 │ 
+  
+  i This expect() is inside a logical expression, which means it may not always run.
+  
+  i Consider using test.skip() to conditionally skip the test, or restructure to avoid conditional expectations.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+conditional.js:18:28 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected conditional expect() call.
+  
+    17 │ test("logical or", async ({ page }) => {
+  > 18 │     someCondition || await expect(page).toHaveTitle("Title");
+       │                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ });
+    20 │ 
+  
+  i This expect() is inside a logical expression, which means it may not always run.
+  
+  i Consider using test.skip() to conditionally skip the test, or restructure to avoid conditional expectations.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+conditional.js:22:24 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected conditional expect() call.
+  
+    21 │ test("nullish coalescing", async ({ page }) => {
+  > 22 │     someValue ?? await expect(page).toHaveTitle("Title");
+       │                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ });
+    24 │ 
+  
+  i This expect() is inside a logical expression, which means it may not always run.
+  
+  i Consider using test.skip() to conditionally skip the test, or restructure to avoid conditional expectations.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+conditional.js:28:19 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected conditional expect() call.
+  
+    26 │     switch (value) {
+    27 │         case "a":
+  > 28 │             await expect(page).toHaveTitle("Title");
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │             break;
+    30 │     }
+  
+  i This expect() is inside a switch case, which means it may not always run.
+  
+  i Consider using test.skip() to conditionally skip the test, or restructure to avoid conditional expectations.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+conditional.js:35:15 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected conditional expect() call.
+  
+    33 │ test("if with .not modifier", async ({ page }) => {
+    34 │     if (someCondition) {
+  > 35 │         await expect(page).not.toHaveTitle("Title");
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    36 │     }
+    37 │ });
+  
+  i This expect() is inside a if statement, which means it may not always run.
+  
+  i Consider using test.skip() to conditionally skip the test, or restructure to avoid conditional expectations.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+conditional.js:40:27 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected conditional expect() call.
+  
+    39 │ test("ternary with .not modifier", async ({ page }) => {
+  > 40 │     someCondition ? await expect(page).not.toBeVisible() : null;
+       │                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │ });
+    42 │ 
+  
+  i This expect() is inside a ternary expression, which means it may not always run.
+  
+  i Consider using test.skip() to conditionally skip the test, or restructure to avoid conditional expectations.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+conditional.js:46:15 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected conditional expect() call.
+  
+    44 │ test("if with .resolves", async ({ page }) => {
+    45 │     if (someCondition) {
+  > 46 │         await expect(fetchData()).resolves.toBeTruthy();
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    47 │     }
+    48 │ });
+  
+  i This expect() is inside a if statement, which means it may not always run.
+  
+  i Consider using test.skip() to conditionally skip the test, or restructure to avoid conditional expectations.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+conditional.js:52:27 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected conditional expect() call.
+  
+    50 │ // .rejects modifier
+    51 │ test("ternary with .rejects", async ({ page }) => {
+  > 52 │     someCondition ? await expect(badRequest()).rejects.toThrow() : null;
+       │                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    53 │ });
+    54 │ 
+  
+  i This expect() is inside a ternary expression, which means it may not always run.
+  
+  i Consider using test.skip() to conditionally skip the test, or restructure to avoid conditional expectations.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+conditional.js:57:28 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected conditional expect() call.
+  
+    55 │ // .poll() modifier
+    56 │ test("logical and with expect.poll", async ({ page }) => {
+  > 57 │     someCondition && await expect.poll(() => getValue()).toBe(true);
+       │                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    58 │ });
+    59 │ 
+  
+  i This expect() is inside a logical expression, which means it may not always run.
+  
+  i Consider using test.skip() to conditionally skip the test, or restructure to avoid conditional expectations.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+conditional.js:64:19 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected conditional expect() call.
+  
+    62 │     switch (value) {
+    63 │         case "a":
+  > 64 │             await expect.soft(page.locator("h1")).toBeVisible();
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    65 │             break;
+    66 │     }
+  
+  i This expect() is inside a switch case, which means it may not always run.
+  
+  i Consider using test.skip() to conditionally skip the test, or restructure to avoid conditional expectations.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+conditional.js:72:15 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected conditional expect() call.
+  
+    70 │ test("if with .resolves.not", async ({ page }) => {
+    71 │     if (someCondition) {
+  > 72 │         await expect(fetchData()).resolves.not.toBeNull();
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    73 │     }
+    74 │ });
+  
+  i This expect() is inside a if statement, which means it may not always run.
+  
+  i Consider using test.skip() to conditionally skip the test, or restructure to avoid conditional expectations.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+conditional.js:78:27 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected conditional expect() call.
+  
+    76 │ // Chained modifiers: .rejects.not
+    77 │ test("ternary with .rejects.not", async ({ page }) => {
+  > 78 │     someCondition ? await expect(badRequest()).rejects.not.toBeUndefined() : null;
+       │                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    79 │ });
+    80 │ 
+  
+  i This expect() is inside a ternary expression, which means it may not always run.
+  
+  i Consider using test.skip() to conditionally skip the test, or restructure to avoid conditional expectations.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+conditional.js:85:19 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected conditional expect() call.
+  
+    83 │     switch (value) {
+    84 │         case "a":
+  > 85 │             await expect.soft(element).not.toBeHidden();
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    86 │             break;
+    87 │     }
+  
+  i This expect() is inside a switch case, which means it may not always run.
+  
+  i Consider using test.skip() to conditionally skip the test, or restructure to avoid conditional expectations.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+conditional.js:95:15 lint/nursery/noConditionalExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected conditional expect() call.
+  
+    93 │         await page.click("button");
+    94 │     } catch (e) {
+  > 95 │         await expect(page).toHaveTitle("Title");
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    96 │     }
+    97 │ });
+  
+  i This expect() is inside a catch clause, which means it may not always run.
+  
+  i Consider using test.skip() to conditionally skip the test, or restructure to avoid conditional expectations.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

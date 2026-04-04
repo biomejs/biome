@@ -177,6 +177,27 @@ pub(crate) fn expected_expression_assignment(p: &JsParser, range: TextRange) -> 
     expected_any(&["expression", "assignment"], range, p)
 }
 
+pub(crate) fn template_expression_expected_expression(
+    p: &JsParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    p.err_builder(
+        "Expected a valid expression in template syntax",
+        range,
+    )
+    .with_hint(
+        "Template expressions can only contain JavaScript expressions, not statements like 'let', 'if', or 'function'.",
+    )
+}
+
+pub(crate) fn template_expression_trailing_code(p: &JsParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder(
+        "Template expressions can only contain a single expression",
+        range,
+    )
+    .with_hint("Remove the extra code or split into multiple template expressions.")
+}
+
 pub(crate) fn expected_unary_expression(p: &JsParser, range: TextRange) -> ParseDiagnostic {
     expected_node("unary expression", range, p)
 }

@@ -1,0 +1,45 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/each_nested.svelte
+---
+
+# Input
+
+```svelte
+{#each categories as category}
+  <div class="category">
+    <h2>{category.name}</h2>
+    {#each category.items as item, i}
+      <div class="item">{i}: {item.title}</div>
+    {/each}
+  </div>
+{/each}
+
+{#each matrix as row}
+  {#each row as cell}
+    <span>{cell}</span>
+  {/each}
+{/each}
+
+```
+
+
+# Formatted
+
+```svelte
+{#each categories as category}
+	<div class="category">
+		<h2>{category.name}</h2>
+		{#each category.items as item, i}
+			<div class="item">{i}: {item.title}</div>
+		{/each}
+	</div>
+{/each}
+
+{#each matrix as row}
+	{#each row as cell}
+		<span>{cell}</span>
+	{/each}
+{/each}
+
+```

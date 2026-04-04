@@ -1,0 +1,1 @@
+data-active:text-red-500

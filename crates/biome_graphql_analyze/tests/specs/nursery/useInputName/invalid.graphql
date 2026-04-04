@@ -1,0 +1,10 @@
+# should generate diagnostics
+type Mutation { SetMessage(record: String): String }
+
+type Mutation { SetMessage(record: SetMessageInput): String }
+
+type Mutation { SetMessage(record: setMessageInput): String }
+
+type Mutation { SetMessage(record: SetMessageInput!): String }
+
+type Mutation { SetMessage(record: [SetMessageInput]): String }

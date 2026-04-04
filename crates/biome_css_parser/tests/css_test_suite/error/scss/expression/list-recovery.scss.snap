@@ -1,0 +1,365 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+// Missing element in a comma-separated list should recover and keep later items
+$vals: (1, ???, 3, 4);
+
+// Missing element in a map pair list should recover and keep later pairs
+$map: (a: 1, b: ???, c: 3);
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssBogus {
+            items: [
+                ScssIdentifier {
+                    dollar_token: DOLLAR@0..82 "$" [Comments("// Missing element in ..."), Newline("\n")] [],
+                    name: CssIdentifier {
+                        value_token: IDENT@82..86 "vals" [] [],
+                    },
+                },
+                COLON@86..88 ":" [] [Whitespace(" ")],
+                CssBogus {
+                    items: [
+                        CssBogus {
+                            items: [
+                                CssBogus {
+                                    items: [
+                                        L_PAREN@88..89 "(" [] [],
+                                        CssBogus {
+                                            items: [
+                                                CssBogus {
+                                                    items: [
+                                                        ScssListExpressionElement {
+                                                            value: ScssExpression {
+                                                                items: ScssExpressionItemList [
+                                                                    CssNumber {
+                                                                        value_token: CSS_NUMBER_LITERAL@89..90 "1" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                        COMMA@90..92 "," [] [Whitespace(" ")],
+                                                        CssBogus {
+                                                            items: [
+                                                                CssBogus {
+                                                                    items: [
+                                                                        CssBogus {
+                                                                            items: [
+                                                                                CssBogusPropertyValue {
+                                                                                    items: [
+                                                                                        ERROR_TOKEN@92..93 "?" [] [],
+                                                                                        ERROR_TOKEN@93..94 "?" [] [],
+                                                                                        ERROR_TOKEN@94..95 "?" [] [],
+                                                                                    ],
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                        COMMA@95..97 "," [] [Whitespace(" ")],
+                                                        ScssListExpressionElement {
+                                                            value: ScssExpression {
+                                                                items: ScssExpressionItemList [
+                                                                    CssNumber {
+                                                                        value_token: CSS_NUMBER_LITERAL@97..98 "3" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                        COMMA@98..100 "," [] [Whitespace(" ")],
+                                                        ScssListExpressionElement {
+                                                            value: ScssExpression {
+                                                                items: ScssExpressionItemList [
+                                                                    CssNumber {
+                                                                        value_token: CSS_NUMBER_LITERAL@100..101 "4" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                        R_PAREN@101..102 ")" [] [],
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                ScssVariableModifierList [],
+                SEMICOLON@102..103 ";" [] [],
+            ],
+        },
+        CssBogus {
+            items: [
+                ScssIdentifier {
+                    dollar_token: DOLLAR@103..180 "$" [Newline("\n"), Newline("\n"), Comments("// Missing element in ..."), Newline("\n")] [],
+                    name: CssIdentifier {
+                        value_token: IDENT@180..183 "map" [] [],
+                    },
+                },
+                COLON@183..185 ":" [] [Whitespace(" ")],
+                CssBogus {
+                    items: [
+                        CssBogus {
+                            items: [
+                                CssBogus {
+                                    items: [
+                                        L_PAREN@185..186 "(" [] [],
+                                        CssBogus {
+                                            items: [
+                                                ScssMapExpressionPair {
+                                                    key: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            CssIdentifier {
+                                                                value_token: IDENT@186..187 "a" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                    colon_token: COLON@187..189 ":" [] [Whitespace(" ")],
+                                                    value: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@189..190 "1" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                                COMMA@190..192 "," [] [Whitespace(" ")],
+                                                CssBogus {
+                                                    items: [
+                                                        ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                CssIdentifier {
+                                                                    value_token: IDENT@192..193 "b" [] [],
+                                                                },
+                                                            ],
+                                                        },
+                                                        COLON@193..195 ":" [] [Whitespace(" ")],
+                                                        CssBogus {
+                                                            items: [
+                                                                CssBogus {
+                                                                    items: [
+                                                                        CssBogusPropertyValue {
+                                                                            items: [
+                                                                                ERROR_TOKEN@195..196 "?" [] [],
+                                                                                ERROR_TOKEN@196..197 "?" [] [],
+                                                                                ERROR_TOKEN@197..198 "?" [] [],
+                                                                            ],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                                COMMA@198..200 "," [] [Whitespace(" ")],
+                                                ScssMapExpressionPair {
+                                                    key: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            CssIdentifier {
+                                                                value_token: IDENT@200..201 "c" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                    colon_token: COLON@201..203 ":" [] [Whitespace(" ")],
+                                                    value: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@203..204 "3" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            ],
+                                        },
+                                        R_PAREN@204..205 ")" [] [],
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                ScssVariableModifierList [],
+                SEMICOLON@205..206 ";" [] [],
+            ],
+        },
+    ],
+    eof_token: EOF@206..207 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..207
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..206
+    0: CSS_BOGUS@0..103
+      0: SCSS_IDENTIFIER@0..86
+        0: DOLLAR@0..82 "$" [Comments("// Missing element in ..."), Newline("\n")] []
+        1: CSS_IDENTIFIER@82..86
+          0: IDENT@82..86 "vals" [] []
+      1: COLON@86..88 ":" [] [Whitespace(" ")]
+      2: CSS_BOGUS@88..102
+        0: CSS_BOGUS@88..102
+          0: CSS_BOGUS@88..102
+            0: L_PAREN@88..89 "(" [] []
+            1: CSS_BOGUS@89..101
+              0: CSS_BOGUS@89..101
+                0: SCSS_LIST_EXPRESSION_ELEMENT@89..90
+                  0: SCSS_EXPRESSION@89..90
+                    0: SCSS_EXPRESSION_ITEM_LIST@89..90
+                      0: CSS_NUMBER@89..90
+                        0: CSS_NUMBER_LITERAL@89..90 "1" [] []
+                1: COMMA@90..92 "," [] [Whitespace(" ")]
+                2: CSS_BOGUS@92..95
+                  0: CSS_BOGUS@92..95
+                    0: CSS_BOGUS@92..95
+                      0: CSS_BOGUS_PROPERTY_VALUE@92..95
+                        0: ERROR_TOKEN@92..93 "?" [] []
+                        1: ERROR_TOKEN@93..94 "?" [] []
+                        2: ERROR_TOKEN@94..95 "?" [] []
+                3: COMMA@95..97 "," [] [Whitespace(" ")]
+                4: SCSS_LIST_EXPRESSION_ELEMENT@97..98
+                  0: SCSS_EXPRESSION@97..98
+                    0: SCSS_EXPRESSION_ITEM_LIST@97..98
+                      0: CSS_NUMBER@97..98
+                        0: CSS_NUMBER_LITERAL@97..98 "3" [] []
+                5: COMMA@98..100 "," [] [Whitespace(" ")]
+                6: SCSS_LIST_EXPRESSION_ELEMENT@100..101
+                  0: SCSS_EXPRESSION@100..101
+                    0: SCSS_EXPRESSION_ITEM_LIST@100..101
+                      0: CSS_NUMBER@100..101
+                        0: CSS_NUMBER_LITERAL@100..101 "4" [] []
+            2: R_PAREN@101..102 ")" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@102..102
+      4: SEMICOLON@102..103 ";" [] []
+    1: CSS_BOGUS@103..206
+      0: SCSS_IDENTIFIER@103..183
+        0: DOLLAR@103..180 "$" [Newline("\n"), Newline("\n"), Comments("// Missing element in ..."), Newline("\n")] []
+        1: CSS_IDENTIFIER@180..183
+          0: IDENT@180..183 "map" [] []
+      1: COLON@183..185 ":" [] [Whitespace(" ")]
+      2: CSS_BOGUS@185..205
+        0: CSS_BOGUS@185..205
+          0: CSS_BOGUS@185..205
+            0: L_PAREN@185..186 "(" [] []
+            1: CSS_BOGUS@186..204
+              0: SCSS_MAP_EXPRESSION_PAIR@186..190
+                0: SCSS_EXPRESSION@186..187
+                  0: SCSS_EXPRESSION_ITEM_LIST@186..187
+                    0: CSS_IDENTIFIER@186..187
+                      0: IDENT@186..187 "a" [] []
+                1: COLON@187..189 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@189..190
+                  0: SCSS_EXPRESSION_ITEM_LIST@189..190
+                    0: CSS_NUMBER@189..190
+                      0: CSS_NUMBER_LITERAL@189..190 "1" [] []
+              1: COMMA@190..192 "," [] [Whitespace(" ")]
+              2: CSS_BOGUS@192..198
+                0: SCSS_EXPRESSION@192..193
+                  0: SCSS_EXPRESSION_ITEM_LIST@192..193
+                    0: CSS_IDENTIFIER@192..193
+                      0: IDENT@192..193 "b" [] []
+                1: COLON@193..195 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@195..198
+                  0: CSS_BOGUS@195..198
+                    0: CSS_BOGUS_PROPERTY_VALUE@195..198
+                      0: ERROR_TOKEN@195..196 "?" [] []
+                      1: ERROR_TOKEN@196..197 "?" [] []
+                      2: ERROR_TOKEN@197..198 "?" [] []
+              3: COMMA@198..200 "," [] [Whitespace(" ")]
+              4: SCSS_MAP_EXPRESSION_PAIR@200..204
+                0: SCSS_EXPRESSION@200..201
+                  0: SCSS_EXPRESSION_ITEM_LIST@200..201
+                    0: CSS_IDENTIFIER@200..201
+                      0: IDENT@200..201 "c" [] []
+                1: COLON@201..203 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@203..204
+                  0: SCSS_EXPRESSION_ITEM_LIST@203..204
+                    0: CSS_NUMBER@203..204
+                      0: CSS_NUMBER_LITERAL@203..204 "3" [] []
+            2: R_PAREN@204..205 ")" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@205..205
+      4: SEMICOLON@205..206 ";" [] []
+  2: EOF@206..207 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+list-recovery.scss:2:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `?`
+  
+    1 │ // Missing element in a comma-separated list should recover and keep later items
+  > 2 │ $vals: (1, ???, 3, 4);
+      │            ^
+    3 │ 
+    4 │ // Missing element in a map pair list should recover and keep later pairs
+  
+list-recovery.scss:2:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `?`
+  
+    1 │ // Missing element in a comma-separated list should recover and keep later items
+  > 2 │ $vals: (1, ???, 3, 4);
+      │             ^
+    3 │ 
+    4 │ // Missing element in a map pair list should recover and keep later pairs
+  
+list-recovery.scss:2:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `?`
+  
+    1 │ // Missing element in a comma-separated list should recover and keep later items
+  > 2 │ $vals: (1, ???, 3, 4);
+      │              ^
+    3 │ 
+    4 │ // Missing element in a map pair list should recover and keep later pairs
+  
+list-recovery.scss:5:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `?`
+  
+    4 │ // Missing element in a map pair list should recover and keep later pairs
+  > 5 │ $map: (a: 1, b: ???, c: 3);
+      │                 ^
+    6 │ 
+  
+list-recovery.scss:5:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `?`
+  
+    4 │ // Missing element in a map pair list should recover and keep later pairs
+  > 5 │ $map: (a: 1, b: ???, c: 3);
+      │                  ^
+    6 │ 
+  
+list-recovery.scss:5:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `?`
+  
+    4 │ // Missing element in a map pair list should recover and keep later pairs
+  > 5 │ $map: (a: 1, b: ???, c: 3);
+      │                   ^
+    6 │ 
+  
+```

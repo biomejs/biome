@@ -732,7 +732,7 @@ fn parse_return_statement(p: &mut JsParser) -> ParsedSyntax {
     let mut complete = m.complete(p, JS_RETURN_STATEMENT);
 
     // The frontmatter of Astro files is executed inside a function during the compilation, so it's safe to have illegal returns
-    if !p.state().in_function() && !p.source_type.as_embedding_kind().is_astro() {
+    if !p.state().in_function() && !p.source_type.as_embedding_kind().is_astro_frontmatter() {
         let err = p.err_builder(
             "Illegal return statement outside of a function",
             complete.range(p),

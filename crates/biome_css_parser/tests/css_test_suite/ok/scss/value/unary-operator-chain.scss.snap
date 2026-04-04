@@ -1,0 +1,114 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+$y: 1;
+$x: not - -$y;
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@0..1 "$" [] [],
+                name: CssIdentifier {
+                    value_token: IDENT@1..2 "y" [] [],
+                },
+            },
+            colon_token: COLON@2..4 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    CssNumber {
+                        value_token: CSS_NUMBER_LITERAL@4..5 "1" [] [],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@5..6 ";" [] [],
+        },
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@6..8 "$" [Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@8..9 "x" [] [],
+                },
+            },
+            colon_token: COLON@9..11 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    ScssUnaryExpression {
+                        operator: NOT_KW@11..15 "not" [] [Whitespace(" ")],
+                        expression: ScssUnaryExpression {
+                            operator: MINUS@15..17 "-" [] [Whitespace(" ")],
+                            expression: ScssUnaryExpression {
+                                operator: MINUS@17..18 "-" [] [],
+                                expression: ScssIdentifier {
+                                    dollar_token: DOLLAR@18..19 "$" [] [],
+                                    name: CssIdentifier {
+                                        value_token: IDENT@19..20 "y" [] [],
+                                    },
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@20..21 ";" [] [],
+        },
+    ],
+    eof_token: EOF@21..22 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..22
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..21
+    0: SCSS_DECLARATION@0..6
+      0: SCSS_IDENTIFIER@0..2
+        0: DOLLAR@0..1 "$" [] []
+        1: CSS_IDENTIFIER@1..2
+          0: IDENT@1..2 "y" [] []
+      1: COLON@2..4 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@4..5
+        0: SCSS_EXPRESSION_ITEM_LIST@4..5
+          0: CSS_NUMBER@4..5
+            0: CSS_NUMBER_LITERAL@4..5 "1" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@5..5
+      4: SEMICOLON@5..6 ";" [] []
+    1: SCSS_DECLARATION@6..21
+      0: SCSS_IDENTIFIER@6..9
+        0: DOLLAR@6..8 "$" [Newline("\n")] []
+        1: CSS_IDENTIFIER@8..9
+          0: IDENT@8..9 "x" [] []
+      1: COLON@9..11 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@11..20
+        0: SCSS_EXPRESSION_ITEM_LIST@11..20
+          0: SCSS_UNARY_EXPRESSION@11..20
+            0: NOT_KW@11..15 "not" [] [Whitespace(" ")]
+            1: SCSS_UNARY_EXPRESSION@15..20
+              0: MINUS@15..17 "-" [] [Whitespace(" ")]
+              1: SCSS_UNARY_EXPRESSION@17..20
+                0: MINUS@17..18 "-" [] []
+                1: SCSS_IDENTIFIER@18..20
+                  0: DOLLAR@18..19 "$" [] []
+                  1: CSS_IDENTIFIER@19..20
+                    0: IDENT@19..20 "y" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@20..20
+      4: SEMICOLON@20..21 ";" [] []
+  2: EOF@21..22 "" [Newline("\n")] []
+
+```

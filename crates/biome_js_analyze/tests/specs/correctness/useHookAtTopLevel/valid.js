@@ -65,37 +65,28 @@ const obj = {
     }
 }
 
-// Hook called indirectly
-function helper() {
-    useEffect();
-}
-
-function Component2({ a }) {
-    helper();
-}
-
-const Component3 = () => {
+const Component2 = () => {
     useEffect();
 };
 
-export function Component4() {
+export function Component3() {
     useEffect();
 };
 
-export default function Component5() {
+export default function Component4() {
     useEffect();
 };
 
-const Component6 = () => {
+const Component5 = () => {
     return useState();
 };
 
-const Component7 = () => {
+const Component6 = () => {
     const value = useRef().value;
     const [_val, _setter] = useState(useMemo('hello'));
 }
 
-function Component8() {
+function Component7() {
     const a = () => {
         return;
     };

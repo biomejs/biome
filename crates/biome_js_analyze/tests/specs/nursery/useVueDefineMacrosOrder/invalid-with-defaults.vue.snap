@@ -3,7 +3,8 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-with-defaults.vue
 ---
 # Input
-```ts
+```vue
+<script lang="ts" setup>
 import { ref } from 'vue'
 
 interface Foo {}
@@ -18,38 +19,43 @@ const emit = defineEmits([])
 const props = withDefaults(defineProps({}), { a: 1 })
 
 const count = ref(0)
+</script>
+
+<template><div /></template>
 
 ```
 
 # Diagnostics
 ```
-invalid-with-defaults.vue:12:7 lint/nursery/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+invalid-with-defaults.vue:13:7 lint/nursery/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   i defineProps macro is out of order.
   
-    11 │ const emit = defineEmits([])
-  > 12 │ const props = withDefaults(defineProps({}), { a: 1 })
+    12 │ const emit = defineEmits([])
+  > 13 │ const props = withDefaults(defineProps({}), { a: 1 })
        │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    13 │ 
-    14 │ const count = ref(0)
+    14 │ 
+    15 │ const count = ref(0)
   
   i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
   
   i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Reorder macro defineProps.
   
-     8  8 │   
-     9  9 │   debugger
-    10    │ - 
-    11    │ - const·emit·=·defineEmits([])
-    12 10 │   const props = withDefaults(defineProps({}), { a: 1 })
-    13 11 │   
-       12 │ + 
-       13 │ + const·emit·=·defineEmits([])
-       14 │ + 
-    14 15 │   const count = ref(0)
-    15 16 │   
+     9  9 │   
+    10 10 │   debugger
+    11    │ - 
+    12    │ - const·emit·=·defineEmits([])
+    13 11 │   const props = withDefaults(defineProps({}), { a: 1 })
+    14 12 │   
+       13 │ + 
+       14 │ + const·emit·=·defineEmits([])
+       15 │ + 
+    15 16 │   const count = ref(0)
+    16 17 │   
   
 
 ```

@@ -1,0 +1,90 @@
+{
+  "$schema": "./packages/@biomejs/biome/configuration_schema.json",
+  "assist": {
+    "enabled": true,
+    "includes": [
+      "**",
+      "!./packages/@biomejs/biome/configuration_schema.json"
+    ],
+    "actions": {
+      "source": {
+        "useSortedKeys": "off",
+        "organizeImports": "on"
+      }
+    }
+  },
+  "css": {
+    "linter": {
+      "enabled": true
+    }
+  },
+  "files": {
+    "includes": [
+      "**/packages/aria-data/*.js",
+      "**/packages/@biomejs/**",
+      "**/packages/prettier-compare/**",
+      "**/packages/tailwindcss-config-analyzer/**",
+      "**/benchmark/**",
+      "plugins/*.js",
+      "scripts/**",
+      "!**/crates",
+      "!!**/dist",
+      "!**/packages/@biomejs/backend-jsonrpc/src/workspace.ts",
+      "!**/__snapshots__",
+      "!**/undefined",
+      "!**/benchmark/target",
+      "!**/benches",
+      "!!**/target",
+      "!!.cargo"
+    ]
+  },
+  "formatter": {
+    "includes": [
+      "**",
+      "!**/configuration_schema.json"
+    ]
+  },
+  "json": {
+    "formatter": {
+      "indentStyle": "space",
+      "lineWidth": 1
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "style": {
+        "noParameterAssign": "error",
+        "useDefaultParameterLast": "error",
+        "useSingleVarDeclarator": "error",
+        "useConst": "error",
+        "noInferrableTypes": "error",
+        "noUselessElse": "error",
+        "useSelfClosingElements": "error",
+        "useNumberNamespace": "error",
+        "useAsConstAssertion": "error",
+        "noUnusedTemplateLiteral": "error",
+        "useTemplate": "error",
+        "useEnumInitializers": "error"
+      },
+      "correctness": {
+        "noUndeclaredDependencies": "error"
+      },
+      "suspicious": {
+        "noVar": "on",
+        "noImportCycles": "error"
+      },
+      "nursery": {
+        "noFloatingPromises": "error"
+      }
+    }
+  },
+  "plugins": [
+    "plugins/no-object-assign.grit"
+  ],
+  "vcs": {
+    "clientKind": "git",
+    "enabled": true,
+    "useIgnoreFile": true
+  }
+}

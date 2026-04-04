@@ -1,22 +1,25 @@
-#![expect(clippy::mutable_key_type)]
 use std::any::type_name;
 use std::collections::{BTreeMap, HashMap};
 use std::fmt::Display;
 use std::slice;
 use std::str::FromStr;
 
+use super::*;
+use crate::WorkspaceSettings;
 use anyhow::{Context, Error, Result, bail};
 use biome_analyze::RuleCategories;
 use biome_configuration::analyzer::RuleSelector;
+use biome_configuration::analyzer::assist::AssistConfiguration;
+use biome_configuration::{Configuration, FormatterConfiguration, LinterConfiguration};
 use biome_diagnostics::PrintDescription;
 use biome_fs::{BiomePath, MemoryFileSystem, TemporaryFs};
-use biome_service::Watcher;
 use biome_service::workspace::{
     FileContent, GetFileContentParams, GetModuleGraphParams, GetModuleGraphResult,
     GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenFileResult, OpenProjectParams,
     OpenProjectResult, PullDiagnosticsParams, PullDiagnosticsResult, ScanKind, ScanProjectParams,
     ScanProjectResult,
 };
+use biome_service::{Watcher, WatcherOptions};
 use camino::Utf8PathBuf;
 use futures::channel::mpsc::{Sender, channel};
 use futures::{Sink, SinkExt, Stream, StreamExt};
@@ -28,7 +31,7 @@ use tower::timeout::Timeout;
 use tower::{Service, ServiceExt};
 use tower_lsp_server::LspService;
 use tower_lsp_server::jsonrpc::{self, Request, Response};
-use tower_lsp_server::lsp_types::{
+use tower_lsp_server::ls_types::{
     self as lsp, ClientCapabilities, CodeDescription, DidChangeConfigurationParams,
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
     DidSaveTextDocumentParams, DocumentFormattingParams, FormattingOptions, InitializeParams,
@@ -36,10 +39,6 @@ use tower_lsp_server::lsp_types::{
     TextDocumentContentChangeEvent, TextDocumentIdentifier, TextDocumentItem, TextEdit, Uri,
     VersionedTextDocumentIdentifier, WorkDoneProgressParams, WorkspaceFolder,
 };
-
-use crate::WorkspaceSettings;
-
-use super::*;
 
 /// Statically build an [Uri] instance that points to the file at `$path`
 /// within the workspace. The filesystem path contained in the return URI is
@@ -216,6 +215,43 @@ impl Server {
         Ok(())
     }
 
+    /// Like [`Self::initialize`] but advertises `codeAction/resolve` support.
+    #[expect(deprecated)]
+    async fn initialize_with_resolve_support(&mut self) -> Result<()> {
+        let _res: InitializeResult = self
+            .request(
+                "initialize",
+                "_init",
+                InitializeParams {
+                    process_id: None,
+                    root_path: None,
+                    root_uri: Some(uri!("")),
+                    initialization_options: None,
+                    capabilities: ClientCapabilities {
+                        text_document: Some(TextDocumentClientCapabilities {
+                            code_action: Some(CodeActionClientCapabilities {
+                                resolve_support: Some(CodeActionCapabilityResolveSupport {
+                                    properties: vec!["edit".to_string()],
+                                }),
+                                ..Default::default()
+                            }),
+                            ..Default::default()
+                        }),
+                        ..Default::default()
+                    },
+                    trace: None,
+                    workspace_folders: None,
+                    client_info: None,
+                    locale: None,
+                    work_done_progress_params: Default::default(),
+                },
+            )
+            .await?
+            .context("initialize returned None")?;
+
+        Ok(())
+    }
+
     /// It creates two projects, one at folder `test_one` and the other in `test_two`.
     ///
     /// Hence, the two roots will be `/workspace/test_one` and `/workspace/test_two`
@@ -341,6 +377,20 @@ impl Server {
         .await
     }
 
+    /// When calling this function, remember to insert the file inside the memory file system
+    async fn load_configuration_with_settings<V>(&mut self, value: V) -> Result<()>
+    where
+        V: Serialize,
+    {
+        self.notify(
+            "workspace/didChangeConfiguration",
+            DidChangeConfigurationParams {
+                settings: to_value(value)?,
+            },
+        )
+        .await
+    }
+
     async fn change_document(
         &mut self,
         version: i32,
@@ -422,10 +472,20 @@ async fn wait_for_notification(
 }
 
 /// Basic handler for requests and notifications coming from the server for tests
-async fn client_handler<I, O>(
+async fn client_handler<I, O>(stream: I, sink: O, notify: Sender<ServerNotification>) -> Result<()>
+where
+    I: Stream<Item = Request> + Unpin,
+    O: Sink<Response> + Unpin,
+{
+    client_handler_with_settings(stream, sink, notify, WorkspaceSettings::default()).await
+}
+
+/// Handler for requests and notifications coming from the server for tests with custom settings
+async fn client_handler_with_settings<I, O>(
     mut stream: I,
     mut sink: O,
     mut notify: Sender<ServerNotification>,
+    settings: WorkspaceSettings,
 ) -> Result<()>
 where
     // This function has to be generic as `RequestStream` and `ResponseSink`
@@ -457,7 +517,6 @@ where
 
         let res = match req.method() {
             "workspace/configuration" => {
-                let settings = WorkspaceSettings::default();
                 let result =
                     to_value(slice::from_ref(&settings)).context("failed to serialize settings")?;
 
@@ -1400,6 +1459,103 @@ async fn pull_quick_fixes() -> Result<()> {
 }
 
 #[tokio::test]
+async fn pull_quick_fixes_with_resolve() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize_with_resolve_support().await?;
+    server.initialized().await?;
+
+    server.open_document("if(a === -0) {}").await?;
+
+    // Phase 1: request code actions — should return unresolved actions (no edit)
+    let res: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 6,
+                    },
+                    end: Position {
+                        line: 0,
+                        character: 6,
+                    },
+                },
+                context: CodeActionContext {
+                    diagnostics: vec![fixable_diagnostic(0)?],
+                    only: Some(vec![CodeActionKind::QUICKFIX]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    // All actions should have data (resolve token) and no edit
+    assert!(!res.is_empty(), "expected at least one code action");
+    for action_or_command in &res {
+        let CodeActionOrCommand::CodeAction(action) = action_or_command else {
+            panic!("expected CodeAction, got Command");
+        };
+        assert!(
+            action.edit.is_none(),
+            "expected no edit in unresolved action, got edit in: {}",
+            action.title
+        );
+        assert!(
+            action.data.is_some(),
+            "expected resolve data in action: {}",
+            action.title
+        );
+    }
+
+    // Phase 2: resolve the first action (the quickfix)
+    let first_action = match &res[0] {
+        CodeActionOrCommand::CodeAction(action) => action.clone(),
+        _ => panic!("expected CodeAction"),
+    };
+
+    let resolved: CodeAction = server
+        .request("codeAction/resolve", "resolve_code_action", first_action)
+        .await?
+        .context("codeAction/resolve returned None")?;
+
+    // The resolved action should now have an edit
+    assert!(resolved.edit.is_some(), "expected edit in resolved action");
+
+    // Verify it's the correct fix (replace -0 with 0)
+    let edit = resolved.edit.unwrap();
+    let changes = edit.changes.unwrap();
+    let edits = &changes[&uri!("document.js")];
+    assert_eq!(edits.len(), 1);
+    assert_eq!(edits[0].new_text, "");
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn pull_biome_quick_fixes() -> Result<()> {
     let factory = ServerFactory::default();
     let (service, client) = factory.create().into_inner();
@@ -2003,7 +2159,8 @@ async fn pull_code_actions_with_import_sorting() -> Result<()> {
 import z from "zod";
 import { test } from "./test";
 import { describe } from "node:test";
-export { z, test, describe };
+
+export { describe, test, z };
 
 if(a === -0) {}
 "#,
@@ -2220,6 +2377,113 @@ if(a === -0) {}
             expected_line_suppression_action,
             expected_toplevel_suppression_action
         ]
+    );
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn pull_organize_imports_when_only_filter_is_set_issue_9741() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize_with_resolve_support().await?;
+    server.initialized().await?;
+
+    server
+        .open_document(
+            r#"
+import z from "zod";
+import { test } from "./test";
+import { describe } from "node:test";
+
+export { describe, test, z };
+"#,
+        )
+        .await?;
+
+    // Request code actions with only: ["source.organizeImports.biome"]
+    // This is what editors like Zed send when configured with
+    // "code_actions_on_format": { "source.organizeImports.biome": true }
+    let res: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 0,
+                    },
+                    end: Position {
+                        line: 6,
+                        character: 0,
+                    },
+                },
+                context: CodeActionContext {
+                    diagnostics: vec![Diagnostic {
+                        range: Range {
+                            start: Position {
+                                line: 1,
+                                character: 0,
+                            },
+                            end: Position {
+                                line: 1,
+                                character: 19,
+                            },
+                        },
+                        severity: Some(DiagnosticSeverity::INFORMATION),
+                        code: Some(NumberOrString::String(String::from(
+                            "assist/source/organizeImports",
+                        ))),
+                        source: Some(String::from("biome")),
+                        message: String::from("The imports and exports are not sorted."),
+                        ..Default::default()
+                    }],
+                    only: Some(vec![CodeActionKind::new("source.organizeImports.biome")]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    // The response must contain the organize imports action.
+    // Before the fix for #9741, this returned an empty array because the
+    // "source.organizeImports.biome" filter was not matching the action category.
+    assert!(
+        !res.is_empty(),
+        "Expected at least one code action, but got an empty response"
+    );
+
+    let action = match &res[0] {
+        CodeActionOrCommand::CodeAction(action) => action,
+        other => panic!("Expected CodeAction, got {:?}", other),
+    };
+
+    assert_eq!(action.title, "Apply safe fix for organizeImports");
+    assert_eq!(
+        action.kind,
+        Some(CodeActionKind::new("source.organizeImports.biome"))
     );
 
     server.close_document().await?;
@@ -2541,6 +2805,92 @@ async fn pull_fix_all() -> Result<()> {
 
     server.close_document().await?;
 
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn fix_all_does_not_sort_imports_unless_requested() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    // Document with unsorted imports AND a lint error (comparing to -0).
+    // If fix-all respects the filter, it should fix the lint error but
+    // leave the import order unchanged.
+    server
+        .open_document("import { b } from \"b\";\nimport { a } from \"a\";\nif(a === -0) {}")
+        .await?;
+
+    // Request source.fixAll WITHOUT source.organizeImports
+    let res: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 0,
+                    },
+                    end: Position {
+                        line: 2,
+                        character: 15,
+                    },
+                },
+                context: CodeActionContext {
+                    diagnostics: vec![fixable_diagnostic(2)?],
+                    only: Some(vec![CodeActionKind::new("source.fixAll")]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    // The fix-all action should exist
+    assert_eq!(res.len(), 1);
+
+    let CodeActionOrCommand::CodeAction(action) = &res[0] else {
+        panic!("expected CodeAction");
+    };
+    assert_eq!(
+        action.kind,
+        Some(CodeActionKind::new("source.fixAll.biome"))
+    );
+
+    // The edit should fix the -0 comparison but NOT reorder imports.
+    // If imports were sorted, "a" would come before "b".
+    let edit = action.edit.as_ref().context("expected edit")?;
+    let changes = edit.changes.as_ref().context("expected changes")?;
+    let edits = changes
+        .get(&uri!("document.js"))
+        .context("expected edits for document.js")?;
+    let new_text = &edits[0].new_text;
+    assert!(
+        new_text.starts_with("import { b }"),
+        "imports should NOT be reordered when organizeImports is not requested, got: {new_text}"
+    );
+
+    server.close_document().await?;
     server.shutdown().await?;
     reader.abort();
 
@@ -3394,7 +3744,7 @@ export function bar() {
     fs.create_file("foo.ts", FOO_CONTENT);
     fs.create_file("bar.ts", BAR_CONTENT);
 
-    let (watcher, instruction_channel) = Watcher::new()?;
+    let (watcher, instruction_channel) = Watcher::new(WatcherOptions::default())?;
 
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
@@ -3451,6 +3801,7 @@ export function bar() {
                 content: FileContent::FromServer,
                 document_file_source: None,
                 persist_node_cache: false,
+                inline_config: None,
             },
         )
         .await?
@@ -3468,7 +3819,11 @@ export function bar() {
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
-                pull_code_actions: false,
+                include_code_fix: false,
+                inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
             },
         )
         .await?
@@ -3498,7 +3853,11 @@ export function bar() {
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
-                pull_code_actions: false,
+                include_code_fix: false,
+                inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
             },
         )
         .await?
@@ -3524,7 +3883,11 @@ export function bar() {
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
-                pull_code_actions: false,
+                include_code_fix: false,
+                inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
             },
         )
         .await?
@@ -3554,7 +3917,11 @@ export function bar() {
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
-                pull_code_actions: false,
+                include_code_fix: false,
+                inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
             },
         )
         .await?
@@ -3605,7 +3972,7 @@ export function bar() {
     fs.create_file("foo.ts", FOO_CONTENT);
     fs.create_file("utils/bar.ts", BAR_CONTENT);
 
-    let (watcher, instruction_channel) = Watcher::new()?;
+    let (watcher, instruction_channel) = Watcher::new(WatcherOptions::default())?;
 
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
@@ -3662,6 +4029,7 @@ export function bar() {
                 content: FileContent::FromServer,
                 document_file_source: None,
                 persist_node_cache: false,
+                inline_config: None,
             },
         )
         .await?
@@ -3679,7 +4047,11 @@ export function bar() {
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
-                pull_code_actions: false,
+                include_code_fix: false,
+                inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
             },
         )
         .await?
@@ -3713,7 +4085,11 @@ export function bar() {
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
-                pull_code_actions: false,
+                include_code_fix: false,
+                inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
             },
         )
         .await?
@@ -3744,7 +4120,11 @@ export function bar() {
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
-                pull_code_actions: false,
+                include_code_fix: false,
+                inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
             },
         )
         .await?
@@ -3774,7 +4154,7 @@ async fn should_open_and_update_nested_files() -> Result<()> {
     let mut fs = TemporaryFs::new("should_open_and_update_nested_files");
     fs.create_file(FILE_PATH, FILE_CONTENT_BEFORE);
 
-    let (watcher, instruction_channel) = Watcher::new()?;
+    let (watcher, instruction_channel) = Watcher::new(WatcherOptions::default())?;
 
     // ARRANGE: Start server.
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
@@ -3838,7 +4218,11 @@ async fn should_open_and_update_nested_files() -> Result<()> {
         result
             .data
             .get(fs.working_directory.join("src").join("a.js").as_str())
-            .map(|module_info| module_info.static_import_paths.clone()),
+            .map(|module_info| module_info
+                .as_js_module_info()
+                .unwrap()
+                .static_import_paths
+                .clone()),
         Some(BTreeMap::from([("foo".to_string(), "foo".to_string())]))
     );
 
@@ -3865,7 +4249,11 @@ async fn should_open_and_update_nested_files() -> Result<()> {
         result
             .data
             .get(fs.working_directory.join("src").join("a.js").as_str())
-            .map(|module_info| module_info.static_import_paths.clone()),
+            .map(|module_info| module_info
+                .as_js_module_info()
+                .unwrap()
+                .static_import_paths
+                .clone()),
         Some(BTreeMap::from([("bar".to_string(), "bar".to_string())]))
     );
 
@@ -4058,7 +4446,9 @@ async fn should_correctly_fix_all_astro_files() -> Result<()> {
     server
         .open_named_document(
             r#"---
-let useConst = "Astro Test";
+loop: for (let i = 0; i < 5; i++) {
+  continue loop;
+}
 ---
 <!doctype html>"#,
             uri!("document.astro"),
@@ -4111,13 +4501,13 @@ let useConst = "Astro Test";
                     character: 0,
                 },
                 end: Position {
-                    line: 4,
+                    line: 6,
                     character: 0,
                 },
             },
             new_text: String::from(
                 r#"---
-const useConst = "Astro Test";
+for (let i = 0; i < 5; i++) {}
 ---
 <!doctype html>"#,
             ),
@@ -4209,6 +4599,914 @@ async fn should_not_return_error_on_code_actions_for_grit_files() -> Result<()> 
     Ok(())
 }
 
+#[tokio::test]
+async fn should_apply_the_inline_configuration_when_formatting_a_file() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .load_configuration_with_settings(WorkspaceSettings {
+            inline_config: Some(Configuration {
+                formatter: Some(FormatterConfiguration {
+                    enabled: Some(false.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }),
+            ..Default::default()
+        })
+        .await?;
+
+    server
+        .notify(
+            "textDocument/didOpen",
+            DidOpenTextDocumentParams {
+                text_document: TextDocumentItem {
+                    uri: uri!("document.js"),
+                    language_id: String::from("javascript"),
+                    version: 0,
+                    text: String::from(r#"function f() {return "Foobar"}"#),
+                },
+            },
+        )
+        .await?;
+
+    let res: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/formatting",
+            "formatting",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned None")?;
+
+    assert!(
+        res.is_none(),
+        "It should not format the file because the inline settings disabled the formatter"
+    );
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn should_acknowledge_changes_in_settings_in_formatting() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .notify(
+            "textDocument/didOpen",
+            DidOpenTextDocumentParams {
+                text_document: TextDocumentItem {
+                    uri: uri!("document.js"),
+                    language_id: String::from("javascript"),
+                    version: 0,
+                    text: String::from(r#"function f() {return "Foobar"}"#),
+                },
+            },
+        )
+        .await?;
+
+    let res: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/formatting",
+            "formatting",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned None")?;
+
+    assert!(
+        res.is_some(),
+        "It should format the file because by the default the formatter is enabled"
+    );
+
+    sleep(Duration::from_millis(300)).await;
+
+    server
+        .load_configuration_with_settings(WorkspaceSettings {
+            inline_config: Some(Configuration {
+                formatter: Some(FormatterConfiguration {
+                    enabled: Some(false.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }),
+            ..Default::default()
+        })
+        .await?;
+
+    server
+        .notify(
+            "textDocument/didOpen",
+            DidOpenTextDocumentParams {
+                text_document: TextDocumentItem {
+                    uri: uri!("document.js"),
+                    language_id: String::from("javascript"),
+                    version: 0,
+                    text: String::from(r#"function f() {return "Foobar"}"#),
+                },
+            },
+        )
+        .await?;
+
+    let res: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/formatting",
+            "formatting",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned None")?;
+
+    assert!(
+        res.is_none(),
+        "It should not format the file because the inline settings disabled the formatter now"
+    );
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn should_apply_the_inline_configuration_when_pulling_diagnostics() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .load_configuration_with_settings(WorkspaceSettings {
+            inline_config: Some(Configuration {
+                linter: Some(LinterConfiguration {
+                    enabled: Some(false.into()),
+                    ..Default::default()
+                }),
+                assist: Some(AssistConfiguration {
+                    enabled: Some(false.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }),
+            ..Default::default()
+        })
+        .await?;
+    server.open_document("const a = 1; a = 2;").await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+
+    assert_eq!(
+        notification,
+        Some(ServerNotification::PublishDiagnostics(
+            PublishDiagnosticsParams {
+                uri: uri!("document.js"),
+                version: Some(0),
+                diagnostics: vec![],
+            }
+        )),
+        "diagnostics should be empty because linting and assist are disabled"
+    );
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn should_acknowledge_changes_in_settings_when_pulling_diagnostics() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.open_document("const a = 1; a = 2;").await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+
+    assert!(notification.is_some());
+
+    let notification = notification.expect("notification");
+    assert!(matches!(
+        notification,
+        ServerNotification::PublishDiagnostics(_)
+    ));
+    if let ServerNotification::PublishDiagnostics(result) = notification {
+        assert!(!result.diagnostics.is_empty(), "should contain diagnostics");
+    }
+
+    sleep(Duration::from_millis(300)).await;
+
+    server
+        .load_configuration_with_settings(WorkspaceSettings {
+            inline_config: Some(Configuration {
+                linter: Some(LinterConfiguration {
+                    enabled: Some(false.into()),
+                    ..Default::default()
+                }),
+                assist: Some(AssistConfiguration {
+                    enabled: Some(false.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }),
+            ..Default::default()
+        })
+        .await?;
+
+    server.open_document("const a = 1; a = 2;").await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+
+    assert_eq!(
+        notification,
+        Some(ServerNotification::PublishDiagnostics(
+            PublishDiagnosticsParams {
+                uri: uri!("document.js"),
+                version: Some(0),
+                diagnostics: vec![],
+            }
+        )),
+        "diagnostics should be empty because linting and assist are disabled"
+    );
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn should_apply_wrapped_biome_settings_from_did_change_configuration() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .open_document("import { b, a } from \"./foo\";\n")
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+
+    assert!(notification.is_some());
+
+    let notification = notification.expect("notification");
+    assert!(matches!(
+        notification,
+        ServerNotification::PublishDiagnostics(_)
+    ));
+    if let ServerNotification::PublishDiagnostics(result) = notification {
+        assert!(
+            !result.diagnostics.is_empty(),
+            "should contain diagnostics before applying wrapped biome settings"
+        );
+    }
+
+    sleep(Duration::from_millis(300)).await;
+
+    server
+        .notify(
+            "workspace/didChangeConfiguration",
+            DidChangeConfigurationParams {
+                settings: serde_json::json!({
+                    "biome": {
+                        "requireConfiguration": true,
+                        "configurationPath": null,
+                    }
+                }),
+            },
+        )
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+
+    assert_eq!(
+        notification,
+        Some(ServerNotification::PublishDiagnostics(
+            PublishDiagnosticsParams {
+                uri: uri!("document.js"),
+                version: Some(0),
+                diagnostics: vec![],
+            }
+        )),
+        "diagnostics should be cleared after applying wrapped biome settings from didChangeConfiguration"
+    );
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn pull_plugin_diagnostics_for_vue_files() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+
+    let config = r#"{
+        "plugins": ["./noFoo.grit"]
+    }"#;
+
+    let plugin = br#"language js;
+
+JsIdentifierBinding() as $name where {
+    $name <: r"^foo$",
+    register_diagnostic(
+        span = $name,
+        message = "Avoid using 'foo' as a variable name.",
+        severity = "error"
+    )
+}
+"#;
+
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
+    fs.insert(to_utf8_file_path_buf(uri!("noFoo.grit")), plugin.as_slice());
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.load_configuration().await?;
+
+    // The template is intentionally multi-line so that if the diagnostic offset
+    // is not applied, the reported span would point into the template instead of
+    // the script section.
+    let vue_file = r#"<template>
+<p>line 1</p>
+<p>line 2</p>
+<p>line 3</p>
+<p>line 4</p>
+<p>line 5</p>
+<p>line 6</p>
+<p>line 7</p>
+<p>line 8</p>
+<p>line 9</p>
+<p>line 10</p>
+</template>
+
+<script setup lang="ts">
+const foo = 'bad'
+</script>
+"#;
+
+    server
+        .open_named_document(vue_file, uri!("file.vue"), "vue")
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+
+    // The plugin diagnostic for `foo` should point to line 14 (0-indexed),
+    // character 6-9 in the full Vue file, not within the extracted script block.
+    match &notification {
+        Some(ServerNotification::PublishDiagnostics(params)) => {
+            assert_eq!(params.uri, uri!("file.vue"));
+            let plugin_diag = params
+                .diagnostics
+                .iter()
+                .find(|d| d.message.contains("Avoid using 'foo'"))
+                .expect("expected a plugin diagnostic for 'foo'");
+            assert_eq!(
+                plugin_diag.range,
+                Range {
+                    start: Position {
+                        line: 14,
+                        character: 6,
+                    },
+                    end: Position {
+                        line: 14,
+                        character: 9,
+                    },
+                },
+                "plugin diagnostic should point to 'foo' on line 14 of the full Vue file"
+            );
+        }
+        other => panic!("expected PublishDiagnostics, got {other:?}"),
+    }
+
+    server.close_document().await?;
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+// #region CONFIGURATION PATH RESOLUTION
+
+/// Verifies that a relative `configurationPath` in the extension settings is
+/// resolved against the workspace root URI.
+///
+/// Regression test for <https://github.com/biomejs/biome/issues/9217>
+#[tokio::test]
+async fn relative_configuration_path_resolves_against_root_uri() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+
+    // Place the config in a sub-directory so the path must be relative.
+    let config = r#"{
+        "formatter": {
+            "enabled": false
+        }
+    }"#;
+    fs.insert(to_utf8_file_path_buf(uri!("configs/biome.json")), config);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    // Set configurationPath to a relative path (the bug: this used to be
+    // resolved against the daemon's cwd instead of the workspace root).
+    server
+        .load_configuration_with_settings(WorkspaceSettings {
+            configuration_path: Some("configs/biome.json".to_string()),
+            ..Default::default()
+        })
+        .await?;
+
+    server.open_document(r#"statement(   );"#).await?;
+
+    // The config disables the formatter, so formatting should return no edits.
+    let res: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/formatting",
+            "formatting",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned None")?;
+
+    assert!(
+        res.is_none(),
+        "Expected no formatting edits because the config at configs/biome.json disables the formatter. \
+         If this fails, the relative configurationPath was not resolved against the workspace root."
+    );
+
+    server.close_document().await?;
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+/// Verifies that a relative `configurationPath` is resolved against the
+/// workspace folder that **contains the file being opened**, not always the
+/// first workspace folder.
+///
+/// Regression test for <https://github.com/biomejs/biome/issues/9217>
+#[tokio::test]
+#[expect(deprecated)]
+async fn relative_configuration_path_resolves_against_correct_workspace_folder() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+
+    // test_one has formatting enabled (default), test_two disables it.
+    // Both configs live at `<folder>/configs/biome.json`.
+    let config_one = r#"{}"#;
+    let config_two = r#"{
+        "formatter": {
+            "enabled": false
+        }
+    }"#;
+
+    fs.insert(
+        to_utf8_file_path_buf(uri!("test_one/configs/biome.json")),
+        config_one,
+    );
+    fs.insert(
+        to_utf8_file_path_buf(uri!("test_two/configs/biome.json")),
+        config_two,
+    );
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    // Initialize with two workspace folders (test_one, test_two).
+    let _res: InitializeResult = server
+        .request(
+            "initialize",
+            "_init",
+            InitializeParams {
+                process_id: None,
+                root_path: None,
+                root_uri: Some(uri!("/")),
+                initialization_options: None,
+                capabilities: ClientCapabilities::default(),
+                trace: None,
+                workspace_folders: Some(vec![
+                    WorkspaceFolder {
+                        name: "test_one".to_string(),
+                        uri: uri!("test_one"),
+                    },
+                    WorkspaceFolder {
+                        name: "test_two".to_string(),
+                        uri: uri!("test_two"),
+                    },
+                ]),
+                client_info: None,
+                locale: None,
+                work_done_progress_params: Default::default(),
+            },
+        )
+        .await?
+        .context("initialize returned None")?;
+
+    server.initialized().await?;
+
+    // Set a relative configurationPath. Each workspace folder has its own
+    // `configs/biome.json`; the correct one must be picked per file.
+    server
+        .load_configuration_with_settings(WorkspaceSettings {
+            configuration_path: Some("configs/biome.json".to_string()),
+            ..Default::default()
+        })
+        .await?;
+
+    // Open a file in test_one first, so a project is already open.
+    server
+        .open_named_document(
+            r#"statement(   );"#,
+            uri!("test_one/document.js"),
+            "javascript",
+        )
+        .await?;
+
+    // Now open a file in test_two — its config disables the formatter.
+    server
+        .open_named_document(
+            r#"statement(   );"#,
+            uri!("test_two/document.js"),
+            "javascript",
+        )
+        .await?;
+
+    let res: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/formatting",
+            "formatting",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("test_two/document.js"),
+                },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned None")?;
+
+    assert!(
+        res.is_none(),
+        "Expected no formatting edits because test_two/configs/biome.json disables the formatter. \
+         If this fails, the relative configurationPath was resolved against the wrong workspace folder."
+    );
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+/// Verifies that an absolute `configurationPath` (e.g. `C:/shared-config/biome.json`)
+/// pointing to a file outside the workspace roots properly attributes the registered
+/// project to the workspace root, so that files opened inside the workspace are
+/// matched correctly.
+///
+/// Regression test for external absolute config path bug (PR #9049).
+#[tokio::test]
+async fn absolute_configuration_path_resolves_outside_workspace() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+
+    // The config lives outside the workspace.
+    let external_config_path = to_utf8_file_path_buf(
+        lsp::Uri::from_str(if cfg!(windows) {
+            "file:///z%3A/shared-config/biome.json"
+        } else {
+            "file:///shared-config/biome.json"
+        })
+        .unwrap(),
+    );
+
+    let config = r#"{
+        "formatter": {
+            "enabled": true
+        }
+    }"#;
+
+    fs.insert(external_config_path.clone(), config);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let settings = WorkspaceSettings {
+        configuration_path: Some(external_config_path.to_string()),
+        ..Default::default()
+    };
+
+    // To reproduce the bug, the initial settings must have
+    // `configuration_path` set. This matches what happens when an IDE starts.
+    let reader = tokio::spawn(client_handler_with_settings(stream, sink, sender, settings));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    // Open a document inside the workspace.
+    server.open_document("statement(   );\n").await?;
+
+    // The document has extra whitespace, so there should be formatting changes.
+    let res: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/formatting",
+            "formatting",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned None")?;
+
+    assert!(
+        res.is_some(),
+        "Expected formatting edits because the external config is enabled and there's extra spaces. \
+         If this is None, the configurationPath caused the project to be created with the wrong path."
+    );
+
+    let edits = res.unwrap();
+    assert_eq!(
+        edits,
+        vec![TextEdit {
+            range: Range {
+                start: Position {
+                    line: 0,
+                    character: 10,
+                },
+                end: Position {
+                    line: 0,
+                    character: 13,
+                },
+            },
+            new_text: String::new(),
+        }]
+    );
+
+    server.close_document().await?;
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+/// Verifies that a relative `configurationPath` (e.g. `../shared-config/biome.json`)
+/// that resolves to a file outside the workspace roots properly attributes the registered
+/// project to the workspace root, so that files opened inside the workspace are
+/// matched correctly.
+///
+/// Same scenario as [absolute_configuration_path_resolves_outside_workspace] but with
+/// a relative path instead of an absolute one.
+#[tokio::test]
+async fn relative_configuration_path_resolves_outside_workspace() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+
+    let absolute_external_config_path = to_utf8_file_path_buf(
+        lsp::Uri::from_str(if cfg!(windows) {
+            "file:///z%3A/shared-config/biome.json"
+        } else {
+            "file:///shared-config/biome.json"
+        })
+        .unwrap(),
+    );
+
+    let config = r#"{
+        "formatter": {
+            "enabled": true
+        }
+    }"#;
+    fs.insert(absolute_external_config_path, config);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let settings = WorkspaceSettings {
+        configuration_path: Some("../shared-config/biome.json".to_string()),
+        ..Default::default()
+    };
+
+    let reader = tokio::spawn(client_handler_with_settings(stream, sink, sender, settings));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    // Open a document inside the workspace.
+    server.open_document("statement(   );\n").await?;
+
+    // The document has extra whitespace, so there should be formatting changes.
+    let res: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/formatting",
+            "formatting",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned None")?;
+
+    assert!(
+        res.is_some(),
+        "Expected formatting edits because the external config is enabled and there's extra spaces. \
+         If this is None, the relative configurationPath caused the project to be created with the wrong path."
+    );
+
+    let edits = res.unwrap();
+    assert_eq!(
+        edits,
+        vec![TextEdit {
+            range: Range {
+                start: Position {
+                    line: 0,
+                    character: 10,
+                },
+                end: Position {
+                    line: 0,
+                    character: 13,
+                },
+            },
+            new_text: String::new(),
+        }]
+    );
+
+    server.close_document().await?;
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
 // #endregion
 
 // #region TEST UTILS
@@ -4237,6 +5535,136 @@ fn assert_diagnostics_count(server_notification: &ServerNotification, expected_c
             panic!("Unexpected notification: {server_notification:?}",);
         }
     }
+}
+
+/// Regression test: an inverted LSP range in a `textDocument/didChange` event
+/// must not panic inside `TextRange::new`. The invalid change should be
+/// silently skipped and the document content must remain unchanged.
+#[tokio::test]
+async fn change_document_inverted_range_does_not_panic() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    let original = "abc\ndef\nghi";
+    server.open_document(original).await?;
+
+    // Send a change with an inverted range (start is after end)
+    server
+        .change_document(
+            1,
+            vec![TextDocumentContentChangeEvent {
+                range: Some(Range {
+                    start: Position {
+                        line: 1,
+                        character: 3,
+                    },
+                    end: Position {
+                        line: 0,
+                        character: 0,
+                    },
+                }),
+                range_length: None,
+                text: String::from("replaced"),
+            }],
+        )
+        .await?;
+
+    let OpenProjectResult { project_key } = server
+        .request(
+            "biome/open_project",
+            "open_project",
+            OpenProjectParams {
+                path: BiomePath::new(""),
+                open_uninitialized: true,
+            },
+        )
+        .await?
+        .expect("open_project returned an error");
+
+    let actual: String = server
+        .request(
+            "biome/get_file_content",
+            "get_file_content",
+            GetFileContentParams {
+                project_key,
+                path: BiomePath::try_from(uri!("document.js").to_file_path().unwrap()).unwrap(),
+            },
+        )
+        .await?
+        .context("get file content error")?;
+
+    // The inverted range should be skipped; document content stays the same
+    assert_eq!(&actual, original);
+
+    server.close_document().await?;
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+/// Regression test: the LSP server should not crash when the client sends
+/// `didChangeWatchedFiles.dynamicRegistration: true` but no `workspaceFolders`
+/// in `InitializeParams`. This is valid per the LSP spec — `workspaceFolders`
+/// is optional and some clients only send `rootUri`.
+#[tokio::test]
+#[expect(deprecated)]
+async fn initialize_without_workspace_folders_does_not_panic() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    let _res: InitializeResult = server
+        .request(
+            "initialize",
+            "_init",
+            InitializeParams {
+                process_id: None,
+                root_path: None,
+                root_uri: Some(uri!("")),
+                initialization_options: None,
+                capabilities: ClientCapabilities {
+                    workspace: Some(lsp::WorkspaceClientCapabilities {
+                        did_change_watched_files: Some(
+                            lsp::DidChangeWatchedFilesClientCapabilities {
+                                dynamic_registration: Some(true),
+                                relative_pattern_support: None,
+                            },
+                        ),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                },
+                trace: None,
+                workspace_folders: None,
+                client_info: None,
+                locale: None,
+                work_done_progress_params: Default::default(),
+            },
+        )
+        .await?
+        .context("initialize returned None")?;
+
+    // `initialized` triggers `setup_capabilities` which registers file watchers.
+    // Before the fix, this panicked because it tried to parse a filesystem path as a URI.
+    server.initialized().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
 }
 
 // #endregion

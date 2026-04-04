@@ -24,6 +24,8 @@ TsConfigJson {
         paths: None,
         paths_base: "",
         type_roots: None,
+        jsx_factory: None,
+        jsx_fragment_factory: None,
     },
     references: [],
 }

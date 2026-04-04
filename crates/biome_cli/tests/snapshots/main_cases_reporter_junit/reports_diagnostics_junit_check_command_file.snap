@@ -1,0 +1,161 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.xml`
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Biome" tests="22" failures="22" errors="16" time="<TIME>">
+    <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.correctness.noUnusedImports" line="1" column="8">
+            <failure message="This import is unused.">line 1, col 8, This import is unused.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.correctness.noUnusedImports" line="2" column="10">
+            <failure message="Several of these imports are unused.">line 2, col 10, Several of these imports are unused.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.correctness.noUnusedVariables" line="8" column="5">
+            <failure message="This variable f is unused.">line 8, col 5, This variable f is unused.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.correctness.noUnusedVariables" line="9" column="7">
+            <failure message="This variable f is unused.">line 9, col 7, This variable f is unused.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.correctness.noUnusedImports" line="1" column="8">
+            <failure message="This import is unused.">line 1, col 8, This import is unused.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.correctness.noUnusedImports" line="2" column="10">
+            <failure message="Several of these imports are unused.">line 2, col 10, Several of these imports are unused.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.correctness.noUnusedVariables" line="8" column="5">
+            <failure message="This variable f is unused.">line 8, col 5, This variable f is unused.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.correctness.noUnusedVariables" line="9" column="7">
+            <failure message="This variable f is unused.">line 9, col 7, This variable f is unused.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.assist.source.organizeImports" line="1" column="1">
+            <failure message="The imports and exports are not sorted.">line 1, col 1, The imports and exports are not sorted.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.suspicious.noDoubleEquals" line="4" column="3">
+            <failure message="Using == may be unsafe if you are relying on type coercion.">line 4, col 3, Using == may be unsafe if you are relying on type coercion.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.suspicious.noDebugger" line="6" column="1">
+            <failure message="This is an unexpected use of the debugger statement.">line 6, col 1, This is an unexpected use of the debugger statement.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.suspicious.noImplicitAnyLet" line="8" column="5">
+            <failure message="This variable implicitly has the any type.">line 8, col 5, This variable implicitly has the any type.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.suspicious.noImplicitAnyLet" line="9" column="7">
+            <failure message="This variable implicitly has the any type.">line 9, col 7, This variable implicitly has the any type.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.suspicious.noRedeclare" line="2" column="10">
+            <failure message="Shouldn&apos;t redeclare &apos;z&apos;. Consider to delete it or rename it.">line 2, col 10, Shouldn&apos;t redeclare &apos;z&apos;. Consider to delete it or rename it.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.suspicious.noRedeclare" line="9" column="7">
+            <failure message="Shouldn&apos;t redeclare &apos;f&apos;. Consider to delete it or rename it.">line 9, col 7, Shouldn&apos;t redeclare &apos;f&apos;. Consider to delete it or rename it.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.assist.source.organizeImports" line="1" column="1">
+            <failure message="The imports and exports are not sorted.">line 1, col 1, The imports and exports are not sorted.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.suspicious.noDoubleEquals" line="4" column="3">
+            <failure message="Using == may be unsafe if you are relying on type coercion.">line 4, col 3, Using == may be unsafe if you are relying on type coercion.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.suspicious.noDebugger" line="6" column="1">
+            <failure message="This is an unexpected use of the debugger statement.">line 6, col 1, This is an unexpected use of the debugger statement.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.suspicious.noImplicitAnyLet" line="8" column="5">
+            <failure message="This variable implicitly has the any type.">line 8, col 5, This variable implicitly has the any type.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.suspicious.noImplicitAnyLet" line="9" column="7">
+            <failure message="This variable implicitly has the any type.">line 9, col 7, This variable implicitly has the any type.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.suspicious.noRedeclare" line="2" column="10">
+            <failure message="Shouldn&apos;t redeclare &apos;z&apos;. Consider to delete it or rename it.">line 2, col 10, Shouldn&apos;t redeclare &apos;z&apos;. Consider to delete it or rename it.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.suspicious.noRedeclare" line="9" column="7">
+            <failure message="Shouldn&apos;t redeclare &apos;f&apos;. Consider to delete it or rename it.">line 9, col 7, Shouldn&apos;t redeclare &apos;f&apos;. Consider to delete it or rename it.</failure>
+        </testcase>
+    </testsuite>
+</testsuites>
+
+```
+
+## `index.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+
+debugger
+
+let f;
+		let f;
+```
+
+## `main.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+
+debugger
+
+let f;
+		let f;
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```

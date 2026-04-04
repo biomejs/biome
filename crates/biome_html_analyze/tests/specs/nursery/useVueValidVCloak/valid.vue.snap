@@ -1,0 +1,10 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<div v-cloak></div>
+
+```

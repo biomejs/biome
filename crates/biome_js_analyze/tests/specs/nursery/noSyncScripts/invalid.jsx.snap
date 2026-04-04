@@ -28,6 +28,8 @@ invalid.jsx:2:9 lint/nursery/noSyncScripts ━━━━━━━━━━━━�
   
   i Synchronous scripts can impact your webpage performance. Add the "async" or "defer" attribute. If using Next.js, consider the Script component instead.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -43,6 +45,8 @@ invalid.jsx:6:9 lint/nursery/noSyncScripts ━━━━━━━━━━━━�
     8 │ 
   
   i Synchronous scripts can impact your webpage performance. Add the "async" or "defer" attribute. If using Next.js, consider the Script component instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

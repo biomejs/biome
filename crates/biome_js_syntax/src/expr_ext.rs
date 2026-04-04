@@ -12,7 +12,7 @@ use crate::{
     JsObjectExpression, JsPostUpdateExpression, JsPreUpdateExpression, JsReferenceIdentifier,
     JsRegexLiteralExpression, JsStaticMemberExpression, JsStringLiteralExpression, JsSyntaxKind,
     JsSyntaxNode, JsSyntaxToken, JsTemplateChunkElement, JsTemplateExpression, JsUnaryExpression,
-    JsWhileStatement, OperatorPrecedence, T, TsStringLiteralType, inner_string_text,
+    JsWhileStatement, OperatorPrecedence, TsStringLiteralType, inner_string_text,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, NodeOrToken, SyntaxNodeCast, SyntaxResult, TextRange,
@@ -915,16 +915,18 @@ impl AnyJsExpression {
 
     /// This function checks if a call expressions has one of the following members:
     ///
-    /// - `it.(only|skip|todo|fails|failing|concurrent|sequential)`
-    /// - `it.(only|skip|todo|fails|failing|concurrent|sequential).(only|skip|todo|fails|failing|concurrent|sequential)`
-    /// - `test.(only|skip|todo|fails|failing|concurrent|sequential)`
-    /// - `test.(only|skip|todo|fails|failing|concurrent|sequential).(only|skip|todo|fails|failing|concurrent|sequential)`
-    /// - `describe.(only|skip|todo|shuffle|concurrent|sequential)`
-    /// - `describe.(only|skip|todo|shuffle|concurrent|sequential).(only|skip|todo|shuffle|concurrent|sequential)`
+    /// - `it.(only|skip|fixme|todo|fails|failing|concurrent|sequential)`
+    /// - `it.(only|skip|fixme|todo|fails|failing|concurrent|sequential).(only|skip|fixme|todo|fails|failing|concurrent|sequential)`
+    /// - `test.(only|skip|fixme|todo|fails|failing|concurrent|sequential)`
+    /// - `test.(only|skip|fixme|todo|fails|failing|concurrent|sequential).(only|skip|fixme|todo|fails|failing|concurrent|sequential)`
+    /// - `describe.(only|skip|fixme|todo|shuffle|concurrent|sequential)`
+    /// - `describe.(only|skip|fixme|todo|shuffle|concurrent|sequential).(only|skip|fixme|todo|shuffle|concurrent|sequential)`
+    /// - `test.step`
+    /// - `test.step.(skip|fixme)`
     /// - `test.describe`
-    /// - `test.describe.(only|skip)`
+    /// - `test.describe.(only|skip|fixme)`
     /// - `test.describe.(parallel|serial)`
-    /// - `test.describe.(parallel|serial).only`
+    /// - `test.describe.(parallel|serial).(only|skip|fixme)`
     /// - `skip`
     /// - `xit`
     /// - `xdescribe`
@@ -961,11 +963,19 @@ impl AnyJsExpression {
         match first {
             Some("describe") => match second {
                 None => true,
-                Some("concurrent" | "sequential" | "only" | "skip" | "todo" | "shuffle") => {
+                Some(
+                    "concurrent" | "sequential" | "only" | "skip" | "fixme" | "todo" | "shuffle",
+                ) => {
                     matches!(
                         third,
                         None | Some(
-                            "concurrent" | "sequential" | "only" | "skip" | "todo" | "shuffle",
+                            "concurrent"
+                                | "sequential"
+                                | "only"
+                                | "skip"
+                                | "fixme"
+                                | "todo"
+                                | "shuffle",
                         )
                     )
                 }
@@ -973,9 +983,14 @@ impl AnyJsExpression {
             },
             Some("it" | "test") => match second {
                 None => true,
-                Some("step") => third.is_none(),
+                Some("step") => match third {
+                    None => true,
+                    Some("skip" | "fixme") => fourth.is_none(),
+                    _ => false,
+                },
                 Some(
-                    "concurrent" | "sequential" | "only" | "skip" | "todo" | "fails" | "failing",
+                    "concurrent" | "sequential" | "only" | "skip" | "fixme" | "todo" | "fails"
+                    | "failing",
                 ) => matches!(
                     third,
                     None | Some(
@@ -983,6 +998,7 @@ impl AnyJsExpression {
                             | "sequential"
                             | "only"
                             | "skip"
+                            | "fixme"
                             | "todo"
                             | "fails"
                             | "failing",
@@ -990,10 +1006,10 @@ impl AnyJsExpression {
                 ),
                 Some("describe") => match third {
                     None => true,
-                    Some("only" | "skip") => fourth.is_none(),
+                    Some("only" | "skip" | "fixme") => fourth.is_none(),
                     Some("parallel" | "serial") => match fourth {
                         None => true,
-                        Some("only") => fifth.is_none(),
+                        Some("only" | "skip" | "fixme") => fifth.is_none(),
                         _ => false,
                     },
                     _ => false,
@@ -1345,11 +1361,29 @@ impl AnyJsExpression {
             Self::TsNonNullAssertionExpression(expression) => expression.expression().ok(),
             Self::TsTypeAssertionExpression(expression) => expression.expression().ok(),
             Self::TsInstantiationExpression(expression) => expression.expression().ok(),
+            Self::JsSequenceExpression(expression) => expression.right().ok(),
             _ => return Some(self.clone()),
         })
         .as_ref()
         .and_then(Self::inner_expression)
     }
+}
+
+/// Returns `true` if this node is a transparent wrapper expression.
+///
+/// A transparent wrapper expression wraps another expression without
+/// affecting the result of the expression.
+pub fn is_transparent_expression_wrapper(node: &JsSyntaxNode) -> bool {
+    matches!(
+        node.kind(),
+        JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION
+            | JsSyntaxKind::JS_SEQUENCE_EXPRESSION
+            | JsSyntaxKind::TS_AS_EXPRESSION
+            | JsSyntaxKind::TS_SATISFIES_EXPRESSION
+            | JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION
+            | JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION
+            | JsSyntaxKind::TS_INSTANTIATION_EXPRESSION
+    )
 }
 
 /// Iterator that returns the callee names in "top down order".
@@ -1392,6 +1426,16 @@ impl Iterator for CalleeNamesIterator {
                 }
                 _ => None,
             },
+            JsComputedMemberExpression(member_expression) => {
+                let member = member_expression.member().ok()?;
+                if let AnyJsExpression::AnyJsLiteralExpression(lit) = &member
+                    && let Some(string_lit) = lit.as_js_string_literal_expression()
+                {
+                    self.next = member_expression.object().ok();
+                    return string_lit.inner_string_text().ok();
+                }
+                None
+            }
             _ => None,
         }
     }
@@ -1955,26 +1999,30 @@ impl JsCallExpression {
     }
 
     /// This is a specialized function that checks if the current [call expression]
-    /// resembles a call expression usually used by a testing frameworks.
+    /// resembles a call expression usually used by testing frameworks.
     ///
     /// If the [call expression] matches the criteria, a different formatting is applied.
     ///
-    /// To evaluate the eligibility of a  [call expression] to be a test framework like,
+    /// To evaluate the eligibility of a [call expression] to be a test framework like,
     /// we need to check its [callee] and its [arguments].
     ///
     /// 1. The [callee] must contain a name or a chain of names that belongs to the
     ///    test frameworks, for example: `test()`, `test.only()`, etc.
-    /// 2. The [arguments] should be at the least 2
+    /// 2. The [arguments] should be at least 2
     /// 3. The first argument has to be a string literal
-    /// 4. The third argument, if present, has to be a number literal
-    /// 5. The second argument has to be an [arrow function expression] or [function expression]
-    /// 6. Both function must have zero or one parameters
+    /// 4. The second argument can be either:
+    ///    - An [arrow function expression] or [function expression] (pattern: `(name, callback, [duration])`)
+    ///    - An object expression for TestOptions (pattern: `(name, options, callback)`)
+    /// 5. The third argument, if present, can be:
+    ///    - A number literal for timeout duration, OR
+    ///    - The callback function when the second argument is TestOptions
+    /// 6. Function expressions in 3-argument patterns must have zero or one parameters
     ///
     /// [call expression]: crate::JsCallExpression
     /// [callee]: crate::AnyJsExpression
     /// [arguments]: crate::JsCallArgumentList
     /// [arrow function expression]: crate::JsArrowFunctionExpression
-    /// [function expression]: crate::JsCallArgumentList
+    /// [function expression]: crate::JsFunctionExpression
     pub fn is_test_call_expression(&self) -> SyntaxResult<bool> {
         use AnyJsExpression::*;
 
@@ -2016,18 +2064,6 @@ impl JsCallExpression {
                     && (callee.contains_a_test_pattern()
                         || matches!(callee, AnyJsExpression::JsCallExpression(call_expression) if call_expression.callee()?.contains_a_test_each_pattern())) =>
             {
-                // it('name', callback, duration)
-                if !matches!(
-                    third,
-                    None | Some(Ok(AnyJsCallArgument::AnyJsExpression(
-                        AnyJsLiteralExpression(
-                            self::AnyJsLiteralExpression::JsNumberLiteralExpression(_)
-                        )
-                    )))
-                ) {
-                    return Ok(false);
-                }
-
                 if second
                     .as_any_js_expression()
                     .is_some_and(is_angular_test_wrapper)
@@ -2035,23 +2071,38 @@ impl JsCallExpression {
                     return Ok(true);
                 }
 
-                let (parameters, has_block_body) = match second {
-                    AnyJsCallArgument::AnyJsExpression(JsFunctionExpression(function)) => (
-                        function
-                            .parameters()
-                            .map(AnyJsArrowFunctionParameters::from),
-                        true,
-                    ),
-                    AnyJsCallArgument::AnyJsExpression(JsArrowFunctionExpression(arrow)) => (
-                        arrow.parameters(),
-                        arrow
-                            .body()
-                            .is_ok_and(|body| matches!(body, AnyJsFunctionBody::JsFunctionBody(_))),
-                    ),
-                    _ => return Ok(false),
-                };
+                // Pattern: (name, callback, [duration])
+                if matches!(
+                    second,
+                    AnyJsCallArgument::AnyJsExpression(
+                        JsFunctionExpression(_) | JsArrowFunctionExpression(_)
+                    )
+                ) {
+                    // Pattern: (name, callback) - no param restrictions to match Prettier
+                    if arguments.args().len() == 2 {
+                        return Ok(true);
+                    }
+                    // Pattern: (name, callback, timeout) - stricter: requires block body and ≤1 param
+                    if is_function_with_block_body(&second)? {
+                        return Ok(matches!(
+                            third,
+                            Some(Ok(AnyJsCallArgument::AnyJsExpression(
+                                AnyJsLiteralExpression(
+                                    self::AnyJsLiteralExpression::JsNumberLiteralExpression(_)
+                                )
+                            )))
+                        ));
+                    }
+                }
 
-                Ok(arguments.args().len() == 2 || (parameters?.len() <= 1 && has_block_body))
+                // Pattern: (name, options, callback)
+                if is_object_expression(&second)
+                    && let Some(Ok(third_arg)) = third
+                {
+                    return is_function_with_block_body(&third_arg);
+                }
+
+                Ok(false)
             }
             _ => Ok(false),
         }
@@ -2101,6 +2152,39 @@ fn is_unit_test_set_up_callee(callee: &AnyJsExpression) -> bool {
             }),
         _ => false,
     }
+}
+
+/// Checks if a call argument is a function expression or arrow function with a block body
+/// and at most one parameter. Used to detect test callback functions.
+fn is_function_with_block_body(arg: &AnyJsCallArgument) -> SyntaxResult<bool> {
+    use AnyJsExpression::*;
+
+    let (parameters, has_block_body) = match arg {
+        AnyJsCallArgument::AnyJsExpression(JsFunctionExpression(function)) => (
+            function
+                .parameters()
+                .map(AnyJsArrowFunctionParameters::from),
+            true,
+        ),
+        AnyJsCallArgument::AnyJsExpression(JsArrowFunctionExpression(arrow)) => (
+            arrow.parameters(),
+            arrow
+                .body()
+                .is_ok_and(|body| matches!(body, AnyJsFunctionBody::JsFunctionBody(_))),
+        ),
+        _ => return Ok(false),
+    };
+
+    Ok(parameters?.len() <= 1 && has_block_body)
+}
+
+/// Checks if a call argument is an object expression literal.
+/// Used to detect TestOptions arguments like `{ retry: 2 }` in Vitest.
+fn is_object_expression(arg: &AnyJsCallArgument) -> bool {
+    matches!(
+        arg.as_any_js_expression(),
+        Some(AnyJsExpression::JsObjectExpression(_))
+    )
 }
 
 impl JsNewExpression {
@@ -2285,6 +2369,28 @@ mod test {
         let call_expression =
             extract_call_expression("test.skip.sequential.only.todo.each([])(name, () => {});");
         assert_eq!(call_expression.is_test_call_expression(), Ok(true));
+
+        // Positive cases for TestOptions pattern
+        let call_expression = extract_call_expression("test('foo', { retry: 3 }, () => {})");
+        assert_eq!(call_expression.is_test_call_expression(), Ok(true));
+
+        let call_expression =
+            extract_call_expression("describe.only('bar', { timeout: 42*1000 }, () => {})");
+        assert_eq!(call_expression.is_test_call_expression(), Ok(true));
+
+        let call_expression =
+            extract_call_expression("it('bar', { timeout: 5000 }, function() {})");
+        assert_eq!(call_expression.is_test_call_expression(), Ok(true));
+
+        // Negative cases for TestOptions pattern
+        let call_expression = extract_call_expression("test('foo', { retry: 3 })");
+        assert_eq!(call_expression.is_test_call_expression(), Ok(false));
+
+        let call_expression = extract_call_expression("test('foo', { retry: 3 }, 42)");
+        assert_eq!(call_expression.is_test_call_expression(), Ok(false));
+
+        let call_expression = extract_call_expression("test('foo', x => x, 1000)");
+        assert_eq!(call_expression.is_test_call_expression(), Ok(false));
     }
 
     #[test]

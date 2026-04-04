@@ -1,16 +1,18 @@
 use biome_css_syntax::{
-    CssComplexSelector, CssComposesPropertyValue, CssCompoundSelector, CssContainerAtRule,
-    CssDashedIdentifier, CssDeclaration, CssGenericComponentValueList, CssIdentifier,
-    CssMediaAtRule, CssNestedQualifiedRule, CssQualifiedRule, CssRoot, CssStartingStyleAtRule,
-    CssSupportsAtRule,
+    AnyCssRoot, CssComplexSelector, CssComposesPropertyValue, CssCompoundSelector,
+    CssContainerAtRule, CssDashedIdentifier, CssDeclaration, CssGenericComponentValueList,
+    CssIdentifier, CssMediaAtRule, CssNestedQualifiedRule, CssQualifiedRule,
+    CssStartingStyleAtRule, CssSupportsAtRule, CssSyntaxKind, CssSyntaxToken, ScssExpression,
 };
 use biome_rowan::{
-    AstNode, AstNodeList, SyntaxNodeText, SyntaxResult, TextRange, TextSize, TokenText,
-    declare_node_union,
+    AstNode, AstNodeList, AstPtr, Direction, SendNode, SyntaxKind, SyntaxResult, TextRange,
+    TextSize, TokenText, declare_node_union,
 };
+use biome_string_case::StrOnlyExtension;
 use rustc_hash::FxHashMap;
+use std::collections::BTreeMap;
 use std::hash::Hash;
-use std::{collections::BTreeMap, rc::Rc};
+use std::sync::Arc;
 
 /// The façade for all semantic information of a CSS document.
 ///
@@ -18,18 +20,20 @@ use std::{collections::BTreeMap, rc::Rc};
 /// It holds a reference-counted pointer to the internal `SemanticModelData`.
 #[derive(Clone, Debug)]
 pub struct SemanticModel {
-    pub(crate) data: Rc<SemanticModelData>,
+    pub(crate) data: Arc<SemanticModelData>,
+    root: SendNode,
 }
 
 impl SemanticModel {
-    pub(crate) fn new(data: SemanticModelData) -> Self {
+    pub(crate) fn new(data: SemanticModelData, root: SendNode) -> Self {
         Self {
-            data: Rc::new(data),
+            data: Arc::new(data),
+            root,
         }
     }
 
-    pub fn root(&self) -> &CssRoot {
-        &self.data.root
+    pub fn root(&self) -> AnyCssRoot {
+        self.root.to_language_root::<AnyCssRoot>()
     }
 
     /// Returns a slice of all rules in the CSS document.
@@ -77,6 +81,10 @@ impl SemanticModel {
             .flat_map(|rule| rule.selectors())
             .map(|selector| selector.specificity())
     }
+
+    pub fn is_media_rule(&self, rule: &Rule) -> bool {
+        matches!(rule.node(&self.root()), AnyRuleStart::CssMediaAtRule(_))
+    }
 }
 
 /// Contains the internal data of a `SemanticModel`.
@@ -85,7 +93,6 @@ impl SemanticModel {
 /// and a list of all rules in the document.
 #[derive(Debug)]
 pub(crate) struct SemanticModelData {
-    pub(crate) root: CssRoot,
     /// List of all top-level rules in the CSS document
     pub(crate) rules: Vec<Rule>,
     /// Map of CSS variables declared in the `:root` selector or using the @property rule.
@@ -115,7 +122,7 @@ pub(crate) struct SemanticModelData {
 #[derive(Debug, Clone)]
 pub struct Rule {
     pub(crate) id: RuleId,
-    pub(crate) node: AnyRuleStart,
+    pub(crate) node: AstPtr<AnyRuleStart>,
     /// The selectors associated with this rule.
     pub(crate) selectors: Vec<Selector>,
     /// The declarations within this rule.
@@ -134,12 +141,15 @@ impl Rule {
         self.id
     }
 
-    pub fn node(&self) -> &AnyRuleStart {
-        &self.node
+    pub fn node(&self, css_root: &AnyCssRoot) -> AnyRuleStart {
+        self.node.to_node(css_root.syntax())
     }
 
-    pub fn range(&self) -> TextRange {
-        self.node.text_trimmed_range()
+    pub fn range(&self, css_root: &AnyCssRoot) -> TextRange {
+        self.node
+            .to_node(css_root.syntax())
+            .syntax()
+            .text_trimmed_range()
     }
 
     pub fn selectors(&self) -> &[Selector] {
@@ -160,10 +170,6 @@ impl Rule {
 
     pub fn specificity(&self) -> Specificity {
         self.specificity
-    }
-
-    pub const fn is_media_rule(&self) -> bool {
-        matches!(self.node, AnyRuleStart::CssMediaAtRule(_))
     }
 }
 
@@ -204,6 +210,194 @@ impl AnyCssSelectorLike {
     }
 }
 
+/// A resolved CSS selector represented as an ordered sequence of `(kind, text)` pairs.
+///
+/// Rather than building a string, the resolved selector stores the sequence of
+/// tokens that make up the selector after nesting/`&` resolution. This avoids
+/// string allocation and trivia contamination: only non-trivia tokens are stored,
+/// so embedded whitespace or comments in the source do not affect equality.
+///
+/// The kind is stored alongside each token text so that the `Display` impl can
+/// reconstruct the canonical whitespace representation:
+/// - `CSS_SPACE_LITERAL` tokens are emitted as-is (they are already a space).
+/// - Explicit combinator tokens (`>`, `+`, `~`, `||`) are surrounded by spaces.
+/// - All other tokens are emitted without surrounding spaces.
+///
+/// For a top-level selector like `.foo > .bar` the token pairs are
+/// `[(DOT, ".foo"), (CSS_SPACE_LITERAL_OR_GT, ">"), (DOT, ".bar")]`.
+///
+/// Two `ResolvedSelector`s are equal when all their `(kind, text)` pairs match,
+/// enabling duplicate-selector detection without any string allocation.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ResolvedSelector(pub(crate) Vec<(CssSyntaxKind, TokenText)>);
+
+impl ResolvedSelector {
+    /// Returns an iterator over the `(kind, text)` pairs that make up this selector.
+    pub fn tokens(&self) -> impl Iterator<Item = &(CssSyntaxKind, TokenText)> {
+        self.0.iter()
+    }
+
+    /// Returns `true` if `kind` represents a combinator token (explicit or implicit).
+    ///
+    /// Combinator tokens separate compound selectors. `CSS_SPACE_LITERAL` is the
+    /// implicit descendant combinator; the others are explicit.
+    pub fn is_combinator(kind: CssSyntaxKind) -> bool {
+        matches!(
+            kind,
+            CssSyntaxKind::CSS_SPACE_LITERAL
+                | CssSyntaxKind::R_ANGLE
+                | CssSyntaxKind::PLUS
+                | CssSyntaxKind::TILDE
+                | CssSyntaxKind::PIPE2
+        )
+    }
+
+    /// Returns `true` if `kind` represents an explicit CSS combinator
+    /// that should be surrounded by spaces when displayed.
+    fn is_explicit_combinator(kind: CssSyntaxKind) -> bool {
+        matches!(
+            kind,
+            CssSyntaxKind::R_ANGLE
+                | CssSyntaxKind::PLUS
+                | CssSyntaxKind::TILDE
+                | CssSyntaxKind::PIPE2
+        )
+    }
+
+    /// Returns `true` if `kind` starts a new simple selector within a compound.
+    ///
+    /// This is used to split compound selectors into their constituent simple
+    /// selectors for normalization.
+    fn starts_simple_selector(kind: CssSyntaxKind) -> bool {
+        matches!(
+            kind,
+            // Class selector: `.foo`
+            CssSyntaxKind::DOT
+            // ID selector: `#foo`
+            | CssSyntaxKind::HASH
+            // Attribute selector: `[attr]`
+            | CssSyntaxKind::L_BRACK
+            // Pseudo-class: `:hover`, pseudo-element: `::before`
+            | CssSyntaxKind::COLON
+            | CssSyntaxKind::COLON2
+        )
+    }
+
+    /// Produces a normalized string representation of this selector for use in
+    /// duplicate-selector comparison.
+    ///
+    /// Normalization follows the same rules as stylelint's `normalizeSelector`:
+    ///
+    /// 1. **Whitespace**: already stripped (trivia excluded from token list).
+    /// 2. **Type selector case**: HTML tag names are case-insensitive, so bare
+    ///    type selectors (`div`, `SPAN`, `P`) are lowercased.
+    /// 3. **Compound selector ordering**: within a compound selector (tokens between
+    ///    two combinators), the individual simple selectors (`.a`, `#id`, `[attr]`,
+    ///    `:hover`) are sorted alphabetically so that `.a.b` and `.b.a` are
+    ///    considered equal.
+    ///
+    /// The combinator representation is canonical: space-literal becomes `" "`,
+    /// explicit combinators keep their text with surrounding spaces.
+    pub fn normalize(&self) -> String {
+        // Step 1: split token list at combinators into (combinator_str, compound_tokens) pairs.
+        // The first pair has an empty combinator.
+        let mut compounds: Vec<(String, Vec<(CssSyntaxKind, &TokenText)>)> = Vec::new();
+        let mut current_combinator = String::new();
+        let mut current_tokens: Vec<(CssSyntaxKind, &TokenText)> = Vec::new();
+
+        for (kind, text) in &self.0 {
+            if Self::is_combinator(*kind) {
+                compounds.push((current_combinator, current_tokens));
+                // Represent all combinators canonically with surrounding spaces
+                current_combinator = if *kind == CssSyntaxKind::CSS_SPACE_LITERAL {
+                    " ".to_string()
+                } else {
+                    format!(" {text} ")
+                };
+                current_tokens = Vec::new();
+            } else {
+                current_tokens.push((*kind, text));
+            }
+        }
+        // Push the last compound (or the only one for simple selectors)
+        compounds.push((current_combinator, current_tokens));
+
+        // Step 2: for each compound, split into simple-selector chunks and sort them.
+        let mut result = String::new();
+
+        for (combinator, tokens) in &compounds {
+            result.push_str(combinator);
+
+            // Split the compound into simple-selector chunks.
+            // A new chunk starts at each token that "opens" a new simple selector
+            // (DOT, HASH, L_BRACK, COLON, COLON2), or at the very first token
+            // (which may be a type selector: IDENT, STAR, or even AMP for nesting).
+            let mut chunks: Vec<String> = Vec::new();
+            let mut chunk = String::new();
+
+            for (i, (kind, text)) in tokens.iter().enumerate() {
+                let starts_new = i == 0 || Self::starts_simple_selector(*kind);
+                if starts_new && i != 0 {
+                    if !chunk.is_empty() {
+                        chunks.push(chunk);
+                    }
+                    chunk = String::new();
+                }
+
+                // Lowercase bare type selectors (IDENT at position 0 of the compound,
+                // not preceded by DOT/HASH/COLON — i.e., the first token is the type).
+                // In practice: if this is the first token of the compound and it is
+                // an IDENT (not DOT/HASH/COLON/COLON2), treat it as a type selector.
+                let token_text =
+                    if i == 0 && matches!(*kind, CssSyntaxKind::IDENT | CssSyntaxKind::STAR) {
+                        text.to_lowercase_cow()
+                    } else {
+                        text.to_string().into()
+                    };
+
+                chunk.push_str(&token_text);
+            }
+            if !chunk.is_empty() {
+                chunks.push(chunk);
+            }
+
+            // Sort simple-selector chunks within the compound for canonical order.
+            // This makes `.b.a` == `.a.b`.
+            //
+            // The first chunk may be a type selector (IDENT) or universal selector
+            // (*), which by CSS grammar must always come first in a compound.  Only
+            // sort the non-type chunks (index 1 onward) so that `a:hover` and
+            // `a.foo` are never reordered to `:hovera` or `.fooa`.
+            let (type_prefix, rest) = if chunks
+                .first()
+                .is_some_and(|c| !c.starts_with(['.', '#', '[', ':', '&']))
+            {
+                chunks.split_at_mut(1)
+            } else {
+                chunks.split_at_mut(0)
+            };
+            rest.sort();
+            result.push_str(&type_prefix.join(""));
+            result.push_str(&rest.join(""));
+        }
+
+        result
+    }
+}
+
+impl std::fmt::Display for ResolvedSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for (kind, text) in &self.0 {
+            if Self::is_explicit_combinator(*kind) {
+                write!(f, " {text} ")?;
+            } else {
+                write!(f, "{text}")?;
+            }
+        }
+        Ok(())
+    }
+}
+
 /// Represents a CSS selector.
 /// /// ```css
 /// span {
@@ -213,27 +407,51 @@ impl AnyCssSelectorLike {
 /// ```
 #[derive(Debug, Clone)]
 pub struct Selector {
-    pub(crate) node: AnyCssSelectorLike,
+    pub(crate) node: AstPtr<AnyCssSelectorLike>,
+    /// The resolved selector, accounting for nesting and `&` references.
+    /// For top-level selectors this is the token sequence from the source.
+    /// For nested selectors each `&` is replaced by the parent token sequence,
+    /// and a space-literal token is inserted when there is no `&`.
+    pub(crate) resolved: ResolvedSelector,
     /// The specificity of the selector.
     pub(crate) specificity: Specificity,
 }
 
 impl Selector {
-    pub fn node(&self) -> &AnyCssSelectorLike {
-        &self.node
+    pub fn node(&self, root: &AnyCssRoot) -> AnyCssSelectorLike {
+        self.node.to_node(root.syntax())
     }
 
-    pub fn text(&self) -> SyntaxNodeText {
-        self.node.syntax().text_trimmed()
+    /// Returns the resolved selector, accounting for CSS nesting and `&` references.
+    pub fn resolved(&self) -> &ResolvedSelector {
+        &self.resolved
     }
 
-    pub fn range(&self) -> TextRange {
-        self.node.syntax().text_trimmed_range()
+    pub fn range(&self, root: &AnyCssRoot) -> TextRange {
+        self.node
+            .to_node(root.syntax())
+            .syntax()
+            .text_trimmed_range()
     }
 
     pub fn specificity(&self) -> Specificity {
         self.specificity
     }
+}
+
+/// Collects the non-trivia tokens of a selector node as [`CssSyntaxToken`]s.
+///
+/// Trivia tokens (whitespace, comments, newlines) are skipped because the
+/// meaningful content of a selector is carried entirely by non-trivia tokens
+/// and the explicit/implicit combinator tokens (including `CSS_SPACE_LITERAL`).
+///
+/// The returned tokens retain their [`CssSyntaxKind`] so that callers can
+/// detect `AMP` (`&`) tokens during resolution without re-parsing text.
+pub fn selector_tokens(node: &AnyCssSelectorLike) -> Vec<CssSyntaxToken> {
+    node.syntax()
+        .descendants_tokens(Direction::Next)
+        .filter(|tok: &CssSyntaxToken| !tok.kind().is_trivia())
+        .collect()
 }
 
 /// Represents the specificity of a CSS selector.
@@ -293,18 +511,18 @@ impl std::fmt::Display for Specificity {
 /// ```
 #[derive(Debug, Clone)]
 pub struct CssModelDeclaration {
-    pub(crate) declaration: CssDeclaration,
-    pub(crate) property: CssProperty,
+    pub(crate) declaration: AstPtr<CssDeclaration>,
+    pub(crate) property: AstPtr<CssProperty>,
     pub(crate) value: CssPropertyInitialValue,
 }
 
 impl CssModelDeclaration {
-    pub fn declaration(&self) -> &CssDeclaration {
-        &self.declaration
+    pub fn declaration(&self, root: &AnyCssRoot) -> CssDeclaration {
+        self.declaration.to_node(root.syntax())
     }
 
-    pub fn property(&self) -> &CssProperty {
-        &self.property
+    pub fn property(&self, root: &AnyCssRoot) -> CssProperty {
+        self.property.to_node(root.syntax())
     }
 
     pub fn value(&self) -> &CssPropertyInitialValue {
@@ -329,19 +547,26 @@ impl CssProperty {
 
 #[derive(Debug, Clone)]
 pub enum CssPropertyInitialValue {
-    GenericComponent(CssGenericComponentValueList),
-    Composes(CssComposesPropertyValue),
+    GenericComponent(AstPtr<CssGenericComponentValueList>),
+    Composes(AstPtr<CssComposesPropertyValue>),
+    ScssExpression(AstPtr<ScssExpression>),
 }
 
 impl From<CssGenericComponentValueList> for CssPropertyInitialValue {
     fn from(value: CssGenericComponentValueList) -> Self {
-        Self::GenericComponent(value)
+        Self::GenericComponent(AstPtr::new(&value))
     }
 }
 
 impl From<CssComposesPropertyValue> for CssPropertyInitialValue {
     fn from(value: CssComposesPropertyValue) -> Self {
-        Self::Composes(value)
+        Self::Composes(AstPtr::new(&value))
+    }
+}
+
+impl From<ScssExpression> for CssPropertyInitialValue {
+    fn from(value: ScssExpression) -> Self {
+        Self::ScssExpression(AstPtr::new(&value))
     }
 }
 
@@ -362,7 +587,7 @@ impl From<CssComposesPropertyValue> for CssPropertyInitialValue {
 pub enum CssGlobalCustomVariable {
     Root(CssModelDeclaration),
     AtProperty {
-        property: CssProperty,
+        property: AstPtr<CssProperty>,
         syntax: Option<String>,
         inherits: Option<bool>,
         initial_value: Option<CssPropertyInitialValue>,

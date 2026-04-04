@@ -1,0 +1,90 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.newly.css
+---
+# Input
+```css
+/* should generate diagnostics */
+
+/* accent-color is limited (not even newly available) */
+a { accent-color: bar; }
+
+/* view-transition at-rule is not yet newly available */
+@view-transition { navigation: auto; }
+
+/* device-posture media condition is not newly available */
+@media (device-posture: folded) { a { color: red; } }
+
+```
+
+# Diagnostics
+```
+invalid.newly.css:4:5 lint/nursery/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i CSS property accent-color isn't part of the chosen Baseline.
+  
+    3 │ /* accent-color is limited (not even newly available) */
+  > 4 │ a { accent-color: bar; }
+      │     ^^^^^^^^^^^^
+    5 │ 
+    6 │ /* view-transition at-rule is not yet newly available */
+  
+  i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
+  
+  i Either remove the feature, or use the @supports at-rule to gate the feature behind a browser-specific support condition.
+  
+  i See MDN Baseline for more information.
+  
+  i Check caniuse.com for more information about the feature accent-color.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.newly.css:7:1 lint/nursery/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i CSS at-rule view-transition isn't part of the chosen Baseline.
+  
+    6 │ /* view-transition at-rule is not yet newly available */
+  > 7 │ @view-transition { navigation: auto; }
+      │ ^
+    8 │ 
+    9 │ /* device-posture media condition is not newly available */
+  
+  i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
+  
+  i Either remove the feature, or use the @supports at-rule to gate the feature behind a browser-specific support condition.
+  
+  i See MDN Baseline for more information.
+  
+  i Check caniuse.com for more information about the feature view-transition.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.newly.css:10:9 lint/nursery/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i CSS media condition device-posture isn't part of the chosen Baseline.
+  
+     9 │ /* device-posture media condition is not newly available */
+  > 10 │ @media (device-posture: folded) { a { color: red; } }
+       │         ^^^^^^^^^^^^^^
+    11 │ 
+  
+  i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
+  
+  i Either remove the feature, or use the @supports at-rule to gate the feature behind a browser-specific support condition.
+  
+  i See MDN Baseline for more information.
+  
+  i Check caniuse.com for more information about the feature device-posture.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

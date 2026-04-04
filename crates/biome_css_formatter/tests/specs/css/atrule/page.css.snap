@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atrule/page.css
 ---
+
 # Input
 
 ```css
@@ -83,19 +84,7 @@ index
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
------
+# Formatted
 
 ```css
 @page {
@@ -186,4 +175,5 @@ Quote style: Double Quotes
 }
 @page :left {
 }
+
 ```

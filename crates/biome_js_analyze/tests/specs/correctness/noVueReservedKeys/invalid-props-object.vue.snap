@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-props-object.vue
+---
+# Input
+```vue
+<script>
+export default {
+    props: {
+        $el: String,
+    }
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-props-object.vue:4:9 lint/correctness/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Key $el is reserved in Vue.
+  
+    2 │ export default {
+    3 │     props: {
+  > 4 │         $el: String,
+      │         ^^^
+    5 │     }
+    6 │ };
+  
+  i Rename the key to avoid conflicts with Vue reserved keys.
+  
+
+```

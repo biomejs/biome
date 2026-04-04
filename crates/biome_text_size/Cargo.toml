@@ -1,32 +1,32 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Utilities to treat text sizes/ranges in a more type-safe"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_text_size"
-publish              = true
-repository.workspace = true
 version              = "0.5.7"
-
-[dependencies]
-schemars = { workspace = true, optional = true }
-serde    = { workspace = true, optional = true }
-
-[features]
-schema = ["dep:schemars", "serde"]
-serde  = ["dep:serde"]
-
-[dev-dependencies]
-serde_test        = "=1.0.177"
-static_assertions = { workspace = true }
+authors.workspace    = true
+edition.workspace    = true
+description          = "Utilities to treat text sizes/ranges in a more type-safe"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
 
 [[test]]
 name              = "serde"
 path              = "tests/serde.rs"
 required-features = ["serde"]
+
+[dependencies]
+schemars = { workspace = true, optional = true }
+serde    = { workspace = true, optional = true }
+
+[dev-dependencies]
+serde_test        = "=1.0.177"
+static_assertions = { workspace = true }
+
+[features]
+schema = ["dep:schemars", "serde"]
+serde  = ["dep:serde"]
 
 [lints]
 workspace = true

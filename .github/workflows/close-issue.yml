@@ -14,7 +14,7 @@ jobs:
     runs-on: depot-ubuntu-24.04-arm-small
     steps:
       - name: Close issue without reproduction
-        uses: actions-cool/issues-helper@9861779a695cf1898bd984c727f685f351cfc372 # v3.7.2
+        uses: actions-cool/issues-helper@200c78641dbf33838311e5a1e0c31bbdb92d7cf0 # v3.8.0
         with:
           actions: "close-issues"
           token: ${{ secrets.GITHUB_TOKEN }}

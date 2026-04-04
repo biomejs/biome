@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: json/array/single_line.json
 ---
+
 # Input
 
 ```json
@@ -17,25 +18,12 @@ info: json/array/single_line.json
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Trailing commas: None
-Expand: Auto
-Bracket spacing: true
------
+# Formatted
 
 ```json
 {
 	"array": ["aaaaaaa", "bbbbbb", false],
 	"indented": [1111, 2222, true]
 }
+
 ```

@@ -1,0 +1,11 @@
+/* should not generate diagnostics */
+import { foo } from "./foo.js";
+import bar from "./bar";
+import { image } from "./image.svg";
+
+// Node.js built-in modules with the `node:` prefix must never be flagged.
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { EventEmitter } from "node:events";
+import * as crypto from "node:crypto";

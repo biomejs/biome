@@ -1,0 +1,173 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+
+<!-- img without alt -->
+<img src="image.png" />
+<img src="image.png" class="photo" />
+
+<!-- area without alt -->
+<area href="foo" />
+<map name="map"><area shape="rect" coords="0,0,100,100" href="link" /></map>
+
+<!-- input type="image" without alt -->
+<input type="image" src="submit.png" />
+<input type="image" src="button.png" name="submit" />
+
+<!-- object without title -->
+<object data="movie.swf"></object>
+<object data="document.pdf" type="application/pdf"></object>
+
+```
+
+# Diagnostics
+```
+invalid.html:4:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a text alternative through the alt, aria-label, or aria-labelledby attribute.
+  
+    3 │ <!-- img without alt -->
+  > 4 │ <img src="image.png" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ <img src="image.png" class="photo" />
+    6 │ 
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
+  
+
+```
+
+```
+invalid.html:5:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a text alternative through the alt, aria-label, or aria-labelledby attribute.
+  
+    3 │ <!-- img without alt -->
+    4 │ <img src="image.png" />
+  > 5 │ <img src="image.png" class="photo" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ <!-- area without alt -->
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
+  
+
+```
+
+```
+invalid.html:8:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a text alternative through the alt, aria-label, or aria-labelledby attribute.
+  
+     7 │ <!-- area without alt -->
+   > 8 │ <area href="foo" />
+       │ ^^^^^^^^^^^^^^^^^^^
+     9 │ <map name="map"><area shape="rect" coords="0,0,100,100" href="link" /></map>
+    10 │ 
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
+  
+
+```
+
+```
+invalid.html:9:17 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a text alternative through the alt, aria-label, or aria-labelledby attribute.
+  
+     7 │ <!-- area without alt -->
+     8 │ <area href="foo" />
+   > 9 │ <map name="map"><area shape="rect" coords="0,0,100,100" href="link" /></map>
+       │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ <!-- input type="image" without alt -->
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
+  
+
+```
+
+```
+invalid.html:12:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a text alternative through the alt, aria-label, or aria-labelledby attribute.
+  
+    11 │ <!-- input type="image" without alt -->
+  > 12 │ <input type="image" src="submit.png" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ <input type="image" src="button.png" name="submit" />
+    14 │ 
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
+  
+
+```
+
+```
+invalid.html:13:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a text alternative through the alt, aria-label, or aria-labelledby attribute.
+  
+    11 │ <!-- input type="image" without alt -->
+    12 │ <input type="image" src="submit.png" />
+  > 13 │ <input type="image" src="button.png" name="submit" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ <!-- object without title -->
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
+  
+
+```
+
+```
+invalid.html:16:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a text alternative through the title, aria-label, or aria-labelledby attribute.
+  
+    15 │ <!-- object without title -->
+  > 16 │ <object data="movie.swf"></object>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ <object data="document.pdf" type="application/pdf"></object>
+    18 │ 
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
+  
+
+```
+
+```
+invalid.html:17:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a text alternative through the title, aria-label, or aria-labelledby attribute.
+  
+    15 │ <!-- object without title -->
+    16 │ <object data="movie.swf"></object>
+  > 17 │ <object data="document.pdf" type="application/pdf"></object>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
+  
+
+```

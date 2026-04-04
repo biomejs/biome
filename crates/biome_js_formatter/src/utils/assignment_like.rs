@@ -680,6 +680,14 @@ impl AnyJsAssignmentLike {
             return Ok(AssignmentLikeLayout::NeverBreakAfterOperator);
         }
 
+        // For type aliases, check for leading comments before checking if we should break the left-hand side.
+        // This ensures comments after the `=` sign are properly indented.
+        if let Self::TsTypeAliasDeclaration(_) = self
+            && self.should_break_after_operator(&right, f)?
+        {
+            return Ok(AssignmentLikeLayout::BreakAfterOperator);
+        }
+
         if self.should_break_left_hand_side()? {
             return Ok(AssignmentLikeLayout::BreakLeftHandSide);
         }

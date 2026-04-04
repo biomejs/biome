@@ -1,0 +1,11 @@
+@container (foo(bar: baz)) {
+  .a { color: red; }
+}
+
+@container (foo(bar: baz)) and (width > 100px) {
+  .b { color: blue; }
+}
+
+@container (foo(url("a.svg" fn(test)))) {
+  .c { color: green; }
+}

@@ -1,0 +1,31 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/await_destructuring.svelte
+---
+
+# Input
+
+```svelte
+{#await promise then { name, age, address }}
+<div>
+<p>Name: {name}</p>
+<p>Age: {age}</p>
+<p>Address: {address}</p>
+</div>
+{/await}
+
+```
+
+
+# Formatted
+
+```svelte
+{#await promise then { name, age, address }}
+	<div>
+		<p>Name: {name}</p>
+		<p>Age: {age}</p>
+		<p>Address: {address}</p>
+	</div>
+{/await}
+
+```

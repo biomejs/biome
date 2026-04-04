@@ -20,8 +20,11 @@ pub(crate) fn parse_vue_directive(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
 
     let pos = p.source().position();
-    // FIXME: Ideally, the lexer would just lex VUE_IDENT directly
-    p.bump_remap_with_context(VUE_IDENT, HtmlLexContext::InsideTagVue);
+    // FIXME: Ideally, the lexer would just lex IDENT directly
+    p.bump_remap_with_context(
+        IDENT,
+        HtmlLexContext::InsideTagWithDirectives { svelte: false },
+    );
     if p.at(T![:]) {
         // is there any trivia after the directive name and before the colon?
         if let Some(last_trivia) = p.source().trivia_list.last()
@@ -70,7 +73,20 @@ pub(crate) fn parse_vue_v_on_shorthand_directive(p: &mut HtmlParser) -> ParsedSy
 
     let m = p.start();
 
-    p.bump_with_context(T![@], HtmlLexContext::InsideTagVue);
+    let pos = p.source().position();
+    p.bump_with_context(
+        T![@],
+        HtmlLexContext::InsideTagWithDirectives { svelte: false },
+    );
+    // is there any trivia after the @ and before argument?
+    if let Some(last_trivia) = p.source().trivia_list.last()
+        && pos < last_trivia.text_range().start()
+    {
+        // `@ click="foo"` is not valid syntax
+        // but we want to recover gracefully
+        p.error(expected_vue_directive_argument(p, last_trivia.text_range()));
+        return Present(m.complete(p, VUE_BOGUS_DIRECTIVE));
+    }
     parse_vue_dynamic_argument(p)
         .or_else(|| parse_vue_static_argument(p))
         .ok();
@@ -90,7 +106,10 @@ pub(crate) fn parse_vue_v_slot_shorthand_directive(p: &mut HtmlParser) -> Parsed
     let m = p.start();
 
     let pos = p.source().position();
-    p.bump_with_context(T![#], HtmlLexContext::InsideTagVue);
+    p.bump_with_context(
+        T![#],
+        HtmlLexContext::InsideTagWithDirectives { svelte: false },
+    );
     // is there any trivia after the hash and before argument?
     if let Some(last_trivia) = p.source().trivia_list.last()
         && pos < last_trivia.text_range().start()
@@ -118,7 +137,20 @@ fn parse_vue_directive_argument(p: &mut HtmlParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    p.bump_with_context(T![:], HtmlLexContext::InsideTagVue);
+    let pos = p.source().position();
+    p.bump_with_context(
+        T![:],
+        HtmlLexContext::InsideTagWithDirectives { svelte: false },
+    );
+    // is there any trivia after the colon and before argument?
+    if let Some(last_trivia) = p.source().trivia_list.last()
+        && pos < last_trivia.text_range().start()
+    {
+        // `: foo="5"` is not valid syntax
+        // but we want to recover gracefully
+        p.error(expected_vue_directive_argument(p, last_trivia.text_range()));
+        return Present(m.complete(p, VUE_BOGUS_DIRECTIVE));
+    }
     parse_vue_dynamic_argument(p)
         .or_else(|| parse_vue_static_argument(p))
         .ok();
@@ -129,7 +161,10 @@ fn parse_vue_directive_argument(p: &mut HtmlParser) -> ParsedSyntax {
 fn parse_vue_static_argument(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
 
-    p.expect_with_context(HTML_LITERAL, HtmlLexContext::InsideTagVue);
+    p.expect_with_context(
+        HTML_LITERAL,
+        HtmlLexContext::InsideTagWithDirectives { svelte: false },
+    );
 
     Present(m.complete(p, VUE_STATIC_ARGUMENT))
 }
@@ -141,9 +176,15 @@ fn parse_vue_dynamic_argument(p: &mut HtmlParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    p.bump_with_context(T!['['], HtmlLexContext::InsideTagVue);
-    p.expect_with_context(HTML_LITERAL, HtmlLexContext::InsideTagVue);
-    p.expect_with_context(T![']'], HtmlLexContext::InsideTagVue);
+    p.bump_with_context(T!['['], HtmlLexContext::VueDirectiveArgument);
+    p.expect_with_context(
+        HTML_LITERAL,
+        HtmlLexContext::InsideTagWithDirectives { svelte: false },
+    );
+    p.expect_with_context(
+        T![']'],
+        HtmlLexContext::InsideTagWithDirectives { svelte: false },
+    );
 
     Present(m.complete(p, VUE_DYNAMIC_ARGUMENT))
 }
@@ -186,8 +227,22 @@ fn parse_vue_modifier(p: &mut HtmlParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    p.bump_with_context(T![.], HtmlLexContext::InsideTagVue);
-    p.expect_with_context(HTML_LITERAL, HtmlLexContext::InsideTagVue);
+    p.bump_with_context(
+        T![.],
+        HtmlLexContext::InsideTagWithDirectives { svelte: false },
+    );
+    if p.at(T![:]) {
+        // `:` is actually a valid modifier, for example `@keydown.:`
+        p.bump_remap_with_context(
+            HTML_LITERAL,
+            HtmlLexContext::InsideTagWithDirectives { svelte: false },
+        );
+    } else {
+        p.expect_with_context(
+            HTML_LITERAL,
+            HtmlLexContext::InsideTagWithDirectives { svelte: false },
+        );
+    }
 
     Present(m.complete(p, VUE_MODIFIER))
 }

@@ -29,10 +29,22 @@ Domains
   - before
   - beforeEach
   - beforeAll
+  - context
   - describe
   - it
   - expect
+  - run
+  - setup
+  - specify
+  - suite
+  - suiteSetup
+  - suiteTeardown
+  - teardown
   - test
+  - xcontext
+  - xdescribe
+  - xit
+  - xspecify
 
 
 Description

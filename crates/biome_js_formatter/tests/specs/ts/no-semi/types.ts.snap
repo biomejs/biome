@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/no-semi/types.ts
 ---
+
 # Input
 
 ```ts
@@ -22,69 +23,20 @@ type OptionsFlags<Type> = {
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
------
-
-```ts
-type A = { a: string; b: number; c: string };
-
-type B = {
-	a: string;
-	b: number;
-	c: string;
-};
-
-interface C {
-	a: string;
-	b: number;
-	c: string;
+```json
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "javascript": {
+    "formatter": {
+      "semicolons": "asNeeded"
+    }
+  }
 }
-
-type OptionsFlags<Type> = {
-	[Property in keyof Type]: boolean;
-};
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: As needed
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
------
+# Formatted
 
 ```ts
 type A = { a: string; b: number; c: string }
@@ -104,4 +56,5 @@ interface C {
 type OptionsFlags<Type> = {
 	[Property in keyof Type]: boolean
 }
+
 ```

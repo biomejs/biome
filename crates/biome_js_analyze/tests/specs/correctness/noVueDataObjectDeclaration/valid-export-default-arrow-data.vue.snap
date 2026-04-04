@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-export-default-arrow-data.vue
+---
+# Input
+```vue
+<script>
+/* should not generate diagnostics */
+// export default arrow `data`
+export default {
+	data: () => {
+		// no-op
+	}
+};
+</script>
+
+```

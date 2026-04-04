@@ -1,0 +1,105 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
+expression: snapshot
+---
+
+## Input
+
+```css
+$list: a,,b;
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@0..1 "$" [] [],
+                name: CssIdentifier {
+                    value_token: IDENT@1..5 "list" [] [],
+                },
+            },
+            colon_token: COLON@5..7 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    ScssListExpression {
+                        elements: ScssListExpressionElementList [
+                            ScssListExpressionElement {
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@7..8 "a" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            COMMA@8..9 "," [] [],
+                            ScssListExpressionElement {
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [],
+                                },
+                            },
+                            COMMA@9..10 "," [] [],
+                            ScssListExpressionElement {
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@10..11 "b" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@11..12 ";" [] [],
+        },
+    ],
+    eof_token: EOF@12..13 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..13
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..12
+    0: SCSS_DECLARATION@0..12
+      0: SCSS_IDENTIFIER@0..5
+        0: DOLLAR@0..1 "$" [] []
+        1: CSS_IDENTIFIER@1..5
+          0: IDENT@1..5 "list" [] []
+      1: COLON@5..7 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@7..11
+        0: SCSS_EXPRESSION_ITEM_LIST@7..11
+          0: SCSS_LIST_EXPRESSION@7..11
+            0: SCSS_LIST_EXPRESSION_ELEMENT_LIST@7..11
+              0: SCSS_LIST_EXPRESSION_ELEMENT@7..8
+                0: SCSS_EXPRESSION@7..8
+                  0: SCSS_EXPRESSION_ITEM_LIST@7..8
+                    0: CSS_IDENTIFIER@7..8
+                      0: IDENT@7..8 "a" [] []
+              1: COMMA@8..9 "," [] []
+              2: SCSS_LIST_EXPRESSION_ELEMENT@9..9
+                0: SCSS_EXPRESSION@9..9
+                  0: SCSS_EXPRESSION_ITEM_LIST@9..9
+              3: COMMA@9..10 "," [] []
+              4: SCSS_LIST_EXPRESSION_ELEMENT@10..11
+                0: SCSS_EXPRESSION@10..11
+                  0: SCSS_EXPRESSION_ITEM_LIST@10..11
+                    0: CSS_IDENTIFIER@10..11
+                      0: IDENT@10..11 "b" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@11..11
+      4: SEMICOLON@11..12 ";" [] []
+  2: EOF@12..13 "" [Newline("\n")] []
+
+```

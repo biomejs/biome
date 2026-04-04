@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atrule/font_feature_values.css
 ---
+
 # Input
 
 ```css
@@ -61,19 +62,7 @@ info: css/atrule/font_feature_values.css
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
------
+# Formatted
 
 ```css
 @font-feature-values ident {
@@ -151,4 +140,5 @@ Quote style: Double Quotes
 		circled: 4;
 	}
 }
+
 ```

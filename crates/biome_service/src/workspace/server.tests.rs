@@ -1,3 +1,6 @@
+use super::*;
+use crate::settings::ModuleGraphResolutionKind;
+use crate::test_utils::setup_workspace_and_open_project;
 use biome_configuration::{
     FormatterConfiguration, JsConfiguration,
     javascript::{JsFormatterConfiguration, JsParserConfiguration},
@@ -5,10 +8,6 @@ use biome_configuration::{
 use biome_formatter::{IndentStyle, LineWidth};
 use biome_fs::MemoryFileSystem;
 use biome_rowan::TextSize;
-
-use crate::test_utils::setup_workspace_and_open_project;
-
-use super::*;
 
 #[test]
 fn commonjs_file_rejects_import_statement() {
@@ -38,6 +37,7 @@ fn commonjs_file_rejects_import_statement() {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -91,6 +91,7 @@ fn store_embedded_nodes_with_current_ranges() {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -152,6 +153,7 @@ fn format_html_with_scripts_and_css() {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -159,6 +161,7 @@ fn format_html_with_scripts_and_css() {
         .format_file(FormatFileParams {
             path: Utf8PathBuf::from("/project/file.html").into(),
             project_key,
+            inline_config: None,
         })
         .unwrap();
 
@@ -238,6 +241,8 @@ function Foo({cond}) {
             project_key,
             configuration,
             workspace_directory: Some(BiomePath::new("/project")),
+            extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
         })
         .unwrap();
 
@@ -258,6 +263,7 @@ function Foo({cond}) {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -268,6 +274,7 @@ function Foo({cond}) {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -291,6 +298,7 @@ function Foo({cond}) {
     match workspace.format_file(FormatFileParams {
         project_key,
         path: BiomePath::new("/project/a.js"),
+        inline_config: None,
     }) {
         Ok(printed) => {
             insta::assert_snapshot!(printed.as_code(), @r###"
@@ -350,6 +358,8 @@ function Foo({cond}) {
             project_key,
             configuration,
             workspace_directory: Some(BiomePath::new("/project")),
+            extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
         })
         .unwrap();
 
@@ -370,6 +380,7 @@ function Foo({cond}) {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -380,6 +391,7 @@ function Foo({cond}) {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -403,6 +415,7 @@ function Foo({cond}) {
     match workspace.format_file(FormatFileParams {
         project_key,
         path: BiomePath::new("/project/a.jsx"),
+        inline_config: None,
     }) {
         Ok(printed) => {
             insta::assert_snapshot!(printed.as_code(), @r###"
@@ -445,6 +458,7 @@ fn pull_diagnostics_and_actions_for_js_file() {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -456,6 +470,7 @@ fn pull_diagnostics_and_actions_for_js_file() {
             enabled_rules: vec![],
             project_key,
             categories: Default::default(),
+            inline_config: None,
         })
         .unwrap();
 
@@ -468,4 +483,374 @@ fn pull_diagnostics_and_actions_for_js_file() {
     );
 
     insta::assert_debug_snapshot!(result)
+}
+
+/// Regression test for https://github.com/biomejs/biome/issues/9506 and
+/// https://github.com/biomejs/biome/issues/9479.
+///
+/// `<script type="speculationrules">` and `<script type="application/ld+json">`
+/// contain JSON-like content that is NOT JavaScript. Before this fix, biome's
+/// embed registry fallback would treat these as JavaScript, causing false
+/// parse errors and incorrect lint diagnostics.
+#[test]
+fn no_diagnostics_for_unsupported_script_types() {
+    // speculationrules content is JSON-like but is NOT JavaScript.
+    // application/ld+json content is JSON-LD, also not JavaScript.
+    // Both should be silently skipped by the embed detector (no JS parse errors).
+    const FILE_CONTENT: &str = r#"<!doctype html>
+<html>
+  <head>
+    <script type="speculationrules">
+      {
+        "prerender": [
+          { "source": "list", "urls": ["/next-page"] }
+        ]
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Test"
+      }
+    </script>
+  </head>
+</html>"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/file.html"), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/file.html"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics_and_actions(PullDiagnosticsAndActionsParams {
+            path: BiomePath::new("/project/file.html"),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    assert!(
+        result.diagnostics.is_empty(),
+        "Expected no diagnostics for unsupported script types, got: {:#?}",
+        result.diagnostics
+    );
+}
+
+#[test]
+fn format_js_with_embedded_css() {
+    const FILE_PATH: &str = "/project/file.js";
+    const FILE_CONTENT: &str = r#"const Foo = styled.div`
+  display:
+    flex;
+  color : red ;
+`;
+
+const Bar = styled(Component)`
+  display:
+    flex;
+  color : red ;
+`;"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code(), @r"
+    const Foo = styled.div`
+    	display: flex;
+    	color: red;
+    `;
+
+    const Bar = styled(Component)`
+    	display: flex;
+    	color: red;
+    `;
+    ");
+}
+
+#[test]
+fn issue_9625() {
+    const FILE_PATH: &str = "/project/file.js";
+    const FILE_CONTENT: &str = r#"const Portfolio = styled.div`
+    display: flex;
+  align-items: center;
+`;
+
+const PortfolioIcon = styled.div`
+  ${({ theme }) => css``
+  };
+`;"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                formatter: Some(FormatterConfiguration {
+                    indent_style: Some(IndentStyle::Space),
+                    ..Default::default()
+                }),
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code(), @r"
+    const Portfolio = styled.div`
+      display: flex;
+      align-items: center;
+    `;
+
+    const PortfolioIcon = styled.div`
+      ${({ theme }) => css``};
+    `;
+    ");
+}
+
+#[test]
+fn format_js_with_embedded_graphql() {
+    const FILE_PATH: &str = "/project/file.js";
+    const FILE_CONTENT: &str = r#"const Foo = gql`
+  query PeopleCount {
+  people(
+       id: $peopleId){
+       totalCount
+       }}
+`;
+
+const Bar = graphql(`
+  query PeopleCount {
+  people(
+       id: $peopleId){
+       totalCount
+       }}
+`);
+
+const Baz = graphql`
+  query PeopleCount {
+  people(
+       id: $peopleId){
+       totalCount
+       }}
+`;"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code(), @r"
+    const Foo = gql`
+    	query PeopleCount {
+    		people(id: $peopleId) {
+    			totalCount
+    		}
+    	}
+    `;
+
+    const Bar = graphql(`
+    	query PeopleCount {
+    		people(id: $peopleId) {
+    			totalCount
+    		}
+    	}
+    `);
+
+    const Baz = graphql`
+    	query PeopleCount {
+    		people(id: $peopleId) {
+    			totalCount
+    		}
+    	}
+    `;
+    ");
+}
+
+#[test]
+fn issue_9131() {
+    const FILE_PATH: &str = "/project/file.js";
+    const FILE_CONTENT: &str = r#"
+const bulkUpsertTransactionsMutation = graphql(`
+  mutation test(
+    $input: Test!
+  ) {
+    test(input: $input) {
+      apple
+    }
+  }
+`);
+
+console.log(`test`) // plain template as call argument
+
+const highlight = foo`some tagged template` // unknown tagged template
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code());
 }

@@ -19,7 +19,7 @@ _Note: The parser emitted 10 diagnostics which are not shown here._
 ```
 issue4568.js:6:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This hook specifies more dependencies than necessary: c
+  × This hook specifies more dependencies than necessary: c.
   
     4 │ xpor function ueCanvasn(
     5 │ ) {
@@ -34,6 +34,10 @@ issue4568.js:6:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━�
   > 6 │   useEffect( => {on late Point},[c
       │                                  ^
     7 │ 
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Specifying more dependencies than required can lead to unnecessary re-rendering
+    and degraded performance.
   
   i Unsafe fix: Remove the extra dependencies from the list.
   

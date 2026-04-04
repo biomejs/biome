@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-definecomponent-empty.js
+---
+# Input
+```js
+// should generate diagnostics
+// defineComponent with empty object is Options API style
+import { defineComponent } from "vue";
+
+export default defineComponent({});
+
+```
+
+# Diagnostics
+```
+invalid-definecomponent-empty.js:5:32 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the Options API is not allowed.
+  
+    3 │ import { defineComponent } from "vue";
+    4 │ 
+  > 5 │ export default defineComponent({});
+      │                                ^^
+    6 │ 
+  
+  i Although the Options API is still supported by Vue, using the Composition API is recommended, and makes it possible to use Vue's Vapor mode for better performance.
+  
+  i Use <script setup> or defineComponent with a function signature to use the Composition API instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

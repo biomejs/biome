@@ -1,0 +1,3 @@
+/* should not generate diagnostics */
+.a { color: red; }
+.b { color: blue; }

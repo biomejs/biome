@@ -23,13 +23,12 @@ jobs:
     if: ${{ github.actor != 'autofix-ci[bot]' }}
     steps:
       - name: Checkout branch
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Install toolchain
-        uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
+        uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
         with:
           components: rustfmt
-          bins: taplo-cli
           cache-base: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -52,6 +51,14 @@ jobs:
       - name: Run format
         run: |
           cargo fmt --all
-          taplo format
 
-      - uses: autofix-ci/action@635ffb0c9798bd160680f18fd73371e355b85f27
+      - uses: tombi-toml/setup-tombi@cebfd308ba02edadfcee148b7473536990950c92 # v1.0.8
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          version: '0.7.32'
+
+      - name: Format TOML files
+        run: tombi format
+
+      - uses: autofix-ci/action@7a166d7532b277f34e16238930461bf77f9d7ed8

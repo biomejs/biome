@@ -44,6 +44,8 @@ invalid.jsx:2:9 lint/nursery/noDuplicatedSpreadProps ━━━━━━━━━
   
   i Spreading an expression more than once will lead to unnecessary computations being performed. Reduce spreads of this expression down to 1.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -59,6 +61,8 @@ invalid.jsx:6:9 lint/nursery/noDuplicatedSpreadProps ━━━━━━━━━
     8 │ 
   
   i Spreading an expression more than once will lead to unnecessary computations being performed. Reduce spreads of this expression down to 1.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -76,6 +80,8 @@ invalid.jsx:10:9 lint/nursery/noDuplicatedSpreadProps ━━━━━━━━�
   
   i Spreading an expression more than once will lead to unnecessary computations being performed. Reduce spreads of this expression down to 1.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -91,6 +97,8 @@ invalid.jsx:14:9 lint/nursery/noDuplicatedSpreadProps ━━━━━━━━�
     16 │ 
   
   i Spreading an expression more than once will lead to unnecessary computations being performed. Reduce spreads of this expression down to 1.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -108,6 +116,8 @@ invalid.jsx:18:9 lint/nursery/noDuplicatedSpreadProps ━━━━━━━━�
   
   i Spreading an expression more than once will lead to unnecessary computations being performed. Reduce spreads of this expression down to 1.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -123,6 +133,8 @@ invalid.jsx:22:9 lint/nursery/noDuplicatedSpreadProps ━━━━━━━━�
     24 │ 
   
   i Spreading an expression more than once will lead to unnecessary computations being performed. Reduce spreads of this expression down to 1.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

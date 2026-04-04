@@ -154,6 +154,44 @@ impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonMemberName {
         )
     }
 }
+impl FormatRule<biome_json_syntax::JsonMetavariable>
+    for crate::json::auxiliary::metavariable::FormatJsonMetavariable
+{
+    type Context = JsonFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_json_syntax::JsonMetavariable,
+        f: &mut JsonFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_json_syntax::JsonMetavariable>::fmt(self, node, f)
+    }
+}
+impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonMetavariable {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_json_syntax::JsonMetavariable,
+        crate::json::auxiliary::metavariable::FormatJsonMetavariable,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::json::auxiliary::metavariable::FormatJsonMetavariable::default(),
+        )
+    }
+}
+impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonMetavariable {
+    type Format = FormatOwnedWithRule<
+        biome_json_syntax::JsonMetavariable,
+        crate::json::auxiliary::metavariable::FormatJsonMetavariable,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::json::auxiliary::metavariable::FormatJsonMetavariable::default(),
+        )
+    }
+}
 impl FormatRule<biome_json_syntax::JsonNullValue>
     for crate::json::value::null_value::FormatJsonNullValue
 {
@@ -414,6 +452,44 @@ impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonBogus {
         FormatOwnedWithRule::new(self, crate::json::bogus::bogus::FormatJsonBogus::default())
     }
 }
+impl FormatRule<biome_json_syntax::JsonBogusName>
+    for crate::json::bogus::bogus_name::FormatJsonBogusName
+{
+    type Context = JsonFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_json_syntax::JsonBogusName,
+        f: &mut JsonFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_json_syntax::JsonBogusName>::fmt(self, node, f)
+    }
+}
+impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonBogusName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_json_syntax::JsonBogusName,
+        crate::json::bogus::bogus_name::FormatJsonBogusName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::json::bogus::bogus_name::FormatJsonBogusName::default(),
+        )
+    }
+}
+impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonBogusName {
+    type Format = FormatOwnedWithRule<
+        biome_json_syntax::JsonBogusName,
+        crate::json::bogus::bogus_name::FormatJsonBogusName,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::json::bogus::bogus_name::FormatJsonBogusName::default(),
+        )
+    }
+}
 impl FormatRule<biome_json_syntax::JsonBogusValue>
     for crate::json::bogus::bogus_value::FormatJsonBogusValue
 {
@@ -449,6 +525,31 @@ impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonBogusValue {
         FormatOwnedWithRule::new(
             self,
             crate::json::bogus::bogus_value::FormatJsonBogusValue::default(),
+        )
+    }
+}
+impl AsFormat<JsonFormatContext> for biome_json_syntax::AnyJsonMemberName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_json_syntax::AnyJsonMemberName,
+        crate::json::any::member_name::FormatAnyJsonMemberName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::json::any::member_name::FormatAnyJsonMemberName::default(),
+        )
+    }
+}
+impl IntoFormat<JsonFormatContext> for biome_json_syntax::AnyJsonMemberName {
+    type Format = FormatOwnedWithRule<
+        biome_json_syntax::AnyJsonMemberName,
+        crate::json::any::member_name::FormatAnyJsonMemberName,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::json::any::member_name::FormatAnyJsonMemberName::default(),
         )
     }
 }

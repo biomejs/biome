@@ -1,0 +1,23 @@
+use biome_markdown_formatter::{MdFormatLanguage, context::MdFormatOptions};
+use biome_markdown_parser::parse_markdown;
+
+#[ignore]
+#[test]
+fn quick_test() {
+    let source = r#"[   See   `AsyncGeneratorFunction`]: ./index.html
+"#;
+    let parse = parse_markdown(source);
+
+    // Print CST
+    eprintln!("{:#?}", parse.syntax());
+    // print red tree
+    eprintln!("{:#?}", parse.tree());
+
+    let options = MdFormatOptions::default();
+    let result =
+        biome_formatter::format_node(&parse.syntax(), MdFormatLanguage::new(options), false);
+
+    // Print formatted output
+    let formatted = result.unwrap();
+    eprintln!("Formatted:\n{}", formatted.print().unwrap().as_code());
+}

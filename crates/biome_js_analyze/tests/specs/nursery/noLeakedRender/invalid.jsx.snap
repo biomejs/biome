@@ -10,6 +10,11 @@ const Example1 = () => {
 	return (
 		<>
 			{0 && <Something />}
+			{0.0 && <Something />}
+			{-0 && <Something />}
+			{-0.0 && <Something />}
+			{0n && <Something />}
+			{-0n && <Something />}
 			{'' && <Something />}
 			{NaN && <Something />}
 		</>
@@ -74,6 +79,18 @@ const MyComponent6 = ({ value }) => {
 	return <div>{(((value))) && <Item />}</div>;
 };
 
+const isNaN = NaN;
+const isZero = 0;
+const emptyStr = '';
+const MyComponent7 = () => {
+	return <>
+		<div> {isNan && 'NaN'} </div>
+		<div> {isZero && 'Zero'} </div>
+		<div>{emptyStr && "Empty String"}</div>
+	</>
+}
+
+
 ```
 
 # Diagnostics
@@ -86,12 +103,14 @@ invalid.jsx:6:5 lint/nursery/noLeakedRender ━━━━━━━━━━━━
     5 │ 		<>
   > 6 │ 			{0 && <Something />}
       │ 			 ^^^^^^^^^^^^^^^^^^
-    7 │ 			{'' && <Something />}
-    8 │ 			{NaN && <Something />}
+    7 │ 			{0.0 && <Something />}
+    8 │ 			{-0 && <Something />}
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -103,14 +122,16 @@ invalid.jsx:7:5 lint/nursery/noLeakedRender ━━━━━━━━━━━━
   
     5 │ 		<>
     6 │ 			{0 && <Something />}
-  > 7 │ 			{'' && <Something />}
-      │ 			 ^^^^^^^^^^^^^^^^^^^
-    8 │ 			{NaN && <Something />}
-    9 │ 		</>
+  > 7 │ 			{0.0 && <Something />}
+      │ 			 ^^^^^^^^^^^^^^^^^^^^
+    8 │ 			{-0 && <Something />}
+    9 │ 			{-0.0 && <Something />}
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -121,220 +142,412 @@ invalid.jsx:8:5 lint/nursery/noLeakedRender ━━━━━━━━━━━━
   i Potential leaked value that might cause unintended rendering.
   
      6 │ 			{0 && <Something />}
-     7 │ 			{'' && <Something />}
-   > 8 │ 			{NaN && <Something />}
+     7 │ 			{0.0 && <Something />}
+   > 8 │ 			{-0 && <Something />}
+       │ 			 ^^^^^^^^^^^^^^^^^^^
+     9 │ 			{-0.0 && <Something />}
+    10 │ 			{0n && <Something />}
+  
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
+  
+  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:9:5 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintended rendering.
+  
+     7 │ 			{0.0 && <Something />}
+     8 │ 			{-0 && <Something />}
+   > 9 │ 			{-0.0 && <Something />}
+       │ 			 ^^^^^^^^^^^^^^^^^^^^^
+    10 │ 			{0n && <Something />}
+    11 │ 			{-0n && <Something />}
+  
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
+  
+  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:10:5 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintended rendering.
+  
+     8 │ 			{-0 && <Something />}
+     9 │ 			{-0.0 && <Something />}
+  > 10 │ 			{0n && <Something />}
+       │ 			 ^^^^^^^^^^^^^^^^^^^
+    11 │ 			{-0n && <Something />}
+    12 │ 			{'' && <Something />}
+  
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
+  
+  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:11:5 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintended rendering.
+  
+     9 │ 			{-0.0 && <Something />}
+    10 │ 			{0n && <Something />}
+  > 11 │ 			{-0n && <Something />}
        │ 			 ^^^^^^^^^^^^^^^^^^^^
-     9 │ 		</>
-    10 │ 	);
+    12 │ 			{'' && <Something />}
+    13 │ 			{NaN && <Something />}
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
 ```
-invalid.jsx:14:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:12:5 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Potential leaked value that might cause unintended rendering.
   
-    13 │ const Component1 = ({ count, title }) => {
-  > 14 │ 	return <div>{count && title}</div>;
+    10 │ 			{0n && <Something />}
+    11 │ 			{-0n && <Something />}
+  > 12 │ 			{'' && <Something />}
+       │ 			 ^^^^^^^^^^^^^^^^^^^
+    13 │ 			{NaN && <Something />}
+    14 │ 		</>
+  
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
+  
+  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:13:5 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintended rendering.
+  
+    11 │ 			{-0n && <Something />}
+    12 │ 			{'' && <Something />}
+  > 13 │ 			{NaN && <Something />}
+       │ 			 ^^^^^^^^^^^^^^^^^^^^
+    14 │ 		</>
+    15 │ 	);
+  
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
+  
+  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:19:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintended rendering.
+  
+    18 │ const Component1 = ({ count, title }) => {
+  > 19 │ 	return <div>{count && title}</div>;
        │ 	             ^^^^^^^^^^^^^^
-    15 │ };
-    16 │ 
+    20 │ };
+    21 │ 
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
 ```
-invalid.jsx:18:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:23:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Potential leaked value that might cause unintended rendering.
   
-    17 │ const Component2 = ({ count }) => {
-  > 18 │ 	return <div>{count && <span>There are {count} results</span>}</div>;
+    22 │ const Component2 = ({ count }) => {
+  > 23 │ 	return <div>{count && <span>There are {count} results</span>}</div>;
        │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    19 │ };
-    20 │ 
+    24 │ };
+    25 │ 
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
 ```
-invalid.jsx:22:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:27:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Potential leaked value that might cause unintended rendering.
   
-    21 │ const Component3 = ({ elements }) => {
-  > 22 │ 	return <div>{elements.length && <List elements={elements} />}</div>;
+    26 │ const Component3 = ({ elements }) => {
+  > 27 │ 	return <div>{elements.length && <List elements={elements} />}</div>;
        │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    23 │ };
-    24 │ 
+    28 │ };
+    29 │ 
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
 ```
-invalid.jsx:27:9 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:32:9 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Potential leaked value that might cause unintended rendering.
   
-    25 │ const Component4 = ({ nestedCollection }) => {
-    26 │ 	return (
-  > 27 │ 		<div>{nestedCollection.elements.length && <List elements={nestedCollection.elements} />}</div>
+    30 │ const Component4 = ({ nestedCollection }) => {
+    31 │ 	return (
+  > 32 │ 		<div>{nestedCollection.elements.length && <List elements={nestedCollection.elements} />}</div>
        │ 		      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    28 │ 	);
-    29 │ };
+    33 │ 	);
+    34 │ };
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
 ```
-invalid.jsx:32:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:37:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Potential leaked value that might cause unintended rendering.
   
-    31 │ const Component5 = ({ elements }) => {
-  > 32 │ 	return <div>{elements[0] && <List elements={elements} />}</div>;
+    36 │ const Component5 = ({ elements }) => {
+  > 37 │ 	return <div>{elements[0] && <List elements={elements} />}</div>;
        │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    33 │ };
-    34 │ 
+    38 │ };
+    39 │ 
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
 ```
-invalid.jsx:36:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:41:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Potential leaked value that might cause unintended rendering.
   
-    35 │ const Component6 = ({ numberA, numberB }) => {
-  > 36 │ 	return <div>{(numberA || numberB) && <Results>{numberA + numberB}</Results>}</div>;
+    40 │ const Component6 = ({ numberA, numberB }) => {
+  > 41 │ 	return <div>{(numberA || numberB) && <Results>{numberA + numberB}</Results>}</div>;
        │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    37 │ };
-    38 │ 
+    42 │ };
+    43 │ 
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
 ```
-invalid.jsx:42:5 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:47:5 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Potential leaked value that might cause unintended rendering.
   
-    40 │ 	return (
-    41 │ 		<>
-  > 42 │ 			{someCondition && (
+    45 │ 	return (
+    46 │ 		<>
+  > 47 │ 			{someCondition && (
        │ 			 ^^^^^^^^^^^^^^^^^^
-  > 43 │ 				<div>
-  > 44 │ 					<p>hello</p>
-  > 45 │ 				</div>
-  > 46 │ 			)}
+  > 48 │ 				<div>
+  > 49 │ 					<p>hello</p>
+  > 50 │ 				</div>
+  > 51 │ 			)}
        │ 			^
-    47 │ 		</>
-    48 │ 	);
+    52 │ 		</>
+    53 │ 	);
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
 ```
-invalid.jsx:52:12 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:57:12 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Potential leaked value that might cause unintended rendering.
   
-    51 │ const MyComponent2 = () => {
-  > 52 │ 	return <>{someCondition && <SomeComponent prop1={val1} prop2={val2} />}</>;
+    56 │ const MyComponent2 = () => {
+  > 57 │ 	return <>{someCondition && <SomeComponent prop1={val1} prop2={val2} />}</>;
        │ 	          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    53 │ };
-    54 │ 
+    58 │ };
+    59 │ 
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
 ```
-invalid.jsx:56:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:61:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Potential leaked value that might cause unintended rendering.
   
-    55 │ const MyComponent3 = () => {
-  > 56 │ 	return <div>{maybeObject && (isFoo ? <Aaa /> : <Bbb />)}</div>;
+    60 │ const MyComponent3 = () => {
+  > 61 │ 	return <div>{maybeObject && (isFoo ? <Aaa /> : <Bbb />)}</div>;
        │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    57 │ };
-    58 │ 
+    62 │ };
+    63 │ 
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
 ```
-invalid.jsx:60:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:65:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Potential leaked value that might cause unintended rendering.
   
-    59 │ const MyComponent4 = ({ count, title }) => {
-  > 60 │ 	return <div>{(((((count))))) && ((title))}</div>;
+    64 │ const MyComponent4 = ({ count, title }) => {
+  > 65 │ 	return <div>{(((((count))))) && ((title))}</div>;
        │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    61 │ };
-    62 │ 
+    66 │ };
+    67 │ 
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
 ```
-invalid.jsx:68:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:73:15 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Potential leaked value that might cause unintended rendering.
   
-    67 │ const MyComponent6 = ({ value }) => {
-  > 68 │ 	return <div>{(((value))) && <Item />}</div>;
+    72 │ const MyComponent6 = ({ value }) => {
+  > 73 │ 	return <div>{(((value))) && <Item />}</div>;
        │ 	             ^^^^^^^^^^^^^^^^^^^^^^^
-    69 │ };
-    70 │ 
+    74 │ };
+    75 │ 
   
   i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
   
   i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:81:10 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintended rendering.
+  
+    79 │ const MyComponent7 = () => {
+    80 │ 	return <>
+  > 81 │ 		<div> {isNan && 'NaN'} </div>
+       │ 		       ^^^^^^^^^^^^^^
+    82 │ 		<div> {isZero && 'Zero'} </div>
+    83 │ 		<div>{emptyStr && "Empty String"}</div>
+  
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
+  
+  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:82:10 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintended rendering.
+  
+    80 │ 	return <>
+    81 │ 		<div> {isNan && 'NaN'} </div>
+  > 82 │ 		<div> {isZero && 'Zero'} </div>
+       │ 		       ^^^^^^^^^^^^^^^^
+    83 │ 		<div>{emptyStr && "Empty String"}</div>
+    84 │ 	</>
+  
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
+  
+  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:83:9 lint/nursery/noLeakedRender ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Potential leaked value that might cause unintended rendering.
+  
+    81 │ 		<div> {isNan && 'NaN'} </div>
+    82 │ 		<div> {isZero && 'Zero'} </div>
+  > 83 │ 		<div>{emptyStr && "Empty String"}</div>
+       │ 		      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    84 │ 	</>
+    85 │ }
+  
+  i JavaScript's && operator returns the left value when it's falsy (e.g., 0, NaN, ''). React will render that value, causing unexpected UI output.
+  
+  i Make sure the condition is explicitly boolean.Use !!value, value > 0, or a ternary expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

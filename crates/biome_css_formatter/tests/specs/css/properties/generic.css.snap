@@ -1,8 +1,8 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 211
 info: css/properties/generic.css
 ---
+
 # Input
 
 ```css
@@ -25,19 +25,7 @@ div {
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
------
+# Formatted
 
 ```css
 div {
@@ -51,4 +39,5 @@ div {
 		delimiters / can be,
 		used;
 }
+
 ```

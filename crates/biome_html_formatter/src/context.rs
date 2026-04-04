@@ -3,7 +3,8 @@ use std::{fmt, ops::Deref, rc::Rc, str::FromStr};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     AttributePosition, BracketSameLine, CstFormatContext, FormatContext, FormatOptions,
-    IndentStyle, IndentWidth, LineEnding, LineWidth, TransformSourceMap, printer::PrinterOptions,
+    IndentStyle, IndentWidth, LineEnding, LineWidth, TrailingNewline, TransformSourceMap,
+    printer::PrinterOptions,
 };
 use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
 
@@ -47,6 +48,9 @@ pub struct HtmlFormatOptions {
 
     /// Controls whether void elements should be self-closed.
     self_close_void_elements: SelfCloseVoidElements,
+
+    /// Whether to add a trailing newline at the end of the file. Defaults to true.
+    trailing_newline: TrailingNewline,
 }
 
 impl Default for HtmlFormatOptions {
@@ -62,6 +66,7 @@ impl Default for HtmlFormatOptions {
             whitespace_sensitivity: WhitespaceSensitivity::default(),
             indent_script_and_style: IndentScriptAndStyle::default(),
             self_close_void_elements: SelfCloseVoidElements::default(),
+            trailing_newline: TrailingNewline::default(),
         }
     }
 }
@@ -129,6 +134,11 @@ impl HtmlFormatOptions {
         self_close_void_elements: SelfCloseVoidElements,
     ) -> Self {
         self.self_close_void_elements = self_close_void_elements;
+        self
+    }
+
+    pub fn with_trailing_newline(mut self, trailing_newline: TrailingNewline) -> Self {
+        self.trailing_newline = trailing_newline;
         self
     }
 
@@ -206,6 +216,14 @@ impl HtmlFormatOptions {
     ) {
         self.self_close_void_elements = self_close_void_elements;
     }
+
+    pub fn set_trailing_newline(&mut self, trailing_newline: TrailingNewline) {
+        self.trailing_newline = trailing_newline;
+    }
+
+    pub fn trailing_newline(&self) -> TrailingNewline {
+        self.trailing_newline
+    }
 }
 
 impl fmt::Display for HtmlFormatOptions {
@@ -227,7 +245,7 @@ impl fmt::Display for HtmlFormatOptions {
             "Self close void elements: {}",
             self.self_close_void_elements
         )?;
-        Ok(())
+        writeln!(f, "Trailing newline: {}", self.trailing_newline.value())
     }
 }
 
@@ -246,6 +264,10 @@ impl FormatOptions for HtmlFormatOptions {
 
     fn line_width(&self) -> LineWidth {
         self.line_width
+    }
+
+    fn trailing_newline(&self) -> TrailingNewline {
+        self.trailing_newline
     }
 
     fn as_print_options(&self) -> biome_formatter::prelude::PrinterOptions {

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_json_analyze/tests/spec_tests.rs
 expression: unsorted.jsonc
-snapshot_kind: text
 ---
 # Input
 ```jsonc

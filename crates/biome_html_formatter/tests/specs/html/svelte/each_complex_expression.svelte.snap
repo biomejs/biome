@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/each_complex_expression.svelte
+---
+
+# Input
+
+```svelte
+{#each obj.items as item}
+  <div>{item}</div>
+{/each}
+
+{#each getItems() as item}
+  <div>{item}</div>
+{/each}
+
+{#each items.filter(x => x.active) as item}
+  <div>{item}</div>
+{/each}
+
+```
+
+
+# Formatted
+
+```svelte
+{#each obj.items as item}
+	<div>{item}</div>
+{/each}
+
+{#each getItems() as item}
+	<div>{item}</div>
+{/each}
+
+{#each items.filter(x => x.active) as item}
+	<div>{item}</div>
+{/each}
+
+```

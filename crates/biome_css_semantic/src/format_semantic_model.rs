@@ -1,9 +1,10 @@
-use crate::model::{Rule, Selector, SemanticModel, Specificity};
+use crate::model::{Selector, SemanticModel, Specificity};
+use biome_css_syntax::AnyCssRoot;
 use biome_formatter::prelude::*;
 use biome_formatter::write;
 use biome_formatter::{
     FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
-    TransformSourceMap,
+    SourceMapGeneration, TrailingNewline, TransformSourceMap,
 };
 use biome_rowan::{AstNode, TextSize};
 
@@ -27,12 +28,17 @@ impl FormatOptions for FormatSemanticModelOptions {
         LineEnding::Lf
     }
 
+    fn trailing_newline(&self) -> TrailingNewline {
+        TrailingNewline::default()
+    }
+
     fn as_print_options(&self) -> PrinterOptions {
         PrinterOptions {
             indent_width: self.indent_width(),
             print_width: self.line_width().into(),
             line_ending: self.line_ending(),
             indent_style: self.indent_style(),
+            source_map_generation: SourceMapGeneration::default(),
         }
     }
 }
@@ -75,43 +81,34 @@ impl Format<FormatSemanticModelContext> for SemanticModel {
             .values()
             .flat_map(|rule| rule.selectors())
             .collect();
-        selectors.sort_by_key(|sel| sel.range().start());
+        selectors.sort_by_key(|sel| sel.range(&self.root()).start());
 
         let mut builder = f.join_nodes_with_hardline();
         for selector in selectors {
-            builder.entry(selector.node().syntax(), selector);
+            builder.entry(
+                selector.node(&self.root()).syntax(),
+                &SelectorWithRoot(selector, &self.root()),
+            );
         }
         builder.finish()
     }
 }
 
-impl Format<FormatSemanticModelContext> for Rule {
-    fn fmt(&self, f: &mut Formatter<FormatSemanticModelContext>) -> FormatResult<()> {
-        write!(
-            f,
-            [
-                text(
-                    self.node().syntax().text_trimmed().into_text().text(),
-                    self.node().syntax().text_trimmed_range().start()
-                ),
-                token(":"),
-                space(),
-                &self.specificity(),
-            ]
-        )
-    }
-}
+struct SelectorWithRoot<'a>(&'a Selector, &'a AnyCssRoot);
 
-impl Format<FormatSemanticModelContext> for Selector {
+impl<'a> Format<FormatSemanticModelContext> for SelectorWithRoot<'a> {
     fn fmt(&self, f: &mut Formatter<FormatSemanticModelContext>) -> FormatResult<()> {
-        let range = std::format!("{:?}", self.range());
+        let selector = self.0;
+        let root = self.1;
+        let range = std::format!("{:?}", selector.range(root));
+        let resolved = selector.resolved().to_string();
         write!(
             f,
             [
-                text(self.text().into_text().text(), self.range().start()),
+                text(resolved.as_str(), selector.range(root).start()),
                 token(":"),
                 space(),
-                &self.specificity(),
+                &selector.specificity(),
                 space(),
                 token(" @ "),
                 text(range.as_str(), TextSize::default()),
@@ -141,9 +138,9 @@ impl Format<FormatSemanticModelContext> for Specificity {
 
 #[cfg(test)]
 mod tests {
-
     use crate::semantic_model;
     use biome_css_parser::{CssParserOptions, parse_css};
+    use biome_css_syntax::CssFileSource;
 
     #[ignore]
     #[test]
@@ -162,7 +159,7 @@ mod tests {
   }
 }"#;
 
-        let parsed = parse_css(source, CssParserOptions::default());
+        let parsed = parse_css(source, CssFileSource::css(), CssParserOptions::default());
         let model = semantic_model(&parsed.tree());
         eprintln!("{}", model);
     }

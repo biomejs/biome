@@ -1,0 +1,10 @@
+<!-- should not generate diagnostics -->
+<ul>
+  <li v-for="item in items" :key="item.id">{{ item }}</li>
+</ul>
+
+<ul>
+  <li v-for="item in items" v-bind:key="item.id">{{ item }}</li>
+</ul>
+
+<div v-for="(item, i) in items" :key="i"></div>

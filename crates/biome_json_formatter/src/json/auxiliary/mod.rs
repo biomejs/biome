@@ -2,4 +2,5 @@
 
 pub(crate) mod member;
 pub(crate) mod member_name;
+pub(crate) mod metavariable;
 pub(crate) mod root;

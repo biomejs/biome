@@ -1,0 +1,457 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```astro
+<svg width="200" height="150"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink">
+
+  <defs>
+      <circle id="myCircle" cx="0" cy="0" r="30" fill="orange" />
+  </defs>
+
+  <!-- xlink:href should be parsed as a single attribute -->
+  <use xlink:href="#myCircle" x="50" y="50" />
+  <use xlink:href="#myCircle" x="150" y="100" fill="steelblue" />
+
+</svg>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "svg" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@5..10 "width" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@10..11 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@11..17 "\"200\"" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@17..23 "height" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@23..24 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@24..29 "\"150\"" [] [],
+                            },
+                        },
+                    },
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@29..39 "xmlns" [Newline("\n"), Whitespace("    ")] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@39..40 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@40..68 "\"http://www.w3.org/2000/svg\"" [] [],
+                            },
+                        },
+                    },
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@68..84 "xmlns:xlink" [Newline("\n"), Whitespace("    ")] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@84..85 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@85..115 "\"http://www.w3.org/1999/xlink\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@115..116 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@116..121 "<" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@121..125 "defs" [] [],
+                        },
+                        attributes: HtmlAttributeList [],
+                        r_angle_token: R_ANGLE@125..126 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlSelfClosingElement {
+                            l_angle_token: L_ANGLE@126..134 "<" [Newline("\n"), Whitespace("      ")] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@134..141 "circle" [] [Whitespace(" ")],
+                            },
+                            attributes: HtmlAttributeList [
+                                HtmlAttribute {
+                                    name: HtmlAttributeName {
+                                        value_token: HTML_LITERAL@141..143 "id" [] [],
+                                    },
+                                    initializer: HtmlAttributeInitializerClause {
+                                        eq_token: EQ@143..144 "=" [] [],
+                                        value: HtmlString {
+                                            value_token: HTML_STRING_LITERAL@144..155 "\"myCircle\"" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                },
+                                HtmlAttribute {
+                                    name: HtmlAttributeName {
+                                        value_token: HTML_LITERAL@155..157 "cx" [] [],
+                                    },
+                                    initializer: HtmlAttributeInitializerClause {
+                                        eq_token: EQ@157..158 "=" [] [],
+                                        value: HtmlString {
+                                            value_token: HTML_STRING_LITERAL@158..162 "\"0\"" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                },
+                                HtmlAttribute {
+                                    name: HtmlAttributeName {
+                                        value_token: HTML_LITERAL@162..164 "cy" [] [],
+                                    },
+                                    initializer: HtmlAttributeInitializerClause {
+                                        eq_token: EQ@164..165 "=" [] [],
+                                        value: HtmlString {
+                                            value_token: HTML_STRING_LITERAL@165..169 "\"0\"" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                },
+                                HtmlAttribute {
+                                    name: HtmlAttributeName {
+                                        value_token: HTML_LITERAL@169..170 "r" [] [],
+                                    },
+                                    initializer: HtmlAttributeInitializerClause {
+                                        eq_token: EQ@170..171 "=" [] [],
+                                        value: HtmlString {
+                                            value_token: HTML_STRING_LITERAL@171..176 "\"30\"" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                },
+                                HtmlAttribute {
+                                    name: HtmlAttributeName {
+                                        value_token: HTML_LITERAL@176..180 "fill" [] [],
+                                    },
+                                    initializer: HtmlAttributeInitializerClause {
+                                        eq_token: EQ@180..181 "=" [] [],
+                                        value: HtmlString {
+                                            value_token: HTML_STRING_LITERAL@181..190 "\"orange\"" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                },
+                            ],
+                            slash_token: SLASH@190..191 "/" [] [],
+                            r_angle_token: R_ANGLE@191..192 ">" [] [],
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@192..196 "<" [Newline("\n"), Whitespace("  ")] [],
+                        slash_token: SLASH@196..197 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@197..201 "defs" [] [],
+                        },
+                        r_angle_token: R_ANGLE@201..202 ">" [] [],
+                    },
+                },
+                HtmlSelfClosingElement {
+                    l_angle_token: L_ANGLE@202..268 "<" [Newline("\n"), Newline("\n"), Whitespace("  "), Comments("<!-- xlink:href shoul ..."), Newline("\n"), Whitespace("  ")] [],
+                    name: HtmlTagName {
+                        value_token: HTML_LITERAL@268..272 "use" [] [Whitespace(" ")],
+                    },
+                    attributes: HtmlAttributeList [
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@272..282 "xlink:href" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@282..283 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@283..295 "\"#myCircle\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@295..296 "x" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@296..297 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@297..302 "\"50\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@302..303 "y" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@303..304 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@304..309 "\"50\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    ],
+                    slash_token: SLASH@309..310 "/" [] [],
+                    r_angle_token: R_ANGLE@310..311 ">" [] [],
+                },
+                HtmlSelfClosingElement {
+                    l_angle_token: L_ANGLE@311..315 "<" [Newline("\n"), Whitespace("  ")] [],
+                    name: HtmlTagName {
+                        value_token: HTML_LITERAL@315..319 "use" [] [Whitespace(" ")],
+                    },
+                    attributes: HtmlAttributeList [
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@319..329 "xlink:href" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@329..330 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@330..342 "\"#myCircle\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@342..343 "x" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@343..344 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@344..350 "\"150\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@350..351 "y" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@351..352 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@352..358 "\"100\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@358..362 "fill" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@362..363 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@363..375 "\"steelblue\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    ],
+                    slash_token: SLASH@375..376 "/" [] [],
+                    r_angle_token: R_ANGLE@376..377 ">" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@377..380 "<" [Newline("\n"), Newline("\n")] [],
+                slash_token: SLASH@380..381 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@381..384 "svg" [] [],
+                },
+                r_angle_token: R_ANGLE@384..385 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@385..386 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..386
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..385
+    0: HTML_ELEMENT@0..385
+      0: HTML_OPENING_ELEMENT@0..116
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "svg" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..115
+          0: HTML_ATTRIBUTE@5..17
+            0: HTML_ATTRIBUTE_NAME@5..10
+              0: HTML_LITERAL@5..10 "width" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@10..17
+              0: EQ@10..11 "=" [] []
+              1: HTML_STRING@11..17
+                0: HTML_STRING_LITERAL@11..17 "\"200\"" [] [Whitespace(" ")]
+          1: HTML_ATTRIBUTE@17..29
+            0: HTML_ATTRIBUTE_NAME@17..23
+              0: HTML_LITERAL@17..23 "height" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@23..29
+              0: EQ@23..24 "=" [] []
+              1: HTML_STRING@24..29
+                0: HTML_STRING_LITERAL@24..29 "\"150\"" [] []
+          2: HTML_ATTRIBUTE@29..68
+            0: HTML_ATTRIBUTE_NAME@29..39
+              0: HTML_LITERAL@29..39 "xmlns" [Newline("\n"), Whitespace("    ")] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@39..68
+              0: EQ@39..40 "=" [] []
+              1: HTML_STRING@40..68
+                0: HTML_STRING_LITERAL@40..68 "\"http://www.w3.org/2000/svg\"" [] []
+          3: HTML_ATTRIBUTE@68..115
+            0: HTML_ATTRIBUTE_NAME@68..84
+              0: HTML_LITERAL@68..84 "xmlns:xlink" [Newline("\n"), Whitespace("    ")] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@84..115
+              0: EQ@84..85 "=" [] []
+              1: HTML_STRING@85..115
+                0: HTML_STRING_LITERAL@85..115 "\"http://www.w3.org/1999/xlink\"" [] []
+        3: R_ANGLE@115..116 ">" [] []
+      1: HTML_ELEMENT_LIST@116..377
+        0: HTML_ELEMENT@116..202
+          0: HTML_OPENING_ELEMENT@116..126
+            0: L_ANGLE@116..121 "<" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
+            1: HTML_TAG_NAME@121..125
+              0: HTML_LITERAL@121..125 "defs" [] []
+            2: HTML_ATTRIBUTE_LIST@125..125
+            3: R_ANGLE@125..126 ">" [] []
+          1: HTML_ELEMENT_LIST@126..192
+            0: HTML_SELF_CLOSING_ELEMENT@126..192
+              0: L_ANGLE@126..134 "<" [Newline("\n"), Whitespace("      ")] []
+              1: HTML_TAG_NAME@134..141
+                0: HTML_LITERAL@134..141 "circle" [] [Whitespace(" ")]
+              2: HTML_ATTRIBUTE_LIST@141..190
+                0: HTML_ATTRIBUTE@141..155
+                  0: HTML_ATTRIBUTE_NAME@141..143
+                    0: HTML_LITERAL@141..143 "id" [] []
+                  1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@143..155
+                    0: EQ@143..144 "=" [] []
+                    1: HTML_STRING@144..155
+                      0: HTML_STRING_LITERAL@144..155 "\"myCircle\"" [] [Whitespace(" ")]
+                1: HTML_ATTRIBUTE@155..162
+                  0: HTML_ATTRIBUTE_NAME@155..157
+                    0: HTML_LITERAL@155..157 "cx" [] []
+                  1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@157..162
+                    0: EQ@157..158 "=" [] []
+                    1: HTML_STRING@158..162
+                      0: HTML_STRING_LITERAL@158..162 "\"0\"" [] [Whitespace(" ")]
+                2: HTML_ATTRIBUTE@162..169
+                  0: HTML_ATTRIBUTE_NAME@162..164
+                    0: HTML_LITERAL@162..164 "cy" [] []
+                  1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@164..169
+                    0: EQ@164..165 "=" [] []
+                    1: HTML_STRING@165..169
+                      0: HTML_STRING_LITERAL@165..169 "\"0\"" [] [Whitespace(" ")]
+                3: HTML_ATTRIBUTE@169..176
+                  0: HTML_ATTRIBUTE_NAME@169..170
+                    0: HTML_LITERAL@169..170 "r" [] []
+                  1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@170..176
+                    0: EQ@170..171 "=" [] []
+                    1: HTML_STRING@171..176
+                      0: HTML_STRING_LITERAL@171..176 "\"30\"" [] [Whitespace(" ")]
+                4: HTML_ATTRIBUTE@176..190
+                  0: HTML_ATTRIBUTE_NAME@176..180
+                    0: HTML_LITERAL@176..180 "fill" [] []
+                  1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@180..190
+                    0: EQ@180..181 "=" [] []
+                    1: HTML_STRING@181..190
+                      0: HTML_STRING_LITERAL@181..190 "\"orange\"" [] [Whitespace(" ")]
+              3: SLASH@190..191 "/" [] []
+              4: R_ANGLE@191..192 ">" [] []
+          2: HTML_CLOSING_ELEMENT@192..202
+            0: L_ANGLE@192..196 "<" [Newline("\n"), Whitespace("  ")] []
+            1: SLASH@196..197 "/" [] []
+            2: HTML_TAG_NAME@197..201
+              0: HTML_LITERAL@197..201 "defs" [] []
+            3: R_ANGLE@201..202 ">" [] []
+        1: HTML_SELF_CLOSING_ELEMENT@202..311
+          0: L_ANGLE@202..268 "<" [Newline("\n"), Newline("\n"), Whitespace("  "), Comments("<!-- xlink:href shoul ..."), Newline("\n"), Whitespace("  ")] []
+          1: HTML_TAG_NAME@268..272
+            0: HTML_LITERAL@268..272 "use" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@272..309
+            0: HTML_ATTRIBUTE@272..295
+              0: HTML_ATTRIBUTE_NAME@272..282
+                0: HTML_LITERAL@272..282 "xlink:href" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@282..295
+                0: EQ@282..283 "=" [] []
+                1: HTML_STRING@283..295
+                  0: HTML_STRING_LITERAL@283..295 "\"#myCircle\"" [] [Whitespace(" ")]
+            1: HTML_ATTRIBUTE@295..302
+              0: HTML_ATTRIBUTE_NAME@295..296
+                0: HTML_LITERAL@295..296 "x" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@296..302
+                0: EQ@296..297 "=" [] []
+                1: HTML_STRING@297..302
+                  0: HTML_STRING_LITERAL@297..302 "\"50\"" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE@302..309
+              0: HTML_ATTRIBUTE_NAME@302..303
+                0: HTML_LITERAL@302..303 "y" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@303..309
+                0: EQ@303..304 "=" [] []
+                1: HTML_STRING@304..309
+                  0: HTML_STRING_LITERAL@304..309 "\"50\"" [] [Whitespace(" ")]
+          3: SLASH@309..310 "/" [] []
+          4: R_ANGLE@310..311 ">" [] []
+        2: HTML_SELF_CLOSING_ELEMENT@311..377
+          0: L_ANGLE@311..315 "<" [Newline("\n"), Whitespace("  ")] []
+          1: HTML_TAG_NAME@315..319
+            0: HTML_LITERAL@315..319 "use" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@319..375
+            0: HTML_ATTRIBUTE@319..342
+              0: HTML_ATTRIBUTE_NAME@319..329
+                0: HTML_LITERAL@319..329 "xlink:href" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@329..342
+                0: EQ@329..330 "=" [] []
+                1: HTML_STRING@330..342
+                  0: HTML_STRING_LITERAL@330..342 "\"#myCircle\"" [] [Whitespace(" ")]
+            1: HTML_ATTRIBUTE@342..350
+              0: HTML_ATTRIBUTE_NAME@342..343
+                0: HTML_LITERAL@342..343 "x" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@343..350
+                0: EQ@343..344 "=" [] []
+                1: HTML_STRING@344..350
+                  0: HTML_STRING_LITERAL@344..350 "\"150\"" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE@350..358
+              0: HTML_ATTRIBUTE_NAME@350..351
+                0: HTML_LITERAL@350..351 "y" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@351..358
+                0: EQ@351..352 "=" [] []
+                1: HTML_STRING@352..358
+                  0: HTML_STRING_LITERAL@352..358 "\"100\"" [] [Whitespace(" ")]
+            3: HTML_ATTRIBUTE@358..375
+              0: HTML_ATTRIBUTE_NAME@358..362
+                0: HTML_LITERAL@358..362 "fill" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@362..375
+                0: EQ@362..363 "=" [] []
+                1: HTML_STRING@363..375
+                  0: HTML_STRING_LITERAL@363..375 "\"steelblue\"" [] [Whitespace(" ")]
+          3: SLASH@375..376 "/" [] []
+          4: R_ANGLE@376..377 ">" [] []
+      2: HTML_CLOSING_ELEMENT@377..385
+        0: L_ANGLE@377..380 "<" [Newline("\n"), Newline("\n")] []
+        1: SLASH@380..381 "/" [] []
+        2: HTML_TAG_NAME@381..384
+          0: HTML_LITERAL@381..384 "svg" [] []
+        3: R_ANGLE@384..385 ">" [] []
+  4: EOF@385..386 "" [Newline("\n")] []
+
+```

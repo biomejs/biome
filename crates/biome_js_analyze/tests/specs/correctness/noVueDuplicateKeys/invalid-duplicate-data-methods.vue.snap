@@ -1,0 +1,48 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-duplicate-data-methods.vue
+---
+# Input
+```vue
+<script>
+export default {
+    data() {
+        return {
+            message: 'hello'
+        };
+    },
+    methods: {
+        message() {
+            console.log('duplicate key');
+        }
+    }
+};
+</script>
+```
+
+# Diagnostics
+```
+invalid-duplicate-data-methods.vue:5:13 lint/correctness/noVueDuplicateKeys ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate key message found in Vue component.
+  
+    3 │     data() {
+    4 │         return {
+  > 5 │             message: 'hello'
+      │             ^^^^^^^
+    6 │         };
+    7 │     },
+  
+  i Key message is also defined here.
+  
+     7 │     },
+     8 │     methods: {
+   > 9 │         message() {
+       │         ^^^^^^^
+    10 │             console.log('duplicate key');
+    11 │         }
+  
+  i Keys defined in different Vue component options (props, data, methods, computed) can conflict when accessed in the template. Rename the key to avoid conflicts.
+  
+
+```

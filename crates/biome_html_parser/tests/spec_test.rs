@@ -1,7 +1,7 @@
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic, termcolor};
-use biome_html_parser::{HtmlParseOptions, parse_html};
+use biome_html_parser::{HtmlParserOptions, parse_html};
 use biome_html_syntax::{HtmlFileSource, HtmlVariant};
 use biome_rowan::SyntaxKind;
 use biome_test_utils::{has_bogus_nodes_or_empty_slots, validate_eof_token};
@@ -31,8 +31,15 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     let content = fs::read_to_string(test_case_path)
         .expect("Expected test path to be a readable file in UTF8 encoding");
 
-    let file_source = HtmlFileSource::try_from(test_case_path).unwrap_or_default();
-    let parser_options = HtmlParseOptions::from(&file_source);
+    let mut file_source = HtmlFileSource::try_from(test_case_path).unwrap_or_default();
+    if test_case_path
+        .iter()
+        .any(|segment| segment == "with-text-expressions")
+    {
+        file_source = HtmlFileSource::html_with_text_expressions();
+    }
+
+    let parser_options = HtmlParserOptions::from(&file_source);
     let parsed = parse_html(&content, parser_options);
     validate_eof_token(parsed.syntax());
 
@@ -137,18 +144,4 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     }, {
         insta::assert_snapshot!(file_name, snapshot);
     });
-}
-
-#[ignore]
-#[test]
-pub fn quick_test() {
-    let code = r#"{@debug something,}
-    "#;
-
-    let root = parse_html(code, (&HtmlFileSource::svelte()).into());
-    let syntax = root.syntax();
-    dbg!(&syntax, root.diagnostics(), root.has_errors());
-    if has_bogus_nodes_or_empty_slots(&syntax) {
-        panic!("modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {syntax}")
-    }
 }

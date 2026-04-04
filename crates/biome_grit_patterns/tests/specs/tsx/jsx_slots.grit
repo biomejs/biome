@@ -1,0 +1,16 @@
+or {
+  // Legacy patterns
+  jsx_opening_element(name = "div"),
+  jsx_self_closing_element(name = "span"),
+  jsx_self_closing_element(type_arguments = TsTypeArguments()),
+  jsx_attribute(name = "className"),
+
+  // Native patterns
+  JsxOpeningElement(name = "div"),
+  JsxSelfClosingElement(name = "button"),
+  JsxSelfClosingElement(type_arguments = TsTypeArguments()),
+  JsxAttribute(name = "id"),
+  JsxAttribute($name, $value) as $attr where {
+    $name <: "style"
+  },
+}

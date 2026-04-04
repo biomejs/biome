@@ -36,9 +36,13 @@ issue6893.js:5:8 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━�
     7 │ 	}, [])
     8 │ }
   
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency firstId to the list.
   
     7 │ → },·[firstId])
       │       +++++++  
@@ -65,9 +69,13 @@ issue6893.js:5:8 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━�
     7 │ 	}, [])
     8 │ }
   
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency secondId to the list.
   
     7 │ → },·[secondId])
       │       ++++++++  

@@ -1,0 +1,18 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.newly.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+
+/* Newly available property - ok with "newly" */
+a { backdrop-filter: auto }
+
+/* Newly available at-rule - ok with "newly" */
+@property --foo {
+    syntax: "*";
+    inherits: false;
+}
+
+```

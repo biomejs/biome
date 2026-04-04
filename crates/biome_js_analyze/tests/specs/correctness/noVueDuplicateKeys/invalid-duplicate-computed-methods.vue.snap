@@ -1,0 +1,48 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-duplicate-computed-methods.vue
+---
+# Input
+```vue
+<script>
+export default {
+    computed: {
+        count() {
+            return this.value * 2;
+        }
+    },
+    methods: {
+        count() {
+            this.value++;
+        }
+    }
+};
+</script>
+```
+
+# Diagnostics
+```
+invalid-duplicate-computed-methods.vue:4:9 lint/correctness/noVueDuplicateKeys ━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate key count found in Vue component.
+  
+    2 │ export default {
+    3 │     computed: {
+  > 4 │         count() {
+      │         ^^^^^
+    5 │             return this.value * 2;
+    6 │         }
+  
+  i Key count is also defined here.
+  
+     7 │     },
+     8 │     methods: {
+   > 9 │         count() {
+       │         ^^^^^
+    10 │             this.value++;
+    11 │         }
+  
+  i Keys defined in different Vue component options (props, data, methods, computed) can conflict when accessed in the template. Rename the key to avoid conflicts.
+  
+
+```

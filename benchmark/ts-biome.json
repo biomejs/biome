@@ -3,10 +3,10 @@
     "rules": {
       "recommended": false,
       "complexity": {
+        "noAdjacentSpacesInRegex": "error",
         "noArguments": "error",
         "noCommaOperator": "error",
         "noExtraBooleanCast": "error",
-        "noMultipleSpacesInRegularExpressionLiterals": "error",
         "noStaticOnlyClass": "error",
         "noUselessCatch": "error",
         "noUselessConstructor": "error",
@@ -15,7 +15,6 @@
         "noUselessRename": "error",
         "noUselessTypeConstraint": "error",
         "noVoid": "error",
-        "noWith": "error",
         "useArrowFunction": "error",
         "useNumericLiterals": "error",
         "useRegexLiterals": "error"
@@ -29,9 +28,7 @@
         "noGlobalObjectCalls": "error",
         "noInnerDeclarations": "error",
         "noInvalidConstructorSuper": "error",
-        "noInvalidNewBuiltin": "error",
         "noInvalidUseBeforeDeclaration": "error",
-        "noNewSymbol": "error",
         "noNonoctalDecimalEscape": "error",
         "noPrecisionLoss": "error",
         "noSelfAssign": "error",
@@ -45,21 +42,21 @@
         "noUnusedLabels": "error",
         "noUnusedPrivateClassMembers": "error",
         "noUnusedVariables": "error",
-        "useArrayLiterals": "error",
         "useIsNan": "error",
         "useValidForDirection": "error",
+        "useValidTypeof": "error",
         "useYield": "error"
       },
       "security": {
         "noGlobalEval": "error"
       },
       "style": {
+        "useArrayLiterals": "error",
         "noInferrableTypes": "error",
         "noNamespace": "error",
         "noNonNullAssertion": "error",
         "noParameterAssign": "error",
         "noParameterProperties": "error",
-        "noVar": "error",
         "useAsConstAssertion": "error",
         "useConst": "error",
         "useCollapsedElseIf": "error",
@@ -105,11 +102,12 @@
         "noSparseArray": "error",
         "noUnsafeDeclarationMerging": "error",
         "noUnsafeNegation": "error",
+        "noVar": "error",
+        "noWith": "error",
         "useAwait": "error",
         "useDefaultSwitchClauseLast": "error",
         "useGetterReturn": "error",
-        "useNamespaceKeyword": "error",
-        "useValidTypeof": "error"
+        "useNamespaceKeyword": "error"
       }
     }
   }

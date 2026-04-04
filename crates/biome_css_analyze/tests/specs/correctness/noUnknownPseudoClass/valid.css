@@ -39,3 +39,9 @@ a:defined { }
 ::-webkit-scrollbar-button:hover {}
 dialog:open {}
 custom-selector:state(checked) {}
+:active-view-transition * { transition-duration: 0s; }
+::scroll-marker:target-current {}
+::scroll-marker:target-before {}
+::scroll-marker:target-after {}
+slot:has-slotted {}
+html:active-view-transition-type(slide) {}

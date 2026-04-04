@@ -9,6 +9,7 @@ use biome_js_syntax::{
 };
 use biome_js_type_info::{Type, TypeMemberKind};
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
+use biome_rule_options::no_misused_promises::NoMisusedPromisesOptions;
 
 use crate::{JsRuleAction, ast_utils::is_in_async_function, services::typed::Typed};
 
@@ -88,7 +89,7 @@ declare_lint_rule! {
         recommended: true,
         sources: &[RuleSource::EslintTypeScript("no-misused-promises").same()],
         fix_kind: FixKind::Unsafe,
-        domains: &[RuleDomain::Project],
+        domains: &[RuleDomain::Types],
     }
 }
 
@@ -103,7 +104,7 @@ impl Rule for NoMisusedPromises {
     type Query = Typed<AnyJsExpression>;
     type State = NoMisusedPromisesState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoMisusedPromisesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let expression = ctx.query();
@@ -235,10 +236,7 @@ fn find_misused_promise_expression(
     //let printed = format!("type of {expression:?} = {ty:?}");
     let is_promise = ty.is_promise_instance();
     let is_maybe_promise = ty.has_variant(|ty| ty.is_promise_instance());
-    let should_signal =
-        // "maybe" promises could still be considered conditionals, so we
-        // don't signal those for the conditional variants
-        is_promise || (!matches!(state, NoMisusedPromisesState::Conditional) && is_maybe_promise);
+    let should_signal = is_promise || is_maybe_promise;
     should_signal.then_some(state)
 }
 

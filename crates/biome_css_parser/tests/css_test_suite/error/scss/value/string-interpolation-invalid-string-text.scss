@@ -1,0 +1,4 @@
+.box {
+  first_chunk: "foo \0 #{$bar}";
+  later_chunk: "#{$bar} baz \0 qux";
+}

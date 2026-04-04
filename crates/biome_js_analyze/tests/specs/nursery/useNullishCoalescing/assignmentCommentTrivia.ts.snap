@@ -1,0 +1,107 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: assignmentCommentTrivia.ts
+---
+# Input
+```ts
+// Comment trivia preservation for ||= to ??= replacement
+// Using types that are safe for replacement (only truthy or nullish)
+
+declare let a: object | null;
+
+// Inline comment before operator
+a /* before */ ||= {};
+
+// Inline comment after operator
+a ||= /* after */ {};
+
+// Both sides
+a /* before */ ||= /* after */ {};
+
+```
+
+# Diagnostics
+```
+assignmentCommentTrivia.ts:7:16 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    6 │ // Inline comment before operator
+  > 7 │ a /* before */ ||= {};
+      │                ^^^
+    8 │ 
+    9 │ // Inline comment after operator
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ??= instead.
+  
+     5  5 │   
+     6  6 │   // Inline comment before operator
+     7    │ - a·/*·before·*/·||=·{};
+        7 │ + a·/*·before·*/·??=·{};
+     8  8 │   
+     9  9 │   // Inline comment after operator
+  
+
+```
+
+```
+assignmentCommentTrivia.ts:10:3 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+     9 │ // Inline comment after operator
+  > 10 │ a ||= /* after */ {};
+       │   ^^^
+    11 │ 
+    12 │ // Both sides
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ??= instead.
+  
+     8  8 │   
+     9  9 │   // Inline comment after operator
+    10    │ - a·||=·/*·after·*/·{};
+       10 │ + a·??=·/*·after·*/·{};
+    11 11 │   
+    12 12 │   // Both sides
+  
+
+```
+
+```
+assignmentCommentTrivia.ts:13:16 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    12 │ // Both sides
+  > 13 │ a /* before */ ||= /* after */ {};
+       │                ^^^
+    14 │ 
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ??= instead.
+  
+    11 11 │   
+    12 12 │   // Both sides
+    13    │ - a·/*·before·*/·||=·/*·after·*/·{};
+       13 │ + a·/*·before·*/·??=·/*·after·*/·{};
+    14 14 │   
+  
+
+```

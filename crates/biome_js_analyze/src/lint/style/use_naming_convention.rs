@@ -408,29 +408,29 @@ declare_lint_rule! {
     ///   - `importAlias`: default imports and aliases of named imports
     ///   - `exportAlias`: aliases of re-exported names
     ///   - `variable`: const, let, using, and var declarations
-    ///   - `const`
-    ///   - `let`
-    ///   - `var`
-    ///   - `using`
+    ///     - `const`
+    ///     - `let`
+    ///     - `var`
+    ///     - `using`
     ///   - `functionParameter`
     ///   - `catchParameter`
     ///   - `indexParameter`: parameters of index signatures
     ///   - `typeParameter`: generic type parameter
     ///   - `classMember`: class properties, parameter properties, methods, getters, and setters
-    ///   - `classProperty`: class properties, including parameter properties
-    ///   - `classMethod`
-    ///   - `classGetter`
-    ///   - `classSetter`
-    ///   - `objectLiteralMember`: literal object properties, methods, getters, and setters
-    ///   - `objectLiteralProperty`
-    ///   - `objectLiteralMethod`
-    ///   - `objectLiteralGetter`
-    ///   - `objectLiteralSetter`
+    ///     - `classProperty`: class properties, including parameter properties
+    ///     - `classMethod`
+    ///     - `classGetter`
+    ///     - `classSetter`
+    ///   - `objectLiteralMember`: literal object properties, methods, getters, and setters (you might want to duplicate the convention for `typeMember`)
+    ///     - `objectLiteralProperty`
+    ///     - `objectLiteralMethod`
+    ///     - `objectLiteralGetter`
+    ///     - `objectLiteralSetter`
     ///   - `typeMember`: properties, methods, getters, and setters declared in type aliases and interfaces
-    ///   - `typeProperty`
-    ///   - `typeMethod`
-    ///   - `typeGetter`
-    ///   - `typeSetter`
+    ///     - `typeProperty`
+    ///     - `typeMethod`
+    ///     - `typeGetter`
+    ///     - `typeSetter`
     /// - `modifiers`: an array of modifiers among:
     ///   - `abstract`: applies to class members and classes
     ///   - `private`: applies to class members

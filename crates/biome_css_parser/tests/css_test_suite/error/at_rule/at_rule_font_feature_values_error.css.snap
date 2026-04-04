@@ -2,6 +2,7 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```css
@@ -37,7 +38,7 @@ expression: snapshot
 ```
 CssRoot {
     bom_token: missing (optional),
-    rules: CssRuleList [
+    items: CssRootItemList [
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
             rule: CssFontFeatureValuesAtRule {
@@ -74,7 +75,7 @@ CssRoot {
                 font_feature_values_token: FONT_FEATURE_VALUES_KW@61..81 "font-feature-values" [] [Whitespace(" ")],
                 names: CssFontFamilyNameList [
                     CssFontFamilyName {
-                        names: CssCustomIdentifierList [
+                        names: CssCustomIdentifierSpaceSeparatedList [
                             CssCustomIdentifier {
                                 value_token: IDENT@81..86 "ident" [] [],
                             },
@@ -125,7 +126,7 @@ CssRoot {
                 font_feature_values_token: FONT_FEATURE_VALUES_KW@150..170 "font-feature-values" [] [Whitespace(" ")],
                 names: CssFontFamilyNameList [
                     CssFontFamilyName {
-                        names: CssCustomIdentifierList [
+                        names: CssCustomIdentifierSpaceSeparatedList [
                             CssCustomIdentifier {
                                 value_token: IDENT@170..176 "ident" [] [Whitespace(" ")],
                             },
@@ -190,7 +191,7 @@ CssRoot {
                 font_feature_values_token: FONT_FEATURE_VALUES_KW@242..262 "font-feature-values" [] [Whitespace(" ")],
                 names: CssFontFamilyNameList [
                     CssFontFamilyName {
-                        names: CssCustomIdentifierList [
+                        names: CssCustomIdentifierSpaceSeparatedList [
                             CssCustomIdentifier {
                                 value_token: IDENT@262..268 "first" [] [Whitespace(" ")],
                             },
@@ -211,7 +212,7 @@ CssRoot {
                     },
                     COMMA@282..284 "," [] [Whitespace(" ")],
                     CssFontFamilyName {
-                        names: CssCustomIdentifierList [
+                        names: CssCustomIdentifierSpaceSeparatedList [
                             CssCustomIdentifier {
                                 value_token: IDENT@284..290 "third" [] [Whitespace(" ")],
                             },
@@ -240,7 +241,7 @@ CssRoot {
 ```
 0: CSS_ROOT@0..304
   0: (empty)
-  1: CSS_RULE_LIST@0..303
+  1: CSS_ROOT_ITEM_LIST@0..303
     0: CSS_AT_RULE@0..26
       0: AT@0..1 "@" [] []
       1: CSS_FONT_FEATURE_VALUES_AT_RULE@1..26
@@ -267,7 +268,7 @@ CssRoot {
         0: FONT_FEATURE_VALUES_KW@61..81 "font-feature-values" [] [Whitespace(" ")]
         1: CSS_FONT_FAMILY_NAME_LIST@81..139
           0: CSS_FONT_FAMILY_NAME@81..139
-            0: CSS_CUSTOM_IDENTIFIER_LIST@81..139
+            0: CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST@81..139
               0: CSS_CUSTOM_IDENTIFIER@81..86
                 0: IDENT@81..86 "ident" [] []
               1: CSS_BOGUS_CUSTOM_IDENTIFIER@86..89
@@ -295,7 +296,7 @@ CssRoot {
         0: FONT_FEATURE_VALUES_KW@150..170 "font-feature-values" [] [Whitespace(" ")]
         1: CSS_FONT_FAMILY_NAME_LIST@170..176
           0: CSS_FONT_FAMILY_NAME@170..176
-            0: CSS_CUSTOM_IDENTIFIER_LIST@170..176
+            0: CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST@170..176
               0: CSS_CUSTOM_IDENTIFIER@170..176
                 0: IDENT@170..176 "ident" [] [Whitespace(" ")]
         2: CSS_FONT_FEATURE_VALUES_BLOCK@176..187
@@ -334,7 +335,7 @@ CssRoot {
         0: FONT_FEATURE_VALUES_KW@242..262 "font-feature-values" [] [Whitespace(" ")]
         1: CSS_FONT_FAMILY_NAME_LIST@262..299
           0: CSS_FONT_FAMILY_NAME@262..282
-            0: CSS_CUSTOM_IDENTIFIER_LIST@262..282
+            0: CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST@262..282
               0: CSS_CUSTOM_IDENTIFIER@262..268
                 0: IDENT@262..268 "first" [] [Whitespace(" ")]
               1: CSS_BOGUS_CUSTOM_IDENTIFIER@268..272
@@ -345,7 +346,7 @@ CssRoot {
                 0: CSS_NUMBER_LITERAL@279..282 "123" [] []
           1: COMMA@282..284 "," [] [Whitespace(" ")]
           2: CSS_FONT_FAMILY_NAME@284..299
-            0: CSS_CUSTOM_IDENTIFIER_LIST@284..299
+            0: CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST@284..299
               0: CSS_CUSTOM_IDENTIFIER@284..290
                 0: IDENT@284..290 "third" [] [Whitespace(" ")]
               1: CSS_BOGUS_CUSTOM_IDENTIFIER@290..299

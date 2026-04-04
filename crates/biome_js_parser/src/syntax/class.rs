@@ -662,6 +662,7 @@ fn parse_class_member_impl(
         && !p.nth_at(1, T![?])
         && !p.nth_at(1, T![;])
         && !p.nth_at(1, T![=])
+        && !p.nth_at(1, T![:])
         && !is_at_method_class_member(p, 1)
         && !p.has_nth_preceding_line_break(1)
     {

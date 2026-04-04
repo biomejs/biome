@@ -98,7 +98,7 @@ function benchmarkLinter(biomeBin, options) {
     console.info("");
 
     const dirs = config.lintedDirs.map((dir) => `"${dir}"`).join(" ");
-    const biomeCmd = `"${biomeBin}" lint --config-path=../../ --max-diagnostics=0 ${dirs}`;
+    const biomeCmd = `"${biomeBin}" lint --config-path=../../biome.json --max-diagnostics=0 ${dirs}`;
     const benchCommands = {
       eslint: `../../node_modules/.bin/eslint --quiet --config=../../eslint.config.js --no-ignore ${dirs}`,
       "ts-eslint": `../../node_modules/.bin/eslint --quiet --config=../../ts-eslint.config.js --no-ignore ${dirs}`,

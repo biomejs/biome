@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/range/single_value.css
 ---
+
 # Input
 
 ```css
@@ -13,23 +14,12 @@ div {
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
------
+# Formatted
 
 ```css
 div {
     COLOR: GREEN;
 
     Border : 1px GrEeN   solid   ;
-}```
+}
+```

@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/each_with_whitespace.svelte
+---
+
+# Input
+
+```svelte
+{#each  items  as  item  }
+  <div>{item}</div>
+{/each}
+
+{#each items as item,i}
+  <div>{item}</div>
+{/each}
+
+{#each items as item ( item.id ) }
+  <div>{item}</div>
+{/each}
+
+```
+
+
+# Formatted
+
+```svelte
+{#each items as item}
+	<div>{item}</div>
+{/each}
+
+{#each items as item, i}
+	<div>{item}</div>
+{/each}
+
+{#each items as item (item.id)}
+	<div>{item}</div>
+{/each}
+
+```

@@ -2,7 +2,7 @@ use crate::PositionEncoding;
 use anyhow::{Context, Result};
 use biome_line_index::{LineCol, LineIndex, WideLineCol};
 use biome_text_size::{TextRange, TextSize};
-use tower_lsp_server::lsp_types::{Position, Range};
+use tower_lsp_server::ls_types::{Position, Range};
 
 /// The function is used to convert a LSP position to TextSize.
 pub fn offset(
@@ -37,5 +37,9 @@ pub fn text_range(
 ) -> Result<TextRange> {
     let start = offset(line_index, range.start, position_encoding)?;
     let end = offset(line_index, range.end, position_encoding)?;
+    anyhow::ensure!(
+        start <= end,
+        "invalid range: start offset ({start:?}) > end offset ({end:?}) for {range:?}"
+    );
     Ok(TextRange::new(start, end))
 }

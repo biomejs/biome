@@ -15,6 +15,7 @@ domains.json:4:7 deserialize ━━━━━━━━━━━━━━━━━
   
   i Accepted values:
   
+  - drizzle
   - react
   - test
   - solid
@@ -23,6 +24,9 @@ domains.json:4:7 deserialize ━━━━━━━━━━━━━━━━━
   - vue
   - project
   - tailwind
+  - turborepo
+  - playwright
+  - types
   
 
 

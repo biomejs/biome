@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/expression/import_meta_expression/import_meta_expression.js
 ---
+
 # Input
 
 ```js
@@ -12,62 +13,20 @@ import.meta.aReallyLongVariableName.andAnotherReallyLongVariableName.andAnotherR
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
------
-
-```js
-console.log(import.meta);
-import.meta.field =
-	obj.aReallyLongVariableName.andAnotherReallyLongVariableName.andAnotherReallyLongVariableName.andAnotherReallyLongVariable;
-import.meta.aReallyLongVariableName.andAnotherReallyLongVariableName
-	.andAnotherReallyLongVariableName.andAnotherReallyLongVariable;
+```json
+{
+  "$schema": "../../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "formatter": {
+    "lineWidth": 120,
+    "indentWidth": 4,
+    "indentStyle": "space"
+  }
+}
 ```
 
-# Lines exceeding max width of 80 characters
-```
-    3: 	obj.aReallyLongVariableName.andAnotherReallyLongVariableName.andAnotherReallyLongVariableName.andAnotherReallyLongVariable;
-```
-
-## Output 1
-
------
-Indent style: Space
-Indent width: 4
-Line ending: LF
-Line width: 120
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
------
+# Formatted
 
 ```js
 console.log(import.meta);
@@ -75,6 +34,7 @@ import.meta.field =
     obj.aReallyLongVariableName.andAnotherReallyLongVariableName.andAnotherReallyLongVariableName.andAnotherReallyLongVariable;
 import.meta.aReallyLongVariableName.andAnotherReallyLongVariableName.andAnotherReallyLongVariableName
     .andAnotherReallyLongVariable;
+
 ```
 
 # Lines exceeding max width of 120 characters

@@ -199,6 +199,11 @@ impl AnyJsBindingDeclaration {
         matches!(self, Self::TsTypeParameter(_))
     }
 
+    /// Returns `true` if `self` is an infer type.
+    pub const fn is_infer_type(&self) -> bool {
+        matches!(self, Self::TsInferType(_))
+    }
+
     /// Returns the export statement if this declaration is directly exported.
     pub fn export(&self) -> Option<JsExport> {
         let maybe_export = match self {

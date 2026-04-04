@@ -2,6 +2,7 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```css
@@ -9,6 +10,8 @@ expression: snapshot
 	unicode-range: U+;
 	unicode-range: U+1111111111;
 	unicode-range: U+11???-2222;
+	unicode-range: U+11???-2??;
+	unicode-range: U+11???-;
 	unicode-range: U+11-2??;
 	unicode-range: U+11-;
 }
@@ -21,7 +24,7 @@ expression: snapshot
 ```
 CssRoot {
     bom_token: missing (optional),
-    rules: CssRuleList [
+    items: CssRootItemList [
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
             rule: CssFontFaceAtRule {
@@ -84,16 +87,16 @@ CssRoot {
                                         COLON@77..79 ":" [] [Whitespace(" ")],
                                         CssBogus {
                                             items: [
-                                                CssUnicodeRange {
-                                                    prefix_token: UNICODE@79..81 "U+" [] [],
-                                                    value: CssUnicodeRangeWildcard {
-                                                        value_token: CSS_UNICODE_RANGE_WILDCARD_LITERAL@81..86 "11???" [] [],
-                                                    },
-                                                },
-                                                CssBogusPropertyValue {
+                                                CssBogusUnicodeRangeValue {
                                                     items: [
+                                                        UNICODE@79..81 "U+" [] [],
+                                                        CssUnicodeRangeWildcard {
+                                                            value_token: CSS_UNICODE_RANGE_WILDCARD_LITERAL@81..86 "11???" [] [],
+                                                        },
                                                         MINUS@86..87 "-" [] [],
-                                                        CSS_NUMBER_LITERAL@87..91 "2222" [] [],
+                                                        CssUnicodeCodepoint {
+                                                            value_token: CSS_UNICODE_CODEPOINT_LITERAL@87..91 "2222" [] [],
+                                                        },
                                                     ],
                                                 },
                                             ],
@@ -117,12 +120,12 @@ CssRoot {
                                                 CssBogusUnicodeRangeValue {
                                                     items: [
                                                         UNICODE@109..111 "U+" [] [],
-                                                        CssUnicodeCodepoint {
-                                                            value_token: CSS_UNICODE_CODEPOINT_LITERAL@111..113 "11" [] [],
-                                                        },
-                                                        MINUS@113..114 "-" [] [],
                                                         CssUnicodeRangeWildcard {
-                                                            value_token: CSS_UNICODE_RANGE_WILDCARD_LITERAL@114..117 "2??" [] [],
+                                                            value_token: CSS_UNICODE_RANGE_WILDCARD_LITERAL@111..116 "11???" [] [],
+                                                        },
+                                                        MINUS@116..117 "-" [] [],
+                                                        CssUnicodeRangeWildcard {
+                                                            value_token: CSS_UNICODE_RANGE_WILDCARD_LITERAL@117..120 "2??" [] [],
                                                         },
                                                     ],
                                                 },
@@ -132,25 +135,25 @@ CssRoot {
                                 },
                                 important: missing (optional),
                             },
-                            semicolon_token: SEMICOLON@117..118 ";" [] [],
+                            semicolon_token: SEMICOLON@120..121 ";" [] [],
                         },
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
                                 property: CssBogusProperty {
                                     items: [
                                         CssIdentifier {
-                                            value_token: IDENT@118..133 "unicode-range" [Newline("\n"), Whitespace("\t")] [],
+                                            value_token: IDENT@121..136 "unicode-range" [Newline("\n"), Whitespace("\t")] [],
                                         },
-                                        COLON@133..135 ":" [] [Whitespace(" ")],
+                                        COLON@136..138 ":" [] [Whitespace(" ")],
                                         CssBogus {
                                             items: [
                                                 CssBogusUnicodeRangeValue {
                                                     items: [
-                                                        UNICODE@135..137 "U+" [] [],
-                                                        CssUnicodeCodepoint {
-                                                            value_token: CSS_UNICODE_CODEPOINT_LITERAL@137..139 "11" [] [],
+                                                        UNICODE@138..140 "U+" [] [],
+                                                        CssUnicodeRangeWildcard {
+                                                            value_token: CSS_UNICODE_RANGE_WILDCARD_LITERAL@140..145 "11???" [] [],
                                                         },
-                                                        MINUS@139..140 "-" [] [],
+                                                        MINUS@145..146 "-" [] [],
                                                     ],
                                                 },
                                             ],
@@ -159,32 +162,89 @@ CssRoot {
                                 },
                                 important: missing (optional),
                             },
-                            semicolon_token: SEMICOLON@140..141 ";" [] [],
+                            semicolon_token: SEMICOLON@146..147 ";" [] [],
+                        },
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssBogusProperty {
+                                    items: [
+                                        CssIdentifier {
+                                            value_token: IDENT@147..162 "unicode-range" [Newline("\n"), Whitespace("\t")] [],
+                                        },
+                                        COLON@162..164 ":" [] [Whitespace(" ")],
+                                        CssBogus {
+                                            items: [
+                                                CssBogusUnicodeRangeValue {
+                                                    items: [
+                                                        UNICODE@164..166 "U+" [] [],
+                                                        CssUnicodeCodepoint {
+                                                            value_token: CSS_UNICODE_CODEPOINT_LITERAL@166..168 "11" [] [],
+                                                        },
+                                                        MINUS@168..169 "-" [] [],
+                                                        CssUnicodeRangeWildcard {
+                                                            value_token: CSS_UNICODE_RANGE_WILDCARD_LITERAL@169..172 "2??" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@172..173 ";" [] [],
+                        },
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssBogusProperty {
+                                    items: [
+                                        CssIdentifier {
+                                            value_token: IDENT@173..188 "unicode-range" [Newline("\n"), Whitespace("\t")] [],
+                                        },
+                                        COLON@188..190 ":" [] [Whitespace(" ")],
+                                        CssBogus {
+                                            items: [
+                                                CssBogusUnicodeRangeValue {
+                                                    items: [
+                                                        UNICODE@190..192 "U+" [] [],
+                                                        CssUnicodeCodepoint {
+                                                            value_token: CSS_UNICODE_CODEPOINT_LITERAL@192..194 "11" [] [],
+                                                        },
+                                                        MINUS@194..195 "-" [] [],
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@195..196 ";" [] [],
                         },
                     ],
-                    r_curly_token: R_CURLY@141..143 "}" [Newline("\n")] [],
+                    r_curly_token: R_CURLY@196..198 "}" [Newline("\n")] [],
                 },
             },
         },
     ],
-    eof_token: EOF@143..144 "" [Newline("\n")] [],
+    eof_token: EOF@198..199 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..144
+0: CSS_ROOT@0..199
   0: (empty)
-  1: CSS_RULE_LIST@0..143
-    0: CSS_AT_RULE@0..143
+  1: CSS_ROOT_ITEM_LIST@0..198
+    0: CSS_AT_RULE@0..198
       0: AT@0..1 "@" [] []
-      1: CSS_FONT_FACE_AT_RULE@1..143
+      1: CSS_FONT_FACE_AT_RULE@1..198
         0: CSS_FONT_FACE_AT_RULE_DECLARATOR@1..11
           0: FONT_FACE_KW@1..11 "font-face" [] [Whitespace(" ")]
-        1: CSS_DECLARATION_BLOCK@11..143
+        1: CSS_DECLARATION_BLOCK@11..198
           0: L_CURLY@11..12 "{" [] []
-          1: CSS_DECLARATION_LIST@12..141
+          1: CSS_DECLARATION_LIST@12..196
             0: CSS_DECLARATION_WITH_SEMICOLON@12..32
               0: CSS_DECLARATION@12..31
                 0: CSS_BOGUS_PROPERTY@12..31
@@ -216,47 +276,77 @@ CssRoot {
                     0: IDENT@62..77 "unicode-range" [Newline("\n"), Whitespace("\t")] []
                   1: COLON@77..79 ":" [] [Whitespace(" ")]
                   2: CSS_BOGUS@79..91
-                    0: CSS_UNICODE_RANGE@79..86
+                    0: CSS_BOGUS_UNICODE_RANGE_VALUE@79..91
                       0: UNICODE@79..81 "U+" [] []
                       1: CSS_UNICODE_RANGE_WILDCARD@81..86
                         0: CSS_UNICODE_RANGE_WILDCARD_LITERAL@81..86 "11???" [] []
-                    1: CSS_BOGUS_PROPERTY_VALUE@86..91
-                      0: MINUS@86..87 "-" [] []
-                      1: CSS_NUMBER_LITERAL@87..91 "2222" [] []
+                      2: MINUS@86..87 "-" [] []
+                      3: CSS_UNICODE_CODEPOINT@87..91
+                        0: CSS_UNICODE_CODEPOINT_LITERAL@87..91 "2222" [] []
                 1: (empty)
               1: SEMICOLON@91..92 ";" [] []
-            3: CSS_DECLARATION_WITH_SEMICOLON@92..118
-              0: CSS_DECLARATION@92..117
-                0: CSS_BOGUS_PROPERTY@92..117
+            3: CSS_DECLARATION_WITH_SEMICOLON@92..121
+              0: CSS_DECLARATION@92..120
+                0: CSS_BOGUS_PROPERTY@92..120
                   0: CSS_IDENTIFIER@92..107
                     0: IDENT@92..107 "unicode-range" [Newline("\n"), Whitespace("\t")] []
                   1: COLON@107..109 ":" [] [Whitespace(" ")]
-                  2: CSS_BOGUS@109..117
-                    0: CSS_BOGUS_UNICODE_RANGE_VALUE@109..117
+                  2: CSS_BOGUS@109..120
+                    0: CSS_BOGUS_UNICODE_RANGE_VALUE@109..120
                       0: UNICODE@109..111 "U+" [] []
-                      1: CSS_UNICODE_CODEPOINT@111..113
-                        0: CSS_UNICODE_CODEPOINT_LITERAL@111..113 "11" [] []
-                      2: MINUS@113..114 "-" [] []
-                      3: CSS_UNICODE_RANGE_WILDCARD@114..117
-                        0: CSS_UNICODE_RANGE_WILDCARD_LITERAL@114..117 "2??" [] []
+                      1: CSS_UNICODE_RANGE_WILDCARD@111..116
+                        0: CSS_UNICODE_RANGE_WILDCARD_LITERAL@111..116 "11???" [] []
+                      2: MINUS@116..117 "-" [] []
+                      3: CSS_UNICODE_RANGE_WILDCARD@117..120
+                        0: CSS_UNICODE_RANGE_WILDCARD_LITERAL@117..120 "2??" [] []
                 1: (empty)
-              1: SEMICOLON@117..118 ";" [] []
-            4: CSS_DECLARATION_WITH_SEMICOLON@118..141
-              0: CSS_DECLARATION@118..140
-                0: CSS_BOGUS_PROPERTY@118..140
-                  0: CSS_IDENTIFIER@118..133
-                    0: IDENT@118..133 "unicode-range" [Newline("\n"), Whitespace("\t")] []
-                  1: COLON@133..135 ":" [] [Whitespace(" ")]
-                  2: CSS_BOGUS@135..140
-                    0: CSS_BOGUS_UNICODE_RANGE_VALUE@135..140
-                      0: UNICODE@135..137 "U+" [] []
-                      1: CSS_UNICODE_CODEPOINT@137..139
-                        0: CSS_UNICODE_CODEPOINT_LITERAL@137..139 "11" [] []
-                      2: MINUS@139..140 "-" [] []
+              1: SEMICOLON@120..121 ";" [] []
+            4: CSS_DECLARATION_WITH_SEMICOLON@121..147
+              0: CSS_DECLARATION@121..146
+                0: CSS_BOGUS_PROPERTY@121..146
+                  0: CSS_IDENTIFIER@121..136
+                    0: IDENT@121..136 "unicode-range" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@136..138 ":" [] [Whitespace(" ")]
+                  2: CSS_BOGUS@138..146
+                    0: CSS_BOGUS_UNICODE_RANGE_VALUE@138..146
+                      0: UNICODE@138..140 "U+" [] []
+                      1: CSS_UNICODE_RANGE_WILDCARD@140..145
+                        0: CSS_UNICODE_RANGE_WILDCARD_LITERAL@140..145 "11???" [] []
+                      2: MINUS@145..146 "-" [] []
                 1: (empty)
-              1: SEMICOLON@140..141 ";" [] []
-          2: R_CURLY@141..143 "}" [Newline("\n")] []
-  2: EOF@143..144 "" [Newline("\n")] []
+              1: SEMICOLON@146..147 ";" [] []
+            5: CSS_DECLARATION_WITH_SEMICOLON@147..173
+              0: CSS_DECLARATION@147..172
+                0: CSS_BOGUS_PROPERTY@147..172
+                  0: CSS_IDENTIFIER@147..162
+                    0: IDENT@147..162 "unicode-range" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@162..164 ":" [] [Whitespace(" ")]
+                  2: CSS_BOGUS@164..172
+                    0: CSS_BOGUS_UNICODE_RANGE_VALUE@164..172
+                      0: UNICODE@164..166 "U+" [] []
+                      1: CSS_UNICODE_CODEPOINT@166..168
+                        0: CSS_UNICODE_CODEPOINT_LITERAL@166..168 "11" [] []
+                      2: MINUS@168..169 "-" [] []
+                      3: CSS_UNICODE_RANGE_WILDCARD@169..172
+                        0: CSS_UNICODE_RANGE_WILDCARD_LITERAL@169..172 "2??" [] []
+                1: (empty)
+              1: SEMICOLON@172..173 ";" [] []
+            6: CSS_DECLARATION_WITH_SEMICOLON@173..196
+              0: CSS_DECLARATION@173..195
+                0: CSS_BOGUS_PROPERTY@173..195
+                  0: CSS_IDENTIFIER@173..188
+                    0: IDENT@173..188 "unicode-range" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@188..190 ":" [] [Whitespace(" ")]
+                  2: CSS_BOGUS@190..195
+                    0: CSS_BOGUS_UNICODE_RANGE_VALUE@190..195
+                      0: UNICODE@190..192 "U+" [] []
+                      1: CSS_UNICODE_CODEPOINT@192..194
+                        0: CSS_UNICODE_CODEPOINT_LITERAL@192..194 "11" [] []
+                      2: MINUS@194..195 "-" [] []
+                1: (empty)
+              1: SEMICOLON@195..196 ";" [] []
+          2: R_CURLY@196..198 "}" [Newline("\n")] []
+  2: EOF@198..199 "" [Newline("\n")] []
 
 ```
 
@@ -292,63 +382,103 @@ unicode_range_error.css:3:19 parse ━━━━━━━━━━━━━━━
   > 3 │ 	unicode-range: U+1111111111;
       │ 	                 ^^^^^^^^^^
     4 │ 	unicode-range: U+11???-2222;
-    5 │ 	unicode-range: U+11-2??;
+    5 │ 	unicode-range: U+11???-2??;
   
   i Valid length (minimum 1 or maximum 6 hex digits) in the start of unicode range.
   
 unicode_range_error.css:4:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected value or character.
+  × Wildcard ranges cannot be combined with a range interval.
   
     2 │ 	unicode-range: U+;
     3 │ 	unicode-range: U+1111111111;
   > 4 │ 	unicode-range: U+11???-2222;
-      │ 	                      ^^^^^
-    5 │ 	unicode-range: U+11-2??;
-    6 │ 	unicode-range: U+11-;
+      │ 	                      ^
+    5 │ 	unicode-range: U+11???-2??;
+    6 │ 	unicode-range: U+11???-;
   
-  i Expected one of:
+  i Use either a wildcard range (e.g. `U+11???`) or an explicit interval (e.g. `U+1100-2222`).
   
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
-  
-unicode_range_error.css:5:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unicode_range_error.css:5:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Codepoint range wildcard is not valid here.
+  × Wildcard ranges cannot be combined with a range interval.
   
     3 │ 	unicode-range: U+1111111111;
     4 │ 	unicode-range: U+11???-2222;
-  > 5 │ 	unicode-range: U+11-2??;
-      │ 	                    ^^^
-    6 │ 	unicode-range: U+11-;
-    7 │ }
+  > 5 │ 	unicode-range: U+11???-2??;
+      │ 	                      ^
+    6 │ 	unicode-range: U+11???-;
+    7 │ 	unicode-range: U+11-2??;
   
-  i Wildcards (`U+????`) are only allowed at the beginning of a Unicode range descriptor. When specifying a range interval (`U+XXXX-YYYY`), wildcards cannot be used in the second position.
+  i Use either a wildcard range (e.g. `U+11???`) or an explicit interval (e.g. `U+1100-2222`).
   
-unicode_range_error.css:6:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unicode_range_error.css:6:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Wildcard ranges cannot be combined with a range interval.
+  
+    4 │ 	unicode-range: U+11???-2222;
+    5 │ 	unicode-range: U+11???-2??;
+  > 6 │ 	unicode-range: U+11???-;
+      │ 	                      ^
+    7 │ 	unicode-range: U+11-2??;
+    8 │ 	unicode-range: U+11-;
+  
+  i Use either a wildcard range (e.g. `U+11???`) or an explicit interval (e.g. `U+1100-2222`).
+  
+unicode_range_error.css:6:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a codepoint but instead found ';'.
   
     4 │ 	unicode-range: U+11???-2222;
-    5 │ 	unicode-range: U+11-2??;
-  > 6 │ 	unicode-range: U+11-;
-      │ 	                    ^
-    7 │ }
-    8 │ 
+    5 │ 	unicode-range: U+11???-2??;
+  > 6 │ 	unicode-range: U+11???-;
+      │ 	                       ^
+    7 │ 	unicode-range: U+11-2??;
+    8 │ 	unicode-range: U+11-;
   
   i Expected a codepoint here.
   
     4 │ 	unicode-range: U+11???-2222;
-    5 │ 	unicode-range: U+11-2??;
-  > 6 │ 	unicode-range: U+11-;
-      │ 	                    ^
-    7 │ }
-    8 │ 
+    5 │ 	unicode-range: U+11???-2??;
+  > 6 │ 	unicode-range: U+11???-;
+      │ 	                       ^
+    7 │ 	unicode-range: U+11-2??;
+    8 │ 	unicode-range: U+11-;
+  
+  i Expected a valid Unicode codepoint (e.g., U+1234).
+  
+unicode_range_error.css:7:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Codepoint range wildcard is not valid here.
+  
+    5 │ 	unicode-range: U+11???-2??;
+    6 │ 	unicode-range: U+11???-;
+  > 7 │ 	unicode-range: U+11-2??;
+      │ 	                    ^^^
+    8 │ 	unicode-range: U+11-;
+    9 │ }
+  
+  i Wildcards (`U+????`) are only allowed at the beginning of a Unicode range descriptor. When specifying a range interval (`U+XXXX-YYYY`), wildcards cannot be used in the second position.
+  
+unicode_range_error.css:8:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a codepoint but instead found ';'.
+  
+     6 │ 	unicode-range: U+11???-;
+     7 │ 	unicode-range: U+11-2??;
+   > 8 │ 	unicode-range: U+11-;
+       │ 	                    ^
+     9 │ }
+    10 │ 
+  
+  i Expected a codepoint here.
+  
+     6 │ 	unicode-range: U+11???-;
+     7 │ 	unicode-range: U+11-2??;
+   > 8 │ 	unicode-range: U+11-;
+       │ 	                    ^
+     9 │ }
+    10 │ 
   
   i Expected a valid Unicode codepoint (e.g., U+1234).
   

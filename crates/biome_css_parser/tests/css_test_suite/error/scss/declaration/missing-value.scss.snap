@@ -1,0 +1,428 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
+expression: snapshot
+---
+
+## Input
+
+```css
+.missing-values {
+  $x: ;
+  color: ;
+}
+
+/* Missing value before closing brace */
+.missing-before-brace {
+  color:}
+
+/* Missing value before closing brace on the next line */
+.missing-before-brace-newline {
+  color:
+}
+
+/* Missing value before !important */
+.missing-before-important {
+  color: !important;
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..16 "missing-values" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@16..17 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    ScssDeclaration {
+                        name: ScssIdentifier {
+                            dollar_token: DOLLAR@17..21 "$" [Newline("\n"), Whitespace("  ")] [],
+                            name: CssIdentifier {
+                                value_token: IDENT@21..22 "x" [] [],
+                            },
+                        },
+                        colon_token: COLON@22..24 ":" [] [Whitespace(" ")],
+                        value: missing (required),
+                        modifiers: ScssVariableModifierList [],
+                        semicolon_token: SEMICOLON@24..25 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@25..33 "color" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@33..35 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@35..36 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@36..38 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@38..82 "." [Newline("\n"), Newline("\n"), Comments("/* Missing value befo ..."), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@82..103 "missing-before-brace" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@103..104 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@104..112 "color" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@112..113 ":" [] [],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: missing (optional),
+                    },
+                ],
+                r_curly_token: R_CURLY@113..114 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@114..175 "." [Newline("\n"), Newline("\n"), Comments("/* Missing value befo ..."), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@175..204 "missing-before-brace-newline" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@204..205 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@205..213 "color" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@213..214 ":" [] [],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: missing (optional),
+                    },
+                ],
+                r_curly_token: R_CURLY@214..216 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@216..257 "." [Newline("\n"), Newline("\n"), Comments("/* Missing value befo ..."), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@257..282 "missing-before-important" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@282..283 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@283..291 "color" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@291..293 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [],
+                                },
+                            },
+                            important: CssDeclarationImportant {
+                                excl_token: BANG@293..294 "!" [] [],
+                                important_token: IMPORTANT_KW@294..303 "important" [] [],
+                            },
+                        },
+                        semicolon_token: SEMICOLON@303..304 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@304..306 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@306..307 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..307
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..306
+    0: CSS_QUALIFIED_RULE@0..38
+      0: CSS_SELECTOR_LIST@0..16
+        0: CSS_COMPOUND_SELECTOR@0..16
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..16
+            0: CSS_CLASS_SELECTOR@0..16
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..16
+                0: IDENT@1..16 "missing-values" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@16..38
+        0: L_CURLY@16..17 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@17..36
+          0: SCSS_DECLARATION@17..25
+            0: SCSS_IDENTIFIER@17..22
+              0: DOLLAR@17..21 "$" [Newline("\n"), Whitespace("  ")] []
+              1: CSS_IDENTIFIER@21..22
+                0: IDENT@21..22 "x" [] []
+            1: COLON@22..24 ":" [] [Whitespace(" ")]
+            2: (empty)
+            3: SCSS_VARIABLE_MODIFIER_LIST@24..24
+            4: SEMICOLON@24..25 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@25..36
+            0: CSS_DECLARATION@25..35
+              0: CSS_GENERIC_PROPERTY@25..35
+                0: CSS_IDENTIFIER@25..33
+                  0: IDENT@25..33 "color" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@33..35 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@35..35
+                  0: SCSS_EXPRESSION_ITEM_LIST@35..35
+              1: (empty)
+            1: SEMICOLON@35..36 ";" [] []
+        2: R_CURLY@36..38 "}" [Newline("\n")] []
+    1: CSS_QUALIFIED_RULE@38..114
+      0: CSS_SELECTOR_LIST@38..103
+        0: CSS_COMPOUND_SELECTOR@38..103
+          0: CSS_NESTED_SELECTOR_LIST@38..38
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@38..103
+            0: CSS_CLASS_SELECTOR@38..103
+              0: DOT@38..82 "." [Newline("\n"), Newline("\n"), Comments("/* Missing value befo ..."), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@82..103
+                0: IDENT@82..103 "missing-before-brace" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@103..114
+        0: L_CURLY@103..104 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@104..113
+          0: CSS_DECLARATION_WITH_SEMICOLON@104..113
+            0: CSS_DECLARATION@104..113
+              0: CSS_GENERIC_PROPERTY@104..113
+                0: CSS_IDENTIFIER@104..112
+                  0: IDENT@104..112 "color" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@112..113 ":" [] []
+                2: SCSS_EXPRESSION@113..113
+                  0: SCSS_EXPRESSION_ITEM_LIST@113..113
+              1: (empty)
+            1: (empty)
+        2: R_CURLY@113..114 "}" [] []
+    2: CSS_QUALIFIED_RULE@114..216
+      0: CSS_SELECTOR_LIST@114..204
+        0: CSS_COMPOUND_SELECTOR@114..204
+          0: CSS_NESTED_SELECTOR_LIST@114..114
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@114..204
+            0: CSS_CLASS_SELECTOR@114..204
+              0: DOT@114..175 "." [Newline("\n"), Newline("\n"), Comments("/* Missing value befo ..."), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@175..204
+                0: IDENT@175..204 "missing-before-brace-newline" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@204..216
+        0: L_CURLY@204..205 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@205..214
+          0: CSS_DECLARATION_WITH_SEMICOLON@205..214
+            0: CSS_DECLARATION@205..214
+              0: CSS_GENERIC_PROPERTY@205..214
+                0: CSS_IDENTIFIER@205..213
+                  0: IDENT@205..213 "color" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@213..214 ":" [] []
+                2: SCSS_EXPRESSION@214..214
+                  0: SCSS_EXPRESSION_ITEM_LIST@214..214
+              1: (empty)
+            1: (empty)
+        2: R_CURLY@214..216 "}" [Newline("\n")] []
+    3: CSS_QUALIFIED_RULE@216..306
+      0: CSS_SELECTOR_LIST@216..282
+        0: CSS_COMPOUND_SELECTOR@216..282
+          0: CSS_NESTED_SELECTOR_LIST@216..216
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@216..282
+            0: CSS_CLASS_SELECTOR@216..282
+              0: DOT@216..257 "." [Newline("\n"), Newline("\n"), Comments("/* Missing value befo ..."), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@257..282
+                0: IDENT@257..282 "missing-before-important" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@282..306
+        0: L_CURLY@282..283 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@283..304
+          0: CSS_DECLARATION_WITH_SEMICOLON@283..304
+            0: CSS_DECLARATION@283..303
+              0: CSS_GENERIC_PROPERTY@283..293
+                0: CSS_IDENTIFIER@283..291
+                  0: IDENT@283..291 "color" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@291..293 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@293..293
+                  0: SCSS_EXPRESSION_ITEM_LIST@293..293
+              1: CSS_DECLARATION_IMPORTANT@293..303
+                0: BANG@293..294 "!" [] []
+                1: IMPORTANT_KW@294..303 "important" [] []
+            1: SEMICOLON@303..304 ";" [] []
+        2: R_CURLY@304..306 "}" [Newline("\n")] []
+  2: EOF@306..307 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+missing-value.scss:2:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found ';'.
+  
+    1 │ .missing-values {
+  > 2 │   $x: ;
+      │       ^
+    3 │   color: ;
+    4 │ }
+  
+  i Expected a SCSS expression here.
+  
+    1 │ .missing-values {
+  > 2 │   $x: ;
+      │       ^
+    3 │   color: ;
+    4 │ }
+  
+missing-value.scss:3:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ .missing-values {
+    2 │   $x: ;
+  > 3 │   color: ;
+      │          ^
+    4 │ }
+    5 │ 
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+missing-value.scss:8:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+     6 │ /* Missing value before closing brace */
+     7 │ .missing-before-brace {
+   > 8 │   color:}
+       │         ^
+     9 │ 
+    10 │ /* Missing value before closing brace on the next line */
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+missing-value.scss:13:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    11 │ .missing-before-brace-newline {
+    12 │   color:
+  > 13 │ }
+       │ ^
+    14 │ 
+    15 │ /* Missing value before !important */
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+missing-value.scss:17:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    15 │ /* Missing value before !important */
+    16 │ .missing-before-important {
+  > 17 │   color: !important;
+       │          ^
+    18 │ }
+    19 │ 
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+```

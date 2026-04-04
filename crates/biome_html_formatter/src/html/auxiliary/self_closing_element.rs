@@ -18,7 +18,9 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
         let bracket_same_line = f.options().bracket_same_line().value();
         let self_close_void_elements = f.options().self_close_void_elements();
         let name = name?;
-        let is_canonical_html_element = should_lowercase_html_tag(f, &name);
+        let is_canonical_html_element = name
+            .as_html_tag_name()
+            .is_some_and(|name| should_lowercase_html_tag(f, name));
 
         write!(f, [l_angle_token.format(), name.format()])?;
 
@@ -40,7 +42,14 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
                 // in the same group as the attributes, unless the token is being borrowed.
                 // When these tokens are borrowed, they are managed by the sibling `HtmlElementList` formatter.
                 if bracket_same_line {
-                    write!(f, [hard_space()])?;
+                    let is_void = node.is_void_element().unwrap_or_default();
+                    let will_have_slash = self_close_void_elements.is_always()
+                        || (slash_token.is_some()
+                            && !(is_void && self_close_void_elements.is_never()));
+
+                    if will_have_slash {
+                        write!(f, [hard_space()])?;
+                    }
                 } else if attributes.len() >= 1 {
                     if self_close_void_elements.is_always() {
                         write!(f, [soft_line_break_or_space()])?;
@@ -56,17 +65,23 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
                     // To resolve this, these tokens either need to be passed to or deferred to sibling text elements when
                     // whitespace sensitivity would require it.
                     if slash_token.is_some() {
-                        write!(f, [slash_token.format()])?;
+                        write!(f, [if_group_fits_on_line(&space()), slash_token.format()])?;
                     } else {
-                        write!(f, [token("/")])?;
+                        write!(f, [if_group_fits_on_line(&space()), token("/")])?;
                     }
                 }
                 // We remove the slash only from void elements
-                else if node.is_void_element()? && self_close_void_elements.is_never() {
+                else if node.is_void_element().unwrap_or_default()
+                    && self_close_void_elements.is_never()
+                {
                     if let Some(slash_token) = &slash_token {
                         write!(f, [format_removed(slash_token)])?;
                     }
                 } else {
+                    if slash_token.is_some() {
+                        // only add a space before the slash if it exists.
+                        write!(f, [space()])?;
+                    }
                     write!(f, [slash_token.format()])?;
                 }
 

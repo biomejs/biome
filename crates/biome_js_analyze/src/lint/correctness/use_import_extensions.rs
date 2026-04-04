@@ -77,6 +77,32 @@ declare_lint_rule! {
     ///
     /// The rule provides the options described below.
     ///
+    /// ### extensionMappings
+    ///
+    /// A map of file extensions to their suggested replacements. This allows you
+    /// to specify custom mappings for import extensions. For example, you can
+    /// map TypeScript imports to JavaScript extensions.
+    ///
+    /// This is useful if you are bundling your code to JavaScript into a package
+    /// and want to make sure all imports of TypeScript files use the `.js` extension
+    /// instead.
+    ///
+    /// If no mapping is found for a given extension, and the import is missing an extension,
+    /// the rule will suggest using the actual extension of the resolved file.
+    ///
+    /// Default: `{}` (empty object)
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "extensionMappings": {
+    ///             "ts": "js",
+    ///             "tsx": "js"
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    ///
     /// ### forceJsExtensions
     ///
     /// Normally, this rule suggests to use the extension of the module that is
@@ -259,6 +285,11 @@ fn get_extensionless_import(
 
     let extension = if force_js_extensions {
         "js"
+    } else if let Some(extension_mappings) = ctx.options().extension_mappings.as_ref()
+        && let Some(mapped_extension) =
+            resolved_extension.and_then(|ext| extension_mappings.get(ext))
+    {
+        mapped_extension.as_ref()
     } else {
         resolved_extension?
     };

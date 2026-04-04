@@ -1,0 +1,23 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/await_dynamic_import.svelte
+---
+
+# Input
+
+```svelte
+{#await import('./Component.svelte') then { default: Component }}
+<Component />
+{/await}
+
+```
+
+
+# Formatted
+
+```svelte
+{#await import('./Component.svelte') then { default: Component }}
+	<Component />
+{/await}
+
+```

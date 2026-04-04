@@ -3,7 +3,8 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-custom.vue
 ---
 # Input
-```ts
+```vue
+<script lang="ts" setup>
 import { ref } from 'vue'
 
 interface Foo {}
@@ -22,42 +23,47 @@ defineProps({})
 definePage({})
 
 const count = ref(0)
+</script>
+
+<template><div /></template>
 
 ```
 
 # Diagnostics
 ```
-invalid-custom.vue:16:1 lint/nursery/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-custom.vue:17:1 lint/nursery/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i definePage macro is out of order.
+  × definePage macro is out of order.
   
-    14 │ defineProps({})
-    15 │ 
-  > 16 │ definePage({})
+    15 │ defineProps({})
+    16 │ 
+  > 17 │ definePage({})
        │ ^^^^^^^^^^^^^^
-    17 │ 
-    18 │ const count = ref(0)
+    18 │ 
+    19 │ const count = ref(0)
   
   i Macros defined in <script setup> should be ordered as follows: definePage, defineModel, defineProps, defineEmits
   
   i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Reorder macro definePage.
   
-     9  9 │   debugger
-    10 10 │   
-       11 │ + definePage({})
-       12 │ + 
+    10 10 │   debugger
+    11 11 │   
+       12 │ + definePage({})
        13 │ + 
-    11 14 │   // Define the props and emits
-    12 15 │   const emit = defineEmits([])
-    13 16 │   /** Props */
-    14    │ - defineProps({})
-    15    │ - 
-    16    │ - definePage({})
-       17 │ + defineProps({})
-    17 18 │   
-    18 19 │   const count = ref(0)
+       14 │ + 
+    12 15 │   // Define the props and emits
+    13 16 │   const emit = defineEmits([])
+    14 17 │   /** Props */
+    15    │ - defineProps({})
+    16    │ - 
+    17    │ - definePage({})
+       18 │ + defineProps({})
+    18 19 │   
+    19 20 │   const count = ref(0)
   
 
 ```

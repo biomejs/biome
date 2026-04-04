@@ -1,0 +1,50 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-multiple-options.vue
+---
+# Input
+```vue
+<script>
+// should generate diagnostics
+// Multiple Options API properties - all should be flagged
+export default {
+  data() {
+    return { count: 0 }
+  },
+  methods: {
+    increment() {
+      this.count++
+    }
+  }
+}
+</script>
+
+
+```
+
+# Diagnostics
+```
+invalid-multiple-options.vue:4:16 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the Options API is not allowed.
+  
+     2 │ // should generate diagnostics
+     3 │ // Multiple Options API properties - all should be flagged
+   > 4 │ export default {
+       │                ^
+   > 5 │   data() {
+        ...
+  > 12 │   }
+  > 13 │ }
+       │ ^
+    14 │ </script>
+    15 │ 
+  
+  i Although the Options API is still supported by Vue, using the Composition API is recommended, and makes it possible to use Vue's Vapor mode for better performance.
+  
+  i Use <script setup> or defineComponent with a function signature to use the Composition API instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

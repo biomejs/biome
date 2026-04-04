@@ -44,19 +44,7 @@ other-ident .html {
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
------
+# Formatted
 
 ```css
 hello|* {
@@ -82,6 +70,5 @@ long-ident|other-ident .html {
 
 .complex-ident ident|hello {
 }
+
 ```
-
-

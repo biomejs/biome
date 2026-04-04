@@ -1,0 +1,19 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/bind_component.svelte
+---
+
+# Input
+
+```svelte
+<AlertDialogPrimitive bind:value />
+
+```
+
+
+# Formatted
+
+```svelte
+<AlertDialogPrimitive bind:value />
+
+```

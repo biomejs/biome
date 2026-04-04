@@ -1,6 +1,11 @@
+pub mod import_key;
+pub mod specifiers_attributes;
+mod util;
+
+use crate::JsRuleAction;
 use biome_analyze::{
-    ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, SourceActionKind, context::RuleContext,
-    declare_source_rule,
+    ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource, SourceActionKind,
+    context::RuleContext, declare_source_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::category;
@@ -14,16 +19,11 @@ use biome_rule_options::{organize_imports::OrganizeImportsOptions, sort_order::S
 use import_key::{ImportInfo, ImportKey};
 use rustc_hash::FxHashMap;
 use specifiers_attributes::{
-    are_import_attributes_sorted, merge_export_specifiers, merge_import_specifiers,
-    sort_attributes, sort_export_specifiers, sort_import_specifiers,
+    are_import_attributes_sorted, merge_export_from_specifiers, merge_export_specifiers,
+    merge_import_specifiers, sort_attributes, sort_export_from_specifiers, sort_export_specifiers,
+    sort_import_specifiers,
 };
-
-use crate::JsRuleAction;
 use util::{attached_trivia, detached_trivia, has_detached_leading_comment, leading_newlines};
-
-pub mod import_key;
-pub mod specifiers_attributes;
-mod util;
 
 declare_source_rule! {
     /// Provides a code action to sort the imports and exports in the file using a built-in or custom order.
@@ -111,7 +111,7 @@ declare_source_rule! {
     /// The line `import { C } from "c"` forms the second chunk.
     /// The blank line between the first two imports is ignored so they form a single chunk.
     ///
-    /// The sorter ensures that chunks are separated from each other with a blank lines.
+    /// The sorter ensures that chunks are separated from each other with blank lines.
     /// Only side-effect imports adjacent to a chunk of imports are not separated by a blank line.
     /// The following code...
     ///
@@ -267,7 +267,7 @@ declare_source_rule! {
     ///
     /// Let's take an example.
     /// In the default configuration, Node.js modules without the `node:` protocol are separated from those with a protocol.
-    /// To groups them together, you can use the predefined group `:NODE:`.
+    /// To group them together, you can use the predefined group `:NODE:`.
     /// Given the following configuration...
     ///
     /// ```json,full_options
@@ -517,12 +517,55 @@ declare_source_rule! {
     /// import D2 from "package";
     /// import { A } from "package";
     /// import { B } from "package";
+    /// import { type T3 } from "package";
     /// ```
     ///
     /// is merged as follows:
     ///
     /// ```ts,ignore
     /// import type { T1, T2 } from "package";
+    /// import D1, * as ns from "package";
+    /// import D2, { A, B, type T3 } from "package";
+    /// ```
+    ///
+    /// You may want to merge the first and the last imports.
+    /// To do this, you have to enable the linter rule [`useImportType`](https://biomejs.dev/linter/rules/use-import-type/)
+    /// and to set its option `style` to `inlineType`.
+    ///
+    /// With the following configuration...
+    ///
+    /// ```json
+    /// {
+    ///   "linter": {
+    ///     "enabled": true,
+    ///     "rules": {
+    ///       "style": {
+    ///         "useImportType": {
+    ///           "level": "on",
+    ///           "options": { "style": "inlineType" }
+    ///         }
+    ///       }
+    ///     }
+    ///   },
+    ///   "assist": {
+    ///     "enabled": true,
+    ///     "actions": { "source": { "organizeImports": "on" } }
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// The previous imports are merged as follows:
+    ///
+    /// ```ts,ignore
+    /// import D1, * as ns from "package";
+    /// import D2, { A, B, type T1, type T2, type T3 } from "package";
+    /// ```
+    ///
+    /// Note that if you set `style` to `separatedType` you will get the following merge:
+    ///
+    /// ```ts,ignore
+    /// import type { T1, T2, T3 } from "package";
+    /// import { V1 } from "package";
     /// import D1, * as ns from "package";
     /// import D2, { A, B } from "package";
     /// ```
@@ -604,7 +647,7 @@ declare_source_rule! {
     /// }
     /// ```
     ///
-    /// Note that you can want to use the lint rule [`useImportType`](https://next.biomejs.dev/linter/rules/use-import-type/) and its [`style`](https://next.biomejs.dev/linter/rules/use-import-type/#style) to enforce the use of `import type` instead of `import { type }`.
+    /// Note that you may want to use the lint rule [`useImportType`](https://next.biomejs.dev/linter/rules/use-import-type/) and its [`style`](https://next.biomejs.dev/linter/rules/use-import-type/#style) to enforce the use of `import type` instead of `import { type }`.
     ///
     /// ### Placing `import type` and `export type` at the end of the chunks
     ///
@@ -633,7 +676,7 @@ declare_source_rule! {
     /// ```
     ///
     /// ## Change the sorting of import identifiers to logical sorting
-    /// This is the default behavior incase you do not override. This only applies to the named import/exports and not the source itself.
+    /// This is the default behavior in case you do not override. This only applies to the named import/exports and not the source itself.
     ///
     /// ```json,options
     /// {
@@ -652,6 +695,7 @@ declare_source_rule! {
         language: "js",
         recommended: true,
         fix_kind: FixKind::Safe,
+        sources: &[RuleSource::Eslint("sort-imports").inspired(), RuleSource::Eslint("no-duplicate-imports").inspired(), RuleSource::EslintImport("order").inspired()],
     }
 }
 
@@ -785,7 +829,7 @@ impl Rule for OrganizeImports {
                 // This is either
                 // - a bare (side-effect) import
                 // - a buggy import or export
-                // a statement
+                // - a statement
                 //
                 // In any case, the chunk ends here
                 report_unsorted_chunk(chunk.take(), &mut result);
@@ -858,6 +902,11 @@ impl Rule for OrganizeImports {
                             if *are_specifiers_unsorted {
                                 // Sort named specifiers
                                 if let AnyJsExportClause::JsExportNamedFromClause(cast) = &clause
+                                    && let Some(sorted_specifiers) =
+                                        sort_export_from_specifiers(&cast.specifiers(), sort_order)
+                                {
+                                    clause = cast.clone().with_specifiers(sorted_specifiers).into();
+                                } else if let AnyJsExportClause::JsExportNamedClause(cast) = &clause
                                     && let Some(sorted_specifiers) =
                                         sort_export_specifiers(&cast.specifiers(), sort_order)
                                 {
@@ -1098,33 +1147,45 @@ fn merge(
         (AnyJsModuleItem::JsExport(item1), AnyJsModuleItem::JsExport(item2)) => {
             let clause1 = item1.export_clause().ok()?;
             let clause2 = item2.export_clause().ok()?;
-            let AnyJsExportClause::JsExportNamedFromClause(clause1) = clause1 else {
-                return None;
+            let merged_item = match (clause1, clause2) {
+                (
+                    AnyJsExportClause::JsExportNamedFromClause(clause1),
+                    AnyJsExportClause::JsExportNamedFromClause(clause2),
+                ) => {
+                    let specifiers1 = clause1.specifiers();
+                    let specifiers2 = clause2.specifiers();
+                    let merged_specifiers =
+                        merge_export_from_specifiers(&specifiers1, &specifiers2, sort_order)?;
+                    let merged_specifiers = clause1.with_specifiers(merged_specifiers);
+                    item2.clone().with_export_clause(merged_specifiers.into())
+                }
+                (
+                    AnyJsExportClause::JsExportNamedClause(clause1),
+                    AnyJsExportClause::JsExportNamedClause(clause2),
+                ) => {
+                    let specifiers1 = clause1.specifiers();
+                    let specifiers2 = clause2.specifiers();
+                    let merged_specifiers =
+                        merge_export_specifiers(&specifiers1, &specifiers2, sort_order)?;
+                    let merged_specifiers = clause1.with_specifiers(merged_specifiers);
+                    item2.clone().with_export_clause(merged_specifiers.into())
+                }
+                _ => return None,
             };
-            let clause2 = clause2.as_js_export_named_from_clause()?;
-            let specifiers1 = clause1.specifiers();
-            let specifiers2 = clause2.specifiers();
-            if let Some(meregd_specifiers) =
-                merge_export_specifiers(&specifiers1, &specifiers2, sort_order)
-            {
-                let meregd_clause = clause1.with_specifiers(meregd_specifiers);
-                let merged_item = item2.clone().with_export_clause(meregd_clause.into());
-
-                let item1_leading_trivia = item1.syntax().first_leading_trivia()?;
-                let merged_item = if item1_leading_trivia.is_empty() {
-                    merged_item
-                } else {
-                    merged_item
-                        .trim_leading_trivia()?
-                        .prepend_trivia_pieces(item1.syntax().first_leading_trivia()?.pieces())?
-                };
-                return Some(merged_item.into());
-            }
+            let item1_leading_trivia = item1.syntax().first_leading_trivia()?;
+            let merged_item = if item1_leading_trivia.is_empty() {
+                merged_item
+            } else {
+                merged_item
+                    .trim_leading_trivia()?
+                    .prepend_trivia_pieces(item1_leading_trivia.pieces())?
+            };
+            Some(merged_item.into())
         }
         (AnyJsModuleItem::JsImport(item1), AnyJsModuleItem::JsImport(item2)) => {
             let clause1 = item1.import_clause().ok()?;
             let clause2 = item2.import_clause().ok()?;
-            match (clause1, clause2) {
+            let merged_item = match (clause1, clause2) {
                 (
                     AnyJsImportClause::JsImportDefaultClause(clause1),
                     AnyJsImportClause::JsImportNamespaceClause(clause2),
@@ -1145,17 +1206,7 @@ fn merge(
                         clause2.source().ok()?,
                     )
                     .build();
-                    let merged_item = item2.clone().with_import_clause(merged_clause.into());
-
-                    let item1_leading_trivia = item1.syntax().first_leading_trivia()?;
-                    let merged_item = if item1_leading_trivia.is_empty() {
-                        merged_item
-                    } else {
-                        merged_item.trim_leading_trivia()?.prepend_trivia_pieces(
-                            item1.syntax().first_leading_trivia()?.pieces(),
-                        )?
-                    };
-                    return Some(merged_item.into());
+                    item2.clone().with_import_clause(merged_clause.into())
                 }
                 (
                     AnyJsImportClause::JsImportCombinedClause(clause1),
@@ -1171,22 +1222,10 @@ fn merge(
                         return None;
                     };
                     let specifiers2 = clause2.named_specifiers().ok()?;
-                    if let Some(meregd_specifiers) =
-                        merge_import_specifiers(specifiers1, &specifiers2, sort_order)
-                    {
-                        let merged_clause = clause1.with_specifier(meregd_specifiers.into());
-                        let merged_item = item2.clone().with_import_clause(merged_clause.into());
-
-                        let item1_leading_trivia = item1.syntax().first_leading_trivia()?;
-                        let merged_item = if item1_leading_trivia.is_empty() {
-                            merged_item
-                        } else {
-                            merged_item.trim_leading_trivia()?.prepend_trivia_pieces(
-                                item1.syntax().first_leading_trivia()?.pieces(),
-                            )?
-                        };
-                        return Some(merged_item.into());
-                    }
+                    let merged_specifiers =
+                        merge_import_specifiers(specifiers1, &specifiers2, sort_order)?;
+                    let merged_clause = clause1.with_specifier(merged_specifiers.into());
+                    item2.clone().with_import_clause(merged_clause.into())
                 }
                 (
                     AnyJsImportClause::JsImportNamedClause(clause1),
@@ -1194,21 +1233,10 @@ fn merge(
                 ) => {
                     let specifiers1 = clause1.named_specifiers().ok()?;
                     let specifiers2 = clause2.named_specifiers().ok()?;
-                    if let Some(meregd_specifiers) =
-                        merge_import_specifiers(specifiers1, &specifiers2, sort_order)
-                    {
-                        let merged_clause = clause1.with_named_specifiers(meregd_specifiers);
-                        let merged_item = item2.clone().with_import_clause(merged_clause.into());
-                        let item1_leading_trivia = item1.syntax().first_leading_trivia()?;
-                        let merged_item = if item1_leading_trivia.is_empty() {
-                            merged_item
-                        } else {
-                            merged_item.trim_leading_trivia()?.prepend_trivia_pieces(
-                                item1.syntax().first_leading_trivia()?.pieces(),
-                            )?
-                        };
-                        return Some(merged_item.into());
-                    }
+                    let merged_specifiers =
+                        merge_import_specifiers(specifiers1, &specifiers2, sort_order)?;
+                    let merged_clause = clause1.with_named_specifiers(merged_specifiers);
+                    item2.clone().with_import_clause(merged_clause.into())
                 }
                 (
                     AnyJsImportClause::JsImportDefaultClause(clause1),
@@ -1230,21 +1258,20 @@ fn merge(
                         clause2.source().ok()?,
                     )
                     .build();
-                    let merged_item = item2.clone().with_import_clause(merged_clause.into());
-                    let item1_leading_trivia = item1.syntax().first_leading_trivia()?;
-                    let merged_item = if item1_leading_trivia.is_empty() {
-                        merged_item
-                    } else {
-                        merged_item.trim_leading_trivia()?.prepend_trivia_pieces(
-                            item1.syntax().first_leading_trivia()?.pieces(),
-                        )?
-                    };
-                    return Some(merged_item.into());
+                    item2.clone().with_import_clause(merged_clause.into())
                 }
-                _ => {}
-            }
+                _ => return None,
+            };
+            let item1_leading_trivia = item1.syntax().first_leading_trivia()?;
+            let merged_item = if item1_leading_trivia.is_empty() {
+                merged_item
+            } else {
+                merged_item
+                    .trim_leading_trivia()?
+                    .prepend_trivia_pieces(item1_leading_trivia.pieces())?
+            };
+            Some(merged_item.into())
         }
-        _ => {}
+        _ => None,
     }
-    None
 }

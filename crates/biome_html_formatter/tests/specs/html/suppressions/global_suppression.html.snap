@@ -1,0 +1,51 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: suppressions/global_suppression.html
+---
+
+# Input
+
+```html
+<!-- biome-ignore-all format: test -->
+
+<html>
+
+<head><body>
+
+
+					</body></head>
+		</html>
+
+
+<html>      </html>
+
+<!-- biome-ignore-all format: intentional -->
+<div>   code   </div>
+
+<!-- Biome format should keep this comment -->
+
+```
+
+
+# Formatted
+
+```html
+<!-- biome-ignore-all format: test -->
+
+<html>
+
+<head><body>
+
+
+					</body></head>
+		</html>
+
+
+<html>      </html>
+
+<!-- biome-ignore-all format: intentional -->
+<div>   code   </div>
+
+<!-- Biome format should keep this comment -->
+
+```

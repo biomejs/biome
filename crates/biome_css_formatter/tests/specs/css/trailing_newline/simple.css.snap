@@ -1,0 +1,37 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/trailing_newline/simple.css
+---
+
+# Input
+
+```css
+.test {
+  color: red;
+  font-size: 14px;
+}
+
+```
+
+
+# Options
+
+```json
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "css": {
+    "formatter": {
+      "trailingNewline": false
+    }
+  }
+}
+```
+
+# Formatted
+
+```css
+.test {
+	color: red;
+	font-size: 14px;
+}
+```

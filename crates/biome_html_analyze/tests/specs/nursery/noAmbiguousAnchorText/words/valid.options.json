@@ -1,0 +1,17 @@
+{
+  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noAmbiguousAnchorText": {
+          "level": "on",
+          "options": {
+            "words": [
+              "disabling the defaults"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

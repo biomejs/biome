@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: grit/marzano/python.grit
 ---
+
 # Input
 
 ```grit
@@ -13,23 +14,12 @@ language python
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Attribute Position: Auto
------
+# Formatted
 
 ```grit
 engine biome(0.1)
 language python
 
 `$var in $dict.keys()` => `$var in $dict`
+
 ```

@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-script-setup.vue
+---
+# Input
+```vue
+<!-- <script setup> syntax is the recommended Vapor Mode compatible pattern -->
+<script setup>
+// should not generate diagnostics
+import { ref } from 'vue'
+
+const count = ref(0)
+
+function increment() {
+  count.value++
+}
+</script>
+
+
+```

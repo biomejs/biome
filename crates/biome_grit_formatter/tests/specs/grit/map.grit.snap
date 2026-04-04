@@ -1,8 +1,8 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: grit/map.grit
-snapshot_kind: text
 ---
+
 # Input
 
 ```grit
@@ -15,19 +15,7 @@ snapshot_kind: text
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Attribute Position: Auto
------
+# Formatted
 
 ```grit
 `const capital = $val` where {
@@ -35,4 +23,5 @@ Attribute Position: Auto
 	$capitals.ours <: `paris`,
 	$val => $capitals.england
 }
+
 ```

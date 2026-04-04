@@ -1,0 +1,43 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/tailwind/supports.css
+---
+
+# Input
+
+```css
+@import "tailwindcss/theme.css" supports( --color-*:initial);
+
+@supports( --color-*:initial){
+.box{
+color:red;
+}
+}
+
+```
+
+
+# Options
+
+```json
+{
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  }
+}
+```
+
+# Formatted
+
+```css
+@import "tailwindcss/theme.css" supports(--color-*: initial);
+
+@supports (--color-*: initial) {
+	.box {
+		color: red;
+	}
+}
+
+```

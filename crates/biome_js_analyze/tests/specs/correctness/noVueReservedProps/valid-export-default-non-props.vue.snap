@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-export-default-non-props.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+export default {
+    data: {
+        ref: ''
+    }
+};
+</script>
+
+```

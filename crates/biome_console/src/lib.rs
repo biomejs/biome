@@ -4,7 +4,7 @@ use std::io;
 use std::io::{IsTerminal, Read, Write};
 use std::panic::RefUnwindSafe;
 use termcolor::{ColorChoice, StandardStream};
-use write::Termcolor;
+use write::{StringBuffer, Termcolor};
 
 pub mod fmt;
 mod markup;
@@ -39,6 +39,14 @@ pub trait Console: Send + Sync + RefUnwindSafe {
 
     /// It reads from a source, and if this source contains something, it's converted into a [String]
     fn read(&mut self) -> Option<String>;
+
+    /// It returns a string of the messages have been written to the buffer. Applicable only to certain consoles
+    fn dump(&mut self) -> Option<String> {
+        None
+    }
+
+    /// It clears the internal buffer of the console, if applicable
+    fn clear(&mut self) {}
 }
 
 /// Extension trait for [Console] providing convenience printing methods
@@ -226,5 +234,50 @@ impl Console for BufferConsole {
             // particular use case for multiple prompts
             Some(self.in_buffer[0].clone())
         }
+    }
+}
+
+#[derive(Debug, Default)]
+pub struct FileBufferConsole {
+    out: Vec<Message>,
+}
+
+impl FileBufferConsole {}
+
+impl Console for FileBufferConsole {
+    fn println(&mut self, level: LogLevel, args: Markup) {
+        self.out.push(Message {
+            level,
+            content: args.to_owned(),
+        });
+    }
+
+    fn print(&mut self, level: LogLevel, args: Markup) {
+        self.out.push(Message {
+            level,
+            content: args.to_owned(),
+        });
+    }
+
+    fn read(&mut self) -> Option<String> {
+        None
+    }
+
+    fn dump(&mut self) -> Option<String> {
+        let mut buffer = Vec::new();
+        let mut write = StringBuffer::new(&mut buffer);
+        let mut fmt = fmt::Formatter::new(&mut write);
+
+        for message in self.out.iter() {
+            for element in message.content.0.iter() {
+                fmt.write_str(element.content.as_str()).unwrap();
+            }
+        }
+
+        String::from_utf8(buffer).ok()
+    }
+
+    fn clear(&mut self) {
+        self.out.clear();
     }
 }

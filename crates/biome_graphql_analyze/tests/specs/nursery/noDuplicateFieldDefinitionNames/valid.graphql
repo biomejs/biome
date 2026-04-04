@@ -1,0 +1,35 @@
+# should not generate diagnostics
+type SomeObjectA
+interface SomeInterfaceA
+input SomeInputObjectA
+
+# ---
+
+type SomeObjectB {
+	foo: String
+}
+
+interface SomeInterfaceB {
+	foo: String
+}
+
+input SomeInputObjectB {
+	foo: String
+}
+
+# ---
+
+type SomeObjectC {
+	foo: String
+	bar: String
+}
+
+interface SomeInterfaceC {
+	foo: String
+	bar: String
+}
+
+input SomeInputObjectC {
+	foo: String
+	bar: String
+}

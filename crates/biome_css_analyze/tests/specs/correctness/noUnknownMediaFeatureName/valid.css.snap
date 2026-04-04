@@ -26,4 +26,7 @@ expression: valid.css
 @media (400px <= width <= 700px) {
 }
 
+@media (prefers-reduced-transparency: reduce) {
+}
+
 ```

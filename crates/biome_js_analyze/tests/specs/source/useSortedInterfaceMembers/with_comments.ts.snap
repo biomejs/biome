@@ -1,0 +1,77 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: with_comments.ts
+---
+# Input
+```ts
+interface _InterfaceWithComments {
+	// This is a zebra property
+	zebra: string;
+
+	/**
+	 * Apple property with JSDoc comment
+	 * @example apple = 42
+	 */
+	apple: number;
+
+	// Simple comment for banana
+	banana: boolean; // inline comment
+
+	/* Block comment for charlie */
+	charlie: object;
+}
+
+```
+
+# Diagnostics
+```
+with_comments.ts:1:1 assist/source/useSortedInterfaceMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The interface members are not sorted by key.
+  
+   > 1 │ interface _InterfaceWithComments {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 2 │ 	// This is a zebra property
+   > 3 │ 	zebra: string;
+   > 4 │ 
+        ...
+  > 14 │ 	/* Block comment for charlie */
+  > 15 │ 	charlie: object;
+  > 16 │ }
+       │ ^
+    17 │ 
+  
+  i Safe fix: Sort the interface members by key.
+  
+     1  1 │   interface _InterfaceWithComments {
+     2    │ - → //·This·is·a·zebra·property
+     3    │ - → zebra:·string;
+        2 │ + 
+        3 │ + → /**
+        4 │ + → ·*·Apple·property·with·JSDoc·comment
+        5 │ + → ·*·@example·apple·=·42
+        6 │ + → ·*/
+        7 │ + → apple:·number;
+     4  8 │   
+     5    │ - → /**
+     6    │ - → ·*·Apple·property·with·JSDoc·comment
+     7    │ - → ·*·@example·apple·=·42
+     8    │ - → ·*/
+     9    │ - → apple:·number;
+        9 │ + → //·Simple·comment·for·banana
+       10 │ + → banana:·boolean;·//·inline·comment
+    10 11 │   
+    11    │ - → //·Simple·comment·for·banana
+    12    │ - → banana:·boolean;·//·inline·comment
+    13    │ - 
+    14    │ - → /*·Block·comment·for·charlie·*/
+    15    │ - → charlie:·object;
+       12 │ + → /*·Block·comment·for·charlie·*/
+       13 │ + → charlie:·object;
+       14 │ + → //·This·is·a·zebra·property
+       15 │ + → zebra:·string;
+    16 16 │   }
+    17 17 │   
+  
+
+```

@@ -31,12 +31,12 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseRegexpExec {
-        version: "next",
+        version: "2.3.9",
         name: "useRegexpExec",
         language: "js",
         recommended: false,
         sources: &[RuleSource::EslintTypeScript("prefer-regexp-exec").same(), RuleSource::EslintRegexp("prefer-regexp-exec").same()],
-        domains: &[RuleDomain::Project],
+        domains: &[RuleDomain::Types],
     }
 }
 

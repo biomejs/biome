@@ -64,7 +64,7 @@ invalid.js:5:2 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━
   i Unsafe fix: Break out into multiple declarations
   
      3  3 │   function test() {
-     4  4 │   	// Comment
+     4  4 │     // Comment
      5    │ - → let·foo,·bar;
         5 │ + → let·foo;
         6 │ + → let·bar;
@@ -153,7 +153,7 @@ invalid.js:16:1 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━�
   i Unsafe fix: Break out into multiple declarations
   
     12 12 │   let
-    13 13 │   	a = 0,
+    13 13 │     a = 0,
     14    │ - → b·=·1;
     15    │ - 
     16    │ - let·//·comment

@@ -61,7 +61,7 @@ declare_lint_rule! {
     /// Default: `[]` (no scripts required)
     ///
     pub UseRequiredScripts {
-        version: "next",
+        version: "2.3.9",
         name: "useRequiredScripts",
         language: "json",
         recommended: false,
@@ -109,7 +109,7 @@ impl Rule for UseRequiredScripts {
             .flatten()
             .filter_map(|member| {
                 let name = member.name().ok()?;
-                let text = name.inner_string_text().ok()?;
+                let text = name.inner_string_text()?.ok()?;
                 Some(text.to_string())
             })
             .collect();

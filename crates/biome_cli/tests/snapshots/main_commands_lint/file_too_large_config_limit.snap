@@ -49,4 +49,5 @@ check.js lint ━━━━━━━━━━━━━━━━━━━━━━
 
 ```block
 Checked 0 files in <TIME>. No fixes applied.
+Found 1 info.
 ```

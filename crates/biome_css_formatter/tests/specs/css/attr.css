@@ -1,0 +1,50 @@
+div {
+	a: attr(href);
+	a: attr(href   type(*));
+	a: attr(href   type( *   )   ,   "test");
+	a: attr(data-width        px
+	);
+	a: attr(data-size    raw-string,   "test"       );
+	a: " (source: "       attr(cite)
+		") "        ;
+	a: attr(data-percentage          %,   100%);
+	a: attr(data-size type(          <length>#
+
+	| <percentage>+)
+	);
+
+	a: attr(width REM);
+	a: attr(data-test hz);
+	a: attr(data-test khz);
+	a: attr(data-test q);
+
+	a: attr(a | b | c | d | e | f | g | h | i | j | k | l | m | n | o | p | q | r | s | t | u | v | w | x | y | z);
+
+	a: attr(a | b | c | d | e | f | g | h | i | j | k | l | m | n | o | p | q | r | s | t | u | v | w | x | y | z type(*));
+
+	a: attr(a | b | c | d | e | f | g | h | i | j | k | l | m | n | o | p | q | r | s | t | u | v | w | x | y | z type(*), "test");
+
+	a: attr(a | b | c | d | e | f | g | h | i | j | k | l | m | n  type(*), "test");
+
+	a: attr(a | b | c | d | e | f | g | h | i | j | k | l | m  type(*), "test");
+
+a: attr(a | b | c | d | e | f | g | h | i | j | k | l | m | n  type(
+
+	<angle> | <color> | <custom-ident>
+	), "test");
+
+
+	a: attr(a | b | c | d | e | f | g | h | i | j | k | l | m | n  type(
+
+	<angle> | <color> | <custom-ident> | <image> | <integer> | <length> | <length-percentage>
+	), "test");
+
+	a: attr(a | b | c | d | e | f | g | h | i | j | k | l | m | n | o | p | q | r | s | t | u  type(
+
+	<angle> | <color> | <custom-ident> | <image> | <integer> | <length> | <length-percentage>
+	), "test");
+
+	a: attr(data-width
+
+type(        <transform-list>   ));
+}

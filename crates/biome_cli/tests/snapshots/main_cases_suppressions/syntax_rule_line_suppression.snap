@@ -28,7 +28,7 @@ file.ts:5:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━�
     6 │   console.log(chalk.yellow('we do something here'));
     7 │ }
   
-  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
   
   i Unsafe fix: If this is intentional, prepend sommething with an underscore.
   

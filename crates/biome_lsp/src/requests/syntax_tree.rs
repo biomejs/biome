@@ -3,7 +3,7 @@ use biome_service::workspace::{
     FeaturesBuilder, GetSyntaxTreeParams, IgnoreKind, PathIsIgnoredParams,
 };
 use serde::{Deserialize, Serialize};
-use tower_lsp_server::lsp_types::{TextDocumentIdentifier, Uri};
+use tower_lsp_server::ls_types::{TextDocumentIdentifier, Uri};
 use tracing::info;
 
 pub const SYNTAX_TREE_REQUEST: &str = "biome_lsp/syntaxTree";
@@ -24,6 +24,7 @@ pub(crate) fn syntax_tree(session: &Session, url: &Uri) -> Result<Option<String>
 
     if session.workspace.is_path_ignored(PathIsIgnoredParams {
         path: path.clone(),
+        is_dir: false,
         project_key: doc.project_key,
         features,
         ignore_kind: IgnoreKind::Ancestors,

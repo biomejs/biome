@@ -1,0 +1,33 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+.a { color: red; }
+.b { color: blue; }
+.c { color: green; }
+.d { color: yellow; }
+
+```
+
+# Diagnostics
+```
+invalid.css:1:1 lint/nursery/noExcessiveLinesPerFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file has too many lines (4). Maximum allowed is 2.
+  
+  > 1 │ .a { color: red; }
+      │ ^^^^^^^^^^^^^^^^^^
+  > 2 │ .b { color: blue; }
+  > 3 │ .c { color: green; }
+  > 4 │ .d { color: yellow; }
+      │ ^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i Consider splitting this file into smaller files.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

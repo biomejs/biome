@@ -1,15 +1,30 @@
 /* should not generate diagnostics */
 
 interface A {
-    f(a: number);
- 	set a(a: number);
- 	[key: string]: string;
+	f(a: number);
+	set a(a: number);
+	[key: string]: string;
+}
+
+// Construct signature type members with generic parameters
+export interface Constructor {
+	new <T>(): T;
+	new <T>(value: T): T;
+}
+
+export interface ConstructorWithMultipleOverloads {
+	new <T>(): T;
+	<T>(): T;
 }
 
 class B implements A {
-    f(a: number) {console.log(a)}
-    set a(a: number) {console.log(a)}
-    [key: string]: string;
+	f(a: number) {
+		console.log(a);
+	}
+	set a(a: number) {
+		console.log(a);
+	}
+	[key: string]: string;
 }
 
 console.log(new B());

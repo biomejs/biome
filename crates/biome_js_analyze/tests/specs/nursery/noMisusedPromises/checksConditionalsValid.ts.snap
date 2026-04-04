@@ -24,4 +24,16 @@ while (await promise) {
 
 const maybePromise = 1 == 2 ? promise : undefined;
 
+const a = (): boolean | Promise<boolean> => {
+  return Promise.resolve(true);
+}
+
+if (await a()) {
+  // Do something
+}
+
+while (await a()) {
+  // Do something
+}
+
 ```

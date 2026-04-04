@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```vue
@@ -21,12 +22,12 @@ HtmlRoot {
     html: HtmlElementList [
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@0..1 "<" [] [],
-            name: HtmlTagName {
+            name: HtmlComponentName {
                 value_token: HTML_LITERAL@1..11 "Component" [] [Whitespace(" ")],
             },
             attributes: HtmlAttributeList [
                 VueDirective {
-                    name_token: VUE_IDENT@11..15 "v-if" [] [],
+                    name_token: IDENT@11..15 "v-if" [] [],
                     arg: missing (optional),
                     modifiers: VueModifierList [],
                     initializer: HtmlAttributeInitializerClause {
@@ -57,12 +58,12 @@ HtmlRoot {
         },
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@46..48 "<" [Newline("\n")] [],
-            name: HtmlTagName {
+            name: HtmlComponentName {
                 value_token: HTML_LITERAL@48..58 "Component" [] [Whitespace(" ")],
             },
             attributes: HtmlAttributeList [
                 VueDirective {
-                    name_token: VUE_IDENT@58..65 "v-else" [] [Whitespace(" ")],
+                    name_token: IDENT@58..65 "v-else" [] [Whitespace(" ")],
                     arg: missing (optional),
                     modifiers: VueModifierList [],
                     initializer: missing (optional),
@@ -101,11 +102,11 @@ HtmlRoot {
   3: HTML_ELEMENT_LIST@0..83
     0: HTML_SELF_CLOSING_ELEMENT@0..46
       0: L_ANGLE@0..1 "<" [] []
-      1: HTML_TAG_NAME@1..11
+      1: HTML_COMPONENT_NAME@1..11
         0: HTML_LITERAL@1..11 "Component" [] [Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@11..44
         0: VUE_DIRECTIVE@11..28
-          0: VUE_IDENT@11..15 "v-if" [] []
+          0: IDENT@11..15 "v-if" [] []
           1: (empty)
           2: VUE_MODIFIER_LIST@15..15
           3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@15..28
@@ -126,11 +127,11 @@ HtmlRoot {
       4: R_ANGLE@45..46 ">" [] []
     1: HTML_SELF_CLOSING_ELEMENT@46..83
       0: L_ANGLE@46..48 "<" [Newline("\n")] []
-      1: HTML_TAG_NAME@48..58
+      1: HTML_COMPONENT_NAME@48..58
         0: HTML_LITERAL@48..58 "Component" [] [Whitespace(" ")]
       2: HTML_ATTRIBUTE_LIST@58..81
         0: VUE_DIRECTIVE@58..65
-          0: VUE_IDENT@58..65 "v-else" [] [Whitespace(" ")]
+          0: IDENT@58..65 "v-else" [] [Whitespace(" ")]
           1: (empty)
           2: VUE_MODIFIER_LIST@65..65
           3: (empty)

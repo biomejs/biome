@@ -5,12 +5,20 @@ use crate::syntax::at_rule::parse_error::{
 };
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::{ParseBlockBody, parse_declaration_or_at_rule_list_block};
+use crate::syntax::declaration::parse_declaration_with_semicolon;
+use crate::syntax::parse_error::scss_only_syntax_error;
+use crate::syntax::scss::{
+    is_at_scss_declaration, is_at_scss_nesting_declaration, parse_scss_declaration,
+    try_parse_scss_nesting_declaration,
+};
 use crate::syntax::{
-    is_at_any_declaration_with_semicolon, is_at_identifier, parse_any_declaration_with_semicolon,
-    parse_custom_identifier_with_keywords, parse_regular_identifier,
+    CssSyntaxFeatures, is_at_any_declaration_with_semicolon, is_at_identifier,
+    is_at_qualified_rule, parse_any_declaration_with_semicolon,
+    parse_custom_identifier_with_keywords, parse_qualified_rule, parse_regular_identifier,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
+use biome_parser::SyntaxFeature;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
@@ -22,6 +30,18 @@ pub(crate) fn is_at_page_at_rule(p: &mut CssParser) -> bool {
     p.at(T![page])
 }
 
+/// Parses `@page` and allows SCSS declarations inside the block so variables can be
+/// scoped to the at-rule body.
+///
+/// Example:
+/// ```scss
+/// @page {
+///   $margin: 1cm;
+///   margin: $margin;
+/// }
+/// ```
+///
+/// Docs: https://sass-lang.com/documentation/variables
 #[inline]
 pub(crate) fn parse_page_at_rule(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_page_at_rule(p) {
@@ -166,7 +186,13 @@ impl ParseBlockBody for PageBlock {
     const BLOCK_KIND: CssSyntaxKind = CSS_PAGE_AT_RULE_BLOCK;
 
     fn is_at_element(&self, p: &mut CssParser) -> bool {
-        at_margin_rule(p) || is_at_at_rule(p) || is_at_any_declaration_with_semicolon(p)
+        at_margin_rule(p)
+            || is_at_at_rule(p)
+           // SCSS allows variable declarations and nested properties inside any block.
+            || is_at_scss_declaration(p)
+            || is_at_scss_nesting_declaration(p)
+            || is_at_any_declaration_with_semicolon(p)
+            || is_at_qualified_rule(p)
     }
 
     fn parse_list(&mut self, p: &mut CssParser) {
@@ -175,7 +201,8 @@ impl ParseBlockBody for PageBlock {
 }
 
 const CSS_PAGE_AT_RULE_ITEM_LIST_RECOVERY_SET: TokenSet<CssSyntaxKind> =
-    token_set!(T![@], T![ident]);
+    token_set!(T![@], T![ident], T!['}']);
+
 struct PageAtRuleItemList;
 impl ParseNodeList for PageAtRuleItemList {
     type Kind = CssSyntaxKind;
@@ -187,8 +214,44 @@ impl ParseNodeList for PageAtRuleItemList {
             parse_margin_at_rule(p)
         } else if is_at_at_rule(p) {
             parse_at_rule(p)
+        } else if is_at_scss_declaration(p) {
+            CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+                p,
+                parse_scss_declaration,
+                |p, marker| {
+                    scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p))
+                },
+            )
+        } else if is_at_scss_nesting_declaration(p) {
+            if let Ok(declaration) = try_parse_scss_nesting_declaration(p, T!['}']) {
+                return declaration;
+            }
+
+            if is_at_qualified_rule(p)
+                && let Present(mut syntax) = parse_qualified_rule(p)
+            {
+                let range = syntax.range(p);
+                p.error(expected_any_page_at_rule_item(p, range));
+                syntax.change_kind(p, CSS_BOGUS);
+                return Present(syntax);
+            }
+
+            parse_declaration_with_semicolon(p)
         } else if is_at_any_declaration_with_semicolon(p) {
             parse_any_declaration_with_semicolon(p)
+        } else if is_at_qualified_rule(p) {
+            // Qualified rules are not allowed in @page at-rules, but we parse
+            // them fully and re-map to a bogus node for better error recovery.
+            // Without this, the curly braces in the qualified rule's block would
+            // confuse recovery and break parsing of subsequent declarations.
+            if let Present(mut syntax) = parse_qualified_rule(p) {
+                let range = syntax.range(p);
+                p.error(expected_any_page_at_rule_item(p, range));
+                syntax.change_kind(p, CSS_BOGUS);
+                return Present(syntax);
+            }
+
+            Absent
         } else {
             Absent
         }

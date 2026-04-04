@@ -1,0 +1,172 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div style:color="red">Red text</div>
+<p style:font-size="20px">Large text</p>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteStyleDirective {
+                        style_token: STYLE_KW@5..10 "style" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@10..11 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@11..16 "color" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@16..17 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@17..22 "\"red\"" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@22..23 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@23..31 "Red text" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@31..32 "<" [] [],
+                slash_token: SLASH@32..33 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@33..36 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@36..37 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@37..39 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@39..41 "p" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteStyleDirective {
+                        style_token: STYLE_KW@41..46 "style" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@46..47 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@47..56 "font-size" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@56..57 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@57..63 "\"20px\"" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@63..64 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@64..74 "Large text" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@74..75 "<" [] [],
+                slash_token: SLASH@75..76 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@76..77 "p" [] [],
+                },
+                r_angle_token: R_ANGLE@77..78 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@78..79 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..79
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..78
+    0: HTML_ELEMENT@0..37
+      0: HTML_OPENING_ELEMENT@0..23
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..22
+          0: SVELTE_STYLE_DIRECTIVE@5..22
+            0: STYLE_KW@5..10 "style" [] []
+            1: SVELTE_DIRECTIVE_VALUE@10..22
+              0: COLON@10..11 ":" [] []
+              1: SVELTE_LITERAL@11..16
+                0: HTML_LITERAL@11..16 "color" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@16..16
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@16..22
+                0: EQ@16..17 "=" [] []
+                1: HTML_STRING@17..22
+                  0: HTML_STRING_LITERAL@17..22 "\"red\"" [] []
+        3: R_ANGLE@22..23 ">" [] []
+      1: HTML_ELEMENT_LIST@23..31
+        0: HTML_CONTENT@23..31
+          0: HTML_LITERAL@23..31 "Red text" [] []
+      2: HTML_CLOSING_ELEMENT@31..37
+        0: L_ANGLE@31..32 "<" [] []
+        1: SLASH@32..33 "/" [] []
+        2: HTML_TAG_NAME@33..36
+          0: HTML_LITERAL@33..36 "div" [] []
+        3: R_ANGLE@36..37 ">" [] []
+    1: HTML_ELEMENT@37..78
+      0: HTML_OPENING_ELEMENT@37..64
+        0: L_ANGLE@37..39 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@39..41
+          0: HTML_LITERAL@39..41 "p" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@41..63
+          0: SVELTE_STYLE_DIRECTIVE@41..63
+            0: STYLE_KW@41..46 "style" [] []
+            1: SVELTE_DIRECTIVE_VALUE@46..63
+              0: COLON@46..47 ":" [] []
+              1: SVELTE_LITERAL@47..56
+                0: HTML_LITERAL@47..56 "font-size" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@56..56
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@56..63
+                0: EQ@56..57 "=" [] []
+                1: HTML_STRING@57..63
+                  0: HTML_STRING_LITERAL@57..63 "\"20px\"" [] []
+        3: R_ANGLE@63..64 ">" [] []
+      1: HTML_ELEMENT_LIST@64..74
+        0: HTML_CONTENT@64..74
+          0: HTML_LITERAL@64..74 "Large text" [] []
+      2: HTML_CLOSING_ELEMENT@74..78
+        0: L_ANGLE@74..75 "<" [] []
+        1: SLASH@75..76 "/" [] []
+        2: HTML_TAG_NAME@76..77
+          0: HTML_LITERAL@76..77 "p" [] []
+        3: R_ANGLE@77..78 ">" [] []
+  4: EOF@78..79 "" [Newline("\n")] []
+
+```

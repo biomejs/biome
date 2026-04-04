@@ -2,7 +2,7 @@ use crate::GraphqlCommentStyle;
 use biome_formatter::{AttributePosition, BracketSpacing, IndentWidth, QuoteStyle, prelude::*};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
-    TransformSourceMap,
+    TrailingNewline, TransformSourceMap,
 };
 
 use crate::comments::{FormatGraphqlLeadingComment, GraphqlComments};
@@ -64,6 +64,8 @@ pub struct GraphqlFormatOptions {
     quote_style: QuoteStyle,
     attribute_position: AttributePosition,
     bracket_spacing: BracketSpacing,
+    /// Whether to add a trailing newline at the end of the file. Defaults to true.
+    trailing_newline: TrailingNewline,
     _file_source: GraphqlFileSource,
 }
 
@@ -78,6 +80,7 @@ impl GraphqlFormatOptions {
             quote_style: QuoteStyle::default(),
             attribute_position: AttributePosition::default(),
             bracket_spacing: BracketSpacing::default(),
+            trailing_newline: TrailingNewline::default(),
         }
     }
 
@@ -111,6 +114,11 @@ impl GraphqlFormatOptions {
         self
     }
 
+    pub fn with_trailing_newline(mut self, trailing_newline: TrailingNewline) -> Self {
+        self.trailing_newline = trailing_newline;
+        self
+    }
+
     pub fn set_indent_style(&mut self, indent_style: IndentStyle) {
         self.indent_style = indent_style;
     }
@@ -135,12 +143,20 @@ impl GraphqlFormatOptions {
         self.bracket_spacing = bracket_spacing;
     }
 
+    pub fn set_trailing_newline(&mut self, trailing_newline: TrailingNewline) {
+        self.trailing_newline = trailing_newline;
+    }
+
     pub fn bracket_spacing(&self) -> BracketSpacing {
         self.bracket_spacing
     }
 
     pub fn quote_style(&self) -> QuoteStyle {
         self.quote_style
+    }
+
+    pub fn trailing_newline(&self) -> TrailingNewline {
+        self.trailing_newline
     }
 }
 
@@ -161,6 +177,10 @@ impl FormatOptions for GraphqlFormatOptions {
         self.line_ending
     }
 
+    fn trailing_newline(&self) -> TrailingNewline {
+        self.trailing_newline
+    }
+
     fn as_print_options(&self) -> PrinterOptions {
         PrinterOptions::from(self)
     }
@@ -173,6 +193,7 @@ impl fmt::Display for GraphqlFormatOptions {
         writeln!(f, "Line ending: {}", self.line_ending)?;
         writeln!(f, "Line width: {}", self.line_width.value())?;
         writeln!(f, "Bracket spacing: {}", self.bracket_spacing.value())?;
-        writeln!(f, "Quote style: {}", self.quote_style)
+        writeln!(f, "Quote style: {}", self.quote_style)?;
+        writeln!(f, "Trailing newline: {}", self.trailing_newline.value())
     }
 }

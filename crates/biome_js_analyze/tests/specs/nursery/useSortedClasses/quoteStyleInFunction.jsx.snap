@@ -30,6 +30,10 @@ quoteStyleInFunction.jsx:2:4 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     3 │ tw({ base: "content-[''] absolute" });
     4 │ tw({ variant: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } });
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
      1  1 │   // functions
@@ -52,6 +56,10 @@ quoteStyleInFunction.jsx:3:12 lint/nursery/useSortedClasses  FIXABLE  ━━━�
       │            ^^^^^^^^^^^^^^^^^^^^^^^
     4 │ tw({ variant: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } });
     5 │ tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center');
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
   
@@ -77,6 +85,10 @@ quoteStyleInFunction.jsx:4:23 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     5 │ tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center');
     6 │ 
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
      2  2 │   tw("content-[''] absolute");
@@ -100,6 +112,10 @@ quoteStyleInFunction.jsx:4:55 lint/nursery/useSortedClasses  FIXABLE  ━━━�
       │                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     5 │ tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center');
     6 │ 
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
   
@@ -125,6 +141,10 @@ quoteStyleInFunction.jsx:5:4 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     6 │ 
     7 │ // function in jsx attribute
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
      3  3 │   tw({ base: "content-[''] absolute" });
@@ -147,6 +167,10 @@ quoteStyleInFunction.jsx:8:16 lint/nursery/useSortedClasses  FIXABLE  ━━━�
        │                ^^^^^^^^^^^^^^^^^^^^^^^
      9 │ <div class={tw({ base: "content-[''] absolute" })}>Hello</div>;
     10 │ <div class={tw({ variant: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } })}>Hello</div>;
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
   
@@ -172,6 +196,10 @@ quoteStyleInFunction.jsx:9:24 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     10 │ <div class={tw({ variant: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } })}>Hello</div>;
     11 │ <div class={tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center')} />;
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
      7  7 │   // function in jsx attribute
@@ -195,6 +223,10 @@ quoteStyleInFunction.jsx:10:35 lint/nursery/useSortedClasses  FIXABLE  ━━━
        │                                   ^^^^^^^^^^^^^^^^^^^^^^^
     11 │ <div class={tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center')} />;
     12 │ 
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
   
@@ -220,6 +252,10 @@ quoteStyleInFunction.jsx:10:67 lint/nursery/useSortedClasses  FIXABLE  ━━━
     11 │ <div class={tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center')} />;
     12 │ 
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
      8  8 │   <div class={tw("content-[''] absolute")}>Hello</div>;
@@ -242,6 +278,10 @@ quoteStyleInFunction.jsx:11:16 lint/nursery/useSortedClasses  FIXABLE  ━━━
   > 11 │ <div class={tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center')} />;
        │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     12 │ 
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
   

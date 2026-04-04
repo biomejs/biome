@@ -325,7 +325,7 @@ macro_rules! format {
 ///
 /// [`Flat`]: crate::format_element::PrintMode::Flat
 /// [`Expanded`]: crate::format_element::PrintMode::Expanded
-/// [`MostExpanded`]: crate::format_element::BestFittingElement::most_expanded
+/// [`MostExpanded`]: crate::format_element::BestFittingVariants::most_expanded
 #[macro_export]
 macro_rules! best_fitting {
     ($least_expanded:expr, $($tail:expr),+ $(,)?) => {
@@ -336,7 +336,7 @@ macro_rules! best_fitting {
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
-    use crate::{FormatState, SimpleFormatOptions, VecBuffer, write};
+    use crate::{FormatState, SimpleFormatOptions, VecBuffer};
     use biome_rowan::TextSize;
 
     struct TestFormat;
@@ -385,8 +385,8 @@ mod tests {
 
     #[test]
     fn best_fitting_variants_print_as_lists() {
+        use crate::Formatted;
         use crate::prelude::*;
-        use crate::{Formatted, format, format_args};
 
         // The second variant below should be selected when printing at a width of 30
         let formatted_best_fitting = format!(

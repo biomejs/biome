@@ -338,28 +338,32 @@ fn svelte_openings() {
         HtmlLexContext::Regular,
         "{@debug}",
         SV_CURLY_AT: 2,
-        HTML_LITERAL: 6,
+        DEBUG_KW: 5,
+        R_CURLY: 1
     }
 
     assert_lex! {
         HtmlLexContext::Regular,
         "{/debug}",
         SV_CURLY_SLASH: 2,
-        HTML_LITERAL: 6,
+        DEBUG_KW: 5,
+        R_CURLY: 1
     }
 
     assert_lex! {
         HtmlLexContext::Regular,
         "{:debug}",
         SV_CURLY_COLON: 2,
-        HTML_LITERAL: 6,
+        DEBUG_KW: 5,
+        R_CURLY: 1
     }
 
     assert_lex! {
         HtmlLexContext::Regular,
         "{#debug}",
         SV_CURLY_HASH: 2,
-        HTML_LITERAL: 6,
+        DEBUG_KW: 5,
+        R_CURLY: 1
     }
 }
 
@@ -404,4 +408,90 @@ fn svelte_keywords() {
         DEBUG_KW: 5,
         WHITESPACE: 2,
     )
+}
+
+#[test]
+fn svelte_line_comment_inside_tag() {
+    assert_lex! {
+        HtmlLexContext::InsideTagSvelte,
+        "// comment\n",
+        COMMENT: 10,
+        NEWLINE: 1,
+    }
+}
+
+#[test]
+fn svelte_line_comment_without_newline() {
+    assert_lex! {
+        HtmlLexContext::InsideTagSvelte,
+        "// comment",
+        COMMENT: 10,
+    }
+}
+
+#[test]
+fn svelte_block_comment_single_line() {
+    assert_lex! {
+        HtmlLexContext::InsideTagSvelte,
+        "/* comment */",
+        COMMENT: 13,
+    }
+}
+
+#[test]
+fn svelte_block_comment_multiline() {
+    assert_lex! {
+        HtmlLexContext::InsideTagSvelte,
+        "/* line1\nline2 */",
+        COMMENT: 17,
+    }
+}
+
+#[test]
+fn plain_slash_inside_tag_not_a_comment() {
+    assert_lex! {
+        HtmlLexContext::InsideTag,
+        "/",
+        SLASH: 1,
+    }
+}
+
+#[test]
+fn plain_double_slash_inside_tag_not_a_comment() {
+    assert_lex! {
+        HtmlLexContext::InsideTag,
+        "//",
+        SLASH: 1,
+        SLASH: 1,
+    }
+}
+
+#[test]
+fn plain_slash_asterisk_inside_tag_not_a_comment() {
+    assert_lex! {
+        HtmlLexContext::InsideTag,
+        "/*",
+        SLASH: 1,
+        HTML_LITERAL: 1,
+    }
+}
+
+#[test]
+fn svelte_slash_remains_slash_in_svelte_context() {
+    assert_lex! {
+        HtmlLexContext::InsideTagSvelte,
+        "/",
+        SLASH: 1,
+    }
+}
+
+#[test]
+fn svelte_slash_after_comment() {
+    assert_lex! {
+        HtmlLexContext::InsideTagSvelte,
+        "// comment\n/",
+        COMMENT: 10,
+        NEWLINE: 1,
+        SLASH: 1,
+    }
 }

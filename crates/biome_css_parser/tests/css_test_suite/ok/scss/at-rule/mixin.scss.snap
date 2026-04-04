@@ -1,0 +1,332 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@mixin button {
+  border-radius: 4px;
+}
+
+@mixin size($width, $height: $width, $args...) {
+  width: $width;
+
+  @if $height > 0 {
+    height: $height;
+  }
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: ScssMixinAtRule {
+                mixin_token: MIXIN_KW@1..7 "mixin" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@7..14 "button" [] [Whitespace(" ")],
+                },
+                parameters: missing (optional),
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@14..15 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@15..31 "border-radius" [Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                    colon_token: COLON@31..33 ":" [] [Whitespace(" ")],
+                                    value: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            CssRegularDimension {
+                                                value_token: CSS_NUMBER_LITERAL@33..34 "4" [] [],
+                                                unit_token: IDENT@34..36 "px" [] [],
+                                            },
+                                        ],
+                                    },
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@36..37 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@37..39 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@39..42 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssMixinAtRule {
+                mixin_token: MIXIN_KW@42..48 "mixin" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@48..52 "size" [] [],
+                },
+                parameters: ScssParameterList {
+                    l_paren_token: L_PAREN@52..53 "(" [] [],
+                    items: ScssParameterItemList [
+                        ScssParameter {
+                            name: ScssIdentifier {
+                                dollar_token: DOLLAR@53..54 "$" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@54..59 "width" [] [],
+                                },
+                            },
+                            default_value: missing (optional),
+                            ellipsis_token: missing (optional),
+                        },
+                        COMMA@59..61 "," [] [Whitespace(" ")],
+                        ScssParameter {
+                            name: ScssIdentifier {
+                                dollar_token: DOLLAR@61..62 "$" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@62..68 "height" [] [],
+                                },
+                            },
+                            default_value: ScssParameterDefaultValue {
+                                colon_token: COLON@68..70 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssIdentifier {
+                                            dollar_token: DOLLAR@70..71 "$" [] [],
+                                            name: CssIdentifier {
+                                                value_token: IDENT@71..76 "width" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                            ellipsis_token: missing (optional),
+                        },
+                        COMMA@76..78 "," [] [Whitespace(" ")],
+                        ScssParameter {
+                            name: ScssIdentifier {
+                                dollar_token: DOLLAR@78..79 "$" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@79..83 "args" [] [],
+                                },
+                            },
+                            default_value: missing (optional),
+                            ellipsis_token: DOT3@83..86 "..." [] [],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@86..88 ")" [] [Whitespace(" ")],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@88..89 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@89..97 "width" [Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                    colon_token: COLON@97..99 ":" [] [Whitespace(" ")],
+                                    value: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            ScssIdentifier {
+                                                dollar_token: DOLLAR@99..100 "$" [] [],
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@100..105 "width" [] [],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@105..106 ";" [] [],
+                        },
+                        CssAtRule {
+                            at_token: AT@106..111 "@" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
+                            rule: ScssIfAtRule {
+                                if_token: IF_KW@111..114 "if" [] [Whitespace(" ")],
+                                condition: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssBinaryExpression {
+                                            left: ScssIdentifier {
+                                                dollar_token: DOLLAR@114..115 "$" [] [],
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@115..122 "height" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                            operator: R_ANGLE@122..124 ">" [] [Whitespace(" ")],
+                                            right: CssNumber {
+                                                value_token: CSS_NUMBER_LITERAL@124..126 "0" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                    ],
+                                },
+                                block: CssDeclarationOrRuleBlock {
+                                    l_curly_token: L_CURLY@126..127 "{" [] [],
+                                    items: CssDeclarationOrRuleList [
+                                        CssDeclarationWithSemicolon {
+                                            declaration: CssDeclaration {
+                                                property: CssGenericProperty {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@127..138 "height" [Newline("\n"), Whitespace("    ")] [],
+                                                    },
+                                                    colon_token: COLON@138..140 ":" [] [Whitespace(" ")],
+                                                    value: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            ScssIdentifier {
+                                                                dollar_token: DOLLAR@140..141 "$" [] [],
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@141..147 "height" [] [],
+                                                                },
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                                important: missing (optional),
+                                            },
+                                            semicolon_token: SEMICOLON@147..148 ";" [] [],
+                                        },
+                                    ],
+                                    r_curly_token: R_CURLY@148..152 "}" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                else_clause: missing (optional),
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@152..154 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@154..155 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..155
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..154
+    0: CSS_AT_RULE@0..39
+      0: AT@0..1 "@" [] []
+      1: SCSS_MIXIN_AT_RULE@1..39
+        0: MIXIN_KW@1..7 "mixin" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@7..14
+          0: IDENT@7..14 "button" [] [Whitespace(" ")]
+        2: (empty)
+        3: CSS_DECLARATION_OR_RULE_BLOCK@14..39
+          0: L_CURLY@14..15 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@15..37
+            0: CSS_DECLARATION_WITH_SEMICOLON@15..37
+              0: CSS_DECLARATION@15..36
+                0: CSS_GENERIC_PROPERTY@15..36
+                  0: CSS_IDENTIFIER@15..31
+                    0: IDENT@15..31 "border-radius" [Newline("\n"), Whitespace("  ")] []
+                  1: COLON@31..33 ":" [] [Whitespace(" ")]
+                  2: SCSS_EXPRESSION@33..36
+                    0: SCSS_EXPRESSION_ITEM_LIST@33..36
+                      0: CSS_REGULAR_DIMENSION@33..36
+                        0: CSS_NUMBER_LITERAL@33..34 "4" [] []
+                        1: IDENT@34..36 "px" [] []
+                1: (empty)
+              1: SEMICOLON@36..37 ";" [] []
+          2: R_CURLY@37..39 "}" [Newline("\n")] []
+    1: CSS_AT_RULE@39..154
+      0: AT@39..42 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_MIXIN_AT_RULE@42..154
+        0: MIXIN_KW@42..48 "mixin" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@48..52
+          0: IDENT@48..52 "size" [] []
+        2: SCSS_PARAMETER_LIST@52..88
+          0: L_PAREN@52..53 "(" [] []
+          1: SCSS_PARAMETER_ITEM_LIST@53..86
+            0: SCSS_PARAMETER@53..59
+              0: SCSS_IDENTIFIER@53..59
+                0: DOLLAR@53..54 "$" [] []
+                1: CSS_IDENTIFIER@54..59
+                  0: IDENT@54..59 "width" [] []
+              1: (empty)
+              2: (empty)
+            1: COMMA@59..61 "," [] [Whitespace(" ")]
+            2: SCSS_PARAMETER@61..76
+              0: SCSS_IDENTIFIER@61..68
+                0: DOLLAR@61..62 "$" [] []
+                1: CSS_IDENTIFIER@62..68
+                  0: IDENT@62..68 "height" [] []
+              1: SCSS_PARAMETER_DEFAULT_VALUE@68..76
+                0: COLON@68..70 ":" [] [Whitespace(" ")]
+                1: SCSS_EXPRESSION@70..76
+                  0: SCSS_EXPRESSION_ITEM_LIST@70..76
+                    0: SCSS_IDENTIFIER@70..76
+                      0: DOLLAR@70..71 "$" [] []
+                      1: CSS_IDENTIFIER@71..76
+                        0: IDENT@71..76 "width" [] []
+              2: (empty)
+            3: COMMA@76..78 "," [] [Whitespace(" ")]
+            4: SCSS_PARAMETER@78..86
+              0: SCSS_IDENTIFIER@78..83
+                0: DOLLAR@78..79 "$" [] []
+                1: CSS_IDENTIFIER@79..83
+                  0: IDENT@79..83 "args" [] []
+              1: (empty)
+              2: DOT3@83..86 "..." [] []
+          2: R_PAREN@86..88 ")" [] [Whitespace(" ")]
+        3: CSS_DECLARATION_OR_RULE_BLOCK@88..154
+          0: L_CURLY@88..89 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@89..152
+            0: CSS_DECLARATION_WITH_SEMICOLON@89..106
+              0: CSS_DECLARATION@89..105
+                0: CSS_GENERIC_PROPERTY@89..105
+                  0: CSS_IDENTIFIER@89..97
+                    0: IDENT@89..97 "width" [Newline("\n"), Whitespace("  ")] []
+                  1: COLON@97..99 ":" [] [Whitespace(" ")]
+                  2: SCSS_EXPRESSION@99..105
+                    0: SCSS_EXPRESSION_ITEM_LIST@99..105
+                      0: SCSS_IDENTIFIER@99..105
+                        0: DOLLAR@99..100 "$" [] []
+                        1: CSS_IDENTIFIER@100..105
+                          0: IDENT@100..105 "width" [] []
+                1: (empty)
+              1: SEMICOLON@105..106 ";" [] []
+            1: CSS_AT_RULE@106..152
+              0: AT@106..111 "@" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
+              1: SCSS_IF_AT_RULE@111..152
+                0: IF_KW@111..114 "if" [] [Whitespace(" ")]
+                1: SCSS_EXPRESSION@114..126
+                  0: SCSS_EXPRESSION_ITEM_LIST@114..126
+                    0: SCSS_BINARY_EXPRESSION@114..126
+                      0: SCSS_IDENTIFIER@114..122
+                        0: DOLLAR@114..115 "$" [] []
+                        1: CSS_IDENTIFIER@115..122
+                          0: IDENT@115..122 "height" [] [Whitespace(" ")]
+                      1: R_ANGLE@122..124 ">" [] [Whitespace(" ")]
+                      2: CSS_NUMBER@124..126
+                        0: CSS_NUMBER_LITERAL@124..126 "0" [] [Whitespace(" ")]
+                2: CSS_DECLARATION_OR_RULE_BLOCK@126..152
+                  0: L_CURLY@126..127 "{" [] []
+                  1: CSS_DECLARATION_OR_RULE_LIST@127..148
+                    0: CSS_DECLARATION_WITH_SEMICOLON@127..148
+                      0: CSS_DECLARATION@127..147
+                        0: CSS_GENERIC_PROPERTY@127..147
+                          0: CSS_IDENTIFIER@127..138
+                            0: IDENT@127..138 "height" [Newline("\n"), Whitespace("    ")] []
+                          1: COLON@138..140 ":" [] [Whitespace(" ")]
+                          2: SCSS_EXPRESSION@140..147
+                            0: SCSS_EXPRESSION_ITEM_LIST@140..147
+                              0: SCSS_IDENTIFIER@140..147
+                                0: DOLLAR@140..141 "$" [] []
+                                1: CSS_IDENTIFIER@141..147
+                                  0: IDENT@141..147 "height" [] []
+                        1: (empty)
+                      1: SEMICOLON@147..148 ";" [] []
+                  2: R_CURLY@148..152 "}" [Newline("\n"), Whitespace("  ")] []
+                3: (empty)
+          2: R_CURLY@152..154 "}" [Newline("\n")] []
+  2: EOF@154..155 "" [Newline("\n")] []
+
+```

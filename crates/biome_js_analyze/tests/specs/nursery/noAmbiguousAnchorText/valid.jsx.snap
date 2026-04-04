@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+const Valid1 = () => {
+	return <a>documentation</a>;
+}
+
+const Valid2 = () => {
+	return <a>${here}</a>;
+}
+
+const Valid3 = () => {
+	return <a aria-label="tutorial on using eslint-plugin-jsx-a11y">click here</a>;
+}
+
+const Valid4 = () => {
+	return <a><span aria-label="tutorial on using eslint-plugin-jsx-a11y">click here</span></a>;
+}
+
+const Valid5 = () => {
+	return <a><img alt="documentation" /></a>;
+}
+
+```

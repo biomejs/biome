@@ -11,3 +11,15 @@ const val = promise ? 123 : 456;
 while (promise) {
   // Do something
 }
+
+const a = (): boolean | Promise<boolean> => {
+  return Promise.resolve(true);
+}
+
+if (a()) {
+  // Do something
+}
+
+while (a()) {
+  // Do something
+}

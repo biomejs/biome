@@ -1,18 +1,17 @@
+use biome_css_syntax::{AnyCssRoot, CssSyntaxKind, CssSyntaxToken};
+use biome_rowan::{AstNode, AstPtr, TextRange, TokenText};
+use rustc_hash::FxHashMap;
 use std::collections::BTreeMap;
 
-use biome_css_syntax::CssRoot;
-use biome_rowan::{AstNode, TextRange};
-use rustc_hash::FxHashMap;
-
 use super::model::{
-    CssGlobalCustomVariable, CssModelDeclaration, Rule, RuleId, Selector, SemanticModel,
-    SemanticModelData, Specificity,
+    CssGlobalCustomVariable, CssModelDeclaration, ResolvedSelector, Rule, RuleId, Selector,
+    SemanticModel, SemanticModelData, Specificity, selector_tokens,
 };
 use crate::events::SemanticEvent;
 use crate::model::AnyRuleStart;
 
 pub struct SemanticModelBuilder {
-    root: CssRoot,
+    root: AnyCssRoot,
     /// List of all top-level rules in the CSS file
     rules: Vec<Rule>,
     global_custom_variables: FxHashMap<String, CssGlobalCustomVariable>,
@@ -27,7 +26,7 @@ pub struct SemanticModelBuilder {
 }
 
 impl SemanticModelBuilder {
-    pub fn new(root: CssRoot) -> Self {
+    pub fn new(root: AnyCssRoot) -> Self {
         Self {
             root,
             rules: Vec::new(),
@@ -51,8 +50,9 @@ impl SemanticModelBuilder {
             if let Some(parent_id) = &current_parent_id {
                 let rule = self.rules_by_id.get(parent_id);
                 if let Some(rule) = rule {
+                    let typed_node = rule.node.to_node(self.root.syntax());
                     if matches!(
-                        rule.node(),
+                        typed_node,
                         AnyRuleStart::CssMediaAtRule(_) | AnyRuleStart::CssSupportsAtRule(_)
                     ) {
                         current_parent_id = iterator
@@ -83,8 +83,9 @@ impl SemanticModelBuilder {
             if let Some(parent_id) = &current_parent_id {
                 let rule = self.rules_by_id.get(parent_id);
                 if let Some(rule) = rule {
+                    let typed_node = rule.node.to_node(self.root.syntax());
                     if matches!(
-                        rule.node(),
+                        typed_node,
                         AnyRuleStart::CssMediaAtRule(_) | AnyRuleStart::CssSupportsAtRule(_)
                     ) {
                         current_parent_id = iterator
@@ -113,13 +114,15 @@ impl SemanticModelBuilder {
 
     pub fn build(self) -> SemanticModel {
         let data = SemanticModelData {
-            root: self.root,
             rules: self.rules,
             global_custom_variables: self.global_custom_variables,
             range_to_rule: self.range_to_rule,
             rules_by_id: self.rules_by_id,
         };
-        SemanticModel::new(data)
+        SemanticModel::new(
+            data,
+            self.root.syntax().as_send().expect("To be a root node"),
+        )
     }
 
     #[inline]
@@ -133,7 +136,7 @@ impl SemanticModelBuilder {
 
                 let new_rule = Rule {
                     id: new_rule_id,
-                    node,
+                    node: AstPtr::new(&node),
                     selectors: Vec::new(),
                     declarations: Vec::new(),
                     parent_id,
@@ -157,10 +160,10 @@ impl SemanticModelBuilder {
 
                     if has_parent {
                         self.range_to_rule
-                            .insert(completed_rule.range(), completed_rule.clone());
+                            .insert(completed_rule.range(&self.root), completed_rule.clone());
                     } else {
                         self.range_to_rule
-                            .insert(completed_rule.range(), completed_rule.clone());
+                            .insert(completed_rule.range(&self.root), completed_rule.clone());
                         self.rules.push(completed_rule.clone());
                     }
                 }
@@ -171,9 +174,9 @@ impl SemanticModelBuilder {
                         let nesting_level = node.nesting_level();
                         self.get_parent_selector_at(nesting_level)
                             .map(|rule| {
-                                rule.selectors()
+                                rule.selectors
                                     .iter()
-                                    .map(|s| s.specificity())
+                                    .map(|s| s.specificity)
                                     .max()
                                     .unwrap_or_default()
                             })
@@ -181,21 +184,46 @@ impl SemanticModelBuilder {
                     } else {
                         self.get_last_parent_selector_rule()
                             .map(|rule| {
-                                rule.selectors()
+                                rule.selectors
                                     .iter()
-                                    .map(|s| s.specificity())
+                                    .map(|s| s.specificity)
                                     .max()
                                     .unwrap_or_default()
                             })
                             .unwrap_or_default()
                     };
 
+                    // Collect non-trivia tokens for the current selector node.
+                    // We keep CssSyntaxToken (not TokenText) so we can inspect .kind()
+                    // to detect AMP tokens during resolution.
+                    let current_tokens = selector_tokens(&node);
+
+                    // Resolve against parent selectors (one ResolvedSelector per parent).
+                    let parent_rule = self.get_last_parent_selector_rule();
+                    let resolved_selectors: Vec<ResolvedSelector> =
+                        if let Some(parent_rule) = parent_rule {
+                            resolve_selector(&current_tokens, &parent_rule.selectors)
+                        } else {
+                            // Top-level selector: convert directly to (kind, TokenText) pairs.
+                            vec![ResolvedSelector(
+                                current_tokens
+                                    .iter()
+                                    .map(|t| (t.kind(), t.token_text_trimmed()))
+                                    .collect(),
+                            )]
+                        };
+
                     let current_rule = self.rules_by_id.get_mut(current_rule).unwrap();
                     let combined = parent_specificity + specificity;
-                    current_rule.selectors.push(Selector {
-                        node,
-                        specificity: combined,
-                    });
+
+                    for resolved in resolved_selectors {
+                        current_rule.selectors.push(Selector {
+                            node: AstPtr::new(&node),
+                            resolved,
+                            specificity: combined,
+                        });
+                    }
+
                     if combined > current_rule.specificity {
                         current_rule.specificity = combined;
                     }
@@ -216,15 +244,15 @@ impl SemanticModelBuilder {
                         self.global_custom_variables.insert(
                             property_name,
                             CssGlobalCustomVariable::Root(CssModelDeclaration {
-                                declaration: node.clone(),
-                                property: property.clone(),
+                                declaration: AstPtr::new(&node),
+                                property: AstPtr::new(&property),
                                 value: value.clone(),
                             }),
                         );
                     }
                     current_rule.declarations.push(CssModelDeclaration {
-                        declaration: node,
-                        property,
+                        declaration: AstPtr::new(&node),
+                        property: AstPtr::new(&property),
                         value,
                     });
                 }
@@ -246,7 +274,7 @@ impl SemanticModelBuilder {
                 self.global_custom_variables.insert(
                     property_name,
                     CssGlobalCustomVariable::AtProperty {
-                        property: property.clone(),
+                        property: AstPtr::new(&property),
                         initial_value,
                         syntax,
                         inherits,
@@ -256,4 +284,57 @@ impl SemanticModelBuilder {
             }
         }
     }
+}
+
+/// Synthetic space-literal `(kind, TokenText)` pair used as the implicit descendant
+/// combinator when a nested selector contains no `&` reference.
+fn space_combinator() -> (CssSyntaxKind, TokenText) {
+    use biome_rowan::SyntaxKind;
+    (
+        CssSyntaxKind::CSS_SPACE_LITERAL,
+        TokenText::new_raw(CssSyntaxKind::CSS_SPACE_LITERAL.to_raw(), " "),
+    )
+}
+
+/// Resolves the `current` token sequence against each parent [`Selector`],
+/// producing one [`ResolvedSelector`] per parent selector.
+///
+/// Resolution rules (per the CSS nesting spec):
+/// - If any token in `current` is an `AMP` (`&`), every such occurrence is
+///   replaced in-place by the full token sequence of the parent selector.
+/// - If there is no `&`, the parent token sequence is prepended and a
+///   synthetic space-literal token is inserted as the descendant combinator.
+///
+/// Tokens are stored as `(CssSyntaxKind, TokenText)` pairs so that the
+/// `Display` impl can reconstruct canonical whitespace around combinators.
+fn resolve_selector(current: &[CssSyntaxToken], parents: &[Selector]) -> Vec<ResolvedSelector> {
+    let has_amp = current.iter().any(|t| t.kind() == CssSyntaxKind::AMP);
+
+    parents
+        .iter()
+        .map(|parent| {
+            let parent_tokens = &parent.resolved.0;
+            if has_amp {
+                // Replace every AMP token with the full parent token sequence.
+                let tokens = current
+                    .iter()
+                    .flat_map(|t| -> Vec<(CssSyntaxKind, TokenText)> {
+                        if t.kind() == CssSyntaxKind::AMP {
+                            parent_tokens.clone()
+                        } else {
+                            vec![(t.kind(), t.token_text_trimmed())]
+                        }
+                    })
+                    .collect();
+                ResolvedSelector(tokens)
+            } else {
+                // Prepend parent tokens + implicit descendant combinator.
+                let mut tokens = Vec::with_capacity(parent_tokens.len() + 1 + current.len());
+                tokens.extend(parent_tokens.iter().cloned());
+                tokens.push(space_combinator());
+                tokens.extend(current.iter().map(|t| (t.kind(), t.token_text_trimmed())));
+                ResolvedSelector(tokens)
+            }
+        })
+        .collect()
 }

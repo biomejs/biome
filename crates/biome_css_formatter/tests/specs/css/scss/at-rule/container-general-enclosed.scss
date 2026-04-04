@@ -1,0 +1,17 @@
+@container (foo(bar: baz)) {
+  .a { color: red; }
+}
+
+@container (foo(bar: baz)) and (width > 100px) {
+  .b { color: blue; }
+}
+
+@container (foo(url("a.svg" namespace.fn(test)))) {
+  .c { color: green; }
+}
+
+@container  main-layout  and( test )  {  }
+
+@container  main-layout  or( test )  {  }
+
+@container  main-layout  foo( url("a.svg" fn(test) ) )  {  }

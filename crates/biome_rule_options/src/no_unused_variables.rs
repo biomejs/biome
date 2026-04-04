@@ -10,7 +10,7 @@ pub struct NoUnusedVariablesOptions {
 }
 
 impl NoUnusedVariablesOptions {
-    pub const DEFAULT_IGNORE_REST_SIBLINGS: bool = false;
+    pub const DEFAULT_IGNORE_REST_SIBLINGS: bool = true;
 
     /// Returns [`Self::ignore_rest_siblings`] if it is set.
     /// Otherwise, returns [`Self::DEFAULT_IGNORE_REST_SIBLINGS`].

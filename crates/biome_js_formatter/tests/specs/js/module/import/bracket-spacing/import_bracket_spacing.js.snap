@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/import/bracket-spacing/import_bracket_spacing.js
 ---
+
 # Input
 
 ```js
@@ -39,79 +40,20 @@ import(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
------
-
-```js
-import { a, b, c } from "D";
-
-import { adsadasdasdasdasdasdasdasdasdasdas, b, c } from "W";
-
-import TheDefault, { named } from "foo";
-
-import { named } from "foo" with { type: "json" };
-
-import "very_long_import_very_long_import_very" with {
-	// something good is here
-	type: /****/ "json",
-};
-
-// Single named alias import
-import { foo as bar } from "foo";
-// Multiple named imports
-import { foo as baz, aaa } from "foo";
-
-import(
-	aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
-	{ assert: { type: "json" } }
-);
+```json
+{
+  "$schema": "../../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "javascript": {
+    "formatter": {
+      "bracketSpacing": false
+    }
+  }
+}
 ```
 
-# Lines exceeding max width of 80 characters
-```
-   20: 	aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
-```
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: false
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
------
+# Formatted
 
 ```js
 import {a, b, c} from "D";
@@ -136,6 +78,7 @@ import(
 	aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
 	{assert: {type: "json"}}
 );
+
 ```
 
 # Lines exceeding max width of 80 characters

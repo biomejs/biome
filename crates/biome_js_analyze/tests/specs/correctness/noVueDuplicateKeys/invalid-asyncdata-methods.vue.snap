@@ -1,0 +1,48 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-asyncdata-methods.vue
+---
+# Input
+```vue
+<script>
+export default {
+  asyncData() {
+    return {
+      handleClick: 'data'
+    }
+  },
+  methods: {
+    handleClick() {
+      console.log('method');
+    }
+  }
+}
+</script>
+```
+
+# Diagnostics
+```
+invalid-asyncdata-methods.vue:5:7 lint/correctness/noVueDuplicateKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate key handleClick found in Vue component.
+  
+    3 │   asyncData() {
+    4 │     return {
+  > 5 │       handleClick: 'data'
+      │       ^^^^^^^^^^^
+    6 │     }
+    7 │   },
+  
+  i Key handleClick is also defined here.
+  
+     7 │   },
+     8 │   methods: {
+   > 9 │     handleClick() {
+       │     ^^^^^^^^^^^
+    10 │       console.log('method');
+    11 │     }
+  
+  i Keys defined in different Vue component options (props, data, methods, computed) can conflict when accessed in the template. Rename the key to avoid conflicts.
+  
+
+```

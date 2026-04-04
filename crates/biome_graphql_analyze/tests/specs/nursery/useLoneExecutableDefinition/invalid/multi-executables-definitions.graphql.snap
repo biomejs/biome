@@ -1,0 +1,120 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: multi-executables-definitions.graphql
+---
+# Input
+```graphql
+# should generate diagnostics
+query Valid {
+	id
+}
+{
+	id
+}
+fragment Bar on Bar {
+	id
+}
+mutation ($name: String!) {
+	createFoo {
+		name
+	}
+}
+mutation Baz($name: String!) {
+	createFoo {
+		name
+	}
+}
+subscription {
+	id
+}
+subscription Sub {
+	id
+}
+
+```
+
+# Diagnostics
+```
+multi-executables-definitions.graphql:5:1 lint/nursery/useLoneExecutableDefinition ━━━━━━━━━━━━━━━━━
+
+  i Document contains multiple definitions. This definition should be in a separate file.
+  
+    3 │ 	id
+    4 │ }
+  > 5 │ {
+      │ ^
+  > 6 │ 	id
+  > 7 │ }
+      │ ^
+    8 │ fragment Bar on Bar {
+    9 │ 	id
+  
+  i This definition also should be in a separate file.
+  
+     6 │ 	id
+     7 │ }
+   > 8 │ fragment Bar on Bar {
+       │ ^^^^^^^^^^^^^^^^^^^^^
+   > 9 │ 	id
+  > 10 │ }
+       │ ^
+    11 │ mutation ($name: String!) {
+    12 │ 	createFoo {
+  
+  i This definition also should be in a separate file.
+  
+     9 │ 	id
+    10 │ }
+  > 11 │ mutation ($name: String!) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 12 │ 	createFoo {
+  > 13 │ 		name
+  > 14 │ 	}
+  > 15 │ }
+       │ ^
+    16 │ mutation Baz($name: String!) {
+    17 │ 	createFoo {
+  
+  i This definition also should be in a separate file.
+  
+    14 │ 	}
+    15 │ }
+  > 16 │ mutation Baz($name: String!) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 17 │ 	createFoo {
+  > 18 │ 		name
+  > 19 │ 	}
+  > 20 │ }
+       │ ^
+    21 │ subscription {
+    22 │ 	id
+  
+  i This definition also should be in a separate file.
+  
+    19 │ 	}
+    20 │ }
+  > 21 │ subscription {
+       │ ^^^^^^^^^^^^^^
+  > 22 │ 	id
+  > 23 │ }
+       │ ^
+    24 │ subscription Sub {
+    25 │ 	id
+  
+  i This definition also should be in a separate file.
+  
+    22 │ 	id
+    23 │ }
+  > 24 │ subscription Sub {
+       │ ^^^^^^^^^^^^^^^^^^
+  > 25 │ 	id
+  > 26 │ }
+       │ ^
+    27 │ 
+  
+  i Queries, mutations, subscriptions or fragments each must be defined in separate files.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

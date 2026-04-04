@@ -20,14 +20,13 @@ use futures::future::ready;
 use rustc_hash::FxHashMap;
 use serde_json::json;
 use std::panic::RefUnwindSafe;
-use std::str::FromStr;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use tokio::io::{AsyncRead, AsyncWrite};
 use tokio::sync::{Notify, watch};
 use tokio::task::spawn_blocking;
 use tower_lsp_server::jsonrpc::Result as LspResult;
-use tower_lsp_server::{ClientSocket, UriExt, lsp_types::*};
+use tower_lsp_server::{ClientSocket, ls_types::*};
 use tower_lsp_server::{LanguageServer, LspService, Server};
 use tracing::{debug, error, info, instrument, warn};
 
@@ -173,20 +172,21 @@ impl LSPServer {
                 CapabilityStatus::Enable(Some(json!(DidChangeWatchedFilesRegistrationOptions {
                     watchers
                 })))
-            } else if let Some(base_path) = self.session.base_path() {
+            } else if let Some(base_uri) = self.session.base_uri() {
+                let base_path = self.session.base_path();
                 let value = DidChangeWatchedFilesRegistrationOptions {
                     watchers: vec![
                         FileSystemWatcher {
                             glob_pattern: GlobPattern::Relative(RelativePattern {
                                 pattern: "**/biome.{json,jsonc}".to_string(),
-                                base_uri: OneOf::Right(Uri::from_str(base_path.as_str()).unwrap()),
+                                base_uri: OneOf::Right(base_uri),
                             }),
                             kind: Some(WatchKind::all()),
                         },
                         FileSystemWatcher {
-                            glob_pattern: GlobPattern::String(format!(
-                                "{}/.editorconfig",
-                                base_path.as_path().as_str()
+                            glob_pattern: GlobPattern::String(base_path.map_or_else(
+                                || "**/.editorconfig".to_string(),
+                                |p| format!("{}/.editorconfig", p.as_path().as_str()),
                             )),
                             kind: Some(WatchKind::all()),
                         },
@@ -262,6 +262,7 @@ impl LSPServer {
                                 .map(|item| CodeActionKind::from(*item))
                                 .collect::<Vec<_>>(),
                         ),
+                        resolve_provider: Some(self.session.supports_code_action_resolve()),
                         ..Default::default()
                     }
                 ))))
@@ -334,7 +335,7 @@ impl LanguageServer for LSPServer {
     #[tracing::instrument(level = "debug", skip_all)]
     async fn initialized(&self, _params: InitializedParams) {
         info!("Attempting to load the configuration from 'biome.json' file");
-        self.session.load_extension_settings().await;
+        self.session.load_extension_settings(None).await;
         self.session.load_workspace_settings(false).await;
 
         self.session.set_initialized();
@@ -356,8 +357,12 @@ impl LanguageServer for LSPServer {
 
     #[tracing::instrument(level = "debug", skip(self))]
     async fn did_change_configuration(&self, params: DidChangeConfigurationParams) {
-        let _ = params;
-        self.session.load_extension_settings().await;
+        let settings = params.settings;
+        self.session.load_extension_settings(Some(settings)).await;
+        // Reload the workspace configuration so that settings such as
+        // `configurationPath` take effect immediately without requiring the
+        // user to restart the server or open a new file.
+        self.session.load_workspace_settings(true).await;
         self.setup_capabilities().await;
         self.session.update_all_diagnostics().await;
     }
@@ -381,7 +386,7 @@ impl LanguageServer for LSPServer {
                         || watched_file.ends_with(".gitignore")
                         || watched_file.ends_with(".ignore"))
                 {
-                    self.session.load_extension_settings().await;
+                    self.session.load_extension_settings(None).await;
                     self.session.load_workspace_settings(true).await;
                     self.setup_capabilities().await;
                     self.session.update_all_diagnostics().await;
@@ -441,7 +446,10 @@ impl LanguageServer for LSPServer {
 
         self.session
             .update_workspace_folders(params.event.added, params.event.removed);
+        self.session.clear_configuration_cache().await;
         self.session.load_workspace_settings(true).await;
+        self.setup_capabilities().await;
+        self.session.update_all_diagnostics().await;
     }
 
     async fn code_action(&self, params: CodeActionParams) -> LspResult<Option<CodeActionResponse>> {
@@ -450,6 +458,20 @@ impl LanguageServer for LSPServer {
         });
 
         self.map_op_error(result).await
+    }
+
+    async fn code_action_resolve(&self, params: CodeAction) -> LspResult<CodeAction> {
+        let result = biome_diagnostics::panic::catch_unwind(move || {
+            handlers::analysis::code_action_resolve(&self.session, params)
+        });
+
+        match result {
+            Ok(result) => match result {
+                Ok(action) => Ok(action),
+                Err(err) => Err(into_lsp_error(err)),
+            },
+            Err(err) => Err(into_lsp_error(err)),
+        }
     }
 
     async fn formatting(

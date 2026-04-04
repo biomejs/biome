@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: graphql/definitions/input_object.graphql
 ---
+
 # Input
 
 ```graphql
@@ -66,20 +67,7 @@ input
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Bracket spacing: true
-Quote style: Double Quotes
------
+# Formatted
 
 ```graphql
 input Point2D {
@@ -107,4 +95,5 @@ input Point2D {
 input input @input {
 	input: input
 }
+
 ```

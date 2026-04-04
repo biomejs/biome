@@ -42,5 +42,8 @@ knowledge_base:
   code_guidelines:
     enabled: true
     filePatterns: [ "**/CLAUDE.md", "**/CONTRIBUTING.md" ]
+issue_enrichment:
+  auto_enrich:
+    enabled: false
 chat:
   auto_reply: false

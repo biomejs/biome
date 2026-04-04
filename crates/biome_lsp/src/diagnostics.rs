@@ -3,7 +3,7 @@ use anyhow::Error;
 use biome_diagnostics::print_diagnostic_to_string;
 use biome_service::WorkspaceError;
 use std::fmt::{Display, Formatter};
-use tower_lsp_server::lsp_types::MessageType;
+use tower_lsp_server::ls_types::MessageType;
 use tower_lsp_server::{Client, jsonrpc};
 
 #[derive(Debug)]

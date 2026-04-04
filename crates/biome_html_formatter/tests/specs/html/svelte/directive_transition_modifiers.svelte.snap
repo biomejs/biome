@@ -1,0 +1,23 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/directive_transition_modifiers.svelte
+---
+
+# Input
+
+```svelte
+<div transition:fade>Content</div>
+<p transition:slide|global>Global transition</p>
+<span transition:fly={{y: 200, duration: 500}}>Complex</span>
+
+```
+
+
+# Formatted
+
+```svelte
+<div transition:fade>Content</div>
+<p transition:slide|global>Global transition</p>
+<span transition:fly={{y: 200, duration: 500}}>Complex</span>
+
+```

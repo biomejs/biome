@@ -1,0 +1,90 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: issue9629.js
+---
+# Input
+```js
+const keyName =
+	obj[val] !== undefined
+		? // TS reverse mapped enum
+			obj[val]
+		: // Normal enum / `const object`
+			// TODO: Figure out a way to cache the names of commonly-used enum numbers for performance if needed
+			testEnumValueToKey(obj, val);
+
+call(
+	!condition
+		? consequent /*consequent-trailing*/
+		: alternate
+);
+
+```
+
+# Diagnostics
+```
+issue9629.js:2:2 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Invert blocks when performing a negation test.
+  
+    1 │ const keyName =
+  > 2 │ 	obj[val] !== undefined
+      │ 	^^^^^^^^^^^^^^^^^^^^^^
+  > 3 │ 		? // TS reverse mapped enum
+  > 4 │ 			obj[val]
+  > 5 │ 		: // Normal enum / `const object`
+  > 6 │ 			// TODO: Figure out a way to cache the names of commonly-used enum numbers for performance if needed
+  > 7 │ 			testEnumValueToKey(obj, val);
+      │ 			^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ call(
+  
+  i Safe fix: Invert the condition and the blocks.
+  
+     1  1 │   const keyName =
+     2    │ - → obj[val]·!==·undefined
+     3    │ - → → ?·//·TS·reverse·mapped·enum
+     4    │ - → → → obj[val]
+     5    │ - → → :·//·Normal·enum·/·`const·object`
+        2 │ + → obj[val]·===·undefined
+        3 │ + → → ?·//·Normal·enum·/·`const·object`
+     6  4 │         // TODO: Figure out a way to cache the names of commonly-used enum numbers for performance if needed
+     7    │ - → → → testEnumValueToKey(obj,·val);
+        5 │ + → → → testEnumValueToKey(obj,·val)
+        6 │ + → → :·//·TS·reverse·mapped·enum
+        7 │ + → → → obj[val];
+     8  8 │   
+     9  9 │   call(
+  
+
+```
+
+```
+issue9629.js:10:2 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Invert blocks when performing a negation test.
+  
+     9 │ call(
+  > 10 │ 	!condition
+       │ 	^^^^^^^^^^
+  > 11 │ 		? consequent /*consequent-trailing*/
+  > 12 │ 		: alternate
+       │ 		^^^^^^^^^^^
+    13 │ );
+    14 │ 
+  
+  i Safe fix: Invert the condition and the blocks.
+  
+     8  8 │   
+     9  9 │   call(
+    10    │ - → !condition
+    11    │ - → → ?·consequent·/*consequent-trailing*/
+    12    │ - → → :·alternate
+       10 │ + → condition
+       11 │ + → → ?·alternate
+       12 │ + → → :·consequent·/*consequent-trailing*/
+    13 13 │   );
+    14 14 │   
+  
+
+```

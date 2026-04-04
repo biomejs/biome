@@ -1,7 +1,7 @@
 use biome_analyze::{SUPPRESSION_INLINE_ACTION_CATEGORY, SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY};
 use biome_line_index::WideEncoding;
 use biome_lsp_converters::{PositionEncoding, negotiated_encoding};
-use tower_lsp_server::lsp_types::{
+use tower_lsp_server::ls_types::{
     ClientCapabilities, CodeActionKind, CodeActionOptions, CodeActionProviderCapability,
     DocumentOnTypeFormattingOptions, OneOf, PositionEncodingKind, ServerCapabilities,
     TextDocumentSyncCapability, TextDocumentSyncKind, WorkspaceFoldersServerCapabilities,
@@ -80,6 +80,7 @@ pub(crate) fn server_capabilities(capabilities: &ClientCapabilities) -> ServerCa
             if code_action.dynamic_registration.unwrap_or(false) {
                 None
             } else if code_action.code_action_literal_support.as_ref().is_some() {
+                let resolve_provider = code_action.resolve_support.is_some();
                 Some(CodeActionProviderCapability::from(CodeActionOptions {
                     code_action_kinds: Some(
                         DEFAULT_CODE_ACTION_CAPABILITIES
@@ -87,6 +88,7 @@ pub(crate) fn server_capabilities(capabilities: &ClientCapabilities) -> ServerCa
                             .map(|item| CodeActionKind::from(*item))
                             .collect::<Vec<_>>(),
                     ),
+                    resolve_provider: Some(resolve_provider),
                     ..Default::default()
                 }))
             } else {

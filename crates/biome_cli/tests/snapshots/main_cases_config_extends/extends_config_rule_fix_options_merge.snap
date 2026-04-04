@@ -57,9 +57,9 @@ test.js:1:9 lint/correctness/noUnusedVariables ━━━━━━━━━━━
   > 1 │ const { a, ...rest } = { a: 1, b: 2}; export { rest }
       │         ^
   
-  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
   
-  i You can use the ignoreRestSiblings option to ignore unused variables in an object destructuring with a spread.
+  i You can enable the ignoreRestSiblings option to ignore unused variables inside destructured objects with rest properties.
   
 
 ```

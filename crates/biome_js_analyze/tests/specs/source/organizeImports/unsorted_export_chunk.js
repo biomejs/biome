@@ -10,3 +10,4 @@ export * as S from "s";
 export { R } from "r";
 function f() {}
 export { A } from "a";
+export { X }

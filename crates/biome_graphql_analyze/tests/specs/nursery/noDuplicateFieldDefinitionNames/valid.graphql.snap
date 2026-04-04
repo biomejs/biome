@@ -1,0 +1,43 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: valid.graphql
+---
+# Input
+```graphql
+# should not generate diagnostics
+type SomeObjectA
+interface SomeInterfaceA
+input SomeInputObjectA
+
+# ---
+
+type SomeObjectB {
+	foo: String
+}
+
+interface SomeInterfaceB {
+	foo: String
+}
+
+input SomeInputObjectB {
+	foo: String
+}
+
+# ---
+
+type SomeObjectC {
+	foo: String
+	bar: String
+}
+
+interface SomeInterfaceC {
+	foo: String
+	bar: String
+}
+
+input SomeInputObjectC {
+	foo: String
+	bar: String
+}
+
+```

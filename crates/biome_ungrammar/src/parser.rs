@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use crate::{
     Grammar, Node, NodeData, Rule, Token, TokenData,
-    error::{Result, bail, format_err},
+    error::{Result, format_err},
     lexer::{self, CombinatorKind, TokenKind},
 };
 

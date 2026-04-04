@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-d.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup lang="ts">
+const props = defineProps({
+	kind: { type: String },
+	enabled: { type: Boolean },
+});
+
+const emit = defineEmits<{
+	(e: "update", value: string): void;
+}>();
+
+foo("someParam");
+foo<string>();
+</script>
+
+```

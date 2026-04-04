@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: graphql/definitions/directive_definition.graphql
 ---
+
 # Input
 
 ```graphql
@@ -44,20 +45,7 @@ on FIELD
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Bracket spacing: true
-Quote style: Double Quotes
------
+# Formatted
 
 ```graphql
 directive @example on FIELD
@@ -70,4 +58,5 @@ directive @example on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
 directive @delegateField(name: String!) repeatable on OBJECT | INTERFACE
 
 directive @directive(directive: directive) on FIELD
+
 ```

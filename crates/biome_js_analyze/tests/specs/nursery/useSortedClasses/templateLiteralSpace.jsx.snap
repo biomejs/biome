@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: templateLiteralSpace.jsx
-snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -27,13 +26,17 @@ templateLiteralSpace.jsx:2:26 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     3 │ 	<div class={`px-2 foo p-4 bar ${variable}`}/>
     4 │ 	<div class={`${variable}px-2 foo p-4 bar`}/>
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
     1 1 │   <>
     2   │ - → <div·class={`${variable}·px-2·foo·p-4·bar`}/>
       2 │ + → <div·class={`${variable}·foo·bar·p-4·px-2`}/>
-    3 3 │   	<div class={`px-2 foo p-4 bar ${variable}`}/>
-    4 4 │   	<div class={`${variable}px-2 foo p-4 bar`}/>
+    3 3 │     <div class={`px-2 foo p-4 bar ${variable}`}/>
+    4 4 │     <div class={`${variable}px-2 foo p-4 bar`}/>
   
 
 ```
@@ -50,14 +53,18 @@ templateLiteralSpace.jsx:3:15 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     4 │ 	<div class={`${variable}px-2 foo p-4 bar`}/>
     5 │ 	<div class={`px-2 foo p-4 bar${variable}`}/>
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
     1 1 │   <>
-    2 2 │   	<div class={`${variable} px-2 foo p-4 bar`}/>
+    2 2 │     <div class={`${variable} px-2 foo p-4 bar`}/>
     3   │ - → <div·class={`px-2·foo·p-4·bar·${variable}`}/>
       3 │ + → <div·class={`foo·bar·p-4·px-2·${variable}`}/>
-    4 4 │   	<div class={`${variable}px-2 foo p-4 bar`}/>
-    5 5 │   	<div class={`px-2 foo p-4 bar${variable}`}/>
+    4 4 │     <div class={`${variable}px-2 foo p-4 bar`}/>
+    5 5 │     <div class={`px-2 foo p-4 bar${variable}`}/>
   
 
 ```
@@ -74,14 +81,18 @@ templateLiteralSpace.jsx:4:30 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     5 │ 	<div class={`px-2 foo p-4 bar${variable}`}/>
     6 │ 	<div class={`bar-${variable} mx-2 m-5 bar-${variable} mx-1 m-5`}/>
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
-    2 2 │   	<div class={`${variable} px-2 foo p-4 bar`}/>
-    3 3 │   	<div class={`px-2 foo p-4 bar ${variable}`}/>
+    2 2 │     <div class={`${variable} px-2 foo p-4 bar`}/>
+    3 3 │     <div class={`px-2 foo p-4 bar ${variable}`}/>
     4   │ - → <div·class={`${variable}px-2·foo·p-4·bar`}/>
       4 │ + → <div·class={`${variable}px-2·foo·bar·p-4`}/>
-    5 5 │   	<div class={`px-2 foo p-4 bar${variable}`}/>
-    6 6 │   	<div class={`bar-${variable} mx-2 m-5 bar-${variable} mx-1 m-5`}/>
+    5 5 │     <div class={`px-2 foo p-4 bar${variable}`}/>
+    6 6 │     <div class={`bar-${variable} mx-2 m-5 bar-${variable} mx-1 m-5`}/>
   
 
 ```
@@ -98,13 +109,17 @@ templateLiteralSpace.jsx:5:15 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     6 │ 	<div class={`bar-${variable} mx-2 m-5 bar-${variable} mx-1 m-5`}/>
     7 │ </>
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
-    3 3 │   	<div class={`px-2 foo p-4 bar ${variable}`}/>
-    4 4 │   	<div class={`${variable}px-2 foo p-4 bar`}/>
+    3 3 │     <div class={`px-2 foo p-4 bar ${variable}`}/>
+    4 4 │     <div class={`${variable}px-2 foo p-4 bar`}/>
     5   │ - → <div·class={`px-2·foo·p-4·bar${variable}`}/>
       5 │ + → <div·class={`foo·p-4·px-2·bar${variable}`}/>
-    6 6 │   	<div class={`bar-${variable} mx-2 m-5 bar-${variable} mx-1 m-5`}/>
+    6 6 │     <div class={`bar-${variable} mx-2 m-5 bar-${variable} mx-1 m-5`}/>
     7 7 │   </>
   
 
@@ -122,10 +137,14 @@ templateLiteralSpace.jsx:6:30 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     7 │ </>
     8 │ 
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
-    4 4 │   	<div class={`${variable}px-2 foo p-4 bar`}/>
-    5 5 │   	<div class={`px-2 foo p-4 bar${variable}`}/>
+    4 4 │     <div class={`${variable}px-2 foo p-4 bar`}/>
+    5 5 │     <div class={`px-2 foo p-4 bar${variable}`}/>
     6   │ - → <div·class={`bar-${variable}·mx-2·m-5·bar-${variable}·mx-1·m-5`}/>
       6 │ + → <div·class={`bar-${variable}·m-5·mx-2·bar-${variable}·mx-1·m-5`}/>
     7 7 │   </>
@@ -146,10 +165,14 @@ templateLiteralSpace.jsx:6:55 lint/nursery/useSortedClasses  FIXABLE  ━━━�
     7 │ </>
     8 │ 
   
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: Sort the classes.
   
-    4 4 │   	<div class={`${variable}px-2 foo p-4 bar`}/>
-    5 5 │   	<div class={`px-2 foo p-4 bar${variable}`}/>
+    4 4 │     <div class={`${variable}px-2 foo p-4 bar`}/>
+    5 5 │     <div class={`px-2 foo p-4 bar${variable}`}/>
     6   │ - → <div·class={`bar-${variable}·mx-2·m-5·bar-${variable}·mx-1·m-5`}/>
       6 │ + → <div·class={`bar-${variable}·mx-2·m-5·bar-${variable}·m-5·mx-1`}/>
     7 7 │   </>

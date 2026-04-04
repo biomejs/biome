@@ -94,6 +94,11 @@ use biome_rule_options::{rule_name_snake_case}::{rule_name_upper_camel}Options;
     ///
     /// Try to stay consistent with the descriptions of implemented rules.
     ///
+    /// You can use asides to highlight important information:
+    /// :::note
+    /// Important information for users.
+    /// :::
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -169,6 +174,11 @@ use biome_rule_options::{rule_name_snake_case}::{rule_name_upper_camel}Options;
     ///
     /// Add a link to the corresponding stylelint rule (if any):
     ///
+    /// You can use asides to highlight important information:
+    /// :::note
+    /// Important information for users.
+    /// :::
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -199,8 +209,7 @@ impl Rule for {rule_name_upper_camel} {{
     type Signals = Option<Self::State>;
     type Options = {rule_name_upper_camel}Options;
 
-
-    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {{
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {{
         let node = ctx.query();
         if node.items().into_iter().next().is_none() {{
             return Some(node.clone());
@@ -223,7 +232,7 @@ impl Rule for {rule_name_upper_camel} {{
                 }},
             )
             .note(markup! {{
-                    "This note will give you more information."
+                "This note will give you more information."
             }}),
         )
     }}
@@ -246,6 +255,11 @@ use biome_rule_options::{rule_name_snake_case}::{rule_name_upper_camel}Options;
     /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
     ///
     /// Try to stay consistent with the descriptions of implemented rules.
+    ///
+    /// You can use asides to highlight important information:
+    /// :::note
+    /// Important information for users.
+    /// :::
     ///
     /// ## Examples
     ///
@@ -280,8 +294,7 @@ impl Rule for {rule_name_upper_camel} {{
     type Signals = Option<Self::State>;
     type Options = {rule_name_upper_camel}Options;
 
-
-    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {{
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {{
         let _node = ctx.query();
         None
     }}
@@ -301,7 +314,7 @@ impl Rule for {rule_name_upper_camel} {{
                 }},
             )
             .note(markup! {{
-                    "This note will give you more information."
+                "This note will give you more information."
             }}),
         )
     }}
@@ -325,12 +338,17 @@ use biome_rule_options::{rule_name_snake_case}::{rule_name_upper_camel}Options;
     ///
     /// Try to stay consistent with the descriptions of implemented rules.
     ///
+    /// You can use asides to highlight important information:
+    /// :::note
+    /// Important information for users.
+    /// :::
+    ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```graphql,expect_diagnostic
-    /// quer {{}}
+    /// query {{}}
     /// ```
     ///
     /// ### Valid
@@ -355,8 +373,7 @@ impl Rule for {rule_name_upper_camel} {{
     type Signals = Option<Self::State>;
     type Options = {rule_name_upper_camel}Options;
 
-
-    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {{
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {{
         let _node = ctx.query();
         None
     }}
@@ -376,7 +393,7 @@ impl Rule for {rule_name_upper_camel} {{
                 }},
             )
             .note(markup! {{
-                    "This note will give you more information."
+                "This note will give you more information."
             }}),
         )
     }}
@@ -399,6 +416,11 @@ use biome_rule_options::{rule_name_snake_case}::{rule_name_upper_camel}Options;
     /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
     ///
     /// Try to stay consistent with the descriptions of implemented rules.
+    ///
+    /// You can use asides to highlight important information:
+    /// :::note
+    /// Important information for users.
+    /// :::
     ///
     /// ## Examples
     ///
@@ -430,8 +452,7 @@ impl Rule for {rule_name_upper_camel} {{
     type Signals = Option<Self::State>;
     type Options = {rule_name_upper_camel}Options;
 
-
-    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {{
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {{
         let _node = ctx.query();
         None
     }}
@@ -451,7 +472,7 @@ impl Rule for {rule_name_upper_camel} {{
                 }},
             )
             .note(markup! {{
-                    "This note will give you more information."
+                "This note will give you more information."
             }}),
         )
     }}
@@ -474,6 +495,11 @@ use biome_rule_options::{rule_name_snake_case}::{rule_name_upper_camel}Options;
     /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
     ///
     /// Try to stay consistent with the descriptions of implemented rules.
+    ///
+    /// You can use asides to highlight important information:
+    /// :::note
+    /// Important information for users.
+    /// :::
     ///
     /// ## Examples
     ///
@@ -503,8 +529,7 @@ impl Rule for {rule_name_upper_camel} {{
     type Signals = Option<Self::State>;
     type Options = {rule_name_upper_camel}Options;
 
-
-    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {{
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {{
         let _node = ctx.query();
         None
     }}
@@ -524,7 +549,7 @@ impl Rule for {rule_name_upper_camel} {{
                 }},
             )
             .note(markup! {{
-                    "This note will give you more information."
+                "This note will give you more information."
             }}),
         )
     }}
@@ -543,15 +568,23 @@ pub fn generate_new_analyzer_rule(kind: LanguageKind, category: Category, rule_n
     } else {
         rule_kind
     };
-    let valid_contents = if matches!(kind, LanguageKind::HtmlVue) {
-        "<!-- should not generate diagnostics -->\n<div>ok</div>"
-    } else {
-        "/* should not generate diagnostics */\n// var a = 1;"
+    let valid_contents = match kind {
+        LanguageKind::Json => "{\n\t\"test\": \"value\"\n}",
+        LanguageKind::Css => "/* should not generate diagnostics */\np {\n\tcolor: red;\n}",
+        LanguageKind::Graphql => "# should not generate diagnostics\nquery {\n\tfield\n}",
+        LanguageKind::Html | LanguageKind::HtmlVue => {
+            "<!-- should not generate diagnostics -->\n<div>ok</div>"
+        }
+        _ => "/* should not generate diagnostics */\n// var a = 1;",
     };
-    let invalid_contents = if matches!(kind, LanguageKind::HtmlVue) {
-        "<!-- should generate diagnostics -->\n<div></div>"
-    } else {
-        "/* should generate diagnostics */\nvar a = 1;\na = 2;\na = 3;"
+    let invalid_contents = match kind {
+        LanguageKind::Json => "{\n\t\"test\": \"value\",\n\t\"test\": \"value\"\n}",
+        LanguageKind::Css => "/* should generate diagnostics */\np {}",
+        LanguageKind::Graphql => "# should generate diagnostics\nquery {}",
+        LanguageKind::Html | LanguageKind::HtmlVue => {
+            "<!-- should generate diagnostics -->\n<div></div>"
+        }
+        _ => "/* should generate diagnostics */\nvar a = 1;\na = 2;\na = 3;",
     };
     let crate_folder = project_root().join(format!("crates/biome_{rule_kind}_analyze"));
     let test_folder = crate_folder.join("tests/specs/nursery");

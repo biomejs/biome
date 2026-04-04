@@ -27,25 +27,6 @@ return { something }
 }
 "#;
 
-mod help {
-    use super::*;
-    use bpaf::Args;
-
-    #[test]
-    fn unknown_command() {
-        let mut console = BufferConsole::default();
-        let fs = MemoryFileSystem::default();
-
-        let (_, result) = run_cli(
-            fs,
-            &mut console,
-            Args::from(["unknown", "--help"].as_slice()),
-        );
-
-        assert!(result.is_ok(), "run_cli returned {result:?}");
-    }
-}
-
 mod main {
     use super::*;
     use bpaf::Args;

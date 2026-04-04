@@ -1,0 +1,6 @@
+.button {
+  $self: &;
+  &--primary {
+    color: red;
+  }
+}

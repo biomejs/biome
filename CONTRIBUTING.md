@@ -130,7 +130,7 @@ just install-tools
 This command will install:
 - `cargo-binstall`, to install binary extensions for `cargo`.
 - `cargo-insta`, a `cargo` extension to manage snapshot testing inside the repository.
-- `taplo-cli`, a small tool for formatting TOML files.
+- `tombi`, a small tool for formatting TOML files.
 - `wasm-bindgen-cli` and `wasm-opt` for managing the WASM build of Biome.
 
 You'll also need to have `pnpm` installed on your machine, and run `pnpm install` from the root of the repository. `pnpm` is needed to [create changesets](#create-a-changeset)
@@ -279,6 +279,16 @@ If you're debugging an LSP reproduction, make sure that the client allows to use
 }
 ```
 
+### Debugging
+
+By default, the `dev` profile of the project removes the debugging information during compilation, which means that some information such as stacktraces aren't available.
+
+If you need to debug the project, use the profile `debugging`. Running this profile might take some time as it will re-compile the dependencies by keeping certain information.
+
+```shell
+cargo t --profile debugging some_test
+```
+
 ## Production binaries
 
 _Usually_, the easiest way to create a production build is to use the `--release` flag, **however** Biome requires an environment variable called `BIOME_VERSION` to generate different code at compile time.
@@ -331,7 +341,21 @@ To know the technical details of how our formatter works and how to write test, 
 
 [Workspace dependencies](https://doc.rust-lang.org/cargo/reference/workspaces.html#the-dependencies-table) are used, and many dependencies are defined in Cargo.toml in the root.
 
-Internal crates are loaded with `workspace = true` for each crate. About `dev-dependencies`, we use [path dependencies](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-path-dependencies) to avoid requiring the published version of these crates.
+Internal crates (`biome_*`) are loaded with `workspace = true` under `[dependencies]`.
+
+However, for `[dev-dependencies]`, internal `biome_*` crates **must** use [path dependencies](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-path-dependencies) instead of `workspace = true`. This avoids resolving these crates from the registry when they are only needed for testing.
+
+```toml
+[dependencies]
+biome_parser = { workspace = true }  # OK: workspace = true for regular deps
+
+[dev-dependencies]
+biome_test_utils = { path = "../biome_test_utils" }              # CORRECT
+biome_formatter  = { path = "../biome_formatter", features = ["countme"] } # CORRECT with features
+# biome_test_utils = { workspace = true }                        # WRONG: do not use workspace for dev-deps
+```
+
+All internal crates live as siblings under `crates/`, so the relative path is always `../biome_<name>`.
 
 ## Node.js development
 

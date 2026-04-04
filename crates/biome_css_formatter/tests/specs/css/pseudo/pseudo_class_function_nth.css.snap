@@ -46,19 +46,7 @@ odd) {}
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
------
+# Formatted
 
 ```css
 :nth-child(2n + 1) {
@@ -100,6 +88,5 @@ Quote style: Double Quotes
 		.OverMultipleLinesWithIndentation
 	) {
 }
+
 ```
-
-

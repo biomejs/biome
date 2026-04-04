@@ -4,11 +4,18 @@ mod svelte;
 mod vue;
 
 use crate::parser::HtmlParser;
-use crate::syntax::HtmlSyntaxFeatures::{DoubleTextExpressions, SingleTextExpressions};
-use crate::syntax::astro::parse_astro_fence;
+use crate::syntax::HtmlSyntaxFeatures::{
+    Astro, DoubleTextExpressions, SingleTextExpressions, Svelte, Vue,
+};
+use crate::syntax::astro::{
+    is_at_astro_directive_keyword, is_at_astro_directive_start, parse_astro_directive,
+    parse_astro_fence, parse_astro_spread_or_expression,
+};
 use crate::syntax::parse_error::*;
 use crate::syntax::svelte::{
-    parse_attach_attribute, parse_svelte_at_block, parse_svelte_hash_block,
+    is_at_svelte_directive_start, is_at_svelte_keyword, parse_attach_attribute,
+    parse_svelte_at_block, parse_svelte_directive, parse_svelte_hash_block,
+    parse_svelte_spread_or_expression,
 };
 use crate::syntax::vue::{
     parse_vue_directive, parse_vue_v_bind_shorthand_directive, parse_vue_v_on_shorthand_directive,
@@ -33,6 +40,8 @@ pub(crate) enum HtmlSyntaxFeatures {
     DoubleTextExpressions,
     /// Exclusive to those documents that support text expressions with { }
     SingleTextExpressions,
+    /// Exclusive to Svelte files (for Svelte-specific directives)
+    Svelte,
     /// Exclusive to those documents that support Vue
     Vue,
 }
@@ -42,14 +51,15 @@ impl SyntaxFeature for HtmlSyntaxFeatures {
 
     fn is_supported(&self, p: &HtmlParser) -> bool {
         match self {
-            Self::Astro => p.options().frontmatter,
-            Self::DoubleTextExpressions => {
+            Astro => p.options().frontmatter,
+            DoubleTextExpressions => {
                 p.options().text_expression == Some(TextExpressionKind::Double)
             }
-            Self::SingleTextExpressions => {
+            SingleTextExpressions => {
                 p.options().text_expression == Some(TextExpressionKind::Single)
             }
-            Self::Vue => p.options().vue,
+            Svelte => p.options().svelte,
+            Vue => p.options().vue,
         }
     }
 }
@@ -84,6 +94,12 @@ pub(crate) fn parse_root(p: &mut HtmlParser) {
             )
             .ok();
     }
+
+    // Whether or not frontmatter was present, once we're past the frontmatter
+    // position `---` can no longer start a fence. This prevents `---` in HTML
+    // content from being incorrectly lexed as a FENCE token.
+    p.set_after_frontmatter(true);
+
     parse_doc_type(p).ok();
     ElementList.parse_list(p);
 
@@ -124,18 +140,97 @@ fn parse_doc_type(p: &mut HtmlParser) -> ParsedSyntax {
     Present(m.complete(p, HTML_DIRECTIVE))
 }
 
-/// We need to treat `:`, `.` and `@` differently if we are in a Vue context.
+/// We need to treat `:`, `.` and `@` differently if we are in a Vue or Astro context.
 ///
 /// Normally, we would do this using [`HtmlSyntaxFeatures`], and we do this elsewhere.
 /// However, this makes it so that these characters are disallowed and using them
 /// will emit diagnostics. We want to allow them if they have no special meaning.
 #[inline(always)]
 fn inside_tag_context(p: &HtmlParser) -> HtmlLexContext {
-    if p.options().vue {
-        HtmlLexContext::InsideTagVue
+    if Vue.is_supported(p) {
+        HtmlLexContext::InsideTagWithDirectives { svelte: false }
+    } else if Svelte.is_supported(p) {
+        HtmlLexContext::InsideTagSvelte
+    } else if Astro.is_supported(p) {
+        HtmlLexContext::InsideTagAstro
     } else {
         HtmlLexContext::InsideTag
     }
+}
+
+#[inline]
+fn is_possible_component(p: &HtmlParser, tag_name: &str) -> bool {
+    tag_name
+        .chars()
+        .next()
+        .is_some_and(|c| c.is_ascii_uppercase())
+        && !p.options().is_html()
+}
+
+/// Returns the lexer context to use when parsing component names and member expressions.
+/// This allows `.` to be lexed as a token for member expressions like Component.Member
+/// We reuse [HtmlLexContext::InsideTagWithDirectives] context because it supports `.` lexing, but this is ONLY used
+/// for parsing component names, not for parsing attributes.
+#[inline(always)]
+fn component_name_context(p: &HtmlParser) -> HtmlLexContext {
+    if Vue.is_supported(p) || Svelte.is_supported(p) || Astro.is_supported(p) {
+        // Use HtmlLexContext::InsideTagWithDirectives for all component-supporting files when parsing component names
+        // This allows `.` to be lexed properly for member expressions
+        // Note: This is safe because we only use this context for tag names, not attributes
+        HtmlLexContext::InsideTagWithDirectives {
+            svelte: Svelte.is_supported(p),
+        }
+    } else {
+        HtmlLexContext::InsideTag
+    }
+}
+
+/// Parse a tag name, which returns AnyHtmlTagName (one of: HtmlTagName, HtmlComponentName, or HtmlMemberName)
+/// This follows the JSX parser pattern for handling member expressions like Component.Member
+fn parse_any_tag_name(p: &mut HtmlParser) -> ParsedSyntax {
+    if !is_at_start_literal(p) {
+        return Absent;
+    }
+    let tag_text = p.cur_text();
+
+    // Check if this could be a component or has member expression
+    let is_component = is_possible_component(p, tag_text);
+    let has_member_expression = !p.options().is_html() && p.nth_at(1, T![.]);
+
+    // Step 1: Parse base name
+    let name = if is_component || has_member_expression {
+        // Parse as component name - use component_name_context to allow `.` for member expressions
+        let m = p.start();
+        p.bump_with_context(HTML_LITERAL, component_name_context(p));
+        Present(m.complete(p, HTML_COMPONENT_NAME))
+    } else {
+        // Parse as regular HTML tag
+        parse_literal(p, HTML_TAG_NAME)
+    };
+    // Step 2: Extend with member access if present (using .map() pattern from JSX parser)
+    name.map(|mut name| {
+        // Check kind BEFORE moving name with precede()
+        let is_lowercase_tag = name.kind(p) == HTML_TAG_NAME;
+
+        while p.at(T![.]) {
+            // Convert BEFORE precede takes ownership of name
+            if is_lowercase_tag {
+                name.change_kind(p, HTML_COMPONENT_NAME);
+            }
+            let m = name.precede(p);
+            p.bump_with_context(T![.], component_name_context(p));
+            if is_at_start_literal(p) {
+                let member_m = p.start();
+                p.bump_with_context(HTML_LITERAL, component_name_context(p));
+                member_m.complete(p, HTML_TAG_NAME);
+            } else {
+                p.error(expected_element_name(p, p.cur_range()));
+            }
+
+            name = m.complete(p, HTML_MEMBER_NAME);
+        }
+        name
+    })
 }
 
 fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
@@ -148,11 +243,24 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
     let opening_tag_name = p.cur_text().to_string();
     let should_be_self_closing = VOID_ELEMENTS
         .iter()
-        .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()));
+        .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()))
+        && !is_possible_component(p, opening_tag_name.as_str());
     let is_embedded_language_tag = EMBEDDED_LANGUAGE_ELEMENTS
         .iter()
         .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()));
-    parse_literal(p, HTML_TAG_NAME).or_add_diagnostic(p, expected_element_name);
+
+    parse_any_tag_name(p).or_add_diagnostic(p, expected_element_name);
+
+    let context = inside_tag_context(p);
+    match context {
+        HtmlLexContext::InsideTagSvelte => {
+            p.re_lex(HtmlReLexContext::InsideTagSvelte);
+        }
+        HtmlLexContext::InsideTagAstro => {
+            p.re_lex(HtmlReLexContext::InsideTagAstro);
+        }
+        _ => {}
+    }
 
     AttributeList.parse_list(p);
 
@@ -181,7 +289,14 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
                 HtmlLexContext::Regular
             },
         );
+
         let opening = m.complete(p, HTML_OPENING_ELEMENT);
+
+        // if the lexer found a keyword, rewind and lex as text
+        if is_at_keyword(p) {
+            p.re_lex(HtmlReLexContext::HtmlText);
+        }
+
         if is_embedded_language_tag {
             // embedded language tags always have 1 element as content
             let list = p.start();
@@ -218,15 +333,16 @@ fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
         return Absent;
     }
     let m = p.start();
-    p.bump_with_context(T![<], HtmlLexContext::InsideTag);
-    p.bump_with_context(T![/], HtmlLexContext::InsideTag);
+    p.bump_with_context(T![<], inside_tag_context(p));
+    p.bump_with_context(T![/], inside_tag_context(p));
     let should_be_self_closing = VOID_ELEMENTS
         .iter()
-        .any(|tag| tag.eq_ignore_ascii_case(p.cur_text()));
+        .any(|tag| tag.eq_ignore_ascii_case(p.cur_text()))
+        && !is_possible_component(p, p.cur_text());
     if should_be_self_closing {
         p.error(void_element_should_not_have_closing_tag(p, p.cur_range()).into_diagnostic(p));
     }
-    let _name = parse_literal(p, HTML_TAG_NAME);
+    let _name = parse_any_tag_name(p);
 
     // There shouldn't be any attributes in a closing tag.
     while p.at(HTML_LITERAL) || p.at(T!["{{"]) || p.at(T!["}}"]) {
@@ -237,6 +353,7 @@ fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
     Present(m.complete(p, HTML_CLOSING_ELEMENT))
 }
 
+#[inline]
 pub(crate) fn parse_html_element(p: &mut HtmlParser) -> ParsedSyntax {
     match p.cur() {
         T!["<![CDATA["] => parse_cdata_section(p),
@@ -259,6 +376,14 @@ pub(crate) fn parse_html_element(p: &mut HtmlParser) -> ParsedSyntax {
             // we remap to HTML_LITERAL
             let m = p.start();
             p.bump_remap(HTML_LITERAL);
+            Present(m.complete(p, HTML_CONTENT))
+        }
+        // At this position, we shouldn't have svelte keyword, so we relex everything
+        // as text
+        _ if is_at_svelte_keyword(p) => {
+            let m = p.start();
+            p.re_lex(HtmlReLexContext::HtmlText);
+            p.bump_with_context(HTML_LITERAL, HtmlLexContext::Regular);
             Present(m.complete(p, HTML_CONTENT))
         }
         HTML_LITERAL => {
@@ -360,6 +485,9 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
 
             Present(m.complete(p, HTML_ATTRIBUTE))
         }
+        // Check for Astro directives before Vue colon shorthand
+        // This must come first because in Astro files, colons are lexed as separate tokens
+        _ if Astro.is_supported(p) && is_at_astro_directive_start(p) => parse_astro_directive(p),
         T![:] => HtmlSyntaxFeatures::Vue.parse_exclusive_syntax(
             p,
             parse_vue_v_bind_shorthand_directive,
@@ -375,34 +503,46 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
             parse_vue_v_slot_shorthand_directive,
             |p, m| disabled_vue(p, m.range(p)),
         ),
-        T!['{'] => SingleTextExpressions.parse_exclusive_syntax(
+        T!['{'] if SingleTextExpressions.is_supported(p) => parse_svelte_spread_or_expression(p),
+        T!['{'] if Astro.is_supported(p) => parse_astro_spread_or_expression(p),
+        // Keep previous behaviour so that invalid documents are still parsed.
+        T!['{'] => Svelte.parse_exclusive_syntax(
             p,
-            |p| parse_single_text_expression(p, HtmlLexContext::InsideTag),
-            |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_svelte_prop(p, m.range(p)),
+            |p| parse_svelte_spread_or_expression(p),
+            |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_svelte(p, m.range(p)),
         ),
-        T!["{@"] => SingleTextExpressions.parse_exclusive_syntax(
+        T!["{@"] => Svelte.parse_exclusive_syntax(
             p,
             |p| parse_attach_attribute(p),
-            |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_svelte_prop(p, m.range(p)),
+            |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_svelte(p, m.range(p)),
         ),
         _ if p.cur_text().starts_with("v-") => {
-            HtmlSyntaxFeatures::Vue
-                .parse_exclusive_syntax(p, parse_vue_directive, |p, m| disabled_vue(p, m.range(p)))
+            Vue.parse_exclusive_syntax(p, parse_vue_directive, |p, m| disabled_vue(p, m.range(p)))
         }
+        _ if Svelte.is_supported(p) && is_at_svelte_directive_start(p) => Svelte
+            .parse_exclusive_syntax(p, parse_svelte_directive, |p, m| {
+                disabled_svelte(p, m.range(p))
+            }),
         _ => {
             let m = p.start();
-            parse_literal(p, HTML_ATTRIBUTE_NAME).or_add_diagnostic(p, expected_attribute);
+            // we've already determined that this isn't a valid astro directive, so if it looks like one, we should remap it as a literal.
+            if Astro.is_supported(p) && is_at_astro_directive_keyword(p) {
+                let name = p.start();
+                p.bump_remap_with_context(HTML_LITERAL, inside_tag_context(p));
+                name.complete(p, HTML_ATTRIBUTE_NAME);
+            } else {
+                parse_literal(p, HTML_ATTRIBUTE_NAME).or_add_diagnostic(p, expected_attribute);
+            }
 
             if p.at(T![=]) {
                 parse_attribute_initializer(p).ok();
-                Present(m.complete(p, HTML_ATTRIBUTE))
-            } else {
-                Present(m.complete(p, HTML_ATTRIBUTE))
             }
+            Present(m.complete(p, HTML_ATTRIBUTE))
         }
     }
 }
 
+#[inline]
 fn is_at_attribute_start(p: &mut HtmlParser) -> bool {
     p.at_ts(token_set![
         HTML_LITERAL,
@@ -411,9 +551,11 @@ fn is_at_attribute_start(p: &mut HtmlParser) -> bool {
         T![:],
         T![@],
         T![#],
-    ]) || (SingleTextExpressions.is_supported(p) && p.at(T!["{@"]))
+    ]) || (Svelte.is_supported(p) && p.at(T!["{@"]))
+        || (Astro.is_supported(p) && is_at_astro_directive_keyword(p))
 }
 
+#[inline]
 fn parse_literal(p: &mut HtmlParser, kind: HtmlSyntaxKind) -> ParsedSyntax {
     if !is_at_start_literal(p) {
         return Absent;
@@ -427,7 +569,8 @@ fn parse_literal(p: &mut HtmlParser, kind: HtmlSyntaxKind) -> ParsedSyntax {
             p.bump_remap_with_context(
                 HTML_LITERAL,
                 match kind {
-                    HTML_TAG_NAME | HTML_ATTRIBUTE_NAME => inside_tag_context(p),
+                    HTML_TAG_NAME | HTML_ATTRIBUTE_NAME | HTML_COMPONENT_NAME
+                    | HTML_MEMBER_NAME => inside_tag_context(p),
                     _ => HtmlLexContext::Regular,
                 },
             )
@@ -436,7 +579,9 @@ fn parse_literal(p: &mut HtmlParser, kind: HtmlSyntaxKind) -> ParsedSyntax {
         p.bump_remap_with_context(
             HTML_LITERAL,
             match kind {
-                HTML_TAG_NAME | HTML_ATTRIBUTE_NAME => inside_tag_context(p),
+                HTML_TAG_NAME | HTML_ATTRIBUTE_NAME | HTML_COMPONENT_NAME | HTML_MEMBER_NAME => {
+                    inside_tag_context(p)
+                }
                 _ => HtmlLexContext::Regular,
             },
         );
@@ -444,7 +589,9 @@ fn parse_literal(p: &mut HtmlParser, kind: HtmlSyntaxKind) -> ParsedSyntax {
         p.bump_with_context(
             HTML_LITERAL,
             match kind {
-                HTML_TAG_NAME | HTML_ATTRIBUTE_NAME => inside_tag_context(p),
+                HTML_TAG_NAME | HTML_ATTRIBUTE_NAME | HTML_COMPONENT_NAME | HTML_MEMBER_NAME => {
+                    inside_tag_context(p)
+                }
                 _ => HtmlLexContext::Regular,
             },
         );
@@ -453,6 +600,7 @@ fn parse_literal(p: &mut HtmlParser, kind: HtmlSyntaxKind) -> ParsedSyntax {
     Present(m.complete(p, kind))
 }
 
+#[inline]
 fn is_at_start_literal(p: &mut HtmlParser) -> bool {
     p.at(HTML_LITERAL) || p.at(T!["{{"]) || p.at(T!["}}"])
 }
@@ -480,8 +628,11 @@ fn parse_attribute_initializer(p: &mut HtmlParser) -> ParsedSyntax {
                 p,
                 |p| parse_single_text_expression(p, inside_tag_context(p)),
                 |p, m| {
-                    p.err_builder("Expressions are only valid inside Astro files.", m.range(p))
-                        .with_hint("Remove it or rename the file to have the .astro extension.")
+                    p.err_builder(
+                        "Text expressions are not supported in this context.",
+                        m.range(p),
+                    )
+                    .with_hint("Remove the expression or use a supported file type.")
                 },
             )
             .or_recover_with_token_set(
@@ -490,6 +641,10 @@ fn parse_attribute_initializer(p: &mut HtmlParser) -> ParsedSyntax {
                 expected_attribute,
             )
             .ok();
+
+        if Astro.is_supported(p) {
+            p.re_lex(HtmlReLexContext::InsideTagAstro);
+        }
     } else if p.at(T!["{{"]) {
         HtmlSyntaxFeatures::DoubleTextExpressions
             .parse_exclusive_syntax(
@@ -543,7 +698,13 @@ fn parse_double_text_expression(p: &mut HtmlParser, context: HtmlLexContext) -> 
 
     if p.at(T!["}}"]) {
         p.expect_with_context(T!["}}"], context);
-        Present(m.complete(p, HTML_DOUBLE_TEXT_EXPRESSION))
+        if context == HtmlLexContext::InsideTag
+            || matches!(context, HtmlLexContext::InsideTagWithDirectives { .. })
+        {
+            Present(m.complete(p, HTML_ATTRIBUTE_DOUBLE_TEXT_EXPRESSION))
+        } else {
+            Present(m.complete(p, HTML_DOUBLE_TEXT_EXPRESSION))
+        }
     } else if p.at(T![<]) {
         let diagnostic = expected_closing_text_expression(p, p.cur_range(), opening_range);
         p.error(diagnostic);
@@ -564,6 +725,7 @@ fn parse_double_text_expression(p: &mut HtmlParser, context: HtmlLexContext) -> 
     }
 }
 
+#[inline]
 pub(crate) fn is_at_opening_double_expression(p: &mut HtmlParser) -> bool {
     p.at(T!["{{"])
 }
@@ -573,7 +735,7 @@ pub(crate) fn parse_single_text_expression(
     p: &mut HtmlParser,
     context: HtmlLexContext,
 ) -> ParsedSyntax {
-    if !HtmlSyntaxFeatures::SingleTextExpressions.is_supported(p) {
+    if !SingleTextExpressions.is_supported(p) {
         return Absent;
     }
 
@@ -590,7 +752,15 @@ pub(crate) fn parse_single_text_expression(
 
     if p.at(T!['}']) {
         p.bump_remap_with_context(T!['}'], context);
-        Present(m.complete(p, HTML_SINGLE_TEXT_EXPRESSION))
+        if context == HtmlLexContext::InsideTag
+            || matches!(context, HtmlLexContext::InsideTagWithDirectives { .. })
+            || context == HtmlLexContext::InsideTagAstro
+            || context == HtmlLexContext::InsideTagSvelte
+        {
+            Present(m.complete(p, HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION))
+        } else {
+            Present(m.complete(p, HTML_SINGLE_TEXT_EXPRESSION))
+        }
     } else if p.at(T![<]) {
         let diagnostic = expected_closing_text_expression(p, p.cur_range(), opening_range);
         p.error(diagnostic);
@@ -634,11 +804,7 @@ fn parse_single_text_expression_content(p: &mut HtmlParser) -> ParsedSyntax {
     }
     let m = p.start();
 
-    if p.at(SVELTE_IDENT) {
-        p.re_lex(HtmlReLexContext::SingleTextExpression);
-    } else {
-        p.bump_remap(HTML_LITERAL);
-    }
+    p.bump_remap(HTML_LITERAL);
 
     Present(m.complete(p, HTML_TEXT_EXPRESSION))
 }
@@ -678,4 +844,14 @@ impl TextExpression {
 
         Present(m.complete(p, HTML_TEXT_EXPRESSION))
     }
+}
+
+#[inline]
+fn is_at_keyword(p: &mut HtmlParser) -> bool {
+    is_at_svelte_keyword(p) || is_at_html_keyword(p)
+}
+
+#[inline]
+fn is_at_html_keyword(p: &mut HtmlParser) -> bool {
+    matches!(p.cur(), T![html] | T![doctype])
 }

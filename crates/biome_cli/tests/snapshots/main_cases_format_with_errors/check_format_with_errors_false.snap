@@ -50,28 +50,12 @@ file.js:1:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━�
   > 1 │ let a = {
       │     ^
   
-  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
   
   i Unsafe fix: If this is intentional, prepend a with an underscore.
   
   - let·a·=·{
   + let·_a·=·{
-  
-
-```
-
-```block
-file.js:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `}` but instead the file ends
-  
-  > 1 │ let a = {
-      │          
-  
-  i the file ends here
-  
-  > 1 │ let a = {
-      │          
   
 
 ```
@@ -102,6 +86,6 @@ file.js format ━━━━━━━━━━━━━━━━━━━━━�
 
 ```block
 Checked 1 file in <TIME>. No fixes applied.
-Found 3 errors.
+Found 2 errors.
 Found 2 warnings.
 ```

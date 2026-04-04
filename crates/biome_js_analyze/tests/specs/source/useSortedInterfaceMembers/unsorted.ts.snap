@@ -1,0 +1,43 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unsorted.ts
+---
+# Input
+```ts
+interface _TestInterface {
+	zebra: string;
+	apple: number;
+	banana: boolean;
+}
+
+```
+
+# Diagnostics
+```
+unsorted.ts:1:1 assist/source/useSortedInterfaceMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The interface members are not sorted by key.
+  
+  > 1 │ interface _TestInterface {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 2 │ 	zebra: string;
+  > 3 │ 	apple: number;
+  > 4 │ 	banana: boolean;
+  > 5 │ }
+      │ ^
+    6 │ 
+  
+  i Safe fix: Sort the interface members by key.
+  
+    1 1 │   interface _TestInterface {
+    2   │ - → zebra:·string;
+    3   │ - → apple:·number;
+    4   │ - → banana:·boolean;
+      2 │ + → apple:·number;
+      3 │ + → banana:·boolean;
+      4 │ + → zebra:·string;
+    5 5 │   }
+    6 6 │   
+  
+
+```

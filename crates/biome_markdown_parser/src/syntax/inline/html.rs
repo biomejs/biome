@@ -1,0 +1,635 @@
+use biome_markdown_syntax::T;
+use biome_markdown_syntax::kind::MarkdownSyntaxKind::*;
+use biome_parser::Parser;
+use biome_parser::prelude::ParsedSyntax::{self, *};
+
+use crate::MarkdownParser;
+use crate::lexer::MarkdownLexContext;
+use crate::syntax::inline_span_crosses_setext;
+
+// #region is_inline_html — top-level dispatcher and HTML construct predicates
+
+/// Check if text starting with `<` is valid inline HTML per CommonMark §6.8.
+/// Returns the byte length of the HTML element if valid, None otherwise.
+///
+/// Dispatches to construct-specific predicates in precedence order:
+/// comment → processing instruction → CDATA → declaration → close tag → open tag.
+pub(crate) fn is_inline_html(text: &str) -> Option<usize> {
+    let bytes = text.as_bytes();
+    if bytes.len() < 2 || bytes[0] != b'<' {
+        return None;
+    }
+
+    None.or_else(|| is_html_comment(bytes, text))
+        .or_else(|| is_html_processing_instruction(bytes, text))
+        .or_else(|| is_html_cdata(bytes, text))
+        .or_else(|| is_html_declaration(bytes, text))
+        .or_else(|| is_html_close_tag(bytes))
+        .or_else(|| is_html_open_tag(bytes))
+}
+
+/// HTML comment: `<!-- ... -->` per CommonMark §6.8.
+///
+/// Special cases: `<!-->` and `<!--->` are valid degenerate comments per spec.
+/// The body must not end with `-`, and `<!--` must not be immediately followed
+/// by `>` or `->` (those are the degenerate forms, handled explicitly).
+fn is_html_comment(bytes: &[u8], text: &str) -> Option<usize> {
+    if !bytes.starts_with(b"<!--") {
+        return None;
+    }
+
+    let rest = &bytes[4..];
+
+    // Degenerate comments: <!-->  and  <!--->
+    if rest.starts_with(b">") {
+        return Some(5);
+    }
+    if rest.starts_with(b"->") {
+        return Some(6);
+    }
+
+    // Find closing --> after <!--
+    let pos = text[4..].find("-->")?;
+    let body = &text[4..4 + pos];
+    // Body must not end with '-'
+    if body.ends_with('-') {
+        return None;
+    }
+    Some(4 + pos + 3)
+}
+
+/// Processing instruction: `<? ... ?>` per CommonMark §6.8.
+fn is_html_processing_instruction(bytes: &[u8], text: &str) -> Option<usize> {
+    if bytes.len() < 2 || bytes[1] != b'?' {
+        return None;
+    }
+    let pos = text[2..].find("?>")?;
+    Some(2 + pos + 2)
+}
+
+/// CDATA section: `<![CDATA[ ... ]]>` per CommonMark §6.8.
+fn is_html_cdata(bytes: &[u8], text: &str) -> Option<usize> {
+    if !bytes.starts_with(b"<![CDATA[") {
+        return None;
+    }
+    let pos = text[9..].find("]]>")?;
+    Some(9 + pos + 3)
+}
+
+/// Declaration: `<!` followed by an ASCII letter, then content until `>`.
+/// e.g., `<!DOCTYPE html>`.
+///
+/// Note: the spec says "uppercase ASCII letter" but this implementation accepts
+/// any ASCII letter (upper or lower) to match existing behavior.
+fn is_html_declaration(bytes: &[u8], text: &str) -> Option<usize> {
+    if bytes.len() < 3 || bytes[1] != b'!' || !bytes[2].is_ascii_alphabetic() {
+        return None;
+    }
+    let pos = text[2..].find('>')?;
+    Some(2 + pos + 1)
+}
+
+/// Close tag: `</tagname>` with optional trailing whitespace before `>`.
+fn is_html_close_tag(bytes: &[u8]) -> Option<usize> {
+    if bytes.len() < 4 || bytes[1] != b'/' {
+        return None;
+    }
+    if !bytes[2].is_ascii_alphabetic() {
+        return None;
+    }
+
+    // Tag name: [A-Za-z][A-Za-z0-9-]*
+    let mut i = 3;
+    while i < bytes.len() && (bytes[i].is_ascii_alphanumeric() || bytes[i] == b'-') {
+        i += 1;
+    }
+
+    // Skip optional whitespace
+    i = skip_html_spaces(bytes, i);
+
+    // Must end with >
+    if i < bytes.len() && bytes[i] == b'>' {
+        return Some(i + 1);
+    }
+    None
+}
+
+// #endregion
+
+// #region Open tag predicate and attribute parsing
+
+/// Open tag: `<tagname ...>` or `<tagname ... />` per CommonMark §6.8.
+///
+/// The boundary check after the tag name rejects patterns like `<example.com>`
+/// — only whitespace, `>`, or `/` are valid after a tag name.
+fn is_html_open_tag(bytes: &[u8]) -> Option<usize> {
+    if bytes.len() < 2 || !bytes[1].is_ascii_alphabetic() {
+        return None;
+    }
+
+    // Tag name: [A-Za-z][A-Za-z0-9-]*
+    let mut i = 2;
+    while i < bytes.len() && (bytes[i].is_ascii_alphanumeric() || bytes[i] == b'-') {
+        i += 1;
+    }
+
+    // After tag name, must have valid boundary: whitespace, >, or /
+    // This prevents <example.com> from being treated as HTML.
+    if i >= bytes.len() {
+        return None;
+    }
+    let boundary = bytes[i];
+    if !is_html_space(boundary) && boundary != b'>' && boundary != b'/' {
+        return None;
+    }
+
+    // Immediate close or self-close (no attributes)
+    if boundary == b'>' {
+        return Some(i + 1);
+    }
+    if boundary == b'/' {
+        return parse_self_close(bytes, i);
+    }
+
+    // Has attributes — parse the tail
+    parse_html_open_tag_tail(bytes, i)
+}
+
+/// Parse attributes and closing delimiter of an open tag.
+/// `i` points at the whitespace after the tag name.
+fn parse_html_open_tag_tail(bytes: &[u8], mut i: usize) -> Option<usize> {
+    let mut need_space = true;
+    // We already know the boundary char was whitespace, so first iteration has space.
+    let mut had_space = true;
+
+    loop {
+        if need_space {
+            let new_i = skip_html_spaces(bytes, i);
+            had_space = had_space || new_i > i;
+            i = new_i;
+        }
+        need_space = true;
+
+        if i >= bytes.len() {
+            return None;
+        }
+
+        // End or self-close
+        if bytes[i] == b'>' {
+            return Some(i + 1);
+        }
+        if bytes[i] == b'/' {
+            return parse_self_close(bytes, i);
+        }
+
+        // Attributes must be separated by whitespace
+        if !had_space {
+            return None;
+        }
+
+        // Parse one attribute
+        i = parse_html_attribute(bytes, i)?;
+
+        // After an attribute with a value, we consumed past the value and
+        // need to find whitespace at the top of the loop.
+        // After a boolean attribute (no value), had_space carries over
+        // from skip_spaces above.
+        had_space = false;
+    }
+}
+
+/// Parse a single HTML attribute (name, optional `=value`).
+/// Returns the position after the attribute, or None if invalid.
+fn parse_html_attribute(bytes: &[u8], mut i: usize) -> Option<usize> {
+    // Attribute name
+    if !is_html_attr_name_start(bytes[i]) {
+        return None;
+    }
+    i += 1;
+    while i < bytes.len() && is_html_attr_name_continue(bytes[i]) {
+        i += 1;
+    }
+
+    // Optional value specification
+    let after_name = skip_html_spaces(bytes, i);
+    if after_name < bytes.len() && bytes[after_name] == b'=' {
+        i = after_name + 1;
+        i = skip_html_spaces(bytes, i);
+        if i >= bytes.len() {
+            return None;
+        }
+        i = parse_html_attribute_value(bytes, i)?;
+    } else {
+        // Boolean attribute — no value; caller will re-skip spaces.
+    }
+
+    Some(i)
+}
+
+/// Parse an HTML attribute value (quoted or unquoted).
+/// Returns the position after the value, or None if invalid.
+///
+/// Unquoted values are terminated by whitespace or any of: `"`, `'`, `=`, `<`, `>`, `` ` ``.
+/// An empty unquoted value is invalid.
+fn parse_html_attribute_value(bytes: &[u8], mut i: usize) -> Option<usize> {
+    match bytes[i] {
+        b'"' => {
+            i += 1;
+            while i < bytes.len() && bytes[i] != b'"' {
+                i += 1;
+            }
+            if i >= bytes.len() {
+                return None;
+            }
+            Some(i + 1) // skip closing quote
+        }
+        b'\'' => {
+            i += 1;
+            while i < bytes.len() && bytes[i] != b'\'' {
+                i += 1;
+            }
+            if i >= bytes.len() {
+                return None;
+            }
+            Some(i + 1) // skip closing quote
+        }
+        _ => {
+            // Unquoted value
+            let start = i;
+            while i < bytes.len() {
+                let b = bytes[i];
+                if matches!(
+                    biome_unicode_table::lookup_byte(b),
+                    biome_unicode_table::Dispatch::WHS
+                        | biome_unicode_table::Dispatch::QOT
+                        | biome_unicode_table::Dispatch::EQL
+                        | biome_unicode_table::Dispatch::LSS
+                        | biome_unicode_table::Dispatch::MOR
+                        | biome_unicode_table::Dispatch::TPL
+                ) {
+                    break;
+                }
+                i += 1;
+            }
+            if i == start {
+                return None; // empty unquoted value
+            }
+            Some(i)
+        }
+    }
+}
+
+/// Check `/>` self-close at position `i` (pointing at `/`).
+fn parse_self_close(bytes: &[u8], i: usize) -> Option<usize> {
+    if i + 1 < bytes.len() && bytes[i + 1] == b'>' {
+        Some(i + 2)
+    } else {
+        None
+    }
+}
+
+// #endregion
+
+// #region Shared helpers
+
+/// Byte classification routed through `biome_unicode_table::lookup_byte`.
+///
+/// The shared dispatch table maps all whitespace to `WHS`, but blockquote-marker
+/// detection needs finer distinctions (CR vs LF vs space vs tab). This enum
+/// refines `WHS` so the scanner can dispatch entirely on classified variants
+/// with no raw byte literals in the loop body.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum HtmlByteKind {
+    /// Line feed `\n` (U+000A)
+    LineFeed,
+    /// Carriage return `\r` (U+000D)
+    CarriageReturn,
+    /// ASCII space (U+0020) — the only whitespace that counts as indent
+    /// before a blockquote marker per CommonMark §5.1.
+    Space,
+    /// Any other WHS byte (tab, vertical tab, form feed)
+    OtherWhitespace,
+    /// `>` — potential blockquote marker
+    MoreThan,
+    /// Everything else
+    Other,
+}
+
+fn classify_html_byte(b: u8) -> HtmlByteKind {
+    use biome_unicode_table::Dispatch::{MOR, WHS};
+    use biome_unicode_table::lookup_byte;
+
+    match lookup_byte(b) {
+        WHS => match b {
+            b'\n' => HtmlByteKind::LineFeed,
+            b'\r' => HtmlByteKind::CarriageReturn,
+            b' ' => HtmlByteKind::Space,
+            _ => HtmlByteKind::OtherWhitespace,
+        },
+        MOR => HtmlByteKind::MoreThan,
+        _ => HtmlByteKind::Other,
+    }
+}
+
+/// Check if an inline HTML span contains a `>` immediately after a newline
+/// (with optional 0-3 leading spaces). In that position `>` is a blockquote
+/// marker per CommonMark §5.1, not part of the HTML tag.
+fn inline_html_crosses_blockquote_marker(span: &str) -> bool {
+    let bytes = span.as_bytes();
+    let len = bytes.len();
+    let mut i = 0;
+    while i < len {
+        match classify_html_byte(bytes[i]) {
+            HtmlByteKind::LineFeed => {
+                i += 1;
+            }
+            HtmlByteKind::CarriageReturn => {
+                i += 1;
+                // Skip CR+LF pair
+                if i < len && classify_html_byte(bytes[i]) == HtmlByteKind::LineFeed {
+                    i += 1;
+                }
+            }
+            _ => {
+                i += 1;
+                continue;
+            }
+        }
+        // After a line ending, skip 0-3 spaces (CommonMark §5.1 indent rule).
+        let mut spaces = 0;
+        while i < len && classify_html_byte(bytes[i]) == HtmlByteKind::Space && spaces < 3 {
+            i += 1;
+            spaces += 1;
+        }
+        if i < len && classify_html_byte(bytes[i]) == HtmlByteKind::MoreThan {
+            return true;
+        }
+    }
+    false
+}
+
+fn is_html_space(b: u8) -> bool {
+    biome_unicode_table::lookup_byte(b) == biome_unicode_table::Dispatch::WHS
+}
+
+/// Skip whitespace (space, tab, newline, carriage return, form feed).
+/// Returns the new position.
+fn skip_html_spaces(bytes: &[u8], mut i: usize) -> usize {
+    while i < bytes.len() && is_html_space(bytes[i]) {
+        i += 1;
+    }
+    i
+}
+
+fn is_html_attr_name_start(b: u8) -> bool {
+    b.is_ascii_alphabetic() || b == b'_' || b == b':'
+}
+
+fn is_html_attr_name_continue(b: u8) -> bool {
+    b.is_ascii_alphanumeric() || b == b'_' || b == b':' || b == b'.' || b == b'-'
+}
+
+// #endregion
+
+// #region parse_inline_html — CST node construction
+
+/// Parse raw inline HTML per CommonMark §6.8.
+///
+/// Grammar: MdInlineHtml = value: MdInlineItemList
+///
+/// Includes: open tags, close tags, comments, processing instructions,
+/// declarations, and CDATA sections.
+pub(crate) fn parse_inline_html(p: &mut MarkdownParser) -> ParsedSyntax {
+    if !p.at(L_ANGLE) {
+        return Absent;
+    }
+
+    // Check if this is valid inline HTML and whether it crosses a blockquote
+    // marker. Both checks use the source text, so scope the borrow here.
+    let html_len = {
+        let source = p.source_after_current();
+        let len = match is_inline_html(source) {
+            Some(len) => len,
+            None => return Absent,
+        };
+        // Reject spans where `>` immediately follows a newline (optionally
+        // preceded by 0-3 spaces). In that position `>` is a blockquote
+        // marker per §5.1, not the closing bracket of an open tag.
+        if inline_html_crosses_blockquote_marker(&source[..len]) {
+            return Absent;
+        }
+        len
+    };
+
+    // Per CommonMark §4.3, setext heading underlines take priority over inline HTML.
+    // If this HTML tag spans across a line that is a setext underline, treat `<` as literal.
+    if inline_span_crosses_setext(p, html_len) {
+        return Absent;
+    }
+
+    // Valid inline HTML - create the node
+    // Use checkpoint so we can rewind if token boundaries don't align
+    let checkpoint = p.checkpoint();
+    let m = p.start();
+
+    // Create content as inline item list containing textual nodes
+    let content = p.start();
+
+    // Track remaining bytes to consume
+    let mut remaining = html_len;
+
+    while remaining > 0 && !p.at(T![EOF]) {
+        let token_len = p.cur_text().len();
+
+        // If the current token is larger than remaining bytes, token boundaries
+        // don't align with our validated HTML - rewind and treat as text
+        if token_len > remaining {
+            m.abandon(p);
+            p.rewind(checkpoint);
+            return Absent;
+        }
+
+        let text_m = p.start();
+        p.bump_remap(MD_TEXTUAL_LITERAL);
+        text_m.complete(p, MD_TEXTUAL);
+        remaining -= token_len;
+    }
+
+    content.complete(p, MD_INLINE_ITEM_LIST);
+
+    Present(m.complete(p, MD_INLINE_HTML))
+}
+
+// #endregion
+
+// #region Autolink parsing
+
+/// Check if the text after `<` looks like a URI autolink.
+/// Per CommonMark §6.4: scheme must be 2-32 chars, start with letter,
+/// followed by letters/digits/+/-/., then `:`.
+fn is_uri_autolink(text: &str) -> bool {
+    let bytes = text.as_bytes();
+    if bytes.is_empty() {
+        return false;
+    }
+
+    // Must start with a letter
+    if !bytes[0].is_ascii_alphabetic() {
+        return false;
+    }
+
+    // Find the colon
+    let mut colon_pos = None;
+    for (i, &b) in bytes.iter().enumerate().skip(1) {
+        if b == b':' {
+            colon_pos = Some(i);
+            break;
+        }
+        // Scheme chars: letters, digits, +, -, .
+        if !b.is_ascii_alphanumeric() && b != b'+' && b != b'-' && b != b'.' {
+            return false;
+        }
+    }
+
+    // Scheme must be 2-32 chars and followed by colon
+    match colon_pos {
+        Some(pos) if (2..=32).contains(&pos) => {
+            // Must have content after the colon and no whitespace/< in URI
+            let rest = &text[pos + 1..];
+            !rest.is_empty()
+                && !rest.contains('<')
+                && !rest.contains('>')
+                && !rest.chars().any(|c| c.is_whitespace())
+        }
+        _ => false,
+    }
+}
+
+/// Check if the text after `<` looks like an email autolink.
+/// Per CommonMark §6.5: local@domain pattern with specific char restrictions.
+fn is_email_autolink(text: &str) -> bool {
+    // Must contain exactly one @ not at start or end
+    let at_pos = match text.find('@') {
+        Some(pos) if pos > 0 && pos < text.len() - 1 => pos,
+        _ => return false,
+    };
+
+    // Check no second @
+    if text[at_pos + 1..].contains('@') {
+        return false;
+    }
+
+    // Local part: alphanumerics and .!#$%&'*+/=?^_`{|}~-
+    let local = &text[..at_pos];
+    for c in local.chars() {
+        if !c.is_ascii_alphanumeric()
+            && !matches!(
+                c,
+                '.' | '!'
+                    | '#'
+                    | '$'
+                    | '%'
+                    | '&'
+                    | '\''
+                    | '*'
+                    | '+'
+                    | '/'
+                    | '='
+                    | '?'
+                    | '^'
+                    | '_'
+                    | '`'
+                    | '{'
+                    | '|'
+                    | '}'
+                    | '~'
+                    | '-'
+            )
+        {
+            return false;
+        }
+    }
+
+    // Domain part: alphanumerics and hyphens, dots for subdomains
+    let domain = &text[at_pos + 1..];
+    if domain.is_empty() || domain.starts_with('.') || domain.ends_with('.') {
+        return false;
+    }
+
+    for label in domain.split('.') {
+        if label.is_empty() || label.len() > 63 || label.starts_with('-') || label.ends_with('-') {
+            return false;
+        }
+
+        for c in label.chars() {
+            if !c.is_ascii_alphanumeric() && c != '-' {
+                return false;
+            }
+        }
+    }
+
+    true
+}
+
+/// Parse an autolink (`<https://example.com>` or `<user@example.com>`).
+///
+/// Grammar: MdAutolink = '<' value: MdInlineItemList '>'
+///
+/// Per CommonMark §6.4 and §6.5, autolinks are URIs or email addresses
+/// wrapped in angle brackets.
+pub(crate) fn parse_autolink(p: &mut MarkdownParser) -> ParsedSyntax {
+    if !p.at(L_ANGLE) {
+        return Absent;
+    }
+
+    // Look ahead to find the closing > and check if content is valid
+    let source = p.source_after_current();
+
+    // Skip the < and find >
+    let after_open = &source[1..];
+    let close_pos = match after_open.find('>') {
+        Some(pos) => pos,
+        None => return Absent, // No closing >
+    };
+
+    // Check for newline before > (not allowed in autolinks)
+    let content = &after_open[..close_pos];
+    if content.contains('\n') || content.contains('\r') {
+        return Absent;
+    }
+
+    // Must be either URI or email autolink
+    if !is_uri_autolink(content) && !is_email_autolink(content) {
+        return Absent;
+    }
+
+    // Valid autolink - parse it
+    let m = p.start();
+
+    // <
+    p.bump(L_ANGLE);
+
+    // Content as inline item list containing textual nodes.
+    // Autolinks don't process backslash escapes, but the lexer may combine
+    // `\>` into a single escape token. We re-lex in CodeSpan context where
+    // backslash is literal, so `\` and `>` are separate tokens.
+    p.relex_code_span();
+
+    let content_m = p.start();
+    while !p.at(R_ANGLE) && !p.at(T![EOF]) && !p.at_inline_end() {
+        let text_m = p.start();
+        p.bump_remap_with_context(MD_TEXTUAL_LITERAL, MarkdownLexContext::CodeSpan);
+        text_m.complete(p, MD_TEXTUAL);
+    }
+    content_m.complete(p, MD_INLINE_ITEM_LIST);
+
+    // >
+    p.expect(R_ANGLE);
+
+    // Re-lex back to regular context
+    p.force_relex_regular();
+
+    Present(m.complete(p, MD_AUTOLINK))
+}
+
+// #endregion

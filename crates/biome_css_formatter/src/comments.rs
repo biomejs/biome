@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use biome_css_syntax::{
-    AnyCssDeclarationName, CssComplexSelector, CssFunction, CssIdentifier, CssLanguage,
-    CssSyntaxKind, TextLen,
+    AnyCssDeclarationName, AnyCssRoot, CssComplexSelector, CssFunction, CssIdentifier, CssLanguage,
+    CssSyntaxKind, TextLen, TextSize,
 };
 use biome_diagnostics::category;
 use biome_formatter::comments::{
@@ -11,7 +11,7 @@ use biome_formatter::comments::{
 use biome_formatter::formatter::Formatter;
 use biome_formatter::{FormatResult, FormatRule, write};
 use biome_rowan::SyntaxTriviaPieceComments;
-use biome_suppression::parse_suppression_comment;
+use biome_suppression::{SuppressionKind, parse_suppression_comment};
 
 pub type CssComments = Comments<CssLanguage>;
 
@@ -68,6 +68,15 @@ impl CommentStyle for CssCommentStyle {
     fn is_suppression(text: &str) -> bool {
         parse_suppression_comment(text)
             .filter_map(Result::ok)
+            .filter(|suppression| suppression.kind == SuppressionKind::Classic)
+            .flat_map(|suppression| suppression.categories)
+            .any(|(key, ..)| key == category!("format"))
+    }
+
+    fn is_global_suppression(text: &str) -> bool {
+        parse_suppression_comment(text)
+            .filter_map(Result::ok)
+            .filter(|suppression| suppression.kind == SuppressionKind::All)
             .flat_map(|suppression| suppression.categories)
             .any(|(key, ..)| key == category!("format"))
     }
@@ -91,13 +100,16 @@ impl CommentStyle for CssCommentStyle {
         match comment.text_position() {
             CommentTextPosition::EndOfLine => handle_function_comment(comment)
                 .or_else(handle_declaration_name_comment)
-                .or_else(handle_complex_selector_comment),
+                .or_else(handle_complex_selector_comment)
+                .or_else(handle_global_suppression),
             CommentTextPosition::OwnLine => handle_function_comment(comment)
                 .or_else(handle_declaration_name_comment)
-                .or_else(handle_complex_selector_comment),
+                .or_else(handle_complex_selector_comment)
+                .or_else(handle_global_suppression),
             CommentTextPosition::SameLine => handle_function_comment(comment)
                 .or_else(handle_declaration_name_comment)
-                .or_else(handle_complex_selector_comment),
+                .or_else(handle_complex_selector_comment)
+                .or_else(handle_global_suppression),
         }
     }
 }
@@ -146,5 +158,28 @@ fn handle_complex_selector_comment(
     {
         return CommentPlacement::leading(right.into_syntax(), comment);
     }
+    CommentPlacement::Default(comment)
+}
+
+fn handle_global_suppression(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let node = comment.enclosing_node();
+
+    if node.text_range_with_trivia().start() == TextSize::from(0) {
+        let has_global_suppression = node.first_leading_trivia().is_some_and(|trivia| {
+            trivia
+                .pieces()
+                .filter(|piece| piece.is_comments())
+                .any(|piece| CssCommentStyle::is_global_suppression(piece.text()))
+        });
+        let root = node.ancestors().find_map(AnyCssRoot::cast);
+        if let Some(root) = root
+            && has_global_suppression
+        {
+            return CommentPlacement::leading(root.syntax().clone(), comment);
+        }
+    }
+
     CommentPlacement::Default(comment)
 }

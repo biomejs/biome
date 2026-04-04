@@ -1,0 +1,10 @@
+// should generate diagnostics
+{
+	"extends": ["./_ignore_catch_all.json"],
+	"files": {
+		"includes": [
+			"**",
+			"!dist/**"
+		]
+	}
+}

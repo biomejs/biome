@@ -1,0 +1,16 @@
+$lines:[full-start  ,  main-start
+/  main-end,
+  full-end];
+$columns:[col-start] minmax(200px,  1fr
+) [col-end];
+ $rows:[header-start] auto [header-end
+body-start] 1fr [body-end];
+   .grid{
+
+
+grid-template-columns:[wide-start]/[wide-end];
+ grid-template-rows:[header-start] auto
+  [header-end body-start] 1fr [body-end];
+ grid-column:[col-start]
+  /[col-end];
+	}

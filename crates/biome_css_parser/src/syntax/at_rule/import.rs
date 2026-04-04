@@ -2,9 +2,12 @@ use crate::parser::CssParser;
 use crate::syntax::at_rule::layer::LayerNameList;
 use crate::syntax::at_rule::media::MediaQueryList;
 use crate::syntax::at_rule::supports::error::expected_any_supports_condition;
-use crate::syntax::at_rule::supports::parse_any_supports_condition;
-use crate::syntax::value::url::{is_at_url_function, parse_url_function};
-use crate::syntax::{is_at_declaration, is_at_string, parse_declaration, parse_string};
+use crate::syntax::at_rule::supports::{
+    is_at_supports_property, parse_any_supports_condition, parse_supports_declaration,
+};
+use crate::syntax::util::skip_possible_tailwind_syntax;
+use crate::syntax::value::url::{is_at_url_function, is_nth_at_url_function, parse_url_function};
+use crate::syntax::{is_at_string, parse_string};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
@@ -44,21 +47,7 @@ pub(crate) fn parse_import_at_rule(p: &mut CssParser) -> ParsedSyntax {
         CSS_BOGUS_AT_RULE
     };
 
-    //  An optional cascade layer name, or for an anonymous layer.
-    if is_at_import_named_layer(p) {
-        parse_import_named_layer(p).ok();
-    } else if is_at_import_anonymous_layer(p) {
-        parse_import_anonymous_layer(p).ok();
-    }
-
-    if is_at_import_supports(p) {
-        // An optional supports condition, we don't have an error here
-        // is_at_import_supports validates the supports condition
-        parse_import_supports(p).ok();
-    }
-
-    MediaQueryList::new(T![;]).parse_list(p);
-
+    parse_import_modifiers(p, T![;]);
     p.expect(T![;]);
 
     Present(m.complete(p, kind))
@@ -72,6 +61,12 @@ pub(crate) fn parse_import_at_rule(p: &mut CssParser) -> ParsedSyntax {
 #[inline]
 pub(crate) fn is_at_import_url(p: &mut CssParser) -> bool {
     is_at_url_function(p) || is_at_string(p)
+}
+
+/// Checks if the token at offset `n` begins a URL or string import target.
+#[inline]
+pub(crate) fn is_nth_at_import_url(p: &mut CssParser, n: usize) -> bool {
+    p.nth_at(n, CSS_STRING_LITERAL) || is_nth_at_url_function(p, n)
 }
 
 /// Parses the URL component of an `@import` rule in CSS.
@@ -89,6 +84,53 @@ pub(crate) fn parse_import_url(p: &mut CssParser) -> ParsedSyntax {
     } else {
         parse_string(p)
     }
+}
+
+/// Parses the optional modifier clauses that may follow a CSS import URL.
+///
+/// This includes cascade layers, `supports(...)`, and trailing media queries.
+///
+/// # Example
+///
+/// ```css
+/// @import "theme.css" layer(base) supports(display: grid) screen;
+/// ```
+#[inline]
+pub(crate) fn parse_import_modifiers(p: &mut CssParser, end_kind: CssSyntaxKind) {
+    parse_import_non_media_modifiers(p);
+    MediaQueryList::new(end_kind).parse_list(p);
+}
+
+/// Parses the shared non-media modifiers that may follow an import URL.
+///
+/// Both CSS `@import` rules and SCSS plain import items allow optional cascade
+/// layer clauses and `supports(...)` clauses before any trailing media queries.
+///
+/// # Example
+///
+/// ```css
+/// @import "theme.css" layer(base) supports(display: grid);
+/// ```
+#[inline]
+pub(crate) fn parse_import_non_media_modifiers(p: &mut CssParser) {
+    skip_possible_tailwind_syntax(p);
+
+    // An optional cascade layer name, or for an anonymous layer.
+    if is_at_import_named_layer(p) {
+        parse_import_named_layer(p).ok();
+    } else if is_at_import_anonymous_layer(p) {
+        parse_import_anonymous_layer(p).ok();
+    }
+
+    skip_possible_tailwind_syntax(p);
+
+    if is_at_import_supports(p) {
+        // An optional supports condition, we don't have an error here
+        // is_at_import_supports validates the supports condition
+        parse_import_supports(p).ok();
+    }
+
+    skip_possible_tailwind_syntax(p);
 }
 
 /// Determines if the current parsing position is at an anonymous layer within an `@import` rule.
@@ -163,10 +205,8 @@ pub(crate) fn parse_import_supports(p: &mut CssParser) -> ParsedSyntax {
     p.bump(T![supports]);
     p.expect(T!['(']);
 
-    if is_at_declaration(p) {
-        // is_at_declaration validates the declaration
-        // we don't have an error here
-        parse_declaration(p).ok();
+    if is_at_supports_property(p) {
+        parse_supports_declaration(p).ok();
     } else {
         parse_any_supports_condition(p)
             .or_recover(

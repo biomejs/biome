@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/arrow/call.js
 ---
+
 # Input
 
 ```js
@@ -53,105 +54,20 @@ romise.then(result => result.veryLongVariable.veryLongPropertyName > someOtherVa
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
------
-
-```js
-const testResults = results.testResults.map((testResult) =>
-	formatResult(testResult, formatter, reporter),
-);
-
-it("mocks regexp instances", () => {
-	expect(
-		// () => moduleMocker.generateFromMetadata(moduleMocker.getMetadata(/a/)),
-	).not.toThrow();
-});
-
-expect(() => asyncRequest({ url: "/test-endpoint" }));
-// .toThrowError(/Required parameter/);
-
-expect(() => asyncRequest({ url: "/test-endpoint-but-with-a-long-url" }));
-// .toThrowError(/Required parameter/);
-
-expect(() =>
-	asyncRequest({ url: "/test-endpoint-but-with-a-suuuuuuuuper-long-url" }),
-);
-// .toThrowError(/Required parameter/);
-
-expect(() =>
-	asyncRequest({ type: "foo", url: "/test-endpoint" }),
-).not.toThrowError();
-
-expect(() =>
-	asyncRequest({ type: "foo", url: "/test-endpoint-but-with-a-long-url" }),
-).not.toThrowError();
-
-const a = Observable.fromPromise(axiosInstance.post("/carts/mine")).map(
-	(response) => response.data,
-);
-
-const b = Observable.fromPromise(axiosInstance.get(url)).map(
-	(response) => response.data,
-);
-
-func(
-	veryLoooooooooooooooooooooooongName,
-	(veryLooooooooooooooooooooooooongName) =>
-		veryLoooooooooooooooongName.something(),
-);
-
-const composition = (ViewComponent, ContainerComponent) =>
-	class extends React.Component {
-		static propTypes = {};
-	};
-
-romise.then((result) =>
-	result.veryLongVariable.veryLongPropertyName > someOtherVariable
-		? "ok"
-		: "fail",
-);
+```json
+{
+  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "javascript": {
+    "formatter": {
+      "arrowParentheses": "asNeeded"
+    }
+  }
+}
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: As needed
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
------
+# Formatted
 
 ```js
 const testResults = results.testResults.map(testResult =>
@@ -207,4 +123,5 @@ romise.then(result =>
 		? "ok"
 		: "fail",
 );
+
 ```

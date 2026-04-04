@@ -32,5 +32,7 @@ issue8288.invalid.jsx:5:19 lint/nursery/noLeakedRender ━━━━━━━━�
   
   i Replace with a safe alternate value like an empty string , null or another JSX element.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```

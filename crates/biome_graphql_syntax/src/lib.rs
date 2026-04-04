@@ -7,6 +7,7 @@
 #[macro_use]
 mod generated;
 mod file_source;
+mod object_ext;
 pub mod string_value_ext;
 mod syntax_node;
 

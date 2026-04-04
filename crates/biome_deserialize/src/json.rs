@@ -101,6 +101,11 @@ impl DeserializableValue for AnyJsonValue {
                 // No need to emit another diagnostic.
                 None
             }
+            Self::JsonMetavariable(_) => {
+                // Metavariables are for GritQL pattern matching only
+                // They can't be deserialized.
+                None
+            }
             Self::JsonBooleanValue(value) => {
                 let value = value.value_token().ok()?;
                 visitor.visit_bool(ctx, value.kind() == T![true], range, name)
@@ -114,7 +119,13 @@ impl DeserializableValue for AnyJsonValue {
             Self::JsonObjectValue(object) => {
                 let members = object.json_member_list().iter().map(|member| {
                     let member = member.ok()?;
-                    Some((member.name().ok()?, member.value().ok()?))
+                    // Extract JsonMemberName from AnyJsonMemberName
+                    let name = match member.name().ok()? {
+                        biome_json_syntax::AnyJsonMemberName::JsonMemberName(n) => n,
+                        // Metavariables and bogus nodes can't be deserialized
+                        _ => return None,
+                    };
+                    Some((name, member.value().ok()?))
                 });
                 visitor.visit_map(ctx, members, range, name)
             }
@@ -130,6 +141,7 @@ impl DeserializableValue for AnyJsonValue {
             Self::JsonArrayValue(_) => Some(DeserializableType::Array),
             Self::JsonBogusValue(_) => None,
             Self::JsonBooleanValue(_) => Some(DeserializableType::Bool),
+            Self::JsonMetavariable(_) => None,
             Self::JsonNullValue(_) => Some(DeserializableType::Null),
             Self::JsonNumberValue(_) => Some(DeserializableType::Number),
             Self::JsonObjectValue(_) => Some(DeserializableType::Map),

@@ -1,0 +1,110 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<input bind:value />
+<AlertDialogPrimitive bind:value />
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@0..1 "<" [] [],
+            name: HtmlTagName {
+                value_token: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                SvelteBindDirective {
+                    bind_token: BIND_KW@7..11 "bind" [] [],
+                    value: SvelteDirectiveValue {
+                        colon_token: COLON@11..12 ":" [] [],
+                        property: SvelteName {
+                            ident_token: IDENT@12..18 "value" [] [Whitespace(" ")],
+                        },
+                        modifiers: SvelteDirectiveModifierList [],
+                        initializer: missing (optional),
+                    },
+                },
+            ],
+            slash_token: SLASH@18..19 "/" [] [],
+            r_angle_token: R_ANGLE@19..20 ">" [] [],
+        },
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@20..22 "<" [Newline("\n")] [],
+            name: HtmlComponentName {
+                value_token: HTML_LITERAL@22..43 "AlertDialogPrimitive" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                SvelteBindDirective {
+                    bind_token: BIND_KW@43..47 "bind" [] [],
+                    value: SvelteDirectiveValue {
+                        colon_token: COLON@47..48 ":" [] [],
+                        property: SvelteName {
+                            ident_token: IDENT@48..54 "value" [] [Whitespace(" ")],
+                        },
+                        modifiers: SvelteDirectiveModifierList [],
+                        initializer: missing (optional),
+                    },
+                },
+            ],
+            slash_token: SLASH@54..55 "/" [] [],
+            r_angle_token: R_ANGLE@55..56 ">" [] [],
+        },
+    ],
+    eof_token: EOF@56..57 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..57
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..56
+    0: HTML_SELF_CLOSING_ELEMENT@0..20
+      0: L_ANGLE@0..1 "<" [] []
+      1: HTML_TAG_NAME@1..7
+        0: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@7..18
+        0: SVELTE_BIND_DIRECTIVE@7..18
+          0: BIND_KW@7..11 "bind" [] []
+          1: SVELTE_DIRECTIVE_VALUE@11..18
+            0: COLON@11..12 ":" [] []
+            1: SVELTE_NAME@12..18
+              0: IDENT@12..18 "value" [] [Whitespace(" ")]
+            2: SVELTE_DIRECTIVE_MODIFIER_LIST@18..18
+            3: (empty)
+      3: SLASH@18..19 "/" [] []
+      4: R_ANGLE@19..20 ">" [] []
+    1: HTML_SELF_CLOSING_ELEMENT@20..56
+      0: L_ANGLE@20..22 "<" [Newline("\n")] []
+      1: HTML_COMPONENT_NAME@22..43
+        0: HTML_LITERAL@22..43 "AlertDialogPrimitive" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@43..54
+        0: SVELTE_BIND_DIRECTIVE@43..54
+          0: BIND_KW@43..47 "bind" [] []
+          1: SVELTE_DIRECTIVE_VALUE@47..54
+            0: COLON@47..48 ":" [] []
+            1: SVELTE_NAME@48..54
+              0: IDENT@48..54 "value" [] [Whitespace(" ")]
+            2: SVELTE_DIRECTIVE_MODIFIER_LIST@54..54
+            3: (empty)
+      3: SLASH@54..55 "/" [] []
+      4: R_ANGLE@55..56 ">" [] []
+  4: EOF@56..57 "" [Newline("\n")] []
+
+```

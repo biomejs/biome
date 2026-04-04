@@ -234,12 +234,16 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::JsExportNamedSpecifier::new_unchecked(node) };
                     $body
                 }
-                $crate::JsSyntaxKind::JS_EXPRESSION_SNIPPED => {
-                    let $pattern = unsafe { $crate::JsExpressionSnipped::new_unchecked(node) };
+                $crate::JsSyntaxKind::JS_EXPRESSION_SNIPPET => {
+                    let $pattern = unsafe { $crate::JsExpressionSnippet::new_unchecked(node) };
                     $body
                 }
                 $crate::JsSyntaxKind::JS_EXPRESSION_STATEMENT => {
                     let $pattern = unsafe { $crate::JsExpressionStatement::new_unchecked(node) };
+                    $body
+                }
+                $crate::JsSyntaxKind::JS_EXPRESSION_TEMPLATE_ROOT => {
+                    let $pattern = unsafe { $crate::JsExpressionTemplateRoot::new_unchecked(node) };
                     $body
                 }
                 $crate::JsSyntaxKind::JS_EXTENDS_CLAUSE => {

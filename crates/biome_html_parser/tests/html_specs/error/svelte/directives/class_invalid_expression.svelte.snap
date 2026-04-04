@@ -1,0 +1,141 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div class:active={>Invalid</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlBogusAttribute {
+                        items: [
+                            CLASS_KW@5..10 "class" [] [],
+                            HtmlBogus {
+                                items: [
+                                    COLON@10..11 ":" [] [],
+                                    SvelteLiteral {
+                                        value_token: HTML_LITERAL@11..17 "active" [] [],
+                                    },
+                                    SvelteDirectiveModifierList [],
+                                    HtmlBogus {
+                                        items: [
+                                            EQ@17..18 "=" [] [],
+                                            HtmlBogusTextExpression {
+                                                items: [
+                                                    L_CURLY@18..19 "{" [] [],
+                                                    HTML_LITERAL@19..27 ">Invalid" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+                r_angle_token: missing (required),
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@27..28 "<" [] [],
+                slash_token: SLASH@28..29 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@29..32 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@32..33 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@33..34 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..34
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..33
+    0: HTML_ELEMENT@0..33
+      0: HTML_OPENING_ELEMENT@0..27
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..27
+          0: HTML_BOGUS_ATTRIBUTE@5..27
+            0: CLASS_KW@5..10 "class" [] []
+            1: HTML_BOGUS@10..27
+              0: COLON@10..11 ":" [] []
+              1: SVELTE_LITERAL@11..17
+                0: HTML_LITERAL@11..17 "active" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@17..17
+              3: HTML_BOGUS@17..27
+                0: EQ@17..18 "=" [] []
+                1: HTML_BOGUS_TEXT_EXPRESSION@18..27
+                  0: L_CURLY@18..19 "{" [] []
+                  1: HTML_LITERAL@19..27 ">Invalid" [] []
+        3: (empty)
+      1: HTML_ELEMENT_LIST@27..27
+      2: HTML_CLOSING_ELEMENT@27..33
+        0: L_ANGLE@27..28 "<" [] []
+        1: SLASH@28..29 "/" [] []
+        2: HTML_TAG_NAME@29..32
+          0: HTML_LITERAL@29..32 "div" [] []
+        3: R_ANGLE@32..33 ">" [] []
+  4: EOF@33..34 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+class_invalid_expression.svelte:1:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found a text expression that doesn't have the closing expression:
+  
+  > 1 │ <div class:active={>Invalid</div>
+      │                   ^^^^^^^^^
+    2 │ 
+  
+  i This is where the opening expression was found:
+  
+  > 1 │ <div class:active={>Invalid</div>
+      │                   ^
+    2 │ 
+  
+class_invalid_expression.svelte:1:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an attribute but instead found '<'.
+  
+  > 1 │ <div class:active={>Invalid</div>
+      │                            ^
+    2 │ 
+  
+  i Expected an attribute here.
+  
+  > 1 │ <div class:active={>Invalid</div>
+      │                            ^
+    2 │ 
+  
+```

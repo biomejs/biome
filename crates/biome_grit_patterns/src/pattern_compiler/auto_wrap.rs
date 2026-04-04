@@ -407,6 +407,9 @@ fn wrap_pattern_in_contains<Q: QueryContext>(
             Some(pattern),
         ))),
     )));
+    // Use context.scope_index (scope 1) for the bubble. This ensures that when the bubble
+    // enters this scope, it resets local pattern variables but preserves global variables
+    // in scope 0 (like $filename, $program, etc.).
     let pattern_definition =
         PatternDefinition::new("<bubble>".to_string(), context.scope_index, vec![], pattern);
     let bubble = Pattern::Bubble(Box::new(Bubble::new(pattern_definition, vec![])));
@@ -414,7 +417,11 @@ fn wrap_pattern_in_contains<Q: QueryContext>(
 }
 
 fn wrap_pattern_in_file<Q: QueryContext>(pattern: Pattern<Q>) -> Result<Pattern<Q>, CompileError> {
-    let pattern = Pattern::File(Box::new(FilePattern::new(Pattern::Top, pattern)));
+    // Use Pattern::Variable to bind $filename when the FilePattern matches
+    let pattern = Pattern::File(Box::new(FilePattern::new(
+        Pattern::Variable(Variable::file_name()),
+        pattern,
+    )));
     Ok(pattern)
 }
 

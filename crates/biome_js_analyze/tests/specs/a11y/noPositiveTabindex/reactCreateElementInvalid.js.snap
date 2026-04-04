@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: reactCreateElementInvalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -27,7 +26,7 @@ reactCreateElementInvalid.js:1:40 lint/a11y/noPositiveTabindex  FIXABLE  ━━�
   
   i Use only 0 and -1 as tabIndex values. Avoid using tabIndex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
   
-  i Unsafe fix: Replace the tableIndex prop value with 0.
+  i Unsafe fix: Replace the tabIndex prop value with 0.
   
     1   │ - React.createElement("div",·{·tabIndex:·'1'·})
       1 │ + React.createElement("div",·{·tabIndex:·"0"·})
@@ -52,7 +51,7 @@ reactCreateElementInvalid.js:2:40 lint/a11y/noPositiveTabindex  FIXABLE  ━━�
   
   i Use only 0 and -1 as tabIndex values. Avoid using tabIndex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
   
-  i Unsafe fix: Replace the tableIndex prop value with 0.
+  i Unsafe fix: Replace the tabIndex prop value with 0.
   
     1 1 │   React.createElement("div", { tabIndex: '1' })
     2   │ - React.createElement("div",·{·tabIndex:·1·})
@@ -79,7 +78,7 @@ reactCreateElementInvalid.js:3:40 lint/a11y/noPositiveTabindex  FIXABLE  ━━�
   
   i Use only 0 and -1 as tabIndex values. Avoid using tabIndex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
   
-  i Unsafe fix: Replace the tableIndex prop value with 0.
+  i Unsafe fix: Replace the tabIndex prop value with 0.
   
     1 1 │   React.createElement("div", { tabIndex: '1' })
     2 2 │   React.createElement("div", { tabIndex: 1 })

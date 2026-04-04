@@ -3,8 +3,8 @@
 
 use super::{CssLexer, TextSize};
 use crate::lexer::CssLexContext;
-use crate::CssParserOptions;
 use biome_css_syntax::CssSyntaxKind::EOF;
+use crate::CssParserOptions;
 use biome_parser::lexer::Lexer;
 use quickcheck_macros::quickcheck;
 use std::sync::mpsc::channel;
@@ -180,6 +180,16 @@ fn string() {
         CSS_STRING_LITERAL:12
     }
 
+    assert_lex! {
+        "\"a\\\r\nb\"",
+        CSS_STRING_LITERAL:7
+    }
+
+    assert_lex! {
+        "\"\\41\nb\"",
+        CSS_STRING_LITERAL:7
+    }
+
     // invalid escape sequence
     assert_lex! {
         r"'\0'",
@@ -309,14 +319,36 @@ fn cdo_and_cdc() {
 #[test]
 fn keywords() {
     assert_lex! {
-        "media keyframes important from",
+        "media keyframes important from through sass each debug warn error for function include mixin return",
         MEDIA_KW:5,
         WHITESPACE:1,
         KEYFRAMES_KW:9,
         WHITESPACE:1,
         IMPORTANT_KW:9,
         WHITESPACE:1,
-        FROM_KW:4
+        FROM_KW:4,
+        WHITESPACE:1,
+        THROUGH_KW:7,
+        WHITESPACE:1,
+        SASS_KW:4,
+        WHITESPACE:1,
+        EACH_KW:4,
+        WHITESPACE:1,
+        DEBUG_KW:5,
+        WHITESPACE:1,
+        WARN_KW:4,
+        WHITESPACE:1,
+        ERROR_KW:5,
+        WHITESPACE:1,
+        FOR_KW:3,
+        WHITESPACE:1,
+        FUNCTION_KW:8,
+        WHITESPACE:1,
+        INCLUDE_KW:7,
+        WHITESPACE:1,
+        MIXIN_KW:5,
+        WHITESPACE:1,
+        RETURN_KW:6
     }
 }
 

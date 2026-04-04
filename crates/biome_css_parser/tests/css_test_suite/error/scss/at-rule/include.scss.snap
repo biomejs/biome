@@ -1,0 +1,299 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@include;
+
+@include ($radius);
+
+@include button($radius: );
+
+@include button(, $padding);
+
+@include button
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: ScssIncludeAtRule {
+                include_token: INCLUDE_KW@1..8 "include" [] [],
+                name: missing (required),
+                arguments: missing (optional),
+                block: missing (optional),
+                semicolon_token: SEMICOLON@8..9 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@9..12 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssIncludeAtRule {
+                include_token: INCLUDE_KW@12..20 "include" [] [Whitespace(" ")],
+                name: missing (required),
+                arguments: ScssIncludeArgumentList {
+                    l_paren_token: L_PAREN@20..21 "(" [] [],
+                    items: CssParameterList [
+                        ScssExpression {
+                            items: ScssExpressionItemList [
+                                ScssIdentifier {
+                                    dollar_token: DOLLAR@21..22 "$" [] [],
+                                    name: CssIdentifier {
+                                        value_token: IDENT@22..28 "radius" [] [],
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@28..29 ")" [] [],
+                },
+                block: missing (optional),
+                semicolon_token: SEMICOLON@29..30 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@30..33 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssIncludeAtRule {
+                include_token: INCLUDE_KW@33..41 "include" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@41..47 "button" [] [],
+                },
+                arguments: ScssIncludeArgumentList {
+                    l_paren_token: L_PAREN@47..48 "(" [] [],
+                    items: CssParameterList [
+                        ScssExpression {
+                            items: ScssExpressionItemList [
+                                ScssKeywordArgument {
+                                    name: ScssIdentifier {
+                                        dollar_token: DOLLAR@48..49 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@49..55 "radius" [] [],
+                                        },
+                                    },
+                                    colon_token: COLON@55..57 ":" [] [Whitespace(" ")],
+                                    value: missing (required),
+                                },
+                            ],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@57..58 ")" [] [],
+                },
+                block: missing (optional),
+                semicolon_token: SEMICOLON@58..59 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@59..62 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssIncludeAtRule {
+                include_token: INCLUDE_KW@62..70 "include" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@70..76 "button" [] [],
+                },
+                arguments: ScssIncludeArgumentList {
+                    l_paren_token: L_PAREN@76..77 "(" [] [],
+                    items: CssParameterList [
+                        missing element,
+                        COMMA@77..79 "," [] [Whitespace(" ")],
+                        ScssExpression {
+                            items: ScssExpressionItemList [
+                                ScssIdentifier {
+                                    dollar_token: DOLLAR@79..80 "$" [] [],
+                                    name: CssIdentifier {
+                                        value_token: IDENT@80..87 "padding" [] [],
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@87..88 ")" [] [],
+                },
+                block: missing (optional),
+                semicolon_token: SEMICOLON@88..89 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@89..92 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssIncludeAtRule {
+                include_token: INCLUDE_KW@92..100 "include" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@100..106 "button" [] [],
+                },
+                arguments: missing (optional),
+                block: missing (optional),
+                semicolon_token: missing (optional),
+            },
+        },
+    ],
+    eof_token: EOF@106..107 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..107
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..106
+    0: CSS_AT_RULE@0..9
+      0: AT@0..1 "@" [] []
+      1: SCSS_INCLUDE_AT_RULE@1..9
+        0: INCLUDE_KW@1..8 "include" [] []
+        1: (empty)
+        2: (empty)
+        3: (empty)
+        4: SEMICOLON@8..9 ";" [] []
+    1: CSS_AT_RULE@9..30
+      0: AT@9..12 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_INCLUDE_AT_RULE@12..30
+        0: INCLUDE_KW@12..20 "include" [] [Whitespace(" ")]
+        1: (empty)
+        2: SCSS_INCLUDE_ARGUMENT_LIST@20..29
+          0: L_PAREN@20..21 "(" [] []
+          1: CSS_PARAMETER_LIST@21..28
+            0: SCSS_EXPRESSION@21..28
+              0: SCSS_EXPRESSION_ITEM_LIST@21..28
+                0: SCSS_IDENTIFIER@21..28
+                  0: DOLLAR@21..22 "$" [] []
+                  1: CSS_IDENTIFIER@22..28
+                    0: IDENT@22..28 "radius" [] []
+          2: R_PAREN@28..29 ")" [] []
+        3: (empty)
+        4: SEMICOLON@29..30 ";" [] []
+    2: CSS_AT_RULE@30..59
+      0: AT@30..33 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_INCLUDE_AT_RULE@33..59
+        0: INCLUDE_KW@33..41 "include" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@41..47
+          0: IDENT@41..47 "button" [] []
+        2: SCSS_INCLUDE_ARGUMENT_LIST@47..58
+          0: L_PAREN@47..48 "(" [] []
+          1: CSS_PARAMETER_LIST@48..57
+            0: SCSS_EXPRESSION@48..57
+              0: SCSS_EXPRESSION_ITEM_LIST@48..57
+                0: SCSS_KEYWORD_ARGUMENT@48..57
+                  0: SCSS_IDENTIFIER@48..55
+                    0: DOLLAR@48..49 "$" [] []
+                    1: CSS_IDENTIFIER@49..55
+                      0: IDENT@49..55 "radius" [] []
+                  1: COLON@55..57 ":" [] [Whitespace(" ")]
+                  2: (empty)
+          2: R_PAREN@57..58 ")" [] []
+        3: (empty)
+        4: SEMICOLON@58..59 ";" [] []
+    3: CSS_AT_RULE@59..89
+      0: AT@59..62 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_INCLUDE_AT_RULE@62..89
+        0: INCLUDE_KW@62..70 "include" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@70..76
+          0: IDENT@70..76 "button" [] []
+        2: SCSS_INCLUDE_ARGUMENT_LIST@76..88
+          0: L_PAREN@76..77 "(" [] []
+          1: CSS_PARAMETER_LIST@77..87
+            0: (empty)
+            1: COMMA@77..79 "," [] [Whitespace(" ")]
+            2: SCSS_EXPRESSION@79..87
+              0: SCSS_EXPRESSION_ITEM_LIST@79..87
+                0: SCSS_IDENTIFIER@79..87
+                  0: DOLLAR@79..80 "$" [] []
+                  1: CSS_IDENTIFIER@80..87
+                    0: IDENT@80..87 "padding" [] []
+          2: R_PAREN@87..88 ")" [] []
+        3: (empty)
+        4: SEMICOLON@88..89 ";" [] []
+    4: CSS_AT_RULE@89..106
+      0: AT@89..92 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_INCLUDE_AT_RULE@92..106
+        0: INCLUDE_KW@92..100 "include" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@100..106
+          0: IDENT@100..106 "button" [] []
+        2: (empty)
+        3: (empty)
+        4: (empty)
+  2: EOF@106..107 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+include.scss:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found ';'.
+  
+  > 1 │ @include;
+      │         ^
+    2 │ 
+    3 │ @include ($radius);
+  
+  i Expected an identifier here.
+  
+  > 1 │ @include;
+      │         ^
+    2 │ 
+    3 │ @include ($radius);
+  
+include.scss:3:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '('.
+  
+    1 │ @include;
+    2 │ 
+  > 3 │ @include ($radius);
+      │          ^
+    4 │ 
+    5 │ @include button($radius: );
+  
+  i Expected an identifier here.
+  
+    1 │ @include;
+    2 │ 
+  > 3 │ @include ($radius);
+      │          ^
+    4 │ 
+    5 │ @include button($radius: );
+  
+include.scss:5:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    3 │ @include ($radius);
+    4 │ 
+  > 5 │ @include button($radius: );
+      │                          ^
+    6 │ 
+    7 │ @include button(, $padding);
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+include.scss:10:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `;` but instead the file ends
+  
+     9 │ @include button
+  > 10 │ 
+       │ 
+  
+  i the file ends here
+  
+     9 │ @include button
+  > 10 │ 
+       │ 
+  
+```

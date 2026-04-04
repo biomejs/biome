@@ -94,12 +94,12 @@ invalid.jsx:8:2 lint/performance/useGoogleFontPreconnect  FIXABLE  ━━━━�
   
   i Safe fix: Add the rel="preconnect" attribute.
   
-     7  7 │   	/>
-     8  8 │   	<link
+     7  7 │     />
+     8  8 │     <link
      9    │ - → → href="https://fonts.gstatic.com"
         9 │ + → → href="https://fonts.gstatic.com"
        10 │ + → → rel="preconnect"
-    10 11 │   	/>
+    10 11 │     />
     11 12 │   </>
   
 

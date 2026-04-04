@@ -24,12 +24,15 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
     /// Asks the workspace whether the given `path` that falls under the project
     /// with the given `project_key` is ignored, assuming the given `scan_kind`
     /// and `request_kind`.
+    ///
+    /// Then `path_kind` is `None`, the underling code fallbacks to a sys call.
     fn is_ignored(
         &self,
         project_key: ProjectKey,
         scan_kind: &ScanKind,
         path: &Utf8Path,
         request_kind: IndexRequestKind,
+        path_kind: Option<PathKind>,
     ) -> Result<bool, WorkspaceError>;
 
     /// Returns whether the given `path` has been indexed.
@@ -86,7 +89,11 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
 
     /// Unloads the index of the file with the given `path` within the
     /// workspace.
-    fn unload_file(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError>;
+    fn unload_file(
+        &self,
+        path: &Utf8Path,
+        project_key: ProjectKey,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError>;
 
     /// Unloads the given `path` from the workspace index.
     ///
@@ -97,12 +104,16 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
     ///
     /// If you already know the path is a file, you should use
     /// [`WorkspaceWatcherBridge::unload_file()`] directly instead.
-    fn unload_path(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError>;
+    fn unload_path(
+        &self,
+        path: &Utf8Path,
+        project_key: ProjectKey,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError>;
 }
 
 /// Trait used to give access to workspace functionality required by the
 /// watcher.
-pub(crate) trait WorkspaceWatcherBridge {
+pub trait WorkspaceWatcherBridge {
     /// Returns a reference to the [`FileSystem`].
     fn fs(&self) -> &dyn FileSystem;
 
@@ -122,6 +133,7 @@ pub(crate) trait WorkspaceWatcherBridge {
         project_key: ProjectKey,
         scan_kind: &ScanKind,
         path: &Utf8Path,
+        path_kind: Option<PathKind>,
     ) -> Result<bool, WorkspaceError>;
 
     /// Indexes the file with the given `path` within the project with the given
@@ -157,7 +169,11 @@ pub(crate) trait WorkspaceWatcherBridge {
 
     /// Unloads the index of the file with the given `path` within the
     /// workspace.
-    fn unload_file(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError>;
+    fn unload_file(
+        &self,
+        path: &Utf8Path,
+        project_key: ProjectKey,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError>;
 
     /// Unloads the given `path` from the workspace index.
     ///
@@ -168,7 +184,11 @@ pub(crate) trait WorkspaceWatcherBridge {
     ///
     /// If you already know the path is a file, you should use
     /// [`WorkspaceWatcherBridge::unload_file()`] directly instead.
-    fn unload_path(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError>;
+    fn unload_path(
+        &self,
+        path: &Utf8Path,
+        project_key: ProjectKey,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError>;
 
     /// Notifies service notification listeners that the watcher has stopped.
     fn notify_stopped(&self);
@@ -226,12 +246,14 @@ where
         project_key: ProjectKey,
         scan_kind: &ScanKind,
         path: &Utf8Path,
+        path_kind: Option<PathKind>,
     ) -> Result<bool, WorkspaceError> {
         self.workspace.is_ignored(
             project_key,
             scan_kind,
             path,
             IndexRequestKind::Explicit(IndexTrigger::Update),
+            path_kind,
         )
     }
 
@@ -270,13 +292,21 @@ where
     }
 
     #[inline]
-    fn unload_file(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError> {
-        self.workspace.unload_file(path)
+    fn unload_file(
+        &self,
+        path: &Utf8Path,
+        project_key: ProjectKey,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        self.workspace.unload_file(path, project_key)
     }
 
     #[inline]
-    fn unload_path(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError> {
-        self.workspace.unload_path(path)
+    fn unload_path(
+        &self,
+        path: &Utf8Path,
+        project_key: ProjectKey,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        self.workspace.unload_path(path, project_key)
     }
 
     #[inline]

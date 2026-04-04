@@ -42,6 +42,8 @@ invalidWithFix.js:2:23 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  â”
   
   i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: If this is intentional, prepend acc with an underscore.
   
      1  1 â”‚   // Simple case with fix
@@ -70,6 +72,8 @@ invalidWithFix.js:8:16 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  â”
   i Parameters that are only used in recursive calls are effectively unused and can be removed.
   
   i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: If this is intentional, prepend b with an underscore.
   
@@ -101,6 +105,8 @@ invalidWithFix.js:8:19 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  â”
   
   i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Unsafe fix: If this is intentional, prepend c with an underscore.
   
      6  6 â”‚   
@@ -131,6 +137,8 @@ invalidWithFix.js:15:14 lint/nursery/noParametersOnlyUsedInRecursion  FIXABLE  â
   i Parameters that are only used in recursive calls are effectively unused and can be removed.
   
   i If the parameter is needed for the recursion to work, consider if the function can be refactored to avoid it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: If this is intentional, prepend acc with an underscore.
   

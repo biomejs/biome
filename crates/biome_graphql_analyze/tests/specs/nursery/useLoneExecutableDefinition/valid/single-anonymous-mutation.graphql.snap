@@ -1,0 +1,14 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: single-anonymous-mutation.graphql
+---
+# Input
+```graphql
+# should not generate diagnostics
+mutation ($name: String!) {
+	createFoo {
+		name
+	}
+}
+
+```
