@@ -82,6 +82,7 @@ impl VueFileHandler {
                             setup,
                             is_source: true,
                             event_handler: false,
+                            allow_statements: true,
                         }),
                 )
             })
@@ -203,6 +204,12 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     javascript::code_actions(params)
 }
 
-fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
+fn fix_all(mut params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
+    let html_options = params
+        .settings
+        .format_options::<HtmlLanguage>(params.biome_path, &params.document_file_source);
+    if *html_options.indent_script_and_style() {
+        params.embeds_initial_indent = 1;
+    }
     javascript::fix_all(params)
 }

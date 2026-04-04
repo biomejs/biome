@@ -38,20 +38,7 @@ $new_list = join($list, "|||GRIT_SORT_SEP|||"),
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Attribute Position: Auto
-Trailing newline: true
------
+# Formatted
 
 ```grit
 language universal

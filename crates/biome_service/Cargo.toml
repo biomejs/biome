@@ -86,7 +86,7 @@ tracing                  = { workspace = true, features = ["attributes", "log"] 
 web-time                 = { workspace = true }
 
 [dev-dependencies]
-biome_configuration = { workspace = true, features = ["test-utils"] }
+biome_configuration = { path = "../biome_configuration", features = ["test-utils"] }
 insta               = { workspace = true }
 
 [features]

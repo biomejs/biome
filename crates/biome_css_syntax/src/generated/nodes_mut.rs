@@ -218,7 +218,7 @@ impl CssClassSelector {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_name(self, element: CssCustomIdentifier) -> Self {
+    pub fn with_name(self, element: AnyCssSelectorCustomIdentifier) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -1176,7 +1176,7 @@ impl CssIdSelector {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_name(self, element: CssCustomIdentifier) -> Self {
+    pub fn with_name(self, element: AnyCssSelectorCustomIdentifier) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -3248,7 +3248,7 @@ impl CssTypeSelector {
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_ident(self, element: CssIdentifier) -> Self {
+    pub fn with_ident(self, element: AnyCssSelectorIdentifier) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -4123,6 +4123,14 @@ impl ScssIncludeAtRule {
         )
     }
 }
+impl ScssInterpolatedIdentifier {
+    pub fn with_items(self, element: ScssInterpolatedIdentifierPartList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl ScssInterpolation {
     pub fn with_hash_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -4432,7 +4440,7 @@ impl ScssPlaceholderSelector {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_name(self, element: CssCustomIdentifier) -> Self {
+    pub fn with_name(self, element: AnyCssSelectorCustomIdentifier) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),

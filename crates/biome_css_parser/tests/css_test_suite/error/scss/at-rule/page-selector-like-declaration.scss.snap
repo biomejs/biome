@@ -1,0 +1,447 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@page :left {
+  font:bold {
+    color: red;
+  }
+
+  #{$name}:hover {
+    color: blue;
+  }
+
+  font-#{$weight}:bold {
+    color: green;
+  }
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssPageAtRule {
+                page_token: PAGE_KW@1..6 "page" [] [Whitespace(" ")],
+                selectors: CssPageSelectorList [
+                    CssPageSelector {
+                        ty: missing (optional),
+                        pseudos: CssPageSelectorPseudoList [
+                            CssPageSelectorPseudo {
+                                colon_token: COLON@6..7 ":" [] [],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@7..12 "left" [] [Whitespace(" ")],
+                                },
+                            },
+                        ],
+                    },
+                ],
+                block: CssPageAtRuleBlock {
+                    l_curly_token: L_CURLY@12..13 "{" [] [],
+                    items: CssPageAtRuleItemList [
+                        CssBogus {
+                            items: [
+                                CssSelectorList [
+                                    CssCompoundSelector {
+                                        nesting_selectors: CssNestedSelectorList [],
+                                        simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
+                                            ident: CssIdentifier {
+                                                value_token: IDENT@13..20 "font" [Newline("\n"), Whitespace("  ")] [],
+                                            },
+                                        },
+                                        sub_selectors: CssSubSelectorList [
+                                            CssPseudoClassSelector {
+                                                colon_token: COLON@20..21 ":" [] [],
+                                                class: CssPseudoClassIdentifier {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@21..26 "bold" [] [Whitespace(" ")],
+                                                    },
+                                                },
+                                            },
+                                        ],
+                                    },
+                                ],
+                                CssDeclarationOrRuleBlock {
+                                    l_curly_token: L_CURLY@26..27 "{" [] [],
+                                    items: CssDeclarationOrRuleList [
+                                        CssDeclarationWithSemicolon {
+                                            declaration: CssDeclaration {
+                                                property: CssGenericProperty {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@27..37 "color" [Newline("\n"), Whitespace("    ")] [],
+                                                    },
+                                                    colon_token: COLON@37..39 ":" [] [Whitespace(" ")],
+                                                    value: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            CssIdentifier {
+                                                                value_token: IDENT@39..42 "red" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                                important: missing (optional),
+                                            },
+                                            semicolon_token: SEMICOLON@42..43 ";" [] [],
+                                        },
+                                    ],
+                                    r_curly_token: R_CURLY@43..47 "}" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                            ],
+                        },
+                        CssBogus {
+                            items: [
+                                CssSelectorList [
+                                    CssCompoundSelector {
+                                        nesting_selectors: CssNestedSelectorList [],
+                                        simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
+                                            ident: ScssInterpolatedIdentifier {
+                                                items: ScssInterpolatedIdentifierPartList [
+                                                    ScssInterpolation {
+                                                        hash_token: HASH@47..52 "#" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
+                                                        l_curly_token: L_CURLY@52..53 "{" [] [],
+                                                        value: ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                ScssIdentifier {
+                                                                    dollar_token: DOLLAR@53..54 "$" [] [],
+                                                                    name: CssIdentifier {
+                                                                        value_token: IDENT@54..58 "name" [] [],
+                                                                    },
+                                                                },
+                                                            ],
+                                                        },
+                                                        r_curly_token: R_CURLY@58..59 "}" [] [],
+                                                    },
+                                                ],
+                                            },
+                                        },
+                                        sub_selectors: CssSubSelectorList [
+                                            CssPseudoClassSelector {
+                                                colon_token: COLON@59..60 ":" [] [],
+                                                class: CssPseudoClassIdentifier {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@60..66 "hover" [] [Whitespace(" ")],
+                                                    },
+                                                },
+                                            },
+                                        ],
+                                    },
+                                ],
+                                CssDeclarationOrRuleBlock {
+                                    l_curly_token: L_CURLY@66..67 "{" [] [],
+                                    items: CssDeclarationOrRuleList [
+                                        CssDeclarationWithSemicolon {
+                                            declaration: CssDeclaration {
+                                                property: CssGenericProperty {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@67..77 "color" [Newline("\n"), Whitespace("    ")] [],
+                                                    },
+                                                    colon_token: COLON@77..79 ":" [] [Whitespace(" ")],
+                                                    value: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            CssIdentifier {
+                                                                value_token: IDENT@79..83 "blue" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                                important: missing (optional),
+                                            },
+                                            semicolon_token: SEMICOLON@83..84 ";" [] [],
+                                        },
+                                    ],
+                                    r_curly_token: R_CURLY@84..88 "}" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                            ],
+                        },
+                        CssBogus {
+                            items: [
+                                CssSelectorList [
+                                    CssCompoundSelector {
+                                        nesting_selectors: CssNestedSelectorList [],
+                                        simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
+                                            ident: ScssInterpolatedIdentifier {
+                                                items: ScssInterpolatedIdentifierPartList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@88..97 "font-" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
+                                                    },
+                                                    ScssInterpolation {
+                                                        hash_token: HASH@97..98 "#" [] [],
+                                                        l_curly_token: L_CURLY@98..99 "{" [] [],
+                                                        value: ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                ScssIdentifier {
+                                                                    dollar_token: DOLLAR@99..100 "$" [] [],
+                                                                    name: CssIdentifier {
+                                                                        value_token: IDENT@100..106 "weight" [] [],
+                                                                    },
+                                                                },
+                                                            ],
+                                                        },
+                                                        r_curly_token: R_CURLY@106..107 "}" [] [],
+                                                    },
+                                                ],
+                                            },
+                                        },
+                                        sub_selectors: CssSubSelectorList [
+                                            CssPseudoClassSelector {
+                                                colon_token: COLON@107..108 ":" [] [],
+                                                class: CssPseudoClassIdentifier {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@108..113 "bold" [] [Whitespace(" ")],
+                                                    },
+                                                },
+                                            },
+                                        ],
+                                    },
+                                ],
+                                CssDeclarationOrRuleBlock {
+                                    l_curly_token: L_CURLY@113..114 "{" [] [],
+                                    items: CssDeclarationOrRuleList [
+                                        CssDeclarationWithSemicolon {
+                                            declaration: CssDeclaration {
+                                                property: CssGenericProperty {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@114..124 "color" [Newline("\n"), Whitespace("    ")] [],
+                                                    },
+                                                    colon_token: COLON@124..126 ":" [] [Whitespace(" ")],
+                                                    value: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            CssIdentifier {
+                                                                value_token: IDENT@126..131 "green" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                                important: missing (optional),
+                                            },
+                                            semicolon_token: SEMICOLON@131..132 ";" [] [],
+                                        },
+                                    ],
+                                    r_curly_token: R_CURLY@132..136 "}" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                            ],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@136..138 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@138..139 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..139
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..138
+    0: CSS_AT_RULE@0..138
+      0: AT@0..1 "@" [] []
+      1: CSS_PAGE_AT_RULE@1..138
+        0: PAGE_KW@1..6 "page" [] [Whitespace(" ")]
+        1: CSS_PAGE_SELECTOR_LIST@6..12
+          0: CSS_PAGE_SELECTOR@6..12
+            0: (empty)
+            1: CSS_PAGE_SELECTOR_PSEUDO_LIST@6..12
+              0: CSS_PAGE_SELECTOR_PSEUDO@6..12
+                0: COLON@6..7 ":" [] []
+                1: CSS_IDENTIFIER@7..12
+                  0: IDENT@7..12 "left" [] [Whitespace(" ")]
+        2: CSS_PAGE_AT_RULE_BLOCK@12..138
+          0: L_CURLY@12..13 "{" [] []
+          1: CSS_PAGE_AT_RULE_ITEM_LIST@13..136
+            0: CSS_BOGUS@13..47
+              0: CSS_SELECTOR_LIST@13..26
+                0: CSS_COMPOUND_SELECTOR@13..26
+                  0: CSS_NESTED_SELECTOR_LIST@13..13
+                  1: CSS_TYPE_SELECTOR@13..20
+                    0: (empty)
+                    1: CSS_IDENTIFIER@13..20
+                      0: IDENT@13..20 "font" [Newline("\n"), Whitespace("  ")] []
+                  2: CSS_SUB_SELECTOR_LIST@20..26
+                    0: CSS_PSEUDO_CLASS_SELECTOR@20..26
+                      0: COLON@20..21 ":" [] []
+                      1: CSS_PSEUDO_CLASS_IDENTIFIER@21..26
+                        0: CSS_IDENTIFIER@21..26
+                          0: IDENT@21..26 "bold" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@26..47
+                0: L_CURLY@26..27 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@27..43
+                  0: CSS_DECLARATION_WITH_SEMICOLON@27..43
+                    0: CSS_DECLARATION@27..42
+                      0: CSS_GENERIC_PROPERTY@27..42
+                        0: CSS_IDENTIFIER@27..37
+                          0: IDENT@27..37 "color" [Newline("\n"), Whitespace("    ")] []
+                        1: COLON@37..39 ":" [] [Whitespace(" ")]
+                        2: SCSS_EXPRESSION@39..42
+                          0: SCSS_EXPRESSION_ITEM_LIST@39..42
+                            0: CSS_IDENTIFIER@39..42
+                              0: IDENT@39..42 "red" [] []
+                      1: (empty)
+                    1: SEMICOLON@42..43 ";" [] []
+                2: R_CURLY@43..47 "}" [Newline("\n"), Whitespace("  ")] []
+            1: CSS_BOGUS@47..88
+              0: CSS_SELECTOR_LIST@47..66
+                0: CSS_COMPOUND_SELECTOR@47..66
+                  0: CSS_NESTED_SELECTOR_LIST@47..47
+                  1: CSS_TYPE_SELECTOR@47..59
+                    0: (empty)
+                    1: SCSS_INTERPOLATED_IDENTIFIER@47..59
+                      0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@47..59
+                        0: SCSS_INTERPOLATION@47..59
+                          0: HASH@47..52 "#" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
+                          1: L_CURLY@52..53 "{" [] []
+                          2: SCSS_EXPRESSION@53..58
+                            0: SCSS_EXPRESSION_ITEM_LIST@53..58
+                              0: SCSS_IDENTIFIER@53..58
+                                0: DOLLAR@53..54 "$" [] []
+                                1: CSS_IDENTIFIER@54..58
+                                  0: IDENT@54..58 "name" [] []
+                          3: R_CURLY@58..59 "}" [] []
+                  2: CSS_SUB_SELECTOR_LIST@59..66
+                    0: CSS_PSEUDO_CLASS_SELECTOR@59..66
+                      0: COLON@59..60 ":" [] []
+                      1: CSS_PSEUDO_CLASS_IDENTIFIER@60..66
+                        0: CSS_IDENTIFIER@60..66
+                          0: IDENT@60..66 "hover" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@66..88
+                0: L_CURLY@66..67 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@67..84
+                  0: CSS_DECLARATION_WITH_SEMICOLON@67..84
+                    0: CSS_DECLARATION@67..83
+                      0: CSS_GENERIC_PROPERTY@67..83
+                        0: CSS_IDENTIFIER@67..77
+                          0: IDENT@67..77 "color" [Newline("\n"), Whitespace("    ")] []
+                        1: COLON@77..79 ":" [] [Whitespace(" ")]
+                        2: SCSS_EXPRESSION@79..83
+                          0: SCSS_EXPRESSION_ITEM_LIST@79..83
+                            0: CSS_IDENTIFIER@79..83
+                              0: IDENT@79..83 "blue" [] []
+                      1: (empty)
+                    1: SEMICOLON@83..84 ";" [] []
+                2: R_CURLY@84..88 "}" [Newline("\n"), Whitespace("  ")] []
+            2: CSS_BOGUS@88..136
+              0: CSS_SELECTOR_LIST@88..113
+                0: CSS_COMPOUND_SELECTOR@88..113
+                  0: CSS_NESTED_SELECTOR_LIST@88..88
+                  1: CSS_TYPE_SELECTOR@88..107
+                    0: (empty)
+                    1: SCSS_INTERPOLATED_IDENTIFIER@88..107
+                      0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@88..107
+                        0: CSS_IDENTIFIER@88..97
+                          0: IDENT@88..97 "font-" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
+                        1: SCSS_INTERPOLATION@97..107
+                          0: HASH@97..98 "#" [] []
+                          1: L_CURLY@98..99 "{" [] []
+                          2: SCSS_EXPRESSION@99..106
+                            0: SCSS_EXPRESSION_ITEM_LIST@99..106
+                              0: SCSS_IDENTIFIER@99..106
+                                0: DOLLAR@99..100 "$" [] []
+                                1: CSS_IDENTIFIER@100..106
+                                  0: IDENT@100..106 "weight" [] []
+                          3: R_CURLY@106..107 "}" [] []
+                  2: CSS_SUB_SELECTOR_LIST@107..113
+                    0: CSS_PSEUDO_CLASS_SELECTOR@107..113
+                      0: COLON@107..108 ":" [] []
+                      1: CSS_PSEUDO_CLASS_IDENTIFIER@108..113
+                        0: CSS_IDENTIFIER@108..113
+                          0: IDENT@108..113 "bold" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@113..136
+                0: L_CURLY@113..114 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@114..132
+                  0: CSS_DECLARATION_WITH_SEMICOLON@114..132
+                    0: CSS_DECLARATION@114..131
+                      0: CSS_GENERIC_PROPERTY@114..131
+                        0: CSS_IDENTIFIER@114..124
+                          0: IDENT@114..124 "color" [Newline("\n"), Whitespace("    ")] []
+                        1: COLON@124..126 ":" [] [Whitespace(" ")]
+                        2: SCSS_EXPRESSION@126..131
+                          0: SCSS_EXPRESSION_ITEM_LIST@126..131
+                            0: CSS_IDENTIFIER@126..131
+                              0: IDENT@126..131 "green" [] []
+                      1: (empty)
+                    1: SEMICOLON@131..132 ";" [] []
+                2: R_CURLY@132..136 "}" [Newline("\n"), Whitespace("  ")] []
+          2: R_CURLY@136..138 "}" [Newline("\n")] []
+  2: EOF@138..139 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+page-selector-like-declaration.scss:2:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ @page :left {
+  > 2 │   font:bold {
+      │   ^^^^^^^^^^^
+  > 3 │     color: red;
+  > 4 │   }
+      │   ^
+    5 │ 
+    6 │   #{$name}:hover {
+  
+  i Expected one of:
+  
+  - declaration
+  - at rule
+  - margin at rule
+  
+page-selector-like-declaration.scss:6:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+     4 │   }
+     5 │ 
+   > 6 │   #{$name}:hover {
+       │   ^^^^^^^^^^^^^^^^
+   > 7 │     color: blue;
+   > 8 │   }
+       │   ^
+     9 │ 
+    10 │   font-#{$weight}:bold {
+  
+  i Expected one of:
+  
+  - declaration
+  - at rule
+  - margin at rule
+  
+page-selector-like-declaration.scss:10:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+     8 │   }
+     9 │ 
+  > 10 │   font-#{$weight}:bold {
+       │   ^^^^^^^^^^^^^^^^^^^^^^
+  > 11 │     color: green;
+  > 12 │   }
+       │   ^
+    13 │ }
+    14 │ 
+  
+  i Expected one of:
+  
+  - declaration
+  - at rule
+  - margin at rule
+  
+```

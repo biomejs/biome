@@ -1,3 +1,4 @@
+<!-- should not generate diagnostics -->
 <script>
 	export let title;
 	export let person;

@@ -171,6 +171,10 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
         self.current_flags.has_preceding_line_break()
     }
 
+    fn has_preceding_whitespace(&self) -> bool {
+        self.current_flags.has_preceding_whitespace()
+    }
+
     fn has_unicode_escape(&self) -> bool {
         self.current_flags.has_unicode_escape()
     }

@@ -19,48 +19,20 @@ info: json/expand-never/expand-never.json
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Trailing commas: None
-Expand: Auto
-Bracket spacing: true
-Trailing newline: true
------
+# Options
 
 ```json
 {
-	"foo": {
-		"bar": {
-			"baz": {
-				"qux": true
-			}
-		}
-	}
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "json": {
+    "formatter": {
+      "expand": "never"
+    }
+  }
 }
-
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Trailing commas: None
-Expand: Never
-Bracket spacing: true
-Trailing newline: true
------
+# Formatted
 
 ```json
 { "foo": { "bar": { "baz": { "qux": true } } } }

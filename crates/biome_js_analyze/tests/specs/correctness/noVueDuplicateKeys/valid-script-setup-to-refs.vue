@@ -1,6 +1,6 @@
-<!-- should not emit diagnostics -->
+<!-- should not generate diagnostics -->
 
-<script setup>
+<script setup lang="ts">
 import { toRefs } from 'vue';
 const props = defineProps<{ toast: string; number?: number }>()
 const { toast } = toRefs(props)

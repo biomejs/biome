@@ -696,13 +696,19 @@ pub struct WatchError {
     pub reason: String,
 }
 
-#[derive(Debug, Default, Diagnostic, Serialize, Deserialize)]
+#[derive(Debug, Diagnostic, Serialize, Deserialize)]
 #[diagnostic(
     category = "project",
     severity = Hint,
-    message = "Biome found a configuration file outside of the current working directory. If the configuration enables the scanner, Biome might scan the whole file system. This behaviour will be fixed in the next major version.",
+    message(
+        message("Biome found the configuration file "{self.config_path}" outside of the current working directory "{self.working_directory}". If the configuration enables the scanner, Biome might scan the whole file system. This behaviour will be fixed in the next major version."),
+        description = "Biome found the configuration file {config_path} outside of the current working directory {working_directory}. If the configuration enables the scanner, Biome might scan the whole file system. This behaviour will be fixed in the next major version."
+    ),
 )]
-pub struct ConfigurationOutsideProject;
+pub struct ConfigurationOutsideProject {
+    pub config_path: String,
+    pub working_directory: String,
+}
 
 #[cfg(test)]
 mod test {

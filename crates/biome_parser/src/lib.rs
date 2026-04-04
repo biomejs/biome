@@ -194,6 +194,11 @@ pub trait Parser: Sized {
         self.source().has_preceding_line_break()
     }
 
+    /// Tests if there's whitespace trivia before the current token.
+    fn has_preceding_whitespace(&self) -> bool {
+        self.source().has_preceding_whitespace()
+    }
+
     /// Get the source code of the parser's current token.
     fn cur_text(&self) -> &str {
         &self.source().text()[self.cur_range()]

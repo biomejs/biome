@@ -1118,8 +1118,17 @@ impl SemanticEventExtractor {
                             // or `let hast: hast.Root` inside a block (variable shadows import)
                             // In these cases, the reference should be promoted to the parent scope
                             // so that the dual lookup can resolve it to the type-only import.
+                            //
+                            // We only promote when a dual imported binding actually exists
+                            // in an ancestor scope. Without this check, `typeof a` references
+                            // (which are AmbientRead on BindingName::Value) would be incorrectly
+                            // promoted instead of resolving to the local value binding (#9519).
                             if reference.is_ambient_read()
                                 && !info.is_imported()
+                                && self
+                                    .bindings
+                                    .get(&name.clone().dual())
+                                    .is_some_and(|dual| dual.is_imported())
                                 && let Some(parent) = self.scopes.last_mut()
                             {
                                 // Promote this reference to the parent scope

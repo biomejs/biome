@@ -274,6 +274,20 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noDrizzleDeleteWithoutWhere",
+        TypeId::of::<
+            biome_rule_options::no_drizzle_delete_without_where::NoDrizzleDeleteWithoutWhereOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
+        "noDrizzleUpdateWithoutWhere",
+        TypeId::of::<
+            biome_rule_options::no_drizzle_update_without_where::NoDrizzleUpdateWithoutWhereOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
         "noDuplicateArgumentNames",
         TypeId::of::<
             biome_rule_options::no_duplicate_argument_names::NoDuplicateArgumentNamesOptions,
@@ -365,6 +379,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "suspicious",
         "noDuplicateProperties",
         TypeId::of::<biome_rule_options::no_duplicate_properties::NoDuplicatePropertiesOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noDuplicateSelectors",
+        TypeId::of::<biome_rule_options::no_duplicate_selectors::NoDuplicateSelectorsOptions>(),
     ));
     result.push(("suspicious", "noDuplicateSelectorsKeyframeBlock", TypeId::of::<biome_rule_options::no_duplicate_selectors_keyframe_block::NoDuplicateSelectorsKeyframeBlockOptions>()));
     result.push((
@@ -615,6 +634,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "style",
         "noInferrableTypes",
         TypeId::of::<biome_rule_options::no_inferrable_types::NoInferrableTypesOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noInlineStyles",
+        TypeId::of::<biome_rule_options::no_inline_styles::NoInlineStylesOptions>(),
     ));
     result.push((
         "correctness",
@@ -1196,6 +1220,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<
             biome_rule_options::no_unsafe_optional_chaining::NoUnsafeOptionalChainingOptions,
         >(),
+    ));
+    result.push((
+        "nursery",
+        "noUntrustedLicenses",
+        TypeId::of::<biome_rule_options::no_untrusted_licenses::NoUntrustedLicensesOptions>(),
     ));
     result.push((
         "nursery",

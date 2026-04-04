@@ -13,8 +13,8 @@
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "8.54.0",
     "@typescript-eslint/parser": "8.54.0",
-    "dprint": "0.52.0",
-    "eslint": "9.39.3",
+    "dprint": "0.53.0",
+    "eslint": "9.39.4",
     "prettier": "3.8.1"
   }
 }

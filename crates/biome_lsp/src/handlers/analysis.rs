@@ -30,6 +30,8 @@ use tower_lsp_server::ls_types::{
 use tracing::{debug, info};
 
 const FIX_ALL_CATEGORY: ActionCategory = ActionCategory::Source(SourceActionKind::FixAll);
+const ORGANIZE_IMPORTS_CATEGORY: ActionCategory =
+    ActionCategory::Source(SourceActionKind::OrganizeImports);
 
 fn fix_all_kind() -> CodeActionKind {
     match FIX_ALL_CATEGORY.to_str() {
@@ -108,12 +110,16 @@ pub(crate) fn code_actions(
     }
 
     let mut has_fix_all = false;
+    let mut has_organize_imports = false;
     let mut filters = Vec::new();
     if let Some(filter) = &params.context.only {
         for kind in filter {
             let kind = kind.as_str();
             if FIX_ALL_CATEGORY.matches(kind) {
                 has_fix_all = true;
+            }
+            if ORGANIZE_IMPORTS_CATEGORY.matches(kind) {
+                has_organize_imports = true;
             }
             filters.push(kind);
         }
@@ -190,7 +196,15 @@ pub(crate) fn code_actions(
     // document if the action category "source.fixAll" was explicitly requested
     // by the language client
     let fix_all = if has_fix_all {
-        fix_all(session, &url, path, &doc.line_index, &diagnostics, None)?
+        fix_all(
+            session,
+            &url,
+            path,
+            &doc.line_index,
+            &diagnostics,
+            None,
+            has_organize_imports,
+        )?
     } else {
         None
     };
@@ -285,7 +299,12 @@ pub(crate) fn code_actions(
     Ok(Some(actions))
 }
 
-/// Generate the code action `source.fixAll.biome` for the current document
+/// Generate the code action `source.fixAll.biome` for the current document.
+///
+/// When `include_organize_imports` is `false`, the organize imports action is
+/// excluded from the fix-all pass. This prevents `source.fixAll.biome` from
+/// sorting imports when `source.organizeImports.biome` was not explicitly
+/// requested by the editor.
 #[tracing::instrument(level = "debug", skip(session, url))]
 fn fix_all(
     session: &Session,
@@ -294,6 +313,7 @@ fn fix_all(
     line_index: &LineIndex,
     diagnostics: &[lsp::Diagnostic],
     offset: Option<u32>,
+    include_organize_imports: bool,
 ) -> Result<Option<CodeActionOrCommand>, Error> {
     let Some(doc) = session.document(url) else {
         return Ok(None);
@@ -356,13 +376,21 @@ fn fix_all(
         categories = categories.with_assist();
     }
 
+    let mut skip = vec![];
+    if !include_organize_imports {
+        skip.push(AnalyzerSelector::Rule(RuleSelector::Rule(
+            "source",
+            "organizeImports",
+        )));
+    }
+
     let fixed = session.workspace.fix_file(FixFileParams {
         project_key: doc.project_key,
         path: path.clone(),
         fix_file_mode: FixFileMode::SafeFixes,
         should_format,
         only: vec![],
-        skip: vec![],
+        skip,
         enabled_rules: vec![],
         suppression_reason: None,
         rule_categories: categories.build(),

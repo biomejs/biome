@@ -1,0 +1,93 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: delete.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// simple delete without where
+await db.delete(users);
+
+// delete without where, no await
+db.delete(users);
+
+// delete assigned to variable without where
+const result = db.delete(users);
+
+// .where as property access (not called) should still trigger
+db.delete(users).where;
+
+```
+
+# Diagnostics
+```
+delete.js:4:7 lint/nursery/noDrizzleDeleteWithoutWhere ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i .delete() is used without .where(). This will delete all rows in the table.
+  
+    3 │ // simple delete without where
+  > 4 │ await db.delete(users);
+      │       ^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ // delete without where, no await
+  
+  i Add a .where() clause to delete only the intended rows, or use .where(sql`1=1`) to explicitly delete all rows.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+delete.js:7:1 lint/nursery/noDrizzleDeleteWithoutWhere ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i .delete() is used without .where(). This will delete all rows in the table.
+  
+    6 │ // delete without where, no await
+  > 7 │ db.delete(users);
+      │ ^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ // delete assigned to variable without where
+  
+  i Add a .where() clause to delete only the intended rows, or use .where(sql`1=1`) to explicitly delete all rows.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+delete.js:10:16 lint/nursery/noDrizzleDeleteWithoutWhere ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i .delete() is used without .where(). This will delete all rows in the table.
+  
+     9 │ // delete assigned to variable without where
+  > 10 │ const result = db.delete(users);
+       │                ^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ // .where as property access (not called) should still trigger
+  
+  i Add a .where() clause to delete only the intended rows, or use .where(sql`1=1`) to explicitly delete all rows.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+delete.js:13:1 lint/nursery/noDrizzleDeleteWithoutWhere ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i .delete() is used without .where(). This will delete all rows in the table.
+  
+    12 │ // .where as property access (not called) should still trigger
+  > 13 │ db.delete(users).where;
+       │ ^^^^^^^^^^^^^^^^
+    14 │ 
+  
+  i Add a .where() clause to delete only the intended rows, or use .where(sql`1=1`) to explicitly delete all rows.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

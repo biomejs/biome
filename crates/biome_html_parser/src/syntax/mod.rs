@@ -98,9 +98,7 @@ pub(crate) fn parse_root(p: &mut HtmlParser) {
     // Whether or not frontmatter was present, once we're past the frontmatter
     // position `---` can no longer start a fence. This prevents `---` in HTML
     // content from being incorrectly lexed as a FENCE token.
-    if p.options().frontmatter {
-        p.set_after_frontmatter(true);
-    }
+    p.set_after_frontmatter(true);
 
     parse_doc_type(p).ok();
     ElementList.parse_list(p);
@@ -160,6 +158,7 @@ fn inside_tag_context(p: &HtmlParser) -> HtmlLexContext {
     }
 }
 
+#[inline]
 fn is_possible_component(p: &HtmlParser, tag_name: &str) -> bool {
     tag_name
         .chars()
@@ -354,6 +353,7 @@ fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
     Present(m.complete(p, HTML_CLOSING_ELEMENT))
 }
 
+#[inline]
 pub(crate) fn parse_html_element(p: &mut HtmlParser) -> ParsedSyntax {
     match p.cur() {
         T!["<![CDATA["] => parse_cdata_section(p),
@@ -542,6 +542,7 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
     }
 }
 
+#[inline]
 fn is_at_attribute_start(p: &mut HtmlParser) -> bool {
     p.at_ts(token_set![
         HTML_LITERAL,
@@ -554,6 +555,7 @@ fn is_at_attribute_start(p: &mut HtmlParser) -> bool {
         || (Astro.is_supported(p) && is_at_astro_directive_keyword(p))
 }
 
+#[inline]
 fn parse_literal(p: &mut HtmlParser, kind: HtmlSyntaxKind) -> ParsedSyntax {
     if !is_at_start_literal(p) {
         return Absent;
@@ -598,6 +600,7 @@ fn parse_literal(p: &mut HtmlParser, kind: HtmlSyntaxKind) -> ParsedSyntax {
     Present(m.complete(p, kind))
 }
 
+#[inline]
 fn is_at_start_literal(p: &mut HtmlParser) -> bool {
     p.at(HTML_LITERAL) || p.at(T!["{{"]) || p.at(T!["}}"])
 }
@@ -722,6 +725,7 @@ fn parse_double_text_expression(p: &mut HtmlParser, context: HtmlLexContext) -> 
     }
 }
 
+#[inline]
 pub(crate) fn is_at_opening_double_expression(p: &mut HtmlParser) -> bool {
     p.at(T!["{{"])
 }
@@ -842,10 +846,12 @@ impl TextExpression {
     }
 }
 
+#[inline]
 fn is_at_keyword(p: &mut HtmlParser) -> bool {
     is_at_svelte_keyword(p) || is_at_html_keyword(p)
 }
 
+#[inline]
 fn is_at_html_keyword(p: &mut HtmlParser) -> bool {
     matches!(p.cur(), T![html] | T![doctype])
 }

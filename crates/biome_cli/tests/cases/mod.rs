@@ -34,6 +34,7 @@ mod overrides_organize_imports;
 mod protected_files;
 mod regression_tests;
 mod reporter_checkstyle;
+mod reporter_concise;
 mod reporter_github;
 mod reporter_gitlab;
 mod reporter_json;

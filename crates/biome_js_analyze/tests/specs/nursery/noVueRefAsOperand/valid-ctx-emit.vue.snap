@@ -3,7 +3,10 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid-ctx-emit.vue
 ---
 # Input
-```ts
+```vue
+/* should not generate diagnostics */
+
+<script>
 import { ref, defineComponent } from 'vue'
 
 export default defineComponent({
@@ -18,5 +21,6 @@ export default defineComponent({
     }
   }
 })
+</script>
 
 ```

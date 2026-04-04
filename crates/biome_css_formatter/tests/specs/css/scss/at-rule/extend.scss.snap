@@ -21,25 +21,14 @@ border:1px solid black;
 .message,.info;
   @extend
 a:hover;
+  @extend
+.icon-#{$name};
 }
 
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-Trailing newline: true
------
+# Formatted
 
 ```scss
 %toolbelt {
@@ -53,6 +42,7 @@ Trailing newline: true
 .alert {
 	@extend .message, .info;
 	@extend a:hover;
+	@extend .icon-#{$name};
 }
 
 ```

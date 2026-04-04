@@ -6,6 +6,7 @@ use crate::{
 };
 
 use biome_rowan::{AstNodeList, SyntaxResult, TokenText, declare_node_union};
+use biome_string_case::StrOnlyExtension;
 
 /// https://html.spec.whatwg.org/#void-elements
 const VOID_ELEMENTS: &[&str] = &[
@@ -422,6 +423,43 @@ impl AnyHtmlTagElement {
                     .and_then(|value| value.string_value())
                     .is_none_or(|value| value != "false")
             })
+    }
+}
+
+impl biome_aria::Element for AnyHtmlElement {
+    fn name(&self) -> Option<impl AsRef<str>> {
+        // HTML element names are case-insensitive; lowercase for AriaRoles matching
+        Some(Self::name(self)?.text().to_lowercase_cow().into_owned())
+    }
+
+    fn attributes(&self) -> impl Iterator<Item = impl biome_aria::Attribute> {
+        Self::attributes(self)
+            .into_iter()
+            .flatten()
+            .filter_map(|attr| match attr {
+                AnyHtmlAttribute::HtmlAttribute(attr) => Some(attr),
+                _ => None,
+            })
+    }
+}
+
+impl biome_aria::Attribute for HtmlAttribute {
+    fn name(&self) -> Option<impl AsRef<str>> {
+        // HTML attribute names are case-insensitive; lowercase for matching
+        Some(
+            self.name()
+                .ok()?
+                .value_token()
+                .ok()?
+                .text_trimmed()
+                .to_lowercase_cow()
+                .into_owned(),
+        )
+    }
+
+    fn value(&self) -> Option<impl AsRef<str>> {
+        // Text implements Deref<str> but not AsRef<str>, convert to String
+        Some(Self::value(self)?.to_string())
     }
 }
 

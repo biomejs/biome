@@ -3,7 +3,7 @@ source: crates/biome_html_analyze/tests/spec_tests.rs
 expression: Button.astro
 ---
 # Input
-```html
+```astro
 <!-- should generate diagnostics -->
 <button class="btn-invalid">This class does not exist</button>
 

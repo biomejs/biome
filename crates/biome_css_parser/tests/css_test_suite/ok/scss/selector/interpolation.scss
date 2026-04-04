@@ -1,0 +1,96 @@
+.#{$name} {
+  color: red;
+}
+
+.#{$name}-bar {
+  color: red;
+}
+
+.foo-#{$i} {
+  color: red;
+}
+
+.foo-#{$name}-bar {
+  color: red;
+}
+
+.foo-#{$name}#{$state} {
+  color: red;
+}
+
+.foo-#{$name}:hover {
+  color: red;
+}
+
+.foo-#{$name}::after {
+  color: red;
+}
+
+.foo #{$name} {
+  color: red;
+}
+
+.foo-#{$name} #{$second} {
+
+}
+
+.foo
+#{$name} {
+  color: red;
+}
+
+.foo/*comment*/#{$name} {
+  color: red;
+}
+
+#app-#{$slot} {
+  color: red;
+}
+
+##{$id} {
+  color: red;
+}
+
+#{$type} {
+  color: red;
+}
+
+|#{$type} {
+  color: red;
+}
+
+*|#{$type} {
+  color: red;
+}
+
+ns|#{$type} {
+  color: red;
+}
+
+ns|foo-#{$name} {
+  color: red;
+}
+
+#{$type}#{$state} {
+  color: red;
+}
+
+#{$type}.class {
+  color: red;
+}
+
+#{$type}:hover {
+  color: red;
+}
+
+#{$type}::after {
+  color: red;
+}
+
+%#{$placeholder} {
+  color: red;
+}
+
+%placeholder-#{$name} {
+  color: red;
+}

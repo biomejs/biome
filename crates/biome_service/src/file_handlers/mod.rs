@@ -28,7 +28,7 @@ use biome_console::fmt::Formatter;
 use biome_css_analyze::METADATA as css_metadata;
 use biome_css_syntax::{CssFileSource, CssLanguage};
 use biome_diagnostics::{Applicability, Diagnostic, DiagnosticExt, Error, Severity, category};
-use biome_formatter::{FormatContext, FormatResult, Formatted, Printed};
+use biome_formatter::{FormatContext, FormatResult, Formatted, Printed, SourceMapGeneration};
 use biome_fs::BiomePath;
 use biome_graphql_analyze::METADATA as graphql_metadata;
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
@@ -50,6 +50,7 @@ use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{FileSourceError, NodeCache, SendNode, SyntaxNode, TokenText};
 use biome_string_case::StrLikeExtension;
+use biome_text_edit::TextEdit;
 use camino::Utf8Path;
 use either::Either;
 use grit::GritFileHandler;
@@ -506,6 +507,10 @@ pub struct FixAllParams<'a> {
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) document_services: &'a DocumentServices,
     pub(crate) working_directory: Option<&'a Utf8Path>,
+    /// The initial indentation level to apply when printing formatted code.
+    /// Used by embedded language handlers (Svelte, Vue) to preserve
+    /// `indentScriptAndStyle` indentation during fix-all operations.
+    pub(crate) embeds_initial_indent: u16,
 }
 
 #[derive(Default)]
@@ -865,23 +870,90 @@ impl<'a> ProcessFixAll<'a> {
                             },
                         ));
                     };
-                };
 
-                Ok(Some(()))
+                    Ok(Some(()))
+                } else {
+                    // Mutation was empty (no tree changes), signal no fix applied
+                    Ok(None)
+                }
             }
             None => Ok(None),
         }
     }
 
+    /// Record a text-edit-based fix (e.g. from a plugin rewrite) that was
+    /// applied outside of the normal mutation path.
+    pub(crate) fn record_text_edit_fix(
+        &mut self,
+        range: TextRange,
+        new_text_len: u32,
+        rule_name: Option<(&'static str, &'static str)>,
+    ) -> Result<(), WorkspaceError> {
+        self.actions.push(FixAction {
+            rule_name: rule_name.map(|(g, r)| (Cow::Borrowed(g), Cow::Borrowed(r))),
+            range,
+        });
+        if !self.growth_guard.check(new_text_len) {
+            return Err(WorkspaceError::RuleError(
+                RuleError::ConflictingRuleFixesError {
+                    rules: self
+                        .actions
+                        .iter()
+                        .rev()
+                        .take(10)
+                        .filter_map(|action| action.rule_name.clone())
+                        .collect::<HashSet<_>>()
+                        .into_iter()
+                        .collect(),
+                },
+            ));
+        }
+        Ok(())
+    }
+
+    /// Apply a plugin text edit if present and the text actually changed.
+    /// Returns `Some(new_text)` if the edit was applied, `None` otherwise.
+    pub(crate) fn apply_plugin_text_edit(
+        &mut self,
+        text_edit: Option<(TextRange, TextEdit)>,
+        current_text: &str,
+    ) -> Result<Option<String>, WorkspaceError> {
+        let Some((range, edit)) = text_edit else {
+            return Ok(None);
+        };
+        let new_text = edit.new_string(current_text);
+        if new_text == current_text {
+            return Ok(None);
+        }
+        self.record_text_edit_fix(range, new_text.len() as u32, Some(("plugin", "gritql")))?;
+        Ok(Some(new_text))
+    }
+
     /// Finish processing the fix all actions. Returns the result of the fix-all actions. The `format_tree`
     /// is a closure that must return the new code (formatted, if needed).
-    pub(crate) fn finish<F, C>(self, format_tree: F) -> Result<FixFileResult, WorkspaceError>
+    ///
+    /// `initial_indent` specifies the base indentation level for printing. This is used by
+    /// embedded language handlers (e.g. Svelte, Vue) to preserve `indentScriptAndStyle`
+    /// indentation when formatting during fix-all operations.
+    pub(crate) fn finish<F, C>(
+        self,
+        format_tree: F,
+        initial_indent: u16,
+    ) -> Result<FixFileResult, WorkspaceError>
     where
         F: FnOnce() -> Result<Either<FormatResult<Formatted<C>>, String>, WorkspaceError>,
         C: FormatContext,
     {
         let code = match format_tree()? {
-            Either::Left(printed) => printed?.print()?.into_code(),
+            Either::Left(printed) => {
+                if initial_indent > 0 {
+                    printed?
+                        .print_with_indent(initial_indent, SourceMapGeneration::Disabled)?
+                        .into_code()
+                } else {
+                    printed?.print()?.into_code()
+                }
+            }
             Either::Right(string) => string,
         };
         Ok(FixFileResult {
@@ -1541,14 +1613,15 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
         L: biome_rowan::Language,
     {
-        if let Some(rule_filter) = rule_filter
-            && rule_filter.match_rule::<R>()
-        {
-            // first we want to register rules via "magic default"
-            self.record_rule_from_manifest::<R, L>(rule_filter);
-            // then we want to register rules
-            self.record_rule_from_domains::<R, L>(rule_filter);
+        let Some(rule_filter) = rule_filter.filter(|rule_filter| rule_filter.match_rule::<R>())
+        else {
+            return;
         };
+
+        // first we want to register rules via "magic default"
+        self.record_rule_from_manifest::<R, L>(rule_filter);
+        // then we want to register rules
+        self.record_rule_from_domains::<R, L>(rule_filter);
 
         // Do not report unused suppression comment diagnostics if:
         // - it is a syntax-only analyzer pass, or

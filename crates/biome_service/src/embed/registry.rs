@@ -40,15 +40,18 @@ static HTML_DETECTORS: [EmbedDetector; 5] = [
     // <script> → JS/TS/JSON (dynamic: depends on type/lang attributes + framework)
     //
     // A single detector handles all <script> variants via the dynamic resolver:
-    //   - <script>                          → JsScript (classic HTML)
-    //   - <script type="module">            → JsModule (ES module)
-    //   - <script lang="ts">                → Ts (Vue/Svelte)
-    //   - <script lang="tsx">               → Tsx (Vue/Svelte)
-    //   - <script lang="jsx">               → Jsx (Vue/Svelte)
-    //   - <script type="importmap">         → Json
-    //   - <script type="application/json">  → Json
-    //   - Astro <script> (no frontmatter)   → Ts
-    //   - Vue/Svelte default                → JsModule
+    //   - <script>                               → JsScript (classic HTML)
+    //   - <script type="module">                 → JsModule (ES module)
+    //   - <script lang="ts">                     → Ts (Vue/Svelte)
+    //   - <script lang="tsx">                    → Tsx (Vue/Svelte)
+    //   - <script lang="jsx">                    → Jsx (Vue/Svelte)
+    //   - <script type="importmap">              → Json
+    //   - <script type="application/json">       → Json
+    //   - Astro <script> (no frontmatter)        → Ts
+    //   - Vue/Svelte default                     → JsModule
+    //   - <script type="speculationrules">       → skipped (unsupported type)
+    //   - <script type="application/ld+json">    → skipped (unsupported type)
+    //   - <script type="text/x-handlebars-*">    → skipped (unsupported type)
     //
     // The handler dispatches on embed_match.guest to call the right parser
     // (parse JS vs parse JSON). No separate detector needed for JSON scripts.
@@ -56,7 +59,10 @@ static HTML_DETECTORS: [EmbedDetector; 5] = [
         tag: "script",
         target: EmbedTarget::Dynamic {
             resolver: resolve_script_language,
-            fallback: Some(GuestLanguage::JsScript),
+            // No fallback: the resolver handles all supported cases explicitly.
+            // Returning None means "skip this element" (e.g. unsupported type
+            // like speculationrules or application/ld+json).
+            fallback: None,
         },
     },
     // <style> → CSS (dynamic: skips SCSS via resolver returning None)

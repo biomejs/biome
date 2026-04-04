@@ -1,13 +1,13 @@
-use biome_formatter::{AttributePosition, IndentStyle, LineWidth, QuoteStyle, TrailingNewline};
-use biome_formatter_test::check_reformat::CheckReformat;
-use biome_js_formatter::context::{ArrowParentheses, JsFormatOptions, Semicolons};
-use biome_js_formatter::{JsFormatLanguage, format_node};
+use biome_formatter::TrailingNewline;
+use biome_fs::{BiomePath, MemoryFileSystem};
+use biome_js_formatter::{context::JsFormatOptions, format_node};
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::JsFileSource;
-
-mod language {
-    include!("language.rs");
-}
+use biome_service::workspace::{
+    ChangeFileParams, DocumentFileSource, FileContent, FormatFileParams, GetFormatterIRParams,
+    OpenFileParams, OpenProjectParams, server,
+};
+use std::sync::Arc;
 
 #[ignore]
 #[test]
@@ -19,34 +19,74 @@ const c = [
 ];
     "#;
     let source_type = JsFileSource::tsx();
-    let tree = parse(
-        src,
-        source_type,
-        JsParserOptions::default().with_parse_class_parameter_decorators(),
+
+    let fs = MemoryFileSystem::default();
+    let workspace = server(Arc::new(fs), None);
+
+    let project = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new(""),
+            open_uninitialized: true,
+        })
+        .unwrap();
+
+    let path = BiomePath::new("test.tsx");
+    workspace
+        .open_file(OpenFileParams {
+            project_key: project.project_key,
+            path: path.clone(),
+            content: FileContent::FromClient {
+                content: src.to_string(),
+                version: 0,
+            },
+            document_file_source: Some(DocumentFileSource::from(source_type)),
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    // Print IR
+    if let Ok(ir) = workspace.get_formatter_ir(GetFormatterIRParams {
+        project_key: project.project_key,
+        path: path.clone(),
+    }) {
+        println!("{ir}");
+    }
+
+    let printed = workspace
+        .format_file(FormatFileParams {
+            project_key: project.project_key,
+            path: path.clone(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    eprintln!("{}", printed.as_code());
+
+    // Idempotency check
+    workspace
+        .change_file(ChangeFileParams {
+            project_key: project.project_key,
+            path: path.clone(),
+            content: printed.as_code().to_string(),
+            version: 1,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let re_printed = workspace
+        .format_file(FormatFileParams {
+            project_key: project.project_key,
+            path: path.clone(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    similar_asserts::assert_eq!(
+        re_printed.as_code(),
+        printed.as_code(),
+        "Formatter is not idempotent"
     );
-    let options = JsFormatOptions::new(source_type)
-        .with_indent_style(IndentStyle::Space)
-        .with_line_width(LineWidth::try_from(80).unwrap())
-        .with_semicolons(Semicolons::Always)
-        .with_quote_style(QuoteStyle::Double)
-        .with_jsx_quote_style(QuoteStyle::Single)
-        .with_arrow_parentheses(ArrowParentheses::AsNeeded)
-        .with_attribute_position(AttributePosition::Multiline);
-
-    let doc = format_node(options.clone(), &tree.syntax(), false).unwrap();
-    let result = doc.print().unwrap();
-
-    println!("{}", doc.into_document());
-    eprintln!("{}", result.as_code());
-
-    CheckReformat::new(
-        &tree.syntax(),
-        result.as_code(),
-        "testing",
-        &language::JsTestFormatLanguage::new(source_type),
-        JsFormatLanguage::new(options),
-    )
-    .check_reformat();
 }
 
 #[test]

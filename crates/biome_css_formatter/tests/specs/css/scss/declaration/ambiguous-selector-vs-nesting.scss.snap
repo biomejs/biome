@@ -11,25 +11,16 @@ info: css/scss/declaration/ambiguous-selector-vs-nesting.scss
   font:bold{color:blue;}
   font:12px{family:sans-serif;}
   font: bold{family:serif;}
+  #{$name}:hover{color:green;}
+  a:#{$pseudo}{color:teal;}
+  font-#{$weight}:bold{color:purple;}
+  font-#{$weight}::before{color:orange;}
 }
 
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-Trailing newline: true
------
+# Formatted
 
 ```scss
 .test {
@@ -44,6 +35,18 @@ Trailing newline: true
 	}
 	font: bold {
 		family: serif;
+	}
+	#{$name}:hover {
+		color: green;
+	}
+	a: #{$pseudo} {
+		color: teal;
+	}
+	font-#{$weight}:bold {
+		color: purple;
+	}
+	font-#{$weight}::before {
+		color: orange;
 	}
 }
 

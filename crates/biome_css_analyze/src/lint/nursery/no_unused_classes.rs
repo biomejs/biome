@@ -70,7 +70,9 @@ impl Rule for NoUnusedClasses {
             return None;
         }
 
-        let class_name = node.name().ok()?.value_token().ok()?;
+        let class_name = node.name().ok()?;
+        let class_name = class_name.as_css_custom_identifier()?;
+        let class_name = class_name.value_token().ok()?;
         let class_name_text = class_name.text_trimmed();
 
         let module_graph = ctx.module_graph();
@@ -85,7 +87,9 @@ impl Rule for NoUnusedClasses {
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        let class_name = node.name().ok()?.value_token().ok()?;
+        let class_name = node.name().ok()?;
+        let class_name = class_name.as_css_custom_identifier()?;
+        let class_name = class_name.value_token().ok()?;
         let class_name_text = class_name.text_trimmed();
         Some(
             RuleDiagnostic::new(

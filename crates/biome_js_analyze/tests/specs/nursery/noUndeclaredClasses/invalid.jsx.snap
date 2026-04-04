@@ -8,23 +8,583 @@ expression: invalid.jsx
 
 import "./button.css";
 
+// 1. String literal in className
 function Button() {
 	return <button className="btn-undefined">Invalid class</button>;
+}
+
+// 2. Variable with string literal
+function Button2() {
+	let cls = "btn-undefined";
+	return <button className={cls}>Invalid class</button>;
+}
+
+// 3. Variable with call expression (single string arg)
+function Button3() {
+	let cls = clx("btn-undefined");
+	return <button className={cls}>Invalid class</button>;
+}
+
+// 4. Variable with call expression (string + object args)
+function Button4() {
+	let cls = clx("btn-undefined", {"btn-invalid": true});
+	return <button className={cls}>Invalid class</button>;
+}
+
+// 5. Inline call expression in className
+function Button5() {
+	return <button className={clsx("btn-undefined", "also-missing")}>Invalid class</button>;
+}
+
+// 6. Call expression with object — unquoted identifier keys
+function Button6() {
+	return <button className={clsx({ undeclaredA: true, undeclaredB: false })}>Invalid class</button>;
+}
+
+// 7. Call expression with array arg
+function Button7() {
+	return <button className={clsx(["btn-undefined", "nope"])}>Invalid class</button>;
+}
+
+// 8. Nested arrays (clsx flattens them)
+function Button8() {
+	return <button className={clsx(["btn-undefined", ["deeply-missing"]])}>Invalid class</button>;
+}
+
+// 9. Mixed: strings, objects, arrays (quoted and unquoted keys)
+function Button9() {
+	return <button className={clsx("btn-undefined", ["arr-missing"], { objMissing: true, "obj-missing-too": false })}>Invalid class</button>;
+}
+
+// 10. Variable with object expression (shorthand property)
+function Button10() {
+	let undeclared = "whatever";
+	return <button className={clsx({ undeclared })}>Invalid class</button>;
+}
+
+// 11. class attribute (SolidJS style)
+function Button11() {
+	return <button class="btn-undefined">Invalid class</button>;
 }
 
 ```
 
 # Diagnostics
 ```
-invalid.jsx:6:28 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:7:28 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The CSS class btn-undefined is not defined in any imported stylesheet.
   
-    5 │ function Button() {
-  > 6 │ 	return <button className="btn-undefined">Invalid class</button>;
+    5 │ // 1. String literal in className
+    6 │ function Button() {
+  > 7 │ 	return <button className="btn-undefined">Invalid class</button>;
       │ 	                          ^^^^^^^^^^^^^
-    7 │ }
-    8 │ 
+    8 │ }
+    9 │ 
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.jsx (this file) -> which imports button.css
+  
+  
+  i Either import a CSS file that defines this class or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:12:13 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class btn-undefined is not defined in any imported stylesheet.
+  
+    10 │ // 2. Variable with string literal
+    11 │ function Button2() {
+  > 12 │ 	let cls = "btn-undefined";
+       │ 	           ^^^^^^^^^^^^^
+    13 │ 	return <button className={cls}>Invalid class</button>;
+    14 │ }
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.jsx (this file) -> which imports button.css
+  
+  
+  i Either import a CSS file that defines this class or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:18:17 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class btn-undefined is not defined in any imported stylesheet.
+  
+    16 │ // 3. Variable with call expression (single string arg)
+    17 │ function Button3() {
+  > 18 │ 	let cls = clx("btn-undefined");
+       │ 	               ^^^^^^^^^^^^^
+    19 │ 	return <button className={cls}>Invalid class</button>;
+    20 │ }
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.jsx (this file) -> which imports button.css
+  
+  
+  i Either import a CSS file that defines this class or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:24:17 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class btn-undefined is not defined in any imported stylesheet.
+  
+    22 │ // 4. Variable with call expression (string + object args)
+    23 │ function Button4() {
+  > 24 │ 	let cls = clx("btn-undefined", {"btn-invalid": true});
+       │ 	               ^^^^^^^^^^^^^
+    25 │ 	return <button className={cls}>Invalid class</button>;
+    26 │ }
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.jsx (this file) -> which imports button.css
+  
+  
+  i Either import a CSS file that defines this class or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:24:35 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class btn-invalid is not defined in any imported stylesheet.
+  
+    22 │ // 4. Variable with call expression (string + object args)
+    23 │ function Button4() {
+  > 24 │ 	let cls = clx("btn-undefined", {"btn-invalid": true});
+       │ 	                                 ^^^^^^^^^^^
+    25 │ 	return <button className={cls}>Invalid class</button>;
+    26 │ }
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.jsx (this file) -> which imports button.css
+  
+  
+  i Either import a CSS file that defines this class or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:30:34 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class btn-undefined is not defined in any imported stylesheet.
+  
+    28 │ // 5. Inline call expression in className
+    29 │ function Button5() {
+  > 30 │ 	return <button className={clsx("btn-undefined", "also-missing")}>Invalid class</button>;
+       │ 	                                ^^^^^^^^^^^^^
+    31 │ }
+    32 │ 
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.jsx (this file) -> which imports button.css
+  
+  
+  i Either import a CSS file that defines this class or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:30:51 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class also-missing is not defined in any imported stylesheet.
+  
+    28 │ // 5. Inline call expression in className
+    29 │ function Button5() {
+  > 30 │ 	return <button className={clsx("btn-undefined", "also-missing")}>Invalid class</button>;
+       │ 	                                                 ^^^^^^^^^^^^
+    31 │ }
+    32 │ 
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.jsx (this file) -> which imports button.css
+  
+  
+  i Either import a CSS file that defines this class or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:35:35 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class undeclaredA is not defined in any imported stylesheet.
+  
+    33 │ // 6. Call expression with object — unquoted identifier keys
+    34 │ function Button6() {
+  > 35 │ 	return <button className={clsx({ undeclaredA: true, undeclaredB: false })}>Invalid class</button>;
+       │ 	                                 ^^^^^^^^^^^
+    36 │ }
+    37 │ 
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.jsx (this file) -> which imports button.css
+  
+  
+  i Either import a CSS file that defines this class or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:35:54 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class undeclaredB is not defined in any imported stylesheet.
+  
+    33 │ // 6. Call expression with object — unquoted identifier keys
+    34 │ function Button6() {
+  > 35 │ 	return <button className={clsx({ undeclaredA: true, undeclaredB: false })}>Invalid class</button>;
+       │ 	                                                    ^^^^^^^^^^^
+    36 │ }
+    37 │ 
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.jsx (this file) -> which imports button.css
+  
+  
+  i Either import a CSS file that defines this class or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:40:35 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class btn-undefined is not defined in any imported stylesheet.
+  
+    38 │ // 7. Call expression with array arg
+    39 │ function Button7() {
+  > 40 │ 	return <button className={clsx(["btn-undefined", "nope"])}>Invalid class</button>;
+       │ 	                                 ^^^^^^^^^^^^^
+    41 │ }
+    42 │ 
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.jsx (this file) -> which imports button.css
+  
+  
+  i Either import a CSS file that defines this class or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:40:52 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class nope is not defined in any imported stylesheet.
+  
+    38 │ // 7. Call expression with array arg
+    39 │ function Button7() {
+  > 40 │ 	return <button className={clsx(["btn-undefined", "nope"])}>Invalid class</button>;
+       │ 	                                                  ^^^^
+    41 │ }
+    42 │ 
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.jsx (this file) -> which imports button.css
+  
+  
+  i Either import a CSS file that defines this class or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:45:35 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class btn-undefined is not defined in any imported stylesheet.
+  
+    43 │ // 8. Nested arrays (clsx flattens them)
+    44 │ function Button8() {
+  > 45 │ 	return <button className={clsx(["btn-undefined", ["deeply-missing"]])}>Invalid class</button>;
+       │ 	                                 ^^^^^^^^^^^^^
+    46 │ }
+    47 │ 
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.jsx (this file) -> which imports button.css
+  
+  
+  i Either import a CSS file that defines this class or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:45:53 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class deeply-missing is not defined in any imported stylesheet.
+  
+    43 │ // 8. Nested arrays (clsx flattens them)
+    44 │ function Button8() {
+  > 45 │ 	return <button className={clsx(["btn-undefined", ["deeply-missing"]])}>Invalid class</button>;
+       │ 	                                                   ^^^^^^^^^^^^^^
+    46 │ }
+    47 │ 
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.jsx (this file) -> which imports button.css
+  
+  
+  i Either import a CSS file that defines this class or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:50:34 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class btn-undefined is not defined in any imported stylesheet.
+  
+    48 │ // 9. Mixed: strings, objects, arrays (quoted and unquoted keys)
+    49 │ function Button9() {
+  > 50 │ 	return <button className={clsx("btn-undefined", ["arr-missing"], { objMissing: true, "obj-missing-too": false })}>Invalid class</button>;
+       │ 	                                ^^^^^^^^^^^^^
+    51 │ }
+    52 │ 
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.jsx (this file) -> which imports button.css
+  
+  
+  i Either import a CSS file that defines this class or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:50:52 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class arr-missing is not defined in any imported stylesheet.
+  
+    48 │ // 9. Mixed: strings, objects, arrays (quoted and unquoted keys)
+    49 │ function Button9() {
+  > 50 │ 	return <button className={clsx("btn-undefined", ["arr-missing"], { objMissing: true, "obj-missing-too": false })}>Invalid class</button>;
+       │ 	                                                  ^^^^^^^^^^^
+    51 │ }
+    52 │ 
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.jsx (this file) -> which imports button.css
+  
+  
+  i Either import a CSS file that defines this class or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:50:69 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class objMissing is not defined in any imported stylesheet.
+  
+    48 │ // 9. Mixed: strings, objects, arrays (quoted and unquoted keys)
+    49 │ function Button9() {
+  > 50 │ 	return <button className={clsx("btn-undefined", ["arr-missing"], { objMissing: true, "obj-missing-too": false })}>Invalid class</button>;
+       │ 	                                                                   ^^^^^^^^^^
+    51 │ }
+    52 │ 
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.jsx (this file) -> which imports button.css
+  
+  
+  i Either import a CSS file that defines this class or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:50:88 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class obj-missing-too is not defined in any imported stylesheet.
+  
+    48 │ // 9. Mixed: strings, objects, arrays (quoted and unquoted keys)
+    49 │ function Button9() {
+  > 50 │ 	return <button className={clsx("btn-undefined", ["arr-missing"], { objMissing: true, "obj-missing-too": false })}>Invalid class</button>;
+       │ 	                                                                                      ^^^^^^^^^^^^^^^
+    51 │ }
+    52 │ 
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.jsx (this file) -> which imports button.css
+  
+  
+  i Either import a CSS file that defines this class or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:56:35 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class undeclared is not defined in any imported stylesheet.
+  
+    54 │ function Button10() {
+    55 │ 	let undeclared = "whatever";
+  > 56 │ 	return <button className={clsx({ undeclared })}>Invalid class</button>;
+       │ 	                                 ^^^^^^^^^^
+    57 │ }
+    58 │ 
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.jsx (this file) -> which imports button.css
+  
+  
+  i Either import a CSS file that defines this class or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:61:24 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class btn-undefined is not defined in any imported stylesheet.
+  
+    59 │ // 11. class attribute (SolidJS style)
+    60 │ function Button11() {
+  > 61 │ 	return <button class="btn-undefined">Invalid class</button>;
+       │ 	                      ^^^^^^^^^^^^^
+    62 │ }
+    63 │ 
   
   i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
   
