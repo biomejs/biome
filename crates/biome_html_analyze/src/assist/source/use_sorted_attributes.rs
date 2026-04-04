@@ -122,7 +122,7 @@ declare_source_rule! {
         name: "useSortedAttributes",
         language: "html",
         recommended: false,
-        sources: &[RuleSource::HtmlEslint("sort-attrs").inspired(), RuleSource::EslintVueJs("attributes-order").inspired()],
+        sources: &[RuleSource::HtmlEslint("sort-attrs").inspired(), RuleSource::EslintVueJs("attributes-order").inspired(), RuleSource::EslintSvelte("sort-attributes").inspired(), RuleSource::EslintAstro("sort-attributes").inspired()],
         fix_kind: FixKind::Safe,
     }
 }
