@@ -1,6 +1,8 @@
 use crate::prelude::*;
 use biome_formatter::write;
-use biome_markdown_syntax::{MdInlineEmphasis, MdInlineEmphasisFields};
+use biome_markdown_syntax::{
+    MdInlineEmphasis, MdInlineEmphasisFields, emphasis_ext::MdEmphasisFence,
+};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdInlineEmphasis;
 impl FormatNodeRule<MdInlineEmphasis> for FormatMdInlineEmphasis {
@@ -10,20 +12,16 @@ impl FormatNodeRule<MdInlineEmphasis> for FormatMdInlineEmphasis {
             content,
             r_fence,
         } = node.as_fields();
-        use biome_markdown_syntax::MarkdownSyntaxKind;
 
-        let l_fence = l_fence?;
-        let r_fence = r_fence?;
-
-        if l_fence.kind() == MarkdownSyntaxKind::DOUBLE_STAR {
+        if node.fence().ok() == Some(MdEmphasisFence::DoubleStar) {
             write!(f, [l_fence.format(), content.format(), r_fence.format()])
         } else {
             write!(
                 f,
                 [
-                    format_replaced(&l_fence, &token("**")),
+                    format_replaced(&l_fence?, &token(MdEmphasisFence::DoubleStar.as_str())),
                     content.format(),
-                    format_replaced(&r_fence, &token("**")),
+                    format_replaced(&r_fence?, &token(MdEmphasisFence::DoubleStar.as_str())),
                 ]
             )
         }
