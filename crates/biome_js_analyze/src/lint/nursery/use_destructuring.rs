@@ -46,33 +46,56 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
-    /// The rule provides separate configuration for variable declarations and assignment expressions.
+    /// ### `variableDeclarator`
+    ///
+    /// Default: `{ "array": true, "object": true }`
+    ///
+    /// Controls whether to enforce destructuring in variable declarations.
+    /// Set `array` or `object` to `false` to disable enforcement for that pattern.
+    ///
+    /// In the following example, array destructuring is disabled in declarations:
     ///
     /// ```json
     /// {
+    ///     "//": "...",
     ///     "options": {
     ///         "variableDeclarator": {
-    ///             "array": true,
-    ///             "object": true
-    ///         },
-    ///         "assignmentExpression": {
-    ///             "array": true,
-    ///             "object": true
+    ///             "array": false
     ///         }
     ///     }
     /// }
     /// ```
     ///
-    /// ### variableDeclarator
+    /// ```js,ignore
+    /// var foo = array[0]; // allowed
+    /// var foo = object.foo; // still flagged
+    /// ```
     ///
-    /// Controls whether to enforce destructuring in variable declarations (e.g., `var foo = object.foo`).
-    /// Both `array` and `object` default to `true`.
+    /// ### `assignmentExpression`
     ///
-    /// ### assignmentExpression
+    /// Default: `{ "array": true, "object": true }`
     ///
-    /// Controls whether to enforce destructuring in assignment expressions (e.g., `foo = object.foo`).
-    /// Both `array` and `object` default to `true`.
+    /// Controls whether to enforce destructuring in assignment expressions.
+    /// Set `array` or `object` to `false` to disable enforcement for that pattern.
     /// When enabled for objects, the diagnostic instructs users to wrap in parentheses: `({ prop } = object)`.
+    ///
+    /// In the following example, assignment destructuring is disabled entirely:
+    ///
+    /// ```json
+    /// {
+    ///     "//": "...",
+    ///     "options": {
+    ///         "assignmentExpression": {
+    ///             "array": false,
+    ///             "object": false
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,ignore
+    /// foo = object.foo; // allowed
+    /// ```
     ///
     pub UseDestructuring {
         version: "2.3.9",

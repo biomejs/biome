@@ -9,6 +9,9 @@ expression: invalid.js
 	var foo = array[0];
 }
 {
+	foo = array[0];
+}
+{
 	var foo = object.foo;
 }
 {
@@ -31,6 +34,12 @@ expression: invalid.js
 }
 {
 	var foo = object['foo'];
+}
+{
+	foo = object.foo;
+}
+{
+	foo = object['foo'];
 }
 {
 	class Foo extends Bar {
@@ -108,20 +117,20 @@ invalid.js:3:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:6:6 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:2 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use object destructuring instead of accessing object properties.
+  i Use array destructuring instead of accessing array elements by index.
   
     4 │ }
     5 │ {
-  > 6 │ 	var foo = object.foo;
-      │ 	    ^^^^^^^^^^^^^^^^
+  > 6 │ 	foo = array[0];
+      │ 	^^^^^^^^^^^^^^
     7 │ }
     8 │ {
   
-  i Object destructuring is more readable and expressive than accessing individual properties.
+  i Array destructuring is more readable and expressive than accessing individual elements by index.
   
-  i Replace the property access with object destructuring syntax.
+  i Replace the array index access with array destructuring syntax.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -135,7 +144,7 @@ invalid.js:9:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
   
      7 │ }
      8 │ {
-   > 9 │ 	var foo = (a, b).foo;
+   > 9 │ 	var foo = object.foo;
        │ 	    ^^^^^^^^^^^^^^^^
     10 │ }
     11 │ {
@@ -156,8 +165,8 @@ invalid.js:12:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
   
     10 │ }
     11 │ {
-  > 12 │ 	var length = (() => {}).length;
-       │ 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 12 │ 	var foo = (a, b).foo;
+       │ 	    ^^^^^^^^^^^^^^^^
     13 │ }
     14 │ {
   
@@ -177,8 +186,8 @@ invalid.js:15:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
   
     13 │ }
     14 │ {
-  > 15 │ 	var foo = (a = b).foo;
-       │ 	    ^^^^^^^^^^^^^^^^^
+  > 15 │ 	var length = (() => {}).length;
+       │ 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^
     16 │ }
     17 │ {
   
@@ -198,8 +207,8 @@ invalid.js:18:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
   
     16 │ }
     17 │ {
-  > 18 │ 	var foo = (a || b).foo;
-       │ 	    ^^^^^^^^^^^^^^^^^^
+  > 18 │ 	var foo = (a = b).foo;
+       │ 	    ^^^^^^^^^^^^^^^^^
     19 │ }
     20 │ {
   
@@ -219,8 +228,8 @@ invalid.js:21:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
   
     19 │ }
     20 │ {
-  > 21 │ 	var foo = f().foo;
-       │ 	    ^^^^^^^^^^^^^
+  > 21 │ 	var foo = (a || b).foo;
+       │ 	    ^^^^^^^^^^^^^^^^^^
     22 │ }
     23 │ {
   
@@ -240,8 +249,8 @@ invalid.js:24:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
   
     22 │ }
     23 │ {
-  > 24 │ 	var foo = object.bar.foo;
-       │ 	    ^^^^^^^^^^^^^^^^^^^^
+  > 24 │ 	var foo = f().foo;
+       │ 	    ^^^^^^^^^^^^^
     25 │ }
     26 │ {
   
@@ -255,16 +264,58 @@ invalid.js:24:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:32:8 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:27:6 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use object destructuring instead of accessing object properties.
   
-    30 │ 	class Foo extends Bar {
-    31 │ 		static foo() {
-  > 32 │ 			var bar = super.foo.bar;
+    25 │ }
+    26 │ {
+  > 27 │ 	var foo = object.bar.foo;
+       │ 	    ^^^^^^^^^^^^^^^^^^^^
+    28 │ }
+    29 │ {
+  
+  i Object destructuring is more readable and expressive than accessing individual properties.
+  
+  i Replace the property access with object destructuring syntax.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:33:2 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use object destructuring instead of accessing object properties.
+  
+    31 │ }
+    32 │ {
+  > 33 │ 	foo = object.foo;
+       │ 	^^^^^^^^^^^^^^^^
+    34 │ }
+    35 │ {
+  
+  i Object destructuring is more readable and expressive than accessing individual properties.
+  
+  i Wrap the assignment in parentheses to use object destructuring: ({ prop } = object).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:8 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use object destructuring instead of accessing object properties.
+  
+    39 │ 	class Foo extends Bar {
+    40 │ 		static foo() {
+  > 41 │ 			var bar = super.foo.bar;
        │ 			    ^^^^^^^^^^^^^^^^^^^
-    33 │ 		}
-    34 │ 	}
+    42 │ 		}
+    43 │ 	}
   
   i Object destructuring is more readable and expressive than accessing individual properties.
   
@@ -276,15 +327,15 @@ invalid.js:32:8 lint/nursery/useDestructuring ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:38:20 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:47:20 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use object destructuring instead of accessing object properties.
   
-    37 │ {
-  > 38 │ 	var /* comment */ foo = object.foo;
+    46 │ {
+  > 47 │ 	var /* comment */ foo = object.foo;
        │ 	                  ^^^^^^^^^^^^^^^^
-    39 │ }
-    40 │ {
+    48 │ }
+    49 │ {
   
   i Object destructuring is more readable and expressive than accessing individual properties.
   
@@ -296,16 +347,16 @@ invalid.js:38:20 lint/nursery/useDestructuring ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:42:17 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:51:17 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use object destructuring instead of accessing object properties.
   
-    40 │ {
-    41 │ 	var a,
-  > 42 │ 		/* comment */ foo = object.foo;
+    49 │ {
+    50 │ 	var a,
+  > 51 │ 		/* comment */ foo = object.foo;
        │ 		              ^^^^^^^^^^^^^^^^
-    43 │ }
-    44 │ {
+    52 │ }
+    53 │ {
   
   i Object destructuring is more readable and expressive than accessing individual properties.
   
@@ -317,16 +368,16 @@ invalid.js:42:17 lint/nursery/useDestructuring ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:45:6 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:54:6 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use object destructuring instead of accessing object properties.
   
-    43 │ }
-    44 │ {
-  > 45 │ 	var foo /* comment */ = object.foo;
+    52 │ }
+    53 │ {
+  > 54 │ 	var foo /* comment */ = object.foo;
        │ 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    46 │ }
-    47 │ {
+    55 │ }
+    56 │ {
   
   i Object destructuring is more readable and expressive than accessing individual properties.
   
@@ -338,16 +389,16 @@ invalid.js:45:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:49:3 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:58:3 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use object destructuring instead of accessing object properties.
   
-    47 │ {
-    48 │ 	var a,
-  > 49 │ 		foo /* comment */ = object.foo;
+    56 │ {
+    57 │ 	var a,
+  > 58 │ 		foo /* comment */ = object.foo;
        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    50 │ }
-    51 │ {
+    59 │ }
+    60 │ {
   
   i Object destructuring is more readable and expressive than accessing individual properties.
   
@@ -359,16 +410,16 @@ invalid.js:49:3 lint/nursery/useDestructuring ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:52:6 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:61:6 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use object destructuring instead of accessing object properties.
   
-    50 │ }
-    51 │ {
-  > 52 │ 	var foo /* comment */ = object.foo,
+    59 │ }
+    60 │ {
+  > 61 │ 	var foo /* comment */ = object.foo,
        │ 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    53 │ 		a;
-    54 │ }
+    62 │ 		a;
+    63 │ }
   
   i Object destructuring is more readable and expressive than accessing individual properties.
   
@@ -380,16 +431,16 @@ invalid.js:52:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:56:6 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:65:6 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use object destructuring instead of accessing object properties.
   
-    54 │ }
-    55 │ {
-  > 56 │ 	var foo = object.foo; /* comment */
+    63 │ }
+    64 │ {
+  > 65 │ 	var foo = object.foo; /* comment */
        │ 	    ^^^^^^^^^^^^^^^^
-    57 │ }
-    58 │ {
+    66 │ }
+    67 │ {
   
   i Object destructuring is more readable and expressive than accessing individual properties.
   
@@ -401,79 +452,16 @@ invalid.js:56:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:59:6 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:68:6 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use object destructuring instead of accessing object properties.
   
-    57 │ }
-    58 │ {
-  > 59 │ 	var foo = object.foo,
+    66 │ }
+    67 │ {
+  > 68 │ 	var foo = object.foo,
        │ 	    ^^^^^^^^^^^^^^^^
-    60 │ 		/* comment */ a;
-    61 │ }
-  
-  i Object destructuring is more readable and expressive than accessing individual properties.
-  
-  i Replace the property access with object destructuring syntax.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:63:6 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use object destructuring instead of accessing object properties.
-  
-    61 │ }
-    62 │ {
-  > 63 │ 	var foo = bar(/* comment */).foo;
-       │ 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    64 │ }
-    65 │ {
-  
-  i Object destructuring is more readable and expressive than accessing individual properties.
-  
-  i Replace the property access with object destructuring syntax.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:66:6 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use object destructuring instead of accessing object properties.
-  
-    64 │ }
-    65 │ {
-  > 66 │ 	var foo = bar /* comment */.baz.foo;
-       │ 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    67 │ }
-    68 │ {
-  
-  i Object destructuring is more readable and expressive than accessing individual properties.
-  
-  i Replace the property access with object destructuring syntax.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:69:6 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use object destructuring instead of accessing object properties.
-  
-    67 │ }
-    68 │ {
-  > 69 │ 	var foo = bar[baz].foo;
-       │ 	    ^^^^^^^^^^^^^^^^^^
+    69 │ 		/* comment */ a;
     70 │ }
-    71 │ {
   
   i Object destructuring is more readable and expressive than accessing individual properties.
   
@@ -491,10 +479,10 @@ invalid.js:72:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
   
     70 │ }
     71 │ {
-  > 72 │ 	var foo = object.foo /* comment */,
-       │ 	    ^^^^^^^^^^^^^^^^
-    73 │ 		a;
-    74 │ }
+  > 72 │ 	var foo = bar(/* comment */).foo;
+       │ 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    73 │ }
+    74 │ {
   
   i Object destructuring is more readable and expressive than accessing individual properties.
   
@@ -506,16 +494,79 @@ invalid.js:72:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:76:6 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:75:6 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use object destructuring instead of accessing object properties.
   
-    74 │ }
-    75 │ {
-  > 76 │ 	var foo = object.foo,
+    73 │ }
+    74 │ {
+  > 75 │ 	var foo = bar /* comment */.baz.foo;
+       │ 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    76 │ }
+    77 │ {
+  
+  i Object destructuring is more readable and expressive than accessing individual properties.
+  
+  i Replace the property access with object destructuring syntax.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:78:6 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use object destructuring instead of accessing object properties.
+  
+    76 │ }
+    77 │ {
+  > 78 │ 	var foo = bar[baz].foo;
+       │ 	    ^^^^^^^^^^^^^^^^^^
+    79 │ }
+    80 │ {
+  
+  i Object destructuring is more readable and expressive than accessing individual properties.
+  
+  i Replace the property access with object destructuring syntax.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:81:6 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use object destructuring instead of accessing object properties.
+  
+    79 │ }
+    80 │ {
+  > 81 │ 	var foo = object.foo /* comment */,
        │ 	    ^^^^^^^^^^^^^^^^
-    77 │ 		/* comment */ a;
-    78 │ }
+    82 │ 		a;
+    83 │ }
+  
+  i Object destructuring is more readable and expressive than accessing individual properties.
+  
+  i Replace the property access with object destructuring syntax.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:85:6 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use object destructuring instead of accessing object properties.
+  
+    83 │ }
+    84 │ {
+  > 85 │ 	var foo = object.foo,
+       │ 	    ^^^^^^^^^^^^^^^^
+    86 │ 		/* comment */ a;
+    87 │ }
   
   i Object destructuring is more readable and expressive than accessing individual properties.
   
