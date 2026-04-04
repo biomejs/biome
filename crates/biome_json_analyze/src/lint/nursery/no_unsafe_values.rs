@@ -204,7 +204,14 @@ fn is_low_surrogate(u: &u16) -> bool {
 /// escape is itself escaped (for example `\\uXXXX`), or if the hex digits are
 /// invalid.
 fn parse_unicode_escape(bytes: &[u8], i: usize) -> Option<u16> {
-    if i + 6 > bytes.len() || bytes[i] != b'\\' || bytes[i + 1] != b'u' {
+    let next = i.checked_add(1)?;
+    let hex_start = i.checked_add(2)?;
+    let end = i.checked_add(6)?;
+    if end > bytes.len() {
+        return None;
+    }
+
+    if bytes.get(i) != Some(&b'\\') || bytes.get(next) != Some(&b'u') {
         return None;
     }
 
@@ -219,7 +226,7 @@ fn parse_unicode_escape(bytes: &[u8], i: usize) -> Option<u16> {
         return None;
     }
 
-    std::str::from_utf8(&bytes[i + 2..i + 6])
+    std::str::from_utf8(bytes.get(hex_start..end)?)
         .ok()
         .and_then(|s| u16::from_str_radix(s, 16).ok())
 }
@@ -234,8 +241,10 @@ fn has_lone_surrogate_escape(bytes: &[u8]) -> bool {
     while i < bytes.len() {
         if let Some(val) = parse_unicode_escape(bytes, i) {
             if is_high_surrogate(&val) {
-                let is_paired =
-                    parse_unicode_escape(bytes, i + 6).is_some_and(|next| is_low_surrogate(&next));
+                let is_paired = i
+                    .checked_add(6)
+                    .and_then(|next_i| parse_unicode_escape(bytes, next_i))
+                    .is_some_and(|next| is_low_surrogate(&next));
                 if !is_paired {
                     return true;
                 }
@@ -277,6 +286,23 @@ mod tests {
     }
 
     #[test]
+    fn parse_unicode_escape_handles_large_index_safely() {
+        assert_eq!(parse_unicode_escape(br"\uD83D", usize::MAX), None);
+        assert_eq!(parse_unicode_escape(br"\uD83D", 5), None);
+    }
+
+    #[test]
+    fn parse_unicode_escape_handles_long_backslash_runs() {
+        let mut even_run = vec![b'\\'; 20];
+        even_run.extend_from_slice(b"uD83D");
+        assert_eq!(parse_unicode_escape(&even_run, 19), None);
+
+        let mut odd_run = vec![b'\\'; 21];
+        odd_run.extend_from_slice(b"uD83D");
+        assert_eq!(parse_unicode_escape(&odd_run, 20), Some(0xD83D));
+    }
+
+    #[test]
     fn has_lone_surrogate_escape_detects_lone_high_surrogate() {
         assert!(has_lone_surrogate_escape(br"\uD83D"));
     }
@@ -299,5 +325,16 @@ mod tests {
     #[test]
     fn has_lone_surrogate_escape_detects_unpaired_high_surrogate() {
         assert!(has_lone_surrogate_escape(br"\uD83D\u0041"));
+    }
+
+    #[test]
+    fn has_lone_surrogate_escape_handles_long_backslash_runs() {
+        let mut escaped = vec![b'\\'; 20];
+        escaped.extend_from_slice(b"uD83D");
+        assert!(!has_lone_surrogate_escape(&escaped));
+
+        let mut unescaped = vec![b'\\'; 21];
+        unescaped.extend_from_slice(b"uD83D");
+        assert!(has_lone_surrogate_escape(&unescaped));
     }
 }
