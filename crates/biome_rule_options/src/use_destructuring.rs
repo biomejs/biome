@@ -12,25 +12,9 @@ pub struct UseDestructuringOptions {
     pub assignment_expression: Option<DestructuringConfig>,
 }
 
-impl UseDestructuringOptions {
-    pub fn variable_declarator(&self) -> &DestructuringConfig {
-        static DEFAULT: DestructuringConfig = DestructuringConfig {
-            array: None,
-            object: None,
-        };
-        self.variable_declarator.as_ref().unwrap_or(&DEFAULT)
-    }
-
-    pub fn assignment_expression(&self) -> &DestructuringConfig {
-        static DEFAULT: DestructuringConfig = DestructuringConfig {
-            array: None,
-            object: None,
-        };
-        self.assignment_expression.as_ref().unwrap_or(&DEFAULT)
-    }
-}
-
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Merge, Eq, PartialEq, Serialize)]
+#[derive(
+    Clone, Copy, Debug, Default, Deserialize, Deserializable, Merge, Eq, PartialEq, Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct DestructuringConfig {

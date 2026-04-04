@@ -65,7 +65,7 @@ impl Rule for UseDestructuring {
 
         match query {
             UseDestructuringQuery::JsAssignmentExpression(node) => {
-                let config = options.assignment_expression();
+                let config = options.assignment_expression.unwrap_or_default();
                 if !config.array() && !config.object() {
                     return None;
                 }
@@ -99,7 +99,7 @@ impl Rule for UseDestructuring {
                 None
             }
             UseDestructuringQuery::JsVariableDeclarator(node) => {
-                let config = options.variable_declarator();
+                let config = options.variable_declarator.unwrap_or_default();
                 if !config.array() && !config.object() {
                     return None;
                 }
