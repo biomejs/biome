@@ -5,7 +5,7 @@ use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_deserialize::TextRange;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlElement, HtmlAttribute};
+use biome_html_syntax::{AnyHtmlElement, HtmlAttribute, HtmlFileSource};
 use biome_rowan::AstNode;
 
 declare_lint_rule! {
@@ -94,18 +94,35 @@ impl Rule for UseSemanticElements {
         }
 
         let element_name = node.name()?;
+        let is_html = ctx.source_type::<HtmlFileSource>().is_html();
         let is_already_semantic =
             semantic_elements
                 .iter()
                 .chain(related_elements.iter())
                 .any(|instance| {
-                    instance.element.as_str() == element_name.text()
+                    let name_matches = if is_html {
+                        instance
+                            .element
+                            .as_str()
+                            .eq_ignore_ascii_case(element_name.text())
+                    } else {
+                        instance.element.as_str() == element_name.text()
+                    };
+                    name_matches
                         && instance.attributes.iter().all(|required_attr| {
                             node.find_attribute_by_name(required_attr.attribute.as_str())
                                 .and_then(|attr| {
                                     attr.initializer()?.value().ok()?.string_value()
                                 })
-                                .is_some_and(|value| value.text() == required_attr.value)
+                                .is_some_and(|value| {
+                                    if is_html {
+                                        value
+                                            .text()
+                                            .eq_ignore_ascii_case(required_attr.value)
+                                    } else {
+                                        value.text() == required_attr.value
+                                    }
+                                })
                         })
                 });
         if is_already_semantic {
@@ -121,23 +138,20 @@ impl Rule for UseSemanticElements {
         let role_value = role_value.trim();
         let role = AriaRole::from_roles(role_value)?;
 
-        let candidates = role
-            .base_html_elements()
-            .iter()
-            .chain(role.related_html_elements())
-            .map(|element| element.to_string())
-            .collect::<Vec<_>>();
-        let candidate_list = candidates.join("\n");
-
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 role_attribute.range(),
                 markup! {
-                    "The elements with this role can be changed to the following elements:\n"
-                    {candidate_list}
-                }
-                .to_owned(),
+                    "The elements with this role can be changed to semantic elements."
+                },
+            )
+            .footer_list(
+                markup! { "Replace with one of these elements:" },
+                role.base_html_elements()
+                    .iter()
+                    .chain(role.related_html_elements())
+                    .map(|element| element.to_string()),
             )
             .note(markup! {
                 "For examples and more information, see " <Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles">"WAI-ARIA Roles"</Hyperlink>
