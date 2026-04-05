@@ -1,8 +1,8 @@
 /* should not generate diagnostics */
 
 // not used in a conditional
-const result = str.match(/test/);
-const result = /test/.exec(str);
+const result1 = str.match(/test/);
+const result2 = /test/.exec(str);
 const matches = str.match(/test/g);
 
 // .test() already used

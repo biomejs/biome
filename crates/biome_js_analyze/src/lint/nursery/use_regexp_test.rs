@@ -51,14 +51,14 @@ declare_lint_rule! {
     }
 }
 
-pub struct UseRegexpTextState {
+pub struct UseRegexpTestState {
     string_node: AnyJsExpression,
     regexp_node: AnyJsExpression,
 }
 
 impl Rule for UseRegexpTest {
     type Query = Typed<JsCallExpression>;
-    type State = UseRegexpTextState;
+    type State = UseRegexpTestState;
     type Signals = Option<Self::State>;
     type Options = UseRegexpTestOptions;
 
@@ -72,7 +72,13 @@ impl Rule for UseRegexpTest {
         let binding = node.callee().ok()?.omit_parentheses();
         let callee = binding.as_js_static_member_expression()?;
         let call_object = &callee.object().ok()?;
-        let call_name = callee.member().ok()?.as_js_name()?.to_trimmed_text();
+        let call_name = callee
+            .member()
+            .ok()?
+            .as_js_name()?
+            .value_token()
+            .ok()?
+            .token_text_trimmed();
 
         let args = node.arguments().ok()?.args();
 
@@ -83,9 +89,9 @@ impl Rule for UseRegexpTest {
         let first_arg = args.first()?.ok()?;
         let first_arg_expr = first_arg.as_any_js_expression()?;
 
-        let (string_node, regexp_node) = if call_name == "match" {
+        let (string_node, regexp_node) = if call_name.text() == "match" {
             (call_object, first_arg_expr)
-        } else if call_name == "exec" {
+        } else if call_name.text() == "exec" {
             (first_arg_expr, call_object)
         } else {
             return None;
@@ -97,35 +103,25 @@ impl Rule for UseRegexpTest {
             return None;
         }
 
-        Some(UseRegexpTextState {
+        Some(UseRegexpTestState {
             regexp_node: regexp_node.clone(),
             string_node: string_node.clone(),
         })
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-
-        let UseRegexpTextState {
-            regexp_node,
-            string_node,
-        } = state;
-
-        let regexp_text = regexp_node.to_trimmed_string();
-        let string_text = string_node.to_trimmed_string();
-
-        let suggestion = format!("{regexp_text}.test({string_text})");
 
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Use "<Emphasis>{suggestion}</Emphasis>" instead."
+                    "Use "<Emphasis>".test()"</Emphasis>" instead of "<Emphasis>".match()"</Emphasis>" or "<Emphasis>".exec()"</Emphasis>" in boolean contexts."
                 },
             )
             .note(markup! {
-                <Emphasis>"RegExp.test()"</Emphasis>" returns a boolean, which is more appropriate and efficient in a boolean context."
+                <Emphasis>"RegExp.test()"</Emphasis>" returns a boolean directly, which is more appropriate and efficient in a boolean context."
             })
         )
     }
@@ -134,7 +130,7 @@ impl Rule for UseRegexpTest {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
 
-        let UseRegexpTextState {
+        let UseRegexpTestState {
             string_node,
             regexp_node,
         } = state;
@@ -155,18 +151,12 @@ impl Rule for UseRegexpTest {
         );
         mutation.replace_node(first_arg_expr.clone(), string_node.clone());
 
-        let regexp_text = regexp_node.to_trimmed_string();
-        let string_text = string_node.to_trimmed_string();
-
-        let suggestion = format!("{regexp_text}.test({string_text})");
-
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! {
-                "Replace with "<Emphasis>{suggestion}</Emphasis>"."
-            }
-            .to_owned(),
+                "Use .test() instead."
+            },
             mutation,
         ))
     }
