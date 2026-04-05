@@ -2213,6 +2213,11 @@ See https://biomejs.dev/linter/rules/no-leaked-render
 	 */
 	noLeakedRender?: NoLeakedRenderConfiguration;
 	/**
+	* Disallow functions declared inside loops that capture unsafe outer variables.
+See https://biomejs.dev/linter/rules/no-loop-func 
+	 */
+	noLoopFunc?: NoLoopFuncConfiguration;
+	/**
 	* Detect return type annotations that are misleadingly wider than what the implementation actually returns.
 See https://biomejs.dev/linter/rules/no-misleading-return-type 
 	 */
@@ -4304,6 +4309,9 @@ export type NoJsxPropsBindConfiguration =
 export type NoLeakedRenderConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoLeakedRenderOptions;
+export type NoLoopFuncConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoLoopFuncOptions;
 export type NoMisleadingReturnTypeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisleadingReturnTypeOptions;
@@ -6052,6 +6060,10 @@ export interface RuleWithNoLeakedRenderOptions {
 	level: RulePlainConfiguration;
 	options?: NoLeakedRenderOptions;
 }
+export interface RuleWithNoLoopFuncOptions {
+	level: RulePlainConfiguration;
+	options?: NoLoopFuncOptions;
+}
 export interface RuleWithNoMisleadingReturnTypeOptions {
 	level: RulePlainConfiguration;
 	options?: NoMisleadingReturnTypeOptions;
@@ -7726,6 +7738,7 @@ export type NoInlineStylesOptions = {};
 export type NoJsxNamespaceOptions = {};
 export type NoJsxPropsBindOptions = {};
 export type NoLeakedRenderOptions = {};
+export type NoLoopFuncOptions = {};
 export type NoMisleadingReturnTypeOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoMultiAssignOptions = {};
@@ -8902,6 +8915,7 @@ export type Category =
 	| "lint/nursery/noJsxPropsBind"
 	| "lint/nursery/noLeakedRender"
 	| "lint/nursery/noMisleadingReturnType"
+	| "lint/nursery/noLoopFunc"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noMultiAssign"

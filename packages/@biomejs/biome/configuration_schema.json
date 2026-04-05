@@ -4246,6 +4246,13 @@
 			]
 		},
 		"NoLeakedRenderOptions": { "type": "object" },
+		"NoLoopFuncConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoLoopFuncOptions" }
+			]
+		},
+		"NoLoopFuncOptions": { "type": "object", "additionalProperties": false },
 		"NoMagicNumbersConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6229,6 +6236,13 @@
 					"description": "Prevent problematic leaked values from being rendered.\nSee https://biomejs.dev/linter/rules/no-leaked-render",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoLeakedRenderConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noLoopFunc": {
+					"description": "Disallow functions declared inside loops that capture unsafe outer variables.\nSee https://biomejs.dev/linter/rules/no-loop-func",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoLoopFuncConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8840,6 +8854,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoLeakedRenderOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoLoopFuncOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoLoopFuncOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
