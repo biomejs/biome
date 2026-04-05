@@ -1,5 +1,3 @@
-use std::sync::LazyLock;
-
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -10,22 +8,14 @@ use biome_js_syntax::{
     JsExport, JsVariableDeclaration, JsVariableDeclarationClause, JsVariableDeclarator,
     JsVariableDeclaratorList,
 };
-use biome_rowan::{AstNode, AstSeparatedList, TextRange};
+use biome_rowan::{AstNode, AstSeparatedList, TextRange, TokenText};
 use biome_rule_options::use_qwik_loader_location::UseQwikLoaderLocationOptions;
-use regex::Regex;
 
 /// Qwik route functions that must be in route boundary files.
 const ROUTE_FNS: &[&str] = &["routeLoader$", "routeAction$"];
 
 /// All Qwik loader/action functions that must be exported with a `use*` name.
 const LINTER_FNS: &[&str] = &["routeLoader$", "routeAction$", "globalAction$"];
-
-static LAYOUT_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"/layout(?:|!|-.+)\.[jt]sx?$").unwrap());
-static INDEX_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"/index(?:|!|@.+)\.[jt]sx?$").unwrap());
-static PLUGIN_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"/plugin(?:|@.+)\.[jt]sx?$").unwrap());
 
 declare_lint_rule! {
     /// Enforce that Qwik loader functions are declared in the correct location.
@@ -96,8 +86,9 @@ impl Rule for UseQwikLoaderLocation {
         let callee = call.callee().ok()?.omit_parentheses();
         let callee_ident_expr = callee.as_js_identifier_expression()?;
         let callee_ref_ident = callee_ident_expr.name().ok()?;
-        let callee_name = callee_ref_ident.to_trimmed_text();
-        let callee_name_text = callee_name.text();
+        let callee_name = callee_ref_ident.value_token().ok()?;
+        let callee_token_text = callee_name.token_text_trimmed();
+        let callee_name_text = callee_token_text.text();
 
         if !LINTER_FNS.contains(&callee_name_text) {
             return None;
@@ -107,17 +98,17 @@ impl Rule for UseQwikLoaderLocation {
         if ROUTE_FNS.contains(&callee_name_text) {
             // Normalize path separators to forward slashes.
             let file_path = ctx.file_path().as_str().replace('\\', "/");
+            let file_name = ctx.file_path().file_name()?;
 
             let is_inside_routes =
                 file_path.starts_with("src/routes/") || file_path.contains("/src/routes/");
-            let can_contain_loader = is_inside_routes
-                && (LAYOUT_REGEX.is_match(&file_path)
-                    || INDEX_REGEX.is_match(&file_path)
-                    || PLUGIN_REGEX.is_match(&file_path));
+            let is_route_file = file_name.starts_with("plugin")
+                || file_name.starts_with("layout")
+                || file_name.starts_with("index");
 
-            if !can_contain_loader {
+            if !(is_inside_routes && is_route_file) {
                 return Some(RuleState::InvalidLoaderLocation {
-                    fn_name: callee_name_text.into(),
+                    fn_name: callee_token_text,
                 });
             }
         }
@@ -132,7 +123,7 @@ impl Rule for UseQwikLoaderLocation {
         let Some(declarator) = declarator else {
             // The call is not inside a variable declaration — not exported.
             return Some(RuleState::MissingExport {
-                fn_name: callee_name_text.into(),
+                fn_name: callee_token_text,
                 span: callee_ref_ident.range(),
             });
         };
@@ -146,19 +137,19 @@ impl Rule for UseQwikLoaderLocation {
         let Some(binding) = binding else {
             // Destructured or otherwise non-identifier binding.
             return Some(RuleState::MissingExport {
-                fn_name: callee_name_text.into(),
+                fn_name: callee_token_text,
                 span: callee_ref_ident.range(),
             });
         };
 
         let id_token = binding.name_token().ok()?;
-        let id_name = id_token.text_trimmed().to_string();
+        let id_name = id_token.token_text_trimmed();
         let span = binding.range();
 
         // Check naming convention
-        if !id_name.starts_with("use") {
+        if !id_name.text().starts_with("use") {
             return Some(RuleState::WrongName {
-                fn_name: callee_name_text.into(),
+                fn_name: callee_token_text,
                 span,
             });
         }
@@ -166,7 +157,7 @@ impl Rule for UseQwikLoaderLocation {
         // Check if exported
         if !is_exported(&declarator, &id_name, &ctx.root()) {
             return Some(RuleState::MissingExport {
-                fn_name: callee_name_text.into(),
+                fn_name: callee_token_text,
                 span,
             });
         }
@@ -193,7 +184,7 @@ impl Rule for UseQwikLoaderLocation {
                     rule_category!(),
                     node.range(),
                     markup! {
-                        "The route function "<Emphasis>{fn_name}</Emphasis>"() has been declared outside of the route boundaries."
+                        "The route function "<Emphasis>{fn_name.text()}</Emphasis>"() has been declared outside of the route boundaries."
                     },
                 )
                 .note(markup! {
@@ -211,7 +202,7 @@ impl Rule for UseQwikLoaderLocation {
                     rule_category!(),
                     span,
                     markup! {
-                        "The loader function "<Emphasis>{fn_name}</Emphasis>"() is not being exported."
+                        "The loader function "<Emphasis>{fn_name.text()}</Emphasis>"() is not being exported."
                     },
                 )
                 .note(markup! {
@@ -223,7 +214,7 @@ impl Rule for UseQwikLoaderLocation {
                     rule_category!(),
                     span,
                     markup! {
-                        "The exported name of "<Emphasis>{fn_name}</Emphasis>"() must follow the "<Emphasis>"use*"</Emphasis>" naming convention."
+                        "The exported name of "<Emphasis>{fn_name.text()}</Emphasis>"() must follow the "<Emphasis>"use*"</Emphasis>" naming convention."
                     },
                 )
                 .note(markup! {
@@ -248,11 +239,11 @@ impl Rule for UseQwikLoaderLocation {
 
 pub enum RuleState {
     /// The loader is declared outside of a route boundary file.
-    InvalidLoaderLocation { fn_name: Box<str> },
+    InvalidLoaderLocation { fn_name: TokenText },
     /// The loader return value is not exported from the module.
-    MissingExport { fn_name: Box<str>, span: TextRange },
+    MissingExport { fn_name: TokenText, span: TextRange },
     /// The exported name does not follow the `use*` convention.
-    WrongName { fn_name: Box<str>, span: TextRange },
+    WrongName { fn_name: TokenText, span: TextRange },
     /// The first argument is a reference instead of an inlined arrow function.
     RecommendedValue { span: TextRange },
 }
@@ -298,14 +289,14 @@ fn is_exported(declarator: &JsVariableDeclarator, name: &str, root: &AnyJsRoot) 
                     .name()
                     .ok()
                     .and_then(|r| r.value_token().ok())
-                    .map(|t| t.text_trimmed().to_string()),
+                    .map(|t| t.token_text_trimmed()),
                 AnyJsExportNamedSpecifier::JsExportNamedSpecifier(s) => s
                     .local_name()
                     .ok()
                     .and_then(|r| r.value_token().ok())
-                    .map(|t| t.text_trimmed().to_string()),
+                    .map(|t| t.token_text_trimmed()),
             };
-            if local_name.as_deref() == Some(name) {
+            if local_name.is_some_and(|f| f == name) {
                 return true;
             }
         }
