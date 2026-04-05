@@ -3,7 +3,7 @@ source: crates/biome_html_analyze/tests/spec_tests.rs
 expression: sorted.vue
 ---
 # Input
-```html
+```vue
 <p class="flex" dir="auto" id="hello" v-show="ok" v-foo:bar.baz v-text="msg"></p>
 
 <div

@@ -3,7 +3,7 @@ source: crates/biome_html_analyze/tests/spec_tests.rs
 expression: sorted.svelte
 ---
 # Input
-```html
+```svelte
 <input dir="auto" spellcheck="true" tabindex="-1" type="checkbox" bind:checked={accepted} />
 <input defaultChecked={true} dir="auto" spellcheck="true" tabindex="-1" type="checkbox" bind:checked>
 <div class="mydiv" dir="auto" spellcheck="true" tabindex="-1" style:color="red">some text</div>
