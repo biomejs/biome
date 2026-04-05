@@ -1,0 +1,275 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const integer = 1.0;
+const dangling = 1.;
+const compact = 123_456.000_000;
+const decimal = 123.111000000;
+const exponent = 123.00e20;
+const leadingDot = .0;
+const exponentFromLeadingDot = .00e20;
+const member = 1.0.toString();
+const alreadyParenthesized = (2.0).toString();
+
+```
+
+# Diagnostics
+```
+invalid.js:2:17 lint/nursery/noZeroFractions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This number literal has a zero fraction.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const integer = 1.0;
+      │                 ^^^
+    3 │ const dangling = 1.;
+    4 │ const compact = 123_456.000_000;
+  
+  i The fractional part is redundant. It has the same runtime value and makes the literal longer than it needs to be.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9829 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the redundant zero fraction.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - const·integer·=·1.0;
+        2 │ + const·integer·=·1;
+     3  3 │   const dangling = 1.;
+     4  4 │   const compact = 123_456.000_000;
+  
+
+```
+
+```
+invalid.js:3:18 lint/nursery/noZeroFractions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This number literal has a dangling dot.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const integer = 1.0;
+  > 3 │ const dangling = 1.;
+      │                  ^^
+    4 │ const compact = 123_456.000_000;
+    5 │ const decimal = 123.111000000;
+  
+  i The fractional part is redundant. It has the same runtime value and makes the literal longer than it needs to be.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9829 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the dangling dot.
+  
+    3 │ const·dangling·=·1.;
+      │                   - 
+
+```
+
+```
+invalid.js:4:17 lint/nursery/noZeroFractions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This number literal has a zero fraction.
+  
+    2 │ const integer = 1.0;
+    3 │ const dangling = 1.;
+  > 4 │ const compact = 123_456.000_000;
+      │                 ^^^^^^^^^^^^^^^
+    5 │ const decimal = 123.111000000;
+    6 │ const exponent = 123.00e20;
+  
+  i The fractional part is redundant. It has the same runtime value and makes the literal longer than it needs to be.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9829 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the redundant zero fraction.
+  
+     2  2 │   const integer = 1.0;
+     3  3 │   const dangling = 1.;
+     4    │ - const·compact·=·123_456.000_000;
+        4 │ + const·compact·=·123_456;
+     5  5 │   const decimal = 123.111000000;
+     6  6 │   const exponent = 123.00e20;
+  
+
+```
+
+```
+invalid.js:5:17 lint/nursery/noZeroFractions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This number literal has a zero fraction.
+  
+    3 │ const dangling = 1.;
+    4 │ const compact = 123_456.000_000;
+  > 5 │ const decimal = 123.111000000;
+      │                 ^^^^^^^^^^^^^
+    6 │ const exponent = 123.00e20;
+    7 │ const leadingDot = .0;
+  
+  i The fractional part is redundant. It has the same runtime value and makes the literal longer than it needs to be.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9829 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the redundant zero fraction.
+  
+     3  3 │   const dangling = 1.;
+     4  4 │   const compact = 123_456.000_000;
+     5    │ - const·decimal·=·123.111000000;
+        5 │ + const·decimal·=·123.111;
+     6  6 │   const exponent = 123.00e20;
+     7  7 │   const leadingDot = .0;
+  
+
+```
+
+```
+invalid.js:6:18 lint/nursery/noZeroFractions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This number literal has a zero fraction.
+  
+    4 │ const compact = 123_456.000_000;
+    5 │ const decimal = 123.111000000;
+  > 6 │ const exponent = 123.00e20;
+      │                  ^^^^^^^^^
+    7 │ const leadingDot = .0;
+    8 │ const exponentFromLeadingDot = .00e20;
+  
+  i The fractional part is redundant. It has the same runtime value and makes the literal longer than it needs to be.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9829 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the redundant zero fraction.
+  
+     4  4 │   const compact = 123_456.000_000;
+     5  5 │   const decimal = 123.111000000;
+     6    │ - const·exponent·=·123.00e20;
+        6 │ + const·exponent·=·123e20;
+     7  7 │   const leadingDot = .0;
+     8  8 │   const exponentFromLeadingDot = .00e20;
+  
+
+```
+
+```
+invalid.js:7:20 lint/nursery/noZeroFractions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This number literal has a zero fraction.
+  
+    5 │ const decimal = 123.111000000;
+    6 │ const exponent = 123.00e20;
+  > 7 │ const leadingDot = .0;
+      │                    ^^
+    8 │ const exponentFromLeadingDot = .00e20;
+    9 │ const member = 1.0.toString();
+  
+  i The fractional part is redundant. It has the same runtime value and makes the literal longer than it needs to be.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9829 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the redundant zero fraction.
+  
+    7 │ const·leadingDot·=·.0;
+      │                    -  
+
+```
+
+```
+invalid.js:8:32 lint/nursery/noZeroFractions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This number literal has a zero fraction.
+  
+     6 │ const exponent = 123.00e20;
+     7 │ const leadingDot = .0;
+   > 8 │ const exponentFromLeadingDot = .00e20;
+       │                                ^^^^^^
+     9 │ const member = 1.0.toString();
+    10 │ const alreadyParenthesized = (2.0).toString();
+  
+  i The fractional part is redundant. It has the same runtime value and makes the literal longer than it needs to be.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9829 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the redundant zero fraction.
+  
+     6  6 │   const exponent = 123.00e20;
+     7  7 │   const leadingDot = .0;
+     8    │ - const·exponentFromLeadingDot·=·.00e20;
+        8 │ + const·exponentFromLeadingDot·=·0e20;
+     9  9 │   const member = 1.0.toString();
+    10 10 │   const alreadyParenthesized = (2.0).toString();
+  
+
+```
+
+```
+invalid.js:9:16 lint/nursery/noZeroFractions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This number literal has a zero fraction.
+  
+     7 │ const leadingDot = .0;
+     8 │ const exponentFromLeadingDot = .00e20;
+   > 9 │ const member = 1.0.toString();
+       │                ^^^
+    10 │ const alreadyParenthesized = (2.0).toString();
+    11 │ 
+  
+  i The fractional part is redundant. It has the same runtime value and makes the literal longer than it needs to be.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9829 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the redundant zero fraction.
+  
+     7  7 │   const leadingDot = .0;
+     8  8 │   const exponentFromLeadingDot = .00e20;
+     9    │ - const·member·=·1.0.toString();
+        9 │ + const·member·=·(1).toString();
+    10 10 │   const alreadyParenthesized = (2.0).toString();
+    11 11 │   
+  
+
+```
+
+```
+invalid.js:10:31 lint/nursery/noZeroFractions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This number literal has a zero fraction.
+  
+     8 │ const exponentFromLeadingDot = .00e20;
+     9 │ const member = 1.0.toString();
+  > 10 │ const alreadyParenthesized = (2.0).toString();
+       │                               ^^^
+    11 │ 
+  
+  i The fractional part is redundant. It has the same runtime value and makes the literal longer than it needs to be.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9829 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the redundant zero fraction.
+  
+     8  8 │   const exponentFromLeadingDot = .00e20;
+     9  9 │   const member = 1.0.toString();
+    10    │ - const·alreadyParenthesized·=·(2.0).toString();
+       10 │ + const·alreadyParenthesized·=·(2).toString();
+    11 11 │   
+  
+
+```
