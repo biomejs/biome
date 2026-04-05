@@ -4,6 +4,7 @@ use crate::registry::{RegistryVisitor, RuleLanguage, RuleSuppressions};
 use crate::{
     Phase, Phases, Queryable, SourceActionKind, SuppressionAction, SuppressionCommentEmitterPayload,
 };
+use biome_analyze_macros::RuleSourceVariantIndex;
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::location::AsSpan;
@@ -93,10 +94,11 @@ impl TryFrom<FixKind> for Applicability {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, RuleSourceVariantIndex)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
+/// Declaration order defines the sort order used for comparing rule sources.
 pub enum RuleSource<'a> {
     /// Rules from [Rust Clippy](https://rust-lang.github.io/rust-clippy/master/index.html)
     Clippy(&'a str),
@@ -262,58 +264,6 @@ impl<'a> Ord for RuleSource<'a> {
 }
 
 impl<'a> RuleSource<'a> {
-    /// Returns the variant index for sorting and comparison across lifetimes.
-    pub const fn variant_index(&self) -> u16 {
-        match self {
-            Self::Clippy(_) => 0,
-            Self::DenoLint(_) => 1,
-            Self::Eslint(_) => 2,
-            Self::EslintBarrelFiles(_) => 3,
-            Self::EslintGraphql(_) => 4,
-            Self::EslintImport(_) => 5,
-            Self::EslintImportAccess(_) => 6,
-            Self::EslintJest(_) => 7,
-            Self::EslintJsDoc(_) => 8,
-            Self::EslintJsxA11y(_) => 9,
-            Self::EslintMysticatea(_) => 10,
-            Self::EslintN(_) => 11,
-            Self::EslintNext(_) => 12,
-            Self::EslintNoSecrets(_) => 13,
-            Self::EslintPackageJson(_) => 14,
-            Self::EslintPackageJsonDependencies(_) => 15,
-            Self::EslintPerfectionist(_) => 16,
-            Self::EslintPlaywright(_) => 17,
-            Self::EslintPromise(_) => 18,
-            Self::EslintQwik(_) => 19,
-            Self::EslintReact(_) => 20,
-            Self::EslintReactHooks(_) => 21,
-            Self::EslintReactPreferFunctionComponent(_) => 22,
-            Self::EslintReactRefresh(_) => 23,
-            Self::EslintReactX(_) => 24,
-            Self::EslintReactXyz(_) => 25,
-            Self::EslintRegexp(_) => 26,
-            Self::EslintSolid(_) => 27,
-            Self::EslintSonarJs(_) => 28,
-            Self::EslintStylistic(_) => 29,
-            Self::EslintTypeScript(_) => 30,
-            Self::EslintUnicorn(_) => 31,
-            Self::EslintUnusedImports(_) => 32,
-            Self::EslintVitest(_) => 33,
-            Self::EslintVueJs(_) => 34,
-            Self::GraphqlSchemaLinter(_) => 35,
-            Self::Stylelint(_) => 36,
-            Self::EslintTurbo(_) => 37,
-            Self::HtmlEslint(_) => 38,
-            Self::EslintE18e(_) => 39,
-            Self::EslintBetterTailwindcss(_) => 40,
-            Self::EslintJson(_) => 41,
-            Self::EslintMarkdown(_) => 42,
-            Self::EslintYml(_) => 43,
-            Self::EslintCss(_) => 44,
-            Self::EslintDrizzle(_) => 45,
-        }
-    }
-
     const fn sort_key(&self) -> (u16, &'a str) {
         (self.variant_index(), self.as_rule_name())
     }

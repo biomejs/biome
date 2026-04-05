@@ -120,6 +120,7 @@ dependencies = [
 name = "biome_analyze"
 version = "0.5.7"
 dependencies = [
+ "biome_analyze_macros",
  "biome_console",
  "biome_deserialize",
  "biome_deserialize_macros",
