@@ -7518,12 +7518,12 @@
 		},
 		"PresetConfig": {
 			"oneOf": [
-				{ "type": "string", "enum": ["all", "none"] },
+				{ "type": "string", "enum": ["All", "None"] },
 				{
 					"type": "object",
-					"properties": { "fromAnalyzer": { "$ref": "#/$defs/RulePreset" } },
+					"properties": { "FromAnalyzer": { "$ref": "#/$defs/RulePreset" } },
 					"additionalProperties": false,
-					"required": ["fromAnalyzer"]
+					"required": ["FromAnalyzer"]
 				}
 			]
 		},

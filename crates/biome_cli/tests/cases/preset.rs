@@ -159,10 +159,7 @@ fn preset_all_enables_all_rules() {
     // noNegationElse is a non-recommended rule in style.
     // It should only trigger when "all" rules are enabled.
     let test = Utf8Path::new("test.js");
-    fs.insert(
-        test.into(),
-        b"if (!cond) { f(); } else { g(); }\n",
-    );
+    fs.insert(test.into(), b"if (!cond) { f(); } else { g(); }\n");
 
     let (fs, result) = run_cli(
         fs,
