@@ -1,0 +1,71 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-func-type-params.ts
+---
+# Input
+```ts
+// When ignoreFunctionTypeParameterNameValueShadow is false,
+// parameter names in function type annotations should be flagged.
+
+function fn1(options: unknown, callback: (options: unknown) => void) {
+}
+
+const test = 1;
+type Callback = (test: string) => void;
+
+```
+
+# Diagnostics
+```
+invalid-func-type-params.ts:4:43 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable shadows another variable with the same name in the outer scope.
+  
+    2 │ // parameter names in function type annotations should be flagged.
+    3 │ 
+  > 4 │ function fn1(options: unknown, callback: (options: unknown) => void) {
+      │                                           ^^^^^^^
+    5 │ }
+    6 │ 
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    2 │ // parameter names in function type annotations should be flagged.
+    3 │ 
+  > 4 │ function fn1(options: unknown, callback: (options: unknown) => void) {
+      │              ^^^^^^^
+    5 │ }
+    6 │ 
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-func-type-params.ts:8:18 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable shadows another variable with the same name in the outer scope.
+  
+    7 │ const test = 1;
+  > 8 │ type Callback = (test: string) => void;
+      │                  ^^^^
+    9 │ 
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    5 │ }
+    6 │ 
+  > 7 │ const test = 1;
+      │       ^^^^
+    8 │ type Callback = (test: string) => void;
+    9 │ 
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

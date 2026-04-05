@@ -1,0 +1,40 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-func-type-params.ts
+---
+# Input
+```ts
+/** should not generate diagnostics */
+
+// Issue #9482: parameter names in function type annotations should not be
+// flagged as shadowing outer-scope variables.
+
+function fn1(options: unknown, callback: (options: unknown) => void) {
+}
+
+// Arrow function type in a type alias
+const test = 1;
+type Callback = (test: string) => void;
+
+// Constructor type
+const value = "hello";
+type Ctor = new (value: number) => object;
+
+// Nested: function type inside an interface method signature
+const data = 42;
+interface Handler {
+  process(data: string): void;
+}
+
+// Call signature in an interface
+const result = true;
+interface Callable {
+  (result: number): void;
+}
+
+// Multiple parameters in function type, one shadows
+const a = 1;
+const b = 2;
+type MultiParam = (a: string, b: number) => void;
+
+```

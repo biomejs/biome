@@ -90,9 +90,10 @@ impl Rule for NoShadow {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let mut shadowed_bindings = Vec::new();
         let model = ctx.query();
+        let options = ctx.options();
 
         for binding in ctx.query().all_bindings() {
-            if let Some(shadowed_binding) = check_shadowing(model, binding) {
+            if let Some(shadowed_binding) = check_shadowing(model, binding, options) {
                 shadowed_bindings.push(shadowed_binding);
             }
         }
@@ -126,7 +127,11 @@ impl Rule for NoShadow {
     }
 }
 
-fn check_shadowing(model: &SemanticModel, binding: Binding) -> Option<ShadowedBinding> {
+fn check_shadowing(
+    model: &SemanticModel,
+    binding: Binding,
+    options: &NoShadowOptions,
+) -> Option<ShadowedBinding> {
     if binding.scope().is_global_scope() {
         // global scope bindings can't shadow anything
         return None;
@@ -136,6 +141,16 @@ fn check_shadowing(model: &SemanticModel, binding: Binding) -> Option<ShadowedBi
         // Parameters in TypeScript overload signatures (constructor, method,
         // and function overloads without a body) are type-only and don't exist
         // at runtime. They should not be treated as shadowing outer variables.
+        return None;
+    }
+
+    if options.ignore_function_type_parameter_name_value_shadow
+        && is_in_function_type_parameter(&binding)
+    {
+        // Parameters in function type annotations (e.g.,
+        // `callback: (options: unknown) => void`) do not create runtime
+        // bindings in the enclosing scope and should not be treated as
+        // shadowing outer variables.
         return None;
     }
 
@@ -313,6 +328,33 @@ fn is_in_overload_signature(binding: &Binding) -> bool {
                 | AnyJsParameterParentFunction::TsSetterSignatureClassMember(_)
                 | AnyJsParameterParentFunction::TsDeclareFunctionDeclaration(_)
                 | AnyJsParameterParentFunction::TsDeclareFunctionExportDefaultDeclaration(_)
+        )
+    )
+}
+
+/// Returns true if the binding is a parameter inside a TypeScript function type
+/// annotation (e.g., `(options: unknown) => void` or `new () => Foo`), a call
+/// signature type member, a method signature type member, or a setter signature
+/// type member. These parameters only exist at the type level and do not create
+/// runtime bindings.
+fn is_in_function_type_parameter(binding: &Binding) -> bool {
+    let node = binding.syntax();
+    let parent_function = node.clone().cast::<JsIdentifierBinding>().and_then(|id| {
+        id.parent::<JsFormalParameter>()
+            .and_then(|p| p.parent_function())
+            .or_else(|| {
+                id.parent::<JsRestParameter>()
+                    .and_then(|p| p.parent_function())
+            })
+    });
+    matches!(
+        parent_function,
+        Some(
+            AnyJsParameterParentFunction::TsFunctionType(_)
+                | AnyJsParameterParentFunction::TsConstructorType(_)
+                | AnyJsParameterParentFunction::TsCallSignatureTypeMember(_)
+                | AnyJsParameterParentFunction::TsMethodSignatureTypeMember(_)
+                | AnyJsParameterParentFunction::TsSetterSignatureTypeMember(_)
         )
     )
 }

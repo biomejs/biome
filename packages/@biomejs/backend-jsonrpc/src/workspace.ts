@@ -7554,7 +7554,20 @@ The values of the list are case-insensitive.
 	disallow?: string[];
 }
 export type NoScriptUrlOptions = {};
-export type NoShadowOptions = {};
+export interface NoShadowOptions {
+	/**
+	* Whether to ignore parameter names in function type annotations that
+shadow variables in the outer scope.
+
+Function type parameters (e.g., `callback: (options: unknown) => void`)
+define the shape of a callback but do not create runtime bindings in the
+enclosing scope. Setting this to `true` (the default) suppresses
+shadowing reports for these parameter names.
+
+Defaults to `true`. 
+	 */
+	ignoreFunctionTypeParameterNameValueShadow?: boolean;
+}
 export type NoSyncScriptsOptions = {};
 export type NoTernaryOptions = {};
 export type NoTopLevelLiteralsOptions = {};
