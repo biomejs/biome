@@ -5901,6 +5901,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoZeroFractionsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoZeroFractionsOptions" }
+			]
+		},
+		"NoZeroFractionsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NormalizedGlob": {
 			"description": "Normalized Biome glob pattern that strips `./` from the pattern.",
 			"type": "string"
@@ -6370,6 +6380,13 @@
 					"description": "Disallow using v-if and v-for directives on the same element.\nSee https://biomejs.dev/linter/rules/no-vue-v-if-with-v-for",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueVIfWithVForConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noZeroFractions": {
+					"description": "Disallow number literals with zero fractions or dangling dots.\nSee https://biomejs.dev/linter/rules/no-zero-fractions",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoZeroFractionsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10116,6 +10133,16 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoYodaExpressionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoZeroFractionsOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoZeroFractionsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

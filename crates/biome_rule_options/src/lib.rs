@@ -307,6 +307,7 @@ pub mod no_vue_setup_props_reactivity_loss;
 pub mod no_vue_v_if_with_v_for;
 pub mod no_with;
 pub mod no_yoda_expression;
+pub mod no_zero_fractions;
 pub mod organize_imports;
 pub mod use_adjacent_overload_signatures;
 pub mod use_alt_text;
