@@ -1,9 +1,11 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
+use crate::analyzer::presets::PresetConfig;
 use crate::analyzer::{
     GroupPlainConfiguration, RuleConfiguration, RuleFixConfiguration, RuleGroupExt,
     RulePlainConfiguration, SeverityOrGroup,
 };
+use biome_analyze::RulePreset;
 use biome_analyze::{RuleFilter, options::RuleOptions};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::{Category, Severity};
@@ -2106,6 +2108,9 @@ pub struct Rules {
     #[doc = r" It enables the lint rules recommended by Biome. `true` by default."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
+    #[doc = r" The rule presets to use."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub preset: Option<PresetConfig>,
     #[deserializable(rename = "a11y")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub a11y: Option<SeverityOrGroup<A11y>>,
@@ -2284,8 +2289,15 @@ impl Rules {
             group.set_recommended(None);
         }
     }
-    pub(crate) const fn is_recommended_false(&self) -> bool {
-        matches!(self.recommended, Some(false))
+    #[doc = r" Returns the current preset. Defaults to the recommended set"]
+    pub(crate) fn preset(&self) -> PresetConfig {
+        if matches!(self.recommended, Some(false)) {
+            PresetConfig::None
+        } else if let Some(preset) = &self.preset {
+            preset.clone()
+        } else {
+            PresetConfig::default()
+        }
     }
     #[doc = r" It returns the enabled rules by default."]
     #[doc = r""]
@@ -2294,63 +2306,60 @@ impl Rules {
         let mut enabled_rules = FxHashSet::default();
         let mut disabled_rules = FxHashSet::default();
         if let Some(group) = self.a11y.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(A11y::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(A11y::preset_as_filters(self.preset()));
         }
         if let Some(group) = self.complexity.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(Complexity::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(Complexity::preset_as_filters(self.preset()));
         }
         if let Some(group) = self.correctness.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(Correctness::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(Correctness::preset_as_filters(self.preset()));
         }
         if let Some(group) = self.nursery.as_ref() {
-            group.collect_preset_rules(
-                !self.is_recommended_false() && biome_flags::is_unstable(),
-                &mut enabled_rules,
-            );
+            group.collect_preset_rules(PresetConfig::None, &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() && biome_flags::is_unstable() {
-            enabled_rules.extend(Nursery::recommended_rules_as_filters());
+        } else if !PresetConfig::None.is_none() {
+            enabled_rules.extend(Nursery::preset_as_filters(PresetConfig::None));
         }
         if let Some(group) = self.performance.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(Performance::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(Performance::preset_as_filters(self.preset()));
         }
         if let Some(group) = self.security.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(Security::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(Security::preset_as_filters(self.preset()));
         }
         if let Some(group) = self.style.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(Style::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(Style::preset_as_filters(self.preset()));
         }
         if let Some(group) = self.suspicious.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(Suspicious::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(Suspicious::preset_as_filters(self.preset()));
         }
         enabled_rules.difference(&disabled_rules).copied().collect()
     }

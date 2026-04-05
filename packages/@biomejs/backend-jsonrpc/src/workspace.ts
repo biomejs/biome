@@ -405,6 +405,10 @@ specified in the ignore file.
 }
 export interface Actions {
 	/**
+	 * The actions preset to use.
+	 */
+	preset?: PresetConfig;
+	/**
 	 * It enables the assist actions recommended by Biome. `true` by default.
 	 */
 	recommended?: boolean;
@@ -948,6 +952,10 @@ export interface Rules {
 	nursery?: SeverityOrNursery;
 	performance?: SeverityOrPerformance;
 	/**
+	 * The rule presets to use.
+	 */
+	preset?: PresetConfig;
+	/**
 	 * It enables the lint rules recommended by Biome. `true` by default.
 	 */
 	recommended?: boolean;
@@ -1022,6 +1030,7 @@ Can be either a plain path string or an object with path and options:
 	 */
 export type PluginConfiguration = string | PluginWithOptions;
 export type VcsClientKind = "git";
+export type PresetConfig = "all" | "none" | { fromAnalyzer: RulePreset };
 /**
  * A list of rules that belong to this group
  */
@@ -1036,6 +1045,10 @@ See https://biomejs.dev/assist/actions/no-duplicate-classes
 See https://biomejs.dev/assist/actions/organize-imports 
 	 */
 	organizeImports?: OrganizeImportsConfiguration;
+	/**
+	 * Enables a particular rule preset
+	 */
+	preset?: PresetConfig;
 	/**
 	 * Enables the recommended rules for this group
 	 */
@@ -1266,6 +1279,10 @@ these patterns. Use negated globs (e.g., `!**/*.test.ts`) for exclusions.
 	 */
 	path: string;
 }
+/**
+ * The set of rules that will be executed by the linter.
+ */
+export type RulePreset = "recommended";
 export type NoDuplicateClassesConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithNoDuplicateClassesOptions;
@@ -1378,6 +1395,10 @@ See https://biomejs.dev/linter/rules/no-static-element-interactions
 See https://biomejs.dev/linter/rules/no-svg-without-title 
 	 */
 	noSvgWithoutTitle?: NoSvgWithoutTitleConfiguration;
+	/**
+	 * Enables a particular rule preset
+	 */
+	preset?: PresetConfig;
 	/**
 	 * Enables the recommended rules for this group
 	 */
@@ -1662,6 +1683,10 @@ See https://biomejs.dev/linter/rules/no-useless-undefined-initialization
 See https://biomejs.dev/linter/rules/no-void 
 	 */
 	noVoid?: NoVoidConfiguration;
+	/**
+	 * Enables a particular rule preset
+	 */
+	preset?: PresetConfig;
 	/**
 	 * Enables the recommended rules for this group
 	 */
@@ -2031,6 +2056,10 @@ See https://biomejs.dev/linter/rules/no-vue-reserved-props
 See https://biomejs.dev/linter/rules/no-vue-setup-props-reactivity-loss 
 	 */
 	noVueSetupPropsReactivityLoss?: NoVueSetupPropsReactivityLossConfiguration;
+	/**
+	 * Enables a particular rule preset
+	 */
+	preset?: PresetConfig;
 	/**
 	 * Enables the recommended rules for this group
 	 */
@@ -2521,6 +2550,10 @@ See https://biomejs.dev/linter/rules/no-vue-v-if-with-v-for
 	 */
 	noVueVIfWithVFor?: NoVueVIfWithVForConfiguration;
 	/**
+	 * Enables a particular rule preset
+	 */
+	preset?: PresetConfig;
+	/**
 	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
@@ -2870,6 +2903,10 @@ See https://biomejs.dev/linter/rules/no-unwanted-polyfillio
 	 */
 	noUnwantedPolyfillio?: NoUnwantedPolyfillioConfiguration;
 	/**
+	 * Enables a particular rule preset
+	 */
+	preset?: PresetConfig;
+	/**
 	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
@@ -2918,6 +2955,10 @@ See https://biomejs.dev/linter/rules/no-global-eval
 See https://biomejs.dev/linter/rules/no-secrets 
 	 */
 	noSecrets?: NoSecretsConfiguration;
+	/**
+	 * Enables a particular rule preset
+	 */
+	preset?: PresetConfig;
 	/**
 	 * Enables the recommended rules for this group
 	 */
@@ -3062,6 +3103,10 @@ See https://biomejs.dev/linter/rules/no-value-at-rule
 See https://biomejs.dev/linter/rules/no-yoda-expression 
 	 */
 	noYodaExpression?: NoYodaExpressionConfiguration;
+	/**
+	 * Enables a particular rule preset
+	 */
+	preset?: PresetConfig;
 	/**
 	 * Enables the recommended rules for this group
 	 */
@@ -3746,6 +3791,10 @@ See https://biomejs.dev/linter/rules/no-var
 See https://biomejs.dev/linter/rules/no-with 
 	 */
 	noWith?: NoWithConfiguration;
+	/**
+	 * Enables a particular rule preset
+	 */
+	preset?: PresetConfig;
 	/**
 	 * Enables the recommended rules for this group
 	 */

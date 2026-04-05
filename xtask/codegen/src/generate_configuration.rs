@@ -345,21 +345,21 @@ fn generate_for_groups(
         let group_pascal_ident = quote::format_ident!("{}", &Case::Pascal.convert(group_name));
         let group_ident = quote::format_ident!("{}", group_name);
 
-        let global_recommended = if group_name == "nursery" {
-            quote! { !self.is_recommended_false() && biome_flags::is_unstable() }
+        let global_preset = if group_name == "nursery" {
+            quote! { PresetConfig::None }
         } else {
-            quote! { !self.is_recommended_false() }
+            quote! { self.preset() }
         };
         group_as_default_rules.push(quote! {
             if let Some(group) = self.#group_ident.as_ref() {
                 group.collect_preset_rules(
-                    #global_recommended,
+                    #global_preset,
                     &mut enabled_rules,
                 );
                 enabled_rules.extend(&group.get_enabled_rules());
                 disabled_rules.extend(&group.get_disabled_rules());
-            } else if #global_recommended {
-                enabled_rules.extend(#group_pascal_ident::recommended_rules_as_filters());
+            } else if !#global_preset.is_none() {
+                enabled_rules.extend(#group_pascal_ident::preset_as_filters(#global_preset));
             }
         });
 
@@ -372,13 +372,6 @@ fn generate_for_groups(
         group_pascal_idents.push(group_pascal_ident);
         group_idents.push(group_ident.clone());
         group_strings.push(Literal::string(group_name));
-        // if kind == RuleCategory::Action {
-        //     struct_groups.push(generate_group_struct(group_name, &rules, kind));
-        //     // struct_groups.push(quote! {
-        //     //     biome_configuration_macros::assist_group_struct!(#group_name);
-        //     // });
-        // } else {
-        // }
         rule_group_names.extend(rules.keys().map(|rule_name| RuleGroup {
             rule_name,
             group_name,
@@ -493,6 +486,8 @@ fn generate_for_groups(
             use biome_diagnostics::{Category, Severity};
             use rustc_hash::FxHashSet;
             use serde::{Deserialize, Serialize};
+            use crate::analyzer::presets::PresetConfig;
+            use biome_analyze::RulePreset;
             #[cfg(feature = "schema")]
             use schemars::JsonSchema;
 
@@ -565,6 +560,10 @@ fn generate_for_groups(
                 #[serde(skip_serializing_if = "Option::is_none")]
                 pub recommended: Option<bool>,
 
+                /// The actions preset to use.
+                #[serde(skip_serializing_if = "Option::is_none")]
+                pub preset: Option<PresetConfig>,
+
                 #(
                     #[deserializable(rename = #group_strings)]
                     #[serde(skip_serializing_if = "Option::is_none")]
@@ -588,10 +587,16 @@ fn generate_for_groups(
 
                 #severity_fn
 
-                // Note: In top level, it is only considered _not_ recommended
-                // when the recommended option is false
-                pub(crate) const fn is_recommended_false(&self) -> bool {
-                    matches!(self.recommended, Some(false))
+
+                /// Returns the current preset. Defaults to the recommended set
+                pub(crate) fn preset(&self) -> PresetConfig {
+                    if matches!(self.recommended, Some(false)) {
+                        PresetConfig::None
+                    } else if let Some(preset) = &self.preset {
+                        preset.clone()
+                    } else {
+                        PresetConfig::default()
+                    }
                 }
 
 
@@ -632,6 +637,8 @@ fn generate_for_groups(
             use biome_diagnostics::{Category, Severity};
             use rustc_hash::FxHashSet;
             use serde::{Deserialize, Serialize};
+            use crate::analyzer::presets::PresetConfig;
+            use biome_analyze::RulePreset;
             #[cfg(feature = "schema")]
             use schemars::JsonSchema;
 
@@ -704,6 +711,10 @@ fn generate_for_groups(
                 #[serde(skip_serializing_if = "Option::is_none")]
                 pub recommended: Option<bool>,
 
+                /// The rule presets to use.
+                #[serde(skip_serializing_if = "Option::is_none")]
+                pub preset: Option<PresetConfig>,
+
                 #(
                     #[deserializable(rename = #group_strings)]
                     #[serde(skip_serializing_if = "Option::is_none")]
@@ -739,10 +750,15 @@ fn generate_for_groups(
                     )*
                 }
 
-                // Note: In top level, it is only considered _not_ recommended
-                // when the recommended option is false
-                pub(crate) const fn is_recommended_false(&self) -> bool {
-                    matches!(self.recommended, Some(false))
+                /// Returns the current preset. Defaults to the recommended set
+                pub(crate) fn preset(&self) -> PresetConfig {
+                    if matches!(self.recommended, Some(false)) {
+                        PresetConfig::None
+                    } else if let Some(preset) = &self.preset {
+                        preset.clone()
+                    } else {
+                        PresetConfig::default()
+                    }
                 }
 
 

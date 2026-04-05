@@ -48,6 +48,8 @@ pub struct RuleMetadata {
     /// Use this field to tag the rule as being worked, which means the rule is still far from being completed.
     /// Possible bugs should be reported in that issue.
     pub issue_number: Option<&'static str>,
+    /// A preset this rule belongs to.
+    pub rule_presets: &'static [RulePreset],
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -814,6 +816,7 @@ impl RuleMetadata {
             severity: Severity::Information,
             domains: &[],
             issue_number: None,
+            rule_presets: &[],
         }
     }
 
@@ -1759,4 +1762,33 @@ impl<L: Language> RuleAction<L> {
 pub struct SuppressAction<L: Language> {
     pub message: MarkupBuf,
     pub mutation: BatchMutation<L>,
+}
+
+#[cfg_attr(
+    feature = "serde",
+    derive(
+        serde::Serialize,
+        serde::Deserialize,
+        biome_deserialize_macros::Deserializable,
+        biome_deserialize_macros::Merge
+    )
+)]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+/// The set of rules that will be executed by the linter.
+pub enum RulePreset {
+    /// A set of rules that are enabled by default.
+    Recommended,
+}
+
+impl FromStr for RulePreset {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "recommended" => Ok(Self::Recommended),
+            _ => Err("Invalid rule preset."),
+        }
+    }
 }
