@@ -1936,6 +1936,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_qwik_classlist::UseQwikClasslistOptions>(),
     ));
     result.push((
+        "nursery",
+        "useQwikLoaderLocation",
+        TypeId::of::<biome_rule_options::use_qwik_loader_location::UseQwikLoaderLocationOptions>(),
+    ));
+    result.push((
         "correctness",
         "useQwikMethodUsage",
         TypeId::of::<biome_rule_options::use_qwik_method_usage::UseQwikMethodUsageOptions>(),

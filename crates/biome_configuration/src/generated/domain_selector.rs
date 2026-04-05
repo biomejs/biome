@@ -59,6 +59,7 @@ static QWIK_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "useQwikClasslist"),
         RuleFilter::Rule("correctness", "useQwikMethodUsage"),
         RuleFilter::Rule("correctness", "useQwikValidLexicalScope"),
+        RuleFilter::Rule("nursery", "useQwikLoaderLocation"),
         RuleFilter::Rule("suspicious", "noReactSpecificProps"),
     ]
 });

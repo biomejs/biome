@@ -6540,6 +6540,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useQwikLoaderLocation": {
+					"description": "Enforce that Qwik loader functions are declared in the correct location.\nSee https://biomejs.dev/linter/rules/use-qwik-loader-location",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseQwikLoaderLocationConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useRegexpExec": {
 					"description": "Enforce RegExp#exec over String#match if no global flag is provided.\nSee https://biomejs.dev/linter/rules/use-regexp-exec",
 					"anyOf": [
@@ -11122,6 +11129,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseQwikLoaderLocationOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseQwikLoaderLocationOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseQwikMethodUsageOptions": {
 			"type": "object",
 			"properties": {
@@ -14504,6 +14520,16 @@
 			]
 		},
 		"UseQwikClasslistOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseQwikLoaderLocationConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseQwikLoaderLocationOptions" }
+			]
+		},
+		"UseQwikLoaderLocationOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

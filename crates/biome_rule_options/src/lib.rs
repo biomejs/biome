@@ -413,6 +413,7 @@ pub mod use_optional_chain;
 pub mod use_parse_int_radix;
 pub mod use_playwright_valid_describe_callback;
 pub mod use_qwik_classlist;
+pub mod use_qwik_loader_location;
 pub mod use_qwik_method_usage;
 pub mod use_qwik_valid_lexical_scope;
 pub mod use_react_function_components;
