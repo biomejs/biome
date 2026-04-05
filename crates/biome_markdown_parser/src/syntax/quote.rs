@@ -155,27 +155,34 @@ fn relex_after_quote_prefix_consumed(p: &mut MarkdownParser) {
 /// Check if `text` could be a thematic break: all non-whitespace bytes must be
 /// the **same** thematic break character (`-`, `*`, or `_`).
 fn is_thematic_break_candidate_text(text: &str) -> bool {
-    use biome_unicode_table::{Dispatch::WHS, lookup_byte};
+    use biome_unicode_table::{
+        Dispatch::{IDT, MIN, MUL, WHS},
+        lookup_byte,
+    };
 
     let mut break_char: Option<u8> = None;
     for &b in text.as_bytes() {
+        let dispatched = lookup_byte(b);
         // Skip whitespace (space, tab, etc.) via the shared lookup table.
-        if lookup_byte(b) == WHS {
+        if dispatched == WHS {
             continue;
         }
-        match b {
-            b'-' | b'*' | b'_' => {
-                if let Some(expected) = break_char {
-                    // Mixed break characters like `_*-` are not valid.
-                    if b != expected {
-                        return false;
-                    }
-                } else {
-                    break_char = Some(b);
+        // Match thematic break characters via dispatch variants:
+        // MIN = `-`, MUL = `*`, IDT = `_` (IDT also covers letters, so
+        // narrow to `b'_'` explicitly).
+        let is_break_char = matches!(dispatched, MIN | MUL) || (dispatched == IDT && b == b'_');
+        if is_break_char {
+            if let Some(expected) = break_char {
+                // Mixed break characters like `_*-` are not valid.
+                if b != expected {
+                    return false;
                 }
+            } else {
+                break_char = Some(b);
             }
+        } else {
             // Any other non-whitespace byte disqualifies the line.
-            _ => return false,
+            return false;
         }
     }
     break_char.is_some()
