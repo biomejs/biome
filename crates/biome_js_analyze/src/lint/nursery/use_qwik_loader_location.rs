@@ -108,7 +108,8 @@ impl Rule for UseQwikLoaderLocation {
             // Normalize path separators to forward slashes.
             let file_path = ctx.file_path().as_str().replace('\\', "/");
 
-            let is_inside_routes = file_path.contains("/src/routes/");
+            let is_inside_routes =
+                file_path.starts_with("src/routes/") || file_path.contains("/src/routes/");
             let can_contain_loader = is_inside_routes
                 && (LAYOUT_REGEX.is_match(&file_path)
                     || INDEX_REGEX.is_match(&file_path)
@@ -116,7 +117,7 @@ impl Rule for UseQwikLoaderLocation {
 
             if !can_contain_loader {
                 return Some(RuleState::InvalidLoaderLocation {
-                    fn_name: callee_name_text.to_string(),
+                    fn_name: callee_name_text.into(),
                 });
             }
         }
@@ -131,7 +132,7 @@ impl Rule for UseQwikLoaderLocation {
         let Some(declarator) = declarator else {
             // The call is not inside a variable declaration — not exported.
             return Some(RuleState::MissingExport {
-                fn_name: callee_name_text.to_string(),
+                fn_name: callee_name_text.into(),
                 span: callee_ref_ident.range(),
             });
         };
@@ -145,7 +146,7 @@ impl Rule for UseQwikLoaderLocation {
         let Some(binding) = binding else {
             // Destructured or otherwise non-identifier binding.
             return Some(RuleState::MissingExport {
-                fn_name: callee_name_text.to_string(),
+                fn_name: callee_name_text.into(),
                 span: callee_ref_ident.range(),
             });
         };
@@ -157,7 +158,7 @@ impl Rule for UseQwikLoaderLocation {
         // Check naming convention
         if !id_name.starts_with("use") {
             return Some(RuleState::WrongName {
-                fn_name: callee_name_text.to_string(),
+                fn_name: callee_name_text.into(),
                 span,
             });
         }
@@ -165,7 +166,7 @@ impl Rule for UseQwikLoaderLocation {
         // Check if exported
         if !is_exported(&declarator, &id_name, &ctx.root()) {
             return Some(RuleState::MissingExport {
-                fn_name: callee_name_text.to_string(),
+                fn_name: callee_name_text.into(),
                 span,
             });
         }
@@ -247,11 +248,11 @@ impl Rule for UseQwikLoaderLocation {
 
 pub enum RuleState {
     /// The loader is declared outside of a route boundary file.
-    InvalidLoaderLocation { fn_name: String },
+    InvalidLoaderLocation { fn_name: Box<str> },
     /// The loader return value is not exported from the module.
-    MissingExport { fn_name: String, span: TextRange },
+    MissingExport { fn_name: Box<str>, span: TextRange },
     /// The exported name does not follow the `use*` convention.
-    WrongName { fn_name: String, span: TextRange },
+    WrongName { fn_name: Box<str>, span: TextRange },
     /// The first argument is a reference instead of an inlined arrow function.
     RecommendedValue { span: TextRange },
 }
