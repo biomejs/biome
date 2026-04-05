@@ -1,0 +1,67 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: invalid.json
+---
+# Input
+```json
+{
+  "\uFF21": "fullwidth latin capital A",
+  "\u2460": "circled digit one"
+}
+
+```
+
+# Diagnostics
+```
+invalid.json:2:3 lint/nursery/noUnnormalizedObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected unnormalized key found.
+  
+    1 │ {
+  > 2 │   "\uFF21": "fullwidth latin capital A",
+      │   ^^^^^^^^
+    3 │   "\u2460": "circled digit one"
+    4 │ }
+  
+  i Unicode keys should be normalized to ensure consistent representation and reliable key comparison. Replace the object key with normalized Unicode.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with normalized value.
+  
+    1 1 │   {
+    2   │ - ··"\uFF21":·"fullwidth·latin·capital·A",
+      2 │ + ··"A":·"fullwidth·latin·capital·A",
+    3 3 │     "\u2460": "circled digit one"
+    4 4 │   }
+  
+
+```
+
+```
+invalid.json:3:3 lint/nursery/noUnnormalizedObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected unnormalized key found.
+  
+    1 │ {
+    2 │   "\uFF21": "fullwidth latin capital A",
+  > 3 │   "\u2460": "circled digit one"
+      │   ^^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i Unicode keys should be normalized to ensure consistent representation and reliable key comparison. Replace the object key with normalized Unicode.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with normalized value.
+  
+    1 1 │   {
+    2 2 │     "\uFF21": "fullwidth latin capital A",
+    3   │ - ··"\u2460":·"circled·digit·one"
+      3 │ + ··"1":·"circled·digit·one"
+    4 4 │   }
+    5 5 │   
+  
+
+```

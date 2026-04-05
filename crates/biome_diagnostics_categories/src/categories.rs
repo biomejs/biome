@@ -234,6 +234,7 @@ define_categories! {
     "lint/nursery/noUndeclaredEnvVars": "https://biomejs.dev/linter/rules/no-undeclared-env-vars",
     "lint/nursery/noUnknownAttribute": "https://biomejs.dev/linter/rules/no-unknown-attribute",
     "lint/nursery/noUnnecessaryConditions": "https://biomejs.dev/linter/rules/no-unnecessary-conditions",
+    "lint/nursery/noUnnormalizedObjectKeys": "https://biomejs.dev/linter/rules/no-unnormalized-object-keys",
     "lint/nursery/noUnsafePlusOperands": "https://biomejs.dev/linter/rules/no-unsafe-plus-operands",
     "lint/nursery/noUntrustedLicenses": "https://biomejs.dev/linter/rules/no-untrusted-licenses",
     "lint/nursery/noUnwantedPolyfillio": "https://biomejs.dev/linter/rules/no-unwanted-polyfillio",

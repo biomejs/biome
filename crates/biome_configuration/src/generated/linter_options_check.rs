@@ -1183,6 +1183,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         ),
     ));
     result.push((
+        "nursery",
+        "noUnnormalizedObjectKeys",
+        TypeId::of::<
+            biome_rule_options::no_unnormalized_object_keys::NoUnnormalizedObjectKeysOptions,
+        >(),
+    ));
+    result.push((
         "correctness",
         "noUnreachable",
         TypeId::of::<biome_rule_options::no_unreachable::NoUnreachableOptions>(),

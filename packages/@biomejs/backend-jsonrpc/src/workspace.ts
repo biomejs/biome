@@ -2327,6 +2327,11 @@ See https://biomejs.dev/linter/rules/no-unnecessary-conditions
 	 */
 	noUnnecessaryConditions?: NoUnnecessaryConditionsConfiguration;
 	/**
+	* Disallow JSON keys that are not normalized.
+See https://biomejs.dev/linter/rules/no-unnormalized-object-keys 
+	 */
+	noUnnormalizedObjectKeys?: NoUnnormalizedObjectKeysConfiguration;
+	/**
 	* Disallow + operations with operands that are known to be unsafe.
 See https://biomejs.dev/linter/rules/no-unsafe-plus-operands 
 	 */
@@ -4292,6 +4297,9 @@ export type NoUnknownAttributeConfiguration =
 export type NoUnnecessaryConditionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnnecessaryConditionsOptions;
+export type NoUnnormalizedObjectKeysConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnnormalizedObjectKeysOptions;
 export type NoUnsafePlusOperandsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnsafePlusOperandsOptions;
@@ -6021,6 +6029,11 @@ export interface RuleWithNoUnnecessaryConditionsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnnecessaryConditionsOptions;
 }
+export interface RuleWithNoUnnormalizedObjectKeysOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoUnnormalizedObjectKeysOptions;
+}
 export interface RuleWithNoUnsafePlusOperandsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnsafePlusOperandsOptions;
@@ -7558,6 +7571,9 @@ export interface NoUnknownAttributeOptions {
 	ignore?: string[];
 }
 export type NoUnnecessaryConditionsOptions = {};
+export interface NoUnnormalizedObjectKeysOptions {
+	form?: NormalizationForm;
+}
 export type NoUnsafePlusOperandsOptions = {};
 export interface NoUntrustedLicensesOptions {
 	/**
@@ -8196,6 +8212,7 @@ while for `useState()` it would be `[1]`.
 	stableResult?: StableHookResult;
 }
 export type Regex = string;
+export type NormalizationForm = "NFC" | "NFD" | "NFKC" | "NFKD";
 /**
 	* The Baseline availability level to target.
 
@@ -8655,6 +8672,7 @@ export type Category =
 	| "lint/nursery/noUndeclaredEnvVars"
 	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
+	| "lint/nursery/noUnnormalizedObjectKeys"
 	| "lint/nursery/noUnsafePlusOperands"
 	| "lint/nursery/noUntrustedLicenses"
 	| "lint/nursery/noUnwantedPolyfillio"

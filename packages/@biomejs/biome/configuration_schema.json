@@ -5322,6 +5322,21 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUnnormalizedObjectKeysConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnnormalizedObjectKeysOptions" }
+			]
+		},
+		"NoUnnormalizedObjectKeysOptions": {
+			"type": "object",
+			"properties": {
+				"form": {
+					"anyOf": [{ "$ref": "#/$defs/NormalizationForm" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoUnreachableConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5901,6 +5916,10 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NormalizationForm": {
+			"type": "string",
+			"enum": ["NFC", "NFD", "NFKC", "NFKD"]
+		},
 		"NormalizedGlob": {
 			"description": "Normalized Biome glob pattern that strips `./` from the pattern.",
 			"type": "string"
@@ -6314,6 +6333,13 @@
 					"description": "Disallow unnecessary type-based conditions that can be statically determined as redundant.\nSee https://biomejs.dev/linter/rules/no-unnecessary-conditions",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnnecessaryConditionsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnnormalizedObjectKeys": {
+					"description": "Disallow JSON keys that are not normalized.\nSee https://biomejs.dev/linter/rules/no-unnormalized-object-keys",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnnormalizedObjectKeysConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9573,6 +9599,16 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnnecessaryConditionsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUnnormalizedObjectKeysOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnnormalizedObjectKeysOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
