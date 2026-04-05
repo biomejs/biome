@@ -72,21 +72,19 @@ impl Rule for UseSemanticElements {
         let role_value = role_attribute.initializer()?.value().ok()?.string_value()?;
         let role_value = role_value.trim();
 
-        if role_value == "img" {
-            return None;
-        }
-
-        // For these roles, the associated elements are impractical
-        if role_value == "combobox"
-            || role_value == "listbox"
-            || role_value == "option"
-            || role_value == "status"
-            || role_value == "alert"
-        {
-            return None;
-        }
-
         let role = AriaRole::from_roles(role_value)?;
+
+        if matches!(
+            role,
+            AriaRole::Img
+                | AriaRole::Combobox
+                | AriaRole::Listbox
+                | AriaRole::Option
+                | AriaRole::Status
+                | AriaRole::Alert
+        ) {
+            return None;
+        }
         let semantic_elements = role.base_html_elements();
         let related_elements = role.related_html_elements();
         if semantic_elements.is_empty() && related_elements.is_empty() {
