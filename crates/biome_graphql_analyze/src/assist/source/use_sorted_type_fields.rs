@@ -11,7 +11,10 @@ use biome_graphql_syntax::{
     GraphqlInputObjectTypeExtension, GraphqlInputValueDefinition, GraphqlInterfaceTypeDefinition,
     GraphqlInterfaceTypeExtension, GraphqlObjectTypeDefinition, GraphqlObjectTypeExtension,
 };
-use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, NodeOrToken, SyntaxNode, TokenText, declare_node_union};
+use biome_rowan::{
+    AstNode, AstNodeList, BatchMutationExt, NodeOrToken, SyntaxNode, TokenText, declare_node_union,
+};
+use biome_rule_options::use_sorted_type_fields::UseSortedTypeFieldsOptions;
 use std::cmp::Ordering;
 
 declare_source_rule! {
@@ -55,31 +58,16 @@ declare_source_rule! {
     }
 }
 
-declare_node_union! {
-    pub UseSortedTypeFieldsQuery =
-        GraphqlObjectTypeDefinition
-        | GraphqlObjectTypeExtension
-        | GraphqlInterfaceTypeDefinition
-        | GraphqlInterfaceTypeExtension
-        | GraphqlInputObjectTypeDefinition
-        | GraphqlInputObjectTypeExtension
-}
-
-pub enum UseSortedTypeFieldsState {
-    TypeFields(GraphqlFieldsDefinition),
-    InputFields(GraphqlInputFieldsDefinition),
-}
-
 impl Rule for UseSortedTypeFields {
-    type Query = Ast<UseSortedTypeFieldsQuery>;
+    type Query = Ast<AnyUseSortedTypeFieldsQuery>;
     type State = UseSortedTypeFieldsState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseSortedTypeFieldsOptions;
 
-    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         match node {
-            UseSortedTypeFieldsQuery::GraphqlObjectTypeDefinition(obj) => {
+            AnyUseSortedTypeFieldsQuery::GraphqlObjectTypeDefinition(obj) => {
                 let fields = obj.fields()?;
                 if is_field_definition_list_sorted(&fields.fields()) {
                     None
@@ -87,7 +75,7 @@ impl Rule for UseSortedTypeFields {
                     Some(UseSortedTypeFieldsState::TypeFields(fields))
                 }
             }
-            UseSortedTypeFieldsQuery::GraphqlObjectTypeExtension(obj) => {
+            AnyUseSortedTypeFieldsQuery::GraphqlObjectTypeExtension(obj) => {
                 let fields = obj.fields()?;
                 if is_field_definition_list_sorted(&fields.fields()) {
                     None
@@ -95,7 +83,7 @@ impl Rule for UseSortedTypeFields {
                     Some(UseSortedTypeFieldsState::TypeFields(fields))
                 }
             }
-            UseSortedTypeFieldsQuery::GraphqlInterfaceTypeDefinition(interface) => {
+            AnyUseSortedTypeFieldsQuery::GraphqlInterfaceTypeDefinition(interface) => {
                 let fields = interface.fields()?;
                 if is_field_definition_list_sorted(&fields.fields()) {
                     None
@@ -103,7 +91,7 @@ impl Rule for UseSortedTypeFields {
                     Some(UseSortedTypeFieldsState::TypeFields(fields))
                 }
             }
-            UseSortedTypeFieldsQuery::GraphqlInterfaceTypeExtension(interface) => {
+            AnyUseSortedTypeFieldsQuery::GraphqlInterfaceTypeExtension(interface) => {
                 let fields = interface.fields()?;
                 if is_field_definition_list_sorted(&fields.fields()) {
                     None
@@ -111,7 +99,7 @@ impl Rule for UseSortedTypeFields {
                     Some(UseSortedTypeFieldsState::TypeFields(fields))
                 }
             }
-            UseSortedTypeFieldsQuery::GraphqlInputObjectTypeDefinition(input) => {
+            AnyUseSortedTypeFieldsQuery::GraphqlInputObjectTypeDefinition(input) => {
                 let fields = input.input_fields()?;
                 if is_input_field_list_sorted(&fields.fields()) {
                     None
@@ -119,7 +107,7 @@ impl Rule for UseSortedTypeFields {
                     Some(UseSortedTypeFieldsState::InputFields(fields))
                 }
             }
-            UseSortedTypeFieldsQuery::GraphqlInputObjectTypeExtension(input) => {
+            AnyUseSortedTypeFieldsQuery::GraphqlInputObjectTypeExtension(input) => {
                 let fields = input.input_fields()?;
                 if is_input_field_list_sorted(&fields.fields()) {
                     None
@@ -165,12 +153,35 @@ impl Rule for UseSortedTypeFields {
     }
 }
 
+declare_node_union! {
+    pub AnyUseSortedTypeFieldsQuery =
+        GraphqlObjectTypeDefinition
+        | GraphqlObjectTypeExtension
+        | GraphqlInterfaceTypeDefinition
+        | GraphqlInterfaceTypeExtension
+        | GraphqlInputObjectTypeDefinition
+        | GraphqlInputObjectTypeExtension
+}
+
+pub enum UseSortedTypeFieldsState {
+    TypeFields(GraphqlFieldsDefinition),
+    InputFields(GraphqlInputFieldsDefinition),
+}
+
 fn get_field_definition_key(node: &GraphqlFieldDefinition) -> Option<TokenText> {
-    node.name().ok()?.value_token().ok().map(|t| t.token_text_trimmed())
+    node.name()
+        .ok()?
+        .value_token()
+        .ok()
+        .map(|t| t.token_text_trimmed())
 }
 
 fn get_input_value_definition_key(node: &GraphqlInputValueDefinition) -> Option<TokenText> {
-    node.name().ok()?.value_token().ok().map(|t| t.token_text_trimmed())
+    node.name()
+        .ok()?
+        .value_token()
+        .ok()
+        .map(|t| t.token_text_trimmed())
 }
 
 fn is_field_definition_list_sorted(list: &GraphqlFieldDefinitionList) -> bool {
@@ -205,23 +216,39 @@ fn is_input_field_list_sorted(list: &GraphqlInputFieldList) -> bool {
     true
 }
 
-fn make_sorted_field_definition_list(list: &GraphqlFieldDefinitionList) -> Option<GraphqlFieldDefinitionList> {
-    let mut items: Vec<(Option<TokenText>, biome_graphql_syntax::GraphqlFieldDefinition)> =
-        list.iter().map(|n| (get_field_definition_key(&n), n)).collect();
+fn make_sorted_field_definition_list(
+    list: &GraphqlFieldDefinitionList,
+) -> Option<GraphqlFieldDefinitionList> {
+    let mut items: Vec<(
+        Option<TokenText>,
+        biome_graphql_syntax::GraphqlFieldDefinition,
+    )> = list
+        .iter()
+        .map(|n| (get_field_definition_key(&n), n))
+        .collect();
     items.sort_by(|(k1, _), (k2, _)| compare_keys(k1, k2));
     GraphqlFieldDefinitionList::cast(SyntaxNode::new_detached(
         list.syntax().kind(),
-        items.into_iter().map(|(_, n)| Some(NodeOrToken::Node(n.into_syntax()))),
+        items
+            .into_iter()
+            .map(|(_, n)| Some(NodeOrToken::Node(n.into_syntax()))),
     ))
 }
 
 fn make_sorted_input_field_list(list: &GraphqlInputFieldList) -> Option<GraphqlInputFieldList> {
-    let mut items: Vec<(Option<TokenText>, biome_graphql_syntax::GraphqlInputValueDefinition)> =
-        list.iter().map(|n| (get_input_value_definition_key(&n), n)).collect();
+    let mut items: Vec<(
+        Option<TokenText>,
+        biome_graphql_syntax::GraphqlInputValueDefinition,
+    )> = list
+        .iter()
+        .map(|n| (get_input_value_definition_key(&n), n))
+        .collect();
     items.sort_by(|(k1, _), (k2, _)| compare_keys(k1, k2));
     GraphqlInputFieldList::cast(SyntaxNode::new_detached(
         list.syntax().kind(),
-        items.into_iter().map(|(_, n)| Some(NodeOrToken::Node(n.into_syntax()))),
+        items
+            .into_iter()
+            .map(|(_, n)| Some(NodeOrToken::Node(n.into_syntax()))),
     ))
 }
 

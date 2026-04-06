@@ -59,6 +59,20 @@ extend input CreateUserInput {
   age: Int
 }
 
+# Unsorted ObjectType fields with comments & descriptions
+type User {
+	# Name of the user
+  name: String
+  age: Int # Age of the user
+	"""
+  ID of the user
+  """
+  id: ID
+	"City of the user"
+	city: String
+	# Add aditional fields
+}
+
 ```
 
 # Diagnostics
@@ -310,6 +324,7 @@ invalid.graphql:51:30 assist/source/useSortedTypeFields  FIXABLE  ━━━━�
   > 54 │ }
        │ ^
     55 │ 
+    56 │ # Unsorted ObjectType fields with comments & descriptions
   
   i Safe fix: Sort these fields.
   
@@ -321,6 +336,46 @@ invalid.graphql:51:30 assist/source/useSortedTypeFields  FIXABLE  ━━━━�
        53 │ + ··name:·String
     54 54 │   }
     55 55 │   
+  
+
+```
+
+```
+invalid.graphql:57:11 assist/source/useSortedTypeFields  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These fields are not sorted.
+  
+    56 │ # Unsorted ObjectType fields with comments & descriptions
+  > 57 │ type User {
+       │           ^
+  > 58 │ 	# Name of the user
+        ...
+  > 66 │ 	city: String
+  > 67 │ 	# Add aditional fields
+  > 68 │ }
+       │ ^
+    69 │ 
+  
+  i Safe fix: Sort these fields.
+  
+    57 57 │   type User {
+    58 58 │     # Name of the user
+    59    │ - ··name:·String
+    60    │ - ··age:·Int·#·Age·of·the·user
+    61    │ - → """
+       59 │ + ··age:·Int·#·Age·of·the·user
+       60 │ + → "City·of·the·user"
+       61 │ + → city:·String
+       62 │ + → """
+    62 63 │     ID of the user
+    63 64 │     """
+    64 65 │     id: ID
+    65    │ - → "City·of·the·user"
+    66    │ - → city:·String
+       66 │ + → #·Name·of·the·user
+       67 │ + ··name:·String
+    67 68 │     # Add aditional fields
+    68 69 │   }
   
 
 ```
