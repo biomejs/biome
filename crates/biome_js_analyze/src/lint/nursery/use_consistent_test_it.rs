@@ -11,44 +11,6 @@ use biome_rule_options::use_consistent_test_it::{TestFunctionKind, UseConsistent
 
 use crate::JsRuleAction;
 
-/// The recognized JS test function identifier names.
-///
-/// A single source of truth for all string literals used to match and
-/// construct test function calls (`it`, `test`, `xit`, `xtest`, `fit`).
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum TestFunctionName {
-    It,
-    Test,
-    Xit,
-    Xtest,
-    Fit,
-}
-
-impl TestFunctionName {
-    /// The JavaScript identifier string for this function name.
-    const fn as_str(self) -> &'static str {
-        match self {
-            Self::It => "it",
-            Self::Test => "test",
-            Self::Xit => "xit",
-            Self::Xtest => "xtest",
-            Self::Fit => "fit",
-        }
-    }
-
-    /// Parse from a string slice. Returns `None` for unrecognized names.
-    fn from_str(s: &str) -> Option<Self> {
-        match s {
-            "it" => Some(Self::It),
-            "test" => Some(Self::Test),
-            "xit" => Some(Self::Xit),
-            "xtest" => Some(Self::Xtest),
-            "fit" => Some(Self::Fit),
-            _ => None,
-        }
-    }
-}
-
 declare_lint_rule! {
     /// Enforce consistent use of `it` or `test` for test functions.
     ///
@@ -262,11 +224,11 @@ impl Rule for UseConsistentTestIt {
                 rule_category!(),
                 state.range,
                 markup! {
-                    "Prefer using "<Emphasis>{suggested}</Emphasis>" over "<Emphasis>{current}</Emphasis>" for test functions."
+                    "The test function "<Emphasis>{current}</Emphasis>" is inconsistent with the configured preferred function "<Emphasis>{suggested}</Emphasis>"."
                 },
             )
             .note(markup! {
-                "Use "<Emphasis>{suggested}</Emphasis>" consistently for all test function calls."
+                "Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase."
             }),
         )
     }
@@ -308,6 +270,44 @@ impl Rule for UseConsistentTestIt {
             message,
             mutation,
         ))
+    }
+}
+
+/// The recognized JS test function identifier names.
+///
+/// A single source of truth for all string literals used to match and
+/// construct test function calls (`it`, `test`, `xit`, `xtest`, `fit`).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum TestFunctionName {
+    It,
+    Test,
+    Xit,
+    Xtest,
+    Fit,
+}
+
+impl TestFunctionName {
+    /// The JavaScript identifier string for this function name.
+    const fn as_str(self) -> &'static str {
+        match self {
+            Self::It => "it",
+            Self::Test => "test",
+            Self::Xit => "xit",
+            Self::Xtest => "xtest",
+            Self::Fit => "fit",
+        }
+    }
+
+    /// Parse from a string slice. Returns `None` for unrecognized names.
+    fn from_str(s: &str) -> Option<Self> {
+        match s {
+            "it" => Some(Self::It),
+            "test" => Some(Self::Test),
+            "xit" => Some(Self::Xit),
+            "xtest" => Some(Self::Xtest),
+            "fit" => Some(Self::Fit),
+            _ => None,
+        }
     }
 }
 

@@ -20,7 +20,7 @@ describe("suite", () => {
 ```
 invalidWithinDescribeTest.js:5:3 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Prefer using test over it for test functions.
+  ! The test function it is inconsistent with the configured preferred function test.
   
     4 │ describe("suite", () => {
   > 5 │   it("foo", () => {});
@@ -28,7 +28,7 @@ invalidWithinDescribeTest.js:5:3 lint/nursery/useConsistentTestIt  FIXABLE  ━�
     6 │   it.skip("foo", () => {});
     7 │   it.only("foo", () => {});
   
-  i Use test consistently for all test function calls.
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -47,7 +47,7 @@ invalidWithinDescribeTest.js:5:3 lint/nursery/useConsistentTestIt  FIXABLE  ━�
 ```
 invalidWithinDescribeTest.js:6:3 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Prefer using test over it for test functions.
+  ! The test function it is inconsistent with the configured preferred function test.
   
     4 │ describe("suite", () => {
     5 │   it("foo", () => {});
@@ -56,7 +56,7 @@ invalidWithinDescribeTest.js:6:3 lint/nursery/useConsistentTestIt  FIXABLE  ━�
     7 │   it.only("foo", () => {});
     8 │   xit("foo", () => {});
   
-  i Use test consistently for all test function calls.
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -75,7 +75,7 @@ invalidWithinDescribeTest.js:6:3 lint/nursery/useConsistentTestIt  FIXABLE  ━�
 ```
 invalidWithinDescribeTest.js:7:3 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Prefer using test over it for test functions.
+  ! The test function it is inconsistent with the configured preferred function test.
   
     5 │   it("foo", () => {});
     6 │   it.skip("foo", () => {});
@@ -84,7 +84,7 @@ invalidWithinDescribeTest.js:7:3 lint/nursery/useConsistentTestIt  FIXABLE  ━�
     8 │   xit("foo", () => {});
     9 │ });
   
-  i Use test consistently for all test function calls.
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -103,7 +103,7 @@ invalidWithinDescribeTest.js:7:3 lint/nursery/useConsistentTestIt  FIXABLE  ━�
 ```
 invalidWithinDescribeTest.js:8:3 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Prefer using xtest over xit for test functions.
+  ! The test function xit is inconsistent with the configured preferred function xtest.
   
      6 │   it.skip("foo", () => {});
      7 │   it.only("foo", () => {});
@@ -112,7 +112,7 @@ invalidWithinDescribeTest.js:8:3 lint/nursery/useConsistentTestIt  FIXABLE  ━�
      9 │ });
     10 │ 
   
-  i Use xtest consistently for all test function calls.
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
