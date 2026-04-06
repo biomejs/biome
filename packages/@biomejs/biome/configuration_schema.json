@@ -2784,6 +2784,16 @@
 			]
 		},
 		"NoBarrelFileOptions": { "type": "object", "additionalProperties": false },
+		"NoBaseToStringConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoBaseToStringOptions" }
+			]
+		},
+		"NoBaseToStringOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoBeforeInteractiveScriptOutsideDocumentConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6052,6 +6062,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noBaseToString": {
+					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-base-to-string",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoBaseToStringConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noBeforeInteractiveScriptOutsideDocument": {
 					"description": "Prevent usage of next/script's beforeInteractive strategy outside of pages/_document.js in a Next.js project.\nSee https://biomejs.dev/linter/rules/no-before-interactive-script-outside-document",
 					"anyOf": [
@@ -7724,6 +7741,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoBarrelFileOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoBaseToStringOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoBaseToStringOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

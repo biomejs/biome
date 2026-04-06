@@ -1,0 +1,87 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "linter": { "enabled": true } }
+```
+
+## `.eslintrc.json`
+
+```json
+{
+        "rules": {
+            "@typescript-eslint/no-base-to-string": ["error", {
+                "ignoredTypeNames": ["Error", "CustomStringLike"],
+                "checkUnknown": true
+            }]
+        },
+        "overrides": [{
+            "files": ["default.ts"],
+            "rules": {
+                "@typescript-eslint/no-base-to-string": "error"
+            }
+        }]
+    }
+```
+
+# Emitted Messages
+
+```block
+biome.json migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1    │ - {·"linter":·{·"enabled":·true·}·}
+       1 │ + {
+       2 │ + → "linter":·{
+       3 │ + → → "enabled":·true,
+       4 │ + → → "rules":·{
+       5 │ + → → → "recommended":·false,
+       6 │ + → → → "nursery":·{
+       7 │ + → → → → "noBaseToString":·{
+       8 │ + → → → → → "level":·"error",
+       9 │ + → → → → → "options":·{·"ignoredTypeNames":·["Error",·"CustomStringLike"]·}
+      10 │ + → → → → }
+      11 │ + → → → }
+      12 │ + → → }
+      13 │ + → },
+      14 │ + → "overrides":·[
+      15 │ + → → {
+      16 │ + → → → "includes":·["default.ts"],
+      17 │ + → → → "linter":·{·"rules":·{·"nursery":·{·"noBaseToString":·"error"·}·}·}
+      18 │ + → → }
+      19 │ + → ]
+      20 │ + }
+      21 │ + 
+  
+
+```
+
+```block
+migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 1 ESLint rules found
+    - 1 can be migrated to Biome's rules (run with --write to migrate)
+    - 100% (1) of your ESLint rules are fully covered by Biome
+      - 100% (1) via direct migration to Biome rules
+  
+  
+
+```
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - biome.json: configuration needs migration.
+  
+  i Use --write to apply the changes.
+  
+  $ biome migrate --write
+  
+
+```

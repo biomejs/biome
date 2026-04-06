@@ -2043,6 +2043,11 @@ See https://biomejs.dev/linter/rules/no-ambiguous-anchor-text
 	 */
 	noAmbiguousAnchorText?: NoAmbiguousAnchorTextConfiguration;
 	/**
+	* Succinct description of the rule.
+See https://biomejs.dev/linter/rules/no-base-to-string 
+	 */
+	noBaseToString?: NoBaseToStringConfiguration;
+	/**
 	* Prevent usage of next/script's beforeInteractive strategy outside of pages/_document.js in a Next.js project.
 See https://biomejs.dev/linter/rules/no-before-interactive-script-outside-document 
 	 */
@@ -4247,6 +4252,9 @@ export type UseYieldConfiguration =
 export type NoAmbiguousAnchorTextConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAmbiguousAnchorTextOptions;
+export type NoBaseToStringConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoBaseToStringOptions;
 export type NoBeforeInteractiveScriptOutsideDocumentConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoBeforeInteractiveScriptOutsideDocumentOptions;
@@ -5983,6 +5991,10 @@ export interface RuleWithUseYieldOptions {
 export interface RuleWithNoAmbiguousAnchorTextOptions {
 	level: RulePlainConfiguration;
 	options?: NoAmbiguousAnchorTextOptions;
+}
+export interface RuleWithNoBaseToStringOptions {
+	level: RulePlainConfiguration;
+	options?: NoBaseToStringOptions;
 }
 export interface RuleWithNoBeforeInteractiveScriptOutsideDocumentOptions {
 	level: RulePlainConfiguration;
@@ -7762,6 +7774,7 @@ export interface NoAmbiguousAnchorTextOptions {
 	 */
 	words?: string[];
 }
+export type NoBaseToStringOptions = {};
 export type NoBeforeInteractiveScriptOutsideDocumentOptions = {};
 export type NoComponentHookFactoriesOptions = {};
 export type NoConditionalExpectOptions = {};
@@ -9016,6 +9029,7 @@ export type Category =
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noAmbiguousAnchorText"
+	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noBeforeInteractiveScriptOutsideDocument"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noComponentHookFactories"

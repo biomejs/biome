@@ -85,6 +85,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noBarrelFile",
         TypeId::of::<biome_rule_options::no_barrel_file::NoBarrelFileOptions>(),
     ));
+    result.push((
+        "nursery",
+        "noBaseToString",
+        TypeId::of::<biome_rule_options::no_base_to_string::NoBaseToStringOptions>(),
+    ));
     result.push(("nursery", "noBeforeInteractiveScriptOutsideDocument", TypeId::of::<biome_rule_options::no_before_interactive_script_outside_document::NoBeforeInteractiveScriptOutsideDocumentOptions>()));
     result.push((
         "suspicious",

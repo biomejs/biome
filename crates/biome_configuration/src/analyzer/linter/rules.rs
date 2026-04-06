@@ -105,6 +105,7 @@ pub enum RuleName {
     NoAwaitInLoops,
     NoBannedTypes,
     NoBarrelFile,
+    NoBaseToString,
     NoBeforeInteractiveScriptOutsideDocument,
     NoBiomeFirstException,
     NoBitwiseOperators,
@@ -601,6 +602,7 @@ impl RuleName {
             Self::NoAwaitInLoops => "noAwaitInLoops",
             Self::NoBannedTypes => "noBannedTypes",
             Self::NoBarrelFile => "noBarrelFile",
+            Self::NoBaseToString => "noBaseToString",
             Self::NoBeforeInteractiveScriptOutsideDocument => {
                 "noBeforeInteractiveScriptOutsideDocument"
             }
@@ -1105,6 +1107,7 @@ impl RuleName {
             Self::NoAwaitInLoops => RuleGroup::Performance,
             Self::NoBannedTypes => RuleGroup::Complexity,
             Self::NoBarrelFile => RuleGroup::Performance,
+            Self::NoBaseToString => RuleGroup::Nursery,
             Self::NoBeforeInteractiveScriptOutsideDocument => RuleGroup::Nursery,
             Self::NoBiomeFirstException => RuleGroup::Suspicious,
             Self::NoBitwiseOperators => RuleGroup::Suspicious,
@@ -1604,6 +1607,7 @@ impl std::str::FromStr for RuleName {
             "noAwaitInLoops" => Ok(Self::NoAwaitInLoops),
             "noBannedTypes" => Ok(Self::NoBannedTypes),
             "noBarrelFile" => Ok(Self::NoBarrelFile),
+            "noBaseToString" => Ok(Self::NoBaseToString),
             "noBeforeInteractiveScriptOutsideDocument" => {
                 Ok(Self::NoBeforeInteractiveScriptOutsideDocument)
             }

@@ -581,6 +581,11 @@ impl Deserializable for Rules {
                                 result.insert(Rule::TypeScriptNoShadow(conf));
                             }
                         }
+                        "@typescript-eslint/no-base-to-string" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::TypeScriptNoBaseToString(conf));
+                            }
+                        }
                         "unicorn/filename-case" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::UnicornFilenameCase(conf));
@@ -672,6 +677,7 @@ pub(crate) enum Rule {
     TypeScriptExplicitMemberAccessibility(
         RuleConf<eslint_typescript::ExplicitMemberAccessibilityOptions>,
     ),
+    TypeScriptNoBaseToString(RuleConf<eslint_typescript::NoBaseToStringOptions>),
     TypeScriptNamingConvention(RuleConf<Box<eslint_typescript::NamingConventionSelection>>),
     TypeScriptNoShadow(RuleConf<eslint_typescript::NoShadowOptions>),
     UnicornFilenameCase(RuleConf<eslint_unicorn::FilenameCaseOptions>),
@@ -691,6 +697,9 @@ impl Rule {
             }
             Self::TypeScriptExplicitMemberAccessibility(_) => {
                 Cow::Borrowed("@typescript-eslint/explicit-member-accessibility")
+            }
+            Self::TypeScriptNoBaseToString(_) => {
+                Cow::Borrowed("@typescript-eslint/no-base-to-string")
             }
             Self::TypeScriptNamingConvention(_) => {
                 Cow::Borrowed("@typescript-eslint/naming-convention")
