@@ -40,7 +40,7 @@ unicode-bom            = { workspace = true }
 # so we need to enable the feature here to make to_html available for spec tests.
 biome_markdown_parser = { path = ".", features = ["test_utils"] }
 biome_test_utils      = { path = "../biome_test_utils" }
-criterion             = { package = "codspeed-criterion-compat", version = "*" }
+criterion             = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta                 = { workspace = true }
 quickcheck            = { workspace = true }
 quickcheck_macros     = { workspace = true }
