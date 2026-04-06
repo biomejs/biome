@@ -15,7 +15,7 @@ impl AnyJsFunction {
     /// # Examples
     ///
     /// ```typescript
-    /// (function () {});
+    /// (function () {})();
     /// (() => {})();
     /// ```
     pub fn is_iife(&self) -> bool {
