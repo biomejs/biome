@@ -96,7 +96,7 @@ Full TypeId(3) => Tuple(
     [
         TupleElementType {
             ty: Resolved(
-                Module(0) TypeId(0),
+                Full TypeId(0),
             ),
             name: None,
             is_optional: false,
@@ -104,7 +104,7 @@ Full TypeId(3) => Tuple(
         },
         TupleElementType {
             ty: Resolved(
-                Module(0) TypeId(1),
+                Full TypeId(1),
             ),
             name: None,
             is_optional: false,
@@ -112,7 +112,7 @@ Full TypeId(3) => Tuple(
         },
         TupleElementType {
             ty: Resolved(
-                Module(0) TypeId(2),
+                Full TypeId(2),
             ),
             name: None,
             is_optional: false,
@@ -125,9 +125,9 @@ Full TypeId(4) => Array.prototype.map
 
 Full TypeId(5) => unknown
 
-Full TypeId(6) => unknown + Module(0) TypeId(0)
+Full TypeId(6) => unknown + Full TypeId(0)
 
-Full TypeId(7) => instanceof Promise<Module(0) TypeId(6)>
+Full TypeId(7) => instanceof Promise<Full TypeId(6)>
 
 Full TypeId(8) => async Function {
   accepts: {
@@ -136,8 +136,8 @@ Full TypeId(8) => async Function {
     ]
     type_args: []
   }
-  returns: Module(0) TypeId(7)
+  returns: Full TypeId(7)
 }
 
-Full TypeId(9) => instanceof Array<Module(0) TypeId(7)>
+Full TypeId(9) => instanceof Array<Full TypeId(7)>
 ```

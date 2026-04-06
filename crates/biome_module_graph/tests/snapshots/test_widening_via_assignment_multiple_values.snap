@@ -1,6 +1,5 @@
 ---
 source: crates/biome_module_graph/tests/snap/mod.rs
-assertion_line: 143
 expression: content
 ---
 
@@ -74,7 +73,7 @@ Full TypeId(2) => unknown
 
 Full TypeId(3) => number: 123
 
-Full TypeId(4) => Module(0) TypeId(0) | Module(0) TypeId(1) | Module(0) TypeId(3)
+Full TypeId(4) => Full TypeId(0) | Full TypeId(1) | Full TypeId(3)
 
 Full TypeId(5) => void
 
@@ -83,7 +82,7 @@ Full TypeId(6) => sync Function "f" {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(5)
+  returns: Full TypeId(5)
 }
 
 Full TypeId(7) => sync Function "g" {
@@ -91,6 +90,6 @@ Full TypeId(7) => sync Function "g" {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(5)
+  returns: Full TypeId(5)
 }
 ```

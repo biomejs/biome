@@ -170,7 +170,7 @@ Full TypeId(2) => string: bar
 
 Full TypeId(3) => Object {
   prototype: No prototype
-  members: ["bar": Module(0) TypeId(0)]
+  members: ["bar": Full TypeId(2)]
 }
 
 Full TypeId(4) => Object {

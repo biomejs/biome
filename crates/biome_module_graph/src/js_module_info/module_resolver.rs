@@ -1,4 +1,4 @@
-use std::{borrow::Cow, collections::hash_map::Entry, ops::Deref, sync::Arc};
+use std::{borrow::Cow, cell::Cell, collections::hash_map::Entry, ops::Deref, sync::Arc};
 
 use biome_js_syntax::AnyJsExpression;
 use biome_js_type_info::{
@@ -246,6 +246,37 @@ impl ModuleResolver {
                 None => self.types.insert_arc(ty),
             })
             .collect();
+
+        // Remap inner Thin Module(0) references to Full-level IDs.
+        //
+        // Types like `TypeofCallExpression` contain inner
+        // `TypeReference::Resolved` references that point to sibling types
+        // within Module 0. The `ty.resolved()` call above doesn't update
+        // these inner `Resolved` references (since they're already resolved
+        // at the Thin level). After the type_id_map is built, we can remap
+        // them so the Full-level resolver can look them up correctly.
+        for i in 0..self.type_id_map.len() {
+            let full_id = self.type_id_map[i];
+            let mut ty: TypeData = (*self.types.get(full_id.index())).clone();
+            // Cell is needed because `update_all_references` requires `impl Copy + Fn`,
+            // which prevents capturing a `&mut bool`.
+            let changed = Cell::new(false);
+            ty.update_all_references(|reference| {
+                if let TypeReference::Resolved(resolved_id) = reference
+                    && resolved_id.resolver_id() == MODULE_0_ID
+                    && let Some(&new_id) = self.type_id_map.get(resolved_id.id().index())
+                {
+                    *reference = TypeReference::Resolved(ResolvedTypeId::new(
+                        TypeResolverLevel::Full,
+                        new_id,
+                    ));
+                    changed.set(true);
+                }
+            });
+            if changed.get() {
+                self.types.replace(full_id.index(), ty);
+            }
+        }
 
         for (range, resolved_id) in &module.expressions {
             self.expressions
