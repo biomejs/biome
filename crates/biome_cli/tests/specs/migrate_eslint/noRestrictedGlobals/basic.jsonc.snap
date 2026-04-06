@@ -1,0 +1,52 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: basic.jsonc
+---
+## ESLint Config
+
+```json
+{
+	"rules": {
+		"no-restricted-globals": [
+			"error",
+			"event",
+			{
+				"message": "Do not commit fdescribe. Use describe instead.",
+				"name": "fdescribe"
+			}
+		]
+	}
+}
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"recommended": false,
+			"style": {
+				"noRestrictedGlobals": {
+					"level": "error",
+					"options": {
+						"deniedGlobals": {
+							"fdescribe": "Do not commit fdescribe. Use describe instead.",
+							"event": "TODO: Add a custom message here."
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+```

@@ -89,7 +89,8 @@ biome_json_parser    = { path = "../biome_json_parser" }
 directories          = { workspace = true }
 insta                = { workspace = true }
 regex                = { workspace = true }
-serial_test          = "=3.3.1"
+serial_test          = "3.3.1"
+tests_macros         = { workspace = true }
 tokio                = { workspace = true, features = ["io-util"] }
 
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dependencies]

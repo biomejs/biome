@@ -230,6 +230,7 @@ dependencies = [
  "serial_test",
  "smallvec",
  "terminal_size 0.4.4",
+ "tests_macros",
  "tikv-jemallocator",
  "tokio",
  "tracing",
