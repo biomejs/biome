@@ -1,0 +1,171 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: ifStatementCommentTrivia.ts
+---
+# Input
+```ts
+// Test cases for comment trivia preservation around if-statement autofix
+
+declare let a: { x: string } | null;
+declare function makeFoo(): { x: string };
+
+// Leading comment should be preserved
+if (a == null) {
+    a = makeFoo();
+}
+
+// Inline comment in condition
+declare let b: { x: string } | null;
+if (b == null /* check */) {
+    b = makeFoo();
+}
+
+// Comment before assignment
+declare let c: { x: string } | null;
+if (c == null) {
+    // assignment comment
+    c = makeFoo();
+}
+
+// Bare expression with leading comment
+declare let d: { x: string } | null;
+// bare leading
+if (!d) d = makeFoo();
+
+```
+
+# Diagnostics
+```
+ifStatementCommentTrivia.ts:7:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ??= instead of an if statement for nullish assignment.
+  
+     6 │ // Leading comment should be preserved
+   > 7 │ if (a == null) {
+       │ ^^^^^^^^^^^^^^^^
+   > 8 │     a = makeFoo();
+   > 9 │ }
+       │ ^
+    10 │ 
+    11 │ // Inline comment in condition
+  
+  i This if statement can be simplified to a nullish coalescing assignment.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ??= instead.
+  
+     5  5 │   
+     6  6 │   // Leading comment should be preserved
+     7    │ - if·(a·==·null)·{
+     8    │ - ····a·=·makeFoo();
+     9    │ - }
+        7 │ + a·??=·makeFoo();
+    10  8 │   
+    11  9 │   // Inline comment in condition
+  
+
+```
+
+```
+ifStatementCommentTrivia.ts:13:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ??= instead of an if statement for nullish assignment.
+  
+    11 │ // Inline comment in condition
+    12 │ declare let b: { x: string } | null;
+  > 13 │ if (b == null /* check */) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 14 │     b = makeFoo();
+  > 15 │ }
+       │ ^
+    16 │ 
+    17 │ // Comment before assignment
+  
+  i This if statement can be simplified to a nullish coalescing assignment.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ??= instead.
+  
+    11 11 │   // Inline comment in condition
+    12 12 │   declare let b: { x: string } | null;
+    13    │ - if·(b·==·null·/*·check·*/)·{
+    14    │ - ····b·=·makeFoo();
+    15    │ - }
+       13 │ + b·??=·makeFoo();
+    16 14 │   
+    17 15 │   // Comment before assignment
+  
+
+```
+
+```
+ifStatementCommentTrivia.ts:19:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ??= instead of an if statement for nullish assignment.
+  
+    17 │ // Comment before assignment
+    18 │ declare let c: { x: string } | null;
+  > 19 │ if (c == null) {
+       │ ^^^^^^^^^^^^^^^^
+  > 20 │     // assignment comment
+  > 21 │     c = makeFoo();
+  > 22 │ }
+       │ ^
+    23 │ 
+    24 │ // Bare expression with leading comment
+  
+  i This if statement can be simplified to a nullish coalescing assignment.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ??= instead.
+  
+    17 17 │   // Comment before assignment
+    18 18 │   declare let c: { x: string } | null;
+    19    │ - if·(c·==·null)·{
+    20    │ - ····//·assignment·comment
+    21    │ - ····c·=·makeFoo();
+    22    │ - }
+       19 │ + //·assignment·comment
+       20 │ + ····c·??=·makeFoo();
+    23 21 │   
+    24 22 │   // Bare expression with leading comment
+  
+
+```
+
+```
+ifStatementCommentTrivia.ts:27:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ??= instead of an if statement for nullish assignment.
+  
+    25 │ declare let d: { x: string } | null;
+    26 │ // bare leading
+  > 27 │ if (!d) d = makeFoo();
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    28 │ 
+  
+  i This if statement can be simplified to a nullish coalescing assignment.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ??= instead.
+  
+    25 25 │   declare let d: { x: string } | null;
+    26 26 │   // bare leading
+    27    │ - if·(!d)·d·=·makeFoo();
+       27 │ + d·??=·makeFoo();
+    28 28 │   
+  
+
+```

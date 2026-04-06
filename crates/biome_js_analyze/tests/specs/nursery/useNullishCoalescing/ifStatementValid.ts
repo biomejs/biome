@@ -1,0 +1,75 @@
+// should not generate diagnostics
+
+declare function makeFoo(): { x: string };
+
+// Has else branch
+declare let f: { x: string } | null;
+if (!f) {
+    f = makeFoo();
+} else {
+    console.log('exists');
+}
+
+// Has else-if branch
+declare let elif: { x: string } | null;
+if (elif == null) {
+    elif = makeFoo();
+} else if (elif.x) {
+    console.log('has x');
+}
+
+// Multiple statements in block
+declare let g: { x: string } | null;
+if (!g) {
+    g = makeFoo();
+    console.log('initialized');
+}
+
+// Not an assignment
+declare let h: { x: string } | null;
+if (!h) {
+    console.log('missing');
+}
+
+// Different variable in test vs assignment
+declare let i: { x: string } | null;
+declare let j: { x: string } | null;
+if (!i) {
+    j = makeFoo();
+}
+
+// Non-nullable type: if (!foo) where foo is string (no null/undefined)
+declare let nn: string;
+if (!nn) {
+    nn = 'default';
+}
+
+// Truthy check (not negated): if (foo) should NOT report
+declare let truthy: { x: string } | null;
+if (truthy) {
+    truthy = makeFoo();
+}
+
+// Inverted null check: if (foo != null) should NOT report
+declare let inv: { x: string } | null;
+if (inv != null) {
+    inv = makeFoo();
+}
+
+// Inverted strict null check: if (foo !== null) should NOT report
+declare let invs: { x: string } | null;
+if (invs !== null) {
+    invs = makeFoo();
+}
+
+// Shadowed variable: const declaration, not assignment
+declare let shadowed: { x: string } | null;
+if (shadowed == null) {
+    const shadowed = makeFoo();
+}
+
+// Destructuring assignment (not simple assignment)
+declare let destr: { x: string } | null;
+if (destr == null) {
+    ({ x: destr } = { x: makeFoo() } as any);
+}

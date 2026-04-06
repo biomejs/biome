@@ -1,0 +1,199 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: ignorePrimitivesSpecific.ts
+---
+# Input
+```ts
+// Tests for ignorePrimitives: { number: true, string: true }
+// Only number and string primitives are ignored
+
+// string | null - should NOT generate diagnostic (string ignored)
+declare const s: string | null;
+const r1 = s || 'default';
+
+// number | undefined - should NOT generate diagnostic (number ignored)
+declare const n: number | undefined;
+const r2 = n || 0;
+
+// boolean | null - SHOULD generate diagnostic (boolean not ignored)
+declare const b: boolean | null;
+const r3 = b || false;
+
+// bigint | null - SHOULD generate diagnostic (bigint not ignored)
+declare const bi: bigint | null;
+const r4 = bi || 0n;
+
+// string | number | null - should NOT generate diagnostic (both ignored)
+declare const sn: string | number | null;
+const r5 = sn || 'default';
+
+// string | boolean | null - SHOULD generate diagnostic (boolean not ignored)
+declare const sb: string | boolean | null;
+const r6 = sb || 'default';
+
+// ||= with ignored primitive type - should NOT generate diagnostic
+declare let assignStr: string | null;
+assignStr ||= 'default';
+
+// ||= with non-ignored primitive type - SHOULD generate diagnostic
+declare let assignBool: boolean | null;
+assignBool ||= true;
+
+// Ternary with ignored primitive type - should NOT generate diagnostic
+declare const tn: number | null;
+const r7 = tn !== null ? tn : 0;
+
+// Ternary with non-ignored primitive type - SHOULD generate diagnostic
+declare const tb: boolean | null;
+const r8 = tb !== null ? tb : false;
+
+// If-statement with ignored primitive type - should NOT generate diagnostic
+declare let ifn: number | null;
+if (ifn == null) { ifn = 0; }
+
+// If-statement with non-ignored primitive type - SHOULD generate diagnostic
+declare let ifb: boolean | null;
+if (ifb == null) { ifb = false; }
+
+```
+
+# Diagnostics
+```
+ignorePrimitivesSpecific.ts:14:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    12 │ // boolean | null - SHOULD generate diagnostic (boolean not ignored)
+    13 │ declare const b: boolean | null;
+  > 14 │ const r3 = b || false;
+       │              ^^
+    15 │ 
+    16 │ // bigint | null - SHOULD generate diagnostic (bigint not ignored)
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignorePrimitivesSpecific.ts:18:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    16 │ // bigint | null - SHOULD generate diagnostic (bigint not ignored)
+    17 │ declare const bi: bigint | null;
+  > 18 │ const r4 = bi || 0n;
+       │               ^^
+    19 │ 
+    20 │ // string | number | null - should NOT generate diagnostic (both ignored)
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignorePrimitivesSpecific.ts:26:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    24 │ // string | boolean | null - SHOULD generate diagnostic (boolean not ignored)
+    25 │ declare const sb: string | boolean | null;
+  > 26 │ const r6 = sb || 'default';
+       │               ^^
+    27 │ 
+    28 │ // ||= with ignored primitive type - should NOT generate diagnostic
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignorePrimitivesSpecific.ts:34:12 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    32 │ // ||= with non-ignored primitive type - SHOULD generate diagnostic
+    33 │ declare let assignBool: boolean | null;
+  > 34 │ assignBool ||= true;
+       │            ^^^
+    35 │ 
+    36 │ // Ternary with ignored primitive type - should NOT generate diagnostic
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignorePrimitivesSpecific.ts:42:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for nullish.
+  
+    40 │ // Ternary with non-ignored primitive type - SHOULD generate diagnostic
+    41 │ declare const tb: boolean | null;
+  > 42 │ const r8 = tb !== null ? tb : false;
+       │            ^^^^^^^^^^^
+    43 │ 
+    44 │ // If-statement with ignored primitive type - should NOT generate diagnostic
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+    40 40 │   // Ternary with non-ignored primitive type - SHOULD generate diagnostic
+    41 41 │   declare const tb: boolean | null;
+    42    │ - const·r8·=·tb·!==·null·?·tb·:·false;
+       42 │ + const·r8·=·tb·??·false;
+    43 43 │   
+    44 44 │   // If-statement with ignored primitive type - should NOT generate diagnostic
+  
+
+```
+
+```
+ignorePrimitivesSpecific.ts:50:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ??= instead of an if statement for nullish assignment.
+  
+    48 │ // If-statement with non-ignored primitive type - SHOULD generate diagnostic
+    49 │ declare let ifb: boolean | null;
+  > 50 │ if (ifb == null) { ifb = false; }
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    51 │ 
+  
+  i This if statement can be simplified to a nullish coalescing assignment.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ??= instead.
+  
+    48 48 │   // If-statement with non-ignored primitive type - SHOULD generate diagnostic
+    49 49 │   declare let ifb: boolean | null;
+    50    │ - if·(ifb·==·null)·{·ifb·=·false;·}
+       50 │ + ifb·??=·false;
+    51 51 │   
+  
+
+```

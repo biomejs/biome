@@ -1,0 +1,50 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 155
+expression: ignoreIfStatementsEnabled.ts
+---
+# Input
+```ts
+// Tests for ignoreIfStatements: true
+// These should NOT generate diagnostics for if-statement patterns
+
+declare let a: { x: string } | null;
+declare function makeFoo(): { x: string };
+
+// Truthiness check - should be ignored
+if (!a) {
+    a = makeFoo();
+}
+
+// Loose null check - should be ignored
+declare let b: { x: string } | null;
+if (b == null) {
+    b = makeFoo();
+}
+
+// || should still be reported even with ignoreIfStatements
+declare const c: string | null;
+const r1 = c || 'default';
+
+```
+
+# Diagnostics
+```
+ignoreIfStatementsEnabled.ts:20:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    18 │ // || should still be reported even with ignoreIfStatements
+    19 │ declare const c: string | null;
+  > 20 │ const r1 = c || 'default';
+       │              ^^
+    21 │ 
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

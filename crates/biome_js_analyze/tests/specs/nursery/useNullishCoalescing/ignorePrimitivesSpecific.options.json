@@ -1,0 +1,18 @@
+{
+	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"linter": {
+		"rules": {
+			"nursery": {
+				"useNullishCoalescing": {
+					"level": "error",
+					"options": {
+						"ignorePrimitives": {
+							"number": true,
+							"string": true
+						}
+					}
+				}
+			}
+		}
+	}
+}

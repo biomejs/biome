@@ -65,3 +65,25 @@ interface InterfaceWithOptional {
 }
 declare const objFromInterface: InterfaceWithOptional;
 const optionalFromInterface = objFromInterface.a || 'default';
+
+// Template literal interpolation
+declare const tpl: string | null;
+const t1 = `prefix ${tpl || 'default'} suffix`;
+
+// Template literal with member access
+declare const tplObj: { name: string | undefined };
+const t2 = `Hello, ${tplObj.name || 'stranger'}!`;
+
+// Template literal with chained ||
+declare const tplA: string | null;
+declare const tplB: string | null;
+const t3 = `value: ${tplA || tplB || 'none'}`;
+
+// Template literal with || in nested expression
+declare const tplNum: number | undefined;
+const t4 = `count: ${(tplNum || 0) + 1}`;
+
+// Tagged template literal
+declare function tag(strings: TemplateStringsArray, ...values: unknown[]): string;
+declare const tplTag: string | null;
+const t5 = tag`tagged ${tplTag || 'default'} end`;

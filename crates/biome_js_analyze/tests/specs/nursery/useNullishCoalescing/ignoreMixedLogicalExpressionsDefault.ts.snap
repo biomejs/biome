@@ -1,0 +1,120 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: ignoreMixedLogicalExpressionsDefault.ts
+---
+# Input
+```ts
+// Tests for ignoreMixedLogicalExpressions: true
+// These should NOT generate diagnostics because || is mixed with &&
+
+declare const a: string | null;
+declare const b: string;
+declare const c: string;
+
+// || as child of &&
+const r1 = (a || 'default') && b;
+
+// || with && child
+const r2 = a || (b && c);
+
+// || as left operand of &&
+const r3 = (a || b) && c;
+
+// Nested: || inside && inside another &&
+const r4 = (a || b) && c && b;
+
+// ||= mixed with && - should NOT generate diagnostic
+declare let assignMixed: string | null;
+assignMixed ||= b && c;
+
+// Chained || with && sibling: inner || should also be suppressed
+// In `(a || b) || (c && d)`, the inner `a || b` is part of the same
+// mixed expression tree and should not generate a diagnostic.
+declare const x: string | null;
+declare const y: string;
+declare const z: string;
+declare const w: string;
+const r5 = x || y || (z && w);
+
+// Three-way chain: a || b || c && d (without parens around &&)
+const r6 = x || y || z && w;
+
+// ||= chained with || containing && sibling
+// `a || (b && c)` as the RHS of ||=
+declare let chainAssign: string | null;
+chainAssign ||= y || (z && w);
+
+// These SHOULD still generate diagnostics (no && mixing)
+declare const d: string | null;
+const r7 = d || 'default';
+
+declare const e: number | undefined;
+const r8 = e || 0;
+
+// ||= without && mixing - SHOULD generate diagnostic
+declare let assignPlain: string | null;
+assignPlain ||= 'default';
+
+```
+
+# Diagnostics
+```
+ignoreMixedLogicalExpressionsDefault.ts:43:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    41 │ // These SHOULD still generate diagnostics (no && mixing)
+    42 │ declare const d: string | null;
+  > 43 │ const r7 = d || 'default';
+       │              ^^
+    44 │ 
+    45 │ declare const e: number | undefined;
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreMixedLogicalExpressionsDefault.ts:46:14 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    45 │ declare const e: number | undefined;
+  > 46 │ const r8 = e || 0;
+       │              ^^
+    47 │ 
+    48 │ // ||= without && mixing - SHOULD generate diagnostic
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreMixedLogicalExpressionsDefault.ts:50:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of ||=.
+  
+    48 │ // ||= without && mixing - SHOULD generate diagnostic
+    49 │ declare let assignPlain: string | null;
+  > 50 │ assignPlain ||= 'default';
+       │             ^^^
+    51 │ 
+  
+  i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
