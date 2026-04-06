@@ -7753,6 +7753,16 @@ export type UseLoneExecutableDefinitionOptions = {};
 export type UseNamedCaptureGroupOptions = {};
 export interface UseNullishCoalescingOptions {
 	/**
+	* Whether to ignore `||` expressions inside `Boolean()` calls.
+
+When `true`, the rule will not report `||` expressions that appear
+as arguments to `Boolean()`, where the falsy-coalescing behavior
+is intentional.
+
+Default: `false` 
+	 */
+	ignoreBooleanCoercion?: boolean;
+	/**
 	* Whether to ignore `||` expressions in conditional test positions
 (if/while/for/do-while/ternary conditions).
 
@@ -7762,6 +7772,38 @@ that appear in places where the falsy-checking behavior may be intentional.
 Default: `true` 
 	 */
 	ignoreConditionalTests?: boolean;
+	/**
+	* Whether to ignore `if` statements that could be simplified by using
+the nullish coalescing assignment operator (`??=`).
+
+When `true`, the rule will not report `if` statements like
+`if (foo == null) { foo = bar; }` that could be written as
+`foo ??= bar`.
+
+Default: `false` 
+	 */
+	ignoreIfStatements?: boolean;
+	/**
+	* Whether to ignore `||` expressions that are part of a mixed logical
+expression with `&&`.
+
+When `true`, the rule will not report `||` expressions where the
+operator is mixed with `&&` in the same expression without parentheses.
+
+Default: `false` 
+	 */
+	ignoreMixedLogicalExpressions?: boolean;
+	/**
+	* Whether to ignore `||` expressions based on the primitive type of the
+left operand.
+
+Set to `true` to ignore all primitive types, or an object with
+`string`, `number`, `boolean`, and `bigint` fields to ignore specific
+types.
+
+Default: all `false` 
+	 */
+	ignorePrimitives?: IgnorePrimitives;
 	/**
 	* Whether to ignore ternary expressions that could be simplified
 using the nullish coalescing operator.
@@ -8294,6 +8336,9 @@ export type MethodSignatureStyle = "property" | "method";
  */
 export type TestFunctionKind = "it" | "test";
 export type CheckInputType = "off" | "loose" | "strict";
+export type IgnorePrimitives =
+	| boolean
+	| { bigint?: boolean; boolean?: boolean; number?: boolean; string?: boolean };
 export type DeclarationStyle = "type" | "runtime";
 export type VueDirectiveStyle = "shorthand" | "longhand";
 export type VueDirectiveStyle2 = "shorthand" | "longhand";

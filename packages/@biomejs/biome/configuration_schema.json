@@ -2087,6 +2087,25 @@
 			},
 			"additionalProperties": false
 		},
+		"IgnorePrimitives": {
+			"oneOf": [
+				{
+					"description": "When true, ignore all primitive types.",
+					"type": "boolean"
+				},
+				{
+					"description": "Ignore specific primitive types.",
+					"type": "object",
+					"properties": {
+						"bigint": { "type": "boolean" },
+						"boolean": { "type": "boolean" },
+						"number": { "type": "boolean" },
+						"string": { "type": "boolean" }
+					},
+					"additionalProperties": false
+				}
+			]
+		},
 		"ImportGroup": {
 			"anyOf": [
 				{ "type": "null" },
@@ -14478,10 +14497,29 @@
 		"UseNullishCoalescingOptions": {
 			"type": "object",
 			"properties": {
+				"ignoreBooleanCoercion": {
+					"description": "Whether to ignore `||` expressions inside `Boolean()` calls.\n\nWhen `true`, the rule will not report `||` expressions that appear\nas arguments to `Boolean()`, where the falsy-coalescing behavior\nis intentional.\n\nDefault: `false`",
+					"type": ["boolean", "null"],
+					"default": null
+				},
 				"ignoreConditionalTests": {
 					"description": "Whether to ignore `||` expressions in conditional test positions\n(if/while/for/do-while/ternary conditions).\n\nWhen `true` (the default), the rule will not report `||` expressions\nthat appear in places where the falsy-checking behavior may be intentional.\n\nDefault: `true`",
 					"type": ["boolean", "null"],
 					"default": null
+				},
+				"ignoreIfStatements": {
+					"description": "Whether to ignore `if` statements that could be simplified by using\nthe nullish coalescing assignment operator (`??=`).\n\nWhen `true`, the rule will not report `if` statements like\n`if (foo == null) { foo = bar; }` that could be written as\n`foo ??= bar`.\n\nDefault: `false`",
+					"type": ["boolean", "null"],
+					"default": null
+				},
+				"ignoreMixedLogicalExpressions": {
+					"description": "Whether to ignore `||` expressions that are part of a mixed logical\nexpression with `&&`.\n\nWhen `true`, the rule will not report `||` expressions where the\noperator is mixed with `&&` in the same expression without parentheses.\n\nDefault: `false`",
+					"type": ["boolean", "null"],
+					"default": null
+				},
+				"ignorePrimitives": {
+					"description": "Whether to ignore `||` expressions based on the primitive type of the\nleft operand.\n\nSet to `true` to ignore all primitive types, or an object with\n`string`, `number`, `boolean`, and `bigint` fields to ignore specific\ntypes.\n\nDefault: all `false`",
+					"anyOf": [{ "$ref": "#/$defs/IgnorePrimitives" }, { "type": "null" }]
 				},
 				"ignoreTernaryTests": {
 					"description": "Whether to ignore ternary expressions that could be simplified\nusing the nullish coalescing operator.\n\nDefault: `false`",
