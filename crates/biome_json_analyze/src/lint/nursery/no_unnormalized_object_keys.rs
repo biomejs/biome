@@ -15,7 +15,7 @@ use unicode_normalization::{UnicodeNormalization, is_nfc, is_nfd, is_nfkc, is_nf
 use crate::JsonRuleAction;
 
 declare_lint_rule! {
-    /// Disallow JSON keys that are not normalized.
+    /// Disallow JSON keys with inconsistent Unicode representation.
     ///
     /// Unicode characters can sometimes have multiple representations that look identical but are technically different character sequences.
     /// For example, the character "é" can be represented as a single code point (U+00E9) or as an "e" followed by a combining accent (U+0065 + U+0301).
