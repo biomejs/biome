@@ -7,7 +7,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_deserialize::TextRange;
-use biome_diagnostics::{Applicability, category};
+use biome_diagnostics::Applicability;
 use biome_js_syntax::{
     AnyJsxAttribute, JsLanguage, JsxAttribute, JsxAttributeList, JsxOpeningElement,
     JsxSelfClosingElement,
@@ -132,7 +132,7 @@ impl Rule for UseSortedAttributes {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         Some(RuleDiagnostic::new(
-            category!("assist/source/useSortedAttributes"),
+            rule_category!(),
             Self::text_range(ctx, state)?,
             markup! {
                 "The attributes are not sorted. "

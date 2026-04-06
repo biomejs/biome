@@ -4,7 +4,6 @@ use biome_analyze::{
     declare_source_rule,
 };
 use biome_console::markup;
-use biome_diagnostics::category;
 use biome_graphql_syntax::{
     GraphqlFieldDefinition, GraphqlFieldDefinitionList, GraphqlFieldsDefinition,
     GraphqlInputFieldList, GraphqlInputFieldsDefinition, GraphqlInputObjectTypeDefinition,
@@ -124,7 +123,7 @@ impl Rule for UseSortedTypeFields {
             UseSortedTypeFieldsState::InputFields(fields) => fields.syntax().text_trimmed_range(),
         };
         Some(RuleDiagnostic::new(
-            category!("assist/source/useSortedTypeFields"),
+            rule_category!(),
             range,
             markup! {
                 "These fields are not sorted."
