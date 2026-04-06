@@ -13,7 +13,8 @@ use crate::syntax::parse_error::{unclosed_image, unclosed_link};
 use crate::syntax::reference::normalize_reference_label;
 use crate::syntax::{
     LinkDestinationKind, MAX_LINK_DESTINATION_PAREN_DEPTH, ParenDepthResult,
-    ends_with_unescaped_close, try_update_paren_depth, validate_link_destination_text,
+    ends_with_unescaped_close, get_title_close_char, is_whitespace_token, try_update_paren_depth,
+    validate_link_destination_text,
 };
 
 /// Parse link starting with `[` - dispatches to inline link or reference link.
@@ -594,11 +595,6 @@ fn bump_textual_link_def(p: &mut MarkdownParser) {
     item.complete(p, MD_TEXTUAL);
 }
 
-fn is_whitespace_token(p: &MarkdownParser) -> bool {
-    let text = p.cur_text();
-    !text.is_empty() && text.chars().all(|c| c == ' ' || c == '\t')
-}
-
 fn inline_title_starts_after_whitespace_tokens(p: &mut MarkdownParser) -> bool {
     p.lookahead(|p| {
         let mut saw_whitespace = false;
@@ -775,19 +771,6 @@ fn bump_link_def_separator(p: &mut MarkdownParser) {
         item.complete(p, MD_TEXTUAL);
     } else {
         bump_textual_link_def(p);
-    }
-}
-
-fn get_title_close_char(p: &MarkdownParser) -> Option<char> {
-    let text = p.cur_text();
-    if text.starts_with('"') {
-        Some('"')
-    } else if text.starts_with('\'') {
-        Some('\'')
-    } else if p.at(L_PAREN) {
-        Some(')')
-    } else {
-        None
     }
 }
 

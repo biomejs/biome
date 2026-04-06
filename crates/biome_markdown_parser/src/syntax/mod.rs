@@ -62,6 +62,27 @@ use thematic_break_block::{at_thematic_break_block, parse_thematic_break_block};
 
 use crate::MarkdownParser;
 
+/// Check if current token is whitespace (space or tab).
+pub(crate) fn is_whitespace_token(p: &MarkdownParser) -> bool {
+    let text = p.cur_text();
+    !text.is_empty() && text.chars().all(|c| c == ' ' || c == '\t')
+}
+
+/// Get the closing character for a title based on current token.
+/// Returns `None` if not at a title start.
+pub(crate) fn get_title_close_char(p: &MarkdownParser) -> Option<char> {
+    let text = p.cur_text();
+    if text.starts_with('"') {
+        Some('"')
+    } else if text.starts_with('\'') {
+        Some('\'')
+    } else if p.at(L_PAREN) {
+        Some(')')
+    } else {
+        None
+    }
+}
+
 /// Maximum paren nesting allowed in link destinations per CommonMark.
 pub(crate) const MAX_LINK_DESTINATION_PAREN_DEPTH: i32 = 32;
 
@@ -644,24 +665,11 @@ pub(crate) fn is_dash_only_thematic_break_text(text: &str) -> bool {
     !text.is_empty() && text.trim().chars().all(|c| c == '-')
 }
 
-/// Token-based check: is the current line a setext underline?
+/// Returns `Some(indent_bytes)` if the current line is a setext underline.
 ///
-/// Call after consuming a NEWLINE token. Skips 0–3 columns of leading whitespace
-/// (tabs expand to the next tab stop per CommonMark §2.2), then checks for
-/// `MD_SETEXT_UNDERLINE_LITERAL` or a dash-only `MD_THEMATIC_BREAK_LITERAL`.
-///
-/// Returns `Some(bytes_consumed)` if the line is a setext underline, `None` otherwise.
-/// The byte count includes only the whitespace tokens consumed during the indent skip,
-/// NOT the underline token itself. Callers that track byte budgets must subtract this.
-///
-/// This is the shared helper for setext detection in inline contexts.
-/// Used by `has_matching_code_span_closer`, `parse_inline_html`, and `parse_inline_item_list`.
-///
-/// Context safety: this function does NOT call `allow_setext_heading` because the token
-/// stream itself encodes context. In blockquotes, `R_ANGLE` tokens appear after NEWLINE
-/// before content, so the whitespace-only skip naturally rejects those lines. In list
-/// items, the indent reflected in the token stream is the raw line indent, and the
-/// `columns < 4` check correctly rejects lines with 4+ columns of leading whitespace.
+/// Call this after consuming `NEWLINE`. It skips up to 3 columns of leading
+/// whitespace, then checks for a setext underline token or a dash-only thematic
+/// break token. The returned byte count covers only the skipped whitespace.
 pub(crate) fn at_setext_underline_after_newline(p: &mut MarkdownParser) -> Option<usize> {
     let mut columns = 0;
     let mut bytes_consumed = 0;

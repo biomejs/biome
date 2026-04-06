@@ -29,8 +29,8 @@ use crate::lexer::MarkdownLexContext;
 use crate::syntax::reference::normalize_reference_label;
 use crate::syntax::{
     LinkDestinationKind, MAX_BLOCK_PREFIX_INDENT, MAX_LINK_DESTINATION_PAREN_DEPTH,
-    ParenDepthResult, ends_with_unescaped_close, try_update_paren_depth,
-    validate_link_destination_text,
+    ParenDepthResult, ends_with_unescaped_close, get_title_close_char, is_whitespace_token,
+    try_update_paren_depth, validate_link_destination_text,
 };
 
 /// Maximum label length per CommonMark spec (999 characters).
@@ -632,21 +632,6 @@ fn parse_link_title(p: &mut MarkdownParser) {
     m.complete(p, MD_LINK_TITLE);
 }
 
-/// Get the closing character for a title based on current token.
-/// Returns None if not at a title start.
-fn get_title_close_char(p: &MarkdownParser) -> Option<char> {
-    let text = p.cur_text();
-    if text.starts_with('"') {
-        Some('"')
-    } else if text.starts_with('\'') {
-        Some('\'')
-    } else if p.at(L_PAREN) {
-        Some(')')
-    } else {
-        None
-    }
-}
-
 /// Parse title content until closing delimiter, including trailing whitespace.
 ///
 /// Inside title quotes, we use Regular context so whitespace doesn't split tokens.
@@ -706,12 +691,6 @@ fn parse_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
         // Use Regular context for title content so whitespace doesn't split
         bump_textual(p);
     }
-}
-
-/// Check if current token is whitespace (space or tab).
-fn is_whitespace_token(p: &MarkdownParser) -> bool {
-    let text = p.cur_text();
-    !text.is_empty() && text.chars().all(|c| c == ' ' || c == '\t')
 }
 
 /// Consume the current token as an MdTextual node.
