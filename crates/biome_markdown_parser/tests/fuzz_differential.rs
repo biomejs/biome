@@ -6,34 +6,14 @@
 //!
 //! Run with: cargo test -p biome_markdown_parser --test fuzz_differential -- --ignored --nocapture
 
+mod test_utils;
+
 use biome_markdown_parser::{document_to_html, parse_markdown};
 use biome_markdown_syntax::MdDocument;
 use biome_rowan::AstNode;
 use std::fs;
 use std::path::{Path, PathBuf};
-
-/// Normalize HTML for comparison, preserving whitespace inside `<pre>` blocks.
-/// Matches the normalization in `xtask/coverage/src/markdown/commonmark.rs`.
-fn normalize_html(html: &str) -> String {
-    let mut result = Vec::new();
-    let mut in_pre = false;
-
-    for line in html.lines() {
-        if line.contains("<pre") {
-            in_pre = true;
-        }
-        if in_pre {
-            result.push(line.to_string());
-        } else {
-            result.push(line.trim_end().to_string());
-        }
-        if line.contains("</pre>") {
-            in_pre = false;
-        }
-    }
-
-    result.join("\n").trim().to_string() + "\n"
-}
+use test_utils::normalize_html;
 
 /// FNV-1a 64-bit hash — deterministic across Rust toolchain versions.
 fn content_hash(s: &str) -> String {

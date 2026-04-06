@@ -193,28 +193,9 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     });
 }
 
-/// Normalize HTML for comparison, preserving whitespace inside `<pre>` blocks.
-/// Matches the normalization in `xtask/coverage/src/markdown/commonmark.rs`.
-fn normalize_html(html: &str) -> String {
-    let mut result = Vec::new();
-    let mut in_pre = false;
-
-    for line in html.lines() {
-        if line.contains("<pre") {
-            in_pre = true;
-        }
-        if in_pre {
-            result.push(line.to_string());
-        } else {
-            result.push(line.trim_end().to_string());
-        }
-        if line.contains("</pre>") {
-            in_pre = false;
-        }
-    }
-
-    result.join("\n").trim().to_string() + "\n"
-}
+#[path = "test_utils.rs"]
+mod test_utils;
+use test_utils::normalize_html;
 
 #[test]
 pub fn quick_test() {
