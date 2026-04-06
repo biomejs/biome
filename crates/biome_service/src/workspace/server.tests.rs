@@ -854,3 +854,191 @@ const highlight = foo`some tagged template` // unknown tagged template
 
     insta::assert_snapshot!(result.as_code());
 }
+
+/// Parenthesized expressions before a graphql tagged template used to crash
+/// the formatter because the syntax rewriter removes parentheses, shifting
+/// text ranges. The embedding service stores original ranges but the formatter
+/// used transformed ranges, causing a mismatch that left orphaned
+/// StartEmbedded tags in the document.
+///
+/// See: https://github.com/biomejs/biome/issues/9484
+#[test]
+fn issue_9484_parens_before_graphql_call() {
+    const FILE_PATH: &str = "/project/file.js";
+    const FILE_CONTENT: &str = r#"import {graphql} from "@generated/gql.js";
+
+const a = {}
+console.log((a))
+
+const fetchFileUploadUrlQuery =
+graphql(`
+  query Q {
+    field
+  }
+`);
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code());
+}
+
+/// After `format_embedded()` replaces StartEmbedded tags with embedded content
+/// containing hard line breaks, `propagate_expand()` must be called again so
+/// that enclosing groups learn they need to expand. Without it, elements like
+/// `IndentIfGroupBreaks` around the call arguments would not indent because
+/// the group mode would still be flat.
+#[test]
+fn issue_9484_propagate_expand_after_embed() {
+    const FILE_PATH: &str = "/project/file.js";
+    // Short call where graphql fits on one line without embedding,
+    // but embedded formatting inserts hard lines that must expand the group.
+    const FILE_CONTENT: &str = r#"const x = foo(graphql`query { a }`, b)
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code());
+}
+
+/// Parenthesized JSX return combined with a graphql tagged template literal
+/// triggered the same range mismatch as issue_9484_parens_before_graphql_call.
+///
+/// See: https://github.com/biomejs/biome/issues/9484
+#[test]
+fn issue_9484_parens_jsx_with_graphql_tag() {
+    const FILE_PATH: &str = "/project/file.tsx";
+    const FILE_CONTENT: &str = r#"import { graphql, useLazyLoadQuery } from 'react-relay';
+
+export const Page = () => {
+  return (<div></div>);
+};
+
+const Table = () => {
+  const query = useLazyLoadQuery(graphql`
+      query Q {
+        field
+      }
+    `, {});
+  return <div></div>;
+};
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code());
+}
