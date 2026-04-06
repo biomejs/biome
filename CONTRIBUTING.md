@@ -68,9 +68,9 @@ AI assistance isn't always perfect, even when used with the utmost care.
 
 Please be respectful to maintainers and disclose AI assistance.
 
-The team does not tolerate the use of AI for PR descriptions and communication. Maintainers have limited bandwidth, and wading through AI-generated verbosity is draining — a verbose explanation for a simple, straightforward fix is a red flag.
+Please do not use AI to write pull request descriptions or contributor communication for this project. Maintainers have limited review bandwidth, and unnecessarily long or low-signal explanations can slow down the review process.
 
-The team reserves the right to close any PR without justification if AI use in communication is suspected. Attempting to re-open the PR or dispute the decision in comments may result in the team declining further contributions from you.
+If we believe AI-generated communication was used, we may close the pull request at our discretion. Repeated attempts to contest that decision in comments or re-open the PR may affect whether we accept future contributions from the same contributor.
 
 ## Asking questions, making proposals
 
