@@ -188,6 +188,10 @@ pub enum RuleSource<'a> {
     EslintYml(&'a str),
     /// Rules from [Eslint CSS](https://github.com/eslint/css)
     EslintCss(&'a str),
+    /// Rules from [Eslint Plugin Svelte](https://sveltejs.github.io/eslint-plugin-svelte/)
+    EslintSvelte(&'a str),
+    /// Rules from [Eslint Plugin Astro](https://ota-meshi.github.io/eslint-plugin-astro/)
+    EslintAstro(&'a str),
     /// Rules from [Eslint Plugin Drizzle](https://orm.drizzle.team/docs/eslint-plugin)
     EslintDrizzle(&'a str),
     /// Action for https://github.com/keithamus/sort-package-json
@@ -246,6 +250,8 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::EslintMarkdown(_) => write!(f, "@eslint/markdown"),
             Self::EslintYml(_) => write!(f, "eslint-plugin-yml"),
             Self::EslintCss(_) => write!(f, "@eslint/css"),
+            Self::EslintSvelte(_) => write!(f, "eslint-plugin-svelte"),
+            Self::EslintAstro(_) => write!(f, "eslint-plugin-astro"),
             Self::EslintDrizzle(_) => write!(f, "eslint-plugin-drizzle"),
             Self::SortPackageJson => write!(f, "sort-package-json"),
         }
@@ -313,8 +319,10 @@ impl<'a> RuleSource<'a> {
             Self::EslintMarkdown(_) => 42,
             Self::EslintYml(_) => 43,
             Self::EslintCss(_) => 44,
-            Self::EslintDrizzle(_) => 45,
-            Self::SortPackageJson => 46,
+            Self::EslintSvelte(_) => 45,
+            Self::EslintAstro(_) => 46,
+            Self::EslintDrizzle(_) => 47,
+            Self::SortPackageJson => 48,
         }
     }
 
@@ -379,6 +387,8 @@ impl<'a> RuleSource<'a> {
             | Self::EslintJson(rule_name)
             | Self::EslintMarkdown(rule_name)
             | Self::EslintYml(rule_name)
+            | Self::EslintSvelte(rule_name)
+            | Self::EslintAstro(rule_name)
             | Self::EslintDrizzle(rule_name) => rule_name,
             Self::SortPackageJson => "sort-package-json",
         }
@@ -432,6 +442,8 @@ impl<'a> RuleSource<'a> {
             Self::EslintMarkdown(_) => "markdown",
             Self::EslintYml(_) => "yml",
             Self::EslintCss(_) => "css",
+            Self::EslintSvelte(_) => "svelte",
+            Self::EslintAstro(_) => "astro",
             Self::EslintDrizzle(_) => "drizzle",
         }
     }
@@ -491,6 +503,8 @@ impl<'a> RuleSource<'a> {
             Self::EslintMarkdown(rule_name) => format!("https://github.com/eslint/markdown/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintYml(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-yml/rules/{rule_name}.html"),
             Self::EslintCss(rule_name) => format!("https://github.com/eslint/css/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintSvelte(rule_name) => format!("https://sveltejs.github.io/eslint-plugin-svelte/rules/{rule_name}"),
+            Self::EslintAstro(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-astro/rules/{rule_name}"),
             Self::EslintDrizzle(rule_name) => format!("https://orm.drizzle.team/docs/eslint-plugin#{rule_name}"),
             Self::SortPackageJson => "https://github.com/keithamus/sort-package-json".to_string(),
         }

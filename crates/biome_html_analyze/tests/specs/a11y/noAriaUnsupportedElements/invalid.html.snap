@@ -1,0 +1,269 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<meta charset="UTF-8" aria-hidden="false" />
+<meta charset="UTF-8" role="meta" />
+<html aria-required="true"></html>
+<script aria-label="script"></script>
+<script role="script"></script>
+<style aria-labelledby="id"></style>
+<style role="style"></style>
+<meta charset="UTF-8" role="meta" aria-hidden="true" />
+<meta charset="UTF-8" aria-foo="bar" aria-hidden="true" />
+<META charset="UTF-8" role="meta" />
+<STYLE ROLE="style"></STYLE>
+<SCRIPT ARIA-LABEL="script"></SCRIPT>
+
+```
+
+# Diagnostics
+```
+invalid.html:1:1 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
+  
+  > 1 │ <meta charset="UTF-8" aria-hidden="false" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ <meta charset="UTF-8" role="meta" />
+    3 │ <html aria-required="true"></html>
+  
+  i Using aria-* on elements that do not support them can cause issues with screen readers.
+  
+  i Unsafe fix: Remove the aria-hidden="false"  attribute.
+  
+    1 │ <meta·charset="UTF-8"·aria-hidden="false"·/>
+      │                       --------------------  
+
+```
+
+```
+invalid.html:2:1 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
+  
+    1 │ <meta charset="UTF-8" aria-hidden="false" />
+  > 2 │ <meta charset="UTF-8" role="meta" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <html aria-required="true"></html>
+    4 │ <script aria-label="script"></script>
+  
+  i Using role on elements that do not support them can cause issues with screen readers.
+  
+  i Unsafe fix: Remove the role="meta"  attribute.
+  
+    2 │ <meta·charset="UTF-8"·role="meta"·/>
+      │                       ------------  
+
+```
+
+```
+invalid.html:3:1 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
+  
+    1 │ <meta charset="UTF-8" aria-hidden="false" />
+    2 │ <meta charset="UTF-8" role="meta" />
+  > 3 │ <html aria-required="true"></html>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ <script aria-label="script"></script>
+    5 │ <script role="script"></script>
+  
+  i Using aria-* on elements that do not support them can cause issues with screen readers.
+  
+  i Unsafe fix: Remove the aria-required="true" attribute.
+  
+    3 │ <html·aria-required="true"></html>
+      │       --------------------        
+
+```
+
+```
+invalid.html:4:1 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
+  
+    2 │ <meta charset="UTF-8" role="meta" />
+    3 │ <html aria-required="true"></html>
+  > 4 │ <script aria-label="script"></script>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ <script role="script"></script>
+    6 │ <style aria-labelledby="id"></style>
+  
+  i Using aria-* on elements that do not support them can cause issues with screen readers.
+  
+  i Unsafe fix: Remove the aria-label="script" attribute.
+  
+    4 │ <script·aria-label="script"></script>
+      │         -------------------          
+
+```
+
+```
+invalid.html:5:1 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
+  
+    3 │ <html aria-required="true"></html>
+    4 │ <script aria-label="script"></script>
+  > 5 │ <script role="script"></script>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ <style aria-labelledby="id"></style>
+    7 │ <style role="style"></style>
+  
+  i Using role on elements that do not support them can cause issues with screen readers.
+  
+  i Unsafe fix: Remove the role="script" attribute.
+  
+    5 │ <script·role="script"></script>
+      │         -------------          
+
+```
+
+```
+invalid.html:6:1 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
+  
+    4 │ <script aria-label="script"></script>
+    5 │ <script role="script"></script>
+  > 6 │ <style aria-labelledby="id"></style>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ <style role="style"></style>
+    8 │ <meta charset="UTF-8" role="meta" aria-hidden="true" />
+  
+  i Using aria-* on elements that do not support them can cause issues with screen readers.
+  
+  i Unsafe fix: Remove the aria-labelledby="id" attribute.
+  
+    6 │ <style·aria-labelledby="id"></style>
+      │        --------------------         
+
+```
+
+```
+invalid.html:7:1 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
+  
+    5 │ <script role="script"></script>
+    6 │ <style aria-labelledby="id"></style>
+  > 7 │ <style role="style"></style>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ <meta charset="UTF-8" role="meta" aria-hidden="true" />
+    9 │ <meta charset="UTF-8" aria-foo="bar" aria-hidden="true" />
+  
+  i Using role on elements that do not support them can cause issues with screen readers.
+  
+  i Unsafe fix: Remove the role="style" attribute.
+  
+    7 │ <style·role="style"></style>
+      │        ------------         
+
+```
+
+```
+invalid.html:8:1 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
+  
+     6 │ <style aria-labelledby="id"></style>
+     7 │ <style role="style"></style>
+   > 8 │ <meta charset="UTF-8" role="meta" aria-hidden="true" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ <meta charset="UTF-8" aria-foo="bar" aria-hidden="true" />
+    10 │ <META charset="UTF-8" role="meta" />
+  
+  i Using role on elements that do not support them can cause issues with screen readers.
+  
+  i Unsafe fix: Remove the role="meta"  attribute.
+  
+    8 │ <meta·charset="UTF-8"·role="meta"·aria-hidden="true"·/>
+      │                       ------------                     
+
+```
+
+```
+invalid.html:9:1 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
+  
+     7 │ <style role="style"></style>
+     8 │ <meta charset="UTF-8" role="meta" aria-hidden="true" />
+   > 9 │ <meta charset="UTF-8" aria-foo="bar" aria-hidden="true" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ <META charset="UTF-8" role="meta" />
+    11 │ <STYLE ROLE="style"></STYLE>
+  
+  i Using aria-* on elements that do not support them can cause issues with screen readers.
+  
+  i Unsafe fix: Remove the aria-hidden="true"  attribute.
+  
+    9 │ <meta·charset="UTF-8"·aria-foo="bar"·aria-hidden="true"·/>
+      │                                      -------------------  
+
+```
+
+```
+invalid.html:10:1 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
+  
+     8 │ <meta charset="UTF-8" role="meta" aria-hidden="true" />
+     9 │ <meta charset="UTF-8" aria-foo="bar" aria-hidden="true" />
+  > 10 │ <META charset="UTF-8" role="meta" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ <STYLE ROLE="style"></STYLE>
+    12 │ <SCRIPT ARIA-LABEL="script"></SCRIPT>
+  
+  i Using role on elements that do not support them can cause issues with screen readers.
+  
+  i Unsafe fix: Remove the role="meta"  attribute.
+  
+    10 │ <META·charset="UTF-8"·role="meta"·/>
+       │                       ------------  
+
+```
+
+```
+invalid.html:11:1 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
+  
+     9 │ <meta charset="UTF-8" aria-foo="bar" aria-hidden="true" />
+    10 │ <META charset="UTF-8" role="meta" />
+  > 11 │ <STYLE ROLE="style"></STYLE>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ <SCRIPT ARIA-LABEL="script"></SCRIPT>
+    13 │ 
+  
+  i Using role on elements that do not support them can cause issues with screen readers.
+  
+  i Unsafe fix: Remove the ROLE="style" attribute.
+  
+    11 │ <STYLE·ROLE="style"></STYLE>
+       │        ------------         
+
+```
+
+```
+invalid.html:12:1 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
+  
+    10 │ <META charset="UTF-8" role="meta" />
+    11 │ <STYLE ROLE="style"></STYLE>
+  > 12 │ <SCRIPT ARIA-LABEL="script"></SCRIPT>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+  
+  i Using aria-* on elements that do not support them can cause issues with screen readers.
+  
+  i Unsafe fix: Remove the ARIA-LABEL="script" attribute.
+  
+    12 │ <SCRIPT·ARIA-LABEL="script"></SCRIPT>
+       │         -------------------          
+
+```
