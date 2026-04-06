@@ -15,7 +15,7 @@ use biome_parser::prelude::ParsedSyntax;
 /// foo($x: 1, $y: 2);
 /// ```
 ///
-/// Docs: https://sass-lang.com/documentation/at-rules/function
+/// Docs: https://sass-lang.com/documentation/syntax/structure
 #[inline]
 pub(super) fn parse_scss_primary_expression(p: &mut CssParser) -> ParsedSyntax {
     if p.at(T!['(']) {

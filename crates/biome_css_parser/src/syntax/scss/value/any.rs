@@ -37,7 +37,10 @@ pub(crate) fn is_at_any_scss_value(p: &mut CssParser) -> bool {
 /// foo#{1 + 1}(arg)
 /// ```
 ///
-/// Docs: https://sass-lang.com/documentation/interpolation
+/// Docs:
+/// - https://sass-lang.com/documentation/syntax/structure
+/// - https://sass-lang.com/documentation/modules
+/// - https://sass-lang.com/documentation/interpolation
 #[inline]
 pub(crate) fn parse_any_scss_value(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_any_scss_value(p) {

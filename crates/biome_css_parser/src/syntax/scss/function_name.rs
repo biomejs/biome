@@ -19,13 +19,15 @@ pub(crate) fn is_at_scss_function_name(p: &mut CssParser) -> bool {
 /// Parses an SCSS function name, including module-qualified names and
 /// interpolation-shaped plain CSS function names.
 ///
-/// Example:
+/// Examples:
 /// ```scss
 /// color.adjust($c, $lightness: 10%);
 /// foo#{1 + 1}(arg);
 /// ```
 ///
-/// Docs: https://sass-lang.com/documentation/interpolation
+/// Docs:
+/// - https://sass-lang.com/documentation/modules
+/// - https://sass-lang.com/documentation/interpolation
 #[inline]
 pub(crate) fn parse_scss_function_name(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_scss_function_name(p) {

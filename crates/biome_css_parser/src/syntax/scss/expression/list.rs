@@ -82,7 +82,7 @@ pub(crate) fn parse_required_scss_value_until(
 /// $map: (a: 1);
 /// ```
 ///
-/// Docs: https://sass-lang.com/documentation/values/maps
+/// Docs: https://sass-lang.com/documentation/syntax/structure
 #[inline]
 pub(crate) fn parse_scss_expression_until(
     p: &mut CssParser,
@@ -99,7 +99,9 @@ pub(crate) fn parse_scss_expression_until(
 /// @include foo($args..., $kw: 1);
 /// ```
 ///
-/// Docs: https://sass-lang.com/documentation/at-rules/mixin
+/// Docs:
+/// - https://sass-lang.com/documentation/at-rules/mixin/
+/// - https://sass-lang.com/documentation/at-rules/function/
 #[inline]
 pub(crate) fn parse_scss_expression_in_args_until(
     p: &mut CssParser,
@@ -150,7 +152,7 @@ pub(crate) fn complete_empty_scss_expression(p: &mut CssParser) -> CompletedMark
 /// $map: (a: 1, b: 2);
 /// ```
 ///
-/// Docs: https://sass-lang.com/documentation/values/maps
+/// Docs: https://sass-lang.com/documentation/syntax/structure
 #[inline]
 fn parse_scss_expression_with_options(
     p: &mut CssParser,

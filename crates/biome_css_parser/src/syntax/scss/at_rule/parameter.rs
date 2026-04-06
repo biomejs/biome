@@ -27,7 +27,9 @@ const SCSS_PARAMETER_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T![,], T
 ///              ^^^^^^^^^^^^^^^^^^^^^^^^
 /// ```
 ///
-/// Docs: https://sass-lang.com/documentation/at-rules/mixin/
+/// Docs:
+/// - https://sass-lang.com/documentation/at-rules/mixin/
+/// - https://sass-lang.com/documentation/at-rules/function/
 #[inline]
 pub(super) fn parse_scss_parameter_list(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_scss_parameter_list(p) {
@@ -75,7 +77,9 @@ fn parse_scss_parameter(p: &mut CssParser) -> ParsedSyntax {
 ///                       ^^^^^
 /// ```
 ///
-/// Docs: https://sass-lang.com/documentation/at-rules/mixin/
+/// Docs:
+/// - https://sass-lang.com/documentation/at-rules/mixin/
+/// - https://sass-lang.com/documentation/at-rules/function/
 #[inline]
 fn parse_scss_parameter_default_value(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_scss_parameter_default_value(p) {

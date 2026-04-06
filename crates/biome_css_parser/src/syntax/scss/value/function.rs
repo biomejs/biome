@@ -28,15 +28,16 @@ pub(crate) fn is_nth_at_scss_function(p: &mut CssParser, n: usize) -> bool {
     is_nth_at_scss_qualified_name(p, n) && p.nth_at(n + 3, T!['('])
 }
 
-/// Parses an SCSS function call whose head uses SCSS-specific function-name
-/// syntax.
+/// Parses an SCSS function call whose head uses a module-qualified function
+/// name.
 ///
 /// Examples:
 /// ```scss
 /// color.adjust($c, $lightness: 10%);
+/// math.pow(2, 3);
 /// ```
 ///
-/// Docs: https://sass-lang.com/documentation/interpolation
+/// Docs: https://sass-lang.com/documentation/modules
 #[inline]
 pub(crate) fn parse_scss_function(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_scss_function(p) {
