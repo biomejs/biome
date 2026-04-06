@@ -6,11 +6,12 @@ expression: index.ts
 ```ts
 /* should generate diagnostics */
 
-import { doWork, doWorkTwo } from "./wrapper";
+import { doWork, doWorkTwo, maybeDoWork } from "./wrapper";
 
 async function main() {
 	doWork("abc");
 	doWorkTwo();
+	maybeDoWork?.("xyz");
 }
 
 ```
@@ -25,7 +26,7 @@ index.ts:6:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━�
   > 6 │ 	doWork("abc");
       │ 	^^^^^^^^^^^^^^
     7 │ 	doWorkTwo();
-    8 │ }
+    8 │ 	maybeDoWork?.("xyz");
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
@@ -47,8 +48,8 @@ index.ts:7:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━�
     6 │ 	doWork("abc");
   > 7 │ 	doWorkTwo();
       │ 	^^^^^^^^^^^^
-    8 │ }
-    9 │ 
+    8 │ 	maybeDoWork?.("xyz");
+    9 │ }
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
@@ -58,5 +59,28 @@ index.ts:7:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━�
   
     7 │ → await·doWorkTwo();
       │   ++++++            
+
+```
+
+```
+index.ts:8:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+     6 │ 	doWork("abc");
+     7 │ 	doWorkTwo();
+   > 8 │ 	maybeDoWork?.("xyz");
+       │ 	^^^^^^^^^^^^^^^^^^^^^
+     9 │ }
+    10 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await operator.
+  
+    8 │ → await·maybeDoWork?.("xyz");
+      │   ++++++                     
 
 ```

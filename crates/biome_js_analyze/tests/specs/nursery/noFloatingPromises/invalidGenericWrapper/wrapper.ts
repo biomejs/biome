@@ -13,3 +13,5 @@ async function _doWorkTwo(): Promise<string> {
 }
 
 export const doWorkTwo = trace(_doWorkTwo, { name: "doWorkTwo" });
+
+export const maybeDoWork: typeof doWork | undefined = doWork;

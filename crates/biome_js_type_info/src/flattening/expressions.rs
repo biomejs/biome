@@ -416,7 +416,7 @@ fn flattened_call(
                         return_types.push(TypeData::Undefined);
                         continue;
                     }
-                    TypeData::Unknown | TypeData::TypeofExpression(_) => {
+                    TypeData::Unknown => {
                         continue;
                     }
                     _ => {}
