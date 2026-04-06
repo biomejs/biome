@@ -78,26 +78,35 @@ impl ProcessFile for LintAssistProcessFile {
                 skipped_suggested_fixes: fix_result.skipped_suggested_fixes,
             });
 
-            let mut output = fix_result.code;
+            // Only apply fix_file output when actual fixes were produced.
+            // When no fixes are applied, fix_file still formats the tree with
+            // delegate_fmt_embedded_nodes=false, which can produce different output
+            // for files with embedded languages (e.g., CSS in HTML <style> tags).
+            // Skipping the comparison avoids overwriting the workspace with
+            // incorrectly-indented embedded content that would then be "fixed"
+            // again by format_only, causing an infinite "Fixed 1 file" loop.
+            if !fix_result.actions.is_empty() {
+                let mut output = fix_result.code;
 
-            if !features_supported.supports_full_html_support() {
-                match workspace_file.as_extension() {
-                    Some("astro") => {
-                        output = AstroFileHandler::output(input.as_str(), output.as_str());
+                if !features_supported.supports_full_html_support() {
+                    match workspace_file.as_extension() {
+                        Some("astro") => {
+                            output = AstroFileHandler::output(input.as_str(), output.as_str());
+                        }
+                        Some("vue") => {
+                            output = VueFileHandler::output(input.as_str(), output.as_str());
+                        }
+                        Some("svelte") => {
+                            output = SvelteFileHandler::output(input.as_str(), output.as_str());
+                        }
+                        _ => {}
                     }
-                    Some("vue") => {
-                        output = VueFileHandler::output(input.as_str(), output.as_str());
-                    }
-                    Some("svelte") => {
-                        output = SvelteFileHandler::output(input.as_str(), output.as_str());
-                    }
-                    _ => {}
                 }
-            }
-            if output != input {
-                changed = true;
-                workspace_file.update_file(output)?;
-                input = workspace_file.input()?;
+                if output != input {
+                    changed = true;
+                    workspace_file.update_file(output)?;
+                    input = workspace_file.input()?;
+                }
             }
         }
 

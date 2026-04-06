@@ -333,6 +333,49 @@ fn should_apply_fixes_to_embedded_languages() {
 }
 
 #[test]
+fn check_write_html_with_embedded_style_is_idempotent() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    // This file is already properly formatted. Running `check --write` should
+    // report "No fixes applied" and not change the file.
+    let html_file = Utf8Path::new("file.html");
+    fs.insert(
+        html_file.into(),
+        "<!DOCTYPE html>\n<html lang=\"en\">\n\t<head>\n\t\t<style>\n\t\tp {\n\t\t\tcolor: red;\n\t\t}\n\t\t</style>\n\t</head>\n\t<body>\n\t\t<p>Hello</p>\n\t</body>\n</html>\n"
+            .as_bytes(),
+    );
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "html": {
+        "formatter": {
+            "enabled": true
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", html_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_write_html_with_embedded_style_is_idempotent",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn should_lint_a_html_file() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
