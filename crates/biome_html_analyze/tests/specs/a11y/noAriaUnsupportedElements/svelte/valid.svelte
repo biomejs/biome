@@ -1,3 +1,4 @@
+<!-- should not generate diagnostics -->
 <meta charset="UTF-8" />
 <div role="button"></div>
 <input aria-label="name" />

@@ -3,7 +3,8 @@ source: crates/biome_html_analyze/tests/spec_tests.rs
 expression: valid.svelte
 ---
 # Input
-```html
+```svelte
+<!-- should not generate diagnostics -->
 <meta charset="UTF-8" />
 <div role="button"></div>
 <input aria-label="name" />

@@ -4,6 +4,7 @@ expression: valid.html
 ---
 # Input
 ```html
+<!-- should not generate diagnostics -->
 <meta charset="UTF-8" />
 <html></html>
 <script></script>

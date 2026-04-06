@@ -1,3 +1,4 @@
+<!-- should generate diagnostics -->
 <template>
   <meta charset="UTF-8" aria-hidden="false" />
   <meta charset="UTF-8" role="meta" />

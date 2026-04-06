@@ -1,3 +1,4 @@
+<!-- should not generate diagnostics -->
 <template>
   <meta charset="UTF-8" />
   <div role="button"></div>
