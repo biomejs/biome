@@ -53,8 +53,7 @@ impl FormatNodeRule<JsTemplateChunkElement> for FormatJsTemplateChunkElement {
         let source_range = f
             .context()
             .source_map()
-            .map(|map| map.source_range(transformed_range))
-            .unwrap_or(transformed_range);
+            .map_or(transformed_range, |map| map.source_range(transformed_range));
 
         Some(source_range)
     }
