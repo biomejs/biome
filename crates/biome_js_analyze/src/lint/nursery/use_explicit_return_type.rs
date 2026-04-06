@@ -9,8 +9,8 @@ use biome_js_syntax::{
     JsArrowFunctionExpression, JsCallExpression, JsFileSource, JsFormalParameter,
     JsFunctionDeclaration, JsGetterClassMember, JsGetterObjectMember, JsInitializerClause,
     JsLanguage, JsMethodClassMember, JsMethodObjectMember, JsObjectExpression,
-    JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember, JsReturnStatement,
-    JsStatementList, JsSyntaxKind, JsVariableDeclarator,
+    JsPropertyClassMember, JsPropertyObjectMember, JsReturnStatement, JsStatementList,
+    JsSyntaxKind, JsVariableDeclarator,
 };
 use biome_rowan::AstNodeList;
 use biome_rowan::{
@@ -498,13 +498,6 @@ fn ancestor_has_return_type(func: &AnyJsFunction) -> bool {
     false
 }
 
-/// Checks if a function is an IIFE (Immediately Invoked Function Expressions)
-fn is_iife(func: &AnyJsFunction) -> bool {
-    func.parent::<JsParenthesizedExpression>()
-        .and_then(|expr| expr.parent::<JsCallExpression>())
-        .is_some()
-}
-
 /// Checks whether the given function is a higher-order function, i.e., a function
 /// that returns another function either directly in its body or as an expression.
 ///
@@ -909,7 +902,7 @@ fn handle_any_function(
         return None;
     }
 
-    if allow_iifes && is_iife(func) {
+    if allow_iifes && func.is_iife() {
         return None;
     }
 
