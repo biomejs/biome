@@ -4920,8 +4920,7 @@
 			"properties": {
 				"ignoreFunctionTypeParameterNameValueShadow": {
 					"description": "Whether to ignore parameter names in function type annotations that\nshadow variables in the outer scope.\n\nFunction type parameters (e.g., `callback: (options: unknown) => void`)\ndefine the shape of a callback but do not create runtime bindings in the\nenclosing scope. Setting this to `true` (the default) suppresses\nshadowing reports for these parameter names.\n\nDefaults to `true`.",
-					"type": "boolean",
-					"default": true
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
