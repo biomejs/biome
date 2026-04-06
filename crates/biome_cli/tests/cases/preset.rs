@@ -422,8 +422,14 @@ fn group_preset_all_with_rule_off() {
         .as_bytes(),
     );
 
+    // debugger; triggers noDebugger (off) — should NOT fire.
+    // function foo() {} triggers noEmptyBlockStatements (non-recommended) — should fire
+    // via preset: "all", proving the preset works.
     let test = Utf8Path::new("test.js");
-    fs.insert(test.into(), DEBUGGER_BEFORE.as_bytes());
+    fs.insert(
+        test.into(),
+        b"debugger;\nfunction foo() {}\n",
+    );
 
     let (fs, result) = run_cli(
         fs,
@@ -431,7 +437,7 @@ fn group_preset_all_with_rule_off() {
         Args::from(["lint", test.as_str()].as_slice()),
     );
 
-    // preset is "all" but noDebugger is explicitly off → no diagnostic for noDebugger
+    // noEmptyBlockStatements fires (preset "all"), but noDebugger does not (explicitly off)
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -574,6 +580,90 @@ fn nursery_rule_enabled_individually() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "nursery_rule_enabled_individually",
+        fs,
+        console,
+        result,
+    ));
+}
+
+// --- empty/partial rules should still enable recommended by default ---
+
+#[test]
+fn empty_rules_object_still_enables_recommended() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+
+    // "rules": {} — no recommended, no preset. Recommended should be the default.
+    let config = Utf8Path::new("biome.json");
+    fs.insert(
+        config.into(),
+        r#"{
+    "linter": {
+        "rules": {}
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let test = Utf8Path::new("test.js");
+    fs.insert(test.into(), DEBUGGER_BEFORE.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--write", "--unsafe", test.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    // noDebugger is recommended and should fire even with empty rules object
+    assert_file_contents(&fs, test, DEBUGGER_AFTER);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "empty_rules_object_still_enables_recommended",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn customising_one_group_still_enables_recommended() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+
+    // Only customising one rule in one group — other recommended rules should still fire.
+    let config = Utf8Path::new("biome.json");
+    fs.insert(
+        config.into(),
+        r#"{
+    "linter": {
+        "rules": {
+            "style": {
+                "noNegationElse": "error"
+            }
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let test = Utf8Path::new("test.js");
+    fs.insert(test.into(), DEBUGGER_BEFORE.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--write", "--unsafe", test.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    // noDebugger is recommended (suspicious) and should still fire
+    assert_file_contents(&fs, test, DEBUGGER_AFTER);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "customising_one_group_still_enables_recommended",
         fs,
         console,
         result,

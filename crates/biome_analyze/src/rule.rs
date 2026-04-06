@@ -860,6 +860,11 @@ impl RuleMetadata {
         self
     }
 
+    pub const fn rule_presets(mut self, rule_presets: &'static [RulePreset]) -> Self {
+        self.rule_presets = rule_presets;
+        self
+    }
+
     pub fn applicability(&self) -> Applicability {
         self.fix_kind
             .try_into()
@@ -1764,6 +1769,8 @@ pub struct SuppressAction<L: Language> {
     pub mutation: BatchMutation<L>,
 }
 
+// NOTE: you must update the JSON schema representation of [biome_configuration::PresetConfig] every time you add a new variant
+/// A preset configuration for enabling a set of rules.
 #[cfg_attr(
     feature = "serde",
     derive(
@@ -1776,7 +1783,6 @@ pub struct SuppressAction<L: Language> {
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-/// The set of rules that will be executed by the linter.
 pub enum RulePreset {
     /// A set of rules that are enabled by default.
     Recommended,

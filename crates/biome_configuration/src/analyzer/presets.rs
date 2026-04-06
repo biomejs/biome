@@ -9,8 +9,8 @@ use bpaf::Bpaf;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::str::FromStr;
 
+/// A preset configuration for enabling a set of rules.
 #[derive(Clone, Debug, Eq, PartialEq, Bpaf, Merge)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum PresetConfig {
     FromAnalyzer(RulePreset),
     All,
@@ -103,5 +103,20 @@ impl Deserializable for PresetConfig {
             }
         }
         value.deserialize(ctx, Visitor, name)
+    }
+}
+
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for PresetConfig {
+    fn schema_name() -> String {
+        "PresetConfig".to_string()
+    }
+
+    fn json_schema(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        schemars::json_schema!({
+            "type": "string",
+            "enum": ["recommended", "all", "none"],
+            "description": "A preset configuration for enabling a set of rules."
+        })
     }
 }

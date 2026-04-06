@@ -22,11 +22,28 @@ expression: redactor(content)
 
 ```js
 debugger;
+function foo() {}
 
 ```
 
 # Emitted Messages
 
 ```block
+test.js:2:16 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block.
+  
+    1 │ debugger;
+  > 2 │ function foo() {}
+      │                ^^
+    3 │ 
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+```
+
+```block
 Checked 1 file in <TIME>. No fixes applied.
+Found 1 warning.
 ```
