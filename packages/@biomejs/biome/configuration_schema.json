@@ -2792,6 +2792,12 @@
 		},
 		"NoBaseToStringOptions": {
 			"type": "object",
+			"properties": {
+				"ignoredTypeNames": {
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoBeforeInteractiveScriptOutsideDocumentConfiguration": {
@@ -6063,7 +6069,7 @@
 					]
 				},
 				"noBaseToString": {
-					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-base-to-string",
+					"description": "Require stringification to avoid values that only use the default object representation.\nSee https://biomejs.dev/linter/rules/no-base-to-string",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoBaseToStringConfiguration" },
 						{ "type": "null" }
