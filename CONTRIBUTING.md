@@ -68,14 +68,9 @@ AI assistance isn't always perfect, even when used with the utmost care.
 
 Please be respectful to maintainers and disclose AI assistance.
 
-The team doesn't tolerate the use of AI for PR descriptions and communication. The team
- reserves the right to close any PR without justification if they think the use of AI
-might interfere with the review process. For example, a verbose explanation for a simple
- and straightforward fix is a red flag.
+The team does not tolerate the use of AI for PR descriptions and communication. Maintainers have limited bandwidth, and wading through AI-generated verbosity is draining — a verbose explanation for a simple, straightforward fix is a red flag.
 
-Possible comments in the attempt at re-opening the PR will be used as proof that you haven't
-read the guidelines, and the team reserves the right of not accepting further contributions from you
- by any means necessary.
+The team reserves the right to close any PR without justification if AI use in communication is suspected. Attempting to re-open the PR or dispute the decision in comments may result in the team declining further contributions from you.
 
 ## Asking questions, making proposals
 
