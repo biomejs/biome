@@ -1,0 +1,27 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 549
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {}
+  }
+}
+```
+
+## `test.js`
+
+```js
+
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

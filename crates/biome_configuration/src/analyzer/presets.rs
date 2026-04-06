@@ -108,8 +108,8 @@ impl Deserializable for PresetConfig {
 
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for PresetConfig {
-    fn schema_name() -> String {
-        "PresetConfig".to_string()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("PresetConfig")
     }
 
     fn json_schema(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
