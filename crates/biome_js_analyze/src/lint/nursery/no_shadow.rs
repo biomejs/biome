@@ -144,7 +144,7 @@ fn check_shadowing(
         return None;
     }
 
-    if options.ignore_function_type_parameter_name_value_shadow
+    if options.ignore_function_type_parameter_name_value_shadow.unwrap_or(true)
         && is_in_function_type_parameter(&binding)
     {
         // Parameters in function type annotations (e.g.,
@@ -334,9 +334,9 @@ fn is_in_overload_signature(binding: &Binding) -> bool {
 
 /// Returns true if the binding is a parameter inside a TypeScript function type
 /// annotation (e.g., `(options: unknown) => void` or `new () => Foo`), a call
-/// signature type member, a method signature type member, or a setter signature
-/// type member. These parameters only exist at the type level and do not create
-/// runtime bindings.
+/// signature type member, a construct signature type member, a method signature
+/// type member, or a setter signature type member. These parameters only exist
+/// at the type level and do not create runtime bindings.
 fn is_in_function_type_parameter(binding: &Binding) -> bool {
     let node = binding.syntax();
     let parent_function = node.clone().cast::<JsIdentifierBinding>().and_then(|id| {
@@ -352,6 +352,7 @@ fn is_in_function_type_parameter(binding: &Binding) -> bool {
         Some(
             AnyJsParameterParentFunction::TsFunctionType(_)
                 | AnyJsParameterParentFunction::TsConstructorType(_)
+                | AnyJsParameterParentFunction::TsConstructSignatureTypeMember(_)
                 | AnyJsParameterParentFunction::TsCallSignatureTypeMember(_)
                 | AnyJsParameterParentFunction::TsMethodSignatureTypeMember(_)
                 | AnyJsParameterParentFunction::TsSetterSignatureTypeMember(_)
