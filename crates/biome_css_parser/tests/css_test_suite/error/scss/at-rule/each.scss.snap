@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -358,71 +357,71 @@ CssRoot {
 each.scss:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a variable binding after `@each`.
-  
+
   > 1 │ @each in $list {
       │       ^^
     2 │   color: red;
     3 │ }
-  
+
   i Add a variable like `$item` before `in`.
-  
+
 each.scss:5:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `$`
-  
+
     3 │ }
-    4 │ 
+    4 │
   > 5 │ @each $item $list {
       │             ^
     6 │   color: red;
     7 │ }
-  
+
   i Remove $
-  
+
 each.scss:5:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `in` but instead found `{`
-  
+
     3 │ }
-    4 │ 
+    4 │
   > 5 │ @each $item $list {
       │                   ^
     6 │   color: red;
     7 │ }
-  
+
   i Remove {
-  
+
 each.scss:9:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found '{'.
-  
+
      7 │ }
-     8 │ 
+     8 │
    > 9 │ @each $item in {
        │                ^
     10 │   color: red;
     11 │ }
-  
+
   i Expected a SCSS expression here.
-  
+
      7 │ }
-     8 │ 
+     8 │
    > 9 │ @each $item in {
        │                ^
     10 │   color: red;
     11 │ }
-  
+
 each.scss:13:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a variable binding after `@each`.
-  
+
     11 │ }
-    12 │ 
+    12 │
   > 13 │ @each $key, in $map {
        │             ^^
     14 │   color: red;
     15 │ }
-  
+
   i Add a variable like `$item` before `in`.
-  
+
 ```

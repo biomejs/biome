@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -179,44 +178,44 @@ CssRoot {
 interpolation.scss:1:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `}` but instead found `;`
-  
+
   > 1 │ $unclosed: #{$name;
       │                   ^
     2 │ $empty: #{};
     3 │ $missing-rhs: #{1 + };
-  
+
   i Remove ;
-  
+
 interpolation.scss:2:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found '}'.
-  
+
     1 │ $unclosed: #{$name;
   > 2 │ $empty: #{};
       │           ^
     3 │ $missing-rhs: #{1 + };
-    4 │ 
-  
+    4 │
+
   i Expected a SCSS expression here.
-  
+
     1 │ $unclosed: #{$name;
   > 2 │ $empty: #{};
       │           ^
     3 │ $missing-rhs: #{1 + };
-    4 │ 
-  
+    4 │
+
 interpolation.scss:3:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
-  
+
     1 │ $unclosed: #{$name;
     2 │ $empty: #{};
   > 3 │ $missing-rhs: #{1 + };
       │                     ^
-    4 │ 
-  
+    4 │
+
   i Expected one of:
-  
+
   - identifier
   - string
   - number
@@ -224,5 +223,5 @@ interpolation.scss:3:21 parse ━━━━━━━━━━━━━━━━�
   - ratio
   - custom property
   - function
-  
+
 ```

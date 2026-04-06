@@ -122,6 +122,9 @@ pub trait NthToken<Lex>: TokenSource {
 
     /// Returns true if the nth non-trivia token is preceded by a line break
     fn has_nth_preceding_line_break(&mut self, n: usize) -> bool;
+
+    /// Returns true if the nth non-trivia token is preceded by whitespace trivia.
+    fn has_nth_preceding_whitespace(&mut self, n: usize) -> bool;
 }
 
 impl<'l, Lex, T> NthToken<Lex> for T
@@ -148,6 +151,17 @@ where
             self.lexer()
                 .nth_non_trivia(n)
                 .is_some_and(|lookahead| lookahead.has_preceding_line_break())
+        }
+    }
+
+    /// Returns true if the nth non-trivia token is preceded by whitespace trivia.
+    fn has_nth_preceding_whitespace(&mut self, n: usize) -> bool {
+        if n == 0 {
+            self.has_preceding_whitespace()
+        } else {
+            self.lexer()
+                .nth_non_trivia(n)
+                .is_some_and(|lookahead| lookahead.has_preceding_whitespace())
         }
     }
 }

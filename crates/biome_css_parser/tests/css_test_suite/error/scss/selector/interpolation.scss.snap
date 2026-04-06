@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -41,7 +40,7 @@ CssRoot {
                         CssBogusSubSelector {
                             items: [
                                 DOT@0..1 "." [] [],
-                                CssBogus {
+                                CssBogusSupportsCondition {
                                     items: [
                                         CssBogus {
                                             items: [
@@ -336,7 +335,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@0..27
             0: CSS_BOGUS_SUB_SELECTOR@0..27
               0: DOT@0..1 "." [] []
-              1: CSS_BOGUS@1..27
+              1: CSS_BOGUS_SUPPORTS_CONDITION@1..27
                 0: CSS_BOGUS@1..27
                   0: CSS_CUSTOM_IDENTIFIER@1..5
                     0: IDENT@1..5 "foo-" [] []
@@ -502,189 +501,189 @@ CssRoot {
 interpolation.scss:1:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found '{'.
-  
+
   > 1 │ .foo-#{$name {
       │              ^
     2 │   color: red;
     3 │ }
-  
+
   i Expected a SCSS expression here.
-  
+
   > 1 │ .foo-#{$name {
       │              ^
     2 │   color: red;
     3 │ }
-  
+
 interpolation.scss:2:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found ': red'.
-  
+
     1 │ .foo-#{$name {
   > 2 │   color: red;
       │        ^^^^^
     3 │ }
-    4 │ 
-  
+    4 │
+
   i Expected a SCSS expression here.
-  
+
     1 │ .foo-#{$name {
   > 2 │   color: red;
       │        ^^^^^
     3 │ }
-    4 │ 
-  
+    4 │
+
 interpolation.scss:2:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `}` but instead found `;`
-  
+
     1 │ .foo-#{$name {
   > 2 │   color: red;
       │             ^
     3 │ }
-    4 │ 
-  
+    4 │
+
   i Remove ;
-  
+
 interpolation.scss:5:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found '}'.
-  
+
     3 │ }
-    4 │ 
+    4 │
   > 5 │ .#{} {
       │    ^
     6 │   color: red;
     7 │ }
-  
+
   i Expected a SCSS expression here.
-  
+
     3 │ }
-    4 │ 
+    4 │
   > 5 │ .#{} {
       │    ^
     6 │   color: red;
     7 │ }
-  
+
 interpolation.scss:9:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found '{'.
-  
+
      7 │ }
-     8 │ 
+     8 │
    > 9 │ :foo-#{$name} {
        │       ^
     10 │   color: red;
     11 │ }
-  
+
   i Expected an identifier here.
-  
+
      7 │ }
-     8 │ 
+     8 │
    > 9 │ :foo-#{$name} {
        │       ^
     10 │   color: red;
     11 │ }
-  
+
 interpolation.scss:9:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a declaration, or an at rule but instead found '$'.
-  
+
      7 │ }
-     8 │ 
+     8 │
    > 9 │ :foo-#{$name} {
        │        ^
     10 │   color: red;
     11 │ }
-  
+
   i Expected a declaration, or an at rule here.
-  
+
      7 │ }
-     8 │ 
+     8 │
    > 9 │ :foo-#{$name} {
        │        ^
     10 │   color: red;
     11 │ }
-  
+
 interpolation.scss:9:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `}`
-  
+
      7 │ }
-     8 │ 
+     8 │
    > 9 │ :foo-#{$name} {
        │             ^
     10 │   color: red;
     11 │ }
-  
+
   i Remove }
-  
+
 interpolation.scss:13:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found '{'.
-  
+
     11 │ }
-    12 │ 
+    12 │
   > 13 │ ::foo-#{$name} {
        │        ^
     14 │   color: red;
     15 │ }
-  
+
   i Expected an identifier here.
-  
+
     11 │ }
-    12 │ 
+    12 │
   > 13 │ ::foo-#{$name} {
        │        ^
     14 │   color: red;
     15 │ }
-  
+
 interpolation.scss:13:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a declaration, or an at rule but instead found '$'.
-  
+
     11 │ }
-    12 │ 
+    12 │
   > 13 │ ::foo-#{$name} {
        │         ^
     14 │   color: red;
     15 │ }
-  
+
   i Expected a declaration, or an at rule here.
-  
+
     11 │ }
-    12 │ 
+    12 │
   > 13 │ ::foo-#{$name} {
        │         ^
     14 │   color: red;
     15 │ }
-  
+
 interpolation.scss:13:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `}`
-  
+
     11 │ }
-    12 │ 
+    12 │
   > 13 │ ::foo-#{$name} {
        │              ^
     14 │   color: red;
     15 │ }
-  
+
   i Remove }
-  
+
 interpolation.scss:16:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `}` but instead the file ends
-  
+
     14 │   color: red;
     15 │ }
-  > 16 │ 
-       │ 
-  
+  > 16 │
+       │
+
   i the file ends here
-  
+
     14 │   color: red;
     15 │ }
-  > 16 │ 
-       │ 
-  
+  > 16 │
+       │
+
 ```

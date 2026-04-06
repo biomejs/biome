@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -386,53 +385,53 @@ CssRoot {
 list-map-paren.scss:2:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `;`
-  
+
     1 │ .test {
   > 2 │   missing-close: fn((1, 2);
       │                           ^
     3 │   missing-map-value: fn((primary:, secondary: blue));
     4 │   missing-map-key: fn((primary: red, : blue));
-  
+
   i Remove ;
-  
+
 list-map-paren.scss:3:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found ','.
-  
+
     1 │ .test {
     2 │   missing-close: fn((1, 2);
   > 3 │   missing-map-value: fn((primary:, secondary: blue));
       │                                  ^
     4 │   missing-map-key: fn((primary: red, : blue));
     5 │ }
-  
+
   i Expected a SCSS expression here.
-  
+
     1 │ .test {
     2 │   missing-close: fn((1, 2);
   > 3 │   missing-map-value: fn((primary:, secondary: blue));
       │                                  ^
     4 │   missing-map-key: fn((primary: red, : blue));
     5 │ }
-  
+
 list-map-paren.scss:4:38 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found ': blue'.
-  
+
     2 │   missing-close: fn((1, 2);
     3 │   missing-map-value: fn((primary:, secondary: blue));
   > 4 │   missing-map-key: fn((primary: red, : blue));
       │                                      ^^^^^^
     5 │ }
-    6 │ 
-  
+    6 │
+
   i Expected a SCSS expression here.
-  
+
     2 │   missing-close: fn((1, 2);
     3 │   missing-map-value: fn((primary:, secondary: blue));
   > 4 │   missing-map-key: fn((primary: red, : blue));
       │                                      ^^^^^^
     5 │ }
-    6 │ 
-  
+    6 │
+
 ```

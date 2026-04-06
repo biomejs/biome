@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -758,130 +757,130 @@ CssRoot {
 pseudo_class_function_selector_disabled.css:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × `:local` and `:global` pseudo-classes are not standard CSS features.
-  
+
   > 1 │ :global(.class div) {}
       │  ^^^^^^^^^^^^^^^^^^
     2 │ :local(.class div + #id) {}
     3 │ :global(.class div) .div {}
-  
+
   i You can enable `:local` and `:global` pseudo-class parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
-  
+
 pseudo_class_function_selector_disabled.css:2:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × `:local` and `:global` pseudo-classes are not standard CSS features.
-  
+
     1 │ :global(.class div) {}
   > 2 │ :local(.class div + #id) {}
       │  ^^^^^^^^^^^^^^^^^^^^^^^
     3 │ :global(.class div) .div {}
     4 │ :global( {}
-  
+
   i You can enable `:local` and `:global` pseudo-class parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
-  
+
 pseudo_class_function_selector_disabled.css:3:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × `:local` and `:global` pseudo-classes are not standard CSS features.
-  
+
     1 │ :global(.class div) {}
     2 │ :local(.class div + #id) {}
   > 3 │ :global(.class div) .div {}
       │  ^^^^^^^^^^^^^^^^^^
     4 │ :global( {}
     5 │ :global() {}
-  
+
   i You can enable `:local` and `:global` pseudo-class parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
-  
+
 pseudo_class_function_selector_disabled.css:4:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × `:local` and `:global` pseudo-classes are not standard CSS features.
-  
+
     2 │ :local(.class div + #id) {}
     3 │ :global(.class div) .div {}
   > 4 │ :global( {}
       │  ^^^^^^^
     5 │ :global() {}
     6 │ :global(.div, .class) {}
-  
+
   i You can enable `:local` and `:global` pseudo-class parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
-  
+
 pseudo_class_function_selector_disabled.css:5:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × `:local` and `:global` pseudo-classes are not standard CSS features.
-  
+
     3 │ :global(.class div) .div {}
     4 │ :global( {}
   > 5 │ :global() {}
       │  ^^^^^^^^
     6 │ :global(.div, .class) {}
     7 │ :global(.div, .class {}
-  
+
   i You can enable `:local` and `:global` pseudo-class parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
-  
+
 pseudo_class_function_selector_disabled.css:6:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × `:local` and `:global` pseudo-classes are not standard CSS features.
-  
+
     4 │ :global( {}
     5 │ :global() {}
   > 6 │ :global(.div, .class) {}
       │  ^^^^^^^^^^^^^^^^^^^^
     7 │ :global(.div, .class {}
     8 │ :global(.div .class {}
-  
+
   i You can enable `:local` and `:global` pseudo-class parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
-  
+
 pseudo_class_function_selector_disabled.css:7:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × `:local` and `:global` pseudo-classes are not standard CSS features.
-  
+
     5 │ :global() {}
     6 │ :global(.div, .class) {}
   > 7 │ :global(.div, .class {}
       │  ^^^^^^^^^^^^^^^^^^^
     8 │ :global(.div .class {}
     9 │ :global(.div .class
-  
+
   i You can enable `:local` and `:global` pseudo-class parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
-  
+
 pseudo_class_function_selector_disabled.css:8:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × `:local` and `:global` pseudo-classes are not standard CSS features.
-  
+
      6 │ :global(.div, .class) {}
      7 │ :global(.div, .class {}
    > 8 │ :global(.div .class {}
        │  ^^^^^^^^^^^^^^^^^^
      9 │ :global(.div .class
-    10 │ 
-  
+    10 │
+
   i You can enable `:local` and `:global` pseudo-class parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
-  
+
 pseudo_class_function_selector_disabled.css:9:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × `:local` and `:global` pseudo-classes are not standard CSS features.
-  
+
      7 │ :global(.div, .class {}
      8 │ :global(.div .class {}
    > 9 │ :global(.div .class
        │  ^^^^^^^^^^^^^^^^^^
-    10 │ 
-  
+    10 │
+
   i You can enable `:local` and `:global` pseudo-class parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
-  
+
 pseudo_class_function_selector_disabled.css:10:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `{` but instead the file ends
-  
+
      8 │ :global(.div .class {}
      9 │ :global(.div .class
-  > 10 │ 
-       │ 
-  
+  > 10 │
+       │
+
   i the file ends here
-  
+
      8 │ :global(.div .class {}
      9 │ :global(.div .class
-  > 10 │ 
-       │ 
-  
+  > 10 │
+       │
+
 ```

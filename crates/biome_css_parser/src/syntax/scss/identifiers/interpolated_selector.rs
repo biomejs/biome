@@ -1,11 +1,19 @@
 use crate::parser::CssParser;
-use crate::syntax::scss::expression::parse_scss_selector_interpolation as parse_selector_interpolation_expression;
-use crate::syntax::scss::identifiers::interpolated_identifier::parse_scss_interpolated_identifier_with;
+use crate::syntax::scss::expression::parse_scss_selector_interpolation;
+use crate::syntax::scss::identifiers::interpolated_identifier::{
+    is_at_identifier_continuation, is_at_identifier_hyphen, is_at_scss_interpolated_identifier,
+    parse_identifier_hyphen,
+};
 use crate::syntax::scss::is_at_scss_interpolation;
 use crate::syntax::selector::{
     parse_selector_custom_identifier_fragment, parse_selector_identifier_fragment,
 };
+use biome_css_syntax::CssSyntaxKind::{
+    EOF, SCSS_INTERPOLATED_IDENTIFIER, SCSS_INTERPOLATED_IDENTIFIER_PART_LIST, SCSS_INTERPOLATION,
+};
 use biome_parser::prelude::ParsedSyntax;
+use biome_parser::prelude::ParsedSyntax::{Absent, Present};
+use biome_parser::{Parser, ParserProgress};
 
 /// Parses selector identifier grammar that may contain interpolation parts.
 ///
@@ -28,7 +36,7 @@ use biome_parser::prelude::ParsedSyntax;
 /// Docs: https://sass-lang.com/documentation/interpolation/
 #[inline]
 pub(crate) fn parse_scss_selector_interpolated_identifier(p: &mut CssParser) -> ParsedSyntax {
-    parse_scss_interpolated_identifier_with(p, parse_scss_selector_identifier_any_fragment)
+    parse_selector_identifier_with(p, parse_selector_identifier_fragment)
 }
 
 /// Parses selector custom identifiers such as `.foo-#{$name}` and preserves the
@@ -48,42 +56,52 @@ pub(crate) fn parse_scss_selector_interpolated_identifier(p: &mut CssParser) -> 
 pub(crate) fn parse_scss_selector_custom_interpolated_identifier(
     p: &mut CssParser,
 ) -> ParsedSyntax {
-    parse_scss_interpolated_identifier_with(p, parse_scss_selector_custom_identifier_any_fragment)
+    parse_selector_identifier_with(p, parse_selector_custom_identifier_fragment)
 }
 
 #[inline]
-fn parse_scss_selector_identifier_any_fragment(p: &mut CssParser) -> ParsedSyntax {
+fn parse_selector_identifier_with(
+    p: &mut CssParser,
+    parse_fragment: fn(&mut CssParser) -> ParsedSyntax,
+) -> ParsedSyntax {
+    if !is_at_scss_interpolated_identifier(p) {
+        return Absent;
+    }
+
+    let Present(first_fragment) = parse_selector_part(p, parse_fragment) else {
+        return Absent;
+    };
+
+    if first_fragment.kind(p) != SCSS_INTERPOLATION && !is_at_identifier_continuation(p) {
+        return Present(first_fragment);
+    }
+
+    let list = first_fragment.precede(p);
+    let mut progress = ParserProgress::default();
+
+    while !p.at(EOF) && is_at_identifier_continuation(p) {
+        progress.assert_progressing(p);
+
+        if is_at_identifier_hyphen(p) {
+            // Safe: guarded by `is_at_identifier_hyphen`.
+            parse_identifier_hyphen(p).ok();
+        } else if parse_selector_part(p, parse_fragment).is_absent() {
+            break;
+        }
+    }
+
+    let list = list.complete(p, SCSS_INTERPOLATED_IDENTIFIER_PART_LIST);
+    Present(list.precede(p).complete(p, SCSS_INTERPOLATED_IDENTIFIER))
+}
+
+#[inline]
+fn parse_selector_part(
+    p: &mut CssParser,
+    parse_fragment: fn(&mut CssParser) -> ParsedSyntax,
+) -> ParsedSyntax {
     if is_at_scss_interpolation(p) {
         parse_scss_selector_interpolation(p)
     } else {
-        parse_selector_identifier_fragment(p)
+        parse_fragment(p)
     }
-}
-
-#[inline]
-fn parse_scss_selector_custom_identifier_any_fragment(p: &mut CssParser) -> ParsedSyntax {
-    if is_at_scss_interpolation(p) {
-        parse_scss_selector_interpolation(p)
-    } else {
-        parse_selector_custom_identifier_fragment(p)
-    }
-}
-
-/// Parses one standalone interpolation inside a selector-aware context.
-///
-/// This is different from [`parse_scss_selector_interpolated_identifier`],
-/// which parses selector identifier grammar that may include interpolation
-/// parts. This helper only parses the single interpolation expression at the
-/// current position.
-///
-/// This keeps the closing `}` in selector lexing mode so whitespace after
-/// `#{$...}` becomes a selector combinator instead of trivia.
-///
-/// Example:
-/// ```scss
-/// #{$type} > .child {}
-/// ```
-#[inline]
-pub(crate) fn parse_scss_selector_interpolation(p: &mut CssParser) -> ParsedSyntax {
-    parse_selector_interpolation_expression(p)
 }

@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -155,35 +154,35 @@ CssRoot {
 at_rule_media_chain_paren_recovery.css:1:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a media condition, or a query feature but instead found ')'.
-  
+
   > 1 │ @media ((color) and) {}
       │                    ^
-    2 │ 
+    2 │
     3 │ @media ((color) or) {}
-  
+
   i Expected a media condition, or a query feature here.
-  
+
   > 1 │ @media ((color) and) {}
       │                    ^
-    2 │ 
+    2 │
     3 │ @media ((color) or) {}
-  
+
 at_rule_media_chain_paren_recovery.css:3:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a media condition, or a query feature but instead found ')'.
-  
+
     1 │ @media ((color) and) {}
-    2 │ 
+    2 │
   > 3 │ @media ((color) or) {}
       │                   ^
-    4 │ 
-  
+    4 │
+
   i Expected a media condition, or a query feature here.
-  
+
     1 │ @media ((color) and) {}
-    2 │ 
+    2 │
   > 3 │ @media ((color) or) {}
       │                   ^
-    4 │ 
-  
+    4 │
+
 ```

@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -332,89 +331,89 @@ CssRoot {
 if-disambiguation-recovery.scss:2:42 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `?`
-  
+
     1 │ .test {
   > 2 │   color: if(not style(--foo: bar): black ??? else: white);
       │                                          ^
     3 │   background: if((style(--bar: baz)): red ??? else: blue);
     4 │ }
-  
+
 if-disambiguation-recovery.scss:2:43 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `?`
-  
+
     1 │ .test {
   > 2 │   color: if(not style(--foo: bar): black ??? else: white);
       │                                           ^
     3 │   background: if((style(--bar: baz)): red ??? else: blue);
     4 │ }
-  
+
 if-disambiguation-recovery.scss:2:44 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `?`
-  
+
     1 │ .test {
   > 2 │   color: if(not style(--foo: bar): black ??? else: white);
       │                                            ^
     3 │   background: if((style(--bar: baz)): red ??? else: blue);
     4 │ }
-  
+
 if-disambiguation-recovery.scss:2:46 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `;` but instead found `else`
-  
+
     1 │ .test {
   > 2 │   color: if(not style(--foo: bar): black ??? else: white);
       │                                              ^^^^
     3 │   background: if((style(--bar: baz)): red ??? else: blue);
     4 │ }
-  
+
   i Remove else
-  
+
 if-disambiguation-recovery.scss:3:43 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `?`
-  
+
     1 │ .test {
     2 │   color: if(not style(--foo: bar): black ??? else: white);
   > 3 │   background: if((style(--bar: baz)): red ??? else: blue);
       │                                           ^
     4 │ }
-    5 │ 
-  
+    5 │
+
 if-disambiguation-recovery.scss:3:44 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `?`
-  
+
     1 │ .test {
     2 │   color: if(not style(--foo: bar): black ??? else: white);
   > 3 │   background: if((style(--bar: baz)): red ??? else: blue);
       │                                            ^
     4 │ }
-    5 │ 
-  
+    5 │
+
 if-disambiguation-recovery.scss:3:45 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `?`
-  
+
     1 │ .test {
     2 │   color: if(not style(--foo: bar): black ??? else: white);
   > 3 │   background: if((style(--bar: baz)): red ??? else: blue);
       │                                             ^
     4 │ }
-    5 │ 
-  
+    5 │
+
 if-disambiguation-recovery.scss:3:47 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `;` but instead found `else`
-  
+
     1 │ .test {
     2 │   color: if(not style(--foo: bar): black ??? else: white);
   > 3 │   background: if((style(--bar: baz)): red ??? else: blue);
       │                                               ^^^^
     4 │ }
-    5 │ 
-  
+    5 │
+
   i Remove else
-  
+
 ```

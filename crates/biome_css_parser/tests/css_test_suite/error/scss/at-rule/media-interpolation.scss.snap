@@ -40,7 +40,7 @@ CssRoot {
                                         L_PAREN@7..8 "(" [] [],
                                         CssBogus {
                                             items: [
-                                                CssBogus {
+                                                CssBogusSupportsCondition {
                                                     items: [
                                                         CssBogus {
                                                             items: [
@@ -148,7 +148,7 @@ CssRoot {
                                     L_PAREN@76..77 "(" [] [],
                                     CssBogus {
                                         items: [
-                                            CssBogus {
+                                            CssBogusSupportsCondition {
                                                 items: [
                                                     CssBogus {
                                                         items: [
@@ -264,7 +264,7 @@ CssRoot {
               0: CSS_BOGUS@7..31
                 0: L_PAREN@7..8 "(" [] []
                 1: CSS_BOGUS@8..29
-                  0: CSS_BOGUS@8..29
+                  0: CSS_BOGUS_SUPPORTS_CONDITION@8..29
                     0: CSS_BOGUS@8..29
                       0: CSS_BOGUS@8..29
                         0: HASH@8..9 "#" [] []
@@ -321,7 +321,7 @@ CssRoot {
           1: CSS_BOGUS@76..100
             0: L_PAREN@76..77 "(" [] []
             1: CSS_BOGUS@77..98
-              0: CSS_BOGUS@77..98
+              0: CSS_BOGUS_SUPPORTS_CONDITION@77..98
                 0: CSS_BOGUS@77..98
                   0: CSS_BOGUS@77..98
                     0: HASH@77..78 "#" [] []
@@ -380,37 +380,37 @@ CssRoot {
 media-interpolation.scss:1:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found ': #{$value'.
-  
+
   > 1 │ @media (#{$feature: #{$value}) {
       │                   ^^^^^^^^^^
     2 │   .box {
     3 │     color: red;
-  
+
   i Expected a SCSS expression here.
-  
+
   > 1 │ @media (#{$feature: #{$value}) {
       │                   ^^^^^^^^^^
     2 │   .box {
     3 │     color: red;
-  
+
 media-interpolation.scss:7:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found ': #{$value'.
-  
+
     5 │ }
-    6 │ 
+    6 │
   > 7 │ @container (#{$feature: #{$value}) {
       │                       ^^^^^^^^^^
     8 │   .box {
     9 │     color: red;
-  
+
   i Expected a SCSS expression here.
-  
+
     5 │ }
-    6 │ 
+    6 │
   > 7 │ @container (#{$feature: #{$value}) {
       │                       ^^^^^^^^^^
     8 │   .box {
     9 │     color: red;
-  
+
 ```

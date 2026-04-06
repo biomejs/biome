@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -112,55 +111,55 @@ CssRoot {
 import.scss:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a string but instead found ';'.
-  
+
   > 1 │ @import;
       │        ^
-    2 │ 
+    2 │
     3 │ @import "theme",;
-  
+
   i Expected a string here.
-  
+
   > 1 │ @import;
       │        ^
-    2 │ 
+    2 │
     3 │ @import "theme",;
-  
+
 import.scss:3:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a string but instead found ';'.
-  
+
     1 │ @import;
-    2 │ 
+    2 │
   > 3 │ @import "theme",;
       │                 ^
-    4 │ 
+    4 │
     5 │ @import "theme", "spacing",;
-  
+
   i Expected a string here.
-  
+
     1 │ @import;
-    2 │ 
+    2 │
   > 3 │ @import "theme",;
       │                 ^
-    4 │ 
+    4 │
     5 │ @import "theme", "spacing",;
-  
+
 import.scss:5:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a string but instead found ';'.
-  
+
     3 │ @import "theme",;
-    4 │ 
+    4 │
   > 5 │ @import "theme", "spacing",;
       │                            ^
-    6 │ 
-  
+    6 │
+
   i Expected a string here.
-  
+
     3 │ @import "theme",;
-    4 │ 
+    4 │
   > 5 │ @import "theme", "spacing",;
       │                            ^
-    6 │ 
-  
+    6 │
+
 ```

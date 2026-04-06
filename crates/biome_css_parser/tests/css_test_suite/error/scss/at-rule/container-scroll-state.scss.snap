@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -237,59 +236,59 @@ CssRoot {
 container-scroll-state.scss:1:42 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `and`
-  
+
   > 1 │ @container scroll-state(scrolled: bottom and ) { }
       │                                          ^^^
-    2 │ 
+    2 │
     3 │ @container scroll-state(not stuck) { }
-  
+
   i Remove and
-  
+
 container-scroll-state.scss:1:46 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
-  
+
   > 1 │ @container scroll-state(scrolled: bottom and ) { }
       │                                              ^
-    2 │ 
+    2 │
     3 │ @container scroll-state(not stuck) { }
-  
+
   i Expected one of:
-  
+
   - ( <container-query> )
   - ( <size-feature> )
   - scroll-state( <scroll-state-query> )
   - style( <style-query> )
-  
+
 container-scroll-state.scss:3:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
-  
+
     1 │ @container scroll-state(scrolled: bottom and ) { }
-    2 │ 
+    2 │
   > 3 │ @container scroll-state(not stuck) { }
       │                             ^^^^^
-    4 │ 
+    4 │
     5 │ @container scroll-state((stuck) or scrolled: bottom) { }
-  
+
   i Expected one of:
-  
+
   - ( <scroll-state-query> )
   - ( <scroll-state-feature> )
-  
+
 container-scroll-state.scss:5:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
-  
+
     3 │ @container scroll-state(not stuck) { }
-    4 │ 
+    4 │
   > 5 │ @container scroll-state((stuck) or scrolled: bottom) { }
       │                                    ^^^^^^^^^^^^^^^^
-    6 │ 
-  
+    6 │
+
   i Expected one of:
-  
+
   - ( <scroll-state-query> )
   - ( <scroll-state-feature> )
-  
+
 ```
