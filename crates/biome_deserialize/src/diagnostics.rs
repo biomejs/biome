@@ -200,8 +200,8 @@ impl DeserializationDiagnostic {
     /// Adds a note to the diagnostic
     pub fn with_note(mut self, message: impl Display) -> Self {
         self.deserialization_advice
-            .notes
-            .push((markup! {{message}}.to_owned(), vec![]));
+            .entries
+            .push(AdviceEntry::Note(markup! {{message}}.to_owned()));
         self
     }
 
@@ -219,12 +219,25 @@ impl DeserializationDiagnostic {
 
     /// Adds a note with a list of strings
     pub fn note_with_list(mut self, message: impl Display, list: &[impl Display]) -> Self {
-        self.deserialization_advice.notes.push((
-            markup! {{message}}.to_owned(),
-            list.iter()
-                .map(|message| markup! {{message}}.to_owned())
-                .collect::<Vec<_>>(),
-        ));
+        self.deserialization_advice.entries.push(
+            AdviceEntry::NoteWithList(
+                markup! {{message}}.to_owned(),
+                list.iter()
+                    .map(|message| markup! {{message}}.to_owned())
+                    .collect::<Vec<_>>(),
+            ),
+        );
+        self
+    }
+
+    /// Adds a new advice what shows a possible command with a message
+    pub fn with_command(mut self, message: impl Display, cmd: impl ToString) -> Self {
+        self.deserialization_advice
+            .entries
+            .push(AdviceEntry::Command(
+                markup! {{message}}.to_owned(),
+                cmd.to_string(),
+            ));
         self
     }
 }
@@ -235,30 +248,49 @@ impl From<SyntaxError> for DeserializationDiagnostic {
     }
 }
 
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
+enum AdviceEntry {
+    Note(MarkupBuf),
+    NoteWithList(MarkupBuf, Vec<MarkupBuf>),
+    Command(MarkupBuf, String),
+}
+
 #[derive(Debug, Default, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub struct DeserializationAdvice {
-    notes: Vec<(MarkupBuf, Vec<MarkupBuf>)>,
+    entries: Vec<AdviceEntry>,
 }
 
 impl DeserializationAdvice {
     pub fn note(mut self, message: impl Display) -> Self {
-        self.notes
-            .push((markup! {{message}}.to_owned(), Vec::new()));
+        self.entries
+            .push(AdviceEntry::Note(markup! {{message}}.to_owned()));
         self
     }
 }
 
 impl Advices for DeserializationAdvice {
     fn record(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
-        for (message, known_keys) in &self.notes {
-            visitor.record_log(LogCategory::Info, message)?;
-            if !known_keys.is_empty() {
-                let list: Vec<_> = known_keys
-                    .iter()
-                    .map(|message| message as &dyn Display)
-                    .collect();
-                visitor.record_list(&list)?;
+        for entry in &self.entries {
+            match entry {
+                AdviceEntry::Note(message) => {
+                    visitor.record_log(LogCategory::Info, message)?;
+                }
+                AdviceEntry::NoteWithList(message, known_keys) => {
+                    visitor.record_log(LogCategory::Info, message)?;
+                    if !known_keys.is_empty() {
+                        let list: Vec<_> = known_keys
+                            .iter()
+                            .map(|message| message as &dyn Display)
+                            .collect();
+                        visitor.record_list(&list)?;
+                    }
+                }
+                AdviceEntry::Command(message, cmd) => {
+                    visitor.record_log(LogCategory::Info, message)?;
+                    visitor.record_command(cmd.as_str())?;
+                }
             }
         }
 

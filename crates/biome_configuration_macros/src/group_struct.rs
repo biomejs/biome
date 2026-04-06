@@ -299,10 +299,18 @@ pub fn generate_group_struct(
                     parent_preset: PresetConfig,
                     enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
                 ) {
-                    // The order of the if-else branches MATTERS!
-                    if self.is_preset_recommended() || self.is_recommended_unset() && parent_preset.is_recommended() {
-                        enabled_rules.extend(Self::recommended_rules_as_filters());
-                    }
+                    // Resolve the effective preset: group's own takes priority, then parent.
+                    let effective_preset = if let Some(preset) = &self.preset {
+                        preset.clone()
+                    } else if matches!(self.recommended, Some(true)) {
+                        PresetConfig::FromAnalyzer(RulePreset::Recommended)
+                    } else if self.recommended.is_none() {
+                        parent_preset
+                    } else {
+                        // recommended: false
+                        PresetConfig::None
+                    };
+                    enabled_rules.extend(Self::preset_as_filters(effective_preset));
                 }
 
                 #get_configuration_function
@@ -406,10 +414,18 @@ pub fn generate_group_struct(
                     parent_preset: PresetConfig,
                     enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
                 ) {
-                    // The order of the if-else branches MATTERS!
-                    if self.is_preset_recommended() || self.is_recommended_unset() && parent_preset.is_recommended() {
-                        enabled_rules.extend(Self::recommended_rules_as_filters());
-                    }
+                    // Resolve the effective preset: group's own takes priority, then parent.
+                    let effective_preset = if let Some(preset) = &self.preset {
+                        preset.clone()
+                    } else if matches!(self.recommended, Some(true)) {
+                        PresetConfig::FromAnalyzer(RulePreset::Recommended)
+                    } else if self.recommended.is_none() {
+                        parent_preset
+                    } else {
+                        // recommended: false
+                        PresetConfig::None
+                    };
+                    enabled_rules.extend(Self::preset_as_filters(effective_preset));
                 }
 
                 fn set_recommended(&mut self, value: Option<bool>) {

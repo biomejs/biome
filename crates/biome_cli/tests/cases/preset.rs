@@ -219,6 +219,55 @@ fn preset_all_does_not_enable_nursery_rules() {
     ));
 }
 
+#[test]
+fn preset_none_with_group_preset_all() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+
+    let config = Utf8Path::new("biome.json");
+    fs.insert(
+        config.into(),
+        r#"{
+    "linter": {
+        "rules": {
+            "preset": "none",
+            "suspicious": {
+                "preset": "all"
+            }
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    // noEmptyBlockStatements is a non-recommended suspicious rule → should trigger.
+    // useLiteralKeys is a recommended complexity rule → should NOT trigger
+    // because top-level preset is "none".
+    let test = Utf8Path::new("test.js");
+    fs.insert(
+        test.into(),
+        br#"function emptyFunctionBody() {}
+a["b"] = 42;
+"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", test.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "preset_none_with_group_preset_all",
+        fs,
+        console,
+        result,
+    ));
+}
+
 // --- preset at the group level ---
 
 #[test]

@@ -345,23 +345,28 @@ fn generate_for_groups(
         let group_pascal_ident = quote::format_ident!("{}", &Case::Pascal.convert(group_name));
         let group_ident = quote::format_ident!("{}", group_name);
 
-        let global_preset = if group_name == "nursery" {
-            quote! { PresetConfig::None }
+        if group_name == "nursery" {
+            // Nursery rules are never enabled via presets — only individually.
+            group_as_default_rules.push(quote! {
+                if let Some(group) = self.#group_ident.as_ref() {
+                    enabled_rules.extend(&group.get_enabled_rules());
+                    disabled_rules.extend(&group.get_disabled_rules());
+                }
+            });
         } else {
-            quote! { self.preset() }
-        };
-        group_as_default_rules.push(quote! {
-            if let Some(group) = self.#group_ident.as_ref() {
-                group.collect_preset_rules(
-                    #global_preset,
-                    &mut enabled_rules,
-                );
-                enabled_rules.extend(&group.get_enabled_rules());
-                disabled_rules.extend(&group.get_disabled_rules());
-            } else if !#global_preset.is_none() {
-                enabled_rules.extend(#group_pascal_ident::preset_as_filters(#global_preset));
-            }
-        });
+            group_as_default_rules.push(quote! {
+                if let Some(group) = self.#group_ident.as_ref() {
+                    group.collect_preset_rules(
+                        self.preset(),
+                        &mut enabled_rules,
+                    );
+                    enabled_rules.extend(&group.get_enabled_rules());
+                    disabled_rules.extend(&group.get_disabled_rules());
+                } else if !self.preset().is_none() {
+                    enabled_rules.extend(#group_pascal_ident::preset_as_filters(self.preset()));
+                }
+            });
+        }
 
         group_as_disabled_rules.push(quote! {
             if let Some(group) = self.#group_ident.as_ref() {

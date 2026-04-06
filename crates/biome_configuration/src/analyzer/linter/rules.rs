@@ -2327,11 +2327,8 @@ impl Rules {
             enabled_rules.extend(Correctness::preset_as_filters(self.preset()));
         }
         if let Some(group) = self.nursery.as_ref() {
-            group.collect_preset_rules(PresetConfig::None, &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !PresetConfig::None.is_none() {
-            enabled_rules.extend(Nursery::preset_as_filters(PresetConfig::None));
         }
         if let Some(group) = self.performance.as_ref() {
             group.collect_preset_rules(self.preset(), &mut enabled_rules);

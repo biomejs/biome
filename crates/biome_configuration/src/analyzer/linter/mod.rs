@@ -52,11 +52,10 @@ impl DeserializableValidator for LinterConfiguration {
         _name: &str,
         range: TextRange,
     ) -> bool {
-        dbg!(&self);
         if let Some(rules) = self.rules.as_ref()
             && rules.recommended.is_some()
         {
-            ctx.report(DeserializationDiagnostic::new("The use of the recommended field has been deprecated, and will removed in the next major version of Biome. Use preset instead.").with_range(range).with_custom_severity(Severity::Information).with_tags(DiagnosticTags::DEPRECATED_CODE));
+            ctx.report(DeserializationDiagnostic::new("The use of the recommended field has been deprecated, and will removed in the next major version of Biome. Use preset instead.").with_range(range).with_custom_severity(Severity::Information).with_tags(DiagnosticTags::DEPRECATED_CODE).with_command("Migrate the configuration with the proper command", "biome migrate"));
 
             if rules.preset.is_some() {
                 ctx.report(DeserializationDiagnostic::new(markup! {
