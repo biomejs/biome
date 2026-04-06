@@ -24,7 +24,7 @@ expression: invalid.svelte
 ```
 invalid.svelte:2:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow aria-hidden="true" from being set on focusable elements.
+  × Incorrect use of aria-hidden="true" detected.
   
     1 │ <!-- should generate diagnostics -->
   > 2 │ <button aria-hidden="true">Click me</button>
@@ -44,7 +44,7 @@ invalid.svelte:2:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
 ```
 invalid.svelte:3:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow aria-hidden="true" from being set on focusable elements.
+  × Incorrect use of aria-hidden="true" detected.
   
     1 │ <!-- should generate diagnostics -->
     2 │ <button aria-hidden="true">Click me</button>
@@ -65,7 +65,7 @@ invalid.svelte:3:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
 ```
 invalid.svelte:4:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow aria-hidden="true" from being set on focusable elements.
+  × Incorrect use of aria-hidden="true" detected.
   
     2 │ <button aria-hidden="true">Click me</button>
     3 │ <a href="/" aria-hidden="true">link</a>
@@ -86,7 +86,7 @@ invalid.svelte:4:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
 ```
 invalid.svelte:5:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow aria-hidden="true" from being set on focusable elements.
+  × Incorrect use of aria-hidden="true" detected.
   
     3 │ <a href="/" aria-hidden="true">link</a>
     4 │ <input aria-hidden="true" />
@@ -107,7 +107,7 @@ invalid.svelte:5:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
 ```
 invalid.svelte:6:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow aria-hidden="true" from being set on focusable elements.
+  × Incorrect use of aria-hidden="true" detected.
   
     4 │ <input aria-hidden="true" />
     5 │ <div tabindex="0" aria-hidden="true"></div>
@@ -128,7 +128,7 @@ invalid.svelte:6:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
 ```
 invalid.svelte:7:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow aria-hidden="true" from being set on focusable elements.
+  × Incorrect use of aria-hidden="true" detected.
   
     5 │ <div tabindex="0" aria-hidden="true"></div>
     6 │ <select aria-hidden="true"><option>opt</option></select>
@@ -149,7 +149,7 @@ invalid.svelte:7:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
 ```
 invalid.svelte:8:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow aria-hidden="true" from being set on focusable elements.
+  × Incorrect use of aria-hidden="true" detected.
   
      6 │ <select aria-hidden="true"><option>opt</option></select>
      7 │ <textarea aria-hidden="true">text</textarea>
@@ -170,7 +170,7 @@ invalid.svelte:8:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
 ```
 invalid.svelte:9:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow aria-hidden="true" from being set on focusable elements.
+  × Incorrect use of aria-hidden="true" detected.
   
      7 │ <textarea aria-hidden="true">text</textarea>
      8 │ <div contenteditable="true" aria-hidden="true">editable</div>
@@ -191,7 +191,7 @@ invalid.svelte:9:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
 ```
 invalid.svelte:10:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow aria-hidden="true" from being set on focusable elements.
+  × Incorrect use of aria-hidden="true" detected.
   
      8 │ <div contenteditable="true" aria-hidden="true">editable</div>
      9 │ <div contenteditable aria-hidden="true">editable bare attr</div>
@@ -212,7 +212,7 @@ invalid.svelte:10:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
 ```
 invalid.svelte:11:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow aria-hidden="true" from being set on focusable elements.
+  × Incorrect use of aria-hidden="true" detected.
   
      9 │ <div contenteditable aria-hidden="true">editable bare attr</div>
     10 │ <div contenteditable="" aria-hidden="true">editable empty string</div>
@@ -233,7 +233,7 @@ invalid.svelte:11:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
 ```
 invalid.svelte:12:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow aria-hidden="true" from being set on focusable elements.
+  × Incorrect use of aria-hidden="true" detected.
   
     10 │ <div contenteditable="" aria-hidden="true">editable empty string</div>
     11 │ <area href="/" aria-hidden="true" />
@@ -254,7 +254,7 @@ invalid.svelte:12:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
 ```
 invalid.svelte:13:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow aria-hidden="true" from being set on focusable elements.
+  × Incorrect use of aria-hidden="true" detected.
   
     11 │ <area href="/" aria-hidden="true" />
     12 │ <details aria-hidden="true">details</details>

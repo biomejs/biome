@@ -18,7 +18,7 @@ expression: invalid.jsx
 ```
 invalid.jsx:2:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow aria-hidden="true" from being set on focusable elements.
+  × Incorrect use of aria-hidden="true" detected.
   
     1 │ <>
   > 2 │   <div aria-hidden="true" tabIndex="0" />
@@ -38,7 +38,7 @@ invalid.jsx:2:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
 ```
 invalid.jsx:3:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow aria-hidden="true" from being set on focusable elements.
+  × Incorrect use of aria-hidden="true" detected.
   
     1 │ <>
     2 │   <div aria-hidden="true" tabIndex="0" />
@@ -59,7 +59,7 @@ invalid.jsx:3:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
 ```
 invalid.jsx:4:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow aria-hidden="true" from being set on focusable elements.
+  × Incorrect use of aria-hidden="true" detected.
   
     2 │   <div aria-hidden="true" tabIndex="0" />
     3 │   <input aria-hidden="true" />
@@ -80,7 +80,7 @@ invalid.jsx:4:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
 ```
 invalid.jsx:5:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow aria-hidden="true" from being set on focusable elements.
+  × Incorrect use of aria-hidden="true" detected.
   
     3 │   <input aria-hidden="true" />
     4 │   <a href="/" aria-hidden="true" />
@@ -101,7 +101,7 @@ invalid.jsx:5:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
 ```
 invalid.jsx:6:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow aria-hidden="true" from being set on focusable elements.
+  × Incorrect use of aria-hidden="true" detected.
   
     4 │   <a href="/" aria-hidden="true" />
     5 │   <button aria-hidden="true" />
@@ -122,7 +122,7 @@ invalid.jsx:6:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
 ```
 invalid.jsx:7:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow aria-hidden="true" from being set on focusable elements.
+  × Incorrect use of aria-hidden="true" detected.
   
     5 │   <button aria-hidden="true" />
     6 │   <textarea aria-hidden="true" />

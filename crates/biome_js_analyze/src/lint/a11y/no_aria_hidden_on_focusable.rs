@@ -122,7 +122,7 @@ impl Rule for NoAriaHiddenOnFocusable {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Disallow "<Emphasis>"aria-hidden=\"true\""</Emphasis>" from being set on focusable elements."
+                    "Incorrect use of "<Emphasis>"aria-hidden=\"true\""</Emphasis>" detected."
                 },
             )
             .note(markup! {
