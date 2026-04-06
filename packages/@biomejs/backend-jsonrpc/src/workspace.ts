@@ -2327,7 +2327,7 @@ See https://biomejs.dev/linter/rules/no-unnecessary-conditions
 	 */
 	noUnnecessaryConditions?: NoUnnecessaryConditionsConfiguration;
 	/**
-	* Disallow JSON keys that are not normalized.
+	* Disallow JSON keys with inconsistent Unicode representation.
 See https://biomejs.dev/linter/rules/no-unnormalized-object-keys 
 	 */
 	noUnnormalizedObjectKeys?: NoUnnormalizedObjectKeysConfiguration;
