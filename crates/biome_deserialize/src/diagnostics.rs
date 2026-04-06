@@ -219,14 +219,14 @@ impl DeserializationDiagnostic {
 
     /// Adds a note with a list of strings
     pub fn note_with_list(mut self, message: impl Display, list: &[impl Display]) -> Self {
-        self.deserialization_advice.entries.push(
-            AdviceEntry::NoteWithList(
+        self.deserialization_advice
+            .entries
+            .push(AdviceEntry::NoteWithList(
                 markup! {{message}}.to_owned(),
                 list.iter()
                     .map(|message| markup! {{message}}.to_owned())
                     .collect::<Vec<_>>(),
-            ),
-        );
+            ));
         self
     }
 

@@ -426,10 +426,7 @@ fn group_preset_all_with_rule_off() {
     // function foo() {} triggers noEmptyBlockStatements (non-recommended) — should fire
     // via preset: "all", proving the preset works.
     let test = Utf8Path::new("test.js");
-    fs.insert(
-        test.into(),
-        b"debugger;\nfunction foo() {}\n",
-    );
+    fs.insert(test.into(), b"debugger;\nfunction foo() {}\n");
 
     let (fs, result) = run_cli(
         fs,

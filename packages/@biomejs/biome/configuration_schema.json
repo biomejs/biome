@@ -7517,15 +7517,9 @@
 			"items": { "$ref": "#/$defs/PluginConfiguration" }
 		},
 		"PresetConfig": {
-			"oneOf": [
-				{ "type": "string", "enum": ["All", "None"] },
-				{
-					"type": "object",
-					"properties": { "FromAnalyzer": { "$ref": "#/$defs/RulePreset" } },
-					"additionalProperties": false,
-					"required": ["FromAnalyzer"]
-				}
-			]
+			"description": "A preset configuration for enabling a set of rules.",
+			"type": "string",
+			"enum": ["recommended", "all", "none"]
 		},
 		"PropertyAssignmentMode": {
 			"description": "Specifies whether property assignments on function parameters are allowed or denied.",
@@ -7734,16 +7728,6 @@
 					"description": "Enables the rule, and it will emit a diagnostic with error severity",
 					"type": "string",
 					"const": "error"
-				}
-			]
-		},
-		"RulePreset": {
-			"description": "The set of rules that will be executed by the linter.",
-			"oneOf": [
-				{
-					"description": "A set of rules that are enabled by default.",
-					"type": "string",
-					"const": "recommended"
 				}
 			]
 		},
