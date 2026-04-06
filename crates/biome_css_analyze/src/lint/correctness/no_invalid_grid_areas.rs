@@ -2,7 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::CssDeclarationOrRuleList;
+use biome_css_syntax::{AnyCssGenericPropertyValueOrExpression, CssDeclarationOrRuleList};
 use biome_diagnostics::Severity;
 use biome_rowan::{TextRange, TokenText};
 use biome_rule_options::no_invalid_grid_areas::NoInvalidGridAreasOptions;
@@ -107,9 +107,20 @@ impl Rule for NoInvalidGridAreas {
                 None
             })
             .flat_map(|grid_props| {
-                grid_props
-                    .into_iter()
+                let value = match grid_props {
+                    Ok(value) => value,
+                    Err(_) => return Vec::new(),
+                };
+                let list = match value {
+                    AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(list) => {
+                        list
+                    }
+                    AnyCssGenericPropertyValueOrExpression::ScssExpression(_) => return Vec::new(),
+                };
+
+                list.into_iter()
                     .filter_map(|x| x.as_any_css_value()?.as_css_string()?.value_token().ok())
+                    .collect::<Vec<_>>()
             })
             // Need to remove `"` with escaping slash from the grid area
             // Ex: "\"a a a\""

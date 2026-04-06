@@ -47,20 +47,18 @@ CssRoot {
                                             },
                                             l_paren_token: L_PAREN@32..33 "(" [] [],
                                             items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssBracketedValue {
-                                                                l_brack_token: L_BRACK@33..34 "[" [] [],
-                                                                items: CssBracketedValueList [
-                                                                    CssCustomIdentifier {
-                                                                        value_token: IDENT@34..40 "length" [] [],
-                                                                    },
-                                                                ],
-                                                                r_brack_token: missing (required),
-                                                            },
-                                                        ],
-                                                    },
+                                                CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssBracketedValue {
+                                                            l_brack_token: L_BRACK@33..34 "[" [] [],
+                                                            items: CssBracketedValueList [
+                                                                CssCustomIdentifier {
+                                                                    value_token: IDENT@34..40 "length" [] [],
+                                                                },
+                                                            ],
+                                                            r_brack_token: missing (required),
+                                                        },
+                                                    ],
                                                 },
                                             ],
                                             r_paren_token: R_PAREN@40..41 ")" [] [],
@@ -111,15 +109,14 @@ CssRoot {
                         0: IDENT@25..32 "--value" [] []
                       1: L_PAREN@32..33 "(" [] []
                       2: CSS_PARAMETER_LIST@33..40
-                        0: CSS_PARAMETER@33..40
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@33..40
-                            0: CSS_COMPONENT_VALUE_LIST@33..40
-                              0: CSS_BRACKETED_VALUE@33..40
-                                0: L_BRACK@33..34 "[" [] []
-                                1: CSS_BRACKETED_VALUE_LIST@34..40
-                                  0: CSS_CUSTOM_IDENTIFIER@34..40
-                                    0: IDENT@34..40 "length" [] []
-                                2: (empty)
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@33..40
+                          0: CSS_COMPONENT_VALUE_LIST@33..40
+                            0: CSS_BRACKETED_VALUE@33..40
+                              0: L_BRACK@33..34 "[" [] []
+                              1: CSS_BRACKETED_VALUE_LIST@34..40
+                                0: CSS_CUSTOM_IDENTIFIER@34..40
+                                  0: IDENT@34..40 "length" [] []
+                              2: (empty)
                       3: R_PAREN@40..41 ")" [] []
                 1: (empty)
               1: (empty)

@@ -1,4 +1,4 @@
-use crate::css_module_info::{CssImport, CssImports, CssModuleInfo, is_global_pseudo};
+use crate::css_module_info::{CssImport, CssImports, CssModuleInfo};
 use crate::module_graph::ModuleGraphFsProxy;
 use biome_css_syntax::{
     AnyCssImportUrl, AnyCssRoot, CssClassSelector, CssPseudoClassFunctionSelector,
@@ -46,7 +46,7 @@ impl<'a> CssModuleVisitor<'a> {
                     } else if let Some(pseudo_fn) =
                         CssPseudoClassFunctionSelector::cast(node.clone())
                     {
-                        if is_global_pseudo(&pseudo_fn) {
+                        if pseudo_fn.is_global_pseudo() {
                             global_depth += 1;
                         }
                     } else if global_depth == 0
@@ -57,7 +57,7 @@ impl<'a> CssModuleVisitor<'a> {
                 }
                 WalkEvent::Leave(node) => {
                     if let Some(pseudo_fn) = CssPseudoClassFunctionSelector::cast(node)
-                        && is_global_pseudo(&pseudo_fn)
+                        && pseudo_fn.is_global_pseudo()
                     {
                         global_depth = global_depth.saturating_sub(1);
                     }
@@ -74,6 +74,7 @@ impl<'a> CssModuleVisitor<'a> {
     /// Each token represents a single class name (e.g., "header" from `.header`).
     fn visit_class_selector(node: CssClassSelector, classes: &mut IndexSet<TokenText>) {
         if let Ok(name) = node.name()
+            && let Some(name) = name.as_css_custom_identifier()
             && let Ok(token) = name.value_token()
         {
             classes.insert(token.token_text_trimmed());

@@ -1,6 +1,6 @@
 //! CLI integration tests for CSS lint rules.
 //!
-//! This file tests the `noUnusedStyles` rule behavior in real-world scenarios:
+//! This file tests the `noUnusedClasses` rule behavior in real-world scenarios:
 //! - Referenced vs unreferenced classes
 //! - Dynamic className expressions
 //! - Global pseudo-class exemptions
@@ -16,9 +16,9 @@ use biome_fs::TemporaryFs;
 use bpaf::Args;
 
 #[test]
-fn no_unused_styles_referenced_class_not_flagged() {
+fn no_unused_classes_referenced_class_not_flagged() {
     let mut console = BufferConsole::default();
-    let mut fs = TemporaryFs::new("no_unused_styles_referenced_class_not_flagged");
+    let mut fs = TemporaryFs::new("no_unused_classes_referenced_class_not_flagged");
 
     // .button referenced via className= (JSX)
     // .card referenced via className= (TSX)
@@ -51,12 +51,12 @@ export default () => <div class="solid" />;
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["lint", "--only=nursery/noUnusedStyles", fs.cli_path()].as_slice()),
+        Args::from(["lint", "--only=nursery/noUnusedClasses", fs.cli_path()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "no_unused_styles_referenced_class_not_flagged",
+        "no_unused_classes_referenced_class_not_flagged",
         fs.create_mem(),
         console,
         result,
@@ -64,9 +64,9 @@ export default () => <div class="solid" />;
 }
 
 #[test]
-fn no_unused_styles_unreferenced_class_flagged() {
+fn no_unused_classes_unreferenced_class_flagged() {
     let mut console = BufferConsole::default();
-    let mut fs = TemporaryFs::new("no_unused_styles_unreferenced_class_flagged");
+    let mut fs = TemporaryFs::new("no_unused_classes_unreferenced_class_flagged");
 
     // .used and .primary are referenced; .orphan and .ghost are not
     fs.create_file(
@@ -83,12 +83,12 @@ export default () => <div className="used primary" />;
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["lint", "--only=nursery/noUnusedStyles", fs.cli_path()].as_slice()),
+        Args::from(["lint", "--only=nursery/noUnusedClasses", fs.cli_path()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "no_unused_styles_unreferenced_class_flagged",
+        "no_unused_classes_unreferenced_class_flagged",
         fs.create_mem(),
         console,
         result,
@@ -96,9 +96,9 @@ export default () => <div className="used primary" />;
 }
 
 #[test]
-fn no_unused_styles_dynamic_classname_not_collected() {
+fn no_unused_classes_dynamic_classname_not_collected() {
     let mut console = BufferConsole::default();
-    let mut fs = TemporaryFs::new("no_unused_styles_dynamic_classname_not_collected");
+    let mut fs = TemporaryFs::new("no_unused_classes_dynamic_classname_not_collected");
 
     fs.create_file("styles.css", ".button { color: blue; }");
     fs.create_file(
@@ -112,12 +112,12 @@ export default () => <div className={"button"} />;
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["lint", "--only=nursery/noUnusedStyles", fs.cli_path()].as_slice()),
+        Args::from(["lint", "--only=nursery/noUnusedClasses", fs.cli_path()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "no_unused_styles_dynamic_classname_not_collected",
+        "no_unused_classes_dynamic_classname_not_collected",
         fs.create_mem(),
         console,
         result,
@@ -125,9 +125,9 @@ export default () => <div className={"button"} />;
 }
 
 #[test]
-fn no_unused_styles_global_pseudo_class_is_exempt() {
+fn no_unused_classes_global_pseudo_class_is_exempt() {
     let mut console = BufferConsole::default();
-    let mut fs = TemporaryFs::new("no_unused_styles_global_pseudo_class_is_exempt");
+    let mut fs = TemporaryFs::new("no_unused_classes_global_pseudo_class_is_exempt");
 
     fs.create_file(
         "styles.css",
@@ -137,12 +137,12 @@ fn no_unused_styles_global_pseudo_class_is_exempt() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["lint", "--only=nursery/noUnusedStyles", fs.cli_path()].as_slice()),
+        Args::from(["lint", "--only=nursery/noUnusedClasses", fs.cli_path()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "no_unused_styles_global_pseudo_class_is_exempt",
+        "no_unused_classes_global_pseudo_class_is_exempt",
         fs.create_mem(),
         console,
         result,
@@ -150,9 +150,9 @@ fn no_unused_styles_global_pseudo_class_is_exempt() {
 }
 
 #[test]
-fn no_unused_styles_transitive_css_import() {
+fn no_unused_classes_transitive_css_import() {
     let mut console = BufferConsole::default();
-    let mut fs = TemporaryFs::new("no_unused_styles_transitive_css_import");
+    let mut fs = TemporaryFs::new("no_unused_classes_transitive_css_import");
 
     fs.create_file("base.css", ".base { box-sizing: border-box; }");
     fs.create_file(
@@ -169,12 +169,12 @@ export default () => <div className="base theme" />;
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["lint", "--only=nursery/noUnusedStyles", fs.cli_path()].as_slice()),
+        Args::from(["lint", "--only=nursery/noUnusedClasses", fs.cli_path()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "no_unused_styles_transitive_css_import",
+        "no_unused_classes_transitive_css_import",
         fs.create_mem(),
         console,
         result,
@@ -182,9 +182,9 @@ export default () => <div className="base theme" />;
 }
 
 #[test]
-fn no_unused_styles_selector_patterns_all_referenced() {
+fn no_unused_classes_selector_patterns_all_referenced() {
     let mut console = BufferConsole::default();
-    let mut fs = TemporaryFs::new("no_unused_styles_selector_patterns_all_referenced");
+    let mut fs = TemporaryFs::new("no_unused_classes_selector_patterns_all_referenced");
 
     fs.create_file(
         "styles.css",
@@ -210,12 +210,12 @@ export default () => (
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["lint", "--only=nursery/noUnusedStyles", fs.cli_path()].as_slice()),
+        Args::from(["lint", "--only=nursery/noUnusedClasses", fs.cli_path()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "no_unused_styles_selector_patterns_all_referenced",
+        "no_unused_classes_selector_patterns_all_referenced",
         fs.create_mem(),
         console,
         result,
@@ -223,9 +223,9 @@ export default () => (
 }
 
 #[test]
-fn no_unused_styles_selector_patterns_partial_reference() {
+fn no_unused_classes_selector_patterns_partial_reference() {
     let mut console = BufferConsole::default();
-    let mut fs = TemporaryFs::new("no_unused_styles_selector_patterns_partial_reference");
+    let mut fs = TemporaryFs::new("no_unused_classes_selector_patterns_partial_reference");
 
     fs.create_file(
         "styles.css",
@@ -245,12 +245,12 @@ export default () => <div className="child foo mobile" />;
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["lint", "--only=nursery/noUnusedStyles", fs.cli_path()].as_slice()),
+        Args::from(["lint", "--only=nursery/noUnusedClasses", fs.cli_path()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "no_unused_styles_selector_patterns_partial_reference",
+        "no_unused_classes_selector_patterns_partial_reference",
         fs.create_mem(),
         console,
         result,
@@ -258,9 +258,9 @@ export default () => <div className="child foo mobile" />;
 }
 
 #[test]
-fn no_unused_styles_component_hierarchy_parent_imports_css() {
+fn no_unused_classes_component_hierarchy_parent_imports_css() {
     let mut console = BufferConsole::default();
-    let mut fs = TemporaryFs::new("no_unused_styles_component_hierarchy_parent_imports_css");
+    let mut fs = TemporaryFs::new("no_unused_classes_component_hierarchy_parent_imports_css");
 
     // Real-world pattern: Parent imports CSS and child component
     // Child component uses classes from that CSS
@@ -285,12 +285,12 @@ export default () => <div><Button /></div>;
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["lint", "--only=nursery/noUnusedStyles", fs.cli_path()].as_slice()),
+        Args::from(["lint", "--only=nursery/noUnusedClasses", fs.cli_path()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "no_unused_styles_component_hierarchy_parent_imports_css",
+        "no_unused_classes_component_hierarchy_parent_imports_css",
         fs.create_mem(),
         console,
         result,
@@ -298,9 +298,9 @@ export default () => <div><Button /></div>;
 }
 
 #[test]
-fn no_unused_styles_component_hierarchy_child_imports_css() {
+fn no_unused_classes_component_hierarchy_child_imports_css() {
     let mut console = BufferConsole::default();
-    let mut fs = TemporaryFs::new("no_unused_styles_component_hierarchy_child_imports_css");
+    let mut fs = TemporaryFs::new("no_unused_classes_component_hierarchy_child_imports_css");
 
     // Child component imports its own CSS
     fs.create_file(
@@ -323,12 +323,12 @@ export default () => <div><Button /></div>;
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["lint", "--only=nursery/noUnusedStyles", fs.cli_path()].as_slice()),
+        Args::from(["lint", "--only=nursery/noUnusedClasses", fs.cli_path()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "no_unused_styles_component_hierarchy_child_imports_css",
+        "no_unused_classes_component_hierarchy_child_imports_css",
         fs.create_mem(),
         console,
         result,
@@ -336,9 +336,9 @@ export default () => <div><Button /></div>;
 }
 
 #[test]
-fn no_unused_styles_component_hierarchy_nested_three_levels() {
+fn no_unused_classes_component_hierarchy_nested_three_levels() {
     let mut console = BufferConsole::default();
-    let mut fs = TemporaryFs::new("no_unused_styles_component_hierarchy_nested_three_levels");
+    let mut fs = TemporaryFs::new("no_unused_classes_component_hierarchy_nested_three_levels");
 
     // Deep nesting: App → Page → Button (App imports all CSS)
     fs.create_file(
@@ -366,12 +366,12 @@ export default () => <Page />;
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["lint", "--only=nursery/noUnusedStyles", fs.cli_path()].as_slice()),
+        Args::from(["lint", "--only=nursery/noUnusedClasses", fs.cli_path()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "no_unused_styles_component_hierarchy_nested_three_levels",
+        "no_unused_classes_component_hierarchy_nested_three_levels",
         fs.create_mem(),
         console,
         result,
@@ -379,9 +379,9 @@ export default () => <Page />;
 }
 
 #[test]
-fn no_undeclared_styles_shows_checked_import_chain() {
+fn no_undeclared_classes_shows_checked_import_chain() {
     let mut console = BufferConsole::default();
-    let mut fs = TemporaryFs::new("no_undeclared_styles_shows_checked_import_chain");
+    let mut fs = TemporaryFs::new("no_undeclared_classes_shows_checked_import_chain");
 
     fs.create_file(
         "button.css",
@@ -396,12 +396,12 @@ export default () => <button className="btn btn-undefined">Click</button>;"#,
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["lint", "--only=nursery/noUndeclaredStyles", fs.cli_path()].as_slice()),
+        Args::from(["lint", "--only=nursery/noUndeclaredClasses", fs.cli_path()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "no_undeclared_styles_shows_checked_import_chain",
+        "no_undeclared_classes_shows_checked_import_chain",
         fs.create_mem(),
         console,
         result,

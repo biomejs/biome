@@ -5,3 +5,7 @@
 	allow: "anything";
 	in: here;
 }
+
+.button {
+	--color-*: initial;
+}

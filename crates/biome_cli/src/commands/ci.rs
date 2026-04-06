@@ -152,16 +152,7 @@ impl TraversalCommand for CiCommandPayload {
         _console: &mut dyn Console,
         _workspace: &dyn Workspace,
     ) -> Result<Box<dyn Execution>, CliDiagnostic> {
-        // This is funny, but we need to disable this at the moment, otherwise
-        // all our tests that run `biome ci` IN OUR CI, will get false positives. Call it CI-ception
-        let is_github = if cfg!(debug_assertions) {
-            false
-        } else {
-            // Ref: https://docs.github.com/actions/learn-github-actions/variables#default-environment-variables
-            std::env::var("GITHUB_ACTIONS")
-                .ok()
-                .is_some_and(|value| value == "true")
-        };
+        let is_github = super::is_github_actions();
 
         Ok(Box::new(CiExecution {
             environment: if is_github {

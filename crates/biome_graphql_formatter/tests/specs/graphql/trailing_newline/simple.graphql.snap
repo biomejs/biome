@@ -13,40 +13,20 @@ type Query {
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Bracket spacing: true
-Quote style: Double Quotes
-Trailing newline: true
------
-
-```graphql
-type Query {
-	hello: String
+```json
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "graphql": {
+    "formatter": {
+      "trailingNewline": false
+    }
+  }
 }
-
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Bracket spacing: true
-Quote style: Double Quotes
-Trailing newline: false
------
+# Formatted
 
 ```graphql
 type Query {

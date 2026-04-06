@@ -55,7 +55,7 @@ ignoredDependencies.js:8:5 lint/correctness/useExhaustiveDependencies  FIXABLE  
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency a to the list.
   
     10 │ ····},·[a]);
        │         +   

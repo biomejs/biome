@@ -1,0 +1,236 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<Component
+/* block comment */
+prop="value"
+/>
+<Component
+// line comment
+prop="value"
+/>
+<Component /* inline block comment */ prop="value" />
+<Component // inline line comment
+prop="value" />
+<Component.Member
+/* block comment */
+prop="value"
+/>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@0..1 "<" [] [],
+            name: HtmlComponentName {
+                value_token: HTML_LITERAL@1..10 "Component" [] [],
+            },
+            attributes: HtmlAttributeList [
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@10..35 "prop" [Newline("\n"), Comments("/* block comment */"), Newline("\n")] [],
+                    },
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@35..36 "=" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@36..43 "\"value\"" [] [],
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@43..45 "/" [Newline("\n")] [],
+            r_angle_token: R_ANGLE@45..46 ">" [] [],
+        },
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@46..48 "<" [Newline("\n")] [],
+            name: HtmlComponentName {
+                value_token: HTML_LITERAL@48..57 "Component" [] [],
+            },
+            attributes: HtmlAttributeList [
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@57..78 "prop" [Newline("\n"), Comments("// line comment"), Newline("\n")] [],
+                    },
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@78..79 "=" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@79..86 "\"value\"" [] [],
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@86..88 "/" [Newline("\n")] [],
+            r_angle_token: R_ANGLE@88..89 ">" [] [],
+        },
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@89..91 "<" [Newline("\n")] [],
+            name: HtmlComponentName {
+                value_token: HTML_LITERAL@91..128 "Component" [] [Whitespace(" "), Comments("/* inline block comme ..."), Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@128..132 "prop" [] [],
+                    },
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@132..133 "=" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@133..141 "\"value\"" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@141..142 "/" [] [],
+            r_angle_token: R_ANGLE@142..143 ">" [] [],
+        },
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@143..145 "<" [Newline("\n")] [],
+            name: HtmlComponentName {
+                value_token: HTML_LITERAL@145..177 "Component" [] [Whitespace(" "), Comments("// inline line comment")],
+            },
+            attributes: HtmlAttributeList [
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@177..182 "prop" [Newline("\n")] [],
+                    },
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@182..183 "=" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@183..191 "\"value\"" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@191..192 "/" [] [],
+            r_angle_token: R_ANGLE@192..193 ">" [] [],
+        },
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@193..195 "<" [Newline("\n")] [],
+            name: HtmlMemberName {
+                object: HtmlComponentName {
+                    value_token: HTML_LITERAL@195..204 "Component" [] [],
+                },
+                dot_token: DOT@204..205 "." [] [],
+                member: HtmlTagName {
+                    value_token: HTML_LITERAL@205..211 "Member" [] [],
+                },
+            },
+            attributes: HtmlAttributeList [
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@211..236 "prop" [Newline("\n"), Comments("/* block comment */"), Newline("\n")] [],
+                    },
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@236..237 "=" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@237..244 "\"value\"" [] [],
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@244..246 "/" [Newline("\n")] [],
+            r_angle_token: R_ANGLE@246..247 ">" [] [],
+        },
+    ],
+    eof_token: EOF@247..248 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..248
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..247
+    0: HTML_SELF_CLOSING_ELEMENT@0..46
+      0: L_ANGLE@0..1 "<" [] []
+      1: HTML_COMPONENT_NAME@1..10
+        0: HTML_LITERAL@1..10 "Component" [] []
+      2: HTML_ATTRIBUTE_LIST@10..43
+        0: HTML_ATTRIBUTE@10..43
+          0: HTML_ATTRIBUTE_NAME@10..35
+            0: HTML_LITERAL@10..35 "prop" [Newline("\n"), Comments("/* block comment */"), Newline("\n")] []
+          1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@35..43
+            0: EQ@35..36 "=" [] []
+            1: HTML_STRING@36..43
+              0: HTML_STRING_LITERAL@36..43 "\"value\"" [] []
+      3: SLASH@43..45 "/" [Newline("\n")] []
+      4: R_ANGLE@45..46 ">" [] []
+    1: HTML_SELF_CLOSING_ELEMENT@46..89
+      0: L_ANGLE@46..48 "<" [Newline("\n")] []
+      1: HTML_COMPONENT_NAME@48..57
+        0: HTML_LITERAL@48..57 "Component" [] []
+      2: HTML_ATTRIBUTE_LIST@57..86
+        0: HTML_ATTRIBUTE@57..86
+          0: HTML_ATTRIBUTE_NAME@57..78
+            0: HTML_LITERAL@57..78 "prop" [Newline("\n"), Comments("// line comment"), Newline("\n")] []
+          1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@78..86
+            0: EQ@78..79 "=" [] []
+            1: HTML_STRING@79..86
+              0: HTML_STRING_LITERAL@79..86 "\"value\"" [] []
+      3: SLASH@86..88 "/" [Newline("\n")] []
+      4: R_ANGLE@88..89 ">" [] []
+    2: HTML_SELF_CLOSING_ELEMENT@89..143
+      0: L_ANGLE@89..91 "<" [Newline("\n")] []
+      1: HTML_COMPONENT_NAME@91..128
+        0: HTML_LITERAL@91..128 "Component" [] [Whitespace(" "), Comments("/* inline block comme ..."), Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@128..141
+        0: HTML_ATTRIBUTE@128..141
+          0: HTML_ATTRIBUTE_NAME@128..132
+            0: HTML_LITERAL@128..132 "prop" [] []
+          1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@132..141
+            0: EQ@132..133 "=" [] []
+            1: HTML_STRING@133..141
+              0: HTML_STRING_LITERAL@133..141 "\"value\"" [] [Whitespace(" ")]
+      3: SLASH@141..142 "/" [] []
+      4: R_ANGLE@142..143 ">" [] []
+    3: HTML_SELF_CLOSING_ELEMENT@143..193
+      0: L_ANGLE@143..145 "<" [Newline("\n")] []
+      1: HTML_COMPONENT_NAME@145..177
+        0: HTML_LITERAL@145..177 "Component" [] [Whitespace(" "), Comments("// inline line comment")]
+      2: HTML_ATTRIBUTE_LIST@177..191
+        0: HTML_ATTRIBUTE@177..191
+          0: HTML_ATTRIBUTE_NAME@177..182
+            0: HTML_LITERAL@177..182 "prop" [Newline("\n")] []
+          1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@182..191
+            0: EQ@182..183 "=" [] []
+            1: HTML_STRING@183..191
+              0: HTML_STRING_LITERAL@183..191 "\"value\"" [] [Whitespace(" ")]
+      3: SLASH@191..192 "/" [] []
+      4: R_ANGLE@192..193 ">" [] []
+    4: HTML_SELF_CLOSING_ELEMENT@193..247
+      0: L_ANGLE@193..195 "<" [Newline("\n")] []
+      1: HTML_MEMBER_NAME@195..211
+        0: HTML_COMPONENT_NAME@195..204
+          0: HTML_LITERAL@195..204 "Component" [] []
+        1: DOT@204..205 "." [] []
+        2: HTML_TAG_NAME@205..211
+          0: HTML_LITERAL@205..211 "Member" [] []
+      2: HTML_ATTRIBUTE_LIST@211..244
+        0: HTML_ATTRIBUTE@211..244
+          0: HTML_ATTRIBUTE_NAME@211..236
+            0: HTML_LITERAL@211..236 "prop" [Newline("\n"), Comments("/* block comment */"), Newline("\n")] []
+          1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@236..244
+            0: EQ@236..237 "=" [] []
+            1: HTML_STRING@237..244
+              0: HTML_STRING_LITERAL@237..244 "\"value\"" [] []
+      3: SLASH@244..246 "/" [Newline("\n")] []
+      4: R_ANGLE@246..247 ">" [] []
+  4: EOF@247..248 "" [Newline("\n")] []
+
+```

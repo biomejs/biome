@@ -3,7 +3,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::CssGenericProperty;
+use biome_css_syntax::{AnyCssGenericPropertyValueOrExpression, CssGenericProperty};
 use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
 use biome_rule_options::no_duplicate_font_names::NoDuplicateFontNamesOptions;
@@ -71,7 +71,13 @@ impl Rule for NoDuplicateFontNames {
         }
 
         let mut family_names: HashSet<CssFontValue> = HashSet::new();
-        let value_list = node.value();
+        let value_list = match node.value() {
+            Ok(value) => match value {
+                AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(list) => list,
+                AnyCssGenericPropertyValueOrExpression::ScssExpression(_) => return None,
+            },
+            Err(_) => return None,
+        };
         let font_families = find_font_family(value_list);
 
         for css_value in font_families {

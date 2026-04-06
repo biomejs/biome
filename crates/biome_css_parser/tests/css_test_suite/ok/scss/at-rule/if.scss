@@ -1,0 +1,25 @@
+@if $theme == dark {
+  color: white;
+}
+
+@if $theme == dark {
+  color: white;
+} @else {
+  color: black;
+}
+
+@if $theme == dark {
+  color: white;
+} @else if $theme == light {
+  color: black;
+} @else {
+  color: gray;
+}
+
+.card {
+  @if $compact {
+    padding: 0;
+  } @else {
+    padding: 1rem;
+  }
+}

@@ -1,3 +1,4 @@
+<!-- should not generate diagnostics -->
 <script setup lang="ts">
 // These are Vue v.2 reserved props, but they are not reserved in Vue v.3.
 interface Props {

@@ -103,6 +103,7 @@ fn apply_organize_action(input_code: &str) -> Result<String, String> {
     let services = JsonAnalyzeServices {
         file_source: JsonFileSource::json(),
         configuration_provider: None,
+        project_layout: None,
     };
 
     let mut result_code = None;

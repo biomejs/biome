@@ -111,7 +111,7 @@ impl Rule for NoUnknownUnit {
                         if unit == "x" {
                             let mut allow_x = false;
 
-                            for ancestor in dimension.unit_token().ok()?.ancestors() {
+                            for ancestor in dimension.unit_token().ok()?.ancestors().skip(1) {
                                 match ancestor.kind() {
                                     CssSyntaxKind::CSS_FUNCTION => {
                                         let function_name_token = ancestor

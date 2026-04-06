@@ -49,7 +49,7 @@ export type PromisedResult = Promise<{ result: true | false }>;
 ```
 Exports {
   "PromisedResult" => {
-    ExportOwnExport => JsOwnExport::Binding(0)
+    ExportOwnExport => JsOwnExport::Binding(12..26)
   }
 }
 Imports {
@@ -60,10 +60,9 @@ Imports {
 ## Exported Bindings
 
 ```
-BindingId(0) => JsBindingData {
-  Name: PromisedResult,
-  Type: Module(0) TypeId(4),
-  Declaration kind: Type
+PromisedResult  => BindingTypeData {
+  Types Module(0) TypeId(4),
+  Exported Ranges: (12..26)
 }
 ```
 
@@ -103,7 +102,7 @@ export { returnPromiseResult };
 ```
 Exports {
   "returnPromiseResult" => {
-    ExportOwnExport => JsOwnExport::Binding(1)
+    ExportOwnExport => JsOwnExport::Binding(77..96)
   }
 }
 Imports {
@@ -118,10 +117,9 @@ Imports {
 ## Exported Bindings
 
 ```
-BindingId(1) => JsBindingData {
-  Name: returnPromiseResult,
-  Type: Module(0) TypeId(7),
-  Declaration kind: HoistedValue
+returnPromiseResult => BindingTypeData {
+  Types Module(0) TypeId(7),
+  Exported Ranges: (215..234)
 }
 ```
 

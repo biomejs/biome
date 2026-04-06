@@ -1,0 +1,26 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: null.json
+---
+# Input
+```json
+null
+
+```
+
+# Diagnostics
+```
+null.json:1:1 lint/nursery/noTopLevelLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Expected the top-level value to be an array or object.
+  
+  > 1 │ null
+      │ ^^^^
+    2 │ 
+  
+  i Some JSON parsers only support objects or arrays as the root element. Wrap your value in an array or object to ensure compatibility.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

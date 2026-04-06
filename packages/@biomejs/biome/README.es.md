@@ -18,8 +18,8 @@
   [ci-url]: https://github.com/biomejs/biome/actions/workflows/main.yml
   [discord-badge]: https://badgen.net/discord/online-members/BypW39g6Yc?icon=discord&label=discord&color=60a5fa
   [discord-url]: https://biomejs.dev/chat
-  [npm-badge]: https://badgen.net/npm/v/@biomejs/biome?icon=npm&color=60a5fa&label=%40biomejs%2Fbiome
-  [npm-url]: https://www.npmjs.com/package/@biomejs/biome/v/latest
+  [npm-badge]: https://npmx.dev/api/registry/badge/version/@biomejs/biome?color=60a5fa&style=shieldsio&label=%40biomejs%2Fbiome
+  [npm-url]: https://npmx.dev/package/@biomejs/biome
   [vscode-badge]: https://img.shields.io/visual-studio-marketplace/v/biomejs.biome?label=Visual%20Studio%20Marketplace&labelColor=374151&color=60a5fa
   [vscode-url]: https://marketplace.visualstudio.com/items?itemName=biomejs.biome
   [open-vsx-badge]: https://img.shields.io/visual-studio-marketplace/v/biomejs.biome?label=Open%20VSX%20Registry&logo=data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2aWV3Qm94PSI0LjYgNSA5Ni4yIDEyMi43IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogIDxwYXRoIGQ9Ik0zMCA0NC4yTDUyLjYgNUg3LjN6TTQuNiA4OC41aDQ1LjNMMjcuMiA0OS40em01MSAwbDIyLjYgMzkuMiAyMi42LTM5LjJ6IiBmaWxsPSIjYzE2MGVmIi8+CiAgPHBhdGggZD0iTTUyLjYgNUwzMCA0NC4yaDQ1LjJ6TTI3LjIgNDkuNGwyMi43IDM5LjEgMjIuNi0zOS4xem01MSAwTDU1LjYgODguNWg0NS4yeiIgZmlsbD0iI2E2MGVlNSIvPgo8L3N2Zz4=&labelColor=374151&color=60a5fa
@@ -38,7 +38,7 @@
 
 **Biome es un [formatter rápido](https://github.com/biomejs/biome/tree/main/benchmark#formatting)** para _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_ y _GraphQL_ que alcanza un **[97% de compatibilidad con _Prettier_](https://console.algora.io/challenges/prettier)**.
 
-**Biome es un [linter de alto rendimiento](https://github.com/biomejs/biome/tree/main/benchmark#linting)** para _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_, y _GraphQL_ que incluye **[más de 340 reglas](https://biomejs.dev/linter/javascript/rules/)** de ESLint, typescript-eslint, y [otras fuentes](https://github.com/biomejs/biome/discussions/3).
+**Biome es un [linter de alto rendimiento](https://github.com/biomejs/biome/tree/main/benchmark#linting)** para _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_, y _GraphQL_ que incluye **[más de 450 reglas](https://biomejs.dev/linter/javascript/rules/)** de ESLint, typescript-eslint, y [otras fuentes](https://github.com/biomejs/biome/discussions/3).
 Produce **diagnósticos detallados y contextualizados** que ayudan a mejorar tu código y convertirte en un mejor programador!
 
 **Biome** fue diseñado desde cero para usarse [interactivamente dentro de un editor](https://biomejs.dev/guides/editors/first-party-extensions/).

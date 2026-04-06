@@ -86,16 +86,18 @@ impl<'a> Iterator for ImportTreeTraversal<'a> {
                 }
 
                 let imports_current = match module_info {
-                    crate::ModuleInfo::Js(js_info) => js_info
+                    ModuleInfo::Js(js_info) => js_info
                         .static_import_paths
                         .values()
                         .chain(js_info.dynamic_import_paths.values())
                         .any(|p| p.as_path() == Some(current_path.as_path())),
-                    crate::ModuleInfo::Html(html_info) => html_info
+                    ModuleInfo::Html(html_info) => html_info
                         .imported_stylesheets
                         .iter()
+                        .chain(html_info.static_import_paths.values())
+                        .chain(html_info.dynamic_import_paths.values())
                         .any(|p| p.as_path() == Some(current_path.as_path())),
-                    crate::ModuleInfo::Css(_) => false,
+                    ModuleInfo::Css(_) => false,
                 };
 
                 if imports_current {
@@ -106,7 +108,7 @@ impl<'a> Iterator for ImportTreeTraversal<'a> {
 
                     // Collect CSS files imported by this parent
                     let css_steps: Vec<_> = match module_info {
-                        crate::ModuleInfo::Js(js_info) => js_info
+                        ModuleInfo::Js(js_info) => js_info
                             .static_import_paths
                             .values()
                             .filter_map(|import_path| {
@@ -122,6 +124,8 @@ impl<'a> Iterator for ImportTreeTraversal<'a> {
                         ModuleInfo::Html(html_info) => html_info
                             .imported_stylesheets
                             .iter()
+                            .chain(html_info.static_import_paths.values())
+                            .chain(html_info.dynamic_import_paths.values())
                             .filter_map(|stylesheet_path| {
                                 let path = stylesheet_path.as_path()?;
                                 let css_info = self.module_graph.css_module_info_for_path(path)?;

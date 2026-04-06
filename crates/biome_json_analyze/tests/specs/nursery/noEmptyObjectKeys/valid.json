@@ -1,0 +1,7 @@
+{
+  "key1": "value1",
+  "key2": {
+    "nestedKey": "nested value",
+    "   nestedKey \n\t  ": "nested value"
+  }
+}

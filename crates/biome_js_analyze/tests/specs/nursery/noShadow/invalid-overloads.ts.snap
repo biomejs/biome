@@ -1,0 +1,79 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-overloads.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// Shadowing overload implementation parameter inside body with let/const
+class ShadowInBody {
+    constructor(a: string);
+    constructor(a: number);
+    constructor(a: unknown) {
+        let a = 4;
+    }
+}
+
+// Rest parameter in implementation shadows outer variable
+const items = [1, 2, 3];
+function restShadow(...items: string[]): void;
+function restShadow(...items: number[]): void;
+function restShadow(...items: (string | number)[]) {}
+
+```
+
+# Diagnostics
+```
+invalid-overloads.ts:8:13 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable shadows another variable with the same name in the outer scope.
+  
+     6 │     constructor(a: number);
+     7 │     constructor(a: unknown) {
+   > 8 │         let a = 4;
+       │             ^
+     9 │     }
+    10 │ }
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    5 │     constructor(a: string);
+    6 │     constructor(a: number);
+  > 7 │     constructor(a: unknown) {
+      │                 ^
+    8 │         let a = 4;
+    9 │     }
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-overloads.ts:16:24 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable shadows another variable with the same name in the outer scope.
+  
+    14 │ function restShadow(...items: string[]): void;
+    15 │ function restShadow(...items: number[]): void;
+  > 16 │ function restShadow(...items: (string | number)[]) {}
+       │                        ^^^^^
+    17 │ 
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    12 │ // Rest parameter in implementation shadows outer variable
+  > 13 │ const items = [1, 2, 3];
+       │       ^^^^^
+    14 │ function restShadow(...items: string[]): void;
+    15 │ function restShadow(...items: number[]): void;
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

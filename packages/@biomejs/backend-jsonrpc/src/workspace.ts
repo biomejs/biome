@@ -176,6 +176,14 @@ export interface FormatterConfiguration {
 	 * Whether to insert spaces around brackets in object literals. Defaults to true.
 	 */
 	bracketSpacing?: BracketSpacing;
+	/**
+	* Whether to insert spaces inside delimiters (after the opening delimiter and before the
+closing delimiter), such as parentheses, brackets, angle brackets, and template literal
+interpolations. Spaces are not added before the opening delimiter, and empty delimiters
+are not affected. Only applies when the content fits on a single line. The specific
+delimiters affected depend on the language. Defaults to false. 
+	 */
+	delimiterSpacing?: DelimiterSpacing;
 	enabled?: Bool;
 	/**
 	* Whether to expand arrays and objects on multiple lines.
@@ -491,6 +499,14 @@ export type AttributePosition = "auto" | "multiline";
  */
 export type BracketSameLine = boolean;
 export type BracketSpacing = boolean;
+/**
+	* Whether to insert spaces inside delimiters (after the opening delimiter and before the closing
+delimiter), such as parentheses, brackets, angle brackets, and template literal interpolations.
+Spaces are not added before the opening delimiter, and empty delimiters are not affected.
+Only applies when the content fits on a single line; when content breaks across multiple lines,
+no extra spaces are added. The specific delimiters affected depend on the language. 
+	 */
+export type DelimiterSpacing = boolean;
 export type Expand = "auto" | "always" | "never";
 export type IndentStyle = "tab" | "space";
 export type IndentWidth = number;
@@ -978,7 +994,21 @@ match these patterns.
 	 */
 	plugins?: Plugins;
 }
-export type PluginConfiguration = string;
+/**
+	* Configuration for a single plugin entry.
+
+Can be either a plain path string or an object with path and options:
+
+```json
+{
+  "plugins": [
+    "simple-plugin.grit",
+    { "path": "scoped-plugin.grit", "includes": ["src/**/*.ts"] }
+  ]
+}
+``` 
+	 */
+export type PluginConfiguration = string | PluginWithOptions;
 export type VcsClientKind = "git";
 /**
  * A list of rules that belong to this group
@@ -999,7 +1029,7 @@ See https://biomejs.dev/assist/actions/organize-imports
 	 */
 	recommended?: boolean;
 	/**
-	* Enforce attribute sorting in JSX elements.
+	* Enforce attribute sorting in HTML elements.
 See https://biomejs.dev/assist/actions/use-sorted-attributes 
 	 */
 	useSortedAttributes?: UseSortedAttributesConfiguration;
@@ -1082,6 +1112,7 @@ export type JsonTrailingCommas = "none" | "all";
  * Rule domains
  */
 export type RuleDomain =
+	| "drizzle"
 	| "react"
 	| "test"
 	| "solid"
@@ -1131,6 +1162,14 @@ export interface OverrideFormatterConfiguration {
 	 * Whether to insert spaces around brackets in object literals. Defaults to true.
 	 */
 	bracketSpacing?: BracketSpacing;
+	/**
+	* Whether to insert spaces inside delimiters (after the opening delimiter and before the
+closing delimiter), such as parentheses, brackets, angle brackets, and template literal
+interpolations. Spaces are not added before the opening delimiter, and empty delimiters
+are not affected. Only applies when the content fits on a single line. The specific
+delimiters affected depend on the language. Defaults to false. 
+	 */
+	delimiterSpacing?: DelimiterSpacing;
 	enabled?: Bool;
 	/**
 	* Whether to expand arrays and objects on multiple lines.
@@ -1194,6 +1233,20 @@ export interface OverrideLinterConfiguration {
 	 * List of rules
 	 */
 	rules?: Rules;
+}
+/**
+ * Plugin path with additional options.
+ */
+export interface PluginWithOptions {
+	/**
+	* A list of glob patterns. The plugin will only run on files matching
+these patterns. Use negated globs (e.g., `!**/*.test.ts`) for exclusions. 
+	 */
+	includes?: NormalizedGlob[];
+	/**
+	 * The path to the plugin.
+	 */
+	path: string;
 }
 export type NoDuplicateClassesConfiguration =
 	| RuleAssistPlainConfiguration
@@ -1319,7 +1372,7 @@ See https://biomejs.dev/linter/rules/use-anchor-content
 	 */
 	useAnchorContent?: UseAnchorContentConfiguration;
 	/**
-	* Enforce that tabIndex is assigned to non-interactive HTML elements with aria-activedescendant.
+	* Enforce that tabindex is assigned to non-interactive HTML elements with aria-activedescendant.
 See https://biomejs.dev/linter/rules/use-aria-activedescendant-with-tabindex 
 	 */
 	useAriaActivedescendantWithTabindex?: UseAriaActivedescendantWithTabindexConfiguration;
@@ -1349,7 +1402,7 @@ See https://biomejs.dev/linter/rules/use-generic-font-names
 	 */
 	useGenericFontNames?: UseGenericFontNamesConfiguration;
 	/**
-	* Enforce that heading elements (h1, h2, etc.) have content and that the content is accessible to screen readers. Accessible means that it is not hidden using the aria-hidden prop.
+	* Enforce that heading elements (h1, h2, etc.) have content and that the content is accessible to screen readers.
 See https://biomejs.dev/linter/rules/use-heading-content 
 	 */
 	useHeadingContent?: UseHeadingContentConfiguration;
@@ -1369,7 +1422,7 @@ See https://biomejs.dev/linter/rules/use-key-with-click-events
 	 */
 	useKeyWithClickEvents?: UseKeyWithClickEventsConfiguration;
 	/**
-	* Enforce onMouseOver / onMouseOut are accompanied by onFocus / onBlur.
+	* Enforce that onmouseover is accompanied by onfocus and onmouseout by onblur.
 See https://biomejs.dev/linter/rules/use-key-with-mouse-events 
 	 */
 	useKeyWithMouseEvents?: UseKeyWithMouseEventsConfiguration;
@@ -2082,6 +2135,16 @@ See https://biomejs.dev/linter/rules/no-div-regex
 	 */
 	noDivRegex?: NoDivRegexConfiguration;
 	/**
+	* Require .where() to be called when using .delete() with Drizzle ORM.
+See https://biomejs.dev/linter/rules/no-drizzle-delete-without-where 
+	 */
+	noDrizzleDeleteWithoutWhere?: NoDrizzleDeleteWithoutWhereConfiguration;
+	/**
+	* Require .where() to be called when using .update() with Drizzle ORM.
+See https://biomejs.dev/linter/rules/no-drizzle-update-without-where 
+	 */
+	noDrizzleUpdateWithoutWhere?: NoDrizzleUpdateWithoutWhereConfiguration;
+	/**
 	* Require all argument names for fields & directives to be unique.
 See https://biomejs.dev/linter/rules/no-duplicate-argument-names 
 	 */
@@ -2117,6 +2180,11 @@ See https://biomejs.dev/linter/rules/no-duplicate-input-field-names
 	 */
 	noDuplicateInputFieldNames?: NoDuplicateInputFieldNamesConfiguration;
 	/**
+	* Disallow duplicate selectors.
+See https://biomejs.dev/linter/rules/no-duplicate-selectors 
+	 */
+	noDuplicateSelectors?: NoDuplicateSelectorsConfiguration;
+	/**
 	* Require all variable definitions to be unique.
 See https://biomejs.dev/linter/rules/no-duplicate-variable-names 
 	 */
@@ -2126,6 +2194,11 @@ See https://biomejs.dev/linter/rules/no-duplicate-variable-names
 See https://biomejs.dev/linter/rules/no-duplicated-spread-props 
 	 */
 	noDuplicatedSpreadProps?: NoDuplicatedSpreadPropsConfiguration;
+	/**
+	* Disallow empty keys in JSON objects.
+See https://biomejs.dev/linter/rules/no-empty-object-keys 
+	 */
+	noEmptyObjectKeys?: NoEmptyObjectKeysConfiguration;
 	/**
 	* Require the use of === or !== for comparison with null.
 See https://biomejs.dev/linter/rules/no-equals-to-null 
@@ -2166,6 +2239,11 @@ See https://biomejs.dev/linter/rules/no-hex-colors
 See https://biomejs.dev/linter/rules/no-increment-decrement 
 	 */
 	noIncrementDecrement?: NoIncrementDecrementConfiguration;
+	/**
+	* Disallow the use of inline styles.
+See https://biomejs.dev/linter/rules/no-inline-styles 
+	 */
+	noInlineStyles?: NoInlineStylesConfiguration;
 	/**
 	* Disallow .bind(), arrow functions, or function expressions in JSX props.
 See https://biomejs.dev/linter/rules/no-jsx-props-bind 
@@ -2292,15 +2370,20 @@ See https://biomejs.dev/linter/rules/no-ternary
 	 */
 	noTernary?: NoTernaryConfiguration;
 	/**
+	* Require the JSON top-level value to be an array or object.
+See https://biomejs.dev/linter/rules/no-top-level-literals 
+	 */
+	noTopLevelLiterals?: NoTopLevelLiteralsConfiguration;
+	/**
+	* Reports CSS class names in HTML class attributes that are not defined in any \<style> block or linked stylesheet available to the file.
+See https://biomejs.dev/linter/rules/no-undeclared-classes 
+	 */
+	noUndeclaredClasses?: NoUndeclaredClassesConfiguration;
+	/**
 	* Disallow the use of undeclared environment variables.
 See https://biomejs.dev/linter/rules/no-undeclared-env-vars 
 	 */
 	noUndeclaredEnvVars?: NoUndeclaredEnvVarsConfiguration;
-	/**
-	* Reports CSS class names in HTML class attributes that are not defined in any \<style> block or linked stylesheet in the same file.
-See https://biomejs.dev/linter/rules/no-undeclared-styles 
-	 */
-	noUndeclaredStyles?: NoUndeclaredStylesConfiguration;
 	/**
 	* Disallow unknown DOM properties.
 See https://biomejs.dev/linter/rules/no-unknown-attribute 
@@ -2312,10 +2395,15 @@ See https://biomejs.dev/linter/rules/no-unnecessary-conditions
 	 */
 	noUnnecessaryConditions?: NoUnnecessaryConditionsConfiguration;
 	/**
-	* Reports CSS class selectors that are never referenced in any JSX or HTML file.
-See https://biomejs.dev/linter/rules/no-unused-styles 
+	* Disallow dependencies with untrusted licenses.
+See https://biomejs.dev/linter/rules/no-untrusted-licenses 
 	 */
-	noUnusedStyles?: NoUnusedStylesConfiguration;
+	noUntrustedLicenses?: NoUntrustedLicensesConfiguration;
+	/**
+	* Reports CSS class selectors that are never referenced in any JSX or HTML file.
+See https://biomejs.dev/linter/rules/no-unused-classes 
+	 */
+	noUnusedClasses?: NoUnusedClassesConfiguration;
 	/**
 	* Disallow redundant return statements.
 See https://biomejs.dev/linter/rules/no-useless-return 
@@ -2332,6 +2420,11 @@ See https://biomejs.dev/linter/rules/no-vue-options-api
 	 */
 	noVueOptionsApi?: NoVueOptionsApiConfiguration;
 	/**
+	* Disallow the use of value wrapped by ref()(Composition API) as operand.
+See https://biomejs.dev/linter/rules/no-vue-ref-as-operand 
+	 */
+	noVueRefAsOperand?: NoVueRefAsOperandConfiguration;
+	/**
 	* Disallow using v-if and v-for directives on the same element.
 See https://biomejs.dev/linter/rules/no-vue-v-if-with-v-for 
 	 */
@@ -2340,6 +2433,11 @@ See https://biomejs.dev/linter/rules/no-vue-v-if-with-v-for
 	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
+	/**
+	* Prefer Array.prototype.some() over verbose existence checks.
+See https://biomejs.dev/linter/rules/use-array-some 
+	 */
+	useArraySome?: UseArraySomeConfiguration;
 	/**
 	* Require Array#sort and Array#toSorted calls to always provide a compareFunction.
 See https://biomejs.dev/linter/rules/use-array-sort-compare 
@@ -2350,6 +2448,11 @@ See https://biomejs.dev/linter/rules/use-array-sort-compare
 See https://biomejs.dev/linter/rules/use-await-thenable 
 	 */
 	useAwaitThenable?: UseAwaitThenableConfiguration;
+	/**
+	* Disallow CSS properties, values, at-rules, functions, and selectors that are not part of the configured Baseline.
+See https://biomejs.dev/linter/rules/use-baseline 
+	 */
+	useBaseline?: UseBaselineConfiguration;
 	/**
 	* Disallow enums from having both number and string members.
 See https://biomejs.dev/linter/rules/use-consistent-enum-value-type 
@@ -2381,7 +2484,7 @@ See https://biomejs.dev/linter/rules/use-exhaustive-switch-cases
 	 */
 	useExhaustiveSwitchCases?: UseExhaustiveSwitchCasesConfiguration;
 	/**
-	* Ensure that test functions contain at least one expect() assertion.
+	* Ensure that test functions contain at least one expect() or similar assertion.
 See https://biomejs.dev/linter/rules/use-expect 
 	 */
 	useExpect?: UseExpectConfiguration;
@@ -2400,6 +2503,11 @@ See https://biomejs.dev/linter/rules/use-find
 See https://biomejs.dev/linter/rules/use-global-this 
 	 */
 	useGlobalThis?: UseGlobalThisConfiguration;
+	/**
+	* Enforce that all imports appear at the top of the module.
+See https://biomejs.dev/linter/rules/use-imports-first 
+	 */
+	useImportsFirst?: UseImportsFirstConfiguration;
 	/**
 	* Enforce id attribute on next/script components with inline content or dangerouslySetInnerHTML.
 See https://biomejs.dev/linter/rules/use-inline-script-id 
@@ -2421,6 +2529,16 @@ See https://biomejs.dev/linter/rules/use-lone-executable-definition
 	 */
 	useLoneExecutableDefinition?: UseLoneExecutableDefinitionConfiguration;
 	/**
+	* Enforce using named capture groups in regular expression.
+See https://biomejs.dev/linter/rules/use-named-capture-group 
+	 */
+	useNamedCaptureGroup?: UseNamedCaptureGroupConfiguration;
+	/**
+	* Enforce using the nullish coalescing operator (??) instead of logical or (||).
+See https://biomejs.dev/linter/rules/use-nullish-coalescing 
+	 */
+	useNullishCoalescing?: UseNullishCoalescingConfiguration;
+	/**
 	* Enforce valid describe() callback.
 See https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback 
 	 */
@@ -2436,6 +2554,11 @@ See https://biomejs.dev/linter/rules/use-required-scripts
 	 */
 	useRequiredScripts?: UseRequiredScriptsConfiguration;
 	/**
+	* Enforce that \<style> blocks in Vue SFCs have the scoped attribute and that \<style> blocks in Astro components do not have the is:global directive.
+See https://biomejs.dev/linter/rules/use-scoped-styles 
+	 */
+	useScopedStyles?: UseScopedStylesConfiguration;
+	/**
 	* Enforce the sorting of CSS utility classes.
 See https://biomejs.dev/linter/rules/use-sorted-classes 
 	 */
@@ -2445,6 +2568,11 @@ See https://biomejs.dev/linter/rules/use-sorted-classes
 See https://biomejs.dev/linter/rules/use-spread 
 	 */
 	useSpread?: UseSpreadConfiguration;
+	/**
+	* Enforce the use of the u or v flag for regular expressions.
+See https://biomejs.dev/linter/rules/use-unicode-regex 
+	 */
+	useUnicodeRegex?: UseUnicodeRegexConfiguration;
 	/**
 	* Enforce consistent defineProps declaration style.
 See https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration 
@@ -4079,6 +4207,12 @@ export type NoDeprecatedMediaTypeConfiguration =
 export type NoDivRegexConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDivRegexOptions;
+export type NoDrizzleDeleteWithoutWhereConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDrizzleDeleteWithoutWhereOptions;
+export type NoDrizzleUpdateWithoutWhereConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDrizzleUpdateWithoutWhereOptions;
 export type NoDuplicateArgumentNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateArgumentNamesOptions;
@@ -4100,12 +4234,18 @@ export type NoDuplicateGraphqlOperationNameConfiguration =
 export type NoDuplicateInputFieldNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateInputFieldNamesOptions;
+export type NoDuplicateSelectorsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicateSelectorsOptions;
 export type NoDuplicateVariableNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateVariableNamesOptions;
 export type NoDuplicatedSpreadPropsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicatedSpreadPropsOptions;
+export type NoEmptyObjectKeysConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoEmptyObjectKeysOptions;
 export type NoEqualsToNullConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoEqualsToNullOptions;
@@ -4130,6 +4270,9 @@ export type NoHexColorsConfiguration =
 export type NoIncrementDecrementConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoIncrementDecrementOptions;
+export type NoInlineStylesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoInlineStylesOptions;
 export type NoJsxPropsBindConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsxPropsBindOptions;
@@ -4205,21 +4348,27 @@ export type NoSyncScriptsConfiguration =
 export type NoTernaryConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTernaryOptions;
+export type NoTopLevelLiteralsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTopLevelLiteralsOptions;
+export type NoUndeclaredClassesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUndeclaredClassesOptions;
 export type NoUndeclaredEnvVarsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUndeclaredEnvVarsOptions;
-export type NoUndeclaredStylesConfiguration =
-	| RulePlainConfiguration
-	| RuleWithNoUndeclaredStylesOptions;
 export type NoUnknownAttributeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnknownAttributeOptions;
 export type NoUnnecessaryConditionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnnecessaryConditionsOptions;
-export type NoUnusedStylesConfiguration =
+export type NoUntrustedLicensesConfiguration =
 	| RulePlainConfiguration
-	| RuleWithNoUnusedStylesOptions;
+	| RuleWithNoUntrustedLicensesOptions;
+export type NoUnusedClassesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnusedClassesOptions;
 export type NoUselessReturnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessReturnOptions;
@@ -4229,15 +4378,24 @@ export type NoVueArrowFuncInWatchConfiguration =
 export type NoVueOptionsApiConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueOptionsApiOptions;
+export type NoVueRefAsOperandConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueRefAsOperandOptions;
 export type NoVueVIfWithVForConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueVIfWithVForOptions;
+export type UseArraySomeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseArraySomeOptions;
 export type UseArraySortCompareConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseArraySortCompareOptions;
 export type UseAwaitThenableConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseAwaitThenableOptions;
+export type UseBaselineConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseBaselineOptions;
 export type UseConsistentEnumValueTypeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentEnumValueTypeOptions;
@@ -4268,6 +4426,9 @@ export type UseFindConfiguration =
 export type UseGlobalThisConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseGlobalThisOptions;
+export type UseImportsFirstConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseImportsFirstOptions;
 export type UseInlineScriptIdConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseInlineScriptIdOptions;
@@ -4280,6 +4441,12 @@ export type UseLoneAnonymousOperationConfiguration =
 export type UseLoneExecutableDefinitionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseLoneExecutableDefinitionOptions;
+export type UseNamedCaptureGroupConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseNamedCaptureGroupOptions;
+export type UseNullishCoalescingConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseNullishCoalescingOptions;
 export type UsePlaywrightValidDescribeCallbackConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUsePlaywrightValidDescribeCallbackOptions;
@@ -4289,12 +4456,18 @@ export type UseRegexpExecConfiguration =
 export type UseRequiredScriptsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseRequiredScriptsOptions;
+export type UseScopedStylesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseScopedStylesOptions;
 export type UseSortedClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSortedClassesOptions;
 export type UseSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSpreadOptions;
+export type UseUnicodeRegexConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseUnicodeRegexOptions;
 export type UseVueConsistentDefinePropsDeclarationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentDefinePropsDeclarationOptions;
@@ -4943,8 +5116,20 @@ export interface NoDuplicateClassesOptions {
 	functions?: string[];
 }
 export interface OrganizeImportsOptions {
+	/**
+	 * Groups to change how imports and exports are sorted.
+	 */
 	groups?: ImportGroups;
+	/**
+	* Order used for sorting identifiers within imports and exports.
+
+Default: `natural`. 
+	 */
 	identifierOrder?: SortOrder;
+	/**
+	 * If `true`, bare imports such as `import "module"` are sorted with other imports.
+	 */
+	sortBareImports?: boolean;
 }
 export interface UseSortedAttributesOptions {
 	sortOrder?: SortOrder;
@@ -5048,7 +5233,6 @@ export interface RuleWithUseAnchorContentOptions {
 	options?: UseAnchorContentOptions;
 }
 export interface RuleWithUseAriaActivedescendantWithTabindexOptions {
-	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseAriaActivedescendantWithTabindexOptions;
 }
@@ -5701,6 +5885,14 @@ export interface RuleWithNoDivRegexOptions {
 	level: RulePlainConfiguration;
 	options?: NoDivRegexOptions;
 }
+export interface RuleWithNoDrizzleDeleteWithoutWhereOptions {
+	level: RulePlainConfiguration;
+	options?: NoDrizzleDeleteWithoutWhereOptions;
+}
+export interface RuleWithNoDrizzleUpdateWithoutWhereOptions {
+	level: RulePlainConfiguration;
+	options?: NoDrizzleUpdateWithoutWhereOptions;
+}
 export interface RuleWithNoDuplicateArgumentNamesOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateArgumentNamesOptions;
@@ -5729,6 +5921,10 @@ export interface RuleWithNoDuplicateInputFieldNamesOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateInputFieldNamesOptions;
 }
+export interface RuleWithNoDuplicateSelectorsOptions {
+	level: RulePlainConfiguration;
+	options?: NoDuplicateSelectorsOptions;
+}
 export interface RuleWithNoDuplicateVariableNamesOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateVariableNamesOptions;
@@ -5736,6 +5932,10 @@ export interface RuleWithNoDuplicateVariableNamesOptions {
 export interface RuleWithNoDuplicatedSpreadPropsOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicatedSpreadPropsOptions;
+}
+export interface RuleWithNoEmptyObjectKeysOptions {
+	level: RulePlainConfiguration;
+	options?: NoEmptyObjectKeysOptions;
 }
 export interface RuleWithNoEqualsToNullOptions {
 	fix?: FixKind;
@@ -5770,6 +5970,11 @@ export interface RuleWithNoHexColorsOptions {
 export interface RuleWithNoIncrementDecrementOptions {
 	level: RulePlainConfiguration;
 	options?: NoIncrementDecrementOptions;
+}
+export interface RuleWithNoInlineStylesOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoInlineStylesOptions;
 }
 export interface RuleWithNoJsxPropsBindOptions {
 	level: RulePlainConfiguration;
@@ -5877,13 +6082,17 @@ export interface RuleWithNoTernaryOptions {
 	level: RulePlainConfiguration;
 	options?: NoTernaryOptions;
 }
+export interface RuleWithNoTopLevelLiteralsOptions {
+	level: RulePlainConfiguration;
+	options?: NoTopLevelLiteralsOptions;
+}
+export interface RuleWithNoUndeclaredClassesOptions {
+	level: RulePlainConfiguration;
+	options?: NoUndeclaredClassesOptions;
+}
 export interface RuleWithNoUndeclaredEnvVarsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUndeclaredEnvVarsOptions;
-}
-export interface RuleWithNoUndeclaredStylesOptions {
-	level: RulePlainConfiguration;
-	options?: NoUndeclaredStylesOptions;
 }
 export interface RuleWithNoUnknownAttributeOptions {
 	level: RulePlainConfiguration;
@@ -5893,9 +6102,13 @@ export interface RuleWithNoUnnecessaryConditionsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnnecessaryConditionsOptions;
 }
-export interface RuleWithNoUnusedStylesOptions {
+export interface RuleWithNoUntrustedLicensesOptions {
 	level: RulePlainConfiguration;
-	options?: NoUnusedStylesOptions;
+	options?: NoUntrustedLicensesOptions;
+}
+export interface RuleWithNoUnusedClassesOptions {
+	level: RulePlainConfiguration;
+	options?: NoUnusedClassesOptions;
 }
 export interface RuleWithNoUselessReturnOptions {
 	fix?: FixKind;
@@ -5911,9 +6124,18 @@ export interface RuleWithNoVueOptionsApiOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueOptionsApiOptions;
 }
+export interface RuleWithNoVueRefAsOperandOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueRefAsOperandOptions;
+}
 export interface RuleWithNoVueVIfWithVForOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueVIfWithVForOptions;
+}
+export interface RuleWithUseArraySomeOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseArraySomeOptions;
 }
 export interface RuleWithUseArraySortCompareOptions {
 	level: RulePlainConfiguration;
@@ -5922,6 +6144,10 @@ export interface RuleWithUseArraySortCompareOptions {
 export interface RuleWithUseAwaitThenableOptions {
 	level: RulePlainConfiguration;
 	options?: UseAwaitThenableOptions;
+}
+export interface RuleWithUseBaselineOptions {
+	level: RulePlainConfiguration;
+	options?: UseBaselineOptions;
 }
 export interface RuleWithUseConsistentEnumValueTypeOptions {
 	level: RulePlainConfiguration;
@@ -5932,6 +6158,7 @@ export interface RuleWithUseConsistentGraphqlDescriptionsOptions {
 	options?: UseConsistentGraphqlDescriptionsOptions;
 }
 export interface RuleWithUseConsistentMethodSignaturesOptions {
+	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseConsistentMethodSignaturesOptions;
 }
@@ -5964,6 +6191,10 @@ export interface RuleWithUseGlobalThisOptions {
 	level: RulePlainConfiguration;
 	options?: UseGlobalThisOptions;
 }
+export interface RuleWithUseImportsFirstOptions {
+	level: RulePlainConfiguration;
+	options?: UseImportsFirstOptions;
+}
 export interface RuleWithUseInlineScriptIdOptions {
 	level: RulePlainConfiguration;
 	options?: UseInlineScriptIdOptions;
@@ -5980,6 +6211,15 @@ export interface RuleWithUseLoneExecutableDefinitionOptions {
 	level: RulePlainConfiguration;
 	options?: UseLoneExecutableDefinitionOptions;
 }
+export interface RuleWithUseNamedCaptureGroupOptions {
+	level: RulePlainConfiguration;
+	options?: UseNamedCaptureGroupOptions;
+}
+export interface RuleWithUseNullishCoalescingOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseNullishCoalescingOptions;
+}
 export interface RuleWithUsePlaywrightValidDescribeCallbackOptions {
 	level: RulePlainConfiguration;
 	options?: UsePlaywrightValidDescribeCallbackOptions;
@@ -5992,6 +6232,11 @@ export interface RuleWithUseRequiredScriptsOptions {
 	level: RulePlainConfiguration;
 	options?: UseRequiredScriptsOptions;
 }
+export interface RuleWithUseScopedStylesOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseScopedStylesOptions;
+}
 export interface RuleWithUseSortedClassesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6001,6 +6246,11 @@ export interface RuleWithUseSpreadOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseSpreadOptions;
+}
+export interface RuleWithUseUnicodeRegexOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseUnicodeRegexOptions;
 }
 export interface RuleWithUseVueConsistentDefinePropsDeclarationOptions {
 	level: RulePlainConfiguration;
@@ -7203,6 +7453,10 @@ export type NoUnusedLabelsOptions = {};
 export type NoUnusedPrivateClassMembersOptions = {};
 export interface NoUnusedVariablesOptions {
 	/**
+	 * An object defining ignored identifiers for different language constructs.
+	 */
+	ignore?: NoUnusedVariablesOptionsIgnore;
+	/**
 	 * Whether to ignore unused variables from an object destructuring with a spread.
 	 */
 	ignoreRestSiblings?: boolean;
@@ -7288,6 +7542,18 @@ export interface NoDeprecatedMediaTypeOptions {
 	allow?: string[];
 }
 export type NoDivRegexOptions = {};
+export interface NoDrizzleDeleteWithoutWhereOptions {
+	/**
+	 * List of variable names to consider as Drizzle ORM instances.
+	 */
+	drizzleObjectName?: string[];
+}
+export interface NoDrizzleUpdateWithoutWhereOptions {
+	/**
+	 * List of variable names to consider as Drizzle ORM instances.
+	 */
+	drizzleObjectName?: string[];
+}
 export type NoDuplicateArgumentNamesOptions = {};
 export type NoDuplicateAttributesOptions = {};
 export type NoDuplicateEnumValueNamesOptions = {};
@@ -7295,8 +7561,10 @@ export type NoDuplicateEnumValuesOptions = {};
 export type NoDuplicateFieldDefinitionNamesOptions = {};
 export type NoDuplicateGraphqlOperationNameOptions = {};
 export type NoDuplicateInputFieldNamesOptions = {};
+export type NoDuplicateSelectorsOptions = {};
 export type NoDuplicateVariableNamesOptions = {};
 export type NoDuplicatedSpreadPropsOptions = {};
+export type NoEmptyObjectKeysOptions = {};
 export type NoEqualsToNullOptions = {};
 export interface NoExcessiveClassesPerFileOptions {
 	/**
@@ -7324,6 +7592,7 @@ export interface NoIncrementDecrementOptions {
 	 */
 	allowForLoopAfterthoughts?: boolean;
 }
+export type NoInlineStylesOptions = {};
 export type NoJsxPropsBindOptions = {};
 export type NoLeakedRenderOptions = {};
 export type NoMisusedPromisesOptions = {};
@@ -7355,6 +7624,11 @@ export type NoScriptUrlOptions = {};
 export type NoShadowOptions = {};
 export type NoSyncScriptsOptions = {};
 export type NoTernaryOptions = {};
+export type NoTopLevelLiteralsOptions = {};
+/**
+ * Options for the `noUndeclaredClasses` rule.
+ */
+export type NoUndeclaredClassesOptions = {};
 export interface NoUndeclaredEnvVarsOptions {
 	/**
 	* Environment variables that should always be allowed.
@@ -7364,18 +7638,86 @@ Supports regular expressions, e.g. `["MY_ENV_.*"]`.
 	 */
 	allowedEnvVars?: Regex[];
 }
-export type NoUndeclaredStylesOptions = {};
 export interface NoUnknownAttributeOptions {
 	ignore?: string[];
 }
 export type NoUnnecessaryConditionsOptions = {};
-export type NoUnusedStylesOptions = {};
+export interface NoUntrustedLicensesOptions {
+	/**
+	* Additional license identifiers to trust, beyond valid SPDX identifiers.
+
+Useful for custom or proprietary licenses that are not part of the SPDX
+standard but are acceptable in your project. 
+	 */
+	allow?: string[];
+	/**
+	* License identifiers to explicitly deny, even if they are valid SPDX identifiers.
+
+Use this to block specific licenses that your project or organization can't use (e.g.,
+copyleft licenses in a proprietary project). 
+	 */
+	deny?: string[];
+	/**
+	* When `true`, deprecated SPDX license identifiers are accepted.
+When `false`, deprecated licenses are flagged as untrusted.
+Defaults to `false`. 
+	 */
+	ignoreDeprecated?: boolean;
+	/**
+	* When `true`, only licenses recognized as free/libre by the Free Software
+Foundation (FSF) are trusted. Licenses in the `allow` list bypass this check.
+Defaults to `false`. 
+	 */
+	requireFsfLibre?: boolean;
+	/**
+	* When `true`, only licenses approved by the Open Source Initiative (OSI)
+are trusted. Licenses in the `allow` list bypass this check.
+Defaults to `false`. 
+	 */
+	requireOsiApproved?: boolean;
+}
+export type NoUnusedClassesOptions = {};
 export type NoUselessReturnOptions = {};
 export type NoVueArrowFuncInWatchOptions = {};
 export type NoVueOptionsApiOptions = {};
+export type NoVueRefAsOperandOptions = {};
 export type NoVueVIfWithVForOptions = {};
+export type UseArraySomeOptions = {};
 export type UseArraySortCompareOptions = {};
 export type UseAwaitThenableOptions = {};
+/**
+ * Options for the `useBaseline` rule.
+ */
+export interface UseBaselineOptions {
+	/**
+	 * CSS at-rules to exclude from checking (without `@`, case-insensitive).
+	 */
+	allowAtRules?: string[];
+	/**
+	 * CSS value functions to exclude from checking (case-insensitive).
+	 */
+	allowFunctions?: string[];
+	/**
+	 * CSS media conditions to exclude from checking (case-insensitive).
+	 */
+	allowMediaConditions?: string[];
+	/**
+	 * CSS properties to exclude from checking (case-insensitive).
+	 */
+	allowProperties?: string[];
+	/**
+	 * CSS property values to exclude from checking (maps property name to allowed values, case-insensitive).
+	 */
+	allowPropertyValues?: Record<string, string[]>;
+	/**
+	 * CSS pseudo-selectors to exclude from checking (without `:` or `::`, case-insensitive).
+	 */
+	allowSelectors?: string[];
+	/**
+	 * The availability level to target. Defaults to `"widely"`.
+	 */
+	available?: AvailabilityTarget;
+}
 export type UseConsistentEnumValueTypeOptions = {};
 export interface UseConsistentGraphqlDescriptionsOptions {
 	/**
@@ -7409,6 +7751,7 @@ export type UseExpectOptions = {};
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
 export type UseGlobalThisOptions = {};
+export type UseImportsFirstOptions = {};
 export type UseInlineScriptIdOptions = {};
 export interface UseInputNameOptions {
 	/**
@@ -7418,6 +7761,19 @@ export interface UseInputNameOptions {
 }
 export type UseLoneAnonymousOperationOptions = {};
 export type UseLoneExecutableDefinitionOptions = {};
+export type UseNamedCaptureGroupOptions = {};
+export interface UseNullishCoalescingOptions {
+	/**
+	* Whether to ignore `||` expressions in conditional test positions
+(if/while/for/do-while/ternary conditions).
+
+When `true` (the default), the rule will not report `||` expressions
+that appear in places where the falsy-checking behavior may be intentional.
+
+Default: `true` 
+	 */
+	ignoreConditionalTests?: boolean;
+}
 export type UsePlaywrightValidDescribeCallbackOptions = {};
 export type UseRegexpExecOptions = {};
 export interface UseRequiredScriptsOptions {
@@ -7426,6 +7782,7 @@ export interface UseRequiredScriptsOptions {
 	 */
 	requiredScripts?: string[];
 }
+export type UseScopedStylesOptions = {};
 export interface UseSortedClassesOptions {
 	/**
 	 * Additional attributes that will be sorted.
@@ -7437,6 +7794,7 @@ export interface UseSortedClassesOptions {
 	functions?: string[];
 }
 export type UseSpreadOptions = {};
+export type UseUnicodeRegexOptions = {};
 export interface UseVueConsistentDefinePropsDeclarationOptions {
 	style?: DeclarationStyle;
 }
@@ -7891,6 +8249,36 @@ export type Visibility = "public" | "package" | "private";
  */
 export type CustomRestrictedElements = Record<string, string>;
 export type DependencyAvailability = boolean | string[];
+export interface NoUnusedVariablesOptionsIgnore {
+	/**
+	 * An array of identifiers to ignore. Use "*" to ignore all identifiers.
+	 */
+	*?: string[];
+	/**
+	 * An array of class names to ignore. Use "*" to ignore all identifiers.
+	 */
+	class?: string[];
+	/**
+	 * An array of function names to ignore. Use "*" to ignore all identifiers.
+	 */
+	function?: string[];
+	/**
+	 * An array of interface names to ignore. Use "*" to ignore all identifiers.
+	 */
+	interface?: string[];
+	/**
+	 * An array of type aliases to ignore. Use "*" to ignore all identifiers.
+	 */
+	typeAlias?: string[];
+	/**
+	 * An array of type parameters to ignore. Use "*" to ignore all identifiers.
+	 */
+	typeParameter?: string[];
+	/**
+	 * An array of variable names to ignore. Use "*" to ignore all identifiers.
+	 */
+	variable?: string[];
+}
 export interface Hook {
 	/**
 	* The "position" of the closure function, starting from zero.
@@ -7921,6 +8309,15 @@ while for `useState()` it would be `[1]`.
 	stableResult?: StableHookResult;
 }
 export type Regex = string;
+/**
+	* The Baseline availability level to target.
+
+- `"widely"` – warn on anything not Baseline widely available.
+- `"newly"` – warn on anything not at least Baseline newly available.
+- A year (e.g. `2023`) – warn on anything whose `baseline_low_date` is after
+  that year (i.e. became newly available after that year). 
+	 */
+export type AvailabilityTarget = AvailabilityNamed | number;
 /**
  * The GraphQL description style to enforce.
  */
@@ -7963,6 +8360,10 @@ export interface Convention {
 }
 export type GroupMatcher = ImportMatcher | SourceMatcher;
 export type StableHookResult = boolean | number[] | string[];
+/**
+ * Named Baseline availability tiers.
+ */
+export type AvailabilityNamed = "widely" | "newly";
 export interface PathOptions {
 	/**
 	 * Names of the exported members that allowed to be not be used.
@@ -8320,8 +8721,10 @@ export type Category =
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
 	| "lint/nursery/noDuplicateGraphqlOperationName"
 	| "lint/nursery/noDuplicateInputFieldNames"
+	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noDuplicateVariableNames"
 	| "lint/nursery/noDuplicatedSpreadProps"
+	| "lint/nursery/noEmptyObjectKeys"
 	| "lint/nursery/noEqualsToNull"
 	| "lint/nursery/noExcessiveClassesPerFile"
 	| "lint/nursery/noExcessiveLinesPerFile"
@@ -8331,6 +8734,7 @@ export type Category =
 	| "lint/nursery/noHexColors"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noIncrementDecrement"
+	| "lint/nursery/noInlineStyles"
 	| "lint/nursery/noJsxPropsBind"
 	| "lint/nursery/noLeakedRender"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
@@ -8339,6 +8743,8 @@ export type Category =
 	| "lint/nursery/noMultiStr"
 	| "lint/nursery/noNestedPromises"
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
+	| "lint/nursery/noDrizzleDeleteWithoutWhere"
+	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noPlaywrightElementHandle"
 	| "lint/nursery/noPlaywrightEval"
 	| "lint/nursery/noPlaywrightForceOption"
@@ -8357,19 +8763,24 @@ export type Category =
 	| "lint/nursery/noShadow"
 	| "lint/nursery/noSyncScripts"
 	| "lint/nursery/noTernary"
+	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/noUndeclaredEnvVars"
-	| "lint/nursery/noUndeclaredStyles"
+	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
-	| "lint/nursery/noUnusedStyles"
+	| "lint/nursery/noUnusedClasses"
+	| "lint/nursery/noUntrustedLicenses"
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessReturn"
 	| "lint/nursery/noVueArrowFuncInWatch"
 	| "lint/nursery/noVueOptionsApi"
+	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueVIfWithVFor"
+	| "lint/nursery/useArraySome"
 	| "lint/nursery/useArraySortCompare"
 	| "lint/nursery/useAwaitThenable"
+	| "lint/nursery/useBaseline"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentEnumValueType"
 	| "lint/nursery/useConsistentGraphqlDescriptions"
@@ -8384,16 +8795,24 @@ export type Category =
 	| "lint/nursery/useFind"
 	| "lint/nursery/useGlobalThis"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useImportsFirst"
 	| "lint/nursery/useInlineScriptId"
 	| "lint/nursery/useInputName"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useLoneAnonymousOperation"
 	| "lint/nursery/useLoneExecutableDefinition"
+	| "lint/nursery/useMaxParams"
+	| "lint/nursery/useNamedCaptureGroup"
+	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/usePlaywrightValidDescribeCallback"
+	| "lint/nursery/useQwikMethodUsage"
+	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useRequiredScripts"
+	| "lint/nursery/useScopedStyles"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
+	| "lint/nursery/useUnicodeRegex"
 	| "lint/nursery/useUniqueArgumentNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"
 	| "lint/nursery/useUniqueGraphqlOperationName"
@@ -8858,7 +9277,8 @@ export type DocumentFileSource =
 	| { Css: CssFileSource }
 	| { Graphql: GraphqlFileSource }
 	| { Html: HtmlFileSource }
-	| { Grit: GritFileSource };
+	| { Grit: GritFileSource }
+	| { Markdown: MdFileSource };
 export interface JsFileSource {
 	/**
 	* Used to mark if the JavaScript is embedded inside some particular files. This affects the parsing.
@@ -8893,6 +9313,9 @@ export interface HtmlFileSource {
 export interface GritFileSource {
 	variant: GritVariant;
 }
+export interface MdFileSource {
+	variant: MarkdownVariant;
+}
 export type EmbeddingKind =
 	| "None"
 	| {
@@ -8901,10 +9324,25 @@ export type EmbeddingKind =
 				 * Whether the script is inside Astro frontmatter
 				 */
 				frontmatter: boolean;
+				/**
+	* Whether this snippet is from a class-related attribute
+(e.g., `class:list={...}` or `class={...}`) 
+	 */
+				is_class_attribute: boolean;
 			};
 	  }
 	| {
 			Vue: {
+				/**
+	* Whether this embed should be parsed as statements (module/script).
+When `false`, the content is parsed as an expression via `parse_template_expression`.
+Source-level embeds (`<script>`) use `true`; directives and text expressions use `false`. 
+	 */
+				allow_statements: boolean;
+				/**
+				 * Whether this is a v-on event handler (e.g., @click="handler")
+				 */
+				event_handler: boolean;
 				/**
 				 * Where the bindings are defined
 				 */
@@ -8967,8 +9405,18 @@ export type HtmlVariant =
 	| "Vue"
 	| "Svelte";
 export type GritVariant = "Standard";
-export type EmbeddingHtmlKind = "None" | "Html" | "Vue" | "Astro" | "Svelte";
+export type MarkdownVariant = "Standard";
+export type EmbeddingHtmlKind =
+	| "None"
+	| "Html"
+	| { Vue: { applicability: EmbeddingStyleApplicability } }
+	| { Astro: { applicability: EmbeddingStyleApplicability } }
+	| { Svelte: { applicability: EmbeddingStyleApplicability } };
 export type HtmlTextExpressions = "None" | "Single" | "Double";
+/**
+ * How the CSS is applied inside a snippet
+ */
+export type EmbeddingStyleApplicability = "Local" | "Global" | "Unknown";
 export interface OpenFileResult {
 	diagnostics: Diagnostic[];
 }
@@ -8999,6 +9447,11 @@ When this field is empty, Biome checks only `files.includes`.
 	 * Controls how to ignore check should be done
 	 */
 	ignoreKind?: IgnoreKind;
+	/**
+	* Whether the path is a directory. Used to skip stat calls when the caller
+already knows the file type from the filesystem traversal. 
+	 */
+	isDir?: boolean;
 	/**
 	 * The path to inspect
 	 */

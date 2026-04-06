@@ -15,20 +15,7 @@ $lines:[full-start  ,  main-start,main-end
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-Trailing newline: true
------
+# Formatted
 
 ```scss
 $brackets: [a, b, c];

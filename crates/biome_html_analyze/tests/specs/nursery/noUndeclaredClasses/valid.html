@@ -1,0 +1,46 @@
+<!-- should not generate diagnostics -->
+<!doctype html>
+<html>
+<head>
+<style>
+	.card { border: 1px solid; }
+	.header { font-size: 2rem; }
+	.footer { font-size: 0.8rem; }
+
+	@media (max-width: 768px) {
+		.mobile { display: block; }
+	}
+
+	.parent .child { color: red; }
+	.button:hover { opacity: 0.8; }
+	.active.highlighted { background: yellow; }
+	.alpha + .beta { margin-top: 8px; }
+	.any-class { display: block; }
+</style>
+</head>
+<body>
+	<div class="card">Single defined class</div>
+	<div class="header footer">Multiple defined classes</div>
+	<div class="mobile">Responsive class</div>
+
+	<div class="parent">
+		<span class="child">Nested</span>
+	</div>
+
+	<div class="button">Button with hover state</div>
+	<div class="active highlighted">Combined selector classes</div>
+
+	<div class="alpha">
+		<div class="beta">Sibling</div>
+	</div>
+
+	<div CLASS="card">Uppercase CLASS</div>
+	<div Class="header">Mixed case Class</div>
+	<div cLaSs="footer">Random mixed case cLaSs</div>
+
+	<div class="">No classes</div>
+	<div class="   ">Only whitespace</div>
+	<div class>No value</div>
+	<div class="any-class">Unstyled section</div>
+</body>
+</html>

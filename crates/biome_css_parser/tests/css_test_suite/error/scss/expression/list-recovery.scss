@@ -1,0 +1,5 @@
+// Missing element in a comma-separated list should recover and keep later items
+$vals: (1, ???, 3, 4);
+
+// Missing element in a map pair list should recover and keep later pairs
+$map: (a: 1, b: ???, c: 3);

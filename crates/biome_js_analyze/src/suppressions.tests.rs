@@ -3,6 +3,7 @@ use biome_analyze::{AnalyzerOptions, Never, RuleCategoriesBuilder, RuleFilter};
 use biome_diagnostics::category;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, print_diagnostic_to_string};
 use biome_js_parser::{JsParserOptions, parse};
+use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{JsFileSource, TextRange, TextSize};
 use biome_package::{Dependencies, PackageJson};
 use std::slice;
@@ -19,11 +20,13 @@ fn quick_test() {
     let rule_filter = RuleFilter::Rule("nursery", "useExplicitType");
 
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
+    let semantic_model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
 
     let services = crate::JsAnalyzerServices::from((
         Default::default(),
         project_layout_with_top_level_dependencies(dependencies),
         JsFileSource::tsx(),
+        Some(semantic_model),
     ));
 
     crate::analyze(
@@ -75,14 +78,14 @@ fn quick_test_suppression() {
         JsFileSource::js_module(),
         JsParserOptions::default(),
     );
-
+    let services = JsAnalyzerServices::from(&parsed.tree());
     let options = AnalyzerOptions::default();
     crate::analyze(
         &parsed.tree(),
         AnalysisFilter::default(),
         &options,
         &[],
-        Default::default(),
+        services,
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -160,14 +163,14 @@ fn suppression() {
 
     let mut lint_ranges: Vec<TextRange> = Vec::new();
     let mut parse_ranges: Vec<TextRange> = Vec::new();
-
+    let services = JsAnalyzerServices::from(&parsed.tree());
     let options = AnalyzerOptions::default();
     crate::analyze(
         &parsed.tree(),
         AnalysisFilter::default(),
         &options,
         &[],
-        Default::default(),
+        services,
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let span = diag.get_span();
@@ -807,11 +810,13 @@ const foo0 = function (bar: string) {
     };
     let options = AnalyzerOptions::default();
     let root = parsed.tree();
+    let semantic_model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
 
     let services = crate::JsAnalyzerServices::from((
         Default::default(),
         Default::default(),
         JsFileSource::ts(),
+        Some(semantic_model),
     ));
 
     crate::analyze(&root, filter, &options, &[], services, |signal| {
@@ -899,24 +904,19 @@ var foo = {
         ..AnalysisFilter::default()
     };
 
-    let options = AnalyzerOptions::default();
-    crate::analyze(
-        &parsed.tree(),
-        filter,
-        &options,
-        &[],
-        Default::default(),
-        |signal| {
-            if let Some(diag) = signal.diagnostic() {
-                let code = diag.category().unwrap();
-                if code == category!("suppressions/unused") {
-                    panic!("unexpected diagnostic {code:?}");
-                }
-            }
+    let services = JsAnalyzerServices::from(&parsed.tree());
 
-            ControlFlow::<Never>::Continue(())
-        },
-    );
+    let options = AnalyzerOptions::default();
+    crate::analyze(&parsed.tree(), filter, &options, &[], services, |signal| {
+        if let Some(diag) = signal.diagnostic() {
+            let code = diag.category().unwrap();
+            if code == category!("suppressions/unused") {
+                panic!("unexpected diagnostic {code:?}");
+            }
+        }
+
+        ControlFlow::<Never>::Continue(())
+    });
 }
 
 #[test]
@@ -942,24 +942,18 @@ console.log("should be suppressed");"#;
     };
 
     let options = AnalyzerOptions::default();
+    let services = JsAnalyzerServices::from(&parsed.tree());
     let mut diagnostic_found = false;
-    analyze(
-        &parsed.tree(),
-        filter,
-        &options,
-        &[],
-        Default::default(),
-        |signal| {
-            if let Some(diag) = signal.diagnostic() {
-                let code = diag.category().unwrap();
-                if code == category!("lint/suspicious/noConsole") {
-                    diagnostic_found = true
-                }
+    analyze(&parsed.tree(), filter, &options, &[], services, |signal| {
+        if let Some(diag) = signal.diagnostic() {
+            let code = diag.category().unwrap();
+            if code == category!("lint/suspicious/noConsole") {
+                diagnostic_found = true
             }
+        }
 
-            ControlFlow::<Never>::Continue(())
-        },
-    );
+        ControlFlow::<Never>::Continue(())
+    });
 
     assert!(diagnostic_found, "must have diagnostics");
 }

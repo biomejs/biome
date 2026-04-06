@@ -1,0 +1,9 @@
+.test {
+  color: if(style(--scheme: dark): #eeeeee; else: black;);
+  background: if(media(print): white; else: black;);
+  border-color: if(supports(color: red): red; else: blue;);
+  outline-color: if(not style(--scheme: light): white; else: black;);
+  accent-color: if((style(--scheme: dark)): green; else: red;);
+  height: if(is-valid-size($size), $size, 100px);
+	inline-size: if(sass($size > 10px): 12px;else: 10px;);
+}

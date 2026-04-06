@@ -1,0 +1,85 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: with-comments.jsx
+---
+# Input
+```jsx
+<Hello
+	// Simple comment
+	tel={5555555}
+	address="NY"
+	{...this.props}
+	// Another simple comment
+	lastName="Smith"
+	firstName="John" // Inline comment
+/>
+
+```
+
+# Diagnostics
+```
+with-comments.jsx:1:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+   > 1 │ <Hello
+       │ ^^^^^^
+   > 2 │ 	// Simple comment
+   > 3 │ 	tel={5555555}
+   > 4 │ 	address="NY"
+   > 5 │ 	{...this.props}
+   > 6 │ 	// Another simple comment
+   > 7 │ 	lastName="Smith"
+   > 8 │ 	firstName="John" // Inline comment
+   > 9 │ />
+       │ ^^
+    10 │ 
+  
+  i Safe fix: Sort the JSX props.
+  
+     1  1 │   <Hello
+     2    │ - → //·Simple·comment
+     3    │ - → tel={5555555}
+     4    │ - → address="NY"
+        2 │ + → address="NY"
+        3 │ + → //·Simple·comment
+        4 │ + → tel={5555555}
+     5  5 │     {...this.props}
+     6  6 │     // Another simple comment
+  
+
+```
+
+```
+with-comments.jsx:1:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+   > 1 │ <Hello
+       │ ^^^^^^
+   > 2 │ 	// Simple comment
+   > 3 │ 	tel={5555555}
+   > 4 │ 	address="NY"
+   > 5 │ 	{...this.props}
+   > 6 │ 	// Another simple comment
+   > 7 │ 	lastName="Smith"
+   > 8 │ 	firstName="John" // Inline comment
+   > 9 │ />
+       │ ^^
+    10 │ 
+  
+  i Safe fix: Sort the JSX props.
+  
+     4  4 │     address="NY"
+     5  5 │     {...this.props}
+     6    │ - → //·Another·simple·comment
+     7    │ - → lastName="Smith"
+     8    │ - → firstName="John"·//·Inline·comment
+        6 │ + → firstName="John"·//·Inline·comment
+        7 │ + → //·Another·simple·comment
+        8 │ + → lastName="Smith"
+     9  9 │   />
+    10 10 │   
+  
+
+```

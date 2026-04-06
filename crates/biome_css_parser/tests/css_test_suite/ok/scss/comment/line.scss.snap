@@ -48,11 +48,13 @@ CssRoot {
                                     value_token: IDENT@5..6 "a" [] [],
                                 },
                                 colon_token: COLON@6..8 ":" [] [Whitespace(" ")],
-                                value: CssGenericComponentValueList [
-                                    CssNumber {
-                                        value_token: CSS_NUMBER_LITERAL@8..21 "1" [] [Whitespace("  "), Comments("// flang }")],
-                                    },
-                                ],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@8..21 "1" [] [Whitespace("  "), Comments("// flang }")],
+                                        },
+                                    ],
+                                },
                             },
                             important: missing (optional),
                         },
@@ -120,11 +122,13 @@ CssRoot {
                                     value_token: IDENT@48..54 "baz" [Newline("\n"), Whitespace("  ")] [],
                                 },
                                 colon_token: COLON@54..56 ":" [] [Whitespace(" ")],
-                                value: CssGenericComponentValueList [
-                                    CssIdentifier {
-                                        value_token: IDENT@56..60 "bang" [] [],
-                                    },
-                                ],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@56..60 "bang" [] [],
+                                        },
+                                    ],
+                                },
                             },
                             important: missing (optional),
                         },
@@ -163,9 +167,10 @@ CssRoot {
                 0: CSS_IDENTIFIER@5..6
                   0: IDENT@5..6 "a" [] []
                 1: COLON@6..8 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@8..21
-                  0: CSS_NUMBER@8..21
-                    0: CSS_NUMBER_LITERAL@8..21 "1" [] [Whitespace("  "), Comments("// flang }")]
+                2: SCSS_EXPRESSION@8..21
+                  0: SCSS_EXPRESSION_ITEM_LIST@8..21
+                    0: CSS_NUMBER@8..21
+                      0: CSS_NUMBER_LITERAL@8..21 "1" [] [Whitespace("  "), Comments("// flang }")]
               1: (empty)
             1: (empty)
         2: R_CURLY@21..26 "}" [Newline("\n"), Whitespace("   ")] []
@@ -210,9 +215,10 @@ CssRoot {
                 0: CSS_IDENTIFIER@48..54
                   0: IDENT@48..54 "baz" [Newline("\n"), Whitespace("  ")] []
                 1: COLON@54..56 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@56..60
-                  0: CSS_IDENTIFIER@56..60
-                    0: IDENT@56..60 "bang" [] []
+                2: SCSS_EXPRESSION@56..60
+                  0: SCSS_EXPRESSION_ITEM_LIST@56..60
+                    0: CSS_IDENTIFIER@56..60
+                      0: IDENT@56..60 "bang" [] []
               1: (empty)
             1: SEMICOLON@60..65 ";" [] [Whitespace(" "), Comments("//}")]
         2: R_CURLY@65..67 "}" [Newline("\n")] []

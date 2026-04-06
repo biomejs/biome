@@ -1,0 +1,134 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+$map: (a: , b: 2);
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@0..1 "$" [] [],
+                name: CssIdentifier {
+                    value_token: IDENT@1..4 "map" [] [],
+                },
+            },
+            colon_token: COLON@4..6 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    ScssMapExpression {
+                        l_paren_token: L_PAREN@6..7 "(" [] [],
+                        pairs: ScssMapExpressionPairList [
+                            ScssMapExpressionPair {
+                                key: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@7..8 "a" [] [],
+                                        },
+                                    ],
+                                },
+                                colon_token: COLON@8..10 ":" [] [Whitespace(" ")],
+                                value: missing (required),
+                            },
+                            COMMA@10..12 "," [] [Whitespace(" ")],
+                            ScssMapExpressionPair {
+                                key: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@12..13 "b" [] [],
+                                        },
+                                    ],
+                                },
+                                colon_token: COLON@13..15 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@15..16 "2" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                        ],
+                        r_paren_token: R_PAREN@16..17 ")" [] [],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@17..18 ";" [] [],
+        },
+    ],
+    eof_token: EOF@18..19 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..19
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..18
+    0: SCSS_DECLARATION@0..18
+      0: SCSS_IDENTIFIER@0..4
+        0: DOLLAR@0..1 "$" [] []
+        1: CSS_IDENTIFIER@1..4
+          0: IDENT@1..4 "map" [] []
+      1: COLON@4..6 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@6..17
+        0: SCSS_EXPRESSION_ITEM_LIST@6..17
+          0: SCSS_MAP_EXPRESSION@6..17
+            0: L_PAREN@6..7 "(" [] []
+            1: SCSS_MAP_EXPRESSION_PAIR_LIST@7..16
+              0: SCSS_MAP_EXPRESSION_PAIR@7..10
+                0: SCSS_EXPRESSION@7..8
+                  0: SCSS_EXPRESSION_ITEM_LIST@7..8
+                    0: CSS_IDENTIFIER@7..8
+                      0: IDENT@7..8 "a" [] []
+                1: COLON@8..10 ":" [] [Whitespace(" ")]
+                2: (empty)
+              1: COMMA@10..12 "," [] [Whitespace(" ")]
+              2: SCSS_MAP_EXPRESSION_PAIR@12..16
+                0: SCSS_EXPRESSION@12..13
+                  0: SCSS_EXPRESSION_ITEM_LIST@12..13
+                    0: CSS_IDENTIFIER@12..13
+                      0: IDENT@12..13 "b" [] []
+                1: COLON@13..15 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@15..16
+                  0: SCSS_EXPRESSION_ITEM_LIST@15..16
+                    0: CSS_NUMBER@15..16
+                      0: CSS_NUMBER_LITERAL@15..16 "2" [] []
+            2: R_PAREN@16..17 ")" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@17..17
+      4: SEMICOLON@17..18 ";" [] []
+  2: EOF@18..19 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+map-missing-value.scss:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found ','.
+  
+  > 1 │ $map: (a: , b: 2);
+      │           ^
+    2 │ 
+  
+  i Expected a SCSS expression here.
+  
+  > 1 │ $map: (a: , b: 2);
+      │           ^
+    2 │ 
+  
+```

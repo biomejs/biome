@@ -5,7 +5,7 @@ use biome_markdown_syntax::AnyMdLeafBlock;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatAnyMdLeafBlock;
 impl FormatRule<AnyMdLeafBlock> for FormatAnyMdLeafBlock {
-    type Context = MarkdownFormatContext;
+    type Context = MdFormatContext;
     fn fmt(&self, node: &AnyMdLeafBlock, f: &mut MarkdownFormatter) -> FormatResult<()> {
         match node {
             AnyMdLeafBlock::AnyMdCodeBlock(node) => node.format().fmt(f),

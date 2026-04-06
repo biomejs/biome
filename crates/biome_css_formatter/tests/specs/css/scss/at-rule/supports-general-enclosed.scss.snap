@@ -1,0 +1,45 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/at-rule/supports-general-enclosed.scss
+---
+
+# Input
+
+```scss
+@supports foo(bar: baz) {
+  .a { color: red; }
+}
+
+@supports (foo(bar: baz)) and (display: grid) {
+  .b { display: grid; }
+}
+
+@supports foo(url("a.svg" namespace.fn(test))) {
+  .c { color: green; }
+}
+
+```
+
+
+# Formatted
+
+```scss
+@supports foo(bar: baz) {
+	.a {
+		color: red;
+	}
+}
+
+@supports (foo(bar: baz)) and (display: grid) {
+	.b {
+		display: grid;
+	}
+}
+
+@supports foo(url("a.svg"namespace.fn(test))) {
+	.c {
+		color: green;
+	}
+}
+
+```

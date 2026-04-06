@@ -179,6 +179,12 @@ impl Rule for NoImportCycles {
         }
 
         let resolved_path = resolved_path.as_path()?;
+
+        // Don't check for cycles through node_modules imports.
+        if is_node_modules_path(resolved_path) {
+            return None;
+        }
+
         let imports = ctx.module_info_for_path(resolved_path)?;
 
         find_cycle(ctx, resolved_path, imports)
@@ -252,6 +258,11 @@ fn find_cycle(
                 continue;
             };
 
+            // Skip node_modules paths — we don't traverse into dependencies.
+            if is_node_modules_path(path) {
+                continue;
+            }
+
             if !seen.insert(resolved_path.clone()) {
                 continue;
             }
@@ -294,4 +305,9 @@ fn find_cycle(
     }
 
     None
+}
+
+/// Returns `true` if the given path is inside a `node_modules` directory.
+fn is_node_modules_path(path: &Utf8Path) -> bool {
+    path.components().any(|c| c.as_str() == "node_modules")
 }

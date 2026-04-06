@@ -934,6 +934,8 @@ pub trait RuleGroupExt: Default + Merge + Debug + From<GroupPlainConfiguration> 
     // Preset rules shouldn't populate disabled rules
     // because that will make specific rules cannot be enabled later.
     fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>];
+    /// Returns all non-domain rules of this group, as a list of [RuleFilter]
+    fn non_domain_rules_as_filters() -> &'static [RuleFilter<'static>];
     /// Returns all rules of this group, as a list of [RuleFilter]
     fn all_rules_as_filters() -> &'static [RuleFilter<'static>];
     fn collect_preset_rules(
@@ -1062,7 +1064,7 @@ where
                     | GroupPlainConfiguration::Info
                     | GroupPlainConfiguration::Warn
                     | GroupPlainConfiguration::Error => {
-                        filters.extend(G::all_rules_as_filters());
+                        filters.extend(G::non_domain_rules_as_filters());
                         filters
                     }
                 }
@@ -1105,7 +1107,7 @@ where
         match self {
             Self::Plain(plain) => {
                 if *plain != GroupPlainConfiguration::Off {
-                    enabled_rules.extend(G::all_rules_as_filters());
+                    enabled_rules.extend(G::non_domain_rules_as_filters());
                 }
             }
             Self::Group(group) => group.collect_preset_rules(parent_is_recommended, enabled_rules),

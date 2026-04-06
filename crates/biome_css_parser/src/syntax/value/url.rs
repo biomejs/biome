@@ -1,8 +1,12 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 
-use crate::syntax::value::function::{is_at_function, is_nth_at_function, parse_function};
+use crate::syntax::value::function::{
+    is_at_css_function, is_at_function, is_nth_at_css_function, is_nth_at_function,
+    parse_css_function, parse_function,
+};
 use crate::syntax::value::parse_error::expected_url_modifier;
+use crate::syntax::{ValueParsingContext, ValueParsingMode};
 use crate::syntax::{is_at_identifier, is_at_string, parse_regular_identifier, parse_string};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -16,7 +20,13 @@ const URL_SET: TokenSet<CssSyntaxKind> = token_set![T![url], T![src]];
 
 /// Determines if the current position of the parser is at the beginning of a URL function.
 pub(crate) fn is_at_url_function(p: &mut CssParser) -> bool {
-    p.at_ts(URL_SET) && p.nth_at(1, T!['('])
+    is_nth_at_url_function(p, 0)
+}
+
+/// Determines if the token at offset `n` begins a URL function.
+#[inline]
+pub(crate) fn is_nth_at_url_function(p: &mut CssParser, n: usize) -> bool {
+    p.nth_at_ts(n, URL_SET) && p.nth_at(n + 1, T!['('])
 }
 
 /// Parses a URL function from the current position of the CSS parser.
@@ -55,6 +65,14 @@ pub(crate) fn is_at_url_function(p: &mut CssParser) -> bool {
 /// Here, `<url-modifier>` represents any modifiers that might be applied to the URL, such as
 /// resolution-based adjustments or format hints.
 pub(crate) fn parse_url_function(p: &mut CssParser) -> ParsedSyntax {
+    parse_url_function_with_context(p, ValueParsingContext::new(p, ValueParsingMode::ScssAware))
+}
+
+/// Parses a URL function while honoring the provided parsing context.
+pub(crate) fn parse_url_function_with_context(
+    p: &mut CssParser,
+    context: ValueParsingContext,
+) -> ParsedSyntax {
     if !is_at_url_function(p) {
         return Absent;
     }
@@ -62,7 +80,7 @@ pub(crate) fn parse_url_function(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump_ts(URL_SET);
 
-    if is_nth_at_function(p, 1) {
+    if is_at_nth_url_function(p, 1, context) {
         // we need to check if the next token is a function or not
         // to cover the case of `src(var(--foo));`
         p.bump(T!['(']);
@@ -71,10 +89,43 @@ pub(crate) fn parse_url_function(p: &mut CssParser) -> ParsedSyntax {
         parse_url_value(p).ok();
     }
 
-    UrlModifierList.parse_list(p);
+    UrlModifierList::new(context).parse_list(p);
     p.expect(T![')']);
 
     Present(m.complete(p, CSS_URL_FUNCTION))
+}
+
+#[inline]
+fn is_at_nth_url_function(p: &mut CssParser, n: usize, context: ValueParsingContext) -> bool {
+    if context.is_scss_syntax_allowed() {
+        is_nth_at_function(p, n)
+    } else {
+        is_nth_at_css_function(p, n)
+    }
+}
+
+#[inline]
+fn is_at_url_modifier_function_with_context(
+    p: &mut CssParser,
+    context: ValueParsingContext,
+) -> bool {
+    if context.is_scss_syntax_allowed() {
+        is_at_function(p)
+    } else {
+        is_at_css_function(p)
+    }
+}
+
+#[inline]
+fn parse_url_modifier_function_with_context(
+    p: &mut CssParser,
+    context: ValueParsingContext,
+) -> ParsedSyntax {
+    if context.is_scss_syntax_allowed() {
+        parse_function(p)
+    } else {
+        parse_css_function(p)
+    }
 }
 
 /// Determines if the current position of the parser is at a URL value.
@@ -121,7 +172,10 @@ pub(crate) fn parse_url_value_raw(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, CSS_URL_VALUE_RAW))
 }
 
-struct UrlModifierListParseRecovery;
+#[derive(Debug, Copy, Clone)]
+struct UrlModifierListParseRecovery {
+    context: ValueParsingContext,
+}
 
 impl ParseRecovery for UrlModifierListParseRecovery {
     type Kind = CssSyntaxKind;
@@ -136,11 +190,20 @@ impl ParseRecovery for UrlModifierListParseRecovery {
         // url("//aa.com/img.svg" foo "bar"  );
         //                              ^    ^
         // "bar" is an invalid modifier |____| ')' is the recovery point
-        p.at(T![')']) || is_at_url_modifier(p)
+        p.at(T![')']) || is_at_url_modifier_with_context(p, self.context)
     }
 }
 
-struct UrlModifierList;
+struct UrlModifierList {
+    context: ValueParsingContext,
+}
+
+impl UrlModifierList {
+    #[inline]
+    fn new(context: ValueParsingContext) -> Self {
+        Self { context }
+    }
+}
 
 impl ParseNodeList for UrlModifierList {
     type Kind = CssSyntaxKind;
@@ -148,7 +211,7 @@ impl ParseNodeList for UrlModifierList {
     const LIST_KIND: Self::Kind = CSS_URL_MODIFIER_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_url_modifier(p)
+        parse_url_modifier_with_context(p, self.context)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -160,26 +223,32 @@ impl ParseNodeList for UrlModifierList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
-        parsed_element.or_recover(p, &UrlModifierListParseRecovery, expected_url_modifier)
+        parsed_element.or_recover(
+            p,
+            &UrlModifierListParseRecovery {
+                context: self.context,
+            },
+            expected_url_modifier,
+        )
     }
 }
 
-/// This function determines if the current token is either an identifier or any function,
-/// indicating a potential modifier for a URL in CSS.
 #[inline]
-pub(crate) fn is_at_url_modifier(p: &mut CssParser) -> bool {
-    is_at_identifier(p) || is_at_function(p)
+fn is_at_url_modifier_with_context(p: &mut CssParser, context: ValueParsingContext) -> bool {
+    is_at_identifier(p) || is_at_url_modifier_function_with_context(p, context)
 }
 
-/// Parses a URL modifier, which can be either a simple function or a regular identifier.
 #[inline]
-pub(crate) fn parse_url_modifier(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_url_modifier(p) {
+fn parse_url_modifier_with_context(
+    p: &mut CssParser,
+    context: ValueParsingContext,
+) -> ParsedSyntax {
+    if !is_at_url_modifier_with_context(p, context) {
         return Absent;
     }
 
-    if is_at_function(p) {
-        parse_function(p)
+    if is_at_url_modifier_function_with_context(p, context) {
+        parse_url_modifier_function_with_context(p, context)
     } else {
         parse_regular_identifier(p)
     }

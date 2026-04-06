@@ -40,8 +40,8 @@ invalid.jsx:2:16 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━
      1  1 │   <>
      2    │ - → <div·tabIndex={1}·/>
         2 │ + → <div·tabIndex="0"·/>
-     3  3 │   	<div tabIndex={"1"} />
-     4  4 │   	<div tabIndex={'5'} />
+     3  3 │     <div tabIndex={"1"} />
+     4  4 │     <div tabIndex={'5'} />
   
 
 ```
@@ -65,11 +65,11 @@ invalid.jsx:3:16 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━
   i Unsafe fix: Replace the tabIndex prop value with 0.
   
      1  1 │   <>
-     2  2 │   	<div tabIndex={1} />
+     2  2 │     <div tabIndex={1} />
      3    │ - → <div·tabIndex={"1"}·/>
         3 │ + → <div·tabIndex="0"·/>
-     4  4 │   	<div tabIndex={'5'} />
-     5  5 │   	<div tabIndex="1" />
+     4  4 │     <div tabIndex={'5'} />
+     5  5 │     <div tabIndex="1" />
   
 
 ```
@@ -92,12 +92,12 @@ invalid.jsx:4:16 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━
   
   i Unsafe fix: Replace the tabIndex prop value with 0.
   
-     2  2 │   	<div tabIndex={1} />
-     3  3 │   	<div tabIndex={"1"} />
+     2  2 │     <div tabIndex={1} />
+     3  3 │     <div tabIndex={"1"} />
      4    │ - → <div·tabIndex={'5'}·/>
         4 │ + → <div·tabIndex="0"·/>
-     5  5 │   	<div tabIndex="1" />
-     6  6 │   	<div tabIndex={1}>foo</div>
+     5  5 │     <div tabIndex="1" />
+     6  6 │     <div tabIndex={1}>foo</div>
   
 
 ```
@@ -120,12 +120,12 @@ invalid.jsx:5:16 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━
   
   i Unsafe fix: Replace the tabIndex prop value with 0.
   
-     3  3 │   	<div tabIndex={"1"} />
-     4  4 │   	<div tabIndex={'5'} />
+     3  3 │     <div tabIndex={"1"} />
+     4  4 │     <div tabIndex={'5'} />
      5    │ - → <div·tabIndex="1"·/>
         5 │ + → <div·tabIndex="0"·/>
-     6  6 │   	<div tabIndex={1}>foo</div>
-     7  7 │   	<div tabIndex={"1"}>foo</div>
+     6  6 │     <div tabIndex={1}>foo</div>
+     7  7 │     <div tabIndex={"1"}>foo</div>
   
 
 ```
@@ -148,12 +148,12 @@ invalid.jsx:6:16 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━
   
   i Unsafe fix: Replace the tabIndex prop value with 0.
   
-     4  4 │   	<div tabIndex={'5'} />
-     5  5 │   	<div tabIndex="1" />
+     4  4 │     <div tabIndex={'5'} />
+     5  5 │     <div tabIndex="1" />
      6    │ - → <div·tabIndex={1}>foo</div>
         6 │ + → <div·tabIndex="0">foo</div>
-     7  7 │   	<div tabIndex={"1"}>foo</div>
-     8  8 │   	<div tabIndex={'5'}>foo</div>
+     7  7 │     <div tabIndex={"1"}>foo</div>
+     8  8 │     <div tabIndex={'5'}>foo</div>
   
 
 ```
@@ -176,12 +176,12 @@ invalid.jsx:7:16 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━
   
   i Unsafe fix: Replace the tabIndex prop value with 0.
   
-     5  5 │   	<div tabIndex="1" />
-     6  6 │   	<div tabIndex={1}>foo</div>
+     5  5 │     <div tabIndex="1" />
+     6  6 │     <div tabIndex={1}>foo</div>
      7    │ - → <div·tabIndex={"1"}>foo</div>
         7 │ + → <div·tabIndex="0">foo</div>
-     8  8 │   	<div tabIndex={'5'}>foo</div>
-     9  9 │   	<div tabIndex={+5}>foo</div>
+     8  8 │     <div tabIndex={'5'}>foo</div>
+     9  9 │     <div tabIndex={+5}>foo</div>
   
 
 ```
@@ -204,12 +204,12 @@ invalid.jsx:8:16 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━
   
   i Unsafe fix: Replace the tabIndex prop value with 0.
   
-     6  6 │   	<div tabIndex={1}>foo</div>
-     7  7 │   	<div tabIndex={"1"}>foo</div>
+     6  6 │     <div tabIndex={1}>foo</div>
+     7  7 │     <div tabIndex={"1"}>foo</div>
      8    │ - → <div·tabIndex={'5'}>foo</div>
         8 │ + → <div·tabIndex="0">foo</div>
-     9  9 │   	<div tabIndex={+5}>foo</div>
-    10 10 │   	<div tabIndex={+0o5}>foo</div>
+     9  9 │     <div tabIndex={+5}>foo</div>
+    10 10 │     <div tabIndex={+0o5}>foo</div>
   
 
 ```
@@ -232,12 +232,12 @@ invalid.jsx:9:16 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━
   
   i Unsafe fix: Replace the tabIndex prop value with 0.
   
-     7  7 │   	<div tabIndex={"1"}>foo</div>
-     8  8 │   	<div tabIndex={'5'}>foo</div>
+     7  7 │     <div tabIndex={"1"}>foo</div>
+     8  8 │     <div tabIndex={'5'}>foo</div>
      9    │ - → <div·tabIndex={+5}>foo</div>
         9 │ + → <div·tabIndex="0">foo</div>
-    10 10 │   	<div tabIndex={+0o5}>foo</div>
-    11 11 │   	<div tabIndex="1">foo</div>
+    10 10 │     <div tabIndex={+0o5}>foo</div>
+    11 11 │     <div tabIndex="1">foo</div>
   
 
 ```
@@ -260,8 +260,8 @@ invalid.jsx:11:16 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━�
   
   i Unsafe fix: Replace the tabIndex prop value with 0.
   
-     9  9 │   	<div tabIndex={+5}>foo</div>
-    10 10 │   	<div tabIndex={+0o5}>foo</div>
+     9  9 │     <div tabIndex={+5}>foo</div>
+    10 10 │     <div tabIndex={+0o5}>foo</div>
     11    │ - → <div·tabIndex="1">foo</div>
        11 │ + → <div·tabIndex="0">foo</div>
     12 12 │   </>

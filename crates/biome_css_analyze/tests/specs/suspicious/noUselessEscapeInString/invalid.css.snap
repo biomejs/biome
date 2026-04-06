@@ -4,51 +4,55 @@ expression: invalid.css
 ---
 # Input
 ```css
+/* should generate diagnostics */
+
 .a::after {
-    content: /*before*/ "useless \a" /*after*/
+    content: /*before*/ "useless \z" /*after*/
 }
 .b::after {
     content: "useless \'"
 }
+
 ```
 
 # Diagnostics
 ```
-invalid.css:2:35 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:4:35 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The character doesn't need to be escaped.
   
-    1 │ .a::after {
-  > 2 │     content: /*before*/ "useless \a" /*after*/
+    3 │ .a::after {
+  > 4 │     content: /*before*/ "useless \z" /*after*/
       │                                   ^
-    3 │ }
-    4 │ .b::after {
+    5 │ }
+    6 │ .b::after {
   
   i Only quotes that enclose the string and special characters need to be escaped.
   
   i Safe fix: Unescape the character.
   
-    2 │ ····content:·/*before*/·"useless·\a"·/*after*/
+    4 │ ····content:·/*before*/·"useless·\z"·/*after*/
       │                                  -            
 
 ```
 
 ```
-invalid.css:5:24 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:7:24 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The character doesn't need to be escaped.
   
-    3 │ }
-    4 │ .b::after {
-  > 5 │     content: "useless \'"
+    5 │ }
+    6 │ .b::after {
+  > 7 │     content: "useless \'"
       │                        ^
-    6 │ }
+    8 │ }
+    9 │ 
   
   i Only quotes that enclose the string and special characters need to be escaped.
   
   i Safe fix: Unescape the character.
   
-    5 │ ····content:·"useless·\'"
+    7 │ ····content:·"useless·\'"
       │                       -  
 
 ```

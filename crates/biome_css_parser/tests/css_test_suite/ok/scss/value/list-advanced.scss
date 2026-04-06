@@ -1,0 +1,154 @@
+// Advanced list syntax tests
+
+// Empty list
+$empty: ();
+
+// Single item list with comma
+$single-comma: (item,);
+
+// Single item list without comma
+$single-space: (item);
+
+// Space-separated list
+$space-list: a b c d e;
+
+// Comma-separated list
+$comma-list: a, b, c, d, e;
+
+// Mixed nesting
+$mixed: (a b, c d, e f);
+
+// List with trailing comma
+$trailing: (a, b, c,);
+
+// List with interpolation
+// TODO(interpolation support): $interpolated: (a, #{$var}, c);
+// TODO(interpolation support): $interpolated-space: a #{$var} c;
+// List with calculations
+$calculations: (10px + 5px, 20px * 2, 100px / 4);
+
+// List with functions
+$functions: (rgb(255, 0, 0), calc(100% - 20px), url("image.png"));
+
+// Deeply nested lists
+$nested: ((a, b), (c, d), (e, f));
+$deep: (((a, b), (c, d)), ((e, f), (g, h)));
+
+// List with maps
+$with-maps: ((key1: val1), (key2: val2));
+
+// List with mixed types
+$mixed-types: (
+  true,
+  false,
+  null,
+  123,
+  "string",
+  $variable,
+);
+
+// List with quoted strings
+$quoted: ("a", 'b', "c d", 'e f');
+
+// List with unquoted strings
+$unquoted: (foo, bar, baz);
+
+// List as function argument
+.test {
+  content: list-function((a, b, c));
+  value: another-function(x y z);
+}
+
+// List in variable with different separators
+$brackets: [a, b, c]; // Note: SCSS doesn't have native bracket lists, but can be parsed
+$parens-comma: (a, b, c);
+$parens-space: (a b c);
+
+// Multi-line list
+$multiline-comma: (
+  item1,
+  item2,
+  item3,
+  item4,
+);
+
+$multiline-space: (
+  item1
+  item2
+  item3
+  item4
+);
+
+// List with operators (space-separated takes precedence)
+$with-operators: a + b c * d;
+$parenthesized: (a + b) (c * d);
+
+// List with negative numbers
+$negatives: (-1, -2, -3);
+$negative-space: -1 -2 -3;
+
+// List with units
+$units: 10px 20em 30% 40vh;
+
+// Complex expressions in list
+$expressions: (
+  (1 + 2),
+  ($a * $b),
+  (10px / 2),
+);
+
+// List with special values
+$special: (
+  inherit,
+  initial,
+  unset,
+  auto,
+);
+
+// List with color values
+$colors: (#fff, rgb(0, 0, 0), hsl(120, 100%, 50%));
+
+// List with CSS keywords
+$keywords: (
+  none,
+  auto,
+  inherit,
+  initial,
+  unset,
+  revert,
+);
+
+// Slash-separated (for font shorthand)
+$font: 16px/1.5;
+$font-list: (12px/1.2, 14px/1.4, 16px/1.6);
+
+// List with URL
+$urls: (url("a.png"), url('b.jpg'), url(c.gif));
+
+// List with custom properties
+$custom: (--var-1, --var-2, --var-3);
+
+// List with attr()
+$attrs: (attr(data-foo), attr(data-bar));
+
+// Nested space and comma lists
+$complex-nested: (a b, c d e, f);
+
+// List with calc
+$calcs: (calc(100% - 10px), calc(50vh - 20px));
+
+// Empty items in list (compressed)
+$sparse: (a,, c); // Note: This might be invalid, testing parser
+
+// List with important (edge case)
+$with-important: (red !important, blue);
+
+// Unicode in lists
+$unicode: (émoji, 🎨, 日本語, ключ);
+
+// Escaped characters in lists
+$escaped: (\escaped, "escaped\"quote", 'escaped\'quote');
+
+
+
+

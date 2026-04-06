@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{fmt, rc::Rc};
 
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding,
@@ -10,14 +10,14 @@ use crate::comments::{FormatMarkdownLeadingComment, MarkdownCommentStyle};
 
 pub type MarkdownComments = Comments<MarkdownLanguage>;
 
-pub struct MarkdownFormatContext {
+pub struct MdFormatContext {
     source_map: Option<TransformSourceMap>,
-    options: MarkdownFormatOptions,
+    options: MdFormatOptions,
     comments: Rc<MarkdownComments>,
 }
 
 #[derive(Debug, Default, Clone, PartialEq)]
-pub struct MarkdownFormatOptions {
+pub struct MdFormatOptions {
     indent_style: IndentStyle,
     indent_width: IndentWidth,
     line_ending: LineEnding,
@@ -25,7 +25,7 @@ pub struct MarkdownFormatOptions {
     trailing_newline: TrailingNewline,
 }
 
-impl CstFormatContext for MarkdownFormatContext {
+impl CstFormatContext for MdFormatContext {
     type Language = MarkdownLanguage;
     type Style = MarkdownCommentStyle;
     type CommentRule = FormatMarkdownLeadingComment;
@@ -35,7 +35,7 @@ impl CstFormatContext for MarkdownFormatContext {
     }
 }
 
-impl FormatOptions for MarkdownFormatOptions {
+impl FormatOptions for MdFormatOptions {
     fn indent_style(&self) -> IndentStyle {
         self.indent_style
     }
@@ -61,15 +61,45 @@ impl FormatOptions for MarkdownFormatOptions {
     }
 }
 
-impl MarkdownFormatOptions {
+impl MdFormatOptions {
+    pub fn new() -> Self {
+        Self {
+            indent_style: IndentStyle::default(),
+            indent_width: IndentWidth::default(),
+            line_ending: LineEnding::default(),
+            line_width: LineWidth::default(),
+            trailing_newline: TrailingNewline::default(),
+        }
+    }
+
+    pub fn with_indent_style(mut self, indent_style: IndentStyle) -> Self {
+        self.indent_style = indent_style;
+        self
+    }
+
+    pub fn with_indent_width(mut self, indent_width: IndentWidth) -> Self {
+        self.indent_width = indent_width;
+        self
+    }
+
     pub fn with_line_width(mut self, line_width: LineWidth) -> Self {
         self.line_width = line_width;
         self
     }
+
+    pub fn with_line_ending(mut self, line_ending: LineEnding) -> Self {
+        self.line_ending = line_ending;
+        self
+    }
+
+    pub fn with_trailing_newline(mut self, trailing_newline: TrailingNewline) -> Self {
+        self.trailing_newline = trailing_newline;
+        self
+    }
 }
 
-impl MarkdownFormatContext {
-    pub fn new(options: MarkdownFormatOptions) -> Self {
+impl MdFormatContext {
+    pub fn new(options: MdFormatOptions) -> Self {
         Self {
             options,
             comments: Rc::new(MarkdownComments::default()),
@@ -87,8 +117,8 @@ impl MarkdownFormatContext {
     }
 }
 
-impl FormatContext for MarkdownFormatContext {
-    type Options = MarkdownFormatOptions;
+impl FormatContext for MdFormatContext {
+    type Options = MdFormatOptions;
 
     fn options(&self) -> &Self::Options {
         &self.options
@@ -96,5 +126,15 @@ impl FormatContext for MarkdownFormatContext {
 
     fn source_map(&self) -> Option<&TransformSourceMap> {
         None
+    }
+}
+
+impl fmt::Display for MdFormatOptions {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Indent style: {}", self.indent_style)?;
+        writeln!(f, "Indent width: {}", self.indent_width.value())?;
+        writeln!(f, "Line ending: {}", self.line_ending)?;
+        writeln!(f, "Line width: {}", self.line_width.value())?;
+        writeln!(f, "Trailing newline: {}", self.trailing_newline.value())
     }
 }

@@ -1,0 +1,171 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```astro
+<BuyButton client:load class:list={['some-css-class']} set:text={string} />
+
+<ShowHideButton client:idle />
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@0..1 "<" [] [],
+            name: HtmlComponentName {
+                value_token: HTML_LITERAL@1..11 "BuyButton" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                AstroClientDirective {
+                    client_token: CLIENT_KW@11..17 "client" [] [],
+                    value: AstroDirectiveValue {
+                        colon_token_token: COLON@17..18 ":" [] [],
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@18..23 "load" [] [Whitespace(" ")],
+                        },
+                        initializer: missing (optional),
+                    },
+                },
+                AstroClassDirective {
+                    class_token: CLASS_KW@23..28 "class" [] [],
+                    value: AstroDirectiveValue {
+                        colon_token_token: COLON@28..29 ":" [] [],
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@29..33 "list" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@33..34 "=" [] [],
+                            value: HtmlAttributeSingleTextExpression {
+                                l_curly_token: L_CURLY@34..35 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@35..53 "['some-css-class']" [] [],
+                                },
+                                r_curly_token: R_CURLY@53..55 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                },
+                AstroSetDirective {
+                    set_token: SET_KW@55..58 "set" [] [],
+                    value: AstroDirectiveValue {
+                        colon_token_token: COLON@58..59 ":" [] [],
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@59..63 "text" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@63..64 "=" [] [],
+                            value: HtmlAttributeSingleTextExpression {
+                                l_curly_token: L_CURLY@64..65 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@65..71 "string" [] [],
+                                },
+                                r_curly_token: R_CURLY@71..73 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@73..74 "/" [] [],
+            r_angle_token: R_ANGLE@74..75 ">" [] [],
+        },
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@75..78 "<" [Newline("\n"), Newline("\n")] [],
+            name: HtmlComponentName {
+                value_token: HTML_LITERAL@78..93 "ShowHideButton" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                AstroClientDirective {
+                    client_token: CLIENT_KW@93..99 "client" [] [],
+                    value: AstroDirectiveValue {
+                        colon_token_token: COLON@99..100 ":" [] [],
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@100..105 "idle" [] [Whitespace(" ")],
+                        },
+                        initializer: missing (optional),
+                    },
+                },
+            ],
+            slash_token: SLASH@105..106 "/" [] [],
+            r_angle_token: R_ANGLE@106..107 ">" [] [],
+        },
+    ],
+    eof_token: EOF@107..108 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..108
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..107
+    0: HTML_SELF_CLOSING_ELEMENT@0..75
+      0: L_ANGLE@0..1 "<" [] []
+      1: HTML_COMPONENT_NAME@1..11
+        0: HTML_LITERAL@1..11 "BuyButton" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@11..73
+        0: ASTRO_CLIENT_DIRECTIVE@11..23
+          0: CLIENT_KW@11..17 "client" [] []
+          1: ASTRO_DIRECTIVE_VALUE@17..23
+            0: COLON@17..18 ":" [] []
+            1: HTML_ATTRIBUTE_NAME@18..23
+              0: HTML_LITERAL@18..23 "load" [] [Whitespace(" ")]
+            2: (empty)
+        1: ASTRO_CLASS_DIRECTIVE@23..55
+          0: CLASS_KW@23..28 "class" [] []
+          1: ASTRO_DIRECTIVE_VALUE@28..55
+            0: COLON@28..29 ":" [] []
+            1: HTML_ATTRIBUTE_NAME@29..33
+              0: HTML_LITERAL@29..33 "list" [] []
+            2: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@33..55
+              0: EQ@33..34 "=" [] []
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@34..55
+                0: L_CURLY@34..35 "{" [] []
+                1: HTML_TEXT_EXPRESSION@35..53
+                  0: HTML_LITERAL@35..53 "['some-css-class']" [] []
+                2: R_CURLY@53..55 "}" [] [Whitespace(" ")]
+        2: ASTRO_SET_DIRECTIVE@55..73
+          0: SET_KW@55..58 "set" [] []
+          1: ASTRO_DIRECTIVE_VALUE@58..73
+            0: COLON@58..59 ":" [] []
+            1: HTML_ATTRIBUTE_NAME@59..63
+              0: HTML_LITERAL@59..63 "text" [] []
+            2: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@63..73
+              0: EQ@63..64 "=" [] []
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@64..73
+                0: L_CURLY@64..65 "{" [] []
+                1: HTML_TEXT_EXPRESSION@65..71
+                  0: HTML_LITERAL@65..71 "string" [] []
+                2: R_CURLY@71..73 "}" [] [Whitespace(" ")]
+      3: SLASH@73..74 "/" [] []
+      4: R_ANGLE@74..75 ">" [] []
+    1: HTML_SELF_CLOSING_ELEMENT@75..107
+      0: L_ANGLE@75..78 "<" [Newline("\n"), Newline("\n")] []
+      1: HTML_COMPONENT_NAME@78..93
+        0: HTML_LITERAL@78..93 "ShowHideButton" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@93..105
+        0: ASTRO_CLIENT_DIRECTIVE@93..105
+          0: CLIENT_KW@93..99 "client" [] []
+          1: ASTRO_DIRECTIVE_VALUE@99..105
+            0: COLON@99..100 ":" [] []
+            1: HTML_ATTRIBUTE_NAME@100..105
+              0: HTML_LITERAL@100..105 "idle" [] [Whitespace(" ")]
+            2: (empty)
+      3: SLASH@105..106 "/" [] []
+      4: R_ANGLE@106..107 ">" [] []
+  4: EOF@107..108 "" [Newline("\n")] []
+
+```

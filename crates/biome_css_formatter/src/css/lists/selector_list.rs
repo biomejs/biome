@@ -53,7 +53,13 @@ impl FormatRule<CssSelectorList> for FormatCssSelectorList {
                 let simple_selector_has_leading_comments = computed_selector
                     .simple_selector()
                     .and_then(|simple_selector| simple_selector.as_css_type_selector().cloned())
-                    .and_then(|type_selector| type_selector.ident().ok()?.value_token().ok())
+                    .and_then(|type_selector| {
+                        type_selector
+                            .ident()
+                            .ok()?
+                            .as_css_identifier()
+                            .and_then(|ident| ident.value_token().ok())
+                    })
                     .is_some_and(|value_token| value_token.has_leading_comments());
 
                 // Sub selector same as the Simple Selector above:

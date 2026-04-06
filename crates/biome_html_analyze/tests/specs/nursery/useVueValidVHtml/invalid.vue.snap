@@ -3,7 +3,7 @@ source: crates/biome_html_analyze/tests/spec_tests.rs
 expression: invalid.vue
 ---
 # Input
-```html
+```vue
 <!-- should generate diagnostics -->
 
 <template>
@@ -157,6 +157,22 @@ invalid.vue:23:31 lint/nursery/useVueValidVHtml ━━━━━━━━━━�
   i v-html directives should be used without arguments, like v-html="content".
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a valid expression in template syntax
+  
+     7 │   <!-- Empty value -->
+   > 8 │   <div v-html=""></div>
+       │                
+     9 │   
+    10 │   <!-- Unexpected argument -->
+  
+  i Template expressions can only contain JavaScript expressions, not statements like 'let', 'if', or 'function'.
   
 
 ```

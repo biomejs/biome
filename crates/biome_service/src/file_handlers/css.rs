@@ -428,7 +428,7 @@ fn parse(
 
     ParseResult {
         any_parse: parse.into(),
-        language: None,
+        language: Some(file_source),
     }
 }
 
@@ -720,10 +720,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
 
     loop {
         let css_services = CssAnalyzerServices {
-            semantic_model: params
-                .document_services
-                .as_css_services()
-                .and_then(|services| services.semantic_model.as_ref()),
+            semantic_model: None,
             file_source,
             module_graph: Some(params.module_graph.clone()),
             project_layout: Some(params.project_layout.clone()),
@@ -738,6 +735,8 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             |signal| process_fix_all.process_signal(signal),
         );
 
+        let plugin_text_edit = action.as_ref().and_then(|a| a.text_edit.clone());
+
         let result = process_fix_all.process_action(action, |root| {
             tree = match AnyCssRoot::cast(root) {
                 Some(tree) => tree,
@@ -747,19 +746,33 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         })?;
 
         if result.is_none() {
-            return process_fix_all.finish(|| {
-                Ok(if params.should_format {
-                    Either::Left(format_node(
-                        params.settings.format_options::<CssLanguage>(
-                            params.biome_path,
-                            &params.document_file_source,
-                        ),
-                        tree.syntax(),
-                    ))
-                } else {
-                    Either::Right(tree.syntax().to_string())
-                })
-            });
+            if let Some(new_text) = process_fix_all
+                .apply_plugin_text_edit(plugin_text_edit, &tree.syntax().to_string())?
+            {
+                let options = params
+                    .settings
+                    .parse_options::<CssLanguage>(params.biome_path, &params.document_file_source);
+                let parse = biome_css_parser::parse_css(&new_text, file_source, options);
+                tree = parse.tree();
+                continue;
+            }
+
+            return process_fix_all.finish(
+                || {
+                    Ok(if params.should_format {
+                        Either::Left(format_node(
+                            params.settings.format_options::<CssLanguage>(
+                                params.biome_path,
+                                &params.document_file_source,
+                            ),
+                            tree.syntax(),
+                        ))
+                    } else {
+                        Either::Right(tree.syntax().to_string())
+                    })
+                },
+                params.embeds_initial_indent,
+            );
         }
     }
 }

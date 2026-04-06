@@ -1,0 +1,39 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+
+<style is:global>
+.foo {
+	color: red;
+}
+</style>
+
+```
+
+# Diagnostics
+```
+invalid.astro:3:8 lint/nursery/useScopedStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This is:global directive is making the styles in this block global.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ 
+  > 3 │ <style is:global>
+      │        ^^^^^^^^^
+    4 │ .foo {
+    5 │ 	color: red;
+  
+  i In Astro, styles are scoped to the component by default. The is:global directive allows for global styles, but it can lead to unintended side effects and maintenance challenges.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the is:global directive so the styles in this block will be scoped to this component.
+  
+    3 │ <style·is:global>
+      │        --------- 
+
+```

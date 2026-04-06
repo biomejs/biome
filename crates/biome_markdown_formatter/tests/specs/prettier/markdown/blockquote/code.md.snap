@@ -1,0 +1,74 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/blockquote/code.md
+---
+
+# Input
+
+```md
+> NOTE: To use `unobtrusive`, `unobtrusive/import`, `unobtrusive/react`, and `unobtrusive/flowtype` together, your eslint config would look like this:
+>```json
+>{
+>  "extends": [
+>    "unobtrusive",
+>    "unobtrusive/import",
+>    "unobtrusive/react",
+>    "unobtrusive/flowtype"
+>  ],
+>  "env": {
+>    "browser": true
+>  }
+>}
+>```
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,6 @@
+ > NOTE: To use `unobtrusive`, `unobtrusive/import`, `unobtrusive/react`, and `unobtrusive/flowtype` together, your eslint config would look like this:
+->
+-> ```json
+-> {
++>```json
++>{
+ >  "extends": [
+ >    "unobtrusive",
+ >    "unobtrusive/import",
+@@ -11,5 +10,5 @@
+ >  "env": {
+ >    "browser": true
+ >  }
+-> }
+-> ```
++>}
++>```
+```
+
+# Output
+
+```md
+> NOTE: To use `unobtrusive`, `unobtrusive/import`, `unobtrusive/react`, and `unobtrusive/flowtype` together, your eslint config would look like this:
+>```json
+>{
+>  "extends": [
+>    "unobtrusive",
+>    "unobtrusive/import",
+>    "unobtrusive/react",
+>    "unobtrusive/flowtype"
+>  ],
+>  "env": {
+>    "browser": true
+>  }
+>}
+>```
+```
+
+# Lines exceeding max width of 80 characters
+```
+    1: > NOTE: To use `unobtrusive`, `unobtrusive/import`, `unobtrusive/react`, and `unobtrusive/flowtype` together, your eslint config would look like this:
+```

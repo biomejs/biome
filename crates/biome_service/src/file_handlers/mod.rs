@@ -28,7 +28,7 @@ use biome_console::fmt::Formatter;
 use biome_css_analyze::METADATA as css_metadata;
 use biome_css_syntax::{CssFileSource, CssLanguage};
 use biome_diagnostics::{Applicability, Diagnostic, DiagnosticExt, Error, Severity, category};
-use biome_formatter::{FormatContext, FormatResult, Formatted, Printed};
+use biome_formatter::{FormatContext, FormatResult, Formatted, Printed, SourceMapGeneration};
 use biome_fs::BiomePath;
 use biome_graphql_analyze::METADATA as graphql_metadata;
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
@@ -43,17 +43,20 @@ use biome_js_syntax::{
 };
 use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
+use biome_markdown_syntax::MdFileSource;
 use biome_module_graph::ModuleGraph;
 use biome_package::PackageJson;
 use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{FileSourceError, NodeCache, SendNode, SyntaxNode, TokenText};
 use biome_string_case::StrLikeExtension;
+use biome_text_edit::TextEdit;
 use camino::Utf8Path;
 use either::Either;
 use grit::GritFileHandler;
 use html::HtmlFileHandler;
 pub use javascript::JsFormatterSettings;
+use md::MarkdownFileHandler;
 use rustc_hash::FxHashSet;
 use std::borrow::Cow;
 use std::collections::HashSet;
@@ -68,6 +71,7 @@ pub(crate) mod html;
 mod ignore;
 pub(crate) mod javascript;
 pub(crate) mod json;
+pub(crate) mod md;
 pub mod svelte;
 mod unknown;
 pub mod vue;
@@ -83,6 +87,7 @@ pub enum DocumentFileSource {
     Graphql(GraphqlFileSource),
     Html(HtmlFileSource),
     Grit(GritFileSource),
+    Markdown(MdFileSource),
     // Ignore files
     Ignore,
     #[default]
@@ -125,6 +130,12 @@ impl From<GritFileSource> for DocumentFileSource {
     }
 }
 
+impl From<MdFileSource> for DocumentFileSource {
+    fn from(value: MdFileSource) -> Self {
+        Self::Markdown(value)
+    }
+}
+
 impl From<&Utf8Path> for DocumentFileSource {
     fn from(path: &Utf8Path) -> Self {
         Self::from_path(path, false)
@@ -159,6 +170,11 @@ impl DocumentFileSource {
             return Ok(file_source.into());
         }
         if let Ok(file_source) = GraphqlFileSource::try_from_well_known(path) {
+            return Ok(file_source.into());
+        }
+
+        #[cfg(feature = "markdown")]
+        if let Ok(file_source) = MdFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
 
@@ -205,6 +221,9 @@ impl DocumentFileSource {
         if let Ok(file_source) = GritFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
+        if let Ok(file_source) = MdFileSource::try_from_extension(extension) {
+            return Ok(file_source.into());
+        }
         Err(FileSourceError::UnknownExtension)
     }
 
@@ -231,6 +250,9 @@ impl DocumentFileSource {
             return Ok(file_source.into());
         }
         if let Ok(file_source) = GritFileSource::try_from_language_id(language_id) {
+            return Ok(file_source.into());
+        }
+        if let Ok(file_source) = MdFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
         Err(FileSourceError::UnknownLanguageId)
@@ -371,6 +393,13 @@ impl DocumentFileSource {
         }
     }
 
+    pub fn to_markdown_file_source(&self) -> Option<MdFileSource> {
+        match self {
+            Self::Markdown(markdown) => Some(*markdown),
+            _ => None,
+        }
+    }
+
     /// The file can be parsed
     pub fn can_parse(path: &Utf8Path) -> bool {
         let file_source = Self::from(path);
@@ -380,7 +409,8 @@ impl DocumentFileSource {
             | Self::Graphql(_)
             | Self::Json(_)
             | Self::Html(_)
-            | Self::Grit(_) => true,
+            | Self::Grit(_)
+            | Self::Markdown(_) => true,
             Self::Ignore => false,
             Self::Unknown => false,
         }
@@ -395,7 +425,8 @@ impl DocumentFileSource {
             | Self::Graphql(_)
             | Self::Json(_)
             | Self::Html(_)
-            | Self::Grit(_) => true,
+            | Self::Grit(_)
+            | Self::Markdown(_) => true,
             Self::Ignore => true,
             Self::Unknown => false,
         }
@@ -410,6 +441,7 @@ impl DocumentFileSource {
             | Self::Graphql(_)
             | Self::Json(_)
             | Self::Grit(_)
+            | Self::Markdown(_)
             | Self::Ignore
             | Self::Unknown => false,
         }
@@ -444,6 +476,7 @@ impl std::fmt::Display for DocumentFileSource {
             Self::Graphql(_) => write!(fmt, "GraphQL"),
             Self::Html(_) => write!(fmt, "HTML"),
             Self::Grit(_) => write!(fmt, "Grit"),
+            Self::Markdown(_) => write!(fmt, "Markdown"),
             Self::Ignore => write!(fmt, "Ignore"),
             Self::Unknown => write!(fmt, "Unknown"),
         }
@@ -474,6 +507,10 @@ pub struct FixAllParams<'a> {
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) document_services: &'a DocumentServices,
     pub(crate) working_directory: Option<&'a Utf8Path>,
+    /// The initial indentation level to apply when printing formatted code.
+    /// Used by embedded language handlers (Svelte, Vue) to preserve
+    /// `indentScriptAndStyle` indentation during fix-all operations.
+    pub(crate) embeds_initial_indent: u16,
 }
 
 #[derive(Default)]
@@ -580,7 +617,6 @@ pub(crate) struct DiagnosticsAndActionsParams<'a> {
     pub(crate) enabled_selectors: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) diagnostic_offset: Option<TextSize>,
-    #[expect(unused)]
     pub(crate) document_services: &'a DocumentServices,
     pub(crate) working_directory: Option<&'a Utf8Path>,
 }
@@ -834,23 +870,90 @@ impl<'a> ProcessFixAll<'a> {
                             },
                         ));
                     };
-                };
 
-                Ok(Some(()))
+                    Ok(Some(()))
+                } else {
+                    // Mutation was empty (no tree changes), signal no fix applied
+                    Ok(None)
+                }
             }
             None => Ok(None),
         }
     }
 
+    /// Record a text-edit-based fix (e.g. from a plugin rewrite) that was
+    /// applied outside of the normal mutation path.
+    pub(crate) fn record_text_edit_fix(
+        &mut self,
+        range: TextRange,
+        new_text_len: u32,
+        rule_name: Option<(&'static str, &'static str)>,
+    ) -> Result<(), WorkspaceError> {
+        self.actions.push(FixAction {
+            rule_name: rule_name.map(|(g, r)| (Cow::Borrowed(g), Cow::Borrowed(r))),
+            range,
+        });
+        if !self.growth_guard.check(new_text_len) {
+            return Err(WorkspaceError::RuleError(
+                RuleError::ConflictingRuleFixesError {
+                    rules: self
+                        .actions
+                        .iter()
+                        .rev()
+                        .take(10)
+                        .filter_map(|action| action.rule_name.clone())
+                        .collect::<HashSet<_>>()
+                        .into_iter()
+                        .collect(),
+                },
+            ));
+        }
+        Ok(())
+    }
+
+    /// Apply a plugin text edit if present and the text actually changed.
+    /// Returns `Some(new_text)` if the edit was applied, `None` otherwise.
+    pub(crate) fn apply_plugin_text_edit(
+        &mut self,
+        text_edit: Option<(TextRange, TextEdit)>,
+        current_text: &str,
+    ) -> Result<Option<String>, WorkspaceError> {
+        let Some((range, edit)) = text_edit else {
+            return Ok(None);
+        };
+        let new_text = edit.new_string(current_text);
+        if new_text == current_text {
+            return Ok(None);
+        }
+        self.record_text_edit_fix(range, new_text.len() as u32, Some(("plugin", "gritql")))?;
+        Ok(Some(new_text))
+    }
+
     /// Finish processing the fix all actions. Returns the result of the fix-all actions. The `format_tree`
     /// is a closure that must return the new code (formatted, if needed).
-    pub(crate) fn finish<F, C>(self, format_tree: F) -> Result<FixFileResult, WorkspaceError>
+    ///
+    /// `initial_indent` specifies the base indentation level for printing. This is used by
+    /// embedded language handlers (e.g. Svelte, Vue) to preserve `indentScriptAndStyle`
+    /// indentation when formatting during fix-all operations.
+    pub(crate) fn finish<F, C>(
+        self,
+        format_tree: F,
+        initial_indent: u16,
+    ) -> Result<FixFileResult, WorkspaceError>
     where
         F: FnOnce() -> Result<Either<FormatResult<Formatted<C>>, String>, WorkspaceError>,
         C: FormatContext,
     {
         let code = match format_tree()? {
-            Either::Left(printed) => printed?.print()?.into_code(),
+            Either::Left(printed) => {
+                if initial_indent > 0 {
+                    printed?
+                        .print_with_indent(initial_indent, SourceMapGeneration::Disabled)?
+                        .into_code()
+                } else {
+                    printed?.print()?.into_code()
+                }
+            }
             Either::Right(string) => string,
         };
         Ok(FixFileResult {
@@ -1054,6 +1157,7 @@ pub(crate) struct Features {
     graphql: GraphqlFileHandler,
     html: HtmlFileHandler,
     grit: GritFileHandler,
+    markdown: MarkdownFileHandler,
     ignore: IgnoreFileHandler,
 }
 
@@ -1069,6 +1173,7 @@ impl Features {
             graphql: GraphqlFileHandler {},
             html: HtmlFileHandler {},
             grit: GritFileHandler {},
+            markdown: MarkdownFileHandler {},
             ignore: IgnoreFileHandler {},
             unknown: UnknownFileHandler::default(),
         }
@@ -1089,6 +1194,7 @@ impl Features {
             DocumentFileSource::Graphql(_) => self.graphql.capabilities(),
             DocumentFileSource::Html(_) => self.html.capabilities(),
             DocumentFileSource::Grit(_) => self.grit.capabilities(),
+            DocumentFileSource::Markdown(_) => self.markdown.capabilities(),
             DocumentFileSource::Ignore => self.ignore.capabilities(),
             DocumentFileSource::Unknown => self.unknown.capabilities(),
         }
@@ -1372,8 +1478,6 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
 
     /// It loops over the domains of the current rule, and check each domain specify
     /// a dependency.
-    ///
-    /// Returns `true` if the rule was enabled, `false` otherwise
     fn record_rule_from_manifest<R, L>(&mut self, rule_filter: RuleFilter<'static>)
     where
         L: biome_rowan::Language,
@@ -1394,16 +1498,20 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         }
 
         let no_only = self.only.is_some_and(|only| only.is_empty());
-        let no_domains = self
-            .settings
-            .as_linter_domains(path)
-            .is_none_or(|d| d.is_empty());
-        if !(no_only && no_domains) {
+        if !no_only {
             return;
         }
 
+        let domains = self.settings.as_linter_domains(path);
         if let Some(manifest) = &self.package_json {
             for domain in R::METADATA.domains {
+                if domains
+                    .as_ref()
+                    .is_some_and(|domains| domains.contains_key(domain))
+                {
+                    continue;
+                }
+
                 let matches_a_dependency = domain
                     .manifest_dependencies()
                     .iter()
@@ -1505,14 +1613,15 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
         L: biome_rowan::Language,
     {
-        if let Some(rule_filter) = rule_filter
-            && rule_filter.match_rule::<R>()
-        {
-            // first we want to register rules via "magic default"
-            self.record_rule_from_manifest::<R, L>(rule_filter);
-            // then we want to register rules
-            self.record_rule_from_domains::<R, L>(rule_filter);
+        let Some(rule_filter) = rule_filter.filter(|rule_filter| rule_filter.match_rule::<R>())
+        else {
+            return;
         };
+
+        // first we want to register rules via "magic default"
+        self.record_rule_from_manifest::<R, L>(rule_filter);
+        // then we want to register rules
+        self.record_rule_from_domains::<R, L>(rule_filter);
 
         // Do not report unused suppression comment diagnostics if:
         // - it is a syntax-only analyzer pass, or

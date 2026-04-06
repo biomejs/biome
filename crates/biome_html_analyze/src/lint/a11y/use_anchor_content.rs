@@ -7,6 +7,7 @@ use biome_html_syntax::{
     AnyHtmlContent, AnyHtmlElement, HtmlAttribute, HtmlElementList, HtmlFileSource,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::use_anchor_content::UseAnchorContentOptions;
 
 use crate::HtmlRuleAction;
 use crate::a11y::{
@@ -97,7 +98,7 @@ impl Rule for UseAnchorContent {
     type Query = Ast<AnyHtmlElement>;
     type State = UseAnchorContentState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseAnchorContentOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
@@ -142,7 +143,8 @@ impl Rule for UseAnchorContent {
         }
 
         // Check if the anchor has accessible content
-        if has_accessible_content(&html_element.children()) {
+        let is_astro = source_type.is_astro();
+        if has_accessible_content(&html_element.children(), is_astro) {
             return None;
         }
 
@@ -189,14 +191,14 @@ impl Rule for UseAnchorContent {
 }
 
 /// Checks if `HtmlElementList` contains accessible content (non-empty text or visible elements).
-fn has_accessible_content(html_child_list: &HtmlElementList) -> bool {
+fn has_accessible_content(html_child_list: &HtmlElementList, is_astro: bool) -> bool {
     html_child_list.into_iter().any(|child| match &child {
         AnyHtmlElement::AnyHtmlContent(content) => is_accessible_text_content(content),
         AnyHtmlElement::HtmlElement(element) => {
             if html_element_has_truthy_aria_hidden(element) {
                 false
             } else {
-                has_accessible_content(&element.children())
+                has_accessible_content(&element.children(), is_astro)
             }
         }
         AnyHtmlElement::HtmlSelfClosingElement(element) => {
@@ -211,7 +213,10 @@ fn has_accessible_content(html_child_list: &HtmlElementList) -> bool {
             let tag_text = element.name().ok().and_then(|n| n.token_text_trimmed());
 
             match tag_text.as_ref().map(|t| t.as_ref()) {
-                Some(name) if name.eq_ignore_ascii_case("img") => {
+                Some(name)
+                    if name.eq_ignore_ascii_case("img")
+                        || (is_astro && name == "Image") =>
+                {
                     html_self_closing_element_has_non_empty_attribute(element, "alt")
                 }
                 Some(name)
@@ -234,6 +239,8 @@ fn has_accessible_content(html_child_list: &HtmlElementList) -> bool {
                     });
                     !is_hidden
                 }
+                // Custom components (PascalCase) may render accessible content
+                Some(name) if name.starts_with(|c: char| c.is_uppercase()) => true,
                 _ => false,
             }
         }

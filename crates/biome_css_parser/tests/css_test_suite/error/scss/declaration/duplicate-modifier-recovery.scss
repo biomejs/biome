@@ -1,0 +1,4 @@
+// Duplicate modifiers with junk in between should still recover
+// without targeted duplicate-modifier parser diagnostics
+$dup-default-junk: 1 !default ??? !default;
+$dup-global-junk: 1 !global ??? !global;

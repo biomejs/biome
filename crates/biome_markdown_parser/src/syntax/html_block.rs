@@ -13,6 +13,7 @@ use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax::{self, *};
 
 use crate::MarkdownParser;
+use crate::syntax::MAX_BLOCK_PREFIX_INDENT;
 use crate::syntax::quote::{consume_quote_prefix_without_virtual, has_quote_prefix};
 
 /// Check if we're at an HTML block (line start, up to 3 spaces indent, then `<`).
@@ -22,11 +23,11 @@ pub(crate) fn at_html_block(p: &mut MarkdownParser) -> bool {
             return false;
         }
 
-        if p.line_start_leading_indent() > 3 {
+        if p.line_start_leading_indent() > MAX_BLOCK_PREFIX_INDENT {
             return false;
         }
 
-        p.skip_line_indent(3);
+        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
 
         p.at(L_ANGLE) && is_html_like_content(p)
     })
@@ -249,7 +250,7 @@ const BLOCK_TAGS: &[&str] = &[
 /// Only block-level HTML and special constructs interrupt paragraphs.
 pub(crate) fn at_html_block_interrupt(p: &mut MarkdownParser) -> bool {
     p.lookahead(|p| {
-        if p.line_start_leading_indent() > 3 {
+        if p.line_start_leading_indent() > MAX_BLOCK_PREFIX_INDENT {
             return false;
         }
 
@@ -271,17 +272,19 @@ pub(crate) fn at_html_block_interrupt(p: &mut MarkdownParser) -> bool {
 
 /// Parse HTML block as raw text until blank line.
 pub(crate) fn parse_html_block(p: &mut MarkdownParser) -> ParsedSyntax {
-    p.skip_line_indent(3);
+    let m = p.start();
+    p.emit_line_indent(MAX_BLOCK_PREFIX_INDENT);
 
     if !p.at(L_ANGLE) {
+        m.abandon(p);
         return Absent;
     }
 
     let Some(kind) = html_block_kind(p) else {
+        m.abandon(p);
         return Absent;
     };
 
-    let m = p.start();
     let content_m = p.start();
 
     match kind {
@@ -396,7 +399,7 @@ fn skip_container_prefixes(p: &mut MarkdownParser) {
 
     let required_indent = p.state().list_item_required_indent;
     if required_indent > 0 {
-        p.skip_line_indent(required_indent);
+        p.emit_indent_tokens(required_indent);
         p.state_mut().virtual_line_start = Some(p.cur_range().start());
     }
 }

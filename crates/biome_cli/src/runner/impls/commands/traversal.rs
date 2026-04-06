@@ -16,7 +16,6 @@ use biome_service::configuration::load_editorconfig;
 use biome_service::workspace::ScanKind;
 use biome_service::{Workspace, WorkspaceError};
 use camino::Utf8PathBuf;
-use std::collections::BTreeSet;
 use std::ffi::OsString;
 use std::ops::{Deref, DerefMut};
 
@@ -209,6 +208,6 @@ where
 
 pub(crate) struct TraverseResult {
     pub(crate) summary: TraversalSummary,
-    pub(crate) evaluated_paths: BTreeSet<BiomePath>,
+    pub(crate) evaluated_paths: Vec<BiomePath>,
     pub(crate) diagnostics: Vec<Error>,
 }

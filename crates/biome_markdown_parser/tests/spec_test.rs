@@ -193,4 +193,20 @@ pub fn quick_test() {
         "![a & b < c](url)\n",
         "<p><img src=\"url\" alt=\"a &amp; b &lt; c\" /></p>\n",
     );
+    test_example(
+        9992,
+        "> ```\n> hello\n> ```\n",
+        "<blockquote>\n<pre><code>hello\n</code></pre>\n</blockquote>\n",
+    );
+    test_example(
+        9993,
+        "- foo\n  - bar\n",
+        "<ul>\n<li>foo\n<ul>\n<li>bar</li>\n</ul>\n</li>\n</ul>\n",
+    );
+    // Setext underline with optional indent inside a list item
+    test_example(
+        9994,
+        "- foo\n   ---\n",
+        "<ul>\n<li>\n<h2>foo</h2>\n</li>\n</ul>\n",
+    );
 }

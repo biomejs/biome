@@ -3,7 +3,7 @@ use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssFileSource;
 use biome_fs::MemoryFileSystem;
 use biome_html_formatter::HtmlFormatOptions;
-use biome_html_parser::HtmlParseOptions;
+use biome_html_parser::HtmlParserOptions;
 use biome_html_syntax::HtmlFileSource;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_formatter::format_node;
@@ -18,15 +18,37 @@ use std::collections::BTreeSet;
 
 pub struct ModuleGraphSnapshot<'a> {
     module_graph: &'a ModuleGraph,
-    fs: &'a MemoryFileSystem,
+    files: Vec<(String, String)>,
     resolver: Option<&'a ModuleResolver>,
 }
 
 impl<'a> ModuleGraphSnapshot<'a> {
     pub fn new(module_graph: &'a ModuleGraph, fs: &'a MemoryFileSystem) -> Self {
+        let files = fs
+            .files
+            .read()
+            .iter()
+            .map(|(file, entry)| {
+                let content = entry.lock();
+                let content = String::from_utf8_lossy(content.as_slice()).into_owned();
+                (file.as_str().to_string(), content)
+            })
+            .collect();
         Self {
             module_graph,
-            fs,
+            files,
+            resolver: None,
+        }
+    }
+
+    /// Build a snapshot from a pre-collected list of `(path, source)` pairs.
+    ///
+    /// Use this when the [`MemoryFileSystem`] has been moved into a
+    /// [`WorkspaceServer`] and is no longer directly accessible.
+    pub fn from_files(module_graph: &'a ModuleGraph, files: Vec<(String, String)>) -> Self {
+        Self {
+            module_graph,
+            files,
             resolver: None,
         }
     }
@@ -40,17 +62,7 @@ impl<'a> ModuleGraphSnapshot<'a> {
 
     pub fn assert_snapshot(&self, test_name: &str) {
         let mut content = String::new();
-        let files: Vec<_> = self
-            .fs
-            .files
-            .read()
-            .iter()
-            .map(|(file, entry)| {
-                let content = entry.lock();
-                let content = std::str::from_utf8(content.as_slice()).unwrap();
-                (file.as_str().to_string(), String::from(content))
-            })
-            .collect();
+        let files: Vec<_> = self.files.clone();
 
         let dependency_data = self.module_graph.data();
         for (file_name, source_code) in &files {
@@ -79,18 +91,31 @@ impl<'a> ModuleGraphSnapshot<'a> {
             content.push_str(extension);
             content.push('\n');
 
-            if let Ok(file_source) = JsFileSource::try_from(file_name.as_path()) {
-                let tree = parse(
-                    source_code.as_str(),
-                    file_source,
-                    JsParserOptions::default(),
-                );
-                let formatted =
-                    format_node(JsFormatOptions::default(), tree.tree().syntax(), false)
-                        .unwrap()
-                        .print()
-                        .unwrap();
-                content.push_str(formatted.as_code().trim());
+            // Check HtmlFileSource first: .vue/.astro/.svelte are also matched
+            // by JsFileSource (legacy embedding path), so we must prioritise the
+            // HTML branch to avoid feeding raw SFC source through the JS parser.
+            if let Ok(file_source) = HtmlFileSource::try_from(file_name.as_path()) {
+                if file_source.is_html() {
+                    // Format plain .html files with the HTML formatter.
+                    let tree = biome_html_parser::parse_html(
+                        source_code.as_str(),
+                        HtmlParserOptions::from(&file_source),
+                    );
+                    let formatted = biome_html_formatter::format_node(
+                        HtmlFormatOptions::default(),
+                        tree.tree().syntax(),
+                        false,
+                    )
+                    .unwrap()
+                    .print()
+                    .unwrap();
+                    content.push_str(formatted.as_code().trim());
+                } else {
+                    // Framework files (.vue, .astro, .svelte): display raw source.
+                    // The HTML formatter cannot handle their embedded blocks, and the
+                    // JS parser would mangle them (closing tags → bogus nodes).
+                    content.push_str(source_code.trim());
+                }
             } else if let Ok(file_source) = CssFileSource::try_from(file_name.as_path()) {
                 let tree = biome_css_parser::parse_css(
                     source_code.as_str(),
@@ -105,19 +130,17 @@ impl<'a> ModuleGraphSnapshot<'a> {
                 .print()
                 .unwrap();
                 content.push_str(formatted.as_code().trim());
-            } else if let Ok(file_source) = HtmlFileSource::try_from(file_name.as_path()) {
-                let tree = biome_html_parser::parse_html(
+            } else if let Ok(file_source) = JsFileSource::try_from(file_name.as_path()) {
+                let tree = parse(
                     source_code.as_str(),
-                    HtmlParseOptions::from(&file_source),
+                    file_source,
+                    JsParserOptions::default(),
                 );
-                let formatted = biome_html_formatter::format_node(
-                    HtmlFormatOptions::default(),
-                    tree.tree().syntax(),
-                    false,
-                )
-                .unwrap()
-                .print()
-                .unwrap();
+                let formatted =
+                    format_node(JsFormatOptions::default(), tree.tree().syntax(), false)
+                        .unwrap()
+                        .print()
+                        .unwrap();
                 content.push_str(formatted.as_code().trim());
             } else {
                 content.push_str(source_code.trim());
@@ -203,23 +226,33 @@ impl<'a> ModuleGraphSnapshot<'a> {
 
                         content.push_str("\n```\n\n");
 
-                        let exported_binding_ids: BTreeSet<_> = data
+                        let exported_binding_ranges: BTreeSet<_> = data
                             .exports
                             .values()
                             .filter_map(JsExport::as_own_export)
                             .filter_map(|export| match export {
-                                JsOwnExport::Binding(binding_id) => Some(*binding_id),
-                                JsOwnExport::Type(_) => None,
+                                JsOwnExport::Binding(binding_range) => Some(*binding_range),
+                                JsOwnExport::Type(_) | JsOwnExport::Namespace(_) => None,
                             })
                             .collect();
-                        if !exported_binding_ids.is_empty() {
+                        if !exported_binding_ranges.is_empty() {
                             content.push_str("## Exported Bindings\n\n");
                             content.push_str("```");
-                            for binding_id in exported_binding_ids {
-                                content.push_str(&format!(
-                                    "\n{binding_id:?} => {}\n",
-                                    data.binding(binding_id)
-                                ));
+                            for binding_range in exported_binding_ranges {
+                                if let Some(type_data) = data.binding_type_data(binding_range) {
+                                    // Get the binding name from the semantic model
+                                    let binding_name = data
+                                        .semantic_model
+                                        .all_bindings()
+                                        .find(|b| b.syntax().text_trimmed_range() == binding_range)
+                                        .and_then(|b| b.tree().name_token().ok())
+                                        .map_or_else(|| "<unknown>".to_string(), |b| b.to_string());
+
+                                    content.push_str(&format!(
+                                        "\n{} => {}\n",
+                                        binding_name, type_data
+                                    ));
+                                }
                             }
                             content.push_str("```\n\n");
                         }
@@ -228,84 +261,13 @@ impl<'a> ModuleGraphSnapshot<'a> {
                     }
                     ModuleInfo::Css(css_data) => {
                         content.push_str("```\n");
-                        content.push_str("classes: [");
-                        let mut classes: Vec<_> = css_data
-                            .classes
-                            .iter()
-                            .map(|c| c.text().to_string())
-                            .collect();
-                        classes.sort();
-                        if classes.is_empty() {
-                            content.push(']');
-                        } else {
-                            content.push('\n');
-                            for class in &classes {
-                                content.push_str(&format!("  {class},\n"));
-                            }
-                            content.push(']');
-                        }
-                        content.push('\n');
-                        content.push_str("imports: [");
-                        let mut imports: Vec<_> = css_data
-                            .imports
-                            .values()
-                            .map(|i| i.specifier.to_string())
-                            .collect();
-                        imports.sort();
-                        if imports.is_empty() {
-                            content.push(']');
-                        } else {
-                            content.push('\n');
-                            for import in &imports {
-                                content.push_str(&format!("  {import},\n"));
-                            }
-                            content.push(']');
-                        }
-                        content.push('\n');
-                        content.push_str("```\n\n");
+                        content.push_str(&css_data.to_string());
+                        content.push_str("\n```\n\n");
                     }
                     ModuleInfo::Html(html_data) => {
                         content.push_str("```\n");
-                        content.push_str("style_classes: [");
-                        let mut style_classes: Vec<_> = html_data
-                            .style_classes
-                            .iter()
-                            .map(|c| c.text().to_string())
-                            .collect();
-                        style_classes.sort();
-                        if style_classes.is_empty() {
-                            content.push(']');
-                        } else {
-                            content.push('\n');
-                            for class in &style_classes {
-                                content.push_str(&format!("  {class},\n"));
-                            }
-                            content.push(']');
-                        }
-                        content.push('\n');
-                        content.push_str("referenced_classes: [");
-                        let mut ref_classes: Vec<_> = html_data
-                            .referenced_classes
-                            .iter()
-                            .flat_map(|r| {
-                                r.token
-                                    .text()
-                                    .split_ascii_whitespace()
-                                    .map(|s| s.to_string())
-                            })
-                            .collect();
-                        ref_classes.sort();
-                        if ref_classes.is_empty() {
-                            content.push(']');
-                        } else {
-                            content.push('\n');
-                            for class in &ref_classes {
-                                content.push_str(&format!("  {class},\n"));
-                            }
-                            content.push(']');
-                        }
-                        content.push('\n');
-                        content.push_str("```\n\n");
+                        content.push_str(&html_data.to_string());
+                        content.push_str("\n```\n\n");
                     }
                 }
             }

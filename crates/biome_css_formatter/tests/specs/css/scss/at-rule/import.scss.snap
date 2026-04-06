@@ -1,0 +1,52 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/at-rule/import.scss
+---
+
+# Input
+
+```scss
+@import"theme";
+
+@import "rounded-corners",
+"text-shadow";
+
+@import
+"theme.scss"
+,
+"spacing";
+
+@import "theme.css"print;
+
+@import "print.css"
+print,
+"spacing";
+
+@import "print.css"
+print
+,
+screen;
+
+@import url("theme.css");
+
+```
+
+
+# Formatted
+
+```scss
+@import "theme";
+
+@import "rounded-corners", "text-shadow";
+
+@import "theme.scss", "spacing";
+
+@import "theme.css" print;
+
+@import "print.css" print, "spacing";
+
+@import "print.css" print, screen;
+
+@import url("theme.css");
+
+```

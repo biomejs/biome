@@ -58,6 +58,20 @@ class D {
   fooD(sn: string | number): void {};
 }
 
+class E {
+  fooE(s: string): void;
+  static barE(): void {};
+  fooE(n: number): void;
+  fooE(sn: string | number): void {};
+}
+
+class F {
+  static fooF(s: string): void;
+  barF(): void {};
+  static fooF(n: number): void;
+  static fooF(sn: string | number): void {};
+}
+
 export function foo(s: string): void;
 export function foo(n: number): void;
 export function bar(): void;
@@ -213,61 +227,91 @@ invalid.ts:50:3 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━
 ```
 
 ```
-invalid.ts:58:17 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:58:3 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All fooE signatures must be adjacent.
+  
+    56 │   fooE(s: string): void;
+    57 │   static barE(): void {};
+  > 58 │   fooE(n: number): void;
+       │   ^^^^
+    59 │   fooE(sn: string | number): void {};
+    60 │ }
+  
+
+```
+
+```
+invalid.ts:65:10 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All fooF signatures must be adjacent.
+  
+    63 │   static fooF(s: string): void;
+    64 │   barF(): void {};
+  > 65 │   static fooF(n: number): void;
+       │          ^^^^
+    66 │   static fooF(sn: string | number): void {};
+    67 │ }
+  
+
+```
+
+```
+invalid.ts:72:17 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! All foo signatures must be adjacent.
   
-    56 │ export function foo(n: number): void;
-    57 │ export function bar(): void;
-  > 58 │ export function foo(sn: string | number): void;
+    70 │ export function foo(n: number): void;
+    71 │ export function bar(): void;
+  > 72 │ export function foo(sn: string | number): void;
        │                 ^^^
-    59 │ 
-    60 │ function f() {
+    73 │ 
+    74 │ function f() {
   
 
 ```
 
 ```
-invalid.ts:64:5 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:78:5 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! All interfaceA signatures must be adjacent.
   
-    62 │     interfaceA(x: boolean): boolean
-    63 │     interfaceB()
-  > 64 │     interfaceA(x: number): number
+    76 │     interfaceA(x: boolean): boolean
+    77 │     interfaceB()
+  > 78 │     interfaceA(x: number): number
        │     ^^^^^^^^^^
-    65 │   }
-    66 │ }
+    79 │   }
+    80 │ }
   
 
 ```
 
 ```
-invalid.ts:72:5 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:86:5 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! All typeMethodA signatures must be adjacent.
   
-    70 │     typeMethodA(x: boolean): boolean;
-    71 │     typeMethodB(): void;
-  > 72 │     typeMethodA(x: number): number;
+    84 │     typeMethodA(x: boolean): boolean;
+    85 │     typeMethodB(): void;
+  > 86 │     typeMethodA(x: number): number;
        │     ^^^^^^^^^^^
-    73 │   };
-    74 │ }
+    87 │   };
+    88 │ }
   
 
 ```
 
 ```
-invalid.ts:79:3 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:93:3 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! All functionA signatures must be adjacent.
   
-    77 │   functionA(x: boolean): boolean,
-    78 │   functionB(),
-  > 79 │   functionA(x: number): number,
+    91 │   functionA(x: boolean): boolean,
+    92 │   functionB(),
+  > 93 │   functionA(x: number): number,
        │   ^^^^^^^^^
-    80 │ } {
-    81 │ }
+    94 │ } {
+    95 │ }
   
 
 ```

@@ -1,0 +1,20 @@
+<!-- should not generate diagnostics -->
+<template>
+  <!-- Custom components should not trigger the rule -->
+  <Button role="button"></Button>
+  <Nav role="navigation"></Nav>
+  <Article role="article"></Article>
+  <Dialog role="dialog"></Dialog>
+  <Form role="form"></Form>
+  <Table role="table"></Table>
+
+  <!-- Kebab-case custom elements should not trigger the rule -->
+  <my-button role="button"></my-button>
+  <my-nav role="navigation"></my-nav>
+  <my-article role="article"></my-article>
+
+  <!-- Native elements with non-redundant roles -->
+  <article role="presentation"></article>
+  <span></span>
+  <div></div>
+</template>

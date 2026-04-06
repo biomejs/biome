@@ -114,8 +114,8 @@ impl WorkspaceError {
         })
     }
 
-    pub fn not_found() -> Self {
-        Self::NotFound(NotFound)
+    pub fn not_found(path: impl Into<String>) -> Self {
+        Self::NotFound(NotFound { path: path.into() })
     }
 
     #[inline]
@@ -257,10 +257,16 @@ pub struct NonUtf8Path {
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
     category = "internalError/fs",
-    message = "The file does not exist in the workspace.",
+    message(
+        message("The file "{self.path}" does not exist in the workspace."),
+        description = "The file {path} does not exist in the workspace."
+    ),
     tags(INTERNAL)
 )]
-pub struct NotFound;
+pub struct NotFound {
+    #[location(resource)]
+    path: String,
+}
 
 #[derive(Debug, Diagnostic, Deserialize, Serialize)]
 #[diagnostic(category = "internalError/panic", severity = Fatal, tags(INTERNAL))]
@@ -690,17 +696,23 @@ pub struct WatchError {
     pub reason: String,
 }
 
-#[derive(Debug, Default, Diagnostic, Serialize, Deserialize)]
+#[derive(Debug, Diagnostic, Serialize, Deserialize)]
 #[diagnostic(
     category = "project",
     severity = Hint,
-    message = "Biome found a configuration file outside of the current working directory. If the configuration enables the scanner, Biome might scan the whole file system. This behaviour will be fixed in the next major version.",
+    message(
+        message("Biome found the configuration file "{self.config_path}" outside of the current working directory "{self.working_directory}". If the configuration enables the scanner, Biome might scan the whole file system. This behaviour will be fixed in the next major version."),
+        description = "Biome found the configuration file {config_path} outside of the current working directory {working_directory}. If the configuration enables the scanner, Biome might scan the whole file system. This behaviour will be fixed in the next major version."
+    ),
 )]
-pub struct ConfigurationOutsideProject;
+pub struct ConfigurationOutsideProject {
+    pub config_path: String,
+    pub working_directory: String,
+}
 
 #[cfg(test)]
 mod test {
-    use crate::diagnostics::{CantReadFile, FileIgnored, NotFound, SourceFileNotSupported};
+    use crate::diagnostics::{CantReadFile, FileIgnored, SourceFileNotSupported};
     use crate::file_handlers::DocumentFileSource;
     use crate::{TransportError, WorkspaceError};
     use biome_diagnostics::{DiagnosticExt, Error, print_diagnostic_to_string};
@@ -751,7 +763,7 @@ mod test {
     fn not_found() {
         snap_diagnostic(
             "not_found",
-            WorkspaceError::NotFound(NotFound).with_file_path("not_found.js"),
+            WorkspaceError::not_found("not_found.js").into(),
         )
     }
 

@@ -15,6 +15,7 @@ pub fn generate_group_struct(
 ) -> TokenStream {
     let mut lines_recommended_rule = Vec::new();
     let mut lines_recommended_rule_as_filter = Vec::new();
+    let mut lines_non_domain_rule_as_filter = Vec::new();
     let mut lines_all_rule_as_filter = Vec::new();
     let mut lines_rule = Vec::new();
     let mut schema_lines_rules = Vec::new();
@@ -100,6 +101,11 @@ pub fn generate_group_struct(
 
             lines_recommended_rule.push(quote! {
                 #rule
+            });
+        }
+        if metadata.domains.is_empty() {
+            lines_non_domain_rule_as_filter.push(quote! {
+                RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[#rule_position])
             });
         }
         lines_all_rule_as_filter.push(quote! {
@@ -268,6 +274,10 @@ pub fn generate_group_struct(
                     #( #lines_recommended_rule_as_filter ),*
                 ];
 
+                const NON_DOMAIN_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
+                    #( #lines_non_domain_rule_as_filter ),*
+                ];
+
                 const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
                     #( #lines_all_rule_as_filter ),*
                 ];
@@ -304,6 +314,10 @@ pub fn generate_group_struct(
 
                 fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
                     Self::RECOMMENDED_RULES_AS_FILTERS
+                }
+
+                fn non_domain_rules_as_filters() -> &'static [RuleFilter<'static>] {
+                    Self::NON_DOMAIN_RULES_AS_FILTERS
                 }
 
                 fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {

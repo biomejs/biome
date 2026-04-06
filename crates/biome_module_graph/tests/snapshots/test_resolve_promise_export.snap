@@ -20,7 +20,7 @@ export const promise = returnsPromise();
 ```
 Exports {
   "promise" => {
-    ExportOwnExport => JsOwnExport::Binding(1)
+    ExportOwnExport => JsOwnExport::Binding(119..126)
   }
 }
 Imports {
@@ -31,10 +31,9 @@ Imports {
 ## Exported Bindings
 
 ```
-BindingId(1) => JsBindingData {
-  Name: promise,
-  Type: Module(0) TypeId(2),
-  Declaration kind: Value
+promise  => BindingTypeData {
+  Types Module(0) TypeId(2),
+  Exported Ranges: (119..126)
 }
 ```
 

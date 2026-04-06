@@ -1,0 +1,28 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/expression/interpolation.scss
+---
+
+# Input
+
+```scss
+$direct:#{$name};
+$binary:#{1+2};
+$nested:#{($a+1)*2};
+$call:#{map-get($map,
+key)};
+$list:#{1,2,3};
+
+```
+
+
+# Formatted
+
+```scss
+$direct: #{$name};
+$binary: #{1 + 2};
+$nested: #{($a + 1) * 2};
+$call: #{map-get($map, key)};
+$list: #{1, 2, 3};
+
+```

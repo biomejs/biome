@@ -1,0 +1,15 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.year.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+
+/* overscroll-behavior became newly available in 2022 - ok */
+.messages { overscroll-behavior: contain; }
+
+/* @container is widely available */
+@container (min-width: 800px) { a { color: red; } }
+
+```

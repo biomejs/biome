@@ -19,65 +19,23 @@ foo((args: {a: string; b: string}) => {
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
-Trailing newline: true
------
-
-```ts
-// Ensure that the type annotation preserves the semicolon in the type
-// annotation, even though the parent group breaks. This was only an issue when
-// `semicolon: AsNeeded` was set, since the semicolon became conditional on
-// whether the group was printed inline.
-//
-// https://github.com/biomejs/biome/issues/1356.
-
-foo((args: { a: string; b: string }) => {
-	return a;
-});
-
+```json
+{
+  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "formatter": {
+    "lineWidth": 40
+  },
+  "javascript": {
+    "formatter": {
+      "semicolons": "asNeeded"
+    }
+  }
+}
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 40
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: As needed
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
-Trailing newline: true
------
+# Formatted
 
 ```ts
 // Ensure that the type annotation preserves the semicolon in the type

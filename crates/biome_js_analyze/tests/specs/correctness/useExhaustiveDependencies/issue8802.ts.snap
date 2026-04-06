@@ -55,7 +55,7 @@ issue8802.ts:17:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency props.value to the list.
   
     19 │ ····},·[props.value]);
        │         +++++++++++   

@@ -44,12 +44,53 @@ pub(crate) fn init(session: CliSession, emit_jsonc: bool) -> Result<(), CliDiagn
         vcs_enabled,
         file_created,
     };
+    session.app.console.log(markup! {{BiomeLogo}"\n"});
     session
         .app
         .console
         .log(markup! {{PrintDiagnostic::simple(&diagnostic)}});
 
     Ok(())
+}
+
+/// ANSI colour representation of the Biome logo with the wordmark and slogan.
+///
+/// Renders the Biome geometric emblem (a triangle with a curved inner cutout)
+/// in blue, alongside the "Biome" wordmark in bold and the "TOOLCHAIN OF THE
+/// WEB" slogan in dim text. The emblem is rasterised from the official SVG
+/// path data using even-odd fill with half-block characters for double
+/// vertical resolution.
+struct BiomeLogo;
+
+impl Display for BiomeLogo {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::io::Result<()> {
+        f.write_markup(markup! {
+            <Info>"                       ▄"</Info>"
+"<Info>"                      ▄██"</Info>"
+"<Info>"                     ▄████"</Info>"
+"<Info>"                    ▄██████"</Info>"
+"<Info>"                   ▄████████"</Info>"
+"<Info>"                  ▄██████████"</Info>"
+"<Info>"                 ▄████████████"</Info>"
+"<Info>"                ▄██████████████"</Info>"
+"<Info>"               ▄████████████████                "</Info><Emphasis>"  ██████▄"</Emphasis>"
+"<Info>"              ▄██████████████████               "</Info><Emphasis>"  ██   ██  ▄▄"</Emphasis>"
+"<Info>"              ▀▀▀       ▀▀▀▀██████              "</Info><Emphasis>"  ██   ██      ▄██████▄  ██▄    ▄██   ▄██████▄"</Emphasis>"
+"<Info>"                             ██████             "</Info><Emphasis>"  ██████▀  ██  ██    ██  ██ █  █ ██  ██      ██"</Emphasis>"
+"<Info>"              ▄▄▄▄████▄▄▄    ███████            "</Info><Emphasis>"  ██   ██  ██  ██    ██  ██  ██  ██  ██▀▀▀▀▀▀▀▀"</Emphasis>"
+"<Info>"          ▄▄█████████████   █████████           "</Info><Emphasis>"  ██   ██  ██  ██    ██  ██      ██  ██"</Emphasis>"
+"<Info>"        ▄███████████████    ██████████          "</Info><Emphasis>"  ██████▀  ██  ▀██████▀  ██      ██   ▀██████▀"</Emphasis>"
+"<Info>"      ▄█████████████████   ▄███████████"</Info>"
+"<Info>"     ███████████▀▀▀▀▀▀▀▀   █████████████        "</Info><Dim>"    T O O L C H A I N   O F   T H E   W E B"</Dim>"
+"<Info>"   ▄█████████▀             ██████████████"</Info>"
+"<Info>"  ▄████████▀     ▄▄▄▄▄▄▄  ████████████████"</Info>"
+"<Info>"  ████████    ▄▄███████████████████████████"</Info>"
+"<Info>" ████████▄   ▄██████████████████████████████"</Info>"
+"<Info>" ████████████████████████████████████████████"</Info>"
+"<Info>" █████████████████████████████████████████████"</Info>"
+"<Info>" ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀"</Info>
+        })
+    }
 }
 
 #[derive(Debug)]

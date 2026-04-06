@@ -2,7 +2,7 @@
 "@biomejs/biome": minor
 ---
 
-Added new nursery lint rule [`noUnusedStyles`](https://biomejs.dev/linter/rules/no-unused-styles/) for CSS. The rule detects CSS class selectors that are never referenced in any HTML or JSX file that imports the stylesheet. This is a project-domain rule that requires the module graph.
+Added new nursery lint rule [`noUnusedClasses`](https://biomejs.dev/linter/rules/no-unused-classes/) for CSS. The rule detects CSS class selectors that are never referenced in any HTML or JSX file that imports the stylesheet. This is a project-domain rule that requires the module graph.
 
 ```css
 /* styles.css — .ghost is never used in any importing file */

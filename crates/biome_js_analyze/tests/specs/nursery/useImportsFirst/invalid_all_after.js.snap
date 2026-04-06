@@ -1,0 +1,55 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_all_after.js
+---
+# Input
+```js
+const foo = 1;
+let bar = 2;
+function baz() {}
+import { qux } from "qux";
+import { quux } from "quux";
+
+```
+
+# Diagnostics
+```
+invalid_all_after.js:4:1 lint/nursery/useImportsFirst ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This import appears after a non-import statement.
+  
+    2 │ let bar = 2;
+    3 │ function baz() {}
+  > 4 │ import { qux } from "qux";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ import { quux } from "quux";
+    6 │ 
+  
+  i Scattering imports makes it harder to see the module's dependencies at a glance.
+  
+  i Move all import statements before any other statements.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_all_after.js:5:1 lint/nursery/useImportsFirst ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This import appears after a non-import statement.
+  
+    3 │ function baz() {}
+    4 │ import { qux } from "qux";
+  > 5 │ import { quux } from "quux";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+  i Scattering imports makes it harder to see the module's dependencies at a glance.
+  
+  i Move all import statements before any other statements.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

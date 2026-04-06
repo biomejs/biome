@@ -547,6 +547,7 @@ fn lint(params: LintParams) -> LintResults {
             .settings
             .full_source()
             .map(|s| s as std::sync::Arc<dyn ExtendedConfigurationProvider>),
+        project_layout: Some(params.project_layout.clone()),
     };
     let (_, analyze_diagnostics) = analyze(
         &root,
@@ -607,6 +608,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         suppression_reason.as_deref(),
     );
     let mut actions = Vec::new();
+    let project_layout_for_services = project_layout.clone();
     let (enabled_rules, disabled_rules, analyzer_options) =
         AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
             .with_only(only)
@@ -632,6 +634,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         configuration_provider: workspace
             .full_source()
             .map(|s| s as std::sync::Arc<dyn ExtendedConfigurationProvider>),
+        project_layout: Some(project_layout_for_services),
     };
     analyze(
         &tree,
@@ -709,6 +712,7 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
                 .settings
                 .full_source()
                 .map(|s| s as std::sync::Arc<dyn ExtendedConfigurationProvider>),
+            project_layout: Some(params.project_layout.clone()),
         };
         let (action, _) = analyze(
             &tree,
@@ -719,6 +723,8 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
             |signal| process_fix_all.process_signal(signal),
         );
 
+        let plugin_text_edit = action.as_ref().and_then(|a| a.text_edit.clone());
+
         let result = process_fix_all.process_action(action, |root| {
             tree = match JsonRoot::cast(root) {
                 Some(tree) => tree,
@@ -728,19 +734,33 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
         })?;
 
         if result.is_none() {
-            return process_fix_all.finish(|| {
-                Ok(if params.should_format {
-                    Either::Left(format_node(
-                        params.settings.format_options::<JsonLanguage>(
-                            params.biome_path,
-                            &params.document_file_source,
-                        ),
-                        tree.syntax(),
-                    ))
-                } else {
-                    Either::Right(tree.syntax().to_string())
-                })
-            });
+            if let Some(new_text) = process_fix_all
+                .apply_plugin_text_edit(plugin_text_edit, &tree.syntax().to_string())?
+            {
+                let options = params
+                    .settings
+                    .parse_options::<JsonLanguage>(params.biome_path, &params.document_file_source);
+                let parse = biome_json_parser::parse_json(&new_text, options);
+                tree = parse.tree();
+                continue;
+            }
+
+            return process_fix_all.finish(
+                || {
+                    Ok(if params.should_format {
+                        Either::Left(format_node(
+                            params.settings.format_options::<JsonLanguage>(
+                                params.biome_path,
+                                &params.document_file_source,
+                            ),
+                            tree.syntax(),
+                        ))
+                    } else {
+                        Either::Right(tree.syntax().to_string())
+                    })
+                },
+                params.embeds_initial_indent,
+            );
         }
     }
 }

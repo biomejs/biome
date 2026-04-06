@@ -11,7 +11,6 @@ use biome_diagnostics::PrintDiagnostic;
 use biome_diagnostics::advice::ListAdvice;
 use biome_fs::BiomePath;
 use camino::{Utf8Path, Utf8PathBuf};
-use std::collections::BTreeSet;
 use std::io;
 use std::time::Duration;
 
@@ -19,7 +18,7 @@ pub(crate) struct ConsoleReporter<'a> {
     pub(crate) summary: TraversalSummary,
     pub(crate) diagnostics_payload: &'a DiagnosticsPayload,
     pub(crate) execution: &'a dyn Execution,
-    pub(crate) evaluated_paths: BTreeSet<BiomePath>,
+    pub(crate) evaluated_paths: Vec<BiomePath>,
     pub(crate) working_directory: Option<Utf8PathBuf>,
     pub(crate) verbose: bool,
 }
@@ -49,7 +48,9 @@ impl<'a> Reporter for ConsoleReporter<'a> {
     }
 }
 
-pub(crate) struct ConsoleReporterVisitor;
+pub(crate) struct ConsoleReporterVisitor {
+    pub(crate) concise: bool,
+}
 
 impl ReporterVisitor for ConsoleReporterVisitor {
     fn report_summary(
@@ -87,7 +88,7 @@ impl ReporterVisitor for ConsoleReporterVisitor {
     fn report_handled_paths(
         &mut self,
         writer: &mut dyn ReporterWriter,
-        evaluated_paths: BTreeSet<BiomePath>,
+        evaluated_paths: Vec<BiomePath>,
         working_directory: Option<&Utf8Path>,
     ) -> io::Result<()> {
         let evaluated_paths_diagnostic = EvaluatedPathsDiagnostic {
@@ -154,6 +155,8 @@ impl ReporterVisitor for ConsoleReporterVisitor {
             if diagnostic.severity() >= diagnostics_payload.diagnostic_level {
                 if diagnostic.tags().is_verbose() && verbose {
                     writer.error(markup! {{PrintDiagnostic::verbose(diagnostic)}});
+                } else if self.concise {
+                    writer.error(markup! {{PrintDiagnostic::concise(diagnostic)}});
                 } else {
                     writer.error(markup! {{PrintDiagnostic::simple(diagnostic)}});
                 }

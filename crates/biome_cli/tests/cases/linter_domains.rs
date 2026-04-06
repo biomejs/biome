@@ -453,3 +453,60 @@ describe("foo", () => {
         result,
     ));
 }
+
+/// Verifies that explicit domain enables are additive with whole-group enables:
+/// the plain group contributes only non-domain rules, and the domain adds its
+/// domain-tagged rules back explicitly.
+#[test]
+fn group_enable_and_domain_enable_are_additive() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    let config = Utf8Path::new("biome.json");
+    fs.insert(
+        config.into(),
+        br#"{
+    "linter": {
+        "rules": {
+            "recommended": false,
+            "correctness": "error"
+        },
+        "domains": {
+            "react": "all"
+        }
+    }
+}
+"#,
+    );
+    let test1 = Utf8Path::new("test1.jsx");
+    fs.insert(
+        test1.into(),
+        br#"import { useEffect, useState } from "react";
+
+export function Component() {
+    const [local, setLocal] = useState(0);
+
+    useEffect(() => {
+        console.log(local);
+    }, []);
+
+    return <button onClick={() => setLocal(1)}>increment</button>;
+}
+"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", test1.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "group_enable_and_domain_enable_are_additive",
+        fs,
+        console,
+        result,
+    ));
+}

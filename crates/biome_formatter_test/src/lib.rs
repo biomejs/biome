@@ -13,6 +13,8 @@ pub mod spec;
 pub mod test_prettier_snapshot;
 pub mod utils;
 
+/// Trait used by the prettier compatibility test infrastructure (`PrettierSnapshot`, `CheckReformat`).
+/// Spec tests use the workspace API directly and do not need this trait.
 pub trait TestFormatLanguage {
     type ServiceLanguage: ServiceLanguage + 'static;
     type Context: CstFormatContext<

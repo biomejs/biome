@@ -1,0 +1,11 @@
+@supports (color:) {
+  .a {
+    color: red;
+  }
+}
+
+@supports (display: grid) and (color:) {
+  .b {
+    color: blue;
+  }
+}

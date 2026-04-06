@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: custom-order-with-bare-imports.js
+---
+# Input
+```js
+import * as path from "node:path";
+import "node:path";
+import "./file.js";
+import { A } from "./file.js";
+
+```
+
+# Diagnostics
+```
+custom-order-with-bare-imports.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+  > 1 │ import * as path from "node:path";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ import "node:path";
+    3 │ import "./file.js";
+  
+  i Safe fix: Organize Imports (Biome)
+  
+    1   │ - import·*·as·path·from·"node:path";
+    2   │ - import·"node:path";
+    3   │ - import·"./file.js";
+    4   │ - import·{·A·}·from·"./file.js";
+      1 │ + import·"./file.js";
+      2 │ + import·{·A·}·from·"./file.js";
+      3 │ + import·"node:path";
+      4 │ + import·*·as·path·from·"node:path";
+    5 5 │   
+  
+
+```

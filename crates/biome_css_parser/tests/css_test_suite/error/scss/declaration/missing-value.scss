@@ -1,0 +1,18 @@
+.missing-values {
+  $x: ;
+  color: ;
+}
+
+/* Missing value before closing brace */
+.missing-before-brace {
+  color:}
+
+/* Missing value before closing brace on the next line */
+.missing-before-brace-newline {
+  color:
+}
+
+/* Missing value before !important */
+.missing-before-important {
+  color: !important;
+}

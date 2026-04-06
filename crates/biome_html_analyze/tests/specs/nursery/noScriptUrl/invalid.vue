@@ -1,5 +1,4 @@
-<!-- Vue invalid cases - should trigger the rule -->
-
+<!-- should generate diagnostics -->
 <template>
   <a href="javascript:void(0)">Void</a>
   <a href=" javascript:alert('XSS') ">Alert</a>
