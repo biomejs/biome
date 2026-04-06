@@ -14,7 +14,11 @@ use regex::Regex;
 declare_lint_rule! {
     /// Disallow unsafe JSON values that may cause interoperability issues.
     ///
-    /// JSON is widely used for data interchange between systems, but certain values can cause interoperability issues when transferred between different parsers and environments. The common unsafe values are:
+    /// Some JSON values can break when parsed by different tools or languages as parser implementations & data types could differ.
+    /// For example, a very large number might become `Infinity` in JavaScript,
+    /// or a string with an incomplete Unicode pair might fail to decode properly.
+    ///
+    /// The common unsafe values are:
     ///
     /// - *Lone surrogates in strings*: Incomplete Unicode character pairs that can cause encoding/decoding failures
     /// - *Numbers that evaluate to Infinity*: Values like `1e400` that exceed JavaScript's number range
