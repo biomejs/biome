@@ -10,4 +10,4 @@ all-features = true
 multiple-versions = "allow"
 
 [advisories]
-unmaintained = 'workspace'
+unmaintained = "workspace"
