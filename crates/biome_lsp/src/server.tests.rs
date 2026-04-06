@@ -2609,10 +2609,7 @@ export { describe, test, z };
         .await?
         .context("codeAction/resolve returned None")?;
 
-    assert!(
-        resolved.edit.is_some(),
-        "expected edit in resolved action"
-    );
+    assert!(resolved.edit.is_some(), "expected edit in resolved action");
     let edit = resolved.edit.unwrap();
     let changes = edit.changes.unwrap();
     let edits = &changes[&uri!("document.js")];
