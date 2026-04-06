@@ -342,8 +342,21 @@ fn check_write_html_with_embedded_style_is_idempotent() {
     let html_file = Utf8Path::new("file.html");
     fs.insert(
         html_file.into(),
-        "<!DOCTYPE html>\n<html lang=\"en\">\n\t<head>\n\t\t<style>\n\t\tp {\n\t\t\tcolor: red;\n\t\t}\n\t\t</style>\n\t</head>\n\t<body>\n\t\t<p>Hello</p>\n\t</body>\n</html>\n"
-            .as_bytes(),
+        r#"<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<style>
+		p {
+			color: red;
+		}
+		</style>
+	</head>
+	<body>
+		<p>Hello</p>
+	</body>
+</html>
+"#
+        .as_bytes(),
     );
 
     fs.insert(
