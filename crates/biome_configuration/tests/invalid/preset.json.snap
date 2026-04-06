@@ -18,6 +18,10 @@ preset.json:2:13 deserialize  DEPRECATED  ━━━━━━━━━━━━�
     8 │ }
     9 │ 
   
+  i Migrate the configuration with the proper command
+  
+  $ biome migrate
+  
 
 
 
