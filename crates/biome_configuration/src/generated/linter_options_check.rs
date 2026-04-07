@@ -380,6 +380,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noDuplicateProperties",
         TypeId::of::<biome_rule_options::no_duplicate_properties::NoDuplicatePropertiesOptions>(),
     ));
+    result.push((
+        "nursery",
+        "noDuplicateSelectors",
+        TypeId::of::<biome_rule_options::no_duplicate_selectors::NoDuplicateSelectorsOptions>(),
+    ));
     result.push(("suspicious", "noDuplicateSelectorsKeyframeBlock", TypeId::of::<biome_rule_options::no_duplicate_selectors_keyframe_block::NoDuplicateSelectorsKeyframeBlockOptions>()));
     result.push((
         "suspicious",
@@ -629,6 +634,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "style",
         "noInferrableTypes",
         TypeId::of::<biome_rule_options::no_inferrable_types::NoInferrableTypesOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noInlineStyles",
+        TypeId::of::<biome_rule_options::no_inline_styles::NoInlineStylesOptions>(),
     ));
     result.push((
         "correctness",
@@ -1210,6 +1220,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<
             biome_rule_options::no_unsafe_optional_chaining::NoUnsafeOptionalChainingOptions,
         >(),
+    ));
+    result.push((
+        "nursery",
+        "noUntrustedLicenses",
+        TypeId::of::<biome_rule_options::no_untrusted_licenses::NoUntrustedLicensesOptions>(),
     ));
     result.push((
         "nursery",

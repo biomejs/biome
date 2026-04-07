@@ -286,6 +286,10 @@ ready:
 new-changeset:
   pnpm changeset
 
+# Creates a new changeset without interaction
+new-changeset-empty:
+  pnpm changeset --empty
+
 # Create new crate
 new-crate name:
   cargo new crates/{{name}} --lib

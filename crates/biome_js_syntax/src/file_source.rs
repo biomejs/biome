@@ -123,6 +123,9 @@ pub enum EmbeddingKind {
     Astro {
         /// Whether the script is inside Astro frontmatter
         frontmatter: bool,
+        /// Whether this snippet is from a class-related attribute
+        /// (e.g., `class:list={...}` or `class={...}`)
+        is_class_attribute: bool,
     },
     Vue {
         /// Whether the script is inside script tag with setup attribute
@@ -131,6 +134,10 @@ pub enum EmbeddingKind {
         is_source: bool,
         /// Whether this is a v-on event handler (e.g., @click="handler")
         event_handler: bool,
+        /// Whether this embed should be parsed as statements (module/script).
+        /// When `false`, the content is parsed as an expression via `parse_template_expression`.
+        /// Source-level embeds (`<script>`) use `true`; directives and text expressions use `false`.
+        allow_statements: bool,
     },
     Svelte {
         /// Where the bindings are defined
@@ -145,7 +152,13 @@ impl EmbeddingKind {
         matches!(self, Self::Astro { .. })
     }
     pub const fn is_astro_frontmatter(&self) -> bool {
-        matches!(self, Self::Astro { frontmatter: true })
+        matches!(
+            self,
+            Self::Astro {
+                frontmatter: true,
+                ..
+            }
+        )
     }
     pub const fn is_vue(&self) -> bool {
         matches!(self, Self::Vue { .. })
@@ -164,6 +177,15 @@ impl EmbeddingKind {
     }
     pub const fn is_svelte(&self) -> bool {
         matches!(self, Self::Svelte { .. })
+    }
+    pub const fn is_class_attribute(&self) -> bool {
+        matches!(
+            self,
+            Self::Astro {
+                is_class_attribute: true,
+                ..
+            }
+        )
     }
 }
 
@@ -229,7 +251,10 @@ impl JsFileSource {
     }
 
     pub fn astro() -> Self {
-        Self::ts().with_embedding_kind(EmbeddingKind::Astro { frontmatter: true })
+        Self::ts().with_embedding_kind(EmbeddingKind::Astro {
+            frontmatter: true,
+            is_class_attribute: false,
+        })
     }
 
     /// Vue file definition
@@ -238,6 +263,7 @@ impl JsFileSource {
             setup: false,
             is_source: true,
             event_handler: false,
+            allow_statements: true,
         })
     }
 
@@ -247,6 +273,7 @@ impl JsFileSource {
             setup: true,
             is_source: true,
             event_handler: false,
+            allow_statements: true,
         })
     }
 
@@ -331,23 +358,29 @@ impl JsFileSource {
                     is_source: true,
                     ..
                 }
-                | EmbeddingKind::Astro { frontmatter: true }
+                | EmbeddingKind::Astro {
+                    frontmatter: true,
+                    ..
+                }
         )
     }
 
     /// Returns true if this is a template expression that should be parsed as an expression
     /// rather than as a module/script. Template expressions in frameworks like Vue ({{ }}),
-    /// Svelte ({ }), and Astro ({ }) should parse `{ duration }` as an object literal,
-    /// not as a block statement.
+    /// Svelte ({ }), and Astro ({ }), as well as Vue directive values (`v-bind:class="..."`),
+    /// should parse `{ duration }` as an object literal, not as a block statement.
     pub const fn is_template_expression(&self) -> bool {
         matches!(
             self.embedding_kind,
             EmbeddingKind::Svelte { is_source: false }
                 | EmbeddingKind::Vue {
-                    is_source: false,
+                    allow_statements: false,
                     ..
                 }
-                | EmbeddingKind::Astro { frontmatter: false }
+                | EmbeddingKind::Astro {
+                    frontmatter: false,
+                    ..
+                }
         )
     }
 

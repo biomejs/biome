@@ -24,8 +24,6 @@ use biome_module_graph::{HtmlEmbeddedContent, ModuleGraph};
 use biome_package::{Manifest, PackageJson, TsConfigJson, TurboJson};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
-use biome_service::Workspace;
-use biome_service::WorkspaceError;
 use biome_service::configuration::{LoadedConfiguration, load_configuration};
 use biome_service::file_handlers::DocumentFileSource;
 use biome_service::projects::Projects;
@@ -34,9 +32,9 @@ use biome_service::settings::{
 };
 use biome_service::test_utils::setup_workspace_and_open_project;
 use biome_service::workspace::{
-    FileContent, OpenFileParams, OpenProjectParams, PullDiagnosticsParams, ScanKind,
-    ScanProjectParams, UpdateSettingsParams, server,
+    PullDiagnosticsParams, ScanKind, ScanProjectParams, UpdateSettingsParams,
 };
+use biome_service::{Workspace, WorkspaceError};
 use biome_string_case::StrLikeExtension;
 use camino::{Utf8Path, Utf8PathBuf};
 use json_comments::StripComments;
@@ -1041,32 +1039,39 @@ pub fn assert_diagnostics_expectation_from_content(
 ///
 /// Returns a snapshot string in the standard analyzer snapshot format
 /// (`# Input` / `# Diagnostics`).
-pub fn analyze_with_workspace(input_file: &Utf8Path, group: &str, rule: &str) -> String {
-    let file_name = input_file.file_name().unwrap();
-    let input_code = std::fs::read_to_string(input_file)
-        .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
+pub fn analyze_with_workspace(
+    input_file: &Utf8Path,
+    input_code: String,
+    group: &str,
+    rule: &str,
+) -> String {
+    let document_file_source = DocumentFileSource::from_well_known(input_file, true);
 
+    if document_file_source == DocumentFileSource::Unknown {
+        panic!(
+            "Invalid document file source: {:?}. Make sure the document is supported by Biome.",
+            input_file
+        );
+    };
+    let file_name = input_file.file_name().unwrap();
     let project_root = Utf8PathBuf::from("/test-project");
     let virtual_file_path = project_root.join(file_name);
 
     // Set up in-memory filesystem
     let fs = MemoryFileSystem::default();
     fs.insert(virtual_file_path.clone(), input_code.as_bytes());
+    let mut files_to_index = vec![virtual_file_path.clone()];
 
-    // Insert sidecar files if they exist on disk
-    insert_sidecar_files(&fs, input_file, &project_root);
+    // Insert sidecar files if they exist on disk.
+    // Returns virtual paths of the inserted source files (CSS, JS, etc.)
+    // so we can index them for the module graph.
+    let sidecar_paths = insert_sidecar_files(&fs, input_file, &project_root);
+    files_to_index.extend(sidecar_paths.clone());
 
-    // Create workspace
-    let workspace = server(Arc::new(fs), None);
-
-    // Open project
-    let project_result = workspace
-        .open_project(OpenProjectParams {
-            path: BiomePath::new(&project_root),
-            open_uninitialized: true,
-        })
-        .expect("failed to open project");
-    let project_key = project_result.project_key;
+    // Create workspace — use WorkspaceServer directly so we can call
+    // index_files_for_test, which opens files with OpenFileReason::Index
+    // and populates the module graph (needed by project-domain rules).
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, project_root.as_str());
 
     // Build configuration: enable full HTML support + merge .options.json if present
     let config = build_test_configuration(input_file);
@@ -1078,7 +1083,7 @@ pub fn analyze_with_workspace(input_file: &Utf8Path, group: &str, rule: &str) ->
             configuration: config,
             workspace_directory: Some(BiomePath::new(&project_root)),
             extended_configurations: vec![],
-            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+            module_graph_resolution_kind: ModuleGraphResolutionKind::Modules,
         })
         .expect("failed to update settings");
 
@@ -1093,20 +1098,26 @@ pub fn analyze_with_workspace(input_file: &Utf8Path, group: &str, rule: &str) ->
         })
         .expect("failed to scan project");
 
-    // Open file
-    workspace
-        .open_file(OpenFileParams {
-            project_key,
-            path: BiomePath::new(&virtual_file_path),
-            content: FileContent::FromClient {
-                content: input_code.clone(),
-                version: 0,
-            },
-            document_file_source: None,
-            persist_node_cache: false,
-            inline_config: None,
-        })
-        .expect("failed to open file");
+    workspace.index_files_for_test(
+        project_key,
+        files_to_index.into_iter().map(|path| {
+            let document_file_source = DocumentFileSource::from_well_known(path.as_path(), true);
+            (BiomePath::new(path), document_file_source)
+        }),
+    );
+
+    // Index all files through the internal indexing path so that:
+    // - Embedded CSS/JS blocks are parsed and stored
+    // - The module graph is populated with CSS classes and import edges
+    // This is required for project-domain rules like noUndeclaredClasses.
+    let mut all_virtual_files = sidecar_paths;
+    all_virtual_files.push(virtual_file_path.clone());
+    let files_with_sources = all_virtual_files.iter().map(|path| {
+        let biome_path = BiomePath::new(path.clone());
+        let doc_source = DocumentFileSource::from_well_known(path.as_path(), true);
+        (biome_path, doc_source)
+    });
+    workspace.index_files_for_test(project_key, files_with_sources);
 
     // Build rule selector
     let rule_selector = format!("{group}/{rule}")
@@ -1195,34 +1206,50 @@ fn build_test_configuration(input_file: &Utf8Path) -> Configuration {
 
 /// Inserts sidecar files (package.json, tsconfig.json, etc.) and peer source
 /// files into the `MemoryFileSystem` for workspace-based tests.
-fn insert_sidecar_files(fs: &MemoryFileSystem, input_file: &Utf8Path, project_root: &Utf8Path) {
+///
+/// Returns the list of virtual paths that were inserted (excluding config sidecars
+/// like package.json/tsconfig.json, which don't need indexing).
+fn insert_sidecar_files(
+    fs: &MemoryFileSystem,
+    input_file: &Utf8Path,
+    project_root: &Utf8Path,
+) -> Vec<Utf8PathBuf> {
+    let mut inserted_files = Vec::new();
     // Insert package.json sidecar
     let package_json_sidecar = input_file.with_extension("package.json");
     if let Ok(content) = std::fs::read_to_string(&package_json_sidecar) {
-        fs.insert(project_root.join("package.json"), content.as_bytes());
+        let target_path = project_root.join("package.json");
+        fs.insert(target_path.clone(), content.as_bytes());
+        inserted_files.push(target_path);
     }
 
     // Insert tsconfig.json sidecar
     let tsconfig_sidecar = input_file.with_extension("tsconfig.json");
     if let Ok(content) = std::fs::read_to_string(&tsconfig_sidecar) {
-        fs.insert(project_root.join("tsconfig.json"), content.as_bytes());
+        let target_path = project_root.join("tsconfig.json");
+        fs.insert(target_path.clone(), content.as_bytes());
+        inserted_files.push(target_path);
     }
 
     // Insert turbo.json sidecar
     let turbo_json_sidecar = input_file.with_extension("turbo.json");
     let turbo_jsonc_sidecar = input_file.with_extension("turbo.jsonc");
     if let Ok(content) = std::fs::read_to_string(&turbo_json_sidecar) {
-        fs.insert(project_root.join("turbo.json"), content.as_bytes());
+        let target_path = project_root.join("turbo.json");
+        fs.insert(target_path.clone(), content.as_bytes());
+        inserted_files.push(target_path);
     } else if let Ok(content) = std::fs::read_to_string(&turbo_jsonc_sidecar) {
-        fs.insert(project_root.join("turbo.jsonc"), content.as_bytes());
+        let target_path = project_root.join("turbo.jsonc");
+        fs.insert(target_path.clone(), content.as_bytes());
+        inserted_files.push(target_path);
     }
 
     // Insert additional source files from the same directory for module graph rules
     let Some(parent_dir) = input_file.parent() else {
-        return;
+        return inserted_files;
     };
     let Ok(entries) = std::fs::read_dir(parent_dir) else {
-        return;
+        return inserted_files;
     };
     for entry in entries.flatten() {
         let Ok(path) = Utf8PathBuf::try_from(entry.path()) else {
@@ -1238,6 +1265,7 @@ fn insert_sidecar_files(fs: &MemoryFileSystem, input_file: &Utf8Path, project_ro
             "js" | "mjs"
                 | "cjs"
                 | "jsx"
+                | "css"
                 | "ts"
                 | "mts"
                 | "cts"
@@ -1249,7 +1277,11 @@ fn insert_sidecar_files(fs: &MemoryFileSystem, input_file: &Utf8Path, project_ro
         ) && let Ok(content) = std::fs::read_to_string(&path)
         {
             let target_name = path.file_name().unwrap();
-            fs.insert(project_root.join(target_name), content.as_bytes());
+            let target_path = project_root.join(target_name);
+            fs.insert(target_path.clone(), content.as_bytes());
+            inserted_files.push(target_path);
         }
     }
+
+    inserted_files
 }

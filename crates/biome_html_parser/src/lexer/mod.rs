@@ -1327,6 +1327,7 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
         self.current_kind
     }
 
+    #[inline]
     fn current_start(&self) -> TextSize {
         self.current_start
     }
@@ -1428,11 +1429,13 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
         self.diagnostics.push(diagnostic);
     }
 
+    #[inline]
     fn advance_char_unchecked(&mut self) {
         let c = self.current_char_unchecked();
         self.position += c.len_utf8();
     }
 
+    #[inline]
     fn advance(&mut self, n: usize) {
         self.position += n;
     }

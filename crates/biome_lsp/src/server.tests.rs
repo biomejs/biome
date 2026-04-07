@@ -4734,6 +4734,77 @@ async fn should_acknowledge_changes_in_settings_when_pulling_diagnostics() -> Re
 }
 
 #[tokio::test]
+async fn should_apply_wrapped_biome_settings_from_did_change_configuration() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .open_document("import { b, a } from \"./foo\";\n")
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+
+    assert!(notification.is_some());
+
+    let notification = notification.expect("notification");
+    assert!(matches!(
+        notification,
+        ServerNotification::PublishDiagnostics(_)
+    ));
+    if let ServerNotification::PublishDiagnostics(result) = notification {
+        assert!(
+            !result.diagnostics.is_empty(),
+            "should contain diagnostics before applying wrapped biome settings"
+        );
+    }
+
+    sleep(Duration::from_millis(300)).await;
+
+    server
+        .notify(
+            "workspace/didChangeConfiguration",
+            DidChangeConfigurationParams {
+                settings: serde_json::json!({
+                    "biome": {
+                        "requireConfiguration": true,
+                        "configurationPath": null,
+                    }
+                }),
+            },
+        )
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+
+    assert_eq!(
+        notification,
+        Some(ServerNotification::PublishDiagnostics(
+            PublishDiagnosticsParams {
+                uri: uri!("document.js"),
+                version: Some(0),
+                diagnostics: vec![],
+            }
+        )),
+        "diagnostics should be cleared after applying wrapped biome settings from didChangeConfiguration"
+    );
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn pull_plugin_diagnostics_for_vue_files() -> Result<()> {
     let fs = MemoryFileSystem::default();
 
@@ -5336,6 +5407,62 @@ async fn change_document_inverted_range_does_not_panic() -> Result<()> {
     assert_eq!(&actual, original);
 
     server.close_document().await?;
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+/// Regression test: the LSP server should not crash when the client sends
+/// `didChangeWatchedFiles.dynamicRegistration: true` but no `workspaceFolders`
+/// in `InitializeParams`. This is valid per the LSP spec — `workspaceFolders`
+/// is optional and some clients only send `rootUri`.
+#[tokio::test]
+#[expect(deprecated)]
+async fn initialize_without_workspace_folders_does_not_panic() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    let _res: InitializeResult = server
+        .request(
+            "initialize",
+            "_init",
+            InitializeParams {
+                process_id: None,
+                root_path: None,
+                root_uri: Some(uri!("")),
+                initialization_options: None,
+                capabilities: ClientCapabilities {
+                    workspace: Some(lsp::WorkspaceClientCapabilities {
+                        did_change_watched_files: Some(
+                            lsp::DidChangeWatchedFilesClientCapabilities {
+                                dynamic_registration: Some(true),
+                                relative_pattern_support: None,
+                            },
+                        ),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                },
+                trace: None,
+                workspace_folders: None,
+                client_info: None,
+                locale: None,
+                work_done_progress_params: Default::default(),
+            },
+        )
+        .await?
+        .context("initialize returned None")?;
+
+    // `initialized` triggers `setup_capabilities` which registers file watchers.
+    // Before the fix, this panicked because it tried to parse a filesystem path as a URI.
+    server.initialized().await?;
+
     server.shutdown().await?;
     reader.abort();
 

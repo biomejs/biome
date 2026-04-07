@@ -95,6 +95,18 @@ impl ReactCreateElementCall {
             None
         }
     }
+
+    pub fn is_custom_component(&self) -> bool {
+        if let Some(any_js_expression) = self.element_type.as_any_js_expression()
+            && let Some(literal_expression) = any_js_expression.as_any_js_literal_expression()
+        {
+            return literal_expression
+                .as_js_string_literal_expression()
+                .is_none();
+        }
+
+        true
+    }
 }
 
 impl ReactApiCall for ReactCreateElementCall {

@@ -5,6 +5,7 @@
     "rules": {
       "nursery": {
         "useVueHyphenatedAttributes": {
+          "level": "on",
           "options": {
             "ignore": [
               "ignoredAttribute"

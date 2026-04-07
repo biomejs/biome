@@ -176,6 +176,14 @@ export interface FormatterConfiguration {
 	 * Whether to insert spaces around brackets in object literals. Defaults to true.
 	 */
 	bracketSpacing?: BracketSpacing;
+	/**
+	* Whether to insert spaces inside delimiters (after the opening delimiter and before the
+closing delimiter), such as parentheses, brackets, angle brackets, and template literal
+interpolations. Spaces are not added before the opening delimiter, and empty delimiters
+are not affected. Only applies when the content fits on a single line. The specific
+delimiters affected depend on the language. Defaults to false. 
+	 */
+	delimiterSpacing?: DelimiterSpacing;
 	enabled?: Bool;
 	/**
 	* Whether to expand arrays and objects on multiple lines.
@@ -491,6 +499,14 @@ export type AttributePosition = "auto" | "multiline";
  */
 export type BracketSameLine = boolean;
 export type BracketSpacing = boolean;
+/**
+	* Whether to insert spaces inside delimiters (after the opening delimiter and before the closing
+delimiter), such as parentheses, brackets, angle brackets, and template literal interpolations.
+Spaces are not added before the opening delimiter, and empty delimiters are not affected.
+Only applies when the content fits on a single line; when content breaks across multiple lines,
+no extra spaces are added. The specific delimiters affected depend on the language. 
+	 */
+export type DelimiterSpacing = boolean;
 export type Expand = "auto" | "always" | "never";
 export type IndentStyle = "tab" | "space";
 export type IndentWidth = number;
@@ -1013,7 +1029,7 @@ See https://biomejs.dev/assist/actions/organize-imports
 	 */
 	recommended?: boolean;
 	/**
-	* Enforce attribute sorting in JSX elements.
+	* Enforce attribute sorting in HTML elements.
 See https://biomejs.dev/assist/actions/use-sorted-attributes 
 	 */
 	useSortedAttributes?: UseSortedAttributesConfiguration;
@@ -1037,6 +1053,11 @@ See https://biomejs.dev/assist/actions/use-sorted-package-json
 See https://biomejs.dev/assist/actions/use-sorted-properties 
 	 */
 	useSortedProperties?: UseSortedPropertiesConfiguration;
+	/**
+	* Sort fields in GraphQL type definitions alphabetically.
+See https://biomejs.dev/assist/actions/use-sorted-type-fields 
+	 */
+	useSortedTypeFields?: UseSortedTypeFieldsConfiguration;
 }
 export type QuoteStyle = "double" | "single";
 /**
@@ -1141,6 +1162,14 @@ export interface OverrideFormatterConfiguration {
 	 * Whether to insert spaces around brackets in object literals. Defaults to true.
 	 */
 	bracketSpacing?: BracketSpacing;
+	/**
+	* Whether to insert spaces inside delimiters (after the opening delimiter and before the
+closing delimiter), such as parentheses, brackets, angle brackets, and template literal
+interpolations. Spaces are not added before the opening delimiter, and empty delimiters
+are not affected. Only applies when the content fits on a single line. The specific
+delimiters affected depend on the language. Defaults to false. 
+	 */
+	delimiterSpacing?: DelimiterSpacing;
 	enabled?: Bool;
 	/**
 	* Whether to expand arrays and objects on multiple lines.
@@ -1240,6 +1269,9 @@ export type UseSortedPackageJsonConfiguration =
 export type UseSortedPropertiesConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedPropertiesOptions;
+export type UseSortedTypeFieldsConfiguration =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithUseSortedTypeFieldsOptions;
 export type GroupPlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 /**
  * A list of rules that belong to this group
@@ -1340,7 +1372,7 @@ See https://biomejs.dev/linter/rules/use-anchor-content
 	 */
 	useAnchorContent?: UseAnchorContentConfiguration;
 	/**
-	* Enforce that tabIndex is assigned to non-interactive HTML elements with aria-activedescendant.
+	* Enforce that tabindex is assigned to non-interactive HTML elements with aria-activedescendant.
 See https://biomejs.dev/linter/rules/use-aria-activedescendant-with-tabindex 
 	 */
 	useAriaActivedescendantWithTabindex?: UseAriaActivedescendantWithTabindexConfiguration;
@@ -1370,7 +1402,7 @@ See https://biomejs.dev/linter/rules/use-generic-font-names
 	 */
 	useGenericFontNames?: UseGenericFontNamesConfiguration;
 	/**
-	* Enforce that heading elements (h1, h2, etc.) have content and that the content is accessible to screen readers. Accessible means that it is not hidden using the aria-hidden prop.
+	* Enforce that heading elements (h1, h2, etc.) have content and that the content is accessible to screen readers.
 See https://biomejs.dev/linter/rules/use-heading-content 
 	 */
 	useHeadingContent?: UseHeadingContentConfiguration;
@@ -1390,7 +1422,7 @@ See https://biomejs.dev/linter/rules/use-key-with-click-events
 	 */
 	useKeyWithClickEvents?: UseKeyWithClickEventsConfiguration;
 	/**
-	* Enforce onMouseOver / onMouseOut are accompanied by onFocus / onBlur.
+	* Enforce that onmouseover is accompanied by onfocus and onmouseout by onblur.
 See https://biomejs.dev/linter/rules/use-key-with-mouse-events 
 	 */
 	useKeyWithMouseEvents?: UseKeyWithMouseEventsConfiguration;
@@ -2148,6 +2180,11 @@ See https://biomejs.dev/linter/rules/no-duplicate-input-field-names
 	 */
 	noDuplicateInputFieldNames?: NoDuplicateInputFieldNamesConfiguration;
 	/**
+	* Disallow duplicate selectors.
+See https://biomejs.dev/linter/rules/no-duplicate-selectors 
+	 */
+	noDuplicateSelectors?: NoDuplicateSelectorsConfiguration;
+	/**
 	* Require all variable definitions to be unique.
 See https://biomejs.dev/linter/rules/no-duplicate-variable-names 
 	 */
@@ -2202,6 +2239,11 @@ See https://biomejs.dev/linter/rules/no-hex-colors
 See https://biomejs.dev/linter/rules/no-increment-decrement 
 	 */
 	noIncrementDecrement?: NoIncrementDecrementConfiguration;
+	/**
+	* Disallow the use of inline styles.
+See https://biomejs.dev/linter/rules/no-inline-styles 
+	 */
+	noInlineStyles?: NoInlineStylesConfiguration;
 	/**
 	* Disallow .bind(), arrow functions, or function expressions in JSX props.
 See https://biomejs.dev/linter/rules/no-jsx-props-bind 
@@ -2352,6 +2394,11 @@ See https://biomejs.dev/linter/rules/no-unknown-attribute
 See https://biomejs.dev/linter/rules/no-unnecessary-conditions 
 	 */
 	noUnnecessaryConditions?: NoUnnecessaryConditionsConfiguration;
+	/**
+	* Disallow dependencies with untrusted licenses.
+See https://biomejs.dev/linter/rules/no-untrusted-licenses 
+	 */
+	noUntrustedLicenses?: NoUntrustedLicensesConfiguration;
 	/**
 	* Reports CSS class selectors that are never referenced in any JSX or HTML file.
 See https://biomejs.dev/linter/rules/no-unused-classes 
@@ -3658,6 +3705,10 @@ export interface RuleAssistWithUseSortedPropertiesOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedPropertiesOptions;
 }
+export interface RuleAssistWithUseSortedTypeFieldsOptions {
+	level: RuleAssistPlainConfiguration;
+	options: UseSortedTypeFieldsOptions;
+}
 export type NoAccessKeyConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAccessKeyOptions;
@@ -4183,6 +4234,9 @@ export type NoDuplicateGraphqlOperationNameConfiguration =
 export type NoDuplicateInputFieldNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateInputFieldNamesOptions;
+export type NoDuplicateSelectorsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicateSelectorsOptions;
 export type NoDuplicateVariableNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateVariableNamesOptions;
@@ -4216,6 +4270,9 @@ export type NoHexColorsConfiguration =
 export type NoIncrementDecrementConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoIncrementDecrementOptions;
+export type NoInlineStylesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoInlineStylesOptions;
 export type NoJsxPropsBindConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsxPropsBindOptions;
@@ -4306,6 +4363,9 @@ export type NoUnknownAttributeConfiguration =
 export type NoUnnecessaryConditionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnnecessaryConditionsOptions;
+export type NoUntrustedLicensesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUntrustedLicensesOptions;
 export type NoUnusedClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnusedClassesOptions;
@@ -5086,6 +5146,7 @@ followed by nested values (multi-line objects, multi-line arrays).
 }
 export type UseSortedPackageJsonOptions = {};
 export type UseSortedPropertiesOptions = {};
+export type UseSortedTypeFieldsOptions = {};
 export type RulePlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 export interface RuleWithNoAccessKeyOptions {
 	fix?: FixKind;
@@ -5172,7 +5233,6 @@ export interface RuleWithUseAnchorContentOptions {
 	options?: UseAnchorContentOptions;
 }
 export interface RuleWithUseAriaActivedescendantWithTabindexOptions {
-	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseAriaActivedescendantWithTabindexOptions;
 }
@@ -5861,6 +5921,10 @@ export interface RuleWithNoDuplicateInputFieldNamesOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateInputFieldNamesOptions;
 }
+export interface RuleWithNoDuplicateSelectorsOptions {
+	level: RulePlainConfiguration;
+	options?: NoDuplicateSelectorsOptions;
+}
 export interface RuleWithNoDuplicateVariableNamesOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateVariableNamesOptions;
@@ -5906,6 +5970,11 @@ export interface RuleWithNoHexColorsOptions {
 export interface RuleWithNoIncrementDecrementOptions {
 	level: RulePlainConfiguration;
 	options?: NoIncrementDecrementOptions;
+}
+export interface RuleWithNoInlineStylesOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoInlineStylesOptions;
 }
 export interface RuleWithNoJsxPropsBindOptions {
 	level: RulePlainConfiguration;
@@ -6033,6 +6102,10 @@ export interface RuleWithNoUnnecessaryConditionsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnnecessaryConditionsOptions;
 }
+export interface RuleWithNoUntrustedLicensesOptions {
+	level: RulePlainConfiguration;
+	options?: NoUntrustedLicensesOptions;
+}
 export interface RuleWithNoUnusedClassesOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnusedClassesOptions;
@@ -6085,6 +6158,7 @@ export interface RuleWithUseConsistentGraphqlDescriptionsOptions {
 	options?: UseConsistentGraphqlDescriptionsOptions;
 }
 export interface RuleWithUseConsistentMethodSignaturesOptions {
+	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseConsistentMethodSignaturesOptions;
 }
@@ -7487,6 +7561,7 @@ export type NoDuplicateEnumValuesOptions = {};
 export type NoDuplicateFieldDefinitionNamesOptions = {};
 export type NoDuplicateGraphqlOperationNameOptions = {};
 export type NoDuplicateInputFieldNamesOptions = {};
+export type NoDuplicateSelectorsOptions = {};
 export type NoDuplicateVariableNamesOptions = {};
 export type NoDuplicatedSpreadPropsOptions = {};
 export type NoEmptyObjectKeysOptions = {};
@@ -7517,6 +7592,7 @@ export interface NoIncrementDecrementOptions {
 	 */
 	allowForLoopAfterthoughts?: boolean;
 }
+export type NoInlineStylesOptions = {};
 export type NoJsxPropsBindOptions = {};
 export type NoLeakedRenderOptions = {};
 export type NoMisusedPromisesOptions = {};
@@ -7566,6 +7642,40 @@ export interface NoUnknownAttributeOptions {
 	ignore?: string[];
 }
 export type NoUnnecessaryConditionsOptions = {};
+export interface NoUntrustedLicensesOptions {
+	/**
+	* Additional license identifiers to trust, beyond valid SPDX identifiers.
+
+Useful for custom or proprietary licenses that are not part of the SPDX
+standard but are acceptable in your project. 
+	 */
+	allow?: string[];
+	/**
+	* License identifiers to explicitly deny, even if they are valid SPDX identifiers.
+
+Use this to block specific licenses that your project or organization can't use (e.g.,
+copyleft licenses in a proprietary project). 
+	 */
+	deny?: string[];
+	/**
+	* When `true`, deprecated SPDX license identifiers are accepted.
+When `false`, deprecated licenses are flagged as untrusted.
+Defaults to `false`. 
+	 */
+	ignoreDeprecated?: boolean;
+	/**
+	* When `true`, only licenses recognized as free/libre by the Free Software
+Foundation (FSF) are trusted. Licenses in the `allow` list bypass this check.
+Defaults to `false`. 
+	 */
+	requireFsfLibre?: boolean;
+	/**
+	* When `true`, only licenses approved by the Open Source Initiative (OSI)
+are trusted. Licenses in the `allow` list bypass this check.
+Defaults to `false`. 
+	 */
+	requireOsiApproved?: boolean;
+}
 export type NoUnusedClassesOptions = {};
 export type NoUselessReturnOptions = {};
 export type NoVueArrowFuncInWatchOptions = {};
@@ -8611,6 +8721,7 @@ export type Category =
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
 	| "lint/nursery/noDuplicateGraphqlOperationName"
 	| "lint/nursery/noDuplicateInputFieldNames"
+	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noDuplicateVariableNames"
 	| "lint/nursery/noDuplicatedSpreadProps"
 	| "lint/nursery/noEmptyObjectKeys"
@@ -8623,6 +8734,7 @@ export type Category =
 	| "lint/nursery/noHexColors"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noIncrementDecrement"
+	| "lint/nursery/noInlineStyles"
 	| "lint/nursery/noJsxPropsBind"
 	| "lint/nursery/noLeakedRender"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
@@ -8651,11 +8763,13 @@ export type Category =
 	| "lint/nursery/noShadow"
 	| "lint/nursery/noSyncScripts"
 	| "lint/nursery/noTernary"
+	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/noUndeclaredEnvVars"
 	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnusedClasses"
+	| "lint/nursery/noUntrustedLicenses"
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessReturn"
@@ -8698,7 +8812,6 @@ export type Category =
 	| "lint/nursery/useScopedStyles"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
-	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/useUnicodeRegex"
 	| "lint/nursery/useUniqueArgumentNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"
@@ -8928,6 +9041,7 @@ export type Category =
 	| "assist/source/useSortedKeys"
 	| "assist/source/useSortedPackageJson"
 	| "assist/source/useSortedProperties"
+	| "assist/source/useSortedTypeFields"
 	| "syntax/correctness/noTypeOnlyImportAttributes"
 	| "syntax/correctness/noSuperWithoutExtends"
 	| "syntax/correctness/noInitializerWithDefinite"
@@ -9210,10 +9324,21 @@ export type EmbeddingKind =
 				 * Whether the script is inside Astro frontmatter
 				 */
 				frontmatter: boolean;
+				/**
+	* Whether this snippet is from a class-related attribute
+(e.g., `class:list={...}` or `class={...}`) 
+	 */
+				is_class_attribute: boolean;
 			};
 	  }
 	| {
 			Vue: {
+				/**
+	* Whether this embed should be parsed as statements (module/script).
+When `false`, the content is parsed as an expression via `parse_template_expression`.
+Source-level embeds (`<script>`) use `true`; directives and text expressions use `false`. 
+	 */
+				allow_statements: boolean;
 				/**
 				 * Whether this is a v-on event handler (e.g., @click="handler")
 				 */

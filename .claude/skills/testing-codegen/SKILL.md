@@ -1,13 +1,13 @@
 ---
 name: testing-codegen
-description: Guide for testing workflows and code generation commands in Biome. Use when running snapshot tests for lint rules, creating changesets for PRs, managing insta snapshots, or regenerating analyzer/parser/formatter code after changes.
+description: Guide for testing workflows and code generation commands in Biome. Use when running snapshot tests for lint rules, managing insta snapshots, or regenerating analyzer/parser/formatter code after changes.
 compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
 ## Purpose
 
-Use this skill for testing, code generation, and preparing contributions. Covers snapshot testing with
-`insta`, code generation commands, and changeset creation.
+Use this skill for testing and code generation. Covers snapshot testing with
+`insta` and code generation commands.
 
 ## Prerequisites
 
@@ -348,48 +348,6 @@ just f  # Format Rust and TOML
 just l  # Lint code
 ```
 
-### Create Changeset
-
-For user-visible changes (bug fixes, new features):
-
-```shell
-just new-changeset
-```
-
-This prompts for:
-
-1. **Package selection**: Usually `@biomejs/biome`
-2. **Change type**:
-   - `patch` - Bug fixes
-   - `minor` - New features
-   - `major` - Breaking changes (requires targeting `next` branch)
-3. **Description**: What changed (used in CHANGELOG)
-
-**Changeset writing guidelines:**
-
-- Be concise and clear (1-3 sentences)
-- Start bug fixes with: `Fixed [#issue](link): ...`
-- Use past tense for your actions: "Added", "Fixed", "Changed"
-- Use present tense for Biome behavior: "Biome now supports..."
-- Include code examples for new rules/features
-- Link to rules: `[useConst](https://biomejs.dev/linter/rules/use-const/)`
-- End sentences with periods
-
-Example changeset:
-
-```markdown
----
-"@biomejs/biome": patch
----
-
-Fixed [#1234](https://github.com/biomejs/biome/issues/1234): The rule [
-`noVar`](https://biomejs.dev/linter/rules/no-var/) now correctly handles variables in for loops.
-
-Biome now analyzes the scope of loop variables properly.
-```
-
-**Edit changeset** - Files created in `.changeset/` directory, edit them directly.
-
 ### Run Doctests
 
 Test code examples in documentation comments:
@@ -424,7 +382,6 @@ cargo test test_name -- --show-output
 - **`.jsonc` arrays**: Use for multiple quick test cases in script context (no imports/exports)
 - **Code generation order**: Grammar → Analyzer → Formatter → Bindings
 - **CI compatibility**: Use `just` commands when possible (matches CI)
-- **Changeset timing**: Create before opening PR, can edit after
 - **Snapshot review**: Always review snapshots carefully - don't blindly accept
 - **Test performance**: Use `#[ignore]` for slow tests, run with `cargo test -- --ignored`
 - **Parser inspection**: Use `just qt <package>` to run quick_test and inspect AST, NOT full Biome builds (much faster)
@@ -480,4 +437,4 @@ fn quick_test() {
 - Main testing guide: `CONTRIBUTING.md` § Testing
 - Insta documentation: https://insta.rs
 - Analyzer testing: `crates/biome_analyze/CONTRIBUTING.md` § Testing
-- Changeset guide: `CONTRIBUTING.md` § Changelog
+- Changeset guide: `../changeset/SKILL.md`

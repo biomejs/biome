@@ -640,6 +640,12 @@ impl Session {
         }
     }
 
+    /// Returns the root URI of the workspace as provided by the client
+    pub(crate) fn base_uri(&self) -> Option<Uri> {
+        let initialize_params = self.initialize_params.get()?;
+        initialize_params.root_uri.clone()
+    }
+
     /// Returns the base path of the workspace on the filesystem if it has one
     pub(crate) fn base_path(&self) -> Option<Utf8PathBuf> {
         let initialize_params = self.initialize_params.get()?;
@@ -1169,6 +1175,10 @@ impl Session {
                 }
             }
             Some(settings) => {
+                let settings = settings
+                    .get(CONFIGURATION_SECTION)
+                    .cloned()
+                    .unwrap_or(settings);
                 let mut config = self.extension_settings.write().unwrap();
                 if let Err(err) = config.set_workspace_settings(settings) {
                     error!("Couldn't set client configuration: {}", err);

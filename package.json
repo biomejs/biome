@@ -13,16 +13,16 @@
   "keywords": [],
   "author": "Biome Developers and Contributors",
   "license": "MIT OR Apache-2.0",
-  "packageManager": "pnpm@10.30.3",
+  "packageManager": "pnpm@10.32.1",
   "engines": {
-    "pnpm": "10.30.3"
+    "pnpm": "10.32.1"
   },
   "type": "module",
   "devDependencies": {
     "@biomejs/plugin-api": "workspace:",
     "@changesets/changelog-github": "0.6.0",
     "@changesets/cli": "2.30.0",
-    "@types/node": "24.11.2",
-    "tombi": "0.7.32"
+    "@types/node": "24.12.0",
+    "tombi": "0.9.7"
   }
 }

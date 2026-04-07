@@ -281,6 +281,46 @@ if let Some(directive) = VueDirective::cast_ref(&element)
 }
 ```
 
+### Code Comments
+
+Comments exist for the next developer who reads this code, not for the developer currently writing it.
+
+**DO:**
+- Explain code that is hard to read, or document exceptions and edge cases
+- Provide context when names alone are not descriptive enough
+- Describe the business logic a function implements
+- Clarify contextual words like "normalize" — e.g., "normalize a file path" and "normalize a URL" mean different things; spell out what normalization means here
+
+**DON'T:**
+- Do NOT embed the context of the current work into comments. A comment like `// As per issue #1234, we skip this case` ties the code to a transient artifact. Instead, explain *why* the case is skipped in terms any future reader would understand.
+- Do NOT scope comments to the specific trigger that prompted the change. For example, if a bug was reported for Astro but the fix applies broadly, do NOT write `// Fix for Astro embedding`. Write a comment that describes the general condition being handled.
+
+**Think big picture, not current task.** Before writing a comment, ask: "If someone reads this a year from now with no knowledge of the issue or PR, does this comment give them the context they need?"
+
+**Example:**
+```rust
+// WRONG: Carries issue/task context
+// Fix for #5678: Astro files need special handling here
+if is_embedded_script(node) {
+    return normalize_offset(node);
+}
+
+// WRONG: Describes what the code does (the code already says that)
+// Check if the node is an embedded script and normalize the offset
+if is_embedded_script(node) {
+    return normalize_offset(node);
+}
+
+// CORRECT: Explains why and clarifies "normalize"
+// Embedded script blocks (e.g. <script> inside .vue/.svelte/.astro files)
+// report offsets relative to the embedding document, not the script itself.
+// Normalize here means: subtract the script block's start position so the
+// offset is relative to the script content.
+if is_embedded_script(node) {
+    return normalize_offset(node);
+}
+```
+
 ### Cargo Dependencies: `workspace = true` vs `path = "..."`
 
 Internal `biome_*` crates listed under `[dev-dependencies]` **MUST** use `path = "../<crate_name>"`, not `workspace = true`. Using `workspace = true` for dev-dependencies can cause Cargo to resolve the crate from the registry instead of the local workspace, which is incorrect.
