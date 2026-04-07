@@ -562,6 +562,69 @@ fn no_diagnostics_for_unsupported_script_types() {
     );
 }
 
+/// Regression test for https://github.com/biomejs/biome/issues/9140.
+///
+/// Astro allows JSX-style attribute shorthand: `<div {prop} />` is sugar for
+/// `<div prop={prop} />`. The HTML/Astro parser forwards JSX-bearing template
+/// expressions to the JS parser with `EmbeddingKind::Astro { frontmatter: false }`,
+/// and the JS parser must accept the shorthand only in that embedding context.
+/// In a regular `.jsx` file the same syntax remains a parse error (covered by
+/// `crates/biome_js_parser/tests/js_test_suite/error/jsx_shorthand_attribute_outside_astro.jsx`).
+#[test]
+fn astro_jsx_shorthand_attribute() {
+    const FILE_CONTENT: &str = r#"---
+const items = ['a', 'b'];
+---
+<ul>
+  {items.map((item) => <li {item}>row</li>)}
+</ul>
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/file.astro"), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/file.astro"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics_and_actions(PullDiagnosticsAndActionsParams {
+            path: BiomePath::new("/project/file.astro"),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    assert!(
+        result.diagnostics.is_empty(),
+        "Expected no diagnostics for Astro JSX shorthand attribute, got: {:#?}",
+        result.diagnostics
+    );
+}
+
 #[test]
 fn format_js_with_embedded_css() {
     const FILE_PATH: &str = "/project/file.js";

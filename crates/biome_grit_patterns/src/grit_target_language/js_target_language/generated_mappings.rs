@@ -425,6 +425,7 @@ pub fn kind_by_name(node_name: &str) -> Option<JsSyntaxKind> {
         "JsxOpeningFragment" => lang::JsxOpeningFragment::KIND_SET.iter().next(),
         "JsxReferenceIdentifier" => lang::JsxReferenceIdentifier::KIND_SET.iter().next(),
         "JsxSelfClosingElement" => lang::JsxSelfClosingElement::KIND_SET.iter().next(),
+        "JsxShorthandAttribute" => lang::JsxShorthandAttribute::KIND_SET.iter().next(),
         "JsxSpreadAttribute" => lang::JsxSpreadAttribute::KIND_SET.iter().next(),
         "JsxSpreadChild" => lang::JsxSpreadChild::KIND_SET.iter().next(),
         "JsxString" => lang::JsxString::KIND_SET.iter().next(),

@@ -2391,6 +2391,7 @@ JsxAttributeList = AnyJsxAttribute*
 AnyJsxAttribute =
 	JsxAttribute
 	| JsxSpreadAttribute
+	| JsxShorthandAttribute
 	| JsMetavariable
 
 JsxAttribute =
@@ -2421,6 +2422,15 @@ JsxSpreadAttribute =
 	'{'
 	'...'
 	argument: AnyJsExpression // parse_assignment_expression_or_higher
+	'}'
+
+// <a {b} />
+//    ^^^
+// Astro-only shorthand attribute. `{name}` is equivalent to `name={name}`.
+// Only valid when the parser is in an Astro-embedded context.
+JsxShorthandAttribute =
+	'{'
+	name: JsReferenceIdentifier
 	'}'
 
 // ==================================
