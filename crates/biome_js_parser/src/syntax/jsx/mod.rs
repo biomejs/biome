@@ -597,12 +597,6 @@ fn is_at_jsx_shorthand_attribute(p: &mut JsParser) -> bool {
     p.at(T!['{']) && is_nth_at_identifier_or_keyword(p, 1) && p.nth_at(2, T!['}'])
 }
 
-// test jsx jsx_shorthand_attribute_astro
-// // file: test.astro
-// const x = <div {prop} />;
-//
-// test_err jsx jsx_shorthand_attribute_outside_astro
-// const x = <div {prop} />;
 fn parse_jsx_shorthand_attribute(p: &mut JsParser) -> ParsedSyntax {
     if !p.at(T!['{']) {
         return Absent;
