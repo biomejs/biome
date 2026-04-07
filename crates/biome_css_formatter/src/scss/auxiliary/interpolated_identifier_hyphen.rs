@@ -1,7 +1,6 @@
 use crate::prelude::*;
-use crate::verbatim::format_css_verbatim_node;
-use biome_css_syntax::ScssInterpolatedIdentifierHyphen;
-use biome_rowan::AstNode;
+use biome_css_syntax::{ScssInterpolatedIdentifierHyphen, ScssInterpolatedIdentifierHyphenFields};
+use biome_formatter::write;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatScssInterpolatedIdentifierHyphen;
 impl FormatNodeRule<ScssInterpolatedIdentifierHyphen> for FormatScssInterpolatedIdentifierHyphen {
@@ -10,6 +9,8 @@ impl FormatNodeRule<ScssInterpolatedIdentifierHyphen> for FormatScssInterpolated
         node: &ScssInterpolatedIdentifierHyphen,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        format_css_verbatim_node(node.syntax()).fmt(f)
+        let ScssInterpolatedIdentifierHyphenFields { minus_token } = node.as_fields();
+
+        write![f, [minus_token.format()]]
     }
 }
