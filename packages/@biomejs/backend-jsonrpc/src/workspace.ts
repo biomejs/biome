@@ -2192,6 +2192,11 @@ See https://biomejs.dev/linter/rules/no-leaked-render
 	 */
 	noLeakedRender?: NoLeakedRenderConfiguration;
 	/**
+	* Detect return type annotations that are misleadingly wider than what the implementation actually returns.
+See https://biomejs.dev/linter/rules/no-misleading-return-type 
+	 */
+	noMisleadingReturnType?: NoMisleadingReturnTypeConfiguration;
+	/**
 	* Disallow Promises to be used in places where they are almost certainly a mistake.
 See https://biomejs.dev/linter/rules/no-misused-promises 
 	 */
@@ -2416,6 +2421,11 @@ See https://biomejs.dev/linter/rules/use-destructuring
 	 */
 	useDestructuring?: UseDestructuringConfiguration;
 	/**
+	* Detects a disposable object assigned to a variable without using or await using syntax.
+See https://biomejs.dev/linter/rules/use-disposables 
+	 */
+	useDisposables?: UseDisposablesConfiguration;
+	/**
 	* Enforce that new Error() is thrown with the original error as cause.
 See https://biomejs.dev/linter/rules/use-error-cause 
 	 */
@@ -2430,6 +2440,11 @@ See https://biomejs.dev/linter/rules/use-exhaustive-switch-cases
 See https://biomejs.dev/linter/rules/use-expect 
 	 */
 	useExpect?: UseExpectConfiguration;
+	/**
+	* Require explicit return types on functions and class methods.
+See https://biomejs.dev/linter/rules/use-explicit-return-type 
+	 */
+	useExplicitReturnType?: UseExplicitReturnTypeConfiguration;
 	/**
 	* Enforce types in functions, methods, variables, and parameters.
 See https://biomejs.dev/linter/rules/use-explicit-type 
@@ -4221,6 +4236,9 @@ export type NoJsxPropsBindConfiguration =
 export type NoLeakedRenderConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoLeakedRenderOptions;
+export type NoMisleadingReturnTypeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoMisleadingReturnTypeOptions;
 export type NoMisusedPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisusedPromisesOptions;
@@ -4353,6 +4371,9 @@ export type UseConsistentTestItConfiguration =
 export type UseDestructuringConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDestructuringOptions;
+export type UseDisposablesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseDisposablesOptions;
 export type UseErrorCauseConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseErrorCauseOptions;
@@ -4362,6 +4383,9 @@ export type UseExhaustiveSwitchCasesConfiguration =
 export type UseExpectConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExpectOptions;
+export type UseExplicitReturnTypeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseExplicitReturnTypeOptions;
 export type UseExplicitTypeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExplicitTypeOptions;
@@ -5923,6 +5947,10 @@ export interface RuleWithNoLeakedRenderOptions {
 	level: RulePlainConfiguration;
 	options?: NoLeakedRenderOptions;
 }
+export interface RuleWithNoMisleadingReturnTypeOptions {
+	level: RulePlainConfiguration;
+	options?: NoMisleadingReturnTypeOptions;
+}
 export interface RuleWithNoMisusedPromisesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6110,6 +6138,11 @@ export interface RuleWithUseDestructuringOptions {
 	level: RulePlainConfiguration;
 	options?: UseDestructuringOptions;
 }
+export interface RuleWithUseDisposablesOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseDisposablesOptions;
+}
 export interface RuleWithUseErrorCauseOptions {
 	level: RulePlainConfiguration;
 	options?: UseErrorCauseOptions;
@@ -6122,6 +6155,10 @@ export interface RuleWithUseExhaustiveSwitchCasesOptions {
 export interface RuleWithUseExpectOptions {
 	level: RulePlainConfiguration;
 	options?: UseExpectOptions;
+}
+export interface RuleWithUseExplicitReturnTypeOptions {
+	level: RulePlainConfiguration;
+	options?: UseExplicitReturnTypeOptions;
 }
 export interface RuleWithUseExplicitTypeOptions {
 	level: RulePlainConfiguration;
@@ -7540,6 +7577,7 @@ export interface NoIncrementDecrementOptions {
 export type NoInlineStylesOptions = {};
 export type NoJsxPropsBindOptions = {};
 export type NoLeakedRenderOptions = {};
+export type NoMisleadingReturnTypeOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoMultiAssignOptions = {};
 export type NoMultiStrOptions = {};
@@ -7694,6 +7732,7 @@ Default: `"it"`
 	withinDescribe?: TestFunctionKind;
 }
 export type UseDestructuringOptions = {};
+export type UseDisposablesOptions = {};
 /**
  * Options for the `useErrorCause` rule.
  */
@@ -7705,6 +7744,24 @@ export interface UseErrorCauseOptions {
 }
 export type UseExhaustiveSwitchCasesOptions = {};
 export type UseExpectOptions = {};
+/**
+ * Options for the `useExplicitReturnType` rule.
+ */
+export interface UseExplicitReturnTypeOptions {
+	/**
+	* Whether to ignore function expressions (functions that are not part of a declaration).
+When `true`, only declarations (function statements and class methods) are checked. 
+	 */
+	allowExpressions?: boolean;
+	/**
+	 * Whether to allow IIFEs (Immediately Invoked Function Expressions) without explicit return types.
+	 */
+	allowIifes?: boolean;
+	/**
+	 * A list of function names that are allowed to not have explicit return types.
+	 */
+	allowedNames?: string[];
+}
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
 export type UseGlobalThisOptions = {};
@@ -7730,6 +7787,13 @@ that appear in places where the falsy-checking behavior may be intentional.
 Default: `true` 
 	 */
 	ignoreConditionalTests?: boolean;
+	/**
+	* Whether to ignore ternary expressions that could be simplified
+using the nullish coalescing operator.
+
+Default: `false` 
+	 */
+	ignoreTernaryTests?: boolean;
 }
 export type UsePlaywrightValidDescribeCallbackOptions = {};
 export type UseQwikLoaderLocationOptions = {};
@@ -8673,6 +8737,7 @@ export type Category =
 	| "lint/nursery/noJsxPropsBind"
 	| "lint/nursery/noLeakedRender"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
+	| "lint/nursery/noMisleadingReturnType"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noMultiAssign"
 	| "lint/nursery/noMultiStr"
@@ -8721,10 +8786,12 @@ export type Category =
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentTestIt"
 	| "lint/nursery/useDestructuring"
+	| "lint/nursery/useDisposables"
 	| "lint/nursery/useErrorCause"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExpect"
 	| "lint/nursery/useExplicitFunctionReturnType"
+	| "lint/nursery/useExplicitReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useFind"
 	| "lint/nursery/useGlobalThis"

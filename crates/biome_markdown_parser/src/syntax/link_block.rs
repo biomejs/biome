@@ -305,8 +305,10 @@ fn skip_destination_tokens(p: &mut MarkdownParser) -> DestinationResult {
                 continue;
             }
 
-            if at_title_start(p) && has_content && saw_separator {
-                // Break here - we've found separator before title
+            if has_content && saw_separator {
+                // After whitespace following destination content, only a title
+                // starter is valid. Any other text means the destination ended
+                // at the whitespace boundary.
                 break;
             }
 

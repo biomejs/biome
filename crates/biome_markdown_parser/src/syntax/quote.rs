@@ -97,6 +97,7 @@ pub(crate) fn parse_quote(p: &mut MarkdownParser) -> ParsedSyntax {
     p.state_mut().block_quote_depth += 1;
 
     let marker_space = emit_quote_prefix_node(p);
+    relex_after_quote_prefix_consumed(p);
     p.set_virtual_line_start();
 
     parse_quote_block_list(p);
@@ -123,6 +124,68 @@ fn emit_quote_prefix_node(p: &mut MarkdownParser) -> bool {
 
     prefix_m.complete(p, MD_QUOTE_PREFIX);
     marker_space
+}
+
+/// After consuming a quote prefix, selectively re-lex the current token as if
+/// it were at line start when the remaining line could form a thematic break.
+///
+/// Re-lexing unconditionally perturbs ordinary quoted text tokenization by
+/// splitting leading spaces into separate tokens. We only need line-start
+/// semantics here for thematic-break candidates like `> ---`.
+///
+/// A candidate is any line whose non-whitespace bytes are all the **same**
+/// thematic break character (`-`, `*`, or `_`). Per CommonMark §4.1, mixing
+/// different break characters (e.g. `_*-`) does **not** form a thematic break.
+fn force_relex_thematic_break_after_quote_prefix(p: &mut MarkdownParser) {
+    let is_thematic_break_candidate = p.at(T![-])
+        || p.at(T![*])
+        || p.at(UNDERSCORE)
+        || p.at(DOUBLE_UNDERSCORE)
+        || (p.at(MD_TEXTUAL_LITERAL) && is_thematic_break_candidate_text(p.cur_text()));
+
+    if is_thematic_break_candidate {
+        p.force_relex_at_line_start();
+    }
+}
+
+fn relex_after_quote_prefix_consumed(p: &mut MarkdownParser) {
+    force_relex_thematic_break_after_quote_prefix(p);
+}
+
+/// Check if `text` could be a thematic break: all non-whitespace bytes must be
+/// the **same** thematic break character (`-`, `*`, or `_`).
+fn is_thematic_break_candidate_text(text: &str) -> bool {
+    use biome_unicode_table::{
+        Dispatch::{IDT, MIN, MUL, WHS},
+        lookup_byte,
+    };
+
+    let mut break_char: Option<u8> = None;
+    for &b in text.as_bytes() {
+        let dispatched = lookup_byte(b);
+        // Skip whitespace (space, tab, etc.) via the shared lookup table.
+        if dispatched == WHS {
+            continue;
+        }
+        // Match thematic break characters via dispatch variants:
+        // MIN = `-`, MUL = `*`, IDT = `_` (IDT also covers letters, so
+        // narrow to `b'_'` explicitly).
+        let is_break_char = matches!(dispatched, MIN | MUL) || (dispatched == IDT && b == b'_');
+        if is_break_char {
+            if let Some(expected) = break_char {
+                // Mixed break characters like `_*-` are not valid.
+                if b != expected {
+                    return false;
+                }
+            } else {
+                break_char = Some(b);
+            }
+        } else {
+            // Any other non-whitespace byte disqualifies the line.
+            return false;
+        }
+    }
+    break_char.is_some()
 }
 
 /// Emit one quote prefix token sequence: [indent?] `>` [optional space/tab].
@@ -273,6 +336,7 @@ impl QuoteBlockList {
         {
             if has_quote_prefix(p, self.depth) {
                 consume_quote_prefix(p, self.depth);
+                relex_after_quote_prefix_consumed(p);
                 self.line_started_with_prefix = true;
             } else {
                 return false;
@@ -532,15 +596,30 @@ fn parse_code_block_newline(p: &mut MarkdownParser, depth: usize) -> bool {
         return false;
     }
 
-    consume_quote_prefix(p, depth);
+    let continues_code_block = p.lookahead(|p| {
+        consume_quote_prefix(p, depth);
 
-    // Blank lines (consecutive newlines) are allowed in indented code
+        // Blank lines (consecutive newlines) are allowed in indented code.
+        if p.at(NEWLINE) {
+            return true;
+        }
+
+        at_quote_indented_code_start(p)
+    });
+
+    if !continues_code_block {
+        return false;
+    }
+
+    consume_quote_prefix(p, depth);
+    relex_after_quote_prefix_consumed(p);
+
+    // Blank lines (consecutive newlines) are allowed in indented code.
     if p.at(NEWLINE) {
         return true;
     }
 
-    // Next line must still be indented to continue the code block
-    at_quote_indented_code_start(p)
+    true
 }
 
 /// Parse a single textual token in an indented code block.

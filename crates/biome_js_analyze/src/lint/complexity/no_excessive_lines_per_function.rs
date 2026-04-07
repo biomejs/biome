@@ -1,9 +1,7 @@
 use crate::services::semantic::Semantic;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_js_syntax::{
-    AnyFunctionLike, AnyJsFunction, JsCallExpression, JsParenthesizedExpression,
-};
+use biome_js_syntax::AnyFunctionLike;
 use biome_rowan::AstNode;
 use biome_rule_options::no_excessive_lines_per_function::NoExcessiveLinesPerFunctionOptions;
 
@@ -142,7 +140,7 @@ impl Rule for NoExcessiveLinesPerFunction {
         let options = ctx.options();
 
         if let AnyFunctionLike::AnyJsFunction(func) = binding
-            && is_iife(func)
+            && func.is_iife()
             && options.skip_iifes()
         {
             return None;
@@ -201,12 +199,6 @@ impl Rule for NoExcessiveLinesPerFunction {
             }),
         )
     }
-}
-
-fn is_iife(func: &AnyJsFunction) -> bool {
-    func.parent::<JsParenthesizedExpression>()
-        .and_then(|expr| expr.parent::<JsCallExpression>())
-        .is_some()
 }
 
 pub struct State {

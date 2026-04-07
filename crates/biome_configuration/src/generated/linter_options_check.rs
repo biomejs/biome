@@ -711,6 +711,12 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push(("suspicious", "noMisleadingInstantiator", TypeId::of::<biome_rule_options::no_misleading_instantiator::NoMisleadingInstantiatorOptions>()));
     result.push((
+        "nursery",
+        "noMisleadingReturnType",
+        TypeId::of::<biome_rule_options::no_misleading_return_type::NoMisleadingReturnTypeOptions>(
+        ),
+    ));
+    result.push((
         "suspicious",
         "noMisplacedAssertion",
         TypeId::of::<biome_rule_options::no_misplaced_assertion::NoMisplacedAssertionOptions>(),
@@ -1616,6 +1622,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_destructuring::UseDestructuringOptions>(),
     ));
     result.push((
+        "nursery",
+        "useDisposables",
+        TypeId::of::<biome_rule_options::use_disposables::UseDisposablesOptions>(),
+    ));
+    result.push((
         "style",
         "useEnumInitializers",
         TypeId::of::<biome_rule_options::use_enum_initializers::UseEnumInitializersOptions>(),
@@ -1654,6 +1665,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "useExplicitLengthCheck",
         TypeId::of::<biome_rule_options::use_explicit_length_check::UseExplicitLengthCheckOptions>(
         ),
+    ));
+    result.push((
+        "nursery",
+        "useExplicitReturnType",
+        TypeId::of::<biome_rule_options::use_explicit_return_type::UseExplicitReturnTypeOptions>(),
     ));
     result.push((
         "nursery",

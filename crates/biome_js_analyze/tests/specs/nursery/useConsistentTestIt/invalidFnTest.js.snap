@@ -19,7 +19,7 @@ fit("foo", () => {});
 ```
 invalidFnTest.js:4:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Prefer using test over it for test functions.
+  ! The test function it is inconsistent with the configured preferred function test.
   
     2 │ // function="test": top-level tests must use test()
     3 │ 
@@ -28,7 +28,7 @@ invalidFnTest.js:4:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━�
     5 │ it.skip("foo", () => {});
     6 │ it.only("foo", () => {});
   
-  i Use test consistently for all test function calls.
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -47,7 +47,7 @@ invalidFnTest.js:4:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━�
 ```
 invalidFnTest.js:5:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Prefer using test over it for test functions.
+  ! The test function it is inconsistent with the configured preferred function test.
   
     4 │ it("foo", () => {});
   > 5 │ it.skip("foo", () => {});
@@ -55,7 +55,7 @@ invalidFnTest.js:5:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━�
     6 │ it.only("foo", () => {});
     7 │ xit("foo", () => {});
   
-  i Use test consistently for all test function calls.
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -74,7 +74,7 @@ invalidFnTest.js:5:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━�
 ```
 invalidFnTest.js:6:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Prefer using test over it for test functions.
+  ! The test function it is inconsistent with the configured preferred function test.
   
     4 │ it("foo", () => {});
     5 │ it.skip("foo", () => {});
@@ -83,7 +83,7 @@ invalidFnTest.js:6:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━�
     7 │ xit("foo", () => {});
     8 │ fit("foo", () => {});
   
-  i Use test consistently for all test function calls.
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -102,7 +102,7 @@ invalidFnTest.js:6:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━�
 ```
 invalidFnTest.js:7:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Prefer using xtest over xit for test functions.
+  ! The test function xit is inconsistent with the configured preferred function xtest.
   
     5 │ it.skip("foo", () => {});
     6 │ it.only("foo", () => {});
@@ -111,7 +111,7 @@ invalidFnTest.js:7:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━�
     8 │ fit("foo", () => {});
     9 │ 
   
-  i Use xtest consistently for all test function calls.
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -130,7 +130,7 @@ invalidFnTest.js:7:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━�
 ```
 invalidFnTest.js:8:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Prefer using test.only over fit for test functions.
+  ! The test function fit is inconsistent with the configured preferred function test.only.
   
     6 │ it.only("foo", () => {});
     7 │ xit("foo", () => {});
@@ -138,7 +138,7 @@ invalidFnTest.js:8:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━�
       │ ^^^
     9 │ 
   
-  i Use test.only consistently for all test function calls.
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

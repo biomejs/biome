@@ -4,6 +4,7 @@ use crate::shared::{TextPrintMode, TrimMode};
 use crate::verbatim::format_verbatim_node;
 use biome_formatter::write;
 use biome_markdown_syntax::{MdHeader, MdHeaderFields};
+use biome_rowan::AstNode;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdHeader;

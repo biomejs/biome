@@ -111,6 +111,7 @@ static TURBOREPO_FILTERS: LazyLock<Vec<RuleFilter<'static>>> =
 static TYPES_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noFloatingPromises"),
+        RuleFilter::Rule("nursery", "noMisleadingReturnType"),
         RuleFilter::Rule("nursery", "noMisusedPromises"),
         RuleFilter::Rule("nursery", "noUnnecessaryConditions"),
         RuleFilter::Rule("nursery", "noUnsafePlusOperands"),
@@ -118,6 +119,7 @@ static TYPES_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "useArraySortCompare"),
         RuleFilter::Rule("nursery", "useAwaitThenable"),
         RuleFilter::Rule("nursery", "useConsistentEnumValueType"),
+        RuleFilter::Rule("nursery", "useDisposables"),
         RuleFilter::Rule("nursery", "useExhaustiveSwitchCases"),
         RuleFilter::Rule("nursery", "useFind"),
         RuleFilter::Rule("nursery", "useNullishCoalescing"),

@@ -51,6 +51,27 @@ setTimeout((("alert('Hi!');")), 100);
 setTimeout(("a" + "b"), 100);
 setTimeout((`alert('Hi!');`), 100);
 
+// Function constructor usage
+Function("b", "c", "return b + c");
+new Function("b", "c", "return b + c");
+Function.call(null, "b", "c", "return b + c");
+Function.apply(null, ["b", "c", "return b + c"]);
+Function.bind(null, "b", "c", "return b + c")();
+Function.bind(null, "b", "c", "return b + c");
+Function["call"](null, "b", "c", "return b + c");
+(Function?.call)(null, "b", "c", "return b + c");
+
+// Global Function after local shadowing ends
+const localClass = () => {
+    class Function {}
+};
+new Function("", "");
+
+var localFunction = function () {
+    function Function() {}
+};
+Function("", "");
+
 ```
 
 # Diagnostics
@@ -538,10 +559,239 @@ invalid.js:46:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━�
   > 46 │ setTimeout((`alert('Hi!');`), 100);
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     47 │ 
+    48 │ // Function constructor usage
   
   i Passing strings to functions like setTimeout, setInterval, or setImmediate is a form of implied eval() and can lead to security and performance issues.
   
   i Use a function instead of a string.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:49:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not use the global Function constructor.
+  
+    48 │ // Function constructor usage
+  > 49 │ Function("b", "c", "return b + c");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    50 │ new Function("b", "c", "return b + c");
+    51 │ Function.call(null, "b", "c", "return b + c");
+  
+  i It parses strings into executable code at runtime and has the same security and performance drawbacks as eval().
+  
+  i Use a function declaration, function expression, or arrow function instead.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:50:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not use the global Function constructor.
+  
+    48 │ // Function constructor usage
+    49 │ Function("b", "c", "return b + c");
+  > 50 │ new Function("b", "c", "return b + c");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    51 │ Function.call(null, "b", "c", "return b + c");
+    52 │ Function.apply(null, ["b", "c", "return b + c"]);
+  
+  i It parses strings into executable code at runtime and has the same security and performance drawbacks as eval().
+  
+  i Use a function declaration, function expression, or arrow function instead.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:51:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not use the global Function constructor.
+  
+    49 │ Function("b", "c", "return b + c");
+    50 │ new Function("b", "c", "return b + c");
+  > 51 │ Function.call(null, "b", "c", "return b + c");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    52 │ Function.apply(null, ["b", "c", "return b + c"]);
+    53 │ Function.bind(null, "b", "c", "return b + c")();
+  
+  i It parses strings into executable code at runtime and has the same security and performance drawbacks as eval().
+  
+  i Use a function declaration, function expression, or arrow function instead.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:52:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not use the global Function constructor.
+  
+    50 │ new Function("b", "c", "return b + c");
+    51 │ Function.call(null, "b", "c", "return b + c");
+  > 52 │ Function.apply(null, ["b", "c", "return b + c"]);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    53 │ Function.bind(null, "b", "c", "return b + c")();
+    54 │ Function.bind(null, "b", "c", "return b + c");
+  
+  i It parses strings into executable code at runtime and has the same security and performance drawbacks as eval().
+  
+  i Use a function declaration, function expression, or arrow function instead.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:53:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not use the global Function constructor.
+  
+    51 │ Function.call(null, "b", "c", "return b + c");
+    52 │ Function.apply(null, ["b", "c", "return b + c"]);
+  > 53 │ Function.bind(null, "b", "c", "return b + c")();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    54 │ Function.bind(null, "b", "c", "return b + c");
+    55 │ Function["call"](null, "b", "c", "return b + c");
+  
+  i It parses strings into executable code at runtime and has the same security and performance drawbacks as eval().
+  
+  i Use a function declaration, function expression, or arrow function instead.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:54:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not use the global Function constructor.
+  
+    52 │ Function.apply(null, ["b", "c", "return b + c"]);
+    53 │ Function.bind(null, "b", "c", "return b + c")();
+  > 54 │ Function.bind(null, "b", "c", "return b + c");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    55 │ Function["call"](null, "b", "c", "return b + c");
+    56 │ (Function?.call)(null, "b", "c", "return b + c");
+  
+  i It parses strings into executable code at runtime and has the same security and performance drawbacks as eval().
+  
+  i Use a function declaration, function expression, or arrow function instead.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:55:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not use the global Function constructor.
+  
+    53 │ Function.bind(null, "b", "c", "return b + c")();
+    54 │ Function.bind(null, "b", "c", "return b + c");
+  > 55 │ Function["call"](null, "b", "c", "return b + c");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    56 │ (Function?.call)(null, "b", "c", "return b + c");
+    57 │ 
+  
+  i It parses strings into executable code at runtime and has the same security and performance drawbacks as eval().
+  
+  i Use a function declaration, function expression, or arrow function instead.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:56:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not use the global Function constructor.
+  
+    54 │ Function.bind(null, "b", "c", "return b + c");
+    55 │ Function["call"](null, "b", "c", "return b + c");
+  > 56 │ (Function?.call)(null, "b", "c", "return b + c");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    57 │ 
+    58 │ // Global Function after local shadowing ends
+  
+  i It parses strings into executable code at runtime and has the same security and performance drawbacks as eval().
+  
+  i Use a function declaration, function expression, or arrow function instead.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:62:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not use the global Function constructor.
+  
+    60 │     class Function {}
+    61 │ };
+  > 62 │ new Function("", "");
+       │ ^^^^^^^^^^^^^^^^^^^^
+    63 │ 
+    64 │ var localFunction = function () {
+  
+  i It parses strings into executable code at runtime and has the same security and performance drawbacks as eval().
+  
+  i Use a function declaration, function expression, or arrow function instead.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:67:1 lint/nursery/noImpliedEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not use the global Function constructor.
+  
+    65 │     function Function() {}
+    66 │ };
+  > 67 │ Function("", "");
+       │ ^^^^^^^^^^^^^^^^
+    68 │ 
+  
+  i It parses strings into executable code at runtime and has the same security and performance drawbacks as eval().
+  
+  i Use a function declaration, function expression, or arrow function instead.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8735 for more information or to report possible bugs.
   

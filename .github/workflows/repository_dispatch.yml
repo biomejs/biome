@@ -41,7 +41,7 @@ jobs:
       - name: Install toolchain
         uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
         with:
-          bins: wasm-bindgen-cli@0.2.106, wasm-opt
+          bins: wasm-bindgen-cli@0.2.117, wasm-opt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -73,7 +73,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
-          node-version: 24.14.0
+          node-version: 24.14.1
           cache: pnpm
 
       - name: Update package.json

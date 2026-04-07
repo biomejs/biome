@@ -39,30 +39,26 @@ info: markdown/list/tab.md
 --- Prettier
 +++ Biome
 @@ -1,22 +1,23 @@
--- Text
-+* Text
+ - Text
  
 -  [title](link)
 + 	[title](link)
  
--- Text
+ - Text
 -  - foo
 -  - foo
 -  - bar
-+* Text
  
--- Text
 + 	- foo
 + 	- foo
 + 	- bar
++
+ - Text
  
 -  # foo
-+* Text
-+
 + 	# foo
  
--- Text
-+* Text
+ - Text
  
 -  ```
 -  foo
@@ -71,8 +67,7 @@ info: markdown/list/tab.md
 + 	foo
 + 	```
  
--- Text
-+* Text
+ - Text
  
 -  `foo`
 + 	`foo`
@@ -81,27 +76,27 @@ info: markdown/list/tab.md
 # Output
 
 ```md
-* Text
+- Text
 
  	[title](link)
 
-* Text
+- Text
 
  	- foo
  	- foo
  	- bar
 
-* Text
+- Text
 
  	# foo
 
-* Text
+- Text
 
  	```
  	foo
  	```
 
-* Text
+- Text
 
  	`foo`
 ```

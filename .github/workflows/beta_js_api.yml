@@ -40,13 +40,13 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
-          node-version: 24.14.0
+          node-version: 24.14.1
 
       - name: Install just
         uses: extractions/setup-just@f8a3cce218d9f83db3a2ecd90e41ac3de6cdfd9b # v3.1.0
 
       - name: Install wasm-bindgen-cli
-        run: cargo install wasm-bindgen-cli --version 0.2.106
+        run: cargo install wasm-bindgen-cli --version 0.2.117
 
       - name: Install wasm-tools
         run: cargo install wasm-tools
@@ -104,7 +104,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
-          node-version: 24.14.0
+          node-version: 24.14.1
           registry-url: 'https://registry.npmjs.org'
 
       - name: Set beta version

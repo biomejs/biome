@@ -11,10 +11,10 @@ use biome_js_syntax::{
     JsConditionalExpression, JsConstructorClassMember, JsFileSource, JsFormalParameter,
     JsFunctionDeclaration, JsGetterClassMember, JsGetterObjectMember, JsInitializerClause,
     JsLanguage, JsLogicalExpression, JsMethodClassMember, JsMethodObjectMember, JsModuleItemList,
-    JsObjectExpression, JsParameters, JsParenthesizedExpression, JsPropertyClassMember,
-    JsPropertyObjectMember, JsReturnStatement, JsSetterClassMember, JsSetterObjectMember,
-    JsStatementList, JsSyntaxKind, JsVariableDeclaration, JsVariableDeclarationClause,
-    JsVariableDeclarator, JsVariableDeclaratorList, JsVariableStatement, TsCallSignatureTypeMember,
+    JsObjectExpression, JsParameters, JsPropertyClassMember, JsPropertyObjectMember,
+    JsReturnStatement, JsSetterClassMember, JsSetterObjectMember, JsStatementList, JsSyntaxKind,
+    JsVariableDeclaration, JsVariableDeclarationClause, JsVariableDeclarator,
+    JsVariableDeclaratorList, JsVariableStatement, TsCallSignatureTypeMember,
     TsDeclareFunctionDeclaration, TsDeclareFunctionExportDefaultDeclaration,
     TsGetterSignatureClassMember, TsMethodSignatureClassMember, TsMethodSignatureTypeMember,
     static_value::StaticValue,
@@ -701,20 +701,6 @@ fn is_arrow_func(func: &AnyJsFunction) -> bool {
     matches!(func, AnyJsFunction::JsArrowFunctionExpression(_))
 }
 
-/// Checks if a function is an IIFE (Immediately Invoked Function Expressions)
-///
-/// # Examples
-///
-/// ```typescript
-/// (function () {});
-/// (() => {})();
-/// ```
-fn is_iife(func: &AnyJsFunction) -> bool {
-    func.parent::<JsParenthesizedExpression>()
-        .and_then(|expr| expr.parent::<JsCallExpression>())
-        .is_some()
-}
-
 /// Checks whether the given function is a higher-order function, i.e., a function
 /// that returns another function either directly in its body or as an expression.
 ///
@@ -899,7 +885,7 @@ fn handle_any_function(func: &AnyJsFunction) -> Option<State> {
         return None;
     }
 
-    if is_iife(func) {
+    if func.is_iife() {
         return None;
     }
 

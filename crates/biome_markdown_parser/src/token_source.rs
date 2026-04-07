@@ -160,6 +160,14 @@ impl<'source> MarkdownTokenSource<'source> {
         self.lexer.force_relex_in_context(context)
     }
 
+    /// Re-lex the current token in Regular context, treating the position as
+    /// a line start. This makes the lexer produce line-start-gated tokens
+    /// like `MD_THEMATIC_BREAK_LITERAL`.
+    pub fn force_relex_at_line_start(&mut self) -> MarkdownSyntaxKind {
+        self.lexer
+            .force_relex_at_line_start(MarkdownLexContext::Regular)
+    }
+
     pub fn set_force_ordered_list_marker(&mut self, value: bool) {
         self.lexer.lexer_mut().set_force_ordered_list_marker(value);
     }

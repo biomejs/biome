@@ -2495,6 +2495,138 @@ export { describe, test, z };
 }
 
 #[tokio::test]
+async fn resolve_organize_imports_action_issue_9812() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize_with_resolve_support().await?;
+    server.initialized().await?;
+
+    server
+        .open_document(
+            r#"
+import z from "zod";
+import { test } from "./test";
+import { describe } from "node:test";
+
+export { describe, test, z };
+"#,
+        )
+        .await?;
+
+    // Request code actions with only: ["source.organizeImports.biome"]
+    // This is less to behave like #9741's test, and more to make it so that I only get a single
+    // code action back from the server.
+    let res: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 0,
+                    },
+                    end: Position {
+                        line: 6,
+                        character: 0,
+                    },
+                },
+                context: CodeActionContext {
+                    diagnostics: vec![Diagnostic {
+                        range: Range {
+                            start: Position {
+                                line: 1,
+                                character: 0,
+                            },
+                            end: Position {
+                                line: 1,
+                                character: 19,
+                            },
+                        },
+                        severity: Some(DiagnosticSeverity::INFORMATION),
+                        code: Some(NumberOrString::String(String::from(
+                            "assist/source/organizeImports",
+                        ))),
+                        source: Some(String::from("biome")),
+                        message: String::from("The imports and exports are not sorted."),
+                        ..Default::default()
+                    }],
+                    only: Some(vec![CodeActionKind::new("source.organizeImports.biome")]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    // This is already fixed and proven in #9741
+    assert!(
+        !res.is_empty(),
+        "Expected at least one code action, but got an empty response"
+    );
+
+    let action = match &res[0] {
+        CodeActionOrCommand::CodeAction(action) => action,
+        other => panic!("Expected CodeAction, got {:?}", other),
+    };
+
+    assert_eq!(action.title, "Apply safe fix for organizeImports");
+    assert_eq!(
+        action.kind,
+        Some(CodeActionKind::new("source.organizeImports.biome"))
+    );
+    // With resolve support, the edit should be deferred so we need to call resolve in order to get
+    // the changes back.
+    assert!(
+        action.edit.is_none(),
+        "expected no edit in unresolved action"
+    );
+
+    // With the changes in #9812 this now succeeds, if you comment out the changes in #9812 this
+    // part will fail with an `Internal error: The rule doesn't exist`.
+    let action_to_resolve = action.clone();
+    let resolved: CodeAction = server
+        .request(
+            "codeAction/resolve",
+            "resolve_code_action",
+            action_to_resolve,
+        )
+        .await?
+        .context("codeAction/resolve returned None")?;
+
+    assert!(resolved.edit.is_some(), "expected edit in resolved action");
+    let edit = resolved.edit.unwrap();
+    let changes = edit.changes.unwrap();
+    let edits = &changes[&uri!("document.js")];
+    assert!(
+        !edits.is_empty(),
+        "expected at least one text edit for the organize imports fix"
+    );
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn does_not_pull_action_for_disabled_rule_in_override_issue_2782() -> Result<()> {
     let fs = MemoryFileSystem::default();
     let config = r#"{

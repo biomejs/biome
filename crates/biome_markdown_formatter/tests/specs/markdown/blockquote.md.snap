@@ -89,7 +89,7 @@ info: markdown/blockquote.md
 >> second level
 >>> third level
 
-> quote with **bold** and *italic*
+> quote with **bold** and _italic_
 
 > quote with `inline code`
 
