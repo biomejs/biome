@@ -5,7 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, AnyJsxElementName, AnyJsxTag,
-    JsSyntaxKind, JsxAttribute,
+    JsFileSource, JsSyntaxKind, JsxAttribute,
 };
 use biome_rowan::{AstNode, WalkEvent};
 use biome_rule_options::no_label_without_control::NoLabelWithoutControlOptions;
@@ -104,6 +104,7 @@ impl Rule for NoLabelWithoutControl {
         let options = ctx.options();
         let element_name = node.name()?.name_value_token().ok()?;
         let element_name = element_name.text_trimmed();
+        let file_source = ctx.source_type::<JsFileSource>();
         let is_allowed_element = has_element_name(options, element_name)
             || DEFAULT_LABEL_COMPONENTS.contains(&element_name);
 
@@ -112,7 +113,8 @@ impl Rule for NoLabelWithoutControl {
         }
 
         let has_text_content = has_accessible_label(options, node);
-        let has_control_association = has_for_attribute(node) || has_nested_control(options, node);
+        let has_control_association =
+            has_for_attribute(node, file_source) || has_nested_control(options, node);
 
         if has_text_content && has_control_association {
             return None;
@@ -266,7 +268,7 @@ const DEFAULT_INPUT_COMPONENTS: [&str; 7] = [
 ];
 
 /// Returns whether the passed `AnyJsxTag` have a `for` or `htmlFor` attribute
-fn has_for_attribute(jsx_tag: &AnyJsxTag) -> bool {
+fn has_for_attribute(jsx_tag: &AnyJsxTag, file_source: &JsFileSource) -> bool {
     let for_attributes = ["for", "htmlFor"];
     let Some(attributes) = jsx_tag.attributes() else {
         return false;
@@ -283,9 +285,12 @@ fn has_for_attribute(jsx_tag: &AnyJsxTag) -> bool {
                 }
             })
             .is_some_and(|jsx_name| for_attributes.contains(&jsx_name.text_trimmed())),
-        AnyJsxAttribute::JsxSpreadAttribute(_)
-        | AnyJsxAttribute::JsxShorthandAttribute(_)
-        | AnyJsxAttribute::JsMetavariable(_) => false,
+        AnyJsxAttribute::JsxShorthandAttribute(attribute) => attribute
+            .name()
+            .ok()
+            .and_then(|name| name.value_token().ok())
+            .is_some_and(|name| for_attributes.contains(&name.text_trimmed())),
+        AnyJsxAttribute::JsxSpreadAttribute(_) | AnyJsxAttribute::JsMetavariable(_) => false,
     })
 }
 
