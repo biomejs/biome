@@ -5,7 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, AnyJsxElementName, AnyJsxTag,
-    JsFileSource, JsSyntaxKind, JsxAttribute,
+    JsSyntaxKind, JsxAttribute,
 };
 use biome_rowan::{AstNode, WalkEvent};
 use biome_rule_options::no_label_without_control::NoLabelWithoutControlOptions;
