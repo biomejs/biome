@@ -3687,6 +3687,25 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoExcessiveSelectorClassesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoExcessiveSelectorClassesOptions" }
+			]
+		},
+		"NoExcessiveSelectorClassesOptions": {
+			"type": "object",
+			"properties": {
+				"maxClasses": {
+					"description": "The maximum number of class selectors allowed in a single selector.\n\nThis option is required to enable the rule.\nUse `0` to disallow class selectors entirely.",
+					"type": ["integer", "null"],
+					"format": "uint16",
+					"maximum": 65535,
+					"minimum": 0
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoExplicitAnyConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6075,6 +6094,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noExcessiveSelectorClasses": {
+					"description": "Limit the number of classes in a selector.\nSee https://biomejs.dev/linter/rules/no-excessive-selector-classes",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoExcessiveSelectorClassesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noFloatingClasses": {
 					"description": "Disallow new operators outside of assignments or comparisons.\nSee https://biomejs.dev/linter/rules/no-floating-classes",
 					"anyOf": [
@@ -8195,6 +8221,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoExcessiveNestedTestSuitesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoExcessiveSelectorClassesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoExcessiveSelectorClassesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

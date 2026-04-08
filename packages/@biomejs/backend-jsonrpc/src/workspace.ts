@@ -2147,6 +2147,11 @@ See https://biomejs.dev/linter/rules/no-excessive-lines-per-file
 	 */
 	noExcessiveLinesPerFile?: NoExcessiveLinesPerFileConfiguration;
 	/**
+	* Limit the number of classes in a selector.
+See https://biomejs.dev/linter/rules/no-excessive-selector-classes 
+	 */
+	noExcessiveSelectorClasses?: NoExcessiveSelectorClassesConfiguration;
+	/**
 	* Disallow new operators outside of assignments or comparisons.
 See https://biomejs.dev/linter/rules/no-floating-classes 
 	 */
@@ -4209,6 +4214,9 @@ export type NoExcessiveClassesPerFileConfiguration =
 export type NoExcessiveLinesPerFileConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExcessiveLinesPerFileOptions;
+export type NoExcessiveSelectorClassesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoExcessiveSelectorClassesOptions;
 export type NoFloatingClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoFloatingClassesOptions;
@@ -5909,6 +5917,10 @@ export interface RuleWithNoExcessiveLinesPerFileOptions {
 	level: RulePlainConfiguration;
 	options?: NoExcessiveLinesPerFileOptions;
 }
+export interface RuleWithNoExcessiveSelectorClassesOptions {
+	level: RulePlainConfiguration;
+	options?: NoExcessiveSelectorClassesOptions;
+}
 export interface RuleWithNoFloatingClassesOptions {
 	level: RulePlainConfiguration;
 	options?: NoFloatingClassesOptions;
@@ -7563,6 +7575,15 @@ export interface NoExcessiveLinesPerFileOptions {
 	 */
 	skipBlankLines?: boolean;
 }
+export interface NoExcessiveSelectorClassesOptions {
+	/**
+	* The maximum number of class selectors allowed in a single selector.
+
+This option is required to enable the rule.
+Use `0` to disallow class selectors entirely. 
+	 */
+	maxClasses?: number;
+}
 export type NoFloatingClassesOptions = {};
 export type NoFloatingPromisesOptions = {};
 export type NoForInOptions = {};
@@ -8726,6 +8747,7 @@ export type Category =
 	| "lint/nursery/noEqualsToNull"
 	| "lint/nursery/noExcessiveClassesPerFile"
 	| "lint/nursery/noExcessiveLinesPerFile"
+	| "lint/nursery/noExcessiveSelectorClasses"
 	| "lint/nursery/noFloatingClasses"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noForIn"

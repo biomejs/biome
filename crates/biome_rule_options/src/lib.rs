@@ -99,6 +99,7 @@ pub mod no_excessive_cognitive_complexity;
 pub mod no_excessive_lines_per_file;
 pub mod no_excessive_lines_per_function;
 pub mod no_excessive_nested_test_suites;
+pub mod no_excessive_selector_classes;
 pub mod no_explicit_any;
 pub mod no_exported_imports;
 pub mod no_exports_in_test;

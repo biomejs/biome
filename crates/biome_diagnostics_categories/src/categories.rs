@@ -196,6 +196,7 @@ define_categories! {
     "lint/nursery/noEqualsToNull": "https://biomejs.dev/linter/rules/no-equals-to-null",
     "lint/nursery/noExcessiveClassesPerFile": "https://biomejs.dev/linter/rules/no-excessive-classes-per-file",
     "lint/nursery/noExcessiveLinesPerFile": "https://biomejs.dev/linter/rules/no-excessive-lines-per-file",
+    "lint/nursery/noExcessiveSelectorClasses": "https://biomejs.dev/linter/rules/no-excessive-selector-classes",
     "lint/nursery/noFloatingClasses": "https://biomejs.dev/linter/rules/no-floating-classes",
     "lint/nursery/noFloatingPromises": "https://biomejs.dev/linter/rules/no-floating-promises",
     "lint/nursery/noForIn": "https://biomejs.dev/linter/rules/no-for-in",
