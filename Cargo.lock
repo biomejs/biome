@@ -489,6 +489,7 @@ dependencies = [
  "camino",
  "enumflags2",
  "insta",
+ "notify",
  "schemars",
  "serde",
  "serde_json",

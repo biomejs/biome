@@ -143,9 +143,10 @@ use crate::runner::crawler::{CrawlPath, Crawler};
 use crate::runner::execution::{Execution, Stdin};
 use crate::runner::finalizer::{FinalizePayload, Finalizer};
 use crate::runner::handler::Handler;
+use crate::runner::impls::watchers::default::DefaultWatcher;
 use crate::runner::process_file::{ProcessFile, ProcessStdinFilePayload};
 use crate::runner::scan_kind::derive_best_scan_kind;
-use crate::runner::watcher::Watcher;
+use crate::runner::watcher::{Watcher, WatcherEvent};
 use crate::{CliDiagnostic, CliSession, setup_cli_subscriber};
 use biome_configuration::Configuration;
 use biome_console::{Console, ConsoleExt, markup};
@@ -189,7 +190,6 @@ pub(crate) trait CommandRunner {
             ProcessFile = Self::ProcessFile,
             Collector = Self::Collector,
         >;
-    type Watcher: Watcher;
     type Finalizer: Finalizer<Input = Self::CrawlerOutput>;
     type Handler: Handler;
     type ProcessFile: ProcessFile;
@@ -256,7 +256,7 @@ pub(crate) trait CommandRunner {
     /// The main command to use.
     fn run(
         &mut self,
-        session: CliSession,
+        mut session: CliSession,
         log_options: &LogOptions,
         cli_options: &CliOptions,
     ) -> Result<(), CliDiagnostic> {
@@ -272,6 +272,8 @@ pub(crate) trait CommandRunner {
                 "The watch mode can only be used with the default reporter.",
             ));
         }
+
+        let watcher_factory = session.watcher_factory.take();
 
         let console = &mut *session.app.console;
         let workspace = &*session.app.workspace;
@@ -343,43 +345,50 @@ pub(crate) trait CommandRunner {
         });
 
         if self.is_watch_mode() {
-            let mut watcher = Self::Watcher::new();
+            let mut watcher: Box<dyn Watcher> = match &watcher_factory {
+                Some(factory) => factory(),
+                None => Box::new(DefaultWatcher::new()),
+            };
 
-            watcher.watch(paths.into_iter().map(Utf8PathBuf::from));
+            watcher.watch(paths.iter().map(Utf8PathBuf::from).collect());
             console.log(markup! {
                 <Info>"Watching for changes..."</Info>
             });
 
             while let Some(event) = watcher.poll() {
-                let collector = self.collector(fs, execution.as_ref(), cli_options);
-                let mut output: Self::CrawlerOutput = Self::Crawler::crawl(
-                    execution.as_ref(),
-                    workspace,
-                    fs,
-                    project_key,
-                    event
-                        .paths
-                        .iter()
-                        .map(|path| CrawlPath::Path(path.clone()))
-                        .collect(),
-                    collector,
-                )?;
+                match event {
+                    WatcherEvent::Changed(paths) => {
+                        let collector = self.collector(fs, execution.as_ref(), cli_options);
+                        let mut output: Self::CrawlerOutput = Self::Crawler::crawl(
+                            execution.as_ref(),
+                            workspace,
+                            fs,
+                            project_key,
+                            paths
+                                .iter()
+                                .map(|path| CrawlPath::Path(path.clone()))
+                                .collect(),
+                            collector,
+                        )?;
 
-                Self::Finalizer::before_finalize(project_key, fs, workspace, &mut output)?;
+                        Self::Finalizer::before_finalize(project_key, fs, workspace, &mut output)?;
 
-                _ = Self::Finalizer::finalize(FinalizePayload {
-                    cli_options,
-                    execution: execution.as_ref(),
-                    fs,
-                    console,
-                    scan_duration: duration,
-                    crawler_output: output,
-                    paths: event
-                        .paths
-                        .into_iter()
-                        .map(|path| path.into_string())
-                        .collect(),
-                });
+                        _ = Self::Finalizer::finalize(FinalizePayload {
+                            cli_options,
+                            execution: execution.as_ref(),
+                            fs,
+                            console,
+                            scan_duration: duration,
+                            crawler_output: output,
+                            paths: paths.into_iter().map(|path| path.into_string()).collect(),
+                        });
+                    }
+                    WatcherEvent::Error(error) => {
+                        console.error(markup! {
+                            {PrintDiagnostic::simple(&error)}
+                        });
+                    }
+                }
             }
 
             return Ok(());

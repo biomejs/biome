@@ -5,7 +5,6 @@ use crate::runner::impls::collectors::default::DefaultCollector;
 use crate::runner::impls::crawlers::default::DefaultCrawler;
 use crate::runner::impls::finalizers::default::DefaultFinalizer;
 use crate::runner::impls::handlers::default::DefaultHandler;
-use crate::runner::impls::watchers::default::DefaultWatcher;
 use crate::runner::process_file::ProcessFile;
 use crate::{CliDiagnostic, TraversalSummary};
 use biome_configuration::Configuration;
@@ -143,7 +142,6 @@ where
     type CrawlerOutput = TraverseResult;
     type Collector = DefaultCollector;
     type Crawler = DefaultCrawler<Self::ProcessFile>;
-    type Watcher = DefaultWatcher;
     type Finalizer = DefaultFinalizer;
     type Handler = DefaultHandler;
     type ProcessFile = P;

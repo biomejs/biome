@@ -84,7 +84,6 @@ where
     type CrawlerOutput = ();
     type Collector = ();
     type Crawler = ();
-    type Watcher = ();
     type Finalizer = ();
     type Handler = ();
     type ProcessFile = ();

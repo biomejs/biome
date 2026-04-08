@@ -26,7 +26,7 @@ biome_css_analyze        = { workspace = true }
 biome_css_syntax         = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
-biome_diagnostics        = { workspace = true, features = ["bpaf", "std"] }
+biome_diagnostics        = { workspace = true, features = ["bpaf", "notify", "std"] }
 biome_flags              = { workspace = true }
 biome_formatter          = { workspace = true }
 biome_fs                 = { workspace = true }

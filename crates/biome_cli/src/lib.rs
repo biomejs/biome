@@ -34,7 +34,9 @@ pub use crate::commands::{BiomeCommand, biome_command};
 pub use crate::logging::{LoggingLevel, setup_cli_subscriber};
 use crate::runner::impls::commands::custom_execution::CustomExecutionCmdImpl;
 use crate::runner::impls::commands::traversal::TraversalCommandImpl;
+pub use crate::runner::impls::watchers::mock::MockWatcher;
 use crate::runner::run::run_command;
+pub use crate::runner::watcher::{Watcher, WatcherEvent};
 pub use diagnostics::CliDiagnostic;
 pub use panic::setup_panic_handler;
 pub use reporter::{DiagnosticsPayload, TraversalSummary};
@@ -49,6 +51,8 @@ pub(crate) const VERSION: &str = match option_env!("BIOME_VERSION") {
 pub struct CliSession<'app> {
     /// Instance of [App] used by this run of the CLI
     pub app: App<'app>,
+
+    pub watcher_factory: Option<Box<dyn Fn() -> Box<dyn Watcher> + Send + Sync>>,
 }
 
 impl<'app> CliSession<'app> {
@@ -58,6 +62,7 @@ impl<'app> CliSession<'app> {
     ) -> Result<Self, CliDiagnostic> {
         Ok(Self {
             app: App::new(console, WorkspaceRef::Borrowed(workspace)),
+            watcher_factory: None,
         })
     }
 
