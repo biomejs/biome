@@ -62,14 +62,24 @@ use thematic_break_block::{at_thematic_break_block, parse_thematic_break_block};
 
 use crate::MarkdownParser;
 
-/// Check if current token is whitespace (space or tab).
-pub(crate) fn is_whitespace_token(p: &MarkdownParser) -> bool {
+/// Check if current token consists only of ASCII spaces and/or tabs.
+///
+/// This intentionally does **not** use `Dispatch::WHS` from the lookup table,
+/// which classifies `\n`, `\r`, and other whitespace bytes. CommonMark §4.7
+/// and §6.3 define the separator between a link destination and an optional
+/// title as spaces/tabs only — newlines are significant structure there, not
+/// whitespace. The lexer uses the same narrow rule for link definitions.
+pub(crate) fn is_space_or_tab_token(p: &MarkdownParser) -> bool {
     let text = p.cur_text();
     !text.is_empty() && text.chars().all(|c| c == ' ' || c == '\t')
 }
 
-/// Get the closing character for a title based on current token.
-/// Returns `None` if not at a title start.
+/// Get the closing delimiter for a CommonMark link title (§4.7, §6.3).
+///
+/// A link title appears after the destination in link reference definitions
+/// (`[label]: url "title"`) and inline links (`[text](url "title")`). It may
+/// be enclosed in `"…"`, `'…'`, or `(…)`. Returns the expected closing
+/// character, or `None` if the current token does not start a title.
 pub(crate) fn get_title_close_char(p: &MarkdownParser) -> Option<char> {
     let text = p.cur_text();
     if text.starts_with('"') {

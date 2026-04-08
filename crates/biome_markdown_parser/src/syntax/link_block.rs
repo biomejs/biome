@@ -29,7 +29,7 @@ use crate::lexer::MarkdownLexContext;
 use crate::syntax::reference::normalize_reference_label;
 use crate::syntax::{
     LinkDestinationKind, MAX_BLOCK_PREFIX_INDENT, MAX_LINK_DESTINATION_PAREN_DEPTH,
-    ParenDepthResult, ends_with_unescaped_close, get_title_close_char, is_whitespace_token,
+    ParenDepthResult, ends_with_unescaped_close, get_title_close_char, is_space_or_tab_token,
     try_update_paren_depth, validate_link_destination_text,
 };
 
@@ -427,7 +427,7 @@ pub(crate) fn parse_link_block(p: &mut MarkdownParser) -> ParsedSyntax {
         // Check for title on next line - need to skip trailing whitespace first
         // Also validate that the title is complete and has no trailing content
         let has_valid_title_after_newline = p.lookahead(|p| {
-            while is_whitespace_token(p) {
+            while is_space_or_tab_token(p) {
                 p.bump_link_definition();
             }
             if p.at(NEWLINE) && !p.at_blank_line() {
@@ -488,14 +488,14 @@ fn parse_link_destination(p: &mut MarkdownParser) {
     let list = p.start();
 
     // Include optional whitespace before destination in the destination node.
-    while is_whitespace_token(p) {
+    while is_space_or_tab_token(p) {
         bump_textual_link_def(p);
     }
 
     // Per CommonMark §4.7, destination can be on the next line
     if p.at(NEWLINE) && !p.at_blank_line() {
         bump_textual_link_def(p);
-        while is_whitespace_token(p) {
+        while is_space_or_tab_token(p) {
             bump_textual_link_def(p);
         }
     }
@@ -514,7 +514,7 @@ fn parse_link_destination(p: &mut MarkdownParser) {
         let mut paren_depth: i32 = 0;
 
         while !p.at(EOF) && !p.at(NEWLINE) {
-            if is_whitespace_token(p) {
+            if is_space_or_tab_token(p) {
                 break; // Bare destination stops at first whitespace
             }
 
@@ -550,7 +550,7 @@ fn bump_textual_link_def(p: &mut MarkdownParser) {
 fn at_link_title(p: &mut MarkdownParser) -> bool {
     p.lookahead(|p| {
         // Skip whitespace before title
-        while is_whitespace_token(p) {
+        while is_space_or_tab_token(p) {
             p.bump_link_definition();
         }
         let text = p.cur_text();
@@ -589,7 +589,7 @@ fn parse_link_title_with_trailing_ws(p: &mut MarkdownParser) {
     let list = p.start();
 
     // Include trailing whitespace after destination
-    while is_whitespace_token(p) {
+    while is_space_or_tab_token(p) {
         bump_textual_link_def(p);
     }
 
@@ -599,7 +599,7 @@ fn parse_link_title_with_trailing_ws(p: &mut MarkdownParser) {
     }
 
     // Include leading whitespace on title line
-    while is_whitespace_token(p) {
+    while is_space_or_tab_token(p) {
         bump_textual_link_def(p);
     }
 
@@ -620,7 +620,7 @@ fn parse_link_title(p: &mut MarkdownParser) {
     let list = p.start();
 
     // Include optional filler whitespace before title
-    while is_whitespace_token(p) {
+    while is_space_or_tab_token(p) {
         bump_textual_link_def(p);
     }
 
@@ -653,7 +653,7 @@ fn parse_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
     if is_complete {
         // Consume trailing whitespace after title (before newline)
         p.re_lex_link_definition();
-        while is_whitespace_token(p) {
+        while is_space_or_tab_token(p) {
             bump_textual_link_def(p);
         }
         return;
@@ -677,7 +677,7 @@ fn parse_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
             bump_textual(p);
             // Consume trailing whitespace after title (before newline)
             p.re_lex_link_definition();
-            while is_whitespace_token(p) {
+            while is_space_or_tab_token(p) {
                 bump_textual_link_def(p);
             }
             break;
