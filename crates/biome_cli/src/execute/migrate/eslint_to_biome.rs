@@ -51,6 +51,8 @@ pub(crate) enum UnsupportedRuleReason {
     KnownSourceNotImplemented,
     /// The rule belongs to an unknown source, and is therefore not implemented in Biome.
     UnknownSource,
+    /// The rule is covered by a different rule, and is therefore not implemented as its own rule in Biome.
+    CoveredByRule(&'static str),
 }
 
 impl Display for UnsupportedRuleReason {
@@ -70,6 +72,9 @@ impl Display for UnsupportedRuleReason {
             }
             Self::UnknownSource => fmt.write_markup(markup! {
                 "These rules originate from an eslint plugin or other tool that Biome doesn't know about."
+            }),
+            Self::CoveredByRule(rule) => fmt.write_markup(markup! {
+                "Covered by the "<Emphasis>{rule}</Emphasis>" rule."
             }),
         }
     }
@@ -227,6 +232,7 @@ impl biome_diagnostics::Diagnostic for MigrationResults {
             let mut formatter_option = Vec::new();
             let mut known_source_not_implemented = Vec::new();
             let mut unknown_source = Vec::new();
+            let mut covered_by_rule = Vec::new();
 
             for (rule, reason) in &self.unsupported {
                 match reason {
@@ -239,6 +245,7 @@ impl biome_diagnostics::Diagnostic for MigrationResults {
                         known_source_not_implemented.push(rule);
                     }
                     UnsupportedRuleReason::UnknownSource => unknown_source.push(rule),
+                    UnsupportedRuleReason::CoveredByRule(_) => covered_by_rule.push((rule, reason)),
                 }
             }
 
@@ -307,6 +314,22 @@ impl biome_diagnostics::Diagnostic for MigrationResults {
                 let list: Vec<_> = unknown_source
                     .iter()
                     .map(|item| *item as &dyn biome_console::fmt::Display)
+                    .collect();
+                visitor.record_list(list.as_slice())?;
+            }
+
+            if !covered_by_rule.is_empty() {
+                visitor.record_log(
+                    biome_diagnostics::LogCategory::Info,
+                    &markup! { "These rules are covered by another rule, but they require manual migration:" },
+                )?;
+                let list: Vec<_> = covered_by_rule
+                    .iter()
+                    .map(|(rule, reason)| UnsupportedRuleDisplay { rule, reason })
+                    .collect();
+                let list: Vec<_> = list
+                    .iter()
+                    .map(|item| item as &dyn biome_console::fmt::Display)
                     .collect();
                 visitor.record_list(list.as_slice())?;
             }

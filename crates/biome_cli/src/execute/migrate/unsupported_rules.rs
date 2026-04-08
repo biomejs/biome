@@ -337,6 +337,10 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     UnsupportedRule(HtmlEslint("no-multiple-empty-lines"), FormatterCovers),
     UnsupportedRule(HtmlEslint("no-trailing-spaces"), FormatterCovers),
     UnsupportedRule(HtmlEslint("quotes"), FormatterCovers),
+    UnsupportedRule(
+        EslintQwik("unused-server"),
+        CoveredByRule("noUnusedVariables"),
+    ),
 ];
 
 #[cfg(test)]
