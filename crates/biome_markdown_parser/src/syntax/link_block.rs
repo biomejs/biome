@@ -207,14 +207,9 @@ fn skip_whitespace_tokens(p: &mut MarkdownParser) {
 /// Skip whitespace tokens (spaces/tabs) in lookahead and return whether any were skipped.
 fn skip_whitespace_tokens_tracked(p: &mut MarkdownParser) -> bool {
     let mut skipped = false;
-    while !p.at(EOF) && !p.at(NEWLINE) {
-        let text = p.cur_text();
-        if text.chars().all(|c| c == ' ' || c == '\t') && !text.is_empty() {
-            p.bump_link_definition();
-            skipped = true;
-        } else {
-            break;
-        }
+    while !p.at(EOF) && !p.at(NEWLINE) && is_space_or_tab_token(p) {
+        p.bump_link_definition();
+        skipped = true;
     }
     skipped
 }
@@ -239,13 +234,8 @@ enum DestinationResult {
 /// Skip destination tokens in lookahead. Returns the destination result.
 fn skip_destination_tokens(p: &mut MarkdownParser) -> DestinationResult {
     // Skip optional leading whitespace before destination
-    while !p.at(EOF) && !p.at(NEWLINE) {
-        let text = p.cur_text();
-        if text.chars().all(|c| c == ' ' || c == '\t') && !text.is_empty() {
-            p.bump_link_definition();
-        } else {
-            break;
-        }
+    while !p.at(EOF) && !p.at(NEWLINE) && is_space_or_tab_token(p) {
+        p.bump_link_definition();
     }
 
     if p.at(L_ANGLE) {
@@ -295,9 +285,8 @@ fn skip_destination_tokens(p: &mut MarkdownParser) -> DestinationResult {
         let mut pending_escape = false;
 
         while !p.at(EOF) && !p.at(NEWLINE) {
-            let text = p.cur_text();
             // Stop at whitespace
-            if text.chars().all(|c| c == ' ' || c == '\t') && !text.is_empty() {
+            if is_space_or_tab_token(p) {
                 if has_content {
                     saw_separator = true;
                 }
@@ -312,6 +301,7 @@ fn skip_destination_tokens(p: &mut MarkdownParser) -> DestinationResult {
                 break;
             }
 
+            let text = p.cur_text();
             if !validate_link_destination_text(text, LinkDestinationKind::Raw, &mut pending_escape)
             {
                 return DestinationResult::Invalid;
