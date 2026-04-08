@@ -73,7 +73,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoRootType {
-    type Query = Ast<NoRootTypeQuery>;
+    type Query = Ast<AnyNoRootTypeQuery>;
     type State = (TokenText, TextRange);
     type Signals = Option<Self::State>;
     type Options = NoRootTypeOptions;
@@ -87,12 +87,12 @@ impl Rule for NoRootType {
         }
 
         match node {
-            NoRootTypeQuery::GraphqlObjectTypeDefinition(type_def) => {
+            AnyNoRootTypeQuery::GraphqlObjectTypeDefinition(type_def) => {
                 let name = type_def.name().ok()?;
                 let value_token = name.value_token().ok()?;
                 check_name(root_types, value_token)
             }
-            NoRootTypeQuery::GraphqlObjectTypeExtension(type_ext) => {
+            AnyNoRootTypeQuery::GraphqlObjectTypeExtension(type_ext) => {
                 let name = type_ext.name().ok()?;
                 let value_token = name.value_token().ok()?;
                 check_name(root_types, value_token)
@@ -117,7 +117,7 @@ impl Rule for NoRootType {
 }
 
 declare_node_union! {
-    pub NoRootTypeQuery = GraphqlObjectTypeDefinition | GraphqlObjectTypeExtension
+    pub AnyNoRootTypeQuery = GraphqlObjectTypeDefinition | GraphqlObjectTypeExtension
 }
 
 fn check_name(
