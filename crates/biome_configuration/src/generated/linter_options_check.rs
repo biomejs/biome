@@ -1657,6 +1657,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useDomNodeTextContent",
+        TypeId::of::<biome_rule_options::use_dom_node_text_content::UseDomNodeTextContentOptions>(),
+    ));
+    result.push((
+        "nursery",
         "useDomQuerySelector",
         TypeId::of::<biome_rule_options::use_dom_query_selector::UseDomQuerySelectorOptions>(),
     ));

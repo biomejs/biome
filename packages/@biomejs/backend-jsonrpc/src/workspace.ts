@@ -2452,6 +2452,11 @@ See https://biomejs.dev/linter/rules/use-disposables
 	 */
 	useDisposables?: UseDisposablesConfiguration;
 	/**
+	* Prefer .textContent over .innerText for DOM node text.
+See https://biomejs.dev/linter/rules/use-dom-node-text-content 
+	 */
+	useDomNodeTextContent?: UseDomNodeTextContentConfiguration;
+	/**
 	* Prefer querySelector() and querySelectorAll() over older DOM query APIs.
 See https://biomejs.dev/linter/rules/use-dom-query-selector 
 	 */
@@ -4450,6 +4455,9 @@ export type UseDestructuringConfiguration =
 export type UseDisposablesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDisposablesOptions;
+export type UseDomNodeTextContentConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseDomNodeTextContentOptions;
 export type UseDomQuerySelectorConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDomQuerySelectorOptions;
@@ -6260,6 +6268,11 @@ export interface RuleWithUseDisposablesOptions {
 	level: RulePlainConfiguration;
 	options?: UseDisposablesOptions;
 }
+export interface RuleWithUseDomNodeTextContentOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseDomNodeTextContentOptions;
+}
 export interface RuleWithUseDomQuerySelectorOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -7901,6 +7914,7 @@ Default: `"it"`
 }
 export type UseDestructuringOptions = {};
 export type UseDisposablesOptions = {};
+export type UseDomNodeTextContentOptions = {};
 export type UseDomQuerySelectorOptions = {};
 /**
  * Options for the `useErrorCause` rule.
@@ -8968,6 +8982,7 @@ export type Category =
 	| "lint/nursery/useDestructuring"
 	| "lint/nursery/useDisposables"
 	| "lint/nursery/useDomQuerySelector"
+	| "lint/nursery/useDomNodeTextContent"
 	| "lint/nursery/useErrorCause"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExpect"

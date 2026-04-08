@@ -6565,6 +6565,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useDomNodeTextContent": {
+					"description": "Prefer .textContent over .innerText for DOM node text.\nSee https://biomejs.dev/linter/rules/use-dom-node-text-content",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseDomNodeTextContentConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useDomQuerySelector": {
 					"description": "Prefer querySelector() and querySelectorAll() over older DOM query APIs.\nSee https://biomejs.dev/linter/rules/use-dom-query-selector",
 					"anyOf": [
@@ -10763,6 +10770,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseDomNodeTextContentOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseDomNodeTextContentOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseDomQuerySelectorOptions": {
 			"type": "object",
 			"properties": {
@@ -14119,6 +14136,16 @@
 			]
 		},
 		"UseDisposablesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseDomNodeTextContentConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseDomNodeTextContentOptions" }
+			]
+		},
+		"UseDomNodeTextContentOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

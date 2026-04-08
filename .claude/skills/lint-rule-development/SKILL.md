@@ -87,6 +87,8 @@ impl Rule for UseMyRuleName {
 }
 ```
 
+Note: It's critically important to follow the guidelines in the `High Quality Diagnostics` section below when writing diagnostics.
+
 ### Using Semantic Model
 
 For rules that need binding analysis:
