@@ -4,21 +4,7 @@ use biome_markdown_parser::parse_markdown;
 #[ignore]
 #[test]
 fn quick_test() {
-    let source = "foo
-baz
-
-backslash\
-form
-
-no hard line
-here
-
-foo  
-bar with empty line after  
-
-foo  
-bar without empty line after  
-";
+    let source = "";
     let parse = parse_markdown(source);
 
     // Print CST
@@ -32,8 +18,5 @@ bar without empty line after
 
     // Print formatted output
     let formatted = result.unwrap();
-    let code = formatted.print().unwrap().as_code().to_string();
-    eprintln!("=== Formatted (len={}) ===", code.len());
-    eprintln!("{:?}", code);
-    eprintln!("=== end ===");
+    eprintln!("Formatted:\n{}", formatted.print().unwrap().as_code());
 }
