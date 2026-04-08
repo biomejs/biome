@@ -835,6 +835,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "JsxNamespaceName" => &[("namespace", 0), ("name", 2)],
         "JsxOpeningElement" => &[("name", 1), ("type_arguments", 2), ("attributes", 3)],
         "JsxSelfClosingElement" => &[("name", 1), ("type_arguments", 2), ("attributes", 3)],
+        "JsxShorthandAttribute" => &[("name", 1)],
         "JsxSpreadAttribute" => &[("argument", 2)],
         "JsxSpreadChild" => &[("expression", 2)],
         "JsxTagExpression" => &[("tag", 0)],
