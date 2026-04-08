@@ -402,6 +402,7 @@ impl<'a> TryFrom<&'a EslintRuleName> for RuleSource<'a> {
             Some("vue") => RuleSource::EslintVueJs,
             Some("turbo") => RuleSource::EslintTurbo,
             Some("@html-eslint") => RuleSource::HtmlEslint,
+            Some("typescript-sort-keys") => RuleSource::EslintTypescriptSortKeys,
             Some(_) => return Err("Unknown ESLint rule source"),
         };
 

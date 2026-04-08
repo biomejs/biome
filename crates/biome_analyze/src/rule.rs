@@ -192,6 +192,8 @@ pub enum RuleSource<'a> {
     EslintCss(&'a str),
     /// Rules from [Eslint Plugin Drizzle](https://orm.drizzle.team/docs/eslint-plugin)
     EslintDrizzle(&'a str),
+    /// Rules from [Eslint Plugin Typescript Sort Keys](https://github.com/infctr/eslint-plugin-typescript-sort-keys)
+    EslintTypescriptSortKeys(&'a str),
 }
 
 impl<'a> std::fmt::Display for RuleSource<'a> {
@@ -247,6 +249,7 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::EslintYml(_) => write!(f, "eslint-plugin-yml"),
             Self::EslintCss(_) => write!(f, "@eslint/css"),
             Self::EslintDrizzle(_) => write!(f, "eslint-plugin-drizzle"),
+            Self::EslintTypescriptSortKeys(_) => write!(f, "eslint-plugin-typescript-sort-keys"),
         }
     }
 }
@@ -325,7 +328,8 @@ impl<'a> RuleSource<'a> {
             | Self::EslintJson(rule_name)
             | Self::EslintMarkdown(rule_name)
             | Self::EslintYml(rule_name)
-            | Self::EslintDrizzle(rule_name) => rule_name,
+            | Self::EslintDrizzle(rule_name)
+            | Self::EslintTypescriptSortKeys(rule_name) => rule_name,
         }
     }
 
@@ -377,6 +381,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintYml(_) => "yml",
             Self::EslintCss(_) => "css",
             Self::EslintDrizzle(_) => "drizzle",
+            Self::EslintTypescriptSortKeys(_) => "typescript-sort-keys",
         }
     }
 
@@ -436,6 +441,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintYml(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-yml/rules/{rule_name}.html"),
             Self::EslintCss(rule_name) => format!("https://github.com/eslint/css/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintDrizzle(rule_name) => format!("https://orm.drizzle.team/docs/eslint-plugin#{rule_name}"),
+            Self::EslintTypescriptSortKeys(rule_name) => format!("https://github.com/infctr/eslint-plugin-typescript-sort-keys/blob/master/docs/rules/{rule_name}.md"),
         }
     }
 
