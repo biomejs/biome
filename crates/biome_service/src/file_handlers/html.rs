@@ -1751,13 +1751,22 @@ pub(crate) fn update_snippets(
         };
 
         if let Some(value_token) = element.value_token() {
-            let leading_trivia = read_leading_trivia(value_token.text_trimmed());
-            let trailing_trivia = read_trailing_trivia(value_token.text_trimmed());
+            let old_text = value_token.text_trimmed();
+            let leading_trivia = read_leading_trivia(old_text);
+            let trailing_trivia = read_trailing_trivia(old_text);
+
+            // The embedded formatter returns code indented from column
+            // zero — it has no idea how deep the embed sits inside the
+            // host file. Splicing it back as-is would only indent the
+            // first line; add the host indent to every line so the
+            // embed lines up with its surroundings.
+            let indent_prefix = content_indent_prefix(&leading_trivia);
+            let reindented_new_code =
+                reindent_embedded_code(snippet.new_code.trim(), indent_prefix);
+
             let new_token = ident(&format!(
                 "{}{}{}",
-                leading_trivia,
-                snippet.new_code.trim(), // trim to avoid duplicating trivia
-                trailing_trivia
+                leading_trivia, reindented_new_code, trailing_trivia
             ));
             mutation.replace_token(value_token, new_token);
         }
@@ -1831,5 +1840,78 @@ fn read_trailing_trivia(value: &str) -> Cow<'_, str> {
         Cow::Borrowed(&value[value.len() - count..])
     } else {
         Cow::Borrowed("")
+    }
+}
+
+/// Returns the indent the host was using for an embed's content, taken
+/// from the whitespace after the last newline in its leading trivia.
+///
+/// For example, `"\n\t\t\t"` yields `"\t\t\t"`. Used to re-indent
+/// replacement code coming from an embedded formatter, which always
+/// returns code indented from column zero.
+fn content_indent_prefix(leading_trivia: &str) -> &str {
+    match leading_trivia.rfind('\n') {
+        Some(pos) => &leading_trivia[pos + 1..],
+        None => leading_trivia,
+    }
+}
+
+/// Prefixes every line of `code` after the first with `indent`. Empty
+/// lines are left alone so no trailing whitespace sneaks in.
+fn reindent_embedded_code(code: &str, indent: &str) -> String {
+    if indent.is_empty() {
+        return code.to_string();
+    }
+    let mut out = String::new();
+    for (i, line) in code.split('\n').enumerate() {
+        if i > 0 {
+            out.push('\n');
+            if !line.is_empty() {
+                out.push_str(indent);
+            }
+        }
+        out.push_str(line);
+    }
+    out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{content_indent_prefix, reindent_embedded_code};
+
+    #[test]
+    fn content_indent_prefix_reads_indent_after_last_newline() {
+        assert_eq!(content_indent_prefix("\n\t\t\t"), "\t\t\t");
+        assert_eq!(content_indent_prefix("\n  "), "  ");
+        assert_eq!(content_indent_prefix("\n\n\t"), "\t");
+    }
+
+    #[test]
+    fn content_indent_prefix_with_no_newline_returns_whole_trivia() {
+        assert_eq!(content_indent_prefix(""), "");
+        assert_eq!(content_indent_prefix("   "), "   ");
+    }
+
+    #[test]
+    fn reindent_embedded_code_prefixes_every_line_after_the_first() {
+        assert_eq!(
+            reindent_embedded_code("p {\n\tcolor: red;\n}", "\t\t\t"),
+            "p {\n\t\t\t\tcolor: red;\n\t\t\t}"
+        );
+    }
+
+    #[test]
+    fn reindent_embedded_code_is_a_noop_when_indent_is_empty() {
+        assert_eq!(reindent_embedded_code("a\nb\nc", ""), "a\nb\nc");
+    }
+
+    #[test]
+    fn reindent_embedded_code_leaves_single_line_input_unchanged() {
+        assert_eq!(reindent_embedded_code("oneline", "\t\t"), "oneline");
+    }
+
+    #[test]
+    fn reindent_embedded_code_does_not_indent_empty_lines() {
+        assert_eq!(reindent_embedded_code("a\n\nb", "  "), "a\n\n  b");
     }
 }
