@@ -539,6 +539,7 @@ pub enum RuleName {
     UseValidForDirection,
     UseValidLang,
     UseValidTypeof,
+    UseVarsOnTop,
     UseVueConsistentDefinePropsDeclaration,
     UseVueConsistentVBindStyle,
     UseVueConsistentVOnStyle,
@@ -1020,6 +1021,7 @@ impl RuleName {
             Self::UseValidForDirection => "useValidForDirection",
             Self::UseValidLang => "useValidLang",
             Self::UseValidTypeof => "useValidTypeof",
+            Self::UseVarsOnTop => "useVarsOnTop",
             Self::UseVueConsistentDefinePropsDeclaration => {
                 "useVueConsistentDefinePropsDeclaration"
             }
@@ -1497,6 +1499,7 @@ impl RuleName {
             Self::UseValidForDirection => RuleGroup::Correctness,
             Self::UseValidLang => RuleGroup::A11y,
             Self::UseValidTypeof => RuleGroup::Correctness,
+            Self::UseVarsOnTop => RuleGroup::Nursery,
             Self::UseVueConsistentDefinePropsDeclaration => RuleGroup::Nursery,
             Self::UseVueConsistentVBindStyle => RuleGroup::Nursery,
             Self::UseVueConsistentVOnStyle => RuleGroup::Nursery,
@@ -1983,6 +1986,7 @@ impl std::str::FromStr for RuleName {
             "useValidForDirection" => Ok(Self::UseValidForDirection),
             "useValidLang" => Ok(Self::UseValidLang),
             "useValidTypeof" => Ok(Self::UseValidTypeof),
+            "useVarsOnTop" => Ok(Self::UseVarsOnTop),
             "useVueConsistentDefinePropsDeclaration" => {
                 Ok(Self::UseVueConsistentDefinePropsDeclaration)
             }
