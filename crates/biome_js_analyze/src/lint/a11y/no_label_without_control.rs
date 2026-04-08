@@ -112,8 +112,7 @@ impl Rule for NoLabelWithoutControl {
         }
 
         let has_text_content = has_accessible_label(options, node);
-        let has_control_association =
-            has_for_attribute(node) || has_nested_control(options, node);
+        let has_control_association = has_for_attribute(node) || has_nested_control(options, node);
 
         if has_text_content && has_control_association {
             return None;
