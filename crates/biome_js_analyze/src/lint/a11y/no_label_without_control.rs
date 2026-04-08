@@ -104,7 +104,6 @@ impl Rule for NoLabelWithoutControl {
         let options = ctx.options();
         let element_name = node.name()?.name_value_token().ok()?;
         let element_name = element_name.text_trimmed();
-        let file_source = ctx.source_type::<JsFileSource>();
         let is_allowed_element = has_element_name(options, element_name)
             || DEFAULT_LABEL_COMPONENTS.contains(&element_name);
 
@@ -114,7 +113,7 @@ impl Rule for NoLabelWithoutControl {
 
         let has_text_content = has_accessible_label(options, node);
         let has_control_association =
-            has_for_attribute(node, file_source) || has_nested_control(options, node);
+            has_for_attribute(node) || has_nested_control(options, node);
 
         if has_text_content && has_control_association {
             return None;
@@ -268,7 +267,7 @@ const DEFAULT_INPUT_COMPONENTS: [&str; 7] = [
 ];
 
 /// Returns whether the passed `AnyJsxTag` have a `for` or `htmlFor` attribute
-fn has_for_attribute(jsx_tag: &AnyJsxTag, file_source: &JsFileSource) -> bool {
+fn has_for_attribute(jsx_tag: &AnyJsxTag) -> bool {
     let for_attributes = ["for", "htmlFor"];
     let Some(attributes) = jsx_tag.attributes() else {
         return false;
