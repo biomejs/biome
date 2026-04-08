@@ -106,6 +106,10 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     UnsupportedRule(EslintJest("padding-around-describe-blocks"), Stylistic),
     UnsupportedRule(EslintJest("padding-around-expect-groups"), Stylistic),
     UnsupportedRule(EslintJest("padding-around-test-blocks"), Stylistic),
+    UnsupportedRule(
+        EslintQwik("unused-server"),
+        CoveredByRule("noUnusedVariables"),
+    ),
     UnsupportedRule(EslintReact("jsx-child-element-spacing"), FormatterCovers),
     UnsupportedRule(EslintReact("jsx-closing-bracket-location"), FormatterCovers),
     UnsupportedRule(EslintReact("jsx-closing-tag-location"), FormatterCovers),
@@ -337,10 +341,6 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     UnsupportedRule(HtmlEslint("no-multiple-empty-lines"), FormatterCovers),
     UnsupportedRule(HtmlEslint("no-trailing-spaces"), FormatterCovers),
     UnsupportedRule(HtmlEslint("quotes"), FormatterCovers),
-    UnsupportedRule(
-        EslintQwik("unused-server"),
-        CoveredByRule("noUnusedVariables"),
-    ),
 ];
 
 #[cfg(test)]

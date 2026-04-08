@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Make sure to mark eslint-qwik-plugin's `unused-server` as unsupported as it's covered by `noUnusedVariables`.
+Marked eslint-qwik-plugin's `unused-server` as redundant since it was covered by `noUnusedVariables`.
