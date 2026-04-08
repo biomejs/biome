@@ -8,9 +8,6 @@ expression: valid.graphql
 type SomeObjectA
 interface SomeInterfaceA
 input SomeInputObjectA
-extend type SomeObjectA
-extend interface SomeInterfaceA
-extend input SomeInputObjectA
 
 # ---
 
@@ -71,5 +68,3 @@ extend input SomeInputObjectC {
 }
 
 ```
-
-_Note: The parser emitted 3 diagnostics which are not shown here._

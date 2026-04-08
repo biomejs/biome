@@ -2,9 +2,6 @@
 type SomeObjectA
 interface SomeInterfaceA
 input SomeInputObjectA
-extend type SomeObjectA
-extend interface SomeInterfaceA
-extend input SomeInputObjectA
 
 # ---
 
