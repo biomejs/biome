@@ -536,6 +536,7 @@ impl<'a> RuleSource<'a> {
                 | Self::GraphqlSchemaLinter(_)
                 | Self::Stylelint(_)
                 | Self::SortPackageJson
+                | Self::Sherif(_)
         )
     }
 
