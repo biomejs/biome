@@ -22,8 +22,7 @@ impl FormatNodeRule<CssGenericProperty> for FormatCssGenericProperty {
         if !trailing_comments.is_empty() {
             for comment in trailing_comments {
                 write!(f, [space()])?;
-                let format_comment =
-                    FormatRefWithRule::new(comment, FormatCssLeadingComment::default());
+                let format_comment = FormatRefWithRule::new(comment, FormatCssLeadingComment);
                 write!(f, [format_comment])?;
                 comment.mark_formatted();
             }
