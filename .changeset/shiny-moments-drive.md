@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Fixed [#9653](https://github.com/biomejs/biome/issues/9653): [`noUndeclaredVariables`](https://biomejs.dev/linter/rules/no-undeclared-variables/) and [`noUnusedVariables`](https://biomejs.dev/linter/rules/no-unused-variables/) no longer report false positives on several Svelte template constructs that declare or reference bindings in the host grammar:
+Fixed [#9136](https://github.com/biomejs/biome/issues/9136) and [#9653](https://github.com/biomejs/biome/issues/9653): [`noUndeclaredVariables`](https://biomejs.dev/linter/rules/no-undeclared-variables/) and [`noUnusedVariables`](https://biomejs.dev/linter/rules/no-unused-variables/) no longer report false positives on several Svelte template constructs that declare or reference bindings in the host grammar:
 
 - `{#snippet name(params)}` — the snippet name and its parameters (including object, array, rest, and nested destructuring) are now tracked.
 - `{@render name(args)}` — the snippet name used at the render site is now resolved against the snippet declaration.
