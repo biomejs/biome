@@ -1,0 +1,13 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+assertion_line: 99
+expression: valid_non_biome_schema.biome.jsonc
+---
+# Input
+```jsonc
+// should not generate diagnostics
+{
+  "$schema": "https://example.com/schemas/2.4.10/schema.json"
+}
+
+```

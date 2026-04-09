@@ -1,0 +1,4 @@
+// should not generate diagnostics
+{
+  "$schema": "https://example.com/schemas/2.4.10/schema.json"
+}

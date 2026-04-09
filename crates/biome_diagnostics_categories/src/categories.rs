@@ -488,6 +488,7 @@ define_categories! {
     "lint/suspicious/useAdjacentOverloadSignatures": "https://biomejs.dev/linter/rules/use-adjacent-overload-signatures",
     "lint/suspicious/useAwait": "https://biomejs.dev/linter/rules/use-await",
     "lint/suspicious/useBiomeIgnoreFolder": "https://biomejs.dev/linter/rules/use-biome-ignore-folder",
+    "lint/suspicious/useBiomeSchemaVersion": "https://biomejs.dev/linter/rules/use-biome-schema-version",
     "lint/suspicious/useDefaultSwitchClauseLast": "https://biomejs.dev/linter/rules/use-default-switch-clause-last",
     "lint/suspicious/useDeprecatedDate": "https://biomejs.dev/linter/rules/use-deprecated-date",
     "lint/suspicious/useErrorMessage": "https://biomejs.dev/linter/rules/use-error-message",

@@ -1517,6 +1517,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_biome_ignore_folder::UseBiomeIgnoreFolderOptions>(),
     ));
     result.push((
+        "suspicious",
+        "useBiomeSchemaVersion",
+        TypeId::of::<biome_rule_options::use_biome_schema_version::UseBiomeSchemaVersionOptions>(),
+    ));
+    result.push((
         "style",
         "useBlockStatements",
         TypeId::of::<biome_rule_options::use_block_statements::UseBlockStatementsOptions>(),

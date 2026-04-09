@@ -1,0 +1,4 @@
+// should not generate diagnostics
+{
+  "$schema": "https://biomejs.dev/schemas/0.0.0/schema.json"
+}

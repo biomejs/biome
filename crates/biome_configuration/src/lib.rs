@@ -44,7 +44,7 @@ pub use analyzer::{
 };
 use biome_analyze::ExtendedConfigurationProvider;
 use biome_console::fmt::{Display, Formatter};
-use biome_console::{KeyValuePair, markup};
+use biome_console::markup;
 use biome_deserialize::{
     Deserializable, DeserializableTypes, DeserializableValidator, DeserializableValue,
     DeserializationContext, DeserializationDiagnostic, DeserializationVisitor, Text, TextRange,
@@ -462,9 +462,9 @@ impl Deserializable for Schema {
 
             fn visit_str(
                 self,
-                ctx: &mut impl DeserializationContext,
+                _ctx: &mut impl DeserializationContext,
                 value: Text,
-                range: TextRange,
+                _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
                 if let Some(captures) = SCHEMA_REGEX.captures(value.text())
@@ -473,24 +473,13 @@ impl Deserializable for Schema {
                     let cli_version = Version::new(VERSION);
                     let config_version_str = Version::new(config_version_match.as_str());
                     match config_version_str.cmp(&cli_version) {
-                            Ordering::Less | Ordering::Greater => {
-                                ctx.report(
-                                    DeserializationDiagnostic::new(
-                                        markup!(<Warn>"The configuration schema version does not match the CLI version " {VERSION}</Warn>),
-                                    )
-                                        .with_range(range)
-                                        .with_custom_severity(Severity::Information)
-                                        .with_note(markup!(
-                                        {KeyValuePair::new("Expected", markup!({VERSION}))}
-                                        {KeyValuePair::new("Found", markup!({config_version_str}))}
-                                    ))
-                                        .with_note(markup!("Run the command "<Emphasis>"biome migrate"</Emphasis>" to migrate the configuration file."))
-                                )
-
-
-                            }
-                            _ => {},
+                        Ordering::Less | Ordering::Greater => {
+                            // Intentionally no deserialization diagnostic here:
+                            // the `useBiomeSchemaVersion` lint provides
+                            // the user-facing diagnostic and safe fix.
                         }
+                        _ => {}
+                    }
                 }
 
                 Some(Schema(value.text().into()))

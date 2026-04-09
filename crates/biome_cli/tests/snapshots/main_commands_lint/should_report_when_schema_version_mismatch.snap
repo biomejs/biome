@@ -24,7 +24,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-biome.json:2:16 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+biome.json:2:16 lint/suspicious/useBiomeSchemaVersion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The configuration schema version does not match the CLI version 0.0.0
   
@@ -34,11 +34,17 @@ biome.json:2:16 deserialize ━━━━━━━━━━━━━━━━━�
     3 │ }
     4 │         
   
-  i   Expected:                     0.0.0
-      Found:                        0.0.1
+  i Expected schema URL: https://biomejs.dev/schemas/0.0.0/schema.json
   
+  i Found version: 0.0.1
   
-  i Run the command biome migrate to migrate the configuration file.
+  i Safe fix: Use the schema URL that matches the running Biome version.
+  
+    1 1 │   {
+    2   │ - ····"$schema":·"https://biomejs.dev/schemas/0.0.1/schema.json"
+      2 │ + ····"$schema":·"https://biomejs.dev/schemas/0.0.0/schema.json"
+    3 3 │   }
+    4 4 │           
   
 
 ```
