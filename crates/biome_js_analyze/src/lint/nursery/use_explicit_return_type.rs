@@ -247,7 +247,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseExplicitReturnType {
-        version: "next",
+        version: "2.4.11",
         name: "useExplicitReturnType",
         language: "ts",
         recommended: false,

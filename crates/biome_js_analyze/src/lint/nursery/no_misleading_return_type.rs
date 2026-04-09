@@ -41,7 +41,7 @@ declare_lint_rule! {
     /// function run(): void { return; }
     /// ```
     pub NoMisleadingReturnType {
-        version: "next",
+        version: "2.4.11",
         name: "noMisleadingReturnType",
         language: "ts",
         recommended: false,

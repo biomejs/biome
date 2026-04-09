@@ -67,7 +67,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseDisposables {
-        version: "next",
+        version: "2.4.11",
         name: "useDisposables",
         language: "js",
         recommended: false,

@@ -64,7 +64,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseQwikLoaderLocation {
-        version: "next",
+        version: "2.4.11",
         name: "useQwikLoaderLocation",
         language: "js",
         sources: &[RuleSource::EslintQwik("loader-location").same()],

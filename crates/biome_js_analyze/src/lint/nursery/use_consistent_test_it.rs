@@ -93,7 +93,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseConsistentTestIt {
-        version: "next",
+        version: "2.4.11",
         name: "useConsistentTestIt",
         language: "js",
         recommended: false,
