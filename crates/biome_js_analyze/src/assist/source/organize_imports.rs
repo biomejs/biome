@@ -179,7 +179,7 @@ declare_source_rule! {
     ///
     /// Use an object matcher to separate `import type` from regular imports:
     /// Setting `"type": true` matches only `import type` and `export type` statements.
-    /// Setting `"type": false` matches only non-type imports anmd exports].
+    /// Setting `"type": false` matches only non-type imports and exports].
     ///
     /// Given the following configuration...
     ///
