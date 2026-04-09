@@ -39,6 +39,13 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         file_source = HtmlFileSource::html_with_text_expressions();
     }
 
+    // TODO: Remove once Angular has been added to file source detection
+    if let Some(file_name) = test_case_path.file_name()
+        && file_name.ends_with(".component.html")
+    {
+        file_source.set_variant(HtmlVariant::Angular);
+    }
+
     let parser_options = HtmlParserOptions::from(&file_source);
     let parsed = parse_html(&content, parser_options);
     validate_eof_token(parsed.syntax());
@@ -51,6 +58,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         HtmlVariant::Astro => "astro",
         HtmlVariant::Vue => "vue",
         HtmlVariant::Svelte => "svelte",
+        HtmlVariant::Angular => "angular",
     };
     writeln!(
         snapshot,

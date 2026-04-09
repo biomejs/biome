@@ -13,6 +13,7 @@ use context::HtmlFormatContext;
 pub use context::HtmlFormatOptions;
 use cst::FormatHtmlSyntaxNode;
 
+mod angular;
 mod astro;
 mod comments;
 pub mod context;

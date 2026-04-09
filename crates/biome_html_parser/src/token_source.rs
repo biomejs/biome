@@ -37,6 +37,9 @@ pub(crate) enum HtmlLexContext {
     /// Like [InsideTag], but with Astro-specific tokens enabled.
     /// This enables parsing of Astro directives (client:, set:, class:, is:, server:)
     InsideTagAstro,
+    /// Like [InsideTag], but with Angular-specific attribute tokens enabled.
+    /// This enables parsing Angular attribute bindings like `(click)`, `[value]`, and `[(ngModel)]`.
+    InsideTagAngular,
     /// Lexes Vue directive arguments inside `[]`.
     VueDirectiveArgument,
     /// When the parser encounters a `=` token (the beginning of the attribute initializer clause), it switches to this context.

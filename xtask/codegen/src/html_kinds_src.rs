@@ -28,8 +28,11 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         ("#", "HASH"),
         ("(", "L_PAREN"),
         (")", "R_PAREN"),
+        ("[(", "L_BRACKET_PAREN"),
+        (")]", "R_BRACKET_PAREN"),
         ("...", "DOT3"),
         ("|", "PIPE"),
+        ("*", "STAR"),
     ],
     keywords: &[
         "null",
@@ -169,6 +172,13 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "VUE_DYNAMIC_ARGUMENT",
         "VUE_MODIFIER_LIST",
         "VUE_MODIFIER",
+        // Angular nodes
+        "ANGULAR_BINDING_NAME",
+        "ANGULAR_EVENT_BINDING",
+        "ANGULAR_PROPERTY_BINDING",
+        "ANGULAR_TWO_WAY_BINDING",
+        "ANGULAR_STRUCTURAL_DIRECTIVE",
+        "ANGULAR_TEMPLATE_REF_VARIABLE",
         // Bogus nodes
         "HTML_BOGUS",
         "HTML_BOGUS_ELEMENT",

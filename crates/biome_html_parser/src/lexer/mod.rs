@@ -36,6 +36,7 @@ enum IdentifierContext {
     Vue,
     VueDirectiveArgument,
     Astro,
+    Angular,
 }
 
 impl IdentifierContext {
@@ -158,6 +159,69 @@ impl<'src> HtmlLexer<'src> {
             }
             _ if self.current_kind != T![<] && is_attribute_name_byte(current) => {
                 self.consume_identifier(current, IdentifierContext::Astro)
+            }
+            IDT => self
+                .consume_language_identifier(current)
+                .unwrap_or_else(|| self.consume_unexpected_character()),
+            _ => {
+                if self.position == 0
+                    && let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM)
+                {
+                    self.unicode_bom_length = bom_size;
+                    return bom;
+                }
+                self.consume_unexpected_character()
+            }
+        }
+    }
+
+    /// Consume a token in the [HtmlLexContext::InsideTagAngular] context.
+    /// This context is used for Angular templates with Angular-specific attribute syntax.
+    fn consume_token_inside_tag_angular(&mut self, current: u8) -> HtmlSyntaxKind {
+        let dispatched = lookup_byte(current);
+
+        match dispatched {
+            WHS => self.consume_newline_or_whitespaces(),
+            LSS => self.consume_l_angle(),
+            MOR => self.consume_byte(T![>]),
+            SLH => self.consume_byte(T![/]),
+            EQL => self.consume_byte(T![=]),
+            EXL => self.consume_byte(T![!]),
+            BTO if self.at_angular_two_way_binding_start() => {
+                self.advance(2);
+                T!["[("]
+            }
+            PNC if self.at_angular_two_way_binding_end() => {
+                self.advance(2);
+                T![")]"]
+            }
+            BTO => self.consume_byte(T!['[']),
+            BTC => self.consume_byte(T![']']),
+            PNO => self.consume_byte(T!['(']),
+            PNC => self.consume_byte(T![')']),
+            HAS => self.consume_byte(T![#]),
+            MUL => self.consume_byte(T![*]),
+            BEO if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
+            BEO => {
+                if self.at_opening_double_text_expression() {
+                    self.consume_l_double_text_expression()
+                } else {
+                    self.consume_byte(T!['{'])
+                }
+            }
+            BEC => {
+                if self.at_closing_double_text_expression() {
+                    self.consume_r_double_text_expression()
+                } else {
+                    self.consume_byte(T!['}'])
+                }
+            }
+            QOT => self.consume_string_literal(current),
+            _ if self.current_kind == T![<] && is_tag_name_byte(current) => {
+                self.consume_tag_name(current)
+            }
+            _ if self.current_kind != T![<] && is_attribute_name_byte(current) => {
+                self.consume_identifier(current, IdentifierContext::Angular)
             }
             IDT => self
                 .consume_language_identifier(current)
@@ -857,6 +921,22 @@ impl<'src> HtmlLexer<'src> {
                         break;
                     }
                 }
+                IdentifierContext::Angular => {
+                    if byte == b')' || byte == b']' {
+                        break;
+                    }
+
+                    if is_attribute_name_byte(byte) {
+                        if len < BUFFER_SIZE {
+                            buffer[len] = byte;
+                            len += 1;
+                        }
+
+                        self.advance(1)
+                    } else {
+                        break;
+                    }
+                }
             }
         }
 
@@ -1133,6 +1213,16 @@ impl<'src> HtmlLexer<'src> {
         self.current_byte() == Some(b'}') && self.byte_at(1) == Some(b'}')
     }
 
+    #[inline(always)]
+    fn at_angular_two_way_binding_start(&self) -> bool {
+        self.current_byte() == Some(b'[') && self.byte_at(1) == Some(b'(')
+    }
+
+    #[inline(always)]
+    fn at_angular_two_way_binding_end(&self) -> bool {
+        self.current_byte() == Some(b')') && self.byte_at(1) == Some(b']')
+    }
+
     /// Consumes the opening CDATA section marker '<![CDATA[' token.
     fn consume_cdata_start(&mut self) -> HtmlSyntaxKind {
         debug_assert!(self.at_start_cdata());
@@ -1347,6 +1437,9 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                         self.consume_token_inside_tag_directives(current, svelte)
                     }
                     HtmlLexContext::InsideTagAstro => self.consume_token_inside_tag_astro(current),
+                    HtmlLexContext::InsideTagAngular => {
+                        self.consume_token_inside_tag_angular(current)
+                    }
                     HtmlLexContext::InsideTagSvelte => {
                         self.consume_token_inside_tag_svelte(current)
                     }
