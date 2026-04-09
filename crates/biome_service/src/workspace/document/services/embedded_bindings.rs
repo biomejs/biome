@@ -1,8 +1,9 @@
+use biome_html_syntax::{HtmlFileSource, HtmlVariant};
 use biome_js_syntax::{
-    AnyJsArrayBindingPatternElement, AnyJsBindingPattern, AnyJsExpression, AnyJsModuleItem,
-    AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsRoot, AnyJsStatement,
-    AnyTsIdentifierBinding, AnyTsType, JsCallExpression, JsExport, JsImport, JsModuleItemList,
-    JsVariableStatement,
+    AnyJsArrayBindingPatternElement, AnyJsArrayElement, AnyJsBindingPattern, AnyJsCallArgument,
+    AnyJsExpression, AnyJsModuleItem, AnyJsObjectBindingPatternMember, AnyJsObjectMember,
+    AnyJsRoot, AnyJsStatement, AnyTsIdentifierBinding, AnyTsType, JsCallExpression, JsExport,
+    JsImport, JsModuleItemList, JsVariableStatement,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, TokenText, WalkEvent};
 use rustc_hash::FxHashMap;
@@ -36,7 +37,11 @@ impl EmbeddedBuilder {
     }
 
     /// To call when visiting a source snippet, where bindings are defined.
-    pub(crate) fn visit_js_source_snippet(&mut self, root: &AnyJsRoot) {
+    pub(crate) fn visit_js_source_snippet(
+        &mut self,
+        root: &AnyJsRoot,
+        host_file_source: &HtmlFileSource,
+    ) {
         let preorder = root.syntax().preorder();
 
         for event in preorder {
@@ -45,12 +50,113 @@ impl EmbeddedBuilder {
                     if let Some(module_item) = JsModuleItemList::cast_ref(&node) {
                         self.visit_module_item_list(module_item);
                     } else if let Some(expr) = JsCallExpression::cast_ref(&node) {
-                        self.visit_define_props_call(&expr);
+                        // call expressions might have different semantics based on the host language
+                        match host_file_source.variant() {
+                            HtmlVariant::Standard(_) => {}
+                            HtmlVariant::Astro => {}
+                            HtmlVariant::Vue => {
+                                self.visit_define_props_call(&expr);
+                            }
+                            HtmlVariant::Svelte => {
+                                self.visit_svelte_block_call_expressions(&expr);
+                            }
+                        }
                     }
                 }
                 WalkEvent::Leave(_) => {}
             }
         }
+    }
+
+    /// Visits expression statements that are defined, usually, in `snippet` and `render` functions.
+    pub(crate) fn visit_svelte_block_call_expressions(
+        &mut self,
+        call_expression: &JsCallExpression,
+    ) -> Option<()> {
+        let callee = call_expression.callee().ok()?;
+        let ident = callee.as_js_identifier_expression()?;
+        let token = ident.name().ok()?.value_token().ok()?;
+        self.js_bindings
+            .insert(token.text_trimmed_range(), token.token_text_trimmed());
+
+        let arguments = call_expression.arguments().ok()?;
+
+        for argument in arguments.args().iter().flatten() {
+            match argument {
+                AnyJsCallArgument::AnyJsExpression(expr) => {
+                    self.visit_svelte_call_bindings(&expr);
+                }
+                AnyJsCallArgument::JsSpread(spread) => {
+                    let expr = spread.argument().ok()?;
+                    self.visit_svelte_call_bindings(&expr);
+                }
+            }
+        }
+
+        None
+    }
+
+    /// Walks a snippet parameter expression and registers every identifier
+    /// that appears at a binding position: plain references, shorthand and
+    /// literal-keyed properties of an object pattern, array elements, and
+    /// nested destructuring.
+    fn visit_svelte_call_bindings(&mut self, expression: &AnyJsExpression) -> Option<()> {
+        match expression {
+            AnyJsExpression::JsIdentifierExpression(ident) => {
+                let token = ident.name().ok()?.value_token().ok()?;
+                self.js_bindings
+                    .insert(token.text_trimmed_range(), token.token_text_trimmed());
+            }
+            AnyJsExpression::JsObjectExpression(object) => {
+                for member in object.members().iter().flatten() {
+                    match member {
+                        AnyJsObjectMember::JsShorthandPropertyObjectMember(prop) => {
+                            let token = prop.name().ok()?.value_token().ok()?;
+                            self.js_bindings
+                                .insert(token.text_trimmed_range(), token.token_text_trimmed());
+                        }
+                        AnyJsObjectMember::JsPropertyObjectMember(prop) => {
+                            let value = prop.value().ok()?;
+                            self.visit_svelte_call_bindings(&value);
+                        }
+                        AnyJsObjectMember::JsSpread(spread) => {
+                            let argument = spread.argument().ok()?;
+                            self.visit_svelte_call_bindings(&argument);
+                        }
+
+                        AnyJsObjectMember::JsBogusMember(_)
+                        | AnyJsObjectMember::JsGetterObjectMember(_)
+                        | AnyJsObjectMember::JsMetavariable(_)
+                        | AnyJsObjectMember::JsMethodObjectMember(_)
+                        | AnyJsObjectMember::JsSetterObjectMember(_) => {}
+                    }
+                }
+            }
+            AnyJsExpression::JsArrayExpression(array) => {
+                for element in array.elements().iter().flatten() {
+                    match element {
+                        AnyJsArrayElement::AnyJsExpression(expr) => {
+                            self.visit_svelte_call_bindings(&expr);
+                        }
+                        AnyJsArrayElement::JsSpread(spread) => {
+                            let argument = spread.argument().ok()?;
+                            self.visit_svelte_call_bindings(&argument);
+                        }
+                        AnyJsArrayElement::JsArrayHole(_) => {}
+                    }
+                }
+            }
+            AnyJsExpression::JsAssignmentExpression(assign) => {
+                let left = assign.left().ok()?;
+                let ident = left.as_any_js_assignment()?.as_js_identifier_assignment()?;
+                let token = ident.name_token().ok()?;
+                self.js_bindings
+                    .insert(token.text_trimmed_range(), token.token_text_trimmed());
+            }
+            _ => {}
+        }
+
+        None
     }
 
     fn visit_module_item_list(&mut self, list: JsModuleItemList) {
@@ -301,7 +407,7 @@ impl EmbeddedBuilder {
     /// - Type-argument: `defineProps<{ title: String }>()`
     /// - Runtime object: `defineProps({ title: String })`
     /// - Runtime array:  `defineProps(['title'])`
-    fn visit_define_props_call(&mut self, call_expression: &biome_js_syntax::JsCallExpression) {
+    fn visit_define_props_call(&mut self, call_expression: &JsCallExpression) {
         let Ok(callee) = call_expression.callee() else {
             return;
         };
@@ -457,6 +563,7 @@ mod tests {
     use crate::workspace::document::services::embedded_bindings::{
         EmbeddedBuilder, EmbeddedExportedBindings,
     };
+    use biome_html_syntax::HtmlFileSource;
     use biome_js_parser::JsParserOptions;
     use biome_js_syntax::{AnyJsRoot, JsFileSource};
 
@@ -465,8 +572,16 @@ mod tests {
         result.tree()
     }
 
-    fn visit_js_root(service: &mut EmbeddedBuilder, root: &AnyJsRoot) {
-        service.visit_js_source_snippet(root);
+    fn visit_js_root(
+        service: &mut EmbeddedBuilder,
+        root: &AnyJsRoot,
+        html_file_source: HtmlFileSource,
+    ) {
+        service.visit_js_source_snippet(root, &html_file_source);
+    }
+
+    fn visit_snippet_header(service: &mut EmbeddedBuilder, source: &str) {
+        service.visit_js_source_snippet(&parse_js(source), &HtmlFileSource::svelte());
     }
 
     fn contains_binding(service: &EmbeddedExportedBindings, binding: &str) -> bool {
@@ -488,7 +603,7 @@ let variable = "salut";
 
         let mut service = EmbeddedExportedBindings::default();
         let mut builder = service.builder();
-        visit_js_root(&mut builder, &parse_js(source));
+        visit_js_root(&mut builder, &parse_js(source), HtmlFileSource::vue());
 
         service.finish(builder);
 
@@ -508,7 +623,7 @@ let [arr, ...rest] = [];
  "#;
         let mut service = EmbeddedExportedBindings::default();
         let mut builder = service.builder();
-        visit_js_root(&mut builder, &parse_js(source));
+        visit_js_root(&mut builder, &parse_js(source), HtmlFileSource::vue());
         service.finish(builder);
 
         assert!(contains_binding(&service, "Component"));
@@ -537,8 +652,8 @@ let lorem = "";
 
         let mut service = EmbeddedExportedBindings::default();
         let mut builder = service.builder();
-        visit_js_root(&mut builder, &parse_js(source));
-        visit_js_root(&mut builder, &parse_js(source_2));
+        visit_js_root(&mut builder, &parse_js(source), HtmlFileSource::vue());
+        visit_js_root(&mut builder, &parse_js(source_2), HtmlFileSource::vue());
         service.finish(builder);
 
         assert!(contains_binding(&service, "Component"));
@@ -561,7 +676,7 @@ function* generator() {}
 "#;
         let mut service = EmbeddedExportedBindings::default();
         let mut builder = service.builder();
-        visit_js_root(&mut builder, &parse_js(source));
+        visit_js_root(&mut builder, &parse_js(source), HtmlFileSource::vue());
         service.finish(builder);
         assert!(contains_binding(&service, "buildLink"));
         assert!(contains_binding(&service, "fetchData"));
@@ -576,7 +691,7 @@ abstract class BaseHandler {}
 "#;
         let mut service = EmbeddedExportedBindings::default();
         let mut builder = service.builder();
-        visit_js_root(&mut builder, &parse_js(source));
+        visit_js_root(&mut builder, &parse_js(source), HtmlFileSource::vue());
         service.finish(builder);
         assert!(contains_binding(&service, "MyService"));
         assert!(contains_binding(&service, "BaseHandler"));
@@ -591,7 +706,7 @@ enum Direction { Up, Down }
 "#;
         let mut service = EmbeddedExportedBindings::default();
         let mut builder = service.builder();
-        visit_js_root(&mut builder, &parse_js(source));
+        visit_js_root(&mut builder, &parse_js(source), HtmlFileSource::vue());
         service.finish(builder);
         assert!(contains_binding(&service, "UserId"));
         assert!(contains_binding(&service, "UserProfile"));
@@ -603,7 +718,7 @@ enum Direction { Up, Down }
         let source = r#"import * as Vue from "vue";"#;
         let mut service = EmbeddedExportedBindings::default();
         let mut builder = service.builder();
-        visit_js_root(&mut builder, &parse_js(source));
+        visit_js_root(&mut builder, &parse_js(source), HtmlFileSource::vue());
         service.finish(builder);
         assert!(contains_binding(&service, "Vue"));
     }
@@ -620,7 +735,7 @@ export default {
 "#;
         let mut service = EmbeddedExportedBindings::default();
         let mut builder = service.builder();
-        visit_js_root(&mut builder, &parse_js(source));
+        visit_js_root(&mut builder, &parse_js(source), HtmlFileSource::vue());
         service.finish(builder);
         assert!(contains_binding(&service, "loading"));
         assert!(contains_binding(&service, "disabled"));
@@ -635,7 +750,7 @@ export default {
 "#;
         let mut service = EmbeddedExportedBindings::default();
         let mut builder = service.builder();
-        visit_js_root(&mut builder, &parse_js(source));
+        visit_js_root(&mut builder, &parse_js(source), HtmlFileSource::vue());
         service.finish(builder);
         assert!(contains_binding(&service, "loading"));
         assert!(contains_binding(&service, "disabled"));
@@ -652,10 +767,70 @@ defineProps({
 "#;
         let mut service = EmbeddedExportedBindings::default();
         let mut builder = service.builder();
-        visit_js_root(&mut builder, &parse_js(source));
+        visit_js_root(&mut builder, &parse_js(source), HtmlFileSource::vue());
         service.finish(builder);
         assert!(contains_binding(&service, "title"));
         assert!(contains_binding(&service, "likes"));
+    }
+
+    #[test]
+    fn tracks_svelte_snippet_plain_identifier_params() {
+        let mut service = EmbeddedExportedBindings::default();
+        let mut builder = service.builder();
+        visit_snippet_header(&mut builder, "figure(image)");
+        service.finish(builder);
+        assert!(contains_binding(&service, "figure"));
+        assert!(contains_binding(&service, "image"));
+    }
+
+    #[test]
+    fn tracks_svelte_snippet_object_destructured_params() {
+        let mut service = EmbeddedExportedBindings::default();
+        let mut builder = service.builder();
+        visit_snippet_header(&mut builder, "figure({ src, caption })");
+        service.finish(builder);
+        assert!(contains_binding(&service, "figure"));
+        assert!(contains_binding(&service, "src"));
+        assert!(contains_binding(&service, "caption"));
+    }
+
+    #[test]
+    fn tracks_svelte_snippet_array_destructured_params() {
+        let mut service = EmbeddedExportedBindings::default();
+        let mut builder = service.builder();
+        visit_snippet_header(&mut builder, "figure([first, second])");
+        service.finish(builder);
+        assert!(contains_binding(&service, "first"));
+        assert!(contains_binding(&service, "second"));
+    }
+
+    #[test]
+    fn tracks_svelte_snippet_rest_params() {
+        let mut service = EmbeddedExportedBindings::default();
+        let mut builder = service.builder();
+        visit_snippet_header(&mut builder, "figure(...rest)");
+        service.finish(builder);
+        assert!(contains_binding(&service, "rest"));
+    }
+
+    #[test]
+    fn tracks_svelte_snippet_nested_destructured_params() {
+        let mut service = EmbeddedExportedBindings::default();
+        let mut builder = service.builder();
+        visit_snippet_header(&mut builder, "figure({ a: [b, c], ...d })");
+        service.finish(builder);
+        assert!(contains_binding(&service, "b"));
+        assert!(contains_binding(&service, "c"));
+        assert!(contains_binding(&service, "d"));
+    }
+
+    #[test]
+    fn tracks_svelte_snippet_default_value_params() {
+        let mut service = EmbeddedExportedBindings::default();
+        let mut builder = service.builder();
+        visit_snippet_header(&mut builder, "figure(image = fallback)");
+        service.finish(builder);
+        assert!(contains_binding(&service, "image"));
     }
 
     #[test]
@@ -666,7 +841,7 @@ const props = defineProps(['foo'])
 "#;
         let mut service = EmbeddedExportedBindings::default();
         let mut builder = service.builder();
-        visit_js_root(&mut builder, &parse_js(source));
+        visit_js_root(&mut builder, &parse_js(source), HtmlFileSource::vue());
         service.finish(builder);
         assert!(contains_binding(&service, "foo"));
     }

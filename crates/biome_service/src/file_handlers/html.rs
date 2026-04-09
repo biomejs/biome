@@ -54,8 +54,8 @@ use biome_html_syntax::{
     HtmlAttributeInitializerClause, HtmlDoubleTextExpression, HtmlElement, HtmlFileSource,
     HtmlLanguage, HtmlRoot, HtmlSingleTextExpression, HtmlSyntaxNode, HtmlTextExpression,
     HtmlTextExpressions, HtmlVariant, SvelteAwaitBlock, SvelteEachBlock, SvelteIfBlock,
-    SvelteKeyBlock, VueDirective, VueVBindShorthandDirective, VueVOnShorthandDirective,
-    VueVSlotShorthandDirective,
+    SvelteKeyBlock, SvelteRenderBlock, SvelteSnippetBlock, VueDirective,
+    VueVBindShorthandDirective, VueVOnShorthandDirective, VueVSlotShorthandDirective,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage};
@@ -445,7 +445,7 @@ fn parse_embedded_nodes(
                         &doc_file_source,
                     )
                     && let Some(parsed) =
-                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
+                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None, &file_source)
                 {
                     nodes.push(parsed.node);
                 }
@@ -461,8 +461,13 @@ fn parse_embedded_nodes(
                                 &candidate,
                                 &doc_file_source,
                             )
-                            && let Some(parsed) =
-                                parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
+                            && let Some(parsed) = parse_matched_embed(
+                                &candidate,
+                                &embed_match,
+                                &mut ctx,
+                                None,
+                                &file_source,
+                            )
                         {
                             nodes.push(parsed.node);
                         }
@@ -477,8 +482,13 @@ fn parse_embedded_nodes(
                                 &candidate,
                                 &doc_file_source,
                             )
-                            && let Some(parsed) =
-                                parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
+                            && let Some(parsed) = parse_matched_embed(
+                                &candidate,
+                                &embed_match,
+                                &mut ctx,
+                                None,
+                                &file_source,
+                            )
                         {
                             nodes.push(parsed.node);
                         }
@@ -499,7 +509,7 @@ fn parse_embedded_nodes(
                         &doc_file_source,
                     )
                     && let Some(parsed) =
-                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
+                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None, &file_source)
                 {
                     nodes.push(parsed.node);
                 }
@@ -514,7 +524,7 @@ fn parse_embedded_nodes(
                         &doc_file_source,
                     )
                     && let Some(parsed) =
-                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
+                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None, &file_source)
                 {
                     nodes.push(parsed.node);
                 }
@@ -528,7 +538,7 @@ fn parse_embedded_nodes(
                         &doc_file_source,
                     )
                     && let Some(parsed) =
-                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
+                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None, &file_source)
                 {
                     nodes.push(parsed.node);
                 }
@@ -543,7 +553,7 @@ fn parse_embedded_nodes(
                         &doc_file_source,
                     )
                     && let Some(parsed) =
-                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
+                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None, &file_source)
                 {
                     nodes.push(parsed.node);
                 }
@@ -558,7 +568,7 @@ fn parse_embedded_nodes(
                         &doc_file_source,
                     )
                     && let Some(parsed) =
-                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
+                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None, &file_source)
                 {
                     nodes.push(parsed.node);
                 }
@@ -588,7 +598,7 @@ fn parse_embedded_nodes(
                         &doc_file_source,
                     )
                     && let Some(parsed) =
-                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
+                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None, &file_source)
                 {
                     if let Some(js_fs) = parsed.js_file_source {
                         embedded_file_source = merge_js_file_source(embedded_file_source, js_fs);
@@ -611,6 +621,7 @@ fn parse_embedded_nodes(
                         &embed_match,
                         &mut ctx,
                         Some(embedded_file_source),
+                        &file_source,
                     )
                 {
                     nodes.push(parsed.node);
@@ -633,6 +644,7 @@ fn parse_embedded_nodes(
                         &embed_match,
                         &mut ctx,
                         Some(embedded_file_source),
+                        &file_source,
                     )
                 {
                     nodes.push(parsed.node);
@@ -652,6 +664,7 @@ fn parse_embedded_nodes(
                         &embed_match,
                         &mut ctx,
                         Some(embedded_file_source),
+                        &file_source,
                     )
                 {
                     nodes.push(parsed.node);
@@ -671,6 +684,7 @@ fn parse_embedded_nodes(
                         &embed_match,
                         &mut ctx,
                         Some(embedded_file_source),
+                        &file_source,
                     )
                 {
                     nodes.push(parsed.node);
@@ -695,6 +709,7 @@ fn parse_embedded_nodes(
                             &embed_match,
                             &mut ctx,
                             Some(embedded_file_source),
+                            &file_source,
                         )
                     {
                         nodes.push(parsed.node);
@@ -726,7 +741,7 @@ fn parse_embedded_nodes(
                         &doc_file_source,
                     )
                     && let Some(parsed) =
-                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
+                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None, &file_source)
                 {
                     if let Some(js_fs) = parsed.js_file_source {
                         embedded_file_source = merge_js_file_source(embedded_file_source, js_fs);
@@ -749,6 +764,7 @@ fn parse_embedded_nodes(
                         &embed_match,
                         &mut ctx,
                         Some(embedded_file_source),
+                        &file_source,
                     )
                 {
                     nodes.push(parsed.node);
@@ -772,6 +788,7 @@ fn parse_embedded_nodes(
                         &embed_match,
                         &mut ctx,
                         Some(embedded_file_source),
+                        &file_source,
                     )
                 {
                     nodes.push(parsed.node);
@@ -792,6 +809,7 @@ fn parse_embedded_nodes(
                                 &embed_match,
                                 &mut ctx,
                                 Some(embedded_file_source),
+                                &file_source,
                             )
                         {
                             nodes.push(parsed.node);
@@ -815,6 +833,7 @@ fn parse_embedded_nodes(
                             &embed_match,
                             &mut ctx,
                             Some(embedded_file_source),
+                            &file_source,
                         )
                     {
                         nodes.push(parsed.node);
@@ -835,6 +854,7 @@ fn parse_embedded_nodes(
                             &embed_match,
                             &mut ctx,
                             Some(embedded_file_source),
+                            &file_source,
                         )
                     {
                         nodes.push(parsed.node);
@@ -856,6 +876,7 @@ fn parse_embedded_nodes(
                         &embed_match,
                         &mut ctx,
                         Some(embedded_file_source),
+                        &file_source,
                     )
                 {
                     nodes.push(parsed.node);
@@ -876,6 +897,46 @@ fn parse_embedded_nodes(
                         &embed_match,
                         &mut ctx,
                         Some(embedded_file_source),
+                        &file_source,
+                    )
+                {
+                    nodes.push(parsed.node);
+                }
+
+                if let Some(snippet_block) = SvelteSnippetBlock::cast_ref(&element)
+                    && let Ok(opening_block) = snippet_block.opening_block()
+                    && let Ok(expression) = opening_block.expression()
+                    && let Some(candidate) = build_text_expression_candidate(&expression)
+                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
+                        HostLanguage::Html,
+                        &candidate,
+                        &doc_file_source,
+                    )
+                    && let Some(parsed) = parse_matched_embed(
+                        &candidate,
+                        &embed_match,
+                        &mut ctx,
+                        Some(embedded_file_source),
+                        &file_source,
+                    )
+                {
+                    nodes.push(parsed.node);
+                }
+
+                if let Some(render_block) = SvelteRenderBlock::cast_ref(&element)
+                    && let Ok(expression) = render_block.expression()
+                    && let Some(candidate) = build_text_expression_candidate(&expression)
+                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
+                        HostLanguage::Html,
+                        &candidate,
+                        &doc_file_source,
+                    )
+                    && let Some(parsed) = parse_matched_embed(
+                        &candidate,
+                        &embed_match,
+                        &mut ctx,
+                        Some(embedded_file_source),
+                        &file_source,
                     )
                 {
                     nodes.push(parsed.node);
@@ -898,6 +959,7 @@ fn parse_embedded_nodes(
                         &embed_match,
                         &mut ctx,
                         Some(embedded_file_source),
+                        &file_source,
                     )
                 {
                     nodes.push(parsed.node);
@@ -916,6 +978,7 @@ fn parse_embedded_nodes(
                         &embed_match,
                         &mut ctx,
                         Some(embedded_file_source),
+                        &file_source,
                     )
                 {
                     nodes.push(parsed.node);
@@ -1117,6 +1180,7 @@ fn parse_matched_embed(
     embed_match: &EmbedMatch,
     ctx: &mut EmbedParseContext,
     embedded_file_source: Option<JsFileSource>,
+    host_file_source: &HtmlFileSource,
 ) -> Option<ParsedEmbed> {
     let content = candidate.content();
 
@@ -1223,9 +1287,12 @@ fn parse_matched_embed(
                 ctx.cache,
             );
 
-            // Only visit source-level snippets for binding tracking
-            if is_source_level {
-                ctx.builder.visit_js_source_snippet(&parse.tree());
+            // We track bindings in the following cases:
+            // - Source snippets
+            // - Snippets declared inside svelte files. Blocks such as #snippet and #render can define functions and bindings.
+            if is_source_level || host_file_source.is_svelte() {
+                ctx.builder
+                    .visit_js_source_snippet(&parse.tree(), host_file_source);
             }
 
             let snippet: EmbeddedSnippet<JsLanguage> = EmbeddedSnippet::new(
