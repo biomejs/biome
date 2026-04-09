@@ -135,7 +135,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noBlankTarget",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("jsx-no-target-blank").inspired()],
+        sources: &[RuleSource::EslintReact("jsx-no-target-blank").inspired(), RuleSource::EslintReactDom("no-unsafe-target-blank").inspired(), RuleSource::EslintReactXyz("dom-no-unsafe-target-blank").inspired()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Safe,

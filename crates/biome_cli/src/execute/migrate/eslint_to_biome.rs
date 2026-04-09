@@ -414,6 +414,8 @@ impl<'a> TryFrom<&'a EslintRuleName> for RuleSource<'a> {
             Some("react-refresh") => RuleSource::EslintReactRefresh,
             Some("react-x") => RuleSource::EslintReactX,
             Some("@eslint-react") => RuleSource::EslintReactXyz,
+            Some("react-jsx") => RuleSource::EslintReactJsx,
+            Some("react-dom") => RuleSource::EslintReactDom,
             Some("regexp") => RuleSource::EslintRegexp,
             Some("solid") => RuleSource::EslintSolid,
             Some("sonarjs") => RuleSource::EslintSonarJs,

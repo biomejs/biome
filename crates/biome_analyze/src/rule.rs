@@ -154,6 +154,10 @@ pub enum RuleSource<'a> {
     EslintReactX(&'a str),
     /// Rules from [eslint-react.xyz](https://eslint-react.xyz/)
     EslintReactXyz(&'a str),
+    /// Rules from [eslint-react.xyz](https://eslint-react.xyz/)
+    EslintReactJsx(&'a str),
+    /// Rules from [eslint-react.xyz](https://eslint-react.xyz/)
+    EslintReactDom(&'a str),
     /// Rules from [Eslint Plugin Regexp](https://github.com/ota-meshi/eslint-plugin-regexp)
     EslintRegexp(&'a str),
     /// Rules from [Eslint Plugin Solid](https://github.com/solidjs-community/eslint-plugin-solid)
@@ -230,6 +234,8 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::EslintReactRefresh(_) => write!(f, "eslint-plugin-react-refresh"),
             Self::EslintReactX(_) => write!(f, "eslint-plugin-react-x"),
             Self::EslintReactXyz(_) => write!(f, "@eslint-react/eslint-plugin"),
+            Self::EslintReactJsx(_) => write!(f, "eslint-plugin-react-jsx"),
+            Self::EslintReactDom(_) => write!(f, "eslint-plugin-react-dom"),
             Self::EslintRegexp(_) => write!(f, "eslint-plugin-regexp"),
             Self::EslintSolid(_) => write!(f, "eslint-plugin-solid"),
             Self::EslintSonarJs(_) => write!(f, "eslint-plugin-sonarjs"),
@@ -310,6 +316,8 @@ impl<'a> RuleSource<'a> {
             | Self::EslintReactRefresh(rule_name)
             | Self::EslintReactX(rule_name)
             | Self::EslintReactXyz(rule_name)
+            | Self::EslintReactJsx(rule_name)
+            | Self::EslintReactDom(rule_name)
             | Self::EslintRegexp(rule_name)
             | Self::EslintSolid(rule_name)
             | Self::EslintSonarJs(rule_name)
@@ -362,6 +370,8 @@ impl<'a> RuleSource<'a> {
             Self::EslintReactRefresh(_) => "react-refresh",
             Self::EslintReactX(_) => "react-x",
             Self::EslintReactXyz(_) => "@eslint-react",
+            Self::EslintReactJsx(_) => "react-jsx",
+            Self::EslintReactDom(_) => "react-dom",
             Self::EslintRegexp(_) => "regexp",
             Self::EslintSolid(_) => "solid",
             Self::EslintSonarJs(_) => "sonarjs",
@@ -422,6 +432,8 @@ impl<'a> RuleSource<'a> {
             Self::EslintReactRefresh(_) => "https://github.com/ArnaudBarre/eslint-plugin-react-refresh".to_string(),
             Self::EslintReactX(rule_name) => format!("https://eslint-react.xyz/docs/rules/{rule_name}"),
             Self::EslintReactXyz(rule_name) => format!("https://eslint-react.xyz/docs/rules/{rule_name}"),
+            Self::EslintReactJsx(rule_name) => format!("https://eslint-react.xyz/docs/rules/jsx-{rule_name}"),
+            Self::EslintReactDom(rule_name) => format!("https://eslint-react.xyz/docs/rules/dom-{rule_name}"),
             Self::EslintRegexp(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-regexp/rules/{rule_name}.html"),
             Self::EslintSolid(rule_name) => format!("https://github.com/solidjs-community/eslint-plugin-solid/blob/main/packages/eslint-plugin-solid/docs/{rule_name}.md"),
             Self::EslintSonarJs(rule_name) => format!("https://github.com/SonarSource/eslint-plugin-sonarjs/blob/HEAD/docs/rules/{rule_name}.md"),
