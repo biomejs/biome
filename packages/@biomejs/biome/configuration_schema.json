@@ -10349,6 +10349,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseBiomeSchemaVersionOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseBiomeSchemaVersionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseBlockStatementsOptions": {
 			"type": "object",
 			"properties": {
@@ -13213,6 +13223,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useBiomeSchemaVersion": {
+					"description": "Ensures that Biome configuration files use the current schema version.\nSee https://biomejs.dev/linter/rules/use-biome-schema-version",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseBiomeSchemaVersionConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useDefaultSwitchClauseLast": {
 					"description": "Enforce default clauses in switch statements to be last.\nSee https://biomejs.dev/linter/rules/use-default-switch-clause-last",
 					"anyOf": [
@@ -13486,6 +13503,16 @@
 			]
 		},
 		"UseBiomeIgnoreFolderOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseBiomeSchemaVersionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseBiomeSchemaVersionOptions" }
+			]
+		},
+		"UseBiomeSchemaVersionOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

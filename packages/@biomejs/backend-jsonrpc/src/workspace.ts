@@ -3615,6 +3615,11 @@ See https://biomejs.dev/linter/rules/use-biome-ignore-folder
 	 */
 	useBiomeIgnoreFolder?: UseBiomeIgnoreFolderConfiguration;
 	/**
+	* Ensures that Biome configuration files use the current schema version.
+See https://biomejs.dev/linter/rules/use-biome-schema-version 
+	 */
+	useBiomeSchemaVersion?: UseBiomeSchemaVersionConfiguration;
+	/**
 	* Enforce default clauses in switch statements to be last.
 See https://biomejs.dev/linter/rules/use-default-switch-clause-last 
 	 */
@@ -5069,6 +5074,9 @@ export type UseAwaitConfiguration =
 export type UseBiomeIgnoreFolderConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseBiomeIgnoreFolderOptions;
+export type UseBiomeSchemaVersionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseBiomeSchemaVersionOptions;
 export type UseDefaultSwitchClauseLastConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDefaultSwitchClauseLastOptions;
@@ -7142,6 +7150,11 @@ export interface RuleWithUseBiomeIgnoreFolderOptions {
 	level: RulePlainConfiguration;
 	options?: UseBiomeIgnoreFolderOptions;
 }
+export interface RuleWithUseBiomeSchemaVersionOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseBiomeSchemaVersionOptions;
+}
 export interface RuleWithUseDefaultSwitchClauseLastOptions {
 	level: RulePlainConfiguration;
 	options?: UseDefaultSwitchClauseLastOptions;
@@ -8222,6 +8235,7 @@ export type NoWithOptions = {};
 export type UseAdjacentOverloadSignaturesOptions = {};
 export type UseAwaitOptions = {};
 export type UseBiomeIgnoreFolderOptions = {};
+export type UseBiomeSchemaVersionOptions = {};
 export type UseDefaultSwitchClauseLastOptions = {};
 export interface UseDeprecatedDateOptions {
 	argumentName?: string;
@@ -9022,6 +9036,7 @@ export type Category =
 	| "lint/suspicious/useAdjacentOverloadSignatures"
 	| "lint/suspicious/useAwait"
 	| "lint/suspicious/useBiomeIgnoreFolder"
+	| "lint/suspicious/useBiomeSchemaVersion"
 	| "lint/suspicious/useDefaultSwitchClauseLast"
 	| "lint/suspicious/useDeprecatedDate"
 	| "lint/suspicious/useErrorMessage"
