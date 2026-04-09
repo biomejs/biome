@@ -194,13 +194,11 @@ where
                                 let has_leading_newline = element.syntax().has_leading_newline();
 
                                 if has_leading_newline {
-                                    dbg!("here1");
                                     write!(f, [hard_line_break()])?;
                                 } else {
                                     write!(f, [space()])?;
                                 }
                             } else if at_group_boundary {
-                                dbg!("here2");
                                 write!(f, [hard_line_break()])?;
                             } else {
                                 write!(f, [soft_line_break_or_space()])?
@@ -279,9 +277,7 @@ where
             write!(f, [group(&indent(&content))])
         }
         ValueListLayout::OneGroupPerLineWithDanglingComments => {
-            // Dangling comments are formatted inline by the property's fmt_dangling_comments
-            // We only need to indent the values, no hard line break here
-            write!(f, [group(&indent(&values))])
+            write!(f, [group(&values)])
         }
     }
 }
