@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: valid-svelte-snippet-params.svelte
+expression: valid_svelte_snippet.svelte
 ---
 # Input
 ```svelte

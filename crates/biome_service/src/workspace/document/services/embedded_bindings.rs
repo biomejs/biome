@@ -1,9 +1,10 @@
+use crate::embed::types::{EmbedBlockKind, SvelteBlockKind};
 use biome_html_syntax::{HtmlFileSource, HtmlVariant};
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsArrayElement, AnyJsBindingPattern, AnyJsCallArgument,
     AnyJsExpression, AnyJsModuleItem, AnyJsObjectBindingPatternMember, AnyJsObjectMember,
-    AnyJsRoot, AnyJsStatement, AnyTsIdentifierBinding, AnyTsType, JsCallExpression, JsExport,
-    JsImport, JsModuleItemList, JsVariableStatement,
+    AnyJsRoot, AnyJsStatement, AnyTsIdentifierBinding, AnyTsType, JsAssignmentExpression,
+    JsCallExpression, JsExport, JsImport, JsModuleItemList, JsVariableStatement,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, TokenText, WalkEvent};
 use rustc_hash::FxHashMap;
@@ -36,11 +37,20 @@ impl EmbeddedBuilder {
         }
     }
 
+    /// Inserts a binding whose identifier is already known from the host CST,
+    /// bypassing the JS visitor. Used for host-language constructs like
+    /// `{#each items as item}` where the binding is introduced by the host
+    /// grammar rather than declared in embedded JavaScript.
+    pub(crate) fn register_binding(&mut self, range: TextRange, text: TokenText) {
+        self.js_bindings.insert(range, text);
+    }
+
     /// To call when visiting a source snippet, where bindings are defined.
     pub(crate) fn visit_js_source_snippet(
         &mut self,
         root: &AnyJsRoot,
         host_file_source: &HtmlFileSource,
+        embed_block_kind: Option<&EmbedBlockKind>,
     ) {
         let preorder = root.syntax().preorder();
 
@@ -58,9 +68,13 @@ impl EmbeddedBuilder {
                                 self.visit_define_props_call(&expr);
                             }
                             HtmlVariant::Svelte => {
-                                self.visit_svelte_block_call_expressions(&expr);
+                                self.visit_svelte_block_call_expressions(&expr, embed_block_kind);
                             }
                         }
+                    } else if let Some(assign) = JsAssignmentExpression::cast_ref(&node)
+                        && host_file_source.is_svelte()
+                    {
+                        self.visit_svelte_const_assignment(&assign, embed_block_kind);
                     }
                 }
                 WalkEvent::Leave(_) => {}
@@ -68,29 +82,65 @@ impl EmbeddedBuilder {
         }
     }
 
+    /// Registers the left-hand side of a `{@const name = value}` assignment
+    /// as a binding. Only runs when the enclosing embed is a Svelte const
+    /// block; every other Svelte embed leaves assignments alone.
+    fn visit_svelte_const_assignment(
+        &mut self,
+        assign: &JsAssignmentExpression,
+        embed_block_kind: Option<&EmbedBlockKind>,
+    ) -> Option<()> {
+        let EmbedBlockKind::Svelte(SvelteBlockKind::Const) = embed_block_kind? else {
+            return None;
+        };
+        let left = assign.left().ok()?;
+        let ident = left.as_any_js_assignment()?.as_js_identifier_assignment()?;
+        let token = ident.name_token().ok()?;
+        self.js_bindings
+            .insert(token.text_trimmed_range(), token.token_text_trimmed());
+        Some(())
+    }
+
     /// Visits expression statements that are defined, usually, in `snippet` and `render` functions.
     pub(crate) fn visit_svelte_block_call_expressions(
         &mut self,
         call_expression: &JsCallExpression,
+        embed_block_kind: Option<&EmbedBlockKind>,
     ) -> Option<()> {
-        let callee = call_expression.callee().ok()?;
-        let ident = callee.as_js_identifier_expression()?;
-        let token = ident.name().ok()?.value_token().ok()?;
-        self.js_bindings
-            .insert(token.text_trimmed_range(), token.token_text_trimmed());
-
-        let arguments = call_expression.arguments().ok()?;
-
-        for argument in arguments.args().iter().flatten() {
-            match argument {
-                AnyJsCallArgument::AnyJsExpression(expr) => {
-                    self.visit_svelte_call_bindings(&expr);
+        let embed_block_kind = embed_block_kind?;
+        match embed_block_kind {
+            EmbedBlockKind::Svelte(svelte) => match svelte {
+                SvelteBlockKind::Render => {
+                    let callee = call_expression.callee().ok()?;
+                    let ident = callee.as_js_identifier_expression()?;
+                    let token = ident.name().ok()?.value_token().ok()?;
+                    self.js_bindings
+                        .insert(token.text_trimmed_range(), token.token_text_trimmed());
                 }
-                AnyJsCallArgument::JsSpread(spread) => {
-                    let expr = spread.argument().ok()?;
-                    self.visit_svelte_call_bindings(&expr);
+                SvelteBlockKind::Snippet => {
+                    let callee = call_expression.callee().ok()?;
+                    let ident = callee.as_js_identifier_expression()?;
+                    let token = ident.name().ok()?.value_token().ok()?;
+                    self.js_bindings
+                        .insert(token.text_trimmed_range(), token.token_text_trimmed());
+
+                    let arguments = call_expression.arguments().ok()?;
+
+                    for argument in arguments.args().iter().flatten() {
+                        match argument {
+                            AnyJsCallArgument::AnyJsExpression(expr) => {
+                                self.visit_svelte_call_bindings(&expr);
+                            }
+                            AnyJsCallArgument::JsSpread(spread) => {
+                                let expr = spread.argument().ok()?;
+                                self.visit_svelte_call_bindings(&expr);
+                            }
+                        }
+                    }
                 }
-            }
+                SvelteBlockKind::Const => {}
+            },
+            EmbedBlockKind::Neutral => return None,
         }
 
         None
@@ -560,6 +610,7 @@ impl EmbeddedBuilder {
 
 #[cfg(test)]
 mod tests {
+    use crate::embed::types::{EmbedBlockKind, EmbedCandidate, SvelteBlockKind};
     use crate::workspace::document::services::embedded_bindings::{
         EmbeddedBuilder, EmbeddedExportedBindings,
     };
@@ -577,11 +628,23 @@ mod tests {
         root: &AnyJsRoot,
         html_file_source: HtmlFileSource,
     ) {
-        service.visit_js_source_snippet(root, &html_file_source);
+        service.visit_js_source_snippet(root, &html_file_source, Some(&EmbedBlockKind::default()));
     }
 
     fn visit_snippet_header(service: &mut EmbeddedBuilder, source: &str) {
-        service.visit_js_source_snippet(&parse_js(source), &HtmlFileSource::svelte());
+        service.visit_js_source_snippet(
+            &parse_js(source),
+            &HtmlFileSource::svelte(),
+            Some(&EmbedBlockKind::Svelte(SvelteBlockKind::Snippet)),
+        );
+    }
+
+    fn visit_render_block(service: &mut EmbeddedBuilder, source: &str) {
+        service.visit_js_source_snippet(
+            &parse_js(source),
+            &HtmlFileSource::svelte(),
+            Some(&EmbedBlockKind::Svelte(SvelteBlockKind::Render)),
+        );
     }
 
     fn contains_binding(service: &EmbeddedExportedBindings, binding: &str) -> bool {
@@ -831,6 +894,16 @@ defineProps({
         visit_snippet_header(&mut builder, "figure(image = fallback)");
         service.finish(builder);
         assert!(contains_binding(&service, "image"));
+    }
+
+    #[test]
+    fn tracks_svelte_render_block_callee_only() {
+        let mut service = EmbeddedExportedBindings::default();
+        let mut builder = service.builder();
+        visit_render_block(&mut builder, "figure(img)");
+        service.finish(builder);
+        assert!(contains_binding(&service, "figure"));
+        assert!(!contains_binding(&service, "img"));
     }
 
     #[test]
