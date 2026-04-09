@@ -510,6 +510,7 @@ define_categories! {
     "assist/source/useSortedPackageJson": "https://biomejs.dev/assist/actions/use-sorted-package-json",
     "assist/source/useSortedProperties": "https://biomejs.dev/assist/actions/use-sorted-properties",
     "assist/source/useSortedTypeFields": "https://biomejs.dev/assist/actions/use-sorted-type-fields",
+    "assist/source/useSortedSelectionSet": "https://biomejs.dev/assist/use-sorted-selection-set",
     // end assist actions
     ; // start syntax rules
     "syntax/correctness/noTypeOnlyImportAttributes",

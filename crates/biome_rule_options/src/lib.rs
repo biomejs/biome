@@ -434,6 +434,7 @@ pub mod use_sorted_interface_members;
 pub mod use_sorted_keys;
 pub mod use_sorted_package_json;
 pub mod use_sorted_properties;
+pub mod use_sorted_selection_set;
 pub mod use_sorted_type_fields;
 pub mod use_spread;
 pub mod use_static_response_methods;

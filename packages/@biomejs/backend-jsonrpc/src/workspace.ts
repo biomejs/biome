@@ -1054,6 +1054,11 @@ See https://biomejs.dev/assist/actions/use-sorted-properties
 	 */
 	useSortedProperties?: UseSortedPropertiesConfiguration;
 	/**
+	* Sort GraphQL selection sets.
+See https://biomejs.dev/assist/actions/use-sorted-selection-set 
+	 */
+	useSortedSelectionSet?: UseSortedSelectionSetConfiguration;
+	/**
 	* Sort fields in GraphQL type definitions alphabetically.
 See https://biomejs.dev/assist/actions/use-sorted-type-fields 
 	 */
@@ -1269,6 +1274,9 @@ export type UseSortedPackageJsonConfiguration =
 export type UseSortedPropertiesConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedPropertiesOptions;
+export type UseSortedSelectionSetConfiguration =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithUseSortedSelectionSetOptions;
 export type UseSortedTypeFieldsConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedTypeFieldsOptions;
@@ -3705,6 +3713,10 @@ export interface RuleAssistWithUseSortedPropertiesOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedPropertiesOptions;
 }
+export interface RuleAssistWithUseSortedSelectionSetOptions {
+	level: RuleAssistPlainConfiguration;
+	options: UseSortedSelectionSetOptions;
+}
 export interface RuleAssistWithUseSortedTypeFieldsOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedTypeFieldsOptions;
@@ -5146,6 +5158,7 @@ followed by nested values (multi-line objects, multi-line arrays).
 }
 export type UseSortedPackageJsonOptions = {};
 export type UseSortedPropertiesOptions = {};
+export type UseSortedSelectionSetOptions = {};
 export type UseSortedTypeFieldsOptions = {};
 export type RulePlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 export interface RuleWithNoAccessKeyOptions {
@@ -9042,6 +9055,7 @@ export type Category =
 	| "assist/source/useSortedPackageJson"
 	| "assist/source/useSortedProperties"
 	| "assist/source/useSortedTypeFields"
+	| "assist/source/useSortedSelectionSet"
 	| "syntax/correctness/noTypeOnlyImportAttributes"
 	| "syntax/correctness/noSuperWithoutExtends"
 	| "syntax/correctness/noInitializerWithDefinite"
