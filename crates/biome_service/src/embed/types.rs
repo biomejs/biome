@@ -134,12 +134,10 @@ impl From<&AnySvelteBlock> for EmbedBlockKind {
             | AnySvelteBlock::SvelteEachBlock(_)
             | AnySvelteBlock::SvelteHtmlBlock(_)
             | AnySvelteBlock::SvelteIfBlock(_)
-            | AnySvelteBlock::SvelteKeyBlock(_) => EmbedBlockKind::Neutral,
-            AnySvelteBlock::SvelteConstBlock(_) => EmbedBlockKind::Svelte(SvelteBlockKind::Const),
-            AnySvelteBlock::SvelteRenderBlock(_) => EmbedBlockKind::Svelte(SvelteBlockKind::Render),
-            AnySvelteBlock::SvelteSnippetBlock(_) => {
-                EmbedBlockKind::Svelte(SvelteBlockKind::Snippet)
-            }
+            | AnySvelteBlock::SvelteKeyBlock(_) => Self::Neutral,
+            AnySvelteBlock::SvelteConstBlock(_) => Self::Svelte(SvelteBlockKind::Const),
+            AnySvelteBlock::SvelteRenderBlock(_) => Self::Svelte(SvelteBlockKind::Render),
+            AnySvelteBlock::SvelteSnippetBlock(_) => Self::Svelte(SvelteBlockKind::Snippet),
         }
     }
 }

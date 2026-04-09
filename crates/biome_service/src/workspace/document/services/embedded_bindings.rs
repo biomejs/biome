@@ -610,7 +610,7 @@ impl EmbeddedBuilder {
 
 #[cfg(test)]
 mod tests {
-    use crate::embed::types::{EmbedBlockKind, EmbedCandidate, SvelteBlockKind};
+    use crate::embed::types::{EmbedBlockKind, SvelteBlockKind};
     use crate::workspace::document::services::embedded_bindings::{
         EmbeddedBuilder, EmbeddedExportedBindings,
     };

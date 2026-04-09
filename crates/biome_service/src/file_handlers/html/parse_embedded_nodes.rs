@@ -399,7 +399,7 @@ fn parse_svelte_blocks(
                         match item {
                             AnySvelteBlockItem::SvelteEachAsKeyedItem(as_keyed) => {
                                 if let Ok(name) = as_keyed.name() {
-                                    register_svelte_each_name_bindings(&mut ctx.builder, name);
+                                    register_svelte_each_name_bindings(ctx.builder, name);
                                 }
                                 if let Some(index) = as_keyed.index()
                                     && let Ok(value) = index.value()
