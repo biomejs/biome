@@ -126,7 +126,7 @@ declare_source_rule! {
     /// import fs from "fs";
     /// ```
     ///
-    /// ...is soretd as:
+    /// ...is sorted as:
     ///
     /// ```js,ignore
     /// import fs from "fs";
@@ -235,7 +235,7 @@ declare_source_rule! {
     ///
     /// ## Change the sorting of named specifiers and attributes
     ///
-    /// By default, attributes, imported and exported names are sorted with a `natural` sort_.
+    /// By default, attributes, imported and exported names are sorted with a `natural` sort.
     /// You can opt for a `lexicographic` sort (sometimes referred as _binary_ sort) by
     /// setting the `identifierOrder` option to `lexicographic`:
     ///
@@ -379,7 +379,7 @@ declare_source_rule! {
     /// import type { T } from "my-package";
     /// ```
     ///
-    /// To place them at the end, use theh following configuration.
+    /// To place them at the end, use the following configuration.
     ///
     /// ```json,options
     /// {
@@ -590,7 +590,7 @@ declare_source_rule! {
     ///
     /// ### Import and export merging
     ///
-    /// mports from the same source in the same chunk are merged when possible:
+    /// Imports from the same source in the same chunk are merged when possible:
     ///
     /// The following code:
     ///
@@ -683,7 +683,7 @@ declare_source_rule! {
     ///
     /// - `!` -- negates a pattern when used as the first character.
     ///   `file.js` matches `!*.test.js`.
-    ///   Exceptions can be layered: `["@my/lib/**", "!@my/lib/internal/**",
+    ///   Exceptions can be layered: `["@my/lib/**", "!@my/lib/internal/**", "@my/lib/internal/allowed/**"]`.
     ///
     /// - `\*` -- matches a literal `*` character.
     ///
