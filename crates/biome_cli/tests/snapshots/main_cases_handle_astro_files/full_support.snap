@@ -184,7 +184,7 @@ file.astro:41:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━
 ```block
 file.astro:11:6 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'Props'. Consider to delete it or rename it.
+  × 'Props' is redeclared in the same scope.
   
      9 │ }
     10 │ 
@@ -201,13 +201,17 @@ file.astro:11:6 lint/suspicious/noRedeclare ━━━━━━━━━━━━
     8 │ 	name: string;
     9 │ }
   
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
+  
 
 ```
 
 ```block
 file.astro:30:7 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'Props'. Consider to delete it or rename it.
+  × 'Props' is redeclared in the same scope.
   
     28 │ 	}
     29 │ 
@@ -224,6 +228,10 @@ file.astro:30:7 lint/suspicious/noRedeclare ━━━━━━━━━━━━
        │ 	          ^^^^^
     27 │ 		name: string;
     28 │ 	}
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
   
 
 ```
