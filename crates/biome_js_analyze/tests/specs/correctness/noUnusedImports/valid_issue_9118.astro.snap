@@ -8,7 +8,7 @@ expression: valid_issue_9118.astro
 ---
 import MyElement, {
 	type MyElementShape,
-	} from './my-element.vue';
+	} from './my-element.astro';
 
 let myElement: MyElementShape =  {};
 ---
