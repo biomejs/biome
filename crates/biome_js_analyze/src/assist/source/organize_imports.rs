@@ -423,7 +423,7 @@ declare_source_rule! {
     /// }
     /// ```
     ///
-    /// ```js,use_options,expect_diagnostic
+    /// ```ts,use_options,expect_diagnostic
     /// import type { T1 } from "a";
     /// import { type T2, V } from "a";
     /// ```
@@ -454,7 +454,7 @@ declare_source_rule! {
     /// }
     /// ```
     ///
-    /// ```js,use_options,expect_diagnostic
+    /// ```ts,use_options,expect_diagnostic
     /// import type { T1 } from "a";
     /// import { V } from "a";
     /// ```
