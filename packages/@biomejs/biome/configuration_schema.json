@@ -6565,6 +6565,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useDomQuerySelector": {
+					"description": "Prefer querySelector() and querySelectorAll() over older DOM query APIs.\nSee https://biomejs.dev/linter/rules/use-dom-query-selector",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseDomQuerySelectorConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useErrorCause": {
 					"description": "Enforce that new Error() is thrown with the original error as cause.\nSee https://biomejs.dev/linter/rules/use-error-cause",
 					"anyOf": [
@@ -10756,6 +10763,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseDomQuerySelectorOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseDomQuerySelectorOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseEnumInitializersOptions": {
 			"type": "object",
 			"properties": {
@@ -14102,6 +14119,16 @@
 			]
 		},
 		"UseDisposablesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseDomQuerySelectorConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseDomQuerySelectorOptions" }
+			]
+		},
+		"UseDomQuerySelectorOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

@@ -355,6 +355,7 @@ pub mod use_deprecated_date;
 pub mod use_deprecated_reason;
 pub mod use_destructuring;
 pub mod use_disposables;
+pub mod use_dom_query_selector;
 pub mod use_enum_initializers;
 pub mod use_error_cause;
 pub mod use_error_message;

@@ -262,6 +262,7 @@ define_categories! {
     "lint/nursery/useConsistentTestIt": "https://biomejs.dev/linter/rules/use-consistent-test-it",
     "lint/nursery/useDestructuring": "https://biomejs.dev/linter/rules/use-destructuring",
     "lint/nursery/useDisposables": "https://biomejs.dev/linter/rules/use-disposables",
+    "lint/nursery/useDomQuerySelector": "https://biomejs.dev/linter/rules/use-dom-query-selector",
     "lint/nursery/useErrorCause": "https://biomejs.dev/linter/rules/use-error-cause",
     "lint/nursery/useExhaustiveSwitchCases": "https://biomejs.dev/linter/rules/use-exhaustive-switch-cases",
     "lint/nursery/useExpect": "https://biomejs.dev/linter/rules/use-expect",

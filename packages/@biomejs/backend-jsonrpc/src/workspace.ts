@@ -2452,6 +2452,11 @@ See https://biomejs.dev/linter/rules/use-disposables
 	 */
 	useDisposables?: UseDisposablesConfiguration;
 	/**
+	* Prefer querySelector() and querySelectorAll() over older DOM query APIs.
+See https://biomejs.dev/linter/rules/use-dom-query-selector 
+	 */
+	useDomQuerySelector?: UseDomQuerySelectorConfiguration;
+	/**
 	* Enforce that new Error() is thrown with the original error as cause.
 See https://biomejs.dev/linter/rules/use-error-cause 
 	 */
@@ -4445,6 +4450,9 @@ export type UseDestructuringConfiguration =
 export type UseDisposablesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDisposablesOptions;
+export type UseDomQuerySelectorConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseDomQuerySelectorOptions;
 export type UseErrorCauseConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseErrorCauseOptions;
@@ -6252,6 +6260,11 @@ export interface RuleWithUseDisposablesOptions {
 	level: RulePlainConfiguration;
 	options?: UseDisposablesOptions;
 }
+export interface RuleWithUseDomQuerySelectorOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseDomQuerySelectorOptions;
+}
 export interface RuleWithUseErrorCauseOptions {
 	level: RulePlainConfiguration;
 	options?: UseErrorCauseOptions;
@@ -7888,6 +7901,7 @@ Default: `"it"`
 }
 export type UseDestructuringOptions = {};
 export type UseDisposablesOptions = {};
+export type UseDomQuerySelectorOptions = {};
 /**
  * Options for the `useErrorCause` rule.
  */
@@ -8953,6 +8967,7 @@ export type Category =
 	| "lint/nursery/useConsistentTestIt"
 	| "lint/nursery/useDestructuring"
 	| "lint/nursery/useDisposables"
+	| "lint/nursery/useDomQuerySelector"
 	| "lint/nursery/useErrorCause"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExpect"
