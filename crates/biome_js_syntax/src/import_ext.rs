@@ -94,6 +94,17 @@ impl AnyJsImportClause {
         }
     }
 
+    /// Return the default specifier of this import clause.
+    pub fn default_specifiers(&self) -> Option<JsDefaultImportSpecifier> {
+        match self {
+            AnyJsImportClause::JsImportBareClause(_) => None,
+            AnyJsImportClause::JsImportCombinedClause(clause) => clause.default_specifier().ok(),
+            AnyJsImportClause::JsImportDefaultClause(clause) => clause.default_specifier().ok(),
+            AnyJsImportClause::JsImportNamedClause(_) => None,
+            AnyJsImportClause::JsImportNamespaceClause(_) => None,
+        }
+    }
+
     /// Attribute of this import clause.
     ///
     /// ```
