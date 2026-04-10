@@ -13,7 +13,6 @@ use biome_deserialize::json::deserialize_from_json_str;
 use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem, normalize_path};
 use biome_js_semantic::ScopeId;
 use biome_js_type_info::{TypeData, TypeResolver};
-use biome_jsdoc_comment::JsdocComment;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_value::{JsonObject, JsonString};
 use biome_module_graph::{
@@ -22,7 +21,7 @@ use biome_module_graph::{
 };
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
-use biome_rowan::Text;
+use biome_rowan::{Text, TextRange, TextSize};
 use biome_test_utils::get_added_js_paths;
 use camino::{Utf8Path, Utf8PathBuf};
 use walkdir::WalkDir;
@@ -549,37 +548,35 @@ fn test_resolve_exports() {
     assert_eq!(
         exports.swap_remove(&Text::new_static("oh\nno")),
         Some(JsExport::Reexport(JsReexport {
+            export_range: None,
             import: JsImport {
                 specifier: "./renamed-reexports".into(),
                 resolved_path: ResolvedPath::from_path("/src/renamed-reexports.ts"),
                 symbol: "ohNo".into()
             },
-            jsdoc_comment: None
         }))
     );
     assert_eq!(
         exports.swap_remove(&Text::new_static("renamed2")),
         Some(JsExport::Own(JsOwnExport::Namespace(JsReexport {
+            export_range: Some(TextRange::new(TextSize::from(1129), TextSize::from(1177))),
             import: JsImport {
                 specifier: "./renamed-reexports".into(),
                 resolved_path: ResolvedPath::from_path("/src/renamed-reexports.ts"),
                 symbol: ImportSymbol::All,
             },
-            jsdoc_comment: Some(JsdocComment::from_comment_text(
-                "/**\n* Hello, namespace 2.\n*/"
-            )),
         })))
     );
 
     assert_eq!(
         data.blanket_reexports,
         &[JsReexport {
+            export_range: Some(TextRange::new(TextSize::from(950), TextSize::from(978))),
             import: JsImport {
                 specifier: "./reexports".into(),
                 resolved_path: ResolvedPath::from_path("/src/reexports.ts"),
                 symbol: ImportSymbol::All,
             },
-            jsdoc_comment: None
         }]
     );
 
@@ -591,14 +588,12 @@ fn test_resolve_exports() {
     assert_eq!(
         data.exports.get(&Text::new_static("renamed")),
         Some(&JsExport::Own(JsOwnExport::Namespace(JsReexport {
+            export_range: Some(TextRange::new(TextSize::from(80), TextSize::from(127))),
             import: JsImport {
                 specifier: "./renamed-reexports".into(),
                 resolved_path: ResolvedPath::from_path("/src/renamed-reexports.ts"),
                 symbol: ImportSymbol::All,
             },
-            jsdoc_comment: Some(JsdocComment::from_comment_text(
-                "/**\n* Hello, namespace 1.\n*/"
-            )),
         })))
     );
 
@@ -2533,12 +2528,12 @@ fn test_namespace_reexport_is_own_export() {
     assert_eq!(
         barrel.exports.get(&Text::new_static("MyNs")),
         Some(&JsExport::Own(JsOwnExport::Namespace(JsReexport {
+            export_range: Some(TextRange::new(TextSize::from(0), TextSize::from(36))),
             import: JsImport {
                 specifier: "./source.ts".into(),
                 resolved_path: ResolvedPath::from_path("/src/source.ts"),
                 symbol: ImportSymbol::All,
             },
-            jsdoc_comment: None,
         }))),
         "`export * as MyNs` must produce JsExport::Own(JsOwnExport::Namespace(JsReexport {{ .. }}))"
     );

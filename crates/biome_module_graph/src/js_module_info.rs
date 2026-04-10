@@ -38,12 +38,6 @@ pub(crate) use visitor::JsModuleVisitor;
 pub struct BindingTypeData {
     /// The inferred type of this binding.
     pub ty: TypeReference,
-
-    /// JSDoc comment associated with this binding, if any.
-    pub jsdoc: Option<JsdocComment>,
-
-    /// Ranges where this binding is exported.
-    pub export_ranges: Vec<TextRange>,
 }
 
 impl Display for BindingTypeData {
@@ -468,8 +462,8 @@ pub enum JsOwnExport {
 /// another module.
 #[derive(Clone, Debug, PartialEq)]
 pub struct JsReexport {
-    /// Optional JSDoc comment associated with the re-export statement.
-    pub jsdoc_comment: Option<JsdocComment>,
+    /// Where this export statement is located.
+    pub export_range: Option<TextRange>,
 
     /// Import from which the symbols are being re-exported.
     pub import: JsImport,

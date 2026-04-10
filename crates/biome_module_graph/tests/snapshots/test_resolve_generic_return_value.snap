@@ -41,17 +41,14 @@ Imports {
 ```
 makePromise  => BindingTypeData {
   Types Module(0) TypeId(6),
-  Exported Ranges: (105..116)
 }
 
 makePromiseCb  => BindingTypeData {
   Types Module(0) TypeId(6),
-  Exported Ranges: (168..181)
 }
 
 promise  => BindingTypeData {
   Types Module(0) TypeId(7),
-  Exported Ranges: (224..231)
 }
 ```
 

@@ -96,11 +96,6 @@ Imports {
 ```
 alpha => BindingTypeData {
   Types Module(0) TypeId(1),
-  JsDoc(
-    @description
-    I am a jsdoc
-  ),
-  Exported Ranges: (114..119)
 }
 ```
 

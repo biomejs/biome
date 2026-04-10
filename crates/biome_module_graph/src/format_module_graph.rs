@@ -3,7 +3,7 @@ use crate::{BindingTypeData, JsExport, JsImport, JsModuleInfo, JsOwnExport, JsRe
 use biome_formatter::prelude::*;
 use biome_formatter::{format_args, write};
 use biome_js_type_info::FormatTypeContext;
-use biome_rowan::{TextRange, TextSize};
+use biome_rowan::TextSize;
 use std::fmt::Formatter;
 use std::ops::Deref;
 
@@ -25,26 +25,6 @@ impl Format<FormatTypeContext> for BindingTypeData {
         &self,
         f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
     ) -> FormatResult<()> {
-        let ranges: Vec<TypedRange> = self
-            .export_ranges
-            .iter()
-            .map(|range| range.into())
-            .collect();
-        let export_ranges = format_with(|f| {
-            let mut join = f.join();
-
-            for range in ranges.clone() {
-                join.entry(&range);
-            }
-            join.finish()
-        });
-
-        let jsdoc = format_with(|f| {
-            if self.jsdoc.is_some() {
-                write!(f, [&self.jsdoc, token(","), hard_line_break()])?;
-            };
-            Ok(())
-        });
         write!(
             f,
             [
@@ -54,9 +34,6 @@ impl Format<FormatTypeContext> for BindingTypeData {
                     &self.ty,
                     token(","),
                     hard_line_break(),
-                    jsdoc,
-                    token("Exported Ranges: "),
-                    &export_ranges
                 ])),
                 token("}")
             ]
@@ -266,23 +243,6 @@ impl Format<FormatTypeContext> for JsBindingData {
         &self,
         f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
     ) -> FormatResult<()> {
-        let jsdoc_comment = format_with(|f| {
-            if let Some(jsdoc) = &self.jsdoc {
-                write!(
-                    f,
-                    [&format_args![
-                        token("JSDoc comment:"),
-                        space(),
-                        jsdoc,
-                        token(","),
-                        hard_line_break()
-                    ]]
-                )
-            } else {
-                Ok(())
-            }
-        });
-
         let content = format_with(|f| {
             write!(
                 f,
@@ -297,7 +257,6 @@ impl Format<FormatTypeContext> for JsBindingData {
                     &self.ty,
                     token(","),
                     hard_line_break(),
-                    jsdoc_comment,
                     token("Declaration kind:"),
                     space(),
                     text(
@@ -329,9 +288,10 @@ impl Format<FormatTypeContext> for JsReexport {
         let content = format_with(|f| {
             write!(f, [&format_args![&self.import]])?;
 
-            if let Some(comment) = &self.jsdoc_comment {
-                write!(f, [&format_args![&comment]])?;
-            }
+            // TODO: address this later
+            // if let Some(comment) = &self.jsdoc_comment {
+            //     write!(f, [&format_args![&comment]])?;
+            // }
 
             Ok(())
         });
@@ -420,50 +380,5 @@ impl Format<FormatTypeContext> for JsImport {
 
         write!(f, [hard_line_break()])?;
         Ok(())
-    }
-}
-#[derive(Clone)]
-struct TypedRange(TextRange);
-
-impl From<&TextRange> for TypedRange {
-    fn from(value: &TextRange) -> Self {
-        Self(*value)
-    }
-}
-
-#[derive(Clone)]
-struct TypedSize(TextSize);
-
-impl From<TextSize> for TypedSize {
-    fn from(value: TextSize) -> Self {
-        Self(value)
-    }
-}
-
-impl Format<FormatTypeContext> for TypedSize {
-    fn fmt(
-        &self,
-        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
-    ) -> FormatResult<()> {
-        let value = std::format!("{}", self.0);
-        write!(f, [text(&value, TextSize::default())])
-    }
-}
-
-impl Format<FormatTypeContext> for TypedRange {
-    fn fmt(
-        &self,
-        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
-    ) -> FormatResult<()> {
-        write!(
-            f,
-            [
-                token("("),
-                TypedSize::from(self.0.start()),
-                token(".."),
-                TypedSize::from(self.0.end()),
-                token(")")
-            ]
-        )
     }
 }

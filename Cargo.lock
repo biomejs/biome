@@ -1068,6 +1068,7 @@ dependencies = [
  "biome_formatter",
  "biome_js_parser",
  "biome_js_syntax",
+ "biome_jsdoc_comment",
  "biome_rowan",
  "rust-lapper",
  "rustc-hash 2.1.2",
@@ -1143,7 +1144,6 @@ dependencies = [
  "biome_formatter",
  "biome_js_parser",
  "biome_js_syntax",
- "biome_js_type_info",
  "biome_rowan",
 ]
 

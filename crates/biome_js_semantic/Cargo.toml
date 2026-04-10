@@ -12,12 +12,13 @@ categories.workspace = true
 publish              = true
 
 [dependencies]
-biome_formatter = { workspace = true }
-biome_js_syntax = { workspace = true }
-biome_rowan     = { workspace = true }
-rust-lapper     = { workspace = true }
-rustc-hash      = { workspace = true }
-smallvec        = { workspace = true }
+biome_formatter     = { workspace = true }
+biome_js_syntax     = { workspace = true }
+biome_jsdoc_comment = { workspace = true }
+biome_rowan         = { workspace = true }
+rust-lapper         = { workspace = true }
+rustc-hash          = { workspace = true }
+smallvec            = { workspace = true }
 
 [dev-dependencies]
 biome_console     = { path = "../biome_console" }
