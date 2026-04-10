@@ -6578,6 +6578,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useReactAsyncServerFunction": {
+					"description": "Require functions with the \"use server\" directive to be async.\nSee https://biomejs.dev/linter/rules/use-react-async-server-function",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseReactAsyncServerFunctionConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useRegexpExec": {
 					"description": "Enforce RegExp#exec over String#match if no global flag is provided.\nSee https://biomejs.dev/linter/rules/use-regexp-exec",
 					"anyOf": [
@@ -11215,6 +11222,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseReactAsyncServerFunctionOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseReactAsyncServerFunctionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseReactFunctionComponentsOptions": {
 			"type": "object",
 			"properties": {
@@ -14650,6 +14667,16 @@
 			]
 		},
 		"UseQwikValidLexicalScopeOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseReactAsyncServerFunctionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseReactAsyncServerFunctionOptions" }
+			]
+		},
+		"UseReactAsyncServerFunctionOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

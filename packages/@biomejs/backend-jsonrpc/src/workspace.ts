@@ -2506,6 +2506,11 @@ See https://biomejs.dev/linter/rules/use-qwik-loader-location
 	 */
 	useQwikLoaderLocation?: UseQwikLoaderLocationConfiguration;
 	/**
+	* Require functions with the "use server" directive to be async.
+See https://biomejs.dev/linter/rules/use-react-async-server-function 
+	 */
+	useReactAsyncServerFunction?: UseReactAsyncServerFunctionConfiguration;
+	/**
 	* Enforce RegExp#exec over String#match if no global flag is provided.
 See https://biomejs.dev/linter/rules/use-regexp-exec 
 	 */
@@ -4422,6 +4427,9 @@ export type UsePlaywrightValidDescribeCallbackConfiguration =
 export type UseQwikLoaderLocationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseQwikLoaderLocationOptions;
+export type UseReactAsyncServerFunctionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseReactAsyncServerFunctionOptions;
 export type UseRegexpExecConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseRegexpExecOptions;
@@ -6209,6 +6217,11 @@ export interface RuleWithUseQwikLoaderLocationOptions {
 	level: RulePlainConfiguration;
 	options?: UseQwikLoaderLocationOptions;
 }
+export interface RuleWithUseReactAsyncServerFunctionOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseReactAsyncServerFunctionOptions;
+}
 export interface RuleWithUseRegexpExecOptions {
 	level: RulePlainConfiguration;
 	options?: UseRegexpExecOptions;
@@ -7797,6 +7810,7 @@ Default: `false`
 }
 export type UsePlaywrightValidDescribeCallbackOptions = {};
 export type UseQwikLoaderLocationOptions = {};
+export type UseReactAsyncServerFunctionOptions = {};
 export type UseRegexpExecOptions = {};
 export interface UseRequiredScriptsOptions {
 	/**
@@ -8736,8 +8750,8 @@ export type Category =
 	| "lint/nursery/noInlineStyles"
 	| "lint/nursery/noJsxPropsBind"
 	| "lint/nursery/noLeakedRender"
-	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisleadingReturnType"
+	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noMultiAssign"
 	| "lint/nursery/noMultiStr"
@@ -8809,6 +8823,7 @@ export type Category =
 	| "lint/nursery/useQwikLoaderLocation"
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
+	| "lint/nursery/useReactAsyncServerFunction"
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useRequiredScripts"
 	| "lint/nursery/useScopedStyles"

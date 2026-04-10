@@ -1969,6 +1969,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         >(),
     ));
     result.push((
+        "nursery",
+        "useReactAsyncServerFunction",
+        TypeId::of::<
+            biome_rule_options::use_react_async_server_function::UseReactAsyncServerFunctionOptions,
+        >(),
+    ));
+    result.push((
         "style",
         "useReactFunctionComponents",
         TypeId::of::<
