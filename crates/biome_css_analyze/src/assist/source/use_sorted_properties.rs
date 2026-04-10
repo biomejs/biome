@@ -13,7 +13,6 @@ use biome_css_syntax::{
     CssDeclarationOrRuleBlock, CssDeclarationOrRuleList, CssDeclarationWithSemicolon,
     CssSyntaxKind, TextRange,
 };
-use biome_diagnostics::category;
 use biome_rowan::{AstNode, BatchMutationExt, NodeOrToken, SyntaxNode, TokenText};
 use biome_rule_options::use_sorted_properties::UseSortedPropertiesOptions;
 use biome_string_case::StrOnlyExtension;
@@ -149,7 +148,7 @@ impl Rule for UseSortedProperties {
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
         Some(RuleDiagnostic::new(
-            category!("assist/source/useSortedProperties"),
+            rule_category!(),
             ctx.query().range(),
             markup! {
                 "The properties are not sorted."

@@ -259,7 +259,7 @@
 					]
 				},
 				"useHeadingContent": {
-					"description": "Enforce that heading elements (h1, h2, etc.) have content and that the content is accessible to screen readers. Accessible means that it is not hidden using the aria-hidden prop.\nSee https://biomejs.dev/linter/rules/use-heading-content",
+					"description": "Enforce that heading elements (h1, h2, etc.) have content and that the content is accessible to screen readers.\nSee https://biomejs.dev/linter/rules/use-heading-content",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseHeadingContentConfiguration" },
 						{ "type": "null" }
@@ -7239,6 +7239,14 @@
 			},
 			"required": ["level", "options"]
 		},
+		"RuleAssistWithUseSortedTypeFieldsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSortedTypeFieldsOptions" }
+			},
+			"required": ["level", "options"]
+		},
 		"RuleDomain": {
 			"description": "Rule domains",
 			"oneOf": [
@@ -11950,7 +11958,7 @@
 					"type": ["boolean", "null"]
 				},
 				"useSortedAttributes": {
-					"description": "Enforce attribute sorting in JSX elements.\nSee https://biomejs.dev/assist/actions/use-sorted-attributes",
+					"description": "Enforce attribute sorting in HTML elements.\nSee https://biomejs.dev/assist/actions/use-sorted-attributes",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseSortedAttributesConfiguration" },
 						{ "type": "null" }
@@ -11981,6 +11989,13 @@
 					"description": "Enforce ordering of CSS properties and nested rules.\nSee https://biomejs.dev/assist/actions/use-sorted-properties",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseSortedPropertiesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useSortedTypeFields": {
+					"description": "Sort fields in GraphQL type definitions alphabetically.\nSee https://biomejs.dev/assist/actions/use-sorted-type-fields",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSortedTypeFieldsConfiguration" },
 						{ "type": "null" }
 					]
 				}
@@ -14804,6 +14819,16 @@
 			]
 		},
 		"UseSortedPropertiesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseSortedTypeFieldsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/$defs/RuleAssistWithUseSortedTypeFieldsOptions" }
+			]
+		},
+		"UseSortedTypeFieldsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

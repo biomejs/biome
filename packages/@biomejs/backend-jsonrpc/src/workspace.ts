@@ -1041,7 +1041,7 @@ See https://biomejs.dev/assist/actions/organize-imports
 	 */
 	recommended?: boolean;
 	/**
-	* Enforce attribute sorting in JSX elements.
+	* Enforce attribute sorting in HTML elements.
 See https://biomejs.dev/assist/actions/use-sorted-attributes 
 	 */
 	useSortedAttributes?: UseSortedAttributesConfiguration;
@@ -1065,6 +1065,11 @@ See https://biomejs.dev/assist/actions/use-sorted-package-json
 See https://biomejs.dev/assist/actions/use-sorted-properties 
 	 */
 	useSortedProperties?: UseSortedPropertiesConfiguration;
+	/**
+	* Sort fields in GraphQL type definitions alphabetically.
+See https://biomejs.dev/assist/actions/use-sorted-type-fields 
+	 */
+	useSortedTypeFields?: UseSortedTypeFieldsConfiguration;
 }
 export type QuoteStyle = "double" | "single";
 /**
@@ -1276,6 +1281,9 @@ export type UseSortedPackageJsonConfiguration =
 export type UseSortedPropertiesConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedPropertiesOptions;
+export type UseSortedTypeFieldsConfiguration =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithUseSortedTypeFieldsOptions;
 export type GroupPlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 /**
  * A list of rules that belong to this group
@@ -1406,7 +1414,7 @@ See https://biomejs.dev/linter/rules/use-generic-font-names
 	 */
 	useGenericFontNames?: UseGenericFontNamesConfiguration;
 	/**
-	* Enforce that heading elements (h1, h2, etc.) have content and that the content is accessible to screen readers. Accessible means that it is not hidden using the aria-hidden prop.
+	* Enforce that heading elements (h1, h2, etc.) have content and that the content is accessible to screen readers.
 See https://biomejs.dev/linter/rules/use-heading-content 
 	 */
 	useHeadingContent?: UseHeadingContentConfiguration;
@@ -3709,6 +3717,10 @@ export interface RuleAssistWithUseSortedPropertiesOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedPropertiesOptions;
 }
+export interface RuleAssistWithUseSortedTypeFieldsOptions {
+	level: RuleAssistPlainConfiguration;
+	options: UseSortedTypeFieldsOptions;
+}
 export type NoAccessKeyConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAccessKeyOptions;
@@ -5146,6 +5158,7 @@ followed by nested values (multi-line objects, multi-line arrays).
 }
 export type UseSortedPackageJsonOptions = {};
 export type UseSortedPropertiesOptions = {};
+export type UseSortedTypeFieldsOptions = {};
 export type RulePlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 export interface RuleWithNoAccessKeyOptions {
 	fix?: FixKind;
@@ -9040,6 +9053,7 @@ export type Category =
 	| "assist/source/useSortedKeys"
 	| "assist/source/useSortedPackageJson"
 	| "assist/source/useSortedProperties"
+	| "assist/source/useSortedTypeFields"
 	| "syntax/correctness/noTypeOnlyImportAttributes"
 	| "syntax/correctness/noSuperWithoutExtends"
 	| "syntax/correctness/noInitializerWithDefinite"
@@ -9053,6 +9067,7 @@ export type Category =
 	| "configuration"
 	| "assist"
 	| "migrate"
+	| "upgrade"
 	| "deserialize"
 	| "plugin"
 	| "project"

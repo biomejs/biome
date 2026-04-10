@@ -8,7 +8,6 @@ use biome_analyze::{
     context::RuleContext, declare_source_rule,
 };
 use biome_console::markup;
-use biome_diagnostics::category;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsCombinedSpecifier, AnyJsExportClause, AnyJsImportClause, AnyJsModuleItem, JsModule,
@@ -746,7 +745,7 @@ impl Rule for OrganizeImports {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         Some(RuleDiagnostic::new(
-            category!("assist/source/organizeImports"),
+            rule_category!(),
             Self::text_range(ctx, state),
             markup! {
                 "The imports and exports are not sorted."
