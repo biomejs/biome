@@ -1020,7 +1020,7 @@ See https://biomejs.dev/assist/actions/no-duplicate-classes
 	 */
 	noDuplicateClasses?: NoDuplicateClassesConfiguration;
 	/**
-	* Sorts and organizes imports and exports in your JavaScript and TypeScript files.
+	* Sorts imports and exports in your JavaScript and TypeScript files.
 See https://biomejs.dev/assist/actions/organize-imports 
 	 */
 	organizeImports?: OrganizeImportsConfiguration;

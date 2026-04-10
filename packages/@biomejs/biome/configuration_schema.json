@@ -12314,7 +12314,7 @@
 					]
 				},
 				"organizeImports": {
-					"description": "Sorts and organizes imports and exports in your JavaScript and TypeScript files.\nSee https://biomejs.dev/assist/actions/organize-imports",
+					"description": "Sorts imports and exports in your JavaScript and TypeScript files.\nSee https://biomejs.dev/assist/actions/organize-imports",
 					"anyOf": [
 						{ "$ref": "#/$defs/OrganizeImportsConfiguration" },
 						{ "type": "null" }
