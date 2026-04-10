@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
 expression: snapshot
 ---
 
@@ -301,24 +302,24 @@ CssRoot {
 string-interpolation.scss:1:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected `}` before closing quote
-
+  
   > 1 │ .box { content: "foo #{$bar"; color: red; }
       │                            ^
-    2 │
+    2 │ 
     3 │ .other { path: '#{$name'; background: blue; }
-
+  
   i Close the interpolation before ending the string.
-
+  
 string-interpolation.scss:3:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected `}` before closing quote
-
+  
     1 │ .box { content: "foo #{$bar"; color: red; }
-    2 │
+    2 │ 
   > 3 │ .other { path: '#{$name'; background: blue; }
       │                        ^
-    4 │
-
+    4 │ 
+  
   i Close the interpolation before ending the string.
-
+  
 ```

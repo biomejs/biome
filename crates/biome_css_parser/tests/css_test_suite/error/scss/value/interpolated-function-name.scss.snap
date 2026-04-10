@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
 expression: snapshot
 ---
 
@@ -421,52 +422,52 @@ CssRoot {
 interpolated-function-name.scss:2:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `;`
-
+  
     1 │ .function-name {
   > 2 │   start: #{1 + 1}foo(arg;
       │                         ^
     3 │   mid: foo#{1 + 1}bar(arg;
     4 │   end: foo#{1 + 1}(arg;
-
+  
   i Remove ;
-
+  
 interpolated-function-name.scss:3:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `;`
-
+  
     1 │ .function-name {
     2 │   start: #{1 + 1}foo(arg;
   > 3 │   mid: foo#{1 + 1}bar(arg;
       │                          ^
     4 │   end: foo#{1 + 1}(arg;
     5 │   full: #{foo}(arg;
-
+  
   i Remove ;
-
+  
 interpolated-function-name.scss:4:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `;`
-
+  
     2 │   start: #{1 + 1}foo(arg;
     3 │   mid: foo#{1 + 1}bar(arg;
   > 4 │   end: foo#{1 + 1}(arg;
       │                       ^
     5 │   full: #{foo}(arg;
     6 │ }
-
+  
   i Remove ;
-
+  
 interpolated-function-name.scss:5:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `;`
-
+  
     3 │   mid: foo#{1 + 1}bar(arg;
     4 │   end: foo#{1 + 1}(arg;
   > 5 │   full: #{foo}(arg;
       │                   ^
     6 │ }
-    7 │
-
+    7 │ 
+  
   i Remove ;
-
+  
 ```

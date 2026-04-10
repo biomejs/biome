@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
 expression: snapshot
 ---
 
@@ -645,121 +646,121 @@ CssRoot {
 at_rule_container_and_query_error.css:2:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
-
+  
     1 │ /* No valid container query after `and` */
   > 2 │ @container (width > 300px) and {
       │                                ^
     3 │ }
-    4 │
-
+    4 │ 
+  
   i Expected one of:
-
+  
   - ( <container-query> )
   - ( <size-feature> )
   - scroll-state( <scroll-state-query> )
   - style( <style-query> )
-
+  
 at_rule_container_and_query_error.css:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
-
+  
     5 │ /* No valid container query after `and missing {` */
     6 │ @container (width > 300px) and
   > 7 │ }
       │ ^
-    8 │
+    8 │ 
     9 │ /* 200px is not a valid container query start */
-
+  
   i Expected one of:
-
+  
   - ( <container-query> )
   - ( <size-feature> )
   - scroll-state( <scroll-state-query> )
   - style( <style-query> )
-
+  
 at_rule_container_and_query_error.css:10:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
-
+  
      9 │ /* 200px is not a valid container query start */
   > 10 │ @container (width > 300px) and 200px {
        │                                ^^^^^
     11 │ }
-    12 │
-
+    12 │ 
+  
   i Expected one of:
-
+  
   - ( <container-query> )
   - ( <size-feature> )
   - scroll-state( <scroll-state-query> )
   - style( <style-query> )
-
+  
 at_rule_container_and_query_error.css:14:53 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
-
+  
     13 │ /* The final `and` is missing its sub-query */
   > 14 │ @container (width > 300px) and (height > 200px) and {
        │                                                     ^
     15 │ }
-    16 │
-
+    16 │ 
+  
   i Expected one of:
-
+  
   - ( <container-query> )
   - ( <size-feature> )
   - scroll-state( <scroll-state-query> )
   - style( <style-query> )
-
+  
 at_rule_container_and_query_error.css:18:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
-
+  
     17 │ /* Missing parenthesis  */
   > 18 │ @container (width > 300px) and width > 200px and (height > 200px) {
        │                                ^^^^^^^^^^^^^
     19 │ }
-    20 │
-
+    20 │ 
+  
   i Expected one of:
-
+  
   - ( <container-query> )
   - ( <size-feature> )
   - scroll-state( <scroll-state-query> )
   - style( <style-query> )
-
+  
 at_rule_container_and_query_error.css:22:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
-
+  
     21 │ /* There's an extra `and` that has no query immediately following it. */
   > 22 │ @container (width > 300px) and and (height > 200px) {
        │                                ^^^
     23 │ }
-    24 │
-
+    24 │ 
+  
   i Expected one of:
-
+  
   - ( <container-query> )
   - ( <size-feature> )
   - scroll-state( <scroll-state-query> )
   - style( <style-query> )
-
+  
 at_rule_container_and_query_error.css:26:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
-
+  
     25 │ /* Invalid query name */
   > 26 │ @container (width > 300px) and randomname and (height > 200px) {
        │                                ^^^^^^^^^^
     27 │ }
-    28 │
-
+    28 │ 
+  
   i Expected one of:
-
+  
   - ( <container-query> )
   - ( <size-feature> )
   - scroll-state( <scroll-state-query> )
   - style( <style-query> )
-
+  
 ```

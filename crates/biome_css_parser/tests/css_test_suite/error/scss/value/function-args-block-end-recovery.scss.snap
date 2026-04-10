@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
 expression: snapshot
 ---
 
@@ -238,14 +239,14 @@ CssRoot {
 function-args-block-end-recovery.scss:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `}`
-
+  
     1 │ .a {
     2 │   color: fn($x: 1, $y
   > 3 │ }
       │ ^
-    4 │
+    4 │ 
     5 │ .b {
-
+  
   i Remove }
-
+  
 ```

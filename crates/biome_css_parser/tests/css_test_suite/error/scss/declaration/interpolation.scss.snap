@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
 expression: snapshot
 ---
 
@@ -225,37 +226,37 @@ CssRoot {
 interpolation.scss:2:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found '}'.
-
+  
     1 │ .empty {
   > 2 │   #{}: 1px;
       │     ^
     3 │ }
-    4 │
-
+    4 │ 
+  
   i Expected a SCSS expression here.
-
+  
     1 │ .empty {
   > 2 │   #{}: 1px;
       │     ^
     3 │ }
-    4 │
-
+    4 │ 
+  
 interpolation.scss:6:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found ':'.
-
+  
     5 │ .unclosed {
   > 6 │   margin-#{$side: 1px;
       │                 ^
     7 │ }
-    8 │
-
+    8 │ 
+  
   i Expected a SCSS expression here.
-
+  
     5 │ .unclosed {
   > 6 │   margin-#{$side: 1px;
       │                 ^
     7 │ }
-    8 │
-
+    8 │ 
+  
 ```

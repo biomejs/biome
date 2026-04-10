@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
 expression: snapshot
 ---
 
@@ -159,46 +160,46 @@ CssRoot {
 interpolation-non-string-quote.scss:2:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing closing quote
-
+  
     1 │ .box {
   > 2 │   width: #{$bar";
       │                ^^
     3 │   color: red;
     4 │ }
-
+  
   i The closing quote must be on the same line.
-
+  
 interpolation-non-string-quote.scss:3:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found ': red'.
-
+  
     1 │ .box {
     2 │   width: #{$bar";
   > 3 │   color: red;
       │        ^^^^^
     4 │ }
-    5 │
-
+    5 │ 
+  
   i Expected a SCSS expression here.
-
+  
     1 │ .box {
     2 │   width: #{$bar";
   > 3 │   color: red;
       │        ^^^^^
     4 │ }
-    5 │
-
+    5 │ 
+  
 interpolation-non-string-quote.scss:3:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `}` but instead found `;`
-
+  
     1 │ .box {
     2 │   width: #{$bar";
   > 3 │   color: red;
       │             ^
     4 │ }
-    5 │
-
+    5 │ 
+  
   i Remove ;
-
+  
 ```

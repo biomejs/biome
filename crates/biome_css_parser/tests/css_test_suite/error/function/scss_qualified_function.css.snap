@@ -301,46 +301,46 @@ CssRoot {
 scss_qualified_function.css:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × SCSS qualified function names are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
-
+  
     1 │ .bad {
   > 2 │   color: mod.fn(1, 2);
       │          ^^^^^^^^^^^^
     3 │   background-image: url("a.png" mod.fn(test));
     4 │   value: module.$fn();
-
+  
 scss_qualified_function.css:3:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × SCSS qualified function names are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
-
+  
     1 │ .bad {
     2 │   color: mod.fn(1, 2);
   > 3 │   background-image: url("a.png" mod.fn(test));
       │                                 ^^^^^^^^^^^^
     4 │   value: module.$fn();
     5 │ }
-
+  
 scss_qualified_function.css:4:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × SCSS qualified names are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
-
+  
     2 │   color: mod.fn(1, 2);
     3 │   background-image: url("a.png" mod.fn(test));
   > 4 │   value: module.$fn();
       │          ^^^^^^^^^^
     5 │ }
-    6 │
-
+    6 │ 
+  
 scss_qualified_function.css:4:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found a variable member.
-
+  
     2 │   color: mod.fn(1, 2);
     3 │   background-image: url("a.png" mod.fn(test));
   > 4 │   value: module.$fn();
       │                    ^
     5 │ }
-    6 │
-
+    6 │ 
+  
   i Function names after `module.` cannot start with `$`.
-
+  
 ```

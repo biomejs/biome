@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
 expression: snapshot
 ---
 
@@ -242,17 +243,17 @@ CssRoot {
 container-style-query-recovery.css:1:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found '123'.
-
+  
   > 1 │ @container style(composes: 123) {
       │                            ^^^
     2 │   .a {
     3 │     color: red;
-
+  
   i Expected an identifier here.
-
+  
   > 1 │ @container style(composes: 123) {
       │                            ^^^
     2 │   .a {
     3 │     color: red;
-
+  
 ```

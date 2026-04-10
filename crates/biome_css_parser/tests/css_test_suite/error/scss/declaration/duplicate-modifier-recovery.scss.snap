@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
 expression: snapshot
 ---
 
@@ -161,64 +162,64 @@ CssRoot {
 duplicate-modifier-recovery.scss:3:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `?`
-
+  
     1 │ // Duplicate modifiers with junk in between should still recover
     2 │ // without targeted duplicate-modifier parser diagnostics
   > 3 │ $dup-default-junk: 1 !default ??? !default;
       │                               ^
     4 │ $dup-global-junk: 1 !global ??? !global;
-    5 │
-
+    5 │ 
+  
 duplicate-modifier-recovery.scss:3:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `?`
-
+  
     1 │ // Duplicate modifiers with junk in between should still recover
     2 │ // without targeted duplicate-modifier parser diagnostics
   > 3 │ $dup-default-junk: 1 !default ??? !default;
       │                                ^
     4 │ $dup-global-junk: 1 !global ??? !global;
-    5 │
-
+    5 │ 
+  
 duplicate-modifier-recovery.scss:3:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `?`
-
+  
     1 │ // Duplicate modifiers with junk in between should still recover
     2 │ // without targeted duplicate-modifier parser diagnostics
   > 3 │ $dup-default-junk: 1 !default ??? !default;
       │                                 ^
     4 │ $dup-global-junk: 1 !global ??? !global;
-    5 │
-
+    5 │ 
+  
 duplicate-modifier-recovery.scss:4:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `?`
-
+  
     2 │ // without targeted duplicate-modifier parser diagnostics
     3 │ $dup-default-junk: 1 !default ??? !default;
   > 4 │ $dup-global-junk: 1 !global ??? !global;
       │                             ^
-    5 │
-
+    5 │ 
+  
 duplicate-modifier-recovery.scss:4:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `?`
-
+  
     2 │ // without targeted duplicate-modifier parser diagnostics
     3 │ $dup-default-junk: 1 !default ??? !default;
   > 4 │ $dup-global-junk: 1 !global ??? !global;
       │                              ^
-    5 │
-
+    5 │ 
+  
 duplicate-modifier-recovery.scss:4:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `?`
-
+  
     2 │ // without targeted duplicate-modifier parser diagnostics
     3 │ $dup-default-junk: 1 !default ??? !default;
   > 4 │ $dup-global-junk: 1 !global ??? !global;
       │                               ^
-    5 │
-
+    5 │ 
+  
 ```

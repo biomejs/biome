@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
 expression: snapshot
 ---
 
@@ -380,37 +381,37 @@ CssRoot {
 media-interpolation.scss:1:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found ': #{$value'.
-
+  
   > 1 │ @media (#{$feature: #{$value}) {
       │                   ^^^^^^^^^^
     2 │   .box {
     3 │     color: red;
-
+  
   i Expected a SCSS expression here.
-
+  
   > 1 │ @media (#{$feature: #{$value}) {
       │                   ^^^^^^^^^^
     2 │   .box {
     3 │     color: red;
-
+  
 media-interpolation.scss:7:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found ': #{$value'.
-
+  
     5 │ }
-    6 │
+    6 │ 
   > 7 │ @container (#{$feature: #{$value}) {
       │                       ^^^^^^^^^^
     8 │   .box {
     9 │     color: red;
-
+  
   i Expected a SCSS expression here.
-
+  
     5 │ }
-    6 │
+    6 │ 
   > 7 │ @container (#{$feature: #{$value}) {
       │                       ^^^^^^^^^^
     8 │   .box {
     9 │     color: red;
-
+  
 ```
