@@ -60,10 +60,7 @@ impl FormatNodeRule<JsUnaryExpression> for FormatJsUnaryExpression {
                 [group(&format_args![
                     maybe_not_space,
                     token("("),
-                    soft_block_indent_with_maybe_space(
-                        &argument.format(),
-                        add_delimiter_space
-                    ),
+                    soft_block_indent_with_maybe_space(&argument.format(), add_delimiter_space),
                     token(")")
                 ])]
             )
