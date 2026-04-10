@@ -106,11 +106,14 @@ impl Rule for NoRootType {
                 rule_category!(),
                 range,
                 markup! {
-                    "The root type "{{name.to_string()}}" is forbidden."
+                    "This schema defines the disallowed root type "<Emphasis>{name.text()}</Emphasis>"."
                 },
             )
             .note(markup! {
-                "It's forbidden to use this root type within this project. Rework to use a different root type."
+                "This project forbids that root type to enforce a specific schema design."
+            })
+            .note(markup! {
+                "Use a different root type, or update the rule configuration if this root type should be allowed."
             }),
         )
     }
