@@ -136,6 +136,11 @@ class Foo20 {
 	set a({ a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, uvw }) {}
 }
 
+// Boundary test: very long plain parameter name
+class Foo21 {
+	set veryLongPropertyNameHere(veryLongParameterNameThatExceedsTheLineWidthLimit) {}
+}
+
 // =====================
 // Object setters
 // =====================
@@ -232,4 +237,9 @@ const foo12 = {
 // Boundary test (breaks): 79+2=81 chars with delimiter spacing
 const foo13 = {
 	set a({ a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, uv }) {},
+};
+
+// Boundary test: very long plain parameter name
+const foo14 = {
+	set veryLongPropertyNameHere(veryLongParameterNameThatExceedsTheLineWidthLimit) {},
 };
