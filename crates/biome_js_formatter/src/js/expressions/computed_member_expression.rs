@@ -42,35 +42,37 @@ impl<'a> FormatComputedMemberLookup<'a> {
 
 impl Format<JsFormatContext> for FormatComputedMemberLookup<'_> {
     fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
+        let l_brack = format_with(|f: &mut JsFormatter| {
+            if f.options().delimiter_spacing().value() {
+                write!(f, [self.0.l_brack_token().format(), space()])
+            } else {
+                write!(f, [self.0.l_brack_token().format()])
+            }
+        });
+
+        let r_brack = format_with(|f: &mut JsFormatter| {
+            if f.options().delimiter_spacing().value() {
+                write!(f, [space(), self.0.r_brack_token().format()])
+            } else {
+                write!(f, [self.0.r_brack_token().format()])
+            }
+        });
+
         let should_insert_space = f.options().delimiter_spacing().value();
 
         match self.0.member()? {
             AnyJsExpression::AnyJsLiteralExpression(
                 AnyJsLiteralExpression::JsNumberLiteralExpression(literal),
             ) => {
-                if should_insert_space {
-                    write!(
-                        f,
-                        [
-                            self.0.optional_chain_token().format(),
-                            self.0.l_brack_token().format(),
-                            space(),
-                            literal.format(),
-                            space(),
-                            self.0.r_brack_token().format()
-                        ]
-                    )
-                } else {
-                    write!(
-                        f,
-                        [
-                            self.0.optional_chain_token().format(),
-                            self.0.l_brack_token().format(),
-                            literal.format(),
-                            self.0.r_brack_token().format()
-                        ]
-                    )
-                }
+                write!(
+                    f,
+                    [
+                        self.0.optional_chain_token().format(),
+                        l_brack,
+                        literal.format(),
+                        r_brack
+                    ]
+                )
             }
             member => {
                 write![

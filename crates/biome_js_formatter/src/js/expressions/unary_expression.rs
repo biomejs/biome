@@ -44,34 +44,31 @@ impl FormatNodeRule<JsUnaryExpression> for FormatJsUnaryExpression {
         // Only add delimiter spacing if this is logical not AND arg is NOT another logical not
         let add_delimiter_space = is_logical_not && should_insert_space && !argument_is_logical_not;
 
+        let maybe_not_space = format_with(|f| {
+            if add_delimiter_space {
+                write!(f, [space()])
+            } else {
+                Ok(())
+            }
+        });
+
         if f.comments().has_comments(argument.syntax())
             && !f.comments().is_suppressed(argument.syntax())
         {
-            if add_delimiter_space {
-                write!(
-                    f,
-                    [group(&format_args![
-                        space(),
-                        token("("),
-                        soft_block_indent_with_maybe_space(&argument.format(), should_insert_space),
-                        token(")")
-                    ])]
-                )
-            } else {
-                write!(
-                    f,
-                    [group(&format_args![
-                        token("("),
-                        soft_block_indent(&argument.format()),
-                        token(")")
-                    ])]
-                )
-            }
-        } else if add_delimiter_space {
-            // Add space after logical not operator
-            write![f, [space(), argument.format()]]
+            write!(
+                f,
+                [group(&format_args![
+                    maybe_not_space,
+                    token("("),
+                    soft_block_indent_with_maybe_space(
+                        &argument.format(),
+                        add_delimiter_space
+                    ),
+                    token(")")
+                ])]
+            )
         } else {
-            write![f, [argument.format()]]
+            write![f, [maybe_not_space, argument.format()]]
         }
     }
 
