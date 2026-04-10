@@ -979,20 +979,17 @@ impl JsModuleInfoCollector {
                     // If the resolved type has no members (e.g., the
                     // reference is still an unresolved qualifier), fall back
                     // to the scope tree to collect namespace bindings directly.
-                    if !found_members {
-                        if let Some(data) = self.get_by_resolved_id(resolved) {
-                            if let TypeData::Reference(TypeReference::Qualifier(qualifier)) =
-                                data.as_raw_data()
-                            {
-                                if let Some(first_part) = qualifier.path.iter().next() {
-                                    self.collect_namespace_exports_for_binding(
-                                        first_part,
-                                        qualifier.scope_id,
-                                        &mut finalised_exports,
-                                    );
-                                }
-                            }
-                        }
+                    if !found_members
+                        && let Some(data) = self.get_by_resolved_id(resolved)
+                        && let TypeData::Reference(TypeReference::Qualifier(qualifier)) =
+                            data.as_raw_data()
+                        && let Some(first_part) = qualifier.path.iter().next()
+                    {
+                        self.collect_namespace_exports_for_binding(
+                            first_part,
+                            qualifier.scope_id,
+                            &mut finalised_exports,
+                        );
                     }
 
                     let export = JsExport::Own(JsOwnExport::Type(resolved));
