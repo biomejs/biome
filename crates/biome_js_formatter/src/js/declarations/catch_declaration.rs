@@ -63,12 +63,7 @@ impl FormatNodeRule<JsCatchDeclaration> for FormatJsCatchDeclaration {
         } else {
             write!(
                 f,
-                [
-                    l_paren,
-                    binding.format(),
-                    type_annotation.format(),
-                    r_paren
-                ]
+                [l_paren, binding.format(), type_annotation.format(), r_paren]
             )
         }
     }
