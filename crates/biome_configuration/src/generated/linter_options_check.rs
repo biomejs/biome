@@ -1668,6 +1668,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useExplicitReturnType",
+        TypeId::of::<biome_rule_options::use_explicit_return_type::UseExplicitReturnTypeOptions>(),
+    ));
+    result.push((
+        "nursery",
         "useExplicitType",
         TypeId::of::<biome_rule_options::use_explicit_type::UseExplicitTypeOptions>(),
     ));
