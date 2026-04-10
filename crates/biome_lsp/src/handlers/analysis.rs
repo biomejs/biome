@@ -34,7 +34,7 @@ use tracing::{debug, info};
 const FIX_ALL_CATEGORY: ActionCategory = ActionCategory::Source(SourceActionKind::FixAll);
 const ORGANIZE_IMPORTS_CATEGORY: ActionCategory =
     ActionCategory::Source(SourceActionKind::OrganizeImports);
-const CONFIG_MIGRATE_QUICKFIX_KIND: &str = "quickfix.biome.migrateConfiguration";
+pub const CONFIG_MIGRATE_QUICKFIX_KIND: &str = "quickfix.biome.migrateConfiguration";
 
 fn fix_all_kind() -> CodeActionKind {
     match FIX_ALL_CATEGORY.to_str() {

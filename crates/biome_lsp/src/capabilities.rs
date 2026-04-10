@@ -8,9 +8,11 @@ use tower_lsp_server::ls_types::{
     WorkspaceServerCapabilities,
 };
 
+use crate::handlers::analysis::CONFIG_MIGRATE_QUICKFIX_KIND;
+
 pub(crate) const DEFAULT_CODE_ACTION_CAPABILITIES: &[&str] = &[
     "quickfix.biome",
-    "quickfix.biome.migrateConfiguration",
+    CONFIG_MIGRATE_QUICKFIX_KIND,
     // quickfix.suppressRule
     SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY,
     SUPPRESSION_INLINE_ACTION_CATEGORY,
