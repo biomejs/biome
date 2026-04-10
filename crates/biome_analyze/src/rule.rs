@@ -150,11 +150,11 @@ pub enum RuleSource<'a> {
     EslintReactPreferFunctionComponent(&'a str),
     /// Rules from [Eslint Plugin React Refresh](https://github.com/ArnaudBarre/eslint-plugin-react-refresh)
     EslintReactRefresh(&'a str),
-    /// A subset of react rules from [eslint-react.xyz](https://eslint-react.xyz/)'s react-x plugin
-    EslintReactX(&'a str),
     /// Rules from [eslint-react.xyz](https://eslint-react.xyz/)
     EslintReactXyz(&'a str),
-    /// A subset of jsx rules from [eslint-react.xyz](https://eslint-react.xyz/)
+    /// A subset of react rules from [eslint-react.xyz](https://eslint-react.xyz/)
+    EslintReactX(&'a str),
+    /// A subset of JSX rules from [eslint-react.xyz](https://eslint-react.xyz/)
     EslintReactJsx(&'a str),
     /// A subset of DOM rules from [eslint-react.xyz](https://eslint-react.xyz/)
     EslintReactDom(&'a str),
