@@ -16,6 +16,14 @@ impl FormatNodeRule<MdQuotePrefix> for FormatMdQuotePrefix {
 
         if let Some(post_marker_space_token) = post_marker_space_token {
             write!(f, [post_marker_space_token.format()])?;
+        } else {
+            let marker = marker_token?;
+            let next_has_text = marker
+                .next_token()
+                .is_some_and(|t| t.text().starts_with(|c: char| !c.is_whitespace()));
+            if next_has_text {
+                write!(f, [space()])?;
+            }
         }
 
         Ok(())

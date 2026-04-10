@@ -71,7 +71,6 @@ info: markdown/code/additional-space.md
 +    ```sh
 +    yarn --version
 +    ```
-\ No newline at end of file
 ```
 
 # Output
@@ -98,7 +97,8 @@ info: markdown/code/additional-space.md
     To check your version of Yarn and ensure it's installed you can type:
     ```sh
     yarn --version
-    ``````
+    ```
+```
 
 # Lines exceeding max width of 80 characters
 ```

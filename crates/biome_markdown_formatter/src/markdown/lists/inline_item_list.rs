@@ -13,7 +13,9 @@ pub(crate) struct FormatMdInlineItemList {
 impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
     type Context = MarkdownFormatContext;
     fn fmt(&self, node: &MdInlineItemList, f: &mut MarkdownFormatter) -> FormatResult<()> {
-        if self.print_mode.is_normalize_words() {
+        if self.print_mode.is_auto_link_like() {
+            return self.fmt_auto_link_like(node, f);
+        } else if self.print_mode.is_normalize_words() {
             return self.fmt_normalize_words(node, f);
         } else if self.print_mode.is_all() {
             return self.fmt_trim_all(node, f);
@@ -91,6 +93,40 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
 }
 
 impl FormatMdInlineItemList {
+    /// If the first and last [MdTextual] are `<` and `>` respectively,
+    /// they are removed. Otherwise falls back to [TrimMode::All].
+    fn fmt_auto_link_like(
+        &self,
+        node: &MdInlineItemList,
+        f: &mut MarkdownFormatter,
+    ) -> FormatResult<()> {
+        let items: Vec<_> = node.iter().collect();
+
+        let starts_with_lt = matches!(items.first(), Some(AnyMdInline::MdTextual(t)) if t.value_token().is_ok_and(|tok| tok.text() == "<"));
+        let ends_with_gt = matches!(items.last(), Some(AnyMdInline::MdTextual(t)) if t.value_token().is_ok_and(|tok| tok.text() == ">"));
+
+        let is_auto_link = starts_with_lt && ends_with_gt && items.len() > 2;
+
+        if !is_auto_link {
+            return self.fmt_trim_all(node, f);
+        }
+
+        let mut joiner = f.join();
+        for (index, item) in items.iter().enumerate() {
+            if (index == 0 || index == items.len() - 1)
+                && let AnyMdInline::MdTextual(text) = item
+            {
+                joiner.entry(&text.format().with_options(FormatMdTextualOptions {
+                    should_remove: true,
+                    ..Default::default()
+                }));
+                continue;
+            }
+            joiner.entry(&item.format());
+        }
+        joiner.finish()
+    }
+
     /// Strips leading and trailing whitespace/hard-lines around the content.
     /// Items between the first and last non-empty nodes are kept as-is;
     /// items outside those boundaries are removed.

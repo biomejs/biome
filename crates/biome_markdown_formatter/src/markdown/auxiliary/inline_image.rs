@@ -33,7 +33,7 @@ impl FormatNodeRule<MdInlineImage> for FormatMdInlineImage {
                 destination
                     .format()
                     .with_options(FormatMdFormatInlineItemListOptions {
-                        print_mode: TextPrintMode::Trim(TrimMode::All)
+                        print_mode: TextPrintMode::Trim(TrimMode::AutoLinkLike)
                     })
             ]
         )?;

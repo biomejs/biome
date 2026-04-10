@@ -39,9 +39,7 @@ info: markdown/list/combined-lists.md
 +
  - hello5
  
--- hello6
-+- hello6
-\ No newline at end of file
+ - hello6
 ```
 
 # Output
@@ -59,4 +57,5 @@ info: markdown/list/combined-lists.md
 
 - hello5
 
-- hello6```
+- hello6
+```
