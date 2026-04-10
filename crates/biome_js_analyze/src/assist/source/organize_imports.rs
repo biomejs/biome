@@ -25,7 +25,7 @@ use specifiers_attributes::{
 use util::{attached_trivia, detached_trivia, has_detached_leading_comment, leading_newlines};
 
 declare_source_rule! {
-    /// Sorts and organizes imports and exports in your JavaScript and TypeScript files.
+    /// Sorts imports and exports in your JavaScript and TypeScript files.
     ///
     /// By default, imports and exports are sorted by "distance" from the current file:
     /// External dependencies come first, followed by local aliases, and local files come last.
@@ -41,7 +41,7 @@ declare_source_rule! {
     /// [natural sort order](https://en.wikipedia.org/wiki/Natural_sort_order)
     /// such that `A < a < a9 < a10 < B < b`
     ///
-    /// The organizer also merges imports and exports from the same source,
+    /// The action also merges imports and exports from the same source,
     /// sorts named specifiers and attributes alphabetically.
     ///
     /// For example, the following code...
@@ -63,7 +63,7 @@ declare_source_rule! {
     /// export { X } from "dep";
     /// ```
     ///
-    /// ...is sorted and organized as follows:
+    /// ...is sorted as follows:
     ///
     /// ```js,ignore
     /// import data from "https://example.org";
@@ -81,20 +81,28 @@ declare_source_rule! {
     /// export * from "./inner.js";
     /// ```
     ///
-    /// The organizer provides several options to customize how import and export are ordered:
+    /// ## Options
+    ///
+    /// The action provides several options to customize how import and export are ordered:
     ///
     /// - `groups` allows to group imports and exports before sorting them.
     ///   It allows expressing custom order between imports or exports.
     /// - `sortBareImports` allows sorting bare imports (also called side-effect imports).
-    ///   By default the organizer doesn't sort them.
+    ///   By default the action doesn't sort them.
     /// - `identifierOrder` allows changing how named specifiers and attributes are sorted
     ///
-    ///
-    /// ## Custom sorting using the `groups` option
+    /// ### Custom order using the `groups` option
     ///
     /// You can customize how imports and exports are grouped using the `groups` option.
     /// The option accepts an array of **group matchers** which in their simplest form
     /// are glob patterns or predefined group matchers.
+    /// Imports and exports that don't match any group are automatically moved after all the groups.
+    ///
+    /// Groups are always matched in order, so earlier matchers take priority.
+    /// To exclude some imports of a group, you can use an array of group matchers
+    /// with negated matchers (natchers prefixed with `!`).
+    /// In the following example, we use the negated glob matcher `!@myown/**`,
+    /// to exclude `@myown/package` from the `:PACKAGE:` group.
     ///
     /// With this configuration...
     ///
@@ -141,22 +149,16 @@ declare_source_rule! {
     /// import sibling from "./file.js";
     /// ```
     ///
-    /// Imports and exports that don't match any group are placed at the end.
-    /// **Groups are always matched in order, so earlier matchers take priority**.
-    /// This is why in the previous example we use the negated matcher `!@myown/**`,
-    /// otherwise imports such as `@myown/package` could be matched by the predefined
-    /// group `:PACKAGE:` and placed in the wrong group.
+    /// Each entry in the `groups` array is a group matcher that can be:
     ///
-    /// Each entry in the `groups` array is a **group matcher** that can be:
-    ///
-    /// - A **predefined group** like `:NODE:` or `:PACKAGE:`
-    /// - A **glob pattern** like `@my/lib/**`
+    /// - A predefined group like `:NODE:` or `:PACKAGE:`
+    /// - A glob pattern like `@my/lib/**`
     ///   We support a [limited set of globs](#supported-glob-patterns).
-    /// - An **object matcher** like `{ "type": true }` for type-only imports
-    /// - A **list** combining any of the above, e.g. `[":BUN:", ":NODE:"]`
+    /// - An object matcher like `{ "type": true }` for type-only imports
+    /// - A list combining any of the above, e.g. `[":BUN:", ":NODE:"]`
     /// - `:BLANK_LINE:` to insert a blank line between groups
     ///
-    /// ### Predefined groups
+    /// #### Predefined groups
     ///
     /// - `:URL:` -- sources starting with `https://` or `http://`
     /// - `:NODE:` -- Node.js built-in modules (`node:path`, `fs`, `path`, etc.)
@@ -169,13 +171,13 @@ declare_source_rule! {
     /// You can prefix a predefined group matcher with `!` to negate the matcher.
     /// For example `!:NODE:` matches everything that isn't a Node.js built-in.
     ///
-    /// ### Glob patterns
+    /// #### Glob patterns
     ///
     /// Use glob patterns to match specific import sources.
     /// Prefix with `!` to exclude sources from a group:
     /// `!:NODE:` matches everything that isn't a Node.js built-in.
     ///
-    /// ### Object matchers
+    /// #### Object matchers
     ///
     /// Use an object matcher to separate `import type` from regular imports:
     /// Setting `"type": true` matches only `import type` and `export type` statements.
@@ -208,8 +210,7 @@ declare_source_rule! {
     /// import type { T } from "@my/lib";
     /// ```
     ///
-    ///
-    /// ## Sorting bare imports
+    /// ### Sorting bare imports
     ///
     /// By default, _bare imports_ (also called _side-effect imports_) form individual chunks.
     /// Setting `sortBareImports` to `true`, allow sorting them with other imports.
@@ -232,8 +233,7 @@ declare_source_rule! {
     /// import { A } from "my-package";
     /// ```
     ///
-    ///
-    /// ## Change the sorting of named specifiers and attributes
+    /// ### Change the sorting of named specifiers and attributes
     ///
     /// By default, attributes, imported and exported names are sorted with a `natural` sort.
     /// You can opt for a `lexicographic` sort (sometimes referred as _binary_ sort) by
@@ -430,7 +430,7 @@ declare_source_rule! {
     ///
     /// ### Maximize import merging with `useImportType`
     ///
-    /// The organizer merges imports from the same source when possible.
+    /// The action merges imports from the same source when possible.
     /// To merge type-only imports (`import type { T }`) with regular imports (`import { V }`),
     /// enable [`useImportType`](https://biomejs.dev/linter/rules/use-import-type/) with `inlineType`:
     ///
@@ -462,7 +462,7 @@ declare_source_rule! {
     ///
     /// ## How it works
     ///
-    /// This section provides an in-depth explanation of the internal mechanics of the organizer.
+    /// This section provides an in-depth explanation of the internal mechanics of the action.
     ///
     /// ### Import anatomy
     ///
@@ -482,7 +482,7 @@ declare_source_rule! {
     ///
     /// Before sorting, imports and exports are divided into **chunks**.
     /// A chunk is a sequence of adjacent imports or exports.
-    /// The organizer never moves imports or exports across chunk boundaries.
+    /// The action never moves imports or exports across chunk boundaries.
     ///
     /// Chunks are separated by:
     /// - Switching between imports and exports
@@ -514,7 +514,7 @@ declare_source_rule! {
     /// import { C } from "c";
     /// ```
     ///
-    /// The organizer ensures blank lines between different chunks.
+    /// The action ensures blank lines between different chunks.
     /// Side-effect imports adjacent to a chunk are not separated by a blank line.
     ///
     /// :::note
