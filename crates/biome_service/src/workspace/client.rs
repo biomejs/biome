@@ -2,11 +2,12 @@ use super::{
     ChangeFileParams, ChangeFileResult, CloseFileParams, FileExitsParams, FixFileParams,
     FixFileResult, FormatFileParams, FormatOnTypeParams, FormatRangeParams,
     GetControlFlowGraphParams, GetFormatterIRParams, GetModuleGraphParams, GetModuleGraphResult,
-    GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams,
-    OpenFileResult, PullActionsParams, PullActionsResult, PullDiagnosticsAndActionsParams,
-    PullDiagnosticsAndActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RenameParams,
-    RenameResult, ScanProjectParams, ScanProjectResult, SearchPatternParams, SearchResults,
-    SupportsFeatureParams, UpdateModuleGraphParams, UpdateSettingsParams, UpdateSettingsResult,
+    GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, MigrateConfigurationParams,
+    MigrateConfigurationResult, OpenFileParams, OpenFileResult, PullActionsParams,
+    PullActionsResult, PullDiagnosticsAndActionsParams, PullDiagnosticsAndActionsResult,
+    PullDiagnosticsParams, PullDiagnosticsResult, RenameParams, RenameResult, ScanProjectParams,
+    ScanProjectResult, SearchPatternParams, SearchResults, SupportsFeatureParams,
+    UpdateModuleGraphParams, UpdateSettingsParams, UpdateSettingsResult,
 };
 use crate::workspace::{
     CheckFileSizeParams, CheckFileSizeResult, CloseProjectParams, FileFeaturesResult,
@@ -155,6 +156,13 @@ where
         params: CheckFileSizeParams,
     ) -> Result<CheckFileSizeResult, WorkspaceError> {
         self.request("biome/check_file_size", params)
+    }
+
+    fn migrate_configuration(
+        &self,
+        params: MigrateConfigurationParams,
+    ) -> Result<MigrateConfigurationResult, WorkspaceError> {
+        self.request("biome/migrate_configuration", params)
     }
 
     fn change_file(&self, params: ChangeFileParams) -> Result<ChangeFileResult, WorkspaceError> {

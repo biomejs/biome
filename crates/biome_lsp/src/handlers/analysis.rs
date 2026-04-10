@@ -9,7 +9,7 @@ use biome_analyze::{
 };
 use biome_configuration::analyzer::{AnalyzerSelector, RuleSelector};
 use biome_diagnostics::Error;
-use biome_fs::BiomePath;
+use biome_fs::{BiomePath, ConfigName};
 use biome_line_index::LineIndex;
 use biome_lsp_converters::from_proto;
 use biome_rowan::{TextRange, TextSize};
@@ -18,8 +18,8 @@ use biome_service::file_handlers::svelte::SvelteFileHandler;
 use biome_service::file_handlers::vue::VueFileHandler;
 use biome_service::workspace::{
     CheckFileSizeParams, FeaturesBuilder, FileFeaturesResult, FixFileMode, FixFileParams,
-    GetFileContentParams, IgnoreKind, PathIsIgnoredParams, ProjectKey, PullActionsParams,
-    SupportsFeatureParams,
+    GetFileContentParams, IgnoreKind, MigrateConfigurationParams, PathIsIgnoredParams, ProjectKey,
+    PullActionsParams, SupportsFeatureParams,
 };
 use biome_service::{WorkspaceError, extension_error};
 use serde_json::Value;
@@ -34,6 +34,7 @@ use tracing::{debug, info};
 const FIX_ALL_CATEGORY: ActionCategory = ActionCategory::Source(SourceActionKind::FixAll);
 const ORGANIZE_IMPORTS_CATEGORY: ActionCategory =
     ActionCategory::Source(SourceActionKind::OrganizeImports);
+const CONFIG_MIGRATE_QUICKFIX_KIND: &str = "quickfix.biome.migrateConfiguration";
 
 fn fix_all_kind() -> CodeActionKind {
     match FIX_ALL_CATEGORY.to_str() {
@@ -91,10 +92,6 @@ pub(crate) fn code_actions(
             .build(),
     })?;
 
-    if !file_features.supports_lint() && !file_features.supports_assist() {
-        info!("Linter and assist are disabled.");
-        return Ok(Some(Vec::new()));
-    }
     let mut categories = RuleCategoriesBuilder::default();
     if file_features.supports_lint() {
         categories = categories.with_lint();
@@ -130,6 +127,20 @@ pub(crate) fn code_actions(
     let position_encoding = session.position_encoding();
 
     let diagnostics = params.context.diagnostics;
+    let migrate_configuration_action = config_migrate_code_action(
+        session,
+        &url,
+        &path,
+        &doc.line_index,
+        &diagnostics,
+        &filters,
+        doc.project_key,
+    )?;
+    if !file_features.supports_lint() && !file_features.supports_assist() {
+        info!("Linter and assist are disabled.");
+        return Ok(Some(migrate_configuration_action.into_iter().collect()));
+    }
+
     let content = session.workspace.get_file_content(GetFileContentParams {
         project_key: doc.project_key,
         path: path.clone(),
@@ -325,6 +336,7 @@ pub(crate) fn code_actions(
             Some(CodeActionOrCommand::CodeAction(lsp_action))
         })
         .chain(fix_all)
+        .chain(migrate_configuration_action)
         .collect();
 
     // If any actions is marked as fixing a diagnostic, hide other actions
@@ -695,6 +707,92 @@ fn fix_all(
         kind: Some(fix_all_kind()),
         diagnostics: Some(diagnostics),
         edit: Some(edit),
+        command: None,
+        is_preferred: Some(true),
+        disabled: None,
+        data: None,
+    })))
+}
+
+fn is_biome_configuration(path: &BiomePath) -> bool {
+    path.ends_with(ConfigName::biome_json()) || path.ends_with(ConfigName::biome_jsonc())
+}
+
+fn code_action_kind_matches_filter(kind: &str, filter: &str) -> bool {
+    kind == filter
+        || kind
+            .strip_prefix(filter)
+            .is_some_and(|suffix| suffix.starts_with('.'))
+}
+
+fn config_migrate_code_action(
+    session: &Session,
+    url: &Uri,
+    path: &BiomePath,
+    line_index: &LineIndex,
+    diagnostics: &[lsp::Diagnostic],
+    filters: &[&str],
+    project_key: biome_service::projects::ProjectKey,
+) -> Result<Option<CodeActionOrCommand>, Error> {
+    if !is_biome_configuration(path) {
+        return Ok(None);
+    }
+
+    if !filters.is_empty()
+        && !filters
+            .iter()
+            .any(|filter| code_action_kind_matches_filter(CONFIG_MIGRATE_QUICKFIX_KIND, filter))
+    {
+        return Ok(None);
+    }
+
+    let relevant_diagnostics: Vec<_> = diagnostics
+        .iter()
+        .filter(|diagnostic| {
+            diagnostic.source.as_deref() == Some("biome")
+                && matches!(
+                    diagnostic.code.as_ref(),
+                    Some(lsp::NumberOrString::String(code)) if code == "deserialize"
+                )
+        })
+        .cloned()
+        .collect();
+    if relevant_diagnostics.is_empty() {
+        return Ok(None);
+    }
+
+    let Some(migrated_content) = session
+        .workspace
+        .migrate_configuration(MigrateConfigurationParams {
+            project_key,
+            path: path.clone(),
+        })?
+        .content
+    else {
+        return Ok(None);
+    };
+
+    let mut changes = HashMap::new();
+    changes.insert(
+        url.clone(),
+        vec![lsp::TextEdit {
+            range: lsp::Range {
+                start: lsp::Position::new(0, 0),
+                end: lsp::Position::new(line_index.len(), 0),
+            },
+            new_text: migrated_content,
+        }],
+    );
+
+    Ok(Some(CodeActionOrCommand::CodeAction(lsp::CodeAction {
+        title: String::from("Migrate configuration file"),
+        kind: Some(CodeActionKind::new(CONFIG_MIGRATE_QUICKFIX_KIND)),
+        diagnostics: Some(relevant_diagnostics),
+        edit: Some(lsp::WorkspaceEdit {
+            changes: Some(changes),
+            document_changes: None,
+            change_annotations: None,
+        }),
         command: None,
         is_preferred: Some(true),
         disabled: None,

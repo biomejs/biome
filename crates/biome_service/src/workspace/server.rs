@@ -25,13 +25,14 @@ use crate::workspace::{
     FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFileContentParams,
     GetFormatterIRParams, GetModuleGraphParams, GetModuleGraphResult, GetRegisteredTypesParams,
     GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, GetTypeInfoParams,
-    IgnoreKind, OpenFileParams, OpenFileResult, OpenProjectParams, OpenProjectResult,
-    ParsePatternParams, ParsePatternResult, PathIsIgnoredParams, PatternId, PullActionsParams,
-    PullActionsResult, PullDiagnosticsAndActionsParams, PullDiagnosticsAndActionsResult,
-    PullDiagnosticsParams, PullDiagnosticsResult, RageEntry, RageParams, RageResult, RenameParams,
-    RenameResult, ScanKind, ScanProjectParams, ScanProjectResult, SearchPatternParams,
-    SearchResults, ServerInfo, ServiceNotification, Settings, SupportsFeatureParams,
-    UpdateModuleGraphParams, UpdateSettingsParams, UpdateSettingsResult,
+    IgnoreKind, MigrateConfigurationParams, MigrateConfigurationResult, OpenFileParams,
+    OpenFileResult, OpenProjectParams, OpenProjectResult, ParsePatternParams, ParsePatternResult,
+    PathIsIgnoredParams, PatternId, PullActionsParams, PullActionsResult,
+    PullDiagnosticsAndActionsParams, PullDiagnosticsAndActionsResult, PullDiagnosticsParams,
+    PullDiagnosticsResult, RageEntry, RageParams, RageResult, RenameParams, RenameResult, ScanKind,
+    ScanProjectParams, ScanProjectResult, SearchPatternParams, SearchResults, ServerInfo,
+    ServiceNotification, Settings, SupportsFeatureParams, UpdateModuleGraphParams,
+    UpdateSettingsParams, UpdateSettingsResult,
 };
 use crate::{Workspace, WorkspaceError};
 use biome_analyze::{AnalyzerPluginVec, RuleCategory};
@@ -51,8 +52,10 @@ use biome_fs::{BiomePath, ConfigName, PathKind, normalize_path};
 use biome_grit_patterns::{CompilePatternOptions, GritQuery, compile_pattern_with_options};
 use biome_html_syntax::HtmlRoot;
 use biome_js_syntax::{AnyJsRoot, EmbeddingKind, LanguageVariant, ModuleKind};
-use biome_json_parser::JsonParserOptions;
-use biome_json_syntax::JsonFileSource;
+use biome_json_formatter::format_node;
+use biome_json_parser::{JsonParserOptions, parse_json_with_cache};
+use biome_json_syntax::{JsonFileSource, JsonLanguage};
+use biome_migrate::migrate_configuration_tree;
 use biome_module_graph::{HtmlEmbeddedContent, ModuleDependencies, ModuleDiagnostic, ModuleGraph};
 use biome_package::{Catalogs, PackageJson, PackageType};
 use biome_parser::AnyParse;
@@ -61,7 +64,7 @@ use biome_plugin_loader::Plugins;
 use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
 use biome_project_layout::ProjectLayout;
 use biome_resolver::FsWithResolverProxy;
-use biome_rowan::{NodeCache, SendNode};
+use biome_rowan::{AstNode, NodeCache, SendNode};
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
 use papaya::HashMap;
@@ -288,6 +291,16 @@ impl WorkspaceServer {
         }
 
         None
+    }
+
+    fn is_root_biome_config(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
+        path.file_name().is_some_and(|file_name| {
+            file_name == ConfigName::biome_json() || file_name == ConfigName::biome_jsonc()
+        }) && path.parent().is_some_and(|directory| {
+            self.projects
+                .get_project_path(project_key)
+                .is_some_and(|project_path| directory == project_path)
+        })
     }
 
     /// Gets the supported capabilities for a given file path.
@@ -1752,6 +1765,62 @@ impl Workspace for WorkspaceServer {
                 |settings| settings.get_max_file_size(&params.path),
             );
         Ok(CheckFileSizeResult { file_size, limit })
+    }
+
+    fn migrate_configuration(
+        &self,
+        params: MigrateConfigurationParams,
+    ) -> Result<MigrateConfigurationResult, WorkspaceError> {
+        if !params.path.ends_with(ConfigName::biome_json())
+            && !params.path.ends_with(ConfigName::biome_jsonc())
+        {
+            return Ok(MigrateConfigurationResult::default());
+        }
+
+        let original_content = self.get_file_content(GetFileContentParams {
+            project_key: params.project_key,
+            path: params.path.clone(),
+        })?;
+
+        let file_source = JsonFileSource::try_from(params.path.as_path()).unwrap_or_default();
+        let mut cache = NodeCache::default();
+        let parse = parse_json_with_cache(
+            &original_content,
+            &mut cache,
+            JsonParserOptions::from(&file_source),
+        );
+        if parse.has_errors() {
+            return Ok(MigrateConfigurationResult::default());
+        }
+
+        let Some(migrated_tree) = migrate_configuration_tree(
+            &parse.tree(),
+            biome_analyze::AnalysisFilter::default(),
+            params.path.as_path(),
+            self.is_root_biome_config(params.project_key, params.path.as_path()),
+        ) else {
+            return Ok(MigrateConfigurationResult::default());
+        };
+
+        let settings = self
+            .projects
+            .get_settings_based_on_path(params.project_key, &params.path)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let settings_handle = self.settings_handle(&settings, None);
+        let document_file_source = DocumentFileSource::from(file_source);
+        let options =
+            settings_handle.format_options::<JsonLanguage>(&params.path, &document_file_source);
+        let formatted =
+            format_node(options, migrated_tree.syntax()).map_err(WorkspaceError::FormatError)?;
+        let migrated_content = formatted
+            .print()
+            .map_err(WorkspaceError::PrintError)?
+            .as_code()
+            .to_string();
+
+        Ok(MigrateConfigurationResult {
+            content: (migrated_content != original_content).then_some(migrated_content),
+        })
     }
 
     /// Changes the content of an open file.

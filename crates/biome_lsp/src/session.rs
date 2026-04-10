@@ -8,7 +8,7 @@ use biome_configuration::{Configuration, ConfigurationPathHint};
 use biome_console::markup;
 use biome_deserialize::Merge;
 use biome_diagnostics::{PrintDescription, Severity};
-use biome_fs::{BiomePath, normalize_path};
+use biome_fs::{BiomePath, ConfigName, normalize_path};
 use biome_line_index::WideEncoding;
 use biome_lsp_converters::{PositionEncoding, negotiated_encoding};
 use biome_service::Workspace;
@@ -213,6 +213,10 @@ impl CapabilitySet {
 }
 
 impl Session {
+    fn is_biome_configuration_file(path: &BiomePath) -> bool {
+        path.ends_with(ConfigName::biome_json()) || path.ends_with(ConfigName::biome_jsonc())
+    }
+
     pub(crate) fn new(
         key: SessionKey,
         client: Client,
@@ -444,8 +448,12 @@ impl Session {
             skip_ignore_check: false,
             not_requested_features: FeaturesBuilder::new().with_search().build(),
         })?;
+        let is_biome_configuration = Self::is_biome_configuration_file(&biome_path);
 
-        if !file_features.supports_lint() && !file_features.supports_assist() {
+        if !is_biome_configuration
+            && !file_features.supports_lint()
+            && !file_features.supports_assist()
+        {
             self.client
                 .publish_diagnostics(url.clone(), vec![], Some(doc.version))
                 .await;
@@ -454,7 +462,7 @@ impl Session {
 
         let diagnostics: Vec<Diagnostic> = {
             let mut categories = RuleCategoriesBuilder::default().with_syntax();
-            if self.configuration_status().is_loaded() {
+            if self.configuration_status().is_loaded() || is_biome_configuration {
                 if file_features.supports_lint() {
                     categories = categories.with_lint();
                 }

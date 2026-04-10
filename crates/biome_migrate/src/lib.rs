@@ -9,13 +9,13 @@ use crate::registry::visit_migration_registry;
 use crate::services::IsRoot;
 pub use biome_analyze::ControlFlow;
 use biome_analyze::{
-    AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal, ApplySuppression,
-    InspectMatcher, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
-    SuppressionAction,
+    ActionFilter, AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal,
+    ApplySuppression, InspectMatcher, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction,
+    RuleRegistry, SuppressionAction,
 };
 use biome_diagnostics::Error;
-use biome_json_syntax::JsonLanguage;
-use biome_rowan::{BatchMutation, SyntaxToken};
+use biome_json_syntax::{JsonLanguage, JsonRoot};
+use biome_rowan::{AstNode, BatchMutation, SyntaxToken};
 use camino::Utf8Path;
 use std::convert::Infallible;
 use std::ops::Deref;
@@ -129,11 +129,43 @@ where
     )
 }
 
+pub fn migrate_configuration_tree(
+    root: &JsonRoot,
+    filter: AnalysisFilter,
+    configuration_file_path: &Utf8Path,
+    is_root: bool,
+) -> Option<JsonRoot> {
+    let mut tree = root.clone();
+
+    loop {
+        let (action, _) =
+            migrate_configuration(&tree, filter, configuration_file_path, is_root, |signal| {
+                if let Some(action) = signal.actions(ActionFilter::rule_fix()).next() {
+                    return ControlFlow::Break(action);
+                }
+                ControlFlow::Continue(())
+            });
+
+        let Some(action) = action else {
+            break;
+        };
+
+        let (root, Some(_)) = action.mutation.commit_with_text_range_and_edit(true) else {
+            continue;
+        };
+
+        let root = JsonRoot::cast(root)?;
+        tree = root;
+    }
+
+    (tree != *root).then_some(tree)
+}
+
 pub(crate) type MigrationAction = RuleAction<JsonLanguage>;
 
 #[cfg(test)]
 mod test {
-    use crate::migrate_configuration;
+    use crate::{migrate_configuration, migrate_configuration_tree};
     use biome_analyze::{ActionFilter, AnalysisFilter, ControlFlow, Never};
     use biome_console::fmt::{Formatter, Termcolor};
     use biome_console::{Markup, markup};
@@ -203,5 +235,49 @@ mod test {
                 ControlFlow::<Never>::Continue(())
             },
         );
+    }
+
+    #[test]
+    fn migrate_configuration_tree_applies_native_config_migrations() {
+        let source = r#"{
+  "files": {
+    "experimentalScannerIgnores": ["dist"]
+  }
+}
+"#;
+
+        let parsed = parse_json(source, JsonParserOptions::default());
+        let migrated = migrate_configuration_tree(
+            &parsed.tree(),
+            AnalysisFilter::default(),
+            Utf8Path::new("biome.json"),
+            true,
+        )
+        .unwrap();
+
+        assert_eq!(
+            migrated.to_string(),
+            concat!(
+                "{\n",
+                "  \"files\": {\n",
+                "    \"includes\":[\"**\", \"!!**/dist\"]\n",
+                "  }\n",
+                "}\n"
+            )
+        );
+    }
+
+    #[test]
+    fn migrate_configuration_tree_returns_none_for_up_to_date_config() {
+        let parsed = parse_json("{}\n", JsonParserOptions::default());
+
+        let migrated = migrate_configuration_tree(
+            &parsed.tree(),
+            AnalysisFilter::default(),
+            Utf8Path::new("biome.json"),
+            true,
+        );
+
+        assert_eq!(migrated, None);
     }
 }

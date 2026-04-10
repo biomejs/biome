@@ -949,6 +949,22 @@ pub struct GetFileContentParams {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
+pub struct MigrateConfigurationParams {
+    pub project_key: ProjectKey,
+    pub path: BiomePath,
+}
+
+#[derive(Debug, Default, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct MigrateConfigurationResult {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct CheckFileSizeParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
@@ -1599,6 +1615,13 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
         &self,
         params: CheckFileSizeParams,
     ) -> Result<CheckFileSizeResult, WorkspaceError>;
+
+    /// Returns the migrated content of an open Biome configuration file if any
+    /// native config migration applies.
+    fn migrate_configuration(
+        &self,
+        params: MigrateConfigurationParams,
+    ) -> Result<MigrateConfigurationResult, WorkspaceError>;
 
     /// Changes the content of an open file.
     fn change_file(&self, params: ChangeFileParams) -> Result<ChangeFileResult, WorkspaceError>;

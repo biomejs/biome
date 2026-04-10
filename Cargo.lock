@@ -1695,6 +1695,7 @@ dependencies = [
  "biome_markdown_formatter",
  "biome_markdown_parser",
  "biome_markdown_syntax",
+ "biome_migrate",
  "biome_module_graph",
  "biome_package",
  "biome_parser",
