@@ -494,21 +494,24 @@ fn write_grouped_arguments(
         // This back tracking is required because testing if the grouped argument breaks would also return `true`
         // if any content of the function body breaks. But, as far as this is concerned, it's only interested if
         // any content in the signature breaks.
-        if matches!(result, Err(FormatError::PoorLayout)) {
-            drop(buffer);
-            f.restore_state_snapshot(snapshot);
+        match result {
+            Ok(()) => {
+                buffer.write_element(FormatElement::Tag(Tag::EndBestFittingEntry))?;
+                buffer.into_vec()
+            }
+            Err(FormatError::PoorLayout) => {
+                drop(buffer);
+                f.restore_state_snapshot(snapshot);
 
-            let mut most_expanded_iter = most_expanded.into_iter();
-            // Skip over the StartBestFittingEntry/EndBestFittingEntry items.
-            most_expanded_iter.next();
-            most_expanded_iter.next_back();
+                let mut most_expanded_iter = most_expanded.into_iter();
+                // Skip over the StartBestFittingEntry/EndBestFittingEntry items.
+                most_expanded_iter.next();
+                most_expanded_iter.next_back();
 
-            return f.write_elements(most_expanded_iter);
+                return f.write_elements(most_expanded_iter);
+            }
+            Err(err) => return Err(err),
         }
-
-        buffer.write_element(FormatElement::Tag(Tag::EndBestFittingEntry))?;
-
-        buffer.into_vec()
     };
 
     // Write the second variant that forces the group of the first/last argument to expand.
