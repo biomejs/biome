@@ -834,24 +834,21 @@ pub(crate) fn update_snippets(
         };
 
         if let Some(value_token) = element.value_token() {
-            let old_text = value_token.text_trimmed();
-            let leading_trivia = read_leading_trivia(old_text);
-            let trailing_trivia = read_trailing_trivia(old_text);
+            let new_token_text = if snippet.needs_reindent {
+                // The formatted code doesn't carry the host's nesting
+                // indentation. Re-apply it to every line so the embed
+                // lines up with its surroundings.
+                let old_text = value_token.text_trimmed();
+                let leading_trivia = read_leading_trivia(old_text);
+                let trailing_trivia = read_trailing_trivia(old_text);
+                let indent_prefix = content_indent_prefix(&leading_trivia);
+                let reindented = reindent_embedded_code(snippet.new_code.trim(), indent_prefix);
+                format!("{}{}{}", leading_trivia, reindented, trailing_trivia)
+            } else {
+                snippet.new_code.clone()
+            };
 
-            // The embedded formatter returns code indented from column
-            // zero — it has no idea how deep the embed sits inside the
-            // host file. Splicing it back as-is would only indent the
-            // first line; add the host indent to every line so the
-            // embed lines up with its surroundings.
-            let indent_prefix = content_indent_prefix(&leading_trivia);
-            let reindented_new_code =
-                reindent_embedded_code(snippet.new_code.trim(), indent_prefix);
-
-            let new_token = ident(&format!(
-                "{}{}{}",
-                leading_trivia, reindented_new_code, trailing_trivia
-            ));
-            mutation.replace_token(value_token, new_token);
+            mutation.replace_token(value_token, ident(&new_token_text));
         }
     }
 

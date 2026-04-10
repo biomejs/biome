@@ -1113,6 +1113,10 @@ pub(crate) struct CodeActionsParams<'a> {
 pub(crate) struct UpdateSnippetsNodes {
     pub(crate) range: TextRange,
     pub(crate) new_code: String,
+    /// When `true`, `new_code` needs to be re-indented to match the
+    /// host's nesting level. When `false`, `new_code` already has the
+    /// right shape and can be spliced back as-is.
+    pub(crate) needs_reindent: bool,
 }
 
 type Lint = fn(LintParams) -> LintResults;
