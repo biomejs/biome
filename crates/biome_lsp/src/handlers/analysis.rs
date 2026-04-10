@@ -112,6 +112,7 @@ pub(crate) fn code_actions(
     let mut has_organize_imports = false;
     let mut filters = Vec::new();
     if let Some(filter) = &params.context.only {
+        filters.reserve(filter.len());
         for kind in filter {
             let kind = kind.as_str();
             if FIX_ALL_CATEGORY.matches(kind) {
@@ -138,7 +139,7 @@ pub(crate) fn code_actions(
     )?;
     if !file_features.supports_lint() && !file_features.supports_assist() {
         info!("Linter and assist are disabled.");
-        return Ok(Some(migrate_configuration_action.into_iter().collect()));
+        return Ok(migrate_configuration_action.map(|action| vec![action]));
     }
 
     let content = session.workspace.get_file_content(GetFileContentParams {
@@ -568,16 +569,6 @@ fn fix_all(
     })?;
     let should_format = file_features.supports_format();
 
-    if session.workspace.is_path_ignored(PathIsIgnoredParams {
-        path: path.clone(),
-        is_dir: false,
-        project_key: doc.project_key,
-        features: analyzer_features,
-        ignore_kind: IgnoreKind::Ancestors,
-    })? {
-        return Ok(None);
-    }
-
     let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {
         project_key: doc.project_key,
         path: path.clone(),
@@ -746,18 +737,15 @@ fn config_migrate_code_action(
         return Ok(None);
     }
 
-    let relevant_diagnostics: Vec<_> = diagnostics
-        .iter()
-        .filter(|diagnostic| {
-            diagnostic.source.as_deref() == Some("biome")
-                && matches!(
-                    diagnostic.code.as_ref(),
-                    Some(lsp::NumberOrString::String(code)) if code == "deserialize"
-                )
-        })
-        .cloned()
-        .collect();
-    if relevant_diagnostics.is_empty() {
+    let is_relevant_diagnostic = |diagnostic: &lsp::Diagnostic| {
+        diagnostic.source.as_deref() == Some("biome")
+            && matches!(
+                diagnostic.code.as_ref(),
+                Some(lsp::NumberOrString::String(code)) if code == "deserialize"
+            )
+    };
+
+    if !diagnostics.iter().any(is_relevant_diagnostic) {
         return Ok(None);
     }
 
@@ -771,6 +759,12 @@ fn config_migrate_code_action(
     else {
         return Ok(None);
     };
+
+    let relevant_diagnostics = diagnostics
+        .iter()
+        .filter(|diagnostic| is_relevant_diagnostic(diagnostic))
+        .cloned()
+        .collect();
 
     let mut changes = HashMap::new();
     changes.insert(

@@ -135,16 +135,22 @@ pub fn migrate_configuration_tree(
     configuration_file_path: &Utf8Path,
     is_root: bool,
 ) -> Option<JsonRoot> {
-    let mut tree = root.clone();
+    let mut tree = None;
 
     loop {
-        let (action, _) =
-            migrate_configuration(&tree, filter, configuration_file_path, is_root, |signal| {
+        let current_tree = tree.as_ref().unwrap_or(root);
+        let (action, _) = migrate_configuration(
+            current_tree,
+            filter,
+            configuration_file_path,
+            is_root,
+            |signal| {
                 if let Some(action) = signal.actions(ActionFilter::rule_fix()).next() {
                     return ControlFlow::Break(action);
                 }
                 ControlFlow::Continue(())
-            });
+            },
+        );
 
         let Some(action) = action else {
             break;
@@ -155,10 +161,10 @@ pub fn migrate_configuration_tree(
         };
 
         let root = JsonRoot::cast(root)?;
-        tree = root;
+        tree = Some(root);
     }
 
-    (tree != *root).then_some(tree)
+    tree
 }
 
 pub(crate) type MigrationAction = RuleAction<JsonLanguage>;
