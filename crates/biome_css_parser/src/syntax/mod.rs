@@ -497,7 +497,7 @@ pub(crate) fn parse_any_value_with_context(
 
 #[inline]
 fn parse_any_exclusive_scss_value(p: &mut CssParser) -> ParsedSyntax {
-    if is_at_scss_function(p) {
+    if is_at_scss_function(p) && !p.nth_at(2, T![$]) {
         CssSyntaxFeatures::Scss.parse_exclusive_syntax(p, parse_scss_function, |p, m| {
             scss_only_syntax_error(p, "SCSS qualified function names", m.range(p))
         })

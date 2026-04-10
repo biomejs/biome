@@ -25,7 +25,14 @@ pub(crate) fn is_at_scss_function(p: &mut CssParser) -> bool {
 
 #[inline]
 pub(crate) fn is_nth_at_scss_function(p: &mut CssParser, n: usize) -> bool {
-    is_nth_at_scss_qualified_name(p, n) && p.nth_at(n + 3, T!['('])
+    if !is_nth_at_scss_qualified_name(p, n) {
+        return false;
+    }
+
+    // `module.name(` has `(` at `n + 3`, while invalid function names such as
+    // `module.$name(` include the `$` token and place `(` at `n + 4`.
+    let l_paren_offset = if p.nth_at(n + 2, T![$]) { 4 } else { 3 };
+    p.nth_at(n + l_paren_offset, T!['('])
 }
 
 /// Parses an SCSS function call whose head uses a module-qualified function

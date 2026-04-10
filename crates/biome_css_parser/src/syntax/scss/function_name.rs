@@ -35,7 +35,10 @@ pub(crate) fn parse_scss_function_name(p: &mut CssParser) -> ParsedSyntax {
     }
 
     if is_at_scss_qualified_name(p) {
-        parse_scss_qualified_name(p)
+        let has_dollar_member = p.nth_at(2, T![$]);
+        parse_scss_qualified_name(p).map(|marker| {
+            add_scss_variable_member_function_name_diagnostic(p, has_dollar_member, marker)
+        })
     } else if is_at_scss_interpolated_identifier(p) {
         parse_scss_interpolated_identifier(p)
     } else {

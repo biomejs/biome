@@ -2857,6 +2857,8 @@ ScssInterpolatedIdentifier =
 
 ScssInterpolatedIdentifierPartList = AnyScssInterpolatedIdentifierPart*
 
+// #{$a}-#{$b}
+//      ^
 ScssInterpolatedIdentifierHyphen =
 	'-'
 
