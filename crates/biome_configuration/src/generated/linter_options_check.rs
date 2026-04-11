@@ -673,6 +673,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_irregular_whitespace::NoIrregularWhitespaceOptions>(),
     ));
     result.push((
+        "nursery",
+        "noJsxLeakedSemicolon",
+        TypeId::of::<biome_rule_options::no_jsx_leaked_semicolon::NoJsxLeakedSemicolonOptions>(),
+    ));
+    result.push((
         "style",
         "noJsxLiterals",
         TypeId::of::<biome_rule_options::no_jsx_literals::NoJsxLiteralsOptions>(),

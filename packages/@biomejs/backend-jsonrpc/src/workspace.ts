@@ -2182,6 +2182,11 @@ See https://biomejs.dev/linter/rules/no-inline-styles
 	 */
 	noInlineStyles?: NoInlineStylesConfiguration;
 	/**
+	* Disallows leaked semicolons in JSX text nodes.
+See https://biomejs.dev/linter/rules/no-jsx-leaked-semicolon 
+	 */
+	noJsxLeakedSemicolon?: NoJsxLeakedSemicolonConfiguration;
+	/**
 	* Disallow .bind(), arrow functions, or function expressions in JSX props.
 See https://biomejs.dev/linter/rules/no-jsx-props-bind 
 	 */
@@ -4230,6 +4235,9 @@ export type NoIncrementDecrementConfiguration =
 export type NoInlineStylesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoInlineStylesOptions;
+export type NoJsxLeakedSemicolonConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoJsxLeakedSemicolonOptions;
 export type NoJsxPropsBindConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsxPropsBindOptions;
@@ -5939,6 +5947,11 @@ export interface RuleWithNoInlineStylesOptions {
 	level: RulePlainConfiguration;
 	options?: NoInlineStylesOptions;
 }
+export interface RuleWithNoJsxLeakedSemicolonOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoJsxLeakedSemicolonOptions;
+}
 export interface RuleWithNoJsxPropsBindOptions {
 	level: RulePlainConfiguration;
 	options?: NoJsxPropsBindOptions;
@@ -7575,6 +7588,7 @@ export interface NoIncrementDecrementOptions {
 	allowForLoopAfterthoughts?: boolean;
 }
 export type NoInlineStylesOptions = {};
+export type NoJsxLeakedSemicolonOptions = {};
 export type NoJsxPropsBindOptions = {};
 export type NoLeakedRenderOptions = {};
 export type NoMisleadingReturnTypeOptions = {};
@@ -8734,6 +8748,7 @@ export type Category =
 	| "lint/nursery/noImpliedEval"
 	| "lint/nursery/noIncrementDecrement"
 	| "lint/nursery/noInlineStyles"
+	| "lint/nursery/noJsxLeakedSemicolon"
 	| "lint/nursery/noJsxPropsBind"
 	| "lint/nursery/noLeakedRender"
 	| "lint/nursery/noMissingGenericFamilyKeyword"

@@ -1,0 +1,166 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+const Invalid1 = () => {
+	return (
+		<div>
+			<div />;
+		</div>
+	);
+}
+
+const Invalid2 = () => {
+	return (
+		<div>
+			<Component>
+				<div />
+			</Component>;
+		</div>
+	);
+}
+
+const Invalid3 = () => (
+	<div>
+		<Component />;
+	</div>
+)
+
+const Invalid4 = () => {
+	return (
+		<>
+			<div />;
+		</>
+	);
+}
+
+const Invalid5 = () => {
+	return (
+		<>
+			<Component>
+				<div />
+			</Component>;
+		</>
+	);
+}
+
+```
+
+# Diagnostics
+```
+invalid.jsx:5:11 lint/nursery/noJsxLeakedSemicolon  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Possible unintentional ';'.
+  
+    3 │ 	return (
+    4 │ 		<div>
+  > 5 │ 			<div />;
+      │ 			       ^
+    6 │ 		</div>
+    7 │ 	);
+  
+  i This ';' will be rendered as text. Remove it, or move it inside the expression if it is intentional.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove semicolon.
+  
+    5 │ → → → <div·/>;
+      │              -
+
+```
+
+```
+invalid.jsx:15:16 lint/nursery/noJsxLeakedSemicolon  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Possible unintentional ';'.
+  
+    13 │ 			<Component>
+    14 │ 				<div />
+  > 15 │ 			</Component>;
+       │ 			            ^
+    16 │ 		</div>
+    17 │ 	);
+  
+  i This ';' will be rendered as text. Remove it, or move it inside the expression if it is intentional.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove semicolon.
+  
+    15 │ → → → </Component>;
+       │                   -
+
+```
+
+```
+invalid.jsx:22:16 lint/nursery/noJsxLeakedSemicolon  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Possible unintentional ';'.
+  
+    20 │ const Invalid3 = () => (
+    21 │ 	<div>
+  > 22 │ 		<Component />;
+       │ 		             ^
+    23 │ 	</div>
+    24 │ )
+  
+  i This ';' will be rendered as text. Remove it, or move it inside the expression if it is intentional.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove semicolon.
+  
+    22 │ → → <Component·/>;
+       │                  -
+
+```
+
+```
+invalid.jsx:29:11 lint/nursery/noJsxLeakedSemicolon  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Possible unintentional ';'.
+  
+    27 │ 	return (
+    28 │ 		<>
+  > 29 │ 			<div />;
+       │ 			       ^
+    30 │ 		</>
+    31 │ 	);
+  
+  i This ';' will be rendered as text. Remove it, or move it inside the expression if it is intentional.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove semicolon.
+  
+    29 │ → → → <div·/>;
+       │              -
+
+```
+
+```
+invalid.jsx:39:16 lint/nursery/noJsxLeakedSemicolon  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Possible unintentional ';'.
+  
+    37 │ 			<Component>
+    38 │ 				<div />
+  > 39 │ 			</Component>;
+       │ 			            ^
+    40 │ 		</>
+    41 │ 	);
+  
+  i This ';' will be rendered as text. Remove it, or move it inside the expression if it is intentional.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove semicolon.
+  
+    39 │ → → → </Component>;
+       │                   -
+
+```

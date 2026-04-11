@@ -1,0 +1,56 @@
+/* should not generate diagnostics */
+const Valid1 = () => {
+	return (
+		<div>
+			<div />
+		</div>
+	);
+}
+
+const Valid2 = () => {
+	return (
+		<div>
+			<div />
+			;
+		</div>
+	);
+}
+
+const Valid3 = () => {
+	return (
+		<div>
+			<div />{';'}
+		</div>
+	);
+}
+
+const Valid4 = () => {
+	return (
+		<div>
+			<div />&#59;
+		</div>
+	);
+}
+
+const Valid5 = () => {
+	return (
+		<div>
+			<span>;</span>
+			<span />;<span />
+			text; text;
+			&amp;
+		</div>
+	);
+}
+
+const Valid6 = () => {
+	return <div />;
+}
+
+const Valid7 = () => {
+	return (
+		<div>
+			<div />text;
+		</div>
+	);
+}
