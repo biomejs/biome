@@ -103,6 +103,7 @@ Exports {
       Specifier: "./renamed-reexports"
       Resolved path: "/src/renamed-reexports.ts"
       Import Symbol: All
+      Exported range: (1129..1177)
     ))
   }
 }
@@ -317,6 +318,7 @@ Exports {
       Specifier: "./renamed-reexports"
       Resolved path: "/src/renamed-reexports.ts"
       Import Symbol: All
+      Exported range: (80..127)
     ))
   }
 }

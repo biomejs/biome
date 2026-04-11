@@ -55,6 +55,7 @@ Exports {
       Specifier: "./source.ts"
       Resolved path: "/src/source.ts"
       Import Symbol: All
+      Exported range: (0..36)
     ))
   }
 }

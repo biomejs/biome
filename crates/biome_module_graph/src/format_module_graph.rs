@@ -3,7 +3,7 @@ use crate::{BindingTypeData, JsExport, JsImport, JsModuleInfo, JsOwnExport, JsRe
 use biome_formatter::prelude::*;
 use biome_formatter::{format_args, write};
 use biome_js_type_info::FormatTypeContext;
-use biome_rowan::TextSize;
+use biome_rowan::{TextRange, TextSize};
 use std::fmt::Formatter;
 use std::ops::Deref;
 
@@ -289,9 +289,12 @@ impl Format<FormatTypeContext> for JsReexport {
             write!(f, [&format_args![&self.import]])?;
 
             // TODO: address this later
-            // if let Some(comment) = &self.jsdoc_comment {
-            //     write!(f, [&format_args![&comment]])?;
-            // }
+            if let Some(export_range) = &self.export_range {
+                write!(
+                    f,
+                    [token("Exported range: "), TypedRange::from(export_range)]
+                )?;
+            }
 
             Ok(())
         });
@@ -380,5 +383,51 @@ impl Format<FormatTypeContext> for JsImport {
 
         write!(f, [hard_line_break()])?;
         Ok(())
+    }
+}
+
+#[derive(Clone)]
+struct TypedRange(TextRange);
+
+impl From<&TextRange> for TypedRange {
+    fn from(value: &TextRange) -> Self {
+        Self(*value)
+    }
+}
+
+#[derive(Clone)]
+struct TypedSize(TextSize);
+
+impl From<TextSize> for TypedSize {
+    fn from(value: TextSize) -> Self {
+        Self(value)
+    }
+}
+
+impl Format<FormatTypeContext> for TypedSize {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
+    ) -> FormatResult<()> {
+        let value = std::format!("{}", self.0);
+        write!(f, [text(&value, TextSize::default())])
+    }
+}
+
+impl Format<FormatTypeContext> for TypedRange {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
+    ) -> FormatResult<()> {
+        write!(
+            f,
+            [
+                token("("),
+                TypedSize::from(self.0.start()),
+                token(".."),
+                TypedSize::from(self.0.end()),
+                token(")")
+            ]
+        )
     }
 }

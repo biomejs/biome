@@ -609,10 +609,20 @@ impl Binding {
         super::is_imported(&self.syntax())
     }
 
+    pub fn is_exported(&self) -> bool {
+        self.data.is_exported(self.syntax().text_trimmed_range())
+    }
+
     /// Returns the JSDoc comment associated with this binding, if any.
     pub fn jsdoc(&self) -> Option<&JsdocComment> {
         let binding = self.data.binding(self.id);
         binding.jsdoc.as_ref()
+    }
+
+    /// Returns the formatted JsDoc comment
+    pub fn to_fmt_jsonc(&self) -> Option<String> {
+        let binding = self.data.binding(self.id);
+        binding.jsdoc.clone().map(|jsdoc| jsdoc.to_string())
     }
 
     /// Returns the text ranges of all export sites for this binding.

@@ -1070,6 +1070,7 @@ dependencies = [
  "biome_js_syntax",
  "biome_jsdoc_comment",
  "biome_rowan",
+ "insta",
  "rust-lapper",
  "rustc-hash 2.1.2",
  "smallvec",
