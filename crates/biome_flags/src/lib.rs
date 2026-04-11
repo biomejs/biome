@@ -17,6 +17,7 @@ pub fn is_unstable() -> bool {
 pub static BIOME_VERSION: LazyLock<Option<&str>> = LazyLock::new(|| option_env!("BIOME_VERSION"));
 
 pub struct BiomeEnv {
+    pub biome_distribution: BiomeEnvVariable,
     pub biome_log_path: BiomeEnvVariable,
     pub biome_log_prefix_name: BiomeEnvVariable,
     pub biome_config_path: BiomeEnvVariable,
@@ -32,6 +33,10 @@ pub static BIOME_ENV: OnceLock<BiomeEnv> = OnceLock::new();
 impl BiomeEnv {
     fn new() -> Self {
         Self {
+            biome_distribution: BiomeEnvVariable::new(
+                "BIOME_DISTRIBUTION",
+                "Override the detected distribution channel of Biom. Acceptable values: npm, homebrew or standalone",
+            ),
             biome_log_path: BiomeEnvVariable::new(
                 "BIOME_LOG_PATH",
                 "The directory where the Daemon logs will be saved.",
@@ -104,6 +109,21 @@ pub fn biome_env() -> &'static BiomeEnv {
 impl Display for BiomeEnv {
     fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
         let padding = 35usize;
+        match self.biome_distribution.value() {
+            None => {
+                KeyValuePair::new(self.biome_distribution.name, markup! { <Dim>"unset"</Dim> })
+                    .with_padding(padding)
+                    .fmt(fmt)?;
+            }
+            Some(value) => {
+                KeyValuePair::new(
+                    self.biome_distribution.name,
+                    markup! {{DebugDisplay(value)}},
+                )
+                .with_padding(padding)
+                .fmt(fmt)?;
+            }
+        };
         match self.biome_log_path.value() {
             None => {
                 KeyValuePair::new(self.biome_log_path.name, markup! { <Dim>"unset"</Dim> })
