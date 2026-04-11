@@ -11,6 +11,6 @@ multiple-versions = "allow"
 
 [advisories]
 unmaintained = "workspace"
-ignore = [
-	{ id = "RUSTSEC-2026-0097", reason = "Upgrading the `rand` crate to a newer version requires `grit-pattern-matcher` to also update the dependency. Also, the current version of Boa depends on a different version of `rand`, and its also affected by this advisory. It's more work than it's worth to fix it right now." }
+ignore       = [
+  { id = "RUSTSEC-2026-0097", reason = "Upgrading the `rand` crate to a newer version requires `grit-pattern-matcher` to also update the dependency. Also, the current version of Boa depends on a different version of `rand`, and its also affected by this advisory. It's more work than it's worth to fix it right now." }
 ]
