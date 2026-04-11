@@ -1,0 +1,58 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<template>
+<!-- should generate diagnostics -->
+
+<!-- invalid boolean value -->
+<div aria-hidden="yes">content</div>
+
+<!-- invalid tristate value -->
+<span aria-checked="test">some text</span>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:5:6 lint/a11y/useValidAriaValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of the ARIA attribute aria-hidden is not correct.
+  
+    4 │ <!-- invalid boolean value -->
+  > 5 │ <div aria-hidden="yes">content</div>
+      │      ^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ <!-- invalid tristate value -->
+  
+  i The only supported values for the aria-hidden property is one of the following:
+  
+  - undefined
+  - false
+  - true
+  
+
+```
+
+```
+invalid.vue:8:7 lint/a11y/useValidAriaValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of the ARIA attribute aria-checked is not correct.
+  
+     7 │ <!-- invalid tristate value -->
+   > 8 │ <span aria-checked="test">some text</span>
+       │       ^^^^^^^^^^^^^^^^^^^
+     9 │ </template>
+    10 │ 
+  
+  i The only supported value for the aria-checked property one of the following:
+  
+  - false
+  - true
+  - mixed
+  
+
+```
