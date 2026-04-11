@@ -138,6 +138,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noComponentHookFactories",
+        TypeId::of::<
+            biome_rule_options::no_component_hook_factories::NoComponentHookFactoriesOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
         "noConditionalExpect",
         TypeId::of::<biome_rule_options::no_conditional_expect::NoConditionalExpectOptions>(),
     ));

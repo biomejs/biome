@@ -29,6 +29,7 @@ pub mod no_comma_operator;
 pub mod no_comment_text;
 pub mod no_common_js;
 pub mod no_compare_neg_zero;
+pub mod no_component_hook_factories;
 pub mod no_conditional_expect;
 pub mod no_confusing_labels;
 pub mod no_confusing_void_type;

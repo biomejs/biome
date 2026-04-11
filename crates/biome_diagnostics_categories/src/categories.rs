@@ -176,6 +176,7 @@ define_categories! {
     "lint/nursery/noAmbiguousAnchorText": "https://biomejs.dev/linter/rules/no-ambiguous-anchor-text",
     "lint/nursery/noBeforeInteractiveScriptOutsideDocument": "https://biomejs.dev/linter/rules/no-before-interactive-script-outside-document",
     "lint/nursery/noColorInvalidHex": "https://biomejs.dev/linter/rules/no-color-invalid-hex",
+    "lint/nursery/noComponentHookFactories": "https://biomejs.dev/linter/rules/no-component-hook-factories",
     "lint/nursery/noConditionalExpect": "https://biomejs.dev/linter/rules/no-conditional-expect",
     "lint/nursery/noContinue": "https://biomejs.dev/linter/rules/no-continue",
     "lint/nursery/noDeprecatedMediaType": "https://biomejs.dev/linter/rules/no-deprecated-media-type",
