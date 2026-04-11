@@ -1,0 +1,22 @@
+<!-- should generate diagnostics -->
+
+<!-- Empty label: no text, no control -->
+<label></label>
+
+<!-- Has text but no control association -->
+<label>A label</label>
+
+<!-- Has `for` attribute but no accessible text -->
+<label for="js_id"></label>
+
+<!-- Has `for` attribute, has nested input, but no accessible text -->
+<label for="js_id"><input /></label>
+
+<!-- Self-closing label (no content, no `for`) -->
+<label />
+
+<!-- Case-insensitive: uppercase LABEL, no text, no control -->
+<LABEL></LABEL>
+
+<!-- Whitespace-only text is not accessible -->
+<label>   <input /></label>

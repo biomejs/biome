@@ -1,0 +1,34 @@
+<!-- should not generate diagnostics -->
+
+<!-- Has `for` attribute and accessible text -->
+<label for="js_id">A label</label>
+
+<!-- Has `for` and aria-label -->
+<label for="js_id" aria-label="A label"></label>
+
+<!-- Has `for` and aria-labelledby -->
+<label for="js_id" aria-labelledby="some-id"></label>
+
+<!-- Wraps an input with text content -->
+<label>A label<input /></label>
+
+<!-- Wraps a textarea with text content -->
+<label>A label<textarea></textarea></label>
+
+<!-- Wraps a select with text content -->
+<label>A label<select><option>opt</option></select></label>
+
+<!-- Wraps a button with text content -->
+<label>A label<button>Click</button></label>
+
+<!-- Nested control with aria-label on the label -->
+<label aria-label="A label"><input /></label>
+
+<!-- Case-insensitive match for control -->
+<label>A label<INPUT /></label>
+
+<!-- Deeply nested input still counts as associated control -->
+<label>A label<span><input /></span></label>
+
+<!-- Text expression is accessible content -->
+<label>{{ labelText }}<input /></label>
