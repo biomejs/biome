@@ -160,7 +160,7 @@ invalid.html:19:6 lint/a11y/useValidAriaValues ━━━━━━━━━━━
 ```
 invalid.html:22:6 lint/a11y/useValidAriaValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The value of the ARIA attribute aria-hidden is not correct.
+  × The value of the ARIA attribute ARIA-HIDDEN is not correct.
   
     21 │ <!-- case insensitive attribute name — still invalid value -->
   > 22 │ <div ARIA-HIDDEN="yes">content</div>
@@ -168,9 +168,9 @@ invalid.html:22:6 lint/a11y/useValidAriaValues ━━━━━━━━━━━
     23 │ 
     24 │ <!-- valueless attribute on non-boolean type — should flag (e.g. aria-orientation has no "true" token) -->
   
-  i Use a valid value for the aria-hidden attribute according to the WAI-ARIA specification.
+  i Use a valid value for the ARIA-HIDDEN attribute according to the WAI-ARIA specification.
   
-  i The only supported values for the aria-hidden property are:
+  i The only supported values for the ARIA-HIDDEN property are:
   
   - undefined
   - false

@@ -6,7 +6,7 @@ use biome_analyze::{
 use biome_aria_metadata::{AriaAttribute, AriaValueType};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlAttribute, HtmlAttribute};
+use biome_html_syntax::{AnyHtmlAttribute, HtmlAttribute, HtmlFileSource};
 use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::use_valid_aria_values::UseValidAriaValuesOptions;
 use biome_string_case::StrLikeExtension;
@@ -56,7 +56,7 @@ declare_lint_rule! {
 }
 
 pub struct UseValidAriaValuesState {
-    attribute_name: String,
+    attribute_name: TokenText,
     property_type: AriaValueType,
 }
 
@@ -78,18 +78,27 @@ impl Rule for UseValidAriaValues {
         };
 
         let name = extract_html_attribute_name(html_attr)?;
-        let name_lower = name.to_ascii_lowercase_cow();
+        let is_html_file = ctx.source_type::<HtmlFileSource>().is_html();
 
-        if let Ok(aria_property) = AriaAttribute::from_str(&name_lower) {
+        // Case-insensitive matching only for .html files.
+        // In Vue/Svelte/Astro, attribute names are case-sensitive.
+        let name_ref = if is_html_file {
+            name.to_ascii_lowercase_cow()
+        } else {
+            std::borrow::Cow::Borrowed(name.text())
+        };
+
+        if let Ok(aria_property) = AriaAttribute::from_str(&name_ref) {
             // For valueless attributes like <div aria-hidden>, treat as "true"
             // per HTML spec (boolean attribute presence = true).
-            let value_text = match html_attr.value() {
-                Some(v) => v.to_string(),
-                None => "true".to_string(),
+            let value_text = html_attr.value();
+            let value_str = match &value_text {
+                Some(v) => v.text(),
+                None => "true",
             };
-            if !aria_property.value_type().contains(&value_text) {
+            if !aria_property.value_type().contains(value_str) {
                 return Some(UseValidAriaValuesState {
-                    attribute_name: name_lower.into_owned(),
+                    attribute_name: name,
                     property_type: aria_property.value_type(),
                 });
             }
@@ -100,7 +109,7 @@ impl Rule for UseValidAriaValues {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let attr = ctx.query();
-        let attribute_name = &state.attribute_name;
+        let attribute_name = state.attribute_name.text();
         let diagnostic = RuleDiagnostic::new(
             rule_category!(),
             attr.range(),
