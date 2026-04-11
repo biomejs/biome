@@ -2511,6 +2511,11 @@ See https://biomejs.dev/linter/rules/use-qwik-loader-location
 	 */
 	useQwikLoaderLocation?: UseQwikLoaderLocationConfiguration;
 	/**
+	* Enforce using a type parameter on Array#reduce instead of casting the initial value.
+See https://biomejs.dev/linter/rules/use-reduce-type-parameter 
+	 */
+	useReduceTypeParameter?: UseReduceTypeParameterConfiguration;
+	/**
 	* Enforce RegExp#exec over String#match if no global flag is provided.
 See https://biomejs.dev/linter/rules/use-regexp-exec 
 	 */
@@ -4430,6 +4435,9 @@ export type UsePlaywrightValidDescribeCallbackConfiguration =
 export type UseQwikLoaderLocationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseQwikLoaderLocationOptions;
+export type UseReduceTypeParameterConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseReduceTypeParameterOptions;
 export type UseRegexpExecConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseRegexpExecOptions;
@@ -6221,6 +6229,11 @@ export interface RuleWithUseQwikLoaderLocationOptions {
 	level: RulePlainConfiguration;
 	options?: UseQwikLoaderLocationOptions;
 }
+export interface RuleWithUseReduceTypeParameterOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseReduceTypeParameterOptions;
+}
 export interface RuleWithUseRegexpExecOptions {
 	level: RulePlainConfiguration;
 	options?: UseRegexpExecOptions;
@@ -7818,6 +7831,7 @@ Default: `false`
 }
 export type UsePlaywrightValidDescribeCallbackOptions = {};
 export type UseQwikLoaderLocationOptions = {};
+export type UseReduceTypeParameterOptions = {};
 export type UseRegexpExecOptions = {};
 export interface UseRequiredScriptsOptions {
 	/**
@@ -8831,6 +8845,7 @@ export type Category =
 	| "lint/nursery/useQwikLoaderLocation"
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
+	| "lint/nursery/useReduceTypeParameter"
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useRequiredScripts"
 	| "lint/nursery/useScopedStyles"
