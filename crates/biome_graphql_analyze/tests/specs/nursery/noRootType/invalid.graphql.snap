@@ -15,7 +15,7 @@ type Mutation {
 ```
 invalid.graphql:2:6 lint/nursery/noRootType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The root type Mutation is forbidden.
+  i This schema defines the disallowed root type Mutation.
   
     1 │ # should generate diagnostics
   > 2 │ type Mutation {
@@ -23,7 +23,9 @@ invalid.graphql:2:6 lint/nursery/noRootType ━━━━━━━━━━━━
     3 │   createUser(input: CreateUserInput!): User!
     4 │ }
   
-  i It's forbidden to use this root type within this project. Rework to use a different root type.
+  i This project forbids that root type to enforce a specific schema design.
+  
+  i Use a different root type, or update the rule configuration if this root type should be allowed.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

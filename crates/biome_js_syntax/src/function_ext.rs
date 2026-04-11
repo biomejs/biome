@@ -1,11 +1,28 @@
 use crate::{
-    AnyJsCallArgument, AnyJsFunction, AnyJsFunctionBody, JsCallArguments, JsConstructorClassMember,
-    JsMethodClassMember, JsMethodObjectMember, JsStatementList, JsSyntaxToken,
+    AnyJsCallArgument, AnyJsFunction, AnyJsFunctionBody, JsCallArguments, JsCallExpression,
+    JsConstructorClassMember, JsMethodClassMember, JsMethodObjectMember, JsParenthesizedExpression,
+    JsStatementList, JsSyntaxToken,
 };
 use biome_rowan::{AstNode, SyntaxResult, TextRange, declare_node_union};
 
 declare_node_union! {
     pub AnyFunctionLike = AnyJsFunction | JsMethodObjectMember | JsMethodClassMember | JsConstructorClassMember
+}
+
+impl AnyJsFunction {
+    /// Checks if a function is an IIFE (Immediately Invoked Function Expressions)
+    ///
+    /// # Examples
+    ///
+    /// ```typescript
+    /// (function () {})();
+    /// (() => {})();
+    /// ```
+    pub fn is_iife(&self) -> bool {
+        self.parent::<JsParenthesizedExpression>()
+            .and_then(|expr| expr.parent::<JsCallExpression>())
+            .is_some()
+    }
 }
 
 impl AnyFunctionLike {

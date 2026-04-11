@@ -4,12 +4,13 @@ use biome_markdown_parser::parse_markdown;
 #[ignore]
 #[test]
 fn quick_test() {
-    let source = r#"#       h1
-"#;
+    let source = "";
     let parse = parse_markdown(source);
 
     // Print CST
     eprintln!("{:#?}", parse.syntax());
+    // print red tree
+    eprintln!("{:#?}", parse.tree());
 
     let options = MdFormatOptions::default();
     let result =

@@ -1,0 +1,35 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/bullet_list.md
+---
+
+# Input
+
+```md
++ item with __bold__ and *italic*
+
+- item with __bold__ and *italic*
+
+* item with `code`
+
+* - - -
+
+* - - -\n  __bold__
+
+```
+
+
+# Formatted
+
+```md
+- item with **bold** and _italic_
+
+- item with **bold** and _italic_
+
+- item with `code`
+
+* - - -
+
+- - - -\n  **bold**
+
+```

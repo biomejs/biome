@@ -1,6 +1,6 @@
 use biome_analyze::options::JsxRuntime;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
+    ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
     RuleCategoriesBuilder,
 };
 use biome_json_analyze::JsonAnalyzeServices;
@@ -64,6 +64,7 @@ fn bench_analyzer(criterion: &mut Criterion) {
                             let json_services = JsonAnalyzeServices {
                                 file_source,
                                 configuration_provider: None,
+                                project_layout: None,
                             };
 
                             biome_json_analyze::analyze(
@@ -74,7 +75,7 @@ fn bench_analyzer(criterion: &mut Criterion) {
                                 &[],
                                 |event| {
                                     black_box(event.diagnostic());
-                                    black_box(event.actions());
+                                    black_box(event.actions(ActionFilter::all()));
                                     ControlFlow::<Never>::Continue(())
                                 },
                             );

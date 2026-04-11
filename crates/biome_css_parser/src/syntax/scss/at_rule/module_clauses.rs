@@ -97,7 +97,7 @@ fn parse_scss_module_configuration(p: &mut CssParser) -> ParsedSyntax {
 /// Docs: https://sass-lang.com/documentation/at-rules/forward/#configuring-modules
 #[inline]
 fn parse_scss_module_configuration_modifier(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_scss_module_configuration_modifier_start(p) {
+    if !is_at_scss_module_configuration_modifier(p) {
         return Absent;
     }
 
@@ -128,7 +128,7 @@ fn parse_scss_module_configuration_modifier(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn is_at_scss_module_configuration_modifier_start(p: &mut CssParser) -> bool {
+fn is_at_scss_module_configuration_modifier(p: &mut CssParser) -> bool {
     p.at(T![!])
 }
 

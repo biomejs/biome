@@ -17,23 +17,17 @@ info: css/global_suppression.css
 #exampleInputEmail1 { color: red;
 }
 
+/* biome-ignore-all format: intentional */
+.code {
+	color: red;
+}
+
+/* Biome format should keep this comment */
+
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-Trailing newline: true
------
+# Formatted
 
 ```css
 /* biome-ignore-all format: test */
@@ -46,4 +40,12 @@ Trailing newline: true
 
 #exampleInputEmail1 { color: red;
 }
+
+/* biome-ignore-all format: intentional */
+.code {
+	color: red;
+}
+
+/* Biome format should keep this comment */
+
 ```

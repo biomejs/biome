@@ -1,4 +1,4 @@
-<!-- Vue valid cases - should NOT trigger the rule -->
+<!-- should not generate diagnostics -->
 
 <template>
   <a href="/about">About</a>

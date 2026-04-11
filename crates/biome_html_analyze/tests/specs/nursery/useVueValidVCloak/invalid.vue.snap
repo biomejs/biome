@@ -3,7 +3,7 @@ source: crates/biome_html_analyze/tests/spec_tests.rs
 expression: invalid.vue
 ---
 # Input
-```html
+```vue
 <!-- invalid v-cloak cases -->
 <div v-cloak:arg></div>
 <div v-cloak.mod></div>

@@ -59,6 +59,7 @@ static QWIK_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "useQwikClasslist"),
         RuleFilter::Rule("correctness", "useQwikMethodUsage"),
         RuleFilter::Rule("correctness", "useQwikValidLexicalScope"),
+        RuleFilter::Rule("nursery", "useQwikLoaderLocation"),
         RuleFilter::Rule("suspicious", "noReactSpecificProps"),
     ]
 });
@@ -97,6 +98,7 @@ static TEST_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("complexity", "noExcessiveNestedTestSuites"),
         RuleFilter::Rule("nursery", "noConditionalExpect"),
+        RuleFilter::Rule("nursery", "useConsistentTestIt"),
         RuleFilter::Rule("nursery", "useExpect"),
         RuleFilter::Rule("suspicious", "noDuplicateTestHooks"),
         RuleFilter::Rule("suspicious", "noExportsInTest"),
@@ -109,11 +111,15 @@ static TURBOREPO_FILTERS: LazyLock<Vec<RuleFilter<'static>>> =
 static TYPES_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noFloatingPromises"),
+        RuleFilter::Rule("nursery", "noMisleadingReturnType"),
         RuleFilter::Rule("nursery", "noMisusedPromises"),
         RuleFilter::Rule("nursery", "noUnnecessaryConditions"),
+        RuleFilter::Rule("nursery", "noUnsafePlusOperands"),
+        RuleFilter::Rule("nursery", "noUselessTypeConversion"),
         RuleFilter::Rule("nursery", "useArraySortCompare"),
         RuleFilter::Rule("nursery", "useAwaitThenable"),
         RuleFilter::Rule("nursery", "useConsistentEnumValueType"),
+        RuleFilter::Rule("nursery", "useDisposables"),
         RuleFilter::Rule("nursery", "useExhaustiveSwitchCases"),
         RuleFilter::Rule("nursery", "useFind"),
         RuleFilter::Rule("nursery", "useNullishCoalescing"),

@@ -35,6 +35,12 @@ pub fn md_bullet_list_item(md_bullet_list: MdBulletList) -> MdBulletListItem {
         [Some(SyntaxElement::Node(md_bullet_list.into_syntax()))],
     ))
 }
+pub fn md_continuation_indent(indent: MdIndentTokenList) -> MdContinuationIndent {
+    MdContinuationIndent::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_CONTINUATION_INDENT,
+        [Some(SyntaxElement::Node(indent.into_syntax()))],
+    ))
+}
 pub fn md_document(value: MdBlockList, eof_token: SyntaxToken) -> MdDocumentBuilder {
     MdDocumentBuilder {
         value,
@@ -308,35 +314,6 @@ impl MdInlineLinkBuilder {
                 self.title
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Token(self.r_paren_token)),
-            ],
-        ))
-    }
-}
-pub fn md_link_block(label: MdTextual, url: MdTextual) -> MdLinkBlockBuilder {
-    MdLinkBlockBuilder {
-        label,
-        url,
-        title: None,
-    }
-}
-pub struct MdLinkBlockBuilder {
-    label: MdTextual,
-    url: MdTextual,
-    title: Option<MdTextual>,
-}
-impl MdLinkBlockBuilder {
-    pub fn with_title(mut self, title: MdTextual) -> Self {
-        self.title = Some(title);
-        self
-    }
-    pub fn build(self) -> MdLinkBlock {
-        MdLinkBlock::unwrap_cast(SyntaxNode::new_detached(
-            MarkdownSyntaxKind::MD_LINK_BLOCK,
-            [
-                Some(SyntaxElement::Node(self.label.into_syntax())),
-                Some(SyntaxElement::Node(self.url.into_syntax())),
-                self.title
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
             ],
         ))
     }
@@ -754,6 +731,16 @@ where
 {
     MdBogus::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_BOGUS,
+        slots,
+    ))
+}
+pub fn md_bogus_block<I>(slots: I) -> MdBogusBlock
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    MdBogusBlock::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_BOGUS_BLOCK,
         slots,
     ))
 }

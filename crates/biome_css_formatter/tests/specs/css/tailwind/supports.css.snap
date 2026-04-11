@@ -17,42 +17,19 @@ color:red;
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-Trailing newline: true
------
-
-```css
-@import "tailwindcss/theme.css" supports(--color-*: initial);
-
-@supports (--color-*: initial) {
-	.box {
-		color: red;
-	}
+```json
+{
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  }
 }
-
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-Trailing newline: true
------
+# Formatted
 
 ```css
 @import "tailwindcss/theme.css" supports(--color-*: initial);

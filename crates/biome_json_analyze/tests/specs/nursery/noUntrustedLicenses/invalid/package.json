@@ -1,0 +1,10 @@
+{
+    "dependencies": {
+        "trusted-pkg": "^1.0.0",
+        "untrusted-pkg": "^1.0.0"
+    },
+    "devDependencies": {
+        "no-license-pkg": "^1.0.0",
+        "spdx-expression-pkg": "^1.0.0"
+    }
+}

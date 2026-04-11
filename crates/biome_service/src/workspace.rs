@@ -58,7 +58,7 @@ mod server;
 use biome_analyze::{ActionCategory, RuleCategories};
 use biome_configuration::{Configuration, analyzer::AnalyzerSelector};
 use biome_console::{Markup, MarkupBuf, markup};
-use biome_diagnostics::{CodeSuggestion, serde::Diagnostic};
+use biome_diagnostics::{Applicability, CodeSuggestion, Severity, serde::Diagnostic};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_grit_patterns::GritTargetLanguage;
@@ -1027,10 +1027,32 @@ pub struct PullDiagnosticsParams {
     /// Rules to apply on top of the configuration
     #[serde(default)]
     pub enabled_rules: Vec<AnalyzerSelector>,
-    /// When `false` the diagnostics, don't have code frames of the code actions (fixes, suppressions, etc.)
-    pub pull_code_actions: bool,
+    /// When `true`, diagnostics include code suggestions for rule fixes.
+    #[serde(default)]
+    pub include_code_fix: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub inline_config: Option<Configuration>,
+
+    /// Max limit of diagnostics types to pull. This limit is meant to cap the number of [Diagnostic] to pull.
+    /// However, the workspace still processes ALL diagnostics coming from the analyzer to compute their severity.
+    /// If no value is provided, the workspace will pull all diagnostics.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub max_diagnostics: Option<u32>,
+
+    /// Minimum severity for a diagnostic to be included. Diagnostics with a
+    /// severity below this threshold are ignored entirely (not counted, not
+    /// serialized). Defaults to [`Severity::Hint`] (include everything).
+    #[serde(default = "default_diagnostic_level")]
+    pub diagnostic_level: Severity,
+
+    /// When true, promote assist diagnostics (`assist/*`) to error severity
+    /// before applying the diagnostic_level filter.
+    #[serde(default)]
+    pub enforce_assist: bool,
+}
+
+fn default_diagnostic_level() -> Severity {
+    Severity::Hint
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1039,6 +1061,11 @@ pub struct PullDiagnosticsParams {
 pub struct PullDiagnosticsResult {
     pub diagnostics: Vec<Diagnostic>,
     pub errors: usize,
+    pub warnings: usize,
+    pub infos: usize,
+    /// Number of parse errors (subset of `errors`). Used by `--skip-parse-errors`
+    /// to distinguish parse errors from analyzer errors.
+    pub parse_errors: usize,
     pub skipped_diagnostics: u64,
 }
 
@@ -1060,6 +1087,14 @@ pub struct PullActionsParams {
     pub categories: RuleCategories,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub inline_config: Option<Configuration>,
+    /// When `false`, returned actions have `suggestion: None` (no `BatchMutation`
+    /// computed). Used by `codeAction/resolve` to defer edit computation.
+    #[serde(default = "default_true")]
+    pub compute_actions: bool,
+}
+
+fn default_true() -> bool {
+    true
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1100,7 +1135,10 @@ pub struct PullActionsResult {
 pub struct CodeAction {
     pub category: ActionCategory,
     pub rule_name: Option<(Cow<'static, str>, Cow<'static, str>)>,
-    pub suggestion: CodeSuggestion,
+    /// The computed code suggestion with text edit. `None` when the action was
+    /// returned without computing edits (deferred for `codeAction/resolve`).
+    pub suggestion: Option<CodeSuggestion>,
+    pub applicability: Option<Applicability>,
     pub offset: Option<TextSize>,
 }
 
@@ -1786,12 +1824,16 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         })
     }
 
+    #[expect(clippy::too_many_arguments)]
     pub fn pull_diagnostics(
         &self,
         categories: RuleCategories,
         only: Vec<AnalyzerSelector>,
         skip: Vec<AnalyzerSelector>,
         pull_code_actions: bool,
+        max_diagnostics: Option<u32>,
+        diagnostic_level: Severity,
+        enforce_assist: bool,
     ) -> Result<PullDiagnosticsResult, WorkspaceError> {
         self.workspace.pull_diagnostics(PullDiagnosticsParams {
             project_key: self.project_key,
@@ -1800,8 +1842,11 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             only,
             skip,
             enabled_rules: vec![],
-            pull_code_actions,
+            include_code_fix: pull_code_actions,
             inline_config: None,
+            max_diagnostics,
+            diagnostic_level,
+            enforce_assist,
         })
     }
 
@@ -1824,6 +1869,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             enabled_rules,
             categories,
             inline_config: None,
+            compute_actions: true,
         })
     }
 

@@ -2,8 +2,10 @@ use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleDomain, RuleKey,
     RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor,
 };
+use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsRoot, JsLanguage, JsSyntaxNode,
+    AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsRoot, JsLanguage, JsReferenceIdentifier,
+    JsSyntaxNode,
 };
 use biome_js_type_info::Type;
 use biome_module_graph::ModuleResolver;
@@ -17,6 +19,7 @@ use std::sync::Arc;
 #[derive(Clone)]
 pub struct TypedService {
     resolver: Option<Arc<ModuleResolver>>,
+    model: Option<SemanticModel>,
 }
 
 impl TypedService {
@@ -65,6 +68,12 @@ impl TypedService {
             }
         }
     }
+
+    pub fn has_binding(&self, reference: &JsReferenceIdentifier) -> bool {
+        self.model
+            .as_ref()
+            .is_some_and(|model| model.binding(reference).is_some())
+    }
 }
 
 impl FromServices for TypedService {
@@ -85,7 +94,8 @@ impl FromServices for TypedService {
 
         let resolver: Option<&Option<Arc<ModuleResolver>>> = services.get_service();
         let resolver = resolver.and_then(|resolver| resolver.as_ref().map(Arc::clone));
-        Ok(Self { resolver })
+        let model = services.get_service::<SemanticModel>().cloned();
+        Ok(Self { resolver, model })
     }
 }
 

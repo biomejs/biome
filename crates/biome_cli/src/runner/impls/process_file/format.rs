@@ -2,6 +2,7 @@ use crate::CliDiagnostic;
 use crate::diagnostics::StdinDiagnostic;
 use crate::runner::crawler::CrawlerContext;
 use crate::runner::diagnostics::{ResultExt, SkippedDiagnostic};
+use crate::runner::execution::Execution;
 use crate::runner::process_file::{
     DiffKind, FileStatus, Message, ProcessFile, ProcessStdinFilePayload, WorkspaceFile,
 };
@@ -18,8 +19,10 @@ use tracing::debug;
 
 pub(crate) struct FormatProcessFile;
 
-impl ProcessFile for FormatProcessFile {
-    fn process_file<Ctx>(
+impl FormatProcessFile {
+    /// Format a file without pulling diagnostics. Used in check mode where
+    /// lint already pulled and reported diagnostics.
+    pub(crate) fn format_only<Ctx>(
         ctx: &Ctx,
         workspace_file: &mut WorkspaceFile,
         features_supported: &FeaturesSupported,
@@ -27,49 +30,20 @@ impl ProcessFile for FormatProcessFile {
     where
         Ctx: CrawlerContext,
     {
-        // Open the file and create a workspace guard
         let execution = ctx.execution();
-        let guard = workspace_file.guard();
-
-        // Get file features
-        let diagnostics_result = guard
-            .pull_diagnostics(
-                RuleCategoriesBuilder::default().with_syntax().build(),
-                Vec::new(),
-                Vec::new(),
-                false, // NOTE: probably to revisit
-            )
-            .with_file_path_and_code(workspace_file.path.to_string(), category!("format"))?;
-
         let input = workspace_file.input()?;
+        Self::do_format(execution, workspace_file, features_supported, input)
+    }
+
+    /// Shared formatting logic: format the file, compare with input, produce
+    /// a diff or write depending on execution mode.
+    fn do_format(
+        execution: &dyn Execution,
+        workspace_file: &mut WorkspaceFile,
+        features_supported: &FeaturesSupported,
+        input: String,
+    ) -> Result<FileStatus, Message> {
         let should_write = execution.requires_write_access();
-        let skip_parse_errors = execution.should_skip_parse_errors();
-
-        if diagnostics_result.errors > 0 && skip_parse_errors {
-            ctx.push_message(Message::from(
-                SkippedDiagnostic.with_file_path(workspace_file.path.to_string()),
-            ));
-            return Ok(FileStatus::Ignored);
-        }
-
-        ctx.push_message(Message::Diagnostics {
-            file_path: workspace_file.path.to_string(),
-            content: input.clone(),
-            diagnostics: diagnostics_result
-                .diagnostics
-                .into_iter()
-                // Formatting is usually blocked by errors, so we want to print only diagnostics that
-                // Have error severity
-                .filter_map(|diagnostic| {
-                    if diagnostic.severity() >= Severity::Error {
-                        Some(Error::from(diagnostic))
-                    } else {
-                        None
-                    }
-                })
-                .collect(),
-            skipped_diagnostics: diagnostics_result.skipped_diagnostics as u32,
-        });
 
         let printed = workspace_file
             .guard()
@@ -92,7 +66,6 @@ impl ProcessFile for FormatProcessFile {
                     }
                     output = VueFileHandler::output(input.as_str(), output.as_str());
                 }
-
                 Some("svelte") => {
                     if output.is_empty() {
                         return Ok(FileStatus::Unchanged);
@@ -119,6 +92,70 @@ impl ProcessFile for FormatProcessFile {
         } else {
             Ok(FileStatus::Unchanged)
         }
+    }
+}
+
+impl ProcessFile for FormatProcessFile {
+    fn process_file<Ctx>(
+        ctx: &Ctx,
+        workspace_file: &mut WorkspaceFile,
+        features_supported: &FeaturesSupported,
+        max_diagnostics: u32,
+        diagnostic_level: Severity,
+    ) -> Result<FileStatus, Message>
+    where
+        Ctx: CrawlerContext,
+    {
+        let execution = ctx.execution();
+        let guard = workspace_file.guard();
+
+        // Pull parse diagnostics — only needed when format runs standalone
+        // (not in check mode where lint already handles diagnostics)
+        let diagnostics_result = guard
+            .pull_diagnostics(
+                RuleCategoriesBuilder::default().with_syntax().build(),
+                Vec::new(),
+                Vec::new(),
+                false, // NOTE: probably to revisit
+                Some(max_diagnostics),
+                diagnostic_level,
+                false, // enforce_assist: format never promotes assist diagnostics
+            )
+            .with_file_path_and_code(workspace_file.path.to_string(), category!("format"))?;
+
+        let input = workspace_file.input()?;
+        let skip_parse_errors = execution.should_skip_parse_errors();
+
+        if diagnostics_result.parse_errors > 0 && skip_parse_errors {
+            ctx.push_message(Message::from(
+                SkippedDiagnostic.with_file_path(workspace_file.path.to_string()),
+            ));
+            return Ok(FileStatus::Ignored);
+        }
+
+        ctx.push_message(Message::Diagnostics {
+            file_path: workspace_file.path.to_string(),
+            content: input.clone(),
+            diagnostics: diagnostics_result
+                .diagnostics
+                .into_iter()
+                // Formatting is usually blocked by errors, so we want to print only diagnostics that
+                // Have error severity
+                .filter_map(|diagnostic| {
+                    if diagnostic.severity() >= Severity::Error {
+                        Some(Error::from(diagnostic))
+                    } else {
+                        None
+                    }
+                })
+                .collect(),
+            skipped_diagnostics: diagnostics_result.skipped_diagnostics as u32,
+            errors: diagnostics_result.errors,
+            warnings: diagnostics_result.warnings,
+            infos: diagnostics_result.infos,
+        });
+
+        Self::do_format(execution, workspace_file, features_supported, input)
     }
 
     fn process_std_in(payload: ProcessStdinFilePayload) -> Result<(), CliDiagnostic> {

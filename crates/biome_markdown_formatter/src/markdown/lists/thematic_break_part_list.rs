@@ -3,7 +3,7 @@ use biome_markdown_syntax::MdThematicBreakPartList;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdThematicBreakPartList;
 impl FormatRule<MdThematicBreakPartList> for FormatMdThematicBreakPartList {
-    type Context = MdFormatContext;
+    type Context = MarkdownFormatContext;
     fn fmt(&self, node: &MdThematicBreakPartList, f: &mut MarkdownFormatter) -> FormatResult<()> {
         f.join().entries(node.iter().formatted()).finish()
     }

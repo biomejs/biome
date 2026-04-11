@@ -20,19 +20,17 @@ info: markdown/spec/example-277.md
 --- Prettier
 +++ Biome
 @@ -1,3 +1,4 @@
--- a
-+* a
+ - a
    > b
--- c
 +  >
-+* c
+ - c
 ```
 
 # Output
 
 ```md
-* a
+- a
   > b
   >
-* c
+- c
 ```

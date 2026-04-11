@@ -11,7 +11,7 @@ use std::ops::DerefMut;
 use std::vec;
 use std::{any::TypeId, marker::PhantomData, ops::Deref};
 
-use super::{eslint_jsxa11y, eslint_typescript, eslint_unicorn, ignorefile};
+use super::{eslint_jest, eslint_jsxa11y, eslint_typescript, eslint_unicorn, ignorefile};
 
 /// This modules includes implementations for deserializing an eslint configuration.
 ///
@@ -546,6 +546,11 @@ impl Deserializable for Rules {
                             }
                         }
                         // Eslint plugin rules with options that we handle
+                        "jest/consistent-test-it" | "vitest/consistent-test-it" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::JestConsistentTestIt(conf));
+                            }
+                        }
                         "jsx-a11y/aria-role" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::Jsxa11yArioaRoles(conf));
@@ -655,6 +660,7 @@ pub(crate) enum Rule {
     NoConsole(RuleConf<Box<NoConsoleOptions>>),
     NoRestrictedGlobals(RuleConf<Box<NoRestrictedGlobal>>),
     // Eslint plugins
+    JestConsistentTestIt(RuleConf<eslint_jest::ConsistentTestItOptions>),
     Jsxa11yArioaRoles(RuleConf<Box<eslint_jsxa11y::AriaRoleOptions>>),
     TypeScriptArrayType(RuleConf<eslint_typescript::ArrayTypeOptions>),
     TypeScriptConsistentTypeImports(RuleConf<eslint_typescript::ConsistentTypeImportsOptions>),
@@ -671,6 +677,7 @@ impl Rule {
             Self::Any(name, _) => name.clone(),
             Self::NoConsole(_) => Cow::Borrowed("no-console"),
             Self::NoRestrictedGlobals(_) => Cow::Borrowed("no-restricted-globals"),
+            Self::JestConsistentTestIt(_) => Cow::Borrowed("jest/consistent-test-it"),
             Self::Jsxa11yArioaRoles(_) => Cow::Borrowed("jsx-a11y/aria-role"),
             Self::TypeScriptArrayType(_) => Cow::Borrowed("@typescript-eslint/array-type"),
             Self::TypeScriptConsistentTypeImports(_) => {

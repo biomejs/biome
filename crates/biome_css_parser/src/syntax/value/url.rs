@@ -1,6 +1,7 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 
+use crate::syntax::scss::{is_at_scss_interpolated_string, parse_scss_interpolated_string};
 use crate::syntax::value::function::{
     is_at_css_function, is_at_function, is_nth_at_css_function, is_nth_at_function,
     parse_css_function, parse_function,
@@ -134,7 +135,7 @@ fn parse_url_modifier_function_with_context(
 /// or a string.
 #[inline]
 pub(crate) fn is_at_url_value(p: &mut CssParser) -> bool {
-    is_at_url_value_raw(p) || is_at_string(p)
+    is_at_url_value_raw(p) || is_at_string(p) || is_at_scss_interpolated_string(p)
 }
 
 /// Parses a URL value from the current position of the CSS parser.
@@ -149,6 +150,8 @@ pub(crate) fn parse_url_value(p: &mut CssParser) -> ParsedSyntax {
 
     if is_at_string(p) {
         parse_string(p)
+    } else if is_at_scss_interpolated_string(p) {
+        parse_scss_interpolated_string(p)
     } else {
         parse_url_value_raw(p)
     }

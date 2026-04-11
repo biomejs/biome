@@ -1327,6 +1327,7 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
         self.current_kind
     }
 
+    #[inline]
     fn current_start(&self) -> TextSize {
         self.current_start
     }
@@ -1428,11 +1429,13 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
         self.diagnostics.push(diagnostic);
     }
 
+    #[inline]
     fn advance_char_unchecked(&mut self) {
         let c = self.current_char_unchecked();
         self.position += c.len_utf8();
     }
 
+    #[inline]
     fn advance(&mut self, n: usize) {
         self.position += n;
     }
@@ -1671,15 +1674,6 @@ impl QuotesSeen {
             return;
         }
 
-        // Handle escape sequences: a `\` that is not itself escaped toggles the
-        // escape flag for the next character.
-        if byte == b'\\' {
-            self.escaped = !self.escaped;
-            self.prev_byte = Some(byte);
-            self.prev_non_ws_byte = Some(byte);
-            return;
-        }
-
         // If the current byte is escaped, it cannot act as a string delimiter
         // or comment opener.
         let was_escaped = self.escaped;
@@ -1741,6 +1735,15 @@ impl QuotesSeen {
             }
             // It was division; update prev_non_ws_byte to `/` now.
             self.prev_non_ws_byte = Some(b'/');
+        }
+
+        // Handle escape sequences: a `\` that is not itself escaped toggles the
+        // escape flag for the next character.
+        if byte == b'\\' {
+            self.escaped = !self.escaped;
+            self.prev_byte = Some(byte);
+            self.prev_non_ws_byte = Some(byte);
+            return;
         }
 
         // Track string delimiters.
@@ -2096,6 +2099,21 @@ const f = "something" "#;
         assert!(
             quotes_seen.is_empty(),
             "regex literal containing dashes must not confuse the tracker"
+        );
+    }
+
+    /// A regex literal containing an escaped character followed by a quantifier
+    /// must close cleanly. This mirrors `/\d{4}/`, which previously regressed
+    /// in Astro frontmatter scanning.
+    #[test]
+    fn issue_9187_regex_with_escape_and_quantifier() {
+        let source = r"const test = /\d{4}/
+";
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(
+            quotes_seen.is_empty(),
+            "regex literal containing an escape and quantifier must close cleanly"
         );
     }
 }

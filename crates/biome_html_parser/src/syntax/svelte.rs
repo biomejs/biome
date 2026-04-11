@@ -761,7 +761,7 @@ fn parse_square_destructured_name(p: &mut HtmlParser) -> ParsedSyntax {
 
     SvelteBindingAssignmentBindingList.parse_list(p);
 
-    p.expect(T![']']);
+    p.expect_with_context(T![']'], HtmlLexContext::Svelte);
 
     Present(m.complete(p, SVELTE_SQUARE_DESTRUCTURED_NAME))
 }
@@ -1072,6 +1072,14 @@ impl ParseSeparatedList for SvelteBindingAssignmentBindingList {
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         if p.at(T![...]) {
             parse_rest_name(p)
+        } else if p.at(T!['{']) {
+            let result = parse_curly_destructured_name(p);
+            p.re_lex(HtmlReLexContext::Svelte);
+            result
+        } else if p.at(T!['[']) {
+            let result = parse_square_destructured_name(p);
+            p.re_lex(HtmlReLexContext::Svelte);
+            result
         } else {
             parse_svelte_name(p)
         }
@@ -1255,18 +1263,22 @@ const SVELTE_DIRECTIVE_KEYWORDS: TokenSet<HtmlSyntaxKind> = token_set!(
     T![animate]
 );
 
+#[inline]
 pub(crate) fn is_at_svelte_keyword(p: &HtmlParser) -> bool {
     p.at_ts(SVELTE_KEYWORDS)
 }
 
+#[inline]
 fn is_at_svelte_directive_keyword(token: HtmlSyntaxKind) -> bool {
     SVELTE_DIRECTIVE_KEYWORDS.contains(token)
 }
 
+#[inline]
 fn is_at_else_opening_block(p: &mut HtmlParser) -> bool {
     p.at(T!["{:"]) && p.nth_at(1, T![else])
 }
 
+#[inline]
 fn is_at_then_or_catch_block(p: &mut HtmlParser) -> bool {
     p.at(T!["{:"]) && (p.nth_at(1, T![then]) || p.nth_at(1, T![catch]))
 }

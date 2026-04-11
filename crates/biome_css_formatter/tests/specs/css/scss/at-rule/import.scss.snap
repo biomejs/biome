@@ -1,6 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
+assertion_line: 240
 info: css/scss/at-rule/import.scss
 ---
 
@@ -8,6 +8,9 @@ info: css/scss/at-rule/import.scss
 
 ```scss
 @import"theme";
+
+@import "#{$file}.scss";
+@import "#{$file}.css"print;
 
 @import "rounded-corners",
 "text-shadow";
@@ -33,23 +36,13 @@ screen;
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-Trailing newline: true
------
+# Formatted
 
 ```scss
 @import "theme";
+
+@import "#{$file}.scss";
+@import "#{$file}.css" print;
 
 @import "rounded-corners", "text-shadow";
 

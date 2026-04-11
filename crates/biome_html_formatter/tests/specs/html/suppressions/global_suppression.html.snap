@@ -19,27 +19,15 @@ info: suppressions/global_suppression.html
 
 <html>      </html>
 
+<!-- biome-ignore-all format: intentional -->
+<div>   code   </div>
+
+<!-- Biome format should keep this comment -->
+
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Attribute Position: Auto
-Bracket same line: false
-Whitespace sensitivity: css
-Indent script and style: false
-Self close void elements: never
-Trailing newline: true
------
+# Formatted
 
 ```html
 <!-- biome-ignore-all format: test -->
@@ -54,4 +42,10 @@ Trailing newline: true
 
 
 <html>      </html>
+
+<!-- biome-ignore-all format: intentional -->
+<div>   code   </div>
+
+<!-- Biome format should keep this comment -->
+
 ```

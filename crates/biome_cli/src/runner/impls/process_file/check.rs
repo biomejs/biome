@@ -5,6 +5,7 @@ use crate::runner::impls::process_file::lint_and_assist::LintAssistProcessFile;
 use crate::runner::process_file::{
     FileStatus, Message, ProcessFile, ProcessStdinFilePayload, WorkspaceFile,
 };
+use biome_diagnostics::Severity;
 use biome_service::workspace::FeaturesSupported;
 
 pub(crate) struct CheckProcessFile;
@@ -14,14 +15,21 @@ impl ProcessFile for CheckProcessFile {
         ctx: &Ctx,
         workspace_file: &mut WorkspaceFile,
         features_supported: &FeaturesSupported,
+        max_diagnostics: u32,
+        diagnostic_level: Severity,
     ) -> Result<FileStatus, Message>
     where
         Ctx: CrawlerContext,
     {
         let execution = ctx.execution();
         let mut has_failures = false;
-        let analyzer_result =
-            LintAssistProcessFile::process_file(ctx, workspace_file, features_supported);
+        let analyzer_result = LintAssistProcessFile::process_file(
+            ctx,
+            workspace_file,
+            features_supported,
+            max_diagnostics,
+            diagnostic_level,
+        );
 
         let mut changed = false;
         // To reduce duplication of the same error on format and lint_and_assist
@@ -54,7 +62,7 @@ impl ProcessFile for CheckProcessFile {
                 // Parse errors are already skipped during the analyze phase, so no need to do it here.
             } else {
                 let format_result =
-                    FormatProcessFile::process_file(ctx, workspace_file, features_supported);
+                    FormatProcessFile::format_only(ctx, workspace_file, features_supported);
 
                 match format_result {
                     Ok(status) => {

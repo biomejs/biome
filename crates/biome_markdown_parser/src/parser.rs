@@ -63,6 +63,12 @@ pub(crate) struct MarkdownParserState {
     /// Indentation column where the current list marker starts.
     /// Used to detect sibling list items after blank lines.
     pub(crate) list_item_marker_indent: usize,
+    /// The bullet marker kind of the parent list (e.g. `-`, `*`, `+`).
+    /// Used to detect marker changes at blank-line boundaries.
+    pub(crate) list_item_marker_kind: Option<MarkdownSyntaxKind>,
+    /// The ordered list delimiter of the parent list (`.` or `)`).
+    /// Used to detect delimiter changes at blank-line boundaries.
+    pub(crate) list_item_ordered_delim: Option<char>,
     /// Emphasis parsing context for the current inline item list.
     pub(crate) emphasis_context: Option<EmphasisContext>,
     /// Normalized link reference definitions collected in a prepass.
@@ -73,6 +79,8 @@ pub(crate) struct MarkdownParserState {
     pub(crate) list_item_indents: Vec<ListItemIndent>,
     /// Recorded quote marker indents keyed by quote node range.
     pub(crate) quote_indents: Vec<QuoteIndent>,
+    /// Whether the most recently parsed list ended with a blank line.
+    pub(crate) last_list_ends_with_blank: bool,
     /// Virtual line start override for container prefixes (e.g., block quotes).
     pub(crate) virtual_line_start: Option<TextSize>,
     /// Flag to unwind quote parsing when nesting exceeds the maximum depth.
@@ -192,6 +200,14 @@ impl<'source> MarkdownParser<'source> {
         self.state.quote_indents.push(QuoteIndent { range, indent });
     }
 
+    pub(crate) fn set_last_list_ends_with_blank(&mut self, value: bool) {
+        self.state.last_list_ends_with_blank = value;
+    }
+
+    pub(crate) fn take_last_list_ends_with_blank(&mut self) -> bool {
+        std::mem::take(&mut self.state.last_list_ends_with_blank)
+    }
+
     /// Re-lex the current token using LinkDefinition context.
     /// This makes whitespace produce separate tokens for destination/title parsing.
     pub(crate) fn re_lex_link_definition(&mut self) {
@@ -205,6 +221,15 @@ impl<'source> MarkdownParser<'source> {
     pub(crate) fn force_relex_regular(&mut self) {
         self.source
             .force_relex_in_context(MarkdownLexContext::Regular);
+    }
+
+    /// Re-lex the current token in Regular context, treating the position as
+    /// a line start. After consuming a blockquote prefix, the lexer's
+    /// `after_newline` flag is false, which prevents it from producing
+    /// line-start-gated tokens like `MD_THEMATIC_BREAK_LITERAL`. This method
+    /// overrides that flag so the lexer behaves as if at line start.
+    pub(crate) fn force_relex_at_line_start(&mut self) {
+        self.source.force_relex_at_line_start();
     }
 
     /// Force re-lex the current token in CodeSpan context.
@@ -226,6 +251,15 @@ impl<'source> MarkdownParser<'source> {
     /// This invalidates any buffered lookahead, so ensure no lookahead is active.
     pub(crate) fn force_relex_emphasis_inline(&mut self) -> MarkdownSyntaxKind {
         self.source.re_lex(MarkdownReLexContext::EmphasisInline)
+    }
+
+    /// Re-lex the current token in HeadingContent context.
+    ///
+    /// Splits MD_HARD_LINE_LITERAL (trailing spaces + newline) into
+    /// MD_TEXTUAL_LITERAL (spaces only) + separate NEWLINE. Use this in
+    /// heading parsing where trailing spaces are not hard breaks (§4.2).
+    pub(crate) fn force_relex_heading_content(&mut self) -> MarkdownSyntaxKind {
+        self.source.force_relex_heading_content()
     }
 
     pub(crate) fn set_force_ordered_list_marker(&mut self, value: bool) {
@@ -374,8 +408,12 @@ impl<'source> MarkdownParser<'source> {
         did_emit
     }
 
-    /// Skip an optional indentation token at line start if it is whitespace-only
-    /// and does not exceed `max_indent` columns.
+    /// Consume optional indentation whitespace at line start, up to `max_indent`
+    /// columns. Each whitespace token is consumed as `Whitespace` trivia
+    /// (attached to the next real token).
+    ///
+    /// This avoids producing `Skipped` trivia, which should be reserved for
+    /// error-recovery paths.
     pub fn skip_line_indent(&mut self, max_indent: usize) -> bool {
         if !self.at_line_start() {
             return false;
@@ -401,10 +439,24 @@ impl<'source> MarkdownParser<'source> {
 
             consumed += indent;
             did_skip = true;
-            self.parse_as_skipped_trivia_tokens(|p| p.bump(MarkdownSyntaxKind::MD_TEXTUAL_LITERAL));
+            self.consume_as_whitespace_trivia();
         }
 
         did_skip
+    }
+
+    /// Consume the current token as `Whitespace` trivia (not `Skipped`).
+    ///
+    /// Use this for spec-driven structural whitespace that should be consumed
+    /// but not appear as explicit CST nodes. The token is removed from the
+    /// event stream and attached as `Whitespace` trivia on the next real token.
+    pub fn consume_as_whitespace_trivia(&mut self) {
+        use biome_parser::token_source::BumpWithContext;
+        use biome_rowan::TriviaPieceKind;
+        self.source_mut().skip_as_trivia_of_kind_with_context(
+            TriviaPieceKind::Whitespace,
+            MarkdownLexContext::Regular,
+        );
     }
 
     /// Returns true if inline content should stop parsing.

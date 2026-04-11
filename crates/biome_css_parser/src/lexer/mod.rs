@@ -3,7 +3,9 @@
 mod tests;
 
 use crate::CssParserOptions;
-use biome_css_syntax::{CssFileSource, CssSyntaxKind, CssSyntaxKind::*, T, TextLen, TextSize};
+use biome_css_syntax::{
+    CssFileSource, CssSyntaxKind, CssSyntaxKind::*, T, TextLen, TextRange, TextSize,
+};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
@@ -13,6 +15,7 @@ use biome_unicode_table::{
     Dispatch::{self, *},
     is_css_non_ascii, lookup_byte,
 };
+use smallvec::SmallVec;
 use std::char::REPLACEMENT_CHARACTER;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
@@ -44,11 +47,47 @@ pub enum CssLexContext {
     /// https://drafts.csswg.org/css-fonts/#unicode-range-desc
     UnicodeRange,
 
+    /// Applied when lexing an SCSS string that contains interpolation.
+    /// Carries the opening quote so lexing can stop on the matching delimiter.
+    ScssString(CssStringQuote),
+    /// Applied while lexing the regular `#{...}` body that originated from an
+    /// outer SCSS string. Behaves like regular lexing, but preserves the outer
+    /// quote for malformed recovery.
+    ScssStringInterpolation(CssStringQuote),
+
     /// Applied when lexing Tailwind CSS utility classes.
     /// Currently, only applicable to when we encounter a `@apply` rule.
     TailwindUtility,
     /// Applied when lexing Tailwind CSS utility names in `@utility`.
     TailwindUtilityName,
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub(crate) enum CssStringQuote {
+    Single,
+    Double,
+}
+
+impl CssStringQuote {
+    #[inline]
+    fn as_byte(self) -> u8 {
+        match self {
+            Self::Single => b'\'',
+            Self::Double => b'"',
+        }
+    }
+}
+
+impl TryFrom<u8> for CssStringQuote {
+    type Error = ();
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            b'\'' => Ok(Self::Single),
+            b'"' => Ok(Self::Double),
+            _ => Err(()),
+        }
+    }
 }
 
 impl LexContext for CssLexContext {
@@ -101,6 +140,7 @@ pub(crate) struct CssLexer<'src> {
 
     options: CssParserOptions,
     source_type: CssFileSource,
+    pending_scss_string_start: Option<PendingScssInterpolatedStringStart>,
 }
 
 impl<'src> Lexer<'src> for CssLexer<'src> {
@@ -138,11 +178,15 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
         let kind = match self.current_byte() {
             Some(current) => match context {
                 CssLexContext::Regular => self.consume_token(current),
+                CssLexContext::ScssStringInterpolation(quote) => {
+                    self.consume_token_in_scss_string_interpolation(current, quote)
+                }
                 CssLexContext::Selector => self.consume_selector_token(current),
                 CssLexContext::PseudoNthSelector => self.consume_pseudo_nth_selector_token(current),
                 CssLexContext::UrlRawValue => self.consume_url_raw_value_token(current),
                 CssLexContext::Color => self.consume_color_token(current),
                 CssLexContext::UnicodeRange => self.consume_unicode_range_token(current),
+                CssLexContext::ScssString(quote) => self.lex_scss_string_chunk_token(quote),
                 CssLexContext::TailwindUtility => self.consume_token_tailwind_utility(current),
                 CssLexContext::TailwindUtilityName => {
                     self.consume_token_tailwind_utility_name(current)
@@ -201,6 +245,7 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
         self.after_whitespace = after_whitespace;
         self.unicode_bom_length = unicode_bom_length;
         self.diagnostics.truncate(diagnostics_pos as usize);
+        self.pending_scss_string_start = None;
     }
 
     fn finish(self) -> Vec<ParseDiagnostic> {
@@ -239,6 +284,7 @@ impl<'src> CssLexer<'src> {
             diagnostics: vec![],
             options: CssParserOptions::default(),
             source_type: CssFileSource::default(),
+            pending_scss_string_start: None,
         }
     }
 
@@ -562,136 +608,373 @@ impl<'src> CssLexer<'src> {
     }
 
     fn consume_string_literal(&mut self, quote: u8) -> CssSyntaxKind {
-        self.assert_current_char_boundary();
-        let start = self.text_position();
+        let Ok(quote) = CssStringQuote::try_from(quote) else {
+            debug_assert!(false, "string literal lexing must start on a quote byte");
+            return ERROR_TOKEN;
+        };
 
-        self.advance(1); // Skip over the quote
-        let mut state = LexStringState::InString;
-
-        while let Some(chr) = self.current_byte() {
-            let dispatch = lookup_byte(chr);
-
-            match dispatch {
-                QOT if quote == chr => {
-                    self.advance(1);
-                    state = match state {
-                        LexStringState::InString => LexStringState::Terminated,
-                        state => state,
-                    };
-                    break;
-                }
-                // '\t' etc
-                BSL => {
-                    let escape_start = self.text_position();
-                    self.advance(1);
-
-                    match self.current_byte() {
-                        Some(b'\n' | b'\r') => self.advance(1),
-
-                        // Handle escaped `'` but only if this is a end quote string.
-                        Some(b'\'') if quote == b'\'' => {
-                            self.advance(1);
-                        }
-
-                        // Handle escaped `'` but only if this is a end quote string.
-                        Some(b'"') if quote == b'"' => {
-                            self.advance(1);
-                        }
-
-                        Some(c) if c.is_ascii_hexdigit() => {
-                            let hex = self.consume_escape_sequence(c);
-
-                            if hex == REPLACEMENT_CHARACTER {
-                                state = LexStringState::InvalidEscapeSequence;
-
-                                let diagnostic = ParseDiagnostic::new(
-                                    "Invalid escape sequence",
-                                    escape_start..self.text_position(),
-                                );
-                                self.diagnostics.push(diagnostic);
-                            }
-                        }
-
-                        Some(chr) => {
-                            self.advance_byte_or_char(chr);
-                        }
-
-                        None => {}
-                    }
-                }
-                WHS if matches!(chr, b'\n' | b'\r') => {
-                    let unterminated =
-                        ParseDiagnostic::new("Missing closing quote", start..self.text_position())
-                            .with_hint("The closing quote must be on the same line.");
-
-                    self.diagnostics.push(unterminated);
-
-                    return ERROR_TOKEN;
-                }
-                // we don't need to handle IDT because it's always len 1.
-                UNI => self.advance_char_unchecked(),
-
-                _ => self.advance(1),
-            }
+        if self.is_scss() {
+            return match self.lex_string_token(StringLexMode::ScssStart { quote }) {
+                StringLexResult::Token(kind) => kind,
+                StringLexResult::Unterminated => ERROR_TOKEN,
+            };
         }
 
-        match state {
-            LexStringState::Terminated => CSS_STRING_LITERAL,
-            LexStringState::InString => {
-                let unterminated =
-                    ParseDiagnostic::new("Missing closing quote", start..self.text_position())
-                        .with_detail(
-                            self.source.text_len()..self.source.text_len(),
-                            "file ends here",
-                        );
-                self.diagnostics.push(unterminated);
-
-                ERROR_TOKEN
-            }
-            LexStringState::InvalidEscapeSequence => ERROR_TOKEN,
+        match self.lex_string_token(StringLexMode::Plain { quote }) {
+            StringLexResult::Token(kind) => kind,
+            StringLexResult::Unterminated => ERROR_TOKEN,
         }
     }
 
-    fn consume_escape_sequence(&mut self, current: u8) -> char {
-        debug_assert!(current.is_ascii_hexdigit());
-
-        // SAFETY: The current byte is a hex digit.
-        let mut hex = (current as char).to_digit(16).unwrap();
-        self.advance(1);
-        // Consume as many hex digits as possible, but no more than 6.
-        // Note that this means 1-6 hex digits have been consumed in total.
-        for _ in 0..5 {
-            let Some(digit) = self.current_byte().and_then(|c| {
-                if c.is_ascii_hexdigit() {
-                    (c as char).to_digit(16)
-                } else {
-                    None
+    fn consume_token_in_scss_string_interpolation(
+        &mut self,
+        current: u8,
+        quote: CssStringQuote,
+    ) -> CssSyntaxKind {
+        if current == quote.as_byte() {
+            return match self.scan_same_quote_in_interpolation(quote) {
+                SameQuoteInInterpolation::NestedString(scan) => {
+                    match self.finish_scss_string_start(self.position, quote, scan) {
+                        StringLexResult::Token(kind) => kind,
+                        StringLexResult::Unterminated => {
+                            debug_assert!(
+                                false,
+                                "same-quote interpolation scans must classify unterminated strings as outer quotes"
+                            );
+                            self.consume_byte(SCSS_STRING_QUOTE)
+                        }
+                    }
                 }
-            }) else {
+                SameQuoteInInterpolation::OuterQuote => self.consume_byte(SCSS_STRING_QUOTE),
+            };
+        }
+
+        self.consume_token(current)
+    }
+
+    /// Classifies a same-quote byte while inside string-origin interpolation.
+    ///
+    /// Inside `#{...}` from an outer interpolated string, the current quote may
+    /// start a real nested string or may be the outer string closing early
+    /// before `}`. This helper performs a non-mutating scan so the valid nested
+    /// string path can reuse the scan result for real token commitment.
+    fn scan_same_quote_in_interpolation(&self, quote: CssStringQuote) -> SameQuoteInInterpolation {
+        let scan = self.scan_string_body(1, quote, true);
+
+        match scan.stop {
+            StringBodyScanStop::ClosingQuote { .. } | StringBodyScanStop::Interpolation { .. } => {
+                SameQuoteInInterpolation::NestedString(scan)
+            }
+            StringBodyScanStop::Newline { .. } | StringBodyScanStop::Eof { .. } => {
+                SameQuoteInInterpolation::OuterQuote
+            }
+        }
+    }
+
+    fn lex_string_token(&mut self, mode: StringLexMode) -> StringLexResult {
+        match mode {
+            StringLexMode::Plain { quote } => {
+                let start = self.position;
+                let scan = self.scan_string_body(1, quote, false);
+                self.commit_plain_string_literal(start, scan)
+            }
+            StringLexMode::ScssStart { quote } => {
+                let start = self.position;
+                // Skip the opening quote we are already on.
+                let scan = self.scan_string_body(1, quote, true);
+                self.finish_scss_string_start(start, quote, scan)
+            }
+        }
+    }
+
+    fn finish_scss_string_start(
+        &mut self,
+        start: usize,
+        quote: CssStringQuote,
+        scan: StringBodyScan,
+    ) -> StringLexResult {
+        if matches!(scan.stop, StringBodyScanStop::Interpolation { .. }) {
+            self.pending_scss_string_start = Some(PendingScssInterpolatedStringStart {
+                quote,
+                content_start: start + 1,
+                initial_chunk_scan: scan,
+            });
+
+            return StringLexResult::Token(self.consume_byte(SCSS_STRING_QUOTE));
+        }
+
+        self.commit_plain_string_literal(start, scan)
+    }
+
+    fn lex_scss_string_chunk_token(&mut self, quote: CssStringQuote) -> CssSyntaxKind {
+        if self.current_byte() == Some(quote.as_byte()) {
+            self.pending_scss_string_start = None;
+            return self.consume_byte(SCSS_STRING_QUOTE);
+        }
+
+        if self.is_at_scss_interpolation_start() {
+            self.pending_scss_string_start = None;
+            return self.consume_byte(T![#]);
+        }
+
+        self.commit_scss_string_content(quote)
+    }
+
+    fn is_at_scss_interpolation_start(&self) -> bool {
+        self.current_byte() == Some(b'#') && self.peek_byte() == Some(b'{')
+    }
+
+    fn commit_scss_string_content(&mut self, quote: CssStringQuote) -> CssSyntaxKind {
+        self.assert_current_char_boundary();
+        let start = self.position;
+
+        let scan = self
+            .take_pending_scss_string_start_scan(quote)
+            .unwrap_or_else(|| self.scan_string_body(0, quote, true));
+
+        match scan.stop {
+            StringBodyScanStop::Interpolation { position }
+            | StringBodyScanStop::ClosingQuote { position } => {
+                debug_assert!(
+                    position > start,
+                    "SCSS string content must never be zero-length"
+                );
+
+                self.position = position;
+                self.push_string_issues(&scan.issues);
+                // Invalid escapes still belong to this string chunk; keep the
+                // semantic token kind and surface the problem via diagnostics.
+                SCSS_STRING_CONTENT_LITERAL
+            }
+            StringBodyScanStop::Newline { position, .. } => {
+                self.position = position;
+                self.push_string_issues(&scan.issues);
+                let unterminated = ParseDiagnostic::new(
+                    "Missing closing quote",
+                    TextSize::from(start as u32)..self.text_position(),
+                )
+                .with_hint("The closing quote must be on the same line.");
+                self.diagnostics.push(unterminated);
+                ERROR_TOKEN
+            }
+            StringBodyScanStop::Eof { position } => {
+                self.position = position;
+                self.push_string_issues(&scan.issues);
+                let unterminated = ParseDiagnostic::new(
+                    "Missing closing quote",
+                    TextSize::from(start as u32)..self.text_position(),
+                )
+                .with_detail(
+                    self.source.text_len()..self.source.text_len(),
+                    "file ends here",
+                );
+                self.diagnostics.push(unterminated);
+                ERROR_TOKEN
+            }
+        }
+    }
+
+    fn commit_plain_string_literal(
+        &mut self,
+        start: usize,
+        scan: StringBodyScan,
+    ) -> StringLexResult {
+        match scan.stop {
+            StringBodyScanStop::ClosingQuote { position } => {
+                self.position = position + 1;
+                self.push_string_issues(&scan.issues);
+                StringLexResult::Token(if !scan.issues.is_empty() {
+                    ERROR_TOKEN
+                } else {
+                    CSS_STRING_LITERAL
+                })
+            }
+            StringBodyScanStop::Newline { position, .. } => {
+                self.position = position;
+                self.push_string_issues(&scan.issues);
+                let unterminated = ParseDiagnostic::new(
+                    "Missing closing quote",
+                    TextSize::from(start as u32)..self.text_position(),
+                )
+                .with_hint("The closing quote must be on the same line.");
+                self.diagnostics.push(unterminated);
+                StringLexResult::Unterminated
+            }
+            StringBodyScanStop::Eof { position } => {
+                self.position = position;
+                self.push_string_issues(&scan.issues);
+                let unterminated = ParseDiagnostic::new(
+                    "Missing closing quote",
+                    TextSize::from(start as u32)..self.text_position(),
+                )
+                .with_detail(
+                    self.source.text_len()..self.source.text_len(),
+                    "file ends here",
+                );
+                self.diagnostics.push(unterminated);
+                StringLexResult::Unterminated
+            }
+            StringBodyScanStop::Interpolation { .. } => {
+                debug_assert!(
+                    false,
+                    "plain string literal finishing must not see an interpolation stop"
+                );
+                StringLexResult::Token(CSS_STRING_LITERAL)
+            }
+        }
+    }
+
+    fn push_string_issues(&mut self, issues: &[StringIssue]) {
+        for issue in issues {
+            match issue {
+                StringIssue::InvalidEscape(range) => {
+                    self.diagnostics
+                        .push(ParseDiagnostic::new("Invalid escape sequence", *range));
+                }
+            }
+        }
+    }
+
+    fn scan_string_body(
+        &self,
+        mut offset: usize,
+        quote: CssStringQuote,
+        allow_interpolation: bool,
+    ) -> StringBodyScan {
+        let mut issues = SmallVec::new();
+        let quote_byte = quote.as_byte();
+
+        while let Some(byte) = self.byte_at(offset) {
+            let position = self.position + offset;
+
+            if byte == quote_byte {
+                return StringBodyScan {
+                    stop: StringBodyScanStop::ClosingQuote { position },
+                    issues,
+                };
+            }
+
+            if allow_interpolation && byte == b'#' && self.byte_at(offset + 1) == Some(b'{') {
+                return StringBodyScan {
+                    stop: StringBodyScanStop::Interpolation { position },
+                    issues,
+                };
+            }
+
+            match lookup_byte(byte) {
+                BSL => {
+                    let (next_offset, invalid_hex_escape) = self.scan_string_escape(offset, quote);
+                    if invalid_hex_escape {
+                        issues.push(StringIssue::InvalidEscape(TextRange::new(
+                            TextSize::from(position as u32),
+                            TextSize::from((self.position + next_offset) as u32),
+                        )));
+                    }
+
+                    offset = next_offset;
+                }
+                WHS if matches!(byte, b'\n' | b'\r') => {
+                    let len = if byte == b'\r' && self.byte_at(offset + 1) == Some(b'\n') {
+                        2
+                    } else {
+                        1
+                    };
+
+                    return StringBodyScan {
+                        stop: StringBodyScanStop::Newline { position, len },
+                        issues,
+                    };
+                }
+                // SAFETY: `offset` starts at a known UTF-8 boundary and only
+                // advances over ASCII bytes, escape scanners, or full Unicode
+                // scalar lengths, so it remains on a char boundary here.
+                UNI => offset += self.char_unchecked_at(offset).len_utf8(),
+                _ => offset += 1,
+            }
+        }
+
+        StringBodyScan {
+            stop: StringBodyScanStop::Eof {
+                position: self.source.len(),
+            },
+            issues,
+        }
+    }
+
+    fn take_pending_scss_string_start_scan(
+        &mut self,
+        quote: CssStringQuote,
+    ) -> Option<StringBodyScan> {
+        self.pending_scss_string_start
+            .take()
+            .filter(|pending| pending.quote == quote && pending.content_start == self.position)
+            .map(|pending| pending.initial_chunk_scan)
+    }
+
+    fn consume_escape_sequence(&mut self) -> char {
+        let (next_offset, escaped) = self.scan_hex_escape(0);
+        self.position += next_offset;
+        escaped
+    }
+
+    fn scan_string_escape(&self, offset: usize, quote: CssStringQuote) -> (usize, bool) {
+        let quote = quote.as_byte();
+        let next = offset + 1;
+        match self.byte_at(next) {
+            Some(b'\n') => (next + 1, false),
+            Some(b'\r') => {
+                let len = if self.byte_at(next + 1) == Some(b'\n') {
+                    2
+                } else {
+                    1
+                };
+                (next + len, false)
+            }
+            Some(byte) if byte == quote => (next + 1, false),
+            Some(byte) if byte.is_ascii_hexdigit() => {
+                let (next_offset, escaped) = self.scan_hex_escape(next);
+                (next_offset, escaped == REPLACEMENT_CHARACTER)
+            }
+            Some(byte) if byte.is_ascii() => (next + 1, false),
+            // SAFETY: `next` is immediately after `\`, which is ASCII, so it
+            // is still a valid UTF-8 boundary for the escaped code point.
+            Some(_) => (next + self.char_unchecked_at(next).len_utf8(), false),
+            None => (next, false),
+        }
+    }
+
+    fn scan_hex_escape(&self, offset: usize) -> (usize, char) {
+        debug_assert!(
+            self.byte_at(offset)
+                .is_some_and(|byte| byte.is_ascii_hexdigit()),
+            "hex escape scanning must start on a hex digit"
+        );
+
+        let max_end = offset + 6;
+        let mut cursor = offset;
+        let mut hex = 0u32;
+
+        while cursor < max_end {
+            let Some(byte) = self.byte_at(cursor) else {
                 break;
             };
-            self.advance(1);
+
+            let Some(digit) = (byte as char).to_digit(16) else {
+                break;
+            };
 
             hex = hex * 16 + digit;
+            cursor += 1;
         }
 
-        // If the next input code point is whitespace, consume it as well.
-        if matches!(self.current_byte(), Some(b'\t' | b' ')) {
-            self.advance(1);
+        if self
+            .byte_at(cursor)
+            .is_some_and(|byte| matches!(byte, b'\t' | b' ' | b'\n' | b'\r' | 0x0C))
+        {
+            cursor += 1;
         }
 
-        // Interpret the hex digits as a hexadecimal number. If this number is zero, or
-        // is for a surrogate, or is greater than the maximum allowed code point, return
-        // U+FFFD REPLACEMENT CHARACTER (�).
-        match hex {
-            // If this number is zero
-            0 => REPLACEMENT_CHARACTER,
-            // or is for a surrogate
-            55_296..=57_343 => REPLACEMENT_CHARACTER,
-            // or is greater than the maximum allowed code point
-            1_114_112.. => REPLACEMENT_CHARACTER,
-            _ => char::from_u32(hex).unwrap_or(REPLACEMENT_CHARACTER),
-        }
+        (cursor, decode_escaped_code_point(hex))
     }
 
     /// Lexes a CSS number literal
@@ -810,6 +1093,12 @@ impl<'src> CssLexer<'src> {
             b"important" => IMPORTANT_KW,
             b"from" => FROM_KW,
             b"to" => TO_KW,
+            b"cover" => COVER_KW,
+            b"contain" => CONTAIN_KW,
+            b"entry" => ENTRY_KW,
+            b"exit" => EXIT_KW,
+            b"entry-crossing" => ENTRY_CROSSING_KW,
+            b"exit-crossing" => EXIT_CROSSING_KW,
             b"through" => THROUGH_KW,
             b"var" => VAR_KW,
             b"highlight" => HIGHLIGHT_KW,
@@ -1157,7 +1446,7 @@ impl<'src> CssLexer<'src> {
                     // even if it becomes the REPLACEMENT CHARACTER (like `\0`).
                     // This is important to handle for cases like the "media
                     // min-width hack": http://browserbu.gs/css-hacks/media-min-width-0-backslash-0/.
-                    Some(c) if c.is_ascii_hexdigit() => self.consume_escape_sequence(c),
+                    Some(c) if c.is_ascii_hexdigit() => self.consume_escape_sequence(),
 
                     Some(_) => {
                         let chr = self.current_char_unchecked();
@@ -1474,6 +1763,8 @@ impl<'src> CssLexer<'src> {
                             IDT | MIN | DIG | ZER => true,
                             // If the third code point is a name-start code point
                             // return true.
+                            // SAFETY: offset 2 is reached only after two ASCII
+                            // `-` bytes, so it is a valid UTF-8 boundary.
                             UNI => is_css_non_ascii(self.char_unchecked_at(2)),
                             // or the third and fourth code points are a valid escape
                             // return true.
@@ -1571,6 +1862,10 @@ impl<'src> ReLexer<'src> for CssLexer<'src> {
 }
 
 impl CssLexer<'_> {
+    pub(crate) fn has_pending_scss_string_start(&self) -> bool {
+        self.pending_scss_string_start.is_some()
+    }
+
     fn consume_scss_expression_token(&mut self, current: u8) -> CssSyntaxKind {
         match current {
             b'+' => self.consume_byte(T![+]),
@@ -1595,14 +1890,104 @@ impl<'src> LexerWithCheckpoint<'src> for CssLexer<'src> {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
-enum LexStringState {
-    /// String that contains an invalid escape sequence
-    InvalidEscapeSequence,
+/// Cached result of the initial SCSS interpolated-string scan.
+///
+/// Regular lexing first sees the opening quote. If the scanner finds an
+/// unescaped `#{` before the matching closing quote, the lexer emits only the
+/// opening `SCSS_STRING_QUOTE` token and stores this cache for the next
+/// `CssLexContext::ScssString(...)` token fetch.
+///
+/// That next fetch reuses the cached scan result for the first string chunk
+/// instead of rescanning from the opening quote or emitting a coarse
+/// `CSS_STRING_LITERAL` that later has to be re-lexed.
+#[derive(Debug, Clone, Eq, PartialEq)]
+struct PendingScssInterpolatedStringStart {
+    /// Delimiter of the outer interpolated string.
+    quote: CssStringQuote,
+    /// Absolute byte position immediately after the opening quote, where the
+    /// first string-content token starts if the chunk is non-empty.
+    content_start: usize,
+    /// Cached scan result for the bytes between `content_start` and the first
+    /// interpolation or closing-quote boundary.
+    initial_chunk_scan: StringBodyScan,
+}
 
-    /// Between the opening `"` and closing `"` quotes.
-    InString,
+/// Semantic mode used by the string lexer driver.
+///
+/// This is the public-facing split inside the lexer between:
+/// - plain quoted strings
+/// - SCSS interpolated-string start detection
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+enum StringLexMode {
+    /// Lex a plain quoted string that cannot start SCSS segmentation.
+    Plain { quote: CssStringQuote },
+    /// Lex the opening quote of an SCSS string, starting segmentation if an
+    /// interpolation boundary appears before the closing quote.
+    ScssStart { quote: CssStringQuote },
+}
 
-    /// Properly terminated string
-    Terminated,
+/// Result of lexing one token in a normal string lexer mode.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+enum StringLexResult {
+    /// The lexer committed a concrete token.
+    Token(CssSyntaxKind),
+    /// The string terminated at newline or EOF before a normal closing token
+    /// could be produced.
+    Unterminated,
+}
+
+/// Classification of a same-quote byte while lexing string-origin
+/// interpolation.
+#[derive(Debug, Clone, Eq, PartialEq)]
+enum SameQuoteInInterpolation {
+    /// The quote starts a valid nested string and carries the reused scan
+    /// result for committing that token.
+    NestedString(StringBodyScan),
+    /// The quote should be treated as the outer string closing early.
+    OuterQuote,
+}
+
+/// Result of scanning a string body from the current lexer position.
+#[derive(Debug, Clone, Eq, PartialEq)]
+struct StringBodyScan {
+    /// Where scanning stopped.
+    stop: StringBodyScanStop,
+    /// Ranges of invalid escape sequences encountered before the stop
+    /// boundary. The caller decides when to emit diagnostics for them.
+    issues: SmallVec<[StringIssue; 1]>,
+}
+
+/// Next boundary encountered while scanning a string body.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+enum StringBodyScanStop {
+    /// An unescaped `#{` starts an interpolation part.
+    Interpolation { position: usize },
+    /// The matching quote closes the outer string.
+    ClosingQuote { position: usize },
+    /// A newline terminates the string as malformed input.
+    Newline { position: usize, len: usize },
+    /// The file ended before a closing quote was found.
+    Eof { position: usize },
+}
+
+/// Non-fatal issues discovered while scanning a quoted string body.
+///
+/// These are returned as data by the shared string-body scanner. The caller
+/// decides when to emit diagnostics after committing the scan result.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+enum StringIssue {
+    /// Invalid escape sequence such as `\0`.
+    InvalidEscape(TextRange),
+}
+
+/// Decodes a CSS hex escape sequence into a Unicode scalar value or the
+/// replacement character when the escape is invalid.
+#[inline]
+fn decode_escaped_code_point(hex: u32) -> char {
+    match hex {
+        0 => REPLACEMENT_CHARACTER,
+        55_296..=57_343 => REPLACEMENT_CHARACTER,
+        1_114_112.. => REPLACEMENT_CHARACTER,
+        _ => char::from_u32(hex).unwrap_or(REPLACEMENT_CHARACTER),
+    }
 }

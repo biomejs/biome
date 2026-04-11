@@ -240,10 +240,10 @@ This paragraph has some `code` in it.
      Header 2
      --------
  
--# Header 1
- 
 +
-+# Header 1
++
+ # Header 1
+-
  ## Header 2
 -
  ### Header 3
@@ -291,7 +291,7 @@ This paragraph has some `code` in it.
  > 1. This is the first list item.
  > 2. This is the second list item.
  >
-@@ -73,17 +74,23 @@
+@@ -73,18 +74,24 @@
      >
      >     Markdown.generate();
  
@@ -302,22 +302,23 @@ This paragraph has some `code` in it.
  - Green
  - Blue
  
-+
-++ Red
-++ Green
-++ Blue
-+
-+
- * Red
- * Green
- * Blue
+-* Red
+-* Green
+-* Blue
  
--- Red
--- Green
--- Blue
+ - Red
+ - Green
+ - Blue
  
++
++- Red
++- Green
++- Blue
++
++
  ```markdown
  - Red
+ - Green
 @@ -99,6 +106,8 @@
  * Blue
  ```
@@ -346,15 +347,15 @@ This paragraph has some `code` in it.
  
 ----
 +* * *
- 
-----
++
 +***
++
++*****
  
 ----
-+*****
-+
 +- - -
-+
+ 
+----
 +---------------------------------------
  
      * * *
@@ -368,24 +369,15 @@ This paragraph has some `code` in it.
  This is [an example](http://example.com "Example") link.
  
  [This link](http://example.com) has no title attr.
-@@ -159,13 +174,15 @@
+@@ -159,6 +174,8 @@
  
      [id]: http://example.com "Optional Title"
  
--_single asterisks_
++
++
+ _single asterisks_
  
-+
-+*single asterisks*
-+
  _single underscores_
- 
- **double asterisks**
- 
--**double underscores**
-+__double underscores__
- 
-     *single asterisks*
- 
 @@ -175,10 +192,14 @@
  
      __double underscores__
@@ -490,14 +482,14 @@ Header 2
 - Blue
 
 
-+ Red
-+ Green
-+ Blue
+- Red
+- Green
+- Blue
 
 
-* Red
-* Green
-* Blue
+- Red
+- Green
+- Blue
 
 
 ```markdown
@@ -584,13 +576,13 @@ This is [an example][id] reference-style link.
 
 
 
-*single asterisks*
+_single asterisks_
 
 _single underscores_
 
 **double asterisks**
 
-__double underscores__
+**double underscores**
 
     *single asterisks*
 

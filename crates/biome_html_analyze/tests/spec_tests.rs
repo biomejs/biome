@@ -1,11 +1,11 @@
-use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
+use biome_analyze::{ActionFilter, AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_html_parser::parse_html;
 use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
 use biome_rowan::AstNode;
 use biome_test_utils::{
-    CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
-    code_fix_to_string, create_analyzer_options, diagnostic_to_string,
+    CheckActionType, analyze_with_workspace, assert_diagnostics_expectation_comment,
+    assert_errors_are_absent, code_fix_to_string, create_analyzer_options, diagnostic_to_string,
     has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker, scripts_from_json,
     write_analyzer_snapshot,
 };
@@ -21,6 +21,11 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
 
     let input_file = Utf8Path::new(input);
     let file_name = input_file.file_name().unwrap();
+
+    // Skip options files — they are configuration, not test inputs
+    if file_name.ends_with(".options.json") {
+        return;
+    }
 
     let (group, rule) = parse_test_path(input_file);
     if rule == "specs" {
@@ -62,18 +67,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             );
         }
     } else {
-        let Ok(source_type) = input_file.try_into() else {
-            return;
-        };
-        analyze_and_snap(
-            &mut snapshot,
-            &input_code,
-            source_type,
-            filter,
-            file_name,
-            input_file,
-            CheckActionType::Lint,
-        );
+        snapshot = analyze_with_workspace(input_file, input_code, group, rule);
     };
 
     insta::with_settings!({
@@ -102,7 +96,7 @@ pub(crate) fn analyze_and_snap(
 
     let (_, errors) = biome_html_analyze::analyze(&root, filter, &options, source_type, |event| {
         if let Some(mut diag) = event.diagnostic() {
-            for action in event.actions() {
+            for action in event.actions(ActionFilter::all()) {
                 if check_action_type.is_suppression() {
                     if action.is_suppression() {
                         check_code_action(input_file, input_code, source_type, &action);
@@ -118,7 +112,7 @@ pub(crate) fn analyze_and_snap(
             return ControlFlow::Continue(());
         }
 
-        for action in event.actions() {
+        for action in event.actions(ActionFilter::all()) {
             if check_action_type.is_suppression() {
                 if action.category.matches("quickfix.suppressRule") {
                     check_code_action(input_file, input_code, source_type, &action);

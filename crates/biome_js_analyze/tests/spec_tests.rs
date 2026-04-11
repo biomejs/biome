@@ -1,6 +1,6 @@
 use biome_analyze::{
-    AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never, Queryable,
-    RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
+    ActionFilter, AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never,
+    Queryable, RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
 };
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_fs::OsFileSystem;
@@ -92,8 +92,11 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     // handles embedded language extraction via the HTML parser pipeline.
     let is_html_ish = matches!(extension, "vue" | "svelte" | "astro" | "html");
 
+    let input_code = read_to_string(input_file)
+        .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
+
     let snapshot = if is_html_ish {
-        analyze_with_workspace(input_file, group, rule)
+        analyze_with_workspace(input_file, input_code, group, rule)
     } else {
         let rule_filter = RuleFilter::Rule(group, rule);
         let filter = AnalysisFilter {
@@ -102,9 +105,6 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
         };
 
         let mut snapshot = String::new();
-
-        let input_code = read_to_string(input_file)
-            .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
         if let Some(scripts) = scripts_from_json(extension, &input_code) {
             for script in scripts {
@@ -221,7 +221,7 @@ pub(crate) fn analyze_and_snap(
     let (_, errors) =
         biome_js_analyze::analyze(&root, filter, &options, plugins, services, |event| {
             if let Some(mut diag) = event.diagnostic() {
-                for action in event.actions() {
+                for action in event.actions(ActionFilter::all()) {
                     if check_action_type.is_suppression() {
                         if action.is_suppression() {
                             check_code_action(
@@ -251,7 +251,7 @@ pub(crate) fn analyze_and_snap(
                 return ControlFlow::Continue(());
             }
 
-            for action in event.actions() {
+            for action in event.actions(ActionFilter::all()) {
                 if check_action_type.is_suppression() {
                     if action.category.matches("quickfix.suppressRule") {
                         check_code_action(

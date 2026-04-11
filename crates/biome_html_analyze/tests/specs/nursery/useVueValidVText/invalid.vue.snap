@@ -3,7 +3,7 @@ source: crates/biome_html_analyze/tests/spec_tests.rs
 expression: invalid.vue
 ---
 # Input
-```html
+```vue
 <!-- should generate diagnostics -->
 
 <div v-text></div>
@@ -234,6 +234,55 @@ invalid.vue:14:12 lint/nursery/useVueValidVText ━━━━━━━━━━�
   i v-text directives do not support any modifiers. Remove the modifier.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a valid expression in template syntax
+  
+    3 │ <div v-text></div>
+  > 4 │ <div v-text=""></div>
+      │              
+    5 │ <div v-text="    "></div>
+    6 │ <div v-text:aaa="foo"></div>
+  
+  i Template expressions can only contain JavaScript expressions, not statements like 'let', 'if', or 'function'.
+  
+
+```
+
+```
+invalid.vue:5:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a valid expression in template syntax
+  
+    3 │ <div v-text></div>
+    4 │ <div v-text=""></div>
+  > 5 │ <div v-text="    "></div>
+      │                  
+    6 │ <div v-text:aaa="foo"></div>
+    7 │ <div v-text.bbb="foo"></div>
+  
+  i Template expressions can only contain JavaScript expressions, not statements like 'let', 'if', or 'function'.
+  
+
+```
+
+```
+invalid.vue:12:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a valid expression in template syntax
+  
+    11 │ <div v-text />
+  > 12 │ <div v-text="" />
+       │              
+    13 │ <div v-text:aaa="foo" />
+    14 │ <div v-text.bbb="foo" />
+  
+  i Template expressions can only contain JavaScript expressions, not statements like 'let', 'if', or 'function'.
   
 
 ```

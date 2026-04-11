@@ -109,6 +109,21 @@ where
         }
     }
 
+    /// Merge all changes from `other` into this mutation.
+    ///
+    /// Both mutations must reference nodes from the same tree. The merged
+    /// changes are applied together in a single [`Self::commit`] call.
+    /// Non-overlapping changes combine naturally. If two changes target the
+    /// same slot of the same parent, the existing last-write-wins semantics
+    /// apply.
+    pub fn merge(&mut self, other: Self) {
+        debug_assert!(
+            self.root == other.root,
+            "Cannot merge mutations from different trees"
+        );
+        self.changes.extend(other.changes);
+    }
+
     /// Push a change to replace the "prev_node" with "next_node".
     /// Trivia from "prev_node" is automatically copied to "next_node".
     ///

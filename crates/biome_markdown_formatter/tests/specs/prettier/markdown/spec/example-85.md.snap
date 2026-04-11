@@ -21,16 +21,16 @@ info: markdown/spec/example-85.md
 +++ Biome
 @@ -1 +1,4 @@
 +
-+    
++
      foo
-+    
++
 ```
 
 # Output
 
 ```md
 
-    
+
     foo
-    
+
 ```

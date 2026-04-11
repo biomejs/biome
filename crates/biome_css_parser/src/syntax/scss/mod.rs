@@ -18,7 +18,7 @@ pub(crate) use at_rule::{
     parse_scss_use_at_rule, parse_scss_warn_at_rule, parse_scss_while_at_rule,
 };
 pub(crate) use declaration::{
-    is_at_scss_declaration, is_at_scss_nesting_declaration, is_at_scss_variable_modifier_start,
+    is_at_scss_declaration, is_at_scss_nesting_declaration, is_at_scss_variable_modifier,
     parse_scss_declaration, parse_scss_interpolated_property_declaration,
     parse_scss_nesting_declaration, try_parse_scss_nesting_declaration,
 };
@@ -50,5 +50,6 @@ pub(crate) use token_sets::{
     SCSS_STATEMENT_START_SET, SCSS_VARIABLE_MODIFIER_LIST_END_SET,
 };
 pub(crate) use value::{
-    is_at_scss_parent_selector_value, parse_scss_fallback_value, parse_scss_parent_selector_value,
+    is_at_scss_interpolated_string, is_at_scss_parent_selector_value,
+    parse_scss_interpolated_string, parse_scss_parent_selector_value,
 };

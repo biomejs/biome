@@ -1,33 +1,34 @@
+mod parse_embedded_nodes;
+
 use super::{
-    AnalyzerCapabilities, AnalyzerVisitorBuilder, Capabilities, CodeActionsParams,
-    DebugCapabilities, DocumentFileSource, EnabledForPath, ExtensionHandler, FixAllParams,
-    FormatEmbedNode, FormatterCapabilities, LintParams, LintResults, ParseEmbedResult, ParseResult,
+    AnalyzerCapabilities, AnalyzerVisitorBuilder, AnalyzerVisitorResult, Capabilities,
+    CodeActionsParams, DebugCapabilities, DocumentFileSource, EnabledForPath, ExtensionHandler,
+    FixAllParams, FormatEmbedNode, FormatterCapabilities, LintParams, LintResults, ParseResult,
     ParserCapabilities, ProcessFixAll, ProcessLint, SearchCapabilities, UpdateSnippetsNodes,
 };
 use crate::configuration::to_analyzer_rules;
-use crate::embed::registry::{EmbedDetectorsRegistry, EmbedMatch};
-use crate::embed::types::{EmbedCandidate, EmbedContent, GuestLanguage, HostLanguage};
+use crate::file_handlers::html::parse_embedded_nodes::parse_embedded_nodes;
 use crate::settings::{
     OverrideSettings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
 };
+use crate::workspace::CodeAction;
+use crate::workspace::FixFileMode;
 use crate::workspace::document::AnyEmbeddedSnippet;
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
-use crate::workspace::{
-    CodeAction, CssDocumentServices, DocumentServices, EmbeddedSnippet, JsDocumentServices,
-};
 use crate::workspace::{FixFileResult, PullActionsResult};
 use crate::{
     WorkspaceError,
     settings::{ServiceLanguage, Settings},
     workspace::GetSyntaxTreeResult,
 };
-use biome_analyze::{AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never};
+use biome_analyze::{
+    ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
+};
 use biome_configuration::html::{
     HtmlAssistConfiguration, HtmlAssistEnabled, HtmlFormatterConfiguration, HtmlFormatterEnabled,
     HtmlLinterConfiguration, HtmlLinterEnabled, HtmlParseInterpolation, HtmlParserConfiguration,
 };
-use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
-use biome_css_syntax::{CssFileSource, CssLanguage};
+use biome_css_syntax::CssLanguage;
 use biome_formatter::format_element::{Interned, LineMode};
 use biome_formatter::prelude::{Document, Tag};
 use biome_formatter::{
@@ -45,20 +46,11 @@ use biome_html_formatter::{
 };
 use biome_html_parser::{HtmlParserOptions, parse_html_with_cache};
 use biome_html_syntax::element_ext::AnyEmbeddedContent;
-use biome_html_syntax::{
-    AnyAstroDirective, AnySvelteDirective, AstroEmbeddedContent, HtmlAttribute,
-    HtmlAttributeInitializerClause, HtmlDoubleTextExpression, HtmlElement, HtmlFileSource,
-    HtmlLanguage, HtmlRoot, HtmlSingleTextExpression, HtmlSyntaxNode, HtmlTextExpression,
-    HtmlTextExpressions, HtmlVariant, SvelteAwaitBlock, SvelteEachBlock, SvelteIfBlock,
-    SvelteKeyBlock, VueDirective, VueVBindShorthandDirective, VueVOnShorthandDirective,
-    VueVSlotShorthandDirective,
-};
-use biome_js_parser::parse_js_with_offset_and_cache;
-use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage};
-use biome_json_parser::parse_json_with_offset_and_cache;
-use biome_json_syntax::{JsonFileSource, JsonLanguage};
+use biome_html_syntax::{HtmlFileSource, HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
+use biome_js_syntax::{JsFileSource, JsLanguage};
+use biome_json_syntax::JsonLanguage;
 use biome_parser::AnyParse;
-use biome_rowan::{AstNode, AstNodeList, BatchMutation, NodeCache, SendNode, TextSize};
+use biome_rowan::{AstNode, BatchMutation, NodeCache, SendNode};
 use camino::Utf8Path;
 use either::Either;
 use std::borrow::Cow;
@@ -405,695 +397,12 @@ fn parse(
     }
 }
 
-fn parse_embedded_nodes(
-    root: &AnyParse,
-    biome_path: &BiomePath,
-    file_source: &DocumentFileSource,
-    settings: &SettingsWithEditor,
-    cache: &mut NodeCache,
-    builder: &mut EmbeddedBuilder,
-) -> ParseEmbedResult {
-    let mut nodes = Vec::new();
-    let html_root: HtmlRoot = root.tree();
-    let Some(file_source) = file_source.to_html_file_source() else {
-        return ParseEmbedResult::default();
-    };
-
-    let doc_file_source = DocumentFileSource::Html(file_source);
-
-    let mut ctx = EmbedParseContext {
-        cache,
-        biome_path,
-        host_file_source: &file_source,
-        settings,
-        builder,
-    };
-
-    match file_source.variant() {
-        HtmlVariant::Standard(text_expression) => {
-            for element in html_root.syntax().descendants() {
-                // Element-level embeds via registry
-                if let Some(html_element) = HtmlElement::cast_ref(&element)
-                    && let Some(candidate) = build_html_candidate(&html_element)
-                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                        HostLanguage::Html,
-                        &candidate,
-                        &doc_file_source,
-                    )
-                    && let Some(parsed) =
-                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
-                {
-                    nodes.push(parsed.node);
-                }
-
-                // Text expressions via registry
-                match text_expression {
-                    HtmlTextExpressions::Single => {
-                        if let Some(text_expression) = HtmlSingleTextExpression::cast_ref(&element)
-                            && let Ok(expression) = text_expression.expression()
-                            && let Some(candidate) = build_text_expression_candidate(&expression)
-                            && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                                HostLanguage::Html,
-                                &candidate,
-                                &doc_file_source,
-                            )
-                            && let Some(parsed) =
-                                parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
-                        {
-                            nodes.push(parsed.node);
-                        }
-                    }
-
-                    HtmlTextExpressions::Double => {
-                        if let Some(text_expression) = HtmlDoubleTextExpression::cast_ref(&element)
-                            && let Ok(expression) = text_expression.expression()
-                            && let Some(candidate) = build_text_expression_candidate(&expression)
-                            && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                                HostLanguage::Html,
-                                &candidate,
-                                &doc_file_source,
-                            )
-                            && let Some(parsed) =
-                                parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
-                        {
-                            nodes.push(parsed.node);
-                        }
-                    }
-                    HtmlTextExpressions::None => {}
-                }
-            }
-        }
-
-        HtmlVariant::Astro => {
-            for element in html_root.syntax().descendants() {
-                // Astro frontmatter → registry
-                if let Some(astro_content) = AstroEmbeddedContent::cast_ref(&element)
-                    && let Some(candidate) = build_astro_frontmatter_candidate(&astro_content)
-                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                        HostLanguage::Html,
-                        &candidate,
-                        &doc_file_source,
-                    )
-                    && let Some(parsed) =
-                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
-                {
-                    nodes.push(parsed.node);
-                }
-
-                // Text expressions via registry
-                if let Some(text_expression) = HtmlSingleTextExpression::cast_ref(&element)
-                    && let Ok(expression) = text_expression.expression()
-                    && let Some(candidate) = build_text_expression_candidate(&expression)
-                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                        HostLanguage::Html,
-                        &candidate,
-                        &doc_file_source,
-                    )
-                    && let Some(parsed) =
-                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
-                {
-                    nodes.push(parsed.node);
-                }
-
-                // HTML elements (script/style) → registry
-                if let Some(html_element) = HtmlElement::cast_ref(&element)
-                    && let Some(candidate) = build_html_candidate(&html_element)
-                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                        HostLanguage::Html,
-                        &candidate,
-                        &doc_file_source,
-                    )
-                    && let Some(parsed) =
-                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
-                {
-                    nodes.push(parsed.node);
-                }
-
-                // Astro directives: class:list={...}, define:vars={...}, etc.
-                if let Some(directive) = AnyAstroDirective::cast_ref(&element)
-                    && let Some(initializer) = directive.initializer()
-                    && let Some(candidate) = build_attribute_expression_candidate(&initializer)
-                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                        HostLanguage::Html,
-                        &candidate,
-                        &doc_file_source,
-                    )
-                    && let Some(parsed) =
-                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
-                {
-                    nodes.push(parsed.node);
-                }
-
-                // Plain HTML attributes with expression values: class={expr}, id={expr}, etc.
-                if let Some(attr) = HtmlAttribute::cast_ref(&element)
-                    && let Some(initializer) = attr.initializer()
-                    && let Some(candidate) = build_attribute_expression_candidate(&initializer)
-                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                        HostLanguage::Html,
-                        &candidate,
-                        &doc_file_source,
-                    )
-                    && let Some(parsed) =
-                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
-                {
-                    nodes.push(parsed.node);
-                }
-            }
-        }
-        HtmlVariant::Vue => {
-            // Two-pass: collect elements + expressions, then process
-            let mut elements = vec![];
-            let mut snippet_expressions = vec![];
-            for element in html_root.syntax().descendants() {
-                if let Some(text_expression) = HtmlDoubleTextExpression::cast_ref(&element) {
-                    snippet_expressions.push(text_expression);
-                }
-
-                if let Some(element) = HtmlElement::cast_ref(&element) {
-                    elements.push(element);
-                }
-            }
-
-            // Pass 1: elements via registry, collecting JS file sources
-            let mut embedded_file_source = JsFileSource::js_module();
-            for element in elements {
-                if let Some(candidate) = build_html_candidate(&element)
-                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                        HostLanguage::Html,
-                        &candidate,
-                        &doc_file_source,
-                    )
-                    && let Some(parsed) =
-                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
-                {
-                    if let Some(js_fs) = parsed.js_file_source {
-                        embedded_file_source = merge_js_file_source(embedded_file_source, js_fs);
-                    }
-                    nodes.push(parsed.node);
-                }
-            }
-
-            // Pass 2: text expressions via registry using merged embedded_file_source
-            for snippet in snippet_expressions {
-                if let Ok(expression) = snippet.expression()
-                    && let Some(candidate) = build_text_expression_candidate(&expression)
-                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                        HostLanguage::Html,
-                        &candidate,
-                        &doc_file_source,
-                    )
-                    && let Some(parsed) = parse_matched_embed(
-                        &candidate,
-                        &embed_match,
-                        &mut ctx,
-                        Some(embedded_file_source),
-                    )
-                {
-                    nodes.push(parsed.node);
-                }
-            }
-
-            // Pass 3: directive attributes via registry using merged embedded_file_source
-            for element in html_root.syntax().descendants() {
-                // Handle @click shorthand (VueVOnShorthandDirective)
-                if let Some(directive) = VueVOnShorthandDirective::cast_ref(&element)
-                    && let Some(initializer) = directive.initializer()
-                    && let Some(candidate) = build_vue_directive_candidate(&initializer, true)
-                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                        HostLanguage::Html,
-                        &candidate,
-                        &doc_file_source,
-                    )
-                    && let Some(parsed) = parse_matched_embed(
-                        &candidate,
-                        &embed_match,
-                        &mut ctx,
-                        Some(embedded_file_source),
-                    )
-                {
-                    nodes.push(parsed.node);
-                }
-
-                // Handle :prop shorthand (VueVBindShorthandDirective)
-                if let Some(directive) = VueVBindShorthandDirective::cast_ref(&element)
-                    && let Some(initializer) = directive.initializer()
-                    && let Some(candidate) = build_vue_directive_candidate(&initializer, false)
-                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                        HostLanguage::Html,
-                        &candidate,
-                        &doc_file_source,
-                    )
-                    && let Some(parsed) = parse_matched_embed(
-                        &candidate,
-                        &embed_match,
-                        &mut ctx,
-                        Some(embedded_file_source),
-                    )
-                {
-                    nodes.push(parsed.node);
-                }
-
-                // Handle #slot shorthand (VueVSlotShorthandDirective)
-                if let Some(directive) = VueVSlotShorthandDirective::cast_ref(&element)
-                    && let Some(initializer) = directive.initializer()
-                    && let Some(candidate) = build_vue_directive_candidate(&initializer, false)
-                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                        HostLanguage::Html,
-                        &candidate,
-                        &doc_file_source,
-                    )
-                    && let Some(parsed) = parse_matched_embed(
-                        &candidate,
-                        &embed_match,
-                        &mut ctx,
-                        Some(embedded_file_source),
-                    )
-                {
-                    nodes.push(parsed.node);
-                }
-
-                // Handle full directives (v-on:, v-bind:, v-if, v-show, etc.)
-                if let Some(directive) = VueDirective::cast_ref(&element)
-                    && let Some(initializer) = directive.initializer()
-                {
-                    let is_v_on = directive
-                        .name_token()
-                        .map(|t| t.text_trimmed() == "v-on")
-                        .unwrap_or(false);
-                    if let Some(candidate) = build_vue_directive_candidate(&initializer, is_v_on)
-                        && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                            HostLanguage::Html,
-                            &candidate,
-                            &doc_file_source,
-                        )
-                        && let Some(parsed) = parse_matched_embed(
-                            &candidate,
-                            &embed_match,
-                            &mut ctx,
-                            Some(embedded_file_source),
-                        )
-                    {
-                        nodes.push(parsed.node);
-                    }
-                }
-            }
-        }
-        HtmlVariant::Svelte => {
-            // Two-pass: collect elements + expressions, then process
-            let mut elements = vec![];
-            let mut snippet_expressions = vec![];
-            for element in html_root.syntax().descendants() {
-                if let Some(text_expression) = HtmlSingleTextExpression::cast_ref(&element) {
-                    snippet_expressions.push(text_expression);
-                }
-
-                if let Some(element) = HtmlElement::cast_ref(&element) {
-                    elements.push(element);
-                }
-            }
-
-            // Pass 1: elements via registry, collecting JS file sources
-            let mut embedded_file_source = JsFileSource::js_module();
-            for element in elements {
-                if let Some(candidate) = build_html_candidate(&element)
-                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                        HostLanguage::Html,
-                        &candidate,
-                        &doc_file_source,
-                    )
-                    && let Some(parsed) =
-                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
-                {
-                    if let Some(js_fs) = parsed.js_file_source {
-                        embedded_file_source = merge_js_file_source(embedded_file_source, js_fs);
-                    }
-                    nodes.push(parsed.node);
-                }
-            }
-
-            // Pass 2: text expressions via registry using merged embedded_file_source
-            for snippet in snippet_expressions {
-                if let Ok(expression) = snippet.expression()
-                    && let Some(candidate) = build_text_expression_candidate(&expression)
-                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                        HostLanguage::Html,
-                        &candidate,
-                        &doc_file_source,
-                    )
-                    && let Some(parsed) = parse_matched_embed(
-                        &candidate,
-                        &embed_match,
-                        &mut ctx,
-                        Some(embedded_file_source),
-                    )
-                {
-                    nodes.push(parsed.node);
-                }
-            }
-
-            // Pass 3: control flow blocks via registry
-            for element in html_root.syntax().descendants() {
-                // Handle {#if expression}
-                if let Some(if_block) = SvelteIfBlock::cast_ref(&element)
-                    && let Ok(opening_block) = if_block.opening_block()
-                    && let Ok(expression) = opening_block.expression()
-                    && let Some(candidate) = build_text_expression_candidate(&expression)
-                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                        HostLanguage::Html,
-                        &candidate,
-                        &doc_file_source,
-                    )
-                    && let Some(parsed) = parse_matched_embed(
-                        &candidate,
-                        &embed_match,
-                        &mut ctx,
-                        Some(embedded_file_source),
-                    )
-                {
-                    nodes.push(parsed.node);
-                }
-
-                // Handle {:else if expression}
-                if let Some(if_block) = SvelteIfBlock::cast_ref(&element) {
-                    for else_if_clause in if_block.else_if_clauses() {
-                        if let Ok(expression) = else_if_clause.expression()
-                            && let Some(candidate) = build_text_expression_candidate(&expression)
-                            && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                                HostLanguage::Html,
-                                &candidate,
-                                &doc_file_source,
-                            )
-                            && let Some(parsed) = parse_matched_embed(
-                                &candidate,
-                                &embed_match,
-                                &mut ctx,
-                                Some(embedded_file_source),
-                            )
-                        {
-                            nodes.push(parsed.node);
-                        }
-                    }
-                }
-
-                // Handle {#each expression as item}
-                if let Some(each_block) = SvelteEachBlock::cast_ref(&element)
-                    && let Ok(opening_block) = each_block.opening_block()
-                {
-                    if let Ok(expression) = opening_block.list()
-                        && let Some(candidate) = build_text_expression_candidate(&expression)
-                        && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                            HostLanguage::Html,
-                            &candidate,
-                            &doc_file_source,
-                        )
-                        && let Some(parsed) = parse_matched_embed(
-                            &candidate,
-                            &embed_match,
-                            &mut ctx,
-                            Some(embedded_file_source),
-                        )
-                    {
-                        nodes.push(parsed.node);
-                    }
-
-                    if let Some(item) = opening_block.item()
-                        && let Some(item) = item.as_svelte_each_as_keyed_item()
-                        && let Some(key) = item.key()
-                        && let Ok(key_expression) = key.expression()
-                        && let Some(candidate) = build_text_expression_candidate(&key_expression)
-                        && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                            HostLanguage::Html,
-                            &candidate,
-                            &doc_file_source,
-                        )
-                        && let Some(parsed) = parse_matched_embed(
-                            &candidate,
-                            &embed_match,
-                            &mut ctx,
-                            Some(embedded_file_source),
-                        )
-                    {
-                        nodes.push(parsed.node);
-                    }
-                }
-
-                // Handle {#await expression}
-                if let Some(await_block) = SvelteAwaitBlock::cast_ref(&element)
-                    && let Ok(opening_block) = await_block.opening_block()
-                    && let Ok(expression) = opening_block.expression()
-                    && let Some(candidate) = build_text_expression_candidate(&expression)
-                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                        HostLanguage::Html,
-                        &candidate,
-                        &doc_file_source,
-                    )
-                    && let Some(parsed) = parse_matched_embed(
-                        &candidate,
-                        &embed_match,
-                        &mut ctx,
-                        Some(embedded_file_source),
-                    )
-                {
-                    nodes.push(parsed.node);
-                }
-
-                // Handle {#key expression}
-                if let Some(key_block) = SvelteKeyBlock::cast_ref(&element)
-                    && let Ok(opening_block) = key_block.opening_block()
-                    && let Ok(expression) = opening_block.expression()
-                    && let Some(candidate) = build_text_expression_candidate(&expression)
-                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                        HostLanguage::Html,
-                        &candidate,
-                        &doc_file_source,
-                    )
-                    && let Some(parsed) = parse_matched_embed(
-                        &candidate,
-                        &embed_match,
-                        &mut ctx,
-                        Some(embedded_file_source),
-                    )
-                {
-                    nodes.push(parsed.node);
-                }
-            }
-
-            // Pass 4: directive attributes and attributes which initializer is a text expression
-            for element in html_root.syntax().descendants() {
-                // Handle special Svelte directives (bind:, class:, etc.)
-                if let Some(directive) = AnySvelteDirective::cast_ref(&element)
-                    && let Some(initializer) = directive.initializer()
-                    && let Some(candidate) = build_svelte_directive_candidate(&initializer)
-                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                        HostLanguage::Html,
-                        &candidate,
-                        &doc_file_source,
-                    )
-                    && let Some(parsed) = parse_matched_embed(
-                        &candidate,
-                        &embed_match,
-                        &mut ctx,
-                        Some(embedded_file_source),
-                    )
-                {
-                    nodes.push(parsed.node);
-                }
-
-                if let Some(attr) = HtmlAttribute::cast_ref(&element)
-                    && let Some(initializer) = attr.initializer()
-                    && let Some(candidate) = build_attribute_expression_candidate(&initializer)
-                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                        HostLanguage::Html,
-                        &candidate,
-                        &doc_file_source,
-                    )
-                    && let Some(parsed) = parse_matched_embed(
-                        &candidate,
-                        &embed_match,
-                        &mut ctx,
-                        Some(embedded_file_source),
-                    )
-                {
-                    nodes.push(parsed.node);
-                }
-            }
-        }
-    }
-
-    ParseEmbedResult { nodes }
-}
-
-/// Build an `EmbedCandidate::Element` from an `HtmlElement`.
-/// Returns `None` if the element has no embedded content or has multiple children (error).
-fn build_html_candidate(element: &HtmlElement) -> Option<EmbedCandidate> {
-    // Multiple children is likely an error — skip
-    if element.children().len() > 1 {
-        return None;
-    }
-
-    let tag_name = element.tag_name()?;
-
-    let attributes: Vec<_> = element
-        .opening_element()
-        .ok()
-        .into_iter()
-        .flat_map(|opening| opening.attributes())
-        .filter_map(|attr| {
-            let html_attr = attr.as_html_attribute()?;
-            let name = html_attr
-                .name()
-                .ok()?
-                .value_token()
-                .ok()?
-                .token_text_trimmed();
-            let value = html_attr
-                .initializer()
-                .and_then(|init| init.value().ok())
-                .and_then(|v| v.as_html_string().cloned())
-                .and_then(|s| s.inner_string_text().ok());
-            Some((name, value))
-        })
-        .collect();
-
-    // Extract content from HtmlEmbeddedContent child
-    let content_child = element.children().iter().next().and_then(|child| {
-        let child = child.as_any_html_content()?;
-        child.as_html_embedded_content().cloned()
-    })?;
-    let value_token = content_child.value_token().ok()?;
-
-    Some(EmbedCandidate::Element {
-        tag_name,
-        attributes,
-        content: EmbedContent {
-            element_range: content_child.range(),
-            content_range: value_token.text_range(),
-            content_offset: value_token.text_range().start(),
-            // Use full token text (including trivia) to match the untrimmed content_offset.
-            // The parser needs text and offset to be consistent.
-            text: value_token.token_text(),
-        },
-    })
-}
-
-/// Build an `EmbedCandidate::Frontmatter` from Astro's `---` block.
-fn build_astro_frontmatter_candidate(element: &AstroEmbeddedContent) -> Option<EmbedCandidate> {
-    let content_token = element.content_token()?;
-
-    Some(EmbedCandidate::Frontmatter {
-        content: EmbedContent {
-            element_range: element.range(),
-            content_range: content_token.text_trimmed_range(),
-            content_offset: content_token.text_range().start(),
-            // Use full token text (including trivia) to match the untrimmed content_offset.
-            // The parser needs text and offset to be consistent.
-            text: content_token.token_text(),
-        },
-    })
-}
-
-/// Build an `EmbedCandidate::TextExpression` from an `HtmlTextExpression`.
-///
-/// This is the inner expression node (the JS code inside `{ }` or `{{ }}`).
-/// The caller extracts it from the outer wrapper (`HtmlSingleTextExpression`,
-/// `HtmlDoubleTextExpression`, or control flow block).
-fn build_text_expression_candidate(expression: &HtmlTextExpression) -> Option<EmbedCandidate> {
-    let content_token = expression.html_literal_token().ok()?;
-    Some(EmbedCandidate::TextExpression {
-        content: EmbedContent {
-            element_range: expression.range(),
-            content_range: content_token.text_range(),
-            content_offset: content_token.text_range().start(),
-            text: content_token.token_text(),
-        },
-    })
-}
-
-/// Build an `EmbedCandidate::Directive` from a Vue directive initializer clause.
-///
-/// Vue directives use quoted string values (`@click="handler()"`).
-/// The JS content is the inner text without quotes, offset by +1 for the opening quote.
-fn build_vue_directive_candidate(
-    initializer: &HtmlAttributeInitializerClause,
-    is_event_handler: bool,
-) -> Option<EmbedCandidate> {
-    let value_node = initializer.value().ok()?;
-    let html_string = value_node.as_html_string()?;
-    let content_token = html_string.value_token().ok()?;
-    let inner_text = html_string.inner_string_text().ok()?;
-    let token_range = content_token.text_trimmed_range();
-    let inner_offset = token_range.start() + TextSize::from(1);
-
-    Some(EmbedCandidate::Directive {
-        content: EmbedContent {
-            element_range: initializer.range(),
-            content_range: token_range,
-            content_offset: inner_offset,
-            text: inner_text,
-        },
-        is_event_handler,
-    })
-}
-
-/// Build an `EmbedCandidate::Directive` from a Svelte directive initializer clause.
-///
-/// Svelte directives use curly brace text expressions (`on:click={handler}`).
-/// The JS content is the literal token inside the expression node.
-fn build_svelte_directive_candidate(
-    initializer: &HtmlAttributeInitializerClause,
-) -> Option<EmbedCandidate> {
-    build_attribute_expression_candidate(initializer)
-}
-
-/// Build an `EmbedCandidate::Directive` from an initializer clause containing
-/// a curly brace text expression (`attr={expr}`).
-///
-/// Used by both Astro and Svelte attribute expression extraction.
-/// Returns `None` if the initializer does not contain a text expression.
-fn build_attribute_expression_candidate(
-    initializer: &HtmlAttributeInitializerClause,
-) -> Option<EmbedCandidate> {
-    let value_node = initializer.value().ok()?;
-    let text_expression = value_node.as_html_attribute_single_text_expression()?;
-    let expression = text_expression.expression().ok()?;
-    let content_token = expression.html_literal_token().ok()?;
-
-    Some(EmbedCandidate::Directive {
-        content: EmbedContent {
-            element_range: expression.range(),
-            content_range: content_token.text_range(),
-            content_offset: content_token.text_range().start(),
-            text: content_token.token_text(),
-        },
-        is_event_handler: false,
-    })
-}
-
 /// Result of parsing a matched embed.
 struct ParsedEmbed {
     /// The parsed snippet + file source, ready to push to `nodes`.
     node: (AnyEmbeddedSnippet, DocumentFileSource),
     /// If JS was parsed, the resolved JsFileSource (for `embedded_file_source` capture).
     js_file_source: Option<JsFileSource>,
-}
-
-/// Merge two `JsFileSource` values by picking the most permissive one.
-///
-/// Vue and Svelte files can have multiple `<script>` tags with different
-/// `lang` attributes. The merged result is used as the base file source
-/// for text expressions and directives, so it must be able to parse any
-/// syntax that might appear in the template.
-///
-/// Hierarchy: Tsx > Ts > Jsx > JsModule > JsScript.
-fn merge_js_file_source(a: JsFileSource, b: JsFileSource) -> JsFileSource {
-    let ts = a.is_typescript() || b.is_typescript();
-    let jsx = a.is_jsx() || b.is_jsx();
-    match (ts, jsx) {
-        (true, true) => JsFileSource::tsx(),
-        (true, false) => JsFileSource::ts(),
-        (false, true) => JsFileSource::jsx(),
-        (false, false) => JsFileSource::js_module(),
-    }
 }
 
 /// Shared parsing context passed to `parse_matched_embed`.
@@ -1105,216 +414,6 @@ struct EmbedParseContext<'a, 'b> {
     host_file_source: &'a HtmlFileSource,
     settings: &'a SettingsWithEditor<'b>,
     builder: &'a mut EmbeddedBuilder,
-}
-
-/// Parse an embedded code fragment using the parser for the matched guest language.
-fn parse_matched_embed(
-    candidate: &EmbedCandidate,
-    embed_match: &EmbedMatch,
-    ctx: &mut EmbedParseContext,
-    embedded_file_source: Option<JsFileSource>,
-) -> Option<ParsedEmbed> {
-    let content = candidate.content();
-
-    match embed_match.guest {
-        GuestLanguage::JsModule
-        | GuestLanguage::JsScript
-        | GuestLanguage::Jsx
-        | GuestLanguage::Ts
-        | GuestLanguage::Tsx => {
-            // Determine base JsFileSource from guest language
-            let mut js_source = match embed_match.guest {
-                GuestLanguage::JsModule => JsFileSource::js_module(),
-                GuestLanguage::JsScript => JsFileSource::js_script(),
-                GuestLanguage::Jsx => JsFileSource::jsx(),
-                GuestLanguage::Ts => JsFileSource::ts(),
-                GuestLanguage::Tsx => JsFileSource::tsx(),
-                _ => unreachable!(),
-            };
-
-            // Configure EmbeddingKind based on framework + candidate type
-            let is_source_level = match candidate {
-                EmbedCandidate::Frontmatter { .. } => {
-                    js_source =
-                        js_source.with_embedding_kind(EmbeddingKind::Astro { frontmatter: true });
-                    true
-                }
-                EmbedCandidate::Element { .. } => {
-                    if ctx.host_file_source.is_svelte() {
-                        js_source = js_source
-                            .with_embedding_kind(EmbeddingKind::Svelte { is_source: true });
-                    } else if ctx.host_file_source.is_vue() {
-                        js_source = js_source.with_embedding_kind(EmbeddingKind::Vue {
-                            setup: candidate.has_attribute("setup"),
-                            is_source: true,
-                            event_handler: false,
-                        });
-                    }
-                    // Astro <script> tags and plain HTML: no EmbeddingKind
-                    true
-                }
-                EmbedCandidate::TextExpression { .. } => {
-                    // Use embedded_file_source as base if available (Vue/Svelte pass 2+)
-                    if let Some(efs) = embedded_file_source {
-                        js_source = efs;
-                    }
-                    if ctx.host_file_source.is_astro() {
-                        js_source = js_source
-                            .with_embedding_kind(EmbeddingKind::Astro { frontmatter: false });
-                    } else if ctx.host_file_source.is_svelte() {
-                        js_source = js_source
-                            .with_embedding_kind(EmbeddingKind::Svelte { is_source: false });
-                    } else if ctx.host_file_source.is_vue() {
-                        js_source = js_source.with_embedding_kind(EmbeddingKind::Vue {
-                            setup: false,
-                            is_source: false,
-                            event_handler: false,
-                        });
-                    }
-                    false
-                }
-                EmbedCandidate::Directive {
-                    is_event_handler, ..
-                } => {
-                    // Use embedded_file_source as base if available (Vue/Svelte pass 2+)
-                    if let Some(efs) = embedded_file_source {
-                        js_source = efs;
-                    }
-                    if ctx.host_file_source.is_svelte() {
-                        js_source = js_source
-                            .with_embedding_kind(EmbeddingKind::Svelte { is_source: false });
-                    } else if ctx.host_file_source.is_vue() {
-                        js_source = js_source.with_embedding_kind(EmbeddingKind::Vue {
-                            setup: false,
-                            is_source: false,
-                            event_handler: *is_event_handler,
-                        });
-                    }
-                    false
-                }
-                _ => false,
-            };
-
-            let doc_source = DocumentFileSource::Js(js_source);
-            let options = ctx
-                .settings
-                .parse_options::<JsLanguage>(ctx.biome_path, &doc_source);
-            let parse = parse_js_with_offset_and_cache(
-                content.text.text(),
-                content.content_offset,
-                js_source,
-                options,
-                ctx.cache,
-            );
-
-            // Only visit source-level snippets for binding tracking
-            if is_source_level {
-                ctx.builder.visit_js_source_snippet(&parse.tree());
-            }
-
-            let snippet: EmbeddedSnippet<JsLanguage> = EmbeddedSnippet::new(
-                parse.into(),
-                content.element_range,
-                content.content_range,
-                content.content_offset,
-            );
-
-            // Source-level embeds get full services; expression-level don't
-            let js_services = if is_source_level
-                && (ctx.settings.as_ref().is_linter_enabled()
-                    || ctx.settings.as_ref().is_assist_enabled())
-            {
-                JsDocumentServices::default()
-                    .with_js_semantic_model(&snippet.tree())
-                    .into()
-            } else {
-                DocumentServices::none()
-            };
-
-            Some(ParsedEmbed {
-                node: ((snippet, js_services).into(), doc_source),
-                // Only source-level embeds contribute to embedded_file_source capture
-                js_file_source: if is_source_level {
-                    Some(js_source)
-                } else {
-                    None
-                },
-            })
-        }
-
-        GuestLanguage::Css => {
-            let css_source = if ctx.host_file_source.is_html() {
-                CssFileSource::css()
-            } else {
-                CssFileSource::new_css_modules()
-            };
-            let doc_source = DocumentFileSource::Css(css_source);
-            let mut options = ctx
-                .settings
-                .parse_options::<CssLanguage>(ctx.biome_path, &doc_source);
-            if ctx.host_file_source.is_vue() {
-                options.css_modules = CssModulesKind::Vue;
-            } else if !ctx.host_file_source.is_html() {
-                options.css_modules = CssModulesKind::Classic;
-            }
-            let parse = parse_css_with_offset_and_cache(
-                content.text.text(),
-                css_source,
-                content.content_offset,
-                ctx.cache,
-                options,
-            );
-
-            let mut services = CssDocumentServices::default();
-            if ctx.settings.as_ref().is_linter_enabled()
-                || ctx.settings.as_ref().is_assist_enabled()
-            {
-                services = services.with_css_semantic_model(&parse.tree());
-            }
-
-            let snippet: EmbeddedSnippet<CssLanguage> = EmbeddedSnippet::new(
-                parse.into(),
-                content.element_range,
-                content.content_range,
-                content.content_offset,
-            );
-
-            Some(ParsedEmbed {
-                node: ((snippet, services.into()).into(), doc_source),
-                js_file_source: None,
-            })
-        }
-
-        GuestLanguage::Json => {
-            let doc_source = DocumentFileSource::Json(JsonFileSource::json());
-            let options = ctx
-                .settings
-                .parse_options::<JsonLanguage>(ctx.biome_path, &doc_source);
-            let parse = parse_json_with_offset_and_cache(
-                content.text.text(),
-                content.content_offset,
-                ctx.cache,
-                options,
-            );
-
-            let snippet: EmbeddedSnippet<JsonLanguage> = EmbeddedSnippet::new(
-                parse.into(),
-                content.element_range,
-                content.content_range,
-                content.content_offset,
-            );
-
-            Some(ParsedEmbed {
-                node: (snippet.into(), doc_source),
-                js_file_source: None,
-            })
-        }
-
-        GuestLanguage::GraphQL => {
-            // GraphQL embeds are only used by the JS handler, not HTML
-            None
-        }
-    }
 }
 
 fn debug_syntax_tree(_biome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
@@ -1446,14 +545,18 @@ fn lint(params: LintParams) -> LintResults {
     );
     let tree = params.parse.tree();
 
-    let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
-            .with_only(params.only)
-            .with_skip(params.skip)
-            .with_path(params.path.as_path())
-            .with_enabled_selectors(params.enabled_selectors)
-            .with_project_layout(params.project_layout.clone())
-            .finish();
+    let AnalyzerVisitorResult {
+        enabled_rules,
+        disabled_rules,
+        analyzer_options,
+        ..
+    } = AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
+        .with_only(params.only)
+        .with_skip(params.skip)
+        .with_path(params.path.as_path())
+        .with_enabled_selectors(params.enabled_selectors)
+        .with_project_layout(params.project_layout.clone())
+        .finish();
 
     let filter = AnalysisFilter {
         categories: params.categories,
@@ -1495,6 +598,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         categories,
         action_offset,
         document_services: _,
+        compute_actions,
     } = params;
     let _ = debug_span!("Code actions HTML", range =? range, path =? path).entered();
     let tree = parse.tree();
@@ -1508,14 +612,18 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let analyzer_options =
         settings.analyzer_options::<HtmlLanguage>(path, &language, suppression_reason.as_deref());
     let mut actions = Vec::new();
-    let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
-            .with_only(only)
-            .with_skip(skip)
-            .with_path(path.as_path())
-            .with_enabled_selectors(rules)
-            .with_project_layout(project_layout)
-            .finish();
+    let AnalyzerVisitorResult {
+        enabled_rules,
+        disabled_rules,
+        analyzer_options,
+        ..
+    } = AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
+        .with_only(only)
+        .with_skip(skip)
+        .with_path(path.as_path())
+        .with_enabled_selectors(rules)
+        .with_project_layout(project_layout)
+        .finish();
 
     let filter = AnalysisFilter {
         categories,
@@ -1525,16 +633,34 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     };
 
     analyze(&tree, filter, &analyzer_options, source_type, |signal| {
-        actions.extend(signal.actions().into_code_action_iter().map(|item| {
-            CodeAction {
-                category: item.category.clone(),
-                rule_name: item
-                    .rule_name
-                    .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
-                suggestion: item.suggestion,
-                offset: action_offset,
-            }
-        }));
+        if compute_actions {
+            actions.extend(
+                signal
+                    .actions(ActionFilter::all())
+                    .into_code_action_iter()
+                    .map(|item| CodeAction {
+                        category: item.category.clone(),
+                        rule_name: item
+                            .rule_name
+                            .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
+                        applicability: Some(item.suggestion.applicability),
+                        suggestion: Some(item.suggestion),
+                        offset: action_offset,
+                    }),
+            );
+        } else {
+            actions.extend(signal.actions_metadata().into_iter().map(|meta| {
+                CodeAction {
+                    category: meta.category,
+                    rule_name: meta
+                        .rule_name
+                        .map(|(g, r)| (Cow::Borrowed(g), Cow::Borrowed(r))),
+                    applicability: Some(meta.applicability),
+                    suggestion: None,
+                    offset: action_offset,
+                }
+            }));
+        }
 
         ControlFlow::<Never>::Continue(())
     });
@@ -1556,14 +682,18 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         &params.document_file_source,
         params.suppression_reason.as_deref(),
     );
-    let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
-            .with_only(params.only)
-            .with_skip(params.skip)
-            .with_path(params.biome_path.as_path())
-            .with_enabled_selectors(params.enabled_rules)
-            .with_project_layout(params.project_layout.clone())
-            .finish();
+    let AnalyzerVisitorResult {
+        enabled_rules,
+        disabled_rules,
+        analyzer_options,
+        fixable_rules,
+    } = AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
+        .with_only(params.only)
+        .with_skip(params.skip)
+        .with_path(params.biome_path.as_path())
+        .with_enabled_selectors(params.enabled_rules)
+        .with_project_layout(params.project_layout.clone())
+        .finish();
 
     let filter = AnalysisFilter {
         categories: params.rule_categories,
@@ -1582,11 +712,69 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         .document_file_source
         .to_html_file_source()
         .unwrap_or_default();
+
+    if matches!(params.fix_file_mode, FixFileMode::ApplySuppressions) {
+        loop {
+            let mut pending_actions = Vec::new();
+
+            let (_, _) = analyze(&tree, filter, &analyzer_options, source_type, |signal| {
+                process_fix_all.collect_signal(signal, &mut pending_actions)
+            });
+
+            let result = process_fix_all.process_batch_actions(pending_actions, |root| {
+                tree = match HtmlRoot::cast(root) {
+                    Some(tree) => tree,
+                    None => return None,
+                };
+                Some(tree.syntax().text_range_with_trivia().len().into())
+            })?;
+
+            if result.is_none() {
+                return process_fix_all.finish(
+                    || {
+                        Ok(if params.should_format {
+                            Either::Left(format_node(
+                                params.settings.format_options::<HtmlLanguage>(
+                                    params.biome_path,
+                                    &params.document_file_source,
+                                ),
+                                tree.syntax(),
+                                // NOTE: this is important that stays false. In this instance, the formatting of embedded
+                                // nodes has already happened, because the workspace during fix_all() process the embedded nodes
+                                // first, and then the root document. This means the embedded nodes don't need to be formatted and can
+                                // be printed verbatim by the formatter.
+                                false,
+                            ))
+                        } else {
+                            Either::Right(tree.syntax().to_string())
+                        })
+                    },
+                    params.embeds_initial_indent,
+                );
+            }
+        }
+    }
+
+    // Phase 1: fix loop with fixable-only rules
+    let fixable_filter = AnalysisFilter {
+        categories: params.rule_categories,
+        enabled_rules: Some(fixable_rules.as_slice()),
+        disabled_rules: &disabled_rules,
+        range: None,
+    };
+
     loop {
-        let (action, _) = analyze(&tree, filter, &analyzer_options, source_type, |signal| {
-            process_fix_all.process_signal(signal)
-        });
-        let result = process_fix_all.process_action(action, |root| {
+        let mut pending_actions = Vec::new();
+
+        let (_, _) = analyze(
+            &tree,
+            fixable_filter,
+            &analyzer_options,
+            source_type,
+            |signal| process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions),
+        );
+
+        let result = process_fix_all.process_batch_actions(pending_actions, |root| {
             tree = match HtmlRoot::cast(root) {
                 Some(tree) => tree,
                 None => return None,
@@ -1595,29 +783,34 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         })?;
 
         if result.is_none() {
-            return process_fix_all.finish(
-                || {
-                    Ok(if params.should_format {
-                        Either::Left(format_node(
-                            params.settings.format_options::<HtmlLanguage>(
-                                params.biome_path,
-                                &params.document_file_source,
-                            ),
-                            tree.syntax(),
-                            // NOTE: this is important that stays false. In this instance, the formatting of embedded
-                            // nodes has already happened, because the workspace during fix_all() process the embedded nodes
-                            // first, and then the root document. This means the embedded nodes don't need to be formatted and can
-                            // be printed verbatim by the formatter.
-                            false,
-                        ))
-                    } else {
-                        Either::Right(tree.syntax().to_string())
-                    })
-                },
-                params.embeds_initial_indent,
-            );
+            break;
         }
     }
+
+    // Phase 2: all rules for final diagnostics
+    {
+        let (_, _) = analyze(&tree, filter, &analyzer_options, source_type, |signal| {
+            process_fix_all.collect_diagnostic_only(signal)
+        });
+    }
+
+    process_fix_all.finish(
+        || {
+            Ok(if params.should_format {
+                Either::Left(format_node(
+                    params.settings.format_options::<HtmlLanguage>(
+                        params.biome_path,
+                        &params.document_file_source,
+                    ),
+                    tree.syntax(),
+                    false,
+                ))
+            } else {
+                Either::Right(tree.syntax().to_string())
+            })
+        },
+        params.embeds_initial_indent,
+    )
 }
 
 #[instrument(level = "debug", skip_all)]
@@ -1641,15 +834,21 @@ pub(crate) fn update_snippets(
         };
 
         if let Some(value_token) = element.value_token() {
-            let leading_trivia = read_leading_trivia(value_token.text_trimmed());
-            let trailing_trivia = read_trailing_trivia(value_token.text_trimmed());
-            let new_token = ident(&format!(
-                "{}{}{}",
-                leading_trivia,
-                snippet.new_code.trim(), // trim to avoid duplicating trivia
-                trailing_trivia
-            ));
-            mutation.replace_token(value_token, new_token);
+            let new_token_text = if snippet.needs_reindent {
+                // The formatted code doesn't carry the host's nesting
+                // indentation. Re-apply it to every line so the embed
+                // lines up with its surroundings.
+                let old_text = value_token.text_trimmed();
+                let leading_trivia = read_leading_trivia(old_text);
+                let trailing_trivia = read_trailing_trivia(old_text);
+                let indent_prefix = content_indent_prefix(&leading_trivia);
+                let reindented = reindent_embedded_code(snippet.new_code.trim(), indent_prefix);
+                format!("{}{}{}", leading_trivia, reindented, trailing_trivia)
+            } else {
+                snippet.new_code.clone()
+            };
+
+            mutation.replace_token(value_token, ident(&new_token_text));
         }
     }
 
@@ -1721,5 +920,78 @@ fn read_trailing_trivia(value: &str) -> Cow<'_, str> {
         Cow::Borrowed(&value[value.len() - count..])
     } else {
         Cow::Borrowed("")
+    }
+}
+
+/// Returns the indent the host was using for an embed's content, taken
+/// from the whitespace after the last newline in its leading trivia.
+///
+/// For example, `"\n\t\t\t"` yields `"\t\t\t"`. Used to re-indent
+/// replacement code coming from an embedded formatter, which always
+/// returns code indented from column zero.
+fn content_indent_prefix(leading_trivia: &str) -> &str {
+    match leading_trivia.rfind('\n') {
+        Some(pos) => &leading_trivia[pos + 1..],
+        None => leading_trivia,
+    }
+}
+
+/// Prefixes every line of `code` after the first with `indent`. Empty
+/// lines are left alone so no trailing whitespace sneaks in.
+fn reindent_embedded_code(code: &str, indent: &str) -> String {
+    if indent.is_empty() {
+        return code.to_string();
+    }
+    let mut out = String::new();
+    for (i, line) in code.split('\n').enumerate() {
+        if i > 0 {
+            out.push('\n');
+            if !line.is_empty() {
+                out.push_str(indent);
+            }
+        }
+        out.push_str(line);
+    }
+    out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{content_indent_prefix, reindent_embedded_code};
+
+    #[test]
+    fn content_indent_prefix_reads_indent_after_last_newline() {
+        assert_eq!(content_indent_prefix("\n\t\t\t"), "\t\t\t");
+        assert_eq!(content_indent_prefix("\n  "), "  ");
+        assert_eq!(content_indent_prefix("\n\n\t"), "\t");
+    }
+
+    #[test]
+    fn content_indent_prefix_with_no_newline_returns_whole_trivia() {
+        assert_eq!(content_indent_prefix(""), "");
+        assert_eq!(content_indent_prefix("   "), "   ");
+    }
+
+    #[test]
+    fn reindent_embedded_code_prefixes_every_line_after_the_first() {
+        assert_eq!(
+            reindent_embedded_code("p {\n\tcolor: red;\n}", "\t\t\t"),
+            "p {\n\t\t\t\tcolor: red;\n\t\t\t}"
+        );
+    }
+
+    #[test]
+    fn reindent_embedded_code_is_a_noop_when_indent_is_empty() {
+        assert_eq!(reindent_embedded_code("a\nb\nc", ""), "a\nb\nc");
+    }
+
+    #[test]
+    fn reindent_embedded_code_leaves_single_line_input_unchanged() {
+        assert_eq!(reindent_embedded_code("oneline", "\t\t"), "oneline");
+    }
+
+    #[test]
+    fn reindent_embedded_code_does_not_indent_empty_lines() {
+        assert_eq!(reindent_embedded_code("a\n\nb", "  "), "a\n\n  b");
     }
 }

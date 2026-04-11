@@ -4112,10 +4112,17 @@ impl AnySvelteAwaitClauses {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnySvelteBindingAssignmentBinding {
+    AnySvelteDestructuredName(AnySvelteDestructuredName),
     SvelteName(SvelteName),
     SvelteRestBinding(SvelteRestBinding),
 }
 impl AnySvelteBindingAssignmentBinding {
+    pub fn as_any_svelte_destructured_name(&self) -> Option<&AnySvelteDestructuredName> {
+        match &self {
+            Self::AnySvelteDestructuredName(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_svelte_name(&self) -> Option<&SvelteName> {
         match &self {
             Self::SvelteName(item) => Some(item),
@@ -9833,16 +9840,29 @@ impl From<SvelteRestBinding> for AnySvelteBindingAssignmentBinding {
 }
 impl AstNode for AnySvelteBindingAssignmentBinding {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SvelteName::KIND_SET.union(SvelteRestBinding::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = AnySvelteDestructuredName::KIND_SET
+        .union(SvelteName::KIND_SET)
+        .union(SvelteRestBinding::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, SVELTE_NAME | SVELTE_REST_BINDING)
+        match kind {
+            SVELTE_NAME | SVELTE_REST_BINDING => true,
+            k if AnySvelteDestructuredName::can_cast(k) => true,
+            _ => false,
+        }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             SVELTE_NAME => Self::SvelteName(SvelteName { syntax }),
             SVELTE_REST_BINDING => Self::SvelteRestBinding(SvelteRestBinding { syntax }),
-            _ => return None,
+            _ => {
+                if let Some(any_svelte_destructured_name) = AnySvelteDestructuredName::cast(syntax)
+                {
+                    return Some(Self::AnySvelteDestructuredName(
+                        any_svelte_destructured_name,
+                    ));
+                }
+                return None;
+            }
         };
         Some(res)
     }
@@ -9850,18 +9870,21 @@ impl AstNode for AnySvelteBindingAssignmentBinding {
         match self {
             Self::SvelteName(it) => it.syntax(),
             Self::SvelteRestBinding(it) => it.syntax(),
+            Self::AnySvelteDestructuredName(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::SvelteName(it) => it.into_syntax(),
             Self::SvelteRestBinding(it) => it.into_syntax(),
+            Self::AnySvelteDestructuredName(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnySvelteBindingAssignmentBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::AnySvelteDestructuredName(it) => std::fmt::Debug::fmt(it, f),
             Self::SvelteName(it) => std::fmt::Debug::fmt(it, f),
             Self::SvelteRestBinding(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -9870,6 +9893,7 @@ impl std::fmt::Debug for AnySvelteBindingAssignmentBinding {
 impl From<AnySvelteBindingAssignmentBinding> for SyntaxNode {
     fn from(n: AnySvelteBindingAssignmentBinding) -> Self {
         match n {
+            AnySvelteBindingAssignmentBinding::AnySvelteDestructuredName(it) => it.into_syntax(),
             AnySvelteBindingAssignmentBinding::SvelteName(it) => it.into_syntax(),
             AnySvelteBindingAssignmentBinding::SvelteRestBinding(it) => it.into_syntax(),
         }

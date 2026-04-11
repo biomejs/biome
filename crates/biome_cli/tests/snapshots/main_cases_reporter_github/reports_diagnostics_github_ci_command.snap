@@ -96,11 +96,11 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-::error title=lint/suspicious/noRedeclare,file=index.ts,line=2,endLine=2,col=10,endColumn=11::Shouldn't redeclare 'z'. Consider to delete it or rename it.
+::error title=lint/suspicious/noRedeclare,file=index.ts,line=2,endLine=2,col=10,endColumn=11::'z' is redeclared in the same scope.
 ```
 
 ```block
-::error title=lint/suspicious/noRedeclare,file=index.ts,line=9,endLine=9,col=7,endColumn=8::Shouldn't redeclare 'f'. Consider to delete it or rename it.
+::error title=lint/suspicious/noRedeclare,file=index.ts,line=9,endLine=9,col=7,endColumn=8::'f' is redeclared in the same scope.
 ```
 
 ```block
@@ -128,11 +128,11 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-::error title=lint/suspicious/noRedeclare,file=main.ts,line=2,endLine=2,col=10,endColumn=11::Shouldn't redeclare 'z'. Consider to delete it or rename it.
+::error title=lint/suspicious/noRedeclare,file=main.ts,line=2,endLine=2,col=10,endColumn=11::'z' is redeclared in the same scope.
 ```
 
 ```block
-::error title=lint/suspicious/noRedeclare,file=main.ts,line=9,endLine=9,col=7,endColumn=8::Shouldn't redeclare 'f'. Consider to delete it or rename it.
+::error title=lint/suspicious/noRedeclare,file=main.ts,line=9,endLine=9,col=7,endColumn=8::'f' is redeclared in the same scope.
 ```
 
 ```block

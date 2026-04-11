@@ -20,9 +20,10 @@ use crate::syntax::parse_error::{
 use crate::syntax::property::color::{is_at_color, parse_color};
 use crate::syntax::property::unicode_range::{is_at_unicode_range, parse_unicode_range};
 use crate::syntax::scss::{
-    is_at_scss_declaration, is_at_scss_identifier, is_at_scss_parent_selector_value,
-    is_at_scss_qualified_name, parse_scss_declaration, parse_scss_identifier,
-    parse_scss_parent_selector_value, parse_scss_qualified_name,
+    is_at_scss_declaration, is_at_scss_identifier, is_at_scss_interpolated_string,
+    is_at_scss_parent_selector_value, is_at_scss_qualified_name, parse_scss_declaration,
+    parse_scss_identifier, parse_scss_interpolated_string, parse_scss_parent_selector_value,
+    parse_scss_qualified_name,
 };
 use crate::syntax::selector::SelectorList;
 use crate::syntax::selector::is_nth_at_selector;
@@ -349,7 +350,8 @@ pub(crate) fn is_at_any_value_with_context(
         || (context.is_scss_syntax_allowed()
             && (is_at_scss_identifier(p)
                 || is_at_scss_qualified_name(p)
-                || is_at_scss_parent_selector_value(p)))
+                || is_at_scss_parent_selector_value(p)
+                || is_at_scss_interpolated_string(p)))
         || is_at_any_non_function_css_value(p)
 }
 
@@ -465,6 +467,8 @@ pub(crate) fn parse_any_value_with_context(
             })
     } else if context.is_scss_syntax_allowed() && is_at_scss_parent_selector_value(p) {
         parse_scss_parent_selector_value(p)
+    } else if context.is_scss_syntax_allowed() && is_at_scss_interpolated_string(p) {
+        parse_scss_interpolated_string(p)
     } else {
         parse_any_non_function_css_value(p)
     }
