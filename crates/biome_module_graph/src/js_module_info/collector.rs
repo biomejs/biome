@@ -684,10 +684,10 @@ impl JsModuleInfoCollector {
                 continue;
             }
 
-            let child_scope = &self.scopes[child_binding.scope_id.index()];
+            let child_scope = &self.semantic_model.scope_from_id(child_binding.scope_id);
             if child_scope
-                .parent
-                .is_some_and(|parent| parent == binding.scope_id)
+                .parent()
+                .is_some_and(|parent| parent.id() == binding.scope_id)
             {
                 exports
                     .entry(child_binding.name.clone())
