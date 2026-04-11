@@ -119,10 +119,6 @@ impl Rule for UseSortedSelectionSet {
     }
 }
 
-fn comparator(a: &ComparableToken, b: &ComparableToken) -> std::cmp::Ordering {
-    ComparableToken::ascii_nat_cmp(a, b)
-}
-
 fn get_field_key(node: &GraphqlField) -> Option<TokenText> {
     if let Some(alias) = node.alias()
         && let Some(name) = alias.value().ok()
@@ -177,7 +173,7 @@ fn compare_selection_keys(k1: &Option<TokenText>, k2: &Option<TokenText>) -> Ord
         (Some(a), Some(b)) => {
             let a = ComparableToken::new(a.clone());
             let b = ComparableToken::new(b.clone());
-            comparator(&a, &b)
+            ComparableToken::ascii_nat_cmp(&a, &b)
         }
         (None, Some(_)) => Ordering::Greater,
         (Some(_), None) => Ordering::Less,
