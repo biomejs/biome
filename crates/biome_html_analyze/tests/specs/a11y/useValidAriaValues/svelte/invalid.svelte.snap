@@ -26,7 +26,7 @@ invalid.svelte:4:6 lint/a11y/useValidAriaValues ━━━━━━━━━━�
     5 │ 
     6 │ <!-- invalid tristate value -->
   
-  i The only supported values for the aria-hidden property is one of the following:
+  i The only supported values for the aria-hidden property are:
   
   - undefined
   - false
@@ -45,7 +45,7 @@ invalid.svelte:7:7 lint/a11y/useValidAriaValues ━━━━━━━━━━�
       │       ^^^^^^^^^^^^^^^^^^^
     8 │ 
   
-  i The only supported value for the aria-checked property one of the following:
+  i The only supported values for the aria-checked property are:
   
   - false
   - true

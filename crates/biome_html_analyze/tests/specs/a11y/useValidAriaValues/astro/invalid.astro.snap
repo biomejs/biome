@@ -28,7 +28,7 @@ invalid.astro:6:6 lint/a11y/useValidAriaValues ━━━━━━━━━━━
     7 │ 
     8 │ <!-- invalid tristate value -->
   
-  i The only supported values for the aria-hidden property is one of the following:
+  i The only supported values for the aria-hidden property are:
   
   - undefined
   - false
@@ -47,7 +47,7 @@ invalid.astro:9:7 lint/a11y/useValidAriaValues ━━━━━━━━━━━
        │       ^^^^^^^^^^^^^^^^^^^
     10 │ 
   
-  i The only supported value for the aria-checked property one of the following:
+  i The only supported values for the aria-checked property are:
   
   - false
   - true

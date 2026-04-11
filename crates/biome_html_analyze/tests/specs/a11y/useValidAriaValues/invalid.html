@@ -20,3 +20,6 @@
 
 <!-- case insensitive attribute name — still invalid value -->
 <div ARIA-HIDDEN="yes">content</div>
+
+<!-- valueless attribute on non-boolean type — should flag (e.g. aria-orientation has no "true" token) -->
+<span aria-orientation>some text</span>

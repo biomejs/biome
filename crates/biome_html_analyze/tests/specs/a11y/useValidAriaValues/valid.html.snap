@@ -33,4 +33,8 @@ expression: valid.html
 <div ARIA-HIDDEN="true">content</div>
 <div Aria-Checked="true">content</div>
 
+<!-- valueless boolean attributes (equivalent to "true" per HTML spec) -->
+<div aria-hidden>content</div>
+<span aria-checked>some text</span>
+
 ```

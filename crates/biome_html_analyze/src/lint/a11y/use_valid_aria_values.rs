@@ -81,8 +81,12 @@ impl Rule for UseValidAriaValues {
         let name_lower = name.to_ascii_lowercase_cow();
 
         if let Ok(aria_property) = AriaAttribute::from_str(&name_lower) {
-            let attribute_value = html_attr.value()?;
-            let value_text = attribute_value.to_string();
+            // For valueless attributes like <div aria-hidden>, treat as "true"
+            // per HTML spec (boolean attribute presence = true).
+            let value_text = match html_attr.value() {
+                Some(v) => v.to_string(),
+                None => "true".to_string(),
+            };
             if !aria_property.value_type().contains(&value_text) {
                 return Some(UseValidAriaValuesState {
                     attribute_name: name_lower.into_owned(),
@@ -107,13 +111,13 @@ impl Rule for UseValidAriaValues {
         let diagnostic = match state.property_type {
             AriaValueType::Boolean => diagnostic.footer_list(
                 markup! {
-                    "The only supported values for the "<Emphasis>{attribute_name}</Emphasis>" property is one of the following:"
+                    "The only supported values for the "<Emphasis>{attribute_name}</Emphasis>" property are:"
                 },
                 ["false", "true"],
             ),
             AriaValueType::OptionalBoolean => diagnostic.footer_list(
                 markup! {
-                    "The only supported values for the "<Emphasis>{attribute_name}</Emphasis>" property is one of the following:"
+                    "The only supported values for the "<Emphasis>{attribute_name}</Emphasis>" property are:"
                 },
                 ["undefined", "false", "true"],
             ),
@@ -127,10 +131,10 @@ impl Rule for UseValidAriaValues {
                 "The only supported value is a space-separated list of HTML identifiers."
             }),
             AriaValueType::String => diagnostic.note(markup! {
-                "The only supported value is text."
+                "The only supported value is non-empty text."
             }),
             AriaValueType::Number => diagnostic.note(markup! {
-                "The only supported value is number."
+                "The only supported value is a number."
             }),
             AriaValueType::Token(tokens) => diagnostic.footer_list(
                 markup! {
@@ -146,7 +150,7 @@ impl Rule for UseValidAriaValues {
             ),
             AriaValueType::Tristate => diagnostic.footer_list(
                 markup! {
-                    "The only supported value for the "<Emphasis>{attribute_name}</Emphasis>" property one of the following:"
+                    "The only supported values for the "<Emphasis>{attribute_name}</Emphasis>" property are:"
                 },
                 ["false", "true", "mixed"],
             ),
