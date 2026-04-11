@@ -10203,6 +10203,41 @@ pub struct ScssInterpolatedIdentifierFields {
     pub items: ScssInterpolatedIdentifierPartList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssInterpolatedIdentifierHyphen {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssInterpolatedIdentifierHyphen {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssInterpolatedIdentifierHyphenFields {
+        ScssInterpolatedIdentifierHyphenFields {
+            minus_token: self.minus_token(),
+        }
+    }
+    pub fn minus_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for ScssInterpolatedIdentifierHyphen {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssInterpolatedIdentifierHyphenFields {
+    pub minus_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssInterpolatedString {
     pub(crate) syntax: SyntaxNode,
 }
@@ -13615,12 +13650,19 @@ impl AnyCssFunction {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssFunctionName {
     CssIdentifier(CssIdentifier),
+    ScssInterpolatedIdentifier(ScssInterpolatedIdentifier),
     ScssQualifiedName(ScssQualifiedName),
 }
 impl AnyCssFunctionName {
     pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
         match &self {
             Self::CssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolated_identifier(&self) -> Option<&ScssInterpolatedIdentifier> {
+        match &self {
+            Self::ScssInterpolatedIdentifier(item) => Some(item),
             _ => None,
         }
     }
@@ -15428,6 +15470,7 @@ pub enum AnyCssValue {
     CssString(CssString),
     CssUnicodeRange(CssUnicodeRange),
     ScssIdentifier(ScssIdentifier),
+    ScssInterpolatedIdentifier(ScssInterpolatedIdentifier),
     ScssInterpolatedString(ScssInterpolatedString),
     ScssParentSelectorValue(ScssParentSelectorValue),
     ScssQualifiedName(ScssQualifiedName),
@@ -15509,6 +15552,12 @@ impl AnyCssValue {
     pub fn as_scss_identifier(&self) -> Option<&ScssIdentifier> {
         match &self {
             Self::ScssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolated_identifier(&self) -> Option<&ScssInterpolatedIdentifier> {
+        match &self {
+            Self::ScssInterpolatedIdentifier(item) => Some(item),
             _ => None,
         }
     }
@@ -15866,6 +15915,7 @@ impl AnyScssIncludeTarget {
 pub enum AnyScssInterpolatedIdentifierPart {
     CssCustomIdentifier(CssCustomIdentifier),
     CssIdentifier(CssIdentifier),
+    ScssInterpolatedIdentifierHyphen(ScssInterpolatedIdentifierHyphen),
     ScssInterpolation(ScssInterpolation),
 }
 impl AnyScssInterpolatedIdentifierPart {
@@ -15878,6 +15928,14 @@ impl AnyScssInterpolatedIdentifierPart {
     pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
         match &self {
             Self::CssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolated_identifier_hyphen(
+        &self,
+    ) -> Option<&ScssInterpolatedIdentifierHyphen> {
+        match &self {
+            Self::ScssInterpolatedIdentifierHyphen(item) => Some(item),
             _ => None,
         }
     }
@@ -28344,6 +28402,56 @@ impl From<ScssInterpolatedIdentifier> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for ScssInterpolatedIdentifierHyphen {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_INTERPOLATED_IDENTIFIER_HYPHEN as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_INTERPOLATED_IDENTIFIER_HYPHEN
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssInterpolatedIdentifierHyphen {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssInterpolatedIdentifierHyphen")
+                .field(
+                    "minus_token",
+                    &support::DebugSyntaxResult(self.minus_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("ScssInterpolatedIdentifierHyphen").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssInterpolatedIdentifierHyphen> for SyntaxNode {
+    fn from(n: ScssInterpolatedIdentifierHyphen) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssInterpolatedIdentifierHyphen> for SyntaxElement {
+    fn from(n: ScssInterpolatedIdentifierHyphen) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for ScssInterpolatedString {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -34346,6 +34454,11 @@ impl From<CssIdentifier> for AnyCssFunctionName {
         Self::CssIdentifier(node)
     }
 }
+impl From<ScssInterpolatedIdentifier> for AnyCssFunctionName {
+    fn from(node: ScssInterpolatedIdentifier) -> Self {
+        Self::ScssInterpolatedIdentifier(node)
+    }
+}
 impl From<ScssQualifiedName> for AnyCssFunctionName {
     fn from(node: ScssQualifiedName) -> Self {
         Self::ScssQualifiedName(node)
@@ -34353,14 +34466,21 @@ impl From<ScssQualifiedName> for AnyCssFunctionName {
 }
 impl AstNode for AnyCssFunctionName {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssIdentifier::KIND_SET.union(ScssQualifiedName::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssIdentifier::KIND_SET
+        .union(ScssInterpolatedIdentifier::KIND_SET)
+        .union(ScssQualifiedName::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_IDENTIFIER | SCSS_QUALIFIED_NAME)
+        matches!(
+            kind,
+            CSS_IDENTIFIER | SCSS_INTERPOLATED_IDENTIFIER | SCSS_QUALIFIED_NAME
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
+            SCSS_INTERPOLATED_IDENTIFIER => {
+                Self::ScssInterpolatedIdentifier(ScssInterpolatedIdentifier { syntax })
+            }
             SCSS_QUALIFIED_NAME => Self::ScssQualifiedName(ScssQualifiedName { syntax }),
             _ => return None,
         };
@@ -34369,12 +34489,14 @@ impl AstNode for AnyCssFunctionName {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::CssIdentifier(it) => it.syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.syntax(),
             Self::ScssQualifiedName(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssIdentifier(it) => it.into_syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.into_syntax(),
             Self::ScssQualifiedName(it) => it.into_syntax(),
         }
     }
@@ -34383,6 +34505,7 @@ impl std::fmt::Debug for AnyCssFunctionName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolatedIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssQualifiedName(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -34391,6 +34514,7 @@ impl From<AnyCssFunctionName> for SyntaxNode {
     fn from(n: AnyCssFunctionName) -> Self {
         match n {
             AnyCssFunctionName::CssIdentifier(it) => it.into_syntax(),
+            AnyCssFunctionName::ScssInterpolatedIdentifier(it) => it.into_syntax(),
             AnyCssFunctionName::ScssQualifiedName(it) => it.into_syntax(),
         }
     }
@@ -39621,6 +39745,11 @@ impl From<ScssIdentifier> for AnyCssValue {
         Self::ScssIdentifier(node)
     }
 }
+impl From<ScssInterpolatedIdentifier> for AnyCssValue {
+    fn from(node: ScssInterpolatedIdentifier) -> Self {
+        Self::ScssInterpolatedIdentifier(node)
+    }
+}
 impl From<ScssInterpolatedString> for AnyCssValue {
     fn from(node: ScssInterpolatedString) -> Self {
         Self::ScssInterpolatedString(node)
@@ -39656,6 +39785,7 @@ impl AstNode for AnyCssValue {
         .union(CssString::KIND_SET)
         .union(CssUnicodeRange::KIND_SET)
         .union(ScssIdentifier::KIND_SET)
+        .union(ScssInterpolatedIdentifier::KIND_SET)
         .union(ScssInterpolatedString::KIND_SET)
         .union(ScssParentSelectorValue::KIND_SET)
         .union(ScssQualifiedName::KIND_SET)
@@ -39673,6 +39803,7 @@ impl AstNode for AnyCssValue {
             | CSS_STRING
             | CSS_UNICODE_RANGE
             | SCSS_IDENTIFIER
+            | SCSS_INTERPOLATED_IDENTIFIER
             | SCSS_INTERPOLATED_STRING
             | SCSS_PARENT_SELECTOR_VALUE
             | SCSS_QUALIFIED_NAME
@@ -39695,6 +39826,9 @@ impl AstNode for AnyCssValue {
             CSS_STRING => Self::CssString(CssString { syntax }),
             CSS_UNICODE_RANGE => Self::CssUnicodeRange(CssUnicodeRange { syntax }),
             SCSS_IDENTIFIER => Self::ScssIdentifier(ScssIdentifier { syntax }),
+            SCSS_INTERPOLATED_IDENTIFIER => {
+                Self::ScssInterpolatedIdentifier(ScssInterpolatedIdentifier { syntax })
+            }
             SCSS_INTERPOLATED_STRING => {
                 Self::ScssInterpolatedString(ScssInterpolatedString { syntax })
             }
@@ -39733,6 +39867,7 @@ impl AstNode for AnyCssValue {
             Self::CssString(it) => it.syntax(),
             Self::CssUnicodeRange(it) => it.syntax(),
             Self::ScssIdentifier(it) => it.syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.syntax(),
             Self::ScssInterpolatedString(it) => it.syntax(),
             Self::ScssParentSelectorValue(it) => it.syntax(),
             Self::ScssQualifiedName(it) => it.syntax(),
@@ -39754,6 +39889,7 @@ impl AstNode for AnyCssValue {
             Self::CssString(it) => it.into_syntax(),
             Self::CssUnicodeRange(it) => it.into_syntax(),
             Self::ScssIdentifier(it) => it.into_syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.into_syntax(),
             Self::ScssInterpolatedString(it) => it.into_syntax(),
             Self::ScssParentSelectorValue(it) => it.into_syntax(),
             Self::ScssQualifiedName(it) => it.into_syntax(),
@@ -39779,6 +39915,7 @@ impl std::fmt::Debug for AnyCssValue {
             Self::CssString(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUnicodeRange(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolatedIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolatedString(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssParentSelectorValue(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssQualifiedName(it) => std::fmt::Debug::fmt(it, f),
@@ -39802,6 +39939,7 @@ impl From<AnyCssValue> for SyntaxNode {
             AnyCssValue::CssString(it) => it.into_syntax(),
             AnyCssValue::CssUnicodeRange(it) => it.into_syntax(),
             AnyCssValue::ScssIdentifier(it) => it.into_syntax(),
+            AnyCssValue::ScssInterpolatedIdentifier(it) => it.into_syntax(),
             AnyCssValue::ScssInterpolatedString(it) => it.into_syntax(),
             AnyCssValue::ScssParentSelectorValue(it) => it.into_syntax(),
             AnyCssValue::ScssQualifiedName(it) => it.into_syntax(),
@@ -40721,6 +40859,11 @@ impl From<CssIdentifier> for AnyScssInterpolatedIdentifierPart {
         Self::CssIdentifier(node)
     }
 }
+impl From<ScssInterpolatedIdentifierHyphen> for AnyScssInterpolatedIdentifierPart {
+    fn from(node: ScssInterpolatedIdentifierHyphen) -> Self {
+        Self::ScssInterpolatedIdentifierHyphen(node)
+    }
+}
 impl From<ScssInterpolation> for AnyScssInterpolatedIdentifierPart {
     fn from(node: ScssInterpolation) -> Self {
         Self::ScssInterpolation(node)
@@ -40730,17 +40873,24 @@ impl AstNode for AnyScssInterpolatedIdentifierPart {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssCustomIdentifier::KIND_SET
         .union(CssIdentifier::KIND_SET)
+        .union(ScssInterpolatedIdentifierHyphen::KIND_SET)
         .union(ScssInterpolation::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_CUSTOM_IDENTIFIER | CSS_IDENTIFIER | SCSS_INTERPOLATION
+            CSS_CUSTOM_IDENTIFIER
+                | CSS_IDENTIFIER
+                | SCSS_INTERPOLATED_IDENTIFIER_HYPHEN
+                | SCSS_INTERPOLATION
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_CUSTOM_IDENTIFIER => Self::CssCustomIdentifier(CssCustomIdentifier { syntax }),
             CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
+            SCSS_INTERPOLATED_IDENTIFIER_HYPHEN => {
+                Self::ScssInterpolatedIdentifierHyphen(ScssInterpolatedIdentifierHyphen { syntax })
+            }
             SCSS_INTERPOLATION => Self::ScssInterpolation(ScssInterpolation { syntax }),
             _ => return None,
         };
@@ -40750,6 +40900,7 @@ impl AstNode for AnyScssInterpolatedIdentifierPart {
         match self {
             Self::CssCustomIdentifier(it) => it.syntax(),
             Self::CssIdentifier(it) => it.syntax(),
+            Self::ScssInterpolatedIdentifierHyphen(it) => it.syntax(),
             Self::ScssInterpolation(it) => it.syntax(),
         }
     }
@@ -40757,6 +40908,7 @@ impl AstNode for AnyScssInterpolatedIdentifierPart {
         match self {
             Self::CssCustomIdentifier(it) => it.into_syntax(),
             Self::CssIdentifier(it) => it.into_syntax(),
+            Self::ScssInterpolatedIdentifierHyphen(it) => it.into_syntax(),
             Self::ScssInterpolation(it) => it.into_syntax(),
         }
     }
@@ -40766,6 +40918,7 @@ impl std::fmt::Debug for AnyScssInterpolatedIdentifierPart {
         match self {
             Self::CssCustomIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolatedIdentifierHyphen(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolation(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -40775,6 +40928,9 @@ impl From<AnyScssInterpolatedIdentifierPart> for SyntaxNode {
         match n {
             AnyScssInterpolatedIdentifierPart::CssCustomIdentifier(it) => it.into_syntax(),
             AnyScssInterpolatedIdentifierPart::CssIdentifier(it) => it.into_syntax(),
+            AnyScssInterpolatedIdentifierPart::ScssInterpolatedIdentifierHyphen(it) => {
+                it.into_syntax()
+            }
             AnyScssInterpolatedIdentifierPart::ScssInterpolation(it) => it.into_syntax(),
         }
     }
@@ -43154,6 +43310,11 @@ impl std::fmt::Display for ScssIncludeAtRule {
     }
 }
 impl std::fmt::Display for ScssInterpolatedIdentifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssInterpolatedIdentifierHyphen {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

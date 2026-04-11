@@ -1945,6 +1945,7 @@ AnyCssValue =
 	| CssCustomIdentifier
 	| CssDashedIdentifier
 	| ScssIdentifier
+	| ScssInterpolatedIdentifier
 	| ScssQualifiedName
 	| ScssParentSelectorValue
 	| CssString
@@ -2017,6 +2018,7 @@ CssFunction =
 
 AnyCssFunctionName =
 	CssIdentifier
+	| ScssInterpolatedIdentifier
 	| ScssQualifiedName
 
 // https://drafts.csswg.org/css-values-4/#url-value
@@ -2855,9 +2857,15 @@ ScssInterpolatedIdentifier =
 
 ScssInterpolatedIdentifierPartList = AnyScssInterpolatedIdentifierPart*
 
+// #{$a}-#{$b}
+//      ^
+ScssInterpolatedIdentifierHyphen =
+	'-'
+
 AnyScssInterpolatedIdentifierPart =
 	CssIdentifier
 	| CssCustomIdentifier
+	| ScssInterpolatedIdentifierHyphen
 	| ScssInterpolation
 
 // @if $theme == dark { color: white; } @else { color: black; }

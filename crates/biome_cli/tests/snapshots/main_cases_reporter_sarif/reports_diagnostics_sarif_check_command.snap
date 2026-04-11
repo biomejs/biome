@@ -404,7 +404,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           "ruleId": "lint/suspicious/noRedeclare",
           "level": "error",
           "message": {
-            "text": "Shouldn't redeclare 'z'. Consider to delete it or rename it."
+            "text": "'z' is redeclared in the same scope."
           },
           "locations": [
             {
@@ -426,7 +426,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           "ruleId": "lint/suspicious/noRedeclare",
           "level": "error",
           "message": {
-            "text": "Shouldn't redeclare 'f'. Consider to delete it or rename it."
+            "text": "'f' is redeclared in the same scope."
           },
           "locations": [
             {
@@ -574,7 +574,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           "ruleId": "lint/suspicious/noRedeclare",
           "level": "error",
           "message": {
-            "text": "Shouldn't redeclare 'z'. Consider to delete it or rename it."
+            "text": "'z' is redeclared in the same scope."
           },
           "locations": [
             {
@@ -596,7 +596,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           "ruleId": "lint/suspicious/noRedeclare",
           "level": "error",
           "message": {
-            "text": "Shouldn't redeclare 'f'. Consider to delete it or rename it."
+            "text": "'f' is redeclared in the same scope."
           },
           "locations": [
             {

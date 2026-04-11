@@ -4145,6 +4145,14 @@ impl ScssInterpolatedIdentifier {
         )
     }
 }
+impl ScssInterpolatedIdentifierHyphen {
+    pub fn with_minus_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
 impl ScssInterpolatedString {
     pub fn with_opening_quote_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
