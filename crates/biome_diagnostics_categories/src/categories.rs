@@ -204,6 +204,7 @@ define_categories! {
     "lint/nursery/noImpliedEval": "https://biomejs.dev/linter/rules/no-implied-eval",
     "lint/nursery/noIncrementDecrement": "https://biomejs.dev/linter/rules/no-increment-decrement",
     "lint/nursery/noInlineStyles": "https://biomejs.dev/linter/rules/no-inline-styles",
+    "lint/nursery/noJsxLeakedDollar": "https://biomejs.dev/linter/rules/no-jsx-leaked-dollar",
     "lint/nursery/noJsxPropsBind": "https://biomejs.dev/linter/rules/no-jsx-props-bind",
     "lint/nursery/noLeakedRender": "https://biomejs.dev/linter/rules/no-leaked-render",
     "lint/nursery/noMissingGenericFamilyKeyword": "https://biomejs.dev/linter/rules/no-missing-generic-family-keyword",
