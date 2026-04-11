@@ -220,23 +220,16 @@ This paragraph has some `code` in it.
 ```diff
 --- Prettier
 +++ Biome
-@@ -4,26 +4,27 @@
+@@ -4,6 +4,8 @@
  
      This is a paragraph.
  
--# Header 1
- 
--## Header 2
- 
-+Header 1
-+========
 +
-+Header 2
-+--------
 +
-     Header 1
-     ========
+ # Header 1
  
+ ## Header 2
+@@ -14,16 +16,13 @@
      Header 2
      --------
  
@@ -255,16 +248,16 @@ This paragraph has some `code` in it.
  ###### Header 6
  
      # Header 1
-@@ -33,16 +34,13 @@
+@@ -33,16 +32,13 @@
      ##### Header 5
      ###### Header 6
  
-+
-+
- # Header 1
--
- ## Header 2
--
+-# Header 1
+ 
+-## Header 2
+ 
++# Header 1
++## Header 2
  ### Header 3
 -
  #### Header 4
@@ -274,7 +267,7 @@ This paragraph has some `code` in it.
  ###### Header 6
  
      # Header 1 #
-@@ -52,12 +50,15 @@
+@@ -52,12 +48,15 @@
      ##### Header 5 #####
      ###### Header 6 ######
  
@@ -291,7 +284,7 @@ This paragraph has some `code` in it.
  > 1. This is the first list item.
  > 2. This is the second list item.
  >
-@@ -73,18 +74,24 @@
+@@ -73,18 +72,24 @@
      >
      >     Markdown.generate();
  
@@ -319,7 +312,7 @@ This paragraph has some `code` in it.
  ```markdown
  - Red
  - Green
-@@ -99,6 +106,8 @@
+@@ -99,6 +104,8 @@
  * Blue
  ```
  
@@ -328,7 +321,7 @@ This paragraph has some `code` in it.
  1. Buy flour and salt
  1. Mix together with water
  1. Bake
-@@ -109,6 +118,8 @@
+@@ -109,6 +116,8 @@
  1. Bake
  ```
  
@@ -337,7 +330,7 @@ This paragraph has some `code` in it.
  Paragraph:
  
      Code
-@@ -119,15 +130,17 @@
+@@ -119,15 +128,17 @@
  
          Code
  
@@ -360,7 +353,7 @@ This paragraph has some `code` in it.
  
      * * *
  
-@@ -139,6 +152,8 @@
+@@ -139,6 +150,8 @@
  
      ---------------------------------------
  
@@ -369,7 +362,7 @@ This paragraph has some `code` in it.
  This is [an example](http://example.com "Example") link.
  
  [This link](http://example.com) has no title attr.
-@@ -159,6 +174,8 @@
+@@ -159,6 +172,8 @@
  
      [id]: http://example.com "Optional Title"
  
@@ -378,7 +371,7 @@ This paragraph has some `code` in it.
  _single asterisks_
  
  _single underscores_
-@@ -175,10 +192,14 @@
+@@ -175,10 +190,14 @@
  
      __double underscores__
  
@@ -406,11 +399,9 @@ This is a paragraph.
 
 
 
-Header 1
-========
+# Header 1
 
-Header 2
---------
+## Header 2
 
     Header 1
     ========
@@ -608,6 +599,6 @@ This paragraph has some `code` in it.
 # Lines exceeding max width of 80 characters
 ```
     1: [View raw (TEST.md)](https://raw.github.com/adamschwartz/github-markdown-kitchen-sink/master/README.md)
-   55: > Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
-   57:     > Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
+   53: > Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
+   55:     > Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
 ```

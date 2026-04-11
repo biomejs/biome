@@ -44,7 +44,8 @@ impl FormatNodeRule<MdFencedCodeBlock> for FormatMdFencedCodeBlock {
                 content
                     .format()
                     .with_options(FormatMdFormatInlineItemListOptions {
-                        print_mode: TextPrintMode::Clean
+                        print_mode: TextPrintMode::Clean,
+                        keep_fences_in_italics: false
                     }),
                 hard_line_break(),
                 r_fence_indent.format(),

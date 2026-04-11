@@ -11,6 +11,7 @@ impl FormatNodeRule<MdLinkLabel> for FormatMdLinkLabel {
             .format()
             .with_options(FormatMdFormatInlineItemListOptions {
                 print_mode: TextPrintMode::Trim(TrimMode::NormalizeWords),
+                keep_fences_in_italics: false,
             })
             .fmt(f)
     }

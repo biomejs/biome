@@ -13,6 +13,7 @@ impl FormatNodeRule<MdLinkDestination> for FormatMdLinkDestination {
             .format()
             .with_options(FormatMdFormatInlineItemListOptions {
                 print_mode: TextPrintMode::Trim(TrimMode::All),
+                keep_fences_in_italics: false,
             })
             .fmt(f)
     }

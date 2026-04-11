@@ -24,7 +24,8 @@ impl FormatNodeRule<MdParagraph> for FormatMdParagraph {
             [list
                 .format()
                 .with_options(FormatMdFormatInlineItemListOptions {
-                    print_mode: self.trim_mode
+                    print_mode: self.trim_mode,
+                    keep_fences_in_italics: false
                 })]
         )?;
         if let Some(hard_line) = hard_line {
