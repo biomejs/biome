@@ -5985,7 +5985,7 @@
 					]
 				},
 				"noComponentHookFactories": {
-					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-component-hook-factories",
+					"description": "Disallows defining React components or custom hooks inside other functions.\nSee https://biomejs.dev/linter/rules/no-component-hook-factories",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoComponentHookFactoriesConfiguration" },
 						{ "type": "null" }

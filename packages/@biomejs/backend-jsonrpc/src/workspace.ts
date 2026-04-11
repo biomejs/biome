@@ -2047,7 +2047,7 @@ See https://biomejs.dev/linter/rules/no-before-interactive-script-outside-docume
 	 */
 	noBeforeInteractiveScriptOutsideDocument?: NoBeforeInteractiveScriptOutsideDocumentConfiguration;
 	/**
-	* Succinct description of the rule.
+	* Disallows defining React components or custom hooks inside other functions.
 See https://biomejs.dev/linter/rules/no-component-hook-factories 
 	 */
 	noComponentHookFactories?: NoComponentHookFactoriesConfiguration;
