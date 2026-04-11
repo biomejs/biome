@@ -64,6 +64,7 @@ pub struct UseReduceTypeParameterState {
     asserted_type: AnyTsType,
     inner_expression: AnyJsExpression,
     is_reduce_right: bool,
+    has_existing_type_arguments: bool,
 }
 
 impl Rule for UseReduceTypeParameter {
@@ -74,11 +75,7 @@ impl Rule for UseReduceTypeParameter {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call = ctx.query();
-
-        // already has type arguments like .reduce<Foo>(...)
-        if call.type_arguments().is_some() {
-            return None;
-        }
+        let has_existing_type_arguments = call.type_arguments().is_some();
 
         let callee = call.callee().ok()?.omit_parentheses();
         let member_expr = callee.as_js_static_member_expression()?;
@@ -110,6 +107,7 @@ impl Rule for UseReduceTypeParameter {
 
         let mut state = extract_assertion(second_expr)?;
         state.is_reduce_right = is_reduce_right;
+        state.has_existing_type_arguments = has_existing_type_arguments;
         Some(state)
     }
 
@@ -125,11 +123,11 @@ impl Rule for UseReduceTypeParameter {
                 rule_category!(),
                 call.syntax().text_trimmed_range(),
                 markup! {
-                    "Use a type parameter on "<Emphasis>{method}</Emphasis>" instead of a type assertion for the initial value."
+                    "The initial value of "<Emphasis>{method}</Emphasis>" uses a type assertion."
                 },
             )
             .note(markup! {
-                "Type assertions can mask type errors in the reducer callback. A type parameter is checked against the callback's return type."
+                "Type assertions can hide type mismatches in the reducer callback. Use a type parameter on the call instead, so TypeScript checks the return type."
             }),
         )
     }
@@ -138,15 +136,12 @@ impl Rule for UseReduceTypeParameter {
         let call = ctx.query();
         let mut mutation = ctx.root().begin();
 
-        // Build type arguments: <AssertedType>
-        let type_arguments = make::ts_type_arguments(
-            make::token(JsSyntaxKind::L_ANGLE),
-            make::ts_type_argument_list([state.asserted_type.clone()], []),
-            make::token(JsSyntaxKind::R_ANGLE),
-        );
-
         // Rebuild argument list with the unwrapped inner expression (no trivia from `as`/`<>`)
-        let inner = state.inner_expression.clone().trim_trivia().unwrap_or(state.inner_expression.clone());
+        let inner = state
+            .inner_expression
+            .clone()
+            .trim_trivia()
+            .unwrap_or(state.inner_expression.clone());
         let old_args = call.arguments().ok()?;
         let old_arg_list = old_args.args();
         let first_arg = old_arg_list.iter().next()?.ok()?;
@@ -160,19 +155,40 @@ impl Rule for UseReduceTypeParameter {
             old_args.r_paren_token().ok()?,
         );
 
-        // Build the new call with type arguments and updated arguments
+        // Build the new call with updated arguments
         let mut builder = make::js_call_expression(call.callee().ok()?, new_args);
         if let Some(chain_token) = call.optional_chain_token() {
             builder = builder.with_optional_chain_token(chain_token);
         }
-        let new_call = builder.with_type_arguments(type_arguments).build();
+
+        // Only add type arguments if the call doesn't already have them
+        if state.has_existing_type_arguments {
+            if let Some(existing_type_args) = call.type_arguments() {
+                builder = builder.with_type_arguments(existing_type_args);
+            }
+        } else {
+            let type_arguments = make::ts_type_arguments(
+                make::token(JsSyntaxKind::L_ANGLE),
+                make::ts_type_argument_list([state.asserted_type.clone()], []),
+                make::token(JsSyntaxKind::R_ANGLE),
+            );
+            builder = builder.with_type_arguments(type_arguments);
+        }
+
+        let new_call = builder.build();
 
         mutation.replace_node(call.clone(), new_call);
+
+        let message = if state.has_existing_type_arguments {
+            markup! { "Remove the type assertion from the initial value." }.to_owned()
+        } else {
+            markup! { "Use a type parameter instead of type assertion." }.to_owned()
+        };
 
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup! { "Use a type parameter instead of type assertion." }.to_owned(),
+            message,
             mutation,
         ))
     }
@@ -189,6 +205,7 @@ fn extract_assertion(expr: AnyJsExpression) -> Option<UseReduceTypeParameterStat
             asserted_type: as_expr.ty().ok()?,
             inner_expression: as_expr.expression().ok()?,
             is_reduce_right: false,
+            has_existing_type_arguments: false,
         });
     }
 
@@ -197,6 +214,7 @@ fn extract_assertion(expr: AnyJsExpression) -> Option<UseReduceTypeParameterStat
             asserted_type: angle_expr.ty().ok()?,
             inner_expression: angle_expr.expression().ok()?,
             is_reduce_right: false,
+            has_existing_type_arguments: false,
         });
     }
 
