@@ -1,0 +1,66 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+
+<!-- div with onclick but no keyboard handler -->
+<div onclick="handleClick()"></div>
+
+<!-- span with onclick but no keyboard handler -->
+<span onclick="handleClick()">text</span>
+
+<!-- <a> without href is not interactive -->
+<a onclick="handleClick()">bare link</a>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:4:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Elements with onclick must also include at least one keyboard handler: onkeydown, onkeyup, or onkeypress.
+  
+    3 │ <!-- div with onclick but no keyboard handler -->
+  > 4 │ <div onclick="handleClick()"></div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ <!-- span with onclick but no keyboard handler -->
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+```
+
+```
+invalid.svelte:7:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Elements with onclick must also include at least one keyboard handler: onkeydown, onkeyup, or onkeypress.
+  
+    6 │ <!-- span with onclick but no keyboard handler -->
+  > 7 │ <span onclick="handleClick()">text</span>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ <!-- <a> without href is not interactive -->
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+```
+
+```
+invalid.svelte:10:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Elements with onclick must also include at least one keyboard handler: onkeydown, onkeyup, or onkeypress.
+  
+     9 │ <!-- <a> without href is not interactive -->
+  > 10 │ <a onclick="handleClick()">bare link</a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+```

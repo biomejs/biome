@@ -24,3 +24,6 @@
 
 <!-- aria-hidden="false" should still flag -->
 <div onclick="handleClick()" aria-hidden="false">content</div>
+
+<!-- <a> without href is NOT interactive — should flag -->
+<a onclick="handleClick()">bare link</a>

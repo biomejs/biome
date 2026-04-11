@@ -16,8 +16,9 @@ declare_lint_rule! {
     /// AT compatibility, and screen reader users. This rule checks that interactive elements with an
     /// `onclick` attribute also include at least one of `onkeydown`, `onkeyup`, or `onkeypress`.
     ///
-    /// This does not apply to elements that are inherently keyboard-accessible (such as `<a>`, `<button>`,
-    /// `<input>`, `<select>`, `<textarea>`) or elements that are hidden from assistive technologies.
+    /// This does not apply to elements that are inherently keyboard-accessible (such as `<button>`,
+    /// `<input>`, `<select>`, `<textarea>`, or `<a>` with an `href` attribute) or elements that are
+    /// hidden from assistive technologies.
     ///
     /// :::note
     /// In `.html` files, this rule matches element names case-insensitively (e.g., `<DIV>`, `<Div>`).
@@ -71,8 +72,9 @@ declare_lint_rule! {
 }
 
 /// Elements that are inherently keyboard-accessible and should not trigger this rule.
+/// Note: `<a>` is only interactive when it has an `href` attribute, so it's handled separately.
 const INTERACTIVE_ELEMENTS: &[&str] = &[
-    "a", "button", "input", "option", "select", "textarea",
+    "button", "input", "option", "select", "textarea",
 ];
 
 impl Rule for UseKeyWithClickEvents {
@@ -91,8 +93,10 @@ impl Rule for UseKeyWithClickEvents {
         let element_name = element.name()?;
         let is_html_file = file_source.is_html();
 
-        // In framework files, skip PascalCase elements (assumed custom components)
-        if !is_html_file && element_name.text().chars().any(|c| c.is_ascii_uppercase()) {
+        // In Vue/Svelte/Astro, PascalCase tag names indicate custom components
+        // and should be skipped. In HTML, all tag names are native elements
+        // regardless of casing (e.g. <DIV> is a valid div).
+        if !is_html_file && element_name.text().starts_with(|c: char| c.is_uppercase()) {
             return None;
         }
 
@@ -104,6 +108,12 @@ impl Rule for UseKeyWithClickEvents {
             }
         };
 
+        // <a> is only interactive when it has an href attribute.
+        // A bare <a onclick> without href has Generic role, not Link.
+        if name_matches("a") && element.find_attribute_by_name("href").is_some() {
+            return None;
+        }
+
         // Skip inherently keyboard-accessible elements
         if INTERACTIVE_ELEMENTS.iter().any(|&n| name_matches(n)) {
             return None;
@@ -114,7 +124,7 @@ impl Rule for UseKeyWithClickEvents {
             .find_attribute_by_name("aria-hidden")
             .is_some_and(|attr| {
                 attr.value()
-                    .map_or(true, |v| !v.trim().eq_ignore_ascii_case("false"))
+                    .is_none_or(|v| !v.trim().eq_ignore_ascii_case("false"))
             })
         {
             return None;

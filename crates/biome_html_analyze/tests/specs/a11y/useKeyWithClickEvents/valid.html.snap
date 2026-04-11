@@ -24,9 +24,6 @@ expression: valid.html
 <div onclick="handleClick()" aria-hidden="true">content</div>
 <div onclick="handleClick()" aria-hidden>content</div>
 
-<!-- type="hidden" -->
-<div onclick="handleClick()" type="hidden" />
-
 <!-- presentation role -->
 <div onclick="handleClick()" role="presentation">content</div>
 <div onclick="handleClick()" role="none">content</div>
