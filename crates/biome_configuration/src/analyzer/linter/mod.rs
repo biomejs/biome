@@ -12,9 +12,7 @@ use std::ops::Deref;
 
 pub type LinterEnabled = Bool<true>;
 
-#[derive(
-    Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge,
-)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]

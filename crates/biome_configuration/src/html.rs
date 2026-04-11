@@ -14,9 +14,7 @@ use serde::{Deserialize, Serialize};
 pub type ExperimentalFullSupportEnabled = Bool<false>;
 
 /// Options applied to HTML files
-#[derive(
-    Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge,
-)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
@@ -32,7 +30,10 @@ pub struct HtmlConfiguration {
     pub parser: Option<HtmlParserConfiguration>,
 
     /// HTML formatter options
-    #[cfg_attr(feature = "cli", bpaf(external(html_formatter_configuration), optional))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(external(html_formatter_configuration), optional)
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub formatter: Option<HtmlFormatterConfiguration>,
 
@@ -52,9 +53,7 @@ pub type HtmlAssistEnabled = Bool<true>;
 pub type HtmlParseInterpolation = Bool<false>;
 
 /// Options that changes how the HTML parser behaves
-#[derive(
-    Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge,
-)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -64,25 +63,32 @@ pub struct HtmlParserConfiguration {
 }
 
 /// Options that changes how the HTML formatter behaves
-#[derive(
-    Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge,
-)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct HtmlFormatterConfiguration {
     /// Control the formatter for HTML (and its super languages) files.
-    #[cfg_attr(feature = "cli", bpaf(long("html-formatter-enabled"), argument("true|false"), optional))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("html-formatter-enabled"), argument("true|false"), optional)
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<HtmlFormatterEnabled>,
 
     /// The indent style applied to HTML (and its super languages) files.
-    #[cfg_attr(feature = "cli", bpaf(long("html-formatter-indent-style"), argument("tab|space"), optional))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("html-formatter-indent-style"), argument("tab|space"), optional)
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_style: Option<IndentStyle>,
 
     /// The size of the indentation applied to HTML (and its super languages) files. Default to 2.
-    #[cfg_attr(feature = "cli", bpaf(long("html-formatter-indent-width"), argument("NUMBER"), optional))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("html-formatter-indent-width"), argument("NUMBER"), optional)
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_width: Option<IndentWidth>,
 
@@ -99,7 +105,10 @@ pub struct HtmlFormatterConfiguration {
     pub line_ending: Option<LineEnding>,
 
     /// What's the max width of a line applied to HTML (and its super languages) files. Defaults to 80.
-    #[cfg_attr(feature = "cli", bpaf(long("html-formatter-line-width"), argument("NUMBER"), optional))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("html-formatter-line-width"), argument("NUMBER"), optional)
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_width: Option<LineWidth>,
 
@@ -186,29 +195,31 @@ pub struct HtmlFormatterConfiguration {
 }
 
 /// Options that changes how the HTML linter behaves
-#[derive(
-    Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge,
-)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct HtmlLinterConfiguration {
     /// Control the linter for HTML (and its super languages) files.
-    #[cfg_attr(feature = "cli", bpaf(long("html-linter-enabled"), argument("true|false"), optional))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("html-linter-enabled"), argument("true|false"), optional)
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<HtmlLinterEnabled>,
 }
 
 /// Options that changes how the HTML assist behaves
-#[derive(
-    Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
-)]
+#[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct HtmlAssistConfiguration {
     /// Control the assist for HTML (and its super languages) files.
-    #[cfg_attr(feature = "cli", bpaf(long("html-assist-enabled"), argument("true|false")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("html-assist-enabled"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<HtmlAssistEnabled>,
 }

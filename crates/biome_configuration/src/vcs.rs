@@ -16,9 +16,7 @@ pub type VcsUseIgnoreFile = Bool<false>;
 pub type VcsEnabled = Bool<false>;
 
 /// Set of properties to integrate Biome with a VCS software.
-#[derive(
-    Clone, Debug, Deserialize, Eq, PartialEq, Serialize, Deserializable, Default, Merge,
-)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, Deserializable, Default, Merge)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -30,14 +28,20 @@ pub struct VcsConfiguration {
     pub enabled: Option<VcsEnabled>,
 
     /// The kind of client.
-    #[cfg_attr(feature = "cli", bpaf(long("vcs-client-kind"), argument("git"), optional))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("vcs-client-kind"), argument("git"), optional)
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[deserializable(bail_on_error)]
     pub client_kind: Option<VcsClientKind>,
 
     /// Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files
     /// specified in the ignore file.
-    #[cfg_attr(feature = "cli", bpaf(long("vcs-use-ignore-file"), argument("true|false")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("vcs-use-ignore-file"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_ignore_file: Option<VcsUseIgnoreFile>,
 
@@ -52,7 +56,10 @@ pub struct VcsConfiguration {
     pub root: Option<String>,
 
     /// The main branch of the project
-    #[cfg_attr(feature = "cli", bpaf(long("vcs-default-branch"), argument("BRANCH"), optional))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("vcs-default-branch"), argument("BRANCH"), optional)
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub default_branch: Option<String>,
 }

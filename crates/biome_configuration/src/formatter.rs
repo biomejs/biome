@@ -13,9 +13,7 @@ pub type UseEditorconfigEnabled = Bool<false>;
 pub type FormatWithErrorsEnabled = Bool<false>;
 
 /// Generic options applied to all files
-#[derive(
-    Clone, Deserializable, Debug, Default, Deserialize, Eq, PartialEq, Merge, Serialize,
-)]
+#[derive(Clone, Deserializable, Debug, Default, Deserialize, Eq, PartialEq, Merge, Serialize)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
@@ -27,7 +25,10 @@ pub struct FormatterConfiguration {
 
     /// Whether formatting should be allowed to proceed if a given file
     /// has syntax errors
-    #[cfg_attr(feature = "cli", bpaf(long("format-with-errors"), argument("true|false")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("format-with-errors"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub format_with_errors: Option<FormatWithErrorsEnabled>,
 
@@ -42,7 +43,10 @@ pub struct FormatterConfiguration {
     pub indent_width: Option<IndentWidth>,
 
     /// The type of line ending.
-    #[cfg_attr(feature = "cli", bpaf(long("line-ending"), argument("lf|crlf|cr|auto")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("line-ending"), argument("lf|crlf|cr|auto"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
 
@@ -52,12 +56,18 @@ pub struct FormatterConfiguration {
     pub line_width: Option<LineWidth>,
 
     /// The attribute position style in HTML-ish languages. Defaults to auto.
-    #[cfg_attr(feature = "cli", bpaf(long("attribute-position"), argument("multiline|auto")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("attribute-position"), argument("multiline|auto"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub attribute_position: Option<AttributePosition>,
 
     /// Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
-    #[cfg_attr(feature = "cli", bpaf(long("bracket-same-line"), argument("true|false")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("bracket-same-line"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bracket_same_line: Option<BracketSameLine>,
 
@@ -86,7 +96,10 @@ pub struct FormatterConfiguration {
     /// Disable the option at your own risk.
     ///
     /// Defaults to true.
-    #[cfg_attr(feature = "cli", bpaf(long("trailing-newline"), argument("true|false")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("trailing-newline"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trailing_newline: Option<TrailingNewline>,
 
@@ -94,7 +107,10 @@ pub struct FormatterConfiguration {
     /// in `biome.json` will override `.editorconfig` configuration.
     ///
     /// Default: `false`.
-    #[cfg_attr(feature = "cli", bpaf(long("use-editorconfig"), argument("true|false")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("use-editorconfig"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_editorconfig: Option<UseEditorconfigEnabled>,
 

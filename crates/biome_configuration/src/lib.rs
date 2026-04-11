@@ -43,15 +43,15 @@ pub use crate::markdown::MarkdownConfiguration;
 #[cfg(feature = "cli")]
 pub use crate::markdown::markdown_configuration;
 use crate::max_size::MaxSize;
+use crate::vcs::VcsConfiguration;
 #[cfg(feature = "cli")]
 use crate::vcs::vcs_configuration;
-use crate::vcs::VcsConfiguration;
+#[cfg(feature = "cli")]
+pub use analyzer::linter_configuration;
 pub use analyzer::{
     LinterConfiguration, RuleConfiguration, RuleFixConfiguration, RulePlainConfiguration,
     RuleWithFixOptions, RuleWithOptions, Rules,
 };
-#[cfg(feature = "cli")]
-pub use analyzer::linter_configuration;
 use biome_analyze::ExtendedConfigurationProvider;
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{KeyValuePair, markup};
@@ -119,9 +119,7 @@ pub const VERSION: &str = match option_env!("BIOME_VERSION") {
 pub type RootEnabled = Bool<true>;
 
 /// The configuration that is contained inside the file `biome.json`
-#[derive(
-    Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge,
-)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(deny_unknown_fields, default, rename_all = "camelCase")]
@@ -145,12 +143,18 @@ pub struct Configuration {
     pub extends: Option<Extends>,
 
     /// The configuration of the VCS integration
-    #[cfg_attr(feature = "cli", bpaf(external(vcs_configuration), optional, hide_usage))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(external(vcs_configuration), optional, hide_usage)
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub vcs: Option<VcsConfiguration>,
 
     /// The configuration of the filesystem
-    #[cfg_attr(feature = "cli", bpaf(external(files_configuration), optional, hide_usage))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(external(files_configuration), optional, hide_usage)
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub files: Option<FilesConfiguration>,
 
@@ -180,7 +184,10 @@ pub struct Configuration {
     pub css: Option<CssConfiguration>,
 
     /// Specific configuration for the Markdown language
-    #[cfg_attr(feature = "cli", bpaf(external(markdown_configuration), optional, hide))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(external(markdown_configuration), optional, hide)
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "markdown")]
     pub markdown: Option<MarkdownConfiguration>,
@@ -585,7 +592,10 @@ pub struct FilesConfiguration {
     pub max_size: Option<MaxSize>,
 
     /// Tells Biome to not emit diagnostics when handling files that it doesn't know
-    #[cfg_attr(feature = "cli", bpaf(long("files-ignore-unknown"), argument("true|false"), optional))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("files-ignore-unknown"), argument("true|false"), optional)
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ignore_unknown: Option<FilesIgnoreUnknownEnabled>,
 

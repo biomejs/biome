@@ -16,45 +16,64 @@ pub type JsFormatterEnabled = Bool<true>;
 pub type BracketSameLineEnabled = Bool<false>;
 
 /// Formatting options specific to the JavaScript files
-#[derive(
-    Clone, Default, Debug, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
-)]
+#[derive(Clone, Default, Debug, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct JsFormatterConfiguration {
     /// Control the formatter for JavaScript (and its super languages) files.
-    #[cfg_attr(feature = "cli", bpaf(long("javascript-formatter-enabled"), argument("true|false")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("javascript-formatter-enabled"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<JsFormatterEnabled>,
 
     /// The type of quotes used in JSX. Defaults to double.
-    #[cfg_attr(feature = "cli", bpaf(long("jsx-quote-style"), argument("double|single")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("jsx-quote-style"), argument("double|single"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub jsx_quote_style: Option<QuoteStyle>,
 
     /// When properties in objects are quoted. Defaults to asNeeded.
-    #[cfg_attr(feature = "cli", bpaf(long("quote-properties"), argument("preserve|as-needed")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("quote-properties"), argument("preserve|as-needed"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub quote_properties: Option<QuoteProperties>,
 
     /// Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "all".
-    #[cfg_attr(feature = "cli", bpaf(long("trailing-commas"), argument("all|es5|none")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("trailing-commas"), argument("all|es5|none"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trailing_commas: Option<TrailingCommas>,
 
     /// Whether the formatter prints semicolons for all statements or only in for statements where it is necessary because of ASI.
-    #[cfg_attr(feature = "cli", bpaf(long("semicolons"), argument("always|as-needed")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("semicolons"), argument("always|as-needed"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub semicolons: Option<Semicolons>,
 
     /// Whether to add non-necessary parentheses to arrow functions. Defaults to "always".
-    #[cfg_attr(feature = "cli", bpaf(long("arrow-parentheses"), argument("always|as-needed")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("arrow-parentheses"), argument("always|as-needed"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub arrow_parentheses: Option<ArrowParentheses>,
 
     /// Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
-    #[cfg_attr(feature = "cli", bpaf(long("bracket-same-line"), argument("true|false")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("bracket-same-line"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bracket_same_line: Option<BracketSameLine>,
 
@@ -95,12 +114,18 @@ pub struct JsFormatterConfiguration {
     pub line_ending: Option<LineEnding>,
 
     /// What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.
-    #[cfg_attr(feature = "cli", bpaf(long("javascript-formatter-line-width"), argument("NUMBER")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("javascript-formatter-line-width"), argument("NUMBER"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_width: Option<LineWidth>,
 
     /// The type of quotes used in JavaScript code. Defaults to double.
-    #[cfg_attr(feature = "cli", bpaf(long("javascript-formatter-quote-style"), argument("double|single")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("javascript-formatter-quote-style"), argument("double|single"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub quote_style: Option<QuoteStyle>,
 
@@ -118,7 +143,10 @@ pub struct JsFormatterConfiguration {
 
     // it's also a top-level configurable property.
     /// Whether to insert spaces around brackets in object literals. Defaults to true.
-    #[cfg_attr(feature = "cli", bpaf(long("javascript-formatter-bracket-spacing"), argument("true|false")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("javascript-formatter-bracket-spacing"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bracket_spacing: Option<BracketSpacing>,
 
@@ -128,7 +156,10 @@ pub struct JsFormatterConfiguration {
     /// When set to `always`, these literals are formatted on multiple lines, regardless of length of the list.
     /// When set to `never`, these literals are formatted on a single line if it fits in the line.
     /// When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
-    #[cfg_attr(feature = "cli", bpaf(long("javascript-formatter-expand"), argument("auto|always|never")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("javascript-formatter-expand"), argument("auto|always|never"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub expand: Option<Expand>,
 
@@ -153,7 +184,10 @@ pub struct JsFormatterConfiguration {
     /// Disable the option at your own risk.
     ///
     /// Defaults to true.
-    #[cfg_attr(feature = "cli", bpaf(long("javascript-formatter-trailing-newline"), argument("true|false")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("javascript-formatter-trailing-newline"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trailing_newline: Option<TrailingNewline>,
 }

@@ -144,7 +144,10 @@ pub struct OverrideFormatterConfiguration {
 
     /// The type of line ending.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg_attr(feature = "cli", bpaf(long("line-ending"), argument("lf|crlf|cr|auto")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("line-ending"), argument("lf|crlf|cr|auto"))
+    )]
     pub line_ending: Option<LineEnding>,
 
     /// What's the max width of a line. Defaults to 80.
@@ -154,12 +157,18 @@ pub struct OverrideFormatterConfiguration {
 
     /// The attribute position style.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg_attr(feature = "cli", bpaf(long("attribute-position"), argument("multiline|auto")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("attribute-position"), argument("multiline|auto"))
+    )]
     pub attribute_position: Option<AttributePosition>,
 
     /// Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg_attr(feature = "cli", bpaf(long("bracket-same-line"), argument("true|false")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("bracket-same-line"), argument("true|false"))
+    )]
     pub bracket_same_line: Option<BracketSameLine>,
 
     /// Whether to insert spaces around brackets in object literals. Defaults to true.
@@ -174,7 +183,10 @@ pub struct OverrideFormatterConfiguration {
     /// When set to `never`, these literals are formatted on a single line if it fits in the line.
     /// When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg_attr(feature = "cli", bpaf(long("object-wrap"), argument("auto|always|never")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("object-wrap"), argument("auto|always|never"))
+    )]
     pub expand: Option<Expand>,
 
     /// Whether to add a trailing newline at the end of the file.
@@ -188,7 +200,10 @@ pub struct OverrideFormatterConfiguration {
     ///
     /// Defaults to true.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg_attr(feature = "cli", bpaf(long("trailing-newline"), argument("true|false")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("trailing-newline"), argument("true|false"))
+    )]
     pub trailing_newline: Option<TrailingNewline>,
 }
 
@@ -234,6 +249,9 @@ pub struct OverrideAssistConfiguration {
 
     /// List of actions
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg_attr(feature = "cli", bpaf(pure(crate::analyzer::assist::Actions::default()), optional, hide))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(pure(crate::analyzer::assist::Actions::default()), optional, hide)
+    )]
     pub actions: Option<crate::analyzer::assist::Actions>,
 }

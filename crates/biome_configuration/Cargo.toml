@@ -60,8 +60,8 @@ tikv-jemallocator = { workspace = true }
 mimalloc = { workspace = true }
 
 [features]
-cli        = ["dep:bpaf"]
 default    = []
+cli        = ["dep:bpaf"]
 markdown   = []
 schema     = [
   "biome_analyze/schema",

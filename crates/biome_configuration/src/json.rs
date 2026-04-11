@@ -9,9 +9,7 @@ use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
 /// Options applied to JSON files
-#[derive(
-    Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
-)]
+#[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(default, deny_unknown_fields)]
@@ -22,7 +20,10 @@ pub struct JsonConfiguration {
     pub parser: Option<JsonParserConfiguration>,
 
     /// Formatting options
-    #[cfg_attr(feature = "cli", bpaf(external(json_formatter_configuration), optional))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(external(json_formatter_configuration), optional)
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub formatter: Option<JsonFormatterConfiguration>,
 
@@ -41,60 +42,80 @@ pub type JsonAllowCommentsEnabled = Bool<false>;
 pub type JsonAllowTrailingCommasEnabled = Bool<false>;
 
 /// Options that changes how the JSON parser behaves
-#[derive(
-    Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
-)]
+#[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct JsonParserConfiguration {
-    #[cfg_attr(feature = "cli", bpaf(long("json-parse-allow-comments"), argument("true|false")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("json-parse-allow-comments"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     /// Allow parsing comments in `.json` files
     pub allow_comments: Option<JsonAllowCommentsEnabled>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg_attr(feature = "cli", bpaf(long("json-parse-allow-trailing-commas"), argument("true|false")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("json-parse-allow-trailing-commas"), argument("true|false"))
+    )]
     /// Allow parsing trailing commas in `.json` files
     pub allow_trailing_commas: Option<JsonAllowTrailingCommasEnabled>,
 }
 
 pub type JsonFormatterEnabled = Bool<true>;
 
-#[derive(
-    Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
-)]
+#[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct JsonFormatterConfiguration {
     /// Control the formatter for JSON (and its super languages) files.
-    #[cfg_attr(feature = "cli", bpaf(long("json-formatter-enabled"), argument("true|false")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("json-formatter-enabled"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<JsonFormatterEnabled>,
 
     /// The indent style applied to JSON (and its super languages) files.
-    #[cfg_attr(feature = "cli", bpaf(long("json-formatter-indent-style"), argument("tab|space")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("json-formatter-indent-style"), argument("tab|space"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_style: Option<IndentStyle>,
 
     /// The size of the indentation applied to JSON (and its super languages) files. Default to 2.
-    #[cfg_attr(feature = "cli", bpaf(long("json-formatter-indent-width"), argument("NUMBER")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("json-formatter-indent-width"), argument("NUMBER"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_width: Option<IndentWidth>,
 
     /// The type of line ending applied to JSON (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
-    #[cfg_attr(feature = "cli", bpaf(long("json-formatter-line-ending"), argument("lf|crlf|cr|auto")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("json-formatter-line-ending"), argument("lf|crlf|cr|auto"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
 
     /// What's the max width of a line applied to JSON (and its super languages) files. Defaults to 80.
-    #[cfg_attr(feature = "cli", bpaf(long("json-formatter-line-width"), argument("NUMBER")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("json-formatter-line-width"), argument("NUMBER"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_width: Option<LineWidth>,
 
     /// Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "none".
-    #[cfg_attr(feature = "cli", bpaf(long("json-formatter-trailing-commas"), argument("none|all")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("json-formatter-trailing-commas"), argument("none|all"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trailing_commas: Option<TrailingCommas>,
 
@@ -104,12 +125,18 @@ pub struct JsonFormatterConfiguration {
     /// When set to `always`, these literals are formatted on multiple lines, regardless of length of the list.
     /// When set to `never`, these literals are formatted on a single line if it fits in the line.
     /// When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
-    #[cfg_attr(feature = "cli", bpaf(long("json-formatter-expand"), argument("auto|always|never"), optional))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("json-formatter-expand"), argument("auto|always|never"), optional)
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub expand: Option<Expand>,
 
     /// Whether to insert spaces around brackets in object literals. Defaults to true.
-    #[cfg_attr(feature = "cli", bpaf(long("json-formatter-bracket-spacing"), argument("true|false")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("json-formatter-bracket-spacing"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bracket_spacing: Option<BracketSpacing>,
 
@@ -123,7 +150,10 @@ pub struct JsonFormatterConfiguration {
     /// Disable the option at your own risk.
     ///
     /// Defaults to true.
-    #[cfg_attr(feature = "cli", bpaf(long("json-formatter-trailing-newline"), argument("true|false")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("json-formatter-trailing-newline"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trailing_newline: Option<TrailingNewline>,
 }
@@ -141,30 +171,32 @@ impl JsonFormatterConfiguration {
 pub type JsonLinterEnabled = Bool<true>;
 
 /// Linter options specific to the JSON linter
-#[derive(
-    Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
-)]
+#[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct JsonLinterConfiguration {
     /// Control the linter for JSON (and its super languages) files.
-    #[cfg_attr(feature = "cli", bpaf(long("json-linter-enabled"), argument("true|false")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("json-linter-enabled"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<JsonLinterEnabled>,
 }
 
 pub type JsonAssistEnabled = Bool<true>;
 /// Assist options specific to the JSON linter
-#[derive(
-    Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
-)]
+#[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct JsonAssistConfiguration {
     /// Control the assist for JSON (and its super languages) files.
-    #[cfg_attr(feature = "cli", bpaf(long("json-assist-enabled"), argument("true|false")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("json-assist-enabled"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<JsonAssistEnabled>,
 }

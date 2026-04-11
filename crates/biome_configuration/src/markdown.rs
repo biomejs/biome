@@ -6,14 +6,15 @@ use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
 /// Options applied to Markdown files
-#[derive(
-    Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge,
-)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct MarkdownConfiguration {
-    #[cfg_attr(feature = "cli", bpaf(external(markdown_formatter_configuration), optional, hide))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(external(markdown_formatter_configuration), optional, hide)
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub formatter: Option<MarkdownFormatterConfiguration>,
 }
@@ -24,9 +25,7 @@ pub type MarkdownAssistEnabled = Bool<true>;
 pub type MarkdownParseInterpolation = Bool<false>;
 
 /// Options that change how the Markdown formatter behaves
-#[derive(
-    Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge,
-)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]

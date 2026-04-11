@@ -10,9 +10,7 @@ use std::str::FromStr;
 pub type ExperimentalEmbeddedSnippetsEnabled = Bool<false>;
 
 /// A set of options applied to the JavaScript files
-#[derive(
-    Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
-)]
+#[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
@@ -60,9 +58,7 @@ pub type JsxEverywhere = Bool<true>;
 pub type JsGritMetavariable = Bool<false>;
 
 /// Options that changes how the JavaScript parser behaves
-#[derive(
-    Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
-)]
+#[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
@@ -83,7 +79,10 @@ pub struct JsParserConfiguration {
     /// When enabled, files like `.js`/`.mjs`/`.cjs` may contain JSX syntax.
     ///
     /// Defaults to `true`.
-    #[cfg_attr(feature = "cli", bpaf(long("jsx-everywhere"), argument("true|false"), optional))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("jsx-everywhere"), argument("true|false"), optional)
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub jsx_everywhere: Option<JsxEverywhere>,
 }
@@ -127,15 +126,16 @@ impl FromStr for JsxRuntime {
 pub type JsLinterEnabled = Bool<true>;
 
 /// Linter options specific to the JavaScript linter
-#[derive(
-    Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
-)]
+#[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct JsLinterConfiguration {
     /// Control the linter for JavaScript (and its super languages) files.
-    #[cfg_attr(feature = "cli", bpaf(long("javascript-linter-enabled"), argument("true|false")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("javascript-linter-enabled"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<JsLinterEnabled>,
 }
@@ -143,15 +143,16 @@ pub struct JsLinterConfiguration {
 pub type JsAssistEnabled = Bool<true>;
 
 /// Assist options specific to the JavaScript assist
-#[derive(
-    Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
-)]
+#[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct JsAssistConfiguration {
     /// Control the assist for JavaScript (and its super languages) files.
-    #[cfg_attr(feature = "cli", bpaf(long("javascript-assist-enabled"), argument("true|false")))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("javascript-assist-enabled"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<JsAssistEnabled>,
 }
