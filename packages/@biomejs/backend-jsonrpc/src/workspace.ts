@@ -2323,6 +2323,11 @@ See https://biomejs.dev/linter/rules/no-react-native-raw-text
 	 */
 	noReactNativeRawText?: NoReactNativeRawTextConfiguration;
 	/**
+	* Disallow string refs in React components.
+See https://biomejs.dev/linter/rules/no-react-string-refs 
+	 */
+	noReactStringRefs?: NoReactStringRefsConfiguration;
+	/**
 	* Checks if a default export exports the same symbol as a named export.
 See https://biomejs.dev/linter/rules/no-redundant-default-export 
 	 */
@@ -4415,6 +4420,9 @@ export type NoReactNativeLiteralColorsConfiguration =
 export type NoReactNativeRawTextConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReactNativeRawTextOptions;
+export type NoReactStringRefsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoReactStringRefsOptions;
 export type NoRedundantDefaultExportConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoRedundantDefaultExportOptions;
@@ -6219,6 +6227,10 @@ export interface RuleWithNoReactNativeRawTextOptions {
 	level: RulePlainConfiguration;
 	options?: NoReactNativeRawTextOptions;
 }
+export interface RuleWithNoReactStringRefsOptions {
+	level: RulePlainConfiguration;
+	options?: NoReactStringRefsOptions;
+}
 export interface RuleWithNoRedundantDefaultExportOptions {
 	level: RulePlainConfiguration;
 	options?: NoRedundantDefaultExportOptions;
@@ -7865,6 +7877,7 @@ export interface NoReactNativeRawTextOptions {
 	 */
 	skip?: string[];
 }
+export type NoReactStringRefsOptions = {};
 export type NoRedundantDefaultExportOptions = {};
 export type NoReturnAssignOptions = {};
 export interface NoRootTypeOptions {
@@ -9075,6 +9088,7 @@ export type Category =
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeDeepImports"
 	| "lint/nursery/noReactNativeRawText"
+	| "lint/nursery/noReactStringRefs"
 	| "lint/nursery/noRedundantDefaultExport"
 	| "lint/nursery/noReturnAssign"
 	| "lint/nursery/noRootType"

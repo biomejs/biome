@@ -4814,6 +4814,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoReactStringRefsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoReactStringRefsOptions" }
+			]
+		},
+		"NoReactStringRefsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoRedeclareConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6443,6 +6453,13 @@
 					"description": "Disallow raw text outside \\<Text> components in React Native.\nSee https://biomejs.dev/linter/rules/no-react-native-raw-text",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoReactNativeRawTextConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noReactStringRefs": {
+					"description": "Disallow string refs in React components.\nSee https://biomejs.dev/linter/rules/no-react-string-refs",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReactStringRefsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9492,6 +9509,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoReactSpecificPropsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoReactStringRefsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoReactStringRefsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

@@ -979,6 +979,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_react_specific_props::NoReactSpecificPropsOptions>(),
     ));
     result.push((
+        "nursery",
+        "noReactStringRefs",
+        TypeId::of::<biome_rule_options::no_react_string_refs::NoReactStringRefsOptions>(),
+    ));
+    result.push((
         "suspicious",
         "noRedeclare",
         TypeId::of::<biome_rule_options::no_redeclare::NoRedeclareOptions>(),
