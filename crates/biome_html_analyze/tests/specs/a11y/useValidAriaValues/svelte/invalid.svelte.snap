@@ -26,6 +26,8 @@ invalid.svelte:4:6 lint/a11y/useValidAriaValues ━━━━━━━━━━�
     5 │ 
     6 │ <!-- invalid tristate value -->
   
+  i Use a valid value for the aria-hidden attribute according to the WAI-ARIA specification.
+  
   i The only supported values for the aria-hidden property are:
   
   - undefined
@@ -44,6 +46,8 @@ invalid.svelte:7:7 lint/a11y/useValidAriaValues ━━━━━━━━━━�
   > 7 │ <span aria-checked="test">some text</span>
       │       ^^^^^^^^^^^^^^^^^^^
     8 │ 
+  
+  i Use a valid value for the aria-checked attribute according to the WAI-ARIA specification.
   
   i The only supported values for the aria-checked property are:
   

@@ -44,6 +44,8 @@ invalid.html:4:7 lint/a11y/useValidAriaValues ━━━━━━━━━━━�
     5 │ 
     6 │ <!-- empty string for aria-labelledby (IdReferenceList requires non-empty) -->
   
+  i Use a valid value for the aria-checked attribute according to the WAI-ARIA specification.
+  
   i The only supported values for the aria-checked property are:
   
   - false
@@ -66,6 +68,8 @@ invalid.html:7:7 lint/a11y/useValidAriaValues ━━━━━━━━━━━�
   
   i The only supported value is a space-separated list of HTML identifiers.
   
+  i Use a valid value for the aria-labelledby attribute according to the WAI-ARIA specification.
+  
 
 ```
 
@@ -82,6 +86,8 @@ invalid.html:10:7 lint/a11y/useValidAriaValues ━━━━━━━━━━━
   
   i The only supported value is a number.
   
+  i Use a valid value for the aria-valuemax attribute according to the WAI-ARIA specification.
+  
 
 ```
 
@@ -95,6 +101,8 @@ invalid.html:13:7 lint/a11y/useValidAriaValues ━━━━━━━━━━━
        │       ^^^^^^^^^^^^^^^^^^^^^^
     14 │ 
     15 │ <!-- invalid boolean for aria-hidden -->
+  
+  i Use a valid value for the aria-orientation attribute according to the WAI-ARIA specification.
   
   i The only supported value for the aria-orientation property is one of the following:
   
@@ -116,6 +124,8 @@ invalid.html:16:6 lint/a11y/useValidAriaValues ━━━━━━━━━━━
     17 │ 
     18 │ <!-- invalid tristate for aria-checked -->
   
+  i Use a valid value for the aria-hidden attribute according to the WAI-ARIA specification.
+  
   i The only supported values for the aria-hidden property are:
   
   - undefined
@@ -135,6 +145,8 @@ invalid.html:19:6 lint/a11y/useValidAriaValues ━━━━━━━━━━━
        │      ^^^^^^^^^^^^^^^^^^^^^^
     20 │ 
     21 │ <!-- case insensitive attribute name — still invalid value -->
+  
+  i Use a valid value for the aria-checked attribute according to the WAI-ARIA specification.
   
   i The only supported values for the aria-checked property are:
   
@@ -156,6 +168,8 @@ invalid.html:22:6 lint/a11y/useValidAriaValues ━━━━━━━━━━━
     23 │ 
     24 │ <!-- valueless attribute on non-boolean type — should flag (e.g. aria-orientation has no "true" token) -->
   
+  i Use a valid value for the aria-hidden attribute according to the WAI-ARIA specification.
+  
   i The only supported values for the aria-hidden property are:
   
   - undefined
@@ -174,6 +188,8 @@ invalid.html:25:7 lint/a11y/useValidAriaValues ━━━━━━━━━━━
   > 25 │ <span aria-orientation>some text</span>
        │       ^^^^^^^^^^^^^^^^
     26 │ 
+  
+  i Use a valid value for the aria-orientation attribute according to the WAI-ARIA specification.
   
   i The only supported value for the aria-orientation property is one of the following:
   

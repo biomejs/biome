@@ -155,7 +155,9 @@ impl Rule for UseValidAriaValues {
                 ["false", "true", "mixed"],
             ),
         };
-        Some(diagnostic)
+        Some(diagnostic.note(markup! {
+            "Use a valid value for the "<Emphasis>{attribute_name}</Emphasis>" attribute according to the "<Hyperlink href="https://www.w3.org/TR/wai-aria/#states_and_properties">"WAI-ARIA specification"</Hyperlink>"."
+        }))
     }
 }
 

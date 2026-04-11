@@ -28,6 +28,8 @@ invalid.vue:5:6 lint/a11y/useValidAriaValues ━━━━━━━━━━━�
     6 │ 
     7 │ <!-- invalid tristate value -->
   
+  i Use a valid value for the aria-hidden attribute according to the WAI-ARIA specification.
+  
   i The only supported values for the aria-hidden property are:
   
   - undefined
@@ -47,6 +49,8 @@ invalid.vue:8:7 lint/a11y/useValidAriaValues ━━━━━━━━━━━�
        │       ^^^^^^^^^^^^^^^^^^^
      9 │ </template>
     10 │ 
+  
+  i Use a valid value for the aria-checked attribute according to the WAI-ARIA specification.
   
   i The only supported values for the aria-checked property are:
   
