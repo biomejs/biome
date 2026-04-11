@@ -679,6 +679,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noJsxNamespace",
+        TypeId::of::<biome_rule_options::no_jsx_namespace::NoJsxNamespaceOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noJsxPropsBind",
         TypeId::of::<biome_rule_options::no_jsx_props_bind::NoJsxPropsBindOptions>(),
     ));
