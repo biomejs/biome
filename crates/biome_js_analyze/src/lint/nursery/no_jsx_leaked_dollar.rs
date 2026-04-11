@@ -4,17 +4,34 @@ use biome_analyze::{
     declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsxChild, JsSyntaxKind, JsSyntaxToken, JsxChildList, JsxText};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TextRange, TextSize};
 use biome_rule_options::no_jsx_leaked_dollar::NoJsxLeakedDollarOptions;
 
 declare_lint_rule! {
-    /// Disallows a leaked `$` sign before a JSX expression.
+    /// Disallow a trailing `$` in a text node if the next sibling node is a JSX expression.
     ///
     /// This can happen when refactoring from a template literal to JSX and forgetting
     /// to remove the dollar sign. This results in an unintentional `$` being rendered
-    /// in the output.
+    /// as text in the output.
+    ///
+    /// ```jsx
+    /// function MyComponent({ user }) {
+    ///   return `Hello ${user.name}`;
+    /// }
+    /// ```
+    ///
+    /// When refactored to JSX, it might look like this:
+    ///
+    /// ```jsx,ignore
+    /// function MyComponent({ user }) {
+    ///   return <>Hello ${user.name}</>;
+    /// }
+    /// ```
+    ///
+    /// However, the `$` before `{user.name}` is unnecessary and will be rendered as text in the output.
     ///
     /// ## Examples
     ///
@@ -53,6 +70,7 @@ declare_lint_rule! {
         language: "jsx",
         recommended: false,
         fix_kind: FixKind::Unsafe,
+        severity: Severity::Warning,
         domains: &[RuleDomain::React],
         sources: &[RuleSource::EslintReactJsx("no-leaked-dollar").same(), RuleSource::EslintReactXyz("jsx-no-leaked-dollar").same()],
     }
@@ -82,11 +100,12 @@ impl Rule for NoJsxLeakedDollar {
 
         // Exception: if the text is exactly "$" and the parent has only 2 children,
         // it looks like an intentional dollar sign (e.g. `<div>${price}</div>`).
-        if text == "$" {
-            let parent = JsxChildList::cast(node.syntax().parent()?)?;
-            if parent.len() == 2 {
-                return None;
-            }
+        if text == "$"
+            && let Some(parent) = node.syntax().parent()
+            && let Some(parent) = JsxChildList::cast(parent)
+            && parent.len() == 2
+        {
+            return None;
         }
 
         // Return the range of the trailing `$` character
@@ -105,7 +124,7 @@ impl Rule for NoJsxLeakedDollar {
                 },
             )
             .note(markup! {
-                "This "<Emphasis>"'$'"</Emphasis>" will be rendered as text. Remove it, or move it inside the expression if it is intentional."
+                "This "<Emphasis>"'$'"</Emphasis>" will be rendered as text. Remove the "<Emphasis>"'$'"</Emphasis>" from the text node or add a suppression if it is intentional."
             }),
         )
     }
