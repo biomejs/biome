@@ -6575,6 +6575,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useStringStartsEndsWith": {
+					"description": "Prefer String#startsWith() and String#endsWith() over verbose prefix and suffix checks.\nSee https://biomejs.dev/linter/rules/use-string-starts-ends-with",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseStringStartsEndsWithConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useUnicodeRegex": {
 					"description": "Enforce the use of the u or v flag for regular expressions.\nSee https://biomejs.dev/linter/rules/use-unicode-regex",
 					"anyOf": [
@@ -11325,6 +11332,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseStringStartsEndsWithOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseStringStartsEndsWithOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseSymbolDescriptionOptions": {
 			"type": "object",
 			"properties": {
@@ -14789,6 +14806,16 @@
 			]
 		},
 		"UseStrictModeOptions": { "type": "object", "additionalProperties": false },
+		"UseStringStartsEndsWithConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseStringStartsEndsWithOptions" }
+			]
+		},
+		"UseStringStartsEndsWithOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseSymbolDescriptionConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
