@@ -72,6 +72,8 @@ const obj = {
 };
 
 class Foo {
+	constructor() { }
+
 	action() {
 		'use server';
 	}

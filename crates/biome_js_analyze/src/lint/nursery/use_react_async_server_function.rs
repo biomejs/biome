@@ -3,7 +3,7 @@ use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
     declare_lint_rule,
 };
-use biome_console::{MarkupBuf, markup};
+use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyFunctionLike, AnyJsExpression, AnyJsFunction, AnyJsFunctionBody, AnyJsRoot, JsDirective,
@@ -82,7 +82,7 @@ declare_lint_rule! {
         recommended: false,
         domains: &[RuleDomain::React],
         sources: &[RuleSource::EslintReact("async-server-action").same(), RuleSource::EslintReactXyz("rsc-function-definition").same(), RuleSource::EslintReactRsc("function-definition").same()],
-        fix_kind: FixKind::Safe,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
@@ -96,7 +96,10 @@ impl Rule for UseReactAsyncServerFunction {
         let node = ctx.query();
 
         // Generator functions are ignored, matching the upstream behavior.
-        if node.is_generator() || node.is_async() {
+        if node.is_async()
+            || node.is_generator()
+            || matches!(node, AnyFunctionLike::JsConstructorClassMember(_))
+        {
             return None;
         }
 
@@ -124,12 +127,14 @@ impl Rule for UseReactAsyncServerFunction {
             RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
-                markup! { "Server function is missing the "<Emphasis>"async"</Emphasis>" keyword." },
+                markup! { "This server function is missing the "<Emphasis>"async"</Emphasis>" keyword." },
             )
-            .note(state.message())
-            .note(markup! {
-                "Add the "<Emphasis>"async"</Emphasis>" keyword to this function."
-            }),
+            .note(match state {
+                ServerFunctionKind::File =>
+                    (markup! { "Functions exported from files with the \"use server\" directive are React Server Functions and therefore must be async." }).to_owned(),
+                ServerFunctionKind::Local =>
+                    (markup! {"Functions with the \"use server\" directive are React Server Functions and therefore must be async." }).to_owned(),
+            })
         )
     }
 
@@ -237,17 +242,6 @@ impl Rule for UseReactAsyncServerFunction {
 pub enum ServerFunctionKind {
     File,
     Local,
-}
-
-impl ServerFunctionKind {
-    fn message(&self) -> MarkupBuf {
-        match self {
-            Self::File =>
-                (markup! { "Functions exported from files with the \"use server\" directive are React Server Functions and therefore must be async." }).to_owned(),
-            Self::Local =>
-                (markup! {"Functions with the \"use server\" directive are React Server Functions and therefore must be async." }).to_owned(),
-        }
-    }
 }
 
 fn make_async_token_with_space() -> biome_js_syntax::JsSyntaxToken {

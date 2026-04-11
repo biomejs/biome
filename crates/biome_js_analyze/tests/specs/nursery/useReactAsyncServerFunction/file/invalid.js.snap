@@ -23,7 +23,7 @@ export const serverFunction3 = () => {
 ```
 invalid.js:4:8 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Server function is missing the async keyword.
+  i This server function is missing the async keyword.
   
     2 │ 'use server';
     3 │ 
@@ -37,11 +37,9 @@ invalid.js:4:8 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━�
   
   i Functions exported from files with the "use server" directive are React Server Functions and therefore must be async.
   
-  i Add the async keyword to this function.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Add async keyword.
+  i Unsafe fix: Add async keyword.
   
     4 │ export·async·function·serverFunction1()·{
       │        ++++++                            
@@ -51,7 +49,7 @@ invalid.js:4:8 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━�
 ```
 invalid.js:7:32 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Server function is missing the async keyword.
+  i This server function is missing the async keyword.
   
      5 │ 	// ...
      6 │ }
@@ -65,11 +63,9 @@ invalid.js:7:32 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━�
   
   i Functions exported from files with the "use server" directive are React Server Functions and therefore must be async.
   
-  i Add the async keyword to this function.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Add async keyword.
+  i Unsafe fix: Add async keyword.
   
     7 │ export·const·serverFunction2·=·async·function·()·{
       │                                ++++++             
@@ -79,7 +75,7 @@ invalid.js:7:32 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━�
 ```
 invalid.js:10:32 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Server function is missing the async keyword.
+  i This server function is missing the async keyword.
   
      8 │ 	// ...
      9 │ }
@@ -92,11 +88,9 @@ invalid.js:10:32 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━
   
   i Functions exported from files with the "use server" directive are React Server Functions and therefore must be async.
   
-  i Add the async keyword to this function.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Add async keyword.
+  i Unsafe fix: Add async keyword.
   
     10 │ export·const·serverFunction3·=·async·()·=>·{
        │                                ++++++       

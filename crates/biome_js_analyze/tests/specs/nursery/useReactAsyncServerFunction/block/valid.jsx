@@ -184,6 +184,14 @@ const validObj2 = {
 };
 
 class Foo {
+	constructor() {
+		'use server';
+	}
+}
+
+class Foo {
+	constructor() { }
+
 	async action() {
 		'use server';
 	}
