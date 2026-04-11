@@ -254,7 +254,7 @@ declare_source_rule! {
         name: "useSortedPackageJson",
         language: "json",
         fix_kind: FixKind::Safe,
-        sources: &[RuleSource::SortPackageJson.same()],
+        sources: &[RuleSource::SortPackageJson.same(), RuleSource::EslintPackageJson("sort-collections").inspired(), RuleSource::EslintPackageJsonDependencies("alphabetically-sorted-dependencies").inspired(), RuleSource::Sherif("unordered-dependencies").inspired()],
     }
 }
 

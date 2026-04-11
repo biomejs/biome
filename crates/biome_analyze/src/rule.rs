@@ -196,6 +196,8 @@ pub enum RuleSource<'a> {
     EslintDrizzle(&'a str),
     /// Action for https://github.com/keithamus/sort-package-json
     SortPackageJson,
+    /// Rules from [Sherif](https://github.com/QuiiBz/sherif)
+    Sherif(&'a str),
 }
 
 impl<'a> std::fmt::Display for RuleSource<'a> {
@@ -254,6 +256,7 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::EslintAstro(_) => write!(f, "eslint-plugin-astro"),
             Self::EslintDrizzle(_) => write!(f, "eslint-plugin-drizzle"),
             Self::SortPackageJson => write!(f, "sort-package-json"),
+            Self::Sherif(_) => write!(f, "Sherif"),
         }
     }
 }
@@ -323,6 +326,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintAstro(_) => 46,
             Self::EslintDrizzle(_) => 47,
             Self::SortPackageJson => 48,
+            Self::Sherif(_) => 49,
         }
     }
 
@@ -389,7 +393,8 @@ impl<'a> RuleSource<'a> {
             | Self::EslintYml(rule_name)
             | Self::EslintSvelte(rule_name)
             | Self::EslintAstro(rule_name)
-            | Self::EslintDrizzle(rule_name) => rule_name,
+            | Self::EslintDrizzle(rule_name)
+            | Self::Sherif(rule_name) => rule_name,
             Self::SortPackageJson => "sort-package-json",
         }
     }
@@ -401,7 +406,8 @@ impl<'a> RuleSource<'a> {
             | Self::Eslint(_)
             | Self::GraphqlSchemaLinter(_)
             | Self::SortPackageJson
-            | Self::Stylelint(_) => "",
+            | Self::Stylelint(_)
+            | Self::Sherif(_) => "",
             Self::EslintBarrelFiles(_) => "barrel-files",
             Self::EslintGraphql(_) => "@graphql-eslint",
             Self::EslintImport(_) => "import",
@@ -507,6 +513,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintAstro(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-astro/rules/{rule_name}"),
             Self::EslintDrizzle(rule_name) => format!("https://orm.drizzle.team/docs/eslint-plugin#{rule_name}"),
             Self::SortPackageJson => "https://github.com/keithamus/sort-package-json".to_string(),
+            Self::Sherif(rule_name) => format!("https://github.com/QuiiBz/sherif#{rule_name}"),
         }
     }
 
@@ -529,6 +536,7 @@ impl<'a> RuleSource<'a> {
                 | Self::GraphqlSchemaLinter(_)
                 | Self::Stylelint(_)
                 | Self::SortPackageJson
+                | Self::Sherif(_)
         )
     }
 

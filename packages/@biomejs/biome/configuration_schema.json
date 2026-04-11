@@ -7235,6 +7235,14 @@
 			},
 			"required": ["level", "options"]
 		},
+		"RuleAssistWithUseSortedSelectionSetOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSortedSelectionSetOptions" }
+			},
+			"required": ["level", "options"]
+		},
 		"RuleAssistWithUseSortedTypeFieldsOptions": {
 			"type": "object",
 			"properties": {
@@ -11988,6 +11996,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useSortedSelectionSet": {
+					"description": "Sort GraphQL selection sets.\nSee https://biomejs.dev/assist/actions/use-sorted-selection-set",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSortedSelectionSetConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSortedTypeFields": {
 					"description": "Sort fields in GraphQL type definitions alphabetically.\nSee https://biomejs.dev/assist/actions/use-sorted-type-fields",
 					"anyOf": [
@@ -14815,6 +14830,16 @@
 			]
 		},
 		"UseSortedPropertiesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseSortedSelectionSetConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/$defs/RuleAssistWithUseSortedSelectionSetOptions" }
+			]
+		},
+		"UseSortedSelectionSetOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
