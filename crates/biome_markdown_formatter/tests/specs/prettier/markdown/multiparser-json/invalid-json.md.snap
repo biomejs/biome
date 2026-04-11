@@ -23,9 +23,7 @@ packages\the-hub\cypress\fixtures\gridConfiguration.json
 -
  ```json
  packages\the-hub\cypress\fixtures\gridConfiguration.json
--```
-+```
-\ No newline at end of file
+ ```
 ```
 
 # Output
@@ -34,4 +32,5 @@ packages\the-hub\cypress\fixtures\gridConfiguration.json
 <!-- #10333 -->
 ```json
 packages\the-hub\cypress\fixtures\gridConfiguration.json
-``````
+```
+```

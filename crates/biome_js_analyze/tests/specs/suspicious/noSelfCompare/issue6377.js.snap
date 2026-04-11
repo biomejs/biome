@@ -30,7 +30,7 @@ sum(1) !== sum(2);
 ```
 issue6377.js:14:1 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Comparing to itself is potentially pointless.
+  × This comparison uses the same expression on both sides.
   
     13 │ // True positives ✅
   > 14 │ sum(1) === sum(1);
@@ -38,13 +38,17 @@ issue6377.js:14:1 lint/suspicious/noSelfCompare ━━━━━━━━━━�
     15 │ sum(1) !== sum(1);
     16 │ 
   
+  i Self-comparisons are usually redundant or a sign that the wrong value is being compared.
+  
+  i Compare two different values instead, or use Number.isNaN() if you are checking for NaN.
+  
 
 ```
 
 ```
 issue6377.js:15:1 lint/suspicious/noSelfCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Comparing to itself is potentially pointless.
+  × This comparison uses the same expression on both sides.
   
     13 │ // True positives ✅
     14 │ sum(1) === sum(1);
@@ -52,6 +56,10 @@ issue6377.js:15:1 lint/suspicious/noSelfCompare ━━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^
     16 │ 
     17 │ // True negatives ✅
+  
+  i Self-comparisons are usually redundant or a sign that the wrong value is being compared.
+  
+  i Compare two different values instead, or use Number.isNaN() if you are checking for NaN.
   
 
 ```

@@ -1046,6 +1046,11 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::ScssInterpolatedIdentifier::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::SCSS_INTERPOLATED_IDENTIFIER_HYPHEN => {
+                    let $pattern =
+                        unsafe { $crate::ScssInterpolatedIdentifierHyphen::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::SCSS_INTERPOLATED_STRING => {
                     let $pattern = unsafe { $crate::ScssInterpolatedString::new_unchecked(node) };
                     $body

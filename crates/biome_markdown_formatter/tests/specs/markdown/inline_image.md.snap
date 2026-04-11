@@ -34,6 +34,8 @@ info: markdown/inline_image.md
 
 ![alt with `code`](image.png)
 
+![alt with `code`](<url>)
+
 ```
 
 
@@ -67,6 +69,8 @@ info: markdown/inline_image.md
 ![alt with **bold** and _italic_](image.png)
 
 ![alt with `code`](image.png)
+
+![alt with `code`](url)
 
 ```
 

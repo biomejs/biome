@@ -1220,11 +1220,17 @@ impl<'src> MarkdownLexer<'src> {
             offset += 1;
         }
 
-        // Check if followed by newline
-        if space_count >= 2
-            && let Some(next) = self.byte_at(offset)
-        {
-            return next == b'\n' || next == b'\r';
+        if space_count >= 2 {
+            // A hard line break requires 2+ spaces followed by a newline
+            // (https://spec.commonmark.org/0.31.2/#hard-line-breaks).
+            // Trailing spaces at EOF are never a valid hard line break,
+            // but they must be split from the preceding text so the
+            // formatter can strip them without idempotency issues.
+            match self.byte_at(offset) {
+                None => return true,
+                Some(b'\n' | b'\r') => return true,
+                _ => {}
+            }
         }
 
         false

@@ -159,6 +159,7 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "SVELTE_DIRECTIVE_MODIFIER",
         "SVELTE_DIRECTIVE_MODIFIER_LIST",
         "SVELTE_LITERAL",
+        "SVELTE_MEMBER_PROPERTY",
         // Vue nodes
         "VUE_DIRECTIVE",
         "VUE_DIRECTIVE_ARGUMENT",

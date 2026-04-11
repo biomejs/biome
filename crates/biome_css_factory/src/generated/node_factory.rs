@@ -3615,6 +3615,14 @@ pub fn scss_interpolated_identifier(
         [Some(SyntaxElement::Node(items.into_syntax()))],
     ))
 }
+pub fn scss_interpolated_identifier_hyphen(
+    minus_token: SyntaxToken,
+) -> ScssInterpolatedIdentifierHyphen {
+    ScssInterpolatedIdentifierHyphen::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_INTERPOLATED_IDENTIFIER_HYPHEN,
+        [Some(SyntaxElement::Token(minus_token))],
+    ))
+}
 pub fn scss_interpolated_string(
     opening_quote_token: SyntaxToken,
     parts: ScssInterpolatedStringPartList,

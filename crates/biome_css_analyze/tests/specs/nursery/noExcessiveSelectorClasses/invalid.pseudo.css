@@ -1,0 +1,5 @@
+/* should generate diagnostics */
+:is(.foo, .bar.baz) {}
+:not(.foo.bar) {}
+:has(.foo .bar) {}
+:nth-child(2n of .foo.bar) {}

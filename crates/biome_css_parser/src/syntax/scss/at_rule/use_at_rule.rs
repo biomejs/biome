@@ -104,7 +104,9 @@ fn parse_scss_use_namespace(p: &mut CssParser) -> ParsedSyntax {
 ///              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 /// ```
 ///
-/// Docs: https://sass-lang.com/documentation/at-rules/use/#configuration
+/// Docs:
+/// - https://sass-lang.com/documentation/at-rules/use/#configuration
+/// - https://sass-lang.com/documentation/at-rules/forward/#configuring-modules
 #[inline]
 pub(super) fn parse_scss_with_clause(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_scss_with_clause(p) {

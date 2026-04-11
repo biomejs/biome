@@ -8051,6 +8051,19 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssInterpolatedIdentifi
         )
     }
 }
+impl FormatRule < biome_css_syntax :: ScssInterpolatedIdentifierHyphen > for crate :: scss :: auxiliary :: interpolated_identifier_hyphen :: FormatScssInterpolatedIdentifierHyphen { type Context = CssFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_css_syntax :: ScssInterpolatedIdentifierHyphen , f : & mut CssFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_css_syntax :: ScssInterpolatedIdentifierHyphen > :: fmt (self , node , f) } }
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssInterpolatedIdentifierHyphen {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: ScssInterpolatedIdentifierHyphen , crate :: scss :: auxiliary :: interpolated_identifier_hyphen :: FormatScssInterpolatedIdentifierHyphen > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: scss :: auxiliary :: interpolated_identifier_hyphen :: FormatScssInterpolatedIdentifierHyphen :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssInterpolatedIdentifierHyphen {
+    type Format = FormatOwnedWithRule < biome_css_syntax :: ScssInterpolatedIdentifierHyphen , crate :: scss :: auxiliary :: interpolated_identifier_hyphen :: FormatScssInterpolatedIdentifierHyphen > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: scss :: auxiliary :: interpolated_identifier_hyphen :: FormatScssInterpolatedIdentifierHyphen :: default ())
+    }
+}
 impl FormatRule<biome_css_syntax::ScssInterpolatedString>
     for crate::scss::auxiliary::interpolated_string::FormatScssInterpolatedString
 {

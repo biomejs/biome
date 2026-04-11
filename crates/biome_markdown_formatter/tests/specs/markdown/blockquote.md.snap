@@ -65,7 +65,7 @@ info: markdown/blockquote.md
 
 > quote with multiple words on a single line
 
->no space after marker
+> no space after marker
 
 >  extra space after marker
 
@@ -77,17 +77,17 @@ info: markdown/blockquote.md
 >
 > second paragraph
 
->> nested quote
+> > nested quote
 
 > > nested quote with space
 
->>> triple nested
+> > > triple nested
 
 > > > triple nested with spaces
 
 > first level
->> second level
->>> third level
+> > second level
+> > > third level
 
 > quote with **bold** and _italic_
 

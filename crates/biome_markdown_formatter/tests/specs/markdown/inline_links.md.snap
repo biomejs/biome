@@ -18,6 +18,8 @@ text with [inline](link) in the middle
 
 [link with **bold**](url)
 
+[foo](<https://example.com>)
+
 ```
 
 
@@ -35,5 +37,7 @@ text with [inline](link) in the middle
 text with [inline](link) in the middle
 
 [link with **bold**](url)
+
+[foo](<https://example.com>)
 
 ```

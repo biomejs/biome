@@ -35,6 +35,9 @@ pub(crate) enum TrimMode {
     Start,
     /// Trim start and end of the list
     All,
+    /// If the first and last [MdTextual] are `<` and `>` respectively, they are trimmed.
+    /// If no link has been detected, if falls back to [Self::All]
+    AutoLinkLike,
     /// This mode works similarly to [TrimMode::All], however, text that contains
     /// words and have more than trailing/leading spaces are normalized to one
     NormalizeWords,
@@ -54,6 +57,10 @@ impl TextPrintMode {
 
     pub(crate) const fn is_normalize_words(&self) -> bool {
         matches!(self, Self::Trim(TrimMode::NormalizeWords))
+    }
+
+    pub(crate) const fn is_auto_link_like(&self) -> bool {
+        matches!(self, Self::Trim(TrimMode::AutoLinkLike))
     }
 
     pub(crate) const fn is_pristine(&self) -> bool {

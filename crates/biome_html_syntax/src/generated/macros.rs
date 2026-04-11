@@ -280,6 +280,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::SvelteLiteral::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::SVELTE_MEMBER_PROPERTY => {
+                    let $pattern = unsafe { $crate::SvelteMemberProperty::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::SVELTE_NAME => {
                     let $pattern = unsafe { $crate::SvelteName::new_unchecked(node) };
                     $body
