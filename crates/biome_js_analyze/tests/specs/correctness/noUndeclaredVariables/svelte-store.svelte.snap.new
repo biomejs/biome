@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 134
+expression: svelte-store.svelte
+---
+# Input
+```js
+<script>
+import { writable } from "svelte";
+let foo = writable(0);
+$foo = 5;
+</script>
+
+```
+
+# Diagnostics
+```
+svelte-store.svelte:4:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The $foo variable is undeclared.
+  
+    2 │ import { writable } from "svelte";
+    3 │ let foo = writable(0);
+  > 4 │ $foo = 5;
+      │ ^^^^
+    5 │ </script>
+    6 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
