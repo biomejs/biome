@@ -276,6 +276,7 @@ define_categories! {
     "lint/nursery/useJsxCurlyBraceConvention": "https://biomejs.dev/linter/rules/use-jsx-curly-brace-convention",
     "lint/nursery/useLoneAnonymousOperation": "https://biomejs.dev/linter/rules/use-lone-anonymous-operation",
     "lint/nursery/useLoneExecutableDefinition": "https://biomejs.dev/linter/rules/use-lone-executable-definition",
+    "lint/nursery/useMathMinMax": "https://biomejs.dev/linter/rules/use-math-min-max",
     "lint/nursery/useMaxParams": "https://biomejs.dev/linter/rules/use-max-params",
     "lint/nursery/useNamedCaptureGroup": "https://biomejs.dev/linter/rules/use-named-capture-group",
     "lint/nursery/useNullishCoalescing": "https://biomejs.dev/linter/rules/use-nullish-coalescing",

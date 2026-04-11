@@ -6625,6 +6625,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useMathMinMax": {
+					"description": "Prefer Math.min() and Math.max() over ternaries for simple comparisons.\nSee https://biomejs.dev/linter/rules/use-math-min-max",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseMathMinMaxConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useNamedCaptureGroup": {
 					"description": "Enforce using named capture groups in regular expression.\nSee https://biomejs.dev/linter/rules/use-named-capture-group",
 					"anyOf": [
@@ -11155,6 +11162,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseMathMinMaxOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseMathMinMaxOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseMaxParamsOptions": {
 			"type": "object",
 			"properties": {
@@ -14580,6 +14597,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseMathMinMaxConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseMathMinMaxOptions" }
+			]
+		},
+		"UseMathMinMaxOptions": { "type": "object", "additionalProperties": false },
 		"UseMaxParamsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },

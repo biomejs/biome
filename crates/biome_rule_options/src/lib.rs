@@ -403,6 +403,7 @@ pub mod use_literal_enum_members;
 pub mod use_literal_keys;
 pub mod use_lone_anonymous_operation;
 pub mod use_lone_executable_definition;
+pub mod use_math_min_max;
 pub mod use_max_params;
 pub mod use_media_caption;
 pub mod use_named_capture_group;
