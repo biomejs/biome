@@ -263,13 +263,12 @@ mod test {
 
         assert_eq!(
             migrated.to_string(),
-            concat!(
-                "{\n",
-                "  \"files\": {\n",
-                "    \"includes\":[\"**\", \"!!**/dist\"]\n",
-                "  }\n",
-                "}\n"
-            )
+            r#"{
+  "files": {
+    "includes":["**", "!!**/dist"]
+  }
+}
+"#
         );
     }
 

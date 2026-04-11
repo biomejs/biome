@@ -9,7 +9,7 @@ use biome_analyze::{
 };
 use biome_configuration::analyzer::{AnalyzerSelector, RuleSelector};
 use biome_diagnostics::Error;
-use biome_fs::{BiomePath, ConfigName};
+use biome_fs::BiomePath;
 use biome_line_index::LineIndex;
 use biome_lsp_converters::from_proto;
 use biome_rowan::{TextRange, TextSize};
@@ -34,10 +34,18 @@ use tracing::{debug, info};
 const FIX_ALL_CATEGORY: ActionCategory = ActionCategory::Source(SourceActionKind::FixAll);
 const ORGANIZE_IMPORTS_CATEGORY: ActionCategory =
     ActionCategory::Source(SourceActionKind::OrganizeImports);
-pub const CONFIG_MIGRATE_QUICKFIX_KIND: &str = "quickfix.biome.migrateConfiguration";
+const CONFIG_MIGRATE_QUICKFIX_CATEGORY: ActionCategory =
+    ActionCategory::QuickFix(Cow::Borrowed("migrateConfiguration"));
 
 fn fix_all_kind() -> CodeActionKind {
     match FIX_ALL_CATEGORY.to_str() {
+        Cow::Borrowed(kind) => CodeActionKind::from(kind),
+        Cow::Owned(kind) => CodeActionKind::from(kind),
+    }
+}
+
+fn config_migrate_kind() -> CodeActionKind {
+    match CONFIG_MIGRATE_QUICKFIX_CATEGORY.to_str() {
         Cow::Borrowed(kind) => CodeActionKind::from(kind),
         Cow::Owned(kind) => CodeActionKind::from(kind),
     }
@@ -133,7 +141,6 @@ pub(crate) fn code_actions(
         &url,
         &path,
         &doc.line_index,
-        &diagnostics,
         &filters,
         doc.project_key,
     )?;
@@ -705,47 +712,23 @@ fn fix_all(
     })))
 }
 
-fn is_biome_configuration(path: &BiomePath) -> bool {
-    path.ends_with(ConfigName::biome_json()) || path.ends_with(ConfigName::biome_jsonc())
-}
-
-fn code_action_kind_matches_filter(kind: &str, filter: &str) -> bool {
-    kind == filter
-        || kind
-            .strip_prefix(filter)
-            .is_some_and(|suffix| suffix.starts_with('.'))
-}
-
 fn config_migrate_code_action(
     session: &Session,
     url: &Uri,
     path: &BiomePath,
     line_index: &LineIndex,
-    diagnostics: &[lsp::Diagnostic],
     filters: &[&str],
     project_key: biome_service::projects::ProjectKey,
 ) -> Result<Option<CodeActionOrCommand>, Error> {
-    if !is_biome_configuration(path) {
+    if !path.is_config() {
         return Ok(None);
     }
 
     if !filters.is_empty()
         && !filters
             .iter()
-            .any(|filter| code_action_kind_matches_filter(CONFIG_MIGRATE_QUICKFIX_KIND, filter))
+            .any(|filter| CONFIG_MIGRATE_QUICKFIX_CATEGORY.matches(filter))
     {
-        return Ok(None);
-    }
-
-    let is_relevant_diagnostic = |diagnostic: &lsp::Diagnostic| {
-        diagnostic.source.as_deref() == Some("biome")
-            && matches!(
-                diagnostic.code.as_ref(),
-                Some(lsp::NumberOrString::String(code)) if code == "deserialize"
-            )
-    };
-
-    if !diagnostics.iter().any(is_relevant_diagnostic) {
         return Ok(None);
     }
 
@@ -759,12 +742,6 @@ fn config_migrate_code_action(
     else {
         return Ok(None);
     };
-
-    let relevant_diagnostics = diagnostics
-        .iter()
-        .filter(|diagnostic| is_relevant_diagnostic(diagnostic))
-        .cloned()
-        .collect();
 
     let mut changes = HashMap::new();
     changes.insert(
@@ -780,8 +757,8 @@ fn config_migrate_code_action(
 
     Ok(Some(CodeActionOrCommand::CodeAction(lsp::CodeAction {
         title: String::from("Migrate configuration file"),
-        kind: Some(CodeActionKind::new(CONFIG_MIGRATE_QUICKFIX_KIND)),
-        diagnostics: Some(relevant_diagnostics),
+        kind: Some(config_migrate_kind()),
+        diagnostics: None,
         edit: Some(lsp::WorkspaceEdit {
             changes: Some(changes),
             document_changes: None,

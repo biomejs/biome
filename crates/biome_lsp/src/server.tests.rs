@@ -12,7 +12,7 @@ use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::analyzer::assist::AssistConfiguration;
 use biome_configuration::{Configuration, FormatterConfiguration, LinterConfiguration};
 use biome_diagnostics::PrintDescription;
-use biome_fs::{BiomePath, MemoryFileSystem, TemporaryFs};
+use biome_fs::{BiomePath, ConfigName, MemoryFileSystem, TemporaryFs};
 use biome_service::workspace::{
     FileContent, GetFileContentParams, GetModuleGraphParams, GetModuleGraphResult,
     GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenFileResult, OpenProjectParams,
@@ -109,20 +109,6 @@ fn fixable_diagnostic(line: u32) -> Result<Diagnostic> {
         tags: None,
         data: None,
     })
-}
-
-fn deserialize_diagnostic(range: Range, message: impl Into<String>) -> Diagnostic {
-    Diagnostic {
-        range,
-        severity: Some(DiagnosticSeverity::ERROR),
-        code: Some(NumberOrString::String(String::from("deserialize"))),
-        code_description: None,
-        source: Some(String::from("biome")),
-        message: message.into(),
-        related_information: None,
-        tags: None,
-        data: None,
-    }
 }
 
 struct Server {
@@ -2000,71 +1986,115 @@ async fn plugin_load_error_show_message() -> Result<()> {
 
 #[tokio::test]
 async fn pull_biome_configuration_migrate_quick_fix() -> Result<()> {
-    let factory = ServerFactory::default();
-    let (service, client) = factory.create().into_inner();
-    let (stream, sink) = client.split();
-    let mut server = Server::new(service);
-
-    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
-    let reader = tokio::spawn(client_handler(stream, sink, sender));
-
-    server.initialize().await?;
-    server.initialized().await?;
-
-    let outdated_config = r#"{
+    let fs = MemoryFileSystem::default();
+    let outdated_json_config = r#"{
+  "files": {
+    "experimentalScannerIgnores": ["dist"]
+  }
+}
+"#;
+    let outdated_jsonc_config = r#"{
   // keep comment support
   "files": {
     "experimentalScannerIgnores": ["dist",],
   },
 }
 "#;
-    server
-        .open_named_document(outdated_config, uri!("biome.jsonc"), "jsonc")
-        .await?;
 
-    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
-    let diagnostics = match notification {
-        Some(ServerNotification::PublishDiagnostics(params)) => params.diagnostics,
-        other => panic!("unexpected notification: {other:?}"),
-    };
+    for file_name in ConfigName::file_names() {
+        let outdated_config = if file_name.ends_with('c') {
+            outdated_jsonc_config
+        } else {
+            outdated_json_config
+        };
+        fs.insert(to_utf8_file_path_buf(test_uri(file_name)), outdated_config);
+    }
 
-    let res: CodeActionResponse = server
-        .request(
-            "textDocument/codeAction",
-            "pull_code_actions",
-            CodeActionParams {
-                text_document: TextDocumentIdentifier {
-                    uri: uri!("biome.jsonc"),
-                },
-                range: diagnostics[0].range,
-                context: CodeActionContext {
-                    diagnostics: diagnostics.clone(),
-                    only: Some(vec![CodeActionKind::QUICKFIX]),
-                    ..Default::default()
-                },
-                work_done_progress_params: WorkDoneProgressParams {
-                    work_done_token: None,
-                },
-                partial_result_params: PartialResultParams {
-                    partial_result_token: None,
-                },
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    for file_name in ConfigName::file_names() {
+        let uri = test_uri(file_name);
+        let language_id = if file_name.ends_with('c') {
+            "jsonc"
+        } else {
+            "json"
+        };
+        let outdated_config = if file_name.ends_with('c') {
+            outdated_jsonc_config
+        } else {
+            outdated_json_config
+        };
+
+        server
+            .open_named_document(outdated_config, uri.clone(), language_id)
+            .await?;
+        let range = Range {
+            start: Position {
+                line: 1,
+                character: 2,
             },
-        )
-        .await?
-        .context("codeAction returned None")?;
+            end: Position {
+                line: 1,
+                character: 38,
+            },
+        };
+        let diagnostics = vec![create_deserialize_diagnostic(
+            range,
+            "This configuration is deprecated.",
+        )];
 
-    assert_eq!(res.len(), 1);
-    let CodeActionOrCommand::CodeAction(action) = &res[0] else {
-        panic!("expected code action");
-    };
-    assert_eq!(action.title, "Migrate configuration file");
-    assert_eq!(
-        action.kind,
-        Some(CodeActionKind::new("quickfix.biome.migrateConfiguration"))
-    );
-    assert_eq!(action.diagnostics, Some(diagnostics));
+        let res: CodeActionResponse = server
+            .request(
+                "textDocument/codeAction",
+                "pull_code_actions",
+                CodeActionParams {
+                    text_document: TextDocumentIdentifier { uri: uri.clone() },
+                    range,
+                    context: CodeActionContext {
+                        diagnostics: diagnostics.clone(),
+                        only: Some(vec![CodeActionKind::QUICKFIX]),
+                        ..Default::default()
+                    },
+                    work_done_progress_params: WorkDoneProgressParams {
+                        work_done_token: None,
+                    },
+                    partial_result_params: PartialResultParams {
+                        partial_result_token: None,
+                    },
+                },
+            )
+            .await?
+            .context("codeAction returned None")?;
 
-    server.close_document().await?;
+        assert_eq!(res.len(), 1, "expected one action for {file_name}");
+        let CodeActionOrCommand::CodeAction(action) = &res[0] else {
+            panic!("expected code action");
+        };
+        assert_eq!(action.title, "Migrate configuration file");
+        assert_eq!(
+            action.kind,
+            Some(CodeActionKind::new("quickfix.biome.migrateConfiguration"))
+        );
+        assert_eq!(action.diagnostics, None);
+
+        server
+            .notify(
+                "textDocument/didClose",
+                DidCloseTextDocumentParams {
+                    text_document: TextDocumentIdentifier { uri },
+                },
+            )
+            .await?;
+    }
 
     server.shutdown().await?;
     reader.abort();
@@ -2439,7 +2469,17 @@ async fn pull_biome_configuration_migrate_quick_fix_from_published_schema_mismat
 
 #[tokio::test]
 async fn pull_biome_configuration_migrate_quick_fix_returns_edit() -> Result<()> {
-    let factory = ServerFactory::default();
+    let fs = MemoryFileSystem::default();
+    let outdated_config = r#"{
+  // keep comment support
+  "files": {
+    "experimentalScannerIgnores": ["dist",],
+  },
+}
+"#;
+    fs.insert(to_utf8_file_path_buf(uri!("biome.jsonc")), outdated_config);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
     let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
@@ -2450,13 +2490,6 @@ async fn pull_biome_configuration_migrate_quick_fix_returns_edit() -> Result<()>
     server.initialize().await?;
     server.initialized().await?;
 
-    let outdated_config = r#"{
-  // keep comment support
-  "files": {
-    "experimentalScannerIgnores": ["dist",],
-  },
-}
-"#;
     server
         .open_named_document(outdated_config, uri!("biome.jsonc"), "jsonc")
         .await?;
@@ -2480,19 +2513,7 @@ async fn pull_biome_configuration_migrate_quick_fix_returns_edit() -> Result<()>
                     },
                 },
                 context: CodeActionContext {
-                    diagnostics: vec![deserialize_diagnostic(
-                        Range {
-                            start: Position {
-                                line: 2,
-                                character: 4,
-                            },
-                            end: Position {
-                                line: 2,
-                                character: 32,
-                            },
-                        },
-                        "This configuration is deprecated.",
-                    )],
+                    diagnostics: vec![],
                     only: Some(vec![CodeActionKind::QUICKFIX]),
                     ..Default::default()
                 },
@@ -2510,6 +2531,7 @@ async fn pull_biome_configuration_migrate_quick_fix_returns_edit() -> Result<()>
     let CodeActionOrCommand::CodeAction(action) = &res[0] else {
         panic!("expected code action");
     };
+    assert_eq!(action.diagnostics, None);
     let edit = action.edit.as_ref().context("expected workspace edit")?;
     let changes = edit.changes.as_ref().context("expected text changes")?;
     let edits = changes
@@ -2573,7 +2595,7 @@ async fn pull_biome_configuration_migrate_quick_fix_is_not_offered_for_up_to_dat
                     },
                 },
                 context: CodeActionContext {
-                    diagnostics: vec![deserialize_diagnostic(
+                    diagnostics: vec![create_deserialize_diagnostic(
                         Range {
                             start: Position {
                                 line: 0,
@@ -2651,7 +2673,7 @@ async fn pull_biome_configuration_migrate_quick_fix_is_not_offered_for_parse_err
                     },
                 },
                 context: CodeActionContext {
-                    diagnostics: vec![deserialize_diagnostic(
+                    diagnostics: vec![create_deserialize_diagnostic(
                         Range {
                             start: Position {
                                 line: 2,
@@ -6443,6 +6465,27 @@ fn assert_diagnostics_count(server_notification: &ServerNotification, expected_c
         ServerNotification::ShowMessage(_) => {
             panic!("Unexpected notification: {server_notification:?}",);
         }
+    }
+}
+
+/// Create a diagnostic with the "deserialize" code.
+fn create_deserialize_diagnostic(range: Range, message: impl Into<String>) -> Diagnostic {
+    Diagnostic {
+        range,
+        severity: Some(DiagnosticSeverity::ERROR),
+        code: Some(NumberOrString::String(String::from("deserialize"))),
+        code_description: None,
+        source: Some(String::from("biome")),
+        message: message.into(),
+        ..Default::default()
+    }
+}
+
+fn test_uri(path: &str) -> Uri {
+    if cfg!(windows) {
+        Uri::from_str(&format!("file:///z%3A/workspace/{path}")).unwrap()
+    } else {
+        Uri::from_str(&format!("file:///workspace/{path}")).unwrap()
     }
 }
 

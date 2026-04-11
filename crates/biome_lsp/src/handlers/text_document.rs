@@ -15,7 +15,8 @@ use tower_lsp_server::ls_types as lsp;
 use tracing::{debug, error, field, info, trace};
 
 fn is_biome_configuration_file(path: &Utf8PathBuf) -> bool {
-    path.ends_with(ConfigName::biome_json()) || path.ends_with(ConfigName::biome_jsonc())
+    path.file_name()
+        .is_some_and(|file_name| ConfigName::file_names().contains(&file_name))
 }
 
 /// Handler for `textDocument/didOpen` LSP notification

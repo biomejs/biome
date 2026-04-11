@@ -294,13 +294,13 @@ impl WorkspaceServer {
     }
 
     fn is_root_biome_config(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
-        path.file_name().is_some_and(|file_name| {
-            file_name == ConfigName::biome_json() || file_name == ConfigName::biome_jsonc()
-        }) && path.parent().is_some_and(|directory| {
-            self.projects
-                .get_project_path(project_key)
-                .is_some_and(|project_path| directory == project_path)
-        })
+        path.file_name()
+            .is_some_and(|file_name| ConfigName::file_names().contains(&file_name))
+            && path.parent().is_some_and(|directory| {
+                self.projects
+                    .get_project_path(project_key)
+                    .is_some_and(|project_path| directory == project_path)
+            })
     }
 
     /// Gets the supported capabilities for a given file path.
@@ -1771,9 +1771,7 @@ impl Workspace for WorkspaceServer {
         &self,
         params: MigrateConfigurationParams,
     ) -> Result<MigrateConfigurationResult, WorkspaceError> {
-        if !params.path.ends_with(ConfigName::biome_json())
-            && !params.path.ends_with(ConfigName::biome_jsonc())
-        {
+        if !params.path.is_config() {
             return Ok(MigrateConfigurationResult::default());
         }
 
