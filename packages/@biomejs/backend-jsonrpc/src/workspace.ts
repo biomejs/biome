@@ -2197,7 +2197,7 @@ See https://biomejs.dev/linter/rules/no-inline-styles
 	 */
 	noInlineStyles?: NoInlineStylesConfiguration;
 	/**
-	* Disallow a trailing $ in a text node if the next sibling node is a JSX expression.
+	* Flags text nodes with a trailing $ before a JSX expression.
 See https://biomejs.dev/linter/rules/no-jsx-leaked-dollar 
 	 */
 	noJsxLeakedDollar?: NoJsxLeakedDollarConfiguration;

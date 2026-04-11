@@ -11,7 +11,7 @@ use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TextRange, TextSize};
 use biome_rule_options::no_jsx_leaked_dollar::NoJsxLeakedDollarOptions;
 
 declare_lint_rule! {
-    /// Disallow a trailing `$` in a text node if the next sibling node is a JSX expression.
+    /// Flags text nodes with a trailing `$` before a JSX expression.
     ///
     /// This can happen when refactoring from a template literal to JSX and forgetting
     /// to remove the dollar sign. This results in an unintentional `$` being rendered

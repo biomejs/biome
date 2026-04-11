@@ -6205,7 +6205,7 @@
 					]
 				},
 				"noJsxLeakedDollar": {
-					"description": "Disallow a trailing $ in a text node if the next sibling node is a JSX expression.\nSee https://biomejs.dev/linter/rules/no-jsx-leaked-dollar",
+					"description": "Flags text nodes with a trailing $ before a JSX expression.\nSee https://biomejs.dev/linter/rules/no-jsx-leaked-dollar",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoJsxLeakedDollarConfiguration" },
 						{ "type": "null" }
