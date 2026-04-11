@@ -53,7 +53,7 @@ const Invalid5 = () => {
 ```
 invalid.jsx:5:11 lint/nursery/noJsxLeakedSemicolon  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Possible unintentional ';'.
+  ! Possible unintentional ';' after a JSX element.
   
     3 │ 	return (
     4 │ 		<div>
@@ -62,7 +62,7 @@ invalid.jsx:5:11 lint/nursery/noJsxLeakedSemicolon  FIXABLE  ━━━━━━�
     6 │ 		</div>
     7 │ 	);
   
-  i This ';' will be rendered as text. Remove it, or move it inside the expression if it is intentional.
+  i This ';' will be rendered as text. Remove the ';' from the text node or add a suppression if it is intentional.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -76,7 +76,7 @@ invalid.jsx:5:11 lint/nursery/noJsxLeakedSemicolon  FIXABLE  ━━━━━━�
 ```
 invalid.jsx:15:16 lint/nursery/noJsxLeakedSemicolon  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Possible unintentional ';'.
+  ! Possible unintentional ';' after a JSX element.
   
     13 │ 			<Component>
     14 │ 				<div />
@@ -85,7 +85,7 @@ invalid.jsx:15:16 lint/nursery/noJsxLeakedSemicolon  FIXABLE  ━━━━━━
     16 │ 		</div>
     17 │ 	);
   
-  i This ';' will be rendered as text. Remove it, or move it inside the expression if it is intentional.
+  i This ';' will be rendered as text. Remove the ';' from the text node or add a suppression if it is intentional.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -99,7 +99,7 @@ invalid.jsx:15:16 lint/nursery/noJsxLeakedSemicolon  FIXABLE  ━━━━━━
 ```
 invalid.jsx:22:16 lint/nursery/noJsxLeakedSemicolon  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Possible unintentional ';'.
+  ! Possible unintentional ';' after a JSX element.
   
     20 │ const Invalid3 = () => (
     21 │ 	<div>
@@ -108,7 +108,7 @@ invalid.jsx:22:16 lint/nursery/noJsxLeakedSemicolon  FIXABLE  ━━━━━━
     23 │ 	</div>
     24 │ )
   
-  i This ';' will be rendered as text. Remove it, or move it inside the expression if it is intentional.
+  i This ';' will be rendered as text. Remove the ';' from the text node or add a suppression if it is intentional.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -122,7 +122,7 @@ invalid.jsx:22:16 lint/nursery/noJsxLeakedSemicolon  FIXABLE  ━━━━━━
 ```
 invalid.jsx:29:11 lint/nursery/noJsxLeakedSemicolon  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Possible unintentional ';'.
+  ! Possible unintentional ';' after a JSX element.
   
     27 │ 	return (
     28 │ 		<>
@@ -131,7 +131,7 @@ invalid.jsx:29:11 lint/nursery/noJsxLeakedSemicolon  FIXABLE  ━━━━━━
     30 │ 		</>
     31 │ 	);
   
-  i This ';' will be rendered as text. Remove it, or move it inside the expression if it is intentional.
+  i This ';' will be rendered as text. Remove the ';' from the text node or add a suppression if it is intentional.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -145,7 +145,7 @@ invalid.jsx:29:11 lint/nursery/noJsxLeakedSemicolon  FIXABLE  ━━━━━━
 ```
 invalid.jsx:39:16 lint/nursery/noJsxLeakedSemicolon  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Possible unintentional ';'.
+  ! Possible unintentional ';' after a JSX element.
   
     37 │ 			<Component>
     38 │ 				<div />
@@ -154,7 +154,7 @@ invalid.jsx:39:16 lint/nursery/noJsxLeakedSemicolon  FIXABLE  ━━━━━━
     40 │ 		</>
     41 │ 	);
   
-  i This ';' will be rendered as text. Remove it, or move it inside the expression if it is intentional.
+  i This ';' will be rendered as text. Remove the ';' from the text node or add a suppression if it is intentional.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

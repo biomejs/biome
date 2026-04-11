@@ -6205,7 +6205,7 @@
 					]
 				},
 				"noJsxLeakedSemicolon": {
-					"description": "Disallows leaked semicolons in JSX text nodes.\nSee https://biomejs.dev/linter/rules/no-jsx-leaked-semicolon",
+					"description": "Flags text nodes with a leading ; after a JSX element.\nSee https://biomejs.dev/linter/rules/no-jsx-leaked-semicolon",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoJsxLeakedSemicolonConfiguration" },
 						{ "type": "null" }

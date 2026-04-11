@@ -2197,7 +2197,7 @@ See https://biomejs.dev/linter/rules/no-inline-styles
 	 */
 	noInlineStyles?: NoInlineStylesConfiguration;
 	/**
-	* Disallows leaked semicolons in JSX text nodes.
+	* Flags text nodes with a leading ; after a JSX element.
 See https://biomejs.dev/linter/rules/no-jsx-leaked-semicolon 
 	 */
 	noJsxLeakedSemicolon?: NoJsxLeakedSemicolonConfiguration;
