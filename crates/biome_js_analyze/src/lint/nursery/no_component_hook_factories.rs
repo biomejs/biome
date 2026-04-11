@@ -8,11 +8,11 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsArrowFunctionParameters, AnyJsFunction, JsAssignmentExpression, JsCallExpression,
-    JsFunctionExpression, JsInitializerClause, JsPropertyClassMember, JsPropertyObjectMember,
-    JsSyntaxNode, JsSyntaxToken,
+    AnyJsArrowFunctionParameters, AnyJsFunction, AnyJsParameter, JsAssignmentExpression,
+    JsCallExpression, JsFunctionExpression, JsInitializerClause, JsPropertyClassMember,
+    JsPropertyObjectMember, JsSyntaxNode, JsSyntaxToken,
 };
-use biome_rowan::{AstNode, declare_node_union};
+use biome_rowan::{AstNode, SyntaxResult, declare_node_union};
 use biome_rule_options::no_component_hook_factories::NoComponentHookFactoriesOptions;
 
 declare_lint_rule! {
@@ -77,7 +77,7 @@ declare_lint_rule! {
         version: "next",
         name: "noComponentHookFactories",
         language: "jsx",
-        sources: &[RuleSource::EslintReactHooks("component-hook-factories").same(), RuleSource::EslintReactX("component-hook-factories").same()],
+        sources: &[RuleSource::EslintReactHooks("component-hook-factories").same(), RuleSource::EslintReactX("component-hook-factories").same(), RuleSource::EslintReactXyz("component-hook-factories").same()],
         recommended: false,
         domains: &[RuleDomain::React],
         severity: Severity::Error,
@@ -230,45 +230,32 @@ fn find_parent_function(syntax: &JsSyntaxNode) -> Option<AnyJsFunction> {
 /// Returns `true` if the node is nested inside a `vi.mock(...)` or `jest.mock(...)`
 /// call, which are test utility calls where defining components inline is acceptable.
 fn is_inside_test_mock_callback(syntax: &JsSyntaxNode) -> bool {
-    for ancestor in syntax.ancestors().skip(1) {
-        let Some(call_expr) = JsCallExpression::cast_ref(&ancestor) else {
-            continue;
-        };
-        let Ok(callee) = call_expr.callee() else {
-            continue;
-        };
-        let Some(member) = callee.as_js_static_member_expression() else {
-            continue;
-        };
-        let Ok(method) = member.member() else {
-            continue;
-        };
-        let Some(method_name) = method.as_js_name() else {
-            continue;
-        };
-        let Ok(method_token) = method_name.value_token() else {
-            continue;
-        };
-        if method_token.text_trimmed() != "mock" {
-            continue;
-        }
-        let Ok(object) = member.object() else {
-            continue;
-        };
-        let Some(object_ident) = object
-            .as_js_identifier_expression()
-            .and_then(|e| e.name().ok())
-        else {
-            continue;
-        };
-        let Ok(object_token) = object_ident.value_token() else {
-            continue;
-        };
-        if matches!(object_token.text_trimmed(), "vi" | "jest") {
-            return true;
-        }
+    syntax
+        .ancestors()
+        .skip(1)
+        .any(|ancestor| is_test_mock_call(&ancestor).unwrap_or(false))
+}
+
+fn is_test_mock_call(ancestor: &JsSyntaxNode) -> Option<bool> {
+    let call_expr = JsCallExpression::cast_ref(ancestor)?;
+    let member = call_expr
+        .callee()
+        .ok()?
+        .as_js_static_member_expression()?
+        .clone();
+    let method_token = member.member().ok()?.as_js_name()?.value_token().ok()?;
+    if method_token.text_trimmed() != "mock" {
+        return None;
     }
-    false
+    let object_token = member
+        .object()
+        .ok()?
+        .as_js_identifier_expression()?
+        .name()
+        .ok()?
+        .value_token()
+        .ok()?;
+    Some(matches!(object_token.text_trimmed(), "vi" | "jest"))
 }
 
 /// Heuristic for Higher-Order Component detection.
@@ -285,34 +272,29 @@ fn is_hoc_like(function: &AnyJsFunction) -> bool {
         AnyJsArrowFunctionParameters::AnyJsBinding(_) => return false,
     };
 
-    for param in items {
-        let Ok(param) = param else { continue };
-        let Some(formal) = param
-            .as_any_js_formal_parameter()
-            .and_then(|p| p.as_js_formal_parameter())
-        else {
-            continue;
-        };
-        let Ok(binding_pattern) = formal.binding() else {
-            continue;
-        };
-        let Some(binding) = binding_pattern.as_any_js_binding() else {
-            continue;
-        };
-        let Some(ident) = binding.as_js_identifier_binding() else {
-            continue;
-        };
-        let Ok(name_token) = ident.name_token() else {
-            continue;
-        };
-        if name_token
+    items.into_iter().any(|param| {
+        is_pascal_case_param(param).unwrap_or(false)
+    })
+}
+
+fn is_pascal_case_param(param: SyntaxResult<AnyJsParameter>) -> Option<bool> {
+    let formal = param
+        .ok()?
+        .as_any_js_formal_parameter()?
+        .as_js_formal_parameter()?
+        .clone();
+    let name_token = formal
+        .binding()
+        .ok()?
+        .as_any_js_binding()?
+        .as_js_identifier_binding()?
+        .name_token()
+        .ok()?;
+    Some(
+        name_token
             .text_trimmed()
             .chars()
             .next()
-            .is_some_and(char::is_uppercase)
-        {
-            return true;
-        }
-    }
-    false
+            .is_some_and(char::is_uppercase),
+    )
 }
