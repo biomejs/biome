@@ -100,3 +100,30 @@ function anyReturn(): string { return JSON.parse("{}"); }
 function tupleNoConst(): [boolean, string] { return [true, "hello"]; }
 
 function ternaryExact(b: boolean): "a" | "b" { return b ? "a" : "b"; }
+
+class Greeter { greet(): string { return "hello"; } }
+const singleObj = { greet(): string { return "hello"; } };
+class ExactClass { getStatus(b: boolean): "a" | "b" { if (b) return "a"; return "b"; } }
+const exactObj = { getStatus(b: boolean): "a" | "b" { if (b) return "a"; return "b"; } };
+class GetterValid { get name(): string { return "bar"; } }
+const getterObj = { get name(): string { return "bar"; } };
+
+class AsyncSingle { async fetch(): Promise<string> { return "data"; } }
+
+// Generator methods should be skipped
+class GeneratorClass {
+    *items(): Generator<string> {
+        yield "a";
+        yield "b";
+    }
+}
+
+// Overloaded class methods should be skipped
+class OverloadedMethods {
+    getStatus(b: true): "loading";
+    getStatus(b: false): "idle";
+    getStatus(b: boolean): string {
+        if (b) return "loading";
+        return "idle";
+    }
+}

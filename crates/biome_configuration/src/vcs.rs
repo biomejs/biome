@@ -3,6 +3,7 @@ use biome_deserialize::{
     DeserializableValidator, DeserializationContext, DeserializationDiagnostic,
 };
 use biome_deserialize_macros::{Deserializable, Merge};
+#[cfg(feature = "cli")]
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
@@ -15,27 +16,32 @@ pub type VcsUseIgnoreFile = Bool<false>;
 pub type VcsEnabled = Bool<false>;
 
 /// Set of properties to integrate Biome with a VCS software.
-#[derive(
-    Clone, Debug, Deserialize, Eq, PartialEq, Serialize, Bpaf, Deserializable, Default, Merge,
-)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, Deserializable, Default, Merge)]
+#[cfg_attr(feature = "cli", derive(Bpaf))]
 #[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub struct VcsConfiguration {
     /// Whether Biome should integrate itself with the VCS client
-    #[bpaf(long("vcs-enabled"), argument("true|false"))]
+    #[cfg_attr(feature = "cli", bpaf(long("vcs-enabled"), argument("true|false")))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<VcsEnabled>,
 
     /// The kind of client.
-    #[bpaf(long("vcs-client-kind"), argument("git"), optional)]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("vcs-client-kind"), argument("git"), optional)
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[deserializable(bail_on_error)]
     pub client_kind: Option<VcsClientKind>,
 
     /// Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files
     /// specified in the ignore file.
-    #[bpaf(long("vcs-use-ignore-file"), argument("true|false"))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("vcs-use-ignore-file"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_ignore_file: Option<VcsUseIgnoreFile>,
 
@@ -45,12 +51,15 @@ pub struct VcsConfiguration {
     /// If Biome can't find the configuration, it will attempt to use the current working directory.
     /// If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic
     /// will be emitted
-    #[bpaf(long("vcs-root"), argument("PATH"), optional)]
+    #[cfg_attr(feature = "cli", bpaf(long("vcs-root"), argument("PATH"), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub root: Option<String>,
 
     /// The main branch of the project
-    #[bpaf(long("vcs-default-branch"), argument("BRANCH"), optional)]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("vcs-default-branch"), argument("BRANCH"), optional)
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub default_branch: Option<String>,
 }

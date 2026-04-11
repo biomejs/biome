@@ -281,6 +281,21 @@ impl Type {
         })
     }
 
+    /// Looks up a named member in the resolved type data and returns
+    /// its type with the correct module context applied.
+    pub fn find_member_type(&self, name: &str) -> Option<Self> {
+        self.resolved_data()
+            .and_then(|data| {
+                data.find_member(self.resolver.as_ref(), |m| {
+                    m.as_raw_member().kind.has_name(name)
+                })
+            })
+            .and_then(|member| {
+                let ty_ref = member.ty();
+                self.resolve(&ty_ref)
+            })
+    }
+
     pub fn resolve(&self, ty: &TypeReference) -> Option<Self> {
         self.resolver
             .resolve_reference(&self.id.apply_module_id_to_reference(ty))

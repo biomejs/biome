@@ -9,3 +9,5 @@
 text with [inline](link) in the middle
 
 [link with **bold**](url)
+
+[foo](<https://example.com>)

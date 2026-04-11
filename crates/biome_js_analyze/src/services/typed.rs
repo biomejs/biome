@@ -4,8 +4,8 @@ use biome_analyze::{
 };
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsRoot, JsLanguage, JsReferenceIdentifier,
-    JsSyntaxNode,
+    AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsRoot, JsClassDeclaration, JsClassExpression,
+    JsLanguage, JsObjectExpression, JsReferenceIdentifier, JsSyntaxNode,
 };
 use biome_js_type_info::Type;
 use biome_module_graph::ModuleResolver;
@@ -67,6 +67,42 @@ impl TypedService {
                 self.type_of_expression(&AnyJsExpression::JsFunctionExpression(expr.clone()))
             }
         }
+    }
+
+    /// Returns the [`Type`] for a class/object member by navigating to the
+    /// parent and looking up the member by name.
+    pub fn type_of_member(&self, member_syntax: &JsSyntaxNode, member_name: &str) -> Type {
+        let parent_type = member_syntax
+            .ancestors()
+            .find_map(|ancestor| {
+                if let Some(class) = JsClassDeclaration::cast(ancestor.clone()) {
+                    return class
+                        .id()
+                        .ok()
+                        .and_then(|id| id.as_js_identifier_binding().cloned())
+                        .and_then(|id| id.name_token().ok())
+                        .map(|name| {
+                            let trimmed = name.token_text_trimmed();
+                            self.type_of_named_value(name.text_trimmed_range(), trimmed.text())
+                        });
+                }
+                if let Some(class_expr) = JsClassExpression::cast(ancestor.clone()) {
+                    return Some(
+                        self.type_of_expression(&AnyJsExpression::JsClassExpression(class_expr)),
+                    );
+                }
+                if let Some(obj_expr) = JsObjectExpression::cast(ancestor.clone()) {
+                    return Some(
+                        self.type_of_expression(&AnyJsExpression::JsObjectExpression(obj_expr)),
+                    );
+                }
+                None
+            })
+            .unwrap_or_default();
+
+        parent_type
+            .find_member_type(member_name)
+            .unwrap_or_default()
     }
 
     pub fn has_binding(&self, reference: &JsReferenceIdentifier) -> bool {

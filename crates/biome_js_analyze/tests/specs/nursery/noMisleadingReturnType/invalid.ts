@@ -47,3 +47,17 @@ function angleBracketConst(): string { return <const>"hello"; }
 function tupleWiden(): [string, number] { return ["hello", 42] as const; }
 
 function ternaryWiden(b: boolean): string { return b ? "a" : "b"; }
+
+class StatusClass { getStatus(b: boolean): string { if (b) return "loading"; return "idle"; } }
+
+const modeObj = { getMode(b: boolean): string { if (b) return "dark"; return "light"; } };
+
+class CodeClass { getCode(b: boolean): number { if (b) return 200; return 404; } }
+
+const codeObj = { getCode(b: boolean): number { if (b) return 200; return 404; } };
+
+class GetterClass { get code(): number { if (Math.random() > 0.5) return 200; return 404; } }
+
+const getterObj = { get code(): number { if (Math.random() > 0.5) return 200; return 404; } };
+
+class AsyncMethod { async getStatus(b: boolean): Promise<string> { if (b) return "loading"; return "idle"; } }

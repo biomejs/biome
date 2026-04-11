@@ -1,6 +1,8 @@
 use crate::prelude::*;
 use biome_formatter::write;
-use biome_markdown_syntax::{MarkdownSyntaxKind, MdInlineItalic, MdInlineItalicFields};
+use biome_markdown_syntax::{
+    MarkdownSyntaxKind, MdInlineItalic, MdInlineItalicFields, MdReferenceImage,
+};
 use biome_rowan::AstNode;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdInlineItalic;
@@ -29,6 +31,18 @@ impl FormatNodeRule<MdInlineItalic> for FormatMdInlineItalic {
             return format_verbatim_node(node.syntax()).fmt(f);
         }
 
+        // Inside reference images the alt text doubles as the reference label.
+        // Normalizing `*` → `_` would change the label and break reference resolution.
+        // E.g. `![foo *bar*]` with `[foo *bar*]: url` must keep `*`.
+        if node
+            .syntax()
+            .ancestors()
+            .skip(1)
+            .any(|a| MdReferenceImage::can_cast(a.kind()))
+        {
+            return write!(f, [l_fence.format(), content.format(), r_fence.format()]);
+        }
+
         let prev_is_alphanum = l_fence
             .prev_token()
             .and_then(|t| t.text_trimmed().chars().last())
@@ -39,7 +53,7 @@ impl FormatNodeRule<MdInlineItalic> for FormatMdInlineItalic {
             .is_some_and(|c| c.is_alphanumeric());
 
         // See https://spec.commonmark.org/0.31.2/#emphasis-and-strong-emphasis
-        // Prefer `_` but use `*` when adjacent to alphanumeric
+        // Prefer `_` but use `*` when adjacent to alphanumeric,
         // For example, `a_b_c` won't parse `b` as italic, but `a*b*c` will).
         let target_kind = if prev_is_alphanum || next_is_alphanum {
             MarkdownSyntaxKind::STAR

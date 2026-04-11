@@ -20,7 +20,7 @@ path = "src/main.rs"
 [dependencies]
 anyhow                   = { workspace = true }
 biome_analyze            = { workspace = true }
-biome_configuration      = { workspace = true }
+biome_configuration      = { workspace = true, features = ["cli"] }
 biome_console            = { workspace = true }
 biome_css_analyze        = { workspace = true }
 biome_css_syntax         = { workspace = true }

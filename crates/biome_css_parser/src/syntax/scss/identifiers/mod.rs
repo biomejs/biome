@@ -12,7 +12,7 @@ pub(crate) use interpolated_identifier::{
     is_at_scss_interpolated_identifier, is_nth_at_scss_interpolated_identifier,
 };
 pub(crate) use interpolated_regular::{
-    parse_scss_interpolated_identifier, parse_scss_regular_interpolation,
+    parse_scss_identifier_or_interpolation, parse_scss_interpolated_identifier,
 };
 pub(crate) use interpolated_selector::{
     parse_scss_selector_custom_interpolated_identifier, parse_scss_selector_interpolated_identifier,

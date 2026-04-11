@@ -321,6 +321,9 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "ScssImportAtRule" => lang::ScssImportAtRule::KIND_SET.iter().next(),
         "ScssIncludeAtRule" => lang::ScssIncludeAtRule::KIND_SET.iter().next(),
         "ScssInterpolatedIdentifier" => lang::ScssInterpolatedIdentifier::KIND_SET.iter().next(),
+        "ScssInterpolatedIdentifierHyphen" => lang::ScssInterpolatedIdentifierHyphen::KIND_SET
+            .iter()
+            .next(),
         "ScssInterpolatedString" => lang::ScssInterpolatedString::KIND_SET.iter().next(),
         "ScssInterpolation" => lang::ScssInterpolation::KIND_SET.iter().next(),
         "ScssKeywordArgument" => lang::ScssKeywordArgument::KIND_SET.iter().next(),
