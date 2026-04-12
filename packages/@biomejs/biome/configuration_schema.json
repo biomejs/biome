@@ -130,7 +130,7 @@
 					]
 				},
 				"noLabelWithoutControl": {
-					"description": "Enforce that a label element or component has a text label and an associated input.\nSee https://biomejs.dev/linter/rules/no-label-without-control",
+					"description": "Enforce that a label element has a text label and an associated control.\nSee https://biomejs.dev/linter/rules/no-label-without-control",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoLabelWithoutControlConfiguration" },
 						{ "type": "null" }

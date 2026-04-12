@@ -1313,7 +1313,7 @@ See https://biomejs.dev/linter/rules/no-interactive-element-to-noninteractive-ro
 	 */
 	noInteractiveElementToNoninteractiveRole?: NoInteractiveElementToNoninteractiveRoleConfiguration;
 	/**
-	* Enforce that a label element or component has a text label and an associated input.
+	* Enforce that a label element has a text label and an associated control.
 See https://biomejs.dev/linter/rules/no-label-without-control 
 	 */
 	noLabelWithoutControl?: NoLabelWithoutControlConfiguration;
