@@ -863,17 +863,19 @@ fn is_quote_blank_line_after_newline(p: &mut MarkdownParser, quote_depth: usize)
 }
 
 fn is_quote_blank_line_from_current(p: &mut MarkdownParser, quote_depth: usize) -> bool {
-    if is_quote_only_blank_line_from_source(p, quote_depth) {
-        return true;
-    }
-    if !has_quote_prefix(p, quote_depth) {
-        return false;
-    }
-    consume_quote_prefix_without_virtual(p, quote_depth);
-    while p.at(MD_TEXTUAL_LITERAL) && p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
-        p.bump(MD_TEXTUAL_LITERAL);
-    }
-    p.at(NEWLINE) || p.at(T![EOF])
+    p.lookahead(|p| {
+        if is_quote_only_blank_line_from_source(p, quote_depth) {
+            return true;
+        }
+        if !has_quote_prefix(p, quote_depth) {
+            return false;
+        }
+        consume_quote_prefix_without_virtual(p, quote_depth);
+        while p.at(MD_TEXTUAL_LITERAL) && p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
+            p.bump(MD_TEXTUAL_LITERAL);
+        }
+        p.at(NEWLINE) || p.at(T![EOF])
+    })
 }
 
 /// Returns `true` when the quote prefix signals a block break (setext
