@@ -439,24 +439,42 @@ impl Visit for SuggestionsVisitor {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+    use biome_diagnostics::Location;
+
     #[test]
-    fn path_normalization_converts_backslashes() {
-        let windows_path = r"typescript\src\account\setup-passkey.tsx";
-        let normalized = windows_path.replace('\\', "/");
-        assert_eq!(normalized, "typescript/src/account/setup-passkey.tsx");
+    fn to_location_normalizes_backslashes() {
+        let location = Location::builder()
+            .resource(&r"typescript\src\account\setup-passkey.tsx")
+            .span(&(0..5))
+            .source_code(&"hello")
+            .build();
+
+        let report = to_location(&location).expect("expected LocationReport");
+        assert_eq!(report.path, "typescript/src/account/setup-passkey.tsx");
     }
 
     #[test]
-    fn path_normalization_preserves_unix_paths() {
-        let unix_path = "typescript/src/account/setup-passkey.tsx";
-        let normalized = unix_path.replace('\\', "/");
-        assert_eq!(normalized, unix_path);
+    fn to_location_preserves_unix_paths() {
+        let location = Location::builder()
+            .resource(&"typescript/src/account/setup-passkey.tsx")
+            .span(&(0..5))
+            .source_code(&"hello")
+            .build();
+
+        let report = to_location(&location).expect("expected LocationReport");
+        assert_eq!(report.path, "typescript/src/account/setup-passkey.tsx");
     }
 
     #[test]
-    fn path_normalization_handles_mixed_separators() {
-        let mixed_path = r"src\components/Button\index.tsx";
-        let normalized = mixed_path.replace('\\', "/");
-        assert_eq!(normalized, "src/components/Button/index.tsx");
+    fn to_location_handles_mixed_separators() {
+        let location = Location::builder()
+            .resource(&r"src\components/Button\index.tsx")
+            .span(&(0..5))
+            .source_code(&"hello")
+            .build();
+
+        let report = to_location(&location).expect("expected LocationReport");
+        assert_eq!(report.path, "src/components/Button/index.tsx");
     }
 }
