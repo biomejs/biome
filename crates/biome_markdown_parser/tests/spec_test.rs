@@ -575,4 +575,3 @@ fn fuzz_code_after_list_not_absorbed() {
         "<ul>\n<li>one</li>\n<li>two</li>\n</ul>\n<pre><code>code here\n</code></pre>\n",
     );
 }
-
