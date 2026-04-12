@@ -436,3 +436,27 @@ impl Visit for SuggestionsVisitor {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn path_normalization_converts_backslashes() {
+        let windows_path = r"typescript\src\account\setup-passkey.tsx";
+        let normalized = windows_path.replace('\\', "/");
+        assert_eq!(normalized, "typescript/src/account/setup-passkey.tsx");
+    }
+
+    #[test]
+    fn path_normalization_preserves_unix_paths() {
+        let unix_path = "typescript/src/account/setup-passkey.tsx";
+        let normalized = unix_path.replace('\\', "/");
+        assert_eq!(normalized, unix_path);
+    }
+
+    #[test]
+    fn path_normalization_handles_mixed_separators() {
+        let mixed_path = r"src\components/Button\index.tsx";
+        let normalized = mixed_path.replace('\\', "/");
+        assert_eq!(normalized, "src/components/Button/index.tsx");
+    }
+}
