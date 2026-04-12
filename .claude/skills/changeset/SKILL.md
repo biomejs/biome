@@ -25,6 +25,8 @@ Note that the file will *not* be literally empty. It will have this content:
 ---
 ```
 
+Do not simply append to the changeset description below the existing content, which creates an invalid changeset.
+
 > Requires `pnpm` — run `pnpm i` from repo root first.
 
 ## Choose the Correct Change Type

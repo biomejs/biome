@@ -7,6 +7,7 @@ test.skip("foo", () => {});
 test.only("foo", () => {});
 test.concurrent("foo", () => {});
 test.each([])(foo, () => {});
+test.for([])("foo", () => {});
 xtest("foo", () => {});
 fit("foo", () => {});
 

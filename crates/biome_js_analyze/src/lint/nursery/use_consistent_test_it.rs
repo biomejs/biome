@@ -373,8 +373,7 @@ fn rename_base_identifier(
     mutation: &mut BatchMutation<JsLanguage>,
 ) -> Option<()> {
     let base = get_base_identifier(callee)?;
-    let new_ref = make::js_reference_identifier(make::ident(new_name.as_str()));
-    mutation.replace_element(base.into(), new_ref.into());
+    mutation.replace_token(base, make::ident(new_name.as_str()));
     Some(())
 }
 
