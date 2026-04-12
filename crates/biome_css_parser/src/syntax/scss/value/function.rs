@@ -66,6 +66,17 @@ pub(crate) fn is_at_scss_interpolated_function_or_value(p: &mut CssParser) -> bo
     is_at_scss_interpolation(p) || is_at_identifier_with_interpolation_suffix(p)
 }
 
+/// Returns true when the current interpolation-containing identifier shape is
+/// immediately followed by `(`.
+///
+/// This uses lexer-backed interpolation-aware lookahead so the SCSS parser can
+/// distinguish `#{foo}` from `#{foo}(...)` and `foo#{1 + 1}` from
+/// `foo#{1 + 1}(...)` without reimplementing that shape check in parser code.
+#[inline]
+pub(crate) fn is_at_scss_interpolated_function(p: &mut CssParser) -> bool {
+    is_at_scss_interpolated_function_or_value(p) && p.source().is_at_scss_interpolated_function()
+}
+
 /// Parses an SCSS interpolation-led value and upgrades it to a function call
 /// when the interpolation-shaped name is followed by `(`.
 ///
@@ -96,6 +107,8 @@ pub(crate) fn parse_scss_interpolated_function_or_value(p: &mut CssParser) -> Pa
     };
 
     let name = if name.kind(p) == SCSS_INTERPOLATION && p.at(T!['(']) {
+        // A bare interpolation such as `#{foo}(...)` still needs to become an
+        // interpolated identifier node before we wrap it in `CSS_FUNCTION`.
         let list = name
             .precede(p)
             .complete(p, SCSS_INTERPOLATED_IDENTIFIER_PART_LIST);
