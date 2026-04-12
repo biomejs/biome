@@ -298,7 +298,7 @@ fn to_json_report(diagnostic: &biome_diagnostics::Error) -> JsonReport {
     let location = to_location(&location).or_else(|| {
         let location = location
             .resource
-            .and_then(|location| location.as_file().map(|f| f.to_string()))?;
+            .and_then(|location| location.as_file().map(|f| f.to_string().replace('\\', "/")))?;
         Some(LocationReport {
             path: location,
             start: LocationSpan { column: 0, line: 0 },
