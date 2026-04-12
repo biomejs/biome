@@ -760,6 +760,8 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             let css_services = CssAnalyzerServices {
                 semantic_model: None,
                 file_source,
+                module_graph: Some(params.module_graph.clone()),
+                project_layout: Some(params.project_layout.clone()),
             };
 
             let mut pending_actions = Vec::new();
@@ -861,6 +863,8 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         let css_services = CssAnalyzerServices {
             semantic_model: None,
             file_source,
+            module_graph: Some(params.module_graph.clone()),
+            project_layout: Some(params.project_layout.clone()),
         };
 
         let (_, _) = analyze(

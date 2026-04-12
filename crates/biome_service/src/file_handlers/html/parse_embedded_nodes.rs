@@ -113,7 +113,8 @@ pub(crate) fn parse_embedded_nodes(
                 // Astro directives: class:list={...}, define:vars={...}, etc.
                 if let Some(directive) = AnyAstroDirective::cast_ref(&element)
                     && let Some(initializer) = directive.initializer()
-                    && let Some(candidate) = build_attribute_expression_candidate(&initializer)
+                    && let Some(candidate) =
+                        build_attribute_expression_candidate(&initializer, true)
                 {
                     ctx.parse_and_push(&candidate, &doc_file_source, None, &mut nodes);
                 }
@@ -121,7 +122,13 @@ pub(crate) fn parse_embedded_nodes(
                 // Plain HTML attributes with expression values: class={expr}, id={expr}, etc.
                 if let Some(attr) = HtmlAttribute::cast_ref(&element)
                     && let Some(initializer) = attr.initializer()
-                    && let Some(candidate) = build_attribute_expression_candidate(&initializer)
+                    && let Some(candidate) = build_attribute_expression_candidate(
+                        &initializer,
+                        attr.name()
+                            .ok()
+                            .and_then(|name| name.value_token().ok())
+                            .is_some_and(|token| token.text_trimmed() == "class"),
+                    )
                 {
                     ctx.parse_and_push(&candidate, &doc_file_source, None, &mut nodes);
                 }
@@ -295,7 +302,13 @@ pub(crate) fn parse_embedded_nodes(
 
                 if let Some(attr) = HtmlAttribute::cast_ref(&element)
                     && let Some(initializer) = attr.initializer()
-                    && let Some(candidate) = build_attribute_expression_candidate(&initializer)
+                    && let Some(candidate) = build_attribute_expression_candidate(
+                        &initializer,
+                        attr.name()
+                            .ok()
+                            .and_then(|name| name.value_token().ok())
+                            .is_some_and(|token| token.text_trimmed() == "class"),
+                    )
                 {
                     ctx.parse_and_push(
                         &candidate,
@@ -521,7 +534,7 @@ fn parse_svelte_blocks(
 fn build_svelte_directive_candidate(
     initializer: &HtmlAttributeInitializerClause,
 ) -> Option<EmbedCandidate> {
-    build_attribute_expression_candidate(initializer)
+    build_attribute_expression_candidate(initializer, false)
 }
 
 /// Build an `EmbedCandidate::Directive` from an initializer clause containing
@@ -531,6 +544,7 @@ fn build_svelte_directive_candidate(
 /// Returns `None` if the initializer does not contain a text expression.
 fn build_attribute_expression_candidate(
     initializer: &HtmlAttributeInitializerClause,
+    is_class_attribute: bool,
 ) -> Option<EmbedCandidate> {
     let value_node = initializer.value().ok()?;
     let text_expression = value_node.as_html_attribute_single_text_expression()?;
@@ -545,6 +559,7 @@ fn build_attribute_expression_candidate(
             text: content_token.token_text(),
         },
         is_event_handler: false,
+        is_class_attribute,
     })
 }
 
@@ -619,6 +634,7 @@ fn build_vue_directive_candidate(
             text: inner_text,
         },
         is_event_handler,
+        is_class_attribute: false,
     })
 }
 
@@ -773,8 +789,10 @@ fn parse_matched_embed(
             // Configure EmbeddingKind based on framework + candidate type
             let is_source_level = match candidate {
                 EmbedCandidate::Frontmatter { .. } => {
-                    js_source =
-                        js_source.with_embedding_kind(EmbeddingKind::Astro { frontmatter: true });
+                    js_source = js_source.with_embedding_kind(EmbeddingKind::Astro {
+                        frontmatter: true,
+                        is_class_attribute: false,
+                    });
                     true
                 }
                 EmbedCandidate::Element { .. } => {
@@ -798,8 +816,10 @@ fn parse_matched_embed(
                         js_source = efs;
                     }
                     if ctx.host_file_source.is_astro() {
-                        js_source = js_source
-                            .with_embedding_kind(EmbeddingKind::Astro { frontmatter: false });
+                        js_source = js_source.with_embedding_kind(EmbeddingKind::Astro {
+                            frontmatter: false,
+                            is_class_attribute: false,
+                        });
                     } else if ctx.host_file_source.is_svelte() {
                         js_source = js_source
                             .with_embedding_kind(EmbeddingKind::Svelte { is_source: false });
@@ -814,7 +834,9 @@ fn parse_matched_embed(
                     false
                 }
                 EmbedCandidate::Directive {
-                    is_event_handler, ..
+                    is_event_handler,
+                    is_class_attribute,
+                    ..
                 } => {
                     // Use embedded_file_source as base if available (Vue/Svelte pass 2+)
                     if let Some(efs) = embedded_file_source {
@@ -823,8 +845,10 @@ fn parse_matched_embed(
                     match ctx.host_file_source.variant() {
                         HtmlVariant::Standard(_) => {}
                         HtmlVariant::Astro => {
-                            js_source = js_source
-                                .with_embedding_kind(EmbeddingKind::Astro { frontmatter: false });
+                            js_source = js_source.with_embedding_kind(EmbeddingKind::Astro {
+                                frontmatter: false,
+                                is_class_attribute: *is_class_attribute,
+                            });
                         }
                         HtmlVariant::Vue => {
                             js_source = js_source.with_embedding_kind(EmbeddingKind::Vue {

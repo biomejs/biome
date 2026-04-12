@@ -834,8 +834,11 @@ fn no_undeclared_classes_reports_unknown_class() {
             enabled_rules: vec![],
             project_key,
             categories: Default::default(),
-            pull_code_actions: false,
+            include_code_fix: false,
             inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
         })
         .unwrap();
 
@@ -894,8 +897,11 @@ fn no_undeclared_classes_passes_when_class_is_defined() {
             enabled_rules: vec![],
             project_key,
             categories: Default::default(),
-            pull_code_actions: false,
+            include_code_fix: false,
             inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
         })
         .unwrap();
 
@@ -948,8 +954,11 @@ fn no_undeclared_classes_silent_without_style_info() {
             enabled_rules: vec![],
             project_key,
             categories: Default::default(),
-            pull_code_actions: false,
+            include_code_fix: false,
             inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
         })
         .unwrap();
 
@@ -1002,8 +1011,11 @@ fn no_undeclared_classes_reports_only_undeclared_in_multi_class() {
             enabled_rules: vec![],
             project_key,
             categories: Default::default(),
-            pull_code_actions: false,
+            include_code_fix: false,
             inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
         })
         .unwrap();
 
@@ -1057,8 +1069,11 @@ fn no_unused_classes_reports_unreferenced_class() {
             enabled_rules: vec![],
             project_key,
             categories: Default::default(),
-            pull_code_actions: false,
+            include_code_fix: false,
             inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
         })
         .unwrap();
 
@@ -1118,8 +1133,11 @@ fn no_unused_classes_passes_when_class_is_referenced_in_jsx() {
             enabled_rules: vec![],
             project_key,
             categories: Default::default(),
-            pull_code_actions: false,
+            include_code_fix: false,
             inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
         })
         .unwrap();
 
@@ -1173,8 +1191,11 @@ fn no_unused_classes_reports_only_unreferenced_classes() {
             enabled_rules: vec![],
             project_key,
             categories: Default::default(),
-            pull_code_actions: false,
+            include_code_fix: false,
             inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
         })
         .unwrap();
 
@@ -1247,8 +1268,11 @@ fn no_unused_classes_passes_with_transitive_css_import() {
                 enabled_rules: vec![],
                 project_key,
                 categories: Default::default(),
-                pull_code_actions: false,
+                include_code_fix: false,
                 inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: Severity::Hint,
+                enforce_assist: false,
             })
             .unwrap();
 

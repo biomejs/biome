@@ -81,7 +81,10 @@ pub struct FormatterConfiguration {
     /// interpolations. Spaces are not added before the opening delimiter, and empty delimiters
     /// are not affected. Only applies when the content fits on a single line. The specific
     /// delimiters affected depend on the language. Defaults to false.
-    #[bpaf(long("delimiter-spacing"), argument("true|false"))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("delimiter-spacing"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub delimiter_spacing: Option<DelimiterSpacing>,
 

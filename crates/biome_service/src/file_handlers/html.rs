@@ -742,10 +742,19 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     if matches!(params.fix_file_mode, FixFileMode::ApplySuppressions) {
         loop {
             let mut pending_actions = Vec::new();
+            let html_services = HtmlAnalyzerServices {
+                module_graph: Some(params.module_graph.clone()),
+                project_layout: Some(params.project_layout.clone()),
+            };
 
-            let (_, _) = analyze(&tree, filter, &analyzer_options, source_type, |signal| {
-                process_fix_all.collect_signal(signal, &mut pending_actions)
-            });
+            let (_, _) = analyze(
+                &tree,
+                filter,
+                &analyzer_options,
+                source_type,
+                html_services,
+                |signal| process_fix_all.collect_signal(signal, &mut pending_actions),
+            );
 
             let result = process_fix_all.process_batch_actions(pending_actions, |root| {
                 tree = match HtmlRoot::cast(root) {
@@ -791,12 +800,17 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
 
     loop {
         let mut pending_actions = Vec::new();
+        let html_services = HtmlAnalyzerServices {
+            module_graph: Some(params.module_graph.clone()),
+            project_layout: Some(params.project_layout.clone()),
+        };
 
         let (_, _) = analyze(
             &tree,
             fixable_filter,
             &analyzer_options,
             source_type,
+            html_services,
             |signal| process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions),
         );
 
@@ -815,9 +829,18 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
 
     // Phase 2: all rules for final diagnostics
     {
-        let (_, _) = analyze(&tree, filter, &analyzer_options, source_type, |signal| {
-            process_fix_all.collect_diagnostic_only(signal)
-        });
+        let html_services = HtmlAnalyzerServices {
+            module_graph: Some(params.module_graph.clone()),
+            project_layout: Some(params.project_layout.clone()),
+        };
+        let (_, _) = analyze(
+            &tree,
+            filter,
+            &analyzer_options,
+            source_type,
+            html_services,
+            |signal| process_fix_all.collect_diagnostic_only(signal),
+        );
     }
 
     process_fix_all.finish(

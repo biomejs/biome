@@ -182,7 +182,10 @@ pub struct OverrideFormatterConfiguration {
     /// are not affected. Only applies when the content fits on a single line. The specific
     /// delimiters affected depend on the language. Defaults to false.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(long("delimiter-spacing"), argument("true|false"))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("delimiter-spacing"), argument("true|false"))
+    )]
     pub delimiter_spacing: Option<DelimiterSpacing>,
 
     /// Whether to expand arrays and objects on multiple lines.

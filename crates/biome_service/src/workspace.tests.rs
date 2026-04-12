@@ -953,8 +953,11 @@ fn correctly_scope_plugin_with_includes() {
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: Vec::new(),
-                pull_code_actions: true,
+                include_code_fix: true,
                 inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: Severity::Hint,
+                enforce_assist: false,
             })
             .unwrap();
 

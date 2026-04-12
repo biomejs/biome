@@ -371,6 +371,8 @@ pub(crate) trait CommandRunner {
                                 .map(|path| CrawlPath::Path(path.clone()))
                                 .collect(),
                             collector,
+                            execution.get_max_diagnostics(cli_options),
+                            cli_options.diagnostic_level,
                         )?;
 
                         Self::Finalizer::before_finalize(project_key, fs, workspace, &mut output)?;
