@@ -1080,6 +1080,7 @@ pub(crate) fn parse_inline_item_list(p: &mut MarkdownParser) {
     }
     let inline_start: usize = p.cur_range().start().into();
     let mut has_content = false;
+    let mut after_hard_break = false;
 
     loop {
         // EOF ends inline content
@@ -1089,6 +1090,13 @@ pub(crate) fn parse_inline_item_list(p: &mut MarkdownParser) {
 
         // NEWLINE handling: check for blank line (paragraph boundary)
         if p.at(NEWLINE) {
+            // After MD_HARD_LINE, a following bare NEWLINE is the blank-line separator.
+            // Container continuations do not appear as bare NEWLINE here: they start
+            // with quote/list continuation tokens first, so this only fires for
+            // paragraph breaks.
+            if after_hard_break {
+                break;
+            }
             if matches!(
                 handle_inline_newline(p, has_content),
                 InlineNewlineAction::Break
@@ -1134,14 +1142,11 @@ pub(crate) fn parse_inline_item_list(p: &mut MarkdownParser) {
         if parsed.is_absent() {
             break;
         }
-        let after_hard_break = matches!(&parsed, Present(cm) if cm.kind(p) == MD_HARD_LINE);
+        after_hard_break = matches!(&parsed, Present(cm) if cm.kind(p) == MD_HARD_LINE);
 
         // Per CommonMark §6.7: after a hard line break, leading spaces on the
         // next line are ignored. Consume as whitespace trivia (structural).
-        if after_hard_break
-            && p.at(MD_TEXTUAL_LITERAL)
-            && p.cur_text().chars().all(|c| c == ' ' || c == '\t')
-        {
+        if after_hard_break {
             while p.at(MD_TEXTUAL_LITERAL) && p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
                 p.consume_as_whitespace_trivia();
             }
