@@ -418,12 +418,10 @@ pub fn quick_test() {
         "<ul>\n<li>bar</li>\n</ul>\n<ul>\n<li>item</li>\n</ul>\n",
     );
     // Reduce: thematic break in list then different marker
-    // NOTE: `- ---` is a pre-existing Biome bug where it parses as a top-level
-    // thematic break instead of a list item containing <hr />.
     test_example(
         30013,
         "- ---\n\n+ item\n",
-        "<hr />\n<ul>\n<li>item</li>\n</ul>\n",
+        "<ul>\n<li>\n<hr />\n</li>\n</ul>\n<ul>\n<li>item</li>\n</ul>\n",
     );
     // Reduce: setext heading in list then different marker
     test_example(
@@ -459,6 +457,38 @@ pub fn quick_test() {
         "- outer\n  - nested\n  lazy line\nhello\n",
         "<ul>\n<li>outer\n<ul>\n<li>nested\nlazy line\nhello</li>\n</ul>\n</li>\n</ul>\n",
     );
+
+    // #region Thematic break vs list item precedence
+    //
+    // When a bullet marker + space leaves content that is itself a valid
+    // thematic break (3+ consecutive matching chars), the list item wins.
+    // When removing the marker leaves spaced or < 3 chars, it stays a break.
+
+    // `- ---` → list item containing <hr /> (3 consecutive dashes after `- `)
+    test_example(30020, "- ---\n", "<ul>\n<li>\n<hr />\n</li>\n</ul>\n");
+    // `* ***` → list item containing <hr /> (3 consecutive stars after `* `)
+    test_example(30021, "* ***\n", "<ul>\n<li>\n<hr />\n</li>\n</ul>\n");
+    // `+ ___` → list item containing <hr /> (3 consecutive underscores after `+ `)
+    test_example(30022, "+ ___\n", "<ul>\n<li>\n<hr />\n</li>\n</ul>\n");
+    // `- ---` with following content and marker change
+    test_example(
+        30023,
+        "- ---\n\n+ item\n",
+        "<ul>\n<li>\n<hr />\n</li>\n</ul>\n<ul>\n<li>item</li>\n</ul>\n",
+    );
+
+    // These remain thematic breaks — removing the marker leaves spaced or < 3 chars.
+    // `- - -` → thematic break (payload `- -` has internal spaces)
+    test_example(30024, "- - -\n", "<hr />\n");
+    // `* * *` → thematic break (payload `* *` has internal spaces)
+    test_example(30025, "* * *\n", "<hr />\n");
+    // Plain `---` → thematic break (no list marker prefix)
+    test_example(30026, "---\n", "<hr />\n");
+    // `***` → thematic break
+    test_example(30027, "***\n", "<hr />\n");
+    // `___` → thematic break (underscore is not a bullet marker)
+    test_example(30028, "___\n", "<hr />\n");
+    // #endregion
 }
 
 fn fuzz_test_example(num: u32, input: &str, expected: &str) {
@@ -492,16 +522,12 @@ fn fuzz_mixed_markers_paragraph() {
     );
 }
 
-/// NOTE: `- ---` is parsed by Biome as a top-level thematic break rather than
-/// a list item containing `<hr />`. This is a separate pre-existing bug
-/// (thematic break precedence over list marker) unrelated to the mixed-marker
-/// list-split fix. The expected value here matches Biome's current behavior.
 #[test]
 fn fuzz_mixed_markers_thematic_break() {
     fuzz_test_example(
         3,
         "- ---\n\n+ item\n",
-        "<hr />\n<ul>\n<li>item</li>\n</ul>\n",
+        "<ul>\n<li>\n<hr />\n</li>\n</ul>\n<ul>\n<li>item</li>\n</ul>\n",
     );
 }
 
@@ -549,3 +575,4 @@ fn fuzz_code_after_list_not_absorbed() {
         "<ul>\n<li>one</li>\n<li>two</li>\n</ul>\n<pre><code>code here\n</code></pre>\n",
     );
 }
+

@@ -58,7 +58,9 @@ use quote::{
     at_quote, consume_quote_prefix, consume_quote_prefix_without_virtual, has_quote_prefix,
     line_has_quote_prefix_at_current, parse_quote,
 };
-use thematic_break_block::{at_thematic_break_block, parse_thematic_break_block};
+use thematic_break_block::{
+    at_thematic_break_block, parse_thematic_break_block, thematic_break_hides_list_item,
+};
 
 use crate::MarkdownParser;
 
@@ -289,17 +291,29 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
     } else if line_starts_with_fence(p) {
         parse_fenced_code_block_force(p)
     } else if at_thematic_break_block(p) {
-        let break_block = try_parse(p, |p| {
-            let break_block = parse_thematic_break_block(p);
-            if break_block.is_absent() {
-                return Err(());
-            }
-            Ok(break_block)
-        });
-        if let Ok(parsed) = break_block {
-            parsed
+        // Per CommonMark §5.2 / §4.1: when the thematic break token starts with
+        // a bullet marker + space and the remaining content is itself a valid
+        // thematic break (3+ chars), the list item interpretation wins.
+        // E.g. `- ---` → list item containing <hr />,
+        //   but `- - -` → thematic break (only 2 chars after marker).
+        let is_hidden_list_item =
+            p.at(MD_THEMATIC_BREAK_LITERAL) && thematic_break_hides_list_item(p.cur_text());
+        if is_hidden_list_item {
+            p.force_relex_thematic_break_parts();
+            parse_bullet_list_item(p)
         } else {
-            parse_paragraph(p)
+            let break_block = try_parse(p, |p| {
+                let break_block = parse_thematic_break_block(p);
+                if break_block.is_absent() {
+                    return Err(());
+                }
+                Ok(break_block)
+            });
+            if let Ok(parsed) = break_block {
+                parsed
+            } else {
+                parse_paragraph(p)
+            }
         }
     } else if at_header(p) {
         // Check for too many hashes BEFORE try_parse (which would lose diagnostics on rewind)

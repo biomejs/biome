@@ -42,6 +42,47 @@ pub(crate) fn at_thematic_break_block(p: &mut MarkdownParser) -> bool {
     })
 }
 
+/// Check if a `MD_THEMATIC_BREAK_LITERAL` token text should actually be parsed
+/// as a bullet list item whose content is a thematic break.
+///
+/// Returns `true` when the text can be split as:
+///   `bullet_marker` + `space/tab` + `consecutive_thematic_break`
+///
+/// The payload must be a CONSECUTIVE run of 3+ matching break characters
+/// with no internal spaces. This distinguishes:
+///   `- ---` → list item (payload `---` is consecutive)
+///   `- - -` → thematic break (payload `- -` has internal spaces)
+///   `- - - -` → thematic break (payload `- - -` has internal spaces)
+///
+/// Only bullet markers (`-`, `*`, `+`) are checked — ordered list markers
+/// cannot collide with thematic break characters.
+pub(crate) fn thematic_break_hides_list_item(text: &str) -> bool {
+    let bytes = text.as_bytes();
+    // Need at least: marker (1) + space (1) + 3 break chars = 5 bytes
+    if bytes.len() < 5 {
+        return false;
+    }
+    if !matches!(bytes[0], b'-' | b'*' | b'+') {
+        return false;
+    }
+    if !matches!(bytes[1], b' ' | b'\t') {
+        return false;
+    }
+
+    // The payload (after marker + space) must be 3+ consecutive matching
+    // break characters, optionally followed by trailing whitespace only.
+    let payload = text[2..].trim_end_matches([' ', '\t']);
+    let payload_bytes = payload.as_bytes();
+    if payload_bytes.len() < THEMATIC_BREAK_MIN_CHARS {
+        return false;
+    }
+    let break_char = payload_bytes[0];
+    if !matches!(break_char, b'-' | b'*' | b'_') {
+        return false;
+    }
+    payload_bytes.iter().all(|&b| b == break_char)
+}
+
 /// Check if the remaining content forms a thematic break pattern.
 ///
 /// Per CommonMark §4.1, a thematic break is 3 or more matching characters
