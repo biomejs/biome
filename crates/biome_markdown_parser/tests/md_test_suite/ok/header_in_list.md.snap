@@ -144,12 +144,16 @@ MdDocument {
                         },
                     ],
                 },
-                MdNewline {
-                    value_token: NEWLINE@39..40 "\n" [] [],
-                },
-                MdNewline {
-                    value_token: NEWLINE@40..41 "\n" [] [],
-                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@39..40 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@40..41 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
                 MdBullet {
                     prefix: MdListMarkerPrefix {
                         pre_marker_indent: MdIndentTokenList [],
@@ -175,14 +179,18 @@ MdDocument {
                             },
                             after: MdHashList [],
                         },
-                        MdNewline {
-                            value_token: NEWLINE@54..55 "\n" [] [],
-                        },
                     ],
                 },
-                MdNewline {
-                    value_token: NEWLINE@55..56 "\n" [] [],
-                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@54..55 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@55..56 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
                 MdBullet {
                     prefix: MdListMarkerPrefix {
                         pre_marker_indent: MdIndentTokenList [],
@@ -330,8 +338,8 @@ MdDocument {
 0: MD_DOCUMENT@0..138
   0: (empty)
   1: MD_BLOCK_LIST@0..138
-    0: MD_BULLET_LIST_ITEM@0..93
-      0: MD_BULLET_LIST@0..93
+    0: MD_BULLET_LIST_ITEM@0..39
+      0: MD_BULLET_LIST@0..39
         0: MD_BULLET@0..8
           0: MD_LIST_MARKER_PREFIX@0..2
             0: MD_INDENT_TOKEN_LIST@0..0
@@ -405,17 +413,19 @@ MdDocument {
                     0: MD_TEXTUAL_LITERAL@31..39 " Level 2" [] []
                 1: (empty)
               3: MD_HASH_LIST@39..39
-        3: MD_NEWLINE@39..40
-          0: NEWLINE@39..40 "\n" [] []
-        4: MD_NEWLINE@40..41
-          0: NEWLINE@40..41 "\n" [] []
-        5: MD_BULLET@41..55
+    1: MD_NEWLINE@39..40
+      0: NEWLINE@39..40 "\n" [] []
+    2: MD_NEWLINE@40..41
+      0: NEWLINE@40..41 "\n" [] []
+    3: MD_BULLET_LIST_ITEM@41..54
+      0: MD_BULLET_LIST@41..54
+        0: MD_BULLET@41..54
           0: MD_LIST_MARKER_PREFIX@41..43
             0: MD_INDENT_TOKEN_LIST@41..41
             1: STAR@41..42 "*" [] []
             2: MD_LIST_POST_MARKER_SPACE@42..43 " " [] []
             3: MD_INDENT_TOKEN_LIST@43..43
-          1: MD_BLOCK_LIST@43..55
+          1: MD_BLOCK_LIST@43..54
             0: MD_HEADER@43..54
               0: MD_INDENT_TOKEN_LIST@43..43
               1: MD_HASH_LIST@43..46
@@ -427,11 +437,13 @@ MdDocument {
                     0: MD_TEXTUAL_LITERAL@46..54 " Level 3" [] []
                 1: (empty)
               3: MD_HASH_LIST@54..54
-            1: MD_NEWLINE@54..55
-              0: NEWLINE@54..55 "\n" [] []
-        6: MD_NEWLINE@55..56
-          0: NEWLINE@55..56 "\n" [] []
-        7: MD_BULLET@56..73
+    4: MD_NEWLINE@54..55
+      0: NEWLINE@54..55 "\n" [] []
+    5: MD_NEWLINE@55..56
+      0: NEWLINE@55..56 "\n" [] []
+    6: MD_BULLET_LIST_ITEM@56..93
+      0: MD_BULLET_LIST@56..93
+        0: MD_BULLET@56..73
           0: MD_LIST_MARKER_PREFIX@56..58
             0: MD_INDENT_TOKEN_LIST@56..56
             1: MINUS@56..57 "-" [] []
@@ -451,9 +463,9 @@ MdDocument {
               3: MD_HASH_LIST@72..72
             1: MD_NEWLINE@72..73
               0: NEWLINE@72..73 "\n" [] []
-        8: MD_NEWLINE@73..74
+        1: MD_NEWLINE@73..74
           0: NEWLINE@73..74 "\n" [] []
-        9: MD_BULLET@74..93
+        2: MD_BULLET@74..93
           0: MD_LIST_MARKER_PREFIX@74..76
             0: MD_INDENT_TOKEN_LIST@74..74
             1: MINUS@74..75 "-" [] []
@@ -473,11 +485,11 @@ MdDocument {
               3: MD_HASH_LIST@91..93
                 0: MD_HASH@91..93
                   0: HASH@91..93 "#" [Whitespace(" ")] []
-    1: MD_NEWLINE@93..94
+    7: MD_NEWLINE@93..94
       0: NEWLINE@93..94 "\n" [] []
-    2: MD_NEWLINE@94..95
+    8: MD_NEWLINE@94..95
       0: NEWLINE@94..95 "\n" [] []
-    3: MD_ORDERED_LIST_ITEM@95..137
+    9: MD_ORDERED_LIST_ITEM@95..137
       0: MD_BULLET_LIST@95..137
         0: MD_BULLET@95..116
           0: MD_LIST_MARKER_PREFIX@95..98
@@ -517,7 +529,7 @@ MdDocument {
                     0: MD_TEXTUAL_LITERAL@121..137 " Ordered level 2" [] []
                 1: (empty)
               3: MD_HASH_LIST@137..137
-    4: MD_NEWLINE@137..138
+    10: MD_NEWLINE@137..138
       0: NEWLINE@137..138 "\n" [] []
   2: EOF@138..138 "" [] []
 
