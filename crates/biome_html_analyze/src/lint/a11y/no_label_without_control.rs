@@ -8,8 +8,7 @@ use biome_rowan::AstNode;
 use biome_rule_options::no_label_without_control::NoLabelWithoutControlOptions;
 
 use crate::a11y::{
-    has_accessible_name, html_element_has_truthy_aria_hidden,
-    html_self_closing_element_has_accessible_name,
+    has_non_empty_attribute, html_element_has_truthy_aria_hidden,
     html_self_closing_element_has_non_empty_attribute,
 };
 
@@ -82,7 +81,7 @@ declare_lint_rule! {
         version: "next",
         name: "noLabelWithoutControl",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("label-has-associated-control").same()],
+        sources: &[RuleSource::EslintJsxA11y("label-has-associated-control").inspired()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -158,11 +157,17 @@ impl Rule for NoLabelWithoutControl {
     }
 }
 
-/// Returns `true` if the element has an accessible label: either via an aria-label/
-/// aria-labelledby attribute or via non-empty text content.
+/// Returns `true` if the element has an accessible label: either via an explicit
+/// `aria-label`/`aria-labelledby` attribute or via non-empty text content.
+///
+/// Note: `title` is intentionally excluded here. While `title` can provide an
+/// accessible name for some elements, it is not a reliable substitute for visible
+/// label text on a `<label>` element.
 fn element_has_accessible_label(element: &AnyHtmlElement) -> bool {
-    // Check aria-label / aria-labelledby / title on the element itself
-    if has_accessible_name(element) {
+    // Check aria-label / aria-labelledby on the element itself (title excluded)
+    if has_non_empty_attribute(element, "aria-label")
+        || has_non_empty_attribute(element, "aria-labelledby")
+    {
         return true;
     }
 
@@ -190,14 +195,16 @@ fn has_accessible_text_in_children(children: &HtmlElementList) -> bool {
             has_accessible_text_in_children(&element.children())
         }
         AnyHtmlElement::HtmlSelfClosingElement(element) => {
-            // A self-closing img with a non-empty alt attribute contributes accessible text
+            // Only an img with a non-empty alt attribute contributes accessible text.
+            // Other self-closing elements (input, br, etc.) do not provide label text
+            // even if they carry aria-label/title — those attributes describe the control,
+            // not the label's own text content.
             if let Some(tag_name) = element.tag_name() {
                 if tag_name.text().eq_ignore_ascii_case("img") {
                     return html_self_closing_element_has_non_empty_attribute(element, "alt");
                 }
             }
-            // Other self-closing elements with an accessible name (aria-label, etc.)
-            html_self_closing_element_has_accessible_name(element)
+            false
         }
         AnyHtmlElement::HtmlBogusElement(_) | AnyHtmlElement::HtmlCdataSection(_) => false,
     })
@@ -216,9 +223,12 @@ fn is_non_empty_text(content: &AnyHtmlContent) -> bool {
     }
 }
 
-/// Returns `true` if the element has a `for` attribute (HTML only, not `htmlFor`).
+/// Returns `true` if the element has a `for` attribute with a non-empty, non-whitespace value.
+///
+/// A `for=""` or `for="   "` attribute is treated as unassociated — an empty value cannot
+/// reference any control's DOM ID.
 fn element_has_for_attribute(element: &AnyHtmlElement) -> bool {
-    element.find_attribute_by_name("for").is_some()
+    has_non_empty_attribute(element, "for")
 }
 
 /// Returns `true` if the element has a nested control element

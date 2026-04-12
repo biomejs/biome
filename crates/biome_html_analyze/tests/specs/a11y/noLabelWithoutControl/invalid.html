@@ -20,3 +20,9 @@
 
 <!-- Whitespace-only text is not accessible -->
 <label>   <input /></label>
+
+<!-- Empty `for` attribute cannot reference any control -->
+<label for="">A label</label>
+
+<!-- Whitespace-only `for` attribute is also unassociated -->
+<label for="   ">A label</label>
