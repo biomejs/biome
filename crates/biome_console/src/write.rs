@@ -1,4 +1,5 @@
 mod html;
+mod stdio;
 mod string;
 mod termcolor;
 
@@ -6,6 +7,10 @@ use std::{fmt, io};
 
 use crate::fmt::MarkupElements;
 
+#[cfg(not(unix))]
+pub(crate) use self::stdio::write_to_color_writer;
+#[cfg(unix)]
+pub(crate) use self::stdio::write_to_std_stream;
 pub use self::{html::HTML, string::StringBuffer, termcolor::Termcolor};
 
 pub trait Write {

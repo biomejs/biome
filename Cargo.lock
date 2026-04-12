@@ -302,6 +302,7 @@ version = "0.5.7"
 dependencies = [
  "biome_markup",
  "biome_text_size",
+ "libc",
  "schemars",
  "serde",
  "termcolor",

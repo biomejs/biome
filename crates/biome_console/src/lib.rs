@@ -1,10 +1,10 @@
 #![deny(clippy::use_self)]
 
 use std::io;
-use std::io::{IsTerminal, Read, Write};
+use std::io::{IsTerminal, Read};
 use std::panic::RefUnwindSafe;
-use termcolor::{ColorChoice, StandardStream};
-use write::{StringBuffer, Termcolor};
+use termcolor::{ColorChoice, StandardStream, WriteColor};
+use write::StringBuffer;
 
 pub mod fmt;
 mod markup;
@@ -149,29 +149,61 @@ impl Default for EnvConsole {
 
 impl Console for EnvConsole {
     fn println(&mut self, level: LogLevel, args: Markup) {
+        #[cfg(unix)]
+        let result = match level {
+            LogLevel::Error => write::write_to_std_stream(
+                io::stderr().lock(),
+                self.err.supports_color(),
+                args,
+                true,
+            ),
+            LogLevel::Log => write::write_to_std_stream(
+                io::stdout().lock(),
+                self.out.supports_color(),
+                args,
+                true,
+            ),
+        };
+
+        #[cfg(not(unix))]
         let mut out = match level {
             LogLevel::Error => self.err.lock(),
             LogLevel::Log => self.out.lock(),
         };
 
-        fmt::Formatter::new(&mut Termcolor(&mut out))
-            .write_markup(args)
-            .unwrap();
+        #[cfg(not(unix))]
+        let result = write::write_to_color_writer(&mut out, args, true);
 
-        writeln!(out).unwrap();
+        let _ = result;
     }
 
     fn print(&mut self, level: LogLevel, args: Markup) {
+        #[cfg(unix)]
+        let result = match level {
+            LogLevel::Error => write::write_to_std_stream(
+                io::stderr().lock(),
+                self.err.supports_color(),
+                args,
+                false,
+            ),
+            LogLevel::Log => write::write_to_std_stream(
+                io::stdout().lock(),
+                self.out.supports_color(),
+                args,
+                false,
+            ),
+        };
+
+        #[cfg(not(unix))]
         let mut out = match level {
             LogLevel::Error => self.err.lock(),
             LogLevel::Log => self.out.lock(),
         };
 
-        fmt::Formatter::new(&mut Termcolor(&mut out))
-            .write_markup(args)
-            .unwrap();
+        #[cfg(not(unix))]
+        let result = write::write_to_color_writer(&mut out, args, false);
 
-        write!(out, "").unwrap();
+        let _ = result;
     }
 
     fn read(&mut self) -> Option<String> {

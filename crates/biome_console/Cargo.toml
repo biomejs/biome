@@ -16,6 +16,7 @@ publish              = true
 [dependencies]
 biome_markup         = { workspace = true }
 biome_text_size      = { workspace = true }
+libc                 = { workspace = true }
 schemars             = { workspace = true, optional = true }
 serde                = { workspace = true, features = ["derive"], optional = true }
 termcolor            = { workspace = true }
