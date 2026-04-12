@@ -26,3 +26,9 @@
 
 <!-- Whitespace-only `for` attribute is also unassociated -->
 <label for="   ">A label</label>
+
+<!-- img with empty alt does not contribute accessible text -->
+<label for="x"><img alt="" /></label>
+
+<!-- img with whitespace-only alt does not contribute accessible text -->
+<label for="x"><img alt="   " /></label>

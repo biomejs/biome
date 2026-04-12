@@ -1,0 +1,16 @@
+<!-- should not generate diagnostics -->
+
+<!-- Basic valid: for + text -->
+<label for="js_id">A label</label>
+
+<!-- aria-label as accessible text -->
+<label for="js_id" aria-label="A label"></label>
+
+<!-- Wraps a textarea with text content -->
+<label>A label<textarea></textarea></label>
+
+<!-- Svelte expression counts as accessible text -->
+<label>{labelText}<input /></label>
+
+<!-- PascalCase <Label> is a custom component — ignored entirely -->
+<Label></Label>

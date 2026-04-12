@@ -1,0 +1,13 @@
+<!-- should not generate diagnostics -->
+
+<!-- Basic valid: for + text -->
+<label for="js_id">A label</label>
+
+<!-- aria-labelledby as accessible text -->
+<label for="js_id" aria-labelledby="some-id"></label>
+
+<!-- Wraps a select with text content -->
+<label>A label<select><option>opt</option></select></label>
+
+<!-- PascalCase <Label> is a custom component — ignored entirely -->
+<Label></Label>

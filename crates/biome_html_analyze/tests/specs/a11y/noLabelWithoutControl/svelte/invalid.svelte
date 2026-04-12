@@ -1,0 +1,13 @@
+<!-- should generate diagnostics -->
+
+<!-- Empty label: no text, no control -->
+<label></label>
+
+<!-- Has text but no control association -->
+<label>A label</label>
+
+<!-- Has for attribute but no accessible text -->
+<label for="js_id"></label>
+
+<!-- Uppercase <INPUT> is NOT matched as a control in Svelte (case-sensitive) -->
+<label>A label<INPUT /></label>
