@@ -3,6 +3,7 @@ color:red;
 }
 
 .#{$name}-bar,
+.#{$name}-#{$second},
 .foo-#{$i},
 .foo-#{$name}-bar,
 .foo-#{$name}#{$state},
@@ -12,6 +13,7 @@ color:red;
 #app-#{$slot},
 ##{$id},
 #{$type},
+#{$type}-#{$state},
 |#{$type},
 *|#{$type},
 ns|#{$type},

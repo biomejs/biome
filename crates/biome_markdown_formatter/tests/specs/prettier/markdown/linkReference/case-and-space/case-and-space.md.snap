@@ -34,7 +34,7 @@ info: markdown/linkReference/case-and-space/case-and-space.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,14 +1,14 @@
+@@ -1,10 +1,10 @@
  # `linkReference`
  
 -[ See `AsyncGeneratorFunction` ][ See `AsyncGeneratorFunction` ]
@@ -46,11 +46,6 @@ info: markdown/linkReference/case-and-space/case-and-space.md
 +![   See   `AsyncGeneratorFunction`   ][   See   `AsyncGeneratorFunction`   ]
  
  # `definition`
- 
--[ See `AsyncGeneratorFunction` ]: ./index.html
-+[   See   `AsyncGeneratorFunction`   ]: ./index.html
- 
- # `footnoteReference`
  
 ```
 
@@ -67,7 +62,7 @@ info: markdown/linkReference/case-and-space/case-and-space.md
 
 # `definition`
 
-[   See   `AsyncGeneratorFunction`   ]: ./index.html
+[ See `AsyncGeneratorFunction` ]: ./index.html
 
 # `footnoteReference`
 

@@ -283,6 +283,11 @@ fn has_for_attribute(jsx_tag: &AnyJsxTag) -> bool {
                 }
             })
             .is_some_and(|jsx_name| for_attributes.contains(&jsx_name.text_trimmed())),
+        AnyJsxAttribute::JsxShorthandAttribute(attribute) => attribute
+            .name()
+            .ok()
+            .and_then(|name| name.value_token().ok())
+            .is_some_and(|name| for_attributes.contains(&name.text_trimmed())),
         AnyJsxAttribute::JsxSpreadAttribute(_) | AnyJsxAttribute::JsMetavariable(_) => false,
     })
 }

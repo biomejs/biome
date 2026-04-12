@@ -8,3 +8,4 @@ pub(crate) mod block_item;
 pub(crate) mod destructured_name;
 pub(crate) mod directive;
 pub(crate) mod each_name;
+pub(crate) mod member_object;

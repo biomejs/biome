@@ -205,7 +205,7 @@ where
 #[cfg(test)]
 mod tests {
     use crate::{AnalysisFilter, ControlFlow, CssAnalyzerServices, analyze};
-    use biome_analyze::{AnalyzerOptions, Never, RuleCategoriesBuilder, RuleFilter};
+    use biome_analyze::{ActionFilter, AnalyzerOptions, Never, RuleCategoriesBuilder, RuleFilter};
     use biome_console::fmt::{Formatter, Termcolor};
     use biome_console::{Markup, markup};
     use biome_css_parser::{CssParserOptions, parse_css};
@@ -281,7 +281,7 @@ mod tests {
                     eprintln!("{text}");
                 }
 
-                for action in signal.actions() {
+                for action in signal.actions(ActionFilter::all()) {
                     let new_code = action.mutation.commit();
                     eprintln!("{new_code}");
                 }

@@ -1,7 +1,7 @@
 use crate::runner::crawler::CrawlerContext;
 use crate::runner::diagnostics::PanicDiagnostic;
 use crate::runner::process_file::{FileStatus, ProcessFile};
-use biome_diagnostics::{DiagnosticExt, DiagnosticTags, category};
+use biome_diagnostics::{DiagnosticExt, DiagnosticTags, Severity, category};
 use biome_fs::{BiomePath, FileSystem, TraversalContext};
 use biome_service::file_handlers::DocumentFileSource;
 use biome_service::workspace::{
@@ -107,15 +107,20 @@ pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
     /// This function wraps the [process_file] function implementing the traversal
     /// in a [catch_unwind] block and emit diagnostics in case of error (either the
     /// traversal function returns Err or panics)
-    fn handle_path<P, Ctx>(&self, biome_path: &BiomePath, ctx: &Ctx)
-    where
+    fn handle_path<P, Ctx>(
+        &self,
+        biome_path: &BiomePath,
+        max_diagnostics: u32,
+        diagnostic_level: Severity,
+        ctx: &Ctx,
+    ) where
         Ctx: CrawlerContext + std::panic::RefUnwindSafe,
         P: ProcessFile + std::panic::RefUnwindSafe,
     {
         // ProcessFile::process_file is generic over Ctx: TraversalContext
         // We pass &Ctx which should also implement TraversalContext
 
-        match catch_unwind(move || P::execute(ctx, biome_path)) {
+        match catch_unwind(move || P::execute(ctx, biome_path, max_diagnostics, diagnostic_level)) {
             Ok(Ok(FileStatus::Changed)) => {
                 ctx.increment_changed(biome_path);
             }

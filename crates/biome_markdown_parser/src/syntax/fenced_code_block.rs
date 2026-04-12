@@ -23,6 +23,7 @@
 //! that can be used for syntax highlighting.
 
 use crate::parser::MarkdownParser;
+use crate::token_source::find_line_start;
 use biome_markdown_syntax::{T, kind::MarkdownSyntaxKind::*};
 use biome_parser::{
     Parser,
@@ -105,26 +106,6 @@ fn bump_fence(p: &mut MarkdownParser, is_tilde_fence: bool) {
         p.bump(T!["```"]);
     } else {
         p.bump_remap(T!["```"]);
-    }
-}
-
-/// Find the start position of the current line in the source text.
-///
-/// Given a slice of text before the current position, finds the byte offset
-/// where the current line begins (after the last newline, handling CRLF).
-fn find_line_start(before: &str) -> usize {
-    let last_newline_pos = before.rfind(['\n', '\r']);
-    match last_newline_pos {
-        Some(pos) => {
-            let bytes = before.as_bytes();
-            // Handle CRLF: if we found \r and next char is \n, skip both
-            if bytes.get(pos) == Some(&b'\r') && bytes.get(pos + 1) == Some(&b'\n') {
-                pos + 2
-            } else {
-                pos + 1
-            }
-        }
-        None => 0,
     }
 }
 
@@ -227,10 +208,10 @@ fn parse_fenced_code_block_impl(p: &mut MarkdownParser, force: bool) -> ParsedSy
     let has_closing = at_closing_fence(p, is_tilde_fence, fence_len);
 
     if has_closing {
-        // Closing fence indent: in a list context, strip up to list_item_required_indent;
-        // otherwise strip up to MAX_BLOCK_PREFIX_INDENT (0-3 spaces).
+        // Closing fence indent: strip list continuation indent plus the
+        // CommonMark-allowed 0-3 spaces before the fence itself.
         let max = if p.state().list_item_required_indent > 0 {
-            p.state().list_item_required_indent
+            p.state().list_item_required_indent + MAX_BLOCK_PREFIX_INDENT
         } else {
             MAX_BLOCK_PREFIX_INDENT
         };
@@ -531,8 +512,19 @@ fn line_has_closing_fence(p: &MarkdownParser, is_tilde_fence: bool, fence_len: u
         return false;
     };
 
+    // Use virtual_line_start only when it's on the same line as the
+    // current position (e.g., after a blockquote prefix). A stale
+    // virtual_line_start from the opening fence line would point to
+    // a completely different line and break closing fence detection.
     let line_start: usize = match p.state().virtual_line_start {
-        Some(virtual_start) => virtual_start.into(),
+        Some(virtual_start) => {
+            let vs: usize = virtual_start.into();
+            if vs <= start && !source[vs..start].contains(['\n', '\r']) {
+                vs
+            } else {
+                find_line_start(&source[..start])
+            }
+        }
         None => find_line_start(&source[..start]),
     };
 
@@ -549,7 +541,7 @@ fn line_has_closing_fence(p: &MarkdownParser, is_tilde_fence: bool, fence_len: u
 
     // Skip optional extra indent (up to 3 spaces per CommonMark)
     // This always succeeds since required=false
-    let idx = consume_indent(source.as_bytes(), idx, MAX_BLOCK_PREFIX_INDENT, false).unwrap();
+    let idx = consume_indent(source.as_bytes(), idx, MAX_BLOCK_PREFIX_INDENT, false).unwrap_or(idx);
 
     let fence_char = if is_tilde_fence { b'~' } else { b'`' };
     let mut fence_count = 0usize;

@@ -283,21 +283,32 @@ if let Some(directive) = VueDirective::cast_ref(&element)
 
 ### Code Comments
 
-Comments exist for the next developer who reads this code, not for the developer currently writing it.
+Comments exist for the next developer who reads this code, not for the developer currently writing it. Write them like you are explaining the code to a colleague who walked into the room ten minutes ago — not to a reviewer on this specific PR.
 
 **DO:**
 - Explain code that is hard to read, or document exceptions and edge cases
 - Provide context when names alone are not descriptive enough
 - Describe the business logic a function implements
 - Clarify contextual words like "normalize" — e.g., "normalize a file path" and "normalize a URL" mean different things; spell out what normalization means here
+- Strike a balance between plain English and technical precision. Prefer concrete nouns ("the HTML file", "the `<style>` block") over abstract ones ("the host CST", "the delegated pipeline") when both convey the same idea
+- Add comments only where they are needed, for example, docstrings, or code paths that are particular and require a special explanation. Most of the code (even new that you write) doesn't need a comment if it follows the business logic.
+- Write comments using proper English grammar and punctuation.
 
 **DON'T:**
 - Do NOT embed the context of the current work into comments. A comment like `// As per issue #1234, we skip this case` ties the code to a transient artifact. Instead, explain *why* the case is skipped in terms any future reader would understand.
 - Do NOT scope comments to the specific trigger that prompted the change. For example, if a bug was reported for Astro but the fix applies broadly, do NOT write `// Fix for Astro embedding`. Write a comment that describes the general condition being handled.
+- Do NOT scope comments narrower than the code itself. If the function is generic across all embedded languages, the comment should not name "CSS" or "`<style>`" — describe the contract the code enforces for any embed, and use a concrete example only as illustration.
+- Do NOT lead with formal-methods / math jargon like `// Invariant:`, `// Precondition:`, `// Lemma:` unless the surrounding code genuinely uses those terms. For most Biome code, plain prose ("When X happens, Y must hold, otherwise …") reads better and is just as precise.
+- Do NOT pile technical terms on top of each other ("delegated format pipeline", "canonical embed IR", "host CST token text") when one plain-English sentence would do. Jargon density should be low; a reader should not need a glossary to understand a comment.
+- Do NOT just paraphrase the function name or the next line of code. If a comment can be deleted without losing information, delete it.
 
-**Think big picture, not current task.** Before writing a comment, ask: "If someone reads this a year from now with no knowledge of the issue or PR, does this comment give them the context they need?"
+**Think big picture, not current task.** Before writing a comment, ask three things:
 
-**Example:**
+1. If someone reads this a year from now with no knowledge of the issue or PR, does this comment give them the context they need?
+2. Is my comment describing the code at the same level of abstraction as the code? (A generic helper deserves a generic explanation; a specific branch deserves a specific one.)
+3. Could I swap any technical term for a plainer word without losing meaning? If yes, swap it.
+
+**Example 1 — issue/task context and over-specificity:**
 ```rust
 // WRONG: Carries issue/task context
 // Fix for #5678: Astro files need special handling here
@@ -320,6 +331,34 @@ if is_embedded_script(node) {
     return normalize_offset(node);
 }
 ```
+
+**Example 2 — jargon, narrow scope, and abstraction mismatch.** This is a real example from a generic helper that replaces an embedded snippet inside any host document (HTML, Vue, Svelte, Astro, …):
+
+```rust
+// WRONG: starts with formal-methods jargon, names a specific case
+// (`<style>`) even though the function handles any embed, and stacks
+// technical terms ("host CST token text", "delegated pipeline") that a
+// new reader has to decode before they can understand the point.
+// Invariant: for a file that required no fix actions, `fix_file` and
+// `format_file` must produce byte-identical output. For `<style>`
+// blocks, `fix_all`'s final format pass prints embedded content
+// verbatim from the host CST token text, while `format_file` routes
+// through the delegated `format_embedded` pipeline and re-wraps the
+// result with the host's indent. …
+
+// CORRECT: plain language, stays at the generic level of the function,
+// uses `<style>` only as a parenthetical example, and is understandable
+// without prior context.
+// The embedded formatter (e.g. the CSS formatter for a <style> block)
+// doesn't know how deeply its code is nested inside the HTML file, so
+// it always returns the code indented from column zero. If we pasted
+// that code back as-is, only the first line would get the HTML
+// indentation (from the leading whitespace we already captured); every
+// other line would end up too far to the left. Add the same indentation
+// to every line so the embed lines up with its surroundings.
+```
+
+The corrected comment names one concrete example (`<style>` / CSS) to make the reader's mental picture vivid, but the rest of the sentence is generic enough to cover any host/embed pair. That is the balance to aim for.
 
 ### Cargo Dependencies: `workspace = true` vs `path = "..."`
 

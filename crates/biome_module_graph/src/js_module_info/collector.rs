@@ -548,6 +548,11 @@ impl JsModuleInfoCollector {
     ) {
         if self.infer_types {
             self.infer_all_types(semantic_model);
+        }
+
+        self.populate_namespace_and_module_members();
+
+        if self.infer_types {
             self.resolve_all_and_downgrade_project_references();
 
             // Purging before flattening will save us from duplicate work during
@@ -715,14 +720,11 @@ impl JsModuleInfoCollector {
         ResolvedTypeId::new(self.level(), id).into()
     }
 
-    /// After the first pass of the collector, import references have been
-    /// resolved to an import binding. But we can't store the information of the
-    /// import target inside the `ResolvedTypeId`, because it resides in the
-    /// module's semantic data, and `ResolvedTypeId` is only 8 bytes. So during
-    /// resolving, we "downgrade" the import references from
-    /// [`TypeReference::Resolved`] to [`TypeReference::Import`].
-    fn resolve_all_and_downgrade_project_references(&mut self) {
-        // First do a pass in which we populate module and namespace members:
+    /// Fills in the `members` field of `TypeData::Module` and
+    /// `TypeData::Namespace` entries that already exist in the type store.
+    /// These entries are created with empty member lists; this pass walks the
+    /// scope tree to collect the bindings that belong to each one.
+    fn populate_namespace_and_module_members(&mut self) {
         let mut i = 0;
         while i < self.types.len() {
             match self.types.get(i).as_ref() {
@@ -730,7 +732,6 @@ impl JsModuleInfoCollector {
                     if let Some(module_binding) = self.find_binding_for_type_index(i) {
                         let ty = TypeData::from(Module {
                             name: module.name.clone(),
-                            // Populate module members:
                             members: self.find_type_members_in_scope(module_binding.scope_id),
                         });
                         self.types.replace(i, ty);
@@ -740,7 +741,6 @@ impl JsModuleInfoCollector {
                     if let Some(namespace_binding) = self.find_binding_for_type_index(i) {
                         let ty = TypeData::from(Namespace {
                             path: namespace.path.clone(),
-                            // Populate namespace members:
                             members: self.find_type_members_in_scope(namespace_binding.scope_id),
                         });
                         self.types.replace(i, ty);
@@ -750,8 +750,15 @@ impl JsModuleInfoCollector {
             }
             i += 1;
         }
+    }
 
-        // Now perform a pass for the actual resolving:
+    /// After the first pass of the collector, import references have been
+    /// resolved to an import binding. But we can't store the information of the
+    /// import target inside the `ResolvedTypeId`, because it resides in the
+    /// module's semantic data, and `ResolvedTypeId` is only 8 bytes. So during
+    /// resolving, we "downgrade" the import references from
+    /// [`TypeReference::Resolved`] to [`TypeReference::Import`].
+    fn resolve_all_and_downgrade_project_references(&mut self) {
         let mut i = 0;
         while i < self.types.len() {
             let ty = self.types.get(i);
@@ -826,6 +833,46 @@ impl JsModuleInfoCollector {
                 ty: binding.ty.clone(),
             })
             .collect()
+    }
+
+    /// Given a binding name and scope, looks up the binding and, if it is a
+    /// namespace or module declaration, inserts all direct child-scope bindings
+    /// into `exports`.
+    fn collect_namespace_exports_for_binding(
+        &self,
+        name: &str,
+        scope_id: ScopeId,
+        exports: &mut IndexMap<Text, JsExport>,
+    ) {
+        let Some(binding_ref) = self.find_binding_in_scope(name, scope_id) else {
+            return;
+        };
+
+        let binding_id = binding_ref.value_ty_or_ty();
+        let binding = &self.bindings[binding_id.index()];
+
+        if !binding.declaration_kind.declares_namespace() {
+            return;
+        }
+
+        // Collect bindings from immediate child scopes of the namespace
+        // binding's scope — the same approach used by
+        // `find_type_members_in_scope` during full type inference.
+        for child_binding in &self.bindings {
+            if child_binding.name.is_empty() {
+                continue;
+            }
+
+            let child_scope = &self.scopes[child_binding.scope_id.index()];
+            if child_scope
+                .parent
+                .is_some_and(|parent| parent == binding.scope_id)
+            {
+                exports
+                    .entry(child_binding.name.clone())
+                    .or_insert_with(|| JsExport::Own(JsOwnExport::Binding(child_binding.range)));
+            }
+        }
     }
 
     fn flatten_all(&mut self) {
@@ -910,6 +957,7 @@ impl JsModuleInfoCollector {
                 }
                 JsCollectedExport::ExportDefaultAssignment { ty } => {
                     let resolved = self.resolve_reference(&ty).unwrap_or(GLOBAL_UNKNOWN_ID);
+                    let mut found_members = false;
 
                     if let Some(data) = self.get_by_resolved_id(resolved) {
                         for member in data.as_raw_data().own_members() {
@@ -928,8 +976,25 @@ impl JsModuleInfoCollector {
                             if let Some(resolved_member) = self.resolve_reference(&member.ty) {
                                 let export = JsExport::Own(JsOwnExport::Type(resolved_member));
                                 finalised_exports.insert(name, export);
+                                found_members = true;
                             }
                         }
+                    }
+
+                    // If the resolved type has no members (e.g., the
+                    // reference is still an unresolved qualifier), fall back
+                    // to the scope tree to collect namespace bindings directly.
+                    if !found_members
+                        && let Some(data) = self.get_by_resolved_id(resolved)
+                        && let TypeData::Reference(TypeReference::Qualifier(qualifier)) =
+                            data.as_raw_data()
+                        && let Some(first_part) = qualifier.path.iter().next()
+                    {
+                        self.collect_namespace_exports_for_binding(
+                            first_part,
+                            qualifier.scope_id,
+                            &mut finalised_exports,
+                        );
                     }
 
                     let export = JsExport::Own(JsOwnExport::Type(resolved));

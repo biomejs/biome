@@ -1,7 +1,5 @@
 [workspace]
 resolver = "2"
-# Use the newer version of the cargo resolver
-# https://doc.rust-lang.org/cargo/reference/resolver.html#resolver-versions
 members  = ["crates/*", "xtask/codegen", "xtask/coverage", "xtask/glue", "xtask/rules_check"]
 
 [workspace.package]
@@ -14,15 +12,12 @@ keywords   = ["formatter", "linter", "parser"]
 categories = ["development-tools", "web-programming"]
 
 [workspace.dependencies]
-# Crates needed in the workspace
 anyhow                       = "1.0.102"
-# publish
 biome_analyze                = { path = "./crates/biome_analyze", version = "0.5.7" }
 biome_analyze_macros         = { path = "./crates/biome_analyze_macros" }
 biome_aria                   = { path = "./crates/biome_aria", version = "0.5.7" }
 biome_aria_metadata          = { path = "./crates/biome_aria_metadata", version = "0.5.7" }
 biome_bench_utils            = { path = "./crates/biome_bench_utils" }
-# not publish
 biome_cli                    = { path = "./crates/biome_cli" }
 biome_configuration          = { path = "./crates/biome_configuration" }
 biome_configuration_macros   = { path = "./crates/biome_configuration_macros" }
@@ -108,7 +103,7 @@ biome_unicode_table          = { path = "./crates/biome_unicode_table", version 
 biome_yaml_factory           = { path = "./crates/biome_yaml_factory", version = "0.0.1" }
 biome_yaml_parser            = { path = "./crates/biome_yaml_parser", version = "0.0.1" }
 biome_yaml_syntax            = { path = "./crates/biome_yaml_syntax", version = "0.0.1" }
-boa_engine                   = "0.21.0"
+boa_engine                   = "0.21.1"
 boxcar                       = "0.2.14"
 bpaf                         = { version = "0.9.24", features = ["derive"] }
 camino                       = "1.2.2"
@@ -126,26 +121,26 @@ grit-pattern-matcher         = "0.5.1"
 grit-util                    = "0.5.1"
 hashbrown                    = { version = "0.15.5", default-features = false }
 ignore                       = "0.4.25"
-indexmap                     = { version = "2.13.0" }
+indexmap                     = { version = "2.13.1" }
 insta                        = "1.46.3"
 jiff                         = "0.2.23"
-libc                         = "0.2.183"
+libc                         = "0.2.184"
 mimalloc                     = "0.1.48"
 notify                       = "8.2.0"
-papaya                       = "0.2.3"
+papaya                       = "0.2.4"
 path-absolutize              = { version = "3.1.1", features = ["use_unix_paths_on_wasm"], optional = false }
 phf                          = { version = "0.13.1", features = ["macros"] }
 prettyplease                 = "0.2.37"
 proc-macro-error2            = { version = "2.0.1", default-features = false }
 proc-macro2                  = "1.0.106"
 quickcheck                   = "1.1.0"
-quickcheck_macros            = "1.1.0"
+quickcheck_macros            = "1.2.0"
 quote                        = "1.0.45"
 rayon                        = "1.11.0"
 regex                        = "1.12.3"
 reqwest                      = { version = "0.12.19", default-features = false }
 rust-lapper                  = "1.2.0"
-rustc-hash                   = "2.1.1"
+rustc-hash                   = "2.1.2"
 schemars                     = { version = "1.2.1", features = ["indexmap2", "smallvec1"] }
 serde                        = { version = "1.0.228", features = ["derive"] }
 serde_json                   = "1.0.149"
@@ -155,10 +150,10 @@ smallvec                     = { version = "1.15.1", features = ["const_new", "s
 static_assertions            = "1.1"
 syn                          = "1.0.109"
 termcolor                    = "1.4.1"
-terminal_size                = "0.4.3"
+terminal_size                = "0.4.4"
 tests_macros                 = { path = "./crates/tests_macros" }
 tikv-jemallocator            = "0.6.1"
-tokio                        = "1.49.0"
+tokio                        = "1.51.0"
 tower                        = "0.5.3"
 tower-lsp-server             = "0.23.0"
 tracing                      = { version = "0.1.44", default-features = false, features = ["attributes", "std"] }
@@ -176,18 +171,15 @@ xtask_coverage               = { path = "xtask/coverage" }
 xtask_glue                   = { path = "xtask/glue" }
 
 [workspace.lints.clippy]
+# https://rust-lang.github.io/rust-clippy/rust-1.88.0/index.html
 allow_attributes                  = "deny"
-# pedantic
 assigning_clones                  = "warn"
-cargo_common_metadata             = "allow"
-# restriction
 cfg_not_test                      = "warn"
 checked_conversions               = "warn"
 cloned_instead_of_copied          = "warn"
 copy_iterator                     = "warn"
 dbg_macro                         = "warn"
 doc_link_with_quotes              = "warn"
-empty_docs                        = "allow"  # there are some false positives inside biome_wasm
 empty_drop                        = "warn"
 empty_enum_variants_with_brackets = "warn"
 empty_enums                       = "warn"
@@ -216,8 +208,8 @@ manual_ok_or                      = "warn"
 manual_string_new                 = "warn"
 map_flatten                       = "warn"
 map_unwrap_or                     = "warn"
+mem_forget                        = "warn"
 mismatching_type_param_order      = "warn"
-multiple_crate_versions           = "allow"
 mut_mut                           = "warn"
 naive_bytecount                   = "warn"
 needless_bitwise_bool             = "warn"
@@ -241,8 +233,6 @@ unreadable_literal                = "warn"
 verbose_bit_mask                  = "warn"
 verbose_file_reads                = "warn"
 zero_sized_map_values             = "warn"
-# https://github.com/rustwasm/wasm-bindgen/issues/3944
-# mem_forget                      = "warn"
 
 [workspace.lints.rust]
 # https://doc.rust-lang.org/rustc/lints/listing/allowed-by-default.html
@@ -270,6 +260,14 @@ debug = false
 [profile.dev.package.biome_wasm]
 opt-level = "s"
 debug     = true
+
+[profile.dev.package.insta]
+# https://insta.rs/docs/quickstart/#optional-faster-runs
+opt-level = 3
+
+[profile.dev.package.similar]
+# https://insta.rs/docs/quickstart/#optional-faster-runs
+opt-level = 3
 
 [profile.release.package.biome_wasm]
 opt-level = 3

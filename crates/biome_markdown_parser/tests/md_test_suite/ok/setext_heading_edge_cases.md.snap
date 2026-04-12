@@ -98,8 +98,8 @@ MdDocument {
                 post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@36..37 " " [] [],
             },
             content: MdBlockList [
-                MdParagraph {
-                    list: MdInlineItemList [
+                MdSetextHeader {
+                    content: MdInlineItemList [
                         MdTextual {
                             value_token: MD_TEXTUAL_LITERAL@37..40 "Foo" [] [],
                         },
@@ -111,20 +111,11 @@ MdDocument {
                             marker_token: R_ANGLE@41..42 ">" [] [],
                             post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@42..43 " " [] [],
                         },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@43..44 "-" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@44..45 "-" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@45..46 "-" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@46..47 "\n" [] [],
-                        },
                     ],
-                    hard_line: missing (optional),
+                    underline_token: MD_SETEXT_UNDERLINE_LITERAL@43..46 "---" [] [],
+                },
+                MdNewline {
+                    value_token: NEWLINE@46..47 "\n" [] [],
                 },
             ],
         },
@@ -161,10 +152,20 @@ MdDocument {
                         MdNewline {
                             value_token: NEWLINE@59..60 "\n" [] [],
                         },
+                        MdContinuationIndent {
+                            indent: MdIndentTokenList [
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@60..61 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@61..62 " " [] [],
+                                },
+                            ],
+                        },
                         MdParagraph {
                             list: MdInlineItemList [
                                 MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@60..65 "baz" [Skipped(" "), Skipped(" ")] [],
+                                    value_token: MD_TEXTUAL_LITERAL@62..65 "baz" [] [],
                                 },
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@65..66 "\n" [] [],
@@ -232,8 +233,8 @@ MdDocument {
         1: R_ANGLE@35..36 ">" [] []
         2: MD_QUOTE_POST_MARKER_SPACE@36..37 " " [] []
       1: MD_BLOCK_LIST@37..47
-        0: MD_PARAGRAPH@37..47
-          0: MD_INLINE_ITEM_LIST@37..47
+        0: MD_SETEXT_HEADER@37..46
+          0: MD_INLINE_ITEM_LIST@37..43
             0: MD_TEXTUAL@37..40
               0: MD_TEXTUAL_LITERAL@37..40 "Foo" [] []
             1: MD_TEXTUAL@40..41
@@ -242,15 +243,9 @@ MdDocument {
               0: MD_QUOTE_INDENT_LIST@41..41
               1: R_ANGLE@41..42 ">" [] []
               2: MD_QUOTE_POST_MARKER_SPACE@42..43 " " [] []
-            3: MD_TEXTUAL@43..44
-              0: MD_TEXTUAL_LITERAL@43..44 "-" [] []
-            4: MD_TEXTUAL@44..45
-              0: MD_TEXTUAL_LITERAL@44..45 "-" [] []
-            5: MD_TEXTUAL@45..46
-              0: MD_TEXTUAL_LITERAL@45..46 "-" [] []
-            6: MD_TEXTUAL@46..47
-              0: MD_TEXTUAL_LITERAL@46..47 "\n" [] []
-          1: (empty)
+          1: MD_SETEXT_UNDERLINE_LITERAL@43..46 "---" [] []
+        1: MD_NEWLINE@46..47
+          0: NEWLINE@46..47 "\n" [] []
     10: MD_NEWLINE@47..48
       0: NEWLINE@47..48 "\n" [] []
     11: MD_BULLET_LIST_ITEM@48..66
@@ -275,10 +270,16 @@ MdDocument {
               1: MD_SETEXT_UNDERLINE_LITERAL@56..59 "---" [] []
             1: MD_NEWLINE@59..60
               0: NEWLINE@59..60 "\n" [] []
-            2: MD_PARAGRAPH@60..66
-              0: MD_INLINE_ITEM_LIST@60..66
-                0: MD_TEXTUAL@60..65
-                  0: MD_TEXTUAL_LITERAL@60..65 "baz" [Skipped(" "), Skipped(" ")] []
+            2: MD_CONTINUATION_INDENT@60..62
+              0: MD_INDENT_TOKEN_LIST@60..62
+                0: MD_INDENT_TOKEN@60..61
+                  0: MD_INDENT_CHAR@60..61 " " [] []
+                1: MD_INDENT_TOKEN@61..62
+                  0: MD_INDENT_CHAR@61..62 " " [] []
+            3: MD_PARAGRAPH@62..66
+              0: MD_INLINE_ITEM_LIST@62..66
+                0: MD_TEXTUAL@62..65
+                  0: MD_TEXTUAL_LITERAL@62..65 "baz" [] []
                 1: MD_TEXTUAL@65..66
                   0: MD_TEXTUAL_LITERAL@65..66 "\n" [] []
               1: (empty)

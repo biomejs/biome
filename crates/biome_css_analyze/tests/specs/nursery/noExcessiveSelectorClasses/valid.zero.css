@@ -1,0 +1,3 @@
+/* should not generate diagnostics */
+:root { --foo: 1px; }
+html { --foo: 1px; }

@@ -29,32 +29,27 @@ info: markdown/blockquote/code.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,7 +1,6 @@
+@@ -1,5 +1,4 @@
  > NOTE: To use `unobtrusive`, `unobtrusive/import`, `unobtrusive/react`, and `unobtrusive/flowtype` together, your eslint config would look like this:
 ->
--> ```json
--> {
-+>```json
-+>{
+ > ```json
+ > {
  >  "extends": [
- >    "unobtrusive",
- >    "unobtrusive/import",
-@@ -11,5 +10,5 @@
- >  "env": {
+@@ -12,4 +11,5 @@
  >    "browser": true
  >  }
--> }
+ > }
 -> ```
-+>}
-+>```
++>
++```
 ```
 
 # Output
 
 ```md
 > NOTE: To use `unobtrusive`, `unobtrusive/import`, `unobtrusive/react`, and `unobtrusive/flowtype` together, your eslint config would look like this:
->```json
->{
+> ```json
+> {
 >  "extends": [
 >    "unobtrusive",
 >    "unobtrusive/import",
@@ -64,8 +59,9 @@ info: markdown/blockquote/code.md
 >  "env": {
 >    "browser": true
 >  }
->}
->```
+> }
+>
+```
 ```
 
 # Lines exceeding max width of 80 characters

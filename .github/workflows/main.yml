@@ -78,6 +78,19 @@ jobs:
       - name: Run udeps
         run: cargo +nightly udeps --all-targets
 
+  deny:
+    name: Cargo Deny
+    runs-on: depot-ubuntu-24.04-arm
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Install cargo-deny
+        uses: taiki-e/install-action@cfdb446e391c69574ebc316dfb7d7849ec12b940 # v2.68.8
+        with:
+          tool: cargo-deny
+      - run: cargo deny check bans
+      - run: cargo deny check advisories
+
   test:
     name: Test
     runs-on: ${{ matrix.os }}

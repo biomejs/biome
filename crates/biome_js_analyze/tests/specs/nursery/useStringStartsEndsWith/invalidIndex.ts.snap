@@ -1,0 +1,178 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidIndex.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+declare const text: string;
+declare const other: string;
+
+text[0] === "a";
+"a" === text[0];
+text[0] !== "a";
+text[0] === other;
+text[text.length - 1] === "z";
+"z" === text[text.length - 1];
+
+```
+
+# Diagnostics
+```
+invalidIndex.ts:6:1 lint/nursery/useStringStartsEndsWith  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This index access comparison looks like you're checking a string prefix.
+  
+    4 │ declare const other: string;
+    5 │ 
+  > 6 │ text[0] === "a";
+      │ ^^^^^^^^^^^^^^^
+    7 │ "a" === text[0];
+    8 │ text[0] !== "a";
+  
+  i Using the built-in string method is clearer and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use startsWith() instead.
+  
+     4  4 │   declare const other: string;
+     5  5 │   
+     6    │ - text[0]·===·"a";
+        6 │ + text.startsWith("a");
+     7  7 │   "a" === text[0];
+     8  8 │   text[0] !== "a";
+  
+
+```
+
+```
+invalidIndex.ts:7:1 lint/nursery/useStringStartsEndsWith  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This index access comparison looks like you're checking a string prefix.
+  
+    6 │ text[0] === "a";
+  > 7 │ "a" === text[0];
+      │ ^^^^^^^^^^^^^^^
+    8 │ text[0] !== "a";
+    9 │ text[0] === other;
+  
+  i Using the built-in string method is clearer and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use startsWith() instead.
+  
+     5  5 │   
+     6  6 │   text[0] === "a";
+     7    │ - "a"·===·text[0];
+        7 │ + text.startsWith("a");
+     8  8 │   text[0] !== "a";
+     9  9 │   text[0] === other;
+  
+
+```
+
+```
+invalidIndex.ts:8:1 lint/nursery/useStringStartsEndsWith  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This index access comparison looks like you're checking a string prefix.
+  
+     6 │ text[0] === "a";
+     7 │ "a" === text[0];
+   > 8 │ text[0] !== "a";
+       │ ^^^^^^^^^^^^^^^
+     9 │ text[0] === other;
+    10 │ text[text.length - 1] === "z";
+  
+  i Using the built-in string method is clearer and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use startsWith() instead.
+  
+     6  6 │   text[0] === "a";
+     7  7 │   "a" === text[0];
+     8    │ - text[0]·!==·"a";
+        8 │ + !text.startsWith("a");
+     9  9 │   text[0] === other;
+    10 10 │   text[text.length - 1] === "z";
+  
+
+```
+
+```
+invalidIndex.ts:9:1 lint/nursery/useStringStartsEndsWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This index access comparison looks like you're checking a string prefix.
+  
+     7 │ "a" === text[0];
+     8 │ text[0] !== "a";
+   > 9 │ text[0] === other;
+       │ ^^^^^^^^^^^^^^^^^
+    10 │ text[text.length - 1] === "z";
+    11 │ "z" === text[text.length - 1];
+  
+  i Using the built-in string method is clearer and easier to read.
+  
+  i Consider using startsWith() instead. Biome did not apply an automatic fix because the replacement could change semantics for this specific expression.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIndex.ts:10:1 lint/nursery/useStringStartsEndsWith  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This index access comparison looks like you're checking a string suffix.
+  
+     8 │ text[0] !== "a";
+     9 │ text[0] === other;
+  > 10 │ text[text.length - 1] === "z";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ "z" === text[text.length - 1];
+    12 │ 
+  
+  i Using the built-in string method is clearer and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use endsWith() instead.
+  
+     8  8 │   text[0] !== "a";
+     9  9 │   text[0] === other;
+    10    │ - text[text.length·-·1]·===·"z";
+       10 │ + text.endsWith("z");
+    11 11 │   "z" === text[text.length - 1];
+    12 12 │   
+  
+
+```
+
+```
+invalidIndex.ts:11:1 lint/nursery/useStringStartsEndsWith  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This index access comparison looks like you're checking a string suffix.
+  
+     9 │ text[0] === other;
+    10 │ text[text.length - 1] === "z";
+  > 11 │ "z" === text[text.length - 1];
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+  
+  i Using the built-in string method is clearer and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use endsWith() instead.
+  
+     9  9 │   text[0] === other;
+    10 10 │   text[text.length - 1] === "z";
+    11    │ - "z"·===·text[text.length·-·1];
+       11 │ + text.endsWith("z");
+    12 12 │   
+  
+
+```

@@ -51,6 +51,7 @@ impl FormatSvelteDirectiveValue {
             let property = property.clone()?;
             let binding_value = match &property {
                 AnySvelteBindingProperty::SvelteLiteral(literal) => literal.value_token(),
+                AnySvelteBindingProperty::SvelteMemberProperty(_) => return Ok(false),
                 AnySvelteBindingProperty::SvelteName(name) => name.ident_token(),
             }?;
 

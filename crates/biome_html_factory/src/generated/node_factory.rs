@@ -1153,6 +1153,20 @@ pub fn svelte_literal(value_token: SyntaxToken) -> SvelteLiteral {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn svelte_member_property(
+    object: AnySvelteMemberObject,
+    dot_token: SyntaxToken,
+    member: SvelteName,
+) -> SvelteMemberProperty {
+    SvelteMemberProperty::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_MEMBER_PROPERTY,
+        [
+            Some(SyntaxElement::Node(object.into_syntax())),
+            Some(SyntaxElement::Token(dot_token)),
+            Some(SyntaxElement::Node(member.into_syntax())),
+        ],
+    ))
+}
 pub fn svelte_name(ident_token: SyntaxToken) -> SvelteName {
     SvelteName::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::SVELTE_NAME,

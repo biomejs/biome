@@ -12,6 +12,9 @@ impl FormatRule<AnySvelteBindingAssignmentBinding> for FormatAnySvelteBindingAss
         f: &mut HtmlFormatter,
     ) -> FormatResult<()> {
         match node {
+            AnySvelteBindingAssignmentBinding::AnySvelteDestructuredName(node) => {
+                node.format().fmt(f)
+            }
             AnySvelteBindingAssignmentBinding::SvelteName(node) => node.format().fmt(f),
             AnySvelteBindingAssignmentBinding::SvelteRestBinding(node) => node.format().fmt(f),
         }

@@ -2123,6 +2123,11 @@ See https://biomejs.dev/linter/rules/no-before-interactive-script-outside-docume
 	 */
 	noBeforeInteractiveScriptOutsideDocument?: NoBeforeInteractiveScriptOutsideDocumentConfiguration;
 	/**
+	* Disallows defining React components or custom hooks inside other functions.
+See https://biomejs.dev/linter/rules/no-component-hook-factories 
+	 */
+	noComponentHookFactories?: NoComponentHookFactoriesConfiguration;
+	/**
 	* Disallow conditional expect() calls inside tests.
 See https://biomejs.dev/linter/rules/no-conditional-expect 
 	 */
@@ -2223,6 +2228,11 @@ See https://biomejs.dev/linter/rules/no-excessive-lines-per-file
 	 */
 	noExcessiveLinesPerFile?: NoExcessiveLinesPerFileConfiguration;
 	/**
+	* Limit the number of classes in a selector.
+See https://biomejs.dev/linter/rules/no-excessive-selector-classes 
+	 */
+	noExcessiveSelectorClasses?: NoExcessiveSelectorClassesConfiguration;
+	/**
 	* Disallow new operators outside of assignments or comparisons.
 See https://biomejs.dev/linter/rules/no-floating-classes 
 	 */
@@ -2243,6 +2253,16 @@ See https://biomejs.dev/linter/rules/no-hex-colors
 	 */
 	noHexColors?: NoHexColorsConfiguration;
 	/**
+	* Disallow identical titles in test suites and test cases.
+See https://biomejs.dev/linter/rules/no-identical-test-title 
+	 */
+	noIdenticalTestTitle?: NoIdenticalTestTitleConfiguration;
+	/**
+	* Disallow the use of eval()-like methods.
+See https://biomejs.dev/linter/rules/no-implied-eval 
+	 */
+	noImpliedEval?: NoImpliedEvalConfiguration;
+	/**
 	* Disallows the usage of the unary operators ++ and --.
 See https://biomejs.dev/linter/rules/no-increment-decrement 
 	 */
@@ -2253,6 +2273,11 @@ See https://biomejs.dev/linter/rules/no-inline-styles
 	 */
 	noInlineStyles?: NoInlineStylesConfiguration;
 	/**
+	* Disallow JSX namespace syntax.
+See https://biomejs.dev/linter/rules/no-jsx-namespace 
+	 */
+	noJsxNamespace?: NoJsxNamespaceConfiguration;
+	/**
 	* Disallow .bind(), arrow functions, or function expressions in JSX props.
 See https://biomejs.dev/linter/rules/no-jsx-props-bind 
 	 */
@@ -2262,6 +2287,11 @@ See https://biomejs.dev/linter/rules/no-jsx-props-bind
 See https://biomejs.dev/linter/rules/no-leaked-render 
 	 */
 	noLeakedRender?: NoLeakedRenderConfiguration;
+	/**
+	* Detect return type annotations that are misleadingly wider than what the implementation actually returns.
+See https://biomejs.dev/linter/rules/no-misleading-return-type 
+	 */
+	noMisleadingReturnType?: NoMisleadingReturnTypeConfiguration;
 	/**
 	* Disallow Promises to be used in places where they are almost certainly a mistake.
 See https://biomejs.dev/linter/rules/no-misused-promises 
@@ -2403,6 +2433,11 @@ See https://biomejs.dev/linter/rules/no-unnecessary-conditions
 	 */
 	noUnnecessaryConditions?: NoUnnecessaryConditionsConfiguration;
 	/**
+	* Disallow + operations with operands that are known to be unsafe.
+See https://biomejs.dev/linter/rules/no-unsafe-plus-operands 
+	 */
+	noUnsafePlusOperands?: NoUnsafePlusOperandsConfiguration;
+	/**
 	* Disallow dependencies with untrusted licenses.
 See https://biomejs.dev/linter/rules/no-untrusted-licenses 
 	 */
@@ -2417,6 +2452,11 @@ See https://biomejs.dev/linter/rules/no-unused-classes
 See https://biomejs.dev/linter/rules/no-useless-return 
 	 */
 	noUselessReturn?: NoUselessReturnConfiguration;
+	/**
+	* Disallow type conversions that do not change the type of an expression.
+See https://biomejs.dev/linter/rules/no-useless-type-conversion 
+	 */
+	noUselessTypeConversion?: NoUselessTypeConversionConfiguration;
 	/**
 	* Disallows using arrow functions when defining a watcher.
 See https://biomejs.dev/linter/rules/no-vue-arrow-func-in-watch 
@@ -2477,10 +2517,20 @@ See https://biomejs.dev/linter/rules/use-consistent-method-signatures
 	 */
 	useConsistentMethodSignatures?: UseConsistentMethodSignaturesConfiguration;
 	/**
+	* Enforce consistent use of it or test for test functions.
+See https://biomejs.dev/linter/rules/use-consistent-test-it 
+	 */
+	useConsistentTestIt?: UseConsistentTestItConfiguration;
+	/**
 	* Require destructuring from arrays and/or objects.
 See https://biomejs.dev/linter/rules/use-destructuring 
 	 */
 	useDestructuring?: UseDestructuringConfiguration;
+	/**
+	* Detects a disposable object assigned to a variable without using or await using syntax.
+See https://biomejs.dev/linter/rules/use-disposables 
+	 */
+	useDisposables?: UseDisposablesConfiguration;
 	/**
 	* Enforce that new Error() is thrown with the original error as cause.
 See https://biomejs.dev/linter/rules/use-error-cause 
@@ -2496,6 +2546,11 @@ See https://biomejs.dev/linter/rules/use-exhaustive-switch-cases
 See https://biomejs.dev/linter/rules/use-expect 
 	 */
 	useExpect?: UseExpectConfiguration;
+	/**
+	* Require explicit return types on functions and class methods.
+See https://biomejs.dev/linter/rules/use-explicit-return-type 
+	 */
+	useExplicitReturnType?: UseExplicitReturnTypeConfiguration;
 	/**
 	* Enforce types in functions, methods, variables, and parameters.
 See https://biomejs.dev/linter/rules/use-explicit-type 
@@ -2552,6 +2607,21 @@ See https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback
 	 */
 	usePlaywrightValidDescribeCallback?: UsePlaywrightValidDescribeCallbackConfiguration;
 	/**
+	* Enforce that Qwik loader functions are declared in the correct location.
+See https://biomejs.dev/linter/rules/use-qwik-loader-location 
+	 */
+	useQwikLoaderLocation?: UseQwikLoaderLocationConfiguration;
+	/**
+	* Require functions with the "use server" directive to be async.
+See https://biomejs.dev/linter/rules/use-react-async-server-function 
+	 */
+	useReactAsyncServerFunction?: UseReactAsyncServerFunctionConfiguration;
+	/**
+	* Enforce using a type parameter on Array#reduce instead of casting the initial value.
+See https://biomejs.dev/linter/rules/use-reduce-type-parameter 
+	 */
+	useReduceTypeParameter?: UseReduceTypeParameterConfiguration;
+	/**
 	* Enforce RegExp#exec over String#match if no global flag is provided.
 See https://biomejs.dev/linter/rules/use-regexp-exec 
 	 */
@@ -2576,6 +2646,11 @@ See https://biomejs.dev/linter/rules/use-sorted-classes
 See https://biomejs.dev/linter/rules/use-spread 
 	 */
 	useSpread?: UseSpreadConfiguration;
+	/**
+	* Prefer String#startsWith() and String#endsWith() over verbose prefix and suffix checks.
+See https://biomejs.dev/linter/rules/use-string-starts-ends-with 
+	 */
+	useStringStartsEndsWith?: UseStringStartsEndsWithConfiguration;
 	/**
 	* Enforce the use of the u or v flag for regular expressions.
 See https://biomejs.dev/linter/rules/use-unicode-regex 
@@ -2622,7 +2697,7 @@ See https://biomejs.dev/linter/rules/use-vue-valid-template-root
 	 */
 	useVueValidTemplateRoot?: UseVueValidTemplateRootConfiguration;
 	/**
-	* Forbids v-bind directives with missing arguments or invalid modifiers.
+	* Forbids v-bind directives with missing values or invalid modifiers.
 See https://biomejs.dev/linter/rules/use-vue-valid-v-bind 
 	 */
 	useVueValidVBind?: UseVueValidVBindConfiguration;
@@ -4207,6 +4282,9 @@ export type NoAmbiguousAnchorTextConfiguration =
 export type NoBeforeInteractiveScriptOutsideDocumentConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoBeforeInteractiveScriptOutsideDocumentOptions;
+export type NoComponentHookFactoriesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoComponentHookFactoriesOptions;
 export type NoConditionalExpectConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoConditionalExpectOptions;
@@ -4267,6 +4345,9 @@ export type NoExcessiveClassesPerFileConfiguration =
 export type NoExcessiveLinesPerFileConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExcessiveLinesPerFileOptions;
+export type NoExcessiveSelectorClassesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoExcessiveSelectorClassesOptions;
 export type NoFloatingClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoFloatingClassesOptions;
@@ -4279,18 +4360,30 @@ export type NoForInConfiguration =
 export type NoHexColorsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoHexColorsOptions;
+export type NoIdenticalTestTitleConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoIdenticalTestTitleOptions;
+export type NoImpliedEvalConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoImpliedEvalOptions;
 export type NoIncrementDecrementConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoIncrementDecrementOptions;
 export type NoInlineStylesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoInlineStylesOptions;
+export type NoJsxNamespaceConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoJsxNamespaceOptions;
 export type NoJsxPropsBindConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsxPropsBindOptions;
 export type NoLeakedRenderConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoLeakedRenderOptions;
+export type NoMisleadingReturnTypeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoMisleadingReturnTypeOptions;
 export type NoMisusedPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisusedPromisesOptions;
@@ -4375,6 +4468,9 @@ export type NoUnknownAttributeConfiguration =
 export type NoUnnecessaryConditionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnnecessaryConditionsOptions;
+export type NoUnsafePlusOperandsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnsafePlusOperandsOptions;
 export type NoUntrustedLicensesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUntrustedLicensesOptions;
@@ -4384,6 +4480,9 @@ export type NoUnusedClassesConfiguration =
 export type NoUselessReturnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessReturnOptions;
+export type NoUselessTypeConversionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessTypeConversionOptions;
 export type NoVueArrowFuncInWatchConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueArrowFuncInWatchOptions;
@@ -4417,9 +4516,15 @@ export type UseConsistentGraphqlDescriptionsConfiguration =
 export type UseConsistentMethodSignaturesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentMethodSignaturesOptions;
+export type UseConsistentTestItConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentTestItOptions;
 export type UseDestructuringConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDestructuringOptions;
+export type UseDisposablesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseDisposablesOptions;
 export type UseErrorCauseConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseErrorCauseOptions;
@@ -4429,6 +4534,9 @@ export type UseExhaustiveSwitchCasesConfiguration =
 export type UseExpectConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExpectOptions;
+export type UseExplicitReturnTypeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseExplicitReturnTypeOptions;
 export type UseExplicitTypeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExplicitTypeOptions;
@@ -4462,6 +4570,15 @@ export type UseNullishCoalescingConfiguration =
 export type UsePlaywrightValidDescribeCallbackConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUsePlaywrightValidDescribeCallbackOptions;
+export type UseQwikLoaderLocationConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseQwikLoaderLocationOptions;
+export type UseReactAsyncServerFunctionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseReactAsyncServerFunctionOptions;
+export type UseReduceTypeParameterConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseReduceTypeParameterOptions;
 export type UseRegexpExecConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseRegexpExecOptions;
@@ -4477,6 +4594,9 @@ export type UseSortedClassesConfiguration =
 export type UseSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSpreadOptions;
+export type UseStringStartsEndsWithConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseStringStartsEndsWithOptions;
 export type UseUnicodeRegexConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUnicodeRegexOptions;
@@ -5881,6 +6001,10 @@ export interface RuleWithNoBeforeInteractiveScriptOutsideDocumentOptions {
 	level: RulePlainConfiguration;
 	options?: NoBeforeInteractiveScriptOutsideDocumentOptions;
 }
+export interface RuleWithNoComponentHookFactoriesOptions {
+	level: RulePlainConfiguration;
+	options?: NoComponentHookFactoriesOptions;
+}
 export interface RuleWithNoConditionalExpectOptions {
 	level: RulePlainConfiguration;
 	options?: NoConditionalExpectOptions;
@@ -5963,6 +6087,10 @@ export interface RuleWithNoExcessiveLinesPerFileOptions {
 	level: RulePlainConfiguration;
 	options?: NoExcessiveLinesPerFileOptions;
 }
+export interface RuleWithNoExcessiveSelectorClassesOptions {
+	level: RulePlainConfiguration;
+	options?: NoExcessiveSelectorClassesOptions;
+}
 export interface RuleWithNoFloatingClassesOptions {
 	level: RulePlainConfiguration;
 	options?: NoFloatingClassesOptions;
@@ -5980,6 +6108,14 @@ export interface RuleWithNoHexColorsOptions {
 	level: RulePlainConfiguration;
 	options?: NoHexColorsOptions;
 }
+export interface RuleWithNoIdenticalTestTitleOptions {
+	level: RulePlainConfiguration;
+	options?: NoIdenticalTestTitleOptions;
+}
+export interface RuleWithNoImpliedEvalOptions {
+	level: RulePlainConfiguration;
+	options?: NoImpliedEvalOptions;
+}
 export interface RuleWithNoIncrementDecrementOptions {
 	level: RulePlainConfiguration;
 	options?: NoIncrementDecrementOptions;
@@ -5989,6 +6125,10 @@ export interface RuleWithNoInlineStylesOptions {
 	level: RulePlainConfiguration;
 	options?: NoInlineStylesOptions;
 }
+export interface RuleWithNoJsxNamespaceOptions {
+	level: RulePlainConfiguration;
+	options?: NoJsxNamespaceOptions;
+}
 export interface RuleWithNoJsxPropsBindOptions {
 	level: RulePlainConfiguration;
 	options?: NoJsxPropsBindOptions;
@@ -5996,6 +6136,10 @@ export interface RuleWithNoJsxPropsBindOptions {
 export interface RuleWithNoLeakedRenderOptions {
 	level: RulePlainConfiguration;
 	options?: NoLeakedRenderOptions;
+}
+export interface RuleWithNoMisleadingReturnTypeOptions {
+	level: RulePlainConfiguration;
+	options?: NoMisleadingReturnTypeOptions;
 }
 export interface RuleWithNoMisusedPromisesOptions {
 	fix?: FixKind;
@@ -6115,6 +6259,10 @@ export interface RuleWithNoUnnecessaryConditionsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnnecessaryConditionsOptions;
 }
+export interface RuleWithNoUnsafePlusOperandsOptions {
+	level: RulePlainConfiguration;
+	options?: NoUnsafePlusOperandsOptions;
+}
 export interface RuleWithNoUntrustedLicensesOptions {
 	level: RulePlainConfiguration;
 	options?: NoUntrustedLicensesOptions;
@@ -6127,6 +6275,10 @@ export interface RuleWithNoUselessReturnOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoUselessReturnOptions;
+}
+export interface RuleWithNoUselessTypeConversionOptions {
+	level: RulePlainConfiguration;
+	options?: NoUselessTypeConversionOptions;
 }
 export interface RuleWithNoVueArrowFuncInWatchOptions {
 	fix?: FixKind;
@@ -6175,9 +6327,19 @@ export interface RuleWithUseConsistentMethodSignaturesOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentMethodSignaturesOptions;
 }
+export interface RuleWithUseConsistentTestItOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseConsistentTestItOptions;
+}
 export interface RuleWithUseDestructuringOptions {
 	level: RulePlainConfiguration;
 	options?: UseDestructuringOptions;
+}
+export interface RuleWithUseDisposablesOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseDisposablesOptions;
 }
 export interface RuleWithUseErrorCauseOptions {
 	level: RulePlainConfiguration;
@@ -6191,6 +6353,10 @@ export interface RuleWithUseExhaustiveSwitchCasesOptions {
 export interface RuleWithUseExpectOptions {
 	level: RulePlainConfiguration;
 	options?: UseExpectOptions;
+}
+export interface RuleWithUseExplicitReturnTypeOptions {
+	level: RulePlainConfiguration;
+	options?: UseExplicitReturnTypeOptions;
 }
 export interface RuleWithUseExplicitTypeOptions {
 	level: RulePlainConfiguration;
@@ -6237,6 +6403,20 @@ export interface RuleWithUsePlaywrightValidDescribeCallbackOptions {
 	level: RulePlainConfiguration;
 	options?: UsePlaywrightValidDescribeCallbackOptions;
 }
+export interface RuleWithUseQwikLoaderLocationOptions {
+	level: RulePlainConfiguration;
+	options?: UseQwikLoaderLocationOptions;
+}
+export interface RuleWithUseReactAsyncServerFunctionOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseReactAsyncServerFunctionOptions;
+}
+export interface RuleWithUseReduceTypeParameterOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseReduceTypeParameterOptions;
+}
 export interface RuleWithUseRegexpExecOptions {
 	level: RulePlainConfiguration;
 	options?: UseRegexpExecOptions;
@@ -6259,6 +6439,11 @@ export interface RuleWithUseSpreadOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseSpreadOptions;
+}
+export interface RuleWithUseStringStartsEndsWithOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseStringStartsEndsWithOptions;
 }
 export interface RuleWithUseUnicodeRegexOptions {
 	fix?: FixKind;
@@ -7546,6 +7731,7 @@ export interface NoAmbiguousAnchorTextOptions {
 	words?: string[];
 }
 export type NoBeforeInteractiveScriptOutsideDocumentOptions = {};
+export type NoComponentHookFactoriesOptions = {};
 export type NoConditionalExpectOptions = {};
 export type NoContinueOptions = {};
 export interface NoDeprecatedMediaTypeOptions {
@@ -7595,10 +7781,21 @@ export interface NoExcessiveLinesPerFileOptions {
 	 */
 	skipBlankLines?: boolean;
 }
+export interface NoExcessiveSelectorClassesOptions {
+	/**
+	* The maximum number of class selectors allowed in a single selector.
+
+This option is required to enable the rule.
+Use `0` to disallow class selectors entirely. 
+	 */
+	maxClasses?: number;
+}
 export type NoFloatingClassesOptions = {};
 export type NoFloatingPromisesOptions = {};
 export type NoForInOptions = {};
 export type NoHexColorsOptions = {};
+export type NoIdenticalTestTitleOptions = {};
+export type NoImpliedEvalOptions = {};
 export interface NoIncrementDecrementOptions {
 	/**
 	 * Allows unary operators ++ and -- in the afterthought (final expression) of a for loop.
@@ -7606,8 +7803,10 @@ export interface NoIncrementDecrementOptions {
 	allowForLoopAfterthoughts?: boolean;
 }
 export type NoInlineStylesOptions = {};
+export type NoJsxNamespaceOptions = {};
 export type NoJsxPropsBindOptions = {};
 export type NoLeakedRenderOptions = {};
+export type NoMisleadingReturnTypeOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoMultiAssignOptions = {};
 export type NoMultiStrOptions = {};
@@ -7655,6 +7854,7 @@ export interface NoUnknownAttributeOptions {
 	ignore?: string[];
 }
 export type NoUnnecessaryConditionsOptions = {};
+export type NoUnsafePlusOperandsOptions = {};
 export interface NoUntrustedLicensesOptions {
 	/**
 	* Additional license identifiers to trust, beyond valid SPDX identifiers.
@@ -7691,6 +7891,7 @@ Defaults to `false`.
 }
 export type NoUnusedClassesOptions = {};
 export type NoUselessReturnOptions = {};
+export type NoUselessTypeConversionOptions = {};
 export type NoVueArrowFuncInWatchOptions = {};
 export type NoVueOptionsApiOptions = {};
 export type NoVueRefAsOperandOptions = {};
@@ -7749,7 +7950,23 @@ Default: "property"
 	 */
 	style?: MethodSignatureStyle;
 }
+/**
+ * Options for the `useConsistentTestIt` rule
+ */
+export interface UseConsistentTestItOptions {
+	/**
+	* The function to use for top-level tests (outside describe blocks).
+Default: `"it"` 
+	 */
+	function?: TestFunctionKind;
+	/**
+	* The function to use for tests inside describe blocks.
+Default: `"it"` 
+	 */
+	withinDescribe?: TestFunctionKind;
+}
 export type UseDestructuringOptions = {};
+export type UseDisposablesOptions = {};
 /**
  * Options for the `useErrorCause` rule.
  */
@@ -7761,6 +7978,24 @@ export interface UseErrorCauseOptions {
 }
 export type UseExhaustiveSwitchCasesOptions = {};
 export type UseExpectOptions = {};
+/**
+ * Options for the `useExplicitReturnType` rule.
+ */
+export interface UseExplicitReturnTypeOptions {
+	/**
+	* Whether to ignore function expressions (functions that are not part of a declaration).
+When `true`, only declarations (function statements and class methods) are checked. 
+	 */
+	allowExpressions?: boolean;
+	/**
+	 * Whether to allow IIFEs (Immediately Invoked Function Expressions) without explicit return types.
+	 */
+	allowIifes?: boolean;
+	/**
+	 * A list of function names that are allowed to not have explicit return types.
+	 */
+	allowedNames?: string[];
+}
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
 export type UseGlobalThisOptions = {};
@@ -7786,8 +8021,18 @@ that appear in places where the falsy-checking behavior may be intentional.
 Default: `true` 
 	 */
 	ignoreConditionalTests?: boolean;
+	/**
+	* Whether to ignore ternary expressions that could be simplified
+using the nullish coalescing operator.
+
+Default: `false` 
+	 */
+	ignoreTernaryTests?: boolean;
 }
 export type UsePlaywrightValidDescribeCallbackOptions = {};
+export type UseQwikLoaderLocationOptions = {};
+export type UseReactAsyncServerFunctionOptions = {};
+export type UseReduceTypeParameterOptions = {};
 export type UseRegexpExecOptions = {};
 export interface UseRequiredScriptsOptions {
 	/**
@@ -7807,6 +8052,7 @@ export interface UseSortedClassesOptions {
 	functions?: string[];
 }
 export type UseSpreadOptions = {};
+export type UseStringStartsEndsWithOptions = {};
 export type UseUnicodeRegexOptions = {};
 export interface UseVueConsistentDefinePropsDeclarationOptions {
 	style?: DeclarationStyle;
@@ -8336,6 +8582,10 @@ export type AvailabilityTarget = AvailabilityNamed | number;
  */
 export type UseConsistentGraphqlDescriptionsStyle = "block" | "inline";
 export type MethodSignatureStyle = "property" | "method";
+/**
+ * The function to use for tests
+ */
+export type TestFunctionKind = "it" | "test";
 export type CheckInputType = "off" | "loose" | "strict";
 export type DeclarationStyle = "type" | "runtime";
 export type VueDirectiveStyle = "shorthand" | "longhand";
@@ -8723,10 +8973,13 @@ export type Category =
 	| "lint/nursery/noAmbiguousAnchorText"
 	| "lint/nursery/noBeforeInteractiveScriptOutsideDocument"
 	| "lint/nursery/noColorInvalidHex"
+	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
 	| "lint/nursery/noContinue"
 	| "lint/nursery/noDeprecatedMediaType"
 	| "lint/nursery/noDivRegex"
+	| "lint/nursery/noDrizzleDeleteWithoutWhere"
+	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateArgumentNames"
 	| "lint/nursery/noDuplicateAttributes"
 	| "lint/nursery/noDuplicateEnumValueNames"
@@ -8741,23 +8994,26 @@ export type Category =
 	| "lint/nursery/noEqualsToNull"
 	| "lint/nursery/noExcessiveClassesPerFile"
 	| "lint/nursery/noExcessiveLinesPerFile"
+	| "lint/nursery/noExcessiveSelectorClasses"
 	| "lint/nursery/noFloatingClasses"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noForIn"
 	| "lint/nursery/noHexColors"
+	| "lint/nursery/noIdenticalTestTitle"
 	| "lint/nursery/noImplicitCoercion"
+	| "lint/nursery/noImpliedEval"
 	| "lint/nursery/noIncrementDecrement"
 	| "lint/nursery/noInlineStyles"
+	| "lint/nursery/noJsxNamespace"
 	| "lint/nursery/noJsxPropsBind"
 	| "lint/nursery/noLeakedRender"
+	| "lint/nursery/noMisleadingReturnType"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noMultiAssign"
 	| "lint/nursery/noMultiStr"
 	| "lint/nursery/noNestedPromises"
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
-	| "lint/nursery/noDrizzleDeleteWithoutWhere"
-	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noPlaywrightElementHandle"
 	| "lint/nursery/noPlaywrightEval"
 	| "lint/nursery/noPlaywrightForceOption"
@@ -8782,10 +9038,12 @@ export type Category =
 	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnusedClasses"
+	| "lint/nursery/noUnsafePlusOperands"
 	| "lint/nursery/noUntrustedLicenses"
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessReturn"
+	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueArrowFuncInWatch"
 	| "lint/nursery/noVueOptionsApi"
 	| "lint/nursery/noVueRefAsOperand"
@@ -8799,11 +9057,14 @@ export type Category =
 	| "lint/nursery/useConsistentGraphqlDescriptions"
 	| "lint/nursery/useConsistentMethodSignatures"
 	| "lint/nursery/useConsistentObjectDefinition"
+	| "lint/nursery/useConsistentTestIt"
 	| "lint/nursery/useDestructuring"
+	| "lint/nursery/useDisposables"
 	| "lint/nursery/useErrorCause"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExpect"
 	| "lint/nursery/useExplicitFunctionReturnType"
+	| "lint/nursery/useExplicitReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useFind"
 	| "lint/nursery/useGlobalThis"
@@ -8818,13 +9079,17 @@ export type Category =
 	| "lint/nursery/useNamedCaptureGroup"
 	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/usePlaywrightValidDescribeCallback"
+	| "lint/nursery/useQwikLoaderLocation"
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
+	| "lint/nursery/useReactAsyncServerFunction"
+	| "lint/nursery/useReduceTypeParameter"
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useRequiredScripts"
 	| "lint/nursery/useScopedStyles"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
+	| "lint/nursery/useStringStartsEndsWith"
 	| "lint/nursery/useUnicodeRegex"
 	| "lint/nursery/useUniqueArgumentNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"
@@ -9594,17 +9859,34 @@ export interface SerializedHtmlModuleInfo {
 export interface PullDiagnosticsParams {
 	categories: RuleCategories;
 	/**
+	* Minimum severity for a diagnostic to be included. Diagnostics with a
+severity below this threshold are ignored entirely (not counted, not
+serialized). Defaults to [`Severity::Hint`] (include everything). 
+	 */
+	diagnosticLevel?: Severity;
+	/**
 	 * Rules to apply on top of the configuration
 	 */
 	enabledRules?: AnalyzerSelector[];
+	/**
+	* When true, promote assist diagnostics (`assist/*`) to error severity
+before applying the diagnostic_level filter. 
+	 */
+	enforceAssist?: boolean;
+	/**
+	 * When `true`, diagnostics include code suggestions for rule fixes.
+	 */
+	includeCodeFix?: boolean;
 	inlineConfig?: Configuration;
+	/**
+	* Max limit of diagnostics types to pull. This limit is meant to cap the number of [Diagnostic] to pull.
+However, the workspace still processes ALL diagnostics coming from the analyzer to compute their severity.
+If no value is provided, the workspace will pull all diagnostics. 
+	 */
+	maxDiagnostics?: number;
 	only?: AnalyzerSelector[];
 	path: BiomePath;
 	projectKey: ProjectKey;
-	/**
-	 * When `false` the diagnostics, don't have code frames of the code actions (fixes, suppressions, etc.)
-	 */
-	pullCodeActions: boolean;
 	skip?: AnalyzerSelector[];
 }
 export type RuleCategories = RuleCategory[];
@@ -9613,10 +9895,22 @@ export type RuleCategory = "syntax" | "lint" | "action" | "transformation";
 export interface PullDiagnosticsResult {
 	diagnostics: Diagnostic[];
 	errors: number;
+	infos: number;
+	/**
+	* Number of parse errors (subset of `errors`). Used by `--skip-parse-errors`
+to distinguish parse errors from analyzer errors. 
+	 */
+	parseErrors: number;
 	skippedDiagnostics: number;
+	warnings: number;
 }
 export interface PullActionsParams {
 	categories?: RuleCategories;
+	/**
+	* When `false`, returned actions have `suggestion: None` (no `BatchMutation`
+computed). Used by `codeAction/resolve` to defer edit computation. 
+	 */
+	computeActions?: boolean;
 	enabledRules?: AnalyzerSelector[];
 	inlineConfig?: Configuration;
 	only?: AnalyzerSelector[];
@@ -9630,11 +9924,20 @@ export interface PullActionsResult {
 	actions: CodeAction[];
 }
 export interface CodeAction {
+	applicability?: Applicability;
 	category: ActionCategory;
 	offset?: TextSize;
 	ruleName?: [string, string];
-	suggestion: CodeSuggestion;
+	/**
+	* The computed code suggestion with text edit. `None` when the action was
+returned without computing edits (deferred for `codeAction/resolve`). 
+	 */
+	suggestion?: CodeSuggestion;
 }
+/**
+ * Indicates how a tool should manage this suggestion.
+ */
+export type Applicability = "always" | "maybeIncorrect";
 /**
 	* The category of a code action, this type maps directly to the
 [CodeActionKind] type in the Language Server Protocol specification
@@ -9681,10 +9984,6 @@ export type OtherActionCategory =
 	| "inlineSuppression"
 	| "toplevelSuppression"
 	| { generic: string };
-/**
- * Indicates how a tool should manage this suggestion.
- */
-export type Applicability = "always" | "maybeIncorrect";
 export interface PullDiagnosticsAndActionsParams {
 	categories?: RuleCategories;
 	enabledRules?: AnalyzerSelector[];

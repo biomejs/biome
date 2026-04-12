@@ -1,0 +1,15 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+assertion_line: 94
+expression: native_slot_names
+---
+SnapshotResult {
+    messages: [],
+    matched_ranges: [
+        "2:5-2:15",
+        "3:5-3:27",
+        "3:17-3:27",
+    ],
+    rewritten_files: [],
+    created_files: [],
+}

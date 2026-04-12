@@ -2,7 +2,7 @@ use crate::commands::MigrateSubCommand;
 use crate::diagnostics::MigrationDiagnostic;
 use crate::runner::diagnostics::{ContentDiffAdvice, MigrateDiffDiagnostic};
 use crate::{CliDiagnostic, CliSession};
-use biome_analyze::AnalysisFilter;
+use biome_analyze::{ActionFilter, AnalysisFilter};
 use biome_configuration::Configuration;
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{Console, ConsoleExt, markup};
@@ -29,6 +29,7 @@ use std::fmt::Debug;
 mod eslint;
 mod eslint_any_rule_to_biome;
 mod eslint_eslint;
+mod eslint_jest;
 mod eslint_jsxa11y;
 mod eslint_to_biome;
 mod eslint_typescript;
@@ -292,13 +293,17 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
             let Some(mut biome_config) = biome_config else {
                 return Ok(MigrationFileResult::HasErrors);
             };
-            let (biome_eslint_config, mut results) =
-                eslint_config.into_biome_config(&eslint_to_biome::MigrationOptions {
-                    include_inspired: *include_inspired,
-                    include_nursery: *include_nursery,
-                });
             let old_biome_config = biome_config.clone();
-            biome_config.merge_with(biome_eslint_config);
+            let (updated_biome_config, mut results) =
+                eslint_to_biome::merge_biome_config_with_eslint(
+                    biome_config,
+                    eslint_config,
+                    &eslint_to_biome::MigrationOptions {
+                        include_inspired: *include_inspired,
+                        include_nursery: *include_nursery,
+                    },
+                );
+            biome_config = updated_biome_config;
             if let Ok(ignore_patterns) = ignorefile::read_ignore_file(fs, eslint::IGNORE_FILE) {
                 if !ignore_patterns.patterns.is_empty() {
                     biome_config
@@ -375,7 +380,7 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
                     configuration_file_path.as_path(),
                     is_root,
                     |signal| {
-                        if let Some(action) = signal.actions().next() {
+                        if let Some(action) = signal.actions(ActionFilter::rule_fix()).next() {
                             return ControlFlow::Break(action);
                         }
                         ControlFlow::Continue(())

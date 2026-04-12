@@ -7,10 +7,10 @@
 }
 
 .function-name {
-  // TODO(interpolation support): start: #{1 + 1}foo(arg);
-  // TODO(interpolation support): mid: foo#{1 + 1}bar(arg);
-  // TODO(interpolation support): end: foo#{1 + 1}(arg);
-  // TODO(interpolation support): full: #{foo}(arg);
+  start: #{1 + 1}foo(arg);
+  mid: foo#{1 + 1}bar(arg);
+  end: foo#{1 + 1}(arg);
+  full: #{foo}(arg);
   width: max($numbers...);
   width: max($numbers    ...);
   width: max($numbers/**/...);
@@ -18,7 +18,3 @@
   prop: fn(value/**/...);
   color: rgba(50 50 0.50 50...);
 }
-
-
-
-

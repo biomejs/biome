@@ -1,6 +1,6 @@
 use biome_analyze::{
-    AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never, Queryable,
-    RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
+    ActionFilter, AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never,
+    Queryable, RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
 };
 use biome_css_analyze::CssAnalyzerServices;
 use biome_css_parser::{CssParserOptions, parse_css};
@@ -22,7 +22,7 @@ use std::ops::Deref;
 use std::sync::Arc;
 use std::{fs::read_to_string, slice};
 
-tests_macros::gen_tests! {"tests/specs/**/*.{css,json,jsonc}", crate::run_test, "module"}
+tests_macros::gen_tests! {"tests/specs/**/*.{css,scss,json,jsonc}", crate::run_test, "module"}
 tests_macros::gen_tests! {"tests/suppression/**/*.{css,json,jsonc}", crate::run_suppression_test, "module"}
 tests_macros::gen_tests! {"tests/plugin/*.grit", crate::run_plugin_test, "module"}
 
@@ -183,7 +183,7 @@ pub(crate) fn analyze_and_snap(
     let (_, errors) =
         biome_css_analyze::analyze(&root, filter, &options, services, plugins, |event| {
             if let Some(mut diag) = event.diagnostic() {
-                for action in event.actions() {
+                for action in event.actions(ActionFilter::all()) {
                     if check_action_type.is_suppression() {
                         if action.is_suppression() {
                             check_code_action(
@@ -211,7 +211,7 @@ pub(crate) fn analyze_and_snap(
                 return ControlFlow::Continue(());
             }
 
-            for action in event.actions() {
+            for action in event.actions(ActionFilter::all()) {
                 if check_action_type.is_suppression() {
                     if action.category.matches("quickfix.suppressRule") {
                         check_code_action(

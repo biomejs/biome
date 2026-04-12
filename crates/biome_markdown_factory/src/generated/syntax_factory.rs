@@ -14,7 +14,7 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
         children: ParsedChildren<Self::Kind>,
     ) -> RawSyntaxNode<Self::Kind> {
         match kind {
-            MD_BOGUS => RawSyntaxNode::new(kind, children.into_iter().map(Some)),
+            MD_BOGUS | MD_BOGUS_BLOCK => RawSyntaxNode::new(kind, children.into_iter().map(Some)),
             MD_AUTOLINK => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
@@ -92,6 +92,25 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                     );
                 }
                 slots.into_node(MD_BULLET_LIST_ITEM, children)
+            }
+            MD_CONTINUATION_INDENT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && MdIndentTokenList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        MD_CONTINUATION_INDENT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(MD_CONTINUATION_INDENT, children)
             }
             MD_DOCUMENT => {
                 let mut elements = (&children).into_iter();
@@ -603,39 +622,6 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                     );
                 }
                 slots.into_node(MD_INLINE_LINK, children)
-            }
-            MD_LINK_BLOCK => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element
-                    && MdTextual::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && MdTextual::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && MdTextual::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        MD_LINK_BLOCK.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(MD_LINK_BLOCK, children)
             }
             MD_LINK_DESTINATION => {
                 let mut elements = (&children).into_iter();

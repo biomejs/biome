@@ -921,7 +921,7 @@ impl JsExportAsClause {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_exported_name(self, element: JsLiteralExportName) -> Self {
+    pub fn with_exported_name(self, element: AnyJsLiteralExportName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -1101,7 +1101,7 @@ impl JsExportNamedFromSpecifier {
                 .splice_slots(0usize..=0usize, once(element.map(|element| element.into()))),
         )
     }
-    pub fn with_source_name(self, element: JsLiteralExportName) -> Self {
+    pub fn with_source_name(self, element: AnyJsLiteralExportName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -1147,7 +1147,7 @@ impl JsExportNamedSpecifier {
                 .splice_slots(2usize..=2usize, once(Some(element.into()))),
         )
     }
-    pub fn with_exported_name(self, element: JsLiteralExportName) -> Self {
+    pub fn with_exported_name(self, element: AnyJsLiteralExportName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
@@ -2305,7 +2305,7 @@ impl JsNamedImportSpecifier {
                 .splice_slots(0usize..=0usize, once(element.map(|element| element.into()))),
         )
     }
-    pub fn with_name(self, element: JsLiteralExportName) -> Self {
+    pub fn with_name(self, element: AnyJsLiteralExportName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -3739,6 +3739,26 @@ impl JsxSelfClosingElement {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(5usize..=5usize, once(Some(element.into()))),
+        )
+    }
+}
+impl JsxShorthandAttribute {
+    pub fn with_l_curly_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_name(self, element: JsReferenceIdentifier) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_r_curly_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
         )
     }
 }

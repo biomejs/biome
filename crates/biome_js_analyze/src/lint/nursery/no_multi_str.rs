@@ -63,12 +63,20 @@ impl Rule for NoMultiStr {
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            node.range(),
-            markup! {
-                "Escaping newlines to create multiline strings is disallowed."
-            },
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                node.range(),
+                markup! {
+                    "This string escapes a newline to span multiple lines."
+                },
+            )
+            .note(markup! {
+                "Escaped newlines make string contents harder to read and can hide unexpected whitespace."
+            })
+            .note(markup! {
+                "Use a template literal or include the newline explicitly instead."
+            }),
+        )
     }
 }

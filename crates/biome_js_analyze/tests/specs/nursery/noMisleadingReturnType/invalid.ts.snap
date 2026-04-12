@@ -1,0 +1,734 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+function stringWiden(b: boolean): string { if (b) return "loading"; return "idle"; }
+function numberWiden(b: boolean): number { if (b) return 200; return 404; }
+function bigintWiden(b: boolean): bigint { if (b) return 1n; return 2n; }
+
+const asConstArrow = (): string => "main" as const;
+const asConstParen = (): string => ("north" as const);
+const asConstNumber = (): number => 42 as const;
+const asConstBlock = (): string => { return "only" as const; };
+
+const arrowMulti = (): string => { if (Math.random() > 0.5) return "yes"; return "no"; };
+
+const fnExprMulti = function(b: boolean): string { if (b) return "dark"; return "light"; };
+
+function nestedPrune(): string {
+    function inner(): number { return 42; }
+    if (Math.random() > 0.5) return "a";
+    return "b";
+}
+
+async function asyncMulti(b: boolean): Promise<string> { if (b) return "a"; return "b"; }
+
+function unionSubset(b: boolean): "a" | "b" | "c" { if (b) return "a"; return "b"; }
+
+function objectAsConst(): { a: string; b: string } {
+    return { a: "x", b: "y" } as const;
+}
+
+async function asyncAsConst(): Promise<string> { return "hello" as const; }
+
+function unwrap<T>(x: T): T | null { return x; }
+
+function asConstVar(): string {
+    const result = "hello" as const;
+    return result;
+}
+
+function recordWider(): Record<string, string> {
+    return { a: "x", b: "y" } as const;
+}
+
+function nullable(flag: boolean): string | null { if (flag) return "yes"; return null; }
+
+const satisfiesConst = (): string => ("idle" as const) satisfies string;
+
+function angleBracketConst(): string { return <const>"hello"; }
+
+function tupleWiden(): [string, number] { return ["hello", 42] as const; }
+
+function ternaryWiden(b: boolean): string { return b ? "a" : "b"; }
+
+class StatusClass { getStatus(b: boolean): string { if (b) return "loading"; return "idle"; } }
+
+const modeObj = { getMode(b: boolean): string { if (b) return "dark"; return "light"; } };
+
+class CodeClass { getCode(b: boolean): number { if (b) return 200; return 404; } }
+
+const codeObj = { getCode(b: boolean): number { if (b) return 200; return 404; } };
+
+class GetterClass { get code(): number { if (Math.random() > 0.5) return 200; return 404; } }
+
+const getterObj = { get code(): number { if (Math.random() > 0.5) return 200; return 404; } };
+
+class AsyncMethod { async getStatus(b: boolean): Promise<string> { if (b) return "loading"; return "idle"; } }
+
+```
+
+# Diagnostics
+```
+invalid.ts:1:33 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+  > 1 │ function stringWiden(b: boolean): string { if (b) return "loading"; return "idle"; }
+      │                                 ^^^^^^^^
+    2 │ function numberWiden(b: boolean): number { if (b) return 200; return 404; }
+    3 │ function bigintWiden(b: boolean): bigint { if (b) return 1n; return 2n; }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using "loading" | "idle" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:2:33 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    1 │ function stringWiden(b: boolean): string { if (b) return "loading"; return "idle"; }
+  > 2 │ function numberWiden(b: boolean): number { if (b) return 200; return 404; }
+      │                                 ^^^^^^^^
+    3 │ function bigintWiden(b: boolean): bigint { if (b) return 1n; return 2n; }
+    4 │ 
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using 200 | 404 as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:3:33 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    1 │ function stringWiden(b: boolean): string { if (b) return "loading"; return "idle"; }
+    2 │ function numberWiden(b: boolean): number { if (b) return 200; return 404; }
+  > 3 │ function bigintWiden(b: boolean): bigint { if (b) return 1n; return 2n; }
+      │                                 ^^^^^^^^
+    4 │ 
+    5 │ const asConstArrow = (): string => "main" as const;
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:5:24 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    3 │ function bigintWiden(b: boolean): bigint { if (b) return 1n; return 2n; }
+    4 │ 
+  > 5 │ const asConstArrow = (): string => "main" as const;
+      │                        ^^^^^^^^
+    6 │ const asConstParen = (): string => ("north" as const);
+    7 │ const asConstNumber = (): number => 42 as const;
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using "main" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:6:24 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    5 │ const asConstArrow = (): string => "main" as const;
+  > 6 │ const asConstParen = (): string => ("north" as const);
+      │                        ^^^^^^^^
+    7 │ const asConstNumber = (): number => 42 as const;
+    8 │ const asConstBlock = (): string => { return "only" as const; };
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using "north" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:7:25 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    5 │ const asConstArrow = (): string => "main" as const;
+    6 │ const asConstParen = (): string => ("north" as const);
+  > 7 │ const asConstNumber = (): number => 42 as const;
+      │                         ^^^^^^^^
+    8 │ const asConstBlock = (): string => { return "only" as const; };
+    9 │ 
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using 42 as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:8:24 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+     6 │ const asConstParen = (): string => ("north" as const);
+     7 │ const asConstNumber = (): number => 42 as const;
+   > 8 │ const asConstBlock = (): string => { return "only" as const; };
+       │                        ^^^^^^^^
+     9 │ 
+    10 │ const arrowMulti = (): string => { if (Math.random() > 0.5) return "yes"; return "no"; };
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using "only" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:10:22 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+     8 │ const asConstBlock = (): string => { return "only" as const; };
+     9 │ 
+  > 10 │ const arrowMulti = (): string => { if (Math.random() > 0.5) return "yes"; return "no"; };
+       │                      ^^^^^^^^
+    11 │ 
+    12 │ const fnExprMulti = function(b: boolean): string { if (b) return "dark"; return "light"; };
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using "yes" | "no" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:12:41 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    10 │ const arrowMulti = (): string => { if (Math.random() > 0.5) return "yes"; return "no"; };
+    11 │ 
+  > 12 │ const fnExprMulti = function(b: boolean): string { if (b) return "dark"; return "light"; };
+       │                                         ^^^^^^^^
+    13 │ 
+    14 │ function nestedPrune(): string {
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using "dark" | "light" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:14:23 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    12 │ const fnExprMulti = function(b: boolean): string { if (b) return "dark"; return "light"; };
+    13 │ 
+  > 14 │ function nestedPrune(): string {
+       │                       ^^^^^^^^
+    15 │     function inner(): number { return 42; }
+    16 │     if (Math.random() > 0.5) return "a";
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using "a" | "b" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:20:38 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    18 │ }
+    19 │ 
+  > 20 │ async function asyncMulti(b: boolean): Promise<string> { if (b) return "a"; return "b"; }
+       │                                      ^^^^^^^^^^^^^^^^^
+    21 │ 
+    22 │ function unionSubset(b: boolean): "a" | "b" | "c" { if (b) return "a"; return "b"; }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using "a" | "b" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:22:33 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    20 │ async function asyncMulti(b: boolean): Promise<string> { if (b) return "a"; return "b"; }
+    21 │ 
+  > 22 │ function unionSubset(b: boolean): "a" | "b" | "c" { if (b) return "a"; return "b"; }
+       │                                 ^^^^^^^^^^^^^^^^^
+    23 │ 
+    24 │ function objectAsConst(): { a: string; b: string } {
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using "a" | "b" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:24:25 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    22 │ function unionSubset(b: boolean): "a" | "b" | "c" { if (b) return "a"; return "b"; }
+    23 │ 
+  > 24 │ function objectAsConst(): { a: string; b: string } {
+       │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │     return { a: "x", b: "y" } as const;
+    26 │ }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:28:30 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    26 │ }
+    27 │ 
+  > 28 │ async function asyncAsConst(): Promise<string> { return "hello" as const; }
+       │                              ^^^^^^^^^^^^^^^^^
+    29 │ 
+    30 │ function unwrap<T>(x: T): T | null { return x; }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using "hello" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:30:25 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    28 │ async function asyncAsConst(): Promise<string> { return "hello" as const; }
+    29 │ 
+  > 30 │ function unwrap<T>(x: T): T | null { return x; }
+       │                         ^^^^^^^^^^
+    31 │ 
+    32 │ function asConstVar(): string {
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:32:22 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    30 │ function unwrap<T>(x: T): T | null { return x; }
+    31 │ 
+  > 32 │ function asConstVar(): string {
+       │                      ^^^^^^^^
+    33 │     const result = "hello" as const;
+    34 │     return result;
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using "hello" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:37:23 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    35 │ }
+    36 │ 
+  > 37 │ function recordWider(): Record<string, string> {
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^
+    38 │     return { a: "x", b: "y" } as const;
+    39 │ }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:41:33 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    39 │ }
+    40 │ 
+  > 41 │ function nullable(flag: boolean): string | null { if (flag) return "yes"; return null; }
+       │                                 ^^^^^^^^^^^^^^^
+    42 │ 
+    43 │ const satisfiesConst = (): string => ("idle" as const) satisfies string;
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:43:26 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    41 │ function nullable(flag: boolean): string | null { if (flag) return "yes"; return null; }
+    42 │ 
+  > 43 │ const satisfiesConst = (): string => ("idle" as const) satisfies string;
+       │                          ^^^^^^^^
+    44 │ 
+    45 │ function angleBracketConst(): string { return <const>"hello"; }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using "idle" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:45:29 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    43 │ const satisfiesConst = (): string => ("idle" as const) satisfies string;
+    44 │ 
+  > 45 │ function angleBracketConst(): string { return <const>"hello"; }
+       │                             ^^^^^^^^
+    46 │ 
+    47 │ function tupleWiden(): [string, number] { return ["hello", 42] as const; }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using "hello" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:47:22 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    45 │ function angleBracketConst(): string { return <const>"hello"; }
+    46 │ 
+  > 47 │ function tupleWiden(): [string, number] { return ["hello", 42] as const; }
+       │                      ^^^^^^^^^^^^^^^^^^
+    48 │ 
+    49 │ function ternaryWiden(b: boolean): string { return b ? "a" : "b"; }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:49:34 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    47 │ function tupleWiden(): [string, number] { return ["hello", 42] as const; }
+    48 │ 
+  > 49 │ function ternaryWiden(b: boolean): string { return b ? "a" : "b"; }
+       │                                  ^^^^^^^^
+    50 │ 
+    51 │ class StatusClass { getStatus(b: boolean): string { if (b) return "loading"; return "idle"; } }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:51:42 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    49 │ function ternaryWiden(b: boolean): string { return b ? "a" : "b"; }
+    50 │ 
+  > 51 │ class StatusClass { getStatus(b: boolean): string { if (b) return "loading"; return "idle"; } }
+       │                                          ^^^^^^^^
+    52 │ 
+    53 │ const modeObj = { getMode(b: boolean): string { if (b) return "dark"; return "light"; } };
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using "loading" | "idle" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:53:38 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    51 │ class StatusClass { getStatus(b: boolean): string { if (b) return "loading"; return "idle"; } }
+    52 │ 
+  > 53 │ const modeObj = { getMode(b: boolean): string { if (b) return "dark"; return "light"; } };
+       │                                      ^^^^^^^^
+    54 │ 
+    55 │ class CodeClass { getCode(b: boolean): number { if (b) return 200; return 404; } }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using "dark" | "light" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:55:38 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    53 │ const modeObj = { getMode(b: boolean): string { if (b) return "dark"; return "light"; } };
+    54 │ 
+  > 55 │ class CodeClass { getCode(b: boolean): number { if (b) return 200; return 404; } }
+       │                                      ^^^^^^^^
+    56 │ 
+    57 │ const codeObj = { getCode(b: boolean): number { if (b) return 200; return 404; } };
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using 200 | 404 as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:57:38 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    55 │ class CodeClass { getCode(b: boolean): number { if (b) return 200; return 404; } }
+    56 │ 
+  > 57 │ const codeObj = { getCode(b: boolean): number { if (b) return 200; return 404; } };
+       │                                      ^^^^^^^^
+    58 │ 
+    59 │ class GetterClass { get code(): number { if (Math.random() > 0.5) return 200; return 404; } }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using 200 | 404 as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:59:31 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    57 │ const codeObj = { getCode(b: boolean): number { if (b) return 200; return 404; } };
+    58 │ 
+  > 59 │ class GetterClass { get code(): number { if (Math.random() > 0.5) return 200; return 404; } }
+       │                               ^^^^^^^^
+    60 │ 
+    61 │ const getterObj = { get code(): number { if (Math.random() > 0.5) return 200; return 404; } };
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using 200 | 404 as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:61:31 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    59 │ class GetterClass { get code(): number { if (Math.random() > 0.5) return 200; return 404; } }
+    60 │ 
+  > 61 │ const getterObj = { get code(): number { if (Math.random() > 0.5) return 200; return 404; } };
+       │                               ^^^^^^^^
+    62 │ 
+    63 │ class AsyncMethod { async getStatus(b: boolean): Promise<string> { if (b) return "loading"; return "idle"; } }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using 200 | 404 as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:63:48 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    61 │ const getterObj = { get code(): number { if (Math.random() > 0.5) return 200; return 404; } };
+    62 │ 
+  > 63 │ class AsyncMethod { async getStatus(b: boolean): Promise<string> { if (b) return "loading"; return "idle"; } }
+       │                                                ^^^^^^^^^^^^^^^^^
+    64 │ 
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using "loading" | "idle" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

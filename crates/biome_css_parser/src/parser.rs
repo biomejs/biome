@@ -1,7 +1,7 @@
-use crate::lexer::CssReLexContext;
+use crate::lexer::{CssReLexContext, CssStringQuote};
 use crate::state::CssParserState;
 use crate::token_source::{CssTokenSource, CssTokenSourceCheckpoint};
-use biome_css_syntax::{CssFileSource, CssSyntaxKind};
+use biome_css_syntax::{CssFileSource, CssSyntaxKind, CssSyntaxKind::SCSS_STRING_QUOTE};
 use biome_parser::ParserContext;
 use biome_parser::diagnostic::merge_diagnostics;
 use biome_parser::event::Event;
@@ -133,6 +133,26 @@ impl<'source> CssParser<'source> {
 
     pub(crate) fn state_mut(&mut self) -> &mut CssParserState {
         &mut self.state
+    }
+
+    pub(crate) fn with_scss_string_interpolation_recovery<T>(
+        &mut self,
+        quote: CssStringQuote,
+        f: impl FnOnce(&mut Self) -> T,
+    ) -> T {
+        self.source.enter_scss_string_interpolation(quote);
+        let result = f(self);
+        self.source.exit_scss_string_interpolation();
+        result
+    }
+
+    /// Returns `true` when the current `SCSS_STRING_QUOTE` starts a segmented
+    /// interpolated string rather than closing the surrounding outer string.
+    ///
+    /// The lexer caches this distinction by setting
+    /// `pending_scss_string_start` only for real interpolated-string starts.
+    pub(crate) fn is_at_scss_interpolated_string(&self) -> bool {
+        self.cur() == SCSS_STRING_QUOTE && self.source().current_has_pending_scss_string_start()
     }
 
     pub fn checkpoint(&self) -> CssParserCheckpoint {
