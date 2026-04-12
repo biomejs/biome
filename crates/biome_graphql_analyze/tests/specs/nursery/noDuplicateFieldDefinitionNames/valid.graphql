@@ -17,18 +17,6 @@ input SomeInputObjectB {
 	foo: String
 }
 
-extend type SomeObjectB {
-	foo: String
-}
-
-extend interface SomeInterfaceB {
-	foo: String
-}
-
-extend input SomeInputObjectB {
-	foo: String
-}
-
 # ---
 
 type SomeObjectC {
@@ -47,16 +35,13 @@ input SomeInputObjectC {
 }
 
 extend type SomeObjectC {
-	foo: String
-	bar: String
+	baz: String
 }
 
 extend interface SomeInterfaceC {
-	foo: String
-	bar: String
+	baz: String
 }
 
 extend input SomeInputObjectC {
-	foo: String
-	bar: String
+	baz: String
 }

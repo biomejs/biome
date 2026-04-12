@@ -34,3 +34,31 @@ extend input SomeInputObject {
 	bar: String
 	foo: String
 }
+
+# extension duplicates field from base type definition
+type BaseObject {
+	name: String
+	age: Int
+}
+
+extend type BaseObject {
+	name: String
+}
+
+interface BaseInterface {
+	name: String
+	age: Int
+}
+
+extend interface BaseInterface {
+	name: String
+}
+
+input BaseInput {
+	name: String
+	age: Int
+}
+
+extend input BaseInput {
+	name: String
+}
