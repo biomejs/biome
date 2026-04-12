@@ -30,3 +30,17 @@ the snapshots:
 4. Install prettier ``pnpm install``
 5. Go to `crates/biome_css_formatter/tests/specs/prettier` directory
 6. Run `node prepare_tests.js <prettier root directory>`
+
+## Updating the SCSS mirror
+
+```bash
+cd crates/biome_css_formatter/tests/specs/prettier/scss
+node prepare_tests.js /path/to/prettier
+```
+
+## Generating SCSS reports
+
+```bash
+REPORT_PRETTIER=1 REPORT_TYPE=json REPORT_FILENAME=crates/biome_css_formatter/tests/specs/prettier/scss/report.json cargo test -p biome_css_formatter --test prettier_tests scss
+REPORT_PRETTIER=1 REPORT_TYPE=markdown REPORT_FILENAME=crates/biome_css_formatter/tests/specs/prettier/scss/report.md cargo test -p biome_css_formatter --test prettier_tests scss
+```

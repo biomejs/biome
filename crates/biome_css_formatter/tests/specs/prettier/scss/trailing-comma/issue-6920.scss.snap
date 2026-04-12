@@ -1,0 +1,38 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/trailing-comma/issue-6920.scss
+---
+
+# Input
+
+```scss
+$my-map: (
+  'foo': 1, // Comment
+  'bar': 2, // Comment
+);
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,4 @@
+ $my-map: (
+-  "foo": 1,
+-  // Comment
++  "foo": 1, // Comment
+   "bar": 2, // Comment
+ );
+```
+
+# Output
+
+```scss
+$my-map: (
+  "foo": 1, // Comment
+  "bar": 2, // Comment
+);
+```

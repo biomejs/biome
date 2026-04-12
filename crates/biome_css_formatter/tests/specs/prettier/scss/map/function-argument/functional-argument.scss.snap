@@ -1,0 +1,203 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/map/function-argument/functional-argument.scss
+---
+
+# Input
+
+```scss
+//simple test
+$display-breakpoints: map-deep-merge(
+  (
+    "print-only": "only print",
+    "screen-only": "only screen",
+    "xs-only": "only screen and (max-width: #{map-get($grid-breakpoints, "sm") - 1})",
+    "sm-only": "only screen and (min-width: #{map-get($grid-breakpoints, "sm")}) and (max-width: #{map-get($grid-breakpoints, "md") - 1})",
+  ),
+  $display-breakpoints
+);
+
+
+//list test
+@each
+$size
+in
+$sizes {
+.icon
+#{$size}
+{
+border
+:
+"#{$size + "px"}"
+solid
+red;
+}
+}
+
+@each
+$size
+in
+$sizes {
+.icon-#{$size}
+{
+border
+:
+"#{$size + "px"}"
+solid
+red;
+}
+}
+
+//map test
+$font-weights
+:
+("regular": 400
+,
+"medium": 500,
+"bold":
+700);
+@each
+$name,
+$boldness
+in
+$icons {
+.text
+#{
+$name
+} {
+color: red;
+font-weight:
+"#{$boldness}"
+}
+}
+
+$font-weights
+:
+("regular": 400
+,
+"medium": 500,
+"bold":
+700);
+@each
+$name,
+$boldness
+in
+$icons {
+.text-#{
+$name
+} {
+color: red;
+font-weight:
+"#{$boldness}"
+}
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -3,10 +3,12 @@
+   (
+     "print-only": "only print",
+     "screen-only": "only screen",
+-    "xs-only":
+-      "only screen and (max-width: #{map-get($grid-breakpoints, "sm") - 1})",
+-    "sm-only":
+-      "only screen and (min-width: #{map-get($grid-breakpoints, "sm")}) and (max-width: #{map-get($grid-breakpoints, "md") - 1})",
++    "xs-only": "only screen and (max-width: #{map-get($grid-breakpoints, "sm") -
++    1})",
++    "sm-only": "only screen and (min-width: #{map-get(
++      $grid-breakpoints,
++      "sm"
++    )}) and (max-width: #{map-get($grid-breakpoints, "md") - 1})",
+   ),
+   $display-breakpoints
+ );
+@@ -30,8 +32,9 @@
+   "medium": 500,
+   "bold": 700,
+ );
+-@each $name, $boldness in $icons {
+-  .text #{ $name } {
++@each $name,
++$boldness in $icons {
++  .text #{$name} {
+     color: red;
+     font-weight: "#{$boldness}";
+   }
+@@ -42,8 +45,9 @@
+   "medium": 500,
+   "bold": 700,
+ );
+-@each $name, $boldness in $icons {
+-  .text-#{ $name } {
++@each $name,
++$boldness in $icons {
++  .text-#{$name} {
+     color: red;
+     font-weight: "#{$boldness}";
+   }
+```
+
+# Output
+
+```scss
+//simple test
+$display-breakpoints: map-deep-merge(
+  (
+    "print-only": "only print",
+    "screen-only": "only screen",
+    "xs-only": "only screen and (max-width: #{map-get($grid-breakpoints, "sm") -
+    1})",
+    "sm-only": "only screen and (min-width: #{map-get(
+      $grid-breakpoints,
+      "sm"
+    )}) and (max-width: #{map-get($grid-breakpoints, "md") - 1})",
+  ),
+  $display-breakpoints
+);
+
+//list test
+@each $size in $sizes {
+  .icon #{$size} {
+    border: "#{$size + "px"}" solid red;
+  }
+}
+
+@each $size in $sizes {
+  .icon-#{$size} {
+    border: "#{$size + "px"}" solid red;
+  }
+}
+
+//map test
+$font-weights: (
+  "regular": 400,
+  "medium": 500,
+  "bold": 700,
+);
+@each $name,
+$boldness in $icons {
+  .text #{$name} {
+    color: red;
+    font-weight: "#{$boldness}";
+  }
+}
+
+$font-weights: (
+  "regular": 400,
+  "medium": 500,
+  "bold": 700,
+);
+@each $name,
+$boldness in $icons {
+  .text-#{$name} {
+    color: red;
+    font-weight: "#{$boldness}";
+  }
+}
+```
