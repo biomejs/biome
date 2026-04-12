@@ -19,6 +19,17 @@ pub struct UseNullishCoalescingOptions {
     ///
     /// Default: `false`
     pub ignore_ternary_tests: Option<bool>,
+
+    /// Whether to ignore `||` expressions when they appear as an argument
+    /// to the global `Boolean()` constructor, where boolean coercion is
+    /// the explicit intent.
+    ///
+    /// Only suppresses the diagnostic when `Boolean` resolves to the global
+    /// built-in. If `Boolean` is shadowed by a local binding, the diagnostic
+    /// is still reported.
+    ///
+    /// Default: `false`
+    pub ignore_boolean_coercion: Option<bool>,
 }
 
 impl UseNullishCoalescingOptions {
@@ -28,5 +39,9 @@ impl UseNullishCoalescingOptions {
 
     pub fn ignore_ternary_tests(&self) -> bool {
         self.ignore_ternary_tests.unwrap_or(false)
+    }
+
+    pub fn ignore_boolean_coercion(&self) -> bool {
+        self.ignore_boolean_coercion.unwrap_or(false)
     }
 }

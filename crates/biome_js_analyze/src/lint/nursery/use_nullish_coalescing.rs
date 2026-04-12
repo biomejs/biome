@@ -7,9 +7,9 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsAssignmentPattern, AnyJsExpression, JsAssignmentExpression, JsAssignmentOperator,
-    JsBinaryOperator, JsConditionalExpression, JsDoWhileStatement, JsForStatement,
-    JsIfStatement, JsLogicalExpression, JsLogicalOperator, JsParenthesizedExpression,
-    JsSyntaxKind, JsWhileStatement, OperatorPrecedence, T,
+    JsBinaryOperator, JsCallExpression, JsConditionalExpression, JsDoWhileStatement,
+    JsForStatement, JsIfStatement, JsLogicalExpression, JsLogicalOperator,
+    JsParenthesizedExpression, JsSyntaxKind, JsWhileStatement, OperatorPrecedence, T,
 };
 use biome_js_type_info::{ConditionalType, TypeData};
 use biome_rowan::{
@@ -142,6 +142,33 @@ declare_lint_rule! {
     /// ```ts,use_options
     /// declare const x: string | null;
     /// const value = x !== null ? x : 'default'; // no diagnostic
+    /// ```
+    ///
+    /// ### ignoreBooleanCoercion
+    ///
+    /// Ignore `||` expressions when they appear as an argument to the
+    /// global `Boolean()` constructor, where boolean coercion is the
+    /// explicit intent.
+    ///
+    /// Only suppresses the diagnostic when `Boolean` resolves to the
+    /// global built-in. If `Boolean` is shadowed by a local binding,
+    /// the diagnostic is still reported.
+    ///
+    /// **Default:** `false`
+    ///
+    /// Setting this to `true` will suppress diagnostics inside `Boolean()`:
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "ignoreBooleanCoercion": true
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```ts,use_options
+    /// declare const a: string | null;
+    /// const r = Boolean(a || 'default'); // no diagnostic
     /// ```
     ///
     pub UseNullishCoalescing {
@@ -362,6 +389,10 @@ fn run_logical_or(
         return None;
     }
 
+    if options.ignore_boolean_coercion() && is_in_global_boolean_call(ctx, logical) {
+        return None;
+    }
+
     let left = logical.left().ok()?;
     let left_ty = ctx.type_of_expression(&left);
 
@@ -515,6 +546,48 @@ fn is_in_test_position(logical: &JsLogicalExpression) -> bool {
         }
     }
     false
+}
+
+/// Returns `true` if the logical expression is an argument to `Boolean(...)` where
+/// `Boolean` refers to the global built-in constructor (i.e. it has no local binding).
+fn is_in_global_boolean_call(
+    ctx: &RuleContext<UseNullishCoalescing>,
+    logical: &JsLogicalExpression,
+) -> bool {
+    // Walk up through parenthesized wrappers and argument-list nodes to the call.
+    let mut node = logical.syntax().clone();
+    loop {
+        let parent = match node.parent() {
+            Some(p) => p,
+            None => return false,
+        };
+        if JsParenthesizedExpression::can_cast(parent.kind())
+            || parent.kind() == JsSyntaxKind::JS_CALL_ARGUMENT_LIST
+            || parent.kind() == JsSyntaxKind::JS_CALL_ARGUMENTS
+        {
+            node = parent;
+            continue;
+        }
+        if let Some(call) = JsCallExpression::cast(parent) {
+            if !call.has_callee("Boolean") {
+                return false;
+            }
+            let callee = match call.callee().ok() {
+                Some(c) => c,
+                None => return false,
+            };
+            let ident = match callee.as_js_identifier_expression() {
+                Some(e) => match e.name().ok() {
+                    Some(name) => name,
+                    None => return false,
+                },
+                None => return false,
+            };
+            // If Boolean has a local binding, it's shadowed -- not the global built-in.
+            return !ctx.has_binding(&ident);
+        }
+        return false;
+    }
 }
 
 fn run_ternary(
