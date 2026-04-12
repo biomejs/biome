@@ -446,7 +446,7 @@ mod tests {
     fn to_location_normalizes_backslashes() {
         let location = Location::builder()
             .resource(&r"typescript\src\account\setup-passkey.tsx")
-            .span(&(0..5))
+            .span(&(0u32..5u32))
             .source_code(&"hello")
             .build();
 
@@ -458,7 +458,7 @@ mod tests {
     fn to_location_preserves_unix_paths() {
         let location = Location::builder()
             .resource(&"typescript/src/account/setup-passkey.tsx")
-            .span(&(0..5))
+            .span(&(0u32..5u32))
             .source_code(&"hello")
             .build();
 
@@ -470,7 +470,7 @@ mod tests {
     fn to_location_handles_mixed_separators() {
         let location = Location::builder()
             .resource(&r"src\components/Button\index.tsx")
-            .span(&(0..5))
+            .span(&(0u32..5u32))
             .source_code(&"hello")
             .build();
 
