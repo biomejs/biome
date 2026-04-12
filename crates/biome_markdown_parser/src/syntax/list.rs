@@ -515,9 +515,17 @@ impl ParseNodeList for BulletList {
         // Check blank line at line start with indent awareness BEFORE
         // delegating to is_at_list_end_common (which uses non-indent-aware check).
         if p.at_line_start() && at_blank_line_start(p) {
-            let result = !has_bullet_item_after_blank_lines_at_indent(p, marker_indent);
-
-            return result;
+            let has_item = has_bullet_item_after_blank_lines_at_indent(p, marker_indent);
+            if !has_item {
+                return true;
+            }
+            // Per CommonMark §5.3, a change in bullet marker across a blank line
+            // starts a new list — even when the first item's content was a heading,
+            // thematic break, setext heading, or fenced code block.
+            if marker_changes_after_blank_lines(p, self.marker_kind) {
+                return true;
+            }
+            return false;
         }
 
         is_at_list_end_common(
@@ -2156,10 +2164,21 @@ fn check_continuation_indent(
     let indent = line_indent_from_current(p);
 
     if indent < state.marker_indent {
-        return ContinuationResult {
-            action: LoopAction::Break,
-            restore: VirtualLineRestore::None,
-        };
+        // Below the marker indent. Lazy continuation is still allowed for
+        // plain-text lines per CommonMark §5.2; list item starts and block
+        // interrupts must break.
+        let can_lazy = state.last_block_was_paragraph
+            && !at_bullet_list_item_with_base_indent(p, 0)
+            && !at_order_list_item_with_base_indent(p, 0)
+            && !at_block_interrupt(p);
+        if !can_lazy {
+            return ContinuationResult {
+                action: LoopAction::Break,
+                restore: VirtualLineRestore::None,
+            };
+        }
+        // Fall through: the insufficient-indent branch below handles the
+        // lazy continuation emit.
     }
 
     if indent >= state.required_indent {
