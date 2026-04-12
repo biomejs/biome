@@ -599,9 +599,11 @@ impl Binding {
     /// itself an `export` statement) or an identifier usage.
     pub fn exports(&self) -> impl Iterator<Item = JsSyntaxNode> + '_ {
         let binding = self.data.binding(self.id);
-        binding.export_ranges.iter().map(|export_start| {
-            self.data.binding_node_by_start[&export_start.start()]
-                .to_node(self.data.to_root().syntax())
+        binding.export_ranges.iter().filter_map(|export_start| {
+            self.data
+                .binding_node_by_start
+                .get(&export_start.start())
+                .map(|ptr| ptr.to_node(self.data.to_root().syntax()))
         })
     }
 
