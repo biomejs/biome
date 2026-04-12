@@ -298,7 +298,7 @@ fn to_json_report(diagnostic: &biome_diagnostics::Error) -> JsonReport {
     let location = to_location(&location).or_else(|| {
         let location = location
             .resource
-            .and_then(|location| location.as_file().map(|f| f.to_string()))?;
+            .and_then(|location| location.as_file().map(|f| f.to_string().replace('\\', "/")))?;
         Some(LocationReport {
             path: location,
             start: LocationSpan { column: 0, line: 0 },
@@ -337,8 +337,11 @@ fn to_location(location: &Location) -> Option<LocationReport> {
     let source = SourceFile::new(source_code);
     let start = source.location(span.start()).ok()?;
     let end = source.location(span.end()).ok()?;
+    // Normalize path separators to forward slashes for consistent JSON output
+    // across platforms (fixes backslash paths on Windows)
+    let path = resource.to_string().replace('\\', "/");
     Some(LocationReport {
-        path: resource.to_string(),
+        path,
         start: LocationSpan {
             column: start.column_number.get(),
             line: start.line_number.get(),
