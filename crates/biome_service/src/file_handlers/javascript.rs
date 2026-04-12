@@ -1275,6 +1275,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         let plugin_text_edit = pending_actions
             .iter()
             .find_map(|action| action.text_edit.clone());
+        pending_actions.retain(|action| action.text_edit.is_none());
         let result = process_fix_all.process_batch_actions(pending_actions, |root| {
             tree = match AnyJsRoot::cast(root) {
                 Some(tree) => tree,
