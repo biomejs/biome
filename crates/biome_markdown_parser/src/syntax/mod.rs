@@ -858,18 +858,22 @@ fn is_quote_blank_line_after_newline(p: &mut MarkdownParser, quote_depth: usize)
 
     p.lookahead(|p| {
         p.bump(NEWLINE);
-        if is_quote_only_blank_line_from_source(p, quote_depth) {
-            return true;
-        }
-        if !has_quote_prefix(p, quote_depth) {
-            return false;
-        }
-        consume_quote_prefix_without_virtual(p, quote_depth);
-        while p.at(MD_TEXTUAL_LITERAL) && p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
-            p.bump(MD_TEXTUAL_LITERAL);
-        }
-        p.at(NEWLINE) || p.at(T![EOF])
+        is_quote_blank_line_from_current(p, quote_depth)
     })
+}
+
+fn is_quote_blank_line_from_current(p: &mut MarkdownParser, quote_depth: usize) -> bool {
+    if is_quote_only_blank_line_from_source(p, quote_depth) {
+        return true;
+    }
+    if !has_quote_prefix(p, quote_depth) {
+        return false;
+    }
+    consume_quote_prefix_without_virtual(p, quote_depth);
+    while p.at(MD_TEXTUAL_LITERAL) && p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
+        p.bump(MD_TEXTUAL_LITERAL);
+    }
+    p.at(NEWLINE) || p.at(T![EOF])
 }
 
 /// Returns `true` when the quote prefix signals a block break (setext
@@ -1009,8 +1013,22 @@ fn handle_inline_newline(p: &mut MarkdownParser, has_content: bool) -> InlineNew
     // Consume the NEWLINE as textual content (remap to MD_TEXTUAL_LITERAL)
     emit_inline_newline_as_text(p);
 
-    // If we're inside a block quote, only consume the quote prefix
-    // when it doesn't start a new block (e.g., a nested quote).
+    handle_line_continuation(p, has_content, true)
+}
+
+/// Consume container continuation prefixes and check for block interrupts.
+///
+/// Called after a line boundary has been crossed — either a NEWLINE (via
+/// `handle_inline_newline`) or a hard line break (`MD_HARD_LINE_LITERAL`,
+/// which embeds its own newline). Handles quote prefixes, list indent,
+/// setext underlines, and other block-level constructs that can end or
+/// interrupt a paragraph.
+fn handle_line_continuation(
+    p: &mut MarkdownParser,
+    has_content: bool,
+    emit_indent_tokens: bool,
+) -> InlineNewlineAction {
+    let quote_depth = p.state().block_quote_depth;
     if break_for_quote_prefix_after_inline_newline(p, quote_depth) {
         return InlineNewlineAction::Break;
     }
@@ -1024,12 +1042,6 @@ fn handle_inline_newline(p: &mut MarkdownParser, has_content: bool) -> InlineNew
         return InlineNewlineAction::Break;
     }
 
-    // Inside a nested list item (depth >= 2), break the paragraph when the
-    // continuation line's indent drops to or below the marker column.
-    // Such lines belong to a parent item, not lazy continuation.
-    // We only check nesting depth, not marker_indent alone, because a
-    // top-level list with leading whitespace (e.g. `  1.  text`) still
-    // allows lazy continuation at indent 0 per CommonMark §5.2.
     if required_indent > 0 && p.state().list_nesting_depth >= 2 {
         let marker_indent = p.state().list_item_marker_indent;
         if marker_indent > 0 {
@@ -1040,9 +1052,6 @@ fn handle_inline_newline(p: &mut MarkdownParser, has_content: bool) -> InlineNew
         }
     }
 
-    // Check for block-level constructs that can interrupt paragraphs.
-    // Textual fence tokens (e.g. "```") may not be caught by line_starts_with_fence
-    // because the lexer emits them as MD_TEXTUAL_LITERAL in inline context.
     if p.at(MD_TEXTUAL_LITERAL) {
         let text = p.cur_text();
         if text.starts_with("```") || text.starts_with("~~~") {
@@ -1053,7 +1062,9 @@ fn handle_inline_newline(p: &mut MarkdownParser, has_content: bool) -> InlineNew
         return InlineNewlineAction::Break;
     }
 
-    emit_inline_continuation_indent(p, required_indent);
+    if emit_indent_tokens {
+        emit_inline_continuation_indent(p, required_indent);
+    }
 
     InlineNewlineAction::Continue
 }
@@ -1145,8 +1156,21 @@ pub(crate) fn parse_inline_item_list(p: &mut MarkdownParser) {
         after_hard_break = matches!(&parsed, Present(cm) if cm.kind(p) == MD_HARD_LINE);
 
         // Per CommonMark §6.7: after a hard line break, leading spaces on the
-        // next line are ignored. Consume as whitespace trivia (structural).
+        // next line are ignored. First, run container continuation handling so
+        // block quote/list prefixes remain part of the same paragraph.
         if after_hard_break {
+            let quote_depth = p.state().block_quote_depth;
+            if p.at(NEWLINE) || is_quote_blank_line_from_current(p, quote_depth) {
+                break;
+            }
+
+            if matches!(
+                handle_line_continuation(p, has_content, false),
+                InlineNewlineAction::Break
+            ) {
+                break;
+            }
+
             while p.at(MD_TEXTUAL_LITERAL) && p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
                 p.consume_as_whitespace_trivia();
             }
