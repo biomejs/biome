@@ -2,7 +2,7 @@ use super::*;
 use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
 use biome_configuration::{
-    FormatterConfiguration, JsConfiguration,
+    Configuration, FormatterConfiguration, JsConfiguration, LinterConfiguration,
     analyzer::AnalyzerSelector,
     javascript::{JsFormatterConfiguration, JsParserConfiguration, JsResolverConfiguration},
 };
@@ -164,6 +164,113 @@ fn pnpm_workspace_update_reapplies_catalogs() {
         .and_then(|catalogs| catalogs.named.get("react19"))
         .and_then(|dependencies| dependencies.get("react"));
     assert_eq!(updated_react, Some("18.3.1"));
+}
+
+#[test]
+fn pull_diagnostics_skips_lint_when_linter_disabled() {
+    const FILE_CONTENT: &str = "debugger;\n";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/file.js"), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    let inline_config = Configuration {
+        linter: Some(LinterConfiguration {
+            enabled: Some(false.into()),
+            ..LinterConfiguration::default()
+        }),
+        ..Configuration::default()
+    };
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/file.js"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let file_features = workspace
+        .file_features(SupportsFeatureParams {
+            project_key,
+            features: FeaturesBuilder::new().with_linter().build(),
+            path: BiomePath::new("/project/file.js"),
+            inline_config: Some(inline_config.clone()),
+            skip_ignore_check: false,
+            not_requested_features: FeaturesBuilder::new().build(),
+        })
+        .unwrap()
+        .features_supported;
+
+    assert!(!file_features.supports_lint());
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new("/project/file.js"),
+            categories: RuleCategories::all(),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            pull_code_actions: true,
+            inline_config: Some(inline_config),
+        })
+        .unwrap();
+
+    assert!(
+        result.diagnostics.is_empty(),
+        "Expected no diagnostics when the linter is disabled, got: {:#?}",
+        result.diagnostics
+    );
+}
+
+#[test]
+fn pull_diagnostics_and_actions_skips_lint_when_linter_disabled() {
+    const FILE_CONTENT: &str = "debugger;\n";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/file.js"), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    let inline_config = Configuration {
+        linter: Some(LinterConfiguration {
+            enabled: Some(false.into()),
+            ..LinterConfiguration::default()
+        }),
+        ..Configuration::default()
+    };
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/file.js"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics_and_actions(PullDiagnosticsAndActionsParams {
+            project_key,
+            path: BiomePath::new("/project/file.js"),
+            categories: RuleCategories::all(),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            inline_config: Some(inline_config),
+        })
+        .unwrap();
+
+    assert!(
+        result.diagnostics.is_empty(),
+        "Expected no diagnostics or actions when the linter is disabled, got: {:#?}",
+        result.diagnostics
+    );
 }
 
 #[test]

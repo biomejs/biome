@@ -224,6 +224,59 @@ impl WorkspaceServer {
         }
     }
 
+    fn supported_analyzer_categories(
+        &self,
+        project_key: ProjectKey,
+        path: &BiomePath,
+        settings: &Settings,
+        capabilities: &Capabilities,
+        inline_config: Option<Configuration>,
+        mut categories: RuleCategories,
+    ) -> Result<RuleCategories, WorkspaceError> {
+        let mut requested_features = FeaturesBuilder::new();
+
+        if categories.is_lint() {
+            requested_features = requested_features.with_linter();
+        }
+
+        if categories.is_assist() {
+            requested_features = requested_features.with_assist();
+        }
+
+        let requested_features = requested_features.build();
+        if requested_features.is_empty() {
+            return Ok(categories);
+        }
+
+        let language =
+            self.get_file_source(path, settings.experimental_full_html_support_enabled());
+        let settings = self.settings_handle(settings, inline_config);
+        let file_features = self
+            .projects
+            .get_file_features(GetFileFeaturesParams {
+                fs: self.fs.as_ref(),
+                project_key,
+                path,
+                requested_features,
+                language,
+                capabilities,
+                handle: &settings,
+                skip_ignore_check: false,
+                not_requested_features: FeaturesBuilder::new().build(),
+            })?
+            .features_supported;
+
+        if categories.is_lint() && !file_features.supports_lint() {
+            categories.remove(RuleCategory::Lint);
+        }
+
+        if categories.is_assist() && !file_features.supports_assist() {
+            categories.remove(RuleCategory::Action);
+        }
+
+        Ok(categories)
+    }
+
     /// Starts the watcher.
     ///
     /// This method will not return until the watcher stops.
@@ -2036,6 +2089,14 @@ impl Workspace for WorkspaceServer {
         let language =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
         let capabilities = self.features.get_capabilities(language);
+        let categories = self.supported_analyzer_categories(
+            project_key,
+            &path,
+            &settings,
+            &capabilities,
+            inline_config.clone(),
+            categories,
+        )?;
 
         let parse_errors = parse
             .diagnostics()
@@ -2200,6 +2261,14 @@ impl Workspace for WorkspaceServer {
         let language =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
         let capabilities = self.features.get_capabilities(language);
+        let categories = self.supported_analyzer_categories(
+            project_key,
+            &path,
+            &settings,
+            &capabilities,
+            inline_config.clone(),
+            categories,
+        )?;
         let result = if (categories.is_lint() || categories.is_assist())
             && let Some(pull_diagnostics_and_actions) =
                 capabilities.analyzer.pull_diagnostics_and_actions
