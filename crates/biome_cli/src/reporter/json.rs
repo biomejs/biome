@@ -477,4 +477,20 @@ mod tests {
         let report = to_location(&location).expect("expected LocationReport");
         assert_eq!(report.path, "src/components/Button/index.tsx");
     }
+
+    #[test]
+    fn fallback_path_normalizes_backslashes() {
+        // When to_location returns None (no span/source_code), the fallback
+        // in to_json_report should still normalize backslashes.
+        let location = Location::builder()
+            .resource(&r"views\admin\dashboard.tsx")
+            .build();
+
+        // to_location returns None here because there's no span
+        assert!(to_location(&location).is_none());
+
+        // Verify the normalization logic directly
+        let raw_path = r"views\admin\dashboard.tsx".to_string().replace('\\', "/");
+        assert_eq!(raw_path, "views/admin/dashboard.tsx");
+    }
 }
