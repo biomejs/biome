@@ -393,4 +393,154 @@ pub fn quick_test() {
         "* item one\n\n- item two\n",
         "<ul>\n<li>item one</li>\n</ul>\n<ul>\n<li>item two</li>\n</ul>\n",
     );
+
+    // Fuzzer: mixed markers after heading-in-list — 3 markers
+    test_example(
+        30001,
+        "- # Bar\n\n+ item one\n\n* item two\n",
+        "<ul>\n<li>\n<h1>Bar</h1>\n</li>\n</ul>\n<ul>\n<li>item one</li>\n</ul>\n<ul>\n<li>item two</li>\n</ul>\n",
+    );
+    // Reduce: heading in list then different marker
+    test_example(
+        30011,
+        "- # Bar\n\n+ item\n",
+        "<ul>\n<li>\n<h1>Bar</h1>\n</li>\n</ul>\n<ul>\n<li>item</li>\n</ul>\n",
+    );
+    // Reduce: paragraph in list then different marker (should work like 10006)
+    test_example(
+        30012,
+        "- bar\n\n+ item\n",
+        "<ul>\n<li>bar</li>\n</ul>\n<ul>\n<li>item</li>\n</ul>\n",
+    );
+    // Reduce: thematic break in list then different marker
+    // NOTE: `- ---` is a pre-existing Biome bug where it parses as a top-level
+    // thematic break instead of a list item containing <hr />.
+    test_example(
+        30013,
+        "- ---\n\n+ item\n",
+        "<hr />\n<ul>\n<li>item</li>\n</ul>\n",
+    );
+    // Reduce: setext heading in list then different marker
+    test_example(
+        30014,
+        "- Foo\n  ---\n\n+ item\n",
+        "<ul>\n<li>\n<h2>Foo</h2>\n</li>\n</ul>\n<ul>\n<li>item</li>\n</ul>\n",
+    );
+
+    // Fuzzer: lazy continuation with trailing paragraph
+    test_example(
+        30002,
+        "- outer\n  * nested\n  lazy line\nhello\n",
+        "<ul>\n<li>outer\n<ul>\n<li>nested\nlazy line\nhello</li>\n</ul>\n</li>\n</ul>\n",
+    );
+
+    // Fuzzer: fenced code after list not absorbed
+    test_example(
+        30003,
+        "* one\n* two\n```\ncode here\n```\n",
+        "<ul>\n<li>one</li>\n<li>two</li>\n</ul>\n<pre><code>code here\n</code></pre>\n",
+    );
+
+    // Fuzzer: mixed markers after fenced code in list item
+    test_example(
+        30004,
+        "- item\n\n  ```\n  code\n  ```\n\n+ other\n",
+        "<ul>\n<li>\n<p>item</p>\n<pre><code>code\n</code></pre>\n</li>\n</ul>\n<ul>\n<li>other</li>\n</ul>\n",
+    );
+
+    // Fuzzer: lazy continuation absorbs following non-indented line
+    test_example(
+        30005,
+        "- outer\n  - nested\n  lazy line\nhello\n",
+        "<ul>\n<li>outer\n<ul>\n<li>nested\nlazy line\nhello</li>\n</ul>\n</li>\n</ul>\n",
+    );
+}
+
+fn fuzz_test_example(num: u32, input: &str, expected: &str) {
+    let root = parse_markdown(input);
+    let doc =
+        MdDocument::cast(root.syntax()).unwrap_or_else(|| panic!("Fuzz {:03}: parse failed", num));
+    let html = document_to_html(
+        &doc,
+        root.list_tightness(),
+        root.list_item_indents(),
+        root.quote_indents(),
+    );
+    similar_asserts::assert_eq!(expected, html, "Fuzz {:03} failed\nInput: {:?}", num, input);
+}
+
+#[test]
+fn fuzz_mixed_markers_heading() {
+    fuzz_test_example(
+        1,
+        "- # Bar\n\n+ item\n",
+        "<ul>\n<li>\n<h1>Bar</h1>\n</li>\n</ul>\n<ul>\n<li>item</li>\n</ul>\n",
+    );
+}
+
+#[test]
+fn fuzz_mixed_markers_paragraph() {
+    fuzz_test_example(
+        2,
+        "- bar\n\n+ item\n",
+        "<ul>\n<li>bar</li>\n</ul>\n<ul>\n<li>item</li>\n</ul>\n",
+    );
+}
+
+/// NOTE: `- ---` is parsed by Biome as a top-level thematic break rather than
+/// a list item containing `<hr />`. This is a separate pre-existing bug
+/// (thematic break precedence over list marker) unrelated to the mixed-marker
+/// list-split fix. The expected value here matches Biome's current behavior.
+#[test]
+fn fuzz_mixed_markers_thematic_break() {
+    fuzz_test_example(
+        3,
+        "- ---\n\n+ item\n",
+        "<hr />\n<ul>\n<li>item</li>\n</ul>\n",
+    );
+}
+
+#[test]
+fn fuzz_mixed_markers_setext() {
+    fuzz_test_example(
+        4,
+        "- Foo\n  ---\n\n+ item\n",
+        "<ul>\n<li>\n<h2>Foo</h2>\n</li>\n</ul>\n<ul>\n<li>item</li>\n</ul>\n",
+    );
+}
+
+#[test]
+fn fuzz_mixed_markers_fenced_code() {
+    fuzz_test_example(
+        5,
+        "- item\n\n  ```\n  code\n  ```\n\n+ other\n",
+        "<ul>\n<li>\n<p>item</p>\n<pre><code>code\n</code></pre>\n</li>\n</ul>\n<ul>\n<li>other</li>\n</ul>\n",
+    );
+}
+
+#[test]
+fn fuzz_lazy_cont_nested_trailing() {
+    fuzz_test_example(
+        6,
+        "- outer\n  * nested\n  lazy line\nhello\n",
+        "<ul>\n<li>outer\n<ul>\n<li>nested\nlazy line\nhello</li>\n</ul>\n</li>\n</ul>\n",
+    );
+}
+
+#[test]
+fn fuzz_lazy_cont_nested_same_marker() {
+    fuzz_test_example(
+        7,
+        "- outer\n  - nested\n  lazy line\nhello\n",
+        "<ul>\n<li>outer\n<ul>\n<li>nested\nlazy line\nhello</li>\n</ul>\n</li>\n</ul>\n",
+    );
+}
+
+#[test]
+fn fuzz_code_after_list_not_absorbed() {
+    fuzz_test_example(
+        8,
+        "* one\n* two\n```\ncode here\n```\n",
+        "<ul>\n<li>one</li>\n<li>two</li>\n</ul>\n<pre><code>code here\n</code></pre>\n",
+    );
 }
