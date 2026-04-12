@@ -58,7 +58,7 @@ Full TypeId(1) => bool: true
 
 Full TypeId(2) => unknown
 
-Full TypeId(3) => Full TypeId(0) | Full TypeId(1)
+Full TypeId(3) => Module(0) TypeId(0) | Module(0) TypeId(1)
 
 Full TypeId(4) => void
 
@@ -67,6 +67,6 @@ Full TypeId(5) => sync Function "f" {
     params: []
     type_args: []
   }
-  returns: Full TypeId(4)
+  returns: Module(0) TypeId(4)
 }
 ```
