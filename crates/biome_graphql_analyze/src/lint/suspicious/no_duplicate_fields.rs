@@ -5,10 +5,10 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_graphql_syntax::{
-    AnyGraphqlOperationDefinition, AnyGraphqlSelection, GraphqlArguments, GraphqlSelectionSet,
-    GraphqlVariableDefinitions,
+    AnyGraphqlDefinition, AnyGraphqlOperationDefinition, AnyGraphqlSelection, GraphqlArguments,
+    GraphqlRoot, GraphqlSelectionSet, GraphqlVariableDefinitions,
 };
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::{AstNode, AstNodeList, TextRange};
 use biome_rule_options::no_duplicate_fields::NoDuplicateFieldsOptions;
 use biome_string_case::StrOnlyExtension;
 
@@ -48,6 +48,20 @@ declare_lint_rule! {
     /// ```graphql,expect_diagnostic
     /// query ($v: String, $t: String, $v: String) {
     ///   id
+    /// }
+    /// ```
+    ///
+    /// ```graphql,expect_diagnostic
+    /// fragment MemberFields on Member {
+    ///   id
+    ///   name
+    /// }
+    ///
+    /// query {
+    ///   member {
+    ///     ...MemberFields
+    ///     name
+    ///   }
     /// }
     /// ```
     ///
@@ -146,6 +160,19 @@ fn check_duplicated_selection_fields(selection_set: &GraphqlSelectionSet) -> Vec
     let mut duplicated_fields = vec![];
     let mut duplicated_arguments = vec![];
     let mut unique_field_names = HashSet::new();
+
+    // First, collect field names introduced by fragment spreads so that direct
+    // fields that duplicate them are flagged.
+    for selection in selection_set.selections() {
+        if let AnyGraphqlSelection::GraphqlFragmentSpread(spread) = &selection {
+            if let Some(fragment_fields) = resolve_fragment_spread_fields(spread) {
+                for name in fragment_fields {
+                    unique_field_names.insert(name);
+                }
+            }
+        }
+    }
+
     for selection in selection_set.selections() {
         let AnyGraphqlSelection::GraphqlField(field) = selection else {
             continue;
@@ -173,6 +200,36 @@ fn check_duplicated_selection_fields(selection_set: &GraphqlSelectionSet) -> Vec
     duplicated_fields.extend(duplicated_arguments);
 
     duplicated_fields
+}
+
+/// Resolve a fragment spread to the field names defined in its corresponding
+/// fragment definition within the same document.
+fn resolve_fragment_spread_fields(
+    spread: &biome_graphql_syntax::GraphqlFragmentSpread,
+) -> Option<Vec<String>> {
+    let spread_name = spread.name().ok()?.to_trimmed_string();
+    // Walk up the syntax tree to find the GraphqlRoot.
+    let root = spread.syntax().ancestors().find_map(GraphqlRoot::cast)?;
+    for definition in root.definitions() {
+        if let AnyGraphqlDefinition::GraphqlFragmentDefinition(fragment) = definition {
+            let fragment_name = fragment.name().ok()?.to_trimmed_string();
+            if fragment_name == spread_name {
+                let selection_set = fragment.selection_set().ok()?;
+                let mut field_names = Vec::new();
+                for selection in selection_set.selections() {
+                    if let AnyGraphqlSelection::GraphqlField(field) = selection {
+                        if let Ok(name) =
+                            field.alias().map_or(field.name(), |alias| alias.value())
+                        {
+                            field_names.push(name.to_trimmed_string());
+                        }
+                    }
+                }
+                return Some(field_names);
+            }
+        }
+    }
+    None
 }
 
 fn check_duplicated_variable_definitions(
