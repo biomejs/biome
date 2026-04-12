@@ -3383,8 +3383,8 @@ fn test_html_inline_style_classes_are_global() {
     assert_eq!(def.name.text(), "card");
     assert_eq!(
         def.applicability,
-        EmbeddingStyleApplicability::Unknown,
-        "HTML inline styles are always Unknown"
+        EmbeddingStyleApplicability::Global,
+        "HTML inline styles are always Global"
     );
 
     // The traversal must yield the class.

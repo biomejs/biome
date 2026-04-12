@@ -10,15 +10,18 @@ use crate::workspace::{
     AnyEmbeddedSnippet, CssDocumentServices, DocumentServices, EmbeddedSnippet, JsDocumentServices,
 };
 use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
-use biome_css_syntax::{CssFileSource, CssLanguage, TextSize};
+use biome_css_syntax::{
+    CssFileSource, CssLanguage, EmbeddingHtmlKind, EmbeddingKind as CssEmbeddingKind,
+    EmbeddingStyleApplicability, TextSize,
+};
 use biome_fs::BiomePath;
 use biome_html_syntax::{
     AnyAstroDirective, AnySvelteBindingAssignmentBinding, AnySvelteBlock, AnySvelteBlockItem,
     AnySvelteDestructuredName, AnySvelteDirective, AnySvelteEachName, AstroEmbeddedContent,
     HtmlAttribute, HtmlAttributeInitializerClause, HtmlAttributeSingleTextExpression,
-    HtmlDoubleTextExpression, HtmlElement, HtmlRoot, HtmlSingleTextExpression, HtmlTextExpression,
-    HtmlTextExpressions, HtmlVariant, SvelteName, VueDirective, VueVBindShorthandDirective,
-    VueVOnShorthandDirective, VueVSlotShorthandDirective,
+    HtmlDoubleTextExpression, HtmlElement, HtmlFileSource, HtmlRoot, HtmlSingleTextExpression,
+    HtmlTextExpression, HtmlTextExpressions, HtmlVariant, SvelteName, VueDirective,
+    VueVBindShorthandDirective, VueVOnShorthandDirective, VueVSlotShorthandDirective,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage};
@@ -728,6 +731,42 @@ fn merge_js_file_source(a: JsFileSource, b: JsFileSource) -> JsFileSource {
     }
 }
 
+fn embedded_css_file_source(
+    host_file_source: &HtmlFileSource,
+    candidate: &EmbedCandidate,
+) -> CssFileSource {
+    let base = if host_file_source.is_html() {
+        CssFileSource::css()
+    } else {
+        CssFileSource::new_css_modules()
+    };
+
+    let embedding_kind = match host_file_source.variant() {
+        HtmlVariant::Standard(_) => CssEmbeddingKind::Html(EmbeddingHtmlKind::Html),
+        HtmlVariant::Vue => {
+            let applicability = if candidate.has_attribute("scoped") {
+                EmbeddingStyleApplicability::Local
+            } else {
+                EmbeddingStyleApplicability::Global
+            };
+            CssEmbeddingKind::Html(EmbeddingHtmlKind::Vue { applicability })
+        }
+        HtmlVariant::Astro => {
+            let applicability = if candidate.has_attribute("is:global") {
+                EmbeddingStyleApplicability::Global
+            } else {
+                EmbeddingStyleApplicability::Local
+            };
+            CssEmbeddingKind::Html(EmbeddingHtmlKind::Astro { applicability })
+        }
+        HtmlVariant::Svelte => CssEmbeddingKind::Html(EmbeddingHtmlKind::Svelte {
+            applicability: EmbeddingStyleApplicability::Local,
+        }),
+    };
+
+    base.with_embedding_kind(embedding_kind)
+}
+
 impl EmbedParseContext<'_, '_> {
     /// Runs the detector on a candidate and, if matched, parses the embed.
     /// Returns the raw `ParsedEmbed` for callers that need to inspect the
@@ -923,11 +962,7 @@ fn parse_matched_embed(
         }
 
         GuestLanguage::Css => {
-            let css_source = if ctx.host_file_source.is_html() {
-                CssFileSource::css()
-            } else {
-                CssFileSource::new_css_modules()
-            };
+            let css_source = embedded_css_file_source(ctx.host_file_source, candidate);
             let doc_source = DocumentFileSource::Css(css_source);
             let mut options = ctx
                 .settings
