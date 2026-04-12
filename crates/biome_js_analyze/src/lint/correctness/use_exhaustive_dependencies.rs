@@ -1053,7 +1053,11 @@ fn get_single_pattern_member(
             {
                 Some((object_pattern.syntax().clone(), Some(member)))
             } else {
-                return GetSinglePatternMemberResult::Unknown;
+                // Computed property names (e.g. `{ [key]: value }`) don't have
+                // a statically-known member name, so we treat the binding the
+                // same as a rest element: check the initializer's stability
+                // without a specific member key.
+                Some((object_pattern.syntax().clone(), None))
             }
         }
         JsSyntaxKind::JS_VARIABLE_DECLARATOR => {
