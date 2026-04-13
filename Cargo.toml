@@ -158,7 +158,7 @@ tracing                      = { version = "0.1.44", default-features = false, f
 tracing-subscriber           = "0.3.23"
 unicode-bom                  = "2.0.3"
 unicode-width                = "0.1.12"
-ureq                         = "3.1.4"
+ureq                         = "3.3.0"
 url                          = "2.5.8"
 uuid                         = "1.18.1"
 walkdir                      = "2.5.0"
