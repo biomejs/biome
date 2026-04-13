@@ -39,7 +39,7 @@ declare_lint_rule! {
         language: "jsx",
         recommended: false,
         severity: Severity::Warning,
-        sources: &[RuleSource::EslintReactDom("no-missing-iframe-sandbox").same(), RuleSource::EslintReactXyz("dom-no-missing-iframe-sandbox").same()],
+        sources: &[RuleSource::EslintReactDom("no-missing-iframe-sandbox").inspired(), RuleSource::EslintReactXyz("dom-no-missing-iframe-sandbox").same()],
     }
 }
 
