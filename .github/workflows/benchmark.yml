@@ -42,6 +42,12 @@ jobs:
       manifests: ${{ steps.outputs.outputs.manifests }}
       module_graph: ${{ steps.outputs.outputs.module_graph }}
     steps:
+      - name: Checkout Branch
+        if: github.event_name == 'push'
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 2
+
       - name: Detect benchmark changes
         if: github.event_name == 'pull_request' || github.event_name == 'push'
         id: filter
