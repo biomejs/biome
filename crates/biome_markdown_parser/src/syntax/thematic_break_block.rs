@@ -21,9 +21,24 @@ use biome_parser::{
     Parser,
     prelude::ParsedSyntax::{self, *},
 };
+use biome_unicode_table::Dispatch::{IDT, MIN, MUL};
+use biome_unicode_table::lookup_byte;
 
 /// CommonMark requires 3 or more matching characters for thematic breaks.
 const THEMATIC_BREAK_MIN_CHARS: usize = 3;
+
+/// Whether `byte` is a thematic break marker character (`*`, `-`, or `_`).
+///
+/// Uses the `biome_unicode_table` lookup table for `*` (`MUL`) and `-` (`MIN`).
+/// `_` shares the `IDT` dispatch variant with ASCII letters, so an explicit
+/// byte check is required to disambiguate.
+fn is_break_marker(byte: u8) -> bool {
+    match lookup_byte(byte) {
+        MUL | MIN => true,
+        IDT => byte == b'_',
+        _ => false,
+    }
+}
 
 pub(crate) fn at_thematic_break_block(p: &mut MarkdownParser) -> bool {
     p.lookahead(|p| {
@@ -101,22 +116,25 @@ fn is_thematic_break_pattern(p: &mut MarkdownParser) -> bool {
     // If the entire line segment is a single textual literal, validate it directly.
     if p.at(MD_TEXTUAL_LITERAL)
         && p.cur_text()
-            .chars()
-            .all(|c| c == ' ' || c == '\t' || c == '*' || c == '-' || c == '_')
+            .bytes()
+            .all(|b| b == b' ' || b == b'\t' || is_break_marker(b))
     {
-        let mut break_char = None;
+        let mut break_byte = None;
         let mut break_count = 0usize;
 
-        for c in p.cur_text().chars() {
-            if c == ' ' || c == '\t' {
+        for b in p.cur_text().bytes() {
+            if b == b' ' || b == b'\t' {
                 continue;
             }
-            if let Some(existing) = break_char {
-                if existing != c {
+            if !is_break_marker(b) {
+                return false;
+            }
+            if let Some(existing) = break_byte {
+                if existing != b {
                     return false;
                 }
             } else {
-                break_char = Some(c);
+                break_byte = Some(b);
             }
             break_count += 1;
         }
@@ -143,11 +161,11 @@ fn is_thematic_break_pattern(p: &mut MarkdownParser) -> bool {
     } else if p.at(MD_TEXTUAL_LITERAL) {
         let text = p.cur_text();
         if text.len() == 1 {
-            match text.chars().next() {
-                Some('*') => '*',
-                Some('-') => '-',
-                Some('_') => '_',
-                _ => return false,
+            let b = text.as_bytes()[0];
+            if is_break_marker(b) {
+                b as char
+            } else {
+                return false;
             }
         } else {
             return false;
@@ -270,9 +288,8 @@ fn parse_thematic_break_parts(p: &mut MarkdownParser) {
         }
 
         if p.at(MD_TEXTUAL_LITERAL) {
-            let first_char = p.cur_text().as_bytes().first().copied();
-            match first_char {
-                Some(b'*' | b'-' | b'_' | b' ' | b'\t') => {
+            match p.cur_text().as_bytes().first().copied() {
+                Some(b) if is_break_marker(b) || b == b' ' || b == b'\t' => {
                     p.force_relex_thematic_break_parts();
                     relex_active = true;
                     continue;
