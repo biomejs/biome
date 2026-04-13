@@ -36,5 +36,7 @@ expression: valid.html
 <!-- Deeply nested input still counts as associated control -->
 <label>A label<span><input /></span></label>
 
+<!-- img with non-empty alt provides accessible text for the label -->
+<label><img alt="A label" /><input /></label>
 
 ```

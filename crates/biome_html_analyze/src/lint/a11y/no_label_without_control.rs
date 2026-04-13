@@ -199,10 +199,10 @@ fn has_accessible_text_in_children(children: &HtmlElementList) -> bool {
             // Other self-closing elements (input, br, etc.) do not provide label text
             // even if they carry aria-label/title — those attributes describe the control,
             // not the label's own text content.
-            if let Some(tag_name) = element.tag_name() {
-                if tag_name.text().eq_ignore_ascii_case("img") {
-                    return html_self_closing_element_has_non_empty_attribute(element, "alt");
-                }
+            if let Some(tag_name) = element.tag_name()
+                && tag_name.text().eq_ignore_ascii_case("img")
+            {
+                return html_self_closing_element_has_non_empty_attribute(element, "alt");
             }
             false
         }
