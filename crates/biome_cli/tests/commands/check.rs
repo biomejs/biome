@@ -1356,7 +1356,15 @@ fn file_too_large_error_on_warnings() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--error-on-warnings", large_file.as_str(), small_file.as_str()].as_slice()),
+        Args::from(
+            [
+                "check",
+                "--error-on-warnings",
+                large_file.as_str(),
+                small_file.as_str(),
+            ]
+            .as_slice(),
+        ),
     );
     assert!(result.is_err(), "run_cli returned {result:?}");
     assert_cli_snapshot(SnapshotPayload::new(

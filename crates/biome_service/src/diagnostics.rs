@@ -834,4 +834,3 @@ mod test {
         snap_diagnostic("module_diagnostic", diagnostics);
     }
 }
-
