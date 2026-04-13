@@ -441,3 +441,45 @@ impl Visit for SuggestionsVisitor {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::normalize_path;
+
+    #[test]
+    fn normalize_path_converts_windows_backslashes() {
+        assert_eq!(
+            normalize_path("typescript\\src\\account\\setup-passkey.tsx"),
+            "typescript/src/account/setup-passkey.tsx"
+        );
+    }
+
+    #[test]
+    fn normalize_path_leaves_unix_paths_unchanged() {
+        assert_eq!(
+            normalize_path("src/components/App.tsx"),
+            "src/components/App.tsx"
+        );
+    }
+
+    #[test]
+    fn normalize_path_handles_mixed_separators() {
+        assert_eq!(
+            normalize_path("src\\components/App.tsx"),
+            "src/components/App.tsx"
+        );
+    }
+
+    #[test]
+    fn normalize_path_handles_empty_string() {
+        assert_eq!(normalize_path(""), "");
+    }
+
+    #[test]
+    fn normalize_path_handles_root_windows_path() {
+        assert_eq!(
+            normalize_path("C:\\Users\\user\\project\\file.ts"),
+            "C:/Users/user/project/file.ts"
+        );
+    }
+}
