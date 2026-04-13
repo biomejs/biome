@@ -122,7 +122,8 @@ fn to_rdjson_location(location: &Location<'_>) -> Option<RdJsonLocation> {
     let start = source.location(span.start()).ok()?;
     let end = source.location(span.end()).ok()?;
     Some(RdJsonLocation {
-        path: resource.to_string(),
+        // Normalize path separators to forward slashes for consistent JSON output across platforms
+        path: resource.to_string().replace('\\', "/"),
         range: Some(RdJsonRange {
             start: RdJsonLineColumn {
                 column: start.column_number.get(),
