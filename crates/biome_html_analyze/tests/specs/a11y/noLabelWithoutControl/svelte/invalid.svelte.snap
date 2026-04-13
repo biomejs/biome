@@ -1,0 +1,87 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+
+<!-- Empty label: no text, no control -->
+<label></label>
+
+<!-- Has text but no control association -->
+<label>A label</label>
+
+<!-- Has for attribute but no accessible text -->
+<label for="js_id"></label>
+
+<!-- Uppercase <INPUT> is NOT matched as a control in Svelte (case-sensitive) -->
+<label>A label<INPUT /></label>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:4:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A form label must be associated with a control.
+  
+    3 │ <!-- Empty label: no text, no control -->
+  > 4 │ <label></label>
+      │ ^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ <!-- Has text but no control association -->
+  
+  i Consider adding accessible text content to the label element.
+  
+  i Consider adding a `for` attribute to the label element or moving the control element inside the label.
+  
+
+```
+
+```
+invalid.svelte:7:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A form label must be associated with a control.
+  
+    6 │ <!-- Has text but no control association -->
+  > 7 │ <label>A label</label>
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ <!-- Has for attribute but no accessible text -->
+  
+  i Consider adding a `for` attribute to the label element or moving the control element inside the label.
+  
+
+```
+
+```
+invalid.svelte:10:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A form label must be associated with a control.
+  
+     9 │ <!-- Has for attribute but no accessible text -->
+  > 10 │ <label for="js_id"></label>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ <!-- Uppercase <INPUT> is NOT matched as a control in Svelte (case-sensitive) -->
+  
+  i Consider adding accessible text content to the label element.
+  
+
+```
+
+```
+invalid.svelte:13:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A form label must be associated with a control.
+  
+    12 │ <!-- Uppercase <INPUT> is NOT matched as a control in Svelte (case-sensitive) -->
+  > 13 │ <label>A label<INPUT /></label>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+  
+  i Consider adding a `for` attribute to the label element or moving the control element inside the label.
+  
+
+```

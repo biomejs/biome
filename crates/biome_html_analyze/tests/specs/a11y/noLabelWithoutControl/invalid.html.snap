@@ -1,0 +1,224 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+
+<!-- Empty label: no text, no control -->
+<label></label>
+
+<!-- Has text but no control association -->
+<label>A label</label>
+
+<!-- Has `for` attribute but no accessible text -->
+<label for="js_id"></label>
+
+<!-- Has `for` attribute, has nested input, but no accessible text -->
+<label for="js_id"><input /></label>
+
+<!-- Self-closing label (no content, no `for`) -->
+<label />
+
+<!-- Case-insensitive: uppercase LABEL, no text, no control -->
+<LABEL></LABEL>
+
+<!-- Whitespace-only text is not accessible -->
+<label>   <input /></label>
+
+<!-- Empty `for` attribute cannot reference any control -->
+<label for="">A label</label>
+
+<!-- Whitespace-only `for` attribute is also unassociated -->
+<label for="   ">A label</label>
+
+<!-- img with empty alt does not contribute accessible text -->
+<label for="x"><img alt="" /></label>
+
+<!-- img with whitespace-only alt does not contribute accessible text -->
+<label for="x"><img alt="   " /></label>
+
+```
+
+# Diagnostics
+```
+invalid.html:4:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A form label must be associated with a control.
+  
+    3 │ <!-- Empty label: no text, no control -->
+  > 4 │ <label></label>
+      │ ^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ <!-- Has text but no control association -->
+  
+  i Consider adding accessible text content to the label element.
+  
+  i Consider adding a `for` attribute to the label element or moving the control element inside the label.
+  
+
+```
+
+```
+invalid.html:7:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A form label must be associated with a control.
+  
+    6 │ <!-- Has text but no control association -->
+  > 7 │ <label>A label</label>
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ <!-- Has `for` attribute but no accessible text -->
+  
+  i Consider adding a `for` attribute to the label element or moving the control element inside the label.
+  
+
+```
+
+```
+invalid.html:10:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A form label must be associated with a control.
+  
+     9 │ <!-- Has `for` attribute but no accessible text -->
+  > 10 │ <label for="js_id"></label>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ <!-- Has `for` attribute, has nested input, but no accessible text -->
+  
+  i Consider adding accessible text content to the label element.
+  
+
+```
+
+```
+invalid.html:13:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A form label must be associated with a control.
+  
+    12 │ <!-- Has `for` attribute, has nested input, but no accessible text -->
+  > 13 │ <label for="js_id"><input /></label>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ <!-- Self-closing label (no content, no `for`) -->
+  
+  i Consider adding accessible text content to the label element.
+  
+
+```
+
+```
+invalid.html:16:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A form label must be associated with a control.
+  
+    15 │ <!-- Self-closing label (no content, no `for`) -->
+  > 16 │ <label />
+       │ ^^^^^^^^^
+    17 │ 
+    18 │ <!-- Case-insensitive: uppercase LABEL, no text, no control -->
+  
+  i Consider adding accessible text content to the label element.
+  
+  i Consider adding a `for` attribute to the label element or moving the control element inside the label.
+  
+
+```
+
+```
+invalid.html:19:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A form label must be associated with a control.
+  
+    18 │ <!-- Case-insensitive: uppercase LABEL, no text, no control -->
+  > 19 │ <LABEL></LABEL>
+       │ ^^^^^^^^^^^^^^^
+    20 │ 
+    21 │ <!-- Whitespace-only text is not accessible -->
+  
+  i Consider adding accessible text content to the label element.
+  
+  i Consider adding a `for` attribute to the label element or moving the control element inside the label.
+  
+
+```
+
+```
+invalid.html:22:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A form label must be associated with a control.
+  
+    21 │ <!-- Whitespace-only text is not accessible -->
+  > 22 │ <label>   <input /></label>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ 
+    24 │ <!-- Empty `for` attribute cannot reference any control -->
+  
+  i Consider adding accessible text content to the label element.
+  
+
+```
+
+```
+invalid.html:25:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A form label must be associated with a control.
+  
+    24 │ <!-- Empty `for` attribute cannot reference any control -->
+  > 25 │ <label for="">A label</label>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ 
+    27 │ <!-- Whitespace-only `for` attribute is also unassociated -->
+  
+  i Consider adding a `for` attribute to the label element or moving the control element inside the label.
+  
+
+```
+
+```
+invalid.html:28:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A form label must be associated with a control.
+  
+    27 │ <!-- Whitespace-only `for` attribute is also unassociated -->
+  > 28 │ <label for="   ">A label</label>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ 
+    30 │ <!-- img with empty alt does not contribute accessible text -->
+  
+  i Consider adding a `for` attribute to the label element or moving the control element inside the label.
+  
+
+```
+
+```
+invalid.html:31:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A form label must be associated with a control.
+  
+    30 │ <!-- img with empty alt does not contribute accessible text -->
+  > 31 │ <label for="x"><img alt="" /></label>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ 
+    33 │ <!-- img with whitespace-only alt does not contribute accessible text -->
+  
+  i Consider adding accessible text content to the label element.
+  
+
+```
+
+```
+invalid.html:34:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A form label must be associated with a control.
+  
+    33 │ <!-- img with whitespace-only alt does not contribute accessible text -->
+  > 34 │ <label for="x"><img alt="   " /></label>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    35 │ 
+  
+  i Consider adding accessible text content to the label element.
+  
+
+```

@@ -1,3 +1,9 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.html
+---
+# Input
+```html
 <!-- should not generate diagnostics -->
 
 <!-- Has `for` attribute and accessible text -->
@@ -30,3 +36,5 @@
 <!-- Deeply nested input still counts as associated control -->
 <label>A label<span><input /></span></label>
 
+
+```
