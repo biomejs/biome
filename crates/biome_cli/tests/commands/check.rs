@@ -1342,7 +1342,27 @@ fn file_too_large_cli_limit() {
         result,
     ));
 }
-
+#[test]
+fn file_too_large_error_on_warnings() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(Utf8PathBuf::from("biome.json"), CONFIG_FILE_SIZE_LIMIT);
+    let file_path = Utf8Path::new("check.js");
+    fs.insert(file_path.into(), "statement1();\nstatement2();");
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--error-on-warnings", file_path.as_str()].as_slice()),
+    );
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "file_too_large_error_on_warnings",
+        fs,
+        console,
+        result,
+    ));
+}
 #[test]
 fn files_max_size_parse_error() {
     let fs = MemoryFileSystem::default();
