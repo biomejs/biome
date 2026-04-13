@@ -358,6 +358,11 @@ if let Some(directive) = VueDirective::cast_ref(&element) {
 
 The CI uses `markdownlint-cli2` which enforces the "compact" style requiring spaces.
 
+## Common Mistakes to Avoid
+
+- Calling `format!()` (allocates a string) when formatting strings in a `markup!` block. `markup!` supports interpolation, E.g. `markup! { "Hello, "{name}"!" }`.
+- Calling `.to_string()` or `.to_string_trimmed()` (allocates a string) on a `SyntaxToken` or `SyntaxNode`. It's highly unlikely that you actually need to call these methods on a syntax node. As for syntax tokens, you can easily borrow a `&str` from the token's text without allocating a new string, using `token.text()`.
+
 ## When to Use This Skill
 
 Load this skill when:
