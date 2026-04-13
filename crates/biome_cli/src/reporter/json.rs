@@ -23,6 +23,12 @@ fn json_escape(input: &str) -> String {
         .replace('\x0C', "\\f")
 }
 
+/// Normalizes path separators to forward slashes for cross-platform JSON output.
+/// On Windows, paths use backslashes which are not valid unescaped in JSON strings.
+fn normalize_path(path: &str) -> String {
+    path.replace('\\', "/")
+}
+
 #[derive(Debug, Default)]
 pub(crate) struct JsonReporterVisitor {
     summary: TraversalSummary,
@@ -109,7 +115,9 @@ fn location_report_to_json(location: &LocationReport) -> AnyJsonValue {
         json_member(
             AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal("path"))),
             token(T![:]),
-            AnyJsonValue::JsonStringValue(json_string_value(json_string_literal(&location.path))),
+            AnyJsonValue::JsonStringValue(json_string_value(json_string_literal(
+                &normalize_path(&location.path),
+            ))),
         ),
         json_member(
             AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal("start"))),
