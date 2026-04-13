@@ -35,7 +35,7 @@ declare_lint_rule! {
         language: "html",
         recommended: false,
         severity: Severity::Warning,
-        sources: &[RuleSource::EslintReactDom("no-missing-iframe-sandbox").same(), RuleSource::EslintReactXyz("dom-no-missing-iframe-sandbox").same()],
+        sources: &[RuleSource::EslintReact("iframe-missing-sandbox").same(), RuleSource::EslintReactDom("no-missing-iframe-sandbox").same(), RuleSource::EslintReactXyz("dom-no-missing-iframe-sandbox").same()],
     }
 }
 
@@ -52,10 +52,7 @@ impl Rule for UseIframeSandbox {
             return None;
         }
 
-        if element
-            .find_attribute_by_name("sandbox")
-            .is_none_or(|sandbox_attribute| sandbox_attribute.value().is_none())
-        {
+        if element.find_attribute_by_name("sandbox").is_none() {
             return Some(());
         }
 
