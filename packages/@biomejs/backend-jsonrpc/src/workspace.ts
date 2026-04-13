@@ -2481,6 +2481,11 @@ See https://biomejs.dev/linter/rules/use-global-this
 	 */
 	useGlobalThis?: UseGlobalThisConfiguration;
 	/**
+	* Enforce the 'sandbox' attribute for 'iframe' elements.
+See https://biomejs.dev/linter/rules/use-iframe-sandbox 
+	 */
+	useIframeSandbox?: UseIframeSandboxConfiguration;
+	/**
 	* Enforce that all imports appear at the top of the module.
 See https://biomejs.dev/linter/rules/use-imports-first 
 	 */
@@ -4442,6 +4447,9 @@ export type UseFindConfiguration =
 export type UseGlobalThisConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseGlobalThisOptions;
+export type UseIframeSandboxConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseIframeSandboxOptions;
 export type UseImportsFirstConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseImportsFirstOptions;
@@ -6244,6 +6252,10 @@ export interface RuleWithUseGlobalThisOptions {
 	level: RulePlainConfiguration;
 	options?: UseGlobalThisOptions;
 }
+export interface RuleWithUseIframeSandboxOptions {
+	level: RulePlainConfiguration;
+	options?: UseIframeSandboxOptions;
+}
 export interface RuleWithUseImportsFirstOptions {
 	level: RulePlainConfiguration;
 	options?: UseImportsFirstOptions;
@@ -7864,6 +7876,7 @@ When `true`, only declarations (function statements and class methods) are check
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
 export type UseGlobalThisOptions = {};
+export type UseIframeSandboxOptions = {};
 export type UseImportsFirstOptions = {};
 export type UseInlineScriptIdOptions = {};
 export interface UseInputNameOptions {
@@ -8901,6 +8914,7 @@ export type Category =
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useFind"
 	| "lint/nursery/useGlobalThis"
+	| "lint/nursery/useIframeSandbox"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useImportsFirst"
 	| "lint/nursery/useInlineScriptId"

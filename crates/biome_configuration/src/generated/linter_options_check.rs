@@ -1806,6 +1806,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_html_lang::UseHtmlLangOptions>(),
     ));
     result.push((
+        "nursery",
+        "useIframeSandbox",
+        TypeId::of::<biome_rule_options::use_iframe_sandbox::UseIframeSandboxOptions>(),
+    ));
+    result.push((
         "a11y",
         "useIframeTitle",
         TypeId::of::<biome_rule_options::use_iframe_title::UseIframeTitleOptions>(),

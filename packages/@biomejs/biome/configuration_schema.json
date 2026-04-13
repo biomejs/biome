@@ -6590,6 +6590,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useIframeSandbox": {
+					"description": "Enforce the 'sandbox' attribute for 'iframe' elements.\nSee https://biomejs.dev/linter/rules/use-iframe-sandbox",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseIframeSandboxConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useImportsFirst": {
 					"description": "Enforce that all imports appear at the top of the module.\nSee https://biomejs.dev/linter/rules/use-imports-first",
 					"anyOf": [
@@ -10977,6 +10984,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseIframeSandboxOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseIframeSandboxOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseIframeTitleOptions": {
 			"type": "object",
 			"properties": {
@@ -14359,6 +14375,16 @@
 			]
 		},
 		"UseHtmlLangOptions": { "type": "object", "additionalProperties": false },
+		"UseIframeSandboxConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseIframeSandboxOptions" }
+			]
+		},
+		"UseIframeSandboxOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseIframeTitleConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
