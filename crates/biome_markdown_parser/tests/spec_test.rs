@@ -276,6 +276,11 @@ pub fn quick_test() {
         "<blockquote>\n<pre><code>code\n</code></pre>\n<hr />\n</blockquote>\n",
     );
     test_example(
+        99923,
+        ">\t>\tfoo\n",
+        "<blockquote>\n<blockquote>\n<p>foo</p>\n</blockquote>\n</blockquote>\n",
+    );
+    test_example(
         9993,
         "- foo\n  - bar\n",
         "<ul>\n<li>foo\n<ul>\n<li>bar</li>\n</ul>\n</li>\n</ul>\n",
@@ -291,6 +296,8 @@ pub fn quick_test() {
         " - foo\n   - bar\n\t - baz\n",
         "<ul>\n<li>foo\n<ul>\n<li>bar\n<ul>\n<li>baz</li>\n</ul>\n</li>\n</ul>\n</li>\n</ul>\n",
     );
+    test_example(10014, "-\tfoo\n", "<ul>\n<li>foo</li>\n</ul>\n");
+    test_example(10015, "- \t foo\n", "<ul>\n<li>foo</li>\n</ul>\n");
     test_example(
         10002,
         "1.  A paragraph\n    with two lines.\n\n        indented code\n\n    > A block quote.\n",
@@ -412,9 +419,8 @@ pub fn quick_test() {
         "- bar\n\n+ item\n",
         "<ul>\n<li>bar</li>\n</ul>\n<ul>\n<li>item</li>\n</ul>\n",
     );
-    // Reduce: thematic break in list then different marker
-    // NOTE: `- ---` is a pre-existing Biome bug where it parses as a top-level
-    // thematic break instead of a list item containing <hr />.
+    // Reduce: thematic break precedence over list-item interpretation.
+    // CommonMark §4.1 (Examples 60-61) gives the thematic break precedence for `- ---`.
     test_example(
         30013,
         "- ---\n\n+ item\n",
@@ -487,10 +493,8 @@ fn fuzz_mixed_markers_paragraph() {
     );
 }
 
-/// NOTE: `- ---` is parsed by Biome as a top-level thematic break rather than
-/// a list item containing `<hr />`. This is a separate pre-existing bug
-/// (thematic break precedence over list marker) unrelated to the mixed-marker
-/// list-split fix. The expected value here matches Biome's current behavior.
+/// CommonMark §4.1 (Examples 60-61) gives the thematic break precedence over the
+/// list-item interpretation for `- ---`, so this should stay a top-level `<hr />`.
 #[test]
 fn fuzz_mixed_markers_thematic_break() {
     fuzz_test_example(
