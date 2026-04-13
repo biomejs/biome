@@ -81,7 +81,7 @@ declare_lint_rule! {
         version: "next",
         name: "noLabelWithoutControl",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("label-has-associated-control").inspired()],
+        sources: &[RuleSource::EslintJsxA11y("label-has-associated-control").same()],
         recommended: true,
         severity: Severity::Error,
     }
