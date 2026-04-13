@@ -1,4 +1,4 @@
 ---
 "@biomejs/biome": patch
 ---
-Fix FileTooLarge diagnostic severity from Information to Warning, so that --error-on-warnings correctly exits with a non-zero code when a file exceeds files.maxSize.
+Fixed #9941: Biome now exits with a non-zero code when a file exceeds `files.maxSize` and `--error-on-warnings` is enabled.
