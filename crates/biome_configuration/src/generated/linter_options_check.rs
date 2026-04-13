@@ -1224,6 +1224,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_unnecessary_conditions::NoUnnecessaryConditionsOptions>(
         ),
     ));
+    result.push(("nursery", "noUnnecessaryTemplateExpression", TypeId::of::<biome_rule_options::no_unnecessary_template_expression::NoUnnecessaryTemplateExpressionOptions>()));
     result.push((
         "correctness",
         "noUnreachable",

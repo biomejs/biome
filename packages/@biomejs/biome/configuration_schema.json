@@ -5408,6 +5408,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUnnecessaryTemplateExpressionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnnecessaryTemplateExpressionOptions" }
+			]
+		},
+		"NoUnnecessaryTemplateExpressionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUnreachableConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6449,6 +6459,13 @@
 					"description": "Disallow unnecessary type-based conditions that can be statically determined as redundant.\nSee https://biomejs.dev/linter/rules/no-unnecessary-conditions",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnnecessaryConditionsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnnecessaryTemplateExpression": {
+					"description": "Disallow unnecessary template expressions.\nSee https://biomejs.dev/linter/rules/no-unnecessary-template-expression",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnnecessaryTemplateExpressionConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9860,6 +9877,16 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnnecessaryConditionsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUnnecessaryTemplateExpressionOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnnecessaryTemplateExpressionOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
