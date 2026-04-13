@@ -1,14 +1,10 @@
 use std::{borrow::Cow, sync::Arc};
 
-use biome_js_semantic::{
-    BindingId, ScopeId, SemanticEvent, SemanticEventExtractor, TsBindingReference,
-};
+use biome_js_semantic::{Reference, ScopeId, SemanticModel, TsBindingReference};
 use biome_js_syntax::{
     AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsExportDefaultDeclaration, AnyJsExpression,
     AnyJsImportClause, JsAssignmentExpression, JsForVariableDeclaration, JsFormalParameter,
-    JsIdentifierBinding, JsRestParameter, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
-    JsVariableDeclaration, TsIdentifierBinding, TsTypeParameter, TsTypeParameterName,
-    inner_string_text,
+    JsRestParameter, JsSyntaxNode, JsVariableDeclaration, TsTypeParameter, inner_string_text,
 };
 use biome_js_type_info::{
     FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GenericTypeParameter, MAX_FLATTEN_DEPTH,
@@ -16,22 +12,16 @@ use biome_js_type_info::{
     TypeImportQualifier, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier,
     TypeResolver, TypeResolverLevel, TypeStore, UnionCollector,
 };
-use biome_jsdoc_comment::JsdocComment;
-use biome_rowan::{AstNode, Text, TextRange, TextSize, TokenText};
+use biome_rowan::{AstNode, Text, TextRange, TokenText};
 use indexmap::IndexMap;
 use rustc_hash::FxHashMap;
 
 use super::{
     Exports, ImportSymbol, Imports, JsExport, JsImport, JsModuleInfo, JsModuleInfoDiagnostic,
     JsModuleInfoInner, JsOwnExport, JsReexport, ResolvedPath, binding::JsBindingData,
-    scope::JsScopeData,
 };
-use crate::js_module_info::{
-    binding::{JsBindingReference, JsBindingReferenceKind},
-    scope::TsBindingReferenceExt,
-    utils::reached_too_many_types,
-};
-use crate::{JsImportPath, JsImportPhase};
+use crate::js_module_info::{scope::TsBindingReferenceExt, utils::reached_too_many_types};
+use crate::{BindingTypeData, JsImportPath, JsImportPhase};
 
 /// Responsible for collecting all the information from which to build the
 /// [`JsModuleInfo`].
@@ -39,21 +29,10 @@ use crate::{JsImportPath, JsImportPhase};
 /// This collects a lot of fields with raw information, which then goes through
 /// another round of processing as we create the intermediate
 /// [`JsModuleInfoBag`], and finally the [`JsModuleInfo`] itself.
-#[derive(Default)]
 pub(super) struct JsModuleInfoCollector {
+    semantic_model: Arc<SemanticModel>,
+
     pub(super) bindings: Vec<JsBindingData>,
-
-    /// Maps a binding range start to its index inside the [Self::bindings]
-    /// vector.
-    bindings_by_start: FxHashMap<TextSize, BindingId>,
-
-    /// Binding and reference nodes indexed by their range start
-    binding_node_by_start: FxHashMap<TextSize, JsSyntaxNode>,
-
-    /// Creates semantic events from the full node traversal.
-    ///
-    /// Re-used from the semantic model in `biome_js_semantic`.
-    extractor: SemanticEventExtractor,
 
     /// Function parameters, both formal parameters as well as rest parameters.
     function_parameters: FxHashMap<JsSyntaxNode, FunctionParameter>,
@@ -63,14 +42,6 @@ pub(super) struct JsModuleInfoCollector {
 
     /// Map of parsed declarations, for caching purposes.
     parsed_expressions: FxHashMap<TextRange, ResolvedTypeId>,
-
-    /// Collection of all the scopes within the module.
-    ///
-    /// The first entry is always the module's global scope.
-    pub(super) scopes: Vec<JsScopeData>,
-
-    /// Used for tracking the scope we are currently in.
-    scope_stack: Vec<ScopeId>,
 
     /// Map with all static import paths, from the source specifier to the
     /// resolved path.
@@ -133,37 +104,48 @@ pub(super) enum JsCollectedExport {
 }
 
 impl JsModuleInfoCollector {
-    pub fn push_node(&mut self, node: &JsSyntaxNode) {
-        use JsSyntaxKind::*;
-        match node.kind() {
-            // Accessible from bindings and references
-            JS_IDENTIFIER_BINDING
-            | TS_IDENTIFIER_BINDING
-            | JS_REFERENCE_IDENTIFIER
-            | JSX_REFERENCE_IDENTIFIER
-            | TS_TYPE_PARAMETER_NAME
-            | TS_LITERAL_ENUM_MEMBER_NAME
-            | JS_IDENTIFIER_ASSIGNMENT => {
-                self.binding_node_by_start
-                    .insert(node.text_trimmed_range().start(), node.clone());
-            }
+    pub(super) fn new(semantic_model: Arc<SemanticModel>) -> Self {
+        let mut bindings = Vec::new();
 
-            _ => {}
+        for binding in semantic_model.all_bindings() {
+            let name = binding
+                .tree()
+                .name_token()
+                .ok()
+                .map(|t| t.token_text_trimmed().into())
+                .unwrap_or_default();
+            let range = binding.syntax().text_trimmed_range();
+
+            bindings.push(JsBindingData {
+                name,
+                scope_id: binding.scope().id(),
+                declaration_kind: binding.declaration_kind(),
+                ty: TypeReference::unknown(),
+                range,
+            });
         }
 
-        self.extractor.enter(node);
+        Self {
+            semantic_model,
+            bindings,
+            function_parameters: FxHashMap::default(),
+            variable_declarations: FxHashMap::default(),
+            parsed_expressions: FxHashMap::default(),
+            static_import_paths: IndexMap::new(),
+            dynamic_import_paths: IndexMap::new(),
+            exports: Vec::new(),
+            blanket_reexports: Vec::new(),
+            types: TypeStore::default(),
+            static_imports: IndexMap::new(),
+            diagnostics: Vec::new(),
+            infer_types: false,
+        }
     }
 
     pub fn leave_node(&mut self, node: &JsSyntaxNode) {
-        self.extractor.leave(node);
-
-        while let Some(event) = self.extractor.pop() {
-            self.push_event(event);
-        }
-
         if let Some(expr) = AnyJsExpression::cast_ref(node) {
             let range = expr.range();
-            let scope_id = *self.scope_stack.last().expect("there must be a scope");
+            let scope_id = self.semantic_model.scope(node).id();
             let ty = TypeData::from_any_js_expression(self, scope_id, &expr);
             let resolved_id = match GLOBAL_RESOLVER.find_type(&ty) {
                 Some(id) => ResolvedTypeId::new(TypeResolverLevel::Global, id),
@@ -175,24 +157,24 @@ impl JsModuleInfoCollector {
 
             self.parsed_expressions.insert(range, resolved_id);
         } else if let Some(decl) = JsForVariableDeclaration::cast_ref(node) {
-            let scope_id = *self.scope_stack.last().expect("there must be a scope");
+            let scope_id = self.semantic_model.scope(node).id();
             let type_bindings =
                 TypeData::typed_bindings_from_js_for_statement(self, scope_id, &decl)
                     .unwrap_or_default();
             self.variable_declarations
                 .insert(decl.syntax().clone(), type_bindings);
         } else if let Some(param) = JsFormalParameter::cast_ref(node) {
-            let scope_id = *self.scope_stack.last().expect("there must be a scope");
+            let scope_id = self.semantic_model.scope(node).id();
             let parsed_param = FunctionParameter::from_js_formal_parameter(self, scope_id, &param);
             self.function_parameters
                 .insert(param.syntax().clone(), parsed_param);
         } else if let Some(param) = JsRestParameter::cast_ref(node) {
-            let scope_id = *self.scope_stack.last().expect("there must be a scope");
+            let scope_id = self.semantic_model.scope(node).id();
             let parsed_param = FunctionParameter::from_js_rest_parameter(self, scope_id, &param);
             self.function_parameters
                 .insert(param.syntax().clone(), parsed_param);
         } else if let Some(decl) = JsVariableDeclaration::cast_ref(node) {
-            let scope_id = *self.scope_stack.last().expect("there must be a scope");
+            let scope_id = self.semantic_model.scope(node).id();
             let type_bindings =
                 TypeData::typed_bindings_from_js_variable_declaration(self, scope_id, &decl);
             self.variable_declarations
@@ -380,163 +362,9 @@ impl JsModuleInfoCollector {
         );
     }
 
-    fn push_event(&mut self, event: SemanticEvent) {
-        use SemanticEvent::*;
-        match event {
-            ScopeStarted {
-                range,
-                parent_scope_id,
-                ..
-            } => {
-                // Scopes will be raised in order
-                let scope_id = ScopeId::new(self.scopes.len());
-
-                self.scopes.push(JsScopeData {
-                    range,
-                    parent: parent_scope_id,
-                    children: Vec::new(),
-                    bindings: Vec::new(),
-                    bindings_by_name: FxHashMap::default(),
-                });
-
-                if let Some(parent_scope_id) = parent_scope_id {
-                    self.scopes[parent_scope_id.index()].children.push(scope_id);
-                }
-
-                self.scope_stack.push(scope_id);
-            }
-            ScopeEnded { .. } => {
-                self.scope_stack.pop();
-            }
-            DeclarationFound {
-                range,
-                scope_id,
-                hoisted_scope_id,
-                declaration_kind,
-            } => {
-                let binding_scope_id = hoisted_scope_id.unwrap_or(scope_id);
-
-                // SAFETY: this scope id is guaranteed to exist because they
-                //         were generated by the event extractor
-                debug_assert!((binding_scope_id.index()) < self.scopes.len());
-
-                let binding_id = BindingId::new(self.bindings.len());
-
-                // We must proceed and register the binding, even if the node
-                // cannot be found. Otherwise, later lookups for the binding
-                // may fail.
-                let node = self.binding_node_by_start.get(&range.start()).cloned();
-                let name_token = node.as_ref().and_then(|node| {
-                    if let Some(node) = JsIdentifierBinding::cast_ref(node) {
-                        node.name_token().ok()
-                    } else if let Some(node) = TsIdentifierBinding::cast_ref(node) {
-                        node.name_token().ok()
-                    } else if let Some(node) = TsTypeParameterName::cast_ref(node) {
-                        node.ident_token().ok()
-                    } else {
-                        None
-                    }
-                });
-
-                let name = name_token.as_ref().map(JsSyntaxToken::token_text_trimmed);
-                let scope_id = *self.scope_stack.last().expect("scope must be present");
-
-                self.bindings.push(JsBindingData {
-                    name: name
-                        .as_ref()
-                        .map(|name| name.clone().into())
-                        .unwrap_or_default(),
-                    references: Vec::new(),
-                    scope_id,
-                    declaration_kind,
-                    ty: TypeReference::unknown(),
-                    jsdoc: node.as_ref().and_then(find_jsdoc),
-                    export_ranges: Vec::new(),
-                    range,
-                });
-                self.bindings_by_start.insert(range.start(), binding_id);
-
-                let scope = &mut self.scopes[binding_scope_id.index()];
-
-                scope.bindings.push(binding_id);
-                if let Some(name) = name {
-                    let binding_reference = TsBindingReference::from_binding_and_declaration_kind(
-                        binding_id,
-                        declaration_kind,
-                    );
-
-                    scope
-                        .bindings_by_name
-                        .entry(name)
-                        .and_modify(|binding| {
-                            *binding = binding.union_with(binding_reference);
-                        })
-                        .or_insert(binding_reference);
-                }
-            }
-            Read {
-                range,
-                declaration_at,
-                ..
-            } => {
-                let binding_id = self.bindings_by_start[&declaration_at];
-                let binding = &mut self.bindings[binding_id.index()];
-                binding.references.push(JsBindingReference {
-                    range_start: range.start(),
-                    kind: JsBindingReferenceKind::Read { _hoisted: false },
-                });
-            }
-            HoistedRead {
-                range,
-                declaration_at,
-                ..
-            } => {
-                let binding_id = self.bindings_by_start[&declaration_at];
-                let binding = &mut self.bindings[binding_id.index()];
-                binding.references.push(JsBindingReference {
-                    range_start: range.start(),
-                    kind: JsBindingReferenceKind::Read { _hoisted: true },
-                });
-            }
-            Write {
-                range,
-                declaration_at,
-                ..
-            } => {
-                let binding_id = self.bindings_by_start[&declaration_at];
-                let binding = &mut self.bindings[binding_id.index()];
-                binding.references.push(JsBindingReference {
-                    range_start: range.start(),
-                    kind: JsBindingReferenceKind::Write { _hoisted: false },
-                });
-            }
-            HoistedWrite {
-                range,
-                declaration_at,
-                ..
-            } => {
-                let binding_id = self.bindings_by_start[&declaration_at];
-                let binding = &mut self.bindings[binding_id.index()];
-                binding.references.push(JsBindingReference {
-                    range_start: range.start(),
-                    kind: JsBindingReferenceKind::Write { _hoisted: true },
-                });
-            }
-            Export {
-                declaration_at,
-                range,
-            } => {
-                let binding_id = self.bindings_by_start[&declaration_at];
-                let binding = &mut self.bindings[binding_id.index()];
-                binding.export_ranges.push(range);
-            }
-            UnresolvedReference { .. } => {}
-        }
-    }
-
     fn finalise(
         &mut self,
-        semantic_model: &biome_js_semantic::SemanticModel,
+        semantic_model: &SemanticModel,
     ) -> (
         IndexMap<Text, JsExport>,
         FxHashMap<TextRange, super::BindingTypeData>,
@@ -566,28 +394,32 @@ impl JsModuleInfoCollector {
     fn infer_all_types(&mut self, semantic_model: &biome_js_semantic::SemanticModel) {
         for index in 0..self.bindings.len() {
             let binding = &self.bindings[index];
-            if let Some(node) = self.binding_node_by_start.get(&binding.range.start()) {
+            if let Some(node) = semantic_model
+                .as_binding_by_range(binding.range)
+                .map(|b| b.syntax().clone())
+            {
                 let scope_id = semantic_model.scope_for_range(binding.range).id();
-                let ty = self.infer_type(&node.clone(), binding.clone(), scope_id, semantic_model);
+                let ty = self.infer_type(&node, binding.clone(), scope_id, semantic_model);
                 self.bindings[index].ty = ty;
             }
         }
     }
 
-    fn has_writable_reference(&self, binding: &JsBindingData) -> bool {
-        binding
-            .references
-            .iter()
-            .any(|reference| reference.is_write())
+    fn has_writable_reference(&self, semantic_model: &SemanticModel, range: TextRange) -> bool {
+        semantic_model
+            .as_binding_by_range(range)
+            .is_some_and(|binding| binding.all_writes().next().is_some())
     }
 
-    fn get_writable_references(&self, binding: &JsBindingData) -> Vec<JsBindingReference> {
-        binding
-            .references
-            .iter()
-            .filter(|reference| reference.is_write())
-            .cloned()
-            .collect()
+    fn get_writable_references(
+        &self,
+        semantic_model: &SemanticModel,
+        range: TextRange,
+    ) -> Vec<Reference> {
+        semantic_model
+            .as_binding_by_range(range)
+            .map(|binding| binding.all_writes().collect())
+            .unwrap_or_default()
     }
 
     fn infer_type(
@@ -595,7 +427,7 @@ impl JsModuleInfoCollector {
         node: &JsSyntaxNode,
         binding: JsBindingData,
         scope_id: ScopeId,
-        semantic_model: &biome_js_semantic::SemanticModel,
+        semantic_model: &SemanticModel,
     ) -> TypeReference {
         let binding_name = &binding.name.clone();
 
@@ -621,7 +453,7 @@ impl JsModuleInfoCollector {
                         .find_map(|(name, ty)| (name == binding_name).then(|| ty.clone()))
                         .unwrap_or_default();
 
-                    if self.has_writable_reference(&binding) {
+                    if self.has_writable_reference(semantic_model, binding.range) {
                         self.widen_binding_from_writable_references(
                             scope_id,
                             &binding,
@@ -682,18 +514,14 @@ impl JsModuleInfoCollector {
         scope_id: ScopeId,
         binding: &JsBindingData,
         ty: &TypeReference,
-        semantic_model: &biome_js_semantic::SemanticModel,
+        semantic_model: &SemanticModel,
     ) -> TypeReference {
-        let references = self.get_writable_references(binding);
+        let references = self.get_writable_references(semantic_model, binding.range);
         let mut union_collector = UnionCollector::new();
         union_collector.add(ty.clone());
         for reference in references {
-            let Some(node) = self.binding_node_by_start.get(&reference.range_start) else {
-                continue;
-            };
-            let reference_scope = semantic_model
-                .scope_for_range(node.text_trimmed_range())
-                .id();
+            let node = reference.syntax();
+            let reference_scope = reference.scope().id();
 
             // We don't want to widen types inside the same scope
             if binding.scope_id == reference_scope {
@@ -799,18 +627,16 @@ impl JsModuleInfoCollector {
     }
 
     fn find_binding_in_scope(&self, name: &str, scope_id: ScopeId) -> Option<TsBindingReference> {
-        let mut scope = &self.scopes[scope_id.index()];
+        let mut scope = self.semantic_model.scope_from_id(scope_id);
         loop {
-            if let Some(binding_ref) = scope.bindings_by_name.get(name) {
-                return Some(*binding_ref);
+            if let Some(binding_ref) = scope.get_binding_reference(name) {
+                return Some(binding_ref);
             }
-
-            match &scope.parent {
-                Some(parent_id) => scope = &self.scopes[parent_id.index()],
+            match scope.parent() {
+                Some(parent) => scope = parent,
                 None => break,
             }
         }
-
         None
     }
 
@@ -818,10 +644,10 @@ impl JsModuleInfoCollector {
         self.bindings
             .iter()
             .filter(|binding| {
-                let scope = &self.scopes[binding.scope_id.index()];
+                let scope = self.semantic_model.scope_from_id(binding.scope_id);
                 scope
-                    .parent
-                    .is_some_and(|parent_scope_id| parent_scope_id == scope_id)
+                    .parent()
+                    .is_some_and(|parent_scope| parent_scope.id() == scope_id)
             })
             .map(|binding| TypeMember {
                 kind: TypeMemberKind::NamedStatic(binding.name.clone()),
@@ -858,10 +684,10 @@ impl JsModuleInfoCollector {
                 continue;
             }
 
-            let child_scope = &self.scopes[child_binding.scope_id.index()];
+            let child_scope = &self.semantic_model.scope_from_id(child_binding.scope_id);
             if child_scope
-                .parent
-                .is_some_and(|parent| parent == binding.scope_id)
+                .parent()
+                .is_some_and(|parent| parent.id() == binding.scope_id)
             {
                 exports
                     .entry(child_binding.name.clone())
@@ -1019,7 +845,10 @@ impl JsModuleInfoCollector {
     }
 
     fn get_export_for_local_name(&mut self, local_name: TokenText) -> Option<JsOwnExport> {
-        let binding_ref = self.scopes[0].bindings_by_name.get(&local_name)?;
+        let binding_ref = self
+            .semantic_model
+            .global_scope()
+            .get_binding_reference(&local_name)?;
 
         let export = match binding_ref {
             TsBindingReference::Merged {
@@ -1211,17 +1040,15 @@ impl JsModuleInfoCollector {
     /// Maps binding ranges to their type information and JSDoc comments.
     fn build_binding_type_data(
         &self,
-        _semantic_model: &biome_js_semantic::SemanticModel,
-    ) -> FxHashMap<TextRange, super::BindingTypeData> {
+        _semantic_model: &SemanticModel,
+    ) -> FxHashMap<TextRange, BindingTypeData> {
         let mut binding_type_data = FxHashMap::default();
 
         for binding in &self.bindings {
             binding_type_data.insert(
                 binding.range,
-                super::BindingTypeData {
+                BindingTypeData {
                     ty: binding.ty.clone(),
-                    jsdoc: binding.jsdoc.clone(),
-                    export_ranges: binding.export_ranges.clone(),
                 },
             );
         }
@@ -1253,16 +1080,4 @@ impl JsModuleInfo {
             infer_types: collector.infer_types,
         }))
     }
-}
-
-fn find_jsdoc(node: &JsSyntaxNode) -> Option<JsdocComment> {
-    node.ancestors().find_map(|ancestor| {
-        if let Some(export) = biome_js_syntax::JsExport::cast_ref(&ancestor) {
-            JsdocComment::try_from(export.syntax()).ok()
-        } else if let Some(decl) = AnyJsDeclaration::cast(ancestor) {
-            JsdocComment::try_from(decl.syntax()).ok()
-        } else {
-            None
-        }
-    })
 }

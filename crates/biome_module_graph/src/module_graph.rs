@@ -252,11 +252,17 @@ impl ModuleGraph {
 
         find_exported_symbol_with_seen_paths(&data, module, symbol_name, &mut seen_paths).and_then(
             |(module, export)| match export {
-                JsOwnExport::Binding(binding_range) => module
-                    .binding_type_data(*binding_range)
-                    .and_then(|data| data.jsdoc.clone()),
+                JsOwnExport::Binding(binding_range) => {
+                    // Find the binding at this range via the semantic model
+                    module
+                        .semantic_model
+                        .as_binding_by_range(*binding_range)
+                        .and_then(|binding| binding.jsdoc().cloned())
+                }
                 JsOwnExport::Type(_) => None,
-                JsOwnExport::Namespace(reexport) => reexport.jsdoc_comment.clone(),
+                JsOwnExport::Namespace(reexport) => reexport
+                    .export_range
+                    .and_then(|range| module.semantic_model.export_jsdoc(range).cloned()),
             },
         )
     }

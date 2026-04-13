@@ -1,0 +1,173 @@
+---
+source: crates/biome_js_semantic/src/tests/format.rs
+expression: content
+---
+## Source
+
+```
+import { helper } from "./utils";
+
+/** The config shape. */
+interface Config {
+    name: string;
+    value: number;
+}
+
+type Pair<T> = { first: T; second: T };
+
+enum Status {
+    Active,
+    Inactive,
+}
+
+/**
+ * Creates a greeting.
+ * @param cfg - the configuration
+ */
+export function greet(cfg: Config): string {
+    return `Hello ${cfg.name}`;
+}
+
+/** The default config. */
+export const DEFAULT: Config = { name: "world", value: helper(0) };
+
+const s: Status = Status.Active;
+const p: Pair<number> = { first: 1, second: 2 };
+
+export { Status };
+```
+
+## Semantic Model
+
+```
+Scope {
+  id: ScopeId(1) @ 1..546
+  children: [
+    Binding {
+      Id: BindingId(0) @ 10..16
+      Scope: ScopeId(1)
+      Imported: true
+      Exported: false
+      Kind: Import
+      ident: helper
+    }
+    Scope {
+      id: ScopeId(2) @ 61..118
+      children: []
+    }
+    Binding {
+      Id: BindingId(1) @ 71..77
+      Scope: ScopeId(2)
+      Imported: false
+      Exported: false
+      Kind: Interface
+      ident: Config
+      JsDoc Comments: The config shape.
+    }
+    Scope {
+      id: ScopeId(3) @ 120..159
+      children: [
+        Binding {
+          Id: BindingId(3) @ 130..131
+          Scope: ScopeId(3)
+          Imported: false
+          Exported: false
+          Kind: Generic
+          ident: T
+        }
+      ]
+    }
+    Binding {
+      Id: BindingId(2) @ 125..129
+      Scope: ScopeId(3)
+      Imported: false
+      Exported: false
+      Kind: Type
+      ident: Pair
+    }
+    Scope {
+      id: ScopeId(4) @ 161..202
+      children: [
+        Binding {
+          Id: BindingId(5) @ 179..185
+          Scope: ScopeId(4)
+          Imported: false
+          Exported: false
+          Kind: Enum
+          ident: Active
+        }
+        Binding {
+          Id: BindingId(6) @ 191..199
+          Scope: ScopeId(4)
+          Imported: false
+          Exported: false
+          Kind: Enum
+          ident: Inactive
+        }
+      ]
+    }
+    Binding {
+      Id: BindingId(4) @ 166..172
+      Scope: ScopeId(4)
+      Imported: false
+      Exported: true
+      Kind: Enum
+      ident: Status
+    }
+    Scope {
+      id: ScopeId(5) @ 276..347
+      children: [
+        Binding {
+          Id: BindingId(8) @ 291..294
+          Scope: ScopeId(5)
+          Imported: false
+          Exported: false
+          Kind: Value
+          ident: cfg
+          JsDoc Comments: Creates a greeting.
+@param cfg - the configuration
+        }
+        Scope {
+          id: ScopeId(6) @ 312..347
+          children: []
+        }
+      ]
+    }
+    Binding {
+      Id: BindingId(7) @ 285..290
+      Scope: ScopeId(5)
+      Imported: false
+      Exported: true
+      Kind: HoistedValue
+      ident: greet
+      JsDoc Comments: Creates a greeting.
+@param cfg - the configuration
+    }
+    Binding {
+      Id: BindingId(9) @ 389..396
+      Scope: ScopeId(1)
+      Imported: false
+      Exported: true
+      Kind: Value
+      ident: DEFAULT
+      JsDoc Comments: The default config.
+    }
+    Binding {
+      Id: BindingId(10) @ 451..452
+      Scope: ScopeId(1)
+      Imported: false
+      Exported: false
+      Kind: Value
+      ident: s
+    }
+    Binding {
+      Id: BindingId(11) @ 484..485
+      Scope: ScopeId(1)
+      Imported: false
+      Exported: false
+      Kind: Value
+      ident: p
+    }
+  ]
+}
+```

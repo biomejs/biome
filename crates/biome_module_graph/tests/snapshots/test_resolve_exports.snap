@@ -103,9 +103,7 @@ Exports {
       Specifier: "./renamed-reexports"
       Resolved path: "/src/renamed-reexports.ts"
       Import Symbol: All
-      JsDoc(
-        Hello, namespace 2.
-      )
+      Exported range: (1129..1177)
     ))
   }
 }
@@ -119,65 +117,42 @@ Imports {
 ```
 foo => BindingTypeData {
   Types Module(0) TypeId(10),
-  JsDoc(
-    @returns {string}
-  ),
-  Exported Ranges: (118..121)
 }
 
 bar => BindingTypeData {
   Types Module(0) TypeId(11),
-  JsDoc(
-    @package
-  ),
-  Exported Ranges: (187..190)
 }
 
 quz  => BindingTypeData {
   Types Module(0) TypeId(0),
-  JsDoc(
-    @private
-  ),
-  Exported Ranges: (250..253)
 }
 
 baz => BindingTypeData {
   Types Module(0) TypeId(13),
-  Exported Ranges: (363..366)
 }
 
 qux  => BindingTypeData {
   Types Module(0) TypeId(1),
-  Exported Ranges: (123..126)
 }
 
 a => BindingTypeData {
   Types Module(0) TypeId(4),
-  Exported Ranges: (426..427)
 }
 
 b => BindingTypeData {
   Types Module(0) TypeId(5),
-  Exported Ranges: (429..430)
 }
 
 d => BindingTypeData {
   Types Module(0) TypeId(7),
-  Exported Ranges: (436..437)
 }
 
 e => BindingTypeData {
   Types Module(0) TypeId(8),
-  Exported Ranges: (439..440)
 }
 
 Component => BindingTypeData {
   Types Module(0) TypeId(17),
-  JsDoc(
-    @public
-    @returns {JSX.Element}
-  ),
-  Exported Ranges: (909..918)
 }
 ```
 
@@ -306,7 +281,6 @@ Imports {
 ```
 ohNo => BindingTypeData {
   Types Module(0) TypeId(1),
-  Exported Ranges: (29..33)
 }
 ```
 
@@ -344,9 +318,7 @@ Exports {
       Specifier: "./renamed-reexports"
       Resolved path: "/src/renamed-reexports.ts"
       Import Symbol: All
-      JsDoc(
-        Hello, namespace 1.
-      )
+      Exported range: (80..127)
     ))
   }
 }
