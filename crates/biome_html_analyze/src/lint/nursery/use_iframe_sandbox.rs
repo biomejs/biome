@@ -66,7 +66,7 @@ impl Rule for UseIframeSandbox {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Iframe is missing "<Emphasis>"sandbox"</Emphasis>" attribute."
+                    "Iframe doesn't have the "<Emphasis>"sandbox"</Emphasis>" attribute."
                 }
             )
             .note(markup! {

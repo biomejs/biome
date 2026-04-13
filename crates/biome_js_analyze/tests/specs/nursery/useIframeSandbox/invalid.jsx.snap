@@ -15,7 +15,7 @@ const Invalid2 = () => <iframe sandbox />;
 ```
 invalid.jsx:2:24 lint/nursery/useIframeSandbox ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Iframe is missing sandbox attribute.
+  ! Iframe doesn't have the sandbox attribute.
   
     1 │ /* should generate diagnostics */
   > 2 │ const Invalid1 = () => <iframe />;
@@ -35,7 +35,7 @@ invalid.jsx:2:24 lint/nursery/useIframeSandbox ━━━━━━━━━━━
 ```
 invalid.jsx:4:24 lint/nursery/useIframeSandbox ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Iframe is missing sandbox attribute.
+  ! Iframe doesn't have the sandbox attribute.
   
     2 │ const Invalid1 = () => <iframe />;
     3 │ 

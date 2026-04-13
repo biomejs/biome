@@ -13,7 +13,7 @@ expression: invalid.html
 ```
 invalid.html:2:1 lint/nursery/useIframeSandbox ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Iframe is missing sandbox attribute.
+  ! Iframe doesn't have the sandbox attribute.
   
     1 │ <!-- should generate diagnostics -->
   > 2 │ <iframe></iframe>
