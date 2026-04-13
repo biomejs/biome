@@ -34,7 +34,6 @@ Imports {
 ```
 Config  => BindingTypeData {
   Types Module(0) TypeId(2),
-  Exported Ranges: (17..23)
 }
 ```
 

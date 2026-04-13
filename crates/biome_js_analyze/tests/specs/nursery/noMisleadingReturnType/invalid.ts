@@ -48,6 +48,10 @@ function tupleWiden(): [string, number] { return ["hello", 42] as const; }
 
 function ternaryWiden(b: boolean): string { return b ? "a" : "b"; }
 
+function pickWider(): Pick<{name: string, age: number}, "name"> { return {name: "hello"} as const; }
+
+function omitWider(): Omit<{name: string, age: number}, "age"> { return {name: "hello"} as const; }
+
 function readonlyWider(): Readonly<{name: string}> { return {name: "hello"} as const; }
 
 class StatusClass { getStatus(b: boolean): string { if (b) return "loading"; return "idle"; } }

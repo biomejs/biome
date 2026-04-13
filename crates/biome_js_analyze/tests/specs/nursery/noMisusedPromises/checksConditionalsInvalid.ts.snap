@@ -30,6 +30,22 @@ while (a()) {
   // Do something
 }
 
+declare const pickPromiseFn: Pick<{fn: () => Promise<boolean>, other: number}, "fn">;
+if (pickPromiseFn.fn()) {
+  // Do something
+}
+while (pickPromiseFn.fn()) {
+  // Do something
+}
+const val2 = pickPromiseFn.fn() ? 1 : 2;
+[1, 2, 3].filter(() => pickPromiseFn.fn());
+
+declare const omitPromiseFn: Omit<{fn: () => Promise<boolean>, other: number}, "other">;
+if (omitPromiseFn.fn()) {
+  // Do something
+}
+const val3 = omitPromiseFn.fn() ? 1 : 2;
+
 declare const reqCache: Required<{p?: Promise<string>}>;
 if (reqCache.p) console.log("cached");
 const v = reqCache.p ? "yes" : "no";
@@ -171,11 +187,135 @@ checksConditionalsInvalid.ts:28:5 lint/nursery/noMisusedPromises ━━━━━
 
   i A Promise was found where a conditional was expected.
   
-    27 │ declare const reqCache: Required<{p?: Promise<string>}>;
-  > 28 │ if (reqCache.p) console.log("cached");
+    27 │ declare const pickPromiseFn: Pick<{fn: () => Promise<boolean>, other: number}, "fn">;
+  > 28 │ if (pickPromiseFn.fn()) {
+       │     ^^^^^^^^^^^^^^^^^^
+    29 │   // Do something
+    30 │ }
+  
+  i A Promise is always truthy, so this is most likely a mistake.
+  
+  i You may have intended to `await` the Promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+checksConditionalsInvalid.ts:31:8 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A Promise was found where a conditional was expected.
+  
+    29 │   // Do something
+    30 │ }
+  > 31 │ while (pickPromiseFn.fn()) {
+       │        ^^^^^^^^^^^^^^^^^^
+    32 │   // Do something
+    33 │ }
+  
+  i A Promise is always truthy, so this is most likely a mistake.
+  
+  i You may have intended to `await` the Promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+checksConditionalsInvalid.ts:34:14 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A Promise was found where a conditional was expected.
+  
+    32 │   // Do something
+    33 │ }
+  > 34 │ const val2 = pickPromiseFn.fn() ? 1 : 2;
+       │              ^^^^^^^^^^^^^^^^^^
+    35 │ [1, 2, 3].filter(() => pickPromiseFn.fn());
+    36 │ 
+  
+  i A Promise is always truthy, so this is most likely a mistake.
+  
+  i You may have intended to `await` the Promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+checksConditionalsInvalid.ts:35:18 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a Promise where a conditional was expected.
+  
+    33 │ }
+    34 │ const val2 = pickPromiseFn.fn() ? 1 : 2;
+  > 35 │ [1, 2, 3].filter(() => pickPromiseFn.fn());
+       │                  ^^^^^^^^^^^^^^^^^^^^^^^^
+    36 │ 
+    37 │ declare const omitPromiseFn: Omit<{fn: () => Promise<boolean>, other: number}, "other">;
+  
+  i A Promise is always truthy, so this is most likely a mistake.
+  
+  i You may have intended to `await` the Promise, but this does not work inside a synchronous callback.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+checksConditionalsInvalid.ts:38:5 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A Promise was found where a conditional was expected.
+  
+    37 │ declare const omitPromiseFn: Omit<{fn: () => Promise<boolean>, other: number}, "other">;
+  > 38 │ if (omitPromiseFn.fn()) {
+       │     ^^^^^^^^^^^^^^^^^^
+    39 │   // Do something
+    40 │ }
+  
+  i A Promise is always truthy, so this is most likely a mistake.
+  
+  i You may have intended to `await` the Promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+checksConditionalsInvalid.ts:41:14 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A Promise was found where a conditional was expected.
+  
+    39 │   // Do something
+    40 │ }
+  > 41 │ const val3 = omitPromiseFn.fn() ? 1 : 2;
+       │              ^^^^^^^^^^^^^^^^^^
+    42 │ 
+    43 │ declare const reqCache: Required<{p?: Promise<string>}>;
+  
+  i A Promise is always truthy, so this is most likely a mistake.
+  
+  i You may have intended to `await` the Promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+checksConditionalsInvalid.ts:44:5 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A Promise was found where a conditional was expected.
+  
+    43 │ declare const reqCache: Required<{p?: Promise<string>}>;
+  > 44 │ if (reqCache.p) console.log("cached");
        │     ^^^^^^^^^^
-    29 │ const v = reqCache.p ? "yes" : "no";
-    30 │ 
+    45 │ const v = reqCache.p ? "yes" : "no";
+    46 │ 
   
   i A Promise is always truthy, so this is most likely a mistake.
   
@@ -187,16 +327,16 @@ checksConditionalsInvalid.ts:28:5 lint/nursery/noMisusedPromises ━━━━━
 ```
 
 ```
-checksConditionalsInvalid.ts:29:11 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+checksConditionalsInvalid.ts:45:11 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i A Promise was found where a conditional was expected.
   
-    27 │ declare const reqCache: Required<{p?: Promise<string>}>;
-    28 │ if (reqCache.p) console.log("cached");
-  > 29 │ const v = reqCache.p ? "yes" : "no";
+    43 │ declare const reqCache: Required<{p?: Promise<string>}>;
+    44 │ if (reqCache.p) console.log("cached");
+  > 45 │ const v = reqCache.p ? "yes" : "no";
        │           ^^^^^^^^^^
-    30 │ 
-    31 │ declare const roCache: Readonly<{p: Promise<string>}>;
+    46 │ 
+    47 │ declare const roCache: Readonly<{p: Promise<string>}>;
   
   i A Promise is always truthy, so this is most likely a mistake.
   
@@ -208,14 +348,14 @@ checksConditionalsInvalid.ts:29:11 lint/nursery/noMisusedPromises ━━━━�
 ```
 
 ```
-checksConditionalsInvalid.ts:32:5 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+checksConditionalsInvalid.ts:48:5 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i A Promise was found where a conditional was expected.
   
-    31 │ declare const roCache: Readonly<{p: Promise<string>}>;
-  > 32 │ if (roCache.p) console.log("cached");
+    47 │ declare const roCache: Readonly<{p: Promise<string>}>;
+  > 48 │ if (roCache.p) console.log("cached");
        │     ^^^^^^^^^
-    33 │ 
+    49 │ 
   
   i A Promise is always truthy, so this is most likely a mistake.
   

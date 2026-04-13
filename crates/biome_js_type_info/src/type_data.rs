@@ -1455,6 +1455,28 @@ impl TypeReferenceQualifier {
         self.path.is_identifier("Record")
     }
 
+    /// Checks whether this type qualifier references a `Pick` type.
+    ///
+    /// This method simply checks whether the reference is for a literal
+    /// `Pick`, without considering whether another symbol named `Pick` is
+    /// in scope. It can be used _after_ type resolution has failed to find a
+    /// `Pick` symbol in scope, but should not be used _instead of_ such type
+    /// resolution.
+    pub fn is_pick(&self) -> bool {
+        self.path.is_identifier("Pick")
+    }
+
+    /// Checks whether this type qualifier references an `Omit` type.
+    ///
+    /// This method simply checks whether the reference is for a literal
+    /// `Omit`, without considering whether another symbol named `Omit` is
+    /// in scope. It can be used _after_ type resolution has failed to find an
+    /// `Omit` symbol in scope, but should not be used _instead of_ such type
+    /// resolution.
+    pub fn is_omit(&self) -> bool {
+        self.path.is_identifier("Omit")
+    }
+
     /// Checks whether this type qualifier references a `Partial` type.
     ///
     /// This method simply checks whether the reference is for a literal

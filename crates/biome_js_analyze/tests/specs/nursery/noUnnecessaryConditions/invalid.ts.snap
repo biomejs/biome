@@ -146,6 +146,13 @@ const mixed1 = true || false;  // Left side makes right irrelevant
 const mixed2 = false && true;  // Left side makes right irrelevant
 const mixed3 = null ?? "default";  // Left side is always nullish
 
+// Always truthy Pick/Omit object
+declare const pickedObj: Pick<{a: string}, "a">;
+if (pickedObj) console.log(pickedObj.a);
+
+declare const omitObj: Omit<{a: string, b: number}, "b">;
+if (omitObj) console.log();
+
 // Always truthy Readonly/Partial object
 declare const ro: Readonly<{a: string}>;
 if (ro) console.log();
@@ -780,7 +787,7 @@ invalid.ts:141:16 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   > 141 │ const mixed3 = null ?? "default";  // Left side is always nullish
         │                ^^^^
     142 │ 
-    143 │ // Always truthy Readonly/Partial object
+    143 │ // Always truthy Pick/Omit object
   
   i This is a nullish coalescing operator, which is unnecessary.
   
@@ -789,7 +796,7 @@ invalid.ts:141:16 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   > 141 │ const mixed3 = null ?? "default";  // Left side is always nullish
         │                ^^^^
     142 │ 
-    143 │ // Always truthy Readonly/Partial object
+    143 │ // Always truthy Pick/Omit object
   
   i The type being accessed is guaranteed to be non-nullish, making coalescing redundant.
   
@@ -805,12 +812,12 @@ invalid.ts:145:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
 
   ! This condition is always truthy based on the type.
   
-    143 │ // Always truthy Readonly/Partial object
-    144 │ declare const ro: Readonly<{a: string}>;
-  > 145 │ if (ro) console.log();
-        │     ^^
+    143 │ // Always truthy Pick/Omit object
+    144 │ declare const pickedObj: Pick<{a: string}, "a">;
+  > 145 │ if (pickedObj) console.log(pickedObj.a);
+        │     ^^^^^^^^^
     146 │ 
-    147 │ declare const partialObj2: Partial<{a: string}>;
+    147 │ declare const omitObj: Omit<{a: string, b: number}, "b">;
   
   i The type being checked can never be falsy, making this condition redundant.
   
@@ -828,10 +835,55 @@ invalid.ts:148:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
 
   ! This condition is always truthy based on the type.
   
-    147 │ declare const partialObj2: Partial<{a: string}>;
-  > 148 │ if (partialObj2) console.log();
-        │     ^^^^^^^^^^^
+    147 │ declare const omitObj: Omit<{a: string, b: number}, "b">;
+  > 148 │ if (omitObj) console.log();
+        │     ^^^^^^^
     149 │ 
+    150 │ // Always truthy Readonly/Partial object
+  
+  i The type being checked can never be falsy, making this condition redundant.
+  
+  i Remove the condition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:152:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy based on the type.
+  
+    150 │ // Always truthy Readonly/Partial object
+    151 │ declare const ro: Readonly<{a: string}>;
+  > 152 │ if (ro) console.log();
+        │     ^^
+    153 │ 
+    154 │ declare const partialObj2: Partial<{a: string}>;
+  
+  i The type being checked can never be falsy, making this condition redundant.
+  
+  i Remove the condition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:155:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy based on the type.
+  
+    154 │ declare const partialObj2: Partial<{a: string}>;
+  > 155 │ if (partialObj2) console.log();
+        │     ^^^^^^^^^^^
+    156 │ 
   
   i The type being checked can never be falsy, making this condition redundant.
   

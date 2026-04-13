@@ -348,6 +348,18 @@ function returnMaybePromise(): Promise<void> | undefined {
 
 returnMaybePromise();
 
+declare function getPick(): Pick<{p: Promise<void>}, "p">;
+getPick().p;
+
+declare function getOmit(): Omit<{data: string, p: Promise<void>}, "data">;
+getOmit().p;
+
+declare const pickedPromiseObj: Pick<{fn: () => Promise<void>, other: number}, "fn">;
+pickedPromiseObj.fn();
+
+declare const omittedPromiseObj: Omit<{fn: () => Promise<void>, other: number}, "other">;
+omittedPromiseObj.fn();
+
 declare function getReqP(): Required<{p: Promise<void>}>;
 getReqP().p;
 

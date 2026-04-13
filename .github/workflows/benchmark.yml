@@ -1,0 +1,399 @@
+name: Benchmarks
+
+on:
+  workflow_dispatch:
+  merge_group:
+  pull_request:
+    types: [opened, synchronize]
+    branches:
+      - main
+      - next
+    paths:
+      - '.github/workflows/benchmark.yml'
+      - 'Cargo.lock'
+      - 'crates/**'
+  push:
+    branches:
+      - main
+      - next
+    paths:
+      - '.github/workflows/benchmark.yml'
+      - 'Cargo.lock'
+      - 'crates/**'
+
+env:
+  RUST_LOG: info
+
+jobs:
+  changes:
+    runs-on: depot-ubuntu-24.04-arm
+    permissions:
+      pull-requests: read
+    outputs:
+      js: ${{ steps.outputs.outputs.js }}
+      json: ${{ steps.outputs.outputs.json }}
+      css: ${{ steps.outputs.outputs.css }}
+      html: ${{ steps.outputs.outputs.html }}
+      graphql: ${{ steps.outputs.outputs.graphql }}
+      markdown: ${{ steps.outputs.outputs.markdown }}
+      grit: ${{ steps.outputs.outputs.grit }}
+      tailwind: ${{ steps.outputs.outputs.tailwind }}
+      configuration: ${{ steps.outputs.outputs.configuration }}
+      manifests: ${{ steps.outputs.outputs.manifests }}
+      module_graph: ${{ steps.outputs.outputs.module_graph }}
+    steps:
+      - name: Detect benchmark changes
+        if: github.event_name == 'pull_request' || github.event_name == 'push'
+        id: filter
+        uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4
+        with:
+          filters: |
+            js:
+              - '.github/workflows/benchmark.yml'
+              - 'Cargo.lock'
+              - 'crates/biome_analyze/**/*.rs'
+              - 'crates/biome_js_analyze/**/*.rs'
+              - 'crates/biome_js_formatter/**/*.rs'
+              - 'crates/biome_js_parser/**/*.rs'
+              - 'crates/biome_js_*/**/*.rs'
+              - 'crates/biome_formatter/**/*.rs'
+              - 'crates/biome_rowan/**/*.rs'
+              - 'crates/biome_parser/**/*.rs'
+            json:
+              - '.github/workflows/benchmark.yml'
+              - 'Cargo.lock'
+              - 'crates/biome_analyze/**/*.rs'
+              - 'crates/biome_json_analyze/**/*.rs'
+              - 'crates/biome_json_formatter/**/*.rs'
+              - 'crates/biome_json_parser/**/*.rs'
+              - 'crates/biome_json_*/**/*.rs'
+              - 'crates/biome_formatter/**/*.rs'
+              - 'crates/biome_rowan/**/*.rs'
+              - 'crates/biome_parser/**/*.rs'
+            css:
+              - '.github/workflows/benchmark.yml'
+              - 'Cargo.lock'
+              - 'crates/biome_analyze/**/*.rs'
+              - 'crates/biome_css_analyze/**/*.rs'
+              - 'crates/biome_css_formatter/**/*.rs'
+              - 'crates/biome_css_parser/**/*.rs'
+              - 'crates/biome_css_*/**/*.rs'
+              - 'crates/biome_formatter/**/*.rs'
+              - 'crates/biome_rowan/**/*.rs'
+              - 'crates/biome_parser/**/*.rs'
+            html:
+              - '.github/workflows/benchmark.yml'
+              - 'Cargo.lock'
+              - 'crates/biome_analyze/**/*.rs'
+              - 'crates/biome_html_analyze/**/*.rs'
+              - 'crates/biome_html_formatter/**/*.rs'
+              - 'crates/biome_html_parser/**/*.rs'
+              - 'crates/biome_html_*/**/*.rs'
+              - 'crates/biome_formatter/**/*.rs'
+              - 'crates/biome_rowan/**/*.rs'
+              - 'crates/biome_parser/**/*.rs'
+            graphql:
+              - '.github/workflows/benchmark.yml'
+              - 'Cargo.lock'
+              - 'crates/biome_analyze/**/*.rs'
+              - 'crates/biome_graphql_formatter/**/*.rs'
+              - 'crates/biome_graphql_parser/**/*.rs'
+              - 'crates/biome_graphql_*/**/*.rs'
+              - 'crates/biome_formatter/**/*.rs'
+              - 'crates/biome_rowan/**/*.rs'
+              - 'crates/biome_parser/**/*.rs'
+            markdown:
+              - '.github/workflows/benchmark.yml'
+              - 'Cargo.lock'
+              - 'crates/biome_markdown_parser/Cargo.toml'
+              - 'crates/biome_markdown_parser/benches/**/*.md'
+              - 'crates/biome_markdown_parser/**/*.rs'
+              - 'crates/biome_markdown_*/**/*.rs'
+              - 'crates/biome_rowan/**/*.rs'
+              - 'crates/biome_parser/**/*.rs'
+            grit:
+              - '.github/workflows/benchmark.yml'
+              - 'Cargo.lock'
+              - 'crates/biome_grit_parser/**/*.rs'
+              - 'crates/biome_grit_patterns/**/*.rs'
+              - 'crates/biome_grit_syntax/**/*.rs'
+              - 'crates/biome_rowan/**/*.rs'
+            tailwind:
+              - '.github/workflows/benchmark.yml'
+              - 'Cargo.lock'
+              - 'crates/biome_tailwind_parser/**/*.rs'
+              - 'crates/biome_tailwind_*/**/*.rs'
+              - 'crates/biome_rowan/**/*.rs'
+              - 'crates/biome_parser/**/*.rs'
+            configuration:
+              - '.github/workflows/benchmark.yml'
+              - 'Cargo.lock'
+              - 'crates/biome_configuration/**/*.rs'
+              - 'crates/biome_rowan/**/*.rs'
+            manifests:
+              - '.github/workflows/benchmark.yml'
+              - 'Cargo.lock'
+              - 'crates/biome_package/**/*.rs'
+              - 'crates/biome_rowan/**/*.rs'
+            module_graph:
+              - '.github/workflows/benchmark.yml'
+              - 'Cargo.lock'
+              - 'crates/biome_module_graph/**/*.rs'
+              - 'crates/biome_rowan/**/*.rs'
+
+      - name: Set change outputs
+        id: outputs
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          JS: ${{ steps.filter.outputs.js }}
+          JSON: ${{ steps.filter.outputs.json }}
+          CSS: ${{ steps.filter.outputs.css }}
+          HTML: ${{ steps.filter.outputs.html }}
+          GRAPHQL: ${{ steps.filter.outputs.graphql }}
+          MARKDOWN: ${{ steps.filter.outputs.markdown }}
+          GRIT: ${{ steps.filter.outputs.grit }}
+          TAILWIND: ${{ steps.filter.outputs.tailwind }}
+          CONFIGURATION: ${{ steps.filter.outputs.configuration }}
+          MANIFESTS: ${{ steps.filter.outputs.manifests }}
+          MODULE_GRAPH: ${{ steps.filter.outputs.module_graph }}
+        run: |
+          if [ "$EVENT_NAME" = 'workflow_dispatch' ] || [ "$EVENT_NAME" = 'merge_group' ]; then
+            JS=true
+            JSON=true
+            CSS=true
+            HTML=true
+            GRAPHQL=true
+            MARKDOWN=true
+            GRIT=true
+            TAILWIND=true
+            CONFIGURATION=true
+            MANIFESTS=true
+            MODULE_GRAPH=true
+          fi
+
+          echo "js=$JS" >> "$GITHUB_OUTPUT"
+          echo "json=$JSON" >> "$GITHUB_OUTPUT"
+          echo "css=$CSS" >> "$GITHUB_OUTPUT"
+          echo "html=$HTML" >> "$GITHUB_OUTPUT"
+          echo "graphql=$GRAPHQL" >> "$GITHUB_OUTPUT"
+          echo "markdown=$MARKDOWN" >> "$GITHUB_OUTPUT"
+          echo "grit=$GRIT" >> "$GITHUB_OUTPUT"
+          echo "tailwind=$TAILWIND" >> "$GITHUB_OUTPUT"
+          echo "configuration=$CONFIGURATION" >> "$GITHUB_OUTPUT"
+          echo "manifests=$MANIFESTS" >> "$GITHUB_OUTPUT"
+          echo "module_graph=$MODULE_GRAPH" >> "$GITHUB_OUTPUT"
+
+  js:
+    needs: changes
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.js == 'true'
+    permissions:
+      contents: read
+      pull-requests: write
+    name: Bench JS / ${{ matrix.package }}
+    runs-on: depot-ubuntu-24.04-arm-16
+    strategy:
+      matrix:
+        package:
+          - biome_js_parser
+          - biome_js_formatter
+          - biome_js_analyze
+    steps: &bench_steps
+      - name: Checkout PR Branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Install toolchain
+        uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
+        with:
+          channel: stable
+          cache-target: release
+          bins: cargo-codspeed
+          cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compile
+        timeout-minutes: 20
+        run: cargo codspeed build -p ${{ matrix.package }}
+        env:
+          CARGO_BUILD_JOBS: 3 # Default is 4 (equals to the vCPU count of the runner), which leads OOM on cargo build
+
+      - name: Run the benchmarks
+        uses: CodSpeedHQ/action@db35df748deb45fdef0960669f57d627c1956c30 # v4.13.1
+        timeout-minutes: 50
+        with:
+          mode: simulation
+          run: cargo codspeed run
+          token: ${{ secrets.CODSPEED_TOKEN }}
+
+  json:
+    needs: changes
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.json == 'true'
+    permissions:
+      contents: read
+      pull-requests: write
+    name: Bench JSON / ${{ matrix.package }}
+    runs-on: depot-ubuntu-24.04-arm-16
+    strategy:
+      matrix:
+        package:
+          - biome_json_parser
+          - biome_json_formatter
+          - biome_json_analyze
+    steps: *bench_steps
+
+  css:
+    needs: changes
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.css == 'true'
+    permissions:
+      contents: read
+      pull-requests: write
+    name: Bench CSS / ${{ matrix.package }}
+    runs-on: depot-ubuntu-24.04-arm-16
+    strategy:
+      matrix:
+        package:
+          - biome_css_parser
+          - biome_css_formatter
+          - biome_css_analyze
+    steps: *bench_steps
+
+  html:
+    needs: changes
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.html == 'true'
+    permissions:
+      contents: read
+      pull-requests: write
+    name: Bench HTML / ${{ matrix.package }}
+    runs-on: depot-ubuntu-24.04-arm-16
+    strategy:
+      matrix:
+        package:
+          - biome_html_parser
+          - biome_html_formatter
+          - biome_html_analyze
+    steps: *bench_steps
+
+  graphql:
+    needs: changes
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.graphql == 'true'
+    permissions:
+      contents: read
+      pull-requests: write
+    name: Bench GraphQL / ${{ matrix.package }}
+    runs-on: depot-ubuntu-24.04-arm-16
+    strategy:
+      matrix:
+        package:
+          - biome_graphql_parser
+          - biome_graphql_formatter
+    steps: *bench_steps
+
+  markdown:
+    needs: changes
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.markdown == 'true'
+    permissions:
+      contents: read
+      pull-requests: write
+    name: Bench Markdown
+    runs-on: depot-ubuntu-24.04-arm-16
+    steps:
+      - name: Checkout PR Branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Install toolchain
+        uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
+        with:
+          channel: stable
+          cache-target: release
+          bins: cargo-codspeed
+          cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compile
+        timeout-minutes: 20
+        run: cargo codspeed build -p biome_markdown_parser
+        env:
+          CARGO_BUILD_JOBS: 3
+
+      - name: Run the benchmarks
+        uses: CodSpeedHQ/action@db35df748deb45fdef0960669f57d627c1956c30 # v4.13.1
+        timeout-minutes: 50
+        with:
+          mode: simulation
+          run: cargo codspeed run -p biome_markdown_parser --bench markdown_parser
+          token: ${{ secrets.CODSPEED_TOKEN }}
+
+  grit:
+    needs: changes
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.grit == 'true'
+    permissions:
+      contents: read
+      pull-requests: write
+    name: Bench GritQL
+    runs-on: depot-ubuntu-24.04-arm-16
+    strategy:
+      matrix:
+        package:
+          - biome_grit_patterns
+    steps: *bench_steps
+
+  tailwind:
+    needs: changes
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.tailwind == 'true'
+    permissions:
+      contents: read
+      pull-requests: write
+    name: Bench Tailwind
+    runs-on: depot-ubuntu-24.04-arm-16
+    strategy:
+      matrix:
+        package:
+          - biome_tailwind_parser
+    steps: *bench_steps
+
+  configuration:
+    needs: changes
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.configuration == 'true'
+    permissions:
+      contents: read
+      pull-requests: write
+    name: Bench Configuration
+    runs-on: depot-ubuntu-24.04-arm-16
+    strategy:
+      matrix:
+        package:
+          - biome_configuration
+    steps: *bench_steps
+
+  manifests:
+    needs: changes
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.manifests == 'true'
+    permissions:
+      contents: read
+      pull-requests: write
+    name: Bench Manifests
+    runs-on: depot-ubuntu-24.04-arm-16
+    strategy:
+      matrix:
+        package:
+          - biome_package
+    steps: *bench_steps
+
+  module-graph:
+    needs: changes
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.module_graph == 'true'
+    permissions:
+      contents: read
+      pull-requests: write
+    name: Bench Module Graph
+    runs-on: depot-ubuntu-24.04-arm-16
+    strategy:
+      matrix:
+        package:
+          - biome_module_graph
+    steps: *bench_steps

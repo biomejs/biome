@@ -66,6 +66,26 @@ interface InterfaceWithOptional {
 declare const objFromInterface: InterfaceWithOptional;
 const optionalFromInterface = objFromInterface.a || 'default';
 
+// Optional property in Pick
+declare const pickOptional: Pick<{a?: string, b: number}, "a">;
+const vPickOpt = pickOptional.a || "default";
+
+// Nullable property in Pick
+declare const pickNullable: Pick<{a: string | null}, "a">;
+const vPickNull = pickNullable.a || "default";
+
+// Nullable property in Omit
+declare const omitNullable: Omit<{x: number, y: string | null}, "x">;
+const vOmitNull = omitNullable.y || "default";
+
+// Nested nullable object in Pick
+declare const nestPick: Pick<{cfg: {name: string} | null}, "cfg">;
+const nestV = nestPick.cfg || {name: "d"};
+
+// Optional property in Omit
+declare const omitOpt: Omit<{a: string, b?: number}, "a">;
+const omitV = omitOpt.b || 0;
+
 // Partial type
 declare const partialObj: Partial<{name: string}>;
 const partialOr = partialObj.name || 'default';

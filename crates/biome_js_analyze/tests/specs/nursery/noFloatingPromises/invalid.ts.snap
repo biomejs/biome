@@ -354,6 +354,18 @@ function returnMaybePromise(): Promise<void> | undefined {
 
 returnMaybePromise();
 
+declare function getPick(): Pick<{p: Promise<void>}, "p">;
+getPick().p;
+
+declare function getOmit(): Omit<{data: string, p: Promise<void>}, "data">;
+getOmit().p;
+
+declare const pickedPromiseObj: Pick<{fn: () => Promise<void>, other: number}, "fn">;
+pickedPromiseObj.fn();
+
+declare const omittedPromiseObj: Omit<{fn: () => Promise<void>, other: number}, "other">;
+omittedPromiseObj.fn();
+
 declare function getReqP(): Required<{p: Promise<void>}>;
 getReqP().p;
 
@@ -1785,7 +1797,7 @@ invalid.ts:349:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   > 349 │ returnMaybePromise();
         │ ^^^^^^^^^^^^^^^^^^^^^
     350 │ 
-    351 │ declare function getReqP(): Required<{p: Promise<void>}>;
+    351 │ declare function getPick(): Pick<{p: Promise<void>}, "p">;
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
@@ -1799,11 +1811,11 @@ invalid.ts:352:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
 
   i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-    351 │ declare function getReqP(): Required<{p: Promise<void>}>;
-  > 352 │ getReqP().p;
+    351 │ declare function getPick(): Pick<{p: Promise<void>}, "p">;
+  > 352 │ getPick().p;
         │ ^^^^^^^^^^^^
     353 │ 
-    354 │ declare function getReadonlyP(): Readonly<{p: Promise<void>}>;
+    354 │ declare function getOmit(): Omit<{data: string, p: Promise<void>}, "data">;
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
@@ -1817,10 +1829,82 @@ invalid.ts:355:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
 
   i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-    354 │ declare function getReadonlyP(): Readonly<{p: Promise<void>}>;
-  > 355 │ getReadonlyP().p;
-        │ ^^^^^^^^^^^^^^^^^
+    354 │ declare function getOmit(): Omit<{data: string, p: Promise<void>}, "data">;
+  > 355 │ getOmit().p;
+        │ ^^^^^^^^^^^^
     356 │ 
+    357 │ declare const pickedPromiseObj: Pick<{fn: () => Promise<void>, other: number}, "fn">;
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:358:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    357 │ declare const pickedPromiseObj: Pick<{fn: () => Promise<void>, other: number}, "fn">;
+  > 358 │ pickedPromiseObj.fn();
+        │ ^^^^^^^^^^^^^^^^^^^^^^
+    359 │ 
+    360 │ declare const omittedPromiseObj: Omit<{fn: () => Promise<void>, other: number}, "other">;
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:361:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    360 │ declare const omittedPromiseObj: Omit<{fn: () => Promise<void>, other: number}, "other">;
+  > 361 │ omittedPromiseObj.fn();
+        │ ^^^^^^^^^^^^^^^^^^^^^^^
+    362 │ 
+    363 │ declare function getReqP(): Required<{p: Promise<void>}>;
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:364:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    363 │ declare function getReqP(): Required<{p: Promise<void>}>;
+  > 364 │ getReqP().p;
+        │ ^^^^^^^^^^^^
+    365 │ 
+    366 │ declare function getReadonlyP(): Readonly<{p: Promise<void>}>;
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:367:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    366 │ declare function getReadonlyP(): Readonly<{p: Promise<void>}>;
+  > 367 │ getReadonlyP().p;
+        │ ^^^^^^^^^^^^^^^^^
+    368 │ 
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   

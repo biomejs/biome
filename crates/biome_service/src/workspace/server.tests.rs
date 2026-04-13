@@ -763,6 +763,138 @@ const PortfolioIcon = styled.div`
 }
 
 #[test]
+fn issue_9113() {
+    const FILE_PATH: &str = "/project/file.ts";
+    const FILE_CONTENT: &str = r#"import styled from 'styled-components';
+
+const Wrapper = styled.div`
+  height: 20px;
+
+  @media screen and (min-width: 768px) {
+    height: 40px;
+  }
+`;
+
+const Container = styled.div`
+	     	display: grid;
+	grid-template-rows: auto;
+	grid-gap: 2px;
+	margin: 4px 4px 0;
+
+    /* top level seems fine */
+	grid-template-columns: repeat(3, 1fr);
+
+    	  @media (min-width: 480px) {
+    		    grid-template-columns: repeat(4, 1fr);
+	}
+
+	   @media (min-width: 640px) {
+		  grid-template-columns: repeat(5, 1fr);
+	}
+
+    	@media (min-width: 780px) {
+    		grid-template-columns: repeat(6, 1fr);
+    	}
+`;"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            categories: Default::default(),
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Error,
+            enforce_assist: false,
+        })
+        .unwrap();
+
+    assert!(
+        result.diagnostics.is_empty(),
+        "Expected no diagnostics for embedded CSS, got: {:#?}",
+        result.diagnostics
+    );
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code(), @r#"
+    import styled from "styled-components";
+
+    const Wrapper = styled.div`
+    	height: 20px;
+
+    	@media screen and (min-width: 768px) {
+    		height: 40px;
+    	}
+    `;
+
+    const Container = styled.div`
+    	display: grid;
+    	grid-template-rows: auto;
+    	grid-gap: 2px;
+    	margin: 4px 4px 0;
+
+    	/* top level seems fine */
+    	grid-template-columns: repeat(3, 1fr);
+
+    	@media (min-width: 480px) {
+    		grid-template-columns: repeat(4, 1fr);
+    	}
+
+    	@media (min-width: 640px) {
+    		grid-template-columns: repeat(5, 1fr);
+    	}
+
+    	@media (min-width: 780px) {
+    		grid-template-columns: repeat(6, 1fr);
+    	}
+    `;
+    "#);
+}
+
+#[test]
 fn format_js_with_embedded_graphql() {
     const FILE_PATH: &str = "/project/file.js";
     const FILE_CONTENT: &str = r#"const Foo = gql`

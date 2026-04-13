@@ -50,6 +50,22 @@ declare const threeOrFour: 3 | 4;
 declare const threeOrFourBigInt: 3n | 4n;
 ~~threeOrFourBigInt;
 
+declare const pickedStr: Pick<{ a: string; b: number }, "a">;
+String(pickedStr.a);
+pickedStr.a.toString();
+"" + pickedStr.a;
+
+declare const omittedStr: Omit<{ a: string; b: number }, "b">;
+String(omittedStr.a);
+
+declare const pickedNum: Pick<{ n: number; s: string }, "n">;
+Number(pickedNum.n);
++pickedNum.n;
+
+declare const pickedBool: Pick<{ flag: boolean; label: string }, "flag">;
+Boolean(pickedBool.flag);
+!!pickedBool.flag;
+
 function reqStr(x: Required<{s?: string}>) { return String(x.s); }
 function reqNum(x: Required<{n?: number}>) { return Number(x.n); }
 function reqBig(x: Required<{b?: bigint}>) { return BigInt(x.b); }

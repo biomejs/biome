@@ -101,6 +101,18 @@ function tupleNoConst(): [boolean, string] { return [true, "hello"]; }
 
 function ternaryExact(b: boolean): "a" | "b" { return b ? "a" : "b"; }
 
+function pickExact(): Pick<{name: string, age: number}, "name"> {
+    return { name: "hello" };
+}
+
+function omitExact(): Omit<{name: string, age: number}, "age"> {
+    return { name: "hello" };
+}
+
+function pickMultipleKeys(): Pick<{name: string, age: number, active: boolean}, "name" | "age"> {
+    return { name: "hello", age: 30 };
+}
+
 function partialSingle(): Partial<{name: string}> { return {name: "hello"}; }
 
 function requiredExact(): Required<{name?: string}> { return {name: "hello"}; }

@@ -62,6 +62,16 @@ let numberAndBigint = 1 + 1n;
 	total += 1n;
 }
 
+{
+	declare const pickedBigint: Pick<{a: bigint, b: number}, "a">;
+	const r1 = pickedBigint.a + 1;
+}
+
+{
+	declare const omittedBigint: Omit<{a: bigint, b: number}, "b">;
+	const r2 = omittedBigint.a + 1;
+}
+
 function reqBigInt(x: Required<{b?: bigint}>) { return x.b + 1; }
 function roBigInt(x: Readonly<{b: bigint}>) { return x.b + 1; }
 
@@ -179,25 +189,25 @@ invalid.ts:56:2 lint/nursery/noUnsafePlusOperands ━━━━━━━━━━
 ```
 
 ```
-invalid.ts:59:56 lint/nursery/noUnsafePlusOperands ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:61:13 lint/nursery/noUnsafePlusOperands ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Numeric + operations must use either two bigint values or two number values.
   
-    57 │ }
-    58 │ 
-  > 59 │ function reqBigInt(x: Required<{b?: bigint}>) { return x.b + 1; }
-       │                                                        ^^^^^^^
-    60 │ function roBigInt(x: Readonly<{b: bigint}>) { return x.b + 1; }
-    61 │ 
+    59 │ {
+    60 │ 	declare const pickedBigint: Pick<{a: bigint, b: number}, "a">;
+  > 61 │ 	const r1 = pickedBigint.a + 1;
+       │ 	           ^^^^^^^^^^^^^^^^^^
+    62 │ }
+    63 │ 
   
   i This operation mixes number with bigint.
   
-    57 │ }
-    58 │ 
-  > 59 │ function reqBigInt(x: Required<{b?: bigint}>) { return x.b + 1; }
-       │                                                        ^^^^^^^
-    60 │ function roBigInt(x: Readonly<{b: bigint}>) { return x.b + 1; }
-    61 │ 
+    59 │ {
+    60 │ 	declare const pickedBigint: Pick<{a: bigint, b: number}, "a">;
+  > 61 │ 	const r1 = pickedBigint.a + 1;
+       │ 	           ^^^^^^^^^^^^^^^^^^
+    62 │ }
+    63 │ 
   
   i Convert one side so both operands use the same numeric type before applying + or +=.
   
@@ -207,21 +217,77 @@ invalid.ts:59:56 lint/nursery/noUnsafePlusOperands ━━━━━━━━━�
 ```
 
 ```
-invalid.ts:60:54 lint/nursery/noUnsafePlusOperands ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:66:13 lint/nursery/noUnsafePlusOperands ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Numeric + operations must use either two bigint values or two number values.
   
-    59 │ function reqBigInt(x: Required<{b?: bigint}>) { return x.b + 1; }
-  > 60 │ function roBigInt(x: Readonly<{b: bigint}>) { return x.b + 1; }
-       │                                                      ^^^^^^^
-    61 │ 
+    64 │ {
+    65 │ 	declare const omittedBigint: Omit<{a: bigint, b: number}, "b">;
+  > 66 │ 	const r2 = omittedBigint.a + 1;
+       │ 	           ^^^^^^^^^^^^^^^^^^^
+    67 │ }
+    68 │ 
   
   i This operation mixes number with bigint.
   
-    59 │ function reqBigInt(x: Required<{b?: bigint}>) { return x.b + 1; }
-  > 60 │ function roBigInt(x: Readonly<{b: bigint}>) { return x.b + 1; }
+    64 │ {
+    65 │ 	declare const omittedBigint: Omit<{a: bigint, b: number}, "b">;
+  > 66 │ 	const r2 = omittedBigint.a + 1;
+       │ 	           ^^^^^^^^^^^^^^^^^^^
+    67 │ }
+    68 │ 
+  
+  i Convert one side so both operands use the same numeric type before applying + or +=.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:69:56 lint/nursery/noUnsafePlusOperands ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Numeric + operations must use either two bigint values or two number values.
+  
+    67 │ }
+    68 │ 
+  > 69 │ function reqBigInt(x: Required<{b?: bigint}>) { return x.b + 1; }
+       │                                                        ^^^^^^^
+    70 │ function roBigInt(x: Readonly<{b: bigint}>) { return x.b + 1; }
+    71 │ 
+  
+  i This operation mixes number with bigint.
+  
+    67 │ }
+    68 │ 
+  > 69 │ function reqBigInt(x: Required<{b?: bigint}>) { return x.b + 1; }
+       │                                                        ^^^^^^^
+    70 │ function roBigInt(x: Readonly<{b: bigint}>) { return x.b + 1; }
+    71 │ 
+  
+  i Convert one side so both operands use the same numeric type before applying + or +=.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:70:54 lint/nursery/noUnsafePlusOperands ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Numeric + operations must use either two bigint values or two number values.
+  
+    69 │ function reqBigInt(x: Required<{b?: bigint}>) { return x.b + 1; }
+  > 70 │ function roBigInt(x: Readonly<{b: bigint}>) { return x.b + 1; }
        │                                                      ^^^^^^^
-    61 │ 
+    71 │ 
+  
+  i This operation mixes number with bigint.
+  
+    69 │ function reqBigInt(x: Required<{b?: bigint}>) { return x.b + 1; }
+  > 70 │ function roBigInt(x: Readonly<{b: bigint}>) { return x.b + 1; }
+       │                                                      ^^^^^^^
+    71 │ 
   
   i Convert one side so both operands use the same numeric type before applying + or +=.
   

@@ -140,6 +140,13 @@ const mixed1 = true || false;  // Left side makes right irrelevant
 const mixed2 = false && true;  // Left side makes right irrelevant
 const mixed3 = null ?? "default";  // Left side is always nullish
 
+// Always truthy Pick/Omit object
+declare const pickedObj: Pick<{a: string}, "a">;
+if (pickedObj) console.log(pickedObj.a);
+
+declare const omitObj: Omit<{a: string, b: number}, "b">;
+if (omitObj) console.log();
+
 // Always truthy Readonly/Partial object
 declare const ro: Readonly<{a: string}>;
 if (ro) console.log();

@@ -56,6 +56,22 @@ declare const threeOrFour: 3 | 4;
 declare const threeOrFourBigInt: 3n | 4n;
 ~~threeOrFourBigInt;
 
+declare const pickedStr: Pick<{ a: string; b: number }, "a">;
+String(pickedStr.a);
+pickedStr.a.toString();
+"" + pickedStr.a;
+
+declare const omittedStr: Omit<{ a: string; b: number }, "b">;
+String(omittedStr.a);
+
+declare const pickedNum: Pick<{ n: number; s: string }, "n">;
+Number(pickedNum.n);
++pickedNum.n;
+
+declare const pickedBool: Pick<{ flag: boolean; label: string }, "flag">;
+Boolean(pickedBool.flag);
+!!pickedBool.flag;
+
 function reqStr(x: Required<{s?: string}>) { return String(x.s); }
 function reqNum(x: Required<{n?: number}>) { return Number(x.n); }
 function reqBig(x: Required<{b?: bigint}>) { return BigInt(x.b); }
@@ -592,7 +608,7 @@ invalid.ts:51:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━
   > 51 │ ~~threeOrFourBigInt;
        │ ^^^^^^^^^^^^^^^^^^^
     52 │ 
-    53 │ function reqStr(x: Required<{s?: string}>) { return String(x.s); }
+    53 │ declare const pickedStr: Pick<{ a: string; b: number }, "a">;
   
   i This expression already evaluates to a bigint.
   
@@ -608,16 +624,15 @@ invalid.ts:51:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━
 ```
 
 ```
-invalid.ts:53:53 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:54:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Avoid calling `String()` on a string value.
   
-    51 │ ~~threeOrFourBigInt;
-    52 │ 
-  > 53 │ function reqStr(x: Required<{s?: string}>) { return String(x.s); }
-       │                                                     ^^^^^^
-    54 │ function reqNum(x: Required<{n?: number}>) { return Number(x.n); }
-    55 │ function reqBig(x: Required<{b?: bigint}>) { return BigInt(x.b); }
+    53 │ declare const pickedStr: Pick<{ a: string; b: number }, "a">;
+  > 54 │ String(pickedStr.a);
+       │ ^^^^^^
+    55 │ pickedStr.a.toString();
+    56 │ "" + pickedStr.a;
   
   i This expression already evaluates to a string.
   
@@ -633,15 +648,89 @@ invalid.ts:53:53 lint/nursery/noUselessTypeConversion ━━━━━━━━�
 ```
 
 ```
-invalid.ts:54:53 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:55:13 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `toString()` on a string value.
+  
+    53 │ declare const pickedStr: Pick<{ a: string; b: number }, "a">;
+    54 │ String(pickedStr.a);
+  > 55 │ pickedStr.a.toString();
+       │             ^^^^^^^^
+    56 │ "" + pickedStr.a;
+    57 │ 
+  
+  i This expression already evaluates to a string.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected string type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:56:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid concatenating a string value with an empty string.
+  
+    54 │ String(pickedStr.a);
+    55 │ pickedStr.a.toString();
+  > 56 │ "" + pickedStr.a;
+       │ ^^^^^^^^^^^^^^^^
+    57 │ 
+    58 │ declare const omittedStr: Omit<{ a: string; b: number }, "b">;
+  
+  i This expression already evaluates to a string.
+  
+  i This expression already evaluates to a string, so the empty string has no effect.
+  
+  i Redundant conversions make it harder to see that the value already has the expected string type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:59:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `String()` on a string value.
+  
+    58 │ declare const omittedStr: Omit<{ a: string; b: number }, "b">;
+  > 59 │ String(omittedStr.a);
+       │ ^^^^^^
+    60 │ 
+    61 │ declare const pickedNum: Pick<{ n: number; s: string }, "n">;
+  
+  i This expression already evaluates to a string.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected string type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:62:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Avoid calling `Number()` on a number value.
   
-    53 │ function reqStr(x: Required<{s?: string}>) { return String(x.s); }
-  > 54 │ function reqNum(x: Required<{n?: number}>) { return Number(x.n); }
-       │                                                     ^^^^^^
-    55 │ function reqBig(x: Required<{b?: bigint}>) { return BigInt(x.b); }
-    56 │ function roStr(x: Readonly<{s: string}>) { return String(x.s); }
+    61 │ declare const pickedNum: Pick<{ n: number; s: string }, "n">;
+  > 62 │ Number(pickedNum.n);
+       │ ^^^^^^
+    63 │ +pickedNum.n;
+    64 │ 
   
   i This expression already evaluates to a number.
   
@@ -657,16 +746,139 @@ invalid.ts:54:53 lint/nursery/noUselessTypeConversion ━━━━━━━━�
 ```
 
 ```
-invalid.ts:55:53 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:63:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid applying unary `+` to a number value.
+  
+    61 │ declare const pickedNum: Pick<{ n: number; s: string }, "n">;
+    62 │ Number(pickedNum.n);
+  > 63 │ +pickedNum.n;
+       │ ^^^^^^^^^^^^
+    64 │ 
+    65 │ declare const pickedBool: Pick<{ flag: boolean; label: string }, "flag">;
+  
+  i This expression already evaluates to a number.
+  
+  i This expression already evaluates to a number, so the unary operator has no effect.
+  
+  i Redundant conversions make it harder to see that the value already has the expected number type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:66:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `Boolean()` on a boolean value.
+  
+    65 │ declare const pickedBool: Pick<{ flag: boolean; label: string }, "flag">;
+  > 66 │ Boolean(pickedBool.flag);
+       │ ^^^^^^^
+    67 │ !!pickedBool.flag;
+    68 │ 
+  
+  i This expression already evaluates to a boolean.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected boolean type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:67:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid applying `!!` to a boolean value.
+  
+    65 │ declare const pickedBool: Pick<{ flag: boolean; label: string }, "flag">;
+    66 │ Boolean(pickedBool.flag);
+  > 67 │ !!pickedBool.flag;
+       │ ^^^^^^^^^^^^^^^^^
+    68 │ 
+    69 │ function reqStr(x: Required<{s?: string}>) { return String(x.s); }
+  
+  i This expression already evaluates to a boolean.
+  
+  i This expression already evaluates to a boolean, so the double negation has no effect.
+  
+  i Redundant conversions make it harder to see that the value already has the expected boolean type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:69:53 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `String()` on a string value.
+  
+    67 │ !!pickedBool.flag;
+    68 │ 
+  > 69 │ function reqStr(x: Required<{s?: string}>) { return String(x.s); }
+       │                                                     ^^^^^^
+    70 │ function reqNum(x: Required<{n?: number}>) { return Number(x.n); }
+    71 │ function reqBig(x: Required<{b?: bigint}>) { return BigInt(x.b); }
+  
+  i This expression already evaluates to a string.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected string type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:70:53 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `Number()` on a number value.
+  
+    69 │ function reqStr(x: Required<{s?: string}>) { return String(x.s); }
+  > 70 │ function reqNum(x: Required<{n?: number}>) { return Number(x.n); }
+       │                                                     ^^^^^^
+    71 │ function reqBig(x: Required<{b?: bigint}>) { return BigInt(x.b); }
+    72 │ function roStr(x: Readonly<{s: string}>) { return String(x.s); }
+  
+  i This expression already evaluates to a number.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected number type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:71:53 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Avoid calling `BigInt()` on a bigint value.
   
-    53 │ function reqStr(x: Required<{s?: string}>) { return String(x.s); }
-    54 │ function reqNum(x: Required<{n?: number}>) { return Number(x.n); }
-  > 55 │ function reqBig(x: Required<{b?: bigint}>) { return BigInt(x.b); }
+    69 │ function reqStr(x: Required<{s?: string}>) { return String(x.s); }
+    70 │ function reqNum(x: Required<{n?: number}>) { return Number(x.n); }
+  > 71 │ function reqBig(x: Required<{b?: bigint}>) { return BigInt(x.b); }
        │                                                     ^^^^^^
-    56 │ function roStr(x: Readonly<{s: string}>) { return String(x.s); }
-    57 │ 
+    72 │ function roStr(x: Readonly<{s: string}>) { return String(x.s); }
+    73 │ 
   
   i This expression already evaluates to a bigint.
   
@@ -682,15 +894,15 @@ invalid.ts:55:53 lint/nursery/noUselessTypeConversion ━━━━━━━━�
 ```
 
 ```
-invalid.ts:56:51 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:72:51 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Avoid calling `String()` on a string value.
   
-    54 │ function reqNum(x: Required<{n?: number}>) { return Number(x.n); }
-    55 │ function reqBig(x: Required<{b?: bigint}>) { return BigInt(x.b); }
-  > 56 │ function roStr(x: Readonly<{s: string}>) { return String(x.s); }
+    70 │ function reqNum(x: Required<{n?: number}>) { return Number(x.n); }
+    71 │ function reqBig(x: Required<{b?: bigint}>) { return BigInt(x.b); }
+  > 72 │ function roStr(x: Readonly<{s: string}>) { return String(x.s); }
        │                                                   ^^^^^^
-    57 │ 
+    73 │ 
   
   i This expression already evaluates to a string.
   

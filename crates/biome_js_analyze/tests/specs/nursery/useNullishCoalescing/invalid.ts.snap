@@ -72,6 +72,26 @@ interface InterfaceWithOptional {
 declare const objFromInterface: InterfaceWithOptional;
 const optionalFromInterface = objFromInterface.a || 'default';
 
+// Optional property in Pick
+declare const pickOptional: Pick<{a?: string, b: number}, "a">;
+const vPickOpt = pickOptional.a || "default";
+
+// Nullable property in Pick
+declare const pickNullable: Pick<{a: string | null}, "a">;
+const vPickNull = pickNullable.a || "default";
+
+// Nullable property in Omit
+declare const omitNullable: Omit<{x: number, y: string | null}, "x">;
+const vOmitNull = omitNullable.y || "default";
+
+// Nested nullable object in Pick
+declare const nestPick: Pick<{cfg: {name: string} | null}, "cfg">;
+const nestV = nestPick.cfg || {name: "d"};
+
+// Optional property in Omit
+declare const omitOpt: Omit<{a: string, b?: number}, "a">;
+const omitV = omitOpt.b || 0;
+
 // Partial type
 declare const partialObj: Partial<{name: string}>;
 const partialOr = partialObj.name || 'default';
@@ -115,12 +135,12 @@ invalid.ts:5:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━�
   
   i Safe fix: Use ?? instead.
   
-     3  3 │   // Nullish literals
-     4  4 │   const a: null = null;
-     5    │ - const·b·=·a·||·'default';
-        5 │ + const·b·=·a·??·'default';
-     6  6 │   
-     7  7 │   const c: undefined = undefined;
+      3   3 │   // Nullish literals
+      4   4 │   const a: null = null;
+      5     │ - const·b·=·a·||·'default';
+          5 │ + const·b·=·a·??·'default';
+      6   6 │   
+      7   7 │   const c: undefined = undefined;
   
 
 ```
@@ -144,12 +164,12 @@ invalid.ts:8:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━�
   
   i Safe fix: Use ?? instead.
   
-     6  6 │   
-     7  7 │   const c: undefined = undefined;
-     8    │ - const·d·=·c·||·'fallback';
-        8 │ + const·d·=·c·??·'fallback';
-     9  9 │   
-    10 10 │   // Union with null
+      6   6 │   
+      7   7 │   const c: undefined = undefined;
+      8     │ - const·d·=·c·||·'fallback';
+          8 │ + const·d·=·c·??·'fallback';
+      9   9 │   
+     10  10 │   // Union with null
   
 
 ```
@@ -436,7 +456,7 @@ invalid.ts:67:50 lint/nursery/useNullishCoalescing ━━━━━━━━━�
   > 67 │ const optionalFromInterface = objFromInterface.a || 'default';
        │                                                  ^^
     68 │ 
-    69 │ // Partial type
+    69 │ // Optional property in Pick
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
@@ -448,16 +468,16 @@ invalid.ts:67:50 lint/nursery/useNullishCoalescing ━━━━━━━━━�
 ```
 
 ```
-invalid.ts:71:35 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:71:33 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    69 │ // Partial type
-    70 │ declare const partialObj: Partial<{name: string}>;
-  > 71 │ const partialOr = partialObj.name || 'default';
-       │                                   ^^
+    69 │ // Optional property in Pick
+    70 │ declare const pickOptional: Pick<{a?: string, b: number}, "a">;
+  > 71 │ const vPickOpt = pickOptional.a || "default";
+       │                                 ^^
     72 │ 
-    73 │ type P = Partial<{a: number}>;
+    73 │ // Nullable property in Pick
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
@@ -469,16 +489,16 @@ invalid.ts:71:35 lint/nursery/useNullishCoalescing ━━━━━━━━━�
 ```
 
 ```
-invalid.ts:75:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:75:34 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    73 │ type P = Partial<{a: number}>;
-    74 │ declare const p: P;
-  > 75 │ const v = p.a || 0;
-       │               ^^
+    73 │ // Nullable property in Pick
+    74 │ declare const pickNullable: Pick<{a: string | null}, "a">;
+  > 75 │ const vPickNull = pickNullable.a || "default";
+       │                                  ^^
     76 │ 
-    77 │ // Partial<T> with nullable base member
+    77 │ // Nullable property in Omit
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
@@ -490,16 +510,16 @@ invalid.ts:75:15 lint/nursery/useNullishCoalescing ━━━━━━━━━�
 ```
 
 ```
-invalid.ts:79:30 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:79:34 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    77 │ // Partial<T> with nullable base member
-    78 │ declare const partNull: Partial<{a: string | null}>;
-  > 79 │ const vPartNull = partNull.a || "default";
-       │                              ^^
+    77 │ // Nullable property in Omit
+    78 │ declare const omitNullable: Omit<{x: number, y: string | null}, "x">;
+  > 79 │ const vOmitNull = omitNullable.y || "default";
+       │                                  ^^
     80 │ 
-    81 │ // Required with nullable optional
+    81 │ // Nested nullable object in Pick
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
@@ -511,16 +531,46 @@ invalid.ts:79:30 lint/nursery/useNullishCoalescing ━━━━━━━━━�
 ```
 
 ```
-invalid.ts:83:28 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:83:28 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    81 │ // Required with nullable optional
-    82 │ declare const reqNull: Required<{a?: string | null}>;
-  > 83 │ const vReqNull = reqNull.a || "default";
+    81 │ // Nested nullable object in Pick
+    82 │ declare const nestPick: Pick<{cfg: {name: string} | null}, "cfg">;
+  > 83 │ const nestV = nestPick.cfg || {name: "d"};
        │                            ^^
     84 │ 
-    85 │ // Readonly with optional property
+    85 │ // Optional property in Omit
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+     81  81 │   // Nested nullable object in Pick
+     82  82 │   declare const nestPick: Pick<{cfg: {name: string} | null}, "cfg">;
+     83     │ - const·nestV·=·nestPick.cfg·||·{name:·"d"};
+         83 │ + const·nestV·=·nestPick.cfg·??·{name:·"d"};
+     84  84 │   
+     85  85 │   // Optional property in Omit
+  
+
+```
+
+```
+invalid.ts:87:25 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    85 │ // Optional property in Omit
+    86 │ declare const omitOpt: Omit<{a: string, b?: number}, "a">;
+  > 87 │ const omitV = omitOpt.b || 0;
+       │                         ^^
+    88 │ 
+    89 │ // Partial type
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   
@@ -532,15 +582,99 @@ invalid.ts:83:28 lint/nursery/useNullishCoalescing ━━━━━━━━━�
 ```
 
 ```
-invalid.ts:87:24 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:91:35 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
-    85 │ // Readonly with optional property
-    86 │ declare const roOpt: Readonly<{a?: string}>;
-  > 87 │ const vRoOpt = roOpt.a || "default";
-       │                        ^^
-    88 │ 
+    89 │ // Partial type
+    90 │ declare const partialObj: Partial<{name: string}>;
+  > 91 │ const partialOr = partialObj.name || 'default';
+       │                                   ^^
+    92 │ 
+    93 │ type P = Partial<{a: number}>;
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:95:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    93 │ type P = Partial<{a: number}>;
+    94 │ declare const p: P;
+  > 95 │ const v = p.a || 0;
+       │               ^^
+    96 │ 
+    97 │ // Partial<T> with nullable base member
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:99:30 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+     97 │ // Partial<T> with nullable base member
+     98 │ declare const partNull: Partial<{a: string | null}>;
+   > 99 │ const vPartNull = partNull.a || "default";
+        │                              ^^
+    100 │ 
+    101 │ // Required with nullable optional
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:103:28 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    101 │ // Required with nullable optional
+    102 │ declare const reqNull: Required<{a?: string | null}>;
+  > 103 │ const vReqNull = reqNull.a || "default";
+        │                            ^^
+    104 │ 
+    105 │ // Readonly with optional property
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:107:24 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    105 │ // Readonly with optional property
+    106 │ declare const roOpt: Readonly<{a?: string}>;
+  > 107 │ const vRoOpt = roOpt.a || "default";
+        │                        ^^
+    108 │ 
   
   i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
   

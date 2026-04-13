@@ -54,6 +54,10 @@ function tupleWiden(): [string, number] { return ["hello", 42] as const; }
 
 function ternaryWiden(b: boolean): string { return b ? "a" : "b"; }
 
+function pickWider(): Pick<{name: string, age: number}, "name"> { return {name: "hello"} as const; }
+
+function omitWider(): Omit<{name: string, age: number}, "age"> { return {name: "hello"} as const; }
+
 function readonlyWider(): Readonly<{name: string}> { return {name: "hello"} as const; }
 
 class StatusClass { getStatus(b: boolean): string { if (b) return "loading"; return "idle"; } }
@@ -562,7 +566,7 @@ invalid.ts:49:34 lint/nursery/noMisleadingReturnType ━━━━━━━━━
   > 49 │ function ternaryWiden(b: boolean): string { return b ? "a" : "b"; }
        │                                  ^^^^^^^^
     50 │ 
-    51 │ function readonlyWider(): Readonly<{name: string}> { return {name: "hello"} as const; }
+    51 │ function pickWider(): Pick<{name: string, age: number}, "name"> { return {name: "hello"} as const; }
   
   i A wider return type hides the precise types that callers could rely on.
   
@@ -576,16 +580,16 @@ invalid.ts:49:34 lint/nursery/noMisleadingReturnType ━━━━━━━━━
 ```
 
 ```
-invalid.ts:51:25 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:51:21 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The return type annotation is wider than what the function actually returns.
   
     49 │ function ternaryWiden(b: boolean): string { return b ? "a" : "b"; }
     50 │ 
-  > 51 │ function readonlyWider(): Readonly<{name: string}> { return {name: "hello"} as const; }
-       │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 51 │ function pickWider(): Pick<{name: string, age: number}, "name"> { return {name: "hello"} as const; }
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     52 │ 
-    53 │ class StatusClass { getStatus(b: boolean): string { if (b) return "loading"; return "idle"; } }
+    53 │ function omitWider(): Omit<{name: string, age: number}, "age"> { return {name: "hello"} as const; }
   
   i A wider return type hides the precise types that callers could rely on.
   
@@ -599,16 +603,62 @@ invalid.ts:51:25 lint/nursery/noMisleadingReturnType ━━━━━━━━━
 ```
 
 ```
-invalid.ts:53:42 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:53:21 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The return type annotation is wider than what the function actually returns.
   
-    51 │ function readonlyWider(): Readonly<{name: string}> { return {name: "hello"} as const; }
+    51 │ function pickWider(): Pick<{name: string, age: number}, "name"> { return {name: "hello"} as const; }
     52 │ 
-  > 53 │ class StatusClass { getStatus(b: boolean): string { if (b) return "loading"; return "idle"; } }
-       │                                          ^^^^^^^^
+  > 53 │ function omitWider(): Omit<{name: string, age: number}, "age"> { return {name: "hello"} as const; }
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     54 │ 
-    55 │ const modeObj = { getMode(b: boolean): string { if (b) return "dark"; return "light"; } };
+    55 │ function readonlyWider(): Readonly<{name: string}> { return {name: "hello"} as const; }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:55:25 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    53 │ function omitWider(): Omit<{name: string, age: number}, "age"> { return {name: "hello"} as const; }
+    54 │ 
+  > 55 │ function readonlyWider(): Readonly<{name: string}> { return {name: "hello"} as const; }
+       │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    56 │ 
+    57 │ class StatusClass { getStatus(b: boolean): string { if (b) return "loading"; return "idle"; } }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:57:42 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    55 │ function readonlyWider(): Readonly<{name: string}> { return {name: "hello"} as const; }
+    56 │ 
+  > 57 │ class StatusClass { getStatus(b: boolean): string { if (b) return "loading"; return "idle"; } }
+       │                                          ^^^^^^^^
+    58 │ 
+    59 │ const modeObj = { getMode(b: boolean): string { if (b) return "dark"; return "light"; } };
   
   i A wider return type hides the precise types that callers could rely on.
   
@@ -622,16 +672,16 @@ invalid.ts:53:42 lint/nursery/noMisleadingReturnType ━━━━━━━━━
 ```
 
 ```
-invalid.ts:55:38 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:59:38 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The return type annotation is wider than what the function actually returns.
   
-    53 │ class StatusClass { getStatus(b: boolean): string { if (b) return "loading"; return "idle"; } }
-    54 │ 
-  > 55 │ const modeObj = { getMode(b: boolean): string { if (b) return "dark"; return "light"; } };
+    57 │ class StatusClass { getStatus(b: boolean): string { if (b) return "loading"; return "idle"; } }
+    58 │ 
+  > 59 │ const modeObj = { getMode(b: boolean): string { if (b) return "dark"; return "light"; } };
        │                                      ^^^^^^^^
-    56 │ 
-    57 │ class CodeClass { getCode(b: boolean): number { if (b) return 200; return 404; } }
+    60 │ 
+    61 │ class CodeClass { getCode(b: boolean): number { if (b) return 200; return 404; } }
   
   i A wider return type hides the precise types that callers could rely on.
   
@@ -645,62 +695,16 @@ invalid.ts:55:38 lint/nursery/noMisleadingReturnType ━━━━━━━━━
 ```
 
 ```
-invalid.ts:57:38 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:61:38 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The return type annotation is wider than what the function actually returns.
   
-    55 │ const modeObj = { getMode(b: boolean): string { if (b) return "dark"; return "light"; } };
-    56 │ 
-  > 57 │ class CodeClass { getCode(b: boolean): number { if (b) return 200; return 404; } }
-       │                                      ^^^^^^^^
-    58 │ 
-    59 │ const codeObj = { getCode(b: boolean): number { if (b) return 200; return 404; } };
-  
-  i A wider return type hides the precise types that callers could rely on.
-  
-  i Consider using 200 | 404 as the return type.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.ts:59:38 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The return type annotation is wider than what the function actually returns.
-  
-    57 │ class CodeClass { getCode(b: boolean): number { if (b) return 200; return 404; } }
-    58 │ 
-  > 59 │ const codeObj = { getCode(b: boolean): number { if (b) return 200; return 404; } };
-       │                                      ^^^^^^^^
+    59 │ const modeObj = { getMode(b: boolean): string { if (b) return "dark"; return "light"; } };
     60 │ 
-    61 │ class GetterClass { get code(): number { if (Math.random() > 0.5) return 200; return 404; } }
-  
-  i A wider return type hides the precise types that callers could rely on.
-  
-  i Consider using 200 | 404 as the return type.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.ts:61:31 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The return type annotation is wider than what the function actually returns.
-  
-    59 │ const codeObj = { getCode(b: boolean): number { if (b) return 200; return 404; } };
-    60 │ 
-  > 61 │ class GetterClass { get code(): number { if (Math.random() > 0.5) return 200; return 404; } }
-       │                               ^^^^^^^^
+  > 61 │ class CodeClass { getCode(b: boolean): number { if (b) return 200; return 404; } }
+       │                                      ^^^^^^^^
     62 │ 
-    63 │ const getterObj = { get code(): number { if (Math.random() > 0.5) return 200; return 404; } };
+    63 │ const codeObj = { getCode(b: boolean): number { if (b) return 200; return 404; } };
   
   i A wider return type hides the precise types that callers could rely on.
   
@@ -714,16 +718,16 @@ invalid.ts:61:31 lint/nursery/noMisleadingReturnType ━━━━━━━━━
 ```
 
 ```
-invalid.ts:63:31 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:63:38 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The return type annotation is wider than what the function actually returns.
   
-    61 │ class GetterClass { get code(): number { if (Math.random() > 0.5) return 200; return 404; } }
+    61 │ class CodeClass { getCode(b: boolean): number { if (b) return 200; return 404; } }
     62 │ 
-  > 63 │ const getterObj = { get code(): number { if (Math.random() > 0.5) return 200; return 404; } };
-       │                               ^^^^^^^^
+  > 63 │ const codeObj = { getCode(b: boolean): number { if (b) return 200; return 404; } };
+       │                                      ^^^^^^^^
     64 │ 
-    65 │ class AsyncMethod { async getStatus(b: boolean): Promise<string> { if (b) return "loading"; return "idle"; } }
+    65 │ class GetterClass { get code(): number { if (Math.random() > 0.5) return 200; return 404; } }
   
   i A wider return type hides the precise types that callers could rely on.
   
@@ -737,15 +741,61 @@ invalid.ts:63:31 lint/nursery/noMisleadingReturnType ━━━━━━━━━
 ```
 
 ```
-invalid.ts:65:48 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:65:31 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The return type annotation is wider than what the function actually returns.
   
-    63 │ const getterObj = { get code(): number { if (Math.random() > 0.5) return 200; return 404; } };
+    63 │ const codeObj = { getCode(b: boolean): number { if (b) return 200; return 404; } };
     64 │ 
-  > 65 │ class AsyncMethod { async getStatus(b: boolean): Promise<string> { if (b) return "loading"; return "idle"; } }
-       │                                                ^^^^^^^^^^^^^^^^^
+  > 65 │ class GetterClass { get code(): number { if (Math.random() > 0.5) return 200; return 404; } }
+       │                               ^^^^^^^^
     66 │ 
+    67 │ const getterObj = { get code(): number { if (Math.random() > 0.5) return 200; return 404; } };
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using 200 | 404 as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:67:31 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    65 │ class GetterClass { get code(): number { if (Math.random() > 0.5) return 200; return 404; } }
+    66 │ 
+  > 67 │ const getterObj = { get code(): number { if (Math.random() > 0.5) return 200; return 404; } };
+       │                               ^^^^^^^^
+    68 │ 
+    69 │ class AsyncMethod { async getStatus(b: boolean): Promise<string> { if (b) return "loading"; return "idle"; } }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Consider using 200 | 404 as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:69:48 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    67 │ const getterObj = { get code(): number { if (Math.random() > 0.5) return 200; return 404; } };
+    68 │ 
+  > 69 │ class AsyncMethod { async getStatus(b: boolean): Promise<string> { if (b) return "loading"; return "idle"; } }
+       │                                                ^^^^^^^^^^^^^^^^^
+    70 │ 
   
   i A wider return type hides the precise types that callers could rely on.
   

@@ -84,6 +84,10 @@ declare const value5: (string & { foo: 'bar' }) | '1' | 1 | null | undefined;
 switch (value5) {
 }
 
+type Status = "loading" | "ready" | "error";
+declare const p: Pick<{s: Status}, "s">;
+switch (p.s) { case "loading": break; case "ready": break; }
+
 function switchReq(x: Required<{kind?: "a" | "b" | "c"}>) {
 	switch (x.kind) { case "a": break; case "b": break; }
 }
@@ -441,7 +445,7 @@ invalid.ts:78:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
   > 79 │ }
        │ ^
     80 │ 
-    81 │ function switchReq(x: Required<{kind?: "a" | "b" | "c"}>) {
+    81 │ type Status = "loading" | "ready" | "error";
   
   i Some variants of the union type are not handled here.
   
@@ -470,15 +474,42 @@ invalid.ts:78:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.ts:82:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:83:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The switch statement is not exhaustive.
   
-    81 │ function switchReq(x: Required<{kind?: "a" | "b" | "c"}>) {
-  > 82 │ 	switch (x.kind) { case "a": break; case "b": break; }
-       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    83 │ }
+    81 │ type Status = "loading" | "ready" | "error";
+    82 │ declare const p: Pick<{s: Status}, "s">;
+  > 83 │ switch (p.s) { case "loading": break; case "ready": break; }
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     84 │ 
+    85 │ function switchReq(x: Required<{kind?: "a" | "b" | "c"}>) {
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - "error"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    83 │ switch·(p.s)·{·case·"loading":·break;·case·"ready":·break;·case·"error":·throw·new·Error("TODO:·Not·implemented·yet");·}
+       │                                                            ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
+
+```
+
+```
+invalid.ts:86:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    85 │ function switchReq(x: Required<{kind?: "a" | "b" | "c"}>) {
+  > 86 │ 	switch (x.kind) { case "a": break; case "b": break; }
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    87 │ }
+    88 │ 
   
   i Some variants of the union type are not handled here.
   
@@ -490,21 +521,21 @@ invalid.ts:82:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
   
   i Unsafe fix: Add the missing cases to the switch statement.
   
-    82 │ → switch·(x.kind)·{·case·"a":·break;·case·"b":·break;·case·"c":·throw·new·Error("TODO:·Not·implemented·yet");·}
+    86 │ → switch·(x.kind)·{·case·"a":·break;·case·"b":·break;·case·"c":·throw·new·Error("TODO:·Not·implemented·yet");·}
        │                                                       ++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
 
 ```
 
 ```
-invalid.ts:86:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:90:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The switch statement is not exhaustive.
   
-    85 │ function switchRo(x: Readonly<{kind: "x" | "y" | "z"}>) {
-  > 86 │ 	switch (x.kind) { case "x": break; }
+    89 │ function switchRo(x: Readonly<{kind: "x" | "y" | "z"}>) {
+  > 90 │ 	switch (x.kind) { case "x": break; }
        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    87 │ }
-    88 │ 
+    91 │ }
+    92 │ 
   
   i Some variants of the union type are not handled here.
   
@@ -517,7 +548,7 @@ invalid.ts:86:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
   
   i Unsafe fix: Add the missing cases to the switch statement.
   
-    86 │ → switch·(x.kind)·{·case·"x":·break;·case·"y":·throw·new·Error("TODO:·Not·implemented·yet");case·"z":·throw·new·Error("TODO:·Not·implemented·yet");·}
+    90 │ → switch·(x.kind)·{·case·"x":·break;·case·"y":·throw·new·Error("TODO:·Not·implemented·yet");case·"z":·throw·new·Error("TODO:·Not·implemented·yet");·}
        │                                      +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
 
 ```
