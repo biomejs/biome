@@ -1,4 +1,5 @@
 use crate::markdown::auxiliary::hard_line::FormatMdFormatHardLineOptions;
+use crate::markdown::auxiliary::inline_italic::FormatMdInlineItalicOptions;
 use crate::markdown::auxiliary::textual::FormatMdTextualOptions;
 use crate::prelude::*;
 use crate::shared::{TextPrintMode, TrimMode};
@@ -8,6 +9,8 @@ use biome_markdown_syntax::{AnyMdInline, MdInlineItemList};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdInlineItemList {
     print_mode: TextPrintMode,
+    /// When true, and there's a [MdInlineItalic], it instrustructs the formatter to keep the fences
+    keep_fences_in_italics: bool,
 }
 
 impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
@@ -81,6 +84,12 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
                         )
                     }));
                 }
+                AnyMdInline::MdInlineItalic(italic) => {
+                    joiner.entry(&italic.format().with_options(FormatMdInlineItalicOptions {
+                        should_keep_fences: self.keep_fences_in_italics,
+                    }));
+                    seen_new_line = false;
+                }
                 _ => {
                     joiner.entry(&item.format());
                     seen_new_line = false;
@@ -122,7 +131,16 @@ impl FormatMdInlineItemList {
                 }));
                 continue;
             }
-            joiner.entry(&item.format());
+            match item {
+                AnyMdInline::MdInlineItalic(italic) => {
+                    joiner.entry(&italic.format().with_options(FormatMdInlineItalicOptions {
+                        should_keep_fences: self.keep_fences_in_italics,
+                    }));
+                }
+                _ => {
+                    joiner.entry(&item.format());
+                }
+            }
         }
         joiner.finish()
     }
@@ -136,7 +154,7 @@ impl FormatMdInlineItemList {
 
         let is_content = |item: &AnyMdInline| match item {
             AnyMdInline::MdTextual(text) => !text.is_empty().unwrap_or_default(),
-            AnyMdInline::MdHardLine(_) => false,
+            AnyMdInline::MdHardLine(_) | AnyMdInline::MdIndentToken(_) => false,
             _ => true,
         };
 
@@ -171,13 +189,36 @@ impl FormatMdInlineItemList {
                             },
                         ));
                     }
+                    AnyMdInline::MdInlineItalic(italic) => {
+                        joiner.entry(&italic.format().with_options(FormatMdInlineItalicOptions {
+                            should_keep_fences: self.keep_fences_in_italics,
+                        }));
+                    }
+                    AnyMdInline::MdIndentToken(indent) => {
+                        let token = indent.md_indent_char_token()?;
+                        joiner.entry(&format_with(|f: &mut MarkdownFormatter| {
+                            f.context()
+                                .comments()
+                                .mark_suppression_checked(indent.syntax());
+                            format_removed(&token).fmt(f)
+                        }));
+                    }
                     _ => {
                         joiner.entry(&item.format());
                     }
                 }
             } else {
                 // Inside content boundaries: keep as-is.
-                joiner.entry(&item.format());
+                match item {
+                    AnyMdInline::MdInlineItalic(italic) => {
+                        joiner.entry(&italic.format().with_options(FormatMdInlineItalicOptions {
+                            should_keep_fences: self.keep_fences_in_italics,
+                        }));
+                    }
+                    _ => {
+                        joiner.entry(&item.format());
+                    }
+                }
             }
         }
 
@@ -200,6 +241,11 @@ impl FormatMdInlineItemList {
                     joiner.entry(&text.format().with_options(FormatMdTextualOptions {
                         print_mode: TextPrintMode::Trim(TrimMode::NormalizeWords),
                         ..Default::default()
+                    }));
+                }
+                AnyMdInline::MdInlineItalic(italic) => {
+                    joiner.entry(&italic.format().with_options(FormatMdInlineItalicOptions {
+                        should_keep_fences: self.keep_fences_in_italics,
                     }));
                 }
                 _ => {
@@ -250,6 +296,11 @@ impl FormatMdInlineItemList {
                         print_mode: TextPrintMode::Pristine,
                     }));
                 }
+                AnyMdInline::MdInlineItalic(italic) => {
+                    joiner.entry(&italic.format().with_options(FormatMdInlineItalicOptions {
+                        should_keep_fences: self.keep_fences_in_italics,
+                    }));
+                }
                 node => {
                     joiner.entry(&node.format());
                 }
@@ -272,6 +323,11 @@ impl FormatMdInlineItemList {
                         print_mode: TextPrintMode::Pristine,
                     }));
                 }
+                AnyMdInline::MdInlineItalic(italic) => {
+                    joiner.entry(&italic.format().with_options(FormatMdInlineItalicOptions {
+                        should_keep_fences: self.keep_fences_in_italics,
+                    }));
+                }
                 node => {
                     joiner.entry(&node.format());
                 }
@@ -283,6 +339,9 @@ impl FormatMdInlineItemList {
 }
 
 pub(crate) struct FormatMdFormatInlineItemListOptions {
+    /// When `true`, and there's a [MdInlineItalic], it instructions the formatter to keep the fences.
+    /// When `false`, it lets the node figure it out.
+    pub(crate) keep_fences_in_italics: bool,
     pub(crate) print_mode: TextPrintMode,
 }
 
@@ -291,6 +350,7 @@ impl FormatRuleWithOptions<MdInlineItemList> for FormatMdInlineItemList {
 
     fn with_options(mut self, options: Self::Options) -> Self {
         self.print_mode = options.print_mode;
+        self.keep_fences_in_italics = options.keep_fences_in_italics;
         self
     }
 }

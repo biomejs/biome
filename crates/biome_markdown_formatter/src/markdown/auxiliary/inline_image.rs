@@ -26,14 +26,16 @@ impl FormatNodeRule<MdInlineImage> for FormatMdInlineImage {
                 l_brack_token.format(),
                 alt.format()
                     .with_options(FormatMdFormatInlineItemListOptions {
-                        print_mode: TextPrintMode::Trim(TrimMode::All)
+                        print_mode: TextPrintMode::Trim(TrimMode::All),
+                        keep_fences_in_italics: false
                     }),
                 r_brack_token.format(),
                 l_paren_token.format(),
                 destination
                     .format()
                     .with_options(FormatMdFormatInlineItemListOptions {
-                        print_mode: TextPrintMode::Trim(TrimMode::AutoLinkLike)
+                        print_mode: TextPrintMode::Trim(TrimMode::AutoLinkLike),
+                        keep_fences_in_italics: false
                     })
             ]
         )?;

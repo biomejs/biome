@@ -1,11 +1,13 @@
 use crate::prelude::*;
-use biome_formatter::write;
+use biome_formatter::{FormatRuleWithOptions, write};
 use biome_markdown_syntax::{
     MarkdownSyntaxKind, MdInlineItalic, MdInlineItalicFields, MdReferenceImage,
 };
 use biome_rowan::AstNode;
 #[derive(Debug, Clone, Default)]
-pub(crate) struct FormatMdInlineItalic;
+pub(crate) struct FormatMdInlineItalic {
+    should_keep_fences: bool,
+}
 impl FormatNodeRule<MdInlineItalic> for FormatMdInlineItalic {
     fn fmt_fields(&self, node: &MdInlineItalic, f: &mut MarkdownFormatter) -> FormatResult<()> {
         let MdInlineItalicFields {
@@ -39,6 +41,7 @@ impl FormatNodeRule<MdInlineItalic> for FormatMdInlineItalic {
             .ancestors()
             .skip(1)
             .any(|a| MdReferenceImage::can_cast(a.kind()))
+            | self.should_keep_fences
         {
             return write!(f, [l_fence.format(), content.format(), r_fence.format()]);
         }
@@ -82,5 +85,17 @@ fn write_fence(
             "_"
         };
         write!(f, [format_replaced(fence, &token(text))])
+    }
+}
+
+pub(crate) struct FormatMdInlineItalicOptions {
+    pub(crate) should_keep_fences: bool,
+}
+
+impl FormatRuleWithOptions<MdInlineItalic> for FormatMdInlineItalic {
+    type Options = FormatMdInlineItalicOptions;
+    fn with_options(mut self, options: Self::Options) -> Self {
+        self.should_keep_fences = options.should_keep_fences;
+        self
     }
 }

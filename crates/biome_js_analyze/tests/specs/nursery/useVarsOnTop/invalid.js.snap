@@ -1,0 +1,183 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+foo();
+var afterExpression = 1;
+
+let okayBeforeExpression = 1;
+foo();
+var afterLetAndExpression = 2;
+
+if (condition) {
+    var insideBlock = 1;
+}
+
+for (var loopValue = 0; loopValue < 1; loopValue++) {}
+
+function invalidFunction() {
+    "use strict";
+    doSomething();
+    var afterStatement = 1;
+}
+
+class InvalidExample {
+    static {
+        doSomething();
+        var afterStaticStatement = 1;
+    }
+}
+
+export function helper() {}
+export var exportedAfterStatement = 1;
+
+```
+
+# Diagnostics
+```
+invalid.js:3:1 lint/nursery/useVarsOnTop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This var declaration is not at the top of its containing scope.
+  
+    1 │ /* should generate diagnostics */
+    2 │ foo();
+  > 3 │ var afterExpression = 1;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ let okayBeforeExpression = 1;
+  
+  i var declarations are hoisted to the top of their enclosing function, script, module, or static block, so declaring them later makes the scope harder to read.
+  
+  i Move this var declaration before other statements in the same scope. At module scope, imports may remain before it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/useVarsOnTop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This var declaration is not at the top of its containing scope.
+  
+    5 │ let okayBeforeExpression = 1;
+    6 │ foo();
+  > 7 │ var afterLetAndExpression = 2;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ if (condition) {
+  
+  i var declarations are hoisted to the top of their enclosing function, script, module, or static block, so declaring them later makes the scope harder to read.
+  
+  i Move this var declaration before other statements in the same scope. At module scope, imports may remain before it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:5 lint/nursery/useVarsOnTop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This var declaration is not at the top of its containing scope.
+  
+     9 │ if (condition) {
+  > 10 │     var insideBlock = 1;
+       │     ^^^^^^^^^^^^^^^^^^^
+    11 │ }
+    12 │ 
+  
+  i var declarations are hoisted to the top of their enclosing function, script, module, or static block, so declaring them later makes the scope harder to read.
+  
+  i Move this var declaration before other statements in the same scope. At module scope, imports may remain before it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:6 lint/nursery/useVarsOnTop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This var declaration is not at the top of its containing scope.
+  
+    11 │ }
+    12 │ 
+  > 13 │ for (var loopValue = 0; loopValue < 1; loopValue++) {}
+       │      ^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ function invalidFunction() {
+  
+  i var declarations are hoisted to the top of their enclosing function, script, module, or static block, so declaring them later makes the scope harder to read.
+  
+  i Move this var declaration before other statements in the same scope. At module scope, imports may remain before it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:5 lint/nursery/useVarsOnTop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This var declaration is not at the top of its containing scope.
+  
+    16 │     "use strict";
+    17 │     doSomething();
+  > 18 │     var afterStatement = 1;
+       │     ^^^^^^^^^^^^^^^^^^^^^^
+    19 │ }
+    20 │ 
+  
+  i var declarations are hoisted to the top of their enclosing function, script, module, or static block, so declaring them later makes the scope harder to read.
+  
+  i Move this var declaration before other statements in the same scope. At module scope, imports may remain before it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:9 lint/nursery/useVarsOnTop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This var declaration is not at the top of its containing scope.
+  
+    22 │     static {
+    23 │         doSomething();
+  > 24 │         var afterStaticStatement = 1;
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │     }
+    26 │ }
+  
+  i var declarations are hoisted to the top of their enclosing function, script, module, or static block, so declaring them later makes the scope harder to read.
+  
+  i Move this var declaration before other statements in the same scope. At module scope, imports may remain before it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:8 lint/nursery/useVarsOnTop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This var declaration is not at the top of its containing scope.
+  
+    28 │ export function helper() {}
+  > 29 │ export var exportedAfterStatement = 1;
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ 
+  
+  i var declarations are hoisted to the top of their enclosing function, script, module, or static block, so declaring them later makes the scope harder to read.
+  
+  i Move this var declaration before other statements in the same scope. At module scope, imports may remain before it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

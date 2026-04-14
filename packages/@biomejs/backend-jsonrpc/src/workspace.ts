@@ -2571,6 +2571,11 @@ See https://biomejs.dev/linter/rules/use-unicode-regex
 	 */
 	useUnicodeRegex?: UseUnicodeRegexConfiguration;
 	/**
+	* Require var declarations to appear at the top of their containing scope.
+See https://biomejs.dev/linter/rules/use-vars-on-top 
+	 */
+	useVarsOnTop?: UseVarsOnTopConfiguration;
+	/**
 	* Enforce consistent defineProps declaration style.
 See https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration 
 	 */
@@ -4496,6 +4501,9 @@ export type UseStringStartsEndsWithConfiguration =
 export type UseUnicodeRegexConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUnicodeRegexOptions;
+export type UseVarsOnTopConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVarsOnTopOptions;
 export type UseVueConsistentDefinePropsDeclarationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentDefinePropsDeclarationOptions;
@@ -6324,6 +6332,10 @@ export interface RuleWithUseUnicodeRegexOptions {
 	level: RulePlainConfiguration;
 	options?: UseUnicodeRegexOptions;
 }
+export interface RuleWithUseVarsOnTopOptions {
+	level: RulePlainConfiguration;
+	options?: UseVarsOnTopOptions;
+}
 export interface RuleWithUseVueConsistentDefinePropsDeclarationOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueConsistentDefinePropsDeclarationOptions;
@@ -7919,6 +7931,7 @@ export interface UseSortedClassesOptions {
 export type UseSpreadOptions = {};
 export type UseStringStartsEndsWithOptions = {};
 export type UseUnicodeRegexOptions = {};
+export type UseVarsOnTopOptions = {};
 export interface UseVueConsistentDefinePropsDeclarationOptions {
 	style?: DeclarationStyle;
 }
@@ -8929,6 +8942,7 @@ export type Category =
 	| "lint/nursery/useUniqueGraphqlOperationName"
 	| "lint/nursery/useUniqueInputFieldNames"
 	| "lint/nursery/useUniqueVariableNames"
+	| "lint/nursery/useVarsOnTop"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueConsistentVBindStyle"
 	| "lint/nursery/useVueConsistentVOnStyle"

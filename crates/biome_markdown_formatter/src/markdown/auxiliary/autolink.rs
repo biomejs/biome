@@ -21,7 +21,8 @@ impl FormatNodeRule<MdAutolink> for FormatMdAutolink {
                 value
                     .format()
                     .with_options(FormatMdFormatInlineItemListOptions {
-                        print_mode: TextPrintMode::Trim(TrimMode::NormalizeWords)
+                        print_mode: TextPrintMode::Trim(TrimMode::NormalizeWords),
+                        keep_fences_in_italics: false
                     }),
                 r_angle_token.format()
             ]

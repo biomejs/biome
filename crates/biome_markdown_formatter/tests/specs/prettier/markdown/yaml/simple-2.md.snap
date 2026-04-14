@@ -1,13 +1,16 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: markdown/spec/example-57.md
+info: markdown/yaml/simple-2.md
 ---
 
 # Input
 
 ```md
-Foo  
------
+---
+hello: world
+---
+
+Content
 
 ```
 
@@ -17,15 +20,20 @@ Foo
 ```diff
 --- Prettier
 +++ Biome
-@@ -1 +1,2 @@
--## Foo
-+Foo  
-+-----
+@@ -1,5 +1,4 @@
+ ---
+-hello: world
+----
++## hello: world
+ 
+ Content
 ```
 
 # Output
 
 ```md
-Foo  
------
+---
+## hello: world
+
+Content
 ```

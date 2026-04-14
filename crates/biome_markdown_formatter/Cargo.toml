@@ -26,6 +26,7 @@ biome_parser          = { path = "../biome_parser" }
 biome_service         = { path = "../biome_service", features = ["markdown"] }
 camino                = { workspace = true }
 countme               = { workspace = true, features = ["enable"] }
+similar-asserts       = { workspace = true }
 tests_macros          = { path = "../tests_macros" }
 
 [features]
