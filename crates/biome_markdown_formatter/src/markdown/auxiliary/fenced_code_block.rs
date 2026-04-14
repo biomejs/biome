@@ -3,6 +3,7 @@ use crate::prelude::*;
 use crate::shared::TextPrintMode;
 use biome_formatter::write;
 use biome_markdown_syntax::{MdFencedCodeBlock, MdFencedCodeBlockFields};
+use biome_rowan::TextSize;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdFencedCodeBlock;
@@ -18,18 +19,15 @@ impl FormatNodeRule<MdFencedCodeBlock> for FormatMdFencedCodeBlock {
         } = node.as_fields();
 
         let l_fence = l_fence?;
-        let fence_text = l_fence.text();
-        // SAFETY: fence_text has at least one character.
-        let fence_char = fence_text.as_bytes()[0] as char;
 
         // Compute the minimum fence length needed (CommonMark §4.5).
         // The fence must be strictly longer than any same-character sequence
         // in the content, otherwise the inner sequence would be parsed as a
         // closing fence. E.g. if the content contains ``` (3 backticks),
         // the outer fence needs at least 4.
-        let max_inner = longest_fence_char_sequence(node, fence_char);
+        let max_inner = longest_fence_char_sequence(node, '`');
         let fence_len = (max_inner + 1).max(3);
-        let normalized_fence: String = std::iter::repeat_n(fence_char, fence_len).collect();
+        let normalized_fence: String = std::iter::repeat_n('`', fence_len).collect();
 
         write!(
             f,
@@ -60,6 +58,8 @@ impl FormatNodeRule<MdFencedCodeBlock> for FormatMdFencedCodeBlock {
                     &text(&normalized_fence, r_fence.text_trimmed_range().start())
                 )]
             )?;
+        } else {
+            write!(f, [text(&normalized_fence, TextSize::default())])?;
         }
 
         Ok(())
