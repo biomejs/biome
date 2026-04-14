@@ -41,7 +41,7 @@ declare_source_rule! {
     /// such that `A < a < a9 < a10 < B < b`
     ///
     /// The action also merges imports and exports from the same source,
-    /// sorts named specifiers and attributes alphabetically.
+    /// sorts named specifiers and attributes using a natural sort order.
     ///
     /// For example, the following code...
     ///
@@ -82,19 +82,19 @@ declare_source_rule! {
     ///
     /// ## Options
     ///
-    /// The action provides several options to customize how import and export are ordered:
+    /// The action provides several options to customize how imports and exports are ordered:
     ///
-    /// - `groups` allows to group imports and exports before sorting them.
+    /// - `groups` allows to group imports and exports before sorting them;
     ///   It allows expressing custom order between imports or exports.
-    /// - `sortBareImports` allows sorting bare imports (also called side-effect imports).
+    /// - `sortBareImports` allows sorting bare imports (also called side-effect imports);
     ///   By default the action doesn't sort them.
     /// - `identifierOrder` allows changing how named specifiers and attributes are sorted
     ///
     /// ### `groups`
     ///
     /// You can customize how imports and exports are grouped using the `groups` option.
-    /// The option accepts an array of group matchers, which in their simplest form
-    /// are glob patterns or predefined group matchers.
+    /// The option accepts an array of group matchers,
+    /// which in their simplest form are glob patterns or predefined group matchers.
     /// Imports and exports that don't match any group are automatically moved after all the groups.
     ///
     /// Groups are always matched in order, so earlier matchers take priority.
@@ -157,7 +157,7 @@ declare_source_rule! {
     /// - A combination of the above, e.g. `[":BUN:", ":NODE:"]`
     /// - `:BLANK_LINE:` to insert a blank line between groups
     ///
-    /// Prefix with `!` a predefined group matcher or a glob pattern to negate it.
+    /// Prefix a predefined group matcher or a glob pattern with `!` to negate it.
     /// For example, `!:NODE:` matches everything that isn't a Node.js built-in.
     ///
     /// #### Predefined groups
@@ -170,9 +170,9 @@ declare_source_rule! {
     /// - `:ALIAS:`: path aliases starting with `#`, `@/`, `~`, `$`, or `%`
     /// - `:PATH:`: absolute and relative paths
     ///
-    /// #### Object matchers
+    /// #### Type-only matcher
     ///
-    /// Use an object matcher to separate `import type` from regular imports:
+    /// Use an type-only matcher to separate `import type` from regular imports:
     /// Setting `"type": true` matches only `import type` and `export type` statements.
     /// Setting `"type": false` matches only non-type imports and exports].
     ///
@@ -205,8 +205,7 @@ declare_source_rule! {
     ///
     /// ### `sortBareImports`
     ///
-    /// By default, _bare imports_, also called _side-effect imports_, form individual chunks,
-    /// and they aren't sorted by default.
+    /// By default, _bare imports_, also called _side-effect imports_, aren't sorted with other imports.
     /// Setting `sortBareImports` to `true`, allow sorting them with other imports.
     ///
     /// :::caution
@@ -229,9 +228,9 @@ declare_source_rule! {
     ///
     /// ### `identifierOrder`
     ///
-    /// By default, attributes, imported and exported names are sorted with a `natural` sort.
-    /// You can opt for a `lexicographic` sort (sometimes referred as _binary_ sort) by
-    /// setting the `identifierOrder` option to `lexicographic`:
+    /// By default, attributes, imported and exported names are sorted with a `natural` sort order.
+    /// Opt for a `lexicographic` sort, also referred as _binary_ sort,
+    /// by setting the `identifierOrder` option to `lexicographic`:
     ///
     /// ```json,options
     /// {
@@ -254,8 +253,8 @@ declare_source_rule! {
     ///
     /// ### Group Node.js and bun built-in
     ///
-    /// The following example moves the Node.js and `bun` built-ins to the top of the file,
-    /// and it adds a blank line at the end.
+    /// The following example moves the Node.js and `bun` built-ins at the top of the file,
+    /// and adds a blank line just after them.
     /// Other imports are placed after this blank line.
     ///
     /// ```json,options
@@ -310,7 +309,7 @@ declare_source_rule! {
     /// ### Group multiple libraries
     ///
     /// In the following example, `react` and libraries like `react-dom` are grouped together.
-    /// A blank line separates them from other imports that are placed at the end.
+    /// A blank line separates them from the other imports placed directly below.
     ///
     ///```json,options
     /// {
@@ -329,11 +328,9 @@ declare_source_rule! {
     /// import { render } from "react-dom/client";
     /// ```
     ///
-    /// ### Place CSS/style imports at the end
+    /// ### Place CSS/style imports last
     ///
-    /// The following example groups style imports together and place them at the end.
-    /// Other imports are placed at the top of the file and are followed by a blank line.
-    ///
+    /// The following example groups style imports together and place them after other imports.
     /// Because groups are matched in order, the first group has to exclude style imports.
     /// `**` matches everything and is followed by the two exceptions that exclude style imports.
     ///
@@ -381,7 +378,7 @@ declare_source_rule! {
     ///
     /// ### Group `import type` and group `export type`
     ///
-    /// Use the following configuration to place `import type` and `export type` at the start of a chunk:
+    /// Use the following configuration to place `import type` and `export type` at the top of the file:
     ///
     /// ```json,options
     /// {
@@ -398,7 +395,7 @@ declare_source_rule! {
     /// import type { T } from "my-package";
     /// ```
     ///
-    /// To place them at the end, use the following configuration.
+    /// To place them after other imports, use the following configuration.
     ///
     /// ```json,options
     /// {
@@ -426,7 +423,6 @@ declare_source_rule! {
     /// {
     ///   "linter": {
     ///     "rules": {
-    ///       "recommended": false,
     ///       "style": {
     ///         "useImportType": {
     ///           "level": "on",
@@ -456,7 +452,6 @@ declare_source_rule! {
     /// {
     ///   "linter": {
     ///     "rules": {
-    ///       "recommended": false,
     ///       "style": {
     ///         "useImportType": {
     ///           "level": "on",
