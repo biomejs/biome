@@ -236,6 +236,7 @@ define_categories! {
     "lint/nursery/noSyncScripts": "https://biomejs.dev/linter/rules/no-sync-scripts",
     "lint/nursery/noTernary": "https://biomejs.dev/linter/rules/no-ternary",
     "lint/nursery/noTopLevelLiterals": "https://biomejs.dev/linter/rules/no-top-level-literals",
+    "lint/nursery/noTypeofUndefined": "https://biomejs.dev/linter/rules/no-typeof-undefined",
     "lint/nursery/noUndeclaredEnvVars": "https://biomejs.dev/linter/rules/no-undeclared-env-vars",
     "lint/nursery/noUnknownAttribute": "https://biomejs.dev/linter/rules/no-unknown-attribute",
     "lint/nursery/noUnnecessaryConditions": "https://biomejs.dev/linter/rules/no-unnecessary-conditions",

@@ -241,6 +241,7 @@ pub mod no_then_property;
 pub mod no_this_in_static;
 pub mod no_top_level_literals;
 pub mod no_ts_ignore;
+pub mod no_typeof_undefined;
 pub mod no_unassigned_variables;
 pub mod no_undeclared_dependencies;
 pub mod no_undeclared_env_vars;

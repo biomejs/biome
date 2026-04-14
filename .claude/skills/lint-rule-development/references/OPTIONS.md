@@ -187,6 +187,17 @@ fn run(ctx: &RuleContext<Self>) -> Self::Signals {
 
 Add options documentation to rule's rustdoc:
 
+For Biome lint rules, document each option in this order:
+
+1. `### <optionName>` header
+2. Short description of what the option changes and why it exists
+3. Default value
+4. One `json,options` block showing how to configure the option
+5. `#### Valid` section with `use_options` examples only
+6. `#### Invalid` section with `use_options` / `expect_diagnostic` examples only
+
+Do not place extra config blocks inside the `Valid` / `Invalid` sections.
+
 ```rust
 declare_lint_rule! {
     /// Enforces a specific convention for code organization.
@@ -195,39 +206,29 @@ declare_lint_rule! {
     ///
     /// ### `behavior`
     ///
-    /// Specifies which behavior to enforce. Accepted values are:
-    /// - `"A"` (default): Enforces behavior A
-    /// - `"B"`: Enforces behavior B
-    /// - `"C"`: Enforces behavior C
+    /// Specifies which behavior to enforce.
     ///
-    /// ### `threshold`
+    /// Default: `"A"`.
     ///
-    /// A number between 0-255 (default: 50). Controls sensitivity of detection.
-    ///
-    /// ### `behaviorExceptions`
-    ///
-    /// An array of strings. Names listed here are excluded from the rule.
-    ///
-    /// ## Examples
-    ///
-    /// ### With default options
-    ///
-    /// [examples with default behavior]
-    ///
-    /// ### With `behavior` set to "B"
-    ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///   "useThisConvention": {
-    ///     "level": "error",
-    ///     "options": {
-    ///       "behavior": "B"
-    ///     }
+    ///   "options": {
+    ///     "behavior": "B"
     ///   }
     /// }
     /// ```
     ///
-    /// [examples with behavior B]
+    /// #### Valid
+    ///
+    /// ```js,use_options
+    /// organizeWithBehaviorB();
+    /// ```
+    ///
+    /// #### Invalid
+    ///
+    /// ```js,use_options,expect_diagnostic
+    /// organizeWithBehaviorA();
+    /// ```
     pub UseThisConvention {
         version: "next",
         name: "useThisConvention",

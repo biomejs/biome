@@ -1,0 +1,14 @@
+{
+	"linter": {
+		"rules": {
+			"nursery": {
+				"noTypeofUndefined": {
+					"level": "on",
+					"options": {
+						"checkGlobalVariables": false
+					}
+				}
+			}
+		}
+	}
+}

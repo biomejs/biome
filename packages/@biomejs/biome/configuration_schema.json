@@ -5160,6 +5160,16 @@
 			]
 		},
 		"NoTsIgnoreOptions": { "type": "object", "additionalProperties": false },
+		"NoTypeofUndefinedConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoTypeofUndefinedOptions" }
+			]
+		},
+		"NoTypeofUndefinedOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUnassignedVariablesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6387,6 +6397,13 @@
 					"description": "Require the JSON top-level value to be an array or object.\nSee https://biomejs.dev/linter/rules/no-top-level-literals",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoTopLevelLiteralsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noTypeofUndefined": {
+					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-typeof-undefined",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoTypeofUndefinedConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9633,6 +9650,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoTsIgnoreOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoTypeofUndefinedOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoTypeofUndefinedOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
