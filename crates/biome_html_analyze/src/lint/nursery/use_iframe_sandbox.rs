@@ -1,9 +1,11 @@
 use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlElement, HtmlFileSource};
+use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
 use biome_rowan::AstNode;
 use biome_rule_options::use_iframe_sandbox::UseIframeSandboxOptions;
+
+use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Enforce the 'sandbox' attribute for 'iframe' elements.
@@ -37,15 +39,16 @@ declare_lint_rule! {
 }
 
 impl Rule for UseIframeSandbox {
-    type Query = Ast<AnyHtmlElement>;
+    type Query = Ast<AnyHtmlTagElement>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = UseIframeSandboxOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
+        let source_type = ctx.source_type::<HtmlFileSource>();
 
-        if !is_iframe_element(element, ctx) {
+        if !is_html_tag(element, source_type, "iframe") {
             return None;
         }
 
@@ -73,22 +76,5 @@ impl Rule for UseIframeSandbox {
                 "Provide a "<Emphasis>"sandbox"</Emphasis>" attribute when using iframe elements."
             }),
         )
-    }
-}
-
-fn is_iframe_element(element: &AnyHtmlElement, ctx: &RuleContext<UseIframeSandbox>) -> bool {
-    let Some(element_name) = element.name() else {
-        return false;
-    };
-
-    let source_type = ctx.source_type::<HtmlFileSource>();
-
-    // In HTML files: case-insensitive (IFRAME, Iframe, iframe all match)
-    // In component frameworks (Vue, Svelte, Astro): case-sensitive (only "iframe" matches)
-    // This means <Iframe> in Vue/Svelte is treated as a component and ignored
-    if source_type.is_html() {
-        element_name.text().eq_ignore_ascii_case("iframe")
-    } else {
-        element_name.text() == "iframe"
     }
 }

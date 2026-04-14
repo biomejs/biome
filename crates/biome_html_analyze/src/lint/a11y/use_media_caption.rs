@@ -7,6 +7,8 @@ use biome_html_syntax::{AnyHtmlElement, HtmlElementList, HtmlFileSource};
 use biome_rowan::AstNode;
 use biome_rule_options::use_media_caption::UseMediaCaptionOptions;
 
+use crate::utils::is_html_tag;
+
 declare_lint_rule! {
     /// Enforces that `audio` and `video` elements must have a `track` for captions.
     ///
@@ -79,17 +81,9 @@ impl Rule for UseMediaCaption {
         let source_type = ctx.source_type::<HtmlFileSource>();
 
         // Check if element is audio or video
-        let element_name = node.name()?;
-        let is_audio = if source_type.is_html() {
-            element_name.text().eq_ignore_ascii_case("audio")
-        } else {
-            element_name.text() == "audio"
-        };
-        let is_video = if source_type.is_html() {
-            element_name.text().eq_ignore_ascii_case("video")
-        } else {
-            element_name.text() == "video"
-        };
+        let tag_element = node.clone().as_any_html_tag_element()?;
+        let is_audio = is_html_tag(&tag_element, source_type, "audio");
+        let is_video = is_html_tag(&tag_element, source_type, "video");
 
         if !is_audio && !is_video {
             return None;
@@ -106,7 +100,7 @@ impl Rule for UseMediaCaption {
         if html_element.opening_element().is_err() {
             return None;
         }
-        if has_caption_track(&html_element.children(), *source_type) {
+        if has_caption_track(&html_element.children(), source_type) {
             return None;
         }
 
@@ -132,16 +126,12 @@ impl Rule for UseMediaCaption {
 }
 
 /// Checks if the given `HtmlElementList` has a `track` element with `kind="captions"`.
-fn has_caption_track(html_child_list: &HtmlElementList, source_type: HtmlFileSource) -> bool {
+fn has_caption_track(html_child_list: &HtmlElementList, source_type: &HtmlFileSource) -> bool {
     html_child_list
         .into_iter()
         .find_map(|child| {
-            let name = child.name()?;
-            let is_track = if source_type.is_html() {
-                name.text().eq_ignore_ascii_case("track")
-            } else {
-                name.text() == "track"
-            };
+            let tag_element = child.clone().as_any_html_tag_element()?;
+            let is_track = is_html_tag(&tag_element, source_type, "track");
             if !is_track {
                 return None;
             }

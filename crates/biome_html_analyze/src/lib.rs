@@ -6,6 +6,7 @@ mod lint;
 pub mod options;
 mod registry;
 mod suppression_action;
+mod utils;
 
 pub use crate::registry::visit_registry;
 use crate::suppression_action::HtmlSuppressionAction;
