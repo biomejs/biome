@@ -34,7 +34,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseIframeSandbox {
-        version: "next",
+        version: "2.4.12",
         name: "useIframeSandbox",
         language: "jsx",
         recommended: false,

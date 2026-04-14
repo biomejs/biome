@@ -69,7 +69,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoIdenticalTestTitle {
-        version: "next",
+        version: "2.4.12",
         name: "noIdenticalTestTitle",
         language: "js",
         recommended: true,
