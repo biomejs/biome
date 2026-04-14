@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
 expression: invalid.js
 ---
 # Input
@@ -23,7 +24,13 @@ const h = `before_${'middle'}_after`;
 // Nested quotes - single in double and vice versa
 const i = `${"it's fine"}`;
 const j = `${'use "double" inside'}`;
+
+// Both quote kinds present: diagnostic should remain, safe fix should not
+const k = `${'"'}${"'"'}`;
+
 ```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._
 
 # Diagnostics
 ```
@@ -251,6 +258,7 @@ invalid.js:18:11 lint/nursery/noUnnecessaryTemplateExpression  FIXABLE  ━━�
   > 18 │ const i = `${"it's fine"}`;
        │           ^^^^^^^^^^^^^^^^
     19 │ const j = `${'use "double" inside'}`;
+    20 │ 
   
   i The template only contains string literal expressions. A regular string literal can be used instead.
   
@@ -272,6 +280,8 @@ invalid.js:19:11 lint/nursery/noUnnecessaryTemplateExpression  FIXABLE  ━━�
     18 │ const i = `${"it's fine"}`;
   > 19 │ const j = `${'use "double" inside'}`;
        │           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ 
+    21 │ // Both quote kinds present: diagnostic should remain, safe fix should not
   
   i The template only contains string literal expressions. A regular string literal can be used instead.
   
@@ -281,5 +291,22 @@ invalid.js:19:11 lint/nursery/noUnnecessaryTemplateExpression  FIXABLE  ━━�
   
     19 │ const·j·=·`${'use·"double"·inside'}`;
        │           ---                     -- 
+
+```
+
+```
+invalid.js:22:11 lint/nursery/noUnnecessaryTemplateExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This template expression is unnecessary.
+  
+    21 │ // Both quote kinds present: diagnostic should remain, safe fix should not
+  > 22 │ const k = `${'"'}${"'"'}`;
+       │           ^^^^^^^^^^^^
+    23 │ 
+  
+  i The template only contains string literal expressions. A regular string literal can be used instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```

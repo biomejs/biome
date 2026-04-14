@@ -80,10 +80,12 @@ declare_lint_rule! {
 /// Represents a part of the combined string that will replace the template.
 #[derive(Debug)]
 pub struct TemplateState {
-    /// Combined string content for the new string literal.
-    content: String,
-    /// Whether to use single quotes for the new literal. `false` means double quotes.
-    use_single_quotes: bool,
+    /// String fragments that will be joined into the replacement literal.
+    fragments: Vec<String>,
+    /// Whether any fragment contains a single quote.
+    has_single_quote: bool,
+    /// Whether any fragment contains a double quote.
+    has_double_quote: bool,
 }
 
 impl Rule for NoUnnecessaryTemplateExpression {
@@ -103,8 +105,10 @@ impl Rule for NoUnnecessaryTemplateExpression {
         // Collect all elements and check whether each is flaggable.
         // We flag the template if every interpolation is a string literal expression
         // AND the text chunks don't contain literal newlines (which require the template syntax).
-        let mut combined = String::new();
+        let mut fragments = Vec::new();
         let mut has_any_interpolation = false;
+        let mut has_single_quote = false;
+        let mut has_double_quote = false;
 
         for element in template.elements().iter() {
             match element {
@@ -118,7 +122,9 @@ impl Rule for NoUnnecessaryTemplateExpression {
                         return None;
                     }
 
-                    combined.push_str(text);
+                    has_single_quote |= text.contains('\'');
+                    has_double_quote |= text.contains('"');
+                    fragments.push(text.to_owned());
                 }
                 AnyJsTemplateElement::JsTemplateElement(elem) => {
                     has_any_interpolation = true;
@@ -132,7 +138,10 @@ impl Rule for NoUnnecessaryTemplateExpression {
                             // inner_string_text strips the surrounding quotes while preserving
                             // the escape sequences exactly as written in the source.
                             let inner = inner_string_text(&value_token);
-                            combined.push_str(inner.text());
+                            let inner_text = inner.text();
+                            has_single_quote |= inner_text.contains('\'');
+                            has_double_quote |= inner_text.contains('"');
+                            fragments.push(inner_text.to_owned());
                         }
                         // Any expression that is not a string literal makes the template necessary
                         // (e.g. a number literal or a variable whose type we don't know).
@@ -148,26 +157,10 @@ impl Rule for NoUnnecessaryTemplateExpression {
             return None;
         }
 
-        // Choose the quote style for the replacement string literal.
-        // Prefer the user's configured quote style; fall back to whichever avoids escaping.
-        let has_single_quote = combined.contains('\'');
-        let has_double_quote = combined.contains('"');
-
-        let use_single_quotes = if has_single_quote && !has_double_quote {
-            // Must use double quotes to avoid escaping.
-            false
-        } else if has_double_quote && !has_single_quote {
-            // Must use single quotes to avoid escaping.
-            true
-        } else {
-            // Either: no quotes in content or both kinds present.
-            // Use the configured preferred quote style (falling back to double).
-            !ctx.preferred_quote().is_double()
-        };
-
         Some(TemplateState {
-            content: combined,
-            use_single_quotes,
+            fragments,
+            has_single_quote,
+            has_double_quote,
         })
     }
 
@@ -190,19 +183,24 @@ impl Rule for NoUnnecessaryTemplateExpression {
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let template = ctx.query();
         let mut mutation = ctx.root().begin();
+        let content = state.fragments.join("");
 
-        // Safety: when the combined content contains both `'` and `"` characters,
-        // we cannot produce a valid string literal without escaping one of them.
-        // The `make::js_string_literal*` functions do not escape content, so we skip
-        // the automatic fix in this case and let the user resolve it manually.
-        if state.content.contains('\'') && state.content.contains('"') {
+        // A string literal cannot represent both quote kinds without escaping.
+        if state.has_single_quote && state.has_double_quote {
             return None;
         }
 
-        let new_token = if state.use_single_quotes {
-            make::js_string_literal_single_quotes(&state.content)
+        let new_token = if state.has_single_quote {
+            make::js_string_literal(&content)
+        } else if state.has_double_quote {
+            make::js_string_literal_single_quotes(&content)
         } else {
-            make::js_string_literal(&state.content)
+            // Prefer the configured quote style when either quote style works.
+            if ctx.preferred_quote().is_double() {
+                make::js_string_literal(&content)
+            } else {
+                make::js_string_literal_single_quotes(&content)
+            }
         };
 
         let new_literal = make::js_string_literal_expression(new_token);
