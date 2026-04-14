@@ -1,4 +1,7 @@
-use super::{CssStringQuote, source_cursor::SourceCursor};
+use super::{
+    CssStringQuote,
+    source_cursor::{SourceCursor, is_newline_byte},
+};
 use biome_css_syntax::{TextRange, TextSize};
 use biome_unicode_table::{Dispatch::*, is_css_non_ascii, lookup_byte};
 use smallvec::SmallVec;
@@ -384,12 +387,8 @@ impl<'src> CssScanCursor<'src> {
         self.advance(1);
 
         match self.current_byte() {
-            Some(b'\n') => {
-                self.advance(1);
-                false
-            }
-            Some(b'\r') => {
-                let len = if self.peek_byte() == Some(b'\n') {
+            Some(byte) if is_newline_byte(byte) => {
+                let len = if byte == b'\r' && self.peek_byte() == Some(b'\n') {
                     2
                 } else {
                     1
@@ -660,7 +659,7 @@ impl<'src> ScssStringScanner<'src> {
                         )));
                     }
                 }
-                WHS if matches!(byte, b'\n' | b'\r') => {
+                WHS if is_newline_byte(byte) => {
                     let len = if byte == b'\r' && self.cursor.peek_byte() == Some(b'\n') {
                         2
                     } else {

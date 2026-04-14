@@ -92,8 +92,13 @@ impl<'src> SourceCursor<'src> {
 
     /// Returns true when a backslash escape starting at `offset` is valid.
     pub(crate) fn is_valid_escape_at(&self, offset: usize) -> bool {
-        !matches!(self.byte_at(offset), Some(b'\n' | b'\r') | None)
+        self.byte_at(offset)
+            .is_some_and(|byte| !is_newline_byte(byte))
     }
+}
+
+pub(super) const fn is_newline_byte(byte: u8) -> bool {
+    matches!(byte, b'\n' | b'\r' | 0x0C)
 }
 
 #[cfg(test)]
@@ -131,5 +136,12 @@ mod tests {
 
         assert_eq!(cursor.position(), 1);
         assert_eq!(cursor.current_byte(), Some(b'b'));
+    }
+
+    #[test]
+    fn form_feed_is_not_a_valid_escape_target() {
+        let cursor = SourceCursor::new("\\\u{000C}", 0);
+
+        assert!(!cursor.is_valid_escape_at(1));
     }
 }

@@ -412,6 +412,51 @@ fn css_scan_cursor_scans_plain_string_without_interpolation_mode() {
 }
 
 #[test]
+fn css_scan_cursor_treats_form_feed_as_string_newline() {
+    let cursor = CssScanCursor::new(
+        SourceCursor::new("\"a\u{000C}b\"", 1),
+        CssScanConfig {
+            is_scss: true,
+            line_comments_enabled: true,
+        },
+    );
+    let scan = cursor.scan_string_body(
+        super::CssStringQuote::Double,
+        StringScanMode::Plain,
+    );
+
+    assert_eq!(
+        scan.stop,
+        StringBodyScanStop::Newline {
+            position: 2,
+            len: 1,
+        }
+    );
+    assert!(scan.issues.is_empty());
+}
+
+#[test]
+fn css_scan_cursor_treats_backslash_form_feed_as_line_continuation() {
+    let cursor = CssScanCursor::new(
+        SourceCursor::new("\"a\\\u{000C}b\"", 1),
+        CssScanConfig {
+            is_scss: true,
+            line_comments_enabled: true,
+        },
+    );
+    let scan = cursor.scan_string_body(
+        super::CssStringQuote::Double,
+        StringScanMode::Plain,
+    );
+
+    assert!(matches!(
+        scan.stop,
+        StringBodyScanStop::ClosingQuote { position: 5 }
+    ));
+    assert!(scan.issues.is_empty());
+}
+
+#[test]
 fn css_scan_cursor_identifier_mode_controls_slash_consumption() {
     let mut cursor = CssScanCursor::new(
         SourceCursor::new("/foo", 0),
@@ -440,6 +485,24 @@ fn css_scan_cursor_identifier_mode_controls_slash_consumption() {
         Some('/')
     );
     assert_eq!(cursor.position(), 1);
+}
+
+#[test]
+fn css_scan_cursor_does_not_treat_backslash_form_feed_as_identifier_escape() {
+    let mut cursor = CssScanCursor::new(
+        SourceCursor::new("\\\u{000C}foo", 0),
+        CssScanConfig {
+            is_scss: true,
+            line_comments_enabled: true,
+        },
+    );
+
+    assert!(!cursor.is_ident_start());
+    assert_eq!(
+        cursor.consume_ident_part(IdentifierScanMode::Standard),
+        None
+    );
+    assert_eq!(cursor.position(), 0);
 }
 
 #[test]
