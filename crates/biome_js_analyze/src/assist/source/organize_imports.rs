@@ -168,9 +168,9 @@ declare_source_rule! {
     ///
     /// #### Type-only matcher
     ///
-    /// Use an type-only matcher to separate `import type` from regular imports:
+    /// Use a type-only matcher to separate `import type` from regular imports:
     /// Setting `"type": true` matches only `import type` and `export type` statements.
-    /// Setting `"type": false` matches only non-type imports and exports].
+    /// Setting `"type": false` matches only non-type imports and exports.
     ///
     /// Given the following configuration...
     ///
@@ -395,8 +395,8 @@ declare_source_rule! {
     /// ```
     ///
     /// Note that you may want to use the lint rule
-    /// [`useImportType`](https://next.biomejs.dev/linter/rules/use-import-type/)
-    /// and its [`style`](https://next.biomejs.dev/linter/rules/use-import-type/#style)
+    /// [`useImportType`](https://biomejs.dev/linter/rules/use-import-type/)
+    /// and its [`style`](https://biomejs.dev/linter/rules/use-import-type/#style)
     /// to enforce the use of `import type` instead of `import { type }`.
     ///
     /// With the following configuration...
