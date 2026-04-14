@@ -404,9 +404,18 @@ declare_source_rule! {
     /// }
     /// ```
     ///
-    /// ```ts,use_options,expect_diagnostic
+    /// The following code...
+    ///
+    /// ```ts,ignore
     /// import type { T } from "my-package";
     /// import { V } from "my-package";
+    /// ```
+    ///
+    /// ...is organized as:
+    ///
+    /// ```ts,ignore
+    /// import { V } from "my-package";
+    /// import type { T } from "my-package";
     /// ```
     ///
     /// Note that you may want to use the lint rule
@@ -414,7 +423,7 @@ declare_source_rule! {
     /// and its [`style`](https://next.biomejs.dev/linter/rules/use-import-type/#style)
     /// to enforce the use of `import type` instead of `import { type }`.
     ///
-    /// Here is an example:
+    /// With the following configuration...
     ///
     /// ```json,full_options
     /// {
@@ -435,9 +444,18 @@ declare_source_rule! {
     /// }
     /// ```
     ///
-    /// ```ts,use_options,expect_diagnostic
+    /// ...the following code...
+    ///
+    /// ```ts,ignore
     /// import type { T1 } from "a";
     /// import { type T2, V } from "a";
+    /// ```
+    ///
+    /// ...is organized as:
+    ///
+    /// ```ts,ignore
+    /// import type { T1, T2 } from "a";
+    /// import { V } from "a";
     /// ```
     ///
     /// ### Maximize import merging with `useImportType`
@@ -464,9 +482,17 @@ declare_source_rule! {
     /// }
     /// ```
     ///
-    /// ```ts,use_options,expect_diagnostic
-    /// import type { T1 } from "a";
+    /// The following code...
+    ///
+    /// ```ts,ignore
+    /// import type { T } from "a";
     /// import { V } from "a";
+    /// ```
+    ///
+    /// ...is organized as:
+    ///
+    /// ```ts,ignore
+    /// import { type T, V } from "a";
     /// ```
     ///
     ///
