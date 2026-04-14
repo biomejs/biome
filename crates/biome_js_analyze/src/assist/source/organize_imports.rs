@@ -500,15 +500,17 @@ declare_source_rule! {
     /// Chunks are separated by:
     /// - Switching between imports and exports
     /// - Any statement that is not an import or an export
-    /// - Bare imports also called side-effect imports (`import "polyfill"`).
+    /// - Bare imports also called side-effect imports (`import "polyfill"`);
     ///   Each forms its own chunk.
-    /// - A comment followed by a blank line that we call a **detached comment**.
+    /// - A comment followed by a blank line that we call a **detached comment**;
     ///   See the [comment handling section](#comment-handling) for more details.
     ///
     /// :::note
     /// Blank lines alone do **not** create new chunks.
     /// Use a comment followed by a blank line to force the start of a new chunk.
     /// :::
+    ///
+    /// The following example shows how imports and exports are chunked.
     ///
     /// ```js,ignore
     /// // chunk 1
@@ -527,8 +529,8 @@ declare_source_rule! {
     /// import { C } from "c";
     /// ```
     ///
-    /// The action ensures blank lines between different chunks.
-    /// Side-effect imports adjacent to a chunk are not separated by a blank line.
+    /// The action enforces the presence of a blank line between different chunks.
+    /// Bare imports adjacent to a chunk of imports are not separated by a blank line.
     ///
     /// :::note
     /// Blank lines inside a chunk are preserved.
@@ -579,11 +581,12 @@ declare_source_rule! {
     /// import defaultNamedCombined, { namedCombined } from "same-source";
     /// ```
     ///
-    /// This kind ordering cannot be changed.
+    /// This kind order cannot be changed.
     ///
     /// ### Named specifier and attribute sorting
     ///
-    /// Named imports, named exports, and import attributes are also sorted.
+    /// Named imports, named exports, and import attributes are also sorted,
+    /// as shown in the following example.
     ///
     /// ```js,expect_diagnostic
     /// import { a, b, A, B, c10, c9 } from "a";
@@ -595,9 +598,9 @@ declare_source_rule! {
     ///
     /// ### Import and export merging
     ///
-    /// Imports from the same source in the same chunk are merged when possible:
+    /// Imports from the same source in the same chunk are merged when possible.
     ///
-    /// The following code:
+    /// The following code...
     ///
     /// ```ts,ignore
     /// import type { T1 } from "package";
@@ -610,7 +613,7 @@ declare_source_rule! {
     /// import { type T3 } from "package";
     /// ```
     ///
-    /// becomes:
+    /// ...becomes:
     ///
     /// ```ts,ignore
     /// import type { T1, T2 } from "package";
@@ -632,8 +635,8 @@ declare_source_rule! {
     /// Comments directly above an import (attached comments) move with that import when it is sorted.
     /// Comments followed by a blank line (detached comments) stay in place and create a new chunk.
     ///
-    /// File-header comments (at the very top of the file) are always treated as detached,
-    /// even without a blank line.
+    /// File-header comments, i.e. comments at the very top of the file,
+    /// are always treated as detached, even without a blank line.
     /// This preserves copyright notices and license headers.
     ///
     /// The following code...
@@ -653,7 +656,7 @@ declare_source_rule! {
     /// import A from "a";
     /// ```
     ///
-    /// ...becomes...
+    /// ...becomes:
     ///
     /// ```js,ignore
     /// // Copyright notice and file header comment
@@ -677,17 +680,17 @@ declare_source_rule! {
     ///
     /// ### Supported glob patterns
     ///
-    /// A source is split into segments by `/`. For example, `src/file.js` has two segments: `src` and `file.js`.
+    /// A source is split into segments by `/`.
+    /// For example, `src/file.js` has two segments: `src` and `file.js`.
     ///
-    /// - `*`: matches zero or more characters within a single segment.
+    /// - `*`: matches zero or more characters within a single segment;
     ///   `file.js` matches `*.js`, but `src/file.js` does not.
     ///
-    /// - `**`: matches zero or more segments.
-    ///   Must be enclosed by `/` or be at the start/end.
+    /// - `**`: matches zero or more segments and must be enclosed by `/` or be at the start/end;
     ///   `file.js` and `src/file.js` both match `**/*.js`.
     ///
-    /// - `!`: negates a pattern when used as the first character.
-    ///   `file.js` matches `!*.test.js`.
+    /// - `!`: negates a pattern when used as the first character;
+    ///   `file.js` matches `!*.test.js`;
     ///   Exceptions can be layered: `["@my/lib/**", "!@my/lib/internal/**", "@my/lib/internal/allowed/**"]`.
     ///
     /// - `\*`: matches a literal `*` character.
