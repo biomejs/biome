@@ -2337,7 +2337,7 @@ See https://biomejs.dev/linter/rules/no-top-level-literals
 	 */
 	noTopLevelLiterals?: NoTopLevelLiteralsConfiguration;
 	/**
-	* Succinct description of the rule.
+	* Disallow comparing undefined using typeof.
 See https://biomejs.dev/linter/rules/no-typeof-undefined 
 	 */
 	noTypeofUndefined?: NoTypeofUndefinedConfiguration;
@@ -6142,6 +6142,7 @@ export interface RuleWithNoTopLevelLiteralsOptions {
 	options?: NoTopLevelLiteralsOptions;
 }
 export interface RuleWithNoTypeofUndefinedOptions {
+	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoTypeofUndefinedOptions;
 }
@@ -7731,7 +7732,15 @@ export type NoShadowOptions = {};
 export type NoSyncScriptsOptions = {};
 export type NoTernaryOptions = {};
 export type NoTopLevelLiteralsOptions = {};
-export type NoTypeofUndefinedOptions = {};
+export interface NoTypeofUndefinedOptions {
+	/**
+	* If `true`, the rule also checks unresolved or global identifiers.
+
+This is disabled by default because `typeof missingGlobal === "undefined"`
+is runtime-safe, while `missingGlobal === undefined` can throw. 
+	 */
+	checkGlobalVariables?: boolean;
+}
 export interface NoUndeclaredEnvVarsOptions {
 	/**
 	* Environment variables that should always be allowed.

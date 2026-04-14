@@ -5168,6 +5168,12 @@
 		},
 		"NoTypeofUndefinedOptions": {
 			"type": "object",
+			"properties": {
+				"checkGlobalVariables": {
+					"description": "If `true`, the rule also checks unresolved or global identifiers.\n\nThis is disabled by default because `typeof missingGlobal === \"undefined\"`\nis runtime-safe, while `missingGlobal === undefined` can throw.",
+					"type": ["boolean", "null"]
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoUnassignedVariablesConfiguration": {
@@ -6401,7 +6407,7 @@
 					]
 				},
 				"noTypeofUndefined": {
-					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-typeof-undefined",
+					"description": "Disallow comparing undefined using typeof.\nSee https://biomejs.dev/linter/rules/no-typeof-undefined",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoTypeofUndefinedConfiguration" },
 						{ "type": "null" }
@@ -9657,6 +9663,7 @@
 		"RuleWithNoTypeofUndefinedOptions": {
 			"type": "object",
 			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoTypeofUndefinedOptions" }
 			},
