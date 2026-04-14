@@ -1,6 +1,6 @@
 use crate::markdown::auxiliary::textual::FormatMdTextualOptions;
 use crate::prelude::*;
-use crate::shared::{TextPrintMode, TrimMode};
+use crate::shared::TextPrintMode;
 use biome_markdown_syntax::MdCodeNameList;
 
 #[derive(Debug, Clone, Default)]
@@ -12,9 +12,8 @@ impl FormatRule<MdCodeNameList> for FormatMdCodeNameList {
 
         for entry in node.iter() {
             joiner.entry(&entry.format().with_options(FormatMdTextualOptions {
-                print_mode: TextPrintMode::Trim(TrimMode::All),
+                print_mode: TextPrintMode::trim_all(),
                 should_remove: false,
-                trim_start: true,
             }));
         }
 

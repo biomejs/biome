@@ -26,7 +26,7 @@ impl FormatNodeRule<MdInlineImage> for FormatMdInlineImage {
                 l_brack_token.format(),
                 alt.format()
                     .with_options(FormatMdFormatInlineItemListOptions {
-                        print_mode: TextPrintMode::Trim(TrimMode::All),
+                        print_mode: TextPrintMode::trim_all(),
                         keep_fences_in_italics: false
                     }),
                 r_brack_token.format(),

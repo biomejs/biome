@@ -40,7 +40,6 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
                                 f,
                                 [text.format().with_options(FormatMdTextualOptions {
                                     should_remove: true,
-                                    trim_start: false,
                                     ..Default::default()
                                 })]
                             )
@@ -53,7 +52,6 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
                                 [
                                     text.format().with_options(FormatMdTextualOptions {
                                         should_remove: true,
-                                        trim_start: false,
                                         ..Default::default()
                                     }),
                                     hard_line_break()
@@ -65,8 +63,11 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
                     } else {
                         joiner.entry(&text.format().with_options(FormatMdTextualOptions {
                             should_remove: false,
-                            trim_start: self.print_mode.is_start() && index == 0,
-                            ..Default::default()
+                            print_mode: if self.print_mode.is_start() && index == 0 {
+                                self.print_mode
+                            } else {
+                                TextPrintMode::default()
+                            },
                         }));
                     }
                 }
@@ -178,14 +179,13 @@ impl FormatMdInlineItemList {
                     AnyMdInline::MdTextual(text) => {
                         joiner.entry(&text.format().with_options(FormatMdTextualOptions {
                             should_remove: true,
-                            trim_start: true,
-                            ..Default::default()
+                            print_mode: TextPrintMode::trim_start(),
                         }));
                     }
                     AnyMdInline::MdHardLine(hard_line) => {
                         joiner.entry(&hard_line.format().with_options(
                             FormatMdFormatHardLineOptions {
-                                print_mode: TextPrintMode::Trim(TrimMode::All),
+                                print_mode: TextPrintMode::trim_all(),
                             },
                         ));
                     }

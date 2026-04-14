@@ -70,4 +70,12 @@ impl TextPrintMode {
     pub(crate) const fn is_clean(&self) -> bool {
         matches!(self, Self::Clean)
     }
+
+    pub(crate) const fn trim_start() -> Self {
+        Self::Trim(TrimMode::Start)
+    }
+
+    pub(crate) const fn trim_all() -> Self {
+        Self::Trim(TrimMode::All)
+    }
 }
