@@ -158,6 +158,9 @@ declare_source_rule! {
     /// - A combination of the above, e.g. `[":BUN:", ":NODE:"]`
     /// - `:BLANK_LINE:` to insert a blank line between groups
     ///
+    /// Prefix with `!` a predefined group matcher or a glob pattern to negate it.
+    /// For example, `!:NODE:` matches everything that isn't a Node.js built-in.
+    ///
     /// #### Predefined groups
     ///
     /// - `:URL:`: sources starting with `https://` or `http://`
@@ -167,15 +170,6 @@ declare_source_rule! {
     /// - `:PACKAGE:`: bare and scoped packages (`lib`, `@scoped/lib`)
     /// - `:ALIAS:`: path aliases starting with `#`, `@/`, `~`, `$`, or `%`
     /// - `:PATH:`: absolute and relative paths
-    ///
-    /// You can prefix a predefined group matcher with `!` to negate the matcher.
-    /// For example `!:NODE:` matches everything that isn't a Node.js built-in.
-    ///
-    /// #### Glob patterns
-    ///
-    /// Use glob patterns to match specific import sources.
-    /// Prefix with `!` to exclude sources from a group:
-    /// `!:NODE:` matches everything that isn't a Node.js built-in.
     ///
     /// #### Object matchers
     ///
