@@ -221,18 +221,18 @@ This paragraph has some `code` in it.
 --- Prettier
 +++ Biome
 @@ -4,6 +4,8 @@
-
+ 
      This is a paragraph.
-
+ 
 +
 +
  # Header 1
-
+ 
  ## Header 2
 @@ -14,16 +16,13 @@
      Header 2
      --------
-
+ 
 +
 +
  # Header 1
@@ -246,16 +246,16 @@ This paragraph has some `code` in it.
  ##### Header 5
 -
  ###### Header 6
-
+ 
      # Header 1
 @@ -33,16 +32,13 @@
      ##### Header 5
      ###### Header 6
-
+ 
 -# Header 1
-
+ 
 -## Header 2
-
+ 
 +# Header 1
 +## Header 2
  ### Header 3
@@ -265,18 +265,18 @@ This paragraph has some `code` in it.
  ##### Header 5
 -
  ###### Header 6
-
+ 
      # Header 1 #
 @@ -52,12 +48,15 @@
      ##### Header 5 #####
      ###### Header 6 ######
-
+ 
 +
 +
  > Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
-
+ 
      > Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
-
+ 
 +
 +
  > ## This is a header.
@@ -287,22 +287,22 @@ This paragraph has some `code` in it.
 @@ -73,18 +72,24 @@
      >
      >     Markdown.generate();
-
+ 
 +
 +
 +
  - Red
  - Green
  - Blue
-
+ 
 -* Red
 -* Green
 -* Blue
-
+ 
  - Red
  - Green
  - Blue
-
+ 
 +
 +- Red
 +- Green
@@ -315,7 +315,7 @@ This paragraph has some `code` in it.
 @@ -99,6 +104,8 @@
  * Blue
  ```
-
+ 
 +
 +
  1. Buy flour and salt
@@ -324,67 +324,67 @@ This paragraph has some `code` in it.
 @@ -109,6 +116,8 @@
  1. Bake
  ```
-
+ 
 +
 +
  Paragraph:
-
+ 
      Code
 @@ -119,15 +128,17 @@
-
+ 
          Code
-
+ 
 ----
-
+ 
 ----
-
+ 
 ----
 +* * *
 +
 +***
 +
 +*****
-
+ 
 ----
 +- - -
-
+ 
 ----
 +---------------------------------------
-
+ 
      * * *
-
+ 
 @@ -139,6 +150,8 @@
-
+ 
      ---------------------------------------
-
+ 
 +
 +
  This is [an example](http://example.com "Example") link.
-
+ 
  [This link](http://example.com) has no title attr.
 @@ -159,6 +172,8 @@
-
+ 
      [id]: http://example.com "Optional Title"
-
+ 
 +
 +
  _single asterisks_
-
+ 
  _single underscores_
 @@ -175,10 +190,14 @@
-
+ 
      __double underscores__
-
+ 
 +
 +
  This paragraph has some `code` in it.
-
+ 
      This paragraph has some `code` in it.
-
+ 
 +
 +
  ![Alt Text](http://placehold.it/200x50 "Image Title")
-
+ 
      ![Alt Text](http://placehold.it/200x50 "Image Title")
 ```
 
