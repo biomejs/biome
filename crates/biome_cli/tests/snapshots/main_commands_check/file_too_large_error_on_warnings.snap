@@ -2,11 +2,28 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
-## `check.js`
+## `biome.json`
+
+```json
+{
+  "files": {
+    "maxSize": 16
+  }
+}
+```
+
+## `large.js`
 
 ```js
 statement1();
 statement2();
+```
+
+## `small.js`
+
+```js
+a;
+
 ```
 
 # Termination Message
@@ -14,13 +31,7 @@ statement2();
 ```block
 check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × No files were processed in the specified paths.
-  
-  i Check your biome.json or biome.jsonc to ensure the paths are not ignored by the configuration.
-  
-  i These paths were provided but ignored:
-  
-  - check.js
+  × Some warnings were emitted while running checks.
   
 
 
@@ -29,7 +40,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-check.js check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+large.js check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The size of the file is 27 B, which exceeds the configured maximum of 16 B for this project.
     Use the `files.maxSize` configuration to change the maximum size of files processed, or `files.includes` to ignore the file.
@@ -38,6 +49,6 @@ check.js check ━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-Checked 0 files in <TIME>. No fixes applied.
+Checked 1 file in <TIME>. No fixes applied.
 Found 1 warning.
 ```

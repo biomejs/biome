@@ -3665,3 +3665,37 @@ fn check_tab_alignment_in_diff_output() {
         result,
     ));
 }
+
+#[test]
+fn file_too_large_error_on_warnings() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(Utf8PathBuf::from("biome.json"), CONFIG_FILE_SIZE_LIMIT);
+    // This file exceeds the limit
+    let large_file = Utf8Path::new("large.js");
+    fs.insert(large_file.into(), "statement1();\nstatement2();");
+    // This file is within the limit
+    let small_file = Utf8Path::new("small.js");
+    fs.insert(small_file.into(), "a;\n");
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "check",
+                "--error-on-warnings",
+                large_file.as_str(),
+                small_file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "file_too_large_error_on_warnings",
+        fs,
+        console,
+        result,
+    ));
+}
