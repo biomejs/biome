@@ -212,7 +212,8 @@ declare_source_rule! {
     ///
     /// ### `sortBareImports`
     ///
-    /// By default, _bare imports_, also called _side-effect imports_, form individual chunks.
+    /// By default, _bare imports_, also called _side-effect imports_, form individual chunks,
+    /// and they aren't sorted by default.
     /// Setting `sortBareImports` to `true`, allow sorting them with other imports.
     ///
     /// :::caution
@@ -285,13 +286,20 @@ declare_source_rule! {
     ///
     /// ### Group monorepo packages
     ///
+    /// Let's assume that all your monorepo packages are scoped by `@mycompany`.
+    /// The following example groups all monorepo imports after imports of external dependencies.
+    ///
+    /// Because groups are matched in order, the first group has to exclude monorepo imports.
+    /// Indeed, `:PACKAGE:` matches imports like `@mycompany/db`, and thus must be excluded
+    /// thanks to the exception `!@mycompany/**`.
+    ///
     /// ```json,options
     /// {
     ///     "options": {
     ///         "groups": [
-    ///             [":PACKAGE:", ":PACKAGE_WITH_PROTOCOL:", "!@mycompany", "!@mycompany/**"],
+    ///             [":PACKAGE:", ":PACKAGE_WITH_PROTOCOL:", "!@mycompany/**"],
     ///             ":BLANK_LINE:",
-    ///             ["@mycompany", "@mycompany/**"],
+    ///             ["@mycompany/**"],
     ///             ":BLANK_LINE:"
     ///         ]
     ///     }
@@ -307,6 +315,9 @@ declare_source_rule! {
     /// ```
     ///
     /// ### Group multiple libraries
+    ///
+    /// In the following example, `react` and libraries like `react-dom` are grouped together.
+    /// A blank line separates them from other imports that are placed at the end.
     ///
     ///```json,options
     /// {
@@ -326,6 +337,12 @@ declare_source_rule! {
     /// ```
     ///
     /// ### Place CSS/style imports at the end
+    ///
+    /// The following example groups style imports together and place them at the end.
+    /// Other imports are placed at the top of the file and are followed by a blank line.
+    ///
+    /// Because groups are matched in order, the first group has to exclude style imports.
+    /// `**` matches everything and is followed by the two exceptions that exclude style imports.
     ///
     /// ```json,options
     /// {
@@ -347,6 +364,9 @@ declare_source_rule! {
     /// ```
     ///
     /// ### Group test utilities together
+    ///
+    /// The following example places test-related utilities at the top of the file.
+    /// They are separated from other imports by a blank line.
     ///
     /// ```json,options
     /// {
