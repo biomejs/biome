@@ -15273,17 +15273,20 @@
 			]
 		},
 		"UseNullishCoalescingOptions": {
+			"description": "Options for the `useNullishCoalescing` rule.",
 			"type": "object",
 			"properties": {
 				"ignoreConditionalTests": {
-					"description": "Whether to ignore `||` expressions in conditional test positions\n(if/while/for/do-while/ternary conditions).\n\nWhen `true` (the default), the rule will not report `||` expressions\nthat appear in places where the falsy-checking behavior may be intentional.\n\nDefault: `true`",
-					"type": ["boolean", "null"],
-					"default": null
+					"description": "Ignore `||` expressions in conditional test positions (default: `true`).",
+					"type": ["boolean", "null"]
+				},
+				"ignoreMixedLogicalExpressions": {
+					"description": "Whether to ignore `||` and `||=` binary operations that are part of a mixed logical expression with `&&` (default: `false`).",
+					"type": ["boolean", "null"]
 				},
 				"ignoreTernaryTests": {
-					"description": "Whether to ignore ternary expressions that could be simplified\nusing the nullish coalescing operator.\n\nDefault: `false`",
-					"type": ["boolean", "null"],
-					"default": null
+					"description": "Ignore ternary expressions that check for `null` or `undefined` (default: `false`).",
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
