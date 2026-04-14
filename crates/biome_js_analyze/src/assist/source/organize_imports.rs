@@ -28,7 +28,6 @@ declare_source_rule! {
     /// Sorts imports and exports in your JavaScript and TypeScript files.
     ///
     /// By default, imports and exports are sorted by "distance" from the current file:
-    /// External dependencies come first, followed by local aliases, and local files come last.
     ///
     /// 1. URLs such as `https://example.org`.
     /// 2. Packages with a protocol such as `node:path`, `bun:test`, `jsr:@my?lib`, or `npm:lib`.
@@ -543,16 +542,8 @@ declare_source_rule! {
     ///
     /// ### Sorting within a chunk
     ///
-    /// Ad described in the preliminary section,
-    /// imports and exports of a chunk are sorted by "distance" from the current file.
-    /// This leads to the following order:
-    ///
-    /// 1. URLs such as `https://example.org`.
-    /// 2. Packages with a protocol such as `node:path`, `bun:test`, `jsr:@my?lib`, or `npm:lib`.
-    /// 3. Packages such as `mylib` or `@my/lib`.
-    /// 4. Aliases: sources starting with `@/`, `#`, `~`, `$`, or `%`.
-    ///    They usually are [Node.js subpath imports](https://nodejs.org/api/packages.html#subpath-imports) or [TypeScript path aliases](https://www.typescriptlang.org/tsconfig/#paths).
-    /// 5. Absolute and relative paths.
+    /// As described in the preliminary section,
+    /// Imports and exports of a chunk are sorted by "distance" from the current file.
     ///
     /// When two imports share the same source, they are ordered by kind:
     ///
