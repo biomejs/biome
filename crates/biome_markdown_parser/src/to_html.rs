@@ -1788,7 +1788,7 @@ fn is_transparent_block(block: &AnyMdBlock) -> bool {
 
 /// Check if blocks are effectively empty (empty or only newlines).
 fn is_empty_content(blocks: &[AnyMdBlock]) -> bool {
-    blocks.is_empty() || blocks.iter().all(is_newline_block)
+    blocks.is_empty() || blocks.iter().all(is_transparent_block)
 }
 
 fn list_item_required_indent(entry: &ListItemIndent) -> usize {
