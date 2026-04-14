@@ -1,13 +1,14 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 520
 expression: redactor(content)
 ---
 # Emitted Messages
 
 ```block
-Prints information for debugging.
+Updates the configuration when there are breaking changes.
 
-Usage: rage [--daemon-logs] [--formatter] [--linter]
+Usage: migrate [--write] [COMMAND ...]
 
 Global options applied to all commands
         --colors=<off|force>  Set the formatting mode for markup: "off" prints everything as plain
@@ -51,7 +52,8 @@ Options to control logging (CLI and Daemon)
         --log-path=PATH       Allows changing the folder where logs are stored. This option is
                               applicable only to the daemon.
                               [env:BIOME_LOG_PATH: N/A]
-                              [default: <BIOME_DIR>/biome-logs]
+                              [default: C:/Users/Gonçalo
+                              Gonçalves\AppData\Local\biomejs\biome\cache\biome-logs]
         --log-level=<none|debug|info|warn|error>  The level of logging. In order, from the most
                               verbose to the least verbose: debug, info, warn, error.
                               The value `none` won't show any logging.
@@ -62,9 +64,15 @@ Options to control logging (CLI and Daemon)
                               [default: pretty]
 
 Available options:
-        --daemon-logs         Prints the Biome daemon server logs
-        --formatter           Prints the formatter options applied
-        --linter              Prints the linter options applied
+        --write               Writes the new configuration file to disk
+        --fix                 Alias of `--write`, writes the new configuration file to disk
     -h, --help                Prints help information
+
+Available commands:
+    prettier                  It attempts to find the files `.prettierrc`/`prettier.json` and
+                              `.prettierignore`, and map the Prettier's configuration into Biome's
+                              configuration file.
+    eslint                    It attempts to find the ESLint configuration file in the working
+                              directory, and update the Biome's configuration file as a result.
 
 ```

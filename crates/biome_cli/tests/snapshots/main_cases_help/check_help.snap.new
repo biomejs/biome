@@ -1,16 +1,16 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 520
 expression: redactor(content)
 ---
 # Emitted Messages
 
 ```block
-Command to use in CI environments. Runs formatter, linter and import sorting to the requested files.
-Files won't be modified, the command is a read-only operation.
+Runs formatter, linter and import sorting to the requested files.
 
-Usage: ci [--formatter-enabled=<true|false>] [--linter-enabled=<true|false>] [--assist-enabled=
-<true|false>] [--format-with-errors=<true|false>] [--enforce-assist=<true|false>] [--changed] [
---since=REF] [--only=<GROUP|RULE|DOMAIN|ACTION>]... [--skip=<GROUP|RULE|DOMAIN|ACTION>]... [PATH]...
+Usage: check [--write] [--unsafe] [--assist-enabled=<true|false>] [--enforce-assist=<true|false>] [
+--format-with-errors=<true|false>] [--profile-rules] [--staged] [--changed] [--since=REF] [--only=
+<GROUP|RULE|DOMAIN|ACTION>]... [--skip=<GROUP|RULE|DOMAIN|ACTION>]... [PATH]...
 
 Options that changes how the JSON parser behaves
         --json-parse-allow-comments=<true|false>  Allow parsing comments in `.json` files
@@ -318,7 +318,8 @@ Options to control logging (CLI and Daemon)
         --log-path=PATH       Allows changing the folder where logs are stored. This option is
                               applicable only to the daemon.
                               [env:BIOME_LOG_PATH: N/A]
-                              [default: <BIOME_DIR>/biome-logs]
+                              [default: C:/Users/Gonçalo
+                              Gonçalves\AppData\Local\biomejs\biome\cache\biome-logs]
         --log-level=<none|debug|info|warn|error>  The level of logging. In order, from the most
                               verbose to the least verbose: debug, info, warn, error.
                               The value `none` won't show any logging.
@@ -332,33 +333,52 @@ Available positional items:
     PATH                      Single file, single path or list of paths
 
 Available options:
+        --write               Apply safe fixes, formatting and import sorting
+        --unsafe              Apply unsafe fixes. Should be used with `--write` or `--fix`
+        --fix                 Alias for `--write`, writes safe fixes, formatting and import sorting
         --formatter-enabled=<true|false>  Allow enabling or disabling the formatter check.
-        --linter-enabled=<true|false>  Allow enabling or disable the linter check.
+        --linter-enabled=<true|false>  Allow enabling or disabling the linter check.
         --assist-enabled=<true|false>  Allow enabling or disabling the assist.
-        --format-with-errors=<true|false>  Whether formatting should be allowed to proceed if a
-                              given file has syntax errors
         --enforce-assist=<true|false>  Allows enforcing assist, and make the CLI fail if some
                               actions aren't applied. Defaults to `true`.
+        --format-with-errors=<true|false>  Whether formatting should be allowed to proceed if a
+                              given file has syntax errors
+        --profile-rules       Enable rule profiling output. Captures timing only for rule execution,
+                              not preprocessing such as querying or building the semantic model.
+        --stdin-file-path=PATH  Use this option when you want to format code piped from `stdin`, and
+                              print the output to `stdout`.
+                              The file doesn't need to exist on disk, what matters is the extension
+                              of the file. Based on the extension, Biome knows how to check the
+                              code.
+                              Also, if you have overrides configured and/or nested configurations,
+                              the path may determine the settings being applied.
+                              The provided path may also affect whether the input is treated as
+                              ignored. If the path doesn't exist on disk (virtual path), Biome won't
+                              require it to be part of the project file set, and ignore checks
+                              (`files.includes` and VCS ignore rules) are skipped.
+                              Example: ```shell echo 'let a;' | biome check
+                              --stdin-file-path=file.js --write ```
+        --staged              When set to true, only the files that have been staged (the ones
+                              prepared to be committed) will be linted. This option should be used
+                              when working locally.
         --changed             When set to true, only the files that have been changed compared to
-                              your `defaultBranch` configuration will be linted.
+                              your `defaultBranch` configuration will be linted. This option should
+                              be used in CI environments.
         --since=REF           Use this to specify the base branch to compare against when you're
                               using the --changed flag and the `defaultBranch` is not set in your
-                              biome.json
-        --threads=NUMBER      The number of threads to use. This is useful when running the CLI in
-                              environments with limited resource, for example CI.
-                              [env:BIOME_THREADS: N/A]
+                              `biome.json`
         --only=<GROUP|RULE|DOMAIN|ACTION>  Run only the given lint rule, assist action, group of
                               rules and actions, or domain. If the severity level of a rule is
                               `off`, then the severity level of the rule is set to `error` if it is
                               a recommended rule or `warn` otherwise.
                               Example:
-                              ```shell biome ci --only=correctness/noUnusedVariables
+                              ```shell biome check --only=correctness/noUnusedVariables
                               --only=suspicious --only=test ```
         --skip=<GROUP|RULE|DOMAIN|ACTION>  Skip the given lint rule, assist action, group of rules
                               and actions, or domain by setting the severity level of the rules to
                               `off`. This option takes precedence over `--only`.
                               Example:
-                              ```shell biome ci --skip=correctness/noUnusedVariables
+                              ```shell biome check --skip=correctness/noUnusedVariables
                               --skip=suspicious --skip=project ```
     -h, --help                Prints help information
 

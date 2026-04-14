@@ -1,15 +1,16 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 520
 expression: redactor(content)
 ---
 # Emitted Messages
 
 ```block
-Starts the Biome daemon server process.
+Acts as a server for the Language Server Protocol over stdin/stdout.
 
-Usage: start [--log-prefix-name=STRING] [--log-path=PATH] [--log-level=<none|debug|info|warn|error>]
-[--log-kind=<pretty|compact|json>] [--watcher-kind=<polling|recommended|none>] [
---watcher-polling-interval=NUMBER]
+Usage: lsp-proxy [--log-prefix-name=STRING] [--log-path=PATH] [--log-level=
+<none|debug|info|warn|error>] [--log-kind=<pretty|compact|json>] [--watcher-kind=
+<polling|recommended|none>] [--watcher-polling-interval=NUMBER]
 
 Options to control logging (CLI and Daemon)
         --log-file=STRING  Optional path/file to redirect log messages to. This option is applicable
@@ -21,7 +22,8 @@ Options to control logging (CLI and Daemon)
         --log-path=PATH    Allows changing the folder where logs are stored. This option is
                            applicable only to the daemon.
                            [env:BIOME_LOG_PATH: N/A]
-                           [default: <BIOME_DIR>/biome-logs]
+                           [default: C:/Users/Gonçalo
+                           Gonçalves\AppData\Local\biomejs\biome\cache\biome-logs]
         --log-level=<none|debug|info|warn|error>  The level of logging. In order, from the most
                            verbose to the least verbose: debug, info, warn, error.
                            The value `none` won't show any logging.
