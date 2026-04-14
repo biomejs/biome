@@ -443,6 +443,181 @@ fn css_scan_cursor_identifier_mode_controls_slash_consumption() {
 }
 
 #[test]
+fn css_scan_cursor_consumes_identifier_sequence_with_escape() {
+    let mut cursor = CssScanCursor::new(
+        SourceCursor::new(r#"\66 oo-bar"#, 0),
+        CssScanConfig {
+            is_scss: true,
+            line_comments_enabled: true,
+        },
+    );
+    let mut buf = [0u8; 16];
+
+    let scan = cursor.consume_ident_sequence(&mut buf, IdentifierScanMode::Standard);
+
+    assert!(scan.count > 0);
+    assert!(scan.only_ascii_used);
+    assert_eq!(&buf[..scan.count], b"foo-bar");
+    assert_eq!(scan.position, 10);
+    assert_eq!(scan.stop_byte, None);
+    assert_eq!(cursor.position(), 10);
+}
+
+#[test]
+fn css_scan_cursor_consumes_identifier_sequence_with_slash_mode() {
+    let mut cursor = CssScanCursor::new(
+        SourceCursor::new("w/2", 0),
+        CssScanConfig {
+            is_scss: true,
+            line_comments_enabled: true,
+        },
+    );
+    let mut buf = [0u8; 16];
+
+    let scan = cursor.consume_ident_sequence(&mut buf, IdentifierScanMode::WithSlash);
+
+    assert_eq!(&buf[..scan.count], b"w/2");
+    assert!(scan.only_ascii_used);
+    assert_eq!(scan.position, 3);
+    assert_eq!(scan.stop_byte, None);
+    assert_eq!(cursor.position(), 3);
+}
+
+#[test]
+fn css_scan_cursor_consumes_identifier_sequence_tracks_non_ascii_transition() {
+    let mut cursor = CssScanCursor::new(
+        SourceCursor::new("abécd ", 0),
+        CssScanConfig {
+            is_scss: true,
+            line_comments_enabled: true,
+        },
+    );
+    let mut buf = [0u8; 16];
+
+    let scan = cursor.consume_ident_sequence(&mut buf, IdentifierScanMode::Standard);
+
+    assert_eq!(&buf[..scan.count], b"ab");
+    assert!(!scan.only_ascii_used);
+    assert_eq!(scan.position, 6);
+    assert_eq!(scan.stop_byte, Some(b' '));
+    assert_eq!(cursor.position(), 6);
+}
+
+#[test]
+fn css_lexer_consumes_identifier_sequence_with_escape() {
+    let mut lexer = CssLexer::from_str(r#"\66 oo-bar"#);
+    let mut buf = [0u8; 16];
+
+    let (count, only_ascii_used) =
+        lexer.consume_ident_sequence(&mut buf, false);
+
+    assert!(count > 0);
+    assert!(only_ascii_used);
+    assert_eq!(&buf[..count], b"foo-bar");
+    assert_eq!(lexer.position(), 10);
+    assert_eq!(lexer.current_byte(), None);
+}
+
+#[test]
+fn css_lexer_consumes_identifier_sequence_with_slash_mode() {
+    let mut lexer = CssLexer::from_str("w/2");
+    let mut buf = [0u8; 16];
+
+    let (count, only_ascii_used) =
+        lexer.consume_ident_sequence(&mut buf, true);
+
+    assert_eq!(&buf[..count], b"w/2");
+    assert!(only_ascii_used);
+    assert_eq!(lexer.position(), 3);
+    assert_eq!(lexer.current_byte(), None);
+}
+
+#[test]
+fn css_lexer_consumes_identifier_sequence_stops_before_slash_when_disabled() {
+    let mut lexer = CssLexer::from_str("w/2");
+    let mut buf = [0u8; 16];
+
+    let (count, only_ascii_used) =
+        lexer.consume_ident_sequence(&mut buf, false);
+
+    assert_eq!(&buf[..count], b"w");
+    assert!(only_ascii_used);
+    assert_eq!(lexer.position(), 1);
+    assert_eq!(lexer.current_byte(), Some(b'/'));
+}
+
+#[test]
+fn css_lexer_consumes_identifier_sequence_tracks_non_ascii_transition() {
+    let mut lexer = CssLexer::from_str("abécd ");
+    let mut buf = [0u8; 16];
+
+    let (count, only_ascii_used) =
+        lexer.consume_ident_sequence(&mut buf, false);
+
+    assert_eq!(&buf[..count], b"ab");
+    assert!(!only_ascii_used);
+    assert_eq!(lexer.position(), 6);
+    assert_eq!(lexer.current_byte(), Some(b' '));
+}
+
+#[test]
+fn css_lexer_tailwind_identifier_sequence_stops_before_hyphen_star_suffix() {
+    let mut lexer = CssLexer::from_str("--color-*")
+        .with_options(CssParserOptions::default().allow_tailwind_directives());
+    let mut buf = [0u8; 16];
+
+    let (count, only_ascii_used) = lexer.consume_ident_sequence(&mut buf, false);
+
+    assert_eq!(&buf[..count], b"--color");
+    assert!(only_ascii_used);
+    assert_eq!(lexer.position(), 7);
+    assert_eq!(lexer.current_byte(), Some(b'-'));
+}
+
+#[test]
+fn css_lexer_tailwind_identifier_sequence_keeps_double_hyphen_before_star() {
+    let mut lexer = CssLexer::from_str("--*")
+        .with_options(CssParserOptions::default().allow_tailwind_directives());
+    let mut buf = [0u8; 16];
+
+    let (count, only_ascii_used) = lexer.consume_ident_sequence(&mut buf, false);
+
+    assert_eq!(&buf[..count], b"--");
+    assert!(only_ascii_used);
+    assert_eq!(lexer.position(), 2);
+    assert_eq!(lexer.current_byte(), Some(b'*'));
+}
+
+#[test]
+fn css_lexer_tailwind_identifier_sequence_does_not_rewind_into_escaped_hyphen_before_star() {
+    let mut lexer = CssLexer::from_str(r"--foo\2d*")
+        .with_options(CssParserOptions::default().allow_tailwind_directives());
+    let mut buf = [0u8; 16];
+
+    let (count, only_ascii_used) = lexer.consume_ident_sequence(&mut buf, false);
+
+    assert_eq!(&buf[..count], b"--foo-");
+    assert!(only_ascii_used);
+    assert_eq!(lexer.position(), 8);
+    assert_eq!(lexer.current_byte(), Some(b'*'));
+}
+
+#[test]
+fn css_lexer_tailwind_identifier_sequence_keeps_count_when_buffer_fills_before_suffix_hyphen() {
+    let mut lexer = CssLexer::from_str("ab-*")
+        .with_options(CssParserOptions::default().allow_tailwind_directives());
+    let mut buf = [0u8; 2];
+
+    let (count, only_ascii_used) = lexer.consume_ident_sequence(&mut buf, false);
+
+    assert_eq!(&buf[..count], b"ab");
+    assert!(only_ascii_used);
+    assert_eq!(count, 2);
+    assert_eq!(lexer.position(), 2);
+    assert_eq!(lexer.current_byte(), Some(b'-'));
+}
+
+#[test]
 fn lexer_scan_cursor_at_detects_interpolated_function_from_offset() {
     let lexer =
         CssLexer::from_str("xxfoo#{1 + 1}(bar)").with_source_type(CssFileSource::scss());

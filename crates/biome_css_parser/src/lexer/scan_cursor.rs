@@ -104,6 +104,24 @@ pub(crate) enum IdentifierScanMode {
     WithSlash,
 }
 
+/// Result metadata from scanning one identifier sequence with the shared
+/// scanner.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub(crate) struct IdentifierSequenceScan {
+    /// Number of lowercase ASCII bytes written into the provided buffer before
+    /// scanning encountered non-ASCII content or the buffer filled up.
+    pub(crate) count: usize,
+    /// Whether every consumed identifier fragment decoded to ASCII.
+    pub(crate) only_ascii_used: bool,
+    /// Whether the most recently consumed fragment was written into the
+    /// keyword buffer.
+    pub(crate) last_was_buffered: bool,
+    /// Absolute byte position immediately after the last consumed fragment.
+    pub(crate) position: usize,
+    /// First byte that stopped the identifier scan, if any.
+    pub(crate) stop_byte: Option<u8>,
+}
+
 impl<'src> CssScanCursor<'src> {
     /// Creates a shared scan cursor at `position` with a stable lexical
     /// environment.
@@ -290,18 +308,65 @@ impl<'src> CssScanCursor<'src> {
 
     /// Consumes identifier fragments until the current position no longer
     /// matches the requested identifier mode.
-    pub(crate) fn consume_ident_sequence(&mut self, mode: IdentifierScanMode) {
+    ///
+    /// This is the shared hot-path entrypoint for lexer identifier scanning:
+    /// it advances one scan cursor across the whole token while optionally
+    /// lowercasing ASCII content into `buf` for keyword matching.
+    pub(crate) fn consume_ident_sequence(
+        &mut self,
+        buf: &mut [u8],
+        mode: IdentifierScanMode,
+    ) -> IdentifierSequenceScan {
+        self.advance_ident_sequence_impl(mode, Some(buf))
+    }
+
+    /// Advances through one identifier sequence without collecting lexer
+    /// keyword-buffer bookkeeping.
+    pub(crate) fn advance_ident_sequence(&mut self, mode: IdentifierScanMode) {
+        let _ = self.advance_ident_sequence_impl(mode, None);
+    }
+
+    fn advance_ident_sequence_impl(
+        &mut self,
+        mode: IdentifierScanMode,
+        mut buf: Option<&mut [u8]>,
+    ) -> IdentifierSequenceScan {
+        let mut idx = 0;
+        let mut only_ascii_used = true;
+        let mut last_was_buffered = false;
+
         while self.current_byte().is_some() {
             let start = self.position();
 
-            if self.consume_ident_part(mode).is_none() {
+            let Some(part) = self.consume_ident_part(mode) else {
                 break;
+            };
+
+            if only_ascii_used && !part.is_ascii() {
+                only_ascii_used = false;
+            }
+
+            last_was_buffered = false;
+            if only_ascii_used && let Some(buf) = buf.as_deref_mut() {
+                if let Some(slot) = buf.get_mut(idx) {
+                    *slot = part.to_ascii_lowercase() as u8;
+                    idx += 1;
+                    last_was_buffered = true;
+                }
             }
 
             debug_assert!(
                 self.position() > start,
                 "identifier-part consumption must advance the scan cursor",
             );
+        }
+
+        IdentifierSequenceScan {
+            count: idx,
+            only_ascii_used,
+            last_was_buffered,
+            position: self.position(),
+            stop_byte: self.current_byte(),
         }
     }
 
@@ -677,7 +742,7 @@ impl<'src> ScssInterpolatedIdentifierScanner<'src> {
                 .then_some(InterpolatedIdentifierFragment::Interpolation)
         } else if self.cursor.is_ident_start() {
             self.cursor
-                .consume_ident_sequence(IdentifierScanMode::Standard);
+                .advance_ident_sequence(IdentifierScanMode::Standard);
             Some(InterpolatedIdentifierFragment::Identifier)
         } else {
             None

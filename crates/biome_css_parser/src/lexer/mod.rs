@@ -265,9 +265,9 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
 
     #[inline]
     fn advance_char_unchecked(&mut self) {
-        let current = self
-            .current_byte()
-            .expect("character advancement requires a byte");
+        let Some(current) = self.current_byte() else {
+            return;
+        };
         self.cursor.advance_byte_or_char(current);
     }
 
@@ -302,12 +302,6 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
         self.cursor.byte_at(offset)
     }
 
-    #[inline]
-    fn prev_byte(&self) -> Option<u8> {
-        self.position()
-            .checked_sub(1)
-            .and_then(|position| self.source().as_bytes().get(position).copied())
-    }
 }
 
 impl<'src> CssLexer<'src> {
@@ -1260,19 +1254,15 @@ impl<'src> CssLexer<'src> {
         }
     }
 
-    /// Consumes a sequence of identifier characters from a byte stream, appending
-    /// them to the provided buffer in lowercase ASCII form.
-    ///
-    /// This function iteratively processes bytes from the stream, which are part
-    /// of an identifier, and appends their lowercase ASCII representation to the buffer.
-    /// It stops processing either when the buffer is full or when a non-identifier
-    /// character is encountered.
+    /// Consumes one identifier token via a single shared scan cursor and
+    /// returns the keyword-buffer bookkeeping needed by the lexer.
     ///
     /// # Arguments
     ///
-    /// * `buf` - A mutable reference to a byte array where the identifier characters
-    ///   will be appended. This buffer should be pre-allocated and have enough
-    ///   space to hold the expected identifier.
+    /// * `buf` - Lowercased ASCII keyword buffer filled by the shared scanner
+    ///   while the identifier remains ASCII-only.
+    /// * `allow_slash` - Whether `/` should be accepted as an identifier
+    ///   fragment for Tailwind utility lexing.
     ///
     /// # Returns
     ///
@@ -1288,65 +1278,42 @@ impl<'src> CssLexer<'src> {
     fn consume_ident_sequence(&mut self, buf: &mut [u8], allow_slash: bool) -> (usize, bool) {
         debug_assert!(self.is_ident_start());
 
-        let mut idx = 0;
-        let mut only_ascii_used = true;
-        // Repeatedly consume the next input code point from the stream.
-        while let Some(current) = self.current_byte() {
-            if let Some(part) = self.consume_ident_part(current, allow_slash) {
-                if only_ascii_used && !part.is_ascii() {
-                    only_ascii_used = false;
-                }
-
-                if only_ascii_used {
-                    // Ensure that there is space in the buffer.
-                    // Since we're only dealing with ASCII, we need at most 1 byte.
-                    if let Some(buf) = buf.get_mut(idx..idx + 1) {
-                        // Convert the ASCII character to lowercase.
-                        buf[0] = part.to_ascii_lowercase() as u8;
-                        idx += 1;
-                    }
-                }
-            } else {
-                break;
-            }
-        }
-
-        (idx, only_ascii_used)
-    }
-
-    /// Consume a character that forms part of a CSS identifier.
-    ///
-    /// Before calling this function, you should make sure that there is a valid identifier start
-    /// using [Self::is_ident_start].
-    ///
-    /// Also handles CSS escape sequences in identifiers and attach appropriate diagnostics for invalid cases.
-    ///
-    /// Returns the consumed character wrapped in `Some` if it is part of an identifier,
-    /// and `None` if it is not.
-    fn consume_ident_part(&mut self, current: u8, allow_slash: bool) -> Option<char> {
-        let dispatched = lookup_byte(current);
-        if self.options.is_tailwind_directives_enabled()
-            && dispatched == MIN
-            && self.peek_byte().map(lookup_byte) == Some(MUL)
-        {
-            // HACK: handle `--*`
-            if self.prev_byte().map(lookup_byte) == Some(MIN) {
-                self.advance(1);
-                return Some(current as char);
-            }
-            // otherwise, handle cases like `--color-*`
-            return None;
-        }
-
         let mut scan_cursor = self.scan_cursor();
         let mode = if allow_slash {
             IdentifierScanMode::WithSlash
         } else {
             IdentifierScanMode::Standard
         };
-        let chr = scan_cursor.consume_ident_part(mode)?;
-        self.set_position(scan_cursor.position());
-        Some(chr)
+
+        let scan = scan_cursor.consume_ident_sequence(buf, mode);
+        let mut position = scan.position;
+        let mut count = scan.count;
+        if self.options.is_tailwind_directives_enabled() && scan.stop_byte == Some(b'*') {
+            let source = self.source().as_bytes();
+            let prev_is_hyphen = scan
+                .position
+                .checked_sub(1)
+                .and_then(|index| source.get(index))
+                .copied()
+                == Some(b'-');
+            let prev_prev_is_hyphen = scan
+                .position
+                .checked_sub(2)
+                .and_then(|index| source.get(index))
+                .copied()
+                == Some(b'-');
+
+            if prev_is_hyphen && !prev_prev_is_hyphen {
+                position = position.saturating_sub(1);
+
+                if scan.only_ascii_used && scan.last_was_buffered {
+                    count = count.saturating_sub(1);
+                }
+            }
+        }
+
+        self.set_position(position);
+        (count, scan.only_ascii_used)
     }
 
     /// Lexes a comment.
@@ -1621,7 +1588,10 @@ impl<'src> CssLexer<'src> {
 
     /// Check if the lexer starts an identifier.
     fn is_ident_start(&self) -> bool {
-        self.scan_cursor().is_ident_start()
+        // ASCII identifier bytes are already proven by dispatch, so avoid
+        // building a shared scan cursor for that trivial hot path.
+        matches!(self.current_byte().map(lookup_byte), Some(IDT))
+            || self.scan_cursor().is_ident_start()
     }
 
     fn consume_token_tailwind_utility(&mut self, current: u8) -> CssSyntaxKind {
