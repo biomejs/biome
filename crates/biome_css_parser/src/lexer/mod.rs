@@ -301,7 +301,6 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
     fn byte_at(&self, offset: usize) -> Option<u8> {
         self.cursor.byte_at(offset)
     }
-
 }
 
 impl<'src> CssLexer<'src> {
