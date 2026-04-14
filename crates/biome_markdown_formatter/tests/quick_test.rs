@@ -4,7 +4,8 @@ use biome_markdown_parser::parse_markdown;
 #[ignore]
 #[test]
 fn quick_test() {
-    let source = "foo  \nbar without empty line after  ";
+    let source = "[*foo* bar][]
+";
     let parse = parse_markdown(source);
 
     // Print CST
@@ -22,6 +23,7 @@ fn quick_test() {
     // Print formatted output
     let formatted = result.unwrap();
     let output = formatted.print().unwrap();
+    let first_ir = format!("{}", formatted.into_document());
     eprintln!("Formatted:\n{}", output.as_code());
 
     // Now re-parse the formatted output and show its CST
@@ -33,4 +35,7 @@ fn quick_test() {
         biome_formatter::format_node(&reparse.syntax(), MdFormatLanguage::new(options), false);
     let output2 = result2.unwrap();
     eprintln!("Re-formatted:\n{}", output2.print().unwrap().as_code());
+    let second_ir = format!("{}", output2.into_document());
+
+    similar_asserts::assert_eq!(second_ir, first_ir, "left is the re-formatted");
 }

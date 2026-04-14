@@ -2008,6 +2008,116 @@ mod tests {
     }
 
     #[test]
+    fn test_hard_break_in_blockquote() {
+        let parsed = parse_markdown("> foo  \n> bar  \n>\n> baz");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<blockquote>\n<p>foo<br />\nbar</p>\n<p>baz</p>\n</blockquote>\n"
+        );
+    }
+
+    #[test]
+    fn test_hard_break_nested_quote_in_list() {
+        let parsed = parse_markdown("- > quoted  \n  > line  \n  >\n  > next para\n\n- after\n");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<ul>\n<li>\n<blockquote>\n<p>quoted<br />\nline</p>\n<p>next para</p>\n</blockquote>\n</li>\n<li>\n<p>after</p>\n</li>\n</ul>\n"
+        );
+    }
+
+    #[test]
+    fn test_tight_list_marker_split() {
+        // Two tight lists separated by blank line with different markers
+        let input = "- foo\n- bar\n\n* baz\n";
+        let parsed = parse_markdown(input);
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<ul>\n<li>foo</li>\n<li>bar</li>\n</ul>\n<ul>\n<li>baz</li>\n</ul>\n"
+        );
+    }
+
+    #[test]
+    fn test_tight_list_basic() {
+        let input = "- foo\n- bar\n";
+        let parsed = parse_markdown(input);
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(html, "<ul>\n<li>foo</li>\n<li>bar</li>\n</ul>\n");
+    }
+
+    #[test]
+    fn test_loose_list_same_marker() {
+        let input = "- foo\n\n- bar\n";
+        let parsed = parse_markdown(input);
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<ul>\n<li>\n<p>foo</p>\n</li>\n<li>\n<p>bar</p>\n</li>\n</ul>\n"
+        );
+    }
+
+    #[test]
+    fn test_ordered_delim_split_tight() {
+        // Different ordered delimiters across blank line → separate tight lists
+        let input = "1. First\n2. Second\n\n1) Third\n2) Fourth\n";
+        let parsed = parse_markdown(input);
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<ol>\n<li>First</li>\n<li>Second</li>\n</ol>\n<ol>\n<li>Third</li>\n<li>Fourth</li>\n</ol>\n"
+        );
+    }
+
+    #[test]
+    fn test_cross_type_split_tight() {
+        // Bullet → ordered across blank line → separate tight lists
+        let input = "- bullet\n\n1. ordered\n";
+        let parsed = parse_markdown(input);
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<ul>\n<li>bullet</li>\n</ul>\n<ol>\n<li>ordered</li>\n</ol>\n"
+        );
+    }
+
+    #[test]
     fn test_tight_list_marker_split() {
         // Two tight lists separated by blank line with different markers
         let input = "- foo\n- bar\n\n* baz\n";

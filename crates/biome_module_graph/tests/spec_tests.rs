@@ -20,7 +20,6 @@ use biome_html_parser::HtmlParserOptions;
 use biome_html_syntax::HtmlFileSource;
 use biome_js_semantic::ScopeId;
 use biome_js_type_info::{TypeData, TypeResolver};
-use biome_jsdoc_comment::JsdocComment;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_value::{JsonObject, JsonString};
 use biome_module_graph::{
@@ -30,7 +29,7 @@ use biome_module_graph::{
 };
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
-use biome_rowan::Text;
+use biome_rowan::{Text, TextRange, TextSize};
 use biome_service::Workspace;
 use biome_service::file_handlers::DocumentFileSource;
 use biome_service::settings::ModuleGraphResolutionKind;
@@ -562,37 +561,35 @@ fn test_resolve_exports() {
     assert_eq!(
         exports.swap_remove(&Text::new_static("oh\nno")),
         Some(JsExport::Reexport(JsReexport {
+            export_range: None,
             import: JsImport {
                 specifier: "./renamed-reexports".into(),
                 resolved_path: ResolvedPath::from_path("/src/renamed-reexports.ts"),
                 symbol: "ohNo".into()
             },
-            jsdoc_comment: None
         }))
     );
     assert_eq!(
         exports.swap_remove(&Text::new_static("renamed2")),
         Some(JsExport::Own(JsOwnExport::Namespace(JsReexport {
+            export_range: Some(TextRange::new(TextSize::from(1129), TextSize::from(1177))),
             import: JsImport {
                 specifier: "./renamed-reexports".into(),
                 resolved_path: ResolvedPath::from_path("/src/renamed-reexports.ts"),
                 symbol: ImportSymbol::All,
             },
-            jsdoc_comment: Some(JsdocComment::from_comment_text(
-                "/**\n* Hello, namespace 2.\n*/"
-            )),
         })))
     );
 
     assert_eq!(
         data.blanket_reexports,
         &[JsReexport {
+            export_range: Some(TextRange::new(TextSize::from(950), TextSize::from(978))),
             import: JsImport {
                 specifier: "./reexports".into(),
                 resolved_path: ResolvedPath::from_path("/src/reexports.ts"),
                 symbol: ImportSymbol::All,
             },
-            jsdoc_comment: None
         }]
     );
 
@@ -604,14 +601,12 @@ fn test_resolve_exports() {
     assert_eq!(
         data.exports.get(&Text::new_static("renamed")),
         Some(&JsExport::Own(JsOwnExport::Namespace(JsReexport {
+            export_range: Some(TextRange::new(TextSize::from(80), TextSize::from(127))),
             import: JsImport {
                 specifier: "./renamed-reexports".into(),
                 resolved_path: ResolvedPath::from_path("/src/renamed-reexports.ts"),
                 symbol: ImportSymbol::All,
             },
-            jsdoc_comment: Some(JsdocComment::from_comment_text(
-                "/**\n* Hello, namespace 1.\n*/"
-            )),
         })))
     );
 
@@ -2546,12 +2541,12 @@ fn test_namespace_reexport_is_own_export() {
     assert_eq!(
         barrel.exports.get(&Text::new_static("MyNs")),
         Some(&JsExport::Own(JsOwnExport::Namespace(JsReexport {
+            export_range: Some(TextRange::new(TextSize::from(0), TextSize::from(36))),
             import: JsImport {
                 specifier: "./source.ts".into(),
                 resolved_path: ResolvedPath::from_path("/src/source.ts"),
                 symbol: ImportSymbol::All,
             },
-            jsdoc_comment: None,
         }))),
         "`export * as MyNs` must produce JsExport::Own(JsOwnExport::Namespace(JsReexport {{ .. }}))"
     );
@@ -2631,6 +2626,46 @@ fn test_namespace_reexport_type_inference() {
 
     let snapshot = ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(&resolver);
     snapshot.assert_snapshot("test_namespace_reexport_type_inference");
+}
+
+#[test]
+fn test_export_equals_namespace_without_type_inference() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/node_modules/@types/react/index.d.ts".into(),
+        include_bytes!("../../biome_resolver/tests/fixtures/resolver_cases_5/node_modules/@types/react/index.d.ts"),
+    );
+
+    let added_paths = [BiomePath::new("/node_modules/@types/react/index.d.ts")];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let project_layout = ProjectLayout::default();
+    project_layout.insert_node_manifest(
+        "/".into(),
+        PackageJson::new("frontend")
+            .with_version("0.0.0")
+            .with_dependencies(Dependencies(Box::new([("react".into(), "19.0.0".into())]))),
+    );
+
+    // infer_types = false, matching the `project` domain behavior
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, false);
+
+    let react_module = module_graph
+        .js_module_info_for_path(Utf8Path::new("/node_modules/@types/react/index.d.ts"))
+        .expect("react module must exist");
+
+    let use_state = react_module.find_js_exported_symbol(module_graph.as_ref(), "useState");
+    assert!(
+        use_state.is_some(),
+        "`useState` must be visible as a named export from `@types/react` even without type inference"
+    );
+
+    let use_callback = react_module.find_js_exported_symbol(module_graph.as_ref(), "useCallback");
+    assert!(
+        use_callback.is_some(),
+        "`useCallback` must be visible as a named export from `@types/react` even without type inference"
+    );
 }
 
 /// Verifies that a JSX file that imports a CSS file shows:
@@ -3290,6 +3325,31 @@ fn find_files_recursively_in_directory(
         .filter_map(|entry| Utf8Path::from_path(entry.path()).map(Utf8Path::to_path_buf))
         .filter(|path| predicate(path))
         .collect()
+}
+
+#[test]
+fn test_optional_and_readonly_members() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"export interface Config {
+    name: string;
+    age?: number;
+    readonly id: string;
+    readonly label?: string;
+}
+"#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
+
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
+
+    snapshot.assert_snapshot("test_optional_and_readonly_members");
 }
 
 // #region HTML module graph + style applicability tests

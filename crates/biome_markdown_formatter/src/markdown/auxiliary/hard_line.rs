@@ -13,6 +13,7 @@ impl FormatNodeRule<MdHardLine> for FormatMdHardLine {
         let token = node.value_token()?;
 
         if self.print_mode.is_pristine() {
+            // We intentionally format this code as is
             return format_verbatim_node(node.syntax()).fmt(f);
         }
 

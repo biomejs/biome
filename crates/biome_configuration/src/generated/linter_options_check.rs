@@ -1816,6 +1816,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_html_lang::UseHtmlLangOptions>(),
     ));
     result.push((
+        "nursery",
+        "useIframeSandbox",
+        TypeId::of::<biome_rule_options::use_iframe_sandbox::UseIframeSandboxOptions>(),
+    ));
+    result.push((
         "a11y",
         "useIframeTitle",
         TypeId::of::<biome_rule_options::use_iframe_title::UseIframeTitleOptions>(),
@@ -2204,6 +2209,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "correctness",
         "useValidTypeof",
         TypeId::of::<biome_rule_options::use_valid_typeof::UseValidTypeofOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "useVarsOnTop",
+        TypeId::of::<biome_rule_options::use_vars_on_top::UseVarsOnTopOptions>(),
     ));
     result.push(("nursery", "useVueConsistentDefinePropsDeclaration", TypeId::of::<biome_rule_options::use_vue_consistent_define_props_declaration::UseVueConsistentDefinePropsDeclarationOptions>()));
     result.push((

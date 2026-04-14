@@ -2255,6 +2255,8 @@ impl TypeMember {
                 let name = text_from_class_member_name(name.name()?);
                 if is_static {
                     TypeMemberKind::NamedStatic(name)
+                } else if is_optional {
+                    TypeMemberKind::NamedOptional(name)
                 } else {
                     TypeMemberKind::Named(name)
                 }
@@ -2280,8 +2282,13 @@ impl TypeMember {
         ty: TypeReference,
         is_optional: bool,
     ) -> Self {
+        let name: Text = name.into();
         Self {
-            kind: TypeMemberKind::Named(name.into()),
+            kind: if is_optional {
+                TypeMemberKind::NamedOptional(name)
+            } else {
+                TypeMemberKind::Named(name)
+            },
             ty: match is_optional {
                 true => ResolvedTypeId::new(resolver.level(), resolver.optional(ty)).into(),
                 false => ty,
@@ -2313,7 +2320,11 @@ impl TypeMember {
                     {
                         // TODO: Assign accessibility to type members.
                         members.push(Self {
-                            kind: TypeMemberKind::Named(named_param.name.clone()),
+                            kind: if named_param.is_optional {
+                                TypeMemberKind::NamedOptional(named_param.name.clone())
+                            } else {
+                                TypeMemberKind::Named(named_param.name.clone())
+                            },
                             ty: param.parameter.ty().clone(),
                         });
                     }

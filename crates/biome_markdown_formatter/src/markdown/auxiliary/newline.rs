@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use biome_formatter::{FormatRuleWithOptions, write};
-use biome_markdown_syntax::{MdHeader, MdNewline};
+use biome_markdown_syntax::{MdHeader, MdNewline, MdSetextHeader};
 use biome_rowan::AstNode;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdNewline {
@@ -15,7 +15,7 @@ impl FormatNodeRule<MdNewline> for FormatMdNewline {
         let after_header = node
             .syntax()
             .prev_sibling()
-            .is_some_and(|s| MdHeader::can_cast(s.kind()));
+            .is_some_and(|s| MdHeader::can_cast(s.kind()) || MdSetextHeader::can_cast(s.kind()));
 
         if after_header {
             let token = node.value_token()?;

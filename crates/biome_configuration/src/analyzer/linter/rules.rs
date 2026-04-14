@@ -471,6 +471,7 @@ pub enum RuleName {
     UseHeadingContent,
     UseHookAtTopLevel,
     UseHtmlLang,
+    UseIframeSandbox,
     UseIframeTitle,
     UseImageSize,
     UseImportExtensions,
@@ -549,6 +550,7 @@ pub enum RuleName {
     UseValidForDirection,
     UseValidLang,
     UseValidTypeof,
+    UseVarsOnTop,
     UseVueConsistentDefinePropsDeclaration,
     UseVueConsistentVBindStyle,
     UseVueConsistentVOnStyle,
@@ -962,6 +964,7 @@ impl RuleName {
             Self::UseHeadingContent => "useHeadingContent",
             Self::UseHookAtTopLevel => "useHookAtTopLevel",
             Self::UseHtmlLang => "useHtmlLang",
+            Self::UseIframeSandbox => "useIframeSandbox",
             Self::UseIframeTitle => "useIframeTitle",
             Self::UseImageSize => "useImageSize",
             Self::UseImportExtensions => "useImportExtensions",
@@ -1040,6 +1043,7 @@ impl RuleName {
             Self::UseValidForDirection => "useValidForDirection",
             Self::UseValidLang => "useValidLang",
             Self::UseValidTypeof => "useValidTypeof",
+            Self::UseVarsOnTop => "useVarsOnTop",
             Self::UseVueConsistentDefinePropsDeclaration => {
                 "useVueConsistentDefinePropsDeclaration"
             }
@@ -1449,6 +1453,7 @@ impl RuleName {
             Self::UseHeadingContent => RuleGroup::A11y,
             Self::UseHookAtTopLevel => RuleGroup::Correctness,
             Self::UseHtmlLang => RuleGroup::A11y,
+            Self::UseIframeSandbox => RuleGroup::Nursery,
             Self::UseIframeTitle => RuleGroup::A11y,
             Self::UseImageSize => RuleGroup::Correctness,
             Self::UseImportExtensions => RuleGroup::Correctness,
@@ -1527,6 +1532,7 @@ impl RuleName {
             Self::UseValidForDirection => RuleGroup::Correctness,
             Self::UseValidLang => RuleGroup::A11y,
             Self::UseValidTypeof => RuleGroup::Correctness,
+            Self::UseVarsOnTop => RuleGroup::Nursery,
             Self::UseVueConsistentDefinePropsDeclaration => RuleGroup::Nursery,
             Self::UseVueConsistentVBindStyle => RuleGroup::Nursery,
             Self::UseVueConsistentVOnStyle => RuleGroup::Nursery,
@@ -1945,6 +1951,7 @@ impl std::str::FromStr for RuleName {
             "useHeadingContent" => Ok(Self::UseHeadingContent),
             "useHookAtTopLevel" => Ok(Self::UseHookAtTopLevel),
             "useHtmlLang" => Ok(Self::UseHtmlLang),
+            "useIframeSandbox" => Ok(Self::UseIframeSandbox),
             "useIframeTitle" => Ok(Self::UseIframeTitle),
             "useImageSize" => Ok(Self::UseImageSize),
             "useImportExtensions" => Ok(Self::UseImportExtensions),
@@ -2023,6 +2030,7 @@ impl std::str::FromStr for RuleName {
             "useValidForDirection" => Ok(Self::UseValidForDirection),
             "useValidLang" => Ok(Self::UseValidLang),
             "useValidTypeof" => Ok(Self::UseValidTypeof),
+            "useVarsOnTop" => Ok(Self::UseVarsOnTop),
             "useVueConsistentDefinePropsDeclaration" => {
                 Ok(Self::UseVueConsistentDefinePropsDeclaration)
             }

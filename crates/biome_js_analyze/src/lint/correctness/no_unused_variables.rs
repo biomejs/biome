@@ -487,11 +487,11 @@ impl Rule for NoUnusedVariables {
             && is_rest_spread_sibling(&decl)
         {
             diag = diag.note(
-                    markup! {
+                markup! {
                         "You can enable the "<Emphasis>"ignoreRestSiblings"</Emphasis>" option to ignore unused variables "
                         "inside destructured objects with rest properties."
                     },
-                );
+            );
         }
 
         Some(diag)

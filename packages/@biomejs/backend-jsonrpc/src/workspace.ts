@@ -2567,6 +2567,11 @@ See https://biomejs.dev/linter/rules/use-global-this
 	 */
 	useGlobalThis?: UseGlobalThisConfiguration;
 	/**
+	* Enforce the 'sandbox' attribute for 'iframe' elements.
+See https://biomejs.dev/linter/rules/use-iframe-sandbox 
+	 */
+	useIframeSandbox?: UseIframeSandboxConfiguration;
+	/**
 	* Enforce that all imports appear at the top of the module.
 See https://biomejs.dev/linter/rules/use-imports-first 
 	 */
@@ -2656,6 +2661,11 @@ See https://biomejs.dev/linter/rules/use-string-starts-ends-with
 See https://biomejs.dev/linter/rules/use-unicode-regex 
 	 */
 	useUnicodeRegex?: UseUnicodeRegexConfiguration;
+	/**
+	* Require var declarations to appear at the top of their containing scope.
+See https://biomejs.dev/linter/rules/use-vars-on-top 
+	 */
+	useVarsOnTop?: UseVarsOnTopConfiguration;
 	/**
 	* Enforce consistent defineProps declaration style.
 See https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration 
@@ -4546,6 +4556,9 @@ export type UseFindConfiguration =
 export type UseGlobalThisConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseGlobalThisOptions;
+export type UseIframeSandboxConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseIframeSandboxOptions;
 export type UseImportsFirstConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseImportsFirstOptions;
@@ -4600,6 +4613,9 @@ export type UseStringStartsEndsWithConfiguration =
 export type UseUnicodeRegexConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUnicodeRegexOptions;
+export type UseVarsOnTopConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVarsOnTopOptions;
 export type UseVueConsistentDefinePropsDeclarationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentDefinePropsDeclarationOptions;
@@ -6370,6 +6386,10 @@ export interface RuleWithUseGlobalThisOptions {
 	level: RulePlainConfiguration;
 	options?: UseGlobalThisOptions;
 }
+export interface RuleWithUseIframeSandboxOptions {
+	level: RulePlainConfiguration;
+	options?: UseIframeSandboxOptions;
+}
 export interface RuleWithUseImportsFirstOptions {
 	level: RulePlainConfiguration;
 	options?: UseImportsFirstOptions;
@@ -6449,6 +6469,10 @@ export interface RuleWithUseUnicodeRegexOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseUnicodeRegexOptions;
+}
+export interface RuleWithUseVarsOnTopOptions {
+	level: RulePlainConfiguration;
+	options?: UseVarsOnTopOptions;
 }
 export interface RuleWithUseVueConsistentDefinePropsDeclarationOptions {
 	level: RulePlainConfiguration;
@@ -7999,6 +8023,7 @@ When `true`, only declarations (function statements and class methods) are check
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
 export type UseGlobalThisOptions = {};
+export type UseIframeSandboxOptions = {};
 export type UseImportsFirstOptions = {};
 export type UseInlineScriptIdOptions = {};
 export interface UseInputNameOptions {
@@ -8054,6 +8079,7 @@ export interface UseSortedClassesOptions {
 export type UseSpreadOptions = {};
 export type UseStringStartsEndsWithOptions = {};
 export type UseUnicodeRegexOptions = {};
+export type UseVarsOnTopOptions = {};
 export interface UseVueConsistentDefinePropsDeclarationOptions {
 	style?: DeclarationStyle;
 }
@@ -9068,6 +9094,7 @@ export type Category =
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useFind"
 	| "lint/nursery/useGlobalThis"
+	| "lint/nursery/useIframeSandbox"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useImportsFirst"
 	| "lint/nursery/useInlineScriptId"
@@ -9096,6 +9123,7 @@ export type Category =
 	| "lint/nursery/useUniqueGraphqlOperationName"
 	| "lint/nursery/useUniqueInputFieldNames"
 	| "lint/nursery/useUniqueVariableNames"
+	| "lint/nursery/useVarsOnTop"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueConsistentVBindStyle"
 	| "lint/nursery/useVueConsistentVOnStyle"

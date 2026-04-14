@@ -926,6 +926,12 @@ pub struct TypeMember {
 }
 
 impl TypeMember {
+    /// Returns whether this member is optional.
+    #[inline]
+    pub fn is_optional(&self) -> bool {
+        self.kind.is_optional()
+    }
+
     /// Returns a reference to the type of the member if we dereference it.
     ///
     /// This means if the member represents a getter or setter, it will
@@ -987,6 +993,7 @@ pub enum TypeMemberKind {
     Getter(Text),
     IndexSignature(TypeReference),
     Named(Text),
+    NamedOptional(Text),
     NamedStatic(Text),
 }
 
@@ -995,10 +1002,17 @@ impl TypeMemberKind {
         match self {
             Self::CallSignature | Self::IndexSignature(_) => false,
             Self::Constructor => name == "constructor",
-            Self::Getter(own_name) | Self::Named(own_name) | Self::NamedStatic(own_name) => {
-                *own_name == name
-            }
+            Self::Getter(own_name)
+            | Self::Named(own_name)
+            | Self::NamedOptional(own_name)
+            | Self::NamedStatic(own_name) => *own_name == name,
         }
+    }
+
+    /// Returns whether this member kind represents an optional member.
+    #[inline]
+    pub fn is_optional(&self) -> bool {
+        matches!(self, Self::NamedOptional(_))
     }
 
     #[inline]
@@ -1025,7 +1039,10 @@ impl TypeMemberKind {
         match self {
             Self::CallSignature | Self::IndexSignature(_) => None,
             Self::Constructor => Some(Text::new_static("constructor")),
-            Self::Getter(name) | Self::Named(name) | Self::NamedStatic(name) => Some(name.clone()),
+            Self::Getter(name)
+            | Self::Named(name)
+            | Self::NamedOptional(name)
+            | Self::NamedStatic(name) => Some(name.clone()),
         }
     }
 }
@@ -1436,6 +1453,61 @@ impl TypeReferenceQualifier {
     /// resolution.
     pub fn is_record(&self) -> bool {
         self.path.is_identifier("Record")
+    }
+
+    /// Checks whether this type qualifier references a `Pick` type.
+    ///
+    /// This method simply checks whether the reference is for a literal
+    /// `Pick`, without considering whether another symbol named `Pick` is
+    /// in scope. It can be used _after_ type resolution has failed to find a
+    /// `Pick` symbol in scope, but should not be used _instead of_ such type
+    /// resolution.
+    pub fn is_pick(&self) -> bool {
+        self.path.is_identifier("Pick")
+    }
+
+    /// Checks whether this type qualifier references an `Omit` type.
+    ///
+    /// This method simply checks whether the reference is for a literal
+    /// `Omit`, without considering whether another symbol named `Omit` is
+    /// in scope. It can be used _after_ type resolution has failed to find an
+    /// `Omit` symbol in scope, but should not be used _instead of_ such type
+    /// resolution.
+    pub fn is_omit(&self) -> bool {
+        self.path.is_identifier("Omit")
+    }
+
+    /// Checks whether this type qualifier references a `Partial` type.
+    ///
+    /// This method simply checks whether the reference is for a literal
+    /// `Partial`, without considering whether another symbol named `Partial` is
+    /// in scope. It can be used _after_ type resolution has failed to find a
+    /// `Partial` symbol in scope, but should not be used _instead of_ such type
+    /// resolution.
+    pub fn is_partial(&self) -> bool {
+        self.path.is_identifier("Partial")
+    }
+
+    /// Checks whether this type qualifier references a `Required` type.
+    ///
+    /// This method simply checks whether the reference is for a literal
+    /// `Required`, without considering whether another symbol named `Required` is
+    /// in scope. It can be used _after_ type resolution has failed to find a
+    /// `Required` symbol in scope, but should not be used _instead of_ such type
+    /// resolution.
+    pub fn is_required(&self) -> bool {
+        self.path.is_identifier("Required")
+    }
+
+    /// Checks whether this type qualifier references a `Readonly` type.
+    ///
+    /// This method simply checks whether the reference is for a literal
+    /// `Readonly`, without considering whether another symbol named `Readonly` is
+    /// in scope. It can be used _after_ type resolution has failed to find a
+    /// `Readonly` symbol in scope, but should not be used _instead of_ such type
+    /// resolution.
+    pub fn is_readonly(&self) -> bool {
+        self.path.is_identifier("Readonly")
     }
 
     /// Checks whether this type qualifier references the `RegExp` type.

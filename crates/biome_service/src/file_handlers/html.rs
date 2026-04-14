@@ -650,6 +650,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         module_graph: Some(module_graph),
         project_layout: Some(project_layout),
     };
+
     analyze(
         &tree,
         filter,
