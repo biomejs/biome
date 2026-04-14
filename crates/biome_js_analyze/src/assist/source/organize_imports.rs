@@ -91,16 +91,16 @@ declare_source_rule! {
     ///   By default the action doesn't sort them.
     /// - `identifierOrder` allows changing how named specifiers and attributes are sorted
     ///
-    /// ### Custom order using the `groups` option
+    /// ### `groups`
     ///
     /// You can customize how imports and exports are grouped using the `groups` option.
-    /// The option accepts an array of **group matchers** which in their simplest form
+    /// The option accepts an array of group matchers, which in their simplest form
     /// are glob patterns or predefined group matchers.
     /// Imports and exports that don't match any group are automatically moved after all the groups.
     ///
     /// Groups are always matched in order, so earlier matchers take priority.
     /// To exclude some imports of a group, you can use an array of group matchers
-    /// with negated matchers (natchers prefixed with `!`).
+    /// with negated matchers, prefixed with `!`.
     /// In the following example, we use the negated glob matcher `!@myown/**`,
     /// to exclude `@myown/package` from the `:PACKAGE:` group.
     ///
@@ -151,22 +151,22 @@ declare_source_rule! {
     ///
     /// Each entry in the `groups` array is a group matcher that can be:
     ///
-    /// - A predefined group like `:NODE:` or `:PACKAGE:`
-    /// - A glob pattern like `@my/lib/**`
-    ///   We support a [limited set of globs](#supported-glob-patterns).
-    /// - An object matcher like `{ "type": true }` for type-only imports
-    /// - A list combining any of the above, e.g. `[":BUN:", ":NODE:"]`
+    /// - A predefined group like `:NODE:`, `:BUN:`, or `:PACKAGE:`
+    /// - A glob pattern like `@my/lib/**`;
+    ///   the action supports a [limited set of globs](#supported-glob-patterns).
+    /// - Type-only imports like `{ "type": true }`
+    /// - A combination of the above, e.g. `[":BUN:", ":NODE:"]`
     /// - `:BLANK_LINE:` to insert a blank line between groups
     ///
     /// #### Predefined groups
     ///
-    /// - `:URL:` -- sources starting with `https://` or `http://`
-    /// - `:NODE:` -- Node.js built-in modules (`node:path`, `fs`, `path`, etc.)
-    /// - `:BUN:` -- Bun built-in modules (`bun:test`, `bun`, etc.)
-    /// - `:PACKAGE_WITH_PROTOCOL:` -- packages with a protocol (`jsr:@my/lib`, `npm:lib`)
-    /// - `:PACKAGE:` -- bare and scoped packages (`lib`, `@scoped/lib`)
-    /// - `:ALIAS:` -- path aliases starting with `#`, `@/`, `~`, `$`, or `%`
-    /// - `:PATH:` -- absolute and relative paths
+    /// - `:URL:`: sources starting with `https://` or `http://`
+    /// - `:NODE:`: Node.js built-in modules (`node:path`, `fs`, `path`, etc.)
+    /// - `:BUN:`: Bun built-in modules (`bun:test`, `bun`, etc.)
+    /// - `:PACKAGE_WITH_PROTOCOL:`: packages with a protocol (`jsr:@my/lib`, `npm:lib`)
+    /// - `:PACKAGE:`: bare and scoped packages (`lib`, `@scoped/lib`)
+    /// - `:ALIAS:`: path aliases starting with `#`, `@/`, `~`, `$`, or `%`
+    /// - `:PATH:`: absolute and relative paths
     ///
     /// You can prefix a predefined group matcher with `!` to negate the matcher.
     /// For example `!:NODE:` matches everything that isn't a Node.js built-in.
@@ -210,12 +210,12 @@ declare_source_rule! {
     /// import type { T } from "@my/lib";
     /// ```
     ///
-    /// ### Sorting bare imports
+    /// ### `sortBareImports`
     ///
-    /// By default, _bare imports_ (also called _side-effect imports_) form individual chunks.
+    /// By default, _bare imports_, also called _side-effect imports_, form individual chunks.
     /// Setting `sortBareImports` to `true`, allow sorting them with other imports.
     ///
-    /// :::note
+    /// :::caution
     /// This can lead to issues because bare imports often signal the presence of side-effects.
     /// Thus changing their order can change the behavior of your code.
     /// :::
@@ -233,7 +233,7 @@ declare_source_rule! {
     /// import { A } from "my-package";
     /// ```
     ///
-    /// ### Change the sorting of named specifiers and attributes
+    /// ### `identifierOrder`
     ///
     /// By default, attributes, imported and exported names are sorted with a `natural` sort.
     /// You can opt for a `lexicographic` sort (sometimes referred as _binary_ sort) by
@@ -248,7 +248,9 @@ declare_source_rule! {
     /// ```
     ///
     /// ```js,use_options,expect_diagnostic
-    /// import { var1, var2, var21, var11, var12, var22 } from "my-package";
+    /// import { var1, var2, var21, var11, var12, var22 } from "my-package" with { "att10": "", "att2": "" };
+    ///
+    /// export { var1, var2, var21, var11, var12, var22 };
     /// ```
     ///
     /// Note that this order doesn't change how import and export sources are sorted.
@@ -256,7 +258,11 @@ declare_source_rule! {
     ///
     /// ## Common configurations
     ///
-    /// ### Group Node.js and bun built-in, even those without `node:` or `bun:` prefixes
+    /// ### Group Node.js and bun built-in
+    ///
+    /// The following example moves the Node.js and `bun` built-ins to the top of the file,
+    /// and it adds a blank line at the end.
+    /// Other imports are placed after this blank line.
     ///
     /// ```json,options
     /// {
@@ -277,7 +283,7 @@ declare_source_rule! {
     /// import fs from "fs";
     /// ```
     ///
-    /// ### Separate monorepo packages from external packages
+    /// ### Group monorepo packages
     ///
     /// ```json,options
     /// {
@@ -300,7 +306,7 @@ declare_source_rule! {
     /// import { A } from "./file.js"
     /// ```
     ///
-    /// ### Group a specific library's imports together
+    /// ### Group multiple libraries
     ///
     ///```json,options
     /// {
@@ -430,7 +436,6 @@ declare_source_rule! {
     ///
     /// ### Maximize import merging with `useImportType`
     ///
-    /// The action merges imports from the same source when possible.
     /// To merge type-only imports (`import type { T }`) with regular imports (`import { V }`),
     /// enable [`useImportType`](https://biomejs.dev/linter/rules/use-import-type/) with `inlineType`:
     ///
@@ -674,20 +679,20 @@ declare_source_rule! {
     ///
     /// A source is split into segments by `/`. For example, `src/file.js` has two segments: `src` and `file.js`.
     ///
-    /// - `*` -- matches zero or more characters within a single segment.
+    /// - `*`: matches zero or more characters within a single segment.
     ///   `file.js` matches `*.js`, but `src/file.js` does not.
     ///
-    /// - `**` -- matches zero or more segments.
+    /// - `**`: matches zero or more segments.
     ///   Must be enclosed by `/` or be at the start/end.
     ///   `file.js` and `src/file.js` both match `**/*.js`.
     ///
-    /// - `!` -- negates a pattern when used as the first character.
+    /// - `!`: negates a pattern when used as the first character.
     ///   `file.js` matches `!*.test.js`.
     ///   Exceptions can be layered: `["@my/lib/**", "!@my/lib/internal/**", "@my/lib/internal/allowed/**"]`.
     ///
-    /// - `\*` -- matches a literal `*` character.
+    /// - `\*`: matches a literal `*` character.
     ///
-    /// - `?`, `[`, `]`, `{`, `}` -- reserved characters, must be escaped with `\`.
+    /// - `?`, `[`, `]`, `{`, `}`: reserved characters, must be escaped with `\`.
     ///
     pub OrganizeImports {
         version: "1.0.0",
