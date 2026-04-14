@@ -384,6 +384,13 @@ impl<'src> CssLexer<'src> {
         )
     }
 
+    fn byte_before(&self, position: usize, offset: usize) -> Option<u8> {
+        position
+            .checked_sub(offset)
+            .and_then(|index| self.source().as_bytes().get(index))
+            .copied()
+    }
+
     #[inline]
     fn set_position(&mut self, position: usize) {
         self.cursor.set_position(position);
@@ -1289,23 +1296,17 @@ impl<'src> CssLexer<'src> {
         let mut position = scan.position;
         let mut count = scan.count;
         if self.options.is_tailwind_directives_enabled() && scan.stop_byte == Some(b'*') {
-            let source = self.source().as_bytes();
-            let prev_is_hyphen = scan
-                .position
-                .checked_sub(1)
-                .and_then(|index| source.get(index))
-                .copied()
-                == Some(b'-');
-            let prev_prev_is_hyphen = scan
-                .position
-                .checked_sub(2)
-                .and_then(|index| source.get(index))
-                .copied()
-                == Some(b'-');
+            // Tailwind keeps `--*` as a unit, but stops before the trailing
+            // `-` in patterns like `--color-*`. Check the raw source bytes at
+            // the scan boundary so escaped hyphens do not trigger this fixup.
+            let prev_is_hyphen = self.byte_before(scan.position, 1) == Some(b'-');
+            let prev_prev_is_hyphen = self.byte_before(scan.position, 2) == Some(b'-');
 
             if prev_is_hyphen && !prev_prev_is_hyphen {
                 position = position.saturating_sub(1);
 
+                // Only trim the keyword-buffer count if that trailing `-`
+                // actually fit into the ASCII buffer.
                 if scan.only_ascii_used && scan.last_was_buffered {
                     count = count.saturating_sub(1);
                 }

@@ -346,13 +346,19 @@ impl<'src> CssScanCursor<'src> {
                 only_ascii_used = false;
             }
 
+            // Once a non-ASCII fragment appears, the lexer can no longer use
+            // the lowercase ASCII buffer for keyword matching, but the scan
+            // still needs to advance through the whole identifier.
             last_was_buffered = false;
-            if only_ascii_used && let Some(buf) = buf.as_deref_mut() {
-                if let Some(slot) = buf.get_mut(idx) {
-                    *slot = part.to_ascii_lowercase() as u8;
-                    idx += 1;
-                    last_was_buffered = true;
-                }
+            if only_ascii_used
+                && let Some(buf) = buf.as_deref_mut()
+                && let Some(slot) = buf.get_mut(idx)
+            {
+                *slot = part.to_ascii_lowercase() as u8;
+                idx += 1;
+                // The lexer's Tailwind `-*` fixup may later need to know
+                // whether this last fragment actually entered the buffer.
+                last_was_buffered = true;
             }
 
             debug_assert!(
