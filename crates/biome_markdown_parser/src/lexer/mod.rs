@@ -272,12 +272,6 @@ impl<'src> MarkdownLexer<'src> {
                     // In link definition context, whitespace separates tokens.
                     // We consume it as textual literal so it's not treated as trivia by the parser.
                     self.consume_link_definition_whitespace()
-                } else if matches!(context, MarkdownLexContext::CodeInfoString) {
-                    return if current == b'\n' || current == b'\r' {
-                        self.consume_newline()
-                    } else {
-                        self.consume_code_info_string()
-                    };
                 } else if self.after_newline && matches!(current, b' ' | b'\t') {
                     // At line start, emit single whitespace tokens to allow
                     // indentation handling and quote marker spacing.
