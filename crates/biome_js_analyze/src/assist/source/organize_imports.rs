@@ -157,9 +157,6 @@ declare_source_rule! {
     /// - A combination of the above, e.g. `[":BUN:", ":NODE:"]`
     /// - `:BLANK_LINE:` to insert a blank line between groups
     ///
-    /// Prefix a predefined group matcher or a glob pattern with `!` to negate it.
-    /// For example, `!:NODE:` matches everything that isn't a Node.js built-in.
-    ///
     /// #### Predefined groups
     ///
     /// - `:URL:`: sources starting with `https://` or `http://`
