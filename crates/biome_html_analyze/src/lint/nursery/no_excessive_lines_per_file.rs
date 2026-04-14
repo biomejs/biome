@@ -2,7 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule, utils::count_lines_in_file,
 };
 use biome_console::markup;
-use biome_graphql_syntax::{GraphqlRoot, GraphqlSyntaxKind};
+use biome_html_syntax::{HtmlRoot, HtmlSyntaxKind};
 use biome_rowan::AstNode;
 use biome_rule_options::no_excessive_lines_per_file::NoExcessiveLinesPerFileOptions;
 
@@ -25,17 +25,17 @@ declare_lint_rule! {
     ///     }
     /// }
     /// ```
-    /// ```graphql,expect_diagnostic,use_options
-    /// query Foo { id }
-    /// query Bar { id }
-    /// query Baz { id }
+    /// ```html,expect_diagnostic,use_options
+    /// <div></div>
+    /// <span></span>
+    /// <p></p>
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```graphql
-    /// query Foo { id }
-    /// query Bar { id }
+    /// ```html
+    /// <div></div>
+    /// <span></span>
     /// ```
     ///
     /// ## Options
@@ -47,22 +47,82 @@ declare_lint_rule! {
     ///
     /// Default: `300`
     ///
+    /// #### Examples
+    ///
+    /// The default value for `maxLines` is `300`. The following example shows how to set the
+    /// `maxLines` option to a smaller value. It reports a diagnostic because the file has more
+    /// than 4 lines:
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "maxLines": 4
+    ///     }
+    /// }
+    /// ```
+    /// ```html,expect_diagnostic,use_options
+    /// <div>Line 1</div>
+    /// <div>Line 2</div>
+    /// <div>Line 3</div>
+    /// <div>Line 4</div>
+    /// <div>Line 5</div>
+    /// ```
+    ///
     /// ### `skipBlankLines`
     ///
     /// When this option is set to `true`, blank lines are not counted towards the maximum line limit.
     ///
     /// Default: `false`
     ///
+    /// #### Examples
+    ///
+    /// The following example shows how `skipBlankLines` can prevent a diagnostic by excluding blank
+    /// lines from the total count:
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "maxLines": 2,
+    ///         "skipBlankLines": true
+    ///     }
+    /// }
+    /// ```
+    /// ```html,use_options
+    /// <div></div>
+    ///
+    ///
+    /// <span></span>
+    /// ```
+    ///
+    /// ## Suppressions
+    ///
+    /// If you need to exceed the line limit in a specific file, you can suppress this rule
+    /// at the top of the file:
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "maxLines": 2
+    ///     }
+    /// }
+    /// ```
+    /// ```html,use_options
+    /// <!-- biome-ignore lint/nursery/noExcessiveLinesPerFile: generated file -->
+    /// <div></div>
+    /// <span></span>
+    /// <p></p>
+    /// ```
+    ///
     pub NoExcessiveLinesPerFile {
-        version: "2.3.12",
+        version: "next",
         name: "noExcessiveLinesPerFile",
-        language: "graphql",
+        language: "html",
         recommended: false,
     }
 }
 
 impl Rule for NoExcessiveLinesPerFile {
-    type Query = Ast<GraphqlRoot>;
+    type Query = Ast<HtmlRoot>;
     type State = usize;
     type Signals = Option<Self::State>;
     type Options = NoExcessiveLinesPerFileOptions;
@@ -73,7 +133,7 @@ impl Rule for NoExcessiveLinesPerFile {
 
         let file_lines_count = count_lines_in_file(
             node.syntax(),
-            |token| token.kind() == GraphqlSyntaxKind::EOF,
+            |token| token.kind() == HtmlSyntaxKind::EOF,
             options.skip_blank_lines(),
         );
 
