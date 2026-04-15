@@ -2036,6 +2036,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useRegexpTest",
+        TypeId::of::<biome_rule_options::use_regexp_test::UseRegexpTestOptions>(),
+    ));
+    result.push((
+        "nursery",
         "useRequiredScripts",
         TypeId::of::<biome_rule_options::use_required_scripts::UseRequiredScriptsOptions>(),
     ));
