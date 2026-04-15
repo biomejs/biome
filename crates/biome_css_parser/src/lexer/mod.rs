@@ -4,13 +4,13 @@ mod tests;
 mod scan_cursor;
 mod source_cursor;
 
-use self::scan_cursor::{CssScanConfig, CssScanCursor, IdentifierScanMode, StringScanMode};
+use self::scan_cursor::CssScanCursor;
 use self::scan_cursor::{
-    PendingUrlRawValueScan, StringBodyScan, StringBodyScanStop, StringIssue, UrlBodyStartScan,
+    PendingUrlRawValueScan, StringBodyScan, StringBodyScanStop, UrlBodyStartScan,
 };
 use self::source_cursor::SourceCursor;
 use crate::CssParserOptions;
-use biome_css_syntax::{CssFileSource, CssSyntaxKind, CssSyntaxKind::*, T, TextLen, TextSize};
+use biome_css_syntax::{CssFileSource, CssSyntaxKind, CssSyntaxKind::*, T, TextLen, TextRange, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
@@ -376,10 +376,8 @@ impl<'src> CssLexer<'src> {
         // only by the byte position they inspect.
         CssScanCursor::new(
             SourceCursor::new(self.source(), position),
-            CssScanConfig {
-                is_scss: self.is_scss(),
-                line_comments_enabled: self.is_line_comment_enabled(),
-            },
+            self.is_scss(),
+            self.is_line_comment_enabled(),
         )
     }
 
@@ -712,7 +710,7 @@ impl<'src> CssLexer<'src> {
     fn scan_same_quote_in_interpolation(&self, quote: CssStringQuote) -> SameQuoteInInterpolation {
         let scan = self
             .scan_cursor_at(self.position() + 1)
-            .scan_string_body(quote, StringScanMode::WithInterpolation);
+            .scan_interpolated_string_body(quote);
 
         match scan.stop {
             StringBodyScanStop::ClosingQuote { .. } | StringBodyScanStop::Interpolation { .. } => {
@@ -731,13 +729,13 @@ impl<'src> CssLexer<'src> {
             StringLexMode::Plain { quote } => {
                 let scan = self
                     .scan_cursor_at(start + 1)
-                    .scan_string_body(quote, StringScanMode::Plain);
+                    .scan_plain_string_body(quote);
                 self.commit_plain_string_literal(start, scan)
             }
             StringLexMode::ScssStart { quote } => {
                 let scan = self
                     .scan_cursor_at(start + 1)
-                    .scan_string_body(quote, StringScanMode::WithInterpolation);
+                    .scan_interpolated_string_body(quote);
                 self.finish_scss_string_start(start, quote, scan)
             }
         }
@@ -788,7 +786,7 @@ impl<'src> CssLexer<'src> {
             .take_pending_scss_string_start_scan(quote)
             .unwrap_or_else(|| {
                 self.scan_cursor()
-                    .scan_string_body(quote, StringScanMode::WithInterpolation)
+                    .scan_interpolated_string_body(quote)
             });
 
         match scan.stop {
@@ -800,14 +798,14 @@ impl<'src> CssLexer<'src> {
                 );
 
                 self.set_position(position);
-                self.push_string_issues(&scan.issues);
+                self.push_string_issues(&scan.invalid_escape_ranges);
                 // Invalid escapes still belong to this string chunk; keep the
                 // semantic token kind and surface the problem via diagnostics.
                 SCSS_STRING_CONTENT_LITERAL
             }
             StringBodyScanStop::Newline { position, .. } => {
                 self.set_position(position);
-                self.push_string_issues(&scan.issues);
+                self.push_string_issues(&scan.invalid_escape_ranges);
                 let unterminated = ParseDiagnostic::new(
                     "Missing closing quote",
                     TextSize::from(start as u32)..self.text_position(),
@@ -818,7 +816,7 @@ impl<'src> CssLexer<'src> {
             }
             StringBodyScanStop::Eof { position } => {
                 self.set_position(position);
-                self.push_string_issues(&scan.issues);
+                self.push_string_issues(&scan.invalid_escape_ranges);
                 let unterminated = ParseDiagnostic::new(
                     "Missing closing quote",
                     TextSize::from(start as u32)..self.text_position(),
@@ -841,8 +839,8 @@ impl<'src> CssLexer<'src> {
         match scan.stop {
             StringBodyScanStop::ClosingQuote { position } => {
                 self.set_position(position + 1);
-                self.push_string_issues(&scan.issues);
-                StringLexResult::Token(if !scan.issues.is_empty() {
+                self.push_string_issues(&scan.invalid_escape_ranges);
+                StringLexResult::Token(if !scan.invalid_escape_ranges.is_empty() {
                     ERROR_TOKEN
                 } else {
                     CSS_STRING_LITERAL
@@ -850,7 +848,7 @@ impl<'src> CssLexer<'src> {
             }
             StringBodyScanStop::Newline { position, .. } => {
                 self.set_position(position);
-                self.push_string_issues(&scan.issues);
+                self.push_string_issues(&scan.invalid_escape_ranges);
                 let unterminated = ParseDiagnostic::new(
                     "Missing closing quote",
                     TextSize::from(start as u32)..self.text_position(),
@@ -861,7 +859,7 @@ impl<'src> CssLexer<'src> {
             }
             StringBodyScanStop::Eof { position } => {
                 self.set_position(position);
-                self.push_string_issues(&scan.issues);
+                self.push_string_issues(&scan.invalid_escape_ranges);
                 let unterminated = ParseDiagnostic::new(
                     "Missing closing quote",
                     TextSize::from(start as u32)..self.text_position(),
@@ -883,14 +881,10 @@ impl<'src> CssLexer<'src> {
         }
     }
 
-    fn push_string_issues(&mut self, issues: &[StringIssue]) {
-        for issue in issues {
-            match issue {
-                StringIssue::InvalidEscape(range) => {
-                    self.diagnostics
-                        .push(ParseDiagnostic::new("Invalid escape sequence", *range));
-                }
-            }
+    fn push_string_issues(&mut self, invalid_escape_ranges: &[TextRange]) {
+        for range in invalid_escape_ranges {
+            self.diagnostics
+                .push(ParseDiagnostic::new("Invalid escape sequence", *range));
         }
     }
 
@@ -1285,13 +1279,11 @@ impl<'src> CssLexer<'src> {
         debug_assert!(self.is_ident_start());
 
         let mut scan_cursor = self.scan_cursor();
-        let mode = if allow_slash {
-            IdentifierScanMode::WithSlash
+        let scan = if allow_slash {
+            scan_cursor.consume_ident_sequence_with_slash(buf)
         } else {
-            IdentifierScanMode::Standard
+            scan_cursor.consume_ident_sequence(buf)
         };
-
-        let scan = scan_cursor.consume_ident_sequence(buf, mode);
         let mut position = scan.position;
         let mut count = scan.count;
         if self.options.is_tailwind_directives_enabled() && scan.stop_byte == Some(b'*') {

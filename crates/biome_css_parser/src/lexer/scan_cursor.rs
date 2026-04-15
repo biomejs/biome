@@ -39,7 +39,7 @@ pub(crate) struct StringBodyScan {
     pub(crate) stop: StringBodyScanStop,
     /// Ranges of invalid escape sequences encountered before the stop
     /// boundary. The caller decides when to emit diagnostics for them.
-    pub(crate) issues: SmallVec<[StringIssue; 1]>,
+    pub(crate) invalid_escape_ranges: SmallVec<[TextRange; 1]>,
 }
 
 /// Next boundary encountered while scanning a string body.
@@ -55,30 +55,10 @@ pub(crate) enum StringBodyScanStop {
     Eof { position: usize },
 }
 
-/// Non-fatal issues discovered while scanning a quoted string body.
-///
-/// These are returned as data by the shared string-body scanner. The caller
-/// decides when to emit diagnostics after committing the scan result.
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub(crate) enum StringIssue {
-    /// Invalid escape sequence such as `\0`.
-    InvalidEscape(TextRange),
-}
-
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 enum InterpolatedIdentifierFragment {
     Identifier,
     Interpolation,
-}
-
-/// Stable lexical environment for shared CSS scanning.
-///
-/// These flags do not change during one scan session. Per-operation behavior
-/// such as "string with interpolation" still uses semantic mode enums.
-#[derive(Debug, Copy, Clone)]
-pub(crate) struct CssScanConfig {
-    pub(crate) is_scss: bool,
-    pub(crate) line_comments_enabled: bool,
 }
 
 /// Shared CSS-aware scanner with low-level source navigation plus CSS-specific
@@ -90,21 +70,8 @@ pub(crate) struct CssScanConfig {
 #[derive(Debug, Copy, Clone)]
 pub(crate) struct CssScanCursor<'src> {
     cursor: SourceCursor<'src>,
-    config: CssScanConfig,
-}
-
-/// Controls whether a string-body scan should stop at SCSS interpolation.
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub(crate) enum StringScanMode {
-    Plain,
-    WithInterpolation,
-}
-
-/// Controls which identifier-adjacent characters the shared scanner accepts.
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub(crate) enum IdentifierScanMode {
-    Standard,
-    WithSlash,
+    is_scss: bool,
+    line_comments_enabled: bool,
 }
 
 /// Result metadata from scanning one identifier sequence with the shared
@@ -128,8 +95,16 @@ pub(crate) struct IdentifierSequenceScan {
 impl<'src> CssScanCursor<'src> {
     /// Creates a shared scan cursor at `position` with a stable lexical
     /// environment.
-    pub(crate) const fn new(cursor: SourceCursor<'src>, config: CssScanConfig) -> Self {
-        Self { cursor, config }
+    pub(crate) const fn new(
+        cursor: SourceCursor<'src>,
+        is_scss: bool,
+        line_comments_enabled: bool,
+    ) -> Self {
+        Self {
+            cursor,
+            is_scss,
+            line_comments_enabled,
+        }
     }
 
     /// Returns the current absolute byte position.
@@ -268,10 +243,20 @@ impl<'src> CssScanCursor<'src> {
         self.is_ident_start_at(0)
     }
 
-    /// Consumes one identifier fragment under the requested mode and returns
-    /// the resulting character when one was consumed.
-    pub(crate) fn consume_ident_part(&mut self, mode: IdentifierScanMode) -> Option<char> {
-        if matches!(mode, IdentifierScanMode::WithSlash) && self.current_byte() == Some(b'/') {
+    /// Consumes one standard CSS identifier fragment and returns the resulting
+    /// character when one was consumed.
+    pub(crate) fn consume_ident_part_regular(&mut self) -> Option<char> {
+        self.consume_ident_part(false)
+    }
+
+    /// Consumes one identifier fragment, also accepting `/` for slash-enabled
+    /// utility names such as Tailwind `w/2`.
+    pub(crate) fn consume_ident_part_with_slash(&mut self) -> Option<char> {
+        self.consume_ident_part(true)
+    }
+
+    fn consume_ident_part(&mut self, allow_slash: bool) -> Option<char> {
+        if allow_slash && self.current_byte() == Some(b'/') {
             self.advance(1);
             return Some('/');
         }
@@ -309,30 +294,35 @@ impl<'src> CssScanCursor<'src> {
         }
     }
 
-    /// Consumes identifier fragments until the current position no longer
-    /// matches the requested identifier mode.
+    /// Consumes standard CSS identifier fragments until the current position
+    /// no longer matches the identifier grammar.
     ///
     /// This is the shared hot-path entrypoint for lexer identifier scanning:
     /// it advances one scan cursor across the whole token while optionally
     /// lowercasing ASCII content into `buf` for keyword matching.
-    pub(crate) fn consume_ident_sequence(
+    pub(crate) fn consume_ident_sequence(&mut self, buf: &mut [u8]) -> IdentifierSequenceScan {
+        self.scan_ident_sequence(Some(buf), false)
+    }
+
+    /// Consumes identifier fragments, also accepting `/` for slash-enabled
+    /// utility names such as Tailwind `w/2`.
+    pub(crate) fn consume_ident_sequence_with_slash(
         &mut self,
         buf: &mut [u8],
-        mode: IdentifierScanMode,
     ) -> IdentifierSequenceScan {
-        self.advance_ident_sequence_impl(mode, Some(buf))
+        self.scan_ident_sequence(Some(buf), true)
     }
 
-    /// Advances through one identifier sequence without collecting lexer
-    /// keyword-buffer bookkeeping.
-    pub(crate) fn advance_ident_sequence(&mut self, mode: IdentifierScanMode) {
-        let _ = self.advance_ident_sequence_impl(mode, None);
+    /// Advances through one standard CSS identifier sequence without
+    /// collecting lexer keyword-buffer bookkeeping.
+    pub(crate) fn advance_ident_sequence(&mut self) {
+        let _ = self.scan_ident_sequence(None, false);
     }
 
-    fn advance_ident_sequence_impl(
+    fn scan_ident_sequence(
         &mut self,
-        mode: IdentifierScanMode,
         mut buf: Option<&mut [u8]>,
+        allow_slash: bool,
     ) -> IdentifierSequenceScan {
         let mut idx = 0;
         let mut only_ascii_used = true;
@@ -341,7 +331,12 @@ impl<'src> CssScanCursor<'src> {
         while self.current_byte().is_some() {
             let start = self.position();
 
-            let Some(part) = self.consume_ident_part(mode) else {
+            let part = if allow_slash {
+                self.consume_ident_part_with_slash()
+            } else {
+                self.consume_ident_part_regular()
+            };
+            let Some(part) = part else {
                 break;
             };
 
@@ -445,7 +440,7 @@ impl<'src> CssScanCursor<'src> {
 
         while let Some(current) = self.current_byte() {
             match current {
-                b'/' if self.config.is_scss && self.peek_byte() == Some(b'*') => {
+                b'/' if self.is_scss && self.peek_byte() == Some(b'*') => {
                     self.advance(2);
                     depth += 1;
                 }
@@ -453,7 +448,7 @@ impl<'src> CssScanCursor<'src> {
                     self.advance(2);
                     depth -= 1;
 
-                    if !self.config.is_scss || depth == 0 {
+                    if !self.is_scss || depth == 0 {
                         return;
                     }
                 }
@@ -481,7 +476,7 @@ impl<'src> CssScanCursor<'src> {
     /// Returns true when the current position starts a line comment under the
     /// active lexical configuration.
     fn is_at_line_comment(self) -> bool {
-        self.config.line_comments_enabled
+        self.line_comments_enabled
             && self.current_byte() == Some(b'/')
             && self.peek_byte() == Some(b'/')
     }
@@ -557,7 +552,7 @@ impl<'src> CssScanCursor<'src> {
                 b'\'' => self.consume_string(CssStringQuote::Single),
                 b'"' => self.consume_string(CssStringQuote::Double),
                 b'/' if self.peek_byte() == Some(b'*') => self.consume_block_comment(),
-                b'/' if self.config.line_comments_enabled && self.peek_byte() == Some(b'/') => {
+                b'/' if self.line_comments_enabled && self.peek_byte() == Some(b'/') => {
                     self.consume_line_comment();
                 }
                 b'#' if self.peek_byte() == Some(b'{') => {
@@ -583,14 +578,15 @@ impl<'src> CssScanCursor<'src> {
         false
     }
 
-    /// Scans the current string body until a closing quote, interpolation,
-    /// newline, or EOF boundary.
-    pub(crate) fn scan_string_body(
-        self,
-        quote: CssStringQuote,
-        mode: StringScanMode,
-    ) -> StringBodyScan {
-        ScssStringScanner { cursor: self }.scan_body(quote, mode)
+    /// Scans a plain string body until a closing quote, newline, or EOF.
+    pub(crate) fn scan_plain_string_body(self, quote: CssStringQuote) -> StringBodyScan {
+        ScssStringScanner { cursor: self }.scan_plain_body(quote)
+    }
+
+    /// Scans an interpolation-aware string body until a closing quote,
+    /// interpolation boundary, newline, or EOF.
+    pub(crate) fn scan_interpolated_string_body(self, quote: CssStringQuote) -> StringBodyScan {
+        ScssStringScanner { cursor: self }.scan_interpolated_body(quote)
     }
 
     /// Returns true when this cursor begins an interpolation-containing
@@ -625,12 +621,21 @@ struct ScssStringScanner<'src> {
 }
 
 impl<'src> ScssStringScanner<'src> {
-    /// Scans until the string closes, hits interpolation, hits a newline, or
+    /// Scans a plain string body until the string closes, hits a newline, or
     /// reaches EOF, while collecting invalid escape diagnostics as data.
-    fn scan_body(mut self, quote: CssStringQuote, mode: StringScanMode) -> StringBodyScan {
-        let mut issues = SmallVec::new();
+    fn scan_plain_body(self, quote: CssStringQuote) -> StringBodyScan {
+        self.scan_body(quote, false)
+    }
+
+    /// Scans an interpolation-aware string body until the string closes, hits
+    /// interpolation, hits a newline, or reaches EOF.
+    fn scan_interpolated_body(self, quote: CssStringQuote) -> StringBodyScan {
+        self.scan_body(quote, true)
+    }
+
+    fn scan_body(mut self, quote: CssStringQuote, stop_at_interpolation: bool) -> StringBodyScan {
+        let mut invalid_escape_ranges = SmallVec::new();
         let quote_byte = quote.as_byte();
-        let allow_interpolation = matches!(mode, StringScanMode::WithInterpolation);
 
         while let Some(byte) = self.cursor.current_byte() {
             let position = self.cursor.position();
@@ -638,14 +643,14 @@ impl<'src> ScssStringScanner<'src> {
             if byte == quote_byte {
                 return StringBodyScan {
                     stop: StringBodyScanStop::ClosingQuote { position },
-                    issues,
+                    invalid_escape_ranges,
                 };
             }
 
-            if allow_interpolation && self.cursor.is_at_scss_interpolation() {
+            if stop_at_interpolation && self.cursor.is_at_scss_interpolation() {
                 return StringBodyScan {
                     stop: StringBodyScanStop::Interpolation { position },
-                    issues,
+                    invalid_escape_ranges,
                 };
             }
 
@@ -653,10 +658,10 @@ impl<'src> ScssStringScanner<'src> {
                 BSL => {
                     let escape_start = self.cursor.position();
                     if self.cursor.consume_string_escape(quote) {
-                        issues.push(StringIssue::InvalidEscape(TextRange::new(
+                        invalid_escape_ranges.push(TextRange::new(
                             TextSize::from(escape_start as u32),
                             TextSize::from(self.cursor.position() as u32),
-                        )));
+                        ));
                     }
                 }
                 WHS if is_newline_byte(byte) => {
@@ -668,7 +673,7 @@ impl<'src> ScssStringScanner<'src> {
 
                     return StringBodyScan {
                         stop: StringBodyScanStop::Newline { position, len },
-                        issues,
+                        invalid_escape_ranges,
                     };
                 }
                 _ => self.cursor.advance_byte_or_char(byte),
@@ -679,7 +684,7 @@ impl<'src> ScssStringScanner<'src> {
             stop: StringBodyScanStop::Eof {
                 position: self.cursor.source_len(),
             },
-            issues,
+            invalid_escape_ranges,
         }
     }
 }
@@ -746,8 +751,7 @@ impl<'src> ScssInterpolatedIdentifierScanner<'src> {
                 .consume_scss_interpolation()
                 .then_some(InterpolatedIdentifierFragment::Interpolation)
         } else if self.cursor.is_ident_start() {
-            self.cursor
-                .advance_ident_sequence(IdentifierScanMode::Standard);
+            self.cursor.advance_ident_sequence();
             Some(InterpolatedIdentifierFragment::Identifier)
         } else {
             None

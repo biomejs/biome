@@ -16,10 +16,7 @@ use std::time::Duration;
 
 use super::{
     source_cursor::SourceCursor,
-    scan_cursor::{
-        CssScanConfig, CssScanCursor, IdentifierScanMode, StringBodyScanStop, StringScanMode,
-        UrlBodyStartScan,
-    },
+    scan_cursor::{CssScanCursor, StringBodyScanStop, UrlBodyStartScan},
     CssLexer, TextSize,
 };
 
@@ -348,13 +345,7 @@ fn url_body_context_handles_escaped_non_ascii_in_raw_url() {
 
 #[test]
 fn css_scan_cursor_reports_interpolated_function_shape() {
-    let cursor = CssScanCursor::new(
-        SourceCursor::new("foo#{1 + 1}(bar)", 0),
-        CssScanConfig {
-            is_scss: true,
-            line_comments_enabled: true,
-        },
-    );
+    let cursor = CssScanCursor::new(SourceCursor::new("foo#{1 + 1}(bar)", 0), true, true);
 
     assert!(cursor.is_at_scss_interpolated_function());
 }
@@ -363,20 +354,8 @@ fn css_scan_cursor_reports_interpolated_function_shape() {
 fn css_scan_cursor_respects_line_comment_config_in_url_body_scanning() {
     let source = "// comment\nfoo)";
 
-    let scss_cursor = CssScanCursor::new(
-        SourceCursor::new(source, 0),
-        CssScanConfig {
-            is_scss: true,
-            line_comments_enabled: true,
-        },
-    );
-    let css_cursor = CssScanCursor::new(
-        SourceCursor::new(source, 0),
-        CssScanConfig {
-            is_scss: false,
-            line_comments_enabled: false,
-        },
-    );
+    let scss_cursor = CssScanCursor::new(SourceCursor::new(source, 0), true, true);
+    let css_cursor = CssScanCursor::new(SourceCursor::new(source, 0), false, false);
 
     let scss_scan = scss_cursor.scan_url_body_start(false);
     let css_scan = css_cursor.scan_url_body_start(false);
@@ -393,17 +372,8 @@ fn css_scan_cursor_respects_line_comment_config_in_url_body_scanning() {
 
 #[test]
 fn css_scan_cursor_scans_plain_string_without_interpolation_mode() {
-    let cursor = CssScanCursor::new(
-        SourceCursor::new("\"a#{b}\"", 1),
-        CssScanConfig {
-            is_scss: true,
-            line_comments_enabled: true,
-        },
-    );
-    let scan = cursor.scan_string_body(
-        super::CssStringQuote::Double,
-        StringScanMode::Plain,
-    );
+    let cursor = CssScanCursor::new(SourceCursor::new("\"a#{b}\"", 1), true, true);
+    let scan = cursor.scan_plain_string_body(super::CssStringQuote::Double);
 
     assert!(matches!(
         scan.stop,
@@ -413,17 +383,8 @@ fn css_scan_cursor_scans_plain_string_without_interpolation_mode() {
 
 #[test]
 fn css_scan_cursor_treats_form_feed_as_string_newline() {
-    let cursor = CssScanCursor::new(
-        SourceCursor::new("\"a\u{000C}b\"", 1),
-        CssScanConfig {
-            is_scss: true,
-            line_comments_enabled: true,
-        },
-    );
-    let scan = cursor.scan_string_body(
-        super::CssStringQuote::Double,
-        StringScanMode::Plain,
-    );
+    let cursor = CssScanCursor::new(SourceCursor::new("\"a\u{000C}b\"", 1), true, true);
+    let scan = cursor.scan_plain_string_body(super::CssStringQuote::Double);
 
     assert_eq!(
         scan.stop,
@@ -432,91 +393,49 @@ fn css_scan_cursor_treats_form_feed_as_string_newline() {
             len: 1,
         }
     );
-    assert!(scan.issues.is_empty());
+    assert!(scan.invalid_escape_ranges.is_empty());
 }
 
 #[test]
 fn css_scan_cursor_treats_backslash_form_feed_as_line_continuation() {
-    let cursor = CssScanCursor::new(
-        SourceCursor::new("\"a\\\u{000C}b\"", 1),
-        CssScanConfig {
-            is_scss: true,
-            line_comments_enabled: true,
-        },
-    );
-    let scan = cursor.scan_string_body(
-        super::CssStringQuote::Double,
-        StringScanMode::Plain,
-    );
+    let cursor = CssScanCursor::new(SourceCursor::new("\"a\\\u{000C}b\"", 1), true, true);
+    let scan = cursor.scan_plain_string_body(super::CssStringQuote::Double);
 
     assert!(matches!(
         scan.stop,
         StringBodyScanStop::ClosingQuote { position: 5 }
     ));
-    assert!(scan.issues.is_empty());
+    assert!(scan.invalid_escape_ranges.is_empty());
 }
 
 #[test]
 fn css_scan_cursor_identifier_mode_controls_slash_consumption() {
-    let mut cursor = CssScanCursor::new(
-        SourceCursor::new("/foo", 0),
-        CssScanConfig {
-            is_scss: true,
-            line_comments_enabled: true,
-        },
-    );
+    let mut cursor = CssScanCursor::new(SourceCursor::new("/foo", 0), true, true);
 
-    assert_eq!(
-        cursor.consume_ident_part(IdentifierScanMode::Standard),
-        None
-    );
+    assert_eq!(cursor.consume_ident_part_regular(), None);
     assert_eq!(cursor.position(), 0);
 
-    let mut cursor = CssScanCursor::new(
-        SourceCursor::new("/foo", 0),
-        CssScanConfig {
-            is_scss: true,
-            line_comments_enabled: true,
-        },
-    );
+    let mut cursor = CssScanCursor::new(SourceCursor::new("/foo", 0), true, true);
 
-    assert_eq!(
-        cursor.consume_ident_part(IdentifierScanMode::WithSlash),
-        Some('/')
-    );
+    assert_eq!(cursor.consume_ident_part_with_slash(), Some('/'));
     assert_eq!(cursor.position(), 1);
 }
 
 #[test]
 fn css_scan_cursor_does_not_treat_backslash_form_feed_as_identifier_escape() {
-    let mut cursor = CssScanCursor::new(
-        SourceCursor::new("\\\u{000C}foo", 0),
-        CssScanConfig {
-            is_scss: true,
-            line_comments_enabled: true,
-        },
-    );
+    let mut cursor = CssScanCursor::new(SourceCursor::new("\\\u{000C}foo", 0), true, true);
 
     assert!(!cursor.is_ident_start());
-    assert_eq!(
-        cursor.consume_ident_part(IdentifierScanMode::Standard),
-        None
-    );
+    assert_eq!(cursor.consume_ident_part_regular(), None);
     assert_eq!(cursor.position(), 0);
 }
 
 #[test]
 fn css_scan_cursor_consumes_identifier_sequence_with_escape() {
-    let mut cursor = CssScanCursor::new(
-        SourceCursor::new(r#"\66 oo-bar"#, 0),
-        CssScanConfig {
-            is_scss: true,
-            line_comments_enabled: true,
-        },
-    );
+    let mut cursor = CssScanCursor::new(SourceCursor::new(r#"\66 oo-bar"#, 0), true, true);
     let mut buf = [0u8; 16];
 
-    let scan = cursor.consume_ident_sequence(&mut buf, IdentifierScanMode::Standard);
+    let scan = cursor.consume_ident_sequence(&mut buf);
 
     assert!(scan.count > 0);
     assert!(scan.only_ascii_used);
@@ -528,16 +447,10 @@ fn css_scan_cursor_consumes_identifier_sequence_with_escape() {
 
 #[test]
 fn css_scan_cursor_consumes_identifier_sequence_with_slash_mode() {
-    let mut cursor = CssScanCursor::new(
-        SourceCursor::new("w/2", 0),
-        CssScanConfig {
-            is_scss: true,
-            line_comments_enabled: true,
-        },
-    );
+    let mut cursor = CssScanCursor::new(SourceCursor::new("w/2", 0), true, true);
     let mut buf = [0u8; 16];
 
-    let scan = cursor.consume_ident_sequence(&mut buf, IdentifierScanMode::WithSlash);
+    let scan = cursor.consume_ident_sequence_with_slash(&mut buf);
 
     assert_eq!(&buf[..scan.count], b"w/2");
     assert!(scan.only_ascii_used);
@@ -548,16 +461,10 @@ fn css_scan_cursor_consumes_identifier_sequence_with_slash_mode() {
 
 #[test]
 fn css_scan_cursor_consumes_identifier_sequence_tracks_non_ascii_transition() {
-    let mut cursor = CssScanCursor::new(
-        SourceCursor::new("abécd ", 0),
-        CssScanConfig {
-            is_scss: true,
-            line_comments_enabled: true,
-        },
-    );
+    let mut cursor = CssScanCursor::new(SourceCursor::new("abécd ", 0), true, true);
     let mut buf = [0u8; 16];
 
-    let scan = cursor.consume_ident_sequence(&mut buf, IdentifierScanMode::Standard);
+    let scan = cursor.consume_ident_sequence(&mut buf);
 
     assert_eq!(&buf[..scan.count], b"ab");
     assert!(!scan.only_ascii_used);
@@ -763,38 +670,17 @@ fn same_quote_nested_string_in_interpolation_reuses_cached_first_chunk_scan() {
 
 #[test]
 fn css_scan_cursor_consumes_identifier_escape_as_a_single_part() {
-    let mut cursor = CssScanCursor::new(
-        SourceCursor::new(r"\61 bc", 0),
-        CssScanConfig {
-            is_scss: false,
-            line_comments_enabled: false,
-        },
-    );
+    let mut cursor = CssScanCursor::new(SourceCursor::new(r"\61 bc", 0), false, false);
 
-    assert_eq!(
-        cursor.consume_ident_part(IdentifierScanMode::Standard),
-        Some('a')
-    );
+    assert_eq!(cursor.consume_ident_part_regular(), Some('a'));
     assert_eq!(cursor.position(), 4);
-    assert_eq!(
-        cursor.consume_ident_part(IdentifierScanMode::Standard),
-        Some('b')
-    );
-    assert_eq!(
-        cursor.consume_ident_part(IdentifierScanMode::Standard),
-        Some('c')
-    );
+    assert_eq!(cursor.consume_ident_part_regular(), Some('b'));
+    assert_eq!(cursor.consume_ident_part_regular(), Some('c'));
 }
 
 #[test]
 fn css_scan_cursor_scans_raw_url_value_until_closing_paren() {
-    let cursor = CssScanCursor::new(
-        SourceCursor::new(r"foo\)bar)", 0),
-        CssScanConfig {
-            is_scss: false,
-            line_comments_enabled: false,
-        },
-    );
+    let cursor = CssScanCursor::new(SourceCursor::new(r"foo\)bar)", 0), false, false);
     let scan = cursor
         .scan_url_raw_value()
         .expect("expected raw url scan");
