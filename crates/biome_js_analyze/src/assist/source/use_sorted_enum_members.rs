@@ -133,14 +133,20 @@ fn get_value_definition_key(node: &TsEnumMember) -> Option<TokenText> {
 fn is_enum_member_list_sorted(list: &TsEnumMemberList) -> bool {
     let mut prev: Option<TokenText> = None;
     for item in list.into_iter().flatten() {
-        if let Some(key) = get_value_definition_key(&item) {
-            if prev
-                .as_ref()
-                .is_some_and(|p| locale_compare(p, &key) == Ordering::Greater)
-            {
-                return false;
+        match get_value_definition_key(&item) {
+            Some(key) => {
+                if prev
+                    .as_ref()
+                    .is_some_and(|p| locale_compare(p, &key) == Ordering::Greater)
+                {
+                    return false;
+                }
+                prev = Some(key);
             }
-            prev = Some(key);
+            None => {
+                // Keep detection in sync with `sorted_separated_list_by` chunk boundaries.
+                prev = None;
+            }
         }
     }
     true
