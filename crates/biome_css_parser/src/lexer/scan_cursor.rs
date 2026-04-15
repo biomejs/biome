@@ -4,7 +4,6 @@ use super::{
 };
 use biome_css_syntax::{TextRange, TextSize};
 use biome_unicode_table::{Dispatch::*, is_css_non_ascii, lookup_byte};
-use smallvec::SmallVec;
 use std::char::REPLACEMENT_CHARACTER;
 
 /// Classification result for the first non-trivia content inside `url(...)`.
@@ -39,7 +38,7 @@ pub(crate) struct StringBodyScan {
     pub(crate) stop: StringBodyScanStop,
     /// Ranges of invalid escape sequences encountered before the stop
     /// boundary. The caller decides when to emit diagnostics for them.
-    pub(crate) invalid_escape_ranges: SmallVec<[TextRange; 1]>,
+    pub(crate) invalid_escape_ranges: Vec<TextRange>,
 }
 
 /// Next boundary encountered while scanning a string body.
@@ -617,7 +616,7 @@ impl<'src> ScssStringScanner<'src> {
     }
 
     fn scan_body(mut self, quote: CssStringQuote, stop_at_interpolation: bool) -> StringBodyScan {
-        let mut invalid_escape_ranges = SmallVec::new();
+        let mut invalid_escape_ranges = Vec::new();
         let quote_byte = quote.as_byte();
 
         while let Some(byte) = self.cursor.current_byte() {
