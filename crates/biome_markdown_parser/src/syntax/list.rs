@@ -1569,6 +1569,10 @@ fn handle_blank_lines(p: &mut MarkdownParser, state: &mut ListItemLoopState) -> 
 
 /// Phase 1: If past the first line and the next quoted content has
 /// insufficient indent, break out of the list item.
+///
+/// Exception: blank `>` continuation lines before a sibling list item
+/// must not break here — fall through so Phase 4 consumes the blank
+/// and `check_continuation_indent` breaks at the marker position.
 fn blank_line_phase_quote_depth_exit(
     p: &mut MarkdownParser,
     state: &ListItemLoopState,
@@ -1580,9 +1584,70 @@ fn blank_line_phase_quote_depth_exit(
         && let Some(next_indent) = next_quote_content_indent(p, quote_depth)
         && next_indent < state.required_indent
     {
+        // Sibling list item after blank `>` lines — fall through.
+        if next_indent <= state.marker_indent + MAX_BLOCK_PREFIX_INDENT
+            && next_quoted_content_continues_same_list(p, state, quote_depth)
+        {
+            return None;
+        }
         return Some(BlankLineOutcome::resolved(LoopAction::Break));
     }
     None
+}
+
+/// Check if the next non-blank quoted content is a list item of the same
+/// type and marker/delimiter at the current marker indent.
+fn next_quoted_content_continues_same_list(
+    p: &mut MarkdownParser,
+    state: &ListItemLoopState,
+    quote_depth: usize,
+) -> bool {
+    p.lookahead(|p| {
+        loop {
+            if !has_quote_prefix(p, quote_depth) {
+                return false;
+            }
+            consume_quote_prefix_without_virtual(p, quote_depth);
+
+            let is_blank = p.lookahead(|p| {
+                while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
+                    p.bump(MD_TEXTUAL_LITERAL);
+                }
+                p.at(NEWLINE) || p.at(T![EOF])
+            });
+
+            if !is_blank {
+                let prev_virtual = p.state().virtual_line_start;
+                p.state_mut().virtual_line_start = Some(p.cur_range().start());
+                let is_item = if let Some(current) = state.parent_marker_kind {
+                    if !at_bullet_list_item_with_base_indent(p, state.marker_indent) {
+                        false
+                    } else {
+                        matches!(current_bullet_marker(p), Some(next) if current == next)
+                    }
+                } else if let Some(current_delim) = state.parent_ordered_delim {
+                    if !at_order_list_item_with_base_indent(p, state.marker_indent) {
+                        false
+                    } else {
+                        matches!(current_ordered_delim(p), Some(next) if current_delim == next)
+                    }
+                } else {
+                    false
+                };
+                p.state_mut().virtual_line_start = prev_virtual;
+                return is_item;
+            }
+
+            while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
+                p.bump(MD_TEXTUAL_LITERAL);
+            }
+            if p.at(NEWLINE) {
+                p.bump(NEWLINE);
+                continue;
+            }
+            return false;
+        }
+    })
 }
 
 /// Phase 2: Detect quote-only blank lines (e.g., a line that is just `>>`).
@@ -1635,6 +1700,14 @@ fn blank_line_phase_non_quote_classify(
 ) -> Option<BlankLineOutcome> {
     if state.first_line || !p.at(NEWLINE) || p.at_blank_line() || newline_has_quote_prefix {
         return None;
+    }
+
+    // When inside a blockquote, a blank line without a quote prefix escapes
+    // the container. Break without recording the blank — it belongs to the
+    // inter-block gap, not to this list's tightness.
+    let quote_depth = p.state().block_quote_depth;
+    if quote_depth > 0 {
+        return Some(BlankLineOutcome::resolved(LoopAction::Break));
     }
 
     let action = classify_blank_line(
