@@ -106,7 +106,7 @@ impl Rule for UseScopedStyles {
             } else {
                 return Some(GlobalStylesKind::Vue);
             }
-        } else if ctx.source_type::<HtmlFileSource>().is_astro() {
+        } else if source_type.is_astro() {
             let is_directives = attributes
                 .iter()
                 .filter_map(|attr| attr.syntax().clone().cast::<AstroIsDirective>());
