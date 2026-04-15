@@ -1,0 +1,53 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+const Invalid1 = () => <iframe />;
+
+const Invalid2 = () => <iframe sandbox />;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:24 lint/nursery/useIframeSandbox ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Iframe doesn't have the sandbox attribute.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const Invalid1 = () => <iframe />;
+      │                        ^^^^^^^^^^
+    3 │ 
+    4 │ const Invalid2 = () => <iframe sandbox />;
+  
+  i The sandbox attribute enables an extra set of restrictions for the content in the iframe, protecting against malicious scripts and other security threats.
+  
+  i Provide a sandbox attribute when using iframe elements.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:4:24 lint/nursery/useIframeSandbox ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Iframe doesn't have the sandbox attribute.
+  
+    2 │ const Invalid1 = () => <iframe />;
+    3 │ 
+  > 4 │ const Invalid2 = () => <iframe sandbox />;
+      │                        ^^^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i The sandbox attribute enables an extra set of restrictions for the content in the iframe, protecting against malicious scripts and other security threats.
+  
+  i Provide a sandbox attribute when using iframe elements.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

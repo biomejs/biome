@@ -27,11 +27,14 @@ info: markdown/list/issue-7846.md
 +++ Biome
 @@ -1,11 +1,11 @@
  - a a  
-    b b  
+-   b b  
 -   c c  
-+    c c  
-    d d  
-   e e
+-   d d  
+-  e e
++b b  
++c c  
++d d  
++e e
  
  1.  a a a  
 -     b b b  
@@ -42,20 +45,20 @@ info: markdown/list/issue-7846.md
 +  c c c  
 +   d d d  
 +    e e e
-\ No newline at end of file
 ```
 
 # Output
 
 ```md
 - a a  
-   b b  
-    c c  
-   d d  
-  e e
+b b  
+c c  
+d d  
+e e
 
 1.  a a a  
    b b b  
   c c c  
    d d d  
-    e e e```
+    e e e
+```

@@ -41,7 +41,7 @@ CssRoot {
                         CssBogusSubSelector {
                             items: [
                                 DOT@0..1 "." [] [],
-                                CssBogus {
+                                CssBogusSupportsCondition {
                                     items: [
                                         CssBogus {
                                             items: [
@@ -336,7 +336,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@0..27
             0: CSS_BOGUS_SUB_SELECTOR@0..27
               0: DOT@0..1 "." [] []
-              1: CSS_BOGUS@1..27
+              1: CSS_BOGUS_SUPPORTS_CONDITION@1..27
                 0: CSS_BOGUS@1..27
                   0: CSS_CUSTOM_IDENTIFIER@1..5
                     0: IDENT@1..5 "foo-" [] []

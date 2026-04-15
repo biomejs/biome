@@ -423,10 +423,11 @@ struct BiomeServerLog;
 impl Display for BiomeServerLog {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         if let Ok(Some(log)) = read_most_recent_log_file(
-            biome_env().biome_log_path.value().map(Utf8PathBuf::from),
             biome_env()
-                .biome_log_prefix_name
-                .value()
+                .value_for("BIOME_LOG_PATH")
+                .map(Utf8PathBuf::from),
+            biome_env()
+                .value_for("BIOME_LOG_PREFIX_NAME")
                 .unwrap_or("server.log".to_string()),
         ) {
             markup!("\n"<Emphasis><Underline>"Biome Server Log:"</Underline></Emphasis>"

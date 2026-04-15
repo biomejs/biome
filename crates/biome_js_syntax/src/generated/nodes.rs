@@ -7919,6 +7919,51 @@ pub struct JsxSelfClosingElementFields {
     pub r_angle_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct JsxShorthandAttribute {
+    pub(crate) syntax: SyntaxNode,
+}
+impl JsxShorthandAttribute {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> JsxShorthandAttributeFields {
+        JsxShorthandAttributeFields {
+            l_curly_token: self.l_curly_token(),
+            name: self.name(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<JsReferenceIdentifier> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for JsxShorthandAttribute {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct JsxShorthandAttributeFields {
+    pub l_curly_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<JsReferenceIdentifier>,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsxSpreadAttribute {
     pub(crate) syntax: SyntaxNode,
 }
@@ -15518,6 +15563,7 @@ impl AnyJsTemplateElement {
 pub enum AnyJsxAttribute {
     JsMetavariable(JsMetavariable),
     JsxAttribute(JsxAttribute),
+    JsxShorthandAttribute(JsxShorthandAttribute),
     JsxSpreadAttribute(JsxSpreadAttribute),
 }
 impl AnyJsxAttribute {
@@ -15530,6 +15576,12 @@ impl AnyJsxAttribute {
     pub fn as_jsx_attribute(&self) -> Option<&JsxAttribute> {
         match &self {
             Self::JsxAttribute(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_jsx_shorthand_attribute(&self) -> Option<&JsxShorthandAttribute> {
+        match &self {
+            Self::JsxShorthandAttribute(item) => Some(item),
             _ => None,
         }
     }
@@ -25778,6 +25830,61 @@ impl From<JsxSelfClosingElement> for SyntaxNode {
 }
 impl From<JsxSelfClosingElement> for SyntaxElement {
     fn from(n: JsxSelfClosingElement) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for JsxShorthandAttribute {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(JSX_SHORTHAND_ATTRIBUTE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == JSX_SHORTHAND_ATTRIBUTE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for JsxShorthandAttribute {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsxShorthandAttribute")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsxShorthandAttribute").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<JsxShorthandAttribute> for SyntaxNode {
+    fn from(n: JsxShorthandAttribute) -> Self {
+        n.syntax
+    }
+}
+impl From<JsxShorthandAttribute> for SyntaxElement {
+    fn from(n: JsxShorthandAttribute) -> Self {
         n.syntax.into()
     }
 }
@@ -37605,6 +37712,11 @@ impl From<JsxAttribute> for AnyJsxAttribute {
         Self::JsxAttribute(node)
     }
 }
+impl From<JsxShorthandAttribute> for AnyJsxAttribute {
+    fn from(node: JsxShorthandAttribute) -> Self {
+        Self::JsxShorthandAttribute(node)
+    }
+}
 impl From<JsxSpreadAttribute> for AnyJsxAttribute {
     fn from(node: JsxSpreadAttribute) -> Self {
         Self::JsxSpreadAttribute(node)
@@ -37614,14 +37726,21 @@ impl AstNode for AnyJsxAttribute {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = JsMetavariable::KIND_SET
         .union(JsxAttribute::KIND_SET)
+        .union(JsxShorthandAttribute::KIND_SET)
         .union(JsxSpreadAttribute::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, JS_METAVARIABLE | JSX_ATTRIBUTE | JSX_SPREAD_ATTRIBUTE)
+        matches!(
+            kind,
+            JS_METAVARIABLE | JSX_ATTRIBUTE | JSX_SHORTHAND_ATTRIBUTE | JSX_SPREAD_ATTRIBUTE
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             JS_METAVARIABLE => Self::JsMetavariable(JsMetavariable { syntax }),
             JSX_ATTRIBUTE => Self::JsxAttribute(JsxAttribute { syntax }),
+            JSX_SHORTHAND_ATTRIBUTE => {
+                Self::JsxShorthandAttribute(JsxShorthandAttribute { syntax })
+            }
             JSX_SPREAD_ATTRIBUTE => Self::JsxSpreadAttribute(JsxSpreadAttribute { syntax }),
             _ => return None,
         };
@@ -37631,6 +37750,7 @@ impl AstNode for AnyJsxAttribute {
         match self {
             Self::JsMetavariable(it) => it.syntax(),
             Self::JsxAttribute(it) => it.syntax(),
+            Self::JsxShorthandAttribute(it) => it.syntax(),
             Self::JsxSpreadAttribute(it) => it.syntax(),
         }
     }
@@ -37638,6 +37758,7 @@ impl AstNode for AnyJsxAttribute {
         match self {
             Self::JsMetavariable(it) => it.into_syntax(),
             Self::JsxAttribute(it) => it.into_syntax(),
+            Self::JsxShorthandAttribute(it) => it.into_syntax(),
             Self::JsxSpreadAttribute(it) => it.into_syntax(),
         }
     }
@@ -37647,6 +37768,7 @@ impl std::fmt::Debug for AnyJsxAttribute {
         match self {
             Self::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             Self::JsxAttribute(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxShorthandAttribute(it) => std::fmt::Debug::fmt(it, f),
             Self::JsxSpreadAttribute(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -37656,6 +37778,7 @@ impl From<AnyJsxAttribute> for SyntaxNode {
         match n {
             AnyJsxAttribute::JsMetavariable(it) => it.into_syntax(),
             AnyJsxAttribute::JsxAttribute(it) => it.into_syntax(),
+            AnyJsxAttribute::JsxShorthandAttribute(it) => it.into_syntax(),
             AnyJsxAttribute::JsxSpreadAttribute(it) => it.into_syntax(),
         }
     }
@@ -41397,6 +41520,11 @@ impl std::fmt::Display for JsxReferenceIdentifier {
     }
 }
 impl std::fmt::Display for JsxSelfClosingElement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for JsxShorthandAttribute {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

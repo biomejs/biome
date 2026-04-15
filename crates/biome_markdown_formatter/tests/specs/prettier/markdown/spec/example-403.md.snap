@@ -20,13 +20,13 @@ bim* bop**
 @@ -1,2 +1,2 @@
 -**foo \*bar **baz**
 -bim\* bop**
-+**foo *bar **baz**
-+bim* bop**
++**foo _bar **baz**
++bim_ bop**
 ```
 
 # Output
 
 ```md
-**foo *bar **baz**
-bim* bop**
+**foo _bar **baz**
+bim_ bop**
 ```

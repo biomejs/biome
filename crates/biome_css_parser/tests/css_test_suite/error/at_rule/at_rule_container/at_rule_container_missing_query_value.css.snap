@@ -1,0 +1,105 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@container not (width <=) { }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssContainerAtRule {
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@1..11 "container" [] [Whitespace(" ")],
+                    name: CssCustomIdentifier {
+                        value_token: IDENT@11..15 "not" [] [Whitespace(" ")],
+                    },
+                    query: CssContainerSizeFeatureInParens {
+                        l_paren_token: L_PAREN@15..16 "(" [] [],
+                        feature: CssQueryFeatureRange {
+                            left: CssIdentifier {
+                                value_token: IDENT@16..22 "width" [] [Whitespace(" ")],
+                            },
+                            comparison: CssQueryFeatureRangeComparison {
+                                operator: LTEQ@22..24 "<=" [] [],
+                            },
+                            right: missing (required),
+                        },
+                        r_paren_token: R_PAREN@24..26 ")" [] [Whitespace(" ")],
+                    },
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@26..28 "{" [] [Whitespace(" ")],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@28..29 "}" [] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@29..30 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..30
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..29
+    0: CSS_AT_RULE@0..29
+      0: AT@0..1 "@" [] []
+      1: CSS_CONTAINER_AT_RULE@1..29
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@1..26
+          0: CONTAINER_KW@1..11 "container" [] [Whitespace(" ")]
+          1: CSS_CUSTOM_IDENTIFIER@11..15
+            0: IDENT@11..15 "not" [] [Whitespace(" ")]
+          2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@15..26
+            0: L_PAREN@15..16 "(" [] []
+            1: CSS_QUERY_FEATURE_RANGE@16..24
+              0: CSS_IDENTIFIER@16..22
+                0: IDENT@16..22 "width" [] [Whitespace(" ")]
+              1: CSS_QUERY_FEATURE_RANGE_COMPARISON@22..24
+                0: LTEQ@22..24 "<=" [] []
+              2: (empty)
+            2: R_PAREN@24..26 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@26..29
+          0: L_CURLY@26..28 "{" [] [Whitespace(" ")]
+          1: CSS_RULE_LIST@28..28
+          2: R_CURLY@28..29 "}" [] []
+  2: EOF@29..30 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+at_rule_container_missing_query_value.css:1:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+  > 1 │ @container not (width <=) { }
+      │                         ^
+    2 │ 
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+```

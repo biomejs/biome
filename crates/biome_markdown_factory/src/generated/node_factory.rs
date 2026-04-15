@@ -35,6 +35,12 @@ pub fn md_bullet_list_item(md_bullet_list: MdBulletList) -> MdBulletListItem {
         [Some(SyntaxElement::Node(md_bullet_list.into_syntax()))],
     ))
 }
+pub fn md_continuation_indent(indent: MdIndentTokenList) -> MdContinuationIndent {
+    MdContinuationIndent::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_CONTINUATION_INDENT,
+        [Some(SyntaxElement::Node(indent.into_syntax()))],
+    ))
+}
 pub fn md_document(value: MdBlockList, eof_token: SyntaxToken) -> MdDocumentBuilder {
     MdDocumentBuilder {
         value,
@@ -725,6 +731,16 @@ where
 {
     MdBogus::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_BOGUS,
+        slots,
+    ))
+}
+pub fn md_bogus_block<I>(slots: I) -> MdBogusBlock
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    MdBogusBlock::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_BOGUS_BLOCK,
         slots,
     ))
 }

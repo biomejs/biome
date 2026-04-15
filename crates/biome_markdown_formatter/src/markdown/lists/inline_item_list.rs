@@ -1,4 +1,5 @@
 use crate::markdown::auxiliary::hard_line::FormatMdFormatHardLineOptions;
+use crate::markdown::auxiliary::inline_italic::FormatMdInlineItalicOptions;
 use crate::markdown::auxiliary::textual::FormatMdTextualOptions;
 use crate::prelude::*;
 use crate::shared::{TextPrintMode, TrimMode};
@@ -8,12 +9,16 @@ use biome_markdown_syntax::{AnyMdInline, MdInlineItemList};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdInlineItemList {
     print_mode: TextPrintMode,
+    /// When true, and there's a [MdInlineItalic], it instrustructs the formatter to keep the fences
+    keep_fences_in_italics: bool,
 }
 
 impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
     type Context = MarkdownFormatContext;
     fn fmt(&self, node: &MdInlineItemList, f: &mut MarkdownFormatter) -> FormatResult<()> {
-        if self.print_mode.is_normalize_words() {
+        if self.print_mode.is_auto_link_like() {
+            return self.fmt_auto_link_like(node, f);
+        } else if self.print_mode.is_normalize_words() {
             return self.fmt_normalize_words(node, f);
         } else if self.print_mode.is_all() {
             return self.fmt_trim_all(node, f);
@@ -35,7 +40,6 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
                                 f,
                                 [text.format().with_options(FormatMdTextualOptions {
                                     should_remove: true,
-                                    trim_start: false,
                                     ..Default::default()
                                 })]
                             )
@@ -48,7 +52,6 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
                                 [
                                     text.format().with_options(FormatMdTextualOptions {
                                         should_remove: true,
-                                        trim_start: false,
                                         ..Default::default()
                                     }),
                                     hard_line_break()
@@ -60,8 +63,11 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
                     } else {
                         joiner.entry(&text.format().with_options(FormatMdTextualOptions {
                             should_remove: false,
-                            trim_start: self.print_mode.is_start() && index == 0,
-                            ..Default::default()
+                            print_mode: if self.print_mode.is_start() && index == 0 {
+                                self.print_mode
+                            } else {
+                                TextPrintMode::default()
+                            },
                         }));
                     }
                 }
@@ -79,6 +85,12 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
                         )
                     }));
                 }
+                AnyMdInline::MdInlineItalic(italic) => {
+                    joiner.entry(&italic.format().with_options(FormatMdInlineItalicOptions {
+                        should_keep_fences: self.keep_fences_in_italics,
+                    }));
+                    seen_new_line = false;
+                }
                 _ => {
                     joiner.entry(&item.format());
                     seen_new_line = false;
@@ -91,6 +103,49 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
 }
 
 impl FormatMdInlineItemList {
+    /// If the first and last [MdTextual] are `<` and `>` respectively,
+    /// they are removed. Otherwise falls back to [TrimMode::All].
+    fn fmt_auto_link_like(
+        &self,
+        node: &MdInlineItemList,
+        f: &mut MarkdownFormatter,
+    ) -> FormatResult<()> {
+        let items: Vec<_> = node.iter().collect();
+
+        let starts_with_lt = matches!(items.first(), Some(AnyMdInline::MdTextual(t)) if t.value_token().is_ok_and(|tok| tok.text() == "<"));
+        let ends_with_gt = matches!(items.last(), Some(AnyMdInline::MdTextual(t)) if t.value_token().is_ok_and(|tok| tok.text() == ">"));
+
+        let is_auto_link = starts_with_lt && ends_with_gt && items.len() > 2;
+
+        if !is_auto_link {
+            return self.fmt_trim_all(node, f);
+        }
+
+        let mut joiner = f.join();
+        for (index, item) in items.iter().enumerate() {
+            if (index == 0 || index == items.len() - 1)
+                && let AnyMdInline::MdTextual(text) = item
+            {
+                joiner.entry(&text.format().with_options(FormatMdTextualOptions {
+                    should_remove: true,
+                    ..Default::default()
+                }));
+                continue;
+            }
+            match item {
+                AnyMdInline::MdInlineItalic(italic) => {
+                    joiner.entry(&italic.format().with_options(FormatMdInlineItalicOptions {
+                        should_keep_fences: self.keep_fences_in_italics,
+                    }));
+                }
+                _ => {
+                    joiner.entry(&item.format());
+                }
+            }
+        }
+        joiner.finish()
+    }
+
     /// Strips leading and trailing whitespace/hard-lines around the content.
     /// Items between the first and last non-empty nodes are kept as-is;
     /// items outside those boundaries are removed.
@@ -100,7 +155,7 @@ impl FormatMdInlineItemList {
 
         let is_content = |item: &AnyMdInline| match item {
             AnyMdInline::MdTextual(text) => !text.is_empty().unwrap_or_default(),
-            AnyMdInline::MdHardLine(_) => false,
+            AnyMdInline::MdHardLine(_) | AnyMdInline::MdIndentToken(_) => false,
             _ => true,
         };
 
@@ -124,16 +179,29 @@ impl FormatMdInlineItemList {
                     AnyMdInline::MdTextual(text) => {
                         joiner.entry(&text.format().with_options(FormatMdTextualOptions {
                             should_remove: true,
-                            trim_start: true,
-                            ..Default::default()
+                            print_mode: TextPrintMode::trim_start(),
                         }));
                     }
                     AnyMdInline::MdHardLine(hard_line) => {
                         joiner.entry(&hard_line.format().with_options(
                             FormatMdFormatHardLineOptions {
-                                print_mode: TextPrintMode::Trim(TrimMode::All),
+                                print_mode: TextPrintMode::trim_all(),
                             },
                         ));
+                    }
+                    AnyMdInline::MdInlineItalic(italic) => {
+                        joiner.entry(&italic.format().with_options(FormatMdInlineItalicOptions {
+                            should_keep_fences: self.keep_fences_in_italics,
+                        }));
+                    }
+                    AnyMdInline::MdIndentToken(indent) => {
+                        let token = indent.md_indent_char_token()?;
+                        joiner.entry(&format_with(|f: &mut MarkdownFormatter| {
+                            f.context()
+                                .comments()
+                                .mark_suppression_checked(indent.syntax());
+                            format_removed(&token).fmt(f)
+                        }));
                     }
                     _ => {
                         joiner.entry(&item.format());
@@ -141,7 +209,16 @@ impl FormatMdInlineItemList {
                 }
             } else {
                 // Inside content boundaries: keep as-is.
-                joiner.entry(&item.format());
+                match item {
+                    AnyMdInline::MdInlineItalic(italic) => {
+                        joiner.entry(&italic.format().with_options(FormatMdInlineItalicOptions {
+                            should_keep_fences: self.keep_fences_in_italics,
+                        }));
+                    }
+                    _ => {
+                        joiner.entry(&item.format());
+                    }
+                }
             }
         }
 
@@ -164,6 +241,11 @@ impl FormatMdInlineItemList {
                     joiner.entry(&text.format().with_options(FormatMdTextualOptions {
                         print_mode: TextPrintMode::Trim(TrimMode::NormalizeWords),
                         ..Default::default()
+                    }));
+                }
+                AnyMdInline::MdInlineItalic(italic) => {
+                    joiner.entry(&italic.format().with_options(FormatMdInlineItalicOptions {
+                        should_keep_fences: self.keep_fences_in_italics,
                     }));
                 }
                 _ => {
@@ -214,6 +296,11 @@ impl FormatMdInlineItemList {
                         print_mode: TextPrintMode::Pristine,
                     }));
                 }
+                AnyMdInline::MdInlineItalic(italic) => {
+                    joiner.entry(&italic.format().with_options(FormatMdInlineItalicOptions {
+                        should_keep_fences: self.keep_fences_in_italics,
+                    }));
+                }
                 node => {
                     joiner.entry(&node.format());
                 }
@@ -236,6 +323,11 @@ impl FormatMdInlineItemList {
                         print_mode: TextPrintMode::Pristine,
                     }));
                 }
+                AnyMdInline::MdInlineItalic(italic) => {
+                    joiner.entry(&italic.format().with_options(FormatMdInlineItalicOptions {
+                        should_keep_fences: self.keep_fences_in_italics,
+                    }));
+                }
                 node => {
                     joiner.entry(&node.format());
                 }
@@ -247,6 +339,9 @@ impl FormatMdInlineItemList {
 }
 
 pub(crate) struct FormatMdFormatInlineItemListOptions {
+    /// When `true`, and there's a [MdInlineItalic], it instructions the formatter to keep the fences.
+    /// When `false`, it lets the node figure it out.
+    pub(crate) keep_fences_in_italics: bool,
     pub(crate) print_mode: TextPrintMode,
 }
 
@@ -255,6 +350,7 @@ impl FormatRuleWithOptions<MdInlineItemList> for FormatMdInlineItemList {
 
     fn with_options(mut self, options: Self::Options) -> Self {
         self.print_mode = options.print_mode;
+        self.keep_fences_in_italics = options.keep_fences_in_italics;
         self
     }
 }

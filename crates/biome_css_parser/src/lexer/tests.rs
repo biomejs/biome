@@ -2,8 +2,8 @@
 #![expect(unused_mut, unused_variables)]
 
 use super::{CssLexer, TextSize};
-use biome_css_syntax::CssSyntaxKind::EOF;
 use crate::lexer::CssLexContext;
+use biome_css_syntax::CssSyntaxKind::EOF;
 use crate::CssParserOptions;
 use biome_parser::lexer::Lexer;
 use quickcheck_macros::quickcheck;
@@ -178,6 +178,16 @@ fn string() {
     assert_lex! {
         r#""Escaped \r""#,
         CSS_STRING_LITERAL:12
+    }
+
+    assert_lex! {
+        "\"a\\\r\nb\"",
+        CSS_STRING_LITERAL:7
+    }
+
+    assert_lex! {
+        "\"\\41\nb\"",
+        CSS_STRING_LITERAL:7
     }
 
     // invalid escape sequence

@@ -18,7 +18,7 @@ pub(crate) use at_rule::{
     parse_scss_use_at_rule, parse_scss_warn_at_rule, parse_scss_while_at_rule,
 };
 pub(crate) use declaration::{
-    is_at_scss_declaration, is_at_scss_nesting_declaration, is_at_scss_variable_modifier_start,
+    is_at_scss_declaration, is_at_scss_nesting_declaration, is_at_scss_variable_modifier,
     parse_scss_declaration, parse_scss_interpolated_property_declaration,
     parse_scss_nesting_declaration, try_parse_scss_nesting_declaration,
 };
@@ -26,15 +26,17 @@ pub(crate) use expression::{
     SCSS_UNARY_OPERATOR_TOKEN_SET, complete_empty_scss_expression, is_at_scss_interpolation,
     is_nth_at_scss_interpolation, parse_required_scss_value_until, parse_scss_expression,
     parse_scss_expression_in_args_until, parse_scss_expression_in_variable_value_until,
-    parse_scss_expression_until, parse_scss_optional_value_until,
+    parse_scss_expression_until, parse_scss_optional_value_until, parse_scss_regular_interpolation,
 };
-pub(crate) use function_name::parse_scss_function_name;
+pub(crate) use function_name::{
+    add_scss_variable_member_function_name_diagnostic, parse_scss_function_name,
+};
 pub(crate) use identifiers::{
     is_at_scss_identifier, is_at_scss_interpolated_identifier, is_at_scss_namespaced_identifier,
     is_at_scss_qualified_name, is_nth_at_scss_interpolated_identifier,
-    is_nth_at_scss_qualified_name, parse_scss_identifier, parse_scss_interpolated_identifier,
-    parse_scss_namespaced_identifier, parse_scss_qualified_name, parse_scss_regular_interpolation,
-    parse_scss_selector_custom_interpolated_identifier,
+    is_nth_at_scss_qualified_name, parse_scss_identifier, parse_scss_identifier_or_interpolation,
+    parse_scss_interpolated_identifier, parse_scss_namespaced_identifier,
+    parse_scss_qualified_name, parse_scss_selector_custom_interpolated_identifier,
     parse_scss_selector_interpolated_identifier,
 };
 pub(crate) use parse_error::{
@@ -50,5 +52,8 @@ pub(crate) use token_sets::{
     SCSS_STATEMENT_START_SET, SCSS_VARIABLE_MODIFIER_LIST_END_SET,
 };
 pub(crate) use value::{
-    is_at_scss_parent_selector_value, parse_scss_fallback_value, parse_scss_parent_selector_value,
+    is_at_any_scss_value, is_at_scss_function, is_at_scss_interpolated_function_or_value,
+    is_at_scss_interpolated_string, is_at_scss_parent_selector_value, is_nth_at_scss_function,
+    parse_any_scss_value, parse_scss_function, parse_scss_interpolated_function_or_value,
+    parse_scss_interpolated_string, parse_scss_parent_selector_value,
 };

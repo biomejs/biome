@@ -1,0 +1,14 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+assertion_line: 94
+expression: mixed_slot_names
+---
+SnapshotResult {
+    messages: [],
+    matched_ranges: [
+        "1:1-1:9",
+        "2:1-2:21",
+    ],
+    rewritten_files: [],
+    created_files: [],
+}

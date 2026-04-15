@@ -2296,6 +2296,7 @@ impl Workspace for WorkspaceServer {
                 new_snippets.push(UpdateSnippetsNodes {
                     range: embedded_snippet.element_range(),
                     new_code: results.code,
+                    needs_reindent: should_format,
                 });
             }
 

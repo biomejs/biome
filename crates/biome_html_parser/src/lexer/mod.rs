@@ -663,6 +663,7 @@ impl<'src> HtmlLexer<'src> {
             WHS => self.consume_newline_or_whitespaces(),
             BEC => self.consume_byte(T!['}']),
             PRD if self.is_at_three_dots() => self.consume_dot3(),
+            PRD => self.consume_byte(T![.]),
             COM => self.consume_byte(T![,]),
             PNO => self.consume_byte(T!['(']),
             PNC => self.consume_byte(T![')']),

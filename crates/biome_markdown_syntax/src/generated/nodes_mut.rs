@@ -45,6 +45,14 @@ impl MdBulletListItem {
         )
     }
 }
+impl MdContinuationIndent {
+    pub fn with_indent(self, element: MdIndentTokenList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl MdDocument {
     pub fn with_bom_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(

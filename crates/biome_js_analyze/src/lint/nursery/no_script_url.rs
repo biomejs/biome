@@ -55,6 +55,7 @@ declare_lint_rule! {
             RuleSource::EslintReact("jsx-no-script-url").same(),
             RuleSource::EslintQwik("jsx-no-script-url").same(),
             RuleSource::EslintSolid("jsx-no-script-url").same(),
+            RuleSource::EslintReactDom("no-script-url").same(),
             RuleSource::EslintReactXyz("dom-no-script-url").same(),
         ],
         recommended: true,

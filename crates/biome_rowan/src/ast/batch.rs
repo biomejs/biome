@@ -102,6 +102,81 @@ impl<L> BatchMutation<L>
 where
     L: Language,
 {
+    #[cfg(debug_assertions)]
+    fn debug_assert_slot_compatibility(
+        parent: Option<&SyntaxNode<L>>,
+        slot_index: usize,
+        prev_element: &SyntaxElement<L>,
+        next_element: Option<&SyntaxElement<L>>,
+    ) {
+        let Some(parent) = parent else {
+            return;
+        };
+
+        let Some(slot) = parent.slots().nth(slot_index) else {
+            debug_assert!(
+                false,
+                "batch mutation targeted missing slot {slot_index} in parent kind {:?}: {parent:?}",
+                parent.kind()
+            );
+            return;
+        };
+
+        let prev_is_node = matches!(prev_element, SyntaxElement::Node(_));
+        let prev_kind = match prev_element {
+            SyntaxElement::Node(node) => format!("{:?}", node.kind()),
+            SyntaxElement::Token(token) => format!("{:?}", token.kind()),
+        };
+        let slot_is_node = matches!(slot, SyntaxSlot::Node(_));
+        let slot_is_token = matches!(slot, SyntaxSlot::Token(_));
+        let slot_kind = match &slot {
+            SyntaxSlot::Node(node) => Some(format!("{:?}", node.kind())),
+            SyntaxSlot::Token(token) => Some(format!("{:?}", token.kind())),
+            SyntaxSlot::Empty { .. } => None,
+        };
+
+        debug_assert!(
+            (prev_is_node && slot_is_node) || (!prev_is_node && slot_is_token),
+            "batch mutation targeted a {} {:?} in slot {slot_index} of parent kind {:?}, but the current slot contains a {} {:?}: {parent:?}",
+            if prev_is_node { "node" } else { "token" },
+            prev_kind,
+            parent.kind(),
+            match &slot {
+                SyntaxSlot::Node(_) => "node",
+                SyntaxSlot::Token(_) => "token",
+                SyntaxSlot::Empty { .. } => "missing element",
+            },
+            slot_kind
+        );
+
+        let Some(next_element) = next_element else {
+            return;
+        };
+
+        let next_kind = match next_element {
+            SyntaxElement::Node(node) => format!("{:?}", node.kind()),
+            SyntaxElement::Token(token) => format!("{:?}", token.kind()),
+        };
+
+        debug_assert!(
+            matches!(
+                (prev_element, next_element),
+                (SyntaxElement::Node(_), SyntaxElement::Node(_))
+                    | (SyntaxElement::Token(_), SyntaxElement::Token(_))
+            ),
+            "batch mutation attempted to replace a {} {:?} with a {} {:?} in parent kind {:?}; use the matching token/node replacement API",
+            if prev_is_node { "node" } else { "token" },
+            prev_kind,
+            if matches!(next_element, SyntaxElement::Node(_)) {
+                "node"
+            } else {
+                "token"
+            },
+            next_kind,
+            parent.kind()
+        );
+    }
+
     pub fn new(root: SyntaxNode<L>) -> Self {
         Self {
             root,
@@ -368,6 +443,13 @@ where
     ) {
         let new_node_slot = prev_element.index();
         let parent = prev_element.parent();
+        #[cfg(debug_assertions)]
+        Self::debug_assert_slot_compatibility(
+            parent.as_ref(),
+            new_node_slot,
+            &prev_element,
+            next_element.as_ref(),
+        );
         let parent_range: Option<(u32, u32)> = parent.as_ref().map(|p| {
             let range = p.text_range_with_trivia();
             (range.start().into(), range.end().into())

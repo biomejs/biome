@@ -54,7 +54,6 @@ info: markdown/long-table/long-table.md
 +| locale | i18n text including empty text | object | emptyText: 'No Data' <br> |
 +| pagination | Pagination [config](https://ant.design/components/pagination/), hide it by setting it to false | boolean \| object | false |
 +| split | Toggles rendering of the split under the list item | boolean | true |
-\ No newline at end of file
 ```
 
 # Output
@@ -72,7 +71,8 @@ info: markdown/long-table/long-table.md
 | loadMore | Shows a load more content | string\|ReactNode | - |
 | locale | i18n text including empty text | object | emptyText: 'No Data' <br> |
 | pagination | Pagination [config](https://ant.design/components/pagination/), hide it by setting it to false | boolean \| object | false |
-| split | Toggles rendering of the split under the list item | boolean | true |```
+| split | Toggles rendering of the split under the list item | boolean | true |
+```
 
 # Lines exceeding max width of 80 characters
 ```

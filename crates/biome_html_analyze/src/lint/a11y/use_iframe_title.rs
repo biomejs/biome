@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::AnyHtmlElement;
+use biome_html_syntax::{AnyHtmlElement, HtmlFileSource};
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_iframe_title::UseIframeTitleOptions;
 
@@ -59,9 +59,8 @@ impl Rule for UseIframeTitle {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
-        let file_extension = ctx.file_path().extension()?;
 
-        if !is_iframe_element(element, file_extension) {
+        if !is_iframe_element(element, ctx) {
             return None;
         }
 
@@ -88,17 +87,19 @@ impl Rule for UseIframeTitle {
     }
 }
 
-/// Checks if the element is an iframe element.
-///
-/// - In `.html` files, matching is case-insensitive.
-/// - In component-based frameworks, only lowercase `iframe` is matched to avoid flagging custom components like `<Iframe>`.
-fn is_iframe_element(element: &AnyHtmlElement, file_extension: &str) -> bool {
-    element.name().is_some_and(|token_text| {
-        let is_html_file = file_extension == "html";
-        if is_html_file {
-            token_text.eq_ignore_ascii_case("iframe")
-        } else {
-            token_text == "iframe"
-        }
-    })
+fn is_iframe_element(element: &AnyHtmlElement, ctx: &RuleContext<UseIframeTitle>) -> bool {
+    let Some(element_name) = element.name() else {
+        return false;
+    };
+
+    let source_type = ctx.source_type::<HtmlFileSource>();
+
+    // In HTML files: case-insensitive (IFRAME, Iframe, iframe all match)
+    // In component frameworks (Vue, Svelte, Astro): case-sensitive (only "iframe" matches)
+    // This means <Iframe> in Vue/Svelte is treated as a component and ignored
+    if source_type.is_html() {
+        element_name.text().eq_ignore_ascii_case("iframe")
+    } else {
+        element_name.text() == "iframe"
+    }
 }

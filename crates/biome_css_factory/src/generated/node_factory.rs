@@ -1395,6 +1395,18 @@ pub fn css_keyframes_percentage_selector(
         [Some(SyntaxElement::Node(selector.into_syntax()))],
     ))
 }
+pub fn css_keyframes_range_selector(
+    name_token: SyntaxToken,
+    percentage: CssPercentage,
+) -> CssKeyframesRangeSelector {
+    CssKeyframesRangeSelector::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_KEYFRAMES_RANGE_SELECTOR,
+        [
+            Some(SyntaxElement::Token(name_token)),
+            Some(SyntaxElement::Node(percentage.into_syntax())),
+        ],
+    ))
+}
 pub fn css_keyframes_scope_function(
     scope_token: SyntaxToken,
     l_paren_token: SyntaxToken,
@@ -2268,14 +2280,14 @@ pub fn css_qualified_rule(
         ],
     ))
 }
-pub fn css_query_feature_boolean(name: CssIdentifier) -> CssQueryFeatureBoolean {
+pub fn css_query_feature_boolean(name: AnyCssQueryFeatureName) -> CssQueryFeatureBoolean {
     CssQueryFeatureBoolean::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_QUERY_FEATURE_BOOLEAN,
         [Some(SyntaxElement::Node(name.into_syntax()))],
     ))
 }
 pub fn css_query_feature_plain(
-    name: CssIdentifier,
+    name: AnyCssQueryFeatureName,
     colon_token: SyntaxToken,
     value: AnyCssQueryFeatureValue,
 ) -> CssQueryFeaturePlain {
@@ -2289,7 +2301,7 @@ pub fn css_query_feature_plain(
     ))
 }
 pub fn css_query_feature_range(
-    left: CssIdentifier,
+    left: AnyCssQueryFeatureName,
     comparison: CssQueryFeatureRangeComparison,
     right: AnyCssQueryFeatureValue,
 ) -> CssQueryFeatureRange {
@@ -2313,7 +2325,7 @@ pub fn css_query_feature_range_comparison(
 pub fn css_query_feature_range_interval(
     left: AnyCssQueryFeatureValue,
     left_comparison: CssQueryFeatureRangeComparison,
-    name: CssIdentifier,
+    name: AnyCssQueryFeatureName,
     right_comparison: CssQueryFeatureRangeComparison,
     right: AnyCssQueryFeatureValue,
 ) -> CssQueryFeatureRangeInterval {
@@ -2331,7 +2343,7 @@ pub fn css_query_feature_range_interval(
 pub fn css_query_feature_reverse_range(
     left: AnyCssQueryFeatureValue,
     comparison: CssQueryFeatureRangeComparison,
-    right: CssIdentifier,
+    right: AnyCssQueryFeatureName,
 ) -> CssQueryFeatureReverseRange {
     CssQueryFeatureReverseRange::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_QUERY_FEATURE_REVERSE_RANGE,
@@ -3603,6 +3615,28 @@ pub fn scss_interpolated_identifier(
         [Some(SyntaxElement::Node(items.into_syntax()))],
     ))
 }
+pub fn scss_interpolated_identifier_hyphen(
+    minus_token: SyntaxToken,
+) -> ScssInterpolatedIdentifierHyphen {
+    ScssInterpolatedIdentifierHyphen::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_INTERPOLATED_IDENTIFIER_HYPHEN,
+        [Some(SyntaxElement::Token(minus_token))],
+    ))
+}
+pub fn scss_interpolated_string(
+    opening_quote_token: SyntaxToken,
+    parts: ScssInterpolatedStringPartList,
+    closing_quote_token: SyntaxToken,
+) -> ScssInterpolatedString {
+    ScssInterpolatedString::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_INTERPOLATED_STRING,
+        [
+            Some(SyntaxElement::Token(opening_quote_token)),
+            Some(SyntaxElement::Node(parts.into_syntax())),
+            Some(SyntaxElement::Token(closing_quote_token)),
+        ],
+    ))
+}
 pub fn scss_interpolation(
     hash_token: SyntaxToken,
     l_curly_token: SyntaxToken,
@@ -3952,6 +3986,12 @@ pub fn scss_show_clause(show_token: SyntaxToken, members: ScssModuleMemberList) 
             Some(SyntaxElement::Token(show_token)),
             Some(SyntaxElement::Node(members.into_syntax())),
         ],
+    ))
+}
+pub fn scss_string_text(value_token: SyntaxToken) -> ScssStringText {
+    ScssStringText::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_STRING_TEXT,
+        [Some(SyntaxElement::Token(value_token))],
     ))
 }
 pub fn scss_unary_expression(
@@ -5052,6 +5092,18 @@ where
 {
     ScssInterpolatedIdentifierPartList::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_INTERPOLATED_IDENTIFIER_PART_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn scss_interpolated_string_part_list<I>(items: I) -> ScssInterpolatedStringPartList
+where
+    I: IntoIterator<Item = AnyScssInterpolatedStringPart>,
+    I::IntoIter: ExactSizeIterator,
+{
+    ScssInterpolatedStringPartList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_INTERPOLATED_STRING_PART_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),

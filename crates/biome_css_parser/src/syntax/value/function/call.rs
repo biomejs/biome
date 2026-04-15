@@ -70,7 +70,7 @@ fn is_at_css_if_function_in_context(p: &mut CssParser, context: ValueParsingCont
         return false;
     }
 
-    if !context.is_scss_parsing_allowed() {
+    if !context.is_full_scss_parsing_allowed() {
         return true;
     }
 
@@ -125,7 +125,7 @@ fn is_nth_at_function_with_context(
     context: ValueParsingContext,
 ) -> bool {
     is_nth_at_identifier(p, n) && p.nth_at(n + 1, T!['('])
-        || (context.is_scss_syntax_allowed()
+        || (context.is_scss_exclusive_syntax_allowed()
             && is_nth_at_scss_qualified_name(p, n)
             && p.nth_at(n + 3, T!['(']))
 }
@@ -158,7 +158,7 @@ fn parse_function_with_context(p: &mut CssParser, context: ValueParsingContext) 
 
     let m = p.start();
 
-    if context.is_scss_syntax_allowed() && is_at_scss_qualified_name(p) {
+    if context.is_scss_exclusive_syntax_allowed() && is_at_scss_qualified_name(p) {
         CssSyntaxFeatures::Scss
             .parse_exclusive_syntax(p, parse_scss_function_name, |p, marker| {
                 scss_only_syntax_error(p, "SCSS qualified function names", marker.range(p))

@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use biome_formatter::FormatContext;
 use biome_formatter::write;
 
 use biome_js_syntax::{
@@ -44,7 +45,17 @@ impl FormatNodeRule<JsTemplateChunkElement> for FormatJsTemplateChunkElement {
             return None;
         }
 
-        Some(node.template_chunk_token().ok()?.text_range())
+        let transformed_range = node.template_chunk_token().ok()?.text_range();
+
+        // Map the range back to the original source positions. The formatter works
+        // with a transformed tree (parentheses removed by JsFormatSyntaxRewriter),
+        // but the embedding service stores ranges from the original tree.
+        let source_range = f
+            .context()
+            .source_map()
+            .map_or(transformed_range, |map| map.source_range(transformed_range));
+
+        Some(source_range)
     }
 }
 

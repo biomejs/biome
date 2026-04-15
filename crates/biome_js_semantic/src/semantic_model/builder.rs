@@ -1,5 +1,9 @@
 use super::*;
-use biome_js_syntax::{AnyJsRoot, JsSyntaxNode, TextRange, TsConditionalType, TsTypeParameterName};
+use biome_js_syntax::{
+    AnyJsDeclaration, AnyJsRoot, JsExport, JsSyntaxNode, TextRange, TsConditionalType,
+    TsTypeParameterName,
+};
+use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::SyntaxNodePtr;
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::collections::hash_map::Entry;
@@ -27,6 +31,7 @@ pub struct SemanticModelBuilder {
     declared_at_by_start: FxHashMap<TextSize, BindingId>,
     exported: FxHashSet<TextSize>,
     unresolved_references: Vec<SemanticModelUnresolvedReference>,
+    pub(crate) export_jsdoc_by_range: FxHashMap<TextRange, JsdocComment>,
 }
 
 impl SemanticModelBuilder {
@@ -45,6 +50,7 @@ impl SemanticModelBuilder {
             declared_at_by_start: FxHashMap::default(),
             exported: FxHashSet::default(),
             unresolved_references: Vec::new(),
+            export_jsdoc_by_range: FxHashMap::default(),
         }
     }
 
@@ -112,6 +118,12 @@ impl SemanticModelBuilder {
             | TS_MAPPED_TYPE => {
                 self.scope_node_by_range
                     .insert(node.text_trimmed_range(), node.clone());
+            }
+            JS_EXPORT => {
+                if let Ok(jsdoc) = JsdocComment::try_from(node) {
+                    self.export_jsdoc_by_range
+                        .insert(node.text_trimmed_range(), jsdoc);
+                }
             }
             _ => {
                 if let Some(conditional_type) = TsConditionalType::cast_ref(node)
@@ -181,11 +193,16 @@ impl SemanticModelBuilder {
                 debug_assert!((binding_scope_id.index()) < self.scopes.len());
 
                 let binding_id = BindingId::new(self.bindings.len());
+                let jsdoc = self
+                    .binding_node_by_start
+                    .get(&range.start())
+                    .and_then(find_jsdoc);
                 self.bindings.push(SemanticModelBindingData {
                     range,
                     references: Vec::new(),
-                    export_by_start: smallvec::SmallVec::new(),
+                    export_ranges: smallvec::SmallVec::new(),
                     declaration_kind,
+                    jsdoc,
                 });
                 self.bindings_by_start.insert(range.start(), binding_id);
 
@@ -345,7 +362,7 @@ impl SemanticModelBuilder {
 
                 let binding_id = self.bindings_by_start[&declaration_at];
                 let binding = &mut self.bindings[binding_id.index()];
-                binding.export_by_start.push(range.start());
+                binding.export_ranges.push(range);
             }
         }
     }
@@ -379,7 +396,20 @@ impl SemanticModelBuilder {
             exported: self.exported,
             unresolved_references: self.unresolved_references,
             globals: self.globals,
+            export_jsdoc_by_range: self.export_jsdoc_by_range,
         };
         SemanticModel::new(data)
     }
+}
+
+fn find_jsdoc(node: &JsSyntaxNode) -> Option<JsdocComment> {
+    node.ancestors().find_map(|ancestor| {
+        if let Some(export) = JsExport::cast_ref(&ancestor) {
+            JsdocComment::try_from(export.syntax()).ok()
+        } else if let Some(decl) = AnyJsDeclaration::cast(ancestor) {
+            JsdocComment::try_from(decl.syntax()).ok()
+        } else {
+            None
+        }
+    })
 }

@@ -1,0 +1,14 @@
+---
+source: crates/biome_service/src/workspace/server.tests.rs
+expression: result.as_code()
+---
+import { graphql } from "@generated/gql.js";
+
+const a = {};
+console.log(a);
+
+const fetchFileUploadUrlQuery = graphql(`
+	query Q {
+		field
+	}
+`);

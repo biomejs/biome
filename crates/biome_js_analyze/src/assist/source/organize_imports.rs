@@ -26,136 +26,9 @@ use specifiers_attributes::{
 use util::{attached_trivia, detached_trivia, has_detached_leading_comment, leading_newlines};
 
 declare_source_rule! {
-    /// Provides a code action to sort the imports and exports in the file using a built-in or custom order.
+    /// Sorts imports and exports in your JavaScript and TypeScript files.
     ///
-    /// Imports and exports are first separated into chunks, before being sorted.
-    /// Imports or exports of a chunk are then grouped according to the user-defined groups.
-    /// Within a group, imports are sorted using a built-in order that depends on the import/export kind, whether the import/export has attributes and the source being imported from.
-    /// **source** is also often called **specifier** in the JavaScript ecosystem.
-    ///
-    /// ```js,ignore
-    /// import A from "@my/lib" with { "attribute1": "value" };
-    /// ^^^^^^^^       ^^^^^^^         ^^^^^^^^^^^^^^^^^^^^^
-    ///   kind         source                attributes
-    ///
-    /// export * from "@my/lib" with { "attribute1": "value" };
-    /// ^^^^^^^^       ^^^^^^^         ^^^^^^^^^^^^^^^^^^^^^
-    ///   kind         source                attributes
-    /// ```
-    ///
-    ///
-    /// ## Chunk of imports and chunk of exports
-    ///
-    /// A **chunk** is a sequence of adjacent imports or exports.
-    /// A chunk contains only imports or exports, not both at the same time.
-    /// The following example includes two chunks.
-    /// The first chunk consists of the three imports and the second chunk consists of the three exports.
-    ///
-    /// ```js,ignore
-    /// // chunk 1
-    /// import A from "a";
-    /// import * as B from "b";
-    /// import { C } from "c";
-    /// // chunk 2
-    /// export * from "d";
-    /// export * as F from "e";
-    /// export { F } from "f";
-    /// ```
-    ///
-    /// Chunks also end as soon as a statement or a **side-effect import** (also called _bare import_) is encountered.
-    /// Every side-effect import forms an independent chunk.
-    /// The following example contains six chunks:
-    ///
-    /// ```js,ignore
-    /// // chunk 1
-    /// import A from "a";
-    /// import * as B from "b";
-    /// // chunk 2
-    /// import "x";
-    /// // chunk 3
-    /// import "y";
-    /// // chunk 4
-    /// import { C } from "c";
-    /// // chunk 5
-    /// export * from "d";
-    /// function f() {}
-    /// // chunk 6
-    /// export * as E from "e";
-    /// export { F } from "f";
-    /// ```
-    ///
-    /// 1. The first chunk contains the two first `import` and ends with the appearance of the first side-effect import `import "x"`.
-    /// 2. The second chunk contains only the side-effect import `import "x"`.
-    /// 3. The third chunk contains only the side-effect import `import "y"`.
-    /// 4. The fourth chunk contains a single `import`; The first `export` ends it.
-    /// 5. The fifth chunk contains the first `export`; The function declaration ends it.
-    /// 6. The sixth chunk contains the last two `export`.
-    ///
-    /// Chunks are also delimited by detached comments.
-    /// A **detached comment** is a comment followed by a blank line.
-    /// Comments not followed by a blank line are **attached comments**.
-    /// Note that blank lines alone are not taken into account when chunking imports and exports.
-    /// The following example contains a detached comment that splits the imports into two chunks:
-    ///
-    /// ```js,ignore
-    /// // Attached comment 1
-    /// import A from "a";
-    ///
-    /// // Attached comment 2
-    /// import * as B from "b";
-    /// // Detached comment
-    ///
-    /// import { C } from "c";
-    /// ```
-    ///
-    /// The line `import { C } from "c"` forms the second chunk.
-    /// The blank line between the first two imports is ignored so they form a single chunk.
-    ///
-    /// The sorter ensures that chunks are separated from each other with blank lines.
-    /// Only side-effect imports adjacent to a chunk of imports are not separated by a blank line.
-    /// The following code...
-    ///
-    /// ```js,ignore
-    /// import A from "a";
-    /// import * as B from "b";
-    /// import "x";
-    /// import { C } from "c";
-    /// export * from "d";
-    /// // Detached comment
-    ///
-    /// export * as F from "e";
-    /// // Attached comment
-    /// export { F } from "f";
-    /// ```
-    ///
-    /// is sorted as:
-    ///
-    /// ```js,ignore
-    /// import A from "a";
-    /// import * as B from "b";
-    /// import "x";
-    /// import { C } from "c";
-    ///
-    /// export * from "d";
-    ///
-    /// // Detached comment
-    ///
-    /// export * as F from "e";
-    /// // Attached comment
-    /// export { F } from "f";
-    /// ```
-    ///
-    /// Also, note that blank lines inside a chunk are ignored and preserved.
-    /// They can be removed by explicitly defining groups as demonstrated in the next section.
-    ///
-    ///
-    /// ## Import and export sorting
-    ///
-    /// Once chunks are formed, imports and exports of each chunk are sorted.
-    /// Imports and exports are sorted by their source.
-    /// Sources are ordered by "distance".
-    /// Sources that are "farther" from the current module are put on the top, sources "closer" to the user are put on the bottom.
-    /// This leads to the following order:
+    /// By default, imports and exports are sorted by "distance" from the current file:
     ///
     /// 1. URLs such as `https://example.org`.
     /// 2. Packages with a protocol such as `node:path`, `bun:test`, `jsr:@my?lib`, or `npm:lib`.
@@ -164,9 +37,12 @@ declare_source_rule! {
     ///    They usually are [Node.js subpath imports](https://nodejs.org/api/packages.html#subpath-imports) or [TypeScript path aliases](https://www.typescriptlang.org/tsconfig/#paths).
     /// 5. Absolute and relative paths.
     ///
-    /// Two imports/exports with the same source category are sorted using a [natural sort order](https://en.wikipedia.org/wiki/Natural_sort_order) tailored to URLs, packages, and paths.
-    /// Notably, the order ensures that `A < a < B < b`.
-    /// The order takes also numbers into account, e.g. `a9 < a10`.
+    /// Imports and exports with the same distance are sorted using a
+    /// [natural sort order](https://en.wikipedia.org/wiki/Natural_sort_order)
+    /// such that `A < a < a9 < a10 < B < b`
+    ///
+    /// The action also merges imports and exports from the same source,
+    /// sorts named specifiers and attributes using a natural sort order.
     ///
     /// For example, the following code...
     ///
@@ -176,11 +52,15 @@ declare_source_rule! {
     /// import fs from "fs";
     /// import { test } from "node:test";
     /// import path from "node:path";
+    /// import { mock } from "node:test";
     /// import parent from "../parent.js";
     /// import scopedLibUsingJsr from "jsr:@scoped/lib";
     /// import data from "https://example.org";
-    /// import lib from "lib";
+    /// import { B, A, b, a10, a9 } from "lib";
     /// import scopedLib from "@scoped/lib";
+    /// export { Y } from "dep";
+    /// export * from "./inner.js";
+    /// export { X } from "dep";
     /// ```
     ///
     /// ...is sorted as follows:
@@ -189,193 +69,112 @@ declare_source_rule! {
     /// import data from "https://example.org";
     /// import scopedLibUsingJsr from "jsr:@scoped/lib";
     /// import path from "node:path";
-    /// import { test } from "node:test";
+    /// import { mock, test } from "node:test";
     /// import scopedLib from "@scoped/lib";
     /// import fs from "fs";
-    /// import lib from "lib";
+    /// import { A, a9, a10, B, b } from "lib";
     /// import internal from "#alias";
     /// import parent from "../parent.js";
     /// import sibling from "./file.js";
+    ///
+    /// export { X, Y } from "dep";
+    /// export * from "./inner.js";
     /// ```
     ///
-    /// If two imports or exports share the same source and are in the same chunk, then they are ordered according to their kind as follows:
+    /// ## Options
     ///
-    /// 1. Namespace type import / Namespace type export
-    /// 2. Default type import
-    /// 3. Named type import / Named type export
-    /// 4. Namespace import / Namespace export
-    /// 5. Combined default and namespace import
-    /// 6. Default import
-    /// 7. Combined default and named import
-    /// 8. Named import / Named export
+    /// The action provides several options to customize how imports and exports are ordered:
     ///
-    /// Imports and exports with attributes are always placed first.
-    /// For example, the following code...
+    /// - `groups` allows to group imports and exports before sorting them;
+    ///   It allows expressing custom order between imports or exports.
+    /// - `identifierOrder` allows changing how named specifiers and attributes are sorted
     ///
-    /// ```ts,ignore
-    /// import * as namespaceImport from "same-source";
-    /// import type * as namespaceTypeImport from "same-source";
-    /// import type { namedTypeImport } from "same-source";
-    /// import defaultNamespaceCombined, * as namespaceCombined from "same-source";
-    /// import defaultNamedCombined, { namedCombined } from "same-source";
-    /// import defaultImport from "same-source";
-    /// import type defaultTypeImport from "same-source";
-    /// import { importWithAttribute } from "same-source" with { "attribute": "value" } ;
-    /// ```
+    /// ### `groups`
     ///
-    /// is sorted as follows:
+    /// You can customize how imports and exports are grouped using the `groups` option.
+    /// The option accepts an array of group matchers,
+    /// which in their simplest form are glob patterns or predefined group matchers.
+    /// Imports and exports that don't match any group are automatically moved after all the groups.
     ///
-    /// ```ts,ignore
-    /// import { importWithAttribute } from "same-source" with { "attribute": "value" } ;
-    /// import type * as namespaceTypeImport from "same-source";
-    /// import type defaultTypeImport from "same-source";
-    /// import type { namedTypeImport } from "same-source";
-    /// import * as namespaceImport from "same-source";
-    /// import defaultNamespaceCombined, * as namespaceCombined from "same-source";
-    /// import defaultImport from "same-source";
-    /// import defaultNamedCombined, { namedCombined } from "same-source";
-    /// ```
+    /// Groups are always matched in order, so earlier matchers take priority.
+    /// To exclude some imports of a group, you can use an array of group matchers
+    /// with negated matchers, prefixed with `!`.
+    /// In the following example, we use the negated glob matcher `!@myown/**`,
+    /// to exclude `@myown/package` from the `:PACKAGE:` group.
     ///
-    /// This default order cannot be changed.
-    /// However, users can still customize how imports and exports are sorted using the concept of groups as explained in the following section.
+    /// With this configuration...
     ///
-    ///
-    /// ## Import and export groups
-    ///
-    /// Imports or exports of a chunk are divided into groups before being sorted with the built-in order described in the previous section.
-    /// By default every chunk consists of a single group.
-    /// These default groups and their order may not be to your taste.
-    /// The sorter provides a `groups` option that allows you to customize how the chunks are divided into groups.
-    /// The `groups` option is a list of group matchers.
-    /// A group matcher is:
-    ///
-    /// - A predefined group matcher, or
-    /// - A glob pattern, or
-    /// - An object matcher, or
-    /// - A list of glob patterns, predefined group matchers, and object matchers.
-    ///
-    /// Predefined group matchers are strings in `CONSTANT_CASE` prefixed and suffixed by `:`.
-    /// The sorter provides several predefined group matchers:
-    ///
-    /// - `:ALIAS:`: sources starting with `#`, `@/`, `~`, `$`, or `%`.
-    /// - `:BUN:`: sources starting with the protocol `bun:` or that correspond to a built-in Bun module such as `bun`.
-    /// - `:NODE:`: sources starting with the protocol `node:` or that correspond to a built-in Node.js module such as `fs` or `path`.
-    /// - `:PACKAGE:`: scoped and bare packages.
-    /// - `:PACKAGE_WITH_PROTOCOL:`: scoped and bare packages with a protocol.
-    /// - `:PATH:`: absolute and relative paths.
-    /// - `:URL:`: sources starting with `https://` and `http://`.
-    ///
-    /// Let's take an example.
-    /// In the default configuration, Node.js modules without the `node:` protocol are separated from those with a protocol.
-    /// To group them together, you can use the predefined group `:NODE:`.
-    /// Given the following configuration...
-    ///
-    /// ```json,full_options
+    /// ```json,options
     /// {
-    ///     "assist": {
-    ///         "actions": {
-    ///             "source": {
-    ///                 "organizeImports": {
-    ///                     "level": "on",
-    ///                     "options": {
-    ///                         "groups": [
-    ///                             ":URL:",
-    ///                             ":NODE:"
-    ///                         ]
-    ///                     }
-    ///                 }
-    ///             }
-    ///         }
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// ...and the following code...
-    ///
-    /// ```js,ignore
-    /// import sibling from "./file.js";
-    /// import internal from "#alias";
-    /// import fs from "fs";
-    /// import { test } from "node:test";
-    /// import path from "node:path";
-    /// import parent from "../parent.js";
-    /// import scopedLibUsingJsr from "jsr:@scoped/lib";
-    /// import data from "https://example.org";
-    /// import lib from "lib";
-    /// import scopedLib from "@scoped/lib";
-    /// ```
-    ///
-    /// ...we end up with the following sorted result where the imports of `node:path` and the `fs` Node.js module are grouped together:
-    ///
-    /// ```js,ignore
-    /// import data from "https://example.org";
-    /// import fs from "fs";
-    /// import path from "node:path";
-    /// import { test } from "node:test";
-    /// import scopedLibUsingJsr from "jsr:@scoped/lib";
-    /// import scopedLib from "@scoped/lib";
-    /// import lib from "lib";
-    /// import internal from "#alias";
-    /// import parent from "../parent.js";
-    /// import sibling from "./file.js";
-    /// ```
-    ///
-    /// Note that all imports that don't match a group matcher are always placed at the end.
-    ///
-    ///
-    /// Group matchers can also be glob patterns and list of glob patterns.
-    /// Glob patterns select imports and exports with a source that matches the pattern.
-    /// In the following example, we create two groups: one that gathers imports/exports with a source starting with `@my/lib` except `@my/lib/special` and the other that gathers imports/exports starting with `@/`.
-    ///
-    /// ```json
-    /// {
-    ///     "options": {
+    ///    "options": {
     ///         "groups": [
-    ///             ["@my/lib", "@my/lib/**", "!@my/lib/special", "!@my/lib/special/**"],
-    ///             "@/**"
+    ///             [":BUN:", ":NODE:"],
+    ///             ":BLANK_LINE:",
+    ///             [":PACKAGE:", "!@myown/**"],
+    ///             ":BLANK_LINE:",
+    ///             "@myown/**",
+    ///             ":BLANK_LINE:",
+    ///             [":ALIAS:", ":PATH:"]
     ///         ]
     ///     }
     /// }
     /// ```
     ///
-    /// By applying this configuration to the following code...
+    /// ...the following code...
     ///
     /// ```js,ignore
-    /// import lib from "@my/lib";
-    /// import aliased from "@/alias";
-    /// import path from "@my/lib/special";
-    /// import test from "@my/lib/path";
+    /// import aliased from "@/components/Button";
+    /// import lib from "lib";
+    /// import path from "node:path";
+    /// import sibling from "./file.js";
+    /// import myown from "@myown/package";
+    /// import scopedLib from "@scoped/lib";
+    /// import fs from "fs";
     /// ```
     ///
-    /// ...we obtain the following sorted result.
-    /// Imports with the sources `@my/lib` and `@my/lib/path` form the first group.
-    /// They match the glob patterns `@my/lib` and `@my/lib/**` respectively.
-    /// The import with the source `@my/lib/special` is not placed in this first group because it is rejected by the exception `!@my/lib/special`.
-    /// The import with the source `@/alias` is placed in a second group because it matches the glob pattern `@/**`.
-    /// Finally, other imports are placed at the end.
+    /// ...is sorted as:
     ///
     /// ```js,ignore
-    /// import lib from "@my/lib";
-    /// import test from "@my/lib/path";
-    /// import aliased from "@/alias";
-    /// import path from "@my/lib/special";
+    /// import fs from "fs";
+    /// import path from "node:path";
+    ///
+    /// import scopedLib from "@scoped/lib";
+    /// import lib from "lib";
+    ///
+    /// import myown from "@myown/package";
+    ///
+    /// import aliased from "@/components/Button";
+    /// import sibling from "./file.js";
     /// ```
     ///
-    /// Note that `@my/lib` matches `@my/lib` but not `@my/lib/**`.
-    /// Conversely, `@my/lib/subpath` matches `@my/lib/**`, but not `@my/lib`.
-    /// So, you have to specify both glob patterns if you want to accept all imports/exports that start with `@my/lib`.
-    /// The prefix `!` indicates an exception.
-    /// You can create exceptions of exceptions by following an exception by a regular glob pattern.
-    /// For example `["@my/lib", "@my/lib/**", "!@my/lib/special", "!@my/lib/special/**", "@my/lib/special/*/accepted/**"]` allows you to accepts all sources matching `@my/lib/special/*/accepted/**`.
-    /// Note that the predefined groups can also be negated. `!:NODE:` matches all sources that don't match `:NODE:`.
-    /// For more details on the supported glob patterns, see the dedicated section.
+    /// Each entry in the `groups` array is a group matcher that can be:
     ///
-    /// Finally, group matchers can be object matchers.
-    /// An object matcher allows to match type-only imports and exports.
+    /// - A predefined group like `:NODE:`, `:BUN:`, or `:PACKAGE:`
+    /// - A glob pattern like `@my/lib/**`;
+    ///   the action supports a [limited set of globs](#supported-glob-patterns).
+    /// - Type-only imports like `{ "type": true }`
+    /// - A combination of the above, e.g. `[":BUN:", ":NODE:"]`
+    /// - `:BLANK_LINE:` to insert a blank line between groups
     ///
-    /// Given the following configuration:
+    /// #### Predefined groups
     ///
-    /// ```json
+    /// - `:URL:`: sources starting with `https://` or `http://`
+    /// - `:NODE:`: Node.js built-in modules (`node:path`, `fs`, `path`, etc.)
+    /// - `:BUN:`: Bun built-in modules (`bun:test`, `bun`, etc.)
+    /// - `:PACKAGE_WITH_PROTOCOL:`: packages with a protocol (`jsr:@my/lib`, `npm:lib`)
+    /// - `:PACKAGE:`: bare and scoped packages (`lib`, `@scoped/lib`)
+    /// - `:ALIAS:`: path aliases starting with `#`, `@/`, `~`, `$`, or `%`
+    /// - `:PATH:`: absolute and relative paths
+    ///
+    /// #### Type-only matcher
+    ///
+    /// Use a type-only matcher to separate `import type` from regular imports:
+    /// Setting `"type": true` matches only `import type` and `export type` statements.
+    /// Setting `"type": false` matches only non-type imports and exports.
+    ///
+    /// Given the following configuration...
+    ///
+    /// ```json,options
     /// {
     ///     "options": {
     ///         "groups": [
@@ -386,158 +185,263 @@ declare_source_rule! {
     /// }
     /// ```
     ///
-    /// The following code:
+    /// ...the following code...
     ///
     /// ```ts,ignore
     /// import type { T } from "@my/lib";
     /// import { V } from "@my/lib";
     /// ```
     ///
-    /// is sorted as follows:
+    /// ...is sorted as:
     ///
     /// ```ts,ignore
     /// import { V } from "@my/lib";
     /// import type { T } from "@my/lib";
     /// ```
     ///
-    /// The object matcher `{ "type": false, "source": ["@my/lib", "@my/lib/**"] }` match against imports and exports without the `type` keyword with a source that matches one of the glob pattern of the list `["@my/lib", "@my/lib/**"]`.
+    /// ### `identifierOrder`
     ///
-    /// The sorter allows the separation of two groups with a blank line using the predefined string `:BLANK_LINE:`.
-    /// Given the following configuration...
+    /// By default, attributes, imported and exported names are sorted with a `natural` sort order.
+    /// Opt for a `lexicographic` sort, also referred as _binary_ sort,
+    /// by setting the `identifierOrder` option to `lexicographic`:
     ///
-    /// ```json
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "identifierOrder": "lexicographic"
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,use_options,expect_diagnostic
+    /// import { var1, var2, var21, var11, var12, var22 } from "my-package" with { "att10": "", "att2": "" };
+    ///
+    /// export { var1, var2, var21, var11, var12, var22 };
+    /// ```
+    ///
+    /// Note that this order doesn't change how import and export sources are sorted.
+    ///
+    ///
+    /// ## Common configurations
+    ///
+    /// ### Group Node.js and bun built-in
+    ///
+    /// The following example moves the Node.js and `bun` built-ins at the top of the file,
+    /// and adds a blank line just after them.
+    /// Other imports are placed after this blank line.
+    ///
+    /// ```json,options
+    /// {
+    ///    "options": {
+    ///         "groups": [
+    ///             [":BUN:", ":NODE:"],
+    ///             ":BLANK_LINE:"
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```ts,use_options,expect_diagnostic
+    /// import { test } from "bun:test";
+    /// import path from "node:path";
+    /// import { A } from "@my/package";
+    /// import { $ } from "bun";
+    /// import fs from "fs";
+    /// ```
+    ///
+    /// ### Group monorepo packages
+    ///
+    /// Let's assume that all your monorepo packages are scoped by `@mycompany`.
+    /// The following example groups all monorepo imports after imports of external dependencies.
+    ///
+    /// Because groups are matched in order, the first group has to exclude monorepo imports.
+    /// Indeed, `:PACKAGE:` matches imports like `@mycompany/db`, and thus must be excluded
+    /// thanks to the exception `!@mycompany/**`.
+    ///
+    /// ```json,options
     /// {
     ///     "options": {
     ///         "groups": [
-    ///             [":BUN:", ":NODE:"],
+    ///             [":PACKAGE:", ":PACKAGE_WITH_PROTOCOL:", "!@mycompany/**"],
     ///             ":BLANK_LINE:",
-    ///             ["@my/lib", "@my/lib/**", "!@my/lib/special", "!@my/lib/special/**"],
-    ///             "@/**"
+    ///             ["@mycompany/**"],
+    ///             ":BLANK_LINE:"
     ///         ]
     ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,use_options,expect_diagnostic
+    /// import { Button } from "@mycompany/ui";
+    /// import express from "express";
+    /// import { db } from "@mycompany/db";
+    /// import { handler } from "./handler.js";
+    /// import { A } from "./file.js"
+    /// ```
+    ///
+    /// ### Group multiple libraries
+    ///
+    /// In the following example, `react` and libraries like `react-dom` are grouped together.
+    /// A blank line separates them from the other imports placed directly below.
+    ///
+    ///```json,options
+    /// {
+    ///     "options": {
+    ///         "groups": [
+    ///             ["react", "react/**", "react-*", "react-*/**"],
+    ///             ":BLANK_LINE:"
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,use_options,expect_diagnostic
+    /// import lib from "lib";
+    /// import { useState } from "react";
+    /// import { render } from "react-dom/client";
+    /// ```
+    ///
+    /// ### Place CSS/style imports last
+    ///
+    /// The following example groups style imports together and place them after other imports.
+    /// Because groups are matched in order, the first group has to exclude style imports.
+    /// `**` matches everything and is followed by the two exceptions that exclude style imports.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "groups": [
+    ///             ["**", "!**/*.css", "!**/*.scss"],
+    ///             ":BLANK_LINE:",
+    ///             ["**/*.css", "**/*.scss"]
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,use_options,expect_diagnostic
+    /// import "./styles/reset.css";
+    /// import { useState } from "react";
+    /// import styles from "./Component.module.css";
+    /// import { Button } from "@/components/Button";
+    /// ```
+    ///
+    /// ### Group test utilities together
+    ///
+    /// The following example places test-related utilities at the top of the file.
+    /// They are separated from other imports by a blank line.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "groups": [
+    ///             ["vitest", "vitest/**", "@testing-library", "@testing-library/**", "jest", "@jest/**"],
+    ///             ":BLANK_LINE:"
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,use_options,expect_diagnostic
+    /// import { render } from "@testing-library/react";
+    /// import { Button } from "@/components/Button";
+    /// import { describe, it, expect } from "vitest";
+    /// import { server } from "./mocks/server";
+    /// ```
+    ///
+    /// ### Group `import type` and group `export type`
+    ///
+    /// Use the following configuration to place `import type` and `export type` at the top of the file:
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "groups": [
+    ///             { "type": true }
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```ts,use_options,expect_diagnostic
+    /// import { V } from "my-package";
+    /// import type { T } from "my-package";
+    /// ```
+    ///
+    /// To place them after other imports, use the following configuration.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "groups": [
+    ///             { "type": false }
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// The following code...
+    ///
+    /// ```ts,ignore
+    /// import type { T } from "my-package";
+    /// import { V } from "my-package";
+    /// ```
+    ///
+    /// ...is organized as:
+    ///
+    /// ```ts,ignore
+    /// import { V } from "my-package";
+    /// import type { T } from "my-package";
+    /// ```
+    ///
+    /// Note that you may want to use the lint rule
+    /// [`useImportType`](https://biomejs.dev/linter/rules/use-import-type/)
+    /// and its [`style`](https://biomejs.dev/linter/rules/use-import-type/#style)
+    /// to enforce the use of `import type` instead of `import { type }`.
+    ///
+    /// With the following configuration...
+    ///
+    /// ```json,full_options
+    /// {
+    ///   "linter": {
+    ///     "rules": {
+    ///       "style": {
+    ///         "useImportType": {
+    ///           "level": "on",
+    ///           "options": { "style": "separatedType" }
+    ///         }
+    ///       }
+    ///     }
+    ///   },
+    ///   "assist": {
+    ///     "enabled": true,
+    ///     "actions": { "source": { "organizeImports": "on" } }
+    ///   }
     /// }
     /// ```
     ///
     /// ...the following code...
     ///
-    /// ```js,ignore
-    /// import test from "bun:test";
-    /// import path from "node:path";
-    /// import lib from "@my/lib";
-    /// import libPath from "@my/lib/path";
-    /// import libSpecial from "@my/lib/special";
-    /// import aliased from "@/alias";
+    /// ```ts,ignore
+    /// import type { T1 } from "a";
+    /// import { type T2, V } from "a";
     /// ```
     ///
-    /// ...is sorted as:
-    ///
-    /// ```js,ignore
-    /// import path from "node:path";
-    ///
-    /// import lib from "@my/lib";
-    /// import test from "@my/lib/path";
-    /// import aliased from "@/alias";
-    /// import path from "@my/lib/special";
-    /// ```
-    ///
-    /// Groups are matched in order.
-    /// This means that one group matcher can shadow succeeding groups.
-    /// For example, in the following configuration, the group matcher `:URL:` is never matched because all imports and exports match the first matcher `**`.
-    ///
-    /// ```json
-    /// {
-    ///     "options": {
-    ///         "groups": [
-    ///             "**",
-    ///             ":URL:"
-    ///         ]
-    ///     }
-    /// }
-    /// ```
-    ///
-    ///
-    /// ## Comment handling
-    ///
-    /// When sorting imports and exports, attached comments are moved with their import or export,
-    /// and detached comments (comments followed by a blank line) are left where they are.
-    ///
-    /// However, there is an exception to the rule.
-    /// If a comment appears at the top of the file, it is considered as detached even if no blank line follows.
-    /// This ensures that copyright notice and file header comments stay at the top of the file.
-    ///
-    /// For example, the following code...
-    ///
-    /// ```js,ignore
-    /// // Copyright notice and file header comment
-    /// import F from "f";
-    /// // Attached comment for `e`
-    /// import E from "e";
-    /// // Attached comment for `d`
-    /// import D from "d";
-    /// // Detached comment (new chunk)
-    ///
-    /// // Attached comment for `b`
-    /// import B from "b";
-    /// // Attached comment for `a`
-    /// import A from "a";
-    /// ```
-    ///
-    /// ...is sorted as follows.
-    /// A blank line is automatically added after the header comment to ensure that the attached comment doesn't merge with the header comment.
-    ///
-    /// ```js,ignore
-    /// // Copyright notice and file header comment
-    ///
-    /// // Attached comment for `d`
-    /// import D from "d";
-    /// // Attached comment for `e`
-    /// import E from "e";
-    /// import F from "f";
-    ///
-    /// // Detached comment (new chunk)
-    ///
-    /// // Attached comment for `a`
-    /// import A from "a";
-    /// // Attached comment for `b`
-    /// import B from "b";
-    /// ```
-    ///
-    ///
-    /// ## Import and export merging
-    ///
-    /// The organizer also merges imports and exports that can be merged.
-    ///
-    /// For example, the following code:
+    /// ...is organized as:
     ///
     /// ```ts,ignore
-    /// import type { T1 } from "package";
-    /// import type { T2 } from "package";
-    /// import * as ns from "package";
-    /// import D1 from "package";
-    /// import D2 from "package";
-    /// import { A } from "package";
-    /// import { B } from "package";
-    /// import { type T3 } from "package";
+    /// import type { T1, T2 } from "a";
+    /// import { V } from "a";
     /// ```
     ///
-    /// is merged as follows:
+    /// ### Maximize import merging with `useImportType`
     ///
-    /// ```ts,ignore
-    /// import type { T1, T2 } from "package";
-    /// import D1, * as ns from "package";
-    /// import D2, { A, B, type T3 } from "package";
-    /// ```
+    /// To merge type-only imports (`import type { T }`) with regular imports (`import { V }`),
+    /// enable [`useImportType`](https://biomejs.dev/linter/rules/use-import-type/) with `inlineType`:
     ///
-    /// You may want to merge the first and the last imports.
-    /// To do this, you have to enable the linter rule [`useImportType`](https://biomejs.dev/linter/rules/use-import-type/)
-    /// and to set its option `style` to `inlineType`.
-    ///
-    /// With the following configuration...
-    ///
-    /// ```json
+    /// ```json,full_options
     /// {
     ///   "linter": {
-    ///     "enabled": true,
     ///     "rules": {
     ///       "style": {
     ///         "useImportType": {
@@ -554,31 +458,135 @@ declare_source_rule! {
     /// }
     /// ```
     ///
-    /// The previous imports are merged as follows:
-    ///
-    /// ```ts,ignore
-    /// import D1, * as ns from "package";
-    /// import D2, { A, B, type T1, type T2, type T3 } from "package";
-    /// ```
-    ///
-    /// Note that if you set `style` to `separatedType` you will get the following merge:
-    ///
-    /// ```ts,ignore
-    /// import type { T1, T2, T3 } from "package";
-    /// import { V1 } from "package";
-    /// import D1, * as ns from "package";
-    /// import D2, { A, B } from "package";
-    /// ```
-    ///
-    ///
-    /// ## Named imports, named exports and attributes sorting
-    ///
-    /// The sorter also sorts named imports, named exports, as well as attributes.
-    /// It uses a natural sort order for comparing numbers.
-    ///
     /// The following code...
     ///
+    /// ```ts,ignore
+    /// import type { T } from "a";
+    /// import { V } from "a";
+    /// ```
+    ///
+    /// ...is organized as:
+    ///
+    /// ```ts,ignore
+    /// import { type T, V } from "a";
+    /// ```
+    ///
+    ///
+    /// ## How it works
+    ///
+    /// This section provides an in-depth explanation of the internal mechanics of the action.
+    ///
+    /// ### Import anatomy
+    ///
+    /// First, let's agree on the terminology that we will use in this section.
+    ///
     /// ```js,ignore
+    /// import A from "@my/lib" with { "attribute1": "value" };
+    /// ^^^^^^^^       ^^^^^^^         ^^^^^^^^^^^^^^^^^^^^^
+    ///   kind         source                attributes
+    ///
+    /// export * from "@my/lib" with { "attribute1": "value" };
+    /// ^^^^^^^^       ^^^^^^^         ^^^^^^^^^^^^^^^^^^^^^
+    ///   kind         source                attributes
+    /// ```
+    ///
+    /// ### Chunks
+    ///
+    /// Before sorting, imports and exports are divided into **chunks**.
+    /// A chunk is a sequence of adjacent imports or exports.
+    /// The action never moves imports or exports across chunk boundaries.
+    ///
+    /// Chunks are separated by:
+    /// - Switching between imports and exports
+    /// - Any statement that is not an import or an export
+    /// - Bare imports also called side-effect imports (`import "polyfill"`);
+    ///   Each forms its own chunk.
+    /// - A comment followed by a blank line that we call a **detached comment**;
+    ///   See the [comment handling section](#comment-handling) for more details.
+    ///
+    /// :::note
+    /// Blank lines alone do **not** create new chunks.
+    /// Use a comment followed by a blank line to force the start of a new chunk.
+    /// :::
+    ///
+    /// The following example shows how imports and exports are chunked.
+    ///
+    /// ```js,ignore
+    /// // chunk 1
+    /// import A from "a";
+    /// import * as B from "b";
+    /// // chunk 2 (a bare import creates its own chunk)
+    /// import "x";
+    /// // Chunk 3
+    /// import A from "a";
+    ///
+    /// // Still same chunk (blank line alone doesn't split)
+    /// import * as B from "b";
+    /// // Detached comment (followed by blank line)
+    ///
+    /// // New chunk starts here
+    /// import { C } from "c";
+    /// ```
+    ///
+    /// The action enforces the presence of a blank line between different chunks.
+    /// Bare imports adjacent to a chunk of imports are not separated by a blank line.
+    ///
+    /// :::note
+    /// Blank lines inside a chunk are preserved.
+    /// They can be removed by explicitly defining the option `groups`.
+    /// :::
+    ///
+    /// ### Sorting within a chunk
+    ///
+    /// As described in the preliminary section,
+    /// Imports and exports of a chunk are sorted by "distance" from the current file.
+    ///
+    /// When two imports share the same source, they are ordered by kind:
+    ///
+    /// 1. Namespace type import / Namespace type export
+    /// 2. Default type import
+    /// 3. Named type import / Named type export
+    /// 4. Namespace import / Namespace export
+    /// 5. Combined default and namespace import
+    /// 6. Default import
+    /// 7. Combined default and named import
+    /// 8. Named import / Named export
+    ///
+    /// Imports and exports with attributes (`with { ... }`) are always placed first.
+    /// For example, the following code...
+    ///
+    /// ```ts,ignore
+    /// import * as namespaceImport from "same-source";
+    /// import type * as namespaceTypeImport from "same-source";
+    /// import type { namedTypeImport } from "same-source";
+    /// import defaultNamespaceCombined, * as namespaceCombined from "same-source";
+    /// import defaultNamedCombined, { namedCombined } from "same-source";
+    /// import defaultImport from "same-source";
+    /// import type defaultTypeImport from "same-source";
+    /// import { importWithAttribute } from "same-source" with { "attribute": "value" } ;
+    /// ```
+    ///
+    /// is sorted as follows:
+    ///
+    /// ```ts,ignore
+    /// import { importWithAttribute } from "same-source" with { "attribute": "value" } ;
+    /// import type * as namespaceTypeImport from "same-source";
+    /// import type defaultTypeImport from "same-source";
+    /// import type { namedTypeImport } from "same-source";
+    /// import * as namespaceImport from "same-source";
+    /// import defaultNamespaceCombined, * as namespaceCombined from "same-source";
+    /// import defaultImport from "same-source";
+    /// import defaultNamedCombined, { namedCombined } from "same-source";
+    /// ```
+    ///
+    /// This kind order cannot be changed.
+    ///
+    /// ### Named specifier and attribute sorting
+    ///
+    /// Named imports, named exports, and import attributes are also sorted,
+    /// as shown in the following example.
+    ///
+    /// ```js,expect_diagnostic
     /// import { a, b, A, B, c10, c9 } from "a";
     ///
     /// export { a, b, A, B, c10, c9 } from "a";
@@ -586,108 +594,106 @@ declare_source_rule! {
     /// import special from  "special" with { "type": "ty", "metadata": "data" };
     /// ```
     ///
-    /// ...is sorted as follows:
+    /// ### Import and export merging
+    ///
+    /// Imports from the same source in the same chunk are merged when possible.
+    ///
+    /// The following code...
+    ///
+    /// ```ts,ignore
+    /// import type { T1 } from "package";
+    /// import type { T2 } from "package";
+    /// import * as ns from "package";
+    /// import D1 from "package";
+    /// import D2 from "package";
+    /// import { A } from "package";
+    /// import { B } from "package";
+    /// import { type T3 } from "package";
+    /// ```
+    ///
+    /// ...becomes:
+    ///
+    /// ```ts,ignore
+    /// import type { T1, T2 } from "package";
+    /// import D1, * as ns from "package";
+    /// import D2, { A, B, type T3 } from "package";
+    /// ```
+    ///
+    /// With [`useImportType`](https://biomejs.dev/linter/rules/use-import-type/)
+    /// set to `separatedType`, the result is:
+    ///
+    /// ```ts,ignore
+    /// import type { T1, T2, T3 } from "package";
+    /// import D1, * as ns from "package";
+    /// import D2, { A, B } from "package";
+    /// ```
+    ///
+    /// ### Comment handling
+    ///
+    /// Comments directly above an import (attached comments) move with that import when it is sorted.
+    /// Comments followed by a blank line (detached comments) stay in place and create a new chunk.
+    ///
+    /// File-header comments, i.e. comments at the very top of the file,
+    /// are always treated as detached, even without a blank line.
+    /// This preserves copyright notices and license headers.
+    ///
+    /// The following code...
     ///
     /// ```js,ignore
-    /// import { A, a, B, b, c9, c10 } from "a";
+    /// // Copyright notice and file header comment
+    /// import F from "f";
+    /// // Attached comment for `e`
+    /// import E from "e";
+    /// // Attached comment for `d`
+    /// import D from "d";
+    /// // Detached comment (new chunk)
     ///
-    /// export { A, a, B, b, c9, c10 } from "a";
-    ///
-    /// import special from  "special" with { "metadata": "data", "type": "ty" };
+    /// // Attached comment for `b`
+    /// import B from "b";
+    /// // Attached comment for `a`
+    /// import A from "a";
     /// ```
     ///
+    /// ...becomes:
     ///
-    /// ## Supported glob patterns
+    /// ```js,ignore
+    /// // Copyright notice and file header comment
     ///
-    /// You need to understand the structure of a source to understand which source matches a glob.
-    /// A source is divided in source segments.
-    /// Every source segment is delimited by the separator `/` or the start/end of the source.
-    /// For instance `src/file.js` consists of two source segments: `src` and `file.js`.
+    /// // Attached comment for `d`
+    /// import D from "d";
+    /// // Attached comment for `e`
+    /// import E from "e";
+    /// import F from "f";
     ///
-    /// - star `*` that matches zero or more characters inside a source segment
+    /// // Detached comment (new chunk)
     ///
-    ///   `file.js` matches `*.js`.
-    ///   Conversely, `src/file.js` doesn't match `*.js`
-    ///
-    /// - globstar `**` that matches zero or more source segments
-    ///   `**` must be enclosed by separators `/` or the start/end of the glob.
-    ///   For example, `**a` is not a valid glob.
-    ///   Also, `**` must not be followed by another globstar.
-    ///   For example, `**/**` is not a valid glob.
-    ///
-    ///   `file.js` and `src/file.js` match `**` and `**/*.js`
-    ///   Conversely, `README.txt` doesn't match `**/*.js` because the source ends with `.txt`.
-    ///
-    /// - Use `\*` to escape `*`
-    ///
-    ///   `\*` matches the literal `*` character in a source.
-    ///
-    /// - `?`, `[`, `]`, `{`, and `}` must be escaped using `\`.
-    ///   These characters are reserved for possible future use.
-    ///
-    /// - Use `!` as first character to negate a glob
-    ///
-    ///   `file.js` matches `!*.test.js`.
-    ///   `src/file.js` matches `!*.js` because the source contains several segments.
-    ///
-    ///
-    /// ## Common configurations
-    ///
-    /// This section provides some examples of common configurations.
-    ///
-    /// ### Placing `import type` and `export type` at the start of the chunks
-    ///
-    /// ```json
-    /// {
-    ///     "options": {
-    ///         "groups": [
-    ///             { "type": true }
-    ///         ]
-    ///     }
-    /// }
+    /// // Attached comment for `a`
+    /// import A from "a";
+    /// // Attached comment for `b`
+    /// import B from "b";
     /// ```
     ///
-    /// Note that you may want to use the lint rule [`useImportType`](https://next.biomejs.dev/linter/rules/use-import-type/) and its [`style`](https://next.biomejs.dev/linter/rules/use-import-type/#style) to enforce the use of `import type` instead of `import { type }`.
+    /// A blank line is automatically added after the header comment
+    /// to ensure that the attached comment doesn't merge with the header comment.
     ///
-    /// ### Placing `import type` and `export type` at the end of the chunks
+    /// ### Supported glob patterns
     ///
-    /// ```json
-    /// {
-    ///     "options": {
-    ///         "groups": [
-    ///             { "type": false }
-    ///         ]
-    ///     }
-    /// }
-    /// ```
+    /// A source is split into segments by `/`.
+    /// For example, `src/file.js` has two segments: `src` and `file.js`.
     ///
-    /// ## Change the sorting of import identifiers to lexicographic sorting
-    /// This only applies to the named import/exports and not the source itself.
+    /// - `*`: matches zero or more characters within a single segment;
+    ///   `file.js` matches `*.js`, but `src/file.js` does not.
     ///
-    /// ```json,options
-    /// {
-    ///     "options": {
-    ///         "identifierOrder": "lexicographic"
-    ///     }
-    /// }
-    /// ```
-    /// ```js,use_options,expect_diagnostic
-    /// import { var1, var2, var21, var11, var12, var22 } from 'my-package'
-    /// ```
+    /// - `**`: matches zero or more segments and must be enclosed by `/` or be at the start/end;
+    ///   `file.js` and `src/file.js` both match `**/*.js`.
     ///
-    /// ## Change the sorting of import identifiers to logical sorting
-    /// This is the default behavior in case you do not override. This only applies to the named import/exports and not the source itself.
+    /// - `!`: negates a pattern when used as the first character;
+    ///   `file.js` matches `!*.test.js`;
+    ///   Exceptions can be layered: `["@my/lib/**", "!@my/lib/internal/**", "@my/lib/internal/allowed/**"]`.
     ///
-    /// ```json,options
-    /// {
-    ///     "options": {
-    ///         "identifierOrder": "natural"
-    ///     }
-    /// }
-    /// ```
-    /// ```js,use_options,expect_diagnostic
-    /// import { var1, var2, var21, var11, var12, var22 } from 'my-package'
-    /// ```
+    /// - `\*`: matches a literal `*` character.
+    ///
+    /// - `?`, `[`, `]`, `{`, `}`: reserved characters, must be escaped with `\`.
     ///
     pub OrganizeImports {
         version: "1.0.0",

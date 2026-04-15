@@ -28,6 +28,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdBulletListItem::new_unchecked(node) };
                     $body
                 }
+                $crate::MarkdownSyntaxKind::MD_CONTINUATION_INDENT => {
+                    let $pattern = unsafe { $crate::MdContinuationIndent::new_unchecked(node) };
+                    $body
+                }
                 $crate::MarkdownSyntaxKind::MD_DOCUMENT => {
                     let $pattern = unsafe { $crate::MdDocument::new_unchecked(node) };
                     $body
@@ -171,6 +175,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::MarkdownSyntaxKind::MD_BOGUS => {
                     let $pattern = unsafe { $crate::MdBogus::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_BOGUS_BLOCK => {
+                    let $pattern = unsafe { $crate::MdBogusBlock::new_unchecked(node) };
                     $body
                 }
                 $crate::MarkdownSyntaxKind::MD_BLOCK_LIST => {

@@ -121,10 +121,10 @@ grit-pattern-matcher         = "0.5.1"
 grit-util                    = "0.5.1"
 hashbrown                    = { version = "0.15.5", default-features = false }
 ignore                       = "0.4.25"
-indexmap                     = { version = "2.13.0" }
+indexmap                     = { version = "2.13.1" }
 insta                        = "1.46.3"
 jiff                         = "0.2.23"
-libc                         = "0.2.183"
+libc                         = "0.2.184"
 mimalloc                     = "0.1.48"
 papaya                       = "0.2.4"
 path-absolutize              = { version = "3.1.1", features = ["use_unix_paths_on_wasm"], optional = false }
@@ -151,14 +151,14 @@ termcolor                    = "1.4.1"
 terminal_size                = "0.4.4"
 tests_macros                 = { path = "./crates/tests_macros" }
 tikv-jemallocator            = "0.6.1"
-tokio                        = "1.49.0"
+tokio                        = "1.51.1"
 tower                        = "0.5.3"
 tower-lsp-server             = "0.23.0"
 tracing                      = { version = "0.1.44", default-features = false, features = ["attributes", "std"] }
 tracing-subscriber           = "0.3.23"
 unicode-bom                  = "2.0.3"
 unicode-width                = "0.1.12"
-ureq                         = "3.1.4"
+ureq                         = "3.3.0"
 url                          = "2.5.8"
 uuid                         = "1.18.1"
 walkdir                      = "2.5.0"

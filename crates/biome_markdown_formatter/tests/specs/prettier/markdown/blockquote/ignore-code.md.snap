@@ -86,7 +86,17 @@ info: markdown/blockquote/ignore-code.md
  
  > - test
  >   ```md
-@@ -36,15 +38,19 @@
+@@ -18,7 +20,8 @@
+ >   - This is a long long
+ >     long long long long
+ >     long long paragraph.
+->   ```
++> 
++  ```
+ 
+ ````md
+ > ```md
+@@ -36,15 +39,19 @@
  > >   long long long long
  > >   long long paragraph.
  > > ```
@@ -135,7 +145,8 @@ info: markdown/blockquote/ignore-code.md
 >   - This is a long long
 >     long long long long
 >     long long paragraph.
->   ```
+> 
+  ```
 
 ````md
 > ```md

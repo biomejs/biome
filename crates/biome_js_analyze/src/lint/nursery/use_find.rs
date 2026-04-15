@@ -109,11 +109,14 @@ impl Rule for UseFind {
                 rule_category!(),
                 state,
                 markup! {
-                    "Prefer using Array#find() over Array#filter[0]."
+                    "This call uses "<Emphasis>"Array#filter()"</Emphasis>" to retrieve a single matching element."
                 },
             )
             .note(markup! {
-                "Use Array#find() instead of Array#filter[0] to improve readability."
+                <Emphasis>"Array#find()"</Emphasis>" expresses that intent more clearly and can stop once it finds the first match."
+            })
+            .note(markup! {
+                "Use "<Emphasis>"Array#find()"</Emphasis>" instead."
             }),
         )
     }

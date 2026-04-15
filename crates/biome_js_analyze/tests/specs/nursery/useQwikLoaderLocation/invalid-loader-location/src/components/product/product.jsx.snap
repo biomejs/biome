@@ -1,0 +1,45 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: product.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+import { routeLoader$ } from '@builder.io/qwik-city';
+
+export const useProductDetails = routeLoader$(async (requestEvent) => {
+	const res = await fetch(`https://.../products/${requestEvent.params.productId}`);
+	const product = await res.json();
+	return product;
+});
+
+```
+
+# Diagnostics
+```
+product.jsx:4:34 lint/nursery/useQwikLoaderLocation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The route function routeLoader$() has been declared outside of the route boundaries.
+  
+    2 │ import { routeLoader$ } from '@builder.io/qwik-city';
+    3 │ 
+  > 4 │ export const useProductDetails = routeLoader$(async (requestEvent) => {
+      │                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 5 │ 	const res = await fetch(`https://.../products/${requestEvent.params.productId}`);
+  > 6 │ 	const product = await res.json();
+  > 7 │ 	return product;
+  > 8 │ });
+      │ ^^
+    9 │ 
+  
+  i Route functions are typically declared within the route boundaries as they are tied to a specific route, if not, Qwik can't associate them with a route.
+  
+  i Route boundary files are index, layout, and plugin files inside the "src/routes" directory.
+  
+  i Move the file within the route boundaries or if you want to create reusable logic, you must re-export from within the router boundary.
+    See the Qwik docs on re-exporting loaders for details.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

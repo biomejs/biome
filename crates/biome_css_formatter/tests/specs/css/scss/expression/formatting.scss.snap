@@ -61,6 +61,7 @@ $b:map-get($map,
 key ));
 
 $interpolation  :"#{$a}-#{$b}";
+$interpolated-ident  :#{$a}-#{$b};
  $calc:calc( 100% - $gutter*2);
   $math:1+2*3%4/5;
  $map-nested:(a:(b:1,
@@ -115,6 +116,7 @@ $fn-long: long-function-name($a, $b, $c, $d);
 $complex-args: foo($a: (1 2, 3 4), $b: map-get($map, key));
 
 $interpolation: "#{$a}-#{$b}";
+$interpolated-ident: #{$a}-#{$b};
 $calc: calc(100% - $gutter * 2);
 $math: 1 + 2 * 3% 4 / 5;
 $map-nested: (

@@ -1,0 +1,21 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_issue_9118.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+---
+import MyElement, {
+	type MyElementShape,
+	} from './my-element.astro';
+
+let myElement: MyElementShape =  {};
+---
+
+<template>
+	<MyElement />
+</template>
+
+
+```

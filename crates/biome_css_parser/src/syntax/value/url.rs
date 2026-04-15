@@ -1,12 +1,17 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 
+use crate::syntax::parse_error::scss_only_syntax_error;
+use crate::syntax::scss::{
+    is_at_scss_function, is_at_scss_interpolated_string, is_nth_at_scss_function,
+    parse_scss_function, parse_scss_interpolated_string,
+};
 use crate::syntax::value::function::{
     is_at_css_function, is_at_function, is_nth_at_css_function, is_nth_at_function,
     parse_css_function, parse_function,
 };
 use crate::syntax::value::parse_error::expected_url_modifier;
-use crate::syntax::{ValueParsingContext, ValueParsingMode};
+use crate::syntax::{CssSyntaxFeatures, ValueParsingContext, ValueParsingMode};
 use crate::syntax::{is_at_identifier, is_at_string, parse_regular_identifier, parse_string};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -14,7 +19,7 @@ use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
-use biome_parser::{Parser, TokenSet, token_set};
+use biome_parser::{Parser, SyntaxFeature, TokenSet, token_set};
 
 const URL_SET: TokenSet<CssSyntaxKind> = token_set![T![url], T![src]];
 
@@ -97,8 +102,8 @@ pub(crate) fn parse_url_function_with_context(
 
 #[inline]
 fn is_at_nth_url_function(p: &mut CssParser, n: usize, context: ValueParsingContext) -> bool {
-    if context.is_scss_syntax_allowed() {
-        is_nth_at_function(p, n)
+    if context.is_scss_exclusive_syntax_allowed() {
+        is_nth_at_scss_function(p, n) || is_nth_at_function(p, n)
     } else {
         is_nth_at_css_function(p, n)
     }
@@ -109,8 +114,8 @@ fn is_at_url_modifier_function_with_context(
     p: &mut CssParser,
     context: ValueParsingContext,
 ) -> bool {
-    if context.is_scss_syntax_allowed() {
-        is_at_function(p)
+    if context.is_scss_exclusive_syntax_allowed() {
+        is_at_scss_function(p) || is_at_function(p)
     } else {
         is_at_css_function(p)
     }
@@ -121,8 +126,14 @@ fn parse_url_modifier_function_with_context(
     p: &mut CssParser,
     context: ValueParsingContext,
 ) -> ParsedSyntax {
-    if context.is_scss_syntax_allowed() {
-        parse_function(p)
+    if context.is_scss_exclusive_syntax_allowed() {
+        if is_at_scss_function(p) {
+            CssSyntaxFeatures::Scss.parse_exclusive_syntax(p, parse_scss_function, |p, marker| {
+                scss_only_syntax_error(p, "SCSS qualified function names", marker.range(p))
+            })
+        } else {
+            parse_function(p)
+        }
     } else {
         parse_css_function(p)
     }
@@ -134,7 +145,7 @@ fn parse_url_modifier_function_with_context(
 /// or a string.
 #[inline]
 pub(crate) fn is_at_url_value(p: &mut CssParser) -> bool {
-    is_at_url_value_raw(p) || is_at_string(p)
+    is_at_url_value_raw(p) || is_at_string(p) || is_at_scss_interpolated_string(p)
 }
 
 /// Parses a URL value from the current position of the CSS parser.
@@ -149,6 +160,8 @@ pub(crate) fn parse_url_value(p: &mut CssParser) -> ParsedSyntax {
 
     if is_at_string(p) {
         parse_string(p)
+    } else if is_at_scss_interpolated_string(p) {
+        parse_scss_interpolated_string(p)
     } else {
         parse_url_value_raw(p)
     }
