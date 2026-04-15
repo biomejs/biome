@@ -9,9 +9,11 @@ const matches = str.match(/test/g);
 if (/test/.test(str)) {}
 if (regex.test(str)) {}
 
-// can't resolve to regex
+// can't resolve to regex without type info or scope analysis
 if (str.match(pattern)) {}
 if (pattern.exec(str)) {}
+const regex = /test/; if (str.match(regex)) {}
+const regex2 = new RegExp('test'); if (str.match(regex2)) {}
 
 // no arguments
 if (str.match()) {}

@@ -1,14 +1,15 @@
 use biome_analyze::{
-    FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_factory::make;
-use biome_js_syntax::{AnyJsExpression, AnyJsName, JsCallExpression, is_in_boolean_context};
+use biome_js_syntax::{
+    AnyJsExpression, AnyJsName, JsCallExpression, JsNewExpression, is_in_boolean_context,
+};
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::use_regexp_test::UseRegexpTestOptions;
 
 use crate::JsRuleAction;
-use crate::services::typed::Typed;
 
 declare_lint_rule! {
     /// Enforce the use of `RegExp.prototype.test()` over `String.prototype.match()` and `RegExp.prototype.exec()` in boolean contexts.
@@ -26,11 +27,11 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js
+    /// ```js,expect_diagnostic
     /// if ("hello world".match(/hello/)) {}
     /// ```
     ///
-    /// ```js
+    /// ```js,expect_diagnostic
     /// if (/hello/.exec("hello world")) {}
     /// ```
     ///
@@ -46,7 +47,6 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         sources: &[RuleSource::EslintUnicorn("prefer-regexp-test").same()],
-        domains: &[RuleDomain::Types],
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -57,7 +57,7 @@ pub struct UseRegexpTestState {
 }
 
 impl Rule for UseRegexpTest {
-    type Query = Typed<JsCallExpression>;
+    type Query = Ast<JsCallExpression>;
     type State = UseRegexpTestState;
     type Signals = Option<Self::State>;
     type Options = UseRegexpTestOptions;
@@ -97,9 +97,7 @@ impl Rule for UseRegexpTest {
             return None;
         };
 
-        let regexp_type = ctx.type_of_expression(regexp_node);
-
-        if !regexp_type.is_regexp_literal() && !regexp_type.is_regexp_instance() {
+        if !is_regexp(regexp_node) {
             return None;
         }
 
@@ -112,18 +110,16 @@ impl Rule for UseRegexpTest {
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
 
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                node.range(),
-                markup! {
-                    "Use "<Emphasis>".test()"</Emphasis>" instead of "<Emphasis>".match()"</Emphasis>" or "<Emphasis>".exec()"</Emphasis>" in boolean contexts."
-                },
-            )
-            .note(markup! {
-                <Emphasis>"RegExp.test()"</Emphasis>" returns a boolean directly, which is more appropriate and efficient in a boolean context."
-            })
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            node.range(),
+            markup! {
+                <Emphasis>".match()"</Emphasis>" and "<Emphasis>".exec()"</Emphasis>" are not designed for boolean checks."
+            },
         )
+        .note(markup! {
+            "These methods return match objects or arrays, which involves unnecessary computation when only checking for a match."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
@@ -159,5 +155,54 @@ impl Rule for UseRegexpTest {
             },
             mutation,
         ))
+    }
+}
+
+/// Returns `true` if the expression is a regex literal (`/pattern/`) or a
+/// `new RegExp(...)` / `new window.RegExp(...)` / `new globalThis.RegExp(...)`
+/// constructor call.
+fn is_regexp(expr: &AnyJsExpression) -> bool {
+    let expr = expr.clone().omit_parentheses();
+    match expr {
+        AnyJsExpression::AnyJsLiteralExpression(literal) => {
+            literal.as_js_regex_literal_expression().is_some()
+        }
+        AnyJsExpression::JsNewExpression(new_expr) => is_regexp_constructor(&new_expr),
+        _ => false,
+    }
+}
+
+fn is_regexp_constructor(expr: &JsNewExpression) -> bool {
+    let Ok(callee) = expr.callee() else {
+        return false;
+    };
+
+    match callee {
+        AnyJsExpression::JsIdentifierExpression(id) => id
+            .name()
+            .ok()
+            .and_then(|n| n.value_token().ok())
+            .is_some_and(|t| t.token_text_trimmed().text() == "RegExp"),
+        AnyJsExpression::JsStaticMemberExpression(member) => {
+            let object_is_global = member
+                .object()
+                .ok()
+                .and_then(|obj| obj.as_js_identifier_expression()?.name().ok()?.value_token().ok())
+                .is_some_and(|t| {
+                    let name = t.token_text_trimmed();
+                    name.text() == "window" || name.text() == "globalThis"
+                });
+
+            if !object_is_global {
+                return false;
+            }
+
+            member
+                .member()
+                .ok()
+                .and_then(|m| m.as_js_name()?.value_token().ok())
+                .is_some_and(|t| t.token_text_trimmed().text() == "RegExp")
+        }
+        _ => false,
     }
 }

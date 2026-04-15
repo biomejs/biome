@@ -10,17 +10,13 @@ if (str.match(/test/i)) {}
 while (str.match(/test/)) {}
 for (; str.match(/test/);) {}
 do {} while (str.match(/test/));
-const regex = /test/; if (str.match(regex)) {}
-let regex = /test/; if (str.match(regex)) {}
-var regex = /test/; if (str.match(regex)) {}
-const regex = /test/; if (regex.exec(str)) {}
 if (obj.prop.match(/test/)) {}
 if (/test/.exec(obj.prop)) {}
 if (str.match(/a/)) {} if (/b/.exec(str)) {}
-const regex = new RegExp('test'); if (str.match(regex)) {}
-const regex = new RegExp('test'); if (regex.exec(str)) {}
-const regex = new window.RegExp('test'); if (str.match(regex)) {}
-const regex = new globalThis.RegExp('test'); if (str.match(regex)) {}
+if (str.match(new RegExp('test'))) {}
+if (new RegExp('test').exec(str)) {}
+if (str.match(new window.RegExp('test'))) {}
+if (str.match(new globalThis.RegExp('test'))) {}
 const x = str.match(/test/) ? a : b;
 if (!str.match(/test/)) {}
 if (str.match(/test/) && other) {}
@@ -43,14 +39,14 @@ if (
 ```
 invalid.js:1:5 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use .test() instead of .match() or .exec() in boolean contexts.
+  i .match() and .exec() are not designed for boolean checks.
   
   > 1 │ if (str.match(/test/)) {}
       │     ^^^^^^^^^^^^^^^^^
     2 │ if (/test/.exec(str)) {}
     3 │ if (str.match(/test/i)) {}
   
-  i RegExp.test() returns a boolean directly, which is more appropriate and efficient in a boolean context.
+  i These methods return match objects or arrays, which involves unnecessary computation when only checking for a match.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -67,7 +63,7 @@ invalid.js:1:5 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:2:5 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use .test() instead of .match() or .exec() in boolean contexts.
+  i .match() and .exec() are not designed for boolean checks.
   
     1 │ if (str.match(/test/)) {}
   > 2 │ if (/test/.exec(str)) {}
@@ -75,7 +71,7 @@ invalid.js:2:5 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━�
     3 │ if (str.match(/test/i)) {}
     4 │ while (str.match(/test/)) {}
   
-  i RegExp.test() returns a boolean directly, which is more appropriate and efficient in a boolean context.
+  i These methods return match objects or arrays, which involves unnecessary computation when only checking for a match.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -93,7 +89,7 @@ invalid.js:2:5 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:3:5 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use .test() instead of .match() or .exec() in boolean contexts.
+  i .match() and .exec() are not designed for boolean checks.
   
     1 │ if (str.match(/test/)) {}
     2 │ if (/test/.exec(str)) {}
@@ -102,7 +98,7 @@ invalid.js:3:5 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━�
     4 │ while (str.match(/test/)) {}
     5 │ for (; str.match(/test/);) {}
   
-  i RegExp.test() returns a boolean directly, which is more appropriate and efficient in a boolean context.
+  i These methods return match objects or arrays, which involves unnecessary computation when only checking for a match.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -121,7 +117,7 @@ invalid.js:3:5 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:4:8 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use .test() instead of .match() or .exec() in boolean contexts.
+  i .match() and .exec() are not designed for boolean checks.
   
     2 │ if (/test/.exec(str)) {}
     3 │ if (str.match(/test/i)) {}
@@ -130,7 +126,7 @@ invalid.js:4:8 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━�
     5 │ for (; str.match(/test/);) {}
     6 │ do {} while (str.match(/test/));
   
-  i RegExp.test() returns a boolean directly, which is more appropriate and efficient in a boolean context.
+  i These methods return match objects or arrays, which involves unnecessary computation when only checking for a match.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -149,16 +145,16 @@ invalid.js:4:8 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:5:8 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use .test() instead of .match() or .exec() in boolean contexts.
+  i .match() and .exec() are not designed for boolean checks.
   
     3 │ if (str.match(/test/i)) {}
     4 │ while (str.match(/test/)) {}
   > 5 │ for (; str.match(/test/);) {}
       │        ^^^^^^^^^^^^^^^^^
     6 │ do {} while (str.match(/test/));
-    7 │ const regex = /test/; if (str.match(regex)) {}
+    7 │ if (obj.prop.match(/test/)) {}
   
-  i RegExp.test() returns a boolean directly, which is more appropriate and efficient in a boolean context.
+  i These methods return match objects or arrays, which involves unnecessary computation when only checking for a match.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -169,7 +165,7 @@ invalid.js:5:8 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━�
      5    │ - for·(;·str.match(/test/);)·{}
         5 │ + for·(;·/test/.test(str);)·{}
      6  6 │   do {} while (str.match(/test/));
-     7  7 │   const regex = /test/; if (str.match(regex)) {}
+     7  7 │   if (obj.prop.match(/test/)) {}
   
 
 ```
@@ -177,16 +173,16 @@ invalid.js:5:8 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:6:14 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use .test() instead of .match() or .exec() in boolean contexts.
+  i .match() and .exec() are not designed for boolean checks.
   
     4 │ while (str.match(/test/)) {}
     5 │ for (; str.match(/test/);) {}
   > 6 │ do {} while (str.match(/test/));
       │              ^^^^^^^^^^^^^^^^^
-    7 │ const regex = /test/; if (str.match(regex)) {}
-    8 │ let regex = /test/; if (str.match(regex)) {}
+    7 │ if (obj.prop.match(/test/)) {}
+    8 │ if (/test/.exec(obj.prop)) {}
   
-  i RegExp.test() returns a boolean directly, which is more appropriate and efficient in a boolean context.
+  i These methods return match objects or arrays, which involves unnecessary computation when only checking for a match.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -196,25 +192,25 @@ invalid.js:6:14 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━
      5  5 │   for (; str.match(/test/);) {}
      6    │ - do·{}·while·(str.match(/test/));
         6 │ + do·{}·while·(/test/.test(str));
-     7  7 │   const regex = /test/; if (str.match(regex)) {}
-     8  8 │   let regex = /test/; if (str.match(regex)) {}
+     7  7 │   if (obj.prop.match(/test/)) {}
+     8  8 │   if (/test/.exec(obj.prop)) {}
   
 
 ```
 
 ```
-invalid.js:7:27 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:5 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use .test() instead of .match() or .exec() in boolean contexts.
+  i .match() and .exec() are not designed for boolean checks.
   
     5 │ for (; str.match(/test/);) {}
     6 │ do {} while (str.match(/test/));
-  > 7 │ const regex = /test/; if (str.match(regex)) {}
-      │                           ^^^^^^^^^^^^^^^^
-    8 │ let regex = /test/; if (str.match(regex)) {}
-    9 │ var regex = /test/; if (str.match(regex)) {}
+  > 7 │ if (obj.prop.match(/test/)) {}
+      │     ^^^^^^^^^^^^^^^^^^^^^^
+    8 │ if (/test/.exec(obj.prop)) {}
+    9 │ if (str.match(/a/)) {} if (/b/.exec(str)) {}
   
-  i RegExp.test() returns a boolean directly, which is more appropriate and efficient in a boolean context.
+  i These methods return match objects or arrays, which involves unnecessary computation when only checking for a match.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -222,94 +218,122 @@ invalid.js:7:27 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━
   
      5  5 │   for (; str.match(/test/);) {}
      6  6 │   do {} while (str.match(/test/));
-     7    │ - const·regex·=·/test/;·if·(str.match(regex))·{}
-        7 │ + const·regex·=·/test/;·if·(regex.test(str))·{}
-     8  8 │   let regex = /test/; if (str.match(regex)) {}
-     9  9 │   var regex = /test/; if (str.match(regex)) {}
+     7    │ - if·(obj.prop.match(/test/))·{}
+        7 │ + if·(/test/.test(obj.prop))·{}
+     8  8 │   if (/test/.exec(obj.prop)) {}
+     9  9 │   if (str.match(/a/)) {} if (/b/.exec(str)) {}
   
 
 ```
 
 ```
-invalid.js:8:25 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:5 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use .test() instead of .match() or .exec() in boolean contexts.
+  i .match() and .exec() are not designed for boolean checks.
   
      6 │ do {} while (str.match(/test/));
-     7 │ const regex = /test/; if (str.match(regex)) {}
-   > 8 │ let regex = /test/; if (str.match(regex)) {}
-       │                         ^^^^^^^^^^^^^^^^
-     9 │ var regex = /test/; if (str.match(regex)) {}
-    10 │ const regex = /test/; if (regex.exec(str)) {}
+     7 │ if (obj.prop.match(/test/)) {}
+   > 8 │ if (/test/.exec(obj.prop)) {}
+       │     ^^^^^^^^^^^^^^^^^^^^^
+     9 │ if (str.match(/a/)) {} if (/b/.exec(str)) {}
+    10 │ if (str.match(new RegExp('test'))) {}
   
-  i RegExp.test() returns a boolean directly, which is more appropriate and efficient in a boolean context.
+  i These methods return match objects or arrays, which involves unnecessary computation when only checking for a match.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use .test() instead.
   
      6  6 │   do {} while (str.match(/test/));
-     7  7 │   const regex = /test/; if (str.match(regex)) {}
-     8    │ - let·regex·=·/test/;·if·(str.match(regex))·{}
-        8 │ + let·regex·=·/test/;·if·(regex.test(str))·{}
-     9  9 │   var regex = /test/; if (str.match(regex)) {}
-    10 10 │   const regex = /test/; if (regex.exec(str)) {}
+     7  7 │   if (obj.prop.match(/test/)) {}
+     8    │ - if·(/test/.exec(obj.prop))·{}
+        8 │ + if·(/test/.test(obj.prop))·{}
+     9  9 │   if (str.match(/a/)) {} if (/b/.exec(str)) {}
+    10 10 │   if (str.match(new RegExp('test'))) {}
   
 
 ```
 
 ```
-invalid.js:9:25 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:5 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use .test() instead of .match() or .exec() in boolean contexts.
+  i .match() and .exec() are not designed for boolean checks.
   
-     7 │ const regex = /test/; if (str.match(regex)) {}
-     8 │ let regex = /test/; if (str.match(regex)) {}
-   > 9 │ var regex = /test/; if (str.match(regex)) {}
-       │                         ^^^^^^^^^^^^^^^^
-    10 │ const regex = /test/; if (regex.exec(str)) {}
-    11 │ if (obj.prop.match(/test/)) {}
+     7 │ if (obj.prop.match(/test/)) {}
+     8 │ if (/test/.exec(obj.prop)) {}
+   > 9 │ if (str.match(/a/)) {} if (/b/.exec(str)) {}
+       │     ^^^^^^^^^^^^^^
+    10 │ if (str.match(new RegExp('test'))) {}
+    11 │ if (new RegExp('test').exec(str)) {}
   
-  i RegExp.test() returns a boolean directly, which is more appropriate and efficient in a boolean context.
+  i These methods return match objects or arrays, which involves unnecessary computation when only checking for a match.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use .test() instead.
   
-     7  7 │   const regex = /test/; if (str.match(regex)) {}
-     8  8 │   let regex = /test/; if (str.match(regex)) {}
-     9    │ - var·regex·=·/test/;·if·(str.match(regex))·{}
-        9 │ + var·regex·=·/test/;·if·(regex.test(str))·{}
-    10 10 │   const regex = /test/; if (regex.exec(str)) {}
-    11 11 │   if (obj.prop.match(/test/)) {}
+     7  7 │   if (obj.prop.match(/test/)) {}
+     8  8 │   if (/test/.exec(obj.prop)) {}
+     9    │ - if·(str.match(/a/))·{}·if·(/b/.exec(str))·{}
+        9 │ + if·(/a/.test(str))·{}·if·(/b/.exec(str))·{}
+    10 10 │   if (str.match(new RegExp('test'))) {}
+    11 11 │   if (new RegExp('test').exec(str)) {}
   
 
 ```
 
 ```
-invalid.js:10:27 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:28 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use .test() instead of .match() or .exec() in boolean contexts.
+  i .match() and .exec() are not designed for boolean checks.
   
-     8 │ let regex = /test/; if (str.match(regex)) {}
-     9 │ var regex = /test/; if (str.match(regex)) {}
-  > 10 │ const regex = /test/; if (regex.exec(str)) {}
-       │                           ^^^^^^^^^^^^^^^
-    11 │ if (obj.prop.match(/test/)) {}
-    12 │ if (/test/.exec(obj.prop)) {}
+     7 │ if (obj.prop.match(/test/)) {}
+     8 │ if (/test/.exec(obj.prop)) {}
+   > 9 │ if (str.match(/a/)) {} if (/b/.exec(str)) {}
+       │                            ^^^^^^^^^^^^^
+    10 │ if (str.match(new RegExp('test'))) {}
+    11 │ if (new RegExp('test').exec(str)) {}
   
-  i RegExp.test() returns a boolean directly, which is more appropriate and efficient in a boolean context.
+  i These methods return match objects or arrays, which involves unnecessary computation when only checking for a match.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use .test() instead.
   
-     8  8 │   let regex = /test/; if (str.match(regex)) {}
-     9  9 │   var regex = /test/; if (str.match(regex)) {}
-    10    │ - const·regex·=·/test/;·if·(regex.exec(str))·{}
-       10 │ + const·regex·=·/test/;·if·(regex.test(str))·{}
-    11 11 │   if (obj.prop.match(/test/)) {}
-    12 12 │   if (/test/.exec(obj.prop)) {}
+     7  7 │   if (obj.prop.match(/test/)) {}
+     8  8 │   if (/test/.exec(obj.prop)) {}
+     9    │ - if·(str.match(/a/))·{}·if·(/b/.exec(str))·{}
+        9 │ + if·(str.match(/a/))·{}·if·(/b/.test(str))·{}
+    10 10 │   if (str.match(new RegExp('test'))) {}
+    11 11 │   if (new RegExp('test').exec(str)) {}
+  
+
+```
+
+```
+invalid.js:10:5 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i .match() and .exec() are not designed for boolean checks.
+  
+     8 │ if (/test/.exec(obj.prop)) {}
+     9 │ if (str.match(/a/)) {} if (/b/.exec(str)) {}
+  > 10 │ if (str.match(new RegExp('test'))) {}
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ if (new RegExp('test').exec(str)) {}
+    12 │ if (str.match(new window.RegExp('test'))) {}
+  
+  i These methods return match objects or arrays, which involves unnecessary computation when only checking for a match.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .test() instead.
+  
+     8  8 │   if (/test/.exec(obj.prop)) {}
+     9  9 │   if (str.match(/a/)) {} if (/b/.exec(str)) {}
+    10    │ - if·(str.match(new·RegExp('test')))·{}
+       10 │ + if·(new·RegExp('test').test(str))·{}
+    11 11 │   if (new RegExp('test').exec(str)) {}
+    12 12 │   if (str.match(new window.RegExp('test'))) {}
   
 
 ```
@@ -317,27 +341,27 @@ invalid.js:10:27 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:11:5 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use .test() instead of .match() or .exec() in boolean contexts.
+  i .match() and .exec() are not designed for boolean checks.
   
-     9 │ var regex = /test/; if (str.match(regex)) {}
-    10 │ const regex = /test/; if (regex.exec(str)) {}
-  > 11 │ if (obj.prop.match(/test/)) {}
-       │     ^^^^^^^^^^^^^^^^^^^^^^
-    12 │ if (/test/.exec(obj.prop)) {}
-    13 │ if (str.match(/a/)) {} if (/b/.exec(str)) {}
+     9 │ if (str.match(/a/)) {} if (/b/.exec(str)) {}
+    10 │ if (str.match(new RegExp('test'))) {}
+  > 11 │ if (new RegExp('test').exec(str)) {}
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ if (str.match(new window.RegExp('test'))) {}
+    13 │ if (str.match(new globalThis.RegExp('test'))) {}
   
-  i RegExp.test() returns a boolean directly, which is more appropriate and efficient in a boolean context.
+  i These methods return match objects or arrays, which involves unnecessary computation when only checking for a match.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use .test() instead.
   
-     9  9 │   var regex = /test/; if (str.match(regex)) {}
-    10 10 │   const regex = /test/; if (regex.exec(str)) {}
-    11    │ - if·(obj.prop.match(/test/))·{}
-       11 │ + if·(/test/.test(obj.prop))·{}
-    12 12 │   if (/test/.exec(obj.prop)) {}
-    13 13 │   if (str.match(/a/)) {} if (/b/.exec(str)) {}
+     9  9 │   if (str.match(/a/)) {} if (/b/.exec(str)) {}
+    10 10 │   if (str.match(new RegExp('test'))) {}
+    11    │ - if·(new·RegExp('test').exec(str))·{}
+       11 │ + if·(new·RegExp('test').test(str))·{}
+    12 12 │   if (str.match(new window.RegExp('test'))) {}
+    13 13 │   if (str.match(new globalThis.RegExp('test'))) {}
   
 
 ```
@@ -345,27 +369,27 @@ invalid.js:11:5 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━
 ```
 invalid.js:12:5 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use .test() instead of .match() or .exec() in boolean contexts.
+  i .match() and .exec() are not designed for boolean checks.
   
-    10 │ const regex = /test/; if (regex.exec(str)) {}
-    11 │ if (obj.prop.match(/test/)) {}
-  > 12 │ if (/test/.exec(obj.prop)) {}
-       │     ^^^^^^^^^^^^^^^^^^^^^
-    13 │ if (str.match(/a/)) {} if (/b/.exec(str)) {}
-    14 │ const regex = new RegExp('test'); if (str.match(regex)) {}
+    10 │ if (str.match(new RegExp('test'))) {}
+    11 │ if (new RegExp('test').exec(str)) {}
+  > 12 │ if (str.match(new window.RegExp('test'))) {}
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ if (str.match(new globalThis.RegExp('test'))) {}
+    14 │ const x = str.match(/test/) ? a : b;
   
-  i RegExp.test() returns a boolean directly, which is more appropriate and efficient in a boolean context.
+  i These methods return match objects or arrays, which involves unnecessary computation when only checking for a match.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use .test() instead.
   
-    10 10 │   const regex = /test/; if (regex.exec(str)) {}
-    11 11 │   if (obj.prop.match(/test/)) {}
-    12    │ - if·(/test/.exec(obj.prop))·{}
-       12 │ + if·(/test/.test(obj.prop))·{}
-    13 13 │   if (str.match(/a/)) {} if (/b/.exec(str)) {}
-    14 14 │   const regex = new RegExp('test'); if (str.match(regex)) {}
+    10 10 │   if (str.match(new RegExp('test'))) {}
+    11 11 │   if (new RegExp('test').exec(str)) {}
+    12    │ - if·(str.match(new·window.RegExp('test')))·{}
+       12 │ + if·(new·window.RegExp('test').test(str))·{}
+    13 13 │   if (str.match(new globalThis.RegExp('test'))) {}
+    14 14 │   const x = str.match(/test/) ? a : b;
   
 
 ```
@@ -373,425 +397,285 @@ invalid.js:12:5 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━
 ```
 invalid.js:13:5 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use .test() instead of .match() or .exec() in boolean contexts.
+  i .match() and .exec() are not designed for boolean checks.
   
-    11 │ if (obj.prop.match(/test/)) {}
-    12 │ if (/test/.exec(obj.prop)) {}
-  > 13 │ if (str.match(/a/)) {} if (/b/.exec(str)) {}
-       │     ^^^^^^^^^^^^^^
-    14 │ const regex = new RegExp('test'); if (str.match(regex)) {}
-    15 │ const regex = new RegExp('test'); if (regex.exec(str)) {}
+    11 │ if (new RegExp('test').exec(str)) {}
+    12 │ if (str.match(new window.RegExp('test'))) {}
+  > 13 │ if (str.match(new globalThis.RegExp('test'))) {}
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ const x = str.match(/test/) ? a : b;
+    15 │ if (!str.match(/test/)) {}
   
-  i RegExp.test() returns a boolean directly, which is more appropriate and efficient in a boolean context.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Unsafe fix: Use .test() instead.
-  
-    11 11 │   if (obj.prop.match(/test/)) {}
-    12 12 │   if (/test/.exec(obj.prop)) {}
-    13    │ - if·(str.match(/a/))·{}·if·(/b/.exec(str))·{}
-       13 │ + if·(/a/.test(str))·{}·if·(/b/.exec(str))·{}
-    14 14 │   const regex = new RegExp('test'); if (str.match(regex)) {}
-    15 15 │   const regex = new RegExp('test'); if (regex.exec(str)) {}
-  
-
-```
-
-```
-invalid.js:13:28 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use .test() instead of .match() or .exec() in boolean contexts.
-  
-    11 │ if (obj.prop.match(/test/)) {}
-    12 │ if (/test/.exec(obj.prop)) {}
-  > 13 │ if (str.match(/a/)) {} if (/b/.exec(str)) {}
-       │                            ^^^^^^^^^^^^^
-    14 │ const regex = new RegExp('test'); if (str.match(regex)) {}
-    15 │ const regex = new RegExp('test'); if (regex.exec(str)) {}
-  
-  i RegExp.test() returns a boolean directly, which is more appropriate and efficient in a boolean context.
+  i These methods return match objects or arrays, which involves unnecessary computation when only checking for a match.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use .test() instead.
   
-    11 11 │   if (obj.prop.match(/test/)) {}
-    12 12 │   if (/test/.exec(obj.prop)) {}
-    13    │ - if·(str.match(/a/))·{}·if·(/b/.exec(str))·{}
-       13 │ + if·(str.match(/a/))·{}·if·(/b/.test(str))·{}
-    14 14 │   const regex = new RegExp('test'); if (str.match(regex)) {}
-    15 15 │   const regex = new RegExp('test'); if (regex.exec(str)) {}
+    11 11 │   if (new RegExp('test').exec(str)) {}
+    12 12 │   if (str.match(new window.RegExp('test'))) {}
+    13    │ - if·(str.match(new·globalThis.RegExp('test')))·{}
+       13 │ + if·(new·globalThis.RegExp('test').test(str))·{}
+    14 14 │   const x = str.match(/test/) ? a : b;
+    15 15 │   if (!str.match(/test/)) {}
   
 
 ```
 
 ```
-invalid.js:14:39 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:14:11 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use .test() instead of .match() or .exec() in boolean contexts.
+  i .match() and .exec() are not designed for boolean checks.
   
-    12 │ if (/test/.exec(obj.prop)) {}
-    13 │ if (str.match(/a/)) {} if (/b/.exec(str)) {}
-  > 14 │ const regex = new RegExp('test'); if (str.match(regex)) {}
-       │                                       ^^^^^^^^^^^^^^^^
-    15 │ const regex = new RegExp('test'); if (regex.exec(str)) {}
-    16 │ const regex = new window.RegExp('test'); if (str.match(regex)) {}
-  
-  i RegExp.test() returns a boolean directly, which is more appropriate and efficient in a boolean context.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Unsafe fix: Use .test() instead.
-  
-    12 12 │   if (/test/.exec(obj.prop)) {}
-    13 13 │   if (str.match(/a/)) {} if (/b/.exec(str)) {}
-    14    │ - const·regex·=·new·RegExp('test');·if·(str.match(regex))·{}
-       14 │ + const·regex·=·new·RegExp('test');·if·(regex.test(str))·{}
-    15 15 │   const regex = new RegExp('test'); if (regex.exec(str)) {}
-    16 16 │   const regex = new window.RegExp('test'); if (str.match(regex)) {}
-  
-
-```
-
-```
-invalid.js:15:39 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use .test() instead of .match() or .exec() in boolean contexts.
-  
-    13 │ if (str.match(/a/)) {} if (/b/.exec(str)) {}
-    14 │ const regex = new RegExp('test'); if (str.match(regex)) {}
-  > 15 │ const regex = new RegExp('test'); if (regex.exec(str)) {}
-       │                                       ^^^^^^^^^^^^^^^
-    16 │ const regex = new window.RegExp('test'); if (str.match(regex)) {}
-    17 │ const regex = new globalThis.RegExp('test'); if (str.match(regex)) {}
-  
-  i RegExp.test() returns a boolean directly, which is more appropriate and efficient in a boolean context.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Unsafe fix: Use .test() instead.
-  
-    13 13 │   if (str.match(/a/)) {} if (/b/.exec(str)) {}
-    14 14 │   const regex = new RegExp('test'); if (str.match(regex)) {}
-    15    │ - const·regex·=·new·RegExp('test');·if·(regex.exec(str))·{}
-       15 │ + const·regex·=·new·RegExp('test');·if·(regex.test(str))·{}
-    16 16 │   const regex = new window.RegExp('test'); if (str.match(regex)) {}
-    17 17 │   const regex = new globalThis.RegExp('test'); if (str.match(regex)) {}
-  
-
-```
-
-```
-invalid.js:16:46 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use .test() instead of .match() or .exec() in boolean contexts.
-  
-    14 │ const regex = new RegExp('test'); if (str.match(regex)) {}
-    15 │ const regex = new RegExp('test'); if (regex.exec(str)) {}
-  > 16 │ const regex = new window.RegExp('test'); if (str.match(regex)) {}
-       │                                              ^^^^^^^^^^^^^^^^
-    17 │ const regex = new globalThis.RegExp('test'); if (str.match(regex)) {}
-    18 │ const x = str.match(/test/) ? a : b;
-  
-  i RegExp.test() returns a boolean directly, which is more appropriate and efficient in a boolean context.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Unsafe fix: Use .test() instead.
-  
-    14 14 │   const regex = new RegExp('test'); if (str.match(regex)) {}
-    15 15 │   const regex = new RegExp('test'); if (regex.exec(str)) {}
-    16    │ - const·regex·=·new·window.RegExp('test');·if·(str.match(regex))·{}
-       16 │ + const·regex·=·new·window.RegExp('test');·if·(regex.test(str))·{}
-    17 17 │   const regex = new globalThis.RegExp('test'); if (str.match(regex)) {}
-    18 18 │   const x = str.match(/test/) ? a : b;
-  
-
-```
-
-```
-invalid.js:17:50 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use .test() instead of .match() or .exec() in boolean contexts.
-  
-    15 │ const regex = new RegExp('test'); if (regex.exec(str)) {}
-    16 │ const regex = new window.RegExp('test'); if (str.match(regex)) {}
-  > 17 │ const regex = new globalThis.RegExp('test'); if (str.match(regex)) {}
-       │                                                  ^^^^^^^^^^^^^^^^
-    18 │ const x = str.match(/test/) ? a : b;
-    19 │ if (!str.match(/test/)) {}
-  
-  i RegExp.test() returns a boolean directly, which is more appropriate and efficient in a boolean context.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Unsafe fix: Use .test() instead.
-  
-    15 15 │   const regex = new RegExp('test'); if (regex.exec(str)) {}
-    16 16 │   const regex = new window.RegExp('test'); if (str.match(regex)) {}
-    17    │ - const·regex·=·new·globalThis.RegExp('test');·if·(str.match(regex))·{}
-       17 │ + const·regex·=·new·globalThis.RegExp('test');·if·(regex.test(str))·{}
-    18 18 │   const x = str.match(/test/) ? a : b;
-    19 19 │   if (!str.match(/test/)) {}
-  
-
-```
-
-```
-invalid.js:18:11 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use .test() instead of .match() or .exec() in boolean contexts.
-  
-    16 │ const regex = new window.RegExp('test'); if (str.match(regex)) {}
-    17 │ const regex = new globalThis.RegExp('test'); if (str.match(regex)) {}
-  > 18 │ const x = str.match(/test/) ? a : b;
+    12 │ if (str.match(new window.RegExp('test'))) {}
+    13 │ if (str.match(new globalThis.RegExp('test'))) {}
+  > 14 │ const x = str.match(/test/) ? a : b;
        │           ^^^^^^^^^^^^^^^^^
-    19 │ if (!str.match(/test/)) {}
-    20 │ if (str.match(/test/) && other) {}
+    15 │ if (!str.match(/test/)) {}
+    16 │ if (str.match(/test/) && other) {}
   
-  i RegExp.test() returns a boolean directly, which is more appropriate and efficient in a boolean context.
+  i These methods return match objects or arrays, which involves unnecessary computation when only checking for a match.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use .test() instead.
   
-    16 16 │   const regex = new window.RegExp('test'); if (str.match(regex)) {}
-    17 17 │   const regex = new globalThis.RegExp('test'); if (str.match(regex)) {}
-    18    │ - const·x·=·str.match(/test/)·?·a·:·b;
-       18 │ + const·x·=·/test/.test(str)·?·a·:·b;
-    19 19 │   if (!str.match(/test/)) {}
-    20 20 │   if (str.match(/test/) && other) {}
+    12 12 │   if (str.match(new window.RegExp('test'))) {}
+    13 13 │   if (str.match(new globalThis.RegExp('test'))) {}
+    14    │ - const·x·=·str.match(/test/)·?·a·:·b;
+       14 │ + const·x·=·/test/.test(str)·?·a·:·b;
+    15 15 │   if (!str.match(/test/)) {}
+    16 16 │   if (str.match(/test/) && other) {}
   
 
 ```
 
 ```
-invalid.js:19:6 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:15:6 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use .test() instead of .match() or .exec() in boolean contexts.
+  i .match() and .exec() are not designed for boolean checks.
   
-    17 │ const regex = new globalThis.RegExp('test'); if (str.match(regex)) {}
-    18 │ const x = str.match(/test/) ? a : b;
-  > 19 │ if (!str.match(/test/)) {}
+    13 │ if (str.match(new globalThis.RegExp('test'))) {}
+    14 │ const x = str.match(/test/) ? a : b;
+  > 15 │ if (!str.match(/test/)) {}
        │      ^^^^^^^^^^^^^^^^^
-    20 │ if (str.match(/test/) && other) {}
-    21 │ if (other && str.match(/test/)) {}
+    16 │ if (str.match(/test/) && other) {}
+    17 │ if (other && str.match(/test/)) {}
   
-  i RegExp.test() returns a boolean directly, which is more appropriate and efficient in a boolean context.
+  i These methods return match objects or arrays, which involves unnecessary computation when only checking for a match.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use .test() instead.
   
-    17 17 │   const regex = new globalThis.RegExp('test'); if (str.match(regex)) {}
-    18 18 │   const x = str.match(/test/) ? a : b;
-    19    │ - if·(!str.match(/test/))·{}
-       19 │ + if·(!/test/.test(str))·{}
-    20 20 │   if (str.match(/test/) && other) {}
-    21 21 │   if (other && str.match(/test/)) {}
+    13 13 │   if (str.match(new globalThis.RegExp('test'))) {}
+    14 14 │   const x = str.match(/test/) ? a : b;
+    15    │ - if·(!str.match(/test/))·{}
+       15 │ + if·(!/test/.test(str))·{}
+    16 16 │   if (str.match(/test/) && other) {}
+    17 17 │   if (other && str.match(/test/)) {}
   
 
 ```
 
 ```
-invalid.js:20:5 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:16:5 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use .test() instead of .match() or .exec() in boolean contexts.
+  i .match() and .exec() are not designed for boolean checks.
   
-    18 │ const x = str.match(/test/) ? a : b;
-    19 │ if (!str.match(/test/)) {}
-  > 20 │ if (str.match(/test/) && other) {}
+    14 │ const x = str.match(/test/) ? a : b;
+    15 │ if (!str.match(/test/)) {}
+  > 16 │ if (str.match(/test/) && other) {}
        │     ^^^^^^^^^^^^^^^^^
-    21 │ if (other && str.match(/test/)) {}
-    22 │ if (str.match(/test/) || fallback) {}
+    17 │ if (other && str.match(/test/)) {}
+    18 │ if (str.match(/test/) || fallback) {}
   
-  i RegExp.test() returns a boolean directly, which is more appropriate and efficient in a boolean context.
+  i These methods return match objects or arrays, which involves unnecessary computation when only checking for a match.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use .test() instead.
   
-    18 18 │   const x = str.match(/test/) ? a : b;
-    19 19 │   if (!str.match(/test/)) {}
-    20    │ - if·(str.match(/test/)·&&·other)·{}
-       20 │ + if·(/test/.test(str)·&&·other)·{}
-    21 21 │   if (other && str.match(/test/)) {}
-    22 22 │   if (str.match(/test/) || fallback) {}
+    14 14 │   const x = str.match(/test/) ? a : b;
+    15 15 │   if (!str.match(/test/)) {}
+    16    │ - if·(str.match(/test/)·&&·other)·{}
+       16 │ + if·(/test/.test(str)·&&·other)·{}
+    17 17 │   if (other && str.match(/test/)) {}
+    18 18 │   if (str.match(/test/) || fallback) {}
   
 
 ```
 
 ```
-invalid.js:21:14 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:17:14 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use .test() instead of .match() or .exec() in boolean contexts.
+  i .match() and .exec() are not designed for boolean checks.
   
-    19 │ if (!str.match(/test/)) {}
-    20 │ if (str.match(/test/) && other) {}
-  > 21 │ if (other && str.match(/test/)) {}
+    15 │ if (!str.match(/test/)) {}
+    16 │ if (str.match(/test/) && other) {}
+  > 17 │ if (other && str.match(/test/)) {}
        │              ^^^^^^^^^^^^^^^^^
-    22 │ if (str.match(/test/) || fallback) {}
-    23 │ if (fallback || str.match(/test/)) {}
+    18 │ if (str.match(/test/) || fallback) {}
+    19 │ if (fallback || str.match(/test/)) {}
   
-  i RegExp.test() returns a boolean directly, which is more appropriate and efficient in a boolean context.
+  i These methods return match objects or arrays, which involves unnecessary computation when only checking for a match.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use .test() instead.
   
-    19 19 │   if (!str.match(/test/)) {}
-    20 20 │   if (str.match(/test/) && other) {}
-    21    │ - if·(other·&&·str.match(/test/))·{}
-       21 │ + if·(other·&&·/test/.test(str))·{}
-    22 22 │   if (str.match(/test/) || fallback) {}
-    23 23 │   if (fallback || str.match(/test/)) {}
+    15 15 │   if (!str.match(/test/)) {}
+    16 16 │   if (str.match(/test/) && other) {}
+    17    │ - if·(other·&&·str.match(/test/))·{}
+       17 │ + if·(other·&&·/test/.test(str))·{}
+    18 18 │   if (str.match(/test/) || fallback) {}
+    19 19 │   if (fallback || str.match(/test/)) {}
   
 
 ```
 
 ```
-invalid.js:22:5 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:18:5 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use .test() instead of .match() or .exec() in boolean contexts.
+  i .match() and .exec() are not designed for boolean checks.
   
-    20 │ if (str.match(/test/) && other) {}
-    21 │ if (other && str.match(/test/)) {}
-  > 22 │ if (str.match(/test/) || fallback) {}
+    16 │ if (str.match(/test/) && other) {}
+    17 │ if (other && str.match(/test/)) {}
+  > 18 │ if (str.match(/test/) || fallback) {}
        │     ^^^^^^^^^^^^^^^^^
-    23 │ if (fallback || str.match(/test/)) {}
-    24 │ if (a && !str.match(/test/)) {}
+    19 │ if (fallback || str.match(/test/)) {}
+    20 │ if (a && !str.match(/test/)) {}
   
-  i RegExp.test() returns a boolean directly, which is more appropriate and efficient in a boolean context.
+  i These methods return match objects or arrays, which involves unnecessary computation when only checking for a match.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use .test() instead.
   
-    20 20 │   if (str.match(/test/) && other) {}
-    21 21 │   if (other && str.match(/test/)) {}
-    22    │ - if·(str.match(/test/)·||·fallback)·{}
-       22 │ + if·(/test/.test(str)·||·fallback)·{}
-    23 23 │   if (fallback || str.match(/test/)) {}
-    24 24 │   if (a && !str.match(/test/)) {}
+    16 16 │   if (str.match(/test/) && other) {}
+    17 17 │   if (other && str.match(/test/)) {}
+    18    │ - if·(str.match(/test/)·||·fallback)·{}
+       18 │ + if·(/test/.test(str)·||·fallback)·{}
+    19 19 │   if (fallback || str.match(/test/)) {}
+    20 20 │   if (a && !str.match(/test/)) {}
   
 
 ```
 
 ```
-invalid.js:23:17 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:19:17 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use .test() instead of .match() or .exec() in boolean contexts.
+  i .match() and .exec() are not designed for boolean checks.
   
-    21 │ if (other && str.match(/test/)) {}
-    22 │ if (str.match(/test/) || fallback) {}
-  > 23 │ if (fallback || str.match(/test/)) {}
+    17 │ if (other && str.match(/test/)) {}
+    18 │ if (str.match(/test/) || fallback) {}
+  > 19 │ if (fallback || str.match(/test/)) {}
        │                 ^^^^^^^^^^^^^^^^^
-    24 │ if (a && !str.match(/test/)) {}
-    25 │ if (!!str.match(/test/)) {}
+    20 │ if (a && !str.match(/test/)) {}
+    21 │ if (!!str.match(/test/)) {}
   
-  i RegExp.test() returns a boolean directly, which is more appropriate and efficient in a boolean context.
+  i These methods return match objects or arrays, which involves unnecessary computation when only checking for a match.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use .test() instead.
   
-    21 21 │   if (other && str.match(/test/)) {}
-    22 22 │   if (str.match(/test/) || fallback) {}
-    23    │ - if·(fallback·||·str.match(/test/))·{}
-       23 │ + if·(fallback·||·/test/.test(str))·{}
-    24 24 │   if (a && !str.match(/test/)) {}
-    25 25 │   if (!!str.match(/test/)) {}
+    17 17 │   if (other && str.match(/test/)) {}
+    18 18 │   if (str.match(/test/) || fallback) {}
+    19    │ - if·(fallback·||·str.match(/test/))·{}
+       19 │ + if·(fallback·||·/test/.test(str))·{}
+    20 20 │   if (a && !str.match(/test/)) {}
+    21 21 │   if (!!str.match(/test/)) {}
   
 
 ```
 
 ```
-invalid.js:24:11 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:20:11 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use .test() instead of .match() or .exec() in boolean contexts.
+  i .match() and .exec() are not designed for boolean checks.
   
-    22 │ if (str.match(/test/) || fallback) {}
-    23 │ if (fallback || str.match(/test/)) {}
-  > 24 │ if (a && !str.match(/test/)) {}
+    18 │ if (str.match(/test/) || fallback) {}
+    19 │ if (fallback || str.match(/test/)) {}
+  > 20 │ if (a && !str.match(/test/)) {}
        │           ^^^^^^^^^^^^^^^^^
-    25 │ if (!!str.match(/test/)) {}
-    26 │ 
+    21 │ if (!!str.match(/test/)) {}
+    22 │ 
   
-  i RegExp.test() returns a boolean directly, which is more appropriate and efficient in a boolean context.
+  i These methods return match objects or arrays, which involves unnecessary computation when only checking for a match.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use .test() instead.
   
-    22 22 │   if (str.match(/test/) || fallback) {}
-    23 23 │   if (fallback || str.match(/test/)) {}
-    24    │ - if·(a·&&·!str.match(/test/))·{}
-       24 │ + if·(a·&&·!/test/.test(str))·{}
-    25 25 │   if (!!str.match(/test/)) {}
-    26 26 │   
+    18 18 │   if (str.match(/test/) || fallback) {}
+    19 19 │   if (fallback || str.match(/test/)) {}
+    20    │ - if·(a·&&·!str.match(/test/))·{}
+       20 │ + if·(a·&&·!/test/.test(str))·{}
+    21 21 │   if (!!str.match(/test/)) {}
+    22 22 │   
   
 
 ```
 
 ```
-invalid.js:25:7 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:21:7 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use .test() instead of .match() or .exec() in boolean contexts.
+  i .match() and .exec() are not designed for boolean checks.
   
-    23 │ if (fallback || str.match(/test/)) {}
-    24 │ if (a && !str.match(/test/)) {}
-  > 25 │ if (!!str.match(/test/)) {}
+    19 │ if (fallback || str.match(/test/)) {}
+    20 │ if (a && !str.match(/test/)) {}
+  > 21 │ if (!!str.match(/test/)) {}
        │       ^^^^^^^^^^^^^^^^^
-    26 │ 
-    27 │ // trivia is preserved for code actions
+    22 │ 
+    23 │ // trivia is preserved for code actions
   
-  i RegExp.test() returns a boolean directly, which is more appropriate and efficient in a boolean context.
+  i These methods return match objects or arrays, which involves unnecessary computation when only checking for a match.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use .test() instead.
   
-    23 23 │   if (fallback || str.match(/test/)) {}
-    24 24 │   if (a && !str.match(/test/)) {}
-    25    │ - if·(!!str.match(/test/))·{}
-       25 │ + if·(!!/test/.test(str))·{}
-    26 26 │   
-    27 27 │   // trivia is preserved for code actions
+    19 19 │   if (fallback || str.match(/test/)) {}
+    20 20 │   if (a && !str.match(/test/)) {}
+    21    │ - if·(!!str.match(/test/))·{}
+       21 │ + if·(!!/test/.test(str))·{}
+    22 22 │   
+    23 23 │   // trivia is preserved for code actions
   
 
 ```
 
 ```
-invalid.js:29:2 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:25:2 lint/nursery/useRegexpTest  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use .test() instead of .match() or .exec() in boolean contexts.
+  i .match() and .exec() are not designed for boolean checks.
   
-    27 │ // trivia is preserved for code actions
-    28 │ if (
-  > 29 │ 	str.match(
+    23 │ // trivia is preserved for code actions
+    24 │ if (
+  > 25 │ 	str.match(
        │ 	^^^^^^^^^^
-  > 30 │ 			// comment
-  > 31 │ 			/test/)
+  > 26 │ 			// comment
+  > 27 │ 			/test/)
        │ 			^^^^^^^
-    32 │ ) {}
-    33 │ 
+    28 │ ) {}
+    29 │ 
   
-  i RegExp.test() returns a boolean directly, which is more appropriate and efficient in a boolean context.
+  i These methods return match objects or arrays, which involves unnecessary computation when only checking for a match.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Use .test() instead.
   
-    27 27 │   // trivia is preserved for code actions
-    28 28 │   if (
-    29    │ - → str.match(
-       29 │ + → /test/.test(
-    30 30 │         // comment
-    31    │ - → → → /test/)
-       31 │ + → → → str)
-    32 32 │   ) {}
-    33 33 │   
+    23 23 │   // trivia is preserved for code actions
+    24 24 │   if (
+    25    │ - → str.match(
+       25 │ + → /test/.test(
+    26 26 │         // comment
+    27    │ - → → → /test/)
+       27 │ + → → → str)
+    28 28 │   ) {}
+    29 29 │   
   
 
 ```

@@ -4,17 +4,13 @@ if (str.match(/test/i)) {}
 while (str.match(/test/)) {}
 for (; str.match(/test/);) {}
 do {} while (str.match(/test/));
-const regex = /test/; if (str.match(regex)) {}
-let regex = /test/; if (str.match(regex)) {}
-var regex = /test/; if (str.match(regex)) {}
-const regex = /test/; if (regex.exec(str)) {}
 if (obj.prop.match(/test/)) {}
 if (/test/.exec(obj.prop)) {}
 if (str.match(/a/)) {} if (/b/.exec(str)) {}
-const regex = new RegExp('test'); if (str.match(regex)) {}
-const regex = new RegExp('test'); if (regex.exec(str)) {}
-const regex = new window.RegExp('test'); if (str.match(regex)) {}
-const regex = new globalThis.RegExp('test'); if (str.match(regex)) {}
+if (str.match(new RegExp('test'))) {}
+if (new RegExp('test').exec(str)) {}
+if (str.match(new window.RegExp('test'))) {}
+if (str.match(new globalThis.RegExp('test'))) {}
 const x = str.match(/test/) ? a : b;
 if (!str.match(/test/)) {}
 if (str.match(/test/) && other) {}
