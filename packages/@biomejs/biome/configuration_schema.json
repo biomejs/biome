@@ -7408,6 +7408,14 @@
 			},
 			"required": ["level", "options"]
 		},
+		"RuleAssistWithUseSortedEnumMembersOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSortedEnumMembersOptions" }
+			},
+			"required": ["level", "options"]
+		},
 		"RuleAssistWithUseSortedInterfaceMembersOptions": {
 			"type": "object",
 			"properties": {
@@ -12331,6 +12339,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useSortedEnumMembers": {
+					"description": "Sort enum members.\nSee https://biomejs.dev/assist/actions/use-sorted-enum-members",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSortedEnumMembersConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSortedInterfaceMembers": {
 					"description": "Sort interface members by key.\nSee https://biomejs.dev/assist/actions/use-sorted-interface-members",
 					"anyOf": [
@@ -15262,6 +15277,16 @@
 					"items": { "type": "string" }
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseSortedEnumMembersConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/$defs/RuleAssistWithUseSortedEnumMembersOptions" }
+			]
+		},
+		"UseSortedEnumMembersOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseSortedInterfaceMembersConfiguration": {

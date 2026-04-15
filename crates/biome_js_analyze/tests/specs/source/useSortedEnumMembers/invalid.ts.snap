@@ -1,0 +1,65 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+enum InvalidStatus {
+	InProgress = 'In Progress',
+	Completed = 'Completed',
+	/**
+	 * JSDoc
+	 */
+	OnHold = 'On Hold',
+	Cancelled = 'Cancelled', // Some inline comment
+	// Pre comment
+	NotStarted = 'Not Started',
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:1 assist/source/useSortedEnumMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Enum is not sorted.
+  
+     1 │ /* should generate diagnostics */
+   > 2 │ enum InvalidStatus {
+       │ ^^^^^^^^^^^^^^^^^^^^
+   > 3 │ 	InProgress = 'In Progress',
+   > 4 │ 	Completed = 'Completed',
+        ...
+  > 10 │ 	// Pre comment
+  > 11 │ 	NotStarted = 'Not Started',
+  > 12 │ }
+       │ ^
+    13 │ 
+  
+  i Safe fix: Sort enum.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   enum InvalidStatus {
+     3    │ - → InProgress·=·'In·Progress',
+        3 │ + → Cancelled·=·'Cancelled',·//·Some·inline·comment
+     4  4 │     Completed = 'Completed',
+     5    │ - → /**
+     6    │ - → ·*·JSDoc
+     7    │ - → ·*/
+     8    │ - → OnHold·=·'On·Hold',
+     9    │ - → Cancelled·=·'Cancelled',·//·Some·inline·comment
+    10    │ - → //·Pre·comment
+    11    │ - → NotStarted·=·'Not·Started',
+        5 │ + → InProgress·=·'In·Progress',
+        6 │ + → //·Pre·comment
+        7 │ + → NotStarted·=·'Not·Started',
+        8 │ + → /**
+        9 │ + → ·*·JSDoc
+       10 │ + → ·*/
+       11 │ + → OnHold·=·'On·Hold',
+    12 12 │   }
+    13 13 │   
+  
+
+```

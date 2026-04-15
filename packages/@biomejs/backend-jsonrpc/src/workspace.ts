@@ -1034,6 +1034,11 @@ See https://biomejs.dev/assist/actions/use-sorted-attributes
 	 */
 	useSortedAttributes?: UseSortedAttributesConfiguration;
 	/**
+	* Sort enum members.
+See https://biomejs.dev/assist/actions/use-sorted-enum-members 
+	 */
+	useSortedEnumMembers?: UseSortedEnumMembersConfiguration;
+	/**
 	* Sort interface members by key.
 See https://biomejs.dev/assist/actions/use-sorted-interface-members 
 	 */
@@ -1262,6 +1267,9 @@ export type OrganizeImportsConfiguration =
 export type UseSortedAttributesConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedAttributesOptions;
+export type UseSortedEnumMembersConfiguration =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithUseSortedEnumMembersOptions;
 export type UseSortedInterfaceMembersConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedInterfaceMembersOptions;
@@ -3782,6 +3790,10 @@ export interface RuleAssistWithUseSortedAttributesOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedAttributesOptions;
 }
+export interface RuleAssistWithUseSortedEnumMembersOptions {
+	level: RuleAssistPlainConfiguration;
+	options: UseSortedEnumMembersOptions;
+}
 export interface RuleAssistWithUseSortedInterfaceMembersOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedInterfaceMembersOptions;
@@ -5282,6 +5294,7 @@ Default: `natural`.
 export interface UseSortedAttributesOptions {
 	sortOrder?: SortOrder;
 }
+export type UseSortedEnumMembersOptions = {};
 export type UseSortedInterfaceMembersOptions = {};
 export interface UseSortedKeysOptions {
 	/**
@@ -9343,12 +9356,13 @@ export type Category =
 	| "assist/source/noDuplicateClasses"
 	| "assist/source/organizeImports"
 	| "assist/source/useSortedAttributes"
+	| "assist/source/useSortedEnumMembers"
 	| "assist/source/useSortedInterfaceMembers"
 	| "assist/source/useSortedKeys"
 	| "assist/source/useSortedPackageJson"
 	| "assist/source/useSortedProperties"
-	| "assist/source/useSortedTypeFields"
 	| "assist/source/useSortedSelectionSet"
+	| "assist/source/useSortedTypeFields"
 	| "syntax/correctness/noTypeOnlyImportAttributes"
 	| "syntax/correctness/noSuperWithoutExtends"
 	| "syntax/correctness/noInitializerWithDefinite"
