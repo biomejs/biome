@@ -243,18 +243,6 @@ impl<'src> CssScanCursor<'src> {
         self.is_ident_start_at(0)
     }
 
-    /// Consumes one standard CSS identifier fragment and returns the resulting
-    /// character when one was consumed.
-    pub(crate) fn consume_ident_part_regular(&mut self) -> Option<char> {
-        self.consume_ident_part(false)
-    }
-
-    /// Consumes one identifier fragment, also accepting `/` for slash-enabled
-    /// utility names such as Tailwind `w/2`.
-    pub(crate) fn consume_ident_part_with_slash(&mut self) -> Option<char> {
-        self.consume_ident_part(true)
-    }
-
     fn consume_ident_part(&mut self, allow_slash: bool) -> Option<char> {
         if allow_slash && self.current_byte() == Some(b'/') {
             self.advance(1);
@@ -331,12 +319,7 @@ impl<'src> CssScanCursor<'src> {
         while self.current_byte().is_some() {
             let start = self.position();
 
-            let part = if allow_slash {
-                self.consume_ident_part_with_slash()
-            } else {
-                self.consume_ident_part_regular()
-            };
-            let Some(part) = part else {
+            let Some(part) = self.consume_ident_part(allow_slash) else {
                 break;
             };
 

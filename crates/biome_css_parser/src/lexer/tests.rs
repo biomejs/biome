@@ -411,22 +411,31 @@ fn css_scan_cursor_treats_backslash_form_feed_as_line_continuation() {
 #[test]
 fn css_scan_cursor_identifier_mode_controls_slash_consumption() {
     let mut cursor = CssScanCursor::new(SourceCursor::new("/foo", 0), true, true);
+    let mut buf = [0u8; 8];
 
-    assert_eq!(cursor.consume_ident_part_regular(), None);
+    let scan = cursor.consume_ident_sequence(&mut buf);
+    assert_eq!(scan.count, 0);
+    assert_eq!(scan.stop_byte, Some(b'/'));
     assert_eq!(cursor.position(), 0);
 
     let mut cursor = CssScanCursor::new(SourceCursor::new("/foo", 0), true, true);
+    let mut buf = [0u8; 8];
 
-    assert_eq!(cursor.consume_ident_part_with_slash(), Some('/'));
-    assert_eq!(cursor.position(), 1);
+    let scan = cursor.consume_ident_sequence_with_slash(&mut buf);
+    assert_eq!(scan.count, 4);
+    assert_eq!(&buf[..scan.count], b"/foo");
+    assert_eq!(cursor.position(), 4);
 }
 
 #[test]
 fn css_scan_cursor_does_not_treat_backslash_form_feed_as_identifier_escape() {
     let mut cursor = CssScanCursor::new(SourceCursor::new("\\\u{000C}foo", 0), true, true);
+    let mut buf = [0u8; 8];
 
     assert!(!cursor.is_ident_start());
-    assert_eq!(cursor.consume_ident_part_regular(), None);
+    let scan = cursor.consume_ident_sequence(&mut buf);
+    assert_eq!(scan.count, 0);
+    assert_eq!(scan.stop_byte, Some(b'\\'));
     assert_eq!(cursor.position(), 0);
 }
 
@@ -671,11 +680,12 @@ fn same_quote_nested_string_in_interpolation_reuses_cached_first_chunk_scan() {
 #[test]
 fn css_scan_cursor_consumes_identifier_escape_as_a_single_part() {
     let mut cursor = CssScanCursor::new(SourceCursor::new(r"\61 bc", 0), false, false);
+    let mut buf = [0u8; 8];
+    let scan = cursor.consume_ident_sequence(&mut buf);
 
-    assert_eq!(cursor.consume_ident_part_regular(), Some('a'));
-    assert_eq!(cursor.position(), 4);
-    assert_eq!(cursor.consume_ident_part_regular(), Some('b'));
-    assert_eq!(cursor.consume_ident_part_regular(), Some('c'));
+    assert_eq!(scan.count, 3);
+    assert_eq!(&buf[..scan.count], b"abc");
+    assert_eq!(cursor.position(), 6);
 }
 
 #[test]
