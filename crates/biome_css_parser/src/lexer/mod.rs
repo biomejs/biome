@@ -10,7 +10,9 @@ use self::scan_cursor::{
 };
 use self::source_cursor::SourceCursor;
 use crate::CssParserOptions;
-use biome_css_syntax::{CssFileSource, CssSyntaxKind, CssSyntaxKind::*, T, TextLen, TextRange, TextSize};
+use biome_css_syntax::{
+    CssFileSource, CssSyntaxKind, CssSyntaxKind::*, T, TextLen, TextRange, TextSize,
+};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
@@ -727,9 +729,7 @@ impl<'src> CssLexer<'src> {
 
         match mode {
             StringLexMode::Plain { quote } => {
-                let scan = self
-                    .scan_cursor_at(start + 1)
-                    .scan_plain_string_body(quote);
+                let scan = self.scan_cursor_at(start + 1).scan_plain_string_body(quote);
                 self.commit_plain_string_literal(start, scan)
             }
             StringLexMode::ScssStart { quote } => {
@@ -784,10 +784,7 @@ impl<'src> CssLexer<'src> {
 
         let scan = self
             .take_pending_scss_string_start_scan(quote)
-            .unwrap_or_else(|| {
-                self.scan_cursor()
-                    .scan_interpolated_string_body(quote)
-            });
+            .unwrap_or_else(|| self.scan_cursor().scan_interpolated_string_body(quote));
 
         match scan.stop {
             StringBodyScanStop::Interpolation { position }
