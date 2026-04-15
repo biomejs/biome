@@ -696,6 +696,77 @@ const Bar = styled(Component)`
 }
 
 #[test]
+fn issue_9975() {
+    const FILE_PATH: &str = "/project/file.ts";
+    const FILE_CONTENT: &str = r#"styled.div`
+  svg:first-of-type {
+    margin-left: 0;
+  }
+`;
+
+styled.div`
+  div:not(:last-child) {
+    border-bottom: 1px solid black;
+  }
+`;"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            categories: RuleCategories::default(),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+
+    assert_eq!(result.parse_errors, 0);
+    assert!(
+        result.diagnostics.is_empty(),
+        "Expected no diagnostics for styled nested selectors, got: {:#?}",
+        result.diagnostics
+    );
+}
+
+#[test]
 fn issue_9625() {
     const FILE_PATH: &str = "/project/file.js";
     const FILE_CONTENT: &str = r#"const Portfolio = styled.div`

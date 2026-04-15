@@ -240,6 +240,12 @@ impl<'source> MarkdownParser<'source> {
             .force_relex_in_context(MarkdownLexContext::CodeSpan);
     }
 
+    /// Re-lexes the current token in the specified context. Returns the kind
+    /// of the re-lexed token (can be the same as before if the context doesn't make a difference for the current token)
+    pub fn re_lex(&mut self, context: MarkdownReLexContext) -> MarkdownSyntaxKind {
+        self.source_mut().re_lex(context)
+    }
+
     /// Re-lex the current token as single-char emphasis delimiter.
     ///
     /// Use this when the emphasis matching algorithm needs to partially consume

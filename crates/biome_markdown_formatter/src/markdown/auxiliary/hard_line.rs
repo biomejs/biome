@@ -14,7 +14,7 @@ impl FormatNodeRule<MdHardLine> for FormatMdHardLine {
 
         if self.print_mode.is_pristine() {
             // We intentionally format this code as is
-            return format_verbatim_node(node.syntax()).fmt(f);
+            return token.format().fmt(f);
         }
 
         let text_content = token.text();

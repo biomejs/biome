@@ -169,9 +169,9 @@ declare_source_rule! {
     ///
     /// #### Type-only matcher
     ///
-    /// Use an type-only matcher to separate `import type` from regular imports:
+    /// Use a type-only matcher to separate `import type` from regular imports:
     /// Setting `"type": true` matches only `import type` and `export type` statements.
-    /// Setting `"type": false` matches only non-type imports and exports].
+    /// Setting `"type": false` matches only non-type imports and exports.
     ///
     /// Given the following configuration...
     ///

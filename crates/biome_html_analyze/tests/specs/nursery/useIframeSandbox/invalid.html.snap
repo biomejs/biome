@@ -17,7 +17,7 @@ invalid.html:2:1 lint/nursery/useIframeSandbox ━━━━━━━━━━━
   
     1 │ <!-- should generate diagnostics -->
   > 2 │ <iframe></iframe>
-      │ ^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^
     3 │ 
   
   i The sandbox attribute enables an extra set of restrictions for the content in the iframe, protecting against malicious scripts and other security threats.

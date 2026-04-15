@@ -186,7 +186,7 @@ impl ParseNodeList for DeclarationOrRuleList {
                 // Check if the *last* token parsed is a closing brace (}).
                 // Indicates the end of a rule block.
                 // If true, the nested qualified rule is considered valid.
-                if p.last().is_some_and(|kind| kind == self.end_kind) {
+                if p.last().is_some_and(|kind| kind == self.end_kind) || p.at(self.end_kind) {
                     Ok(rule)
                 } else {
                     // If the condition is not met, return an error to indicate parsing failure.

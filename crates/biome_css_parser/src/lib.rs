@@ -252,7 +252,7 @@ pub fn parse_css_with_offset_and_cache(
 mod tests {
     use crate::{CssParserOptions, parse_css};
     use crate::{parse_css_with_cache, parse_css_with_offset};
-    use biome_css_syntax::CssFileSource;
+    use biome_css_syntax::{CssFileSource, EmbeddingKind};
     use biome_rowan::TextSize;
 
     #[test]
@@ -331,5 +331,25 @@ mod tests {
             offset_parse.syntax().inner().text_with_trivia().to_string(),
             normal_parse.syntax().text_with_trivia().to_string()
         );
+    }
+
+    #[test]
+    fn styled_embedding_accepts_nested_selectors_without_ampersand() {
+        for css in [
+            "svg:first-of-type {\n  margin-left: 0;\n}\n",
+            "div:not(:last-child) {\n  border-bottom: 1px solid black;\n}\n",
+        ] {
+            let parse = parse_css(
+                css,
+                CssFileSource::css().with_embedding_kind(EmbeddingKind::Styled),
+                CssParserOptions::default(),
+            );
+
+            assert!(
+                !parse.has_errors(),
+                "styled embedded CSS should accept nested selectors without &: {:#?}",
+                parse.diagnostics()
+            );
+        }
     }
 }
