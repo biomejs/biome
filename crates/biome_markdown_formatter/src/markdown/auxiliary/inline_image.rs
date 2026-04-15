@@ -27,7 +27,8 @@ impl FormatNodeRule<MdInlineImage> for FormatMdInlineImage {
                 alt.format()
                     .with_options(FormatMdFormatInlineItemListOptions {
                         print_mode: TextPrintMode::trim_all(),
-                        keep_fences_in_italics: false
+                        keep_fences_in_italics: false,
+                        inside_list: false,
                     }),
                 r_brack_token.format(),
                 l_paren_token.format(),
@@ -35,7 +36,8 @@ impl FormatNodeRule<MdInlineImage> for FormatMdInlineImage {
                     .format()
                     .with_options(FormatMdFormatInlineItemListOptions {
                         print_mode: TextPrintMode::Trim(TrimMode::AutoLinkLike),
-                        keep_fences_in_italics: false
+                        keep_fences_in_italics: false,
+                        inside_list: false,
                     })
             ]
         )?;

@@ -7,7 +7,6 @@ pub(crate) struct FormatMdQuote;
 impl FormatNodeRule<MdQuote> for FormatMdQuote {
     fn fmt_fields(&self, node: &MdQuote, f: &mut MarkdownFormatter) -> FormatResult<()> {
         let MdQuoteFields { content, prefix } = node.as_fields();
-
         write!(f, [prefix.format(), content.format()])
     }
 }

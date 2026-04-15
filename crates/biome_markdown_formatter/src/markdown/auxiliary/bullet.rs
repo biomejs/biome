@@ -1,9 +1,12 @@
 use crate::markdown::auxiliary::list_marker_prefix::FormatMdListMarkerPrefixOptions;
+use crate::markdown::lists::block_list::FormatMdBlockListOptions;
 use crate::prelude::*;
+use crate::shared::TextPrintMode;
 use biome_formatter::write;
 use biome_markdown_syntax::{
     AnyMdBlock, AnyMdLeafBlock, MarkdownSyntaxKind, MdBullet, MdBulletFields,
 };
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdBullet;
 impl FormatNodeRule<MdBullet> for FormatMdBullet {
@@ -19,6 +22,7 @@ impl FormatNodeRule<MdBullet> for FormatMdBullet {
         // but still format content through child formatters.
         let target_marker = if marker.kind() == MarkdownSyntaxKind::MINUS
             || first_block_is_dash_thematic_break(&content)
+            || marker.kind() == MarkdownSyntaxKind::MD_ORDERED_LIST_MARKER
         {
             None
         } else {
@@ -31,8 +35,13 @@ impl FormatNodeRule<MdBullet> for FormatMdBullet {
                 .format()
                 .with_options(FormatMdListMarkerPrefixOptions { target_marker })]
         )?;
-        content.format().fmt(f)?;
-        Ok(())
+        write!(
+            f,
+            [content.format().with_options(FormatMdBlockListOptions {
+                paragraph_print_mode: TextPrintMode::trim_keep_leading_spaces(),
+                trim: false,
+            })]
+        )
     }
 }
 

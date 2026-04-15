@@ -35,13 +35,6 @@ info: markdown/blockquote/code.md
  > ```json
  > {
  >  "extends": [
-@@ -12,4 +11,5 @@
- >    "browser": true
- >  }
- > }
--> ```
-+>
-+```
 ```
 
 # Output
@@ -60,8 +53,7 @@ info: markdown/blockquote/code.md
 >    "browser": true
 >  }
 > }
->
-```
+> ```
 ```
 
 # Lines exceeding max width of 80 characters

@@ -25,7 +25,8 @@ impl FormatNodeRule<MdInlineLink> for FormatMdInlineLink {
                 text.format()
                     .with_options(FormatMdFormatInlineItemListOptions {
                         print_mode: TextPrintMode::trim_all(),
-                        keep_fences_in_italics: false
+                        keep_fences_in_italics: false,
+                        inside_list: false,
                     }),
                 r_brack_token.format(),
                 l_paren_token.format(),
@@ -33,7 +34,8 @@ impl FormatNodeRule<MdInlineLink> for FormatMdInlineLink {
                     .format()
                     .with_options(FormatMdFormatInlineItemListOptions {
                         print_mode: TextPrintMode::trim_all(),
-                        keep_fences_in_italics: false
+                        keep_fences_in_italics: false,
+                        inside_list: false,
                     })
             ]
         )?;

@@ -69,7 +69,7 @@ impl FormatNodeRule<MdTextual> for FormatMdTextual {
                     )]
                 )
             }
-        } else if self.print_mode.is_all() {
+        } else if self.print_mode.is_trim_all() {
             let trimmed_text = value_token.text().trim_start().trim_end();
             write!(
                 f,
@@ -78,13 +78,24 @@ impl FormatNodeRule<MdTextual> for FormatMdTextual {
                     &text(trimmed_text, value_token.text_trimmed_range().start())
                 )]
             )
-        } else if self.print_mode.is_start() {
+        } else if self.print_mode.is_trim_start() {
             let trimmed_text = value_token.text().trim_start();
             write!(
                 f,
                 [format_replaced(
                     &value_token,
                     &text(trimmed_text, value_token.text_trimmed_range().start())
+                )]
+            )
+        } else if self.print_mode.is_keep_leading_spaces() {
+            // Preserve the leading whitespace trivia as literal text so that
+            // continuation-line indentation inside list items is kept.
+            let full_text = value_token.text();
+            write!(
+                f,
+                [format_replaced(
+                    &value_token,
+                    &text(full_text, value_token.text_range().start())
                 )]
             )
         } else {
