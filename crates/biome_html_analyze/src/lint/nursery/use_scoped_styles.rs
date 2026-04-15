@@ -97,7 +97,7 @@ impl Rule for UseScopedStyles {
         }
 
         let attributes = opening.attributes();
-        if ctx.source_type::<HtmlFileSource>().is_vue() {
+        if source_type.is_vue() {
             let has_scoped = attributes.find_by_name("scoped").is_some();
             let has_module = attributes.find_by_name("module").is_some();
 
