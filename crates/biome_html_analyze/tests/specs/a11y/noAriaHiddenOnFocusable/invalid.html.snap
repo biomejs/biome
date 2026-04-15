@@ -31,7 +31,7 @@ invalid.html:2:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
   
     1 │ <!-- should generate diagnostics -->
   > 2 │ <button aria-hidden="true">Click me</button>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     3 │ <a href="/" aria-hidden="true">link</a>
     4 │ <input aria-hidden="true" />
   
@@ -52,7 +52,7 @@ invalid.html:3:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
     1 │ <!-- should generate diagnostics -->
     2 │ <button aria-hidden="true">Click me</button>
   > 3 │ <a href="/" aria-hidden="true">link</a>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     4 │ <input aria-hidden="true" />
     5 │ <div tabindex="0" aria-hidden="true"></div>
   
@@ -94,7 +94,7 @@ invalid.html:5:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
     3 │ <a href="/" aria-hidden="true">link</a>
     4 │ <input aria-hidden="true" />
   > 5 │ <div tabindex="0" aria-hidden="true"></div>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ <select aria-hidden="true"><option>opt</option></select>
     7 │ <textarea aria-hidden="true">text</textarea>
   
@@ -115,7 +115,7 @@ invalid.html:6:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
     4 │ <input aria-hidden="true" />
     5 │ <div tabindex="0" aria-hidden="true"></div>
   > 6 │ <select aria-hidden="true"><option>opt</option></select>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     7 │ <textarea aria-hidden="true">text</textarea>
     8 │ <div contenteditable="true" aria-hidden="true">editable</div>
   
@@ -136,7 +136,7 @@ invalid.html:7:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
     5 │ <div tabindex="0" aria-hidden="true"></div>
     6 │ <select aria-hidden="true"><option>opt</option></select>
   > 7 │ <textarea aria-hidden="true">text</textarea>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     8 │ <div contenteditable="true" aria-hidden="true">editable</div>
     9 │ <div contenteditable aria-hidden="true">editable bare attr</div>
   
@@ -157,7 +157,7 @@ invalid.html:8:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
      6 │ <select aria-hidden="true"><option>opt</option></select>
      7 │ <textarea aria-hidden="true">text</textarea>
    > 8 │ <div contenteditable="true" aria-hidden="true">editable</div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
      9 │ <div contenteditable aria-hidden="true">editable bare attr</div>
     10 │ <div contenteditable="" aria-hidden="true">editable empty string</div>
   
@@ -178,7 +178,7 @@ invalid.html:9:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
      7 │ <textarea aria-hidden="true">text</textarea>
      8 │ <div contenteditable="true" aria-hidden="true">editable</div>
    > 9 │ <div contenteditable aria-hidden="true">editable bare attr</div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     10 │ <div contenteditable="" aria-hidden="true">editable empty string</div>
     11 │ <p tabindex="0" aria-hidden="true">text</p>
   
@@ -199,7 +199,7 @@ invalid.html:10:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━
      8 │ <div contenteditable="true" aria-hidden="true">editable</div>
      9 │ <div contenteditable aria-hidden="true">editable bare attr</div>
   > 10 │ <div contenteditable="" aria-hidden="true">editable empty string</div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     11 │ <p tabindex="0" aria-hidden="true">text</p>
     12 │ <BUTTON aria-hidden="true">uppercase</BUTTON>
   
@@ -220,7 +220,7 @@ invalid.html:11:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━
      9 │ <div contenteditable aria-hidden="true">editable bare attr</div>
     10 │ <div contenteditable="" aria-hidden="true">editable empty string</div>
   > 11 │ <p tabindex="0" aria-hidden="true">text</p>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     12 │ <BUTTON aria-hidden="true">uppercase</BUTTON>
     13 │ <INPUT aria-hidden="true" />
   
@@ -241,7 +241,7 @@ invalid.html:12:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━
     10 │ <div contenteditable="" aria-hidden="true">editable empty string</div>
     11 │ <p tabindex="0" aria-hidden="true">text</p>
   > 12 │ <BUTTON aria-hidden="true">uppercase</BUTTON>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     13 │ <INPUT aria-hidden="true" />
     14 │ <area href="/" aria-hidden="true" />
   
@@ -304,7 +304,7 @@ invalid.html:15:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━
     13 │ <INPUT aria-hidden="true" />
     14 │ <area href="/" aria-hidden="true" />
   > 15 │ <details aria-hidden="true">details</details>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     16 │ <summary aria-hidden="true">summary</summary>
     17 │ 
   
@@ -325,7 +325,7 @@ invalid.html:16:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━
     14 │ <area href="/" aria-hidden="true" />
     15 │ <details aria-hidden="true">details</details>
   > 16 │ <summary aria-hidden="true">summary</summary>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     17 │ 
   
   i aria-hidden should not be set to true on focusable elements because this can lead to confusing behavior for screen reader users.

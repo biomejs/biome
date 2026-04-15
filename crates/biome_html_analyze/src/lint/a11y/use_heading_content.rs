@@ -2,9 +2,7 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{
-    AnyHtmlContent, AnyHtmlElement, HtmlElementList, HtmlFileSource,
-};
+use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlElementList, HtmlFileSource};
 use biome_rowan::AstNode;
 use biome_rule_options::use_heading_content::UseHeadingContentOptions;
 
@@ -14,6 +12,7 @@ use crate::a11y::{
     html_self_closing_element_has_non_empty_attribute,
     html_self_closing_element_has_truthy_aria_hidden,
 };
+use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Enforce that heading elements (`h1`, `h2`, etc.) have content and that the content is
@@ -85,29 +84,25 @@ impl Rule for UseHeadingContent {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        let element_name = node.name()?;
         let source_type = ctx.source_type::<HtmlFileSource>();
 
-        let is_heading = if source_type.is_html() {
-            HEADING_ELEMENTS
-                .iter()
-                .any(|&h| element_name.text().eq_ignore_ascii_case(h))
-        } else {
-            HEADING_ELEMENTS.contains(&element_name.text())
-        };
+        let tag_element = node.clone().as_any_html_tag_element()?;
+        let is_heading = HEADING_ELEMENTS
+            .iter()
+            .any(|&h| is_html_tag(&tag_element, source_type, h));
 
         if !is_heading {
             return None;
         }
 
         // If the heading itself has aria-hidden, it is hidden from screen readers entirely
-        if get_truthy_aria_hidden_attribute(node).is_some() {
+        if get_truthy_aria_hidden_attribute(&tag_element).is_some() {
             return Some(());
         }
 
         // If the heading has an accessible name (aria-label, aria-labelledby, title),
         // screen readers can announce it even without visible content
-        if has_accessible_name(node) {
+        if has_accessible_name(&tag_element) {
             return None;
         }
 

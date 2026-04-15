@@ -442,16 +442,15 @@ impl AnyHtmlTagElement {
     }
 }
 
-impl biome_aria::Element for AnyHtmlElement {
+impl biome_aria::Element for AnyHtmlTagElement {
     fn name(&self) -> Option<impl AsRef<str>> {
         // HTML element names are case-insensitive; lowercase for AriaRoles matching
-        Some(Self::name(self)?.text().to_lowercase_cow().into_owned())
+        Some(Self::tag_name(self)?.text().to_lowercase_cow().into_owned())
     }
 
     fn attributes(&self) -> impl Iterator<Item = impl biome_aria::Attribute> {
         Self::attributes(self)
             .into_iter()
-            .flatten()
             .filter_map(|attr| match attr {
                 AnyHtmlAttribute::HtmlAttribute(attr) => Some(attr),
                 _ => None,

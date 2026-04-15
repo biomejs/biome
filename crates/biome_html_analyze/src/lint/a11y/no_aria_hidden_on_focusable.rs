@@ -3,12 +3,14 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlElement, HtmlAttribute, HtmlFileSource};
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_html_syntax::{HtmlAttribute, HtmlFileSource};
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_aria_hidden_on_focusable::NoAriaHiddenOnFocusableOptions;
 
 use crate::HtmlRuleAction;
 use crate::a11y::get_truthy_aria_hidden_attribute;
+use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Enforce that aria-hidden="true" is not set on focusable elements.
@@ -61,7 +63,7 @@ pub struct NoAriaHiddenOnFocusableState {
 }
 
 impl Rule for NoAriaHiddenOnFocusable {
-    type Query = Ast<AnyHtmlElement>;
+    type Query = Ast<AnyHtmlTagElement>;
     type State = NoAriaHiddenOnFocusableState;
     type Signals = Option<Self::State>;
     type Options = NoAriaHiddenOnFocusableOptions;
@@ -69,8 +71,7 @@ impl Rule for NoAriaHiddenOnFocusable {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
         let aria_hidden_attr = get_truthy_aria_hidden_attribute(element)?;
-        let file_source = ctx.source_type::<HtmlFileSource>();
-        let is_html = file_source.is_html();
+        let source_type = ctx.source_type::<HtmlFileSource>();
 
         // Tabindex overrides native focusability: negative removes from tab order,
         // non-negative makes the element focusable regardless of element type.
@@ -86,7 +87,7 @@ impl Rule for NoAriaHiddenOnFocusable {
         }
 
         // Check if element is natively focusable or has contenteditable
-        if is_focusable_element(element, is_html)? {
+        if is_focusable_element(element, source_type)? {
             return Some(NoAriaHiddenOnFocusableState {
                 aria_hidden_attribute: aria_hidden_attr,
             });
@@ -144,36 +145,26 @@ fn get_tabindex_value(attribute: &HtmlAttribute) -> Option<i32> {
 ///
 /// Returns `Some(false)` when the element is recognized but not focusable.
 /// Returns `None` when the element name cannot be determined (e.g., bogus elements).
-fn is_focusable_element(element: &AnyHtmlElement, is_html: bool) -> Option<bool> {
-    let element_name = element.name()?;
-
-    let name_matches = |name: &str| -> bool {
-        if is_html {
-            element_name.eq_ignore_ascii_case(name)
-        } else {
-            element_name.text() == name
-        }
-    };
-
+fn is_focusable_element(element: &AnyHtmlTagElement, source_type: &HtmlFileSource) -> Option<bool> {
     // <a> and <area> are only focusable when they have an href attribute
-    if (name_matches("a") || name_matches("area"))
+    if (is_html_tag(element, source_type, "a") || is_html_tag(element, source_type, "area"))
         && element.find_attribute_by_name("href").is_some()
     {
         return Some(true);
     }
 
     // These elements are always natively focusable
-    if name_matches("button")
-        || name_matches("select")
-        || name_matches("textarea")
-        || name_matches("details")
-        || name_matches("summary")
+    if is_html_tag(element, source_type, "button")
+        || is_html_tag(element, source_type, "select")
+        || is_html_tag(element, source_type, "textarea")
+        || is_html_tag(element, source_type, "details")
+        || is_html_tag(element, source_type, "summary")
     {
         return Some(true);
     }
 
     // <input> is focusable unless type="hidden"
-    if name_matches("input") {
+    if is_html_tag(element, source_type, "input") {
         let is_hidden = element
             .find_attribute_by_name("type")
             .and_then(|attr| attr.value())
@@ -197,7 +188,7 @@ fn is_focusable_element(element: &AnyHtmlElement, is_html: bool) -> Option<bool>
 /// - Invalid values (e.g., `"banana"`) → **Inherit** state (not an editing host)
 ///
 /// Ref: <https://html.spec.whatwg.org/multipage/interaction.html#attr-contenteditable>
-fn has_contenteditable_true(element: &AnyHtmlElement) -> bool {
+fn has_contenteditable_true(element: &AnyHtmlTagElement) -> bool {
     element
         .find_attribute_by_name("contenteditable")
         .is_some_and(|attr| match attr.value() {
