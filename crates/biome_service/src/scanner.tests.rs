@@ -61,6 +61,7 @@ fn scanner_only_loads_used_type_definitions_from_node_modules() {
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
+            invocation_configuration: None,
             configuration: Default::default(),
             workspace_directory: Some(fixtures_path.clone().into()),
             extended_configurations: Default::default(),
@@ -142,6 +143,7 @@ fn scanner_ignored_files_are_not_loaded() {
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
+            invocation_configuration: None,
             configuration,
             workspace_directory: Some(fixtures_path.clone().into()),
             extended_configurations: Default::default(),
@@ -196,6 +198,7 @@ fn scanner_required_files_are_only_ignored_in_ignored_directories() {
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
+            invocation_configuration: None,
             configuration,
             workspace_directory: Some(fixtures_path.clone().into()),
             extended_configurations: Default::default(),

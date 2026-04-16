@@ -207,6 +207,15 @@ pub(crate) trait CommandRunner {
     /// because it should be derived from the configuration.
     fn minimal_scan_kind(&self) -> Option<ScanKind>;
 
+    /// Optional, ad-hoc configuration that should apply across all resolved
+    /// project settings, including nested projects discovered during scan.
+    ///
+    /// Currently this means configuration supplied via CLI arguments that
+    /// needs to take precedence over configuration from disk.
+    fn invocation_configuration(&self) -> Option<Configuration> {
+        None
+    }
+
     /// Generates the collector to use for this command.
     fn collector(
         &self,
@@ -434,6 +443,7 @@ pub(crate) trait CommandRunner {
             project_key: open_project_result.project_key,
             workspace_directory: Some(BiomePath::new(project_dir)),
             configuration,
+            invocation_configuration: self.invocation_configuration(),
             extended_configurations: extended_configurations
                 .into_iter()
                 .map(|(path, config)| (BiomePath::from(path), config))

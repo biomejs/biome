@@ -795,6 +795,8 @@ impl FeaturesBuilder {
 pub struct UpdateSettingsParams {
     pub project_key: ProjectKey,
     pub configuration: Configuration,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub invocation_configuration: Option<Configuration>,
     pub workspace_directory: Option<BiomePath>,
     #[serde(skip_serializing_if = "Vec::is_empty", default)]
     pub extended_configurations: Vec<(BiomePath, Configuration)>,

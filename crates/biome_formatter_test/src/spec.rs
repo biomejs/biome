@@ -128,6 +128,7 @@ impl<'a> SpecSnapshot<'a> {
         workspace
             .update_settings(UpdateSettingsParams {
                 project_key,
+                invocation_configuration: None,
                 configuration: self.initial_configuration,
                 workspace_directory: None,
                 extended_configurations: vec![],
@@ -168,6 +169,7 @@ impl<'a> SpecSnapshot<'a> {
             workspace
                 .update_settings(UpdateSettingsParams {
                     project_key,
+                    invocation_configuration: None,
                     configuration: options_config,
                     workspace_directory: None,
                     extended_configurations: vec![],
@@ -230,6 +232,7 @@ impl<'a> SpecSnapshot<'a> {
                 workspace
                     .update_settings(UpdateSettingsParams {
                         project_key,
+                        invocation_configuration: None,
                         configuration: Configuration {
                             formatter: Some(
                                 biome_configuration::formatter::FormatterConfiguration {

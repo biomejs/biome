@@ -146,6 +146,49 @@ impl TraversalCommand for CiCommandPayload {
         None
     }
 
+    fn invocation_configuration(&self) -> Option<Configuration> {
+        let formatter = self
+            .formatter_enabled
+            .is_some()
+            .then(|| FormatterConfiguration {
+                enabled: self.formatter_enabled,
+                format_with_errors: self.format_with_errors,
+                ..Default::default()
+            });
+        let linter = self.linter_enabled.is_some().then(|| LinterConfiguration {
+            enabled: self.linter_enabled,
+            ..Default::default()
+        });
+        let assist = self.assist_enabled.is_some().then(|| AssistConfiguration {
+            enabled: self.assist_enabled,
+            ..Default::default()
+        });
+
+        if formatter.is_none()
+            && linter.is_none()
+            && assist.is_none()
+            && self.json_parser.is_none()
+            && self.css_parser.is_none()
+        {
+            None
+        } else {
+            Some(Configuration {
+                formatter,
+                linter,
+                assist,
+                json: self.json_parser.clone().map(|parser| JsonConfiguration {
+                    parser: Some(parser),
+                    ..Default::default()
+                }),
+                css: self.css_parser.clone().map(|parser| CssConfiguration {
+                    parser: Some(parser),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            })
+        }
+    }
+
     fn get_execution(
         &self,
         cli_options: &CliOptions,
@@ -179,45 +222,6 @@ impl TraversalCommand for CiCommandPayload {
     ) -> Result<Configuration, WorkspaceError> {
         let mut configuration =
             self.combine_configuration(loaded_directory, loaded_configuration, fs)?;
-
-        let formatter = configuration
-            .formatter
-            .get_or_insert_with(FormatterConfiguration::default);
-
-        if self.formatter_enabled.is_some() {
-            formatter.enabled = self.formatter_enabled;
-            formatter.format_with_errors = self.format_with_errors;
-        }
-
-        let linter = configuration
-            .linter
-            .get_or_insert_with(LinterConfiguration::default);
-
-        if self.linter_enabled.is_some() {
-            linter.enabled = self.linter_enabled;
-        }
-
-        let json = configuration
-            .json
-            .get_or_insert_with(JsonConfiguration::default);
-        if self.json_parser.is_some() {
-            json.parser.merge_with(self.json_parser.clone())
-        }
-
-        let css = configuration
-            .css
-            .get_or_insert_with(CssConfiguration::default);
-        if self.css_parser.is_some() {
-            css.parser.merge_with(self.css_parser.clone());
-        }
-
-        let assist = configuration
-            .assist
-            .get_or_insert_with(AssistConfiguration::default);
-
-        if self.assist_enabled.is_some() {
-            assist.enabled = self.assist_enabled;
-        }
 
         if let Some(mut conf) = self.configuration.clone() {
             if let Some(linter) = conf.linter.as_mut() {

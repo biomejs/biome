@@ -191,6 +191,7 @@ fn should_not_index_an_ignored_file_inside_vcs_ignore_file() {
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
+            invocation_configuration: None,
             workspace_directory: Some(BiomePath::new("/project")),
             configuration: Configuration {
                 vcs: Some(VcsConfiguration {
@@ -231,6 +232,7 @@ fn should_not_index_an_ignored_file_inside_file_includes() {
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
+            invocation_configuration: None,
             workspace_directory: Some(BiomePath::new("/project")),
             configuration: Configuration {
                 files: Some(FilesConfiguration {
@@ -273,6 +275,7 @@ fn should_index_an_ignored_file_if_it_is_a_dependency_of_a_non_ignored_file() {
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
+            invocation_configuration: None,
             workspace_directory: Some(BiomePath::new("/project")),
             configuration: Configuration {
                 files: Some(FilesConfiguration {
@@ -321,6 +324,7 @@ fn should_not_index_a_force_ignored_file_even_if_it_is_a_dependency() {
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
+            invocation_configuration: None,
             workspace_directory: Some(BiomePath::new("/project")),
             configuration: Configuration {
                 files: Some(FilesConfiguration {
@@ -366,6 +370,7 @@ fn should_not_index_dependency_with_scan_kind_known_files() {
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
+            invocation_configuration: None,
             workspace_directory: Some(BiomePath::new("/project")),
             configuration: Configuration {
                 files: Some(FilesConfiguration {
@@ -408,6 +413,7 @@ fn should_not_index_inside_an_ignored_folder_inside_file_includes() {
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
+            invocation_configuration: None,
             workspace_directory: Some(BiomePath::new("/project")),
             configuration: Configuration {
                 files: Some(FilesConfiguration {
@@ -452,6 +458,7 @@ fn should_not_index_inside_an_ignored_folder_inside_vcs_ignore_file() {
     workspace
         .update_settings(UpdateSettingsParams {
             project_key,
+            invocation_configuration: None,
             workspace_directory: Some(BiomePath::new(fs.cli_path())),
             configuration: Configuration {
                 vcs: Some(VcsConfiguration {

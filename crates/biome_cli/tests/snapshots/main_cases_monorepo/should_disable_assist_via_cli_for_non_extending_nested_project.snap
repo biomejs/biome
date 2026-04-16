@@ -1,0 +1,134 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 520
+expression: redactor(content)
+---
+## `packages/non-extending/biome.json`
+
+```json
+{
+  "root": false
+}
+```
+
+## `biome.json`
+
+```json
+{
+  "assist": {
+    "enabled": true
+  }
+}
+```
+
+## `packages/extending/biome.json`
+
+```json
+{
+  "root": false,
+  "extends": "//"
+}
+```
+
+## `packages/extending/file.js`
+
+```js
+import * as something from "../something";
+import { lorem, foom, bar } from "foo";
+
+```
+
+## `packages/non-extending/file.js`
+
+```js
+import * as something from "../something";
+import { lorem, foom, bar } from "foo";
+
+```
+
+# Emitted Messages
+
+```block
+packages/extending/file.js:1:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+  > 1 │ import * as something from "../something";
+      │             ^^^^^^^^^
+    2 │ import { lorem, foom, bar } from "foo";
+    3 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1 │ import·*·as·something·from·"../something";
+      │ ------------------------------------------
+
+```
+
+```block
+packages/extending/file.js:2:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    1 │ import * as something from "../something";
+  > 2 │ import { lorem, foom, bar } from "foo";
+      │        ^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1 1 │   import * as something from "../something";
+    2   │ - import·{·lorem,·foom,·bar·}·from·"foo";
+    3 2 │   
+  
+
+```
+
+```block
+packages/non-extending/file.js:1:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+  > 1 │ import * as something from "../something";
+      │             ^^^^^^^^^
+    2 │ import { lorem, foom, bar } from "foo";
+    3 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1 │ import·*·as·something·from·"../something";
+      │ ------------------------------------------
+
+```
+
+```block
+packages/non-extending/file.js:2:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    1 │ import * as something from "../something";
+  > 2 │ import { lorem, foom, bar } from "foo";
+      │        ^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1 1 │   import * as something from "../something";
+    2   │ - import·{·lorem,·foom,·bar·}·from·"foo";
+    3 2 │   
+  
+
+```
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+Found 4 warnings.
+```
