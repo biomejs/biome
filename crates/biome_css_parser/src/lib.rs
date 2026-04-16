@@ -352,4 +352,26 @@ mod tests {
             );
         }
     }
+
+    #[test]
+    fn styled_snippet_allows_nested_rule_before_declaration() {
+        let css_code = r#"
+div:first-of-type {
+    color: black;
+}
+background: black;
+"#;
+
+        let parse = parse_css(
+            css_code,
+            CssFileSource::css().with_embedding_kind(EmbeddingKind::Styled),
+            CssParserOptions::default(),
+        );
+
+        assert!(
+            !parse.has_errors(),
+            "styled embedded CSS should parse without errors: {:?}",
+            parse.diagnostics()
+        );
+    }
 }

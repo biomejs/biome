@@ -22,7 +22,8 @@ impl FormatNodeRule<MdReferenceLink> for FormatMdReferenceLink {
                 text.format()
                     .with_options(FormatMdFormatInlineItemListOptions {
                         print_mode: TextPrintMode::trim_all(),
-                        keep_fences_in_italics: true
+                        keep_fences_in_italics: true,
+                        inside_list: false,
                     }),
                 r_brack_token.format(),
             ]

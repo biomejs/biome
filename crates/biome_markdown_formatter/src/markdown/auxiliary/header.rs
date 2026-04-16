@@ -24,7 +24,8 @@ impl FormatNodeRule<MdHeader> for FormatMdHeader {
                 [
                     space(),
                     content.format().with_options(FormatMdParagraphOptions {
-                        trim_mode: TextPrintMode::Trim(TrimMode::Start)
+                        trim_mode: TextPrintMode::Trim(TrimMode::Start),
+                        inside_list: false,
                     })
                 ]
             )?;

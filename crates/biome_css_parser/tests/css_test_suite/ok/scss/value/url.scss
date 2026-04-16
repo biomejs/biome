@@ -15,9 +15,14 @@ div {
   // TODO(interpolation support): trailing-spaces: url(a#{b}c  );
   expr1: url(join-url("..", "image.png"));
   expr2: url(1 + 2);
+  expr4: url(foo#{1 + 1}(bar));
+  expr5: url(#{name}(bar));
+  expr6: url(#{prefix}-#{suffix}(bar));
   modifier: url("a.png" color.adjust($c, $lightness: 10%));
   format: url("a.png" format(color.adjust($c, $lightness: 10%)));
-  // TODO(interpolation support): expr3: url(a#{b}"c");
+  modifier-interpolated-mid: url("a.png" foo#{1 + 1}(bar));
+  modifier-interpolated-start: url("a.png" #{format}(woff2));
+  expr3: url(a#{b}"c");
 }
 
 // TODO(interpolation support): @import url(//fonts.googleapis.com/css?family=#{get-font-family(

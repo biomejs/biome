@@ -41,17 +41,20 @@ pub(crate) enum TrimMode {
     /// This mode works similarly to [TrimMode::All], however, text that contains
     /// words and have more than trailing/leading spaces are normalized to one
     NormalizeWords,
+    /// After a newline, keep the whitespace-only tokens that represent
+    /// continuation-line indentation instead of removing them.
+    KeepLeadingSpaces,
     /// Don't trim anything
     #[default]
     None,
 }
 
 impl TextPrintMode {
-    pub(crate) const fn is_start(&self) -> bool {
+    pub(crate) const fn is_trim_start(&self) -> bool {
         matches!(self, Self::Trim(TrimMode::Start))
     }
 
-    pub(crate) const fn is_all(&self) -> bool {
+    pub(crate) const fn is_trim_all(&self) -> bool {
         matches!(self, Self::Trim(TrimMode::All))
     }
 
@@ -61,6 +64,10 @@ impl TextPrintMode {
 
     pub(crate) const fn is_auto_link_like(&self) -> bool {
         matches!(self, Self::Trim(TrimMode::AutoLinkLike))
+    }
+
+    pub(crate) const fn is_keep_leading_spaces(&self) -> bool {
+        matches!(self, Self::Trim(TrimMode::KeepLeadingSpaces))
     }
 
     pub(crate) const fn is_pristine(&self) -> bool {
@@ -77,5 +84,9 @@ impl TextPrintMode {
 
     pub(crate) const fn trim_all() -> Self {
         Self::Trim(TrimMode::All)
+    }
+
+    pub(crate) const fn trim_keep_leading_spaces() -> Self {
+        Self::Trim(TrimMode::KeepLeadingSpaces)
     }
 }

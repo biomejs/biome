@@ -30,18 +30,16 @@ info: markdown/list/nested-checkbox.md
  - parent list item parent list item parent list item parent list item parent list item parent list item
 -  - child list item child list item child list item child list item child list item child list item
  
--  paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
 +     - child list item child list item child list item child list item child list item child list item
 +
-+    paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
+   paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
  
  - [x] parent task list item parent task list item parent task list item parent task list item
 -  - [x] child task list item child task list item child task list item child task list item
  
--  paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
 +     - [x] child task list item child task list item child task list item child task list item
 +
-+    paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
+   paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
 ```
 
 # Output
@@ -51,21 +49,21 @@ info: markdown/list/nested-checkbox.md
 
      - child list item child list item child list item child list item child list item child list item
 
-    paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
+  paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
 
 - [x] parent task list item parent task list item parent task list item parent task list item
 
      - [x] child task list item child task list item child task list item child task list item
 
-    paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
+  paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
 ```
 
 # Lines exceeding max width of 80 characters
 ```
     1: - parent list item parent list item parent list item parent list item parent list item parent list item
     3:      - child list item child list item child list item child list item child list item child list item
-    5:     paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
+    5:   paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
     7: - [x] parent task list item parent task list item parent task list item parent task list item
     9:      - [x] child task list item child task list item child task list item child task list item
-   11:     paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
+   11:   paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
 ```

@@ -9,11 +9,12 @@ use crate::syntax::scss::{
 };
 use crate::syntax::{
     CssSyntaxFeatures, is_at_any_declaration_with_semicolon, is_at_metavariable,
-    is_at_nested_qualified_rule, parse_any_declaration_with_semicolon, parse_metavariable,
-    parse_nested_qualified_rule, try_parse,
+    is_at_nested_qualified_rule, is_at_qualified_rule, parse_any_declaration_with_semicolon,
+    parse_metavariable, parse_nested_qualified_rule, parse_qualified_rule, try_parse,
     try_parse_nested_qualified_rule_without_selector_recovery,
 };
 use biome_css_syntax::CssSyntaxKind::*;
+use biome_css_syntax::EmbeddingKind;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
@@ -43,12 +44,20 @@ impl ParseBlockBody for DeclarationOrRuleListBlock {
 #[inline]
 fn is_at_declaration_or_rule_item(p: &mut CssParser) -> bool {
     is_at_at_rule(p)
+        || is_at_top_level_qualified_rule(p)
         || is_at_nested_qualified_rule(p)
         || is_at_scss_nesting_declaration(p)
         || is_at_scss_declaration(p)
         || is_at_scss_interpolated_property(p)
         || is_at_any_declaration_with_semicolon(p)
         || is_at_metavariable(p)
+}
+
+#[inline]
+fn is_at_top_level_qualified_rule(p: &mut CssParser) -> bool {
+    !p.state().is_nesting_block
+        && matches!(p.source_type.as_embedding_kind(), EmbeddingKind::Styled)
+        && is_at_qualified_rule(p)
 }
 
 struct DeclarationOrRuleListParseRecovery {
@@ -162,7 +171,11 @@ impl ParseNodeList for DeclarationOrRuleList {
                 // } <---
                 // The closing brace indicates the end of the declaration block.
                 // If either condition is true, the declaration is considered valid.
-                let valid = matches!(p.last(), Some(T![;])) || p.at(self.end_kind);
+                // Reject speculative declaration parses that stop at the end of an inner block
+                // rather than the current declaration-or-rule list.
+                // This avoids misclassifying selectors as declarations in embedded snippets.
+                let valid =
+                    (matches!(p.last(), Some(T![;])) && !p.at(T!['}'])) || p.at(self.end_kind);
                 if valid { Ok(declaration) } else { Err(()) }
             });
 
@@ -197,6 +210,26 @@ impl ParseNodeList for DeclarationOrRuleList {
             // If parsing as a nested qualified rule was successful, return the parsed rule.
             if let Ok(rule) = rule {
                 return rule;
+            }
+
+            // Styled snippets allow top-level qualified rules, but plain
+            // declarations like `background: black;` are ambiguous with a
+            // selector prefix. Only treat the construct as a qualified rule
+            // after the speculative declaration parse has already failed.
+            if is_at_top_level_qualified_rule(p) {
+                let rule = try_parse(p, |p| {
+                    let rule = parse_qualified_rule(p);
+
+                    if p.at(self.end_kind) || is_at_declaration_or_rule_item(p) {
+                        Ok(rule)
+                    } else {
+                        Err(())
+                    }
+                });
+
+                if let Ok(rule) = rule {
+                    return rule;
+                }
             }
 
             // If both parsing attempts fail,

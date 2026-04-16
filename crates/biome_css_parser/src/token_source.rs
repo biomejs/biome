@@ -96,6 +96,19 @@ impl<'src> CssTokenSource<'src> {
         self.lexer.lexer().has_pending_scss_string_start()
     }
 
+    /// Delegates to the lexer-owned `CssScanCursor` helper without exposing
+    /// cursor construction or current-token offset plumbing at the
+    /// token-source layer.
+    ///
+    /// The token source derives the start offset from its current buffered
+    /// token range instead of the underlying lexer's state because the
+    /// buffered lexer may already be positioned ahead of the parser's current
+    /// token.
+    pub(crate) fn is_at_scss_interpolated_function(&self) -> bool {
+        let start = usize::from(self.current_range().start());
+        self.lexer.lexer().is_at_scss_interpolated_function(start)
+    }
+
     #[inline]
     fn effective_context(&self, context: CssLexContext) -> CssLexContext {
         match (

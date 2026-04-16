@@ -1,12 +1,17 @@
 use crate::markdown::lists::inline_item_list::FormatMdFormatInlineItemListOptions;
 use crate::prelude::*;
 use crate::shared::TextPrintMode;
-use biome_formatter::write;
+use biome_formatter::{FormatRuleWithOptions, write};
 use biome_markdown_syntax::{MdFencedCodeBlock, MdFencedCodeBlockFields};
 use biome_rowan::TextSize;
 
 #[derive(Debug, Clone, Default)]
-pub(crate) struct FormatMdFencedCodeBlock;
+pub(crate) struct FormatMdFencedCodeBlock {
+    /// Whether the fenced code block is inside a list.
+    /// When inside a list
+    inside_list: bool,
+}
+
 impl FormatNodeRule<MdFencedCodeBlock> for FormatMdFencedCodeBlock {
     fn fmt_fields(&self, node: &MdFencedCodeBlock, f: &mut MarkdownFormatter) -> FormatResult<()> {
         let MdFencedCodeBlockFields {
@@ -29,10 +34,24 @@ impl FormatNodeRule<MdFencedCodeBlock> for FormatMdFencedCodeBlock {
         let fence_len = (max_inner + 1).max(3);
         let normalized_fence: String = std::iter::repeat_n('`', fence_len).collect();
 
+        // Spaces to remove in case we're inside a list
+        let excess = if self.inside_list { indent.len() } else { 0 };
+
+        if excess > 0 {
+            for token in indent.iter() {
+                let char_token = token.md_indent_char_token()?;
+                f.context()
+                    .comments()
+                    .mark_suppression_checked(token.syntax());
+                write!(f, [format_removed(&char_token)])?;
+            }
+        } else {
+            write!(f, [indent.format()])?;
+        }
+
         write!(
             f,
             [
-                indent.format(),
                 format_replaced(
                     &l_fence,
                     &text(&normalized_fence, l_fence.text_trimmed_range().start())
@@ -43,12 +62,27 @@ impl FormatNodeRule<MdFencedCodeBlock> for FormatMdFencedCodeBlock {
                     .format()
                     .with_options(FormatMdFormatInlineItemListOptions {
                         print_mode: TextPrintMode::Clean,
-                        keep_fences_in_italics: false
+                        keep_fences_in_italics: false,
+                        inside_list: false,
                     }),
-                hard_line_break(),
-                r_fence_indent.format(),
             ]
         )?;
+
+        // The closing fence's indentation is stored entirely in r_fence_indent
+        // (unlike the opening fence, there is no separate continuation-indent
+        // node preceding it in the block list). Remove the same number of
+        // excess spaces that were removed from the opening fence.
+        let r_fence_tokens: Vec<_> = r_fence_indent.iter().collect();
+        for token in r_fence_tokens.iter().take(excess) {
+            let char_token = token.md_indent_char_token()?;
+            f.context()
+                .comments()
+                .mark_suppression_checked(token.syntax());
+            write!(f, [format_removed(&char_token)])?;
+        }
+        for token in r_fence_tokens.iter().skip(excess) {
+            write!(f, [token.format()])?;
+        }
 
         if let Ok(r_fence) = r_fence {
             write!(
@@ -63,6 +97,19 @@ impl FormatNodeRule<MdFencedCodeBlock> for FormatMdFencedCodeBlock {
         }
 
         Ok(())
+    }
+}
+
+pub(crate) struct FormatMdFencedCodeBlockOptions {
+    pub(crate) inside_list: bool,
+}
+
+impl FormatRuleWithOptions<MdFencedCodeBlock> for FormatMdFencedCodeBlock {
+    type Options = FormatMdFencedCodeBlockOptions;
+
+    fn with_options(mut self, options: Self::Options) -> Self {
+        self.inside_list = options.inside_list;
+        self
     }
 }
 

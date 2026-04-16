@@ -59,15 +59,14 @@ info: markdown/code/additional-space.md
 -   yarn install
 -   ```
 -
--   To check your version of Yarn and ensure it's installed you can type:
++    ```sh
++    yarn install
++    ```
+    To check your version of Yarn and ensure it's installed you can type:
 -
 -   ```sh
 -   yarn --version
 -   ```
-+    ```sh
-+    yarn install
-+    ```
-+    To check your version of Yarn and ensure it's installed you can type:
 +    ```sh
 +    yarn --version
 +    ```
@@ -94,7 +93,7 @@ info: markdown/code/additional-space.md
     ```sh
     yarn install
     ```
-    To check your version of Yarn and ensure it's installed you can type:
+   To check your version of Yarn and ensure it's installed you can type:
     ```sh
     yarn --version
     ```
