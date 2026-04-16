@@ -1,6 +1,6 @@
 use crate::markdown::lists::inline_item_list::FormatMdFormatInlineItemListOptions;
 use crate::prelude::*;
-use crate::shared::{TextPrintMode, TrimMode};
+use crate::shared::TextPrintMode;
 use biome_formatter::write;
 use biome_markdown_syntax::{MdSetextHeader, MdSetextHeaderFields};
 
@@ -31,8 +31,9 @@ impl FormatNodeRule<MdSetextHeader> for FormatMdSetextHeader {
                 content
                     .format()
                     .with_options(FormatMdFormatInlineItemListOptions {
-                        print_mode: TextPrintMode::Trim(TrimMode::All),
-                        keep_fences_in_italics: false
+                        print_mode: TextPrintMode::trim_all(),
+                        keep_fences_in_italics: false,
+                        inside_list: false,
                     }),
                 format_removed(&underline_token)
             ]

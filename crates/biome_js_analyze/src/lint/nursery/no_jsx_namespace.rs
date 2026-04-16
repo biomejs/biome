@@ -36,7 +36,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoJsxNamespace {
-        version: "next",
+        version: "2.4.12",
         name: "noJsxNamespace",
         language: "jsx",
         recommended: false,

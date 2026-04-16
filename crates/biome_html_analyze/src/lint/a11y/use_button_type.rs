@@ -2,9 +2,12 @@ use biome_analyze::RuleSource;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlElement, HtmlFileSource};
+use biome_html_syntax::HtmlFileSource;
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_rowan::{AstNode, AstNodeList};
 use biome_rule_options::use_button_type::UseButtonTypeOptions;
+
+use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Enforces the usage and validity of the attribute `type` for the element `button`
@@ -44,15 +47,16 @@ pub struct UseButtonTypeState {
 }
 
 impl Rule for UseButtonType {
-    type Query = Ast<AnyHtmlElement>;
+    type Query = Ast<AnyHtmlTagElement>;
     type State = UseButtonTypeState;
     type Signals = Option<Self::State>;
     type Options = UseButtonTypeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
+        let source_type = ctx.source_type::<HtmlFileSource>();
 
-        if !is_button_element(element, ctx) {
+        if !is_html_tag(element, source_type, "button") {
             return None;
         }
 
@@ -125,31 +129,11 @@ impl Rule for UseButtonType {
     }
 }
 
-fn is_button_element(element: &AnyHtmlElement, ctx: &RuleContext<UseButtonType>) -> bool {
-    let Some(element_name) = element.name() else {
-        return false;
-    };
-
-    let source_type = ctx.source_type::<HtmlFileSource>();
-
-    // In HTML files: case-insensitive (BUTTON, Button, button all match)
-    // In component frameworks (Vue, Svelte, Astro): case-sensitive (only "button" matches)
-    // This means <Button> in Vue/Svelte is treated as a component and ignored
-    if source_type.is_html() {
-        element_name.text().eq_ignore_ascii_case("button")
-    } else {
-        element_name.text() == "button"
-    }
-}
-
 /// Checks if a dynamic attribute (shorthand or directive) exists for the given name.
 /// For example, `<button {type}>` (Svelte), `<button :type="foo">` (Vue), or `<button v-bind:type="foo">` (Vue).
-fn has_dynamic_attribute(element: &AnyHtmlElement, name: &str) -> bool {
-    let Some(attributes) = element.attributes() else {
-        return false;
-    };
-
-    attributes
+fn has_dynamic_attribute(element: &AnyHtmlTagElement, name: &str) -> bool {
+    element
+        .attributes()
         .iter()
         .find_map(|attr| {
             // Check if this is a HtmlSingleTextExpression (Svelte shorthand syntax)

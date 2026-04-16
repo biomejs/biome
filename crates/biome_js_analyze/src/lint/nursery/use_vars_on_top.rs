@@ -48,7 +48,7 @@ declare_lint_rule! {
     /// - [noVar](https://biomejs.dev/linter/rules/no-var/)
     /// - [useConst](https://biomejs.dev/linter/rules/use-const/)
     pub UseVarsOnTop {
-        version: "next",
+        version: "2.4.12",
         name: "useVarsOnTop",
         language: "js",
         recommended: false,

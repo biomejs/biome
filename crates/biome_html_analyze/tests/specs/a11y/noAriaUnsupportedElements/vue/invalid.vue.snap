@@ -66,7 +66,7 @@ invalid.vue:5:3 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━
     3 │   <meta charset="UTF-8" aria-hidden="false" />
     4 │   <meta charset="UTF-8" role="meta" />
   > 5 │   <script aria-label="script"></script>
-      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │   <style aria-labelledby="id"></style>
     7 │   <style role="style"></style>
   
@@ -87,7 +87,7 @@ invalid.vue:6:3 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━
     4 │   <meta charset="UTF-8" role="meta" />
     5 │   <script aria-label="script"></script>
   > 6 │   <style aria-labelledby="id"></style>
-      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     7 │   <style role="style"></style>
     8 │ </template>
   
@@ -108,7 +108,7 @@ invalid.vue:7:3 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━
     5 │   <script aria-label="script"></script>
     6 │   <style aria-labelledby="id"></style>
   > 7 │   <style role="style"></style>
-      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │   ^^^^^^^^^^^^^^^^^^^^
     8 │ </template>
     9 │ 
   

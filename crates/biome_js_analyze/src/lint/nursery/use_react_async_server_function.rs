@@ -76,7 +76,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseReactAsyncServerFunction {
-        version: "next",
+        version: "2.4.12",
         name: "useReactAsyncServerFunction",
         language: "js",
         recommended: false,

@@ -74,7 +74,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoComponentHookFactories {
-        version: "next",
+        version: "2.4.12",
         name: "noComponentHookFactories",
         language: "jsx",
         sources: &[RuleSource::EslintReactHooks("component-hook-factories").same(), RuleSource::EslintReactX("component-hook-factories").same(), RuleSource::EslintReactXyz("component-hook-factories").same()],

@@ -63,7 +63,7 @@ invalid.svelte:4:1 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━
     2 │ <meta charset="UTF-8" aria-hidden="false" />
     3 │ <meta charset="UTF-8" role="meta" />
   > 4 │ <script aria-label="script"></script>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     5 │ <style aria-labelledby="id"></style>
     6 │ <style role="style"></style>
   
@@ -84,7 +84,7 @@ invalid.svelte:5:1 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━
     3 │ <meta charset="UTF-8" role="meta" />
     4 │ <script aria-label="script"></script>
   > 5 │ <style aria-labelledby="id"></style>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ <style role="style"></style>
     7 │ 
   
@@ -105,7 +105,7 @@ invalid.svelte:6:1 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━
     4 │ <script aria-label="script"></script>
     5 │ <style aria-labelledby="id"></style>
   > 6 │ <style role="style"></style>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^
     7 │ 
   
   i Using role on elements that do not support them can cause issues with screen readers.

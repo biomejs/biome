@@ -31,7 +31,7 @@ invalid.vue:3:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
     1 │ <!-- should generate diagnostics -->
     2 │ <template>
   > 3 │   <button aria-hidden="true">Click me</button>
-      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     4 │   <a href="/" aria-hidden="true">link</a>
     5 │   <input aria-hidden="true" />
   
@@ -52,7 +52,7 @@ invalid.vue:4:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
     2 │ <template>
     3 │   <button aria-hidden="true">Click me</button>
   > 4 │   <a href="/" aria-hidden="true">link</a>
-      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     5 │   <input aria-hidden="true" />
     6 │   <div tabindex="0" aria-hidden="true"></div>
   
@@ -94,7 +94,7 @@ invalid.vue:6:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
     4 │   <a href="/" aria-hidden="true">link</a>
     5 │   <input aria-hidden="true" />
   > 6 │   <div tabindex="0" aria-hidden="true"></div>
-      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     7 │   <select aria-hidden="true"><option>opt</option></select>
     8 │   <textarea aria-hidden="true">text</textarea>
   
@@ -115,7 +115,7 @@ invalid.vue:7:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
     5 │   <input aria-hidden="true" />
     6 │   <div tabindex="0" aria-hidden="true"></div>
   > 7 │   <select aria-hidden="true"><option>opt</option></select>
-      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     8 │   <textarea aria-hidden="true">text</textarea>
     9 │   <div contenteditable="true" aria-hidden="true">editable</div>
   
@@ -136,7 +136,7 @@ invalid.vue:8:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
      6 │   <div tabindex="0" aria-hidden="true"></div>
      7 │   <select aria-hidden="true"><option>opt</option></select>
    > 8 │   <textarea aria-hidden="true">text</textarea>
-       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
      9 │   <div contenteditable="true" aria-hidden="true">editable</div>
     10 │   <div contenteditable aria-hidden="true">editable bare attr</div>
   
@@ -157,7 +157,7 @@ invalid.vue:9:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
      7 │   <select aria-hidden="true"><option>opt</option></select>
      8 │   <textarea aria-hidden="true">text</textarea>
    > 9 │   <div contenteditable="true" aria-hidden="true">editable</div>
-       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     10 │   <div contenteditable aria-hidden="true">editable bare attr</div>
     11 │   <div contenteditable="" aria-hidden="true">editable empty string</div>
   
@@ -178,7 +178,7 @@ invalid.vue:10:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
      8 │   <textarea aria-hidden="true">text</textarea>
      9 │   <div contenteditable="true" aria-hidden="true">editable</div>
   > 10 │   <div contenteditable aria-hidden="true">editable bare attr</div>
-       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     11 │   <div contenteditable="" aria-hidden="true">editable empty string</div>
     12 │   <area href="/" aria-hidden="true" />
   
@@ -199,7 +199,7 @@ invalid.vue:11:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
      9 │   <div contenteditable="true" aria-hidden="true">editable</div>
     10 │   <div contenteditable aria-hidden="true">editable bare attr</div>
   > 11 │   <div contenteditable="" aria-hidden="true">editable empty string</div>
-       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     12 │   <area href="/" aria-hidden="true" />
     13 │   <details aria-hidden="true">details</details>
   
@@ -241,7 +241,7 @@ invalid.vue:13:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
     11 │   <div contenteditable="" aria-hidden="true">editable empty string</div>
     12 │   <area href="/" aria-hidden="true" />
   > 13 │   <details aria-hidden="true">details</details>
-       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     14 │   <summary aria-hidden="true">summary</summary>
     15 │ </template>
   
@@ -262,7 +262,7 @@ invalid.vue:14:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
     12 │   <area href="/" aria-hidden="true" />
     13 │   <details aria-hidden="true">details</details>
   > 14 │   <summary aria-hidden="true">summary</summary>
-       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     15 │ </template>
     16 │ 
   

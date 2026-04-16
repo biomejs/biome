@@ -2632,6 +2632,11 @@ See https://biomejs.dev/linter/rules/use-regexp-exec
 	 */
 	useRegexpExec?: UseRegexpExecConfiguration;
 	/**
+	* Enforce the use of RegExp.prototype.test() over String.prototype.match() and RegExp.prototype.exec() in boolean contexts.
+See https://biomejs.dev/linter/rules/use-regexp-test 
+	 */
+	useRegexpTest?: UseRegexpTestConfiguration;
+	/**
 	* Enforce the presence of required scripts in package.json.
 See https://biomejs.dev/linter/rules/use-required-scripts 
 	 */
@@ -4595,6 +4600,9 @@ export type UseReduceTypeParameterConfiguration =
 export type UseRegexpExecConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseRegexpExecOptions;
+export type UseRegexpTestConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseRegexpTestOptions;
 export type UseRequiredScriptsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseRequiredScriptsOptions;
@@ -6441,6 +6449,11 @@ export interface RuleWithUseRegexpExecOptions {
 	level: RulePlainConfiguration;
 	options?: UseRegexpExecOptions;
 }
+export interface RuleWithUseRegexpTestOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseRegexpTestOptions;
+}
 export interface RuleWithUseRequiredScriptsOptions {
 	level: RulePlainConfiguration;
 	options?: UseRequiredScriptsOptions;
@@ -8059,6 +8072,7 @@ export type UseQwikLoaderLocationOptions = {};
 export type UseReactAsyncServerFunctionOptions = {};
 export type UseReduceTypeParameterOptions = {};
 export type UseRegexpExecOptions = {};
+export type UseRegexpTestOptions = {};
 export interface UseRequiredScriptsOptions {
 	/**
 	 * List of script names that must be present in package.json
@@ -9112,6 +9126,7 @@ export type Category =
 	| "lint/nursery/useReactAsyncServerFunction"
 	| "lint/nursery/useReduceTypeParameter"
 	| "lint/nursery/useRegexpExec"
+	| "lint/nursery/useRegexpTest"
 	| "lint/nursery/useRequiredScripts"
 	| "lint/nursery/useScopedStyles"
 	| "lint/nursery/useSortedClasses"

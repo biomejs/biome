@@ -56,7 +56,7 @@ declare_lint_rule! {
     /// list[0] === "a";
     /// ```
     pub UseStringStartsEndsWith {
-        version: "next",
+        version: "2.4.12",
         name: "useStringStartsEndsWith",
         language: "js",
         recommended: true,

@@ -7,6 +7,7 @@ pub mod options;
 mod registry;
 mod services;
 mod suppression_action;
+mod utils;
 
 pub use crate::registry::visit_registry;
 pub use crate::services::module_graph::{HtmlModuleGraph, HtmlModuleGraphService};

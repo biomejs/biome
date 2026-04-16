@@ -289,6 +289,7 @@ define_categories! {
     "lint/nursery/useReactAsyncServerFunction": "https://biomejs.dev/linter/rules/use-react-async-server-function",
     "lint/nursery/useReduceTypeParameter": "https://biomejs.dev/linter/rules/use-reduce-type-parameter",
     "lint/nursery/useRegexpExec": "https://biomejs.dev/linter/rules/use-regexp-exec",
+    "lint/nursery/useRegexpTest": "https://biomejs.dev/linter/rules/use-regexp-test",
     "lint/nursery/useRequiredScripts": "https://biomejs.dev/linter/rules/use-required-scripts",
     "lint/nursery/useScopedStyles": "https://biomejs.dev/linter/rules/use-scoped-styles",
     "lint/nursery/useSortedClasses": "https://biomejs.dev/linter/rules/use-sorted-classes",

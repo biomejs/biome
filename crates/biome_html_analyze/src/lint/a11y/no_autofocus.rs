@@ -4,11 +4,12 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
-use biome_html_syntax::{HtmlAttribute, HtmlElement, HtmlSelfClosingElement};
+use biome_html_syntax::{HtmlAttribute, HtmlElement, HtmlFileSource, HtmlSelfClosingElement};
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_autofocus::NoAutofocusOptions;
 
 use crate::HtmlRuleAction;
+use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Enforce that the `autofocus` attribute is not used on elements.
@@ -72,6 +73,7 @@ impl Rule for NoAutofocus {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
+        let source_type = ctx.source_type::<HtmlFileSource>();
 
         // Check if this is an autofocus attribute
         if !is_autofocus_attribute(node) {
@@ -79,7 +81,7 @@ impl Rule for NoAutofocus {
         }
 
         // Check if element is inside a dialog or has popover attribute in ancestors
-        if is_inside_allowed_context(node).unwrap_or(false) {
+        if is_inside_allowed_context(node, source_type).unwrap_or(false) {
             return None;
         }
 
@@ -128,7 +130,7 @@ fn is_autofocus_attribute(node: &HtmlAttribute) -> bool {
 /// Note: We skip the first [HtmlElement] (the one containing the autofocus attribute)
 /// because we only want to check if it's *inside* a dialog/popover, not if
 /// it *is* the dialog/popover itself.
-fn is_inside_allowed_context(attr: &HtmlAttribute) -> Option<bool> {
+fn is_inside_allowed_context(attr: &HtmlAttribute, source_type: &HtmlFileSource) -> Option<bool> {
     let mut skip_first_element = true;
 
     // Walk up the ancestors to find if we're inside a dialog or popover
@@ -142,7 +144,7 @@ fn is_inside_allowed_context(attr: &HtmlAttribute) -> Option<bool> {
             continue;
         }
 
-        if is_dialog_or_popover(&tag_element) {
+        if is_dialog_or_popover(&tag_element, source_type) {
             return Some(true);
         }
     }
@@ -161,12 +163,7 @@ fn get_tag_element(node: &biome_html_syntax::HtmlSyntaxNode) -> Option<AnyHtmlTa
 }
 
 /// Check if the tag element is a dialog or has popover attribute
-fn is_dialog_or_popover(tag_element: &AnyHtmlTagElement) -> bool {
-    let is_dialog = tag_element
-        .name()
-        .ok()
-        .and_then(|n| n.token_text_trimmed())
-        .is_some_and(|text| text.eq_ignore_ascii_case("dialog"));
-
-    is_dialog || tag_element.find_attribute_by_name("popover").is_some()
+fn is_dialog_or_popover(element: &AnyHtmlTagElement, source_type: &HtmlFileSource) -> bool {
+    is_html_tag(element, source_type, "dialog")
+        || element.find_attribute_by_name("popover").is_some()
 }

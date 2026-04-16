@@ -88,17 +88,6 @@ fn is_at_css_if_function_in_context(p: &mut CssParser, context: ValueParsingCont
 }
 
 #[inline]
-pub(crate) fn is_at_function(p: &mut CssParser) -> bool {
-    is_at_function_with_context(p, ValueParsingContext::new(p, ValueParsingMode::ScssAware))
-}
-
-/// Checks if the current position is at a simple function head in CSS-only mode.
-#[inline]
-pub(crate) fn is_at_css_function(p: &mut CssParser) -> bool {
-    is_at_function_with_context(p, ValueParsingContext::new(p, ValueParsingMode::CssOnly))
-}
-
-#[inline]
 fn is_at_function_with_context(p: &mut CssParser, context: ValueParsingContext) -> bool {
     is_nth_at_function_with_context(p, 0, context) && !is_at_url_function(p)
 }

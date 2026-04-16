@@ -24,6 +24,8 @@ pub enum MarkdownLexContext {
     /// Inside fenced code block - no markdown parsing.
     #[expect(dead_code)]
     FencedCodeBlock,
+    /// Inside code info strings. Newlines end them.
+    CodeInfoString,
     /// Inside HTML block - minimal markdown parsing.
     #[expect(dead_code)]
     HtmlBlock,
@@ -69,6 +71,8 @@ pub enum MarkdownReLexContext {
     /// directly, but kept for symmetry with the lex context enum.
     #[expect(dead_code)]
     ThematicBreakParts,
+    /// Inside the code block list, where strings doesn't have particular meaning
+    CodeInfoString,
 }
 
 /// An extremely fast, lookup table based, lossless Markdown lexer
@@ -235,6 +239,14 @@ impl<'src> MarkdownLexer<'src> {
         context: MarkdownLexContext,
     ) -> MarkdownSyntaxKind {
         let dispatched = lookup_byte(current);
+        // Info strings are plain text (CommonMark https://spec.commonmark.org/0.31.2/#info-string) — only newlines end them.
+        if matches!(context, MarkdownLexContext::CodeInfoString) {
+            return if current == b'\n' || current == b'\r' {
+                self.consume_newline()
+            } else {
+                self.consume_code_info_string()
+            };
+        }
         match dispatched {
             // Whitespace handling is context-sensitive and order-dependent:
             // 1. Check newline first (highest priority - block separator)
@@ -604,6 +616,21 @@ impl<'src> MarkdownLexer<'src> {
                 self.advance(1);
             } else {
                 break;
+            }
+        }
+
+        MD_TEXTUAL_LITERAL
+    }
+
+    /// Consumes the tokens of a code info string
+    fn consume_code_info_string(&mut self) -> MarkdownSyntaxKind {
+        self.assert_at_char_boundary();
+
+        while let Some(byte) = self.current_byte() {
+            if byte == b'\n' || byte == b'\r' {
+                break;
+            } else {
+                self.advance(1);
             }
         }
 
@@ -1253,6 +1280,7 @@ impl<'src> ReLexer<'src> for MarkdownLexer<'src> {
             MarkdownReLexContext::LinkDefinition => MarkdownLexContext::LinkDefinition,
             MarkdownReLexContext::EmphasisInline => MarkdownLexContext::EmphasisInline,
             MarkdownReLexContext::ThematicBreakParts => MarkdownLexContext::ThematicBreakParts,
+            MarkdownReLexContext::CodeInfoString => MarkdownLexContext::CodeInfoString,
         };
 
         let re_lexed_kind = match self.current_byte() {

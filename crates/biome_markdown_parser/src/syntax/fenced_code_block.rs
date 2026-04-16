@@ -22,7 +22,11 @@
 //! The opening fence may be followed by an info string (language identifier)
 //! that can be used for syntax highlighting.
 
+use crate::lexer::MarkdownReLexContext;
 use crate::parser::MarkdownParser;
+use crate::syntax::parse_error::unterminated_fenced_code;
+use crate::syntax::quote::try_bump_quote_marker;
+use crate::syntax::{MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES};
 use crate::token_source::find_line_start;
 use biome_markdown_syntax::{T, kind::MarkdownSyntaxKind::*};
 use biome_parser::{
@@ -32,10 +36,6 @@ use biome_parser::{
         TokenSource,
     },
 };
-
-use crate::syntax::parse_error::unterminated_fenced_code;
-use crate::syntax::quote::try_bump_quote_marker;
-use crate::syntax::{MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES};
 
 /// Minimum number of fence characters required per CommonMark §4.5.
 const MIN_FENCE_LENGTH: usize = 3;
@@ -234,6 +234,9 @@ fn parse_fenced_code_block_impl(p: &mut MarkdownParser, force: bool) -> ParsedSy
 /// The language name is on the same line as the opening fence.
 /// If the current token has a preceding line break or is NEWLINE, the code block has no language.
 fn parse_code_name_list(p: &mut MarkdownParser) {
+    // Relexing
+    p.re_lex(MarkdownReLexContext::CodeInfoString);
+
     let m = p.start();
 
     // If the current token is already on a new line, there's no language name
