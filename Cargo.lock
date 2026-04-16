@@ -787,7 +787,7 @@ dependencies = [
  "insta",
  "mimalloc",
  "path-absolutize",
- "rand 0.9.3",
+ "rand 0.8.5",
  "regex",
  "rustc-hash 2.1.2",
  "schemars",
