@@ -14715,6 +14715,10 @@
 		"UseIterableCallbackReturnOptions": {
 			"type": "object",
 			"properties": {
+				"allowImplicit": {
+					"description": "When `true`, allows callbacks in methods that require a return value\n(e.g. `map`, `filter`) to implicitly return `undefined` via `return;`.\nThis matches ESLint's `allowImplicit` option for `array-callback-return`.",
+					"type": ["boolean", "null"]
+				},
 				"checkForEach": {
 					"description": "When `true`, the rule reports `forEach` callbacks that return a value (default behaviour).\nWhen `false` or unset, such callbacks are ignored.",
 					"type": ["boolean", "null"]
