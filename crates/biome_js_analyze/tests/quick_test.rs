@@ -1,6 +1,7 @@
 use biome_analyze::options::JsxRuntime;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleFilter,
+    ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
+    RuleFilter,
 };
 use biome_deserialize::TextRange;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, print_diagnostic_to_string};
@@ -52,7 +53,8 @@ export function f(options: PostcssOptions) {
         .with_file_path(file_path.clone())
         .with_configuration(
             AnalyzerConfiguration::default().with_jsx_runtime(JsxRuntime::ReactClassic),
-        );
+        )
+        .with_working_directory(fs.working_directory.clone());
     let rule_filter = RuleFilter::Rule("correctness", "noUnusedImports");
 
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
@@ -86,7 +88,7 @@ export function f(options: PostcssOptions) {
                 eprintln!("{text}");
             }
 
-            for action in signal.actions() {
+            for action in signal.actions(ActionFilter::all()) {
                 let new_code = action.mutation.commit();
                 eprintln!("new code!!!");
                 eprintln!("{new_code}");

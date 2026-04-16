@@ -4,6 +4,7 @@ use crate::registry::{RegistryVisitor, RuleLanguage, RuleSuppressions};
 use crate::{
     Phase, Phases, Queryable, SourceActionKind, SuppressionAction, SuppressionCommentEmitterPayload,
 };
+use biome_analyze_macros::RuleSourceVariantIndex;
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::location::AsSpan;
@@ -93,10 +94,11 @@ impl TryFrom<FixKind> for Applicability {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, RuleSourceVariantIndex)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
+/// Declaration order defines the sort order used for comparing rule sources.
 pub enum RuleSource<'a> {
     /// Rules from [Rust Clippy](https://rust-lang.github.io/rust-clippy/master/index.html)
     Clippy(&'a str),
@@ -149,9 +151,15 @@ pub enum RuleSource<'a> {
     /// Rules from [Eslint Plugin React Refresh](https://github.com/ArnaudBarre/eslint-plugin-react-refresh)
     EslintReactRefresh(&'a str),
     /// Rules from [eslint-react.xyz](https://eslint-react.xyz/)
-    EslintReactX(&'a str),
-    /// Rules from [eslint-react.xyz](https://eslint-react.xyz/)
     EslintReactXyz(&'a str),
+    /// A subset of react rules from [eslint-react.xyz](https://eslint-react.xyz/)
+    EslintReactX(&'a str),
+    /// A subset of JSX rules from [eslint-react.xyz](https://eslint-react.xyz/)
+    EslintReactJsx(&'a str),
+    /// A subset of DOM rules from [eslint-react.xyz](https://eslint-react.xyz/)
+    EslintReactDom(&'a str),
+    /// A subset of RSC rules from [eslint-react.xyz](https://eslint-react.xyz/)
+    EslintReactRsc(&'a str),
     /// Rules from [Eslint Plugin Regexp](https://github.com/ota-meshi/eslint-plugin-regexp)
     EslintRegexp(&'a str),
     /// Rules from [Eslint Plugin Solid](https://github.com/solidjs-community/eslint-plugin-solid)
@@ -188,6 +196,18 @@ pub enum RuleSource<'a> {
     EslintYml(&'a str),
     /// Rules from [Eslint CSS](https://github.com/eslint/css)
     EslintCss(&'a str),
+    /// Rules from [Eslint Plugin Svelte](https://sveltejs.github.io/eslint-plugin-svelte/)
+    EslintSvelte(&'a str),
+    /// Rules from [Eslint Plugin Astro](https://ota-meshi.github.io/eslint-plugin-astro/)
+    EslintAstro(&'a str),
+    /// Rules from [Eslint Plugin Drizzle](https://orm.drizzle.team/docs/eslint-plugin)
+    EslintDrizzle(&'a str),
+    /// Action for https://github.com/keithamus/sort-package-json
+    SortPackageJson,
+    /// Rules from [Sherif](https://github.com/QuiiBz/sherif)
+    Sherif(&'a str),
+    /// Rules from [Eslint Plugin Typescript Sort Keys](https://github.com/infctr/eslint-plugin-typescript-sort-keys)
+    EslintTypescriptSortKeys(&'a str),
 }
 
 impl<'a> std::fmt::Display for RuleSource<'a> {
@@ -224,6 +244,9 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::EslintReactRefresh(_) => write!(f, "eslint-plugin-react-refresh"),
             Self::EslintReactX(_) => write!(f, "eslint-plugin-react-x"),
             Self::EslintReactXyz(_) => write!(f, "@eslint-react/eslint-plugin"),
+            Self::EslintReactJsx(_) => write!(f, "eslint-plugin-react-jsx"),
+            Self::EslintReactDom(_) => write!(f, "eslint-plugin-react-dom"),
+            Self::EslintReactRsc(_) => write!(f, "eslint-plugin-react-rsc"),
             Self::EslintRegexp(_) => write!(f, "eslint-plugin-regexp"),
             Self::EslintSolid(_) => write!(f, "eslint-plugin-solid"),
             Self::EslintSonarJs(_) => write!(f, "eslint-plugin-sonarjs"),
@@ -242,6 +265,12 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::EslintMarkdown(_) => write!(f, "@eslint/markdown"),
             Self::EslintYml(_) => write!(f, "eslint-plugin-yml"),
             Self::EslintCss(_) => write!(f, "@eslint/css"),
+            Self::EslintSvelte(_) => write!(f, "eslint-plugin-svelte"),
+            Self::EslintAstro(_) => write!(f, "eslint-plugin-astro"),
+            Self::EslintDrizzle(_) => write!(f, "eslint-plugin-drizzle"),
+            Self::SortPackageJson => write!(f, "sort-package-json"),
+            Self::Sherif(_) => write!(f, "Sherif"),
+            Self::EslintTypescriptSortKeys(_) => write!(f, "eslint-plugin-typescript-sort-keys"),
         }
     }
 }
@@ -259,57 +288,6 @@ impl<'a> Ord for RuleSource<'a> {
 }
 
 impl<'a> RuleSource<'a> {
-    /// Returns the variant index for sorting and comparison across lifetimes.
-    pub const fn variant_index(&self) -> u16 {
-        match self {
-            Self::Clippy(_) => 0,
-            Self::DenoLint(_) => 1,
-            Self::Eslint(_) => 2,
-            Self::EslintBarrelFiles(_) => 3,
-            Self::EslintGraphql(_) => 4,
-            Self::EslintImport(_) => 5,
-            Self::EslintImportAccess(_) => 6,
-            Self::EslintJest(_) => 7,
-            Self::EslintJsDoc(_) => 8,
-            Self::EslintJsxA11y(_) => 9,
-            Self::EslintMysticatea(_) => 10,
-            Self::EslintN(_) => 11,
-            Self::EslintNext(_) => 12,
-            Self::EslintNoSecrets(_) => 13,
-            Self::EslintPackageJson(_) => 14,
-            Self::EslintPackageJsonDependencies(_) => 15,
-            Self::EslintPerfectionist(_) => 16,
-            Self::EslintPlaywright(_) => 17,
-            Self::EslintPromise(_) => 18,
-            Self::EslintQwik(_) => 19,
-            Self::EslintReact(_) => 20,
-            Self::EslintReactHooks(_) => 21,
-            Self::EslintReactPreferFunctionComponent(_) => 22,
-            Self::EslintReactRefresh(_) => 23,
-            Self::EslintReactX(_) => 24,
-            Self::EslintReactXyz(_) => 25,
-            Self::EslintRegexp(_) => 26,
-            Self::EslintSolid(_) => 27,
-            Self::EslintSonarJs(_) => 28,
-            Self::EslintStylistic(_) => 29,
-            Self::EslintTypeScript(_) => 30,
-            Self::EslintUnicorn(_) => 31,
-            Self::EslintUnusedImports(_) => 32,
-            Self::EslintVitest(_) => 33,
-            Self::EslintVueJs(_) => 34,
-            Self::GraphqlSchemaLinter(_) => 35,
-            Self::Stylelint(_) => 36,
-            Self::EslintTurbo(_) => 37,
-            Self::HtmlEslint(_) => 38,
-            Self::EslintE18e(_) => 39,
-            Self::EslintBetterTailwindcss(_) => 40,
-            Self::EslintJson(_) => 41,
-            Self::EslintMarkdown(_) => 42,
-            Self::EslintYml(_) => 43,
-            Self::EslintCss(_) => 44,
-        }
-    }
-
     const fn sort_key(&self) -> (u16, &'a str) {
         (self.variant_index(), self.as_rule_name())
     }
@@ -353,6 +331,9 @@ impl<'a> RuleSource<'a> {
             | Self::EslintReactRefresh(rule_name)
             | Self::EslintReactX(rule_name)
             | Self::EslintReactXyz(rule_name)
+            | Self::EslintReactJsx(rule_name)
+            | Self::EslintReactDom(rule_name)
+            | Self::EslintReactRsc(rule_name)
             | Self::EslintRegexp(rule_name)
             | Self::EslintSolid(rule_name)
             | Self::EslintSonarJs(rule_name)
@@ -370,7 +351,13 @@ impl<'a> RuleSource<'a> {
             | Self::EslintPlaywright(rule_name)
             | Self::EslintJson(rule_name)
             | Self::EslintMarkdown(rule_name)
-            | Self::EslintYml(rule_name) => rule_name,
+            | Self::EslintYml(rule_name)
+            | Self::EslintSvelte(rule_name)
+            | Self::EslintAstro(rule_name)
+            | Self::EslintDrizzle(rule_name)
+            | Self::Sherif(rule_name) => rule_name,
+            Self::SortPackageJson => "sort-package-json",
+            Self::EslintTypescriptSortKeys(rule_name) => rule_name,
         }
     }
 
@@ -380,7 +367,9 @@ impl<'a> RuleSource<'a> {
             | Self::DenoLint(_)
             | Self::Eslint(_)
             | Self::GraphqlSchemaLinter(_)
-            | Self::Stylelint(_) => "",
+            | Self::SortPackageJson
+            | Self::Stylelint(_)
+            | Self::Sherif(_) => "",
             Self::EslintBarrelFiles(_) => "barrel-files",
             Self::EslintGraphql(_) => "@graphql-eslint",
             Self::EslintImport(_) => "import",
@@ -403,6 +392,9 @@ impl<'a> RuleSource<'a> {
             Self::EslintReactRefresh(_) => "react-refresh",
             Self::EslintReactX(_) => "react-x",
             Self::EslintReactXyz(_) => "@eslint-react",
+            Self::EslintReactJsx(_) => "react-jsx",
+            Self::EslintReactDom(_) => "react-dom",
+            Self::EslintReactRsc(_) => "react-rsc",
             Self::EslintRegexp(_) => "regexp",
             Self::EslintSolid(_) => "solid",
             Self::EslintSonarJs(_) => "sonarjs",
@@ -421,6 +413,10 @@ impl<'a> RuleSource<'a> {
             Self::EslintMarkdown(_) => "markdown",
             Self::EslintYml(_) => "yml",
             Self::EslintCss(_) => "css",
+            Self::EslintSvelte(_) => "svelte",
+            Self::EslintAstro(_) => "astro",
+            Self::EslintDrizzle(_) => "drizzle",
+            Self::EslintTypescriptSortKeys(_) => "typescript-sort-keys",
         }
     }
 
@@ -461,6 +457,9 @@ impl<'a> RuleSource<'a> {
             Self::EslintReactRefresh(_) => "https://github.com/ArnaudBarre/eslint-plugin-react-refresh".to_string(),
             Self::EslintReactX(rule_name) => format!("https://eslint-react.xyz/docs/rules/{rule_name}"),
             Self::EslintReactXyz(rule_name) => format!("https://eslint-react.xyz/docs/rules/{rule_name}"),
+            Self::EslintReactJsx(rule_name) => format!("https://eslint-react.xyz/docs/rules/jsx-{rule_name}"),
+            Self::EslintReactDom(rule_name) => format!("https://eslint-react.xyz/docs/rules/dom-{rule_name}"),
+            Self::EslintReactRsc(rule_name) => format!("https://eslint-react.xyz/docs/rules/rsc-{rule_name}"),
             Self::EslintRegexp(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-regexp/rules/{rule_name}.html"),
             Self::EslintSolid(rule_name) => format!("https://github.com/solidjs-community/eslint-plugin-solid/blob/main/packages/eslint-plugin-solid/docs/{rule_name}.md"),
             Self::EslintSonarJs(rule_name) => format!("https://github.com/SonarSource/eslint-plugin-sonarjs/blob/HEAD/docs/rules/{rule_name}.md"),
@@ -479,6 +478,12 @@ impl<'a> RuleSource<'a> {
             Self::EslintMarkdown(rule_name) => format!("https://github.com/eslint/markdown/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintYml(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-yml/rules/{rule_name}.html"),
             Self::EslintCss(rule_name) => format!("https://github.com/eslint/css/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintSvelte(rule_name) => format!("https://sveltejs.github.io/eslint-plugin-svelte/rules/{rule_name}"),
+            Self::EslintAstro(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-astro/rules/{rule_name}"),
+            Self::EslintDrizzle(rule_name) => format!("https://orm.drizzle.team/docs/eslint-plugin#{rule_name}"),
+            Self::SortPackageJson => "https://github.com/keithamus/sort-package-json".to_string(),
+            Self::Sherif(rule_name) => format!("https://github.com/QuiiBz/sherif#{rule_name}"),
+            Self::EslintTypescriptSortKeys(rule_name) => format!("https://github.com/infctr/eslint-plugin-typescript-sort-keys/blob/master/docs/rules/{rule_name}.md"),
         }
     }
 
@@ -500,6 +505,8 @@ impl<'a> RuleSource<'a> {
                 | Self::Eslint(_)
                 | Self::GraphqlSchemaLinter(_)
                 | Self::Stylelint(_)
+                | Self::SortPackageJson
+                | Self::Sherif(_)
         )
     }
 
@@ -566,6 +573,8 @@ impl RuleSourceKind {
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum RuleDomain {
+    /// Drizzle ORM rules
+    Drizzle,
     /// React library rules
     React,
     /// Testing rules
@@ -594,6 +603,7 @@ impl Display for RuleDomain {
     fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
         // use lower case naming, it needs to match the name of the configuration
         match self {
+            Self::Drizzle => fmt.write_str("drizzle"),
             Self::React => fmt.write_str("react"),
             Self::Test => fmt.write_str("test"),
             Self::Solid => fmt.write_str("solid"),
@@ -647,6 +657,7 @@ impl RuleDomain {
             Self::Turborepo => &[&("turbo", ">=1.0.0")],
             Self::Playwright => &[&("@playwright/test", ">=1.0.0")],
             Self::Types => &[],
+            Self::Drizzle => &[&("drizzle-orm", ">=0.9.0")],
         }
     }
 
@@ -687,6 +698,7 @@ impl RuleDomain {
             Self::Turborepo => &[],
             Self::Playwright => &["test", "expect"],
             Self::Types => &[],
+            Self::Drizzle => &[],
         }
     }
 
@@ -703,6 +715,7 @@ impl RuleDomain {
             Self::Turborepo => "turborepo",
             Self::Playwright => "playwright",
             Self::Types => "types",
+            Self::Drizzle => "drizzle",
         }
     }
 }
@@ -723,6 +736,7 @@ impl FromStr for RuleDomain {
             "turborepo" => Ok(Self::Turborepo),
             "playwright" => Ok(Self::Playwright),
             "types" => Ok(Self::Types),
+            "drizzle" => Ok(Self::Drizzle),
             _ => Err("Invalid rule domain"),
         }
     }
@@ -801,9 +815,10 @@ impl RuleMetadata {
             RuleCategory::Lint => {
                 ActionCategory::QuickFix(Cow::Owned(format!("{}.{}", group, self.name)))
             }
-            RuleCategory::Action => {
-                ActionCategory::Source(SourceActionKind::Other(Cow::Borrowed(self.name)))
-            }
+            RuleCategory::Action => match self.name {
+                "organizeImports" => ActionCategory::Source(SourceActionKind::OrganizeImports),
+                other => ActionCategory::Source(SourceActionKind::Other(Cow::Borrowed(other))),
+            },
             RuleCategory::Syntax | RuleCategory::Transformation => unimplemented!(""),
         }
     }
@@ -977,6 +992,16 @@ macro_rules! declare_source_rule {
                 $( $key: $value, )*
             }
         );
+
+        // Declare a new `rule_category!` macro in the module context that
+        // expands to the category of this rule
+        // This is implemented by calling the `group_category!` macro from the
+        // parent module (that should be declared by a call to `declare_group!`)
+        // and providing it with the name of this rule as a string literal token
+        #[expect(unused_macros)]
+        macro_rules! rule_category {
+            () => { super::group_category!( $name ) };
+        }
 
         /// This macro returns the corresponding [ActionCategory] to use inside the [RuleAction]
         #[expect(unused_macros)]
@@ -1439,12 +1464,6 @@ pub struct RuleDiagnostic {
     advice_offset: Option<TextSize>,
 }
 
-impl RuleDiagnostic {
-    pub(crate) fn set_advice_offset(&mut self, offset: TextSize) {
-        self.advice_offset = Some(offset);
-    }
-}
-
 impl Diagnostic for RuleDiagnostic {
     fn severity(&self) -> Severity {
         self.severity
@@ -1549,6 +1568,10 @@ impl RuleDiagnostic {
             severity: Severity::default(),
             advice_offset: None,
         }
+    }
+
+    pub(crate) fn set_advice_offset(&mut self, offset: TextSize) {
+        self.advice_offset = Some(offset);
     }
 
     /// Marks this diagnostic as deprecated code, which will

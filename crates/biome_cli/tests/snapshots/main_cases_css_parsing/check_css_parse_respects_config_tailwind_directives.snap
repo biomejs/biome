@@ -17,8 +17,10 @@ expression: redactor(content)
 ## `file.css`
 
 ```css
-@import 'tailwindcss';
-.foo { color: red; }
+@import "tailwindcss";
+.foo {
+  color: red;
+}
 ```
 
 # Termination Message

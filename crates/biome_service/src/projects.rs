@@ -107,6 +107,24 @@ impl Projects {
         Some(data.root_settings.clone())
     }
 
+    /// Retrieves the correct settings and working directory for the given project.
+    pub fn get_settings_and_wd_based_on_path(
+        &self,
+        project_key: ProjectKey,
+        file_path: &Utf8Path,
+    ) -> Option<(Utf8PathBuf, Settings)> {
+        let projects = self.0.pin();
+        let data = projects.get(&project_key)?;
+
+        for (project_path, settings) in &data.nested_settings {
+            if file_path.starts_with(project_path) {
+                return Some((project_path.clone(), settings.clone()));
+            }
+        }
+
+        Some((data.path.clone(), data.root_settings.clone()))
+    }
+
     /// Retrieves the correct settings for the given project.
     pub fn get_nested_settings(
         &self,

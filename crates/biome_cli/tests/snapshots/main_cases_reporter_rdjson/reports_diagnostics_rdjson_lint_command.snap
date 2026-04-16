@@ -308,7 +308,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
           }
         }
       },
-      "message": "Shouldn't redeclare 'z'. Consider to delete it or rename it.",
+      "message": "'z' is redeclared in the same scope.",
       "suggestions": [
         {
           "range": {
@@ -321,7 +321,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
               "line": 1
             }
           },
-          "text": "'z' is defined here:"
+          "text": "Remove the duplicate declaration or rename one of the variables."
         }
       ]
     },
@@ -343,7 +343,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
           }
         }
       },
-      "message": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+      "message": "'f' is redeclared in the same scope.",
       "suggestions": [
         {
           "range": {
@@ -356,7 +356,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
               "line": 8
             }
           },
-          "text": "'f' is defined here:"
+          "text": "Remove the duplicate declaration or rename one of the variables."
         }
       ]
     },
@@ -458,7 +458,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
           }
         }
       },
-      "message": "Shouldn't redeclare 'z'. Consider to delete it or rename it.",
+      "message": "'z' is redeclared in the same scope.",
       "suggestions": [
         {
           "range": {
@@ -471,7 +471,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
               "line": 1
             }
           },
-          "text": "'z' is defined here:"
+          "text": "Remove the duplicate declaration or rename one of the variables."
         }
       ]
     },
@@ -493,7 +493,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
           }
         }
       },
-      "message": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+      "message": "'f' is redeclared in the same scope.",
       "suggestions": [
         {
           "range": {
@@ -506,7 +506,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
               "line": 8
             }
           },
-          "text": "'f' is defined here:"
+          "text": "Remove the duplicate declaration or rename one of the variables."
         }
       ]
     }

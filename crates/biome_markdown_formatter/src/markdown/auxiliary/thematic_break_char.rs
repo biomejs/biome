@@ -1,6 +1,5 @@
 use crate::prelude::*;
 use biome_markdown_syntax::MdThematicBreakChar;
-use biome_rowan::AstNode;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdThematicBreakChar;
 impl FormatNodeRule<MdThematicBreakChar> for FormatMdThematicBreakChar {
@@ -9,6 +8,6 @@ impl FormatNodeRule<MdThematicBreakChar> for FormatMdThematicBreakChar {
         node: &MdThematicBreakChar,
         f: &mut MarkdownFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        node.value().format().fmt(f)
     }
 }

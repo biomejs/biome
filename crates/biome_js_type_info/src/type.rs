@@ -17,7 +17,9 @@ use crate::{
     GLOBAL_RESOLVER, Literal, ResolvedTypeData, ResolvedTypeId, ResolvedTypeMember, TypeData,
     TypeId, TypeReference, TypeResolver, UNKNOWN_DATA,
     globals::{
-        GLOBAL_ARRAY_ID, GLOBAL_NUMBER_ID, GLOBAL_PROMISE_ID, GLOBAL_STRING_ID, GLOBAL_UNKNOWN_ID,
+        GLOBAL_ARRAY_ID, GLOBAL_ASYNC_DISPOSABLE_ID, GLOBAL_DISPOSABLE_ID, GLOBAL_NUMBER_ID,
+        GLOBAL_PROMISE_ID, GLOBAL_STRING_ID, GLOBAL_SYMBOL_ASYNC_DISPOSE_ID,
+        GLOBAL_SYMBOL_DISPOSE_ID, GLOBAL_UNKNOWN_ID,
     },
 };
 
@@ -245,6 +247,53 @@ impl Type {
             },
             _ => false,
         })
+    }
+
+    pub fn is_disposable(&self) -> bool {
+        if self.id == GLOBAL_DISPOSABLE_ID {
+            return true;
+        }
+
+        self.resolved_data().is_some_and(|ty| {
+            ty.find_member(self.resolver.as_ref(), |member| {
+                member.is_index_signature_with_ty(|ty| {
+                    self.resolve(ty)
+                        .is_some_and(|ty| ty.id == GLOBAL_SYMBOL_DISPOSE_ID)
+                })
+            })
+            .is_some()
+        })
+    }
+
+    pub fn is_async_disposable(&self) -> bool {
+        if self.id == GLOBAL_ASYNC_DISPOSABLE_ID {
+            return true;
+        }
+
+        self.resolved_data().is_some_and(|ty| {
+            ty.find_member(self.resolver.as_ref(), |member| {
+                member.is_index_signature_with_ty(|ty| {
+                    self.resolve(ty)
+                        .is_some_and(|ty| ty.id == GLOBAL_SYMBOL_ASYNC_DISPOSE_ID)
+                })
+            })
+            .is_some()
+        })
+    }
+
+    /// Looks up a named member in the resolved type data and returns
+    /// its type with the correct module context applied.
+    pub fn find_member_type(&self, name: &str) -> Option<Self> {
+        self.resolved_data()
+            .and_then(|data| {
+                data.find_member(self.resolver.as_ref(), |m| {
+                    m.as_raw_member().kind.has_name(name)
+                })
+            })
+            .and_then(|member| {
+                let ty_ref = member.ty();
+                self.resolve(&ty_ref)
+            })
     }
 
     pub fn resolve(&self, ty: &TypeReference) -> Option<Self> {

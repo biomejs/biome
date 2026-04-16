@@ -3,7 +3,8 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-asyncdata-methods.vue
 ---
 # Input
-```ts
+```vue
+<script>
 export default {
   asyncData() {
     return {
@@ -16,30 +17,30 @@ export default {
     }
   }
 }
-
+</script>
 ```
 
 # Diagnostics
 ```
-invalid-asyncdata-methods.vue:4:7 lint/correctness/noVueDuplicateKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-asyncdata-methods.vue:5:7 lint/correctness/noVueDuplicateKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Duplicate key handleClick found in Vue component.
   
-    2 │   asyncData() {
-    3 │     return {
-  > 4 │       handleClick: 'data'
+    3 │   asyncData() {
+    4 │     return {
+  > 5 │       handleClick: 'data'
       │       ^^^^^^^^^^^
-    5 │     }
-    6 │   },
+    6 │     }
+    7 │   },
   
   i Key handleClick is also defined here.
   
-     6 │   },
-     7 │   methods: {
-   > 8 │     handleClick() {
+     7 │   },
+     8 │   methods: {
+   > 9 │     handleClick() {
        │     ^^^^^^^^^^^
-     9 │       console.log('method');
-    10 │     }
+    10 │       console.log('method');
+    11 │     }
   
   i Keys defined in different Vue component options (props, data, methods, computed) can conflict when accessed in the template. Rename the key to avoid conflicts.
   

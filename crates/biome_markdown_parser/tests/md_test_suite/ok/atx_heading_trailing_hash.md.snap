@@ -60,7 +60,7 @@ MdDocument {
             },
             after: MdHashList [
                 MdHash {
-                    hash_token: HASH@12..14 "#" [Skipped(" ")] [],
+                    hash_token: HASH@12..14 "#" [Whitespace(" ")] [],
                 },
             ],
         },
@@ -84,7 +84,7 @@ MdDocument {
             },
             after: MdHashList [
                 MdHash {
-                    hash_token: HASH@22..26 "#" [Skipped(" "), Skipped(" "), Skipped(" ")] [],
+                    hash_token: HASH@22..26 "#" [Whitespace(" "), Whitespace(" "), Whitespace(" ")] [],
                 },
             ],
         },
@@ -143,7 +143,7 @@ MdDocument {
         1: (empty)
       3: MD_HASH_LIST@12..14
         0: MD_HASH@12..14
-          0: HASH@12..14 "#" [Skipped(" ")] []
+          0: HASH@12..14 "#" [Whitespace(" ")] []
     3: MD_NEWLINE@14..15
       0: NEWLINE@14..15 "\n" [] []
     4: MD_HEADER@15..26
@@ -158,7 +158,7 @@ MdDocument {
         1: (empty)
       3: MD_HASH_LIST@22..26
         0: MD_HASH@22..26
-          0: HASH@22..26 "#" [Skipped(" "), Skipped(" "), Skipped(" ")] []
+          0: HASH@22..26 "#" [Whitespace(" "), Whitespace(" "), Whitespace(" ")] []
     5: MD_NEWLINE@26..27
       0: NEWLINE@26..27 "\n" [] []
     6: MD_PARAGRAPH@27..32

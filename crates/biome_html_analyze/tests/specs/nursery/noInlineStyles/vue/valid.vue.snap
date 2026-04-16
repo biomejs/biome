@@ -1,0 +1,25 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+
+<template>
+	<div class="text-red"></div>
+
+	<p class="body-text">Hello</p>
+
+	<span id="hidden-element">Hidden</span>
+
+	<input type="text" class="input-field" />
+
+	<a href="#" class="link-unstyled">Link</a>
+
+	<span data-style="not-inline">Not inline style</span>
+
+	<Card style="primary" />
+</template>
+
+```

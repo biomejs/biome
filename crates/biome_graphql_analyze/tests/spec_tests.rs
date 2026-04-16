@@ -1,4 +1,4 @@
-use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
+use biome_analyze::{ActionFilter, AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_graphql_parser::parse_graphql;
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
@@ -98,11 +98,14 @@ pub(crate) fn analyze_and_snap(
     let root = parsed.tree();
 
     let mut code_fixes = Vec::new();
-    let options = create_analyzer_options::<GraphqlLanguage>(input_file, &mut diagnostics);
+    // Use the parent directory as a working directory for relative paths in diagnostics
+    let working_directory = input_file.parent().unwrap_or(Utf8Path::new("."));
+    let options =
+        create_analyzer_options::<GraphqlLanguage>(input_file, working_directory, &mut diagnostics);
 
     let (_, errors) = biome_graphql_analyze::analyze(&root, filter, &options, |event| {
         if let Some(mut diag) = event.diagnostic() {
-            for action in event.actions() {
+            for action in event.actions(ActionFilter::all()) {
                 if check_action_type.is_suppression() {
                     if action.is_suppression() {
                         check_code_action(input_file, input_code, source_type, &action);
@@ -118,7 +121,7 @@ pub(crate) fn analyze_and_snap(
             return ControlFlow::Continue(());
         }
 
-        for action in event.actions() {
+        for action in event.actions(ActionFilter::all()) {
             if check_action_type.is_suppression() {
                 if action.category.matches("quickfix.suppressRule") {
                     check_code_action(input_file, input_code, source_type, &action);

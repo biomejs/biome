@@ -5,5 +5,7 @@
 	// uncovered by this rule
 	"delete x",
 	"delete f()",
-	"delete el.dataset.something"
+	"delete el.dataset.something",
+	// `delete process.env.FOO` is the documented way to remove env vars in Node.js
+	"delete process.env.FOO"
 ]

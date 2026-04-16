@@ -16,6 +16,7 @@ impl FormatRule<AnySvelteBindingProperty> for FormatAnySvelteBindingProperty {
             AnySvelteBindingProperty::SvelteLiteral(node) => {
                 node.format().with_options(self.compact).fmt(f)
             }
+            AnySvelteBindingProperty::SvelteMemberProperty(node) => node.format().fmt(f),
             AnySvelteBindingProperty::SvelteName(node) => {
                 node.format().with_options(self.compact).fmt(f)
             }

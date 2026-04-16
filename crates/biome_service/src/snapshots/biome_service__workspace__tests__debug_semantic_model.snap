@@ -9,13 +9,19 @@ Scope {
       id: ScopeId(2) @ 1..87
       children: [
         Binding {
-          id: BindingId(1) @ 14..18
-          scope: ScopeId(2)
+          Id: BindingId(1) @ 14..18
+          Scope: ScopeId(2)
+          Imported: false
+          Exported: false
+          Kind: Value
           ident: name
         }
         Binding {
-          id: BindingId(2) @ 28..31
-          scope: ScopeId(2)
+          Id: BindingId(2) @ 28..31
+          Scope: ScopeId(2)
+          Imported: false
+          Exported: false
+          Kind: Value
           ident: age
         }
         Scope {
@@ -25,8 +31,11 @@ Scope {
       ]
     }
     Binding {
-      id: BindingId(0) @ 10..13
-      scope: ScopeId(2)
+      Id: BindingId(0) @ 10..13
+      Scope: ScopeId(2)
+      Imported: false
+      Exported: false
+      Kind: HoistedValue
       ident: foo
     }
     Scope {
@@ -36,13 +45,19 @@ Scope {
           id: ScopeId(5) @ 142..240
           children: [
             Binding {
-              id: BindingId(4) @ 154..158
-              scope: ScopeId(5)
+              Id: BindingId(4) @ 154..158
+              Scope: ScopeId(5)
+              Imported: false
+              Exported: false
+              Kind: Value
               ident: name
             }
             Binding {
-              id: BindingId(5) @ 168..171
-              scope: ScopeId(5)
+              Id: BindingId(5) @ 168..171
+              Scope: ScopeId(5)
+              Imported: false
+              Exported: false
+              Kind: Value
               ident: age
             }
             Scope {
@@ -54,8 +69,11 @@ Scope {
       ]
     }
     Binding {
-      id: BindingId(3) @ 94..100
-      scope: ScopeId(4)
+      Id: BindingId(3) @ 94..100
+      Scope: ScopeId(4)
+      Imported: false
+      Exported: false
+      Kind: Class
       ident: Person
     }
   ]

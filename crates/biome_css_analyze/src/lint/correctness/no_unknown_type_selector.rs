@@ -22,7 +22,7 @@ fn is_root_in_view_transition_pseudo_element(type_selector: &CssTypeSelector) ->
     let Some(type_selector_text) = type_selector
         .ident()
         .ok()
-        .and_then(|ident| ident.value_token().ok())
+        .and_then(|ident| ident.as_css_identifier().and_then(|ident| ident.value_token().ok()))
         .map(|token| token.token_text_trimmed().text().to_string())
     else {
         return false;
@@ -113,6 +113,7 @@ impl Rule for NoUnknownTypeSelector {
         let type_selector = css_type_selector
             .ident()
             .ok()?
+            .as_css_identifier()?
             .value_token()
             .ok()?
             .token_text_trimmed();

@@ -1,10 +1,13 @@
 use crate::prelude::*;
-use biome_markdown_syntax::MdQuote;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_markdown_syntax::{MdQuote, MdQuoteFields};
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdQuote;
 impl FormatNodeRule<MdQuote> for FormatMdQuote {
     fn fmt_fields(&self, node: &MdQuote, f: &mut MarkdownFormatter) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let MdQuoteFields { content, prefix } = node.as_fields();
+
+        write!(f, [prefix.format(), content.format()])
     }
 }

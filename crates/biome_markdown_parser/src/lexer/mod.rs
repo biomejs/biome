@@ -38,6 +38,12 @@ pub enum MarkdownLexContext {
     /// STAR/MINUS/UNDERSCORE tokens and whitespace emits as MD_INDENT_CHAR,
     /// instead of aggregating into MD_THEMATIC_BREAK_LITERAL.
     ThematicBreakParts,
+    /// Inside ATX heading content. Behaves like Regular but does NOT bundle
+    /// trailing spaces with the newline into MD_HARD_LINE_LITERAL. Instead,
+    /// spaces are emitted as MD_TEXTUAL_LITERAL and the newline is emitted
+    /// separately. This allows the parser to consume trailing spaces as
+    /// Whitespace trivia without swallowing the newline.
+    HeadingContent,
 }
 
 impl LexContext for MarkdownLexContext {
@@ -262,8 +268,13 @@ impl<'src> MarkdownLexer<'src> {
                     // After a block quote marker, emit a single whitespace token
                     // so the parser can skip the optional space.
                     self.consume_single_whitespace_as_text()
-                } else if current == b' ' && self.is_potential_hard_line_break() {
-                    // Handle hard line break (2+ spaces before newline) mid-line
+                } else if current == b' '
+                    && !matches!(context, MarkdownLexContext::HeadingContent)
+                    && self.is_potential_hard_line_break()
+                {
+                    // Handle hard line break (2+ spaces before newline) mid-line.
+                    // Skipped in HeadingContent context: headings don't produce
+                    // hard breaks, so spaces and newline are emitted separately.
                     self.consume_whitespace()
                 } else {
                     // Whitespace is part of text in Markdown.
@@ -774,7 +785,10 @@ impl<'src> MarkdownLexer<'src> {
                 b'*' => STAR,
                 b'_' => UNDERSCORE,
                 b'-' => MINUS,
-                _ => unreachable!(),
+                _ => {
+                    debug_assert!(false, "unexpected byte in emphasis marker");
+                    MD_TEXTUAL_LITERAL
+                }
             };
         }
 
@@ -785,7 +799,10 @@ impl<'src> MarkdownLexer<'src> {
             return match start_char {
                 b'*' => DOUBLE_STAR,
                 b'_' => DOUBLE_UNDERSCORE,
-                _ => unreachable!(),
+                _ => {
+                    debug_assert!(false, "unexpected byte in double emphasis marker");
+                    MD_TEXTUAL_LITERAL
+                }
             };
         }
 
@@ -795,7 +812,10 @@ impl<'src> MarkdownLexer<'src> {
             b'*' => STAR,
             b'_' => UNDERSCORE,
             b'-' => MINUS,
-            _ => unreachable!(),
+            _ => {
+                debug_assert!(false, "unexpected byte in single emphasis marker");
+                MD_TEXTUAL_LITERAL
+            }
         }
     }
 
@@ -1054,8 +1074,12 @@ impl<'src> MarkdownLexer<'src> {
                             break;
                         }
                         // Look ahead to check if this could be the start of a hard line break
-                        // (2+ spaces followed by newline)
-                        if self.is_potential_hard_line_break() {
+                        // (2+ spaces followed by newline). Skip this check in HeadingContent
+                        // context: headings don't produce hard breaks (§4.2), so trailing
+                        // spaces should stay as ordinary text for the parser to handle.
+                        if !matches!(context, MarkdownLexContext::HeadingContent)
+                            && self.is_potential_hard_line_break()
+                        {
                             break;
                         }
                         self.advance(1);
@@ -1196,11 +1220,17 @@ impl<'src> MarkdownLexer<'src> {
             offset += 1;
         }
 
-        // Check if followed by newline
-        if space_count >= 2
-            && let Some(next) = self.byte_at(offset)
-        {
-            return next == b'\n' || next == b'\r';
+        if space_count >= 2 {
+            // A hard line break requires 2+ spaces followed by a newline
+            // (https://spec.commonmark.org/0.31.2/#hard-line-breaks).
+            // Trailing spaces at EOF are never a valid hard line break,
+            // but they must be split from the preceding text so the
+            // formatter can strip them without idempotency issues.
+            match self.byte_at(offset) {
+                None => return true,
+                Some(b'\n' | b'\r') => return true,
+                _ => {}
+            }
         }
 
         false

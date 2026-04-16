@@ -1,10 +1,11 @@
 use crate::JsonRuleAction;
+use crate::utils::is_package_json;
 use biome_analyze::utils::{is_separated_list_sorted_by, sorted_separated_list_by};
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, context::RuleContext, declare_source_rule, RuleSource
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
+    declare_source_rule,
 };
 use biome_console::markup;
-use biome_diagnostics::category;
 use biome_json_factory::make;
 use biome_json_syntax::{
     AnyJsonValue, JsonLanguage, JsonMemberList, JsonObjectValue, T, TextRange,
@@ -16,6 +17,10 @@ use std::{cmp::Ordering, ops::Not};
 
 declare_source_rule! {
     /// Sort the keys of a JSON object in natural order.
+    ///
+    /// :::note
+    /// For consistent ordering in `package.json` files, use the action [useSortedPackageJson](https://biomejs.dev/assist/actions/use-sorted-package-json)
+    /// :::
     ///
     /// [Natural order](https://en.wikipedia.org/wiki/Natural_sort_order) means
     /// that uppercase letters come before lowercase letters (e.g. `A` < `a` <
@@ -207,6 +212,9 @@ impl Rule for UseSortedKeys {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let options = ctx.options();
+        // package.json files have specialized sorting via useSortedPackageJson; add a note.
+        let path = ctx.file_path();
+
         let message = if options.group_by_nesting.unwrap_or(false) {
             markup! {
                 "The members are not sorted by nesting level and key."
@@ -216,11 +224,16 @@ impl Rule for UseSortedKeys {
                 "The members are not sorted by key."
             }
         };
-        Some(RuleDiagnostic::new(
-            category!("assist/source/useSortedKeys"),
-            Self::text_range(ctx, state),
-            message,
-        ))
+        let mut diagnostic =
+            RuleDiagnostic::new(rule_category!(), Self::text_range(ctx, state), message);
+
+        if is_package_json(path) {
+            diagnostic = diagnostic.note(markup! {
+                "For consistent ordering in `package.json` files, use the action "<Hyperlink href="https://biomejs.dev/assist/actions/use-sorted-package-json">"useSortedPackageJson"</Hyperlink>"."
+            })
+        }
+
+        Some(diagnostic)
     }
 
     fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {

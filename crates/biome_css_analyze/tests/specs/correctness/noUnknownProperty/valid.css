@@ -68,6 +68,14 @@ a {
 	color: yellow;
 }
 
+/* Scroll and modern CSS properties */
+a { scroll-marker-group: after; }
+a { scroll-target-group: auto; }
+a { reading-flow: flex-visual; }
+a { reading-order: 1; }
+a { overlay: auto; }
+a { dynamic-range-limit: standard; }
+
 /* View Transition navigation property (should not be flagged) */
 view-transition {
 	navigation: auto;

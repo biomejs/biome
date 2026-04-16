@@ -26,6 +26,16 @@ Use this skill when creating diagnostics - the error messages, warnings, and hin
 - Actionable: Always suggest how to fix
 - Show don't tell: Prefer code frames over textual explanations
 
+**CRITICAL: No Emojis in Diagnostics**
+
+Emojis are BANNED in all diagnostic messages, advice text, and error output:
+- NO emojis in diagnostic messages
+- NO emojis in advice notes
+- NO emojis in code frame annotations
+- NO emojis in log messages
+
+Keep all user-facing text professional and emoji-free.
+
 ## Common Workflows
 
 ### Create a Diagnostic Type
@@ -142,14 +152,14 @@ impl Rule for NoVar {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Use "<Emphasis>"let"</Emphasis>" or "<Emphasis>"const"</Emphasis>" instead of "<Emphasis>"var"</Emphasis>"."
+                    "Using "<Emphasis>"var"</Emphasis>" is not recommended."
                 },
             )
             .note(markup! {
-                "Variables declared with "<Emphasis>"var"</Emphasis>" are function-scoped, not block-scoped."
+                "Variables declared with "<Emphasis>"var"</Emphasis>" are function-scoped, not block-scoped, which means they can leak outside of loops and conditionals and cause unexpected behavior."
             })
             .note(markup! {
-                "See the "<Hyperlink href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/var">"MDN documentation"</Hyperlink>" for more details."
+                "Consider using "<Emphasis>"let"</Emphasis>" or "<Emphasis>"const"</Emphasis>" instead."
             })
         )
     }

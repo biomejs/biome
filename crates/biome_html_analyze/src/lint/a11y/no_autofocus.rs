@@ -88,13 +88,18 @@ impl Rule for NoAutofocus {
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            node.syntax().text_trimmed_range(),
-            markup! {
-                "Avoid the "<Emphasis>"autofocus"</Emphasis>" attribute."
-            },
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                node.syntax().text_trimmed_range(),
+                markup! {
+                    "This element uses the "<Emphasis>"autofocus"</Emphasis>" attribute outside an allowed modal context."
+                },
+            )
+            .note(markup! {
+                "Autofocusing elements can disrupt navigation and confuse screen reader and keyboard users."
+            }),
+        )
     }
 
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<HtmlRuleAction> {

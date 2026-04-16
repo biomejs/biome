@@ -35,7 +35,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noVoidElementsWithChildren",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("void-dom-elements-no-children").same()],
+        sources: &[RuleSource::EslintReact("void-dom-elements-no-children").same(), RuleSource::EslintReactDom("no-void-elements-with-children").same(), RuleSource::EslintReactXyz("dom-no-void-elements-with-children").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,

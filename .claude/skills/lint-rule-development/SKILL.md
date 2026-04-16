@@ -14,6 +14,19 @@ Use this skill when creating new lint rules or assist actions for Biome. It prov
 2. Ensure `cargo`, `just`, and `pnpm` are available
 3. Read `crates/biome_analyze/CONTRIBUTING.md` for in-depth concepts
 
+## Code Standards
+
+**CRITICAL: No Emojis**
+
+Emojis are BANNED in all lint rule code:
+- NO emojis in rustdoc comments
+- NO emojis in diagnostic messages
+- NO emojis in code action descriptions
+- NO emojis in test files or test comments
+- NO emojis anywhere in the rule implementation
+
+Keep all code and documentation professional and emoji-free.
+
 ## Common Workflows
 
 ### Create a New Lint Rule
@@ -75,17 +88,57 @@ impl Rule for UseMyRuleName {
             RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
+                // Pillar 1 — WHAT the error is.
                 markup! {
-                    "Avoid using this identifier."
+                    "This identifier "<Emphasis>"prohibited_name"</Emphasis>" is not allowed."
                 },
             )
+            // Pillar 2 — WHY it is triggered / why it is a problem.
             .note(markup! {
-                "This identifier is prohibited because..."
+                "Using this identifier leads to [specific problem]."
+            })
+            // Pillar 3 — WHAT the user should do to fix it.
+            // Use a code action instead when an automated fix is possible.
+            .note(markup! {
+                "Replace it with [alternative] or remove it entirely."
             }),
         )
     }
 }
 ```
+
+### The Three Diagnostic Pillars (REQUIRED)
+
+Every diagnostic **must** follow the three pillars defined in `crates/biome_analyze/CONTRIBUTING.md`:
+
+| Pillar | Question answered | Implemented as |
+| --- | --- | --- |
+| 1 | **What** is the error? | The `RuleDiagnostic` message (first argument to `markup!`) |
+| 2 | **Why** is it a problem? | A `.note()` explaining the consequence or rationale |
+| 3 | **What should the user do?** | A code action (`action` fn), or a second `.note()` if no fix is available |
+
+**Example from `noUnusedVariables`:**
+```rust
+RuleDiagnostic::new(
+    rule_category!(),
+    range,
+    // Pillar 1: what
+    markup! { "This variable "<Emphasis>{name}</Emphasis>" is unused." },
+)
+// Pillar 2: why
+.note(markup! {
+    "Unused variables are often the result of typos, incomplete refactors, or other sources of bugs."
+})
+// Pillar 3: what to do (here as a note; ideally a code action)
+.note(markup! {
+    "Remove the variable or use it."
+})
+```
+
+**Common mistakes to avoid:**
+- Combining pillars 2 and 3 into a single note — keep them separate.
+- Writing pillar 3 as the only note, skipping pillar 2.
+- Writing a pillar 1 message that already contains "why" — the message should stay short and factual; move the rationale to pillar 2.
 
 ### Using Semantic Model
 
@@ -188,6 +241,40 @@ tests/specs/nursery/useMyRuleName/
 └── options.json        # Optional rule configuration
 ```
 
+**IMPORTANT: Magic Comments for Test Expectations**
+
+All test files MUST include magic comments at the top to set expectations:
+
+- **Valid tests** (should not generate diagnostics):
+```javascript
+/* should not generate diagnostics */
+const allowed_name = 1;
+```
+
+- **Invalid tests** (should generate diagnostics):
+```javascript
+// should generate diagnostics
+const prohibited_name = 1;
+const another_prohibited = 2;
+```
+
+For HTML files:
+```html
+<!-- should not generate diagnostics -->
+<!doctype html>
+<html>...</html>
+```
+
+For languages that support both comment styles, use `/* */` or `//` as appropriate. The comment should be the very first line of the file.
+
+These magic comments:
+- Document the intent of the test file
+- Help reviewers understand what's expected
+- Serve as a quick reference when debugging test failures
+
+Example `invalid.js`:
+```javascript
+// should generate diagnostics
 **Every test file must start with a top-level comment** declaring whether it expects diagnostics. The test runner enforces this — see the `testing-codegen` skill for full rules. The short version:
 
 `valid.js` — comment is **mandatory** (test panics without it):
@@ -204,6 +291,13 @@ const prohibited_name = 1;
 const another_prohibited = 2;
 ```
 
+Example `valid.js`:
+```javascript
+/* should not generate diagnostics */
+const allowed_name = 1;
+const another_allowed = 2;
+```
+
 Run snapshot tests:
 ```shell
 just test-lintrule useMyRuleName
@@ -211,7 +305,8 @@ just test-lintrule useMyRuleName
 
 Review snapshots:
 ```shell
-cargo insta review
+cargo insta accept # accept all snapshots
+cargo insta reject # reject all snapshots
 ```
 
 ### Generate Analyzer Code
@@ -301,6 +396,13 @@ impl Rule for UseMyRuleName {
 - **Error recovery**: When navigating CST, use `.ok()?` pattern to handle missing nodes gracefully
 - **Testing arrays**: Use `.jsonc` files with arrays of code snippets for multiple test cases
 
+## Common Mistakes to Avoid
+
+Generally, mistakes revolve around allocating unnecessary data during rule execution, which can lead to performance issues. Common examples include:
+
+- Placing `String` or `Box<str>` in a Rule's `State` type. It's a strong indicator that you are allocating a string unnecessarily. If the string comes from a CST token, this usually can be avoided by using `TokenText` instead.
+- Building strings or other data structures only used in the code action in `run()` instead of `action()`. `run()` should only decide whether to emit a diagnostic; `action()` should build the fix. This matters for performance because building the action can be expensive, and we should avoid doing it when no diagnostic is emitted.
+
 ## Common Query Types
 
 ```rust
@@ -316,6 +418,53 @@ declare_node_union! {
 }
 type Query = Semantic<AnyFunctionLike>;
 ```
+
+## High Quality Diagnostics
+
+**VERY IMPORTANT**: Rule diagnostics MUST convey these messages, in this order:
+
+1. What the problem is
+2. Why it's a problem (motivation to fix the issue)
+3. How to fix it (actionable advice)
+
+If the rule has an `action()` to fix the issue, the 3rd message should go in the action's message. If not, it should go in the diagnostic's advice.
+
+Diagnostics must remain focused on the specific issue that the rule is flagging. Avoid including superfluous details that aren't directly relevant to the problem, as this can overwhelm users and obscure the main point.
+If a rule can flag multiple classes of the same category of issue, the diagnostic messages should be surgically customized to the specific issue being flagged, rather than using generic messages that apply to all cases. This ensures that users receive precise and relevant information about the problem and how to fix it.
+
+### Examples
+
+Good:
+```
+1. "Foo is not allowed here."
+2. "Foo harms readability because of X, Y, Z."
+3. "Consider using Bar instead, which is more concise and easier to read."
+```
+
+```
+1. "Unexpected for-in loop."
+2. "For-in loops are confusing and easy to misuse."
+3. "You likely want to use a regular loop, for-of loop or forEach instead."
+```
+
+Bad:
+
+```
+1. "Prefer let or const over var." // conflates the what and the how in one message,
+2. "var is bad." // not meaningful motivation to fix, doesn't explain the consequences
+// third message missing is bad, because it doesn't give users a clear path to fix the issue
+```
+
+```
+1. "This var declaration is not at the top of its containing scope." // Good start, explains what the problem is
+2. "Move standalone var declarations before other statements in the same function, script, module, or static block." // Doesn't explain why, only tells the action. The "why" must come second, after the what.
+3. "At module scope, imports and leading "<Emphasis>"export var"</Emphasis>" declarations may appear before other statements." // Doesn't explain the action, just gives a superfluous detail about module scope.
+```
+
+## Tips
+
+- New rules are always in the `nursery` group. No need to move them to another category.
+- Changesets are always required for new rules. New rules are `patch` level changes. There's a skill to help write good changesets.
 
 ## References
 

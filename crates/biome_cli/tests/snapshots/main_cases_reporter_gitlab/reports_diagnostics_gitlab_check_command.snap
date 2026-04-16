@@ -270,7 +270,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+    "description": "'f' is redeclared in the same scope.",
     "check_name": "lint/suspicious/noRedeclare",
     "fingerprint": "13204486605360217019",
     "severity": "critical",
@@ -282,7 +282,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+    "description": "'f' is redeclared in the same scope.",
     "check_name": "lint/suspicious/noRedeclare",
     "fingerprint": "8601445511714044637",
     "severity": "critical",
@@ -294,7 +294,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+    "description": "'f' is redeclared in the same scope.",
     "check_name": "lint/suspicious/noRedeclare",
     "fingerprint": "7842353260163629265",
     "severity": "critical",
@@ -474,7 +474,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "Shouldn't redeclare 'z'. Consider to delete it or rename it.",
+    "description": "'z' is redeclared in the same scope.",
     "check_name": "lint/suspicious/noRedeclare",
     "fingerprint": "8595162422023295635",
     "severity": "critical",
@@ -486,7 +486,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+    "description": "'f' is redeclared in the same scope.",
     "check_name": "lint/suspicious/noRedeclare",
     "fingerprint": "4835254919265693190",
     "severity": "critical",
@@ -498,7 +498,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+    "description": "'f' is redeclared in the same scope.",
     "check_name": "lint/suspicious/noRedeclare",
     "fingerprint": "3103625193263367010",
     "severity": "critical",
@@ -606,7 +606,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "Shouldn't redeclare 'z'. Consider to delete it or rename it.",
+    "description": "'z' is redeclared in the same scope.",
     "check_name": "lint/suspicious/noRedeclare",
     "fingerprint": "4177467054814594004",
     "severity": "critical",
@@ -618,7 +618,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+    "description": "'f' is redeclared in the same scope.",
     "check_name": "lint/suspicious/noRedeclare",
     "fingerprint": "710662920264236176",
     "severity": "critical",
@@ -630,7 +630,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+    "description": "'f' is redeclared in the same scope.",
     "check_name": "lint/suspicious/noRedeclare",
     "fingerprint": "11240683920503391137",
     "severity": "critical",
@@ -642,7 +642,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+    "description": "'f' is redeclared in the same scope.",
     "check_name": "lint/suspicious/noRedeclare",
     "fingerprint": "14476601875768703957",
     "severity": "critical",
@@ -654,7 +654,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+    "description": "'f' is redeclared in the same scope.",
     "check_name": "lint/suspicious/noRedeclare",
     "fingerprint": "16119156397775465086",
     "severity": "critical",
@@ -666,7 +666,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+    "description": "'f' is redeclared in the same scope.",
     "check_name": "lint/suspicious/noRedeclare",
     "fingerprint": "16860125444609679494",
     "severity": "critical",

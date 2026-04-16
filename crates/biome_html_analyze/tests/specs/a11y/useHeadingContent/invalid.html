@@ -1,0 +1,26 @@
+<!-- Empty heading -->
+<h1></h1>
+
+<!-- Whitespace-only heading -->
+<h2>   </h2>
+
+<!-- Heading with aria-hidden (hides entire heading from screen readers) -->
+<h1 aria-hidden="true">invisible content</h1>
+
+<!-- Heading with only aria-hidden children -->
+<h1><span aria-hidden="true">hidden</span></h1>
+
+<!-- All heading levels empty -->
+<h3></h3>
+<h4></h4>
+<h5></h5>
+<h6></h6>
+
+<!-- Heading with aria-hidden and aria-label (aria-hidden takes priority) -->
+<h1 aria-label="Screen reader content" aria-hidden="true">invisible content</h1>
+
+<!-- Self-closing heading (void-style, no content) -->
+<h1 />
+
+<!-- PascalCase in HTML is case-insensitive, not a custom component -->
+<h1><Span></Span></h1>

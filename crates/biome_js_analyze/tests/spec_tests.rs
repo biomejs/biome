@@ -1,6 +1,6 @@
 use biome_analyze::{
-    AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never, Queryable,
-    RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
+    ActionFilter, AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never,
+    Queryable, RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
 };
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_fs::OsFileSystem;
@@ -11,10 +11,9 @@ use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage, ModuleKind};
 use biome_package::PackageType;
 use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::{AstNode, FileSourceError};
-use biome_service::file_handlers::VueFileHandler;
 use biome_test_utils::{
-    CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
-    code_fix_to_string, create_analyzer_options, diagnostic_to_string,
+    CheckActionType, analyze_with_workspace, assert_diagnostics_expectation_comment,
+    assert_errors_are_absent, code_fix_to_string, create_analyzer_options, diagnostic_to_string,
     has_bogus_nodes_or_empty_slots, module_graph_for_test_file, parse_test_path,
     project_layout_for_test_file, register_leak_checker, scripts_from_json,
     write_analyzer_snapshot,
@@ -24,7 +23,7 @@ use std::ops::Deref;
 use std::sync::Arc;
 use std::{fs::read_to_string, slice};
 
-tests_macros::gen_tests! {"tests/specs/**/*.{cjs,cts,js,mjs,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_test, "module"}
+tests_macros::gen_tests! {"tests/specs/**/*.{cjs,cts,js,mjs,jsx,tsx,ts,json,jsonc,svelte,vue,html,astro}", crate::run_test, "module"}
 tests_macros::gen_tests! {"tests/suppression/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_suppression_test, "module"}
 tests_macros::gen_tests! {"tests/multiple_rules/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_multi_rule_test, "module"}
 tests_macros::gen_tests! {"tests/plugin/*.grit", crate::run_plugin_test, "module"}
@@ -72,6 +71,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
 
     let input_file = Utf8Path::new(input);
     let file_name = input_file.file_name().unwrap();
+    let extension = input_file.extension().unwrap_or_default();
 
     let (group, rule) = parse_test_path(input_file);
     if rule == "specs" || rule == "suppression" {
@@ -88,24 +88,48 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
         panic!("could not find rule {group}/{rule}");
     }
 
-    let rule_filter = RuleFilter::Rule(group, rule);
-    let filter = AnalysisFilter {
-        enabled_rules: Some(slice::from_ref(&rule_filter)),
-        ..AnalysisFilter::default()
-    };
-
-    let mut snapshot = String::new();
-    let extension = input_file.extension().unwrap_or_default();
+    // For HTML-ish files, use the workspace-based test path which properly
+    // handles embedded language extraction via the HTML parser pipeline.
+    let is_html_ish = matches!(extension, "vue" | "svelte" | "astro" | "html");
 
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
-    if let Some(scripts) = scripts_from_json(extension, &input_code) {
-        for script in scripts {
+    let snapshot = if is_html_ish {
+        analyze_with_workspace(input_file, input_code, group, rule)
+    } else {
+        let rule_filter = RuleFilter::Rule(group, rule);
+        let filter = AnalysisFilter {
+            enabled_rules: Some(slice::from_ref(&rule_filter)),
+            ..AnalysisFilter::default()
+        };
+
+        let mut snapshot = String::new();
+
+        if let Some(scripts) = scripts_from_json(extension, &input_code) {
+            for script in scripts {
+                analyze_and_snap(
+                    &mut snapshot,
+                    &script,
+                    JsFileSource::js_script(),
+                    filter,
+                    file_name,
+                    input_file,
+                    CheckActionType::Lint,
+                    JsParserOptions::default(),
+                    &[],
+                );
+            }
+        } else {
+            let Ok(source_type): Result<JsFileSource, FileSourceError> = input_file.try_into()
+            else {
+                return;
+            };
+
             analyze_and_snap(
                 &mut snapshot,
-                &script,
-                JsFileSource::js_script(),
+                &input_code,
+                source_type,
                 filter,
                 file_name,
                 input_file,
@@ -113,38 +137,9 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
                 JsParserOptions::default(),
                 &[],
             );
-        }
-    } else {
-        let Ok(source_type): Result<JsFileSource, FileSourceError> = input_file.try_into() else {
-            return;
         };
 
-        // TODO: Remove once we have full support of vue files
-        // This is needed to set the language to TypeScript for Vue files
-        // because we can't do it in <script> definition in the current implementation.
-        let source_type = if source_type.as_embedding_kind().is_vue() {
-            JsFileSource::ts()
-                .with_embedding_kind(*VueFileHandler::file_source(&input_code).as_embedding_kind())
-        } else {
-            source_type
-        };
-        let input_code = if source_type.as_embedding_kind().is_vue() {
-            VueFileHandler::input(&input_code)
-        } else {
-            input_code.as_str()
-        };
-
-        analyze_and_snap(
-            &mut snapshot,
-            input_code,
-            source_type,
-            filter,
-            file_name,
-            input_file,
-            CheckActionType::Lint,
-            JsParserOptions::default(),
-            &[],
-        );
+        snapshot
     };
 
     insta::with_settings!({
@@ -182,7 +177,10 @@ pub(crate) fn analyze_and_snap(
     let parsed = parse(input_code, source_type, parser_options);
     let root = parsed.tree();
 
-    let mut options = create_analyzer_options::<JsLanguage>(input_file, &mut diagnostics);
+    // Use the parent directory as working directory for relative paths in diagnostics
+    let working_directory = input_file.parent().unwrap_or(Utf8Path::new("."));
+    let mut options =
+        create_analyzer_options::<JsLanguage>(input_file, working_directory, &mut diagnostics);
 
     // Query tsconfig.json for JSX factory settings if jsx_runtime is ReactClassic
     // and the factory settings are not already set
@@ -226,7 +224,7 @@ pub(crate) fn analyze_and_snap(
     let (_, errors) =
         biome_js_analyze::analyze(&root, filter, &options, plugins, services, |event| {
             if let Some(mut diag) = event.diagnostic() {
-                for action in event.actions() {
+                for action in event.actions(ActionFilter::all()) {
                     if check_action_type.is_suppression() {
                         if action.is_suppression() {
                             check_code_action(
@@ -256,7 +254,7 @@ pub(crate) fn analyze_and_snap(
                 return ControlFlow::Continue(());
             }
 
-            for action in event.actions() {
+            for action in event.actions(ActionFilter::all()) {
                 if check_action_type.is_suppression() {
                     if action.category.matches("quickfix.suppressRule") {
                         check_code_action(
@@ -489,6 +487,7 @@ fn run_plugin_test(input: &'static str, _: &str, _: &str, _: &str) {
     let plugin = match AnalyzerGritPlugin::load(
         &OsFileSystem::new(plugin_path.to_owned()),
         Utf8Path::new(plugin_path),
+        None,
     ) {
         Ok(plugin) => plugin,
         Err(err) => panic!("Cannot load plugin: {err:?}"),

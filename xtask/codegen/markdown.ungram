@@ -39,6 +39,7 @@ SyntaxElement = SyntaxElement
 
 // Needed by the infrastructure
 MdBogus = SyntaxElement*
+MdBogusBlock = SyntaxElement*
 
 MdDocument =
   bom: 'UNICODE_BOM'?
@@ -51,6 +52,7 @@ AnyMdBlock =
 	AnyMdLeafBlock
 	| AnyMdContainerBlock
 	| MdQuotePrefix
+	| MdBogusBlock
 
 AnyMdLeafBlock =
 	MdThematicBreakBlock
@@ -59,9 +61,9 @@ AnyMdLeafBlock =
 	| AnyMdCodeBlock
 	| MdHtmlBlock
 	| MdLinkReferenceDefinition
-	| MdLinkBlock
 	| MdParagraph
 	| MdNewline
+	| MdContinuationIndent
 
 AnyMdContainerBlock =
 	MdQuote
@@ -166,10 +168,6 @@ MdLinkDestination = content: MdInlineItemList
 // Titles can contain multiple tokens
 MdLinkTitle = content: MdInlineItemList
 
-// Legacy MdLinkBlock retained for backwards compatibility
-MdLinkBlock = label: MdTextual
-                url: MdTextual
-                title: MdTextual?
 
 // > Foo
 // ^^^^^
@@ -373,6 +371,15 @@ MdThematicBreakBlock = parts: MdThematicBreakPartList
 // This preserves NEWLINEs in the CST without creating "newline-only paragraphs".
 // Used when a NEWLINE appears between blocks and isn't part of inline content.
 MdNewline = value: 'NEWLINE'
+
+// Indentation on a continuation line inside a list item, e.g. the two spaces
+// before `bar` in:
+// - foo
+//   bar
+// See CommonMark §5.2: https://spec.commonmark.org/0.31.2/#list-items
+// Wraps the structural indent that check_continuation_indent consumes
+// before block detection.
+MdContinuationIndent = indent: MdIndentTokenList
 
 MdHardLine = value: 'md_hard_line_literal'
 MdSoftBreak = value: 'md_soft_break_literal'

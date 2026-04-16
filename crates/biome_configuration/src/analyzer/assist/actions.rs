@@ -70,7 +70,10 @@ pub enum ActionName {
     UseSortedAttributes,
     UseSortedInterfaceMembers,
     UseSortedKeys,
+    UseSortedPackageJson,
     UseSortedProperties,
+    UseSortedSelectionSet,
+    UseSortedTypeFields,
 }
 impl ActionName {
     pub const fn as_str(self) -> &'static str {
@@ -80,7 +83,10 @@ impl ActionName {
             Self::UseSortedAttributes => "useSortedAttributes",
             Self::UseSortedInterfaceMembers => "useSortedInterfaceMembers",
             Self::UseSortedKeys => "useSortedKeys",
+            Self::UseSortedPackageJson => "useSortedPackageJson",
             Self::UseSortedProperties => "useSortedProperties",
+            Self::UseSortedSelectionSet => "useSortedSelectionSet",
+            Self::UseSortedTypeFields => "useSortedTypeFields",
         }
     }
     pub const fn group(self) -> RuleGroup {
@@ -90,7 +96,10 @@ impl ActionName {
             Self::UseSortedAttributes => RuleGroup::Source,
             Self::UseSortedInterfaceMembers => RuleGroup::Source,
             Self::UseSortedKeys => RuleGroup::Source,
+            Self::UseSortedPackageJson => RuleGroup::Source,
             Self::UseSortedProperties => RuleGroup::Source,
+            Self::UseSortedSelectionSet => RuleGroup::Source,
+            Self::UseSortedTypeFields => RuleGroup::Source,
         }
     }
 }
@@ -103,7 +112,10 @@ impl std::str::FromStr for ActionName {
             "useSortedAttributes" => Ok(Self::UseSortedAttributes),
             "useSortedInterfaceMembers" => Ok(Self::UseSortedInterfaceMembers),
             "useSortedKeys" => Ok(Self::UseSortedKeys),
+            "useSortedPackageJson" => Ok(Self::UseSortedPackageJson),
             "useSortedProperties" => Ok(Self::UseSortedProperties),
+            "useSortedSelectionSet" => Ok(Self::UseSortedSelectionSet),
+            "useSortedTypeFields" => Ok(Self::UseSortedTypeFields),
             _ => Err("This rule name doesn't exist."),
         }
     }

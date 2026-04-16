@@ -5,11 +5,11 @@ use super::stmt::parse_statements;
 use crate::JsParser;
 use crate::prelude::*;
 use crate::state::{ChangeParserState, EnableStrictMode};
+use crate::syntax::expr::{ExpressionContext, parse_expression};
 use crate::syntax::js_parse_error;
 use crate::syntax::stmt::parse_directives;
 use biome_js_syntax::JsSyntaxKind::*;
 use biome_js_syntax::ModuleKind;
-
 // test_err js unterminated_unicode_codepoint
 // let s = "\u{200";
 
@@ -56,8 +56,6 @@ pub(crate) fn parse(p: &mut JsParser) -> CompletedMarker {
 /// This fixes issues where `{ duration }` was incorrectly parsed as a block statement
 /// instead of as an object literal expression.
 fn parse_template_expression(p: &mut JsParser, m: Marker) -> CompletedMarker {
-    use crate::syntax::expr::{ExpressionContext, parse_expression};
-
     // Parse as a single expression with default context
     // This allows { } to be parsed as object literals, not block statements
     let expr_marker = p.start();

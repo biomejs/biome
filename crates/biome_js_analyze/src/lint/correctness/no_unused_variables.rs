@@ -16,7 +16,9 @@ use biome_js_syntax::{
     TsInterfaceDeclaration, TsTypeAliasDeclaration,
 };
 use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult};
-use biome_rule_options::no_unused_variables::NoUnusedVariablesOptions;
+use biome_rule_options::no_unused_variables::{
+    NoUnusedVariablesOptions, NoUnusedVariablesOptionsIgnore,
+};
 
 declare_lint_rule! {
     /// Disallow unused variables.
@@ -95,6 +97,16 @@ declare_lint_rule! {
     /// console.log(rest);
     /// ```
     ///
+    /// TypeScript namespaces that participate in declaration merging with an exported
+    /// or referenced value of the same name are not flagged.
+    /// ```ts
+    /// const MyComponent = () => {};
+    /// namespace MyComponent {
+    ///     export type Props = { id: string };
+    /// }
+    /// export default MyComponent;
+    /// ```
+    ///
     /// In Astro files, a top-level interface or a type alias named `Props` is always ignored
     /// as it's implicitly read by the framework.
     /// ```astro,ignore
@@ -117,7 +129,7 @@ declare_lint_rule! {
     ///
     /// Default: `true`
     ///
-    /// #### Example
+    /// If this option is set to `false`, unused rest siblings either have to be renamed or removed.
     ///
     /// ```json,options
     /// {
@@ -138,6 +150,57 @@ declare_lint_rule! {
     /// const { brand: _, ...other } = car;
     /// console.log(other);
     /// ```
+    ///
+    /// ### `ignore`
+    ///
+    /// An object that allows excluding matching identifiers from this rule.
+    ///
+    /// Each key may specify an array of identifiers to ignore which are case-sensitive matches.
+    ///
+    /// The special string `"*"` can serve two purposes:
+    /// - As a **key** it refers to every kind of identifier.
+    /// - As a **value** it may be used to match all identifiers in the respective group, effectively disabling this rule for that group.
+    ///
+    /// Allowed keys:
+    ///
+    /// - `"*"`: Applies to all identifiers
+    /// - `"class"`: Applies to class names
+    /// - `"function"`: Applies to function names
+    /// - `"interface"`: Applies to interface names
+    /// - `"typeAlias"`: Applies to type aliases
+    /// - `"typeParameter"`: Applies to type parameters
+    /// - `"variable"`: Applies to variable names
+    ///
+    /// Default: `{}` (no variables are excluded)
+    ///
+    /// For example, you can exclude all unused identifiers named `ignored` regardless of their kind,
+    /// all unused classes named `IgnoredClass`, and all unused functions with the following
+    /// configuration.
+    ///
+    /// A variable named `unusedVariable` is still flagged as unused, and so is a class named
+    /// `UnusedClass` since they don't fall under the exceptions.
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "ignore": {
+    ///       "*": ["ignored"],
+    ///       "class": ["IgnoredClass"],
+    ///       "function": ["*"]
+    ///     }
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```js,expect_diagnostic,ignore,use_options
+    /// const ignored = 0;
+    /// class IgnoredClass {}
+    /// function ignoredFunction() {}
+    ///
+    /// const unusedVariable = 0;
+    /// class UnusedClass {}
+    /// ```
+    ///
     pub NoUnusedVariables {
         version: "1.0.0",
         name: "noUnusedVariables",
@@ -326,12 +389,16 @@ impl Rule for NoUnusedVariables {
                 .find_map(JsModuleItemList::cast)
         {
             // A declaration file without top-level exports and imports is a global declaration file.
-            // All top-level types and variables are available in every files of the project.
+            // All top-level types and variables are available in every file of the project.
             // Thus, it is ok if top-level types are not used locally.
             let is_top_level = items.parent::<TsDeclarationModule>().is_some();
             if is_top_level && items.into_iter().all(|x| x.as_any_js_statement().is_some()) {
                 return None;
             }
+        }
+
+        if is_ignored(binding, ctx.options()).unwrap_or_default() {
+            return None;
         }
 
         let binding_name = binding.name_token().ok()?;
@@ -420,11 +487,11 @@ impl Rule for NoUnusedVariables {
             && is_rest_spread_sibling(&decl)
         {
             diag = diag.note(
-                    markup! {
+                markup! {
                         "You can enable the "<Emphasis>"ignoreRestSiblings"</Emphasis>" option to ignore unused variables "
                         "inside destructured objects with rest properties."
                     },
-                );
+            );
         }
 
         Some(diag)
@@ -471,6 +538,144 @@ impl Rule for NoUnusedVariables {
     }
 }
 
+/// Returns `true` if `binding` is considered as ignored by the user.
+pub fn is_ignored(
+    binding: &AnyJsIdentifierBinding,
+    options: &NoUnusedVariablesOptions,
+) -> Option<bool> {
+    let binding_name = binding.name_token().ok()?;
+    let binding_name = binding_name.text_trimmed();
+
+    let ignore_options = options.ignore();
+    let is_all_ignored = ignore_options.all.unwrap_or_default().iter().any(|ignore| {
+        &**ignore == NoUnusedVariablesOptionsIgnore::IGNORE_ALL || &**ignore == binding_name
+    });
+
+    if is_all_ignored {
+        return Some(true);
+    }
+
+    let specific_ignores = match binding.syntax().parent()?.kind() {
+        JsSyntaxKind::JS_FUNCTION_DECLARATION => ignore_options.function,
+        JsSyntaxKind::JS_CLASS_DECLARATION => ignore_options.class,
+        JsSyntaxKind::TS_INTERFACE_DECLARATION => ignore_options.interface,
+        JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION => ignore_options.type_alias,
+        JsSyntaxKind::TS_TYPE_PARAMETER => ignore_options.type_parameter,
+        _ => ignore_options.variable,
+    };
+
+    let is_specific_ignored = specific_ignores.unwrap_or_default().iter().any(|ignore| {
+        &**ignore == NoUnusedVariablesOptionsIgnore::IGNORE_ALL || &**ignore == binding_name
+    });
+
+    Some(is_specific_ignored)
+}
+
+fn containing_statement_list(decl: &AnyJsBindingDeclaration) -> Option<JsSyntaxNode> {
+    decl.syntax().ancestors().find(|a| {
+        matches!(
+            a.kind(),
+            JsSyntaxKind::JS_MODULE_ITEM_LIST | JsSyntaxKind::JS_STATEMENT_LIST
+        )
+    })
+}
+
+fn is_namespace_merge_value_declaration(decl: &AnyJsBindingDeclaration) -> bool {
+    matches!(
+        decl,
+        AnyJsBindingDeclaration::JsVariableDeclarator(_)
+            | AnyJsBindingDeclaration::JsFunctionDeclaration(_)
+            | AnyJsBindingDeclaration::JsClassDeclaration(_)
+            | AnyJsBindingDeclaration::TsEnumDeclaration(_)
+    )
+}
+
+fn is_namespace_merge_value_used(
+    model: &SemanticModel,
+    namespace: &AnyJsIdentifierBinding,
+    other: &AnyJsIdentifierBinding,
+    name: &str,
+) -> Option<bool> {
+    if other.syntax().text_trimmed_range() == namespace.syntax().text_trimmed_range() {
+        return None;
+    }
+
+    if other.name_token().ok()?.text_trimmed() != name {
+        return None;
+    }
+
+    let other_decl = other.declaration()?;
+    if !is_namespace_merge_value_declaration(&other_decl) {
+        return None;
+    }
+
+    Some(model.is_exported(other) || !is_unused(model, other))
+}
+
+fn is_namespace_merged_with_used_value(
+    model: &SemanticModel,
+    binding: &AnyJsIdentifierBinding,
+) -> Option<bool> {
+    let decl = binding.declaration()?;
+    let name_token = binding.name_token().ok()?;
+    let name = name_token.text_trimmed();
+    let statement_list = containing_statement_list(&decl)?;
+    let scope = model.scope(&statement_list);
+
+    for scope_binding in scope.bindings() {
+        let other = scope_binding.tree();
+        if let Some(is_used) = is_namespace_merge_value_used(model, binding, &other, name) {
+            return Some(is_used);
+        }
+    }
+
+    Some(false)
+}
+
+fn is_value_merged_with_exported_namespace(
+    model: &SemanticModel,
+    binding: &AnyJsIdentifierBinding,
+) -> Option<bool> {
+    let decl = binding.declaration()?;
+    let name_token = binding.name_token().ok()?;
+    let name = name_token.text_trimmed();
+    let statement_list = containing_statement_list(&decl)?;
+    let scope = model.scope(&statement_list);
+
+    // Namespace declarations must follow the value they merge with, so the
+    // scope name lookup points directly at the merged namespace when it exists.
+    let namespace = scope.get_binding(name)?.tree();
+    if namespace.syntax().text_trimmed_range() == binding.syntax().text_trimmed_range() {
+        return Some(false);
+    }
+
+    let namespace_decl = namespace.declaration()?;
+    if !matches!(
+        namespace_decl,
+        AnyJsBindingDeclaration::TsModuleDeclaration(_)
+    ) {
+        return Some(false);
+    }
+
+    Some(model.is_exported(&namespace))
+}
+
+fn is_declaration_merged_with_used(
+    model: &SemanticModel,
+    binding: &AnyJsIdentifierBinding,
+) -> Option<bool> {
+    let decl = binding.declaration()?;
+    match decl {
+        AnyJsBindingDeclaration::TsModuleDeclaration(_) => {
+            is_namespace_merged_with_used_value(model, binding)
+        }
+        _ if is_namespace_merge_value_declaration(&decl) => {
+            is_value_merged_with_exported_namespace(model, binding)
+        }
+        _ => None,
+    }
+}
+
 /// Returns `true` if `binding` is considered as unused.
 pub fn is_unused(model: &SemanticModel, binding: &AnyJsIdentifierBinding) -> bool {
     if matches!(binding, AnyJsIdentifierBinding::TsLiteralEnumMemberName(_)) {
@@ -489,12 +694,11 @@ pub fn is_unused(model: &SemanticModel, binding: &AnyJsIdentifierBinding) -> boo
         return false;
     }
 
-    // We need to check if all uses of this binding are somehow recursive or unused
     let Some(declaration) = binding.declaration() else {
         return false;
     };
     let declaration = declaration.syntax();
-    binding
+    let unused_by_refs = binding
         .all_references(model)
         .filter_map(|reference| {
             let ref_parent = reference.syntax().parent()?;
@@ -558,7 +762,11 @@ pub fn is_unused(model: &SemanticModel, binding: &AnyJsIdentifierBinding) -> boo
             }
             // Always false when the ref is outside the declaration
             false
-        })
+        });
+    if !unused_by_refs {
+        return false;
+    }
+    !is_declaration_merged_with_used(model, binding).unwrap_or(false)
 }
 
 /// Returns `true` if `expr` is unused.

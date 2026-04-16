@@ -3,11 +3,13 @@ use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
 use biome_configuration::{
     FormatterConfiguration, JsConfiguration,
+    analyzer::AnalyzerSelector,
     javascript::{JsFormatterConfiguration, JsParserConfiguration},
 };
 use biome_formatter::{IndentStyle, LineWidth};
 use biome_fs::MemoryFileSystem;
 use biome_rowan::TextSize;
+use std::str::FromStr;
 
 #[test]
 fn commonjs_file_rejects_import_statement() {
@@ -485,6 +487,146 @@ fn pull_diagnostics_and_actions_for_js_file() {
     insta::assert_debug_snapshot!(result)
 }
 
+/// Regression test for https://github.com/biomejs/biome/issues/9506 and
+/// https://github.com/biomejs/biome/issues/9479.
+///
+/// `<script type="speculationrules">` and `<script type="application/ld+json">`
+/// contain JSON-like content that is NOT JavaScript. Before this fix, biome's
+/// embed registry fallback would treat these as JavaScript, causing false
+/// parse errors and incorrect lint diagnostics.
+#[test]
+fn no_diagnostics_for_unsupported_script_types() {
+    // speculationrules content is JSON-like but is NOT JavaScript.
+    // application/ld+json content is JSON-LD, also not JavaScript.
+    // Both should be silently skipped by the embed detector (no JS parse errors).
+    const FILE_CONTENT: &str = r#"<!doctype html>
+<html>
+  <head>
+    <script type="speculationrules">
+      {
+        "prerender": [
+          { "source": "list", "urls": ["/next-page"] }
+        ]
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Test"
+      }
+    </script>
+  </head>
+</html>"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/file.html"), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/file.html"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics_and_actions(PullDiagnosticsAndActionsParams {
+            path: BiomePath::new("/project/file.html"),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    assert!(
+        result.diagnostics.is_empty(),
+        "Expected no diagnostics for unsupported script types, got: {:#?}",
+        result.diagnostics
+    );
+}
+
+/// Regression test for https://github.com/biomejs/biome/issues/9140.
+///
+/// Astro allows JSX-style attribute shorthand: `<div {prop} />` is sugar for
+/// `<div prop={prop} />`. The HTML/Astro parser forwards JSX-bearing template
+/// expressions to the JS parser with `EmbeddingKind::Astro { frontmatter: false }`,
+/// and the JS parser must accept the shorthand only in that embedding context.
+/// In a regular `.jsx` file the same syntax remains a parse error (covered by
+/// `crates/biome_js_parser/tests/js_test_suite/error/jsx_shorthand_attribute_outside_astro.jsx`).
+#[test]
+fn astro_jsx_shorthand_attribute() {
+    const FILE_CONTENT: &str = r#"---
+const items = ['a', 'b'];
+---
+<ul>
+  {items.map((item) => <li {item}>row</li>)}
+</ul>
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/file.astro"), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/file.astro"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics_and_actions(PullDiagnosticsAndActionsParams {
+            path: BiomePath::new("/project/file.astro"),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    assert!(
+        result.diagnostics.is_empty(),
+        "Expected no diagnostics for Astro JSX shorthand attribute, got: {:#?}",
+        result.diagnostics
+    );
+}
+
 #[test]
 fn format_js_with_embedded_css() {
     const FILE_PATH: &str = "/project/file.js";
@@ -551,6 +693,207 @@ const Bar = styled(Component)`
     	color: red;
     `;
     ");
+}
+
+#[test]
+fn issue_9625() {
+    const FILE_PATH: &str = "/project/file.js";
+    const FILE_CONTENT: &str = r#"const Portfolio = styled.div`
+    display: flex;
+  align-items: center;
+`;
+
+const PortfolioIcon = styled.div`
+  ${({ theme }) => css``
+  };
+`;"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                formatter: Some(FormatterConfiguration {
+                    indent_style: Some(IndentStyle::Space),
+                    ..Default::default()
+                }),
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code(), @r"
+    const Portfolio = styled.div`
+      display: flex;
+      align-items: center;
+    `;
+
+    const PortfolioIcon = styled.div`
+      ${({ theme }) => css``};
+    `;
+    ");
+}
+
+#[test]
+fn issue_9113() {
+    const FILE_PATH: &str = "/project/file.ts";
+    const FILE_CONTENT: &str = r#"import styled from 'styled-components';
+
+const Wrapper = styled.div`
+  height: 20px;
+
+  @media screen and (min-width: 768px) {
+    height: 40px;
+  }
+`;
+
+const Container = styled.div`
+	     	display: grid;
+	grid-template-rows: auto;
+	grid-gap: 2px;
+	margin: 4px 4px 0;
+
+    /* top level seems fine */
+	grid-template-columns: repeat(3, 1fr);
+
+    	  @media (min-width: 480px) {
+    		    grid-template-columns: repeat(4, 1fr);
+	}
+
+	   @media (min-width: 640px) {
+		  grid-template-columns: repeat(5, 1fr);
+	}
+
+    	@media (min-width: 780px) {
+    		grid-template-columns: repeat(6, 1fr);
+    	}
+`;"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            categories: Default::default(),
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Error,
+            enforce_assist: false,
+        })
+        .unwrap();
+
+    assert!(
+        result.diagnostics.is_empty(),
+        "Expected no diagnostics for embedded CSS, got: {:#?}",
+        result.diagnostics
+    );
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code(), @r#"
+    import styled from "styled-components";
+
+    const Wrapper = styled.div`
+    	height: 20px;
+
+    	@media screen and (min-width: 768px) {
+    		height: 40px;
+    	}
+    `;
+
+    const Container = styled.div`
+    	display: grid;
+    	grid-template-rows: auto;
+    	grid-gap: 2px;
+    	margin: 4px 4px 0;
+
+    	/* top level seems fine */
+    	grid-template-columns: repeat(3, 1fr);
+
+    	@media (min-width: 480px) {
+    		grid-template-columns: repeat(4, 1fr);
+    	}
+
+    	@media (min-width: 640px) {
+    		grid-template-columns: repeat(5, 1fr);
+    	}
+
+    	@media (min-width: 780px) {
+    		grid-template-columns: repeat(6, 1fr);
+    	}
+    `;
+    "#);
 }
 
 #[test]
@@ -707,4 +1050,687 @@ const highlight = foo`some tagged template` // unknown tagged template
         .unwrap();
 
     insta::assert_snapshot!(result.as_code());
+}
+
+/// Parenthesized expressions before a graphql tagged template used to crash
+/// the formatter because the syntax rewriter removes parentheses, shifting
+/// text ranges. The embedding service stores original ranges but the formatter
+/// used transformed ranges, causing a mismatch that left orphaned
+/// StartEmbedded tags in the document.
+///
+/// See: https://github.com/biomejs/biome/issues/9484
+#[test]
+fn issue_9484_parens_before_graphql_call() {
+    const FILE_PATH: &str = "/project/file.js";
+    const FILE_CONTENT: &str = r#"import {graphql} from "@generated/gql.js";
+
+const a = {}
+console.log((a))
+
+const fetchFileUploadUrlQuery =
+graphql(`
+  query Q {
+    field
+  }
+`);
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code());
+}
+
+/// After `format_embedded()` replaces StartEmbedded tags with embedded content
+/// containing hard line breaks, `propagate_expand()` must be called again so
+/// that enclosing groups learn they need to expand. Without it, elements like
+/// `IndentIfGroupBreaks` around the call arguments would not indent because
+/// the group mode would still be flat.
+#[test]
+fn issue_9484_propagate_expand_after_embed() {
+    const FILE_PATH: &str = "/project/file.js";
+    // Short call where graphql fits on one line without embedding,
+    // but embedded formatting inserts hard lines that must expand the group.
+    const FILE_CONTENT: &str = r#"const x = foo(graphql`query { a }`, b)
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code());
+}
+
+/// Parenthesized JSX return combined with a graphql tagged template literal
+/// triggered the same range mismatch as issue_9484_parens_before_graphql_call.
+///
+/// See: https://github.com/biomejs/biome/issues/9484
+#[test]
+fn issue_9484_parens_jsx_with_graphql_tag() {
+    const FILE_PATH: &str = "/project/file.tsx";
+    const FILE_CONTENT: &str = r#"import { graphql, useLazyLoadQuery } from 'react-relay';
+
+export const Page = () => {
+  return (<div></div>);
+};
+
+const Table = () => {
+  const query = useLazyLoadQuery(graphql`
+      query Q {
+        field
+      }
+    `, {});
+  return <div></div>;
+};
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code());
+}
+
+// noUndeclaredClasses
+
+/// A class used in `class="..."` that has no matching `.foo {}` in any `<style>`
+/// block should be flagged.
+#[test]
+fn no_undeclared_classes_reports_unknown_class() {
+    const FILE_CONTENT: &str = r#"<style>.card { border: 1px solid; }</style>
+<div class="header">Content</div>"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/index.html"),
+        FILE_CONTENT.as_bytes(),
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/index.html"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            path: BiomePath::new("/project/index.html"),
+            only: vec![AnalyzerSelector::from_str("lint/nursery/noUndeclaredClasses").unwrap()],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+
+    assert_eq!(
+        result.diagnostics.len(),
+        1,
+        "Expected one diagnostic for undeclared class 'header'"
+    );
+    assert!(
+        format!("{:?}", result.diagnostics[0]).contains("header"),
+        "Diagnostic should mention 'header'"
+    );
+}
+
+/// When every class used in `class="..."` is defined in a `<style>` block,
+/// no diagnostics should be emitted.
+#[test]
+fn no_undeclared_classes_passes_when_class_is_defined() {
+    const FILE_CONTENT: &str = r#"<style>.card { border: 1px solid; }</style>
+<div class="card">Content</div>"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/index.html"),
+        FILE_CONTENT.as_bytes(),
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/index.html"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            path: BiomePath::new("/project/index.html"),
+            only: vec![AnalyzerSelector::from_str("lint/nursery/noUndeclaredClasses").unwrap()],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+
+    assert!(
+        result.diagnostics.is_empty(),
+        "Expected no diagnostics when class is declared"
+    );
+}
+
+/// An HTML file with no `<style>` blocks and no linked stylesheets should
+/// never emit diagnostics, to avoid false positives on unstyled HTML.
+#[test]
+fn no_undeclared_classes_silent_without_style_info() {
+    const FILE_CONTENT: &str = r#"<div class="anything">Content</div>"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/index.html"),
+        FILE_CONTENT.as_bytes(),
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/index.html"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            path: BiomePath::new("/project/index.html"),
+            only: vec![AnalyzerSelector::from_str("lint/nursery/noUndeclaredClasses").unwrap()],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+
+    assert!(
+        result.diagnostics.is_empty(),
+        "Expected no diagnostics when the file has no style information"
+    );
+}
+
+/// Multiple classes in one `class` attribute: only undeclared ones flagged.
+#[test]
+fn no_undeclared_classes_reports_only_undeclared_in_multi_class() {
+    const FILE_CONTENT: &str = r#"<style>.card { border: 1px solid; } .title { font-weight: bold; }</style>
+<div class="card header title footer">Content</div>"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/index.html"),
+        FILE_CONTENT.as_bytes(),
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/index.html"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            path: BiomePath::new("/project/index.html"),
+            only: vec![AnalyzerSelector::from_str("lint/nursery/noUndeclaredClasses").unwrap()],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+
+    // "card" and "title" are declared; "header" and "footer" are not.
+    assert_eq!(
+        result.diagnostics.len(),
+        2,
+        "Expected diagnostics for 'header' and 'footer' only"
+    );
+}
+
+// noUnusedClasses
+
+/// A CSS class that no JS/HTML file imports or references should be flagged.
+#[test]
+fn no_unused_classes_reports_unreferenced_class() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/styles.css"),
+        b".unused { color: red; }",
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/styles.css"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            path: BiomePath::new("/project/styles.css"),
+            only: vec![AnalyzerSelector::from_str("lint/nursery/noUnusedClasses").unwrap()],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+
+    assert_eq!(
+        result.diagnostics.len(),
+        1,
+        "Expected one diagnostic for unreferenced class 'unused'"
+    );
+    assert!(
+        format!("{:?}", result.diagnostics[0]).contains("unused"),
+        "Diagnostic should mention 'unused'"
+    );
+}
+
+/// A CSS class that is referenced via `className` in a JSX file that imports
+/// the stylesheet should not be flagged.
+#[test]
+fn no_unused_classes_passes_when_class_is_referenced_in_jsx() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/styles.css"),
+        b".button { color: blue; }",
+    );
+    fs.insert(
+        Utf8PathBuf::from("/project/App.jsx"),
+        b"import \"./styles.css\";\nexport default () => <div className=\"button\" />;",
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/styles.css"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            path: BiomePath::new("/project/styles.css"),
+            only: vec![AnalyzerSelector::from_str("lint/nursery/noUnusedClasses").unwrap()],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+
+    assert!(
+        result.diagnostics.is_empty(),
+        "Expected no diagnostics when class is referenced in importing JSX"
+    );
+}
+
+/// Only unused classes should be flagged; referenced ones should pass.
+#[test]
+fn no_unused_classes_reports_only_unreferenced_classes() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/styles.css"),
+        b".used { color: green; } .orphan { color: red; }",
+    );
+    fs.insert(
+        Utf8PathBuf::from("/project/App.jsx"),
+        b"import \"./styles.css\";\nexport default () => <div className=\"used\" />;",
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/styles.css"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            path: BiomePath::new("/project/styles.css"),
+            only: vec![AnalyzerSelector::from_str("lint/nursery/noUnusedClasses").unwrap()],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+
+    assert_eq!(
+        result.diagnostics.len(),
+        1,
+        "Expected one diagnostic for unreferenced class 'orphan'"
+    );
+    assert!(
+        format!("{:?}", result.diagnostics[0]).contains("orphan"),
+        "Diagnostic should mention 'orphan'"
+    );
+}
+
+/// A CSS class referenced via a transitive CSS @import chain should not be
+/// flagged. If app.jsx imports theme.css which @imports base.css, classes in
+/// base.css that are used in app.jsx are considered referenced.
+#[test]
+fn no_unused_classes_passes_with_transitive_css_import() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/base.css"),
+        b".base { box-sizing: border-box; }",
+    );
+    fs.insert(
+        Utf8PathBuf::from("/project/theme.css"),
+        b"@import \"./base.css\"; .theme { background: white; }",
+    );
+    fs.insert(
+        Utf8PathBuf::from("/project/App.jsx"),
+        b"import \"./theme.css\";\nexport default () => <div className=\"base theme\" />;",
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    // Open all files so that the module graph is fully populated.
+    for path in [
+        "/project/App.jsx",
+        "/project/theme.css",
+        "/project/base.css",
+    ] {
+        workspace
+            .open_file(OpenFileParams {
+                project_key,
+                path: BiomePath::new(path),
+                content: FileContent::FromServer,
+                document_file_source: None,
+                persist_node_cache: false,
+                inline_config: None,
+            })
+            .unwrap();
+    }
+
+    for path in ["/project/base.css", "/project/theme.css"] {
+        let result = workspace
+            .pull_diagnostics(PullDiagnosticsParams {
+                path: BiomePath::new(path),
+                only: vec![AnalyzerSelector::from_str("lint/nursery/noUnusedClasses").unwrap()],
+                skip: vec![],
+                enabled_rules: vec![],
+                project_key,
+                categories: Default::default(),
+                include_code_fix: false,
+                inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: Severity::Hint,
+                enforce_assist: false,
+            })
+            .unwrap();
+
+        assert!(
+            result.diagnostics.is_empty(),
+            "Expected no diagnostics for {path} — all classes are transitively referenced"
+        );
+    }
 }

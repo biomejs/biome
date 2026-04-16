@@ -1,5 +1,6 @@
 use super::*;
 use biome_js_syntax::{AnyJsFunction, AnyJsRoot, JsSyntaxNodePtr};
+use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::SendNode;
 use std::sync::Arc;
 
@@ -93,6 +94,8 @@ pub(crate) struct SemanticModelData {
     pub(crate) unresolved_references: Vec<SemanticModelUnresolvedReference>,
     /// All globals references
     pub(crate) globals: Vec<SemanticModelGlobalBindingData>,
+    /// JSDoc comments attached to export statements (keyed by the JsExport node's range).
+    pub(crate) export_jsdoc_by_range: FxHashMap<TextRange, JsdocComment>,
 }
 
 impl SemanticModelData {
@@ -512,5 +515,28 @@ impl SemanticModel {
                 .as_js_identifier_binding()?
                 .all_reads(self),
         })
+    }
+
+    /// Returns a [Binding] for the declaration at the given range if one exists.
+    pub fn as_binding_by_range(&self, range: TextRange) -> Option<Binding> {
+        let binding_id = self.data.bindings_by_start.get(&range.start())?;
+        Some(Binding {
+            data: self.data.clone(),
+            id: *binding_id,
+        })
+    }
+
+    /// Returns a [Binding] for the declaration at the given start range
+    pub fn as_binding_by_range_start(&self, range: TextSize) -> Option<Binding> {
+        let binding_id = self.data.bindings_by_start.get(&range)?;
+        Some(Binding {
+            data: self.data.clone(),
+            id: *binding_id,
+        })
+    }
+
+    /// Returns the JSDoc comment attached to the export statement at `range`, if any.
+    pub fn export_jsdoc(&self, range: TextRange) -> Option<&JsdocComment> {
+        self.data.export_jsdoc_by_range.get(&range)
     }
 }

@@ -6,6 +6,7 @@ use crate::{
 };
 
 use biome_rowan::{AstNodeList, SyntaxResult, TokenText, declare_node_union};
+use biome_string_case::StrOnlyExtension;
 
 /// https://html.spec.whatwg.org/#void-elements
 const VOID_ELEMENTS: &[&str] = &[
@@ -300,7 +301,7 @@ impl HtmlElement {
         name_text.eq_ignore_ascii_case("script")
     }
 
-    fn has_attribute(&self, name: &str, value: &str) -> bool {
+    fn has_attribute_with_value(&self, name: &str, value: &str) -> bool {
         let attribute = self.find_attribute_by_name(name);
         attribute.is_some_and(|attribute| {
             attribute
@@ -317,12 +318,12 @@ impl HtmlElement {
 
     /// Returns `true` if the element is a `<script type="module">`
     pub fn is_javascript_module(&self) -> SyntaxResult<bool> {
-        Ok(self.is_script_tag() && self.has_attribute("type", "module"))
+        Ok(self.is_script_tag() && self.has_attribute_with_value("type", "module"))
     }
 
     /// Returns `true` if the element is a `<script lang="ts">`
     pub fn is_typescript_lang(&self) -> bool {
-        self.is_script_tag() && self.has_attribute("lang", "ts")
+        self.is_script_tag() && self.has_attribute_with_value("lang", "ts")
     }
 
     /// Returns `true` if the element is a `<script setup>` tag.
@@ -332,17 +333,23 @@ impl HtmlElement {
 
     /// Returns `true` if the element is a `<script lang="jsx">`
     pub fn is_jsx_lang(&self) -> bool {
-        self.is_script_tag() && self.has_attribute("lang", "jsx")
+        self.is_script_tag() && self.has_attribute_with_value("lang", "jsx")
     }
 
     /// Returns `true` if the element is a `<script lang="tsx">`
     pub fn is_tsx_lang(&self) -> bool {
-        self.is_script_tag() && self.has_attribute("lang", "tsx")
+        self.is_script_tag() && self.has_attribute_with_value("lang", "tsx")
     }
 
     /// Returns `true` if the element is a `<style lang="sass">` or `<style lang="scss">`
     pub fn is_sass_lang(&self) -> bool {
-        self.is_style_tag() && self.has_attribute("lang", "scss")
+        self.is_style_tag()
+            && (self.has_attribute_with_value("lang", "scss")
+                || self.has_attribute_with_value("lang", "sass"))
+    }
+
+    pub fn is_style_scoped(&self, attribute_name: &str) -> bool {
+        self.is_style_tag() && self.find_attribute_by_name(attribute_name).is_some()
     }
 
     pub fn name(&self) -> SyntaxResult<AnyHtmlTagName> {
@@ -416,6 +423,43 @@ impl AnyHtmlTagElement {
                     .and_then(|value| value.string_value())
                     .is_none_or(|value| value != "false")
             })
+    }
+}
+
+impl biome_aria::Element for AnyHtmlElement {
+    fn name(&self) -> Option<impl AsRef<str>> {
+        // HTML element names are case-insensitive; lowercase for AriaRoles matching
+        Some(Self::name(self)?.text().to_lowercase_cow().into_owned())
+    }
+
+    fn attributes(&self) -> impl Iterator<Item = impl biome_aria::Attribute> {
+        Self::attributes(self)
+            .into_iter()
+            .flatten()
+            .filter_map(|attr| match attr {
+                AnyHtmlAttribute::HtmlAttribute(attr) => Some(attr),
+                _ => None,
+            })
+    }
+}
+
+impl biome_aria::Attribute for HtmlAttribute {
+    fn name(&self) -> Option<impl AsRef<str>> {
+        // HTML attribute names are case-insensitive; lowercase for matching
+        Some(
+            self.name()
+                .ok()?
+                .value_token()
+                .ok()?
+                .text_trimmed()
+                .to_lowercase_cow()
+                .into_owned(),
+        )
+    }
+
+    fn value(&self) -> Option<impl AsRef<str>> {
+        // Text implements Deref<str> but not AsRef<str>, convert to String
+        Some(Self::value(self)?.to_string())
     }
 }
 

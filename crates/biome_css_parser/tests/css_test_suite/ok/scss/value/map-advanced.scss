@@ -42,16 +42,18 @@ $deep: (
 
 // Map with interpolation in keys
 $interpolated-key: (
-  // TODO(interpolation support): #{$var}-key: value,
-  // TODO(interpolation support): prefix-#{$suffix}: value2,
-  // TODO(interpolation support): #{$a}-#{$b}: value3,
+  #{$var}-key: value,
+  prefix-#{$suffix}: value2,
+  #{$a}-#{$b}: value3,
 );
 
 // Map with interpolation in values
 $interpolated-value: (
-  // TODO(interpolation support): key1: #{$var},
-  // TODO(interpolation support): key2: prefix-#{$suffix},
-  // TODO(interpolation support): key3: #{$a + $b},
+  key1: #{$var},
+  key: #{$name},
+  key2: #{$a}-#{$b},
+  key3: prefix-#{$suffix},
+  key4: #{$a + $b},
 );
 
 // Map with calculations
@@ -155,6 +157,5 @@ $unicode: (
   日本語: 値,
   ключ: значение,
 );
-
 
 

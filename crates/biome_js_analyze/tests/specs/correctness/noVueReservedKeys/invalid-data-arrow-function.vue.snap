@@ -3,7 +3,8 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-data-arrow-function.vue
 ---
 # Input
-```ts
+```vue
+<script>
 export default {
     data: () => {
         return {
@@ -12,21 +13,22 @@ export default {
         }
     }
 };
+</script>
 
 ```
 
 # Diagnostics
 ```
-invalid-data-arrow-function.vue:4:13 lint/correctness/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-data-arrow-function.vue:5:13 lint/correctness/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Key $el is reserved in Vue.
   
-    2 │     data: () => {
-    3 │         return {
-  > 4 │             $el: '',
+    3 │     data: () => {
+    4 │         return {
+  > 5 │             $el: '',
       │             ^^^
-    5 │             _foo: String,
-    6 │         }
+    6 │             _foo: String,
+    7 │         }
   
   i Rename the key to avoid conflicts with Vue reserved keys.
   
@@ -34,16 +36,16 @@ invalid-data-arrow-function.vue:4:13 lint/correctness/noVueReservedKeys ━━�
 ```
 
 ```
-invalid-data-arrow-function.vue:5:13 lint/correctness/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-data-arrow-function.vue:6:13 lint/correctness/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Keys starting with an underscore are reserved in Vue.
   
-    3 │         return {
-    4 │             $el: '',
-  > 5 │             _foo: String,
+    4 │         return {
+    5 │             $el: '',
+  > 6 │             _foo: String,
       │             ^^^^
-    6 │         }
-    7 │     }
+    7 │         }
+    8 │     }
   
   i Rename the key to avoid conflicts with Vue reserved keys.
   

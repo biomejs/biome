@@ -490,7 +490,8 @@ impl TemporaryFs {
     /// will be stripped of the working directory path, making snapshots predictable.
     pub fn create_mem(&self) -> MemoryFileSystem {
         let fs = MemoryFileSystem::default();
-        for (path, content) in self.files.iter() {
+        for (path, _) in self.files.iter() {
+            let content = fs::read_to_string(path.as_std_path()).expect("File to exist");
             fs.insert(
                 path.clone()
                     .strip_prefix(self.project_directory.as_str())

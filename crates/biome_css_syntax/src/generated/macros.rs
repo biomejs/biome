@@ -403,6 +403,11 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssKeyframesPercentageSelector::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_KEYFRAMES_RANGE_SELECTOR => {
+                    let $pattern =
+                        unsafe { $crate::CssKeyframesRangeSelector::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_KEYFRAMES_SCOPE_FUNCTION => {
                     let $pattern =
                         unsafe { $crate::CssKeyframesScopeFunction::new_unchecked(node) };
@@ -1036,6 +1041,20 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::ScssIncludeAtRule::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::SCSS_INTERPOLATED_IDENTIFIER => {
+                    let $pattern =
+                        unsafe { $crate::ScssInterpolatedIdentifier::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_INTERPOLATED_IDENTIFIER_HYPHEN => {
+                    let $pattern =
+                        unsafe { $crate::ScssInterpolatedIdentifierHyphen::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_INTERPOLATED_STRING => {
+                    let $pattern = unsafe { $crate::ScssInterpolatedString::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::SCSS_INTERPOLATION => {
                     let $pattern = unsafe { $crate::ScssInterpolation::new_unchecked(node) };
                     $body
@@ -1122,6 +1141,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::SCSS_SHOW_CLAUSE => {
                     let $pattern = unsafe { $crate::ScssShowClause::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_STRING_TEXT => {
+                    let $pattern = unsafe { $crate::ScssStringText::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::SCSS_UNARY_EXPRESSION => {
@@ -1527,6 +1550,16 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::SCSS_IMPORT_ITEM_LIST => {
                     let $pattern = unsafe { $crate::ScssImportItemList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_INTERPOLATED_IDENTIFIER_PART_LIST => {
+                    let $pattern =
+                        unsafe { $crate::ScssInterpolatedIdentifierPartList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_INTERPOLATED_STRING_PART_LIST => {
+                    let $pattern =
+                        unsafe { $crate::ScssInterpolatedStringPartList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::SCSS_LIST_EXPRESSION_ELEMENT_LIST => {

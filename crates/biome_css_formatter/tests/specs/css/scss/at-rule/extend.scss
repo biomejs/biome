@@ -13,4 +13,6 @@ border:1px solid black;
 .message,.info;
   @extend
 a:hover;
+  @extend
+.icon-#{$name};
 }

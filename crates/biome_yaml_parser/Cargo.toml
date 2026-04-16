@@ -22,7 +22,7 @@ biome_yaml_syntax   = { workspace = true }
 tracing             = { workspace = true }
 
 [dev-dependencies]
-biome_test_utils  = { workspace = true }
+biome_test_utils  = { path = "../biome_test_utils" }
 insta             = { workspace = true }
 quickcheck        = { workspace = true }
 quickcheck_macros = { workspace = true }

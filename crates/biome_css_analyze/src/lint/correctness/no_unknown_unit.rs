@@ -115,11 +115,11 @@ impl Rule for NoUnknownUnit {
                                 match ancestor.kind() {
                                     CssSyntaxKind::CSS_FUNCTION => {
                                         let function_name_token = ancestor
-                                            .cast::<CssFunction>()?
-                                            .name()
-                                            .ok()?
-                                            .as_css_identifier()
-                                            .and_then(|name| name.value_token().ok())?;
+                                    .cast::<CssFunction>()?
+                                    .name()
+                                    .ok()?
+                                    .as_css_identifier()
+                                    .and_then(|name| name.value_token().ok())?;
                                         let function_name = function_name_token
                                             .text_trimmed()
                                             .to_ascii_lowercase_cow();
@@ -147,21 +147,23 @@ impl Rule for NoUnknownUnit {
                                         }
                                     }
                                     CssSyntaxKind::CSS_QUERY_FEATURE_PLAIN => {
-                                        let feature_name_token = ancestor
+                                        if let Some(feature_name_token) = ancestor
                                             .cast::<CssQueryFeaturePlain>()?
                                             .name()
                                             .ok()?
-                                            .value_token()
-                                            .ok()?;
-                                        let feature_name = feature_name_token
-                                            .text_trimmed()
-                                            .to_ascii_lowercase_cow();
-
-                                        if RESOLUTION_MEDIA_FEATURE_NAMES
-                                            .contains(&feature_name.as_ref())
+                                            .as_css_identifier()
+                                            .and_then(|name| name.value_token().ok())
                                         {
-                                            allow_x = true;
-                                            break;
+                                            let feature_name = feature_name_token
+                                                .text_trimmed()
+                                                .to_ascii_lowercase_cow();
+
+                                            if RESOLUTION_MEDIA_FEATURE_NAMES
+                                                .contains(&feature_name.as_ref())
+                                            {
+                                                allow_x = true;
+                                                break;
+                                            }
                                         }
                                     }
                                     _ => {}

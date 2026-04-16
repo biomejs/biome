@@ -124,7 +124,9 @@ $complex: (
 );
 
 // Expressions in selectors
-// TODO(interpolation support): .class-#{1 + 1} {
+.class-#{1 + 1} {
+  color: red;
+}
 
 // Expressions in property values
 .test {
@@ -159,5 +161,4 @@ $precedence4: 2 * 3 + 4 * 5; // Should be (2*3) + (4*5) = 26
 $no-space: 1+2;
 $with-space: 1 + 2;
 $mixed-space: 1+ 2;
-
 

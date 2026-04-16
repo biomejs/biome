@@ -12,33 +12,15 @@ let a = 		1	;
 
 function name() { return "    "     };
 
+// biome-ignore-all format: intentional
+console.log("code")
+
+// Biome format should keep this comment
+
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
-Trailing newline: true
------
+# Formatted
 
 ```js
 // biome-ignore-all format: test
@@ -46,4 +28,10 @@ Trailing newline: true
 let a = 		1	;
 
 function name() { return "    "     };
+
+// biome-ignore-all format: intentional
+console.log("code")
+
+// Biome format should keep this comment
+
 ```

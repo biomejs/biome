@@ -13,6 +13,22 @@ This directory contains specialized skills for AI coding assistants working on B
 
 Skills complement the specialized **agents** in `.claude/agents/` - agents are personas that do the work, skills are the procedural knowledge they reference.
 
+## Universal Coding Standards
+
+**CRITICAL: No Emojis Policy**
+
+Emojis are BANNED in all code contributions and documentation:
+- NO emojis in source code
+- NO emojis in comments (code comments, rustdoc, etc.)
+- NO emojis in diagnostic messages
+- NO emojis in test files
+- NO emojis in commit messages
+- NO emojis in PR descriptions
+- NO emojis in skill documents or agent instructions
+- NO emojis in any generated code or text
+
+This applies to all agents, all skills, and all contributions. Keep code and documentation professional and emoji-free.
+
 ## Available Skills
 
 ### Core Development Skills
@@ -28,10 +44,13 @@ Skills complement the specialized **agents** in `.claude/agents/` - agents are p
 | Skill | Purpose | Best Used With |
 | ------- | --------- | ---------------- |
 | **[biome-developer](./biome-developer/SKILL.md)** | General development best practices, common gotchas, Biome-specific patterns | Any agent |
-| **[testing-codegen](./testing-codegen/SKILL.md)** | Run tests, manage snapshots, create changesets, generate code | Any agent |
+| **[testing-codegen](./testing-codegen/SKILL.md)** | Run tests, manage snapshots, generate code | Any agent |
+| **[changeset](./changeset/SKILL.md)** | Create and write proper changesets for the CHANGELOG | Any agent |
+| **[pull-request](./pull-request/SKILL.md)** | Create PRs with proper titles, descriptions, and branch targeting | Any agent |
 | **[type-inference](./type-inference/SKILL.md)** | Work with module graph and type inference system | `biome-lint-engineer` |
 | **[diagnostics-development](./diagnostics-development/SKILL.md)** | Create user-friendly error messages and diagnostics | Any agent |
 | **[prettier-compare](./prettier-compare/SKILL.md)** | Compare Biome and Prettier formatting output and IR | `ir-formatter-engineer` |
+| **[eslint-migrate-options](./eslint-migrate-options/SKILL.md)** | Write custom ESLint-to-Biome option migrators | Any agent |
 
 ## Quick Workflow Guide
 
@@ -170,6 +189,8 @@ Skills are designed to be **quick reference cards** - scan in 30 seconds and kno
 ├── README.md (this file)
 ├── biome-developer/
 │   └── SKILL.md
+├── changeset/
+│   └── SKILL.md
 ├── lint-rule-development/
 │   ├── SKILL.md
 │   └── references/
@@ -178,13 +199,17 @@ Skills are designed to be **quick reference cards** - scan in 30 seconds and kno
 │   └── SKILL.md
 ├── parser-development/
 │   └── SKILL.md
+├── pull-request/
+│   └── SKILL.md
 ├── testing-codegen/
 │   └── SKILL.md
 ├── type-inference/
 │   └── SKILL.md
 ├── diagnostics-development/
 │   └── SKILL.md
-└── prettier-compare/
+├── prettier-compare/
+│   └── SKILL.md
+└── eslint-migrate-options/
     └── SKILL.md
 ```
 

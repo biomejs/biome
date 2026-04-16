@@ -142,11 +142,19 @@ pub struct AnalyzerOptions {
 
     /// Suppression reason used when applying a suppression code action
     pub(crate) suppression_reason: Option<String>,
+
+    /// The working directory for the caller.
+    pub working_directory: Arc<Option<Utf8PathBuf>>,
 }
 
 impl AnalyzerOptions {
     pub fn with_file_path(mut self, file_path: impl Into<Utf8PathBuf>) -> Self {
         self.file_path = Arc::new(file_path.into());
+        self
+    }
+
+    pub fn with_working_directory(mut self, working_directory: impl Into<Utf8PathBuf>) -> Self {
+        self.working_directory = Arc::new(Some(working_directory.into()));
         self
     }
 

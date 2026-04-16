@@ -9,7 +9,7 @@ use crate::syntax::scss::{
 use biome_css_syntax::CssSyntaxKind::{
     CSS_BOGUS_PROPERTY_VALUE, EOF, SCSS_ARBITRARY_ARGUMENT, SCSS_EXPRESSION,
     SCSS_EXPRESSION_ITEM_LIST, SCSS_KEYWORD_ARGUMENT, SCSS_LIST_EXPRESSION,
-    SCSS_LIST_EXPRESSION_ELEMENT, SCSS_LIST_EXPRESSION_ELEMENT_LIST,
+    SCSS_LIST_EXPRESSION_ELEMENT, SCSS_LIST_EXPRESSION_ELEMENT_LIST, SCSS_STRING_QUOTE,
 };
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
@@ -36,23 +36,42 @@ pub(crate) fn parse_scss_expression(p: &mut CssParser) -> ParsedSyntax {
     parse_scss_expression_until(p, END_OF_SCSS_EXPRESSION_TOKEN_SET)
 }
 
-/// Parses a SCSS expression list that may be empty in contexts like nested
-/// properties.
-///
-/// Example:
-/// ```scss
-/// font: {
-///   size: 12px;
-/// }
-/// ```
-///
-/// Specification: https://sass-lang.com/documentation/style-rules/declarations#nested-properties
+/// Parses a SCSS value that may be empty, returning `Absent` when no expression
+/// content was produced.
 #[inline]
-pub(crate) fn parse_scss_expression_allow_empty_value_until(
+pub(crate) fn parse_scss_optional_value_until(
     p: &mut CssParser,
     end_ts: TokenSet<CssSyntaxKind>,
 ) -> ParsedSyntax {
-    parse_scss_expression_with_options(p, ScssExpressionOptions::optional_value(end_ts))
+    let options = ScssExpressionOptions::optional_value(end_ts);
+
+    if is_at_scss_expression_sequence_end(p, options) {
+        return Absent;
+    }
+
+    parse_scss_expression_with_options(p, options)
+}
+
+/// Parses a required SCSS value and recovers missing content as an empty
+/// `ScssExpression` node plus a diagnostic.
+///
+/// Example:
+/// ```scss
+/// color: ;
+/// ```
+#[inline]
+pub(crate) fn parse_required_scss_value_until(
+    p: &mut CssParser,
+    end_ts: TokenSet<CssSyntaxKind>,
+) -> CompletedMarker {
+    match parse_scss_optional_value_until(p, end_ts) {
+        Present(value) => value,
+        Absent => {
+            let empty_expression = complete_empty_scss_expression(p);
+            p.error(expected_component_value(p, p.cur_range()));
+            empty_expression
+        }
+    }
 }
 
 /// Parses a SCSS expression until a caller-provided terminator, used by map
@@ -63,7 +82,7 @@ pub(crate) fn parse_scss_expression_allow_empty_value_until(
 /// $map: (a: 1);
 /// ```
 ///
-/// Docs: https://sass-lang.com/documentation/values/maps
+/// Docs: https://sass-lang.com/documentation/syntax/structure
 #[inline]
 pub(crate) fn parse_scss_expression_until(
     p: &mut CssParser,
@@ -80,7 +99,9 @@ pub(crate) fn parse_scss_expression_until(
 /// @include foo($args..., $kw: 1);
 /// ```
 ///
-/// Docs: https://sass-lang.com/documentation/at-rules/mixin
+/// Docs:
+/// - https://sass-lang.com/documentation/at-rules/mixin/
+/// - https://sass-lang.com/documentation/at-rules/function/
 #[inline]
 pub(crate) fn parse_scss_expression_in_args_until(
     p: &mut CssParser,
@@ -108,7 +129,15 @@ pub(super) fn parse_scss_inner_expression_until(
 }
 
 #[inline]
-pub(super) fn complete_empty_scss_expression(p: &mut CssParser) -> CompletedMarker {
+pub(crate) fn parse_scss_inner_expression_in_string_until(
+    p: &mut CssParser,
+    end_ts: TokenSet<CssSyntaxKind>,
+) -> ParsedSyntax {
+    parse_scss_expression_with_options(p, ScssExpressionOptions::value_in_string(end_ts))
+}
+
+#[inline]
+pub(crate) fn complete_empty_scss_expression(p: &mut CssParser) -> CompletedMarker {
     let expression = p.start();
     let expression_items = p.start();
     expression_items.complete(p, SCSS_EXPRESSION_ITEM_LIST);
@@ -123,7 +152,7 @@ pub(super) fn complete_empty_scss_expression(p: &mut CssParser) -> CompletedMark
 /// $map: (a: 1, b: 2);
 /// ```
 ///
-/// Docs: https://sass-lang.com/documentation/values/maps
+/// Docs: https://sass-lang.com/documentation/syntax/structure
 #[inline]
 fn parse_scss_expression_with_options(
     p: &mut CssParser,
@@ -189,6 +218,9 @@ fn is_at_scss_expression_sequence_end(p: &mut CssParser, options: ScssExpression
     p.at(EOF)
         || is_at_scss_expression_end(p, options)
         || (options.comma_separates_list() && p.at(T![,]))
+        || (options.stops_at_string_quote
+            && p.at(SCSS_STRING_QUOTE)
+            && !p.is_at_scss_interpolated_string())
 }
 
 #[inline]
@@ -260,6 +292,7 @@ fn parse_scss_keyword_argument(p: &mut CssParser, options: ScssExpressionOptions
             allows_keyword_arguments: false,
             allows_ellipsis: false,
             stops_before_variable_modifiers: false,
+            stops_at_string_quote: false,
         },
     )
     .or_add_diagnostic(p, expected_component_value);

@@ -13,14 +13,14 @@ set windows-powershell := true
 install-tools:
 	cargo install cargo-binstall
 	cargo binstall cargo-insta wasm-opt
-	cargo binstall wasm-bindgen-cli --version 0.2.105
+	cargo binstall wasm-bindgen-cli --version 0.2.117
 	pnpm install
 
 # Upgrades the tools needed to develop
 upgrade-tools:
 	cargo install cargo-binstall --force
 	cargo binstall cargo-insta wasm-opt --force
-	cargo binstall wasm-bindgen-cli --version 0.2.105 --force
+	cargo binstall wasm-bindgen-cli --version 0.2.117 --force
 
 # Generate all files across crates and tools. You rarely want to use it locally.
 gen-all:
@@ -237,6 +237,25 @@ test-doc:
 test-markdown-conformance:
 	cargo run -p xtask_coverage -- --suites=markdown/commonmark
 
+# Generate differential fuzz corpus for the markdown parser using commonmark.js
+# Requires `pnpm install` from the repo root (commonmark is a root devDependency).
+fuzz-markdown-generate count="1000" seed="42":
+	node crates/biome_markdown_parser/tests/fuzz_generate_corpus.cjs \
+		--count={{count}} --seed={{seed}} \
+		--output=crates/biome_markdown_parser/tests/fuzz_corpus/corpus.jsonl
+
+# Run differential fuzzer comparing Biome markdown output against commonmark.js
+# Runs the checked-in seed corpus plus any generated corpus.jsonl
+fuzz-markdown-differential:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	CORPUS="$(pwd)/crates/biome_markdown_parser/tests/fuzz_corpus/corpus.jsonl"
+	if [ -f "$CORPUS" ]; then
+		FUZZ_CORPUS="$CORPUS" cargo test -p biome_markdown_parser --test fuzz_differential -- --ignored --nocapture
+	else
+		cargo test -p biome_markdown_parser --test fuzz_differential -- --ignored --nocapture
+	fi
+
 # Update the CommonMark spec.json to a specific version
 update-commonmark-spec version:
 	./scripts/update-commonmark-spec.sh {{version}}
@@ -285,6 +304,10 @@ ready:
 # Creates a new changeset for the final changelog
 new-changeset:
   pnpm changeset
+
+# Creates a new changeset without interaction
+new-changeset-empty:
+  pnpm changeset --empty
 
 # Create new crate
 new-crate name:

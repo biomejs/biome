@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-vue-interpolation.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+let counter = 0;
+</script>
+<template>
+  <p>{{ counter += 1 }}</p>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-vue-interpolation.vue:6:9 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The assignment should not be in an expression.
+  
+    4 │ </script>
+    5 │ <template>
+  > 6 │   <p>{{ counter += 1 }}</p>
+      │         ^^^^^^^^^^^^
+    7 │ </template>
+    8 │ 
+  
+  i The use of assignments in expressions is confusing.
+    Expressions are often considered as side-effect free.
+  
+
+```

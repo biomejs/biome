@@ -1,0 +1,43 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: basic.jsonc
+---
+## ESLint Config
+
+```json
+{
+	"rules": {
+		"unicorn/filename-case": [
+			"error",
+			{ "cases": { "camelCase": true, "pascalCase": true } }
+		]
+	}
+}
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"recommended": false,
+			"style": {
+				"useFilenamingConvention": {
+					"level": "error",
+					"options": { "filenameCases": ["camelCase", "PascalCase"] }
+				}
+			}
+		}
+	}
+}
+
+```

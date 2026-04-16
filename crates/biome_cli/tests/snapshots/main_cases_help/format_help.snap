@@ -7,7 +7,7 @@ expression: redactor(content)
 ```block
 Run the formatter on a set of files.
 
-Usage: format [--write] [--staged] [--changed] [--since=REF] [PATH]...
+Usage: format [--write] [--staged] [--changed] [--since=REF] [--watch] [PATH]...
 
 Generic options applied to all files
         --format-with-errors=<true|false>  Whether formatting should be allowed to proceed if a
@@ -23,6 +23,13 @@ Generic options applied to all files
                               apply to self closing elements).
         --bracket-spacing=<true|false>  Whether to insert spaces around brackets in object literals.
                               Defaults to true.
+        --delimiter-spacing=<true|false>  Whether to insert spaces inside delimiters (after the
+                              opening delimiter and before the closing delimiter), such as
+                              parentheses, brackets, angle brackets, and template literal
+                              interpolations. Spaces are not added before the opening delimiter, and
+                              empty delimiters are not affected. Only applies when the content fits
+                              on a single line. The specific delimiters affected depend on the
+                              language. Defaults to false.
         --expand=<auto|always|never>  Whether to expand arrays and objects on multiple lines. When
                               set to `auto`, object literals are formatted on multiple lines if the
                               first property has a newline, and array literals are formatted on a
@@ -234,9 +241,10 @@ Global options applied to all commands
                               processed during the execution of the command.
         --error-on-warnings   Tell Biome to exit with an error code if some diagnostics emit
                               warnings.
-  [--reporter=<default|json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson|sarif>] [
-  --reporter-file=PATH]
-        --reporter=<default|json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson|sarif>
+  [--reporter=<default|json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson|sarif|concise>
+  ] [--reporter-file=PATH]
+        --reporter=
+    <default|json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson|sarif|concise>
         --reporter-file=PATH
 
         --diagnostic-level=<info|warn|error>  The level of diagnostics to show. In order, from the
@@ -323,6 +331,8 @@ Available options:
         --since=REF           Use this to specify the base branch to compare against when you're
                               using the --changed flag, and the `defaultBranch` is not set in your
                               biome.json
+        --watch               Enables the watch mode to re-run the check automatically when any
+                              non-excluded file in the workspace has changed.
     -h, --help                Prints help information
 
 ```

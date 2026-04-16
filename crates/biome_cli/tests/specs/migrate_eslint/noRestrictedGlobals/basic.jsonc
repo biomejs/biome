@@ -1,0 +1,11 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": {
+      "no-restricted-globals": ["error", "event", {
+        "name": "fdescribe",
+        "message": "Do not commit fdescribe. Use describe instead."
+      }]
+    }
+  }
+}

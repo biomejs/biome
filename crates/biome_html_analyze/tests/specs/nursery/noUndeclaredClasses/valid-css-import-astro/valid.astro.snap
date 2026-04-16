@@ -1,0 +1,21 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+---
+import "./styles.css";
+---
+
+<!-- class:list: all defined -->
+<div class:list={["card", "hero"]}>class:list</div>
+
+<!-- class={expr}: all defined -->
+<div class={"container"}>class expression</div>
+
+<!-- plain class: all defined -->
+<div class="card">plain class</div>
+
+```
