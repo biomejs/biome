@@ -146,6 +146,8 @@ pub enum RuleSource<'a> {
     EslintReact(&'a str),
     /// Rules from [Eslint Plugin React Hooks](https://github.com/facebook/react/blob/main/packages/eslint-plugin-react-hooks/README.md)
     EslintReactHooks(&'a str),
+    /// Rules from [Eslint Plugin React Native](https://github.com/Intellicode/eslint-plugin-react-native)
+    EslintReactNative(&'a str),
     /// Rules from [Eslint Plugin React Prefer Function Component](https://github.com/tatethurston/eslint-plugin-react-prefer-function-component)
     EslintReactPreferFunctionComponent(&'a str),
     /// Rules from [Eslint Plugin React Refresh](https://github.com/ArnaudBarre/eslint-plugin-react-refresh)
@@ -230,6 +232,7 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::EslintQwik(_) => write!(f, "eslint-plugin-qwik"),
             Self::EslintReact(_) => write!(f, "eslint-plugin-react"),
             Self::EslintReactHooks(_) => write!(f, "eslint-plugin-react-hooks"),
+            Self::EslintReactNative(_) => write!(f, "eslint-plugin-react-native"),
             Self::EslintReactPreferFunctionComponent(_) => {
                 write!(f, "eslint-plugin-react-prefer-function-component")
             }
@@ -315,6 +318,7 @@ impl<'a> RuleSource<'a> {
             | Self::EslintQwik(rule_name)
             | Self::EslintReact(rule_name)
             | Self::EslintReactHooks(rule_name)
+            | Self::EslintReactNative(rule_name)
             | Self::EslintReactPreferFunctionComponent(rule_name)
             | Self::EslintReactRefresh(rule_name)
             | Self::EslintReactX(rule_name)
@@ -370,6 +374,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintQwik(_) => "qwik",
             Self::EslintReact(_) => "react",
             Self::EslintReactHooks(_) => "react-hooks",
+            Self::EslintReactNative(_) => "react-native",
             Self::EslintReactPreferFunctionComponent(_) => "react-prefer-function-component",
             Self::EslintReactRefresh(_) => "react-refresh",
             Self::EslintReactX(_) => "react-x",
@@ -433,6 +438,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintQwik(rule_name) => format!("https://qwik.dev/docs/advanced/eslint/#{rule_name}"),
             Self::EslintReact(rule_name) => format!("https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintReactHooks(_) =>  "https://github.com/facebook/react/blob/main/packages/eslint-plugin-react-hooks/README.md".to_string(),
+            Self::EslintReactNative(rule_name) => format!("https://github.com/Intellicode/eslint-plugin-react-native/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintReactPreferFunctionComponent(_) => "https://github.com/tatethurston/eslint-plugin-react-prefer-function-component".to_string(),
             Self::EslintReactRefresh(_) => "https://github.com/ArnaudBarre/eslint-plugin-react-refresh".to_string(),
             Self::EslintReactX(rule_name) => format!("https://eslint-react.xyz/docs/rules/{rule_name}"),
@@ -551,6 +557,8 @@ pub enum RuleDomain {
     Drizzle,
     /// React library rules
     React,
+    /// React Native framework rules
+    ReactNative,
     /// Testing rules
     Test,
     /// Solid.js framework rules
@@ -579,6 +587,7 @@ impl Display for RuleDomain {
         match self {
             Self::Drizzle => fmt.write_str("drizzle"),
             Self::React => fmt.write_str("react"),
+            Self::ReactNative => fmt.write_str("reactNative"),
             Self::Test => fmt.write_str("test"),
             Self::Solid => fmt.write_str("solid"),
             Self::Next => fmt.write_str("next"),
@@ -613,6 +622,7 @@ impl RuleDomain {
     pub const fn manifest_dependencies(self) -> &'static [&'static (&'static str, &'static str)] {
         match self {
             Self::React => &[&("react", ">=16.0.0")],
+            Self::ReactNative => &[&("react-native", ">=0.60.0")],
             Self::Test => &[
                 &("jest", ">=26.0.0"),
                 &("mocha", ">=8.0.0"),
@@ -639,6 +649,7 @@ impl RuleDomain {
     pub const fn globals(self) -> &'static [&'static str] {
         match self {
             Self::React => &[],
+            Self::ReactNative => &[],
             Self::Test => &[
                 "after",
                 "afterAll",
@@ -679,6 +690,7 @@ impl RuleDomain {
     pub const fn as_str(&self) -> &'static str {
         match self {
             Self::React => "react",
+            Self::ReactNative => "reactNative",
             Self::Test => "test",
             Self::Solid => "solid",
             Self::Next => "next",
@@ -692,6 +704,46 @@ impl RuleDomain {
             Self::Drizzle => "drizzle",
         }
     }
+
+    pub const fn as_description(&self) -> &'static str {
+        match self {
+            Self::React => {
+                "Use this domain inside React projects. It enables a set of rules that can help catching bugs and enforce correct practices. This domain enable rules that might conflict with the Solid domain."
+            }
+            Self::ReactNative => {
+                "Use this domain inside React Native projects. It enables a set of rules that help catch runtime issues specific to React Native, such as rendering raw text outside of `<Text>` components."
+            }
+            Self::Test => {
+                "Use this domain when linting test files. It enables a set of rules that are library agnostic, and can help to catch possible misuse of the test APIs."
+            }
+            Self::Solid => {
+                "Use this domain inside Solid projects. This domain enables rules that might conflict with the React domain."
+            }
+            Self::Next => "Use this domain inside Next.js projects.",
+            Self::Playwright => {
+                "Use this domain inside Playwright test projects. This domain enables rules that help enforce best practices and catch common mistakes when writing Playwright tests."
+            }
+            Self::Project => {
+                "This domain contains rules that perform project-level analysis. This includes our module graph for dependency resolution. When enabling rules that belong to this domain, Biome will scan the entire project. The scanning phase will have a performance impact on the linting process. See the documentation on our [scanner](/internals/architecture/#scanner) to learn more about the scanner."
+            }
+            Self::Vue => {
+                "Use this domain inside Vue projects. This domain enables rules that are specific to Vue projects."
+            }
+            Self::Qwik => {
+                "Use this domain inside Qwik projects. This domain enables rules that are specific to Qwik projects."
+            }
+            Self::Tailwind => {
+                "Use this domain inside Tailwind CSS projects. This domain enables rules that are specific to Tailwind CSS."
+            }
+            Self::Turborepo => {
+                "Use this domain inside Turborepo projects. This domain enables rules that are specific to Turborepo projects."
+            }
+            Self::Types => {
+                "This domain contains rules that perform project-level analysis. This includes our module graph for dependency resolution. When enabling rules that belong to this domain, Biome will scan the entire project, *and it will enable the inference engine to resolve and flat types*. The scanning phase will have a performance impact on the linting process. See the documentation on our [scanner](/internals/architecture/#scanner) to learn more about the scanner."
+            }
+            Self::Drizzle => "Use this domain with projects using Drizzle.",
+        }
+    }
 }
 
 impl FromStr for RuleDomain {
@@ -700,6 +752,7 @@ impl FromStr for RuleDomain {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "react" => Ok(Self::React),
+            "reactNative" => Ok(Self::ReactNative),
             "test" => Ok(Self::Test),
             "solid" => Ok(Self::Solid),
             "next" => Ok(Self::Next),

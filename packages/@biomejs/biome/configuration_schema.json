@@ -4740,6 +4740,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoReactNativeRawTextConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoReactNativeRawTextOptions" }
+			]
+		},
+		"NoReactNativeRawTextOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoReactPropAssignmentsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6334,6 +6344,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noReactNativeRawText": {
+					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-react-native-raw-text",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReactNativeRawTextConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noRedundantDefaultExport": {
 					"description": "Checks if a default export exports the same symbol as a named export.\nSee https://biomejs.dev/linter/rules/no-redundant-default-export",
 					"anyOf": [
@@ -7327,6 +7344,11 @@
 					"description": "React library rules",
 					"type": "string",
 					"const": "react"
+				},
+				{
+					"description": "React Native framework rules",
+					"type": "string",
+					"const": "reactNative"
 				},
 				{ "description": "Testing rules", "type": "string", "const": "test" },
 				{
@@ -9275,6 +9297,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoReactForwardRefOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoReactNativeRawTextOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoReactNativeRawTextOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

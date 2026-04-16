@@ -1074,6 +1074,7 @@ export type JsonTrailingCommas = "none" | "all";
 export type RuleDomain =
 	| "drizzle"
 	| "react"
+	| "reactNative"
 	| "test"
 	| "solid"
 	| "next"
@@ -2296,6 +2297,11 @@ See https://biomejs.dev/linter/rules/no-playwright-wait-for-timeout
 See https://biomejs.dev/linter/rules/no-proto 
 	 */
 	noProto?: NoProtoConfiguration;
+	/**
+	* Succinct description of the rule.
+See https://biomejs.dev/linter/rules/no-react-native-raw-text 
+	 */
+	noReactNativeRawText?: NoReactNativeRawTextConfiguration;
 	/**
 	* Checks if a default export exports the same symbol as a named export.
 See https://biomejs.dev/linter/rules/no-redundant-default-export 
@@ -4349,6 +4355,9 @@ export type NoPlaywrightWaitForTimeoutConfiguration =
 export type NoProtoConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoProtoOptions;
+export type NoReactNativeRawTextConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoReactNativeRawTextOptions;
 export type NoRedundantDefaultExportConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoRedundantDefaultExportOptions;
@@ -6117,6 +6126,10 @@ export interface RuleWithNoProtoOptions {
 	level: RulePlainConfiguration;
 	options?: NoProtoOptions;
 }
+export interface RuleWithNoReactNativeRawTextOptions {
+	level: RulePlainConfiguration;
+	options?: NoReactNativeRawTextOptions;
+}
 export interface RuleWithNoRedundantDefaultExportOptions {
 	level: RulePlainConfiguration;
 	options?: NoRedundantDefaultExportOptions;
@@ -7730,6 +7743,12 @@ export type NoPlaywrightWaitForNavigationOptions = {};
 export type NoPlaywrightWaitForSelectorOptions = {};
 export type NoPlaywrightWaitForTimeoutOptions = {};
 export type NoProtoOptions = {};
+export interface NoReactNativeRawTextOptions {
+	/**
+	 * Names of additional components that are allowed to contain raw text.
+	 */
+	skip?: string[];
+}
 export type NoRedundantDefaultExportOptions = {};
 export type NoReturnAssignOptions = {};
 export interface NoRootTypeOptions {
@@ -8900,6 +8919,7 @@ export type Category =
 	| "lint/nursery/noPlaywrightWaitForSelector"
 	| "lint/nursery/noPlaywrightWaitForTimeout"
 	| "lint/nursery/noProto"
+	| "lint/nursery/noReactNativeRawText"
 	| "lint/nursery/noRedundantDefaultExport"
 	| "lint/nursery/noReturnAssign"
 	| "lint/nursery/noRootType"

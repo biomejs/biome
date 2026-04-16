@@ -228,6 +228,7 @@ define_categories! {
     "lint/nursery/noPlaywrightWaitForSelector": "https://biomejs.dev/linter/rules/no-playwright-wait-for-selector",
     "lint/nursery/noPlaywrightWaitForTimeout": "https://biomejs.dev/linter/rules/no-playwright-wait-for-timeout",
     "lint/nursery/noProto": "https://biomejs.dev/linter/rules/no-proto",
+    "lint/nursery/noReactNativeRawText": "https://biomejs.dev/linter/rules/no-react-native-raw-text",
     "lint/nursery/noRedundantDefaultExport": "https://biomejs.dev/linter/rules/no-redundant-default-export",
     "lint/nursery/noReturnAssign": "https://biomejs.dev/linter/rules/no-return-assign",
     "lint/nursery/noRootType": "https://biomejs.dev/linter/rules/no-root-type",
