@@ -708,7 +708,7 @@ impl RuleDomain {
     pub const fn as_description(&self) -> &'static str {
         match self {
             Self::React => {
-                "Use this domain inside React projects. It enables a set of rules that can help catching bugs and enforce correct practices. This domain enable rules that might conflict with the Solid domain."
+                "Use this domain inside React projects. It enables a set of rules that can help catching bugs and enforce correct practices. This domain enables rules that might conflict with the Solid domain."
             }
             Self::ReactNative => {
                 "Use this domain inside React Native projects. It enables a set of rules that help catch runtime issues specific to React Native, such as rendering raw text outside of `<Text>` components."
