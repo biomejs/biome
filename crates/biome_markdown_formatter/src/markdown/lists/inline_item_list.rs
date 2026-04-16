@@ -123,15 +123,21 @@ impl FormatMdInlineItemList {
     /// align with the first character of the item's content. For example, with
     /// `1. item`, the content starts at column 3, so continuation lines need
     /// exactly 3 spaces. The parser represents those required spaces as
-    /// `MdIndentToken` nodes in the CST. When the source has one extra space on
-    /// top of those (e.g. 4 spaces for a `1. ` item that only needs 3), this
-    /// function removes that single excess space.
+    /// `MdIndentToken` nodes in the CST (or, for blank-line-separated "loose"
+    /// paragraphs, as a preceding `MdContinuationIndent` block). Any extra
+    /// leading spaces beyond the required indent end up as `MdTextual " "`
+    /// tokens at the start of the paragraph's `MdInlineItemList`.
     ///
-    /// The excess space is only removed when it is the sole extra space before
-    /// the content. If there are multiple extra spaces, they are treated as
-    /// intentional alignment — for example, to position a nested sub-item — and
-    /// are left alone. Spaces after a hard-line-break (`  \n`) are also
-    /// preserved because those reflect an explicit choice by the author.
+    /// This function normalizes those extras:
+    ///
+    /// - At the very start of the paragraph (loose, blank-line-separated
+    ///   context), ALL leading `" "` textuals are removed — they carry no
+    ///   meaning past the continuation indent.
+    /// - On a soft-wrap continuation within the same paragraph (after a `\n`
+    ///   textual), a single excess space is stripped (typo) but two or more
+    ///   are preserved (intentional alignment).
+    /// - Spaces following a hard-line-break (`  \n`) are always preserved
+    ///   because those reflect an explicit choice by the author.
     fn fmt_inside_list(
         &self,
         node: &MdInlineItemList,
@@ -139,9 +145,11 @@ impl FormatMdInlineItemList {
     ) -> FormatResult<()> {
         let items: Vec<AnyMdInline> = node.iter().collect();
         let mut joiner = f.join();
-        // Start as true: the paragraph itself may begin with an excess space
-        // (blank-line-separated paragraph inside a block list).
-        let mut seen_new_line = true;
+        // True until we have emitted the first non-space content of the
+        // paragraph. While true, every leading `" "` textual is excess and is
+        // removed unconditionally.
+        let mut at_paragraph_start = true;
+        let mut seen_new_line = false;
         let mut after_hard_line = false;
 
         for (i, item) in items.iter().enumerate() {
@@ -150,6 +158,9 @@ impl FormatMdInlineItemList {
                     if text.is_newline()? {
                         seen_new_line = true;
                         after_hard_line = false;
+                        // Paragraph content has started — any spaces that come
+                        // after this newline are soft-wrap, not paragraph-start.
+                        at_paragraph_start = false;
                         joiner.entry(&format_with(|f| {
                             write!(
                                 f,
@@ -162,11 +173,19 @@ impl FormatMdInlineItemList {
                                 ]
                             )
                         }));
+                    } else if at_paragraph_start && text.value_token()?.text() == " " {
+                        // Leading space at the start of a loose paragraph —
+                        // strip unconditionally (these are pure excess past the
+                        // continuation indent).
+                        joiner.entry(&text.format().with_options(FormatMdTextualOptions {
+                            should_remove: true,
+                            ..Default::default()
+                        }));
                     } else if seen_new_line && !after_hard_line && text.value_token()?.text() == " "
                     {
-                        // Only remove this space if the next token is not also a single
-                        // space. Multiple adjacent spaces mean intentional indentation
-                        // (e.g. a sub-bullet or deeper indent) and must be kept.
+                        // Soft-wrap continuation excess. Single extra space is
+                        // a typo (strip); two or more mean intentional
+                        // alignment (keep).
                         let next_is_space = matches!(
                             items.get(i + 1),
                             Some(AnyMdInline::MdTextual(next))
@@ -196,6 +215,7 @@ impl FormatMdInlineItemList {
                         }
                     } else {
                         let was_after_newline = seen_new_line;
+                        at_paragraph_start = false;
                         seen_new_line = false;
                         after_hard_line = false;
                         joiner.entry(&text.format().with_options(FormatMdTextualOptions {
@@ -213,6 +233,7 @@ impl FormatMdInlineItemList {
                 AnyMdInline::MdHardLine(hard_line) => {
                     seen_new_line = true;
                     after_hard_line = true;
+                    at_paragraph_start = false;
                     joiner.entry(&format_with(|f| {
                         write!(
                             f,
@@ -227,6 +248,7 @@ impl FormatMdInlineItemList {
                 AnyMdInline::MdInlineItalic(italic) => {
                     seen_new_line = false;
                     after_hard_line = false;
+                    at_paragraph_start = false;
                     joiner.entry(&italic.format().with_options(FormatMdInlineItalicOptions {
                         should_keep_fences: self.keep_fences_in_italics,
                     }));
@@ -238,6 +260,7 @@ impl FormatMdInlineItemList {
                 }
                 _ => {
                     seen_new_line = false;
+                    at_paragraph_start = false;
                     joiner.entry(&item.format());
                 }
             }
