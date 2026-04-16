@@ -2298,7 +2298,7 @@ See https://biomejs.dev/linter/rules/no-proto
 	 */
 	noProto?: NoProtoConfiguration;
 	/**
-	* Succinct description of the rule.
+	* Disallow raw text outside \<Text> components in React Native.
 See https://biomejs.dev/linter/rules/no-react-native-raw-text 
 	 */
 	noReactNativeRawText?: NoReactNativeRawTextConfiguration;

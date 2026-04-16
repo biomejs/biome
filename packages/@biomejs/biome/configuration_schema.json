@@ -4748,6 +4748,13 @@
 		},
 		"NoReactNativeRawTextOptions": {
 			"type": "object",
+			"properties": {
+				"skip": {
+					"description": "Names of additional components that are allowed to contain raw text.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoReactPropAssignmentsConfiguration": {
@@ -6345,7 +6352,7 @@
 					]
 				},
 				"noReactNativeRawText": {
-					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-react-native-raw-text",
+					"description": "Disallow raw text outside \\<Text> components in React Native.\nSee https://biomejs.dev/linter/rules/no-react-native-raw-text",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoReactNativeRawTextConfiguration" },
 						{ "type": "null" }
