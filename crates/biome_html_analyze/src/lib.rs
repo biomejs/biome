@@ -9,6 +9,7 @@ mod services;
 mod suppression_action;
 
 pub use crate::registry::visit_registry;
+pub use crate::services::aria::{Aria, AriaServices};
 pub use crate::services::module_graph::{HtmlModuleGraph, HtmlModuleGraphService};
 use crate::suppression_action::HtmlSuppressionAction;
 
@@ -26,6 +27,7 @@ use biome_analyze::{
 use biome_deserialize::TextRange;
 use biome_diagnostics::Error;
 use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
+use biome_aria::AriaRoles;
 use biome_module_graph::ModuleGraph;
 use biome_project_layout::ProjectLayout;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
@@ -123,6 +125,7 @@ where
     }
 
     services.insert_service(source_type);
+    services.insert_service(Arc::new(AriaRoles));
     if let Some(module_graph) = html_services.module_graph {
         services.insert_service(module_graph);
     }

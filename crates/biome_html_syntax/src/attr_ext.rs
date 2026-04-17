@@ -2,7 +2,56 @@ use crate::{
     AnyHtmlAttribute, AnyHtmlAttributeInitializer, HtmlAttribute, HtmlAttributeList,
     HtmlAttributeName, inner_string_text,
 };
+use biome_aria::Attribute;
 use biome_rowan::{AstNodeList, Text, TokenText};
+
+impl Attribute for AnyHtmlAttribute {
+    fn name(&self) -> Option<impl AsRef<str>> {
+        self.name()
+    }
+
+    fn value(&self) -> Option<impl AsRef<str>> {
+        match self {
+            AnyHtmlAttribute::HtmlAttribute(attr) => {
+                attr.initializer()?.value().ok()?.as_static_value()
+            }
+            _ => None,
+        }
+    }
+}
+
+impl AnyHtmlAttribute {
+    pub fn name(&self) -> Option<TokenText> {
+        match self {
+            AnyHtmlAttribute::HtmlAttribute(attr) => attr
+                .name()
+                .ok()?
+                .value_token()
+                .ok()
+                .map(|token| token.token_text()),
+            AnyHtmlAttribute::AnySvelteDirective(_)
+            | AnyHtmlAttribute::AnyVueDirective(_)
+            | AnyHtmlAttribute::HtmlAttributeDoubleTextExpression(_)
+            | AnyHtmlAttribute::HtmlAttributeSingleTextExpression(_)
+            | AnyHtmlAttribute::HtmlBogusAttribute(_)
+            | AnyHtmlAttribute::HtmlSpreadAttribute(_)
+            | AnyHtmlAttribute::SvelteAttachAttribute(_) => None,
+        }
+    }
+
+    pub fn value(&self) -> Option<Text> {
+        match self {
+            AnyHtmlAttribute::HtmlAttribute(attr) => attr.value(),
+            AnyHtmlAttribute::AnySvelteDirective(_)
+            | AnyHtmlAttribute::AnyVueDirective(_)
+            | AnyHtmlAttribute::HtmlAttributeDoubleTextExpression(_)
+            | AnyHtmlAttribute::HtmlAttributeSingleTextExpression(_)
+            | AnyHtmlAttribute::HtmlBogusAttribute(_)
+            | AnyHtmlAttribute::HtmlSpreadAttribute(_)
+            | AnyHtmlAttribute::SvelteAttachAttribute(_) => None,
+        }
+    }
+}
 
 impl AnyHtmlAttributeInitializer {
     /// Returns the string value of the attribute, if available, without quotes.

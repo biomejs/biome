@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
+use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -7,7 +7,7 @@ use biome_html_syntax::{AnyHtmlElement, HtmlAttribute};
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TokenText};
 use biome_rule_options::no_noninteractive_tabindex::NoNoninteractiveTabindexOptions;
 
-use crate::HtmlRuleAction;
+use crate::{Aria, HtmlRuleAction};
 
 declare_lint_rule! {
     /// Enforce that `tabindex` is not assigned to non-interactive HTML elements.
@@ -64,7 +64,7 @@ pub struct RuleState {
 }
 
 impl Rule for NoNoninteractiveTabindex {
-    type Query = Ast<AnyHtmlElement>;
+    type Query = Aria<AnyHtmlElement>;
     type State = RuleState;
     type Signals = Option<Self::State>;
     type Options = NoNoninteractiveTabindexOptions;
@@ -72,7 +72,7 @@ impl Rule for NoNoninteractiveTabindex {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        if !is_not_interactive_element(node)? {
+        if !ctx.aria_roles().is_not_interactive_element(node) {
             return None;
         }
 
@@ -147,23 +147,3 @@ fn is_negative_tabindex(number_like_string: &str) -> bool {
     }
 }
 
-fn is_not_interactive_element(node: &AnyHtmlElement) -> Option<bool> {
-    let element_name_token = node.name()?;
-    let element_name = element_name_token.text();
-
-    match element_name {
-        "header" => Some(false),
-        "a" | "area" | "button" | "select" | "textarea" => Some(false),
-        "svg" => Some(true),
-        "body" | "br" | "details" | "dir" | "frame" | "iframe" | "label" | "mark" | "marquee"
-        | "menu" | "meter" | "optgroup" | "pre" | "progress" | "ruby" => Some(true),
-        "input" => Some(
-            node.find_attribute_by_name("type")
-                .and_then(|attr| attr.initializer())
-                .and_then(|init| init.value().ok())
-                .and_then(|val| val.string_value())
-                .is_some_and(|value| value == "hidden"),
-        ),
-        _ => Some(true),
-    }
-}

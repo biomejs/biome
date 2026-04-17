@@ -1,28 +1,29 @@
 [package]
-name                 = "biome_html_syntax"
-version              = "0.5.7"
-authors.workspace    = true
-edition.workspace    = true
-description          = "SyntaxKind and common rowan definitions for biome_html_parser"
-homepage.workspace   = true
+name = "biome_html_syntax"
+version = "0.5.7"
+authors.workspace = true
+edition.workspace = true
+description = "SyntaxKind and common rowan definitions for biome_html_parser"
+homepage.workspace = true
 repository.workspace = true
-license.workspace    = true
-keywords.workspace   = true
+license.workspace = true
+keywords.workspace = true
 categories.workspace = true
-publish              = true
+publish = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-biome_rowan       = { workspace = true, features = ["serde"] }
+biome_rowan = { workspace = true, features = ["serde"] }
 biome_string_case = { workspace = true }
-camino            = { workspace = true }
-schemars          = { workspace = true, optional = true }
-serde             = { workspace = true, features = ["derive"] }
+camino = { workspace = true }
+schemars = { workspace = true, optional = true }
+serde = { workspace = true, features = ["derive"] }
+biome_aria = { workspace = true }
 
 [dev-dependencies]
 biome_html_factory = { path = "../biome_html_factory" }
-biome_html_parser  = { path = "../biome_html_parser" }
+biome_html_parser = { path = "../biome_html_parser" }
 
 [features]
 schema = ["biome_rowan/serde", "schemars"]
