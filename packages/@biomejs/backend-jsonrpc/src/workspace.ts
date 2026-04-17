@@ -2298,6 +2298,11 @@ See https://biomejs.dev/linter/rules/no-proto
 	 */
 	noProto?: NoProtoConfiguration;
 	/**
+	* Disallow color literals in React Native styles.
+See https://biomejs.dev/linter/rules/no-react-native-literal-colors 
+	 */
+	noReactNativeLiteralColors?: NoReactNativeLiteralColorsConfiguration;
+	/**
 	* Disallow raw text outside \<Text> components in React Native.
 See https://biomejs.dev/linter/rules/no-react-native-raw-text 
 	 */
@@ -4355,6 +4360,9 @@ export type NoPlaywrightWaitForTimeoutConfiguration =
 export type NoProtoConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoProtoOptions;
+export type NoReactNativeLiteralColorsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoReactNativeLiteralColorsOptions;
 export type NoReactNativeRawTextConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReactNativeRawTextOptions;
@@ -6126,6 +6134,10 @@ export interface RuleWithNoProtoOptions {
 	level: RulePlainConfiguration;
 	options?: NoProtoOptions;
 }
+export interface RuleWithNoReactNativeLiteralColorsOptions {
+	level: RulePlainConfiguration;
+	options?: NoReactNativeLiteralColorsOptions;
+}
 export interface RuleWithNoReactNativeRawTextOptions {
 	level: RulePlainConfiguration;
 	options?: NoReactNativeRawTextOptions;
@@ -7743,6 +7755,7 @@ export type NoPlaywrightWaitForNavigationOptions = {};
 export type NoPlaywrightWaitForSelectorOptions = {};
 export type NoPlaywrightWaitForTimeoutOptions = {};
 export type NoProtoOptions = {};
+export type NoReactNativeLiteralColorsOptions = {};
 export interface NoReactNativeRawTextOptions {
 	/**
 	 * Names of additional components that are allowed to contain raw text.
@@ -8919,6 +8932,7 @@ export type Category =
 	| "lint/nursery/noPlaywrightWaitForSelector"
 	| "lint/nursery/noPlaywrightWaitForTimeout"
 	| "lint/nursery/noProto"
+	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
 	| "lint/nursery/noRedundantDefaultExport"
 	| "lint/nursery/noReturnAssign"

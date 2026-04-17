@@ -6362,7 +6362,7 @@
 					]
 				},
 				"noReactNativeLiteralColors": {
-					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-react-native-literal-colors",
+					"description": "Disallow color literals in React Native styles.\nSee https://biomejs.dev/linter/rules/no-react-native-literal-colors",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoReactNativeLiteralColorsConfiguration" },
 						{ "type": "null" }
