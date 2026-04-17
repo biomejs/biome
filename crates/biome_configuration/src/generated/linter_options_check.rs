@@ -940,6 +940,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noReactNativeLiteralColors",
+        TypeId::of::<
+            biome_rule_options::no_react_native_literal_colors::NoReactNativeLiteralColorsOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
         "noReactNativeRawText",
         TypeId::of::<biome_rule_options::no_react_native_raw_text::NoReactNativeRawTextOptions>(),
     ));

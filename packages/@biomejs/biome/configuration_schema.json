@@ -4740,6 +4740,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoReactNativeLiteralColorsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoReactNativeLiteralColorsOptions" }
+			]
+		},
+		"NoReactNativeLiteralColorsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoReactNativeRawTextConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6348,6 +6358,13 @@
 					"description": "Disallow the use of the deprecated __proto__ object property.\nSee https://biomejs.dev/linter/rules/no-proto",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoProtoConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noReactNativeLiteralColors": {
+					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-react-native-literal-colors",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReactNativeLiteralColorsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9304,6 +9321,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoReactForwardRefOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoReactNativeLiteralColorsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoReactNativeLiteralColorsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
