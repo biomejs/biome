@@ -10,8 +10,7 @@ $mylist: (alpha, beta, gamma, );
 $my-single-item-list: (alpha,);
 $box-shadow-first-two: 0 0.5em $background, 0 -0.5em $background;
 $list2: (1px solid,);
-// TODO(interpolation support): $no-whitespaces: $variable#{something};
-
+$no-whitespaces: $variable#{something};
 
 
 
@@ -208,17 +207,50 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@151..152 ";" [] [],
         },
+        ScssVariableDeclaration {
+            name: ScssVariable {
+                dollar_token: DOLLAR@152..154 "$" [Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@154..168 "no-whitespaces" [] [],
+                },
+            },
+            colon_token: COLON@168..170 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    ScssVariable {
+                        dollar_token: DOLLAR@170..171 "$" [] [],
+                        name: CssIdentifier {
+                            value_token: IDENT@171..179 "variable" [] [],
+                        },
+                    },
+                    ScssInterpolation {
+                        hash_token: HASH@179..180 "#" [] [],
+                        l_curly_token: L_CURLY@180..181 "{" [] [],
+                        value: ScssExpression {
+                            items: ScssExpressionItemList [
+                                CssIdentifier {
+                                    value_token: IDENT@181..190 "something" [] [],
+                                },
+                            ],
+                        },
+                        r_curly_token: R_CURLY@190..191 "}" [] [],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@191..192 ";" [] [],
+        },
     ],
-    eof_token: EOF@152..228 "" [Newline("\n"), Comments("// TODO(interpolation ..."), Newline("\n"), Newline("\n"), Newline("\n"), Newline("\n")] [],
+    eof_token: EOF@192..195 "" [Newline("\n"), Newline("\n"), Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..228
+0: CSS_ROOT@0..195
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..152
+  1: CSS_ROOT_ITEM_LIST@0..192
     0: SCSS_VARIABLE_DECLARATION@0..32
       0: SCSS_VARIABLE@0..7
         0: DOLLAR@0..1 "$" [] []
@@ -336,6 +368,28 @@ CssRoot {
             2: R_PAREN@150..151 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@151..151
       4: SEMICOLON@151..152 ";" [] []
-  2: EOF@152..228 "" [Newline("\n"), Comments("// TODO(interpolation ..."), Newline("\n"), Newline("\n"), Newline("\n"), Newline("\n")] []
+    4: SCSS_VARIABLE_DECLARATION@152..192
+      0: SCSS_VARIABLE@152..168
+        0: DOLLAR@152..154 "$" [Newline("\n")] []
+        1: CSS_IDENTIFIER@154..168
+          0: IDENT@154..168 "no-whitespaces" [] []
+      1: COLON@168..170 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@170..191
+        0: SCSS_EXPRESSION_ITEM_LIST@170..191
+          0: SCSS_VARIABLE@170..179
+            0: DOLLAR@170..171 "$" [] []
+            1: CSS_IDENTIFIER@171..179
+              0: IDENT@171..179 "variable" [] []
+          1: SCSS_INTERPOLATION@179..191
+            0: HASH@179..180 "#" [] []
+            1: L_CURLY@180..181 "{" [] []
+            2: SCSS_EXPRESSION@181..190
+              0: SCSS_EXPRESSION_ITEM_LIST@181..190
+                0: CSS_IDENTIFIER@181..190
+                  0: IDENT@181..190 "something" [] []
+            3: R_CURLY@190..191 "}" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@191..191
+      4: SEMICOLON@191..192 ";" [] []
+  2: EOF@192..195 "" [Newline("\n"), Newline("\n"), Newline("\n")] []
 
 ```
