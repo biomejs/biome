@@ -421,7 +421,7 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintReactHooks("exhaustive-deps").same(), RuleSource::EslintReactX("exhaustive-deps").same(), RuleSource::EslintReactXyz("exhaustive-deps").same()],
         recommended: true,
         severity: Severity::Error,
-        domains: &[RuleDomain::React, RuleDomain::Next],
+        domains: &[RuleDomain::Next, RuleDomain::React, RuleDomain::ReactNative],
         fix_kind: FixKind::Unsafe,
     }
 }

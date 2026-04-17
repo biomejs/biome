@@ -94,7 +94,7 @@ declare_lint_rule! {
             RuleSource::EslintReactXyz("no-nested-component-definitions").same(),
         ],
         recommended: false,
-        domains: &[RuleDomain::React],
+        domains: &[RuleDomain::React, RuleDomain::ReactNative],
         severity: Severity::Error,
     }
 }

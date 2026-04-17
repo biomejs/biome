@@ -70,7 +70,7 @@ declare_lint_rule! {
         name: "noArrayIndexKey",
         language: "jsx",
         sources: &[RuleSource::EslintReact("no-array-index-key").same(), RuleSource::EslintReactX("no-array-index-key").same(), RuleSource::EslintReactXyz("no-array-index-key").same()],
-        domains: &[RuleDomain::React],
+        domains: &[RuleDomain::React, RuleDomain::ReactNative],
         recommended: true,
         severity: Severity::Error,
     }

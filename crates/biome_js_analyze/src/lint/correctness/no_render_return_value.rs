@@ -36,7 +36,7 @@ declare_lint_rule! {
         name: "noRenderReturnValue",
         language: "jsx",
         recommended: true,
-        domains: &[RuleDomain::React],
+        domains: &[RuleDomain::React, RuleDomain::ReactNative],
         severity: Severity::Error,
     }
 }

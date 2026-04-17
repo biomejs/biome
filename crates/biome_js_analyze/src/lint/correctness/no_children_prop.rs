@@ -30,7 +30,7 @@ declare_lint_rule! {
         name: "noChildrenProp",
         language: "jsx",
         sources: &[RuleSource::EslintReact("no-children-prop").same(), RuleSource::EslintReactJsx("no-children-prop").same(), RuleSource::EslintReactXyz("jsx-no-children-prop").same()],
-        domains: &[RuleDomain::React],
+        domains: &[RuleDomain::React, RuleDomain::ReactNative],
         recommended: true,
         severity: Severity::Error,
     }

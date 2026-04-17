@@ -81,7 +81,7 @@ declare_lint_rule! {
         language: "jsx",
         recommended: false,
         severity: Severity::Error,
-        domains: &[RuleDomain::React],
+        domains: &[RuleDomain::React, RuleDomain::ReactNative],
     }
 }
 

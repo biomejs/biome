@@ -49,7 +49,7 @@ declare_lint_rule! {
         name: "useReactFunctionComponents",
         language: "jsx",
         recommended: false,
-        domains: &[RuleDomain::React],
+        domains: &[RuleDomain::React, RuleDomain::ReactNative],
         sources: &[RuleSource::EslintReactPreferFunctionComponent("react-prefer-function-component").same()],
     }
 }

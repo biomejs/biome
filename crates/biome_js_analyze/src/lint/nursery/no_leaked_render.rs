@@ -89,7 +89,7 @@ declare_lint_rule! {
         version: "2.3.8",
         name: "noLeakedRender",
         language: "jsx",
-        domains: &[RuleDomain::React],
+        domains: &[RuleDomain::React, RuleDomain::ReactNative],
         sources: &[
             RuleSource::EslintReact("jsx-no-leaked-render").inspired(),
         ],

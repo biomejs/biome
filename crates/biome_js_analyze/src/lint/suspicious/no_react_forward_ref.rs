@@ -71,7 +71,7 @@ declare_lint_rule! {
         name: "noReactForwardRef",
         language: "js",
         severity: Severity::Warning,
-        domains: &[RuleDomain::React],
+        domains: &[RuleDomain::React, RuleDomain::ReactNative],
         sources: &[
             RuleSource::EslintReactX("no-forward-ref").same(),
             RuleSource::EslintReactXyz("no-forward-ref").same(),

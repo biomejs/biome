@@ -41,7 +41,7 @@ declare_lint_rule! {
         language: "jsx",
         recommended: false,
         sources: &[RuleSource::EslintReact("jsx-no-bind").inspired()],
-        domains: &[RuleDomain::React],
+        domains: &[RuleDomain::React, RuleDomain::ReactNative],
     }
 }
 

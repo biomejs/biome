@@ -80,7 +80,7 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintReactHooks("rules-of-hooks").same()],
         recommended: true,
         severity: Severity::Error,
-        domains: &[RuleDomain::React, RuleDomain::Next],
+        domains: &[RuleDomain::Next, RuleDomain::React, RuleDomain::ReactNative],
     }
 }
 

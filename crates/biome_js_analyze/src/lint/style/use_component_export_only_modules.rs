@@ -104,7 +104,7 @@ declare_lint_rule! {
         name: "useComponentExportOnlyModules",
         language: "jsx",
         sources: &[RuleSource::EslintReactRefresh("only-export-components").inspired()],
-        domains: &[RuleDomain::React],
+        domains: &[RuleDomain::React, RuleDomain::ReactNative],
         recommended: false,
         severity: Severity::Warning,
     }

@@ -44,7 +44,7 @@ declare_lint_rule! {
         name: "noReactPropAssignments",
         language: "jsx",
         sources: &[RuleSource::EslintReactHooks("react-compiler").same()],
-        domains: &[RuleDomain::React],
+        domains: &[RuleDomain::React, RuleDomain::ReactNative],
         recommended: false,
     }
 }

@@ -65,7 +65,7 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintReact("jsx-key").same(), RuleSource::EslintQwik("jsx-key").same(), RuleSource::EslintReactX("no-missing-key").same(), RuleSource::EslintReactXyz("no-missing-key").same()],
         recommended: true,
         severity: Severity::Error,
-        domains: &[RuleDomain::React, RuleDomain::Qwik],
+        domains: &[RuleDomain::Qwik, RuleDomain::React, RuleDomain::ReactNative],
     }
 }
 

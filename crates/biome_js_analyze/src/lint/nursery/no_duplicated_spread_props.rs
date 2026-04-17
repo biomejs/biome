@@ -35,7 +35,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         sources: &[RuleSource::EslintReact("jsx-props-no-spread-multi").same()],
-        domains: &[RuleDomain::React, RuleDomain::Solid],
+        domains: &[RuleDomain::React, RuleDomain::ReactNative, RuleDomain::Solid],
     }
 }
 

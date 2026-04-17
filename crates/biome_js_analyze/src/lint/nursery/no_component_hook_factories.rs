@@ -79,7 +79,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintReactHooks("component-hook-factories").same(), RuleSource::EslintReactX("component-hook-factories").same(), RuleSource::EslintReactXyz("component-hook-factories").same()],
         recommended: false,
-        domains: &[RuleDomain::React],
+        domains: &[RuleDomain::React, RuleDomain::ReactNative],
         severity: Severity::Error,
     }
 }
