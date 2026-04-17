@@ -1,7 +1,6 @@
 use crate::parser::CssParser;
 use crate::syntax::scss::{
-    expected_scss_expression, is_at_scss_variable, parse_scss_expression_until,
-    parse_scss_variable,
+    expected_scss_expression, is_at_scss_variable, parse_scss_expression_until, parse_scss_variable,
 };
 use biome_css_syntax::CssSyntaxKind::{
     self, CSS_BOGUS_PARAMETER, SCSS_PARAMETER, SCSS_PARAMETER_DEFAULT_VALUE,

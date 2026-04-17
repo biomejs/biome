@@ -1,8 +1,7 @@
 use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_identifier;
 use crate::syntax::scss::{
-    is_at_scss_interpolation, is_nth_at_scss_interpolation,
-    is_nth_at_scss_module_member_access,
+    is_at_scss_interpolation, is_nth_at_scss_interpolation, is_nth_at_scss_module_member_access,
     parse_scss_function_name, parse_scss_identifier_or_interpolation,
     parse_scss_interpolated_identifier,
 };

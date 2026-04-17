@@ -99,9 +99,11 @@ pub(crate) fn parse_any_declaration_with_semicolon(p: &mut CssParser) -> ParsedS
     if is_at_empty_declaration(p) {
         parse_empty_declaration(p)
     } else if is_at_scss_variable_declaration(p) {
-        CssSyntaxFeatures::Scss.parse_exclusive_syntax(p, parse_scss_variable_declaration, |p, marker| {
-            scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p))
-        })
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_variable_declaration,
+            |p, marker| scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p)),
+        )
     } else if is_at_any_declaration_with_semicolon(p) {
         parse_declaration_with_semicolon(p)
     } else {

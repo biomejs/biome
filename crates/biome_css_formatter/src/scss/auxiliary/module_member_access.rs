@@ -5,11 +5,7 @@ use biome_formatter::write;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatScssModuleMemberAccess;
 impl FormatNodeRule<ScssModuleMemberAccess> for FormatScssModuleMemberAccess {
-    fn fmt_fields(
-        &self,
-        node: &ScssModuleMemberAccess,
-        f: &mut CssFormatter,
-    ) -> FormatResult<()> {
+    fn fmt_fields(&self, node: &ScssModuleMemberAccess, f: &mut CssFormatter) -> FormatResult<()> {
         let ScssModuleMemberAccessFields {
             module,
             dot_token,

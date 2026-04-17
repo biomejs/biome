@@ -1,11 +1,10 @@
 use crate::parser::CssParser;
 use crate::syntax::scss::{
-    add_scss_variable_member_function_name_diagnostic, is_at_scss_function, is_at_scss_variable,
+    add_scss_variable_member_function_name_diagnostic, is_at_scss_function,
     is_at_scss_interpolated_function_or_value, is_at_scss_interpolated_string,
-    is_at_scss_module_member_access, is_at_scss_parent_selector_value, parse_scss_function,
-    parse_scss_interpolated_function_or_value, parse_scss_variable,
-    parse_scss_interpolated_string, parse_scss_parent_selector_value,
-    parse_scss_module_member_access,
+    is_at_scss_module_member_access, is_at_scss_parent_selector_value, is_at_scss_variable,
+    parse_scss_function, parse_scss_interpolated_function_or_value, parse_scss_interpolated_string,
+    parse_scss_module_member_access, parse_scss_parent_selector_value, parse_scss_variable,
 };
 use biome_css_syntax::T;
 use biome_parser::Parser;
