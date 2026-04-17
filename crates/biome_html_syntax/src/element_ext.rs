@@ -4,7 +4,7 @@ use crate::{
     HtmlElement, HtmlEmbeddedContent, HtmlOpeningElement, HtmlSelfClosingElement, HtmlSyntaxToken,
     HtmlTagName, ScriptType, inner_string_text,
 };
-
+use biome_aria::Attribute;
 use biome_rowan::{AstNodeList, SyntaxResult, TokenText, declare_node_union};
 use biome_string_case::StrOnlyExtension;
 
@@ -135,6 +135,16 @@ impl AnyHtmlElement {
             // Other variants don't have attributes
             _ => None,
         }
+    }
+}
+
+impl biome_aria::Element for AnyHtmlElement {
+    fn name(&self) -> Option<impl AsRef<str>> {
+        self.name()
+    }
+
+    fn attributes(&self) -> impl Iterator<Item = impl Attribute> {
+        self.attributes().into_iter().flat_map(|list| list.iter())
     }
 }
 

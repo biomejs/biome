@@ -155,7 +155,7 @@
 					]
 				},
 				"noNoninteractiveTabindex": {
-					"description": "Enforce that tabIndex is not assigned to non-interactive HTML elements.\nSee https://biomejs.dev/linter/rules/no-noninteractive-tabindex",
+					"description": "Enforce that tabindex is not assigned to non-interactive HTML elements.\nSee https://biomejs.dev/linter/rules/no-noninteractive-tabindex",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoNoninteractiveTabindexConfiguration" },
 						{ "type": "null" }
