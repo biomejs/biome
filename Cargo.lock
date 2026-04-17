@@ -854,6 +854,7 @@ dependencies = [
  "phf 0.13.1",
  "schemars",
  "serde",
+ "smallvec",
  "tests_macros",
  "tikv-jemallocator",
 ]
