@@ -1,0 +1,265 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+require.ensure("./entry")
+require["ensure"]("./entry")
+require?.ensure("./entry")
+
+arguments.callee
+arguments["callee"]
+
+foo.__defineGetter__
+foo["__defineGetter__"]
+
+const { ensure } = require
+const { callee } = arguments
+const { __defineGetter__ } = foo
+
+({ callee } = arguments)
+
+```
+
+# Diagnostics
+```
+invalid.js:2:9 lint/nursery/noRestrictedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use 'require.ensure'.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ require.ensure("./entry")
+      │         ^^^^^^
+    3 │ require["ensure"]("./entry")
+    4 │ require?.ensure("./entry")
+  
+  i Use dynamic import() instead.
+  
+  i Remove this usage to comply with the project's guidelines.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:9 lint/nursery/noRestrictedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use 'require.ensure'.
+  
+    1 │ /* should generate diagnostics */
+    2 │ require.ensure("./entry")
+  > 3 │ require["ensure"]("./entry")
+      │         ^^^^^^^^
+    4 │ require?.ensure("./entry")
+    5 │ 
+  
+  i Use dynamic import() instead.
+  
+  i Remove this usage to comply with the project's guidelines.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:10 lint/nursery/noRestrictedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use 'require.ensure'.
+  
+    2 │ require.ensure("./entry")
+    3 │ require["ensure"]("./entry")
+  > 4 │ require?.ensure("./entry")
+      │          ^^^^^^
+    5 │ 
+    6 │ arguments.callee
+  
+  i Use dynamic import() instead.
+  
+  i Remove this usage to comply with the project's guidelines.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:11 lint/nursery/noRestrictedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not access properties on 'arguments'.
+  
+    4 │ require?.ensure("./entry")
+    5 │ 
+  > 6 │ arguments.callee
+      │           ^^^^^^
+    7 │ arguments["callee"]
+    8 │ 
+  
+  i Avoid accessing arbitrary arguments properties.
+  
+  i Only these properties are allowed on 'arguments': length.
+  
+  i Remove this usage to comply with the project's guidelines.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:11 lint/nursery/noRestrictedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not access properties on 'arguments'.
+  
+    6 │ arguments.callee
+  > 7 │ arguments["callee"]
+      │           ^^^^^^^^
+    8 │ 
+    9 │ foo.__defineGetter__
+  
+  i Avoid accessing arbitrary arguments properties.
+  
+  i Only these properties are allowed on 'arguments': length.
+  
+  i Remove this usage to comply with the project's guidelines.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:5 lint/nursery/noRestrictedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use property '__defineGetter__'.
+  
+     7 │ arguments["callee"]
+     8 │ 
+   > 9 │ foo.__defineGetter__
+       │     ^^^^^^^^^^^^^^^^
+    10 │ foo["__defineGetter__"]
+    11 │ 
+  
+  i Use Object.defineProperty() instead.
+  
+  i Property '__defineGetter__' is only allowed on these objects: Object.
+  
+  i Remove this usage to comply with the project's guidelines.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:5 lint/nursery/noRestrictedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use property '__defineGetter__'.
+  
+     9 │ foo.__defineGetter__
+  > 10 │ foo["__defineGetter__"]
+       │     ^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ const { ensure } = require
+  
+  i Use Object.defineProperty() instead.
+  
+  i Property '__defineGetter__' is only allowed on these objects: Object.
+  
+  i Remove this usage to comply with the project's guidelines.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:9 lint/nursery/noRestrictedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use 'require.ensure'.
+  
+    10 │ foo["__defineGetter__"]
+    11 │ 
+  > 12 │ const { ensure } = require
+       │         ^^^^^^
+    13 │ const { callee } = arguments
+    14 │ const { __defineGetter__ } = foo
+  
+  i Use dynamic import() instead.
+  
+  i Remove this usage to comply with the project's guidelines.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:9 lint/nursery/noRestrictedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not access properties on 'arguments'.
+  
+    12 │ const { ensure } = require
+  > 13 │ const { callee } = arguments
+       │         ^^^^^^
+    14 │ const { __defineGetter__ } = foo
+    15 │ 
+  
+  i Avoid accessing arbitrary arguments properties.
+  
+  i Only these properties are allowed on 'arguments': length.
+  
+  i Remove this usage to comply with the project's guidelines.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:9 lint/nursery/noRestrictedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use property '__defineGetter__'.
+  
+    12 │ const { ensure } = require
+    13 │ const { callee } = arguments
+  > 14 │ const { __defineGetter__ } = foo
+       │         ^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ ({ callee } = arguments)
+  
+  i Use Object.defineProperty() instead.
+  
+  i Property '__defineGetter__' is only allowed on these objects: Object.
+  
+  i Remove this usage to comply with the project's guidelines.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:4 lint/nursery/noRestrictedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not access properties on 'arguments'.
+  
+    14 │ const { __defineGetter__ } = foo
+    15 │ 
+  > 16 │ ({ callee } = arguments)
+       │    ^^^^^^
+    17 │ 
+  
+  i Avoid accessing arbitrary arguments properties.
+  
+  i Only these properties are allowed on 'arguments': length.
+  
+  i Remove this usage to comply with the project's guidelines.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

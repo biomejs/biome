@@ -13,7 +13,7 @@ use biome_console::fmt::Display;
 use biome_console::markup;
 use biome_deserialize::Merge;
 use biome_diagnostics::Location;
-use biome_rule_options::no_restricted_globals;
+use biome_rule_options::{no_restricted_globals, no_restricted_properties};
 use rustc_hash::FxHashMap;
 
 /// This modules includes implementations for converting an ESLint config to a Biome config.
@@ -657,6 +657,31 @@ fn migrate_eslint_rule(
                             options: *Box::new((*rule_options).into()),
                         },
                     ));
+                }
+            }
+        }
+        eslint_eslint::Rule::NoRestrictedProperties(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                let severity = conf.severity();
+                let entries = conf
+                    .into_vec()
+                    .into_iter()
+                    .map(|entry| (*entry).into())
+                    .collect::<Vec<_>>()
+                    .into_boxed_slice();
+                let group = rules.nursery.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    group.no_restricted_properties =
+                        Some(biome_config::RuleConfiguration::WithOptions(
+                            biome_config::RuleWithOptions {
+                                level: severity.into(),
+                                options: *Box::new(
+                                    no_restricted_properties::NoRestrictedPropertiesOptions {
+                                        entries: (!entries.is_empty()).then_some(entries),
+                                    },
+                                ),
+                            },
+                        ));
                 }
             }
         }

@@ -282,7 +282,15 @@ fn migrate_eslintrcjson_include_inspired() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "eslint", "--include-inspired"].as_slice()),
+        Args::from(
+            [
+                "migrate",
+                "eslint",
+                "--include-inspired",
+                "--include-nursery",
+            ]
+            .as_slice(),
+        ),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -390,6 +398,59 @@ fn migrate_eslintrcjson_rule_options() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "migrate_eslintrcjson_rule_options",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn migrate_no_restricted_properties_with_options() {
+    let biomejson = r#"{}"#;
+    let eslintrc = r#"{
+        "rules": {
+            "no-restricted-properties": ["error",
+                {
+                    "object": "require",
+                    "property": "ensure",
+                    "message": "Use dynamic import() instead."
+                },
+                {
+                    "object": "arguments",
+                    "allowProperties": ["length"]
+                },
+                {
+                    "property": "__defineGetter__",
+                    "allowObjects": ["Object"]
+                }
+            ]
+        }
+    }"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8Path::new("biome.json").into(), biomejson.as_bytes());
+    fs.insert(Utf8Path::new(".eslintrc.json").into(), eslintrc.as_bytes());
+
+    let mut console = BufferConsole::default();
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "migrate",
+                "eslint",
+                "--include-inspired",
+                "--include-nursery",
+                "--write",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "migrate_no_restricted_properties_with_options",
         fs,
         console,
         result,

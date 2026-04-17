@@ -1,0 +1,31 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noRestrictedProperties": {
+          "level": "error",
+          "options": {
+            "entries": [
+              {
+                "object": "require",
+                "property": "ensure",
+                "message": "Use dynamic import() instead."
+              },
+              {
+                "object": "arguments",
+                "message": "Avoid accessing arbitrary arguments properties.",
+                "allowProperties": ["length"]
+              },
+              {
+                "property": "__defineGetter__",
+                "message": "Use Object.defineProperty() instead.",
+                "allowObjects": ["Object"]
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

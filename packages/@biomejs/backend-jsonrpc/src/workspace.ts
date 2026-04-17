@@ -2308,6 +2308,11 @@ See https://biomejs.dev/linter/rules/no-redundant-default-export
 	 */
 	noRedundantDefaultExport?: NoRedundantDefaultExportConfiguration;
 	/**
+	* Disallow specific object properties.
+See https://biomejs.dev/linter/rules/no-restricted-properties 
+	 */
+	noRestrictedProperties?: NoRestrictedPropertiesConfiguration;
+	/**
 	* Disallow assignments in return statements.
 See https://biomejs.dev/linter/rules/no-return-assign 
 	 */
@@ -4366,6 +4371,9 @@ export type NoReactNativeRawTextConfiguration =
 export type NoRedundantDefaultExportConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoRedundantDefaultExportOptions;
+export type NoRestrictedPropertiesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoRestrictedPropertiesOptions;
 export type NoReturnAssignConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReturnAssignOptions;
@@ -6142,6 +6150,10 @@ export interface RuleWithNoRedundantDefaultExportOptions {
 	level: RulePlainConfiguration;
 	options?: NoRedundantDefaultExportOptions;
 }
+export interface RuleWithNoRestrictedPropertiesOptions {
+	level: RulePlainConfiguration;
+	options?: NoRestrictedPropertiesOptions;
+}
 export interface RuleWithNoReturnAssignOptions {
 	level: RulePlainConfiguration;
 	options?: NoReturnAssignOptions;
@@ -7763,6 +7775,21 @@ export interface NoReactNativeRawTextOptions {
 	skip?: string[];
 }
 export type NoRedundantDefaultExportOptions = {};
+export interface NoRestrictedPropertiesOptions {
+	/**
+	* Restriction entries for object/property access.
+
+Each entry can describe one of these cases:
+
+- exact object/property match:
+  `{ "object": "require", "property": "ensure" }`
+- property-wide restriction with allowed objects:
+  `{ "property": "__defineGetter__", "allowObjects": ["Object"] }`
+- object-wide restriction with allowed properties:
+  `{ "object": "arguments", "allowProperties": ["length"] }` 
+	 */
+	entries?: RestrictedPropertyEntry[];
+}
 export type NoReturnAssignOptions = {};
 export interface NoRootTypeOptions {
 	/**
@@ -8475,6 +8502,38 @@ while for `useState()` it would be `[1]`.
 	 */
 	stableResult?: StableHookResult;
 }
+export interface RestrictedPropertyEntry {
+	/**
+	* Objects that are allowed when `property` is restricted globally.
+
+Example:
+`{ "property": "__defineGetter__", "allowObjects": ["Object"] }` 
+	 */
+	allowObjects?: string[];
+	/**
+	* Properties that are allowed when `object` is restricted globally.
+
+Example:
+`{ "object": "arguments", "allowProperties": ["length"] }` 
+	 */
+	allowProperties?: string[];
+	/**
+	 * Optional custom note appended to the diagnostic.
+	 */
+	message?: string;
+	/**
+	* Object name to restrict.
+
+Example: `"require"` or `"Object"`. 
+	 */
+	object?: string;
+	/**
+	* Property name to restrict.
+
+Example: `"ensure"` or `"__defineGetter__"`. 
+	 */
+	property?: string;
+}
 export type Regex = string;
 /**
 	* The Baseline availability level to target.
@@ -8935,6 +8994,7 @@ export type Category =
 	| "lint/nursery/noProto"
 	| "lint/nursery/noReactNativeRawText"
 	| "lint/nursery/noRedundantDefaultExport"
+	| "lint/nursery/noRestrictedProperties"
 	| "lint/nursery/noReturnAssign"
 	| "lint/nursery/noRootType"
 	| "lint/nursery/noScriptUrl"
