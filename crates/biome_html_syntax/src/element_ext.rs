@@ -144,9 +144,7 @@ impl biome_aria::Element for AnyHtmlElement {
     }
 
     fn attributes(&self) -> impl Iterator<Item = impl Attribute> {
-        self.attributes()
-            .into_iter()
-            .flat_map(|list| list.iter())
+        self.attributes().into_iter().flat_map(|list| list.iter())
     }
 }
 

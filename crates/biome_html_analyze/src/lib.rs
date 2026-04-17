@@ -25,10 +25,10 @@ use biome_analyze::{
     LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
     to_analyzer_suppressions,
 };
+use biome_aria::AriaRoles;
 use biome_deserialize::TextRange;
 use biome_diagnostics::Error;
 use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
-use biome_aria::AriaRoles;
 use biome_module_graph::ModuleGraph;
 use biome_project_layout::ProjectLayout;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
