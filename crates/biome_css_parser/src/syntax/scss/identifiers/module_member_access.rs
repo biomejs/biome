@@ -1,12 +1,12 @@
 use crate::parser::CssParser;
 use crate::syntax::{is_nth_at_identifier, parse_regular_identifier};
-use biome_css_syntax::CssSyntaxKind::SCSS_QUALIFIED_NAME;
+use biome_css_syntax::CssSyntaxKind::SCSS_MODULE_MEMBER_ACCESS;
 use biome_css_syntax::T;
 use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 
-use super::{is_at_scss_identifier, parse_scss_identifier};
+use super::{is_at_scss_variable, parse_scss_variable};
 
 /// Detects `module.member` or `module.$var` so module-qualified
 /// values/functions are recognized before plain identifiers.
@@ -18,11 +18,11 @@ use super::{is_at_scss_identifier, parse_scss_identifier};
 ///
 /// Docs: https://sass-lang.com/documentation/modules
 #[inline]
-pub(crate) fn is_at_scss_qualified_name(p: &mut CssParser) -> bool {
-    is_nth_at_scss_qualified_name(p, 0)
+pub(crate) fn is_at_scss_module_member_access(p: &mut CssParser) -> bool {
+    is_nth_at_scss_module_member_access(p, 0)
 }
 
-/// Detects a qualified name starting `n` tokens ahead.
+/// Detects a module member access starting `n` tokens ahead.
 ///
 /// Example:
 /// ```scss
@@ -31,14 +31,14 @@ pub(crate) fn is_at_scss_qualified_name(p: &mut CssParser) -> bool {
 ///
 /// Docs: https://sass-lang.com/documentation/modules
 #[inline]
-pub(crate) fn is_nth_at_scss_qualified_name(p: &mut CssParser, n: usize) -> bool {
+pub(crate) fn is_nth_at_scss_module_member_access(p: &mut CssParser, n: usize) -> bool {
     is_nth_at_identifier(p, n)
         && p.nth_at(n + 1, T![.])
         && ((p.nth_at(n + 2, T![$]) && is_nth_at_identifier(p, n + 3))
             || is_nth_at_identifier(p, n + 2))
 }
 
-/// Parses a module-qualified name, preserving whether the member is a `$var` or
+/// Parses a module member access, preserving whether the member is a `$var` or
 /// a plain identifier for later resolution.
 ///
 /// Example:
@@ -48,8 +48,8 @@ pub(crate) fn is_nth_at_scss_qualified_name(p: &mut CssParser, n: usize) -> bool
 ///
 /// Docs: https://sass-lang.com/documentation/modules
 #[inline]
-pub(crate) fn parse_scss_qualified_name(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_scss_qualified_name(p) {
+pub(crate) fn parse_scss_module_member_access(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_scss_module_member_access(p) {
         return Absent;
     }
 
@@ -57,11 +57,11 @@ pub(crate) fn parse_scss_qualified_name(p: &mut CssParser) -> ParsedSyntax {
     parse_regular_identifier(p).ok();
     p.expect(T![.]);
 
-    if is_at_scss_identifier(p) {
-        parse_scss_identifier(p).ok();
+    if is_at_scss_variable(p) {
+        parse_scss_variable(p).ok();
     } else {
         parse_regular_identifier(p).ok();
     }
 
-    Present(m.complete(p, SCSS_QUALIFIED_NAME))
+    Present(m.complete(p, SCSS_MODULE_MEMBER_ACCESS))
 }

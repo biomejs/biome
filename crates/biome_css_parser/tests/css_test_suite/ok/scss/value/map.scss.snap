@@ -40,8 +40,8 @@ div {
 CssRoot {
     bom_token: missing (optional),
     items: CssRootItemList [
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@0..1 "$" [] [],
                 name: CssIdentifier {
                     value_token: IDENT@1..4 "foo" [] [],
@@ -720,7 +720,7 @@ CssRoot {
                                             items: CssParameterList [
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@483..484 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@484..487 "foo" [] [],
@@ -783,7 +783,7 @@ CssRoot {
                                             items: CssParameterList [
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@527..528 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@528..531 "foo" [] [],
@@ -834,7 +834,7 @@ CssRoot {
                                             items: CssParameterList [
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@557..558 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@558..561 "foo" [] [],
@@ -889,8 +889,8 @@ CssRoot {
 0: CSS_ROOT@0..597
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..592
-    0: SCSS_DECLARATION@0..318
-      0: SCSS_IDENTIFIER@0..4
+    0: SCSS_VARIABLE_DECLARATION@0..318
+      0: SCSS_VARIABLE@0..4
         0: DOLLAR@0..1 "$" [] []
         1: CSS_IDENTIFIER@1..4
           0: IDENT@1..4 "foo" [] []
@@ -1313,7 +1313,7 @@ CssRoot {
                       2: CSS_PARAMETER_LIST@483..509
                         0: SCSS_EXPRESSION@483..487
                           0: SCSS_EXPRESSION_ITEM_LIST@483..487
-                            0: SCSS_IDENTIFIER@483..487
+                            0: SCSS_VARIABLE@483..487
                               0: DOLLAR@483..484 "$" [] []
                               1: CSS_IDENTIFIER@484..487
                                 0: IDENT@484..487 "foo" [] []
@@ -1352,7 +1352,7 @@ CssRoot {
                       2: CSS_PARAMETER_LIST@527..539
                         0: SCSS_EXPRESSION@527..531
                           0: SCSS_EXPRESSION_ITEM_LIST@527..531
-                            0: SCSS_IDENTIFIER@527..531
+                            0: SCSS_VARIABLE@527..531
                               0: DOLLAR@527..528 "$" [] []
                               1: CSS_IDENTIFIER@528..531
                                 0: IDENT@528..531 "foo" [] []
@@ -1384,7 +1384,7 @@ CssRoot {
                       2: CSS_PARAMETER_LIST@557..588
                         0: SCSS_EXPRESSION@557..561
                           0: SCSS_EXPRESSION_ITEM_LIST@557..561
-                            0: SCSS_IDENTIFIER@557..561
+                            0: SCSS_VARIABLE@557..561
                               0: DOLLAR@557..558 "$" [] []
                               1: CSS_IDENTIFIER@558..561
                                 0: IDENT@558..561 "foo" [] []

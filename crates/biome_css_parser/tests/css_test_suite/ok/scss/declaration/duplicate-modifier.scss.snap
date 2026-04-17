@@ -19,8 +19,8 @@ $dup-mixed: 1 !default !global !default;
 CssRoot {
     bom_token: missing (optional),
     items: CssRootItemList [
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@0..1 "$" [] [],
                 name: CssIdentifier {
                     value_token: IDENT@1..12 "dup-default" [] [],
@@ -46,8 +46,8 @@ CssRoot {
             ],
             semicolon_token: SEMICOLON@33..34 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@34..36 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@36..46 "dup-global" [] [],
@@ -73,8 +73,8 @@ CssRoot {
             ],
             semicolon_token: SEMICOLON@65..66 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@66..68 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@68..77 "dup-mixed" [] [],
@@ -115,8 +115,8 @@ CssRoot {
 0: CSS_ROOT@0..108
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..107
-    0: SCSS_DECLARATION@0..34
-      0: SCSS_IDENTIFIER@0..12
+    0: SCSS_VARIABLE_DECLARATION@0..34
+      0: SCSS_VARIABLE@0..12
         0: DOLLAR@0..1 "$" [] []
         1: CSS_IDENTIFIER@1..12
           0: IDENT@1..12 "dup-default" [] []
@@ -133,8 +133,8 @@ CssRoot {
           0: BANG@25..26 "!" [] []
           1: DEFAULT_KW@26..33 "default" [] []
       4: SEMICOLON@33..34 ";" [] []
-    1: SCSS_DECLARATION@34..66
-      0: SCSS_IDENTIFIER@34..46
+    1: SCSS_VARIABLE_DECLARATION@34..66
+      0: SCSS_VARIABLE@34..46
         0: DOLLAR@34..36 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@36..46
           0: IDENT@36..46 "dup-global" [] []
@@ -151,8 +151,8 @@ CssRoot {
           0: BANG@58..59 "!" [] []
           1: GLOBAL_KW@59..65 "global" [] []
       4: SEMICOLON@65..66 ";" [] []
-    2: SCSS_DECLARATION@66..107
-      0: SCSS_IDENTIFIER@66..77
+    2: SCSS_VARIABLE_DECLARATION@66..107
+      0: SCSS_VARIABLE@66..77
         0: DOLLAR@66..68 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@68..77
           0: IDENT@68..77 "dup-mixed" [] []

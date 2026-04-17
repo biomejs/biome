@@ -86,7 +86,7 @@ CssRoot {
             at_token: AT@39..42 "@" [Newline("\n"), Newline("\n")] [],
             rule: ScssForAtRule {
                 for_token: FOR_KW@42..46 "for" [] [Whitespace(" ")],
-                variable: ScssIdentifier {
+                variable: ScssVariable {
                     dollar_token: DOLLAR@46..47 "$" [] [],
                     name: CssIdentifier {
                         value_token: IDENT@47..49 "i" [] [Whitespace(" ")],
@@ -140,7 +140,7 @@ CssRoot {
             at_token: AT@78..81 "@" [Newline("\n"), Newline("\n")] [],
             rule: ScssForAtRule {
                 for_token: FOR_KW@81..85 "for" [] [Whitespace(" ")],
-                variable: ScssIdentifier {
+                variable: ScssVariable {
                     dollar_token: DOLLAR@85..86 "$" [] [],
                     name: CssIdentifier {
                         value_token: IDENT@86..88 "i" [] [Whitespace(" ")],
@@ -188,7 +188,7 @@ CssRoot {
             at_token: AT@112..115 "@" [Newline("\n"), Newline("\n")] [],
             rule: ScssForAtRule {
                 for_token: FOR_KW@115..119 "for" [] [Whitespace(" ")],
-                variable: ScssIdentifier {
+                variable: ScssVariable {
                     dollar_token: DOLLAR@119..120 "$" [] [],
                     name: CssIdentifier {
                         value_token: IDENT@120..122 "i" [] [Whitespace(" ")],
@@ -237,7 +237,7 @@ CssRoot {
             rule: CssBogusAtRule {
                 items: [
                     FOR_KW@152..156 "for" [] [Whitespace(" ")],
-                    ScssIdentifier {
+                    ScssVariable {
                         dollar_token: DOLLAR@156..157 "$" [] [],
                         name: CssIdentifier {
                             value_token: IDENT@157..159 "i" [] [Whitespace(" ")],
@@ -312,7 +312,7 @@ CssRoot {
       0: AT@39..42 "@" [Newline("\n"), Newline("\n")] []
       1: SCSS_FOR_AT_RULE@42..78
         0: FOR_KW@42..46 "for" [] [Whitespace(" ")]
-        1: SCSS_IDENTIFIER@46..49
+        1: SCSS_VARIABLE@46..49
           0: DOLLAR@46..47 "$" [] []
           1: CSS_IDENTIFIER@47..49
             0: IDENT@47..49 "i" [] [Whitespace(" ")]
@@ -347,7 +347,7 @@ CssRoot {
       0: AT@78..81 "@" [Newline("\n"), Newline("\n")] []
       1: SCSS_FOR_AT_RULE@81..112
         0: FOR_KW@81..85 "for" [] [Whitespace(" ")]
-        1: SCSS_IDENTIFIER@85..88
+        1: SCSS_VARIABLE@85..88
           0: DOLLAR@85..86 "$" [] []
           1: CSS_IDENTIFIER@86..88
             0: IDENT@86..88 "i" [] [Whitespace(" ")]
@@ -379,7 +379,7 @@ CssRoot {
       0: AT@112..115 "@" [Newline("\n"), Newline("\n")] []
       1: SCSS_FOR_AT_RULE@115..149
         0: FOR_KW@115..119 "for" [] [Whitespace(" ")]
-        1: SCSS_IDENTIFIER@119..122
+        1: SCSS_VARIABLE@119..122
           0: DOLLAR@119..120 "$" [] []
           1: CSS_IDENTIFIER@120..122
             0: IDENT@120..122 "i" [] [Whitespace(" ")]
@@ -411,7 +411,7 @@ CssRoot {
       0: AT@149..152 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@152..175
         0: FOR_KW@152..156 "for" [] [Whitespace(" ")]
-        1: SCSS_IDENTIFIER@156..159
+        1: SCSS_VARIABLE@156..159
           0: DOLLAR@156..157 "$" [] []
           1: CSS_IDENTIFIER@157..159
             0: IDENT@157..159 "i" [] [Whitespace(" ")]

@@ -1,13 +1,17 @@
 use crate::prelude::*;
-use biome_css_syntax::{ScssDeclaration, ScssDeclarationFields};
+use biome_css_syntax::{ScssVariableDeclaration, ScssVariableDeclarationFields};
 use biome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
-pub(crate) struct FormatScssDeclaration;
+pub(crate) struct FormatScssVariableDeclaration;
 
-impl FormatNodeRule<ScssDeclaration> for FormatScssDeclaration {
-    fn fmt_fields(&self, node: &ScssDeclaration, f: &mut CssFormatter) -> FormatResult<()> {
-        let ScssDeclarationFields {
+impl FormatNodeRule<ScssVariableDeclaration> for FormatScssVariableDeclaration {
+    fn fmt_fields(
+        &self,
+        node: &ScssVariableDeclaration,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        let ScssVariableDeclarationFields {
             name,
             colon_token,
             value,

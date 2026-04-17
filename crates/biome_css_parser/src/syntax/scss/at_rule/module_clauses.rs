@@ -1,7 +1,7 @@
 use crate::parser::CssParser;
 use crate::syntax::scss::{
-    expected_scss_expression, is_at_scss_identifier, parse_scss_expression_in_variable_value_until,
-    parse_scss_identifier,
+    expected_scss_expression, is_at_scss_variable, parse_scss_expression_in_variable_value_until,
+    parse_scss_variable,
 };
 use crate::syntax::{is_at_identifier, parse_regular_identifier};
 use biome_css_syntax::CssSyntaxKind::{
@@ -72,14 +72,14 @@ fn parse_scss_module_configuration_item_list(p: &mut CssParser) {
 /// - https://sass-lang.com/documentation/at-rules/forward/#configuring-modules
 #[inline]
 fn parse_scss_module_configuration(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_scss_identifier(p) {
+    if !is_at_scss_variable(p) {
         return Absent;
     }
 
     let m = p.start();
 
-    // We only enter this branch after `is_at_scss_identifier`, so `Absent` is impossible here.
-    parse_scss_identifier(p).ok();
+    // We only enter this branch after `is_at_scss_variable`, so `Absent` is impossible here.
+    parse_scss_variable(p).ok();
     p.expect(T![:]);
     parse_scss_expression_in_variable_value_until(p, SCSS_MODULE_CONFIGURATION_VALUE_END_SET)
         .or_add_diagnostic(p, expected_scss_expression);
@@ -155,8 +155,8 @@ pub(super) fn parse_scss_module_member_list(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn parse_scss_module_member(p: &mut CssParser) -> ParsedSyntax {
-    if is_at_scss_identifier(p) {
-        parse_scss_identifier(p)
+    if is_at_scss_variable(p) {
+        parse_scss_variable(p)
     } else if is_at_identifier(p) {
         parse_regular_identifier(p)
     } else {
