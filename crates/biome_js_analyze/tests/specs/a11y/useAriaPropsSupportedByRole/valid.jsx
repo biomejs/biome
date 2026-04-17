@@ -62,7 +62,6 @@
 	<menu type="toolbar" aria-busy />
 	<menu type="toolbar" aria-controls />
 	<menu type="toolbar" aria-describedby />
-	<menu type="toolbar" aria-disabled />
 	<menu type="toolbar" aria-dropeffect />
 	<menu type="toolbar" aria-flowto />
 	<menu type="toolbar" aria-grabbed />

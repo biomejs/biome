@@ -463,6 +463,9 @@ fn generate_aria_roles(aria: &Aria) -> TokenStream {
             if name == "roletype" {
                 variants.clear();
                 for global_attribute in &data.supported_attributes {
+                    if global_attribute.deprecated_in_version.is_some() {
+                        continue;
+                    }
                     let variant = Ident::new(
                         &Case::Pascal.convert(&global_attribute.name),
                         Span::call_site(),
@@ -626,6 +629,9 @@ fn generate_aria_roles(aria: &Aria) -> TokenStream {
         }
         variants.clear();
         for attribute in data.all_attributes() {
+            if attribute.deprecated_in_version.is_some() {
+                continue;
+            }
             let variant = Ident::new(&Case::Pascal.convert(&attribute.name), Span::call_site());
             variants.push(variant);
         }

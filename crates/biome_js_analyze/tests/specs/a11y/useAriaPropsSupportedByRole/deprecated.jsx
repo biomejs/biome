@@ -1,11 +1,16 @@
-<input type="radio" aria-invalid />
-<input type="radio" aria-haspopup />
-<input type="checkbox" aria-haspopup />
-<input type="reset" aria-invalid />
-<input type="submit" aria-invalid />
-<input type="image" aria-invalid />
-<input type="button" aria-invalid />
-<menu type="toolbar" aria-haspopup />
-<menu type="toolbar" aria-invalid />
-<area href="#" aria-invalid />
-<a href="#" aria-invalid />
+/* should generate diagnostics */
+<>
+	<input type="radio" aria-invalid />
+	<input type="radio" aria-haspopup />
+	<input type="checkbox" aria-haspopup />
+	<input type="reset" aria-invalid />
+	<input type="submit" aria-invalid />
+	<input type="image" aria-invalid />
+	<input type="button" aria-invalid />
+	<menu type="toolbar" aria-disabled />
+	<menu type="toolbar" aria-errormessage />
+	<menu type="toolbar" aria-haspopup />
+	<menu type="toolbar" aria-invalid />
+	<area href="#" aria-invalid />
+	<a href="#" aria-invalid />
+</>

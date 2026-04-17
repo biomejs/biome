@@ -4,17 +4,243 @@ expression: deprecated.jsx
 ---
 # Input
 ```jsx
-<input type="radio" aria-invalid />
-<input type="radio" aria-haspopup />
-<input type="checkbox" aria-haspopup />
-<input type="reset" aria-invalid />
-<input type="submit" aria-invalid />
-<input type="image" aria-invalid />
-<input type="button" aria-invalid />
-<menu type="toolbar" aria-haspopup />
-<menu type="toolbar" aria-invalid />
-<area href="#" aria-invalid />
-<a href="#" aria-invalid />
+/* should generate diagnostics */
+<>
+	<input type="radio" aria-invalid />
+	<input type="radio" aria-haspopup />
+	<input type="checkbox" aria-haspopup />
+	<input type="reset" aria-invalid />
+	<input type="submit" aria-invalid />
+	<input type="image" aria-invalid />
+	<input type="button" aria-invalid />
+	<menu type="toolbar" aria-disabled />
+	<menu type="toolbar" aria-errormessage />
+	<menu type="toolbar" aria-haspopup />
+	<menu type="toolbar" aria-invalid />
+	<area href="#" aria-invalid />
+	<a href="#" aria-invalid />
+</>
+
 ```
 
-_Note: The parser emitted 15 diagnostics which are not shown here._
+# Diagnostics
+```
+deprecated.jsx:3:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-invalid' is not supported by this element.
+  
+    1 │ /* should generate diagnostics */
+    2 │ <>
+  > 3 │ 	<input type="radio" aria-invalid />
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 	<input type="radio" aria-haspopup />
+    5 │ 	<input type="checkbox" aria-haspopup />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+deprecated.jsx:4:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-haspopup' is not supported by this element.
+  
+    2 │ <>
+    3 │ 	<input type="radio" aria-invalid />
+  > 4 │ 	<input type="radio" aria-haspopup />
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 	<input type="checkbox" aria-haspopup />
+    6 │ 	<input type="reset" aria-invalid />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+deprecated.jsx:5:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-haspopup' is not supported by this element.
+  
+    3 │ 	<input type="radio" aria-invalid />
+    4 │ 	<input type="radio" aria-haspopup />
+  > 5 │ 	<input type="checkbox" aria-haspopup />
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 	<input type="reset" aria-invalid />
+    7 │ 	<input type="submit" aria-invalid />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+deprecated.jsx:6:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-invalid' is not supported by this element.
+  
+    4 │ 	<input type="radio" aria-haspopup />
+    5 │ 	<input type="checkbox" aria-haspopup />
+  > 6 │ 	<input type="reset" aria-invalid />
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 	<input type="submit" aria-invalid />
+    8 │ 	<input type="image" aria-invalid />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+deprecated.jsx:7:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-invalid' is not supported by this element.
+  
+    5 │ 	<input type="checkbox" aria-haspopup />
+    6 │ 	<input type="reset" aria-invalid />
+  > 7 │ 	<input type="submit" aria-invalid />
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 	<input type="image" aria-invalid />
+    9 │ 	<input type="button" aria-invalid />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+deprecated.jsx:8:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-invalid' is not supported by this element.
+  
+     6 │ 	<input type="reset" aria-invalid />
+     7 │ 	<input type="submit" aria-invalid />
+   > 8 │ 	<input type="image" aria-invalid />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 	<input type="button" aria-invalid />
+    10 │ 	<menu type="toolbar" aria-disabled />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+deprecated.jsx:9:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-invalid' is not supported by this element.
+  
+     7 │ 	<input type="submit" aria-invalid />
+     8 │ 	<input type="image" aria-invalid />
+   > 9 │ 	<input type="button" aria-invalid />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 	<menu type="toolbar" aria-disabled />
+    11 │ 	<menu type="toolbar" aria-errormessage />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+deprecated.jsx:10:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-disabled' is not supported by this element.
+  
+     8 │ 	<input type="image" aria-invalid />
+     9 │ 	<input type="button" aria-invalid />
+  > 10 │ 	<menu type="toolbar" aria-disabled />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 	<menu type="toolbar" aria-errormessage />
+    12 │ 	<menu type="toolbar" aria-haspopup />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+deprecated.jsx:11:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-errormessage' is not supported by this element.
+  
+     9 │ 	<input type="button" aria-invalid />
+    10 │ 	<menu type="toolbar" aria-disabled />
+  > 11 │ 	<menu type="toolbar" aria-errormessage />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 	<menu type="toolbar" aria-haspopup />
+    13 │ 	<menu type="toolbar" aria-invalid />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+deprecated.jsx:12:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-haspopup' is not supported by this element.
+  
+    10 │ 	<menu type="toolbar" aria-disabled />
+    11 │ 	<menu type="toolbar" aria-errormessage />
+  > 12 │ 	<menu type="toolbar" aria-haspopup />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 	<menu type="toolbar" aria-invalid />
+    14 │ 	<area href="#" aria-invalid />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+deprecated.jsx:13:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-invalid' is not supported by this element.
+  
+    11 │ 	<menu type="toolbar" aria-errormessage />
+    12 │ 	<menu type="toolbar" aria-haspopup />
+  > 13 │ 	<menu type="toolbar" aria-invalid />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 	<area href="#" aria-invalid />
+    15 │ 	<a href="#" aria-invalid />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+deprecated.jsx:14:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-invalid' is not supported by this element.
+  
+    12 │ 	<menu type="toolbar" aria-haspopup />
+    13 │ 	<menu type="toolbar" aria-invalid />
+  > 14 │ 	<area href="#" aria-invalid />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 	<a href="#" aria-invalid />
+    16 │ </>
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+deprecated.jsx:15:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-invalid' is not supported by this element.
+  
+    13 │ 	<menu type="toolbar" aria-invalid />
+    14 │ 	<area href="#" aria-invalid />
+  > 15 │ 	<a href="#" aria-invalid />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ </>
+    17 │ 
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
