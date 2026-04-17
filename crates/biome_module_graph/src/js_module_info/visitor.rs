@@ -1,4 +1,5 @@
 use crate::css_module_info::CssClassReference;
+use biome_js_semantic::ScopeId;
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsBinding, AnyJsBindingPattern, AnyJsDeclarationClause,
     AnyJsExportClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause,
@@ -7,8 +8,7 @@ use biome_js_syntax::{
     JsExportNamedFromClause, JsExportNamedSpecifierList, JsIdentifierBinding,
     JsVariableDeclaratorList, JsxAttribute, TsExportAssignmentClause, unescape_js_string,
 };
-use biome_js_type_info::{ImportSymbol, ScopeId, TypeData, TypeReference, TypeResolver};
-use biome_jsdoc_comment::JsdocComment;
+use biome_js_type_info::{ImportSymbol, TypeData, TypeReference, TypeResolver};
 use biome_resolver::{ResolveOptions, resolve};
 use biome_rowan::{AstNode, TokenText, WalkEvent};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -33,6 +33,7 @@ pub(crate) struct JsModuleVisitor<'a> {
     file_path: Utf8PathBuf,
     directory: &'a Utf8Path,
     fs_proxy: &'a ModuleGraphFsProxy<'a>,
+    semantic_model: std::sync::Arc<biome_js_semantic::SemanticModel>,
     infer_types: bool,
 }
 
@@ -42,6 +43,7 @@ impl<'a> JsModuleVisitor<'a> {
         file_path: Utf8PathBuf,
         directory: &'a Utf8Path,
         fs_proxy: &'a ModuleGraphFsProxy,
+        semantic_model: std::sync::Arc<biome_js_semantic::SemanticModel>,
         infer_types: bool,
     ) -> Self {
         Self {
@@ -49,12 +51,13 @@ impl<'a> JsModuleVisitor<'a> {
             file_path,
             directory,
             fs_proxy,
+            semantic_model,
             infer_types,
         }
     }
 
     pub fn collect_info(self) -> JsModuleInfo {
-        let mut collector = JsModuleInfoCollector::default();
+        let mut collector = JsModuleInfoCollector::new(self.semantic_model.clone());
 
         let iter = self.root.syntax().preorder();
         for event in iter {
@@ -67,8 +70,6 @@ impl<'a> JsModuleVisitor<'a> {
                     } else if let Some(attr) = JsxAttribute::cast_ref(&node) {
                         self.visit_jsx_attribute(attr, &mut collector);
                     }
-
-                    collector.push_node(&node);
                 }
                 WalkEvent::Leave(node) => {
                     collector.leave_node(&node);
@@ -76,7 +77,7 @@ impl<'a> JsModuleVisitor<'a> {
             }
         }
 
-        JsModuleInfo::new(collector, self.infer_types)
+        JsModuleInfo::new(collector, self.semantic_model, self.infer_types)
     }
 
     /// Collects static CSS class references from JSX `class` and `className`
@@ -314,11 +315,8 @@ impl<'a> JsModuleVisitor<'a> {
             specifier: specifier.into(),
             symbol: ImportSymbol::All,
         };
-        let jsdoc_comment = node
-            .syntax()
-            .parent()
-            .and_then(|parent| JsdocComment::try_from(parent).ok());
 
+        let export_range = node.syntax().parent().map(|p| p.text_trimmed_range());
         if let Some(export_as) = node.export_as() {
             let export_name = export_as
                 .exported_name()
@@ -329,13 +327,13 @@ impl<'a> JsModuleVisitor<'a> {
                 export_name,
                 reexport: JsReexport {
                     import,
-                    jsdoc_comment,
+                    export_range,
                 },
             });
         } else {
             collector.register_blanket_reexport(JsReexport {
                 import,
-                jsdoc_comment,
+                export_range,
             });
         }
 
@@ -377,7 +375,7 @@ impl<'a> JsModuleVisitor<'a> {
                         resolved_path: resolved_path.clone(),
                         symbol: ImportSymbol::Named(imported_name),
                     },
-                    jsdoc_comment: None,
+                    export_range: None,
                 },
             });
         }

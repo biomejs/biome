@@ -1,6 +1,7 @@
 use crate::utils::is_node_equal;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
+use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::JsBinaryExpression;
 use biome_rowan::AstNode;
@@ -56,10 +57,20 @@ impl Rule for NoSelfCompare {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            ctx.query().range(),
-            "Comparing to itself is potentially pointless.",
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                ctx.query().range(),
+                markup! {
+                    "This comparison uses the same expression on both sides."
+                },
+            )
+            .note(markup! {
+                "Self-comparisons are usually redundant or a sign that the wrong value is being compared."
+            })
+            .note(markup! {
+                "Compare two different values instead, or use "<Emphasis>"Number.isNaN()"</Emphasis>" if you are checking for NaN."
+            }),
+        )
     }
 }

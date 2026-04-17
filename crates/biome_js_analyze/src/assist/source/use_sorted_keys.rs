@@ -8,7 +8,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_deserialize::TextRange;
-use biome_diagnostics::{Applicability, category};
+use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsObjectMember, JsLanguage, JsObjectExpression, JsObjectMemberList, T,
@@ -161,7 +161,7 @@ declare_source_rule! {
         name: "useSortedKeys",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::EslintPerfectionist("sort-objects").inspired()],
+        sources: &[RuleSource::Eslint("sort-keys").inspired(), RuleSource::EslintPerfectionist("sort-objects").inspired()],
         fix_kind: FixKind::Safe,
     }
 }
@@ -278,7 +278,7 @@ impl Rule for UseSortedKeys {
             }
         };
         Some(RuleDiagnostic::new(
-            category!("assist/source/useSortedKeys"),
+            rule_category!(),
             ctx.query().range(),
             message,
         ))
@@ -288,6 +288,7 @@ impl Rule for UseSortedKeys {
         ctx.query()
             .syntax()
             .ancestors()
+            .skip(1)
             .find_map(JsObjectExpression::cast)
             .map(|object| object.range())
     }

@@ -111,7 +111,7 @@ customHook.ts:14:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━�
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency a to the list.
   
     16 │ ····},·[a]);
        │         +   
@@ -200,7 +200,7 @@ customHook.ts:46:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━�
     Failing to specify dependencies can result in Effects not updating correctly when state changes.
     These "stale closures" are a common source of surprising bugs.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency a to the list.
   
     46 │ ····useEvenMoreEffect([],·["foo",·a],·()·=>·{
        │                                 +++          
@@ -232,7 +232,7 @@ customHook.ts:46:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━�
     Failing to specify dependencies can result in Effects not updating correctly when state changes.
     These "stale closures" are a common source of surprising bugs.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency b to the list.
   
     46 │ ····useEvenMoreEffect([],·["foo",·b],·()·=>·{
        │                                 +++          
@@ -348,7 +348,7 @@ customHook.ts:61:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━�
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency a to the list.
   
     61 │ ····doSomething([a],·"apple",·()·=>·{
        │                  +                   
@@ -382,7 +382,7 @@ customHook.ts:61:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━�
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency b to the list.
   
     61 │ ····doSomething([b],·"apple",·()·=>·{
        │                  +                   
@@ -414,7 +414,7 @@ customHook.ts:64:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━�
     Failing to specify dependencies can result in Effects not updating correctly when state changes.
     These "stale closures" are a common source of surprising bugs.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency a to the list.
   
     64 │ ····doSomething(["a·b",·a],·[a],·()·=>·{
        │                       +++               

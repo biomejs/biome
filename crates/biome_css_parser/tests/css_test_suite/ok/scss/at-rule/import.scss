@@ -1,0 +1,42 @@
+@import "theme";
+
+@import "#{$file}.scss";
+@import "#{$file}.css" print;
+
+@import "rounded-corners", "text-shadow";
+
+@import "theme.scss";
+
+@import "theme.css", "spacing";
+
+@import "theme.css";
+
+@import "theme.CSS?cache=1#section";
+
+@import "print.css" print;
+
+@import "print.css" print, screen;
+
+@import "print.css" print, "spacing";
+
+@import url("foo.css"), "#{$bar}";
+
+@import "http://example.com/theme";
+
+@import url("theme.css");
+
+@import "//example.com/theme";
+
+@import "https://example.com/theme.css";
+
+@mixin plain-import {
+  @import "theme.css";
+}
+
+@mixin dynamic-import {
+  @import "theme";
+}
+
+@if true {
+  @import "theme";
+}

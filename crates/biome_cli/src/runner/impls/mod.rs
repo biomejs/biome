@@ -5,3 +5,4 @@ pub(crate) mod executions;
 pub(crate) mod finalizers;
 pub(crate) mod handlers;
 pub(crate) mod process_file;
+pub(crate) mod watchers;

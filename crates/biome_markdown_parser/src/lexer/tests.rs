@@ -4,7 +4,7 @@
 use super::{MarkdownLexer, TextSize};
 use crate::lexer::MarkdownLexContext;
 use biome_markdown_syntax::MarkdownSyntaxKind::*;
-use biome_parser::lexer::Lexer;
+use biome_parser::lexer::{BufferedLexer, Lexer};
 use quickcheck_macros::quickcheck;
 use std::sync::mpsc::channel;
 use std::thread;
@@ -573,4 +573,35 @@ fn block_quote_simple() {
         MD_TEXTUAL_LITERAL:15, // "This is a quote"
         NEWLINE:1,
     }
+}
+
+#[test]
+fn force_relex_at_line_start_produces_thematic_break() {
+    // After consuming a blockquote prefix (`> `), `---` is normally lexed as
+    // MINUS tokens because after_newline is false. force_relex_at_line_start
+    // should make the lexer treat the position as a line start, producing
+    // MD_THEMATIC_BREAK_LITERAL instead.
+    let source = "> ---\n";
+    let lexer = MarkdownLexer::from_str(source);
+    let mut buffered = BufferedLexer::new(lexer);
+
+    // Lex first token: `>` (R_ANGLE)
+    buffered.next_token(MarkdownLexContext::Regular);
+    assert_eq!(buffered.current(), R_ANGLE);
+
+    // Lex second token: ` ` (whitespace as MD_TEXTUAL_LITERAL)
+    buffered.next_token(MarkdownLexContext::Regular);
+    assert_eq!(buffered.current(), MD_TEXTUAL_LITERAL);
+
+    // Lex third token: without re-lex, `---` becomes MINUS
+    buffered.next_token(MarkdownLexContext::Regular);
+    assert_eq!(buffered.current(), MINUS, "without re-lex, should be MINUS");
+
+    // Now re-lex at line start — should produce MD_THEMATIC_BREAK_LITERAL
+    let kind = buffered.force_relex_at_line_start(MarkdownLexContext::Regular);
+    assert_eq!(
+        kind, MD_THEMATIC_BREAK_LITERAL,
+        "after force_relex_at_line_start, `---` should be MD_THEMATIC_BREAK_LITERAL"
+    );
+    assert_eq!(buffered.current(), MD_THEMATIC_BREAK_LITERAL);
 }

@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: chunk-with-bare-export.js
+---
+# Input
+```js
+import { A } from "package";
+export { A };
+
+```
+
+# Diagnostics
+```
+chunk-with-bare-export.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+  > 1 │ import { A } from "package";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ export { A };
+    3 │ 
+  
+  i Safe fix: Organize Imports (Biome)
+  
+    1 1 │   import { A } from "package";
+      2 │ + 
+    2 3 │   export { A };
+    3 4 │   
+  
+
+```

@@ -15,32 +15,29 @@ info: json/global_suppression.jsonc
 	    "a": "b", "c": "d", "e": "f"
 }
 
+// biome-ignore-all format: intentional
+{"code":true}
+
+// Biome format should keep this comment
+
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Trailing commas: None
-Expand: Auto
-Bracket spacing: true
-Trailing newline: true
------
+# Formatted
 
 ```jsonc
 // biome-ignore-all format: test
+
 
 {
 
 
 	    "a": "b", "c": "d", "e": "f"
 }
+
+// biome-ignore-all format: intentional
+{"code":true}
+
+// Biome format should keep this comment
+
 ```

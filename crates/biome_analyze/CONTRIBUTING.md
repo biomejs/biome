@@ -38,9 +38,9 @@ The analyzer allows implementors to create **three different** types of rules:
       - [Navigating the CST (Concrete Syntax Tree)](#navigating-the-cst-concrete-syntax-tree)
       - [Querying multiple node types via `declare_node_union!`](#querying-multiple-node-types-via-declare_node_union)
       - [Services](#services)
-        - [Semantic Model](#semantic-model)
-          * [How to use the query `Semantic<>` in a lint rule](#how-to-use-the-query-semantic-in-a-lint-rule)
-        - [Using Multiple Services in a Rule](#using-multiple-services-in-a-rule)
+        * [Semantic Model](#semantic-model)
+          + [How to use the query `Semantic<>` in a lint rule](#how-to-use-the-query-semantic-in-a-lint-rule)
+        * [Using Multiple Services in a Rule](#using-multiple-services-in-a-rule)
       - [Multiple Signals](#multiple-signals)
       - [Code Actions](#code-actions)
       - [Custom Syntax Tree Visitors](#custom-syntax-tree-visitors)
@@ -359,7 +359,7 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
    Please also keep [Biome's technical principles](https://biomejs.dev/internals/philosophy/#technical) in mind when writing those messages and implementing your diagnostic rule.
 
    ```rust
-   fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic>
+   fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
        let node = ctx.query();
        Some(
            RuleDiagnostic::new(
@@ -838,6 +838,42 @@ pub enum Behavior {
     C,
 }
 ```
+
+#### Custom eslint migrators for rule options
+
+If you are working on a port of an ESLint rule, and you are adding an option from that source rule, you may want to provide a custom migrator for that rule, to help users migrate their configuration from ESLint to Biome.
+
+This is usually implemented in `crates/biome_cli/src/execute/migrate/eslint_to_biome.rs`, in the `migrate_eslint_rule` function. The conversion of the options comes from a `impl From<eslint_eslint::RuleConf> for biome_rule_options::...` implementation.
+
+Example:
+
+```rust
+eslint_eslint::Rule::JestConsistentTestIt(conf) => {
+  if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+      let severity = conf.severity();
+      let group = rules.nursery.get_or_insert_with(Default::default);
+      if let SeverityOrGroup::Group(group) = group {
+          let rule_options =
+              if let eslint_eslint::RuleConf::Option(_, rule_options) = conf {
+                  rule_options.into()
+              } else {
+                  eslint_jest::ConsistentTestItOptions::default().into()
+              };
+          group.use_consistent_test_it =
+              Some(biome_config::RuleFixConfiguration::WithOptions(
+                  biome_config::RuleWithFixOptions {
+                      level: severity.into(),
+                      fix: None,
+                      options: rule_options,
+                  },
+              ));
+      }
+      results.add(&name, RuleMigrationResult::Migrated);
+  }
+}
+```
+
+These custom migrators can be tested by adding a snapshot test to `crates/biome_cli/tests/specs/migrate_eslint/`.
 
 ##### Testing & Documenting Rule Options
 

@@ -1,0 +1,687 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+function addToCart(data) {
+	'use server';
+}
+
+function requestUsername(formData) {
+	'use server';
+	const username = formData.get('username');
+}
+
+function addToCart(data) {
+	"use server";
+}
+
+function requestUsername(formData) {
+	"use server";
+	const username = formData.get('username');
+}
+
+const addToCart = (data) => {
+	'use server';
+}
+
+const requestUsername = (formData) => {
+	'use server';
+	const username = formData.get('username');
+}
+
+const addToCart = (data) => {
+	"use server";
+}
+
+const requestUsername = (formData) => {
+	"use server";
+	const username = formData.get('username');
+}
+
+const addToCart = function (data) {
+	'use server';
+}
+
+const requestUsername = function (formData) {
+	'use server';
+	const username = formData.get('username');
+}
+
+const addToCart = function (data) {
+	"use server";
+}
+
+const requestUsername = function (formData) {
+	"use server";
+	const username = formData.get('username');
+}
+
+export function addToCart(data) {
+	'use server';
+}
+
+export default function addToCart(data) {
+	'use server';
+}
+
+export default function (data) {
+	'use server';
+}
+
+const obj = {
+	action() {
+		'use server';
+	}
+};
+
+class Foo {
+	constructor() { }
+
+	action() {
+		'use server';
+	}
+}
+
+class Foo {
+	static action() {
+		'use server';
+	}
+}
+
+function outer() {
+	function inner() {
+		'use server';
+	}
+}
+
+const action = function named(data) {
+	'use server';
+}
+
+const Invalid1 = () => <form action={() => { 'use server'; }} />
+
+const Invalid2 = () => <form
+	action={function () {
+		'use server';
+		doSomething();
+	}}
+/>
+
+```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
+# Diagnostics
+```
+invalid.jsx:2:1 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This server function is missing the async keyword.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ function addToCart(data) {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 3 │ 	'use server';
+  > 4 │ }
+      │ ^
+    5 │ 
+    6 │ function requestUsername(formData) {
+  
+  i Functions with the "use server" directive are React Server Functions and therefore must be async.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add async keyword.
+  
+    2 │ async·function·addToCart(data)·{
+      │ ++++++                          
+
+```
+
+```
+invalid.jsx:6:1 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This server function is missing the async keyword.
+  
+     4 │ }
+     5 │ 
+   > 6 │ function requestUsername(formData) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 7 │ 	'use server';
+   > 8 │ 	const username = formData.get('username');
+   > 9 │ }
+       │ ^
+    10 │ 
+    11 │ function addToCart(data) {
+  
+  i Functions with the "use server" directive are React Server Functions and therefore must be async.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add async keyword.
+  
+    6 │ async·function·requestUsername(formData)·{
+      │ ++++++                                    
+
+```
+
+```
+invalid.jsx:11:1 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This server function is missing the async keyword.
+  
+     9 │ }
+    10 │ 
+  > 11 │ function addToCart(data) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 12 │ 	"use server";
+  > 13 │ }
+       │ ^
+    14 │ 
+    15 │ function requestUsername(formData) {
+  
+  i Functions with the "use server" directive are React Server Functions and therefore must be async.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add async keyword.
+  
+    11 │ async·function·addToCart(data)·{
+       │ ++++++                          
+
+```
+
+```
+invalid.jsx:15:1 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This server function is missing the async keyword.
+  
+    13 │ }
+    14 │ 
+  > 15 │ function requestUsername(formData) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 16 │ 	"use server";
+  > 17 │ 	const username = formData.get('username');
+  > 18 │ }
+       │ ^
+    19 │ 
+    20 │ const addToCart = (data) => {
+  
+  i Functions with the "use server" directive are React Server Functions and therefore must be async.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add async keyword.
+  
+    15 │ async·function·requestUsername(formData)·{
+       │ ++++++                                    
+
+```
+
+```
+invalid.jsx:20:19 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This server function is missing the async keyword.
+  
+    18 │ }
+    19 │ 
+  > 20 │ const addToCart = (data) => {
+       │                   ^^^^^^^^^^^
+  > 21 │ 	'use server';
+  > 22 │ }
+       │ ^
+    23 │ 
+    24 │ const requestUsername = (formData) => {
+  
+  i Functions with the "use server" directive are React Server Functions and therefore must be async.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add async keyword.
+  
+    20 │ const·addToCart·=·async·(data)·=>·{
+       │                   ++++++           
+
+```
+
+```
+invalid.jsx:24:25 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This server function is missing the async keyword.
+  
+    22 │ }
+    23 │ 
+  > 24 │ const requestUsername = (formData) => {
+       │                         ^^^^^^^^^^^^^^^
+  > 25 │ 	'use server';
+  > 26 │ 	const username = formData.get('username');
+  > 27 │ }
+       │ ^
+    28 │ 
+    29 │ const addToCart = (data) => {
+  
+  i Functions with the "use server" directive are React Server Functions and therefore must be async.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add async keyword.
+  
+    24 │ const·requestUsername·=·async·(formData)·=>·{
+       │                         ++++++               
+
+```
+
+```
+invalid.jsx:29:19 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This server function is missing the async keyword.
+  
+    27 │ }
+    28 │ 
+  > 29 │ const addToCart = (data) => {
+       │                   ^^^^^^^^^^^
+  > 30 │ 	"use server";
+  > 31 │ }
+       │ ^
+    32 │ 
+    33 │ const requestUsername = (formData) => {
+  
+  i Functions with the "use server" directive are React Server Functions and therefore must be async.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add async keyword.
+  
+    29 │ const·addToCart·=·async·(data)·=>·{
+       │                   ++++++           
+
+```
+
+```
+invalid.jsx:33:25 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This server function is missing the async keyword.
+  
+    31 │ }
+    32 │ 
+  > 33 │ const requestUsername = (formData) => {
+       │                         ^^^^^^^^^^^^^^^
+  > 34 │ 	"use server";
+  > 35 │ 	const username = formData.get('username');
+  > 36 │ }
+       │ ^
+    37 │ 
+    38 │ const addToCart = function (data) {
+  
+  i Functions with the "use server" directive are React Server Functions and therefore must be async.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add async keyword.
+  
+    33 │ const·requestUsername·=·async·(formData)·=>·{
+       │                         ++++++               
+
+```
+
+```
+invalid.jsx:38:19 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This server function is missing the async keyword.
+  
+    36 │ }
+    37 │ 
+  > 38 │ const addToCart = function (data) {
+       │                   ^^^^^^^^^^^^^^^^^
+  > 39 │ 	'use server';
+  > 40 │ }
+       │ ^
+    41 │ 
+    42 │ const requestUsername = function (formData) {
+  
+  i Functions with the "use server" directive are React Server Functions and therefore must be async.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add async keyword.
+  
+    38 │ const·addToCart·=·async·function·(data)·{
+       │                   ++++++                 
+
+```
+
+```
+invalid.jsx:42:25 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This server function is missing the async keyword.
+  
+    40 │ }
+    41 │ 
+  > 42 │ const requestUsername = function (formData) {
+       │                         ^^^^^^^^^^^^^^^^^^^^^
+  > 43 │ 	'use server';
+  > 44 │ 	const username = formData.get('username');
+  > 45 │ }
+       │ ^
+    46 │ 
+    47 │ const addToCart = function (data) {
+  
+  i Functions with the "use server" directive are React Server Functions and therefore must be async.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add async keyword.
+  
+    42 │ const·requestUsername·=·async·function·(formData)·{
+       │                         ++++++                     
+
+```
+
+```
+invalid.jsx:47:19 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This server function is missing the async keyword.
+  
+    45 │ }
+    46 │ 
+  > 47 │ const addToCart = function (data) {
+       │                   ^^^^^^^^^^^^^^^^^
+  > 48 │ 	"use server";
+  > 49 │ }
+       │ ^
+    50 │ 
+    51 │ const requestUsername = function (formData) {
+  
+  i Functions with the "use server" directive are React Server Functions and therefore must be async.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add async keyword.
+  
+    47 │ const·addToCart·=·async·function·(data)·{
+       │                   ++++++                 
+
+```
+
+```
+invalid.jsx:51:25 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This server function is missing the async keyword.
+  
+    49 │ }
+    50 │ 
+  > 51 │ const requestUsername = function (formData) {
+       │                         ^^^^^^^^^^^^^^^^^^^^^
+  > 52 │ 	"use server";
+  > 53 │ 	const username = formData.get('username');
+  > 54 │ }
+       │ ^
+    55 │ 
+    56 │ export function addToCart(data) {
+  
+  i Functions with the "use server" directive are React Server Functions and therefore must be async.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add async keyword.
+  
+    51 │ const·requestUsername·=·async·function·(formData)·{
+       │                         ++++++                     
+
+```
+
+```
+invalid.jsx:56:8 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This server function is missing the async keyword.
+  
+    54 │ }
+    55 │ 
+  > 56 │ export function addToCart(data) {
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 57 │ 	'use server';
+  > 58 │ }
+       │ ^
+    59 │ 
+    60 │ export default function addToCart(data) {
+  
+  i Functions with the "use server" directive are React Server Functions and therefore must be async.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add async keyword.
+  
+    56 │ export·async·function·addToCart(data)·{
+       │        ++++++                          
+
+```
+
+```
+invalid.jsx:60:16 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This server function is missing the async keyword.
+  
+    58 │ }
+    59 │ 
+  > 60 │ export default function addToCart(data) {
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 61 │ 	'use server';
+  > 62 │ }
+       │ ^
+    63 │ 
+    64 │ export default function (data) {
+  
+  i Functions with the "use server" directive are React Server Functions and therefore must be async.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add async keyword.
+  
+    60 │ export·default·async·function·addToCart(data)·{
+       │                ++++++                          
+
+```
+
+```
+invalid.jsx:64:16 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This server function is missing the async keyword.
+  
+    62 │ }
+    63 │ 
+  > 64 │ export default function (data) {
+       │                ^^^^^^^^^^^^^^^^^
+  > 65 │ 	'use server';
+  > 66 │ }
+       │ ^
+    67 │ 
+    68 │ const obj = {
+  
+  i Functions with the "use server" directive are React Server Functions and therefore must be async.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add async keyword.
+  
+    64 │ export·default·async·function·(data)·{
+       │                ++++++                 
+
+```
+
+```
+invalid.jsx:69:2 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This server function is missing the async keyword.
+  
+    68 │ const obj = {
+  > 69 │ 	action() {
+       │ 	^^^^^^^^^^
+  > 70 │ 		'use server';
+  > 71 │ 	}
+       │ 	^
+    72 │ };
+    73 │ 
+  
+  i Functions with the "use server" directive are React Server Functions and therefore must be async.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add async keyword.
+  
+    69 │ → async·action()·{
+       │   ++++++          
+
+```
+
+```
+invalid.jsx:77:2 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This server function is missing the async keyword.
+  
+    75 │ 	constructor() { }
+    76 │ 
+  > 77 │ 	action() {
+       │ 	^^^^^^^^^^
+  > 78 │ 		'use server';
+  > 79 │ 	}
+       │ 	^
+    80 │ }
+    81 │ 
+  
+  i Functions with the "use server" directive are React Server Functions and therefore must be async.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add async keyword.
+  
+    77 │ → async·action()·{
+       │   ++++++          
+
+```
+
+```
+invalid.jsx:83:2 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This server function is missing the async keyword.
+  
+    82 │ class Foo {
+  > 83 │ 	static action() {
+       │ 	^^^^^^^^^^^^^^^^^
+  > 84 │ 		'use server';
+  > 85 │ 	}
+       │ 	^
+    86 │ }
+    87 │ 
+  
+  i Functions with the "use server" directive are React Server Functions and therefore must be async.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add async keyword.
+  
+    83 │ → static·async·action()·{
+       │          ++++++          
+
+```
+
+```
+invalid.jsx:89:2 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This server function is missing the async keyword.
+  
+    88 │ function outer() {
+  > 89 │ 	function inner() {
+       │ 	^^^^^^^^^^^^^^^^^^
+  > 90 │ 		'use server';
+  > 91 │ 	}
+       │ 	^
+    92 │ }
+    93 │ 
+  
+  i Functions with the "use server" directive are React Server Functions and therefore must be async.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add async keyword.
+  
+    89 │ → async·function·inner()·{
+       │   ++++++                  
+
+```
+
+```
+invalid.jsx:94:16 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This server function is missing the async keyword.
+  
+    92 │ }
+    93 │ 
+  > 94 │ const action = function named(data) {
+       │                ^^^^^^^^^^^^^^^^^^^^^^
+  > 95 │ 	'use server';
+  > 96 │ }
+       │ ^
+    97 │ 
+    98 │ const Invalid1 = () => <form action={() => { 'use server'; }} />
+  
+  i Functions with the "use server" directive are React Server Functions and therefore must be async.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add async keyword.
+  
+    94 │ const·action·=·async·function·named(data)·{
+       │                ++++++                      
+
+```
+
+```
+invalid.jsx:98:38 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This server function is missing the async keyword.
+  
+     96 │ }
+     97 │ 
+   > 98 │ const Invalid1 = () => <form action={() => { 'use server'; }} />
+        │                                      ^^^^^^^^^^^^^^^^^^^^^^^
+     99 │ 
+    100 │ const Invalid2 = () => <form
+  
+  i Functions with the "use server" directive are React Server Functions and therefore must be async.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add async keyword.
+  
+    98 │ const·Invalid1·=·()·=>·<form·action={async·()·=>·{·'use·server';·}}·/>
+       │                                      ++++++                           
+
+```
+
+```
+invalid.jsx:101:10 lint/nursery/useReactAsyncServerFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This server function is missing the async keyword.
+  
+    100 │ const Invalid2 = () => <form
+  > 101 │ 	action={function () {
+        │ 	        ^^^^^^^^^^^^^
+  > 102 │ 		'use server';
+  > 103 │ 		doSomething();
+  > 104 │ 	}}
+        │ 	^
+    105 │ />
+    106 │ 
+  
+  i Functions with the "use server" directive are React Server Functions and therefore must be async.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add async keyword.
+  
+    101 │ → action={async·function·()·{
+        │           ++++++             
+
+```

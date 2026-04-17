@@ -205,8 +205,6 @@ postcss-simple-vars.css:4:12 parse ━━━━━━━━━━━━━━━
     5 │ background-color: darken(@link-color, 10%);
     6 │ border: 1px solid var(--border-color);
   
-  i SCSS only syntax
-  
 postcss-simple-vars.css:5:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a declaration item but instead found '@'.

@@ -135,7 +135,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noBlankTarget",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("jsx-no-target-blank").inspired()],
+        sources: &[RuleSource::EslintReact("jsx-no-target-blank").inspired(), RuleSource::EslintReactDom("no-unsafe-target-blank").inspired(), RuleSource::EslintReactXyz("dom-no-unsafe-target-blank").inspired()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Safe,
@@ -160,14 +160,15 @@ impl Rule for NoBlankTarget {
                     .then(|| node.find_attribute_by_name(attr_name))
                     .flatten()
             })?;
-        let href = href.as_static_value()?;
 
         let target_attribute = node.find_attribute_by_name("target")?;
         if target_attribute.as_static_value()?.text() != "_blank" {
             return None;
         }
 
-        if !ctx.options().allow_domains.is_empty() {
+        if let Some(href) = href.as_static_value()
+            && !ctx.options().allow_domains.is_empty()
+        {
             let allow_domains: Vec<&str> = ctx
                 .options()
                 .allow_domains

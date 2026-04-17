@@ -1,0 +1,81 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/list/issue-17652.md
+---
+
+# Input
+
+```md
+1. Some text, and code block below, with newline after code block
+
+   ```yaml
+   ---
+   foo: bar
+   ```
+
+   1. Another
+   2. List
+
+1. Some text, and code block below, with newline after code block
+
+   1. Another
+   2. List
+
+
+   ```yaml
+   ---
+   foo: bar
+   ```
+
+   1. Another
+   2. List
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -9,9 +9,11 @@
+    2. List
+ 
+ 1. Some text, and code block below, with newline after code block
++
+    1. Another
+    2. List
+ 
++
+    ```yaml
+    ---
+    foo: bar
+```
+
+# Output
+
+```md
+1. Some text, and code block below, with newline after code block
+
+   ```yaml
+   ---
+   foo: bar
+   ```
+
+   1. Another
+   2. List
+
+1. Some text, and code block below, with newline after code block
+
+   1. Another
+   2. List
+
+
+   ```yaml
+   ---
+   foo: bar
+   ```
+
+   1. Another
+   2. List
+```

@@ -10,6 +10,7 @@ impl FormatRule<AnyCssAttributeMatcherValue> for FormatAnyCssAttributeMatcherVal
         match node {
             AnyCssAttributeMatcherValue::CssIdentifier(node) => node.format().fmt(f),
             AnyCssAttributeMatcherValue::CssString(node) => node.format().fmt(f),
+            AnyCssAttributeMatcherValue::ScssInterpolatedString(node) => node.format().fmt(f),
         }
     }
 }

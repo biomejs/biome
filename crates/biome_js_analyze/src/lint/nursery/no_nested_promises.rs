@@ -221,10 +221,10 @@ fn references_outer_scope(
                 let binding_syntax = binding.syntax();
 
                 // If the binding is not inside the nested callback, it's an outer scope reference
-                if !is_descendant_of(binding_syntax, nested_callback.syntax()) {
+                if !is_descendant_of(&binding_syntax, nested_callback.syntax()) {
                     // Further check: is it inside the parent callback?
                     // If yes, this is a closure over parent scope variable
-                    if is_descendant_of(binding_syntax, parent_callback.syntax()) {
+                    if is_descendant_of(&binding_syntax, parent_callback.syntax()) {
                         return true;
                     }
                 }

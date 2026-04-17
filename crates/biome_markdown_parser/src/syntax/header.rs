@@ -32,6 +32,7 @@ use biome_parser::{
     prelude::ParsedSyntax::{self, *},
 };
 
+use crate::syntax::MAX_BLOCK_PREFIX_INDENT;
 use crate::syntax::parse_any_inline;
 
 /// Maximum number of `#` characters allowed in an ATX heading (CommonMark §4.2).
@@ -44,14 +45,14 @@ pub(crate) fn at_header(p: &mut MarkdownParser) -> bool {
         if !p.at_line_start() && !p.at_start_of_input() {
             return false;
         }
-        p.skip_line_indent(3);
+        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
         p.at(T![#])
     })
 }
 
 /// Parse an ATX header.
 ///
-/// Grammar: MdHeader = before: MdHashList content: MdParagraph? after: MdHashList
+/// Grammar: MdHeader = indent: MdIndentTokenList before: MdHashList content: MdParagraph? after: MdHashList
 ///
 /// ATX headers start with 1-6 `#` characters followed by space or end of line.
 /// More than 6 `#` characters is not a valid header.
@@ -66,7 +67,7 @@ pub(crate) fn parse_header(p: &mut MarkdownParser) -> ParsedSyntax {
     // The lexer emits all consecutive `#` chars as a single HASH token,
     // so we need to verify the token length doesn't exceed 6 before consuming it.
     let hash_count = p.lookahead(|p| {
-        p.skip_line_indent(3);
+        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
         if p.at(T![#]) { p.cur_text().len() } else { 0 }
     });
 
@@ -79,7 +80,7 @@ pub(crate) fn parse_header(p: &mut MarkdownParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    p.skip_line_indent(3);
+    p.emit_line_indent(MAX_BLOCK_PREFIX_INDENT);
 
     // Parse opening hashes (MdHashList containing MdHash nodes)
     parse_hash_list(p);
@@ -158,8 +159,17 @@ pub(crate) fn parse_header_content(p: &mut MarkdownParser) {
                 // Backslash at end of heading is literal text, not a hard break.
                 let _ = super::parse_textual(p);
             } else {
-                // Trailing spaces before newline — skip as trivia.
-                p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_HARD_LINE_LITERAL));
+                // Re-lex MD_HARD_LINE_LITERAL in heading context to split
+                // the bundled spaces + newline. Headings don't produce hard
+                // breaks (§4.2), so we re-lex to get the trailing spaces as
+                // MD_TEXTUAL_LITERAL and consume them as Whitespace trivia.
+                // The newline remains as a separate token for normal handling.
+                p.force_relex_heading_content();
+                // After re-lex, current token is the whitespace-only part.
+                // Consume it as Whitespace trivia if it's whitespace.
+                if p.at(MD_TEXTUAL_LITERAL) && p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
+                    p.consume_as_whitespace_trivia();
+                }
             }
             break;
         }
@@ -330,11 +340,12 @@ pub(crate) fn parse_trailing_hashes(p: &mut MarkdownParser) {
     let m = p.start();
 
     if at_trailing_hashes_start(p) {
-        // Skip whitespace before trailing hashes
+        // Consume whitespace before trailing hashes as whitespace trivia.
+        // Per CommonMark §4.2, the space between content and closing # is structural.
         while p.at(MD_TEXTUAL_LITERAL) {
             let text = p.cur_text();
             if text.chars().all(|c| c == ' ' || c == '\t') {
-                p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
+                p.consume_as_whitespace_trivia();
             } else {
                 break;
             }
@@ -346,18 +357,25 @@ pub(crate) fn parse_trailing_hashes(p: &mut MarkdownParser) {
             p.bump(T![#]);
             hash_m.complete(p, MD_HASH);
 
-            // Skip any trailing whitespace AFTER the closing hashes
-            // Per CommonMark §4.2, trailing whitespace after closing hashes is ignored
-            // The lexer may combine trailing whitespace with the newline into a single token
-            // Check both MD_TEXTUAL_LITERAL and MD_HARD_LINE_LITERAL (5+ spaces before newline)
+            // Consume trailing whitespace AFTER the closing hashes.
+            // Per CommonMark §4.2, trailing whitespace after closing hashes is ignored.
+            // For MD_HARD_LINE_LITERAL, re-lex in HeadingContent context to split
+            // the bundled spaces + newline, then consume only the whitespace part.
             while p.at(MD_TEXTUAL_LITERAL) || p.at(MD_HARD_LINE_LITERAL) {
+                if p.at(MD_HARD_LINE_LITERAL) {
+                    p.force_relex_heading_content();
+                    // After re-lex, consume whitespace-only tokens.
+                    if p.at(MD_TEXTUAL_LITERAL)
+                        && p.cur_text().chars().all(|c| c == ' ' || c == '\t')
+                    {
+                        p.consume_as_whitespace_trivia();
+                    }
+                    break;
+                }
                 let text = p.cur_text();
-                // Check if this is whitespace-only (spaces/tabs) or whitespace+newline
-                let is_trailing_ws = text
-                    .chars()
-                    .all(|c| c == ' ' || c == '\t' || c == '\n' || c == '\r');
+                let is_trailing_ws = text.chars().all(|c| c == ' ' || c == '\t');
                 if is_trailing_ws {
-                    p.parse_as_skipped_trivia_tokens(|p| p.bump_any());
+                    p.consume_as_whitespace_trivia();
                 } else {
                     break;
                 }

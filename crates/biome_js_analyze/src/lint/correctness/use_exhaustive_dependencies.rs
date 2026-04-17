@@ -418,7 +418,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useExhaustiveDependencies",
         language: "jsx",
-        sources: &[RuleSource::EslintReactHooks("exhaustive-deps").same()],
+        sources: &[RuleSource::EslintReactHooks("exhaustive-deps").same(), RuleSource::EslintReactX("exhaustive-deps").same(), RuleSource::EslintReactXyz("exhaustive-deps").same()],
         recommended: true,
         severity: Severity::Error,
         domains: &[RuleDomain::React, RuleDomain::Next],
@@ -800,7 +800,7 @@ fn is_stable_binding(
                     depth + 1,
                 ),
                 GetSinglePatternMemberResult::TooDeep => false,
-                GetSinglePatternMemberResult::Unknown => true,
+                GetSinglePatternMemberResult::Unknown => false,
             }
         }
 
@@ -1075,6 +1075,7 @@ fn get_single_pattern_member(
     }
 }
 
+#[derive(Debug)]
 enum GetSinglePatternMemberResult {
     /// The binding is part of a pattern 1 level deep
     Member(ReactHookResultMember),
@@ -1627,11 +1628,12 @@ impl Rule for UseExhaustiveDependencies {
 
         let message = match state {
             Fix::AddDependency {
-                captures: (_, captures),
+                captures,
                 dependencies_array,
                 ..
             } => {
-                let new_elements = captures.first().into_iter().filter_map(|node| {
+                let (capture_text, captures_range) = captures;
+                let new_elements = captures_range.first().into_iter().filter_map(|node| {
                     if let Some(jsx_ref) = JsxReferenceIdentifier::cast_ref(node) {
                         return Some(AnyJsArrayElement::AnyJsExpression(
                             make::js_identifier_expression(make::js_reference_identifier(
@@ -1662,7 +1664,7 @@ impl Rule for UseExhaustiveDependencies {
                     recreate_array(dependencies_array, elements),
                 );
 
-                markup! { "Add the missing dependency to the list." }
+                markup! { "Add the missing dependency "<Emphasis>{capture_text.as_ref()}</Emphasis>" to the list." }
             }
             Fix::RemoveDependency {
                 dependencies,

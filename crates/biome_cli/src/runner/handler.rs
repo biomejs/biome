@@ -1,7 +1,7 @@
 use crate::runner::crawler::CrawlerContext;
 use crate::runner::diagnostics::PanicDiagnostic;
 use crate::runner::process_file::{FileStatus, ProcessFile};
-use biome_diagnostics::{DiagnosticExt, DiagnosticTags, category};
+use biome_diagnostics::{DiagnosticExt, DiagnosticTags, Severity, category};
 use biome_fs::{BiomePath, FileSystem, TraversalContext};
 use biome_service::file_handlers::DocumentFileSource;
 use biome_service::workspace::{
@@ -35,9 +35,8 @@ pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
         let fs = ctx.fs();
         let workspace = ctx.workspace();
         let execution = ctx.execution();
-        let path = biome_path.as_path();
         let project_key = ctx.project_key();
-        if fs.path_is_dir(path) || fs.path_is_symlink(path) {
+        if biome_path.path_kind().is_dir() || biome_path.path_kind().is_symlink() {
             // handle:
             // - directories
             // - symlinks
@@ -48,6 +47,9 @@ pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
                 .is_path_ignored(PathIsIgnoredParams {
                     project_key,
                     path: biome_path.clone(),
+                    // Treat symlinks the same as directories for include/ignore matching,
+                    // since symlinks in this branch point to directories.
+                    is_dir: true,
                     features: execution.wanted_features(),
                     ignore_kind: IgnoreKind::Ancestors,
                 })
@@ -60,7 +62,7 @@ pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
         }
 
         // bail on fifo and socket files
-        if !fs.path_is_file(path) {
+        if !biome_path.path_kind().is_file() {
             return false;
         }
 
@@ -105,15 +107,20 @@ pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
     /// This function wraps the [process_file] function implementing the traversal
     /// in a [catch_unwind] block and emit diagnostics in case of error (either the
     /// traversal function returns Err or panics)
-    fn handle_path<P, Ctx>(&self, biome_path: &BiomePath, ctx: &Ctx)
-    where
+    fn handle_path<P, Ctx>(
+        &self,
+        biome_path: &BiomePath,
+        max_diagnostics: u32,
+        diagnostic_level: Severity,
+        ctx: &Ctx,
+    ) where
         Ctx: CrawlerContext + std::panic::RefUnwindSafe,
         P: ProcessFile + std::panic::RefUnwindSafe,
     {
         // ProcessFile::process_file is generic over Ctx: TraversalContext
         // We pass &Ctx which should also implement TraversalContext
 
-        match catch_unwind(move || P::execute(ctx, biome_path)) {
+        match catch_unwind(move || P::execute(ctx, biome_path, max_diagnostics, diagnostic_level)) {
             Ok(Ok(FileStatus::Changed)) => {
                 ctx.increment_changed(biome_path);
             }

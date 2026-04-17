@@ -1,0 +1,76 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: basic.jsonc
+---
+## ESLint Config
+
+```json
+{
+	"rules": {
+		"@typescript-eslint/naming-convention": [
+			"error",
+			{ "leadingUnderscore": "forbid", "selector": "property" },
+			{
+				"format": ["strictCamelCase"],
+				"leadingUnderscore": "require",
+				"modifiers": ["private"],
+				"selector": "property"
+			},
+			{ "prefix": ["I", "IO"], "selector": "interface" },
+			{ "format": ["UPPER_CASE"], "selector": "enumMember" },
+			{ "format": ["UPPER_CASE"], "selector": "variable", "types": ["boolean"] }
+		]
+	}
+}
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"recommended": false,
+			"style": {
+				"useNamingConvention": {
+					"level": "error",
+					"options": {
+						"strictCase": false,
+						"requireAscii": false,
+						"conventions": [
+							{
+								"selector": { "kind": "enumMember" },
+								"formats": ["CONSTANT_CASE"]
+							},
+							{ "selector": { "kind": "interface" }, "match": "(?:I|IO)(.*)" },
+							{
+								"selector": {
+									"kind": "classProperty",
+									"modifiers": ["private"]
+								},
+								"match": "_([^_]*)",
+								"formats": ["camelCase"]
+							},
+							{ "selector": { "kind": "classProperty" }, "match": "([^_]*)" },
+							{ "selector": { "kind": "typeProperty" }, "match": "([^_]*)" },
+							{
+								"selector": { "kind": "objectLiteralProperty" },
+								"match": "([^_]*)"
+							}
+						]
+					}
+				}
+			}
+		}
+	}
+}
+
+```

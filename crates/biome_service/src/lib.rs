@@ -14,6 +14,8 @@ pub mod workspace_types;
 mod scanner;
 mod utils;
 
+mod embed;
+
 #[cfg(feature = "testing")]
 pub mod test_utils;
 

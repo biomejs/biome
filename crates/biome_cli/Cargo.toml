@@ -20,13 +20,13 @@ path = "src/main.rs"
 [dependencies]
 anyhow                   = { workspace = true }
 biome_analyze            = { workspace = true }
-biome_configuration      = { workspace = true }
+biome_configuration      = { workspace = true, features = ["cli"] }
 biome_console            = { workspace = true }
 biome_css_analyze        = { workspace = true }
 biome_css_syntax         = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
-biome_diagnostics        = { workspace = true, features = ["bpaf", "std"] }
+biome_diagnostics        = { workspace = true, features = ["bpaf", "notify", "std"] }
 biome_flags              = { workspace = true }
 biome_formatter          = { workspace = true }
 biome_fs                 = { workspace = true }
@@ -47,6 +47,7 @@ biome_json_parser        = { workspace = true }
 biome_json_syntax        = { workspace = true }
 biome_lsp                = { workspace = true }
 biome_migrate            = { workspace = true }
+biome_package            = { workspace = true }
 biome_resolver           = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_rule_options       = { workspace = true }
@@ -56,11 +57,15 @@ bpaf                     = { workspace = true, features = ["bright-color"] }
 camino                   = { workspace = true }
 crossbeam                = { workspace = true }
 dashmap                  = { workspace = true }
+notify                   = { workspace = true }
+papaya                   = { workspace = true }
 path-absolutize          = { workspace = true }
-quick-junit              = "0.5.2"
+quick-junit              = "0.6.0"
 rayon                    = { workspace = true }
 regex                    = { workspace = true }
+reqwest                  = { workspace = true, features = ["blocking", "rustls-tls"] }
 rustc-hash               = { workspace = true }
+self_update              = { version = "0.42.0", default-features = false, features = ["rustls"] }
 serde                    = { workspace = true, features = ["derive"] }
 serde_json               = { workspace = true }
 smallvec                 = { workspace = true }
@@ -81,22 +86,23 @@ tracing-subscriber       = { workspace = true, features = ["env-filter", "json"]
 tracing-tree             = "0.4.1"
 
 [dev-dependencies]
-biome_css_formatter  = { workspace = true }
-biome_css_parser     = { workspace = true }
-biome_js_formatter   = { workspace = true }
-biome_json_formatter = { workspace = true }
-biome_json_parser    = { workspace = true }
+biome_css_formatter  = { path = "../biome_css_formatter" }
+biome_css_parser     = { path = "../biome_css_parser" }
+biome_js_formatter   = { path = "../biome_js_formatter" }
+biome_json_formatter = { path = "../biome_json_formatter" }
+biome_json_parser    = { path = "../biome_json_parser" }
 directories          = { workspace = true }
 insta                = { workspace = true }
 regex                = { workspace = true }
 serial_test          = "3.3.1"
+tests_macros         = { workspace = true }
 tokio                = { workspace = true, features = ["io-util"] }
 
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dependencies]
 tikv-jemallocator = { workspace = true }
 
 [target.'cfg(unix)'.dependencies]
-libc  = "0.2.180"
+libc  = "0.2.184"
 tokio = { workspace = true, features = ["process"] }
 
 [target.'cfg(windows)'.dependencies]

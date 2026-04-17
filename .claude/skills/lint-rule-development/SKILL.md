@@ -1,6 +1,7 @@
 ---
 name: lint-rule-development
-description: Step-by-step guide for creating and implementing lint rules in Biome's analyzer. Use when implementing rules like noVar, useConst, or any custom lint/assist rule. Examples:<example>User wants to create a rule that detects unused variables</example><example>User needs to add code actions to fix diagnostic issues</example><example>User is implementing semantic analysis for binding references</example>
+description: Step-by-step guide for creating and implementing lint rules in Biome's analyzer. Use when implementing rules like noVar, useConst, or any custom lint/assist rule, adding code actions to fix diagnostics, implementing semantic analysis for binding references, or adding configurable options to rules.
+compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
 ## Purpose
@@ -72,12 +73,12 @@ impl Rule for UseMyRuleName {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let binding = ctx.query();
-        
+
         // Check if identifier matches your rule logic
         if binding.name_token().ok()?.text() == "prohibited_name" {
             return Some(());
         }
-        
+
         None
     }
 
@@ -144,27 +145,27 @@ RuleDiagnostic::new(
 For rules that need binding analysis:
 
 ```rust
-use biome_analyze::Semantic;
+use crate::services::semantic::Semantic;
 
 impl Rule for MySemanticRule {
     type Query = Semantic<JsReferenceIdentifier>;
-    
+
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let model = ctx.model();
-        
+
         // Check if binding is declared
         let binding = node.binding(model)?;
-        
+
         // Get all references to this binding
         let all_refs = binding.all_references(model);
-        
+
         // Get only read references
         let read_refs = binding.all_reads(model);
-        
+
         // Get only write references
         let write_refs = binding.all_writes(model);
-        
+
         Some(())
     }
 }
@@ -191,15 +192,15 @@ impl Rule for UseMyRuleName {
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
-        
+
         // Example: Replace the node
         mutation.replace_node(
             node.clone(),
             make::js_identifier_binding(make::ident("replacement"))
         );
-        
+
         Some(JsRuleAction::new(
-            ctx.action_category(ctx.category(), ctx.group()),
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Use 'replacement' instead" }.to_owned(),
             mutation,
@@ -274,6 +275,18 @@ These magic comments:
 Example `invalid.js`:
 ```javascript
 // should generate diagnostics
+**Every test file must start with a top-level comment** declaring whether it expects diagnostics. The test runner enforces this — see the `testing-codegen` skill for full rules. The short version:
+
+`valid.js` — comment is **mandatory** (test panics without it):
+```js
+/* should not generate diagnostics */
+const x = 1;
+const y = 2;
+```
+
+`invalid.js` — comment is strongly recommended (also enforced when present):
+```js
+/* should generate diagnostics */
 const prohibited_name = 1;
 const another_prohibited = 2;
 ```
@@ -292,22 +305,28 @@ just test-lintrule useMyRuleName
 
 Review snapshots:
 ```shell
-cargo insta review
+cargo insta accept # accept all snapshots
+cargo insta reject # reject all snapshots
 ```
 
 ### Generate Analyzer Code
 
-After modifying rules, generate updated boilerplate:
+During development, use the lightweight codegen commands:
+
+```shell
+just gen-rules          # Updates rule registrations in *_analyze crates
+just gen-configuration  # Updates configuration schemas
+```
+
+These generate enough code to compile and test your rule without errors.
+
+For full codegen (migrations, schema, bindings, formatting), run:
 
 ```shell
 just gen-analyzer
 ```
 
-This updates:
-- Rule registrations
-- Configuration schemas
-- Documentation exports
-- Type bindings
+**Note:** The CI autofix job runs `gen-analyzer` automatically when you open a PR, so running it locally is optional.
 
 ### Format and Lint
 
@@ -317,70 +336,54 @@ just f  # Format code
 just l  # Lint code
 ```
 
-## Documenting Rules
+### Adding Configurable Options
 
-### Multi-File Examples
+When a rule needs user-configurable behavior, add options via the `biome_rule_options` crate.
+For the full reference (merge strategies, design guidelines, common patterns), see
+[references/OPTIONS.md](references/OPTIONS.md).
 
-For rules that analyze relationships between multiple files (e.g., import cycles, cross-file dependencies, CSS class references), use the `file=<path>` property:
+**Quick workflow:**
 
-```rust
-/// ### Invalid
-///
-/// ```js,expect_diagnostic,file=foo.js
-/// import { bar } from "./bar.js";
-/// export function foo() {
-///     return bar();
-/// }
-/// ```
-///
-/// ```js,expect_diagnostic,file=bar.js
-/// import { foo } from "./foo.js";
-/// export function bar() {
-///     return foo();
-/// }
-/// ```
-```
-
-**How it works:**
-- All files in a documentation section (`### Invalid` or `### Valid`) are collected into an in-memory file system
-- The module graph is automatically populated from these files
-- Each file with `expect_diagnostic` must emit exactly one diagnostic
-- Files without `expect_diagnostic` provide context but aren't expected to trigger the rule
-
-**Supported languages:**
-- Supported: JavaScript/TypeScript/JSX/TSX
-- Supported: CSS (module graph automatically populated from `file=` blocks)
-- Not supported: HTML with `<style>` blocks (requires embedded snippet parsing - not yet implemented)
-
-### The `ignore` Directive
-
-Use `ignore` to exclude code blocks from automatic validation:
+**Step 1.** Define the options type in `biome_rule_options/src/<snake_case_rule_name>.rs`:
 
 ```rust
-/// ```html,expect_diagnostic,ignore
-/// <style>.card { border: 1px solid; }</style>
-/// <div class="header">Content</div>
-/// ```
+use biome_deserialize_macros::{Deserializable, Merge};
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Default, Clone, Serialize, Deserialize, Deserializable, Merge)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
+pub struct UseMyRuleNameOptions {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub behavior: Option<MyBehavior>,
+}
 ```
 
-**When to use `ignore`:**
-- Rules that require features not yet available in rustdoc context (e.g., HTML embedded snippets)
-- Examples that need special parser configuration
-- Illustrative examples where automatic validation isn't critical
+**Step 2.** Wire it into the rule:
 
-**Important:** Even with `ignore`, you should have comprehensive snapshot tests in `tests/specs/`.
-
-### Code Block Property Order
-
-For consistency, properties should be ordered:
 ```rust
-/// ```<language>[,expect_diagnostic][,(options|full_options|use_options)][,ignore][,file=path]
+use biome_rule_options::use_my_rule_name::UseMyRuleNameOptions;
+
+impl Rule for UseMyRuleName {
+    type Options = UseMyRuleNameOptions;
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let options = ctx.options();
+        let behavior = options.behavior.unwrap_or_default();
+        // ...
+    }
+}
 ```
 
-Examples:
-- `css,expect_diagnostic,file=styles.css`
-- `jsx,file=App.jsx`
-- `html,expect_diagnostic,ignore`
+**Step 3.** Test with `options.json` in the test directory (see [references/OPTIONS.md](references/OPTIONS.md) for examples).
+
+**Step 4.** Run codegen: `just gen-rules && just gen-configuration`
+
+**Key rules:**
+- All fields must be `Option<T>` for config merging to work
+- Use `Box<[Box<str>]>` instead of `Vec<String>` for collection fields
+- Use `#[derive(Merge)]` for simple cases, implement `Merge` manually for collections
+- Only add options when truly needed (conflicting community preferences, multiple valid interpretations)
 
 ## Tips
 
@@ -392,6 +395,13 @@ Examples:
 - **Check for globals**: Always verify if a variable is global before reporting it (use semantic model)
 - **Error recovery**: When navigating CST, use `.ok()?` pattern to handle missing nodes gracefully
 - **Testing arrays**: Use `.jsonc` files with arrays of code snippets for multiple test cases
+
+## Common Mistakes to Avoid
+
+Generally, mistakes revolve around allocating unnecessary data during rule execution, which can lead to performance issues. Common examples include:
+
+- Placing `String` or `Box<str>` in a Rule's `State` type. It's a strong indicator that you are allocating a string unnecessarily. If the string comes from a CST token, this usually can be avoided by using `TokenText` instead.
+- Building strings or other data structures only used in the code action in `run()` instead of `action()`. `run()` should only decide whether to emit a diagnostic; `action()` should build the fix. This matters for performance because building the action can be expensive, and we should avoid doing it when no diagnostic is emitted.
 
 ## Common Query Types
 
@@ -408,6 +418,53 @@ declare_node_union! {
 }
 type Query = Semantic<AnyFunctionLike>;
 ```
+
+## High Quality Diagnostics
+
+**VERY IMPORTANT**: Rule diagnostics MUST convey these messages, in this order:
+
+1. What the problem is
+2. Why it's a problem (motivation to fix the issue)
+3. How to fix it (actionable advice)
+
+If the rule has an `action()` to fix the issue, the 3rd message should go in the action's message. If not, it should go in the diagnostic's advice.
+
+Diagnostics must remain focused on the specific issue that the rule is flagging. Avoid including superfluous details that aren't directly relevant to the problem, as this can overwhelm users and obscure the main point.
+If a rule can flag multiple classes of the same category of issue, the diagnostic messages should be surgically customized to the specific issue being flagged, rather than using generic messages that apply to all cases. This ensures that users receive precise and relevant information about the problem and how to fix it.
+
+### Examples
+
+Good:
+```
+1. "Foo is not allowed here."
+2. "Foo harms readability because of X, Y, Z."
+3. "Consider using Bar instead, which is more concise and easier to read."
+```
+
+```
+1. "Unexpected for-in loop."
+2. "For-in loops are confusing and easy to misuse."
+3. "You likely want to use a regular loop, for-of loop or forEach instead."
+```
+
+Bad:
+
+```
+1. "Prefer let or const over var." // conflates the what and the how in one message,
+2. "var is bad." // not meaningful motivation to fix, doesn't explain the consequences
+// third message missing is bad, because it doesn't give users a clear path to fix the issue
+```
+
+```
+1. "This var declaration is not at the top of its containing scope." // Good start, explains what the problem is
+2. "Move standalone var declarations before other statements in the same function, script, module, or static block." // Doesn't explain why, only tells the action. The "why" must come second, after the what.
+3. "At module scope, imports and leading "<Emphasis>"export var"</Emphasis>" declarations may appear before other statements." // Doesn't explain the action, just gives a superfluous detail about module scope.
+```
+
+## Tips
+
+- New rules are always in the `nursery` group. No need to move them to another category.
+- Changesets are always required for new rules. New rules are `patch` level changes. There's a skill to help write good changesets.
 
 ## References
 

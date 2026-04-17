@@ -18,41 +18,43 @@ YamlRoot {
             bom_token: missing (optional),
             directives: YamlDirectiveList [],
             dashdashdash_token: missing (optional),
-            node: YamlBlockMapping {
-                mapping_start_token: MAPPING_START@0..0 "" [] [],
-                properties: missing (optional),
-                entries: YamlBlockMapEntryList [
-                    YamlBlockMapImplicitEntry {
-                        key: YamlFlowYamlNode {
-                            properties: missing (optional),
-                            content: YamlPlainScalar {
-                                value_token: PLAIN_LITERAL@0..2 "aa" [] [],
-                            },
-                        },
-                        colon_token: COLON@2..4 ":" [] [Whitespace(" ")],
-                        value: YamlFlowInBlockNode {
-                            flow_start_token: FLOW_START@4..4 "" [] [],
-                            flow: YamlFlowYamlNode {
-                                properties: missing (optional),
+            node: YamlBlockInBlockNode {
+                properties: YamlPropertyList [],
+                content: YamlBlockMapping {
+                    mapping_start_token: MAPPING_START@0..0 "" [] [],
+                    entries: YamlBlockMapEntryList [
+                        YamlBlockMapImplicitEntry {
+                            key: YamlFlowYamlNode {
+                                properties: YamlPropertyList [],
                                 content: YamlPlainScalar {
-                                    value_token: PLAIN_LITERAL@4..6 "bb" [] [],
+                                    value_token: PLAIN_LITERAL@0..2 "aa" [] [],
                                 },
                             },
-                            flow_end_token: FLOW_END@6..6 "" [] [],
-                        },
-                    },
-                    YamlBlockMapImplicitEntry {
-                        key: YamlFlowYamlNode {
-                            properties: missing (optional),
-                            content: YamlPlainScalar {
-                                value_token: PLAIN_LITERAL@6..10 "abc" [Newline("\n")] [],
+                            colon_token: COLON@2..4 ":" [] [Whitespace(" ")],
+                            value: YamlFlowInBlockNode {
+                                flow_start_token: FLOW_START@4..4 "" [] [],
+                                flow: YamlFlowYamlNode {
+                                    properties: YamlPropertyList [],
+                                    content: YamlPlainScalar {
+                                        value_token: PLAIN_LITERAL@4..6 "bb" [] [],
+                                    },
+                                },
+                                flow_end_token: FLOW_END@6..6 "" [] [],
                             },
                         },
-                        colon_token: missing (required),
-                        value: missing (optional),
-                    },
-                ],
-                mapping_end_token: MAPPING_END@10..11 "" [Newline("\n")] [],
+                        YamlBlockMapImplicitEntry {
+                            key: YamlFlowYamlNode {
+                                properties: YamlPropertyList [],
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@6..10 "abc" [Newline("\n")] [],
+                                },
+                            },
+                            colon_token: missing (required),
+                            value: missing (optional),
+                        },
+                    ],
+                    mapping_end_token: MAPPING_END@10..11 "" [Newline("\n")] [],
+                },
             },
             dotdotdot_token: missing (optional),
         },
@@ -70,31 +72,32 @@ YamlRoot {
       0: (empty)
       1: YAML_DIRECTIVE_LIST@0..0
       2: (empty)
-      3: YAML_BLOCK_MAPPING@0..11
-        0: MAPPING_START@0..0 "" [] []
-        1: (empty)
-        2: YAML_BLOCK_MAP_ENTRY_LIST@0..10
-          0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@0..6
-            0: YAML_FLOW_YAML_NODE@0..2
-              0: (empty)
-              1: YAML_PLAIN_SCALAR@0..2
-                0: PLAIN_LITERAL@0..2 "aa" [] []
-            1: COLON@2..4 ":" [] [Whitespace(" ")]
-            2: YAML_FLOW_IN_BLOCK_NODE@4..6
-              0: FLOW_START@4..4 "" [] []
-              1: YAML_FLOW_YAML_NODE@4..6
-                0: (empty)
-                1: YAML_PLAIN_SCALAR@4..6
-                  0: PLAIN_LITERAL@4..6 "bb" [] []
-              2: FLOW_END@6..6 "" [] []
-          1: YAML_BLOCK_MAP_IMPLICIT_ENTRY@6..10
-            0: YAML_FLOW_YAML_NODE@6..10
-              0: (empty)
-              1: YAML_PLAIN_SCALAR@6..10
-                0: PLAIN_LITERAL@6..10 "abc" [Newline("\n")] []
-            1: (empty)
-            2: (empty)
-        3: MAPPING_END@10..11 "" [Newline("\n")] []
+      3: YAML_BLOCK_IN_BLOCK_NODE@0..11
+        0: YAML_PROPERTY_LIST@0..0
+        1: YAML_BLOCK_MAPPING@0..11
+          0: MAPPING_START@0..0 "" [] []
+          1: YAML_BLOCK_MAP_ENTRY_LIST@0..10
+            0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@0..6
+              0: YAML_FLOW_YAML_NODE@0..2
+                0: YAML_PROPERTY_LIST@0..0
+                1: YAML_PLAIN_SCALAR@0..2
+                  0: PLAIN_LITERAL@0..2 "aa" [] []
+              1: COLON@2..4 ":" [] [Whitespace(" ")]
+              2: YAML_FLOW_IN_BLOCK_NODE@4..6
+                0: FLOW_START@4..4 "" [] []
+                1: YAML_FLOW_YAML_NODE@4..6
+                  0: YAML_PROPERTY_LIST@4..4
+                  1: YAML_PLAIN_SCALAR@4..6
+                    0: PLAIN_LITERAL@4..6 "bb" [] []
+                2: FLOW_END@6..6 "" [] []
+            1: YAML_BLOCK_MAP_IMPLICIT_ENTRY@6..10
+              0: YAML_FLOW_YAML_NODE@6..10
+                0: YAML_PROPERTY_LIST@6..6
+                1: YAML_PLAIN_SCALAR@6..10
+                  0: PLAIN_LITERAL@6..10 "abc" [Newline("\n")] []
+              1: (empty)
+              2: (empty)
+          2: MAPPING_END@10..11 "" [Newline("\n")] []
       4: (empty)
   1: EOF@11..11 "" [] []
 

@@ -18,11 +18,14 @@ pub mod grit;
 pub mod html;
 pub mod javascript;
 pub mod json;
+pub mod markdown;
 pub mod max_size;
 mod overrides;
 pub mod vcs;
 
-use crate::analyzer::assist::{Actions, AssistConfiguration, Source, assist_configuration};
+#[cfg(feature = "cli")]
+use crate::analyzer::assist::assist_configuration;
+use crate::analyzer::assist::{Actions, AssistConfiguration, Source};
 use crate::analyzer::{RuleAssistConfiguration, RuleDomains};
 use crate::bool::Bool;
 use crate::css::{CssFormatterConfiguration, CssLinterConfiguration, CssParserConfiguration};
@@ -31,14 +34,23 @@ pub use crate::diagnostics::CantLoadExtendFile;
 use crate::extends::Extends;
 pub use crate::generated::{push_to_analyzer_assist, push_to_analyzer_rules};
 use crate::graphql::{GraphqlFormatterConfiguration, GraphqlLinterConfiguration};
-pub use crate::grit::{GritConfiguration, grit_configuration};
+pub use crate::grit::GritConfiguration;
+#[cfg(feature = "cli")]
+pub use crate::grit::grit_configuration;
 use crate::javascript::{JsFormatterConfiguration, JsLinterConfiguration};
 use crate::json::{JsonFormatterConfiguration, JsonLinterConfiguration};
+pub use crate::markdown::MarkdownConfiguration;
+#[cfg(feature = "cli")]
+pub use crate::markdown::markdown_configuration;
 use crate::max_size::MaxSize;
-use crate::vcs::{VcsConfiguration, vcs_configuration};
+use crate::vcs::VcsConfiguration;
+#[cfg(feature = "cli")]
+use crate::vcs::vcs_configuration;
+#[cfg(feature = "cli")]
+pub use analyzer::linter_configuration;
 pub use analyzer::{
     LinterConfiguration, RuleConfiguration, RuleFixConfiguration, RulePlainConfiguration,
-    RuleWithFixOptions, RuleWithOptions, Rules, linter_configuration,
+    RuleWithFixOptions, RuleWithOptions, Rules,
 };
 use biome_analyze::ExtendedConfigurationProvider;
 use biome_console::fmt::{Display, Formatter};
@@ -50,14 +62,27 @@ use biome_deserialize::{
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::Severity;
 use biome_formatter::{IndentStyle, QuoteStyle};
+#[cfg(feature = "cli")]
 use bpaf::Bpaf;
 use camino::Utf8PathBuf;
-pub use css::{CssConfiguration, css_configuration};
-pub use formatter::{FormatterConfiguration, formatter_configuration};
-pub use graphql::{GraphqlConfiguration, graphql_configuration};
-pub use html::{HtmlConfiguration, html_configuration};
-pub use javascript::{JsConfiguration, js_configuration};
-pub use json::{JsonConfiguration, json_configuration};
+pub use css::CssConfiguration;
+#[cfg(feature = "cli")]
+pub use css::css_configuration;
+pub use formatter::FormatterConfiguration;
+#[cfg(feature = "cli")]
+pub use formatter::formatter_configuration;
+pub use graphql::GraphqlConfiguration;
+#[cfg(feature = "cli")]
+pub use graphql::graphql_configuration;
+pub use html::HtmlConfiguration;
+#[cfg(feature = "cli")]
+pub use html::html_configuration;
+pub use javascript::JsConfiguration;
+#[cfg(feature = "cli")]
+pub use javascript::js_configuration;
+pub use json::JsonConfiguration;
+#[cfg(feature = "cli")]
+pub use json::json_configuration;
 pub use overrides::{
     OverrideAssistConfiguration, OverrideFilesConfiguration, OverrideFormatterConfiguration,
     OverrideGlobs, OverrideLinterConfiguration, OverridePattern, Overrides,
@@ -94,92 +119,106 @@ pub const VERSION: &str = match option_env!("BIOME_VERSION") {
 pub type RootEnabled = Bool<true>;
 
 /// The configuration that is contained inside the file `biome.json`
-#[derive(
-    Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Bpaf, Deserializable, Merge,
-)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
+#[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(deny_unknown_fields, default, rename_all = "camelCase")]
 #[deserializable(with_validator)]
 pub struct Configuration {
     /// A field for the [JSON schema](https://json-schema.org/) specification
     #[serde(rename = "$schema")]
-    #[bpaf(hide, pure(Default::default()))]
+    #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub schema: Option<Schema>,
 
     /// Indicates whether this configuration file is at the root of a Biome
     /// project. By default, this is `true`.
-    #[bpaf(hide, hide_usage)]
+    #[cfg_attr(feature = "cli", bpaf(hide, hide_usage))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub root: Option<RootEnabled>,
 
     /// A list of paths to other JSON files, used to extends the current configuration.
-    #[bpaf(hide, pure(Default::default()))]
+    #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub extends: Option<Extends>,
 
     /// The configuration of the VCS integration
-    #[bpaf(external(vcs_configuration), optional, hide_usage)]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(external(vcs_configuration), optional, hide_usage)
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub vcs: Option<VcsConfiguration>,
 
     /// The configuration of the filesystem
-    #[bpaf(external(files_configuration), optional, hide_usage)]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(external(files_configuration), optional, hide_usage)
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub files: Option<FilesConfiguration>,
 
     /// The configuration of the formatter
-    #[bpaf(external(formatter_configuration), optional)]
+    #[cfg_attr(feature = "cli", bpaf(external(formatter_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub formatter: Option<FormatterConfiguration>,
 
     /// The configuration for the linter
-    #[bpaf(external(linter_configuration), optional)]
+    #[cfg_attr(feature = "cli", bpaf(external(linter_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub linter: Option<LinterConfiguration>,
 
     /// Specific configuration for the JavaScript language
-    #[bpaf(external(js_configuration), optional)]
+    #[cfg_attr(feature = "cli", bpaf(external(js_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub javascript: Option<JsConfiguration>,
 
     /// Specific configuration for the Json language
-    #[bpaf(external(json_configuration), optional)]
+    #[cfg_attr(feature = "cli", bpaf(external(json_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub json: Option<JsonConfiguration>,
 
     /// Specific configuration for the Css language
-    #[bpaf(external(css_configuration), optional)]
+    #[cfg_attr(feature = "cli", bpaf(external(css_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub css: Option<CssConfiguration>,
 
+    /// Specific configuration for the Markdown language
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(external(markdown_configuration), optional, hide)
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "markdown")]
+    pub markdown: Option<MarkdownConfiguration>,
+
     /// Specific configuration for the GraphQL language
-    #[bpaf(external(graphql_configuration), optional)]
+    #[cfg_attr(feature = "cli", bpaf(external(graphql_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub graphql: Option<GraphqlConfiguration>,
 
     /// Specific configuration for the GraphQL language
-    #[bpaf(external(grit_configuration), optional)]
+    #[cfg_attr(feature = "cli", bpaf(external(grit_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub grit: Option<GritConfiguration>,
 
     /// Specific configuration for the HTML language
-    #[bpaf(external(html_configuration), optional)]
+    #[cfg_attr(feature = "cli", bpaf(external(html_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub html: Option<HtmlConfiguration>,
 
     /// A list of granular patterns that should be applied only to a sub set of files
-    #[bpaf(hide, pure(Default::default()))]
+    #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub overrides: Option<Overrides>,
 
     /// List of plugins to load.
-    #[bpaf(hide, pure(Default::default()))]
+    #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub plugins: Option<biome_plugin_loader::Plugins>,
 
     /// Specific configuration for assists
-    #[bpaf(external(assist_configuration), optional)]
+    #[cfg_attr(feature = "cli", bpaf(external(assist_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub assist: Option<AssistConfiguration>,
 }
@@ -403,7 +442,8 @@ impl Configuration {
     }
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Bpaf, Merge)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Merge)]
+#[cfg_attr(feature = "cli", derive(Bpaf))]
 #[serde(deny_unknown_fields, default, rename_all = "camelCase")]
 pub struct Schema(String);
 
@@ -540,24 +580,28 @@ impl Display for Version<'_> {
 pub type FilesIgnoreUnknownEnabled = Bool<false>;
 
 /// The configuration of the filesystem
-#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Bpaf, Merge)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Merge)]
+#[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct FilesConfiguration {
     /// The maximum allowed size for source code files in bytes. Files above
     /// this limit will be ignored for performance reasons. Defaults to 1 MiB
-    #[bpaf(long("files-max-size"), argument("NUMBER"))]
+    #[cfg_attr(feature = "cli", bpaf(long("files-max-size"), argument("NUMBER")))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub max_size: Option<MaxSize>,
 
     /// Tells Biome to not emit diagnostics when handling files that it doesn't know
-    #[bpaf(long("files-ignore-unknown"), argument("true|false"), optional)]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("files-ignore-unknown"), argument("true|false"), optional)
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ignore_unknown: Option<FilesIgnoreUnknownEnabled>,
 
     /// A list of glob patterns. Biome will handle only those files/folders that will
     /// match these patterns.
-    #[bpaf(hide, pure(Default::default()))]
+    #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub includes: Option<Vec<biome_glob::NormalizedGlob>>,
 
@@ -566,7 +610,7 @@ pub struct FilesConfiguration {
     ///
     /// Set of file and folder names that should be unconditionally ignored by
     /// Biome's scanner.
-    #[bpaf(hide, pure(Default::default()))]
+    #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub experimental_scanner_ignores: Option<Vec<String>>,
 }
@@ -693,6 +737,10 @@ pub enum ConfigurationPathHint {
     /// The path can either be a directory path or a file path.
     /// Throws any kind of I/O errors.
     FromUser(Utf8PathBuf),
+
+    /// Very similar to [ConfigurationPathHint::FromUser]. However, this variant is used to indicate
+    /// that the configuration is outside of the current workspace.
+    FromUserExternal(Utf8PathBuf),
 }
 
 impl Display for ConfigurationPathHint {
@@ -705,7 +753,7 @@ impl Display for ConfigurationPathHint {
             Self::FromLsp(path) => {
                 write!(fmt, "Configuration path provided from the LSP: {path}",)
             }
-            Self::FromUser(path) => {
+            Self::FromUser(path) | Self::FromUserExternal(path) => {
                 write!(fmt, "Configuration path provided by the user: {path}",)
             }
         }
@@ -723,9 +771,10 @@ impl ConfigurationPathHint {
     pub fn to_path_buf(&self) -> Option<Utf8PathBuf> {
         match self {
             Self::None => None,
-            Self::FromWorkspace(path) | Self::FromLsp(path) | Self::FromUser(path) => {
-                Some(path.to_path_buf())
-            }
+            Self::FromWorkspace(path)
+            | Self::FromLsp(path)
+            | Self::FromUser(path)
+            | Self::FromUserExternal(path) => Some(path.to_path_buf()),
         }
     }
 }

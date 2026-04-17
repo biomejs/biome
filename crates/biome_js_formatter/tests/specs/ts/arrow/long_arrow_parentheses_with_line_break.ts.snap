@@ -25,70 +25,20 @@ function outerFunctionToForceIndent() {
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
-Trailing newline: true
------
-
-```ts
-const this_is_a_very_long_function_name_so_need_to_break_a_new_line_here = (
-	id,
-) => {
-	return id;
-};
-
-type InstanceID = string;
-type MaybeCardWithAttachment = string;
-function outerFunctionToForceIndent() {
-	const cardWithAttachment: (id: InstanceID) => MaybeCardWithAttachment = (
-		id,
-	) => {
-		return `${id}test`;
-	};
+```json
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "javascript": {
+    "formatter": {
+      "arrowParentheses": "asNeeded"
+    }
+  }
 }
-
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: As needed
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
-Trailing newline: true
------
+# Formatted
 
 ```ts
 const this_is_a_very_long_function_name_so_need_to_break_a_new_line_here =

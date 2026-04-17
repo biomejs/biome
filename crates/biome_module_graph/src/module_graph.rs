@@ -136,6 +136,10 @@ impl ModuleGraph {
                                 .static_import_paths
                                 .values()
                                 .any(|p| p.as_path() == Some(current.as_path()))
+                            || html_info
+                                .dynamic_import_paths
+                                .values()
+                                .any(|p| p.as_path() == Some(current.as_path()))
                     }
                 };
 
@@ -364,11 +368,9 @@ impl ModuleGraph {
                     html_info
                         .imported_stylesheets
                         .iter()
+                        .chain(html_info.static_import_paths.values())
+                        .chain(html_info.dynamic_import_paths.values())
                         .any(|p| p.as_path() == Some(current_path))
-                        || html_info
-                            .static_import_paths
-                            .values()
-                            .any(|p| p.as_path() == Some(current_path))
                 }
                 ModuleInfo::Css(_) => false,
             };
@@ -390,6 +392,7 @@ impl ModuleGraph {
                         .imported_stylesheets
                         .iter()
                         .chain(html_info.static_import_paths.values())
+                        .chain(html_info.dynamic_import_paths.values())
                         .filter_map(|stylesheet_path| {
                             let path = stylesheet_path.as_path()?;
                             self.css_module_info_for_path(path)?;
@@ -463,9 +466,26 @@ impl ModuleGraph {
                     });
                 }
             }
+
+            // 3. CSS files imported via static imports from embedded scripts
+            //    (e.g., Astro frontmatter `import "./styles.css"`).
+            for import_path in html_info
+                .static_import_paths
+                .values()
+                .chain(html_info.dynamic_import_paths.values())
+            {
+                if let Some(path) = import_path.as_path()
+                    && let Some(css_info) = self.css_module_info_for_path(path)
+                {
+                    linked_steps.push(CssClassStep {
+                        css_path: path.to_path_buf(),
+                        css_classes: css_info.classes.clone(),
+                    });
+                }
+            }
         }
 
-        // 3. Upward traversal: CSS imported by parent files that import this HTML file.
+        // 4. Upward traversal: CSS imported by parent files that import this HTML file.
         let stack = vec![html_path.to_path_buf()];
         let mut visited = FxHashSet::default();
         visited.insert(html_path.to_path_buf());
@@ -495,6 +515,7 @@ impl ModuleGraph {
         let css_imports: Vec<_> = html_info
             .imported_stylesheets
             .iter()
+            .chain(html_info.static_import_paths.values())
             .filter_map(|stylesheet_path| {
                 let path = stylesheet_path.as_path()?;
                 self.css_module_info_for_path(path)?;
@@ -576,16 +597,12 @@ impl ModuleGraph {
                         .values()
                         .chain(js_info.dynamic_import_paths.values())
                         .any(|p| p.as_path() == Some(current_path.as_path())),
-                    ModuleInfo::Html(html_info) => {
-                        html_info
-                            .imported_stylesheets
-                            .iter()
-                            .any(|p| p.as_path() == Some(current_path.as_path()))
-                            || html_info
-                                .static_import_paths
-                                .values()
-                                .any(|p| p.as_path() == Some(current_path.as_path()))
-                    }
+                    ModuleInfo::Html(html_info) => html_info
+                        .imported_stylesheets
+                        .iter()
+                        .chain(html_info.static_import_paths.values())
+                        .chain(html_info.dynamic_import_paths.values())
+                        .any(|p| p.as_path() == Some(current_path.as_path())),
                     ModuleInfo::Css(_) => false,
                 };
 
@@ -630,6 +647,7 @@ impl ModuleGraph {
                                 .imported_stylesheets
                                 .iter()
                                 .chain(html_info.static_import_paths.values())
+                                .chain(html_info.dynamic_import_paths.values())
                             {
                                 if let Some(path) = stylesheet_path.as_path()
                                     && let Some(css_info) = self.css_module_info_for_path(path)
@@ -675,12 +693,16 @@ impl ModuleGraph {
         &self,
         fs: &dyn FsWithResolverProxy,
         project_layout: &ProjectLayout,
-        added_or_updated_paths: &[(&BiomePath, AnyJsRoot)],
+        added_or_updated_paths: &[(
+            &BiomePath,
+            AnyJsRoot,
+            std::sync::Arc<biome_js_semantic::SemanticModel>,
+        )],
         enable_type_inference: bool,
     ) -> (ModuleDependencies, Vec<ModuleDiagnostic>) {
         // Make sure all directories are registered for the added/updated paths.
         let path_info = self.path_info.pin();
-        for (path, _) in added_or_updated_paths {
+        for (path, _, _) in added_or_updated_paths {
             let mut parent = path.parent();
             while let Some(path) = parent {
                 let mut inserted = false;
@@ -702,13 +724,14 @@ impl ModuleGraph {
         // Traverse all the added and updated paths and insert their module
         // info.
         let modules = self.data.pin();
-        for (path, root) in added_or_updated_paths {
+        for (path, root, semantic_model) in added_or_updated_paths {
             let directory = path.parent().unwrap_or(path);
             let visitor = JsModuleVisitor::new(
                 root.clone(),
                 path.to_path_buf(),
                 directory,
                 &fs_proxy,
+                semantic_model.clone(),
                 enable_type_inference,
             );
 
@@ -842,7 +865,11 @@ impl ModuleGraph {
                 }
             }
 
-            for resolved_path in module.static_import_paths.values() {
+            for resolved_path in module
+                .static_import_paths
+                .values()
+                .chain(module.dynamic_import_paths.values())
+            {
                 if let Some(p) = resolved_path.as_path() {
                     dependencies.insert(p.to_path_buf());
                 }
@@ -917,10 +944,17 @@ impl ModuleGraph {
 
         find_exported_symbol_with_seen_paths(&data, module, symbol_name, &mut seen_paths).and_then(
             |(module, export)| match export {
-                JsOwnExport::Binding(binding_id) => {
-                    module.bindings[binding_id.index()].jsdoc.clone()
+                JsOwnExport::Binding(binding_range) => {
+                    // Find the binding at this range via the semantic model
+                    module
+                        .semantic_model
+                        .as_binding_by_range(*binding_range)
+                        .and_then(|binding| binding.jsdoc().cloned())
                 }
                 JsOwnExport::Type(_) => None,
+                JsOwnExport::Namespace(reexport) => reexport
+                    .export_range
+                    .and_then(|range| module.semantic_model.export_jsdoc(range).cloned()),
             },
         )
     }
@@ -1026,11 +1060,31 @@ fn find_exported_symbol_with_seen_paths<'a>(
             Some((module, own_export))
         }
         Some(JsExport::Reexport(reexport) | JsExport::ReexportType(reexport)) => {
-            if reexport.import.symbol == ImportSymbol::All {
-                // TODO: Follow namespace exports.
-                None
-            } else {
-                match reexport.import.resolved_path.as_deref() {
+            match &reexport.import.symbol {
+                ImportSymbol::All => {
+                    // TODO: Follow namespace exports.
+                    None
+                }
+                // The source-side name may differ from the export name when the
+                // reexport uses an alias, e.g. `export { l as beforeEach } from
+                // './tasks'`. In that case we must look up the source-side name
+                // (`l`) in the target module, not the alias (`beforeEach`).
+                ImportSymbol::Named(source_name) => {
+                    let lookup = source_name.text();
+                    match reexport.import.resolved_path.as_deref() {
+                        Ok(path) if seen_paths.insert(path) => data.get(path).and_then(|module| {
+                            if let ModuleInfo::Js(module) = module {
+                                find_exported_symbol_with_seen_paths(
+                                    data, module, lookup, seen_paths,
+                                )
+                            } else {
+                                None
+                            }
+                        }),
+                        _ => None,
+                    }
+                }
+                ImportSymbol::Default => match reexport.import.resolved_path.as_deref() {
                     Ok(path) if seen_paths.insert(path) => data.get(path).and_then(|module| {
                         if let ModuleInfo::Js(module) = module {
                             find_exported_symbol_with_seen_paths(
@@ -1044,7 +1098,7 @@ fn find_exported_symbol_with_seen_paths<'a>(
                         }
                     }),
                     _ => None,
-                }
+                },
             }
         }
         None => module.blanket_reexports.iter().find_map(|reexport| {

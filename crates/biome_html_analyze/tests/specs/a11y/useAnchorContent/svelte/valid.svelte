@@ -1,3 +1,4 @@
+<!-- should not generate diagnostics -->
 <!-- Custom components should not trigger the rule -->
 <Link></Link>
 <CustomAnchor></CustomAnchor>
@@ -16,3 +17,7 @@
 <!-- Accessible via aria-label or title alone -->
 <a aria-label="Navigate to dashboard"></a>
 <a title="Go to settings page"></a>
+
+<!-- Custom components may render accessible content -->
+<a><Image alt="description" /></a>
+<a><CustomIcon /></a>

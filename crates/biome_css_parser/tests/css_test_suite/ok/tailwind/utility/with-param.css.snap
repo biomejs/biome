@@ -47,18 +47,16 @@ CssRoot {
                                             },
                                             l_paren_token: L_PAREN@35..36 "(" [] [],
                                             items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            TwValueThemeReference {
-                                                                reference: CssDashedIdentifier {
-                                                                    value_token: IDENT@36..46 "--tab-size" [] [],
-                                                                },
-                                                                minus_token: MINUS@46..47 "-" [] [],
-                                                                star_token: STAR@47..48 "*" [] [],
+                                                CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        TwValueThemeReference {
+                                                            reference: CssDashedIdentifier {
+                                                                value_token: IDENT@36..46 "--tab-size" [] [],
                                                             },
-                                                        ],
-                                                    },
+                                                            minus_token: MINUS@46..47 "-" [] [],
+                                                            star_token: STAR@47..48 "*" [] [],
+                                                        },
+                                                    ],
                                                 },
                                             ],
                                             r_paren_token: R_PAREN@48..49 ")" [] [],
@@ -109,14 +107,13 @@ CssRoot {
                         0: IDENT@28..35 "--value" [] []
                       1: L_PAREN@35..36 "(" [] []
                       2: CSS_PARAMETER_LIST@36..48
-                        0: CSS_PARAMETER@36..48
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@36..48
-                            0: CSS_COMPONENT_VALUE_LIST@36..48
-                              0: TW_VALUE_THEME_REFERENCE@36..48
-                                0: CSS_DASHED_IDENTIFIER@36..46
-                                  0: IDENT@36..46 "--tab-size" [] []
-                                1: MINUS@46..47 "-" [] []
-                                2: STAR@47..48 "*" [] []
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@36..48
+                          0: CSS_COMPONENT_VALUE_LIST@36..48
+                            0: TW_VALUE_THEME_REFERENCE@36..48
+                              0: CSS_DASHED_IDENTIFIER@36..46
+                                0: IDENT@36..46 "--tab-size" [] []
+                              1: MINUS@46..47 "-" [] []
+                              2: STAR@47..48 "*" [] []
                       3: R_PAREN@48..49 ")" [] []
                 1: (empty)
               1: SEMICOLON@49..50 ";" [] []

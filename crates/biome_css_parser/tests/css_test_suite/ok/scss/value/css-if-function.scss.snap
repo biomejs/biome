@@ -1,0 +1,252 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+.test {
+  color: if(style(--scheme: dark): #eeeeee;);
+  background: if(media(print): white; else: black;);
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..6 "test" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@6..7 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@7..15 "color" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@15..17 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIfFunction {
+                                            if_token: IF_KW@17..19 "if" [] [],
+                                            l_paren_token: L_PAREN@19..20 "(" [] [],
+                                            css_if_branch_list: CssIfBranchList [
+                                                CssIfBranch {
+                                                    condition: CssIfStyleTest {
+                                                        style_token: STYLE_KW@20..25 "style" [] [],
+                                                        l_paren_token: L_PAREN@25..26 "(" [] [],
+                                                        test: CssDeclaration {
+                                                            property: CssGenericProperty {
+                                                                name: CssDashedIdentifier {
+                                                                    value_token: IDENT@26..34 "--scheme" [] [],
+                                                                },
+                                                                colon_token: COLON@34..36 ":" [] [Whitespace(" ")],
+                                                                value: ScssExpression {
+                                                                    items: ScssExpressionItemList [
+                                                                        CssIdentifier {
+                                                                            value_token: IDENT@36..40 "dark" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            },
+                                                            important: missing (optional),
+                                                        },
+                                                        r_paren_token: R_PAREN@40..41 ")" [] [],
+                                                    },
+                                                    colon_token: COLON@41..43 ":" [] [Whitespace(" ")],
+                                                    value: CssGenericComponentValueList [
+                                                        CssColor {
+                                                            hash_token: HASH@43..44 "#" [] [],
+                                                            value_token: CSS_COLOR_LITERAL@44..50 "eeeeee" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                                SEMICOLON@50..51 ";" [] [],
+                                            ],
+                                            r_paren_token: R_PAREN@51..52 ")" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@52..53 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@53..66 "background" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@66..68 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIfFunction {
+                                            if_token: IF_KW@68..70 "if" [] [],
+                                            l_paren_token: L_PAREN@70..71 "(" [] [],
+                                            css_if_branch_list: CssIfBranchList [
+                                                CssIfBranch {
+                                                    condition: CssIfMediaTest {
+                                                        media_token: MEDIA_KW@71..76 "media" [] [],
+                                                        l_paren_token: L_PAREN@76..77 "(" [] [],
+                                                        test: CssQueryFeatureBoolean {
+                                                            name: CssIdentifier {
+                                                                value_token: IDENT@77..82 "print" [] [],
+                                                            },
+                                                        },
+                                                        r_paren_token: R_PAREN@82..83 ")" [] [],
+                                                    },
+                                                    colon_token: COLON@83..85 ":" [] [Whitespace(" ")],
+                                                    value: CssGenericComponentValueList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@85..90 "white" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                                SEMICOLON@90..92 ";" [] [Whitespace(" ")],
+                                                CssIfBranch {
+                                                    condition: CssElseKeyword {
+                                                        else_token: ELSE_KW@92..96 "else" [] [],
+                                                    },
+                                                    colon_token: COLON@96..98 ":" [] [Whitespace(" ")],
+                                                    value: CssGenericComponentValueList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@98..103 "black" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                                SEMICOLON@103..104 ";" [] [],
+                                            ],
+                                            r_paren_token: R_PAREN@104..105 ")" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@105..106 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@106..108 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@108..109 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..109
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..108
+    0: CSS_QUALIFIED_RULE@0..108
+      0: CSS_SELECTOR_LIST@0..6
+        0: CSS_COMPOUND_SELECTOR@0..6
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..6
+            0: CSS_CLASS_SELECTOR@0..6
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..6
+                0: IDENT@1..6 "test" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@6..108
+        0: L_CURLY@6..7 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@7..106
+          0: CSS_DECLARATION_WITH_SEMICOLON@7..53
+            0: CSS_DECLARATION@7..52
+              0: CSS_GENERIC_PROPERTY@7..52
+                0: CSS_IDENTIFIER@7..15
+                  0: IDENT@7..15 "color" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@15..17 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@17..52
+                  0: SCSS_EXPRESSION_ITEM_LIST@17..52
+                    0: CSS_IF_FUNCTION@17..52
+                      0: IF_KW@17..19 "if" [] []
+                      1: L_PAREN@19..20 "(" [] []
+                      2: CSS_IF_BRANCH_LIST@20..51
+                        0: CSS_IF_BRANCH@20..50
+                          0: CSS_IF_STYLE_TEST@20..41
+                            0: STYLE_KW@20..25 "style" [] []
+                            1: L_PAREN@25..26 "(" [] []
+                            2: CSS_DECLARATION@26..40
+                              0: CSS_GENERIC_PROPERTY@26..40
+                                0: CSS_DASHED_IDENTIFIER@26..34
+                                  0: IDENT@26..34 "--scheme" [] []
+                                1: COLON@34..36 ":" [] [Whitespace(" ")]
+                                2: SCSS_EXPRESSION@36..40
+                                  0: SCSS_EXPRESSION_ITEM_LIST@36..40
+                                    0: CSS_IDENTIFIER@36..40
+                                      0: IDENT@36..40 "dark" [] []
+                              1: (empty)
+                            3: R_PAREN@40..41 ")" [] []
+                          1: COLON@41..43 ":" [] [Whitespace(" ")]
+                          2: CSS_GENERIC_COMPONENT_VALUE_LIST@43..50
+                            0: CSS_COLOR@43..50
+                              0: HASH@43..44 "#" [] []
+                              1: CSS_COLOR_LITERAL@44..50 "eeeeee" [] []
+                        1: SEMICOLON@50..51 ";" [] []
+                      3: R_PAREN@51..52 ")" [] []
+              1: (empty)
+            1: SEMICOLON@52..53 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@53..106
+            0: CSS_DECLARATION@53..105
+              0: CSS_GENERIC_PROPERTY@53..105
+                0: CSS_IDENTIFIER@53..66
+                  0: IDENT@53..66 "background" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@66..68 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@68..105
+                  0: SCSS_EXPRESSION_ITEM_LIST@68..105
+                    0: CSS_IF_FUNCTION@68..105
+                      0: IF_KW@68..70 "if" [] []
+                      1: L_PAREN@70..71 "(" [] []
+                      2: CSS_IF_BRANCH_LIST@71..104
+                        0: CSS_IF_BRANCH@71..90
+                          0: CSS_IF_MEDIA_TEST@71..83
+                            0: MEDIA_KW@71..76 "media" [] []
+                            1: L_PAREN@76..77 "(" [] []
+                            2: CSS_QUERY_FEATURE_BOOLEAN@77..82
+                              0: CSS_IDENTIFIER@77..82
+                                0: IDENT@77..82 "print" [] []
+                            3: R_PAREN@82..83 ")" [] []
+                          1: COLON@83..85 ":" [] [Whitespace(" ")]
+                          2: CSS_GENERIC_COMPONENT_VALUE_LIST@85..90
+                            0: CSS_IDENTIFIER@85..90
+                              0: IDENT@85..90 "white" [] []
+                        1: SEMICOLON@90..92 ";" [] [Whitespace(" ")]
+                        2: CSS_IF_BRANCH@92..103
+                          0: CSS_ELSE_KEYWORD@92..96
+                            0: ELSE_KW@92..96 "else" [] []
+                          1: COLON@96..98 ":" [] [Whitespace(" ")]
+                          2: CSS_GENERIC_COMPONENT_VALUE_LIST@98..103
+                            0: CSS_IDENTIFIER@98..103
+                              0: IDENT@98..103 "black" [] []
+                        3: SEMICOLON@103..104 ";" [] []
+                      3: R_PAREN@104..105 ")" [] []
+              1: (empty)
+            1: SEMICOLON@105..106 ";" [] []
+        2: R_CURLY@106..108 "}" [Newline("\n")] []
+  2: EOF@108..109 "" [Newline("\n")] []
+
+```

@@ -5,9 +5,9 @@ use biome_js_type_info_macros::Resolvable;
 use biome_rowan::Text;
 
 use crate::{
-    GLOBAL_UNKNOWN_ID, NUM_PREDEFINED_TYPES, ScopeId, TypeData, TypeId, TypeImportQualifier,
-    TypeInstance, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeofValue,
-    Union,
+    GLOBAL_UNKNOWN_ID, Literal, NUM_PREDEFINED_TYPES, Object, ScopeId, TypeData, TypeId,
+    TypeImportQualifier, TypeInstance, TypeMember, TypeMemberKind, TypeReference,
+    TypeReferenceQualifier, TypeofValue, Union,
     globals::{GLOBAL_RESOLVER_ID, GLOBAL_UNDEFINED_ID, UNKNOWN_ID, global_type_name},
 };
 
@@ -737,6 +737,30 @@ pub trait TypeResolver {
     // #endregion
 }
 
+#[derive(Default)]
+pub struct UnionCollector {
+    types: Vec<TypeReference>,
+}
+
+impl UnionCollector {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn add(&mut self, ty: TypeReference) {
+        self.types.push(ty);
+    }
+
+    pub fn finish(self) -> Cow<'static, TypeData> {
+        if self.types.is_empty() {
+            return Cow::Owned(TypeData::unknown());
+        }
+        Cow::Owned(TypeData::Union(Box::new(Union(
+            self.types.into_boxed_slice(),
+        ))))
+    }
+}
+
 /// Trait to be implemented by `TypeData` and its subtypes to aid the resolver.
 pub trait Resolvable: Sized {
     /// Returns the resolved version of this type.
@@ -754,38 +778,254 @@ impl Resolvable for TypeReference {
                 match resolved_id {
                     Some(resolved_id) => Some(Self::Resolved(resolved_id)),
                     None if qualifier.has_known_type_parameters() => Some({
-                        // If we can't resolve the qualifier as is, attempt to
-                        // resolve it without type parameters. If it can be
-                        // resolved that way, we create an instantiation for it
-                        // and resolve to there.
-                        resolver
-                            .resolve_qualifier(&qualifier.without_type_parameters())
-                            .and_then(|resolved_id| {
-                                let resolved = resolver
-                                    .get_by_resolved_id(resolved_id)
-                                    .map(|data| data.to_data());
-                                let parameters =
-                                    resolved.as_ref().and_then(|data| data.type_parameters())?;
+                        // Handle Record<K, V> by synthesizing an object type
+                        // with an index signature: { [key: K]: V }
+                        if qualifier.is_record() && qualifier.type_parameters.len() == 2 {
+                            let params = self.resolved_params(resolver);
+                            let key_type = params[0].clone();
+                            let value_type = params[1].clone();
+                            let resolved_id: ResolvedTypeId =
+                                resolver.register_and_resolve(TypeData::Object(Box::new(Object {
+                                    prototype: None,
+                                    members: [TypeMember {
+                                        kind: TypeMemberKind::IndexSignature(key_type),
+                                        ty: value_type,
+                                    }]
+                                    .into(),
+                                })));
+                            Self::Resolved(resolved_id)
+                        } else if (qualifier.is_pick() || qualifier.is_omit())
+                            && qualifier.type_parameters.len() == 2
+                        {
+                            // Handle Pick<T, K> and Omit<T, K> by resolving T,
+                            // extracting its members, and filtering by K.
+                            let is_pick = qualifier.is_pick();
+                            let params = self.resolved_params(resolver);
+
+                            let members = extract_string_literal_keys(resolver, &params[1])
+                                .and_then(|key_names| {
+                                    let resolved_t = resolver.resolve_and_get(&params[0])?;
+                                    let t_data = resolved_t.to_data();
+                                    if !matches!(
+                                        &t_data,
+                                        TypeData::Object(_)
+                                            | TypeData::Interface(_)
+                                            | TypeData::Class(_)
+                                            | TypeData::Global
+                                    ) {
+                                        return None;
+                                    }
+                                    Some(
+                                        t_data
+                                            .own_members()
+                                            .filter(|member| {
+                                                if let Some(name) = member.name() {
+                                                    let name_str = name.text();
+                                                    if is_pick {
+                                                        key_names
+                                                            .iter()
+                                                            .any(|k| k.text() == name_str)
+                                                    } else {
+                                                        key_names
+                                                            .iter()
+                                                            .all(|k| k.text() != name_str)
+                                                    }
+                                                } else {
+                                                    // Keep non-named members (like
+                                                    // index signatures) for Omit,
+                                                    // exclude for Pick.
+                                                    !is_pick
+                                                }
+                                            })
+                                            .cloned()
+                                            .collect::<Vec<_>>(),
+                                    )
+                                });
+
+                            if let Some(members) = members {
                                 let resolved_id: ResolvedTypeId = resolver.register_and_resolve(
-                                    TypeData::instance_of(TypeInstance {
-                                        ty: resolved_id.into(),
-                                        type_parameters: Self::merge_parameters(
-                                            parameters,
-                                            &qualifier.type_parameters,
-                                        ),
-                                    }),
+                                    TypeData::Object(Box::new(Object {
+                                        prototype: None,
+                                        members: members.into(),
+                                    })),
                                 );
-                                Some(resolved_id.into())
-                            })
-                            .unwrap_or_else(|| {
+                                Self::Resolved(resolved_id)
+                            } else {
                                 Self::from(TypeReferenceQualifier {
                                     path: qualifier.path.clone(),
-                                    type_parameters: self.resolved_params(resolver),
+                                    type_parameters: params,
                                     scope_id: qualifier.scope_id,
                                     type_only: qualifier.type_only,
                                     excluded_binding_id: qualifier.excluded_binding_id,
                                 })
-                            })
+                            }
+                        } else if (qualifier.is_partial() || qualifier.is_required())
+                            && qualifier.type_parameters.len() == 1
+                        {
+                            let params = self.resolved_params(resolver);
+                            let inner_ref = &params[0];
+                            let is_partial = qualifier.is_partial();
+                            // Collect members while borrowing resolver immutably,
+                            // then modify them afterwards to avoid borrow conflicts.
+                            let collected: Option<Vec<(TypeMember, bool)>> =
+                                resolver.resolve_and_get(inner_ref).map(|resolved| {
+                                    resolved
+                                        .as_raw_data()
+                                        .own_members()
+                                        .map(|member| {
+                                            let was_optional = member.is_optional();
+                                            let kind = match &member.kind {
+                                                TypeMemberKind::IndexSignature(key_ref) => {
+                                                    TypeMemberKind::IndexSignature(
+                                                        resolved
+                                                            .apply_module_id_to_reference(key_ref)
+                                                            .into_owned(),
+                                                    )
+                                                }
+                                                other => {
+                                                    if is_partial {
+                                                        match other {
+                                                            TypeMemberKind::Named(name) => {
+                                                                TypeMemberKind::NamedOptional(
+                                                                    name.clone(),
+                                                                )
+                                                            }
+                                                            _ => other.clone(),
+                                                        }
+                                                    } else {
+                                                        // Required: make optional members non-optional
+                                                        match other {
+                                                            TypeMemberKind::NamedOptional(name) => {
+                                                                TypeMemberKind::Named(name.clone())
+                                                            }
+                                                            _ => other.clone(),
+                                                        }
+                                                    }
+                                                }
+                                            };
+                                            (
+                                                TypeMember {
+                                                    kind,
+                                                    ty: resolved
+                                                        .apply_module_id_to_reference(&member.ty)
+                                                        .into_owned(),
+                                                },
+                                                was_optional,
+                                            )
+                                        })
+                                        .collect()
+                                });
+                            if let Some(collected_members) = collected {
+                                let members: Vec<TypeMember> = collected_members
+                                    .into_iter()
+                                    .map(|(mut member, was_optional)| {
+                                        if is_partial && !was_optional {
+                                            let id = resolver.optional(member.ty.clone());
+                                            member.ty = resolver.reference_to_id(id);
+                                        } else if !is_partial && was_optional {
+                                            strip_undefined_from_member(resolver, &mut member);
+                                        }
+                                        member
+                                    })
+                                    .collect();
+                                let resolved_id: ResolvedTypeId = resolver.register_and_resolve(
+                                    TypeData::Object(Box::new(Object {
+                                        prototype: None,
+                                        members: members.into(),
+                                    })),
+                                );
+                                Self::Resolved(resolved_id)
+                            } else {
+                                Self::from(TypeReferenceQualifier {
+                                    path: qualifier.path.clone(),
+                                    type_parameters: params,
+                                    scope_id: qualifier.scope_id,
+                                    type_only: qualifier.type_only,
+                                    excluded_binding_id: qualifier.excluded_binding_id,
+                                })
+                            }
+                        } else if qualifier.is_readonly() && qualifier.type_parameters.len() == 1 {
+                            let params = self.resolved_params(resolver);
+                            let inner_ref = &params[0];
+                            let collected: Option<Vec<TypeMember>> =
+                                resolver.resolve_and_get(inner_ref).map(|resolved| {
+                                    resolved
+                                        .as_raw_data()
+                                        .own_members()
+                                        .map(|member| {
+                                            let kind = match &member.kind {
+                                                TypeMemberKind::IndexSignature(key_ref) => {
+                                                    TypeMemberKind::IndexSignature(
+                                                        resolved
+                                                            .apply_module_id_to_reference(key_ref)
+                                                            .into_owned(),
+                                                    )
+                                                }
+                                                other => other.clone(),
+                                            };
+                                            TypeMember {
+                                                kind,
+                                                ty: resolved
+                                                    .apply_module_id_to_reference(&member.ty)
+                                                    .into_owned(),
+                                            }
+                                        })
+                                        .collect()
+                                });
+                            if let Some(members) = collected {
+                                let resolved_id: ResolvedTypeId = resolver.register_and_resolve(
+                                    TypeData::Object(Box::new(Object {
+                                        prototype: None,
+                                        members: members.into(),
+                                    })),
+                                );
+                                Self::Resolved(resolved_id)
+                            } else {
+                                Self::from(TypeReferenceQualifier {
+                                    path: qualifier.path.clone(),
+                                    type_parameters: params,
+                                    scope_id: qualifier.scope_id,
+                                    type_only: qualifier.type_only,
+                                    excluded_binding_id: qualifier.excluded_binding_id,
+                                })
+                            }
+                        } else {
+                            // If we can't resolve the qualifier as is, attempt to
+                            // resolve it without type parameters. If it can be
+                            // resolved that way, we create an instantiation for it
+                            // and resolve to there.
+                            resolver
+                                .resolve_qualifier(&qualifier.without_type_parameters())
+                                .and_then(|resolved_id| {
+                                    let resolved = resolver
+                                        .get_by_resolved_id(resolved_id)
+                                        .map(|data| data.to_data());
+                                    let parameters = resolved
+                                        .as_ref()
+                                        .and_then(|data| data.type_parameters())?;
+                                    let resolved_params = self.resolved_params(resolver);
+                                    let resolved_id: ResolvedTypeId = resolver
+                                        .register_and_resolve(TypeData::instance_of(
+                                            TypeInstance {
+                                                ty: resolved_id.into(),
+                                                type_parameters: Self::merge_parameters(
+                                                    parameters,
+                                                    &resolved_params,
+                                                ),
+                                            },
+                                        ));
+                                    Some(resolved_id.into())
+                                })
+                                .unwrap_or_else(|| {
+                                    Self::from(TypeReferenceQualifier {
+                                        path: qualifier.path.clone(),
+                                        type_parameters: self.resolved_params(resolver),
+                                        scope_id: qualifier.scope_id,
+                                        type_only: qualifier.type_only,
+                                        excluded_binding_id: qualifier.excluded_binding_id,
+                                    })
+                                })
+                        }
                     }),
                     None => None,
                 }
@@ -835,3 +1075,66 @@ macro_rules! derive_primitive_resolved {
 }
 
 derive_primitive_resolved!(bool, f64, u32, u64, usize);
+
+/// Extracts string literal keys from a `K` type reference in `Pick<T, K>` or
+/// `Omit<T, K>`.
+///
+/// Accepts a single string literal or a union of string literals. Returns
+/// `None` otherwise.
+fn extract_string_literal_keys(
+    resolver: &mut dyn TypeResolver,
+    k_ref: &TypeReference,
+) -> Option<Vec<Text>> {
+    let resolved_k = resolver.resolve_and_get(k_ref)?;
+    match resolved_k.to_data() {
+        TypeData::Literal(lit) => {
+            if let Literal::String(s) = lit.as_ref() {
+                Some(vec![s.as_ref().clone()])
+            } else {
+                None
+            }
+        }
+        TypeData::Union(union) => Some(
+            union
+                .types()
+                .iter()
+                .filter_map(|ty| {
+                    let resolved = resolver.resolve_and_get(ty)?;
+                    let TypeData::Literal(lit) = resolved.to_data() else {
+                        return None;
+                    };
+                    let Literal::String(s) = lit.as_ref() else {
+                        return None;
+                    };
+                    Some(s.as_ref().clone())
+                })
+                .collect(),
+        ),
+        _ => None,
+    }
+}
+
+/// Strips `undefined` from the type of a member that was previously optional.
+///
+/// This is used when applying `Required<T>` to remove the `undefined` that was
+/// added to the member's type when it was marked as optional.
+fn strip_undefined_from_member(resolver: &mut dyn TypeResolver, member: &mut TypeMember) {
+    let Some(resolved) = resolver.resolve_and_get(&member.ty) else {
+        return;
+    };
+    let TypeData::Union(union) = resolved.as_raw_data() else {
+        return;
+    };
+    let filtered: Vec<_> = union
+        .0
+        .iter()
+        .filter(|v| **v != TypeReference::from(GLOBAL_UNDEFINED_ID))
+        .cloned()
+        .collect();
+    if filtered.len() == 1 {
+        member.ty = filtered[0].clone();
+    } else if filtered.len() < union.0.len() {
+        let id = resolver.register_and_resolve(TypeData::Union(Box::new(Union(filtered.into()))));
+        member.ty = TypeReference::from(id);
+    }
+}

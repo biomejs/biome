@@ -3,7 +3,8 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-methods.vue
 ---
 # Input
-```ts
+```vue
+<script>
 export default {
     methods: {
         $el() {},
@@ -12,38 +13,22 @@ export default {
         $options: function() {},
     }
 };
+</script>
 
 ```
 
 # Diagnostics
 ```
-invalid-methods.vue:3:9 lint/correctness/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-methods.vue:4:9 lint/correctness/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Key $el is reserved in Vue.
   
-    1 │ export default {
-    2 │     methods: {
-  > 3 │         $el() {},
+    2 │ export default {
+    3 │     methods: {
+  > 4 │         $el() {},
       │         ^^^
-    4 │         $data: () => {},
-    5 │         $props: () => ({}),
-  
-  i Rename the key to avoid conflicts with Vue reserved keys.
-  
-
-```
-
-```
-invalid-methods.vue:4:9 lint/correctness/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Key $data is reserved in Vue.
-  
-    2 │     methods: {
-    3 │         $el() {},
-  > 4 │         $data: () => {},
-      │         ^^^^^
-    5 │         $props: () => ({}),
-    6 │         $options: function() {},
+    5 │         $data: () => {},
+    6 │         $props: () => ({}),
   
   i Rename the key to avoid conflicts with Vue reserved keys.
   
@@ -53,14 +38,14 @@ invalid-methods.vue:4:9 lint/correctness/noVueReservedKeys ━━━━━━━
 ```
 invalid-methods.vue:5:9 lint/correctness/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Key $props is reserved in Vue.
+  × Key $data is reserved in Vue.
   
-    3 │         $el() {},
-    4 │         $data: () => {},
-  > 5 │         $props: () => ({}),
-      │         ^^^^^^
-    6 │         $options: function() {},
-    7 │     }
+    3 │     methods: {
+    4 │         $el() {},
+  > 5 │         $data: () => {},
+      │         ^^^^^
+    6 │         $props: () => ({}),
+    7 │         $options: function() {},
   
   i Rename the key to avoid conflicts with Vue reserved keys.
   
@@ -70,14 +55,31 @@ invalid-methods.vue:5:9 lint/correctness/noVueReservedKeys ━━━━━━━
 ```
 invalid-methods.vue:6:9 lint/correctness/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  × Key $props is reserved in Vue.
+  
+    4 │         $el() {},
+    5 │         $data: () => {},
+  > 6 │         $props: () => ({}),
+      │         ^^^^^^
+    7 │         $options: function() {},
+    8 │     }
+  
+  i Rename the key to avoid conflicts with Vue reserved keys.
+  
+
+```
+
+```
+invalid-methods.vue:7:9 lint/correctness/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
   × Key $options is reserved in Vue.
   
-    4 │         $data: () => {},
-    5 │         $props: () => ({}),
-  > 6 │         $options: function() {},
+    5 │         $data: () => {},
+    6 │         $props: () => ({}),
+  > 7 │         $options: function() {},
       │         ^^^^^^^^
-    7 │     }
-    8 │ };
+    8 │     }
+    9 │ };
   
   i Rename the key to avoid conflicts with Vue reserved keys.
   

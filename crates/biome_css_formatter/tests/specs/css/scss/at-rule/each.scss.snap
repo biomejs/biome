@@ -1,0 +1,60 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/at-rule/each.scss
+---
+
+# Input
+
+```scss
+.a{
+@each $item in$list{
+color:$item;
+}
+}
+
+.b{
+@each
+$key,$value
+in(
+  primary: 16px,
+secondary:24px
+){
+font-size:$value;
+}
+}
+
+.c{
+@each $animal in puma,sea-slug,egret,salamander{
+color:red;
+}
+}
+
+```
+
+
+# Formatted
+
+```scss
+.a {
+	@each $item in $list {
+		color: $item;
+	}
+}
+
+.b {
+	@each $key,
+	$value in (
+		primary: 16px,
+		secondary: 24px,
+	) {
+		font-size: $value;
+	}
+}
+
+.c {
+	@each $animal in puma, sea-slug, egret, salamander {
+		color: red;
+	}
+}
+
+```

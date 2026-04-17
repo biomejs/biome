@@ -19,6 +19,7 @@ MdDocument {
     bom_token: missing (optional),
     value: MdBlockList [
         MdLinkReferenceDefinition {
+            indent: MdIndentTokenList [],
             l_brack_token: L_BRACK@0..1 "[" [] [],
             label: MdLinkLabel {
                 content: MdInlineItemList [
@@ -62,8 +63,9 @@ MdDocument {
   0: (empty)
   1: MD_BLOCK_LIST@0..16
     0: MD_LINK_REFERENCE_DEFINITION@0..15
-      0: L_BRACK@0..1 "[" [] []
-      1: MD_LINK_LABEL@1..8
+      0: MD_INDENT_TOKEN_LIST@0..0
+      1: L_BRACK@0..1 "[" [] []
+      2: MD_LINK_LABEL@1..8
         0: MD_INLINE_ITEM_LIST@1..8
           0: MD_TEXTUAL@1..4
             0: MD_TEXTUAL_LITERAL@1..4 "foo" [] []
@@ -71,15 +73,15 @@ MdDocument {
             0: MD_TEXTUAL_LITERAL@4..5 "\n" [] []
           2: MD_TEXTUAL@5..8
             0: MD_TEXTUAL_LITERAL@5..8 "bar" [] []
-      2: R_BRACK@8..9 "]" [] []
-      3: COLON@9..10 ":" [] []
-      4: MD_LINK_DESTINATION@10..15
+      3: R_BRACK@8..9 "]" [] []
+      4: COLON@9..10 ":" [] []
+      5: MD_LINK_DESTINATION@10..15
         0: MD_INLINE_ITEM_LIST@10..15
           0: MD_TEXTUAL@10..11
             0: MD_TEXTUAL_LITERAL@10..11 " " [] []
           1: MD_TEXTUAL@11..15
             0: MD_TEXTUAL_LITERAL@11..15 "/url" [] []
-      5: (empty)
+      6: (empty)
     1: MD_NEWLINE@15..16
       0: NEWLINE@15..16 "\n" [] []
   2: EOF@16..16 "" [] []

@@ -2,6 +2,7 @@ use crate::html::auxiliary::attribute_initializer_clause::{
     CompactKind, FormatHtmlAttributeInitializerClauseOptions,
 };
 use crate::prelude::*;
+use crate::shared::FmtAnySvelteBindingProperty;
 use biome_formatter::{FormatRuleWithOptions, write};
 use biome_html_syntax::{
     AnySvelteBindingProperty, SvelteDirectiveValue, SvelteDirectiveValueFields,
@@ -51,6 +52,7 @@ impl FormatSvelteDirectiveValue {
             let property = property.clone()?;
             let binding_value = match &property {
                 AnySvelteBindingProperty::SvelteLiteral(literal) => literal.value_token(),
+                AnySvelteBindingProperty::SvelteMemberProperty(_) => return Ok(false),
                 AnySvelteBindingProperty::SvelteName(name) => name.ident_token(),
             }?;
 
@@ -66,6 +68,10 @@ impl FormatSvelteDirectiveValue {
                 return Ok(false);
             }
 
+            let property = FmtAnySvelteBindingProperty {
+                node: property,
+                compact: true,
+            };
             write!(
                 f,
                 [
@@ -78,7 +84,7 @@ impl FormatSvelteDirectiveValue {
                             tag_name: None
                         }
                     ),
-                    property.format().with_options(true),
+                    &property,
                     modifiers.format().with_options(true)
                 ]
             )?;

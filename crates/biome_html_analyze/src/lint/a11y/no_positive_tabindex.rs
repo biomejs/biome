@@ -2,8 +2,10 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlElement, HtmlAttribute};
+use biome_html_syntax::HtmlAttribute;
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
+use biome_rule_options::no_positive_tabindex::NoPositiveTabindexOptions;
 
 use crate::HtmlRuleAction;
 
@@ -55,10 +57,10 @@ pub struct NoPositiveTabindexState {
 }
 
 impl Rule for NoPositiveTabindex {
-    type Query = Ast<AnyHtmlElement>;
+    type Query = Ast<AnyHtmlTagElement>;
     type State = NoPositiveTabindexState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoPositiveTabindexOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();

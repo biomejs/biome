@@ -35,20 +35,7 @@ function my_todo($target, $message) {
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Attribute Position: Auto
-Trailing newline: true
------
+# Formatted
 
 ```grit
 // define a lines function

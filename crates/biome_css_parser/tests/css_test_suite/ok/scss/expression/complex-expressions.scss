@@ -1,0 +1,164 @@
+// Complex SCSS expressions
+
+// Parenthesized expressions
+$paren1: (1 + 2);
+$paren2: ((1 + 2) * 3);
+$paren3: (((10)));
+
+// Nested parentheses with operations
+$nested: ((1 + 2) * (3 + 4));
+$deep: (((1 + 2) * 3) + ((4 + 5) * 6));
+
+// Mixed operators
+$mixed: 1 + 2 * 3 - 4 / 5;
+$with-parens: (1 + 2) * (3 - 4) / 5;
+
+// Comparison operators
+$comparison1: 10 > 5;
+$comparison2: 10 >= 10;
+$comparison3: 5 < 10;
+$comparison4: 5 <= 5;
+$comparison5: 10 == 10;
+$comparison6: 10 != 5;
+
+// Logical operators
+$and1: true and true;
+$and2: true and false;
+$or1: true or false;
+$or2: false or false;
+$not1: not true;
+$not2: not false;
+
+// Complex logical expressions
+$complex-logic: (true and false) or (true and true);
+$nested-logic: not ((true and false) or (false and true));
+
+// Unary operators
+$positive: +10;
+$negative: -10;
+$not-bool: not true;
+
+// Multiple unary operators
+$double-negative: --10;
+$not-not: not not true;
+
+// Expressions with variables
+$a: 10;
+$b: 20;
+$sum: $a + $b;
+$product: $a * $b;
+$comparison: $a < $b;
+
+// Expressions with interpolation
+// TODO(interpolation support): $expr1: 10 + #{$a};
+// TODO(interpolation support): $expr2: #{$a} * #{$b};
+
+// String concatenation
+$concat1: "hello" + " " + "world";
+$concat2: foo + bar;
+$concat3: "str" + ing;
+
+// Division expressions (SCSS division context)
+$division1: (10 / 2);
+$division2: (100px / 10);
+$division3: $a / $b;
+
+// Modulo operator
+$mod1: 10 % 3;
+$mod2: 100 % 7;
+
+// Color operations
+$color1: #036;
+$color2: rgb(255, 0, 0);
+$color-add: $color1 + $color2;
+
+// List operations
+$list-concat: (a, b) + (c, d);
+$list-add: (a b) + c;
+
+// Map in expressions
+$map-expr: ((key: value));
+
+// Function calls in expressions
+$func1: round(10.5) + ceil(20.3);
+$func2: max(10, 20, 30) - min(5, 10, 15);
+
+// Complex calculations with units
+$calc1: 10px + 5em;
+$calc2: 100% - 20px;
+$calc3: 50vh * 2;
+
+// Expressions with null
+$null-expr: null or "default";
+$null-check: $var or "fallback";
+
+// Boolean expressions with values
+$bool-or-val: false or 10;
+$bool-and-val: true and "value";
+
+// Nested function calls
+$nested-func: round(sqrt(abs(-16)));
+
+// Expression as map value
+$expr-in-map: (
+  sum: $a + $b,
+  product: $a * $b,
+  comparison: $a > $b,
+);
+
+// Expression as list item
+$expr-in-list: ($a + $b, $a * $b, $a > $b);
+
+// Comma operator (list creation)
+$comma-expr: 1, 2, 3;
+
+// Space operator (list creation)
+$space-expr: 1 2 3;
+
+// Mixed in complex context
+$complex: (
+  calc: (1 + 2) * (3 + 4),
+  logic: (true and false) or true,
+  compare: (10 > 5) and (20 < 30),
+  nested: ((1 + (2 * 3)) - (4 / 2)),
+);
+
+// Expressions in selectors
+.class-#{1 + 1} {
+  color: red;
+}
+
+// Expressions in property values
+.test {
+  width: (100% / 3);
+  height: $a + $b + 10px;
+  margin: ($a * 2) ($b * 2);
+}
+
+// Expressions with each operator explicitly tested
+$plus: 10 + 20;
+$minus: 30 - 10;
+$multiply: 5 * 4;
+$divide: (20 / 4);
+$modulo: 17 % 5;
+$gt: 10 > 5;
+$gte: 10 >= 10;
+$lt: 5 < 10;
+$lte: 5 <= 5;
+$eq: 10 == 10;
+$neq: 10 != 5;
+$and: true and true;
+$or: false or true;
+$not: not false;
+
+// Operator precedence test
+$precedence1: 1 + 2 * 3; // Should be 1 + (2 * 3) = 7
+$precedence2: (1 + 2) * 3; // Should be 9
+$precedence3: 10 - 5 - 2; // Left-to-right: (10 - 5) - 2 = 3
+$precedence4: 2 * 3 + 4 * 5; // Should be (2*3) + (4*5) = 26
+
+// Edge cases with whitespace
+$no-space: 1+2;
+$with-space: 1 + 2;
+$mixed-space: 1+ 2;
+

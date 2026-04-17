@@ -3,7 +3,7 @@ use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssFileSource;
 use biome_fs::MemoryFileSystem;
 use biome_html_formatter::HtmlFormatOptions;
-use biome_html_parser::HtmlParseOptions;
+use biome_html_parser::HtmlParserOptions;
 use biome_html_syntax::HtmlFileSource;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_formatter::format_node;
@@ -99,7 +99,7 @@ impl<'a> ModuleGraphSnapshot<'a> {
                     // Format plain .html files with the HTML formatter.
                     let tree = biome_html_parser::parse_html(
                         source_code.as_str(),
-                        HtmlParseOptions::from(&file_source),
+                        HtmlParserOptions::from(&file_source),
                     );
                     let formatted = biome_html_formatter::format_node(
                         HtmlFormatOptions::default(),
@@ -226,23 +226,33 @@ impl<'a> ModuleGraphSnapshot<'a> {
 
                         content.push_str("\n```\n\n");
 
-                        let exported_binding_ids: BTreeSet<_> = data
+                        let exported_binding_ranges: BTreeSet<_> = data
                             .exports
                             .values()
                             .filter_map(JsExport::as_own_export)
                             .filter_map(|export| match export {
-                                JsOwnExport::Binding(binding_id) => Some(*binding_id),
-                                JsOwnExport::Type(_) => None,
+                                JsOwnExport::Binding(binding_range) => Some(*binding_range),
+                                JsOwnExport::Type(_) | JsOwnExport::Namespace(_) => None,
                             })
                             .collect();
-                        if !exported_binding_ids.is_empty() {
+                        if !exported_binding_ranges.is_empty() {
                             content.push_str("## Exported Bindings\n\n");
                             content.push_str("```");
-                            for binding_id in exported_binding_ids {
-                                content.push_str(&format!(
-                                    "\n{binding_id:?} => {}\n",
-                                    data.binding(binding_id)
-                                ));
+                            for binding_range in exported_binding_ranges {
+                                if let Some(type_data) = data.binding_type_data(binding_range) {
+                                    // Get the binding name from the semantic model
+                                    let binding_name = data
+                                        .semantic_model
+                                        .all_bindings()
+                                        .find(|b| b.syntax().text_trimmed_range() == binding_range)
+                                        .and_then(|b| b.tree().name_token().ok())
+                                        .map_or_else(|| "<unknown>".to_string(), |b| b.to_string());
+
+                                    content.push_str(&format!(
+                                        "\n{} => {}\n",
+                                        binding_name, type_data
+                                    ));
+                                }
                             }
                             content.push_str("```\n\n");
                         }

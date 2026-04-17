@@ -1,0 +1,10 @@
+$expr1: $a + $b * $c;
+$expr2: ($a + $b) * $c;
+$expr3: $a * $b + $c;
+$expr4: -$a + $b;
+$expr5: not $a and $b;
+$expr6: $a == $b or $c != $d;
+
+
+
+

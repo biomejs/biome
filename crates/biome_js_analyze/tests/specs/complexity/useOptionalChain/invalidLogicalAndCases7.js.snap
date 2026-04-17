@@ -1,0 +1,242 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidLogicalAndCases7.js
+---
+# Input
+```js
+// should generate diagnostics
+
+// simple prefix
+bar && foo && foo.length;
+
+// prefix with longer chain
+bar && foo && foo.bar && foo.bar.baz;
+
+// multiple unrelated prefixes
+a && b && foo && foo.bar;
+
+// prefix with member access in chain
+bar && foo.bar && foo.bar.baz;
+
+// prefix is a call expression
+something() && foo && foo.bar;
+
+// prefix with a chain that has a jump
+bar && foo && foo.bar.baz;
+
+// prefix with chained calls
+bar && foo && foo.bar && foo.bar();
+
+// longer prefix chain
+a && b && c && foo && foo.bar;
+
+// the original issue example
+bar && foo && foo.length;
+
+```
+
+# Diagnostics
+```
+invalidLogicalAndCases7.js:4:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    3 │ // simple prefix
+  > 4 │ bar && foo && foo.length;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ // prefix with longer chain
+  
+  i Unsafe fix: Change to an optional chain.
+  
+     2  2 │   
+     3  3 │   // simple prefix
+     4    │ - bar·&&·foo·&&·foo.length;
+        4 │ + bar·&&·foo?.length;
+     5  5 │   
+     6  6 │   // prefix with longer chain
+  
+
+```
+
+```
+invalidLogicalAndCases7.js:7:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    6 │ // prefix with longer chain
+  > 7 │ bar && foo && foo.bar && foo.bar.baz;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ // multiple unrelated prefixes
+  
+  i Unsafe fix: Change to an optional chain.
+  
+     5  5 │   
+     6  6 │   // prefix with longer chain
+     7    │ - bar·&&·foo·&&·foo.bar·&&·foo.bar.baz;
+        7 │ + bar·&&·foo?.bar?.baz;
+     8  8 │   
+     9  9 │   // multiple unrelated prefixes
+  
+
+```
+
+```
+invalidLogicalAndCases7.js:10:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+     9 │ // multiple unrelated prefixes
+  > 10 │ a && b && foo && foo.bar;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ // prefix with member access in chain
+  
+  i Unsafe fix: Change to an optional chain.
+  
+     8  8 │   
+     9  9 │   // multiple unrelated prefixes
+    10    │ - a·&&·b·&&·foo·&&·foo.bar;
+       10 │ + a·&&·b·&&·foo?.bar;
+    11 11 │   
+    12 12 │   // prefix with member access in chain
+  
+
+```
+
+```
+invalidLogicalAndCases7.js:13:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    12 │ // prefix with member access in chain
+  > 13 │ bar && foo.bar && foo.bar.baz;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ // prefix is a call expression
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    11 11 │   
+    12 12 │   // prefix with member access in chain
+    13    │ - bar·&&·foo.bar·&&·foo.bar.baz;
+       13 │ + bar·&&·foo.bar?.baz;
+    14 14 │   
+    15 15 │   // prefix is a call expression
+  
+
+```
+
+```
+invalidLogicalAndCases7.js:16:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    15 │ // prefix is a call expression
+  > 16 │ something() && foo && foo.bar;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 
+    18 │ // prefix with a chain that has a jump
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    14 14 │   
+    15 15 │   // prefix is a call expression
+    16    │ - something()·&&·foo·&&·foo.bar;
+       16 │ + something()·&&·foo?.bar;
+    17 17 │   
+    18 18 │   // prefix with a chain that has a jump
+  
+
+```
+
+```
+invalidLogicalAndCases7.js:19:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    18 │ // prefix with a chain that has a jump
+  > 19 │ bar && foo && foo.bar.baz;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ 
+    21 │ // prefix with chained calls
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    17 17 │   
+    18 18 │   // prefix with a chain that has a jump
+    19    │ - bar·&&·foo·&&·foo.bar.baz;
+       19 │ + bar·&&·foo?.bar.baz;
+    20 20 │   
+    21 21 │   // prefix with chained calls
+  
+
+```
+
+```
+invalidLogicalAndCases7.js:22:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    21 │ // prefix with chained calls
+  > 22 │ bar && foo && foo.bar && foo.bar();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ 
+    24 │ // longer prefix chain
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    20 20 │   
+    21 21 │   // prefix with chained calls
+    22    │ - bar·&&·foo·&&·foo.bar·&&·foo.bar();
+       22 │ + bar·&&·foo?.bar?.();
+    23 23 │   
+    24 24 │   // longer prefix chain
+  
+
+```
+
+```
+invalidLogicalAndCases7.js:25:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    24 │ // longer prefix chain
+  > 25 │ a && b && c && foo && foo.bar;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ 
+    27 │ // the original issue example
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    23 23 │   
+    24 24 │   // longer prefix chain
+    25    │ - a·&&·b·&&·c·&&·foo·&&·foo.bar;
+       25 │ + a·&&·b·&&·c·&&·foo?.bar;
+    26 26 │   
+    27 27 │   // the original issue example
+  
+
+```
+
+```
+invalidLogicalAndCases7.js:28:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    27 │ // the original issue example
+  > 28 │ bar && foo && foo.length;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ 
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    26 26 │   
+    27 27 │   // the original issue example
+    28    │ - bar·&&·foo·&&·foo.length;
+       28 │ + bar·&&·foo?.length;
+    29 29 │   
+  
+
+```

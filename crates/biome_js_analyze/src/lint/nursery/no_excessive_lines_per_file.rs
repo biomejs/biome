@@ -150,7 +150,7 @@ impl Rule for NoExcessiveLinesPerFile {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "This file has too many lines ("{state}"). Maximum allowed is "{options.max_lines().to_string()}"."
+                    "This file has too many lines ("{state}"). Maximum allowed is "{options.max_lines()}"."
                 },
             )
             .note(markup! {

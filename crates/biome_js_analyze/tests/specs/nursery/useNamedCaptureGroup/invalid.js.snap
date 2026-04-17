@@ -1,0 +1,223 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/(ba[rz])/;
+/([0-9]{4})/;
+/(foo)(bar)/;
+/(?:ab)(cd)/;
+/([a-z])\1/;
+new RegExp("(foo)");
+RegExp("(foo)");
+new RegExp("(foo)(bar)");
+new RegExp("\\d+(foo)");
+
+```
+
+# Diagnostics
+```
+invalid.js:1:2 lint/nursery/useNamedCaptureGroup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Capture group is not named.
+  
+  > 1 │ /(ba[rz])/;
+      │  ^
+    2 │ /([0-9]{4})/;
+    3 │ /(foo)(bar)/;
+  
+  i Named capture groups improve readability by associating a descriptive name with each match. Use (?<name>...) instead of (...).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:2:2 lint/nursery/useNamedCaptureGroup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Capture group is not named.
+  
+    1 │ /(ba[rz])/;
+  > 2 │ /([0-9]{4})/;
+      │  ^
+    3 │ /(foo)(bar)/;
+    4 │ /(?:ab)(cd)/;
+  
+  i Named capture groups improve readability by associating a descriptive name with each match. Use (?<name>...) instead of (...).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:2 lint/nursery/useNamedCaptureGroup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Capture group is not named.
+  
+    1 │ /(ba[rz])/;
+    2 │ /([0-9]{4})/;
+  > 3 │ /(foo)(bar)/;
+      │  ^
+    4 │ /(?:ab)(cd)/;
+    5 │ /([a-z])\1/;
+  
+  i Named capture groups improve readability by associating a descriptive name with each match. Use (?<name>...) instead of (...).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:7 lint/nursery/useNamedCaptureGroup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Capture group is not named.
+  
+    1 │ /(ba[rz])/;
+    2 │ /([0-9]{4})/;
+  > 3 │ /(foo)(bar)/;
+      │       ^
+    4 │ /(?:ab)(cd)/;
+    5 │ /([a-z])\1/;
+  
+  i Named capture groups improve readability by associating a descriptive name with each match. Use (?<name>...) instead of (...).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:8 lint/nursery/useNamedCaptureGroup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Capture group is not named.
+  
+    2 │ /([0-9]{4})/;
+    3 │ /(foo)(bar)/;
+  > 4 │ /(?:ab)(cd)/;
+      │        ^
+    5 │ /([a-z])\1/;
+    6 │ new RegExp("(foo)");
+  
+  i Named capture groups improve readability by associating a descriptive name with each match. Use (?<name>...) instead of (...).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:2 lint/nursery/useNamedCaptureGroup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Capture group is not named.
+  
+    3 │ /(foo)(bar)/;
+    4 │ /(?:ab)(cd)/;
+  > 5 │ /([a-z])\1/;
+      │  ^
+    6 │ new RegExp("(foo)");
+    7 │ RegExp("(foo)");
+  
+  i Named capture groups improve readability by associating a descriptive name with each match. Use (?<name>...) instead of (...).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:13 lint/nursery/useNamedCaptureGroup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Capture group is not named.
+  
+    4 │ /(?:ab)(cd)/;
+    5 │ /([a-z])\1/;
+  > 6 │ new RegExp("(foo)");
+      │             ^
+    7 │ RegExp("(foo)");
+    8 │ new RegExp("(foo)(bar)");
+  
+  i Named capture groups improve readability by associating a descriptive name with each match. Use (?<name>...) instead of (...).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:9 lint/nursery/useNamedCaptureGroup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Capture group is not named.
+  
+    5 │ /([a-z])\1/;
+    6 │ new RegExp("(foo)");
+  > 7 │ RegExp("(foo)");
+      │         ^
+    8 │ new RegExp("(foo)(bar)");
+    9 │ new RegExp("\\d+(foo)");
+  
+  i Named capture groups improve readability by associating a descriptive name with each match. Use (?<name>...) instead of (...).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:13 lint/nursery/useNamedCaptureGroup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Capture group is not named.
+  
+     6 │ new RegExp("(foo)");
+     7 │ RegExp("(foo)");
+   > 8 │ new RegExp("(foo)(bar)");
+       │             ^
+     9 │ new RegExp("\\d+(foo)");
+    10 │ 
+  
+  i Named capture groups improve readability by associating a descriptive name with each match. Use (?<name>...) instead of (...).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:18 lint/nursery/useNamedCaptureGroup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Capture group is not named.
+  
+     6 │ new RegExp("(foo)");
+     7 │ RegExp("(foo)");
+   > 8 │ new RegExp("(foo)(bar)");
+       │                  ^
+     9 │ new RegExp("\\d+(foo)");
+    10 │ 
+  
+  i Named capture groups improve readability by associating a descriptive name with each match. Use (?<name>...) instead of (...).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:17 lint/nursery/useNamedCaptureGroup ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Capture group is not named.
+  
+     7 │ RegExp("(foo)");
+     8 │ new RegExp("(foo)(bar)");
+   > 9 │ new RegExp("\\d+(foo)");
+       │                 ^
+    10 │ 
+  
+  i Named capture groups improve readability by associating a descriptive name with each match. Use (?<name>...) instead of (...).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -9,6 +9,7 @@ impl FormatRule<AnyCssFunctionName> for FormatAnyCssFunctionName {
     fn fmt(&self, node: &AnyCssFunctionName, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
             AnyCssFunctionName::CssIdentifier(node) => node.format().fmt(f),
+            AnyCssFunctionName::ScssInterpolatedIdentifier(node) => node.format().fmt(f),
             AnyCssFunctionName::ScssQualifiedName(node) => node.format().fmt(f),
         }
     }

@@ -453,3 +453,106 @@ describe("foo", () => {
         result,
     ));
 }
+
+/// Regression test for https://github.com/biomejs/biome/issues/9258
+/// Skipping a domain should not report suppression comments for rules in that
+/// domain as unused.
+#[test]
+fn skip_domain_does_not_report_unused_suppression() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    let config = Utf8Path::new("biome.json");
+    fs.insert(
+        config.into(),
+        r#"{
+    "linter": {
+        "domains": {
+            "test": "all"
+        }
+    }
+}
+"#
+        .as_bytes(),
+    );
+    let test1 = Utf8Path::new("test1.js");
+    fs.insert(
+        test1.into(),
+        r#"// biome-ignore lint/suspicious/noFocusedTests: reason
+describe.only("bar", () => {});
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--skip=test", test1.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "skip_domain_does_not_report_unused_suppression",
+        fs,
+        console,
+        result,
+    ));
+}
+
+/// Verifies that explicit domain enables are additive with whole-group enables:
+/// the plain group contributes only non-domain rules, and the domain adds its
+/// domain-tagged rules back explicitly.
+#[test]
+fn group_enable_and_domain_enable_are_additive() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    let config = Utf8Path::new("biome.json");
+    fs.insert(
+        config.into(),
+        br#"{
+    "linter": {
+        "rules": {
+            "recommended": false,
+            "correctness": "error"
+        },
+        "domains": {
+            "react": "all"
+        }
+    }
+}
+"#,
+    );
+    let test1 = Utf8Path::new("test1.jsx");
+    fs.insert(
+        test1.into(),
+        br#"import { useEffect, useState } from "react";
+
+export function Component() {
+    const [local, setLocal] = useState(0);
+
+    useEffect(() => {
+        console.log(local);
+    }, []);
+
+    return <button onClick={() => setLocal(1)}>increment</button>;
+}
+"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", test1.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "group_enable_and_domain_enable_are_additive",
+        fs,
+        console,
+        result,
+    ));
+}

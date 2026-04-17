@@ -1,4 +1,5 @@
 use crate::globals::{is_js_global, is_ts_global};
+use crate::services::embedded_bindings::EmbeddedBindings;
 use crate::services::semantic::SemanticServices;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
@@ -86,6 +87,13 @@ impl Rule for NoUndeclaredVariables {
                     return None;
                 }
 
+                let embedded_bindings = ctx
+                    .get_service::<EmbeddedBindings>()
+                    .expect("embedded bindings service");
+                if embedded_bindings.contains_binding(text) {
+                    return None;
+                }
+
                 // Typescript Const Assertion
                 if text == "const" && under_as_expression {
                     return None;
@@ -94,7 +102,7 @@ impl Rule for NoUndeclaredVariables {
                 // arguments object within non-arrow functions
                 if text == "arguments" {
                     let is_in_non_arrow_function =
-                        identifier.syntax().ancestors().any(|ancestor| {
+                        identifier.syntax().ancestors().skip(1).any(|ancestor| {
                             !matches!(
                                 AnyJsFunction::cast(ancestor),
                                 None | Some(AnyJsFunction::JsArrowFunctionExpression(_))

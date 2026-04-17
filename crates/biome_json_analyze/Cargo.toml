@@ -21,9 +21,12 @@ name    = "json_analyzer"
 biome_analyze        = { workspace = true }
 biome_analyze_macros = { workspace = true }
 biome_console        = { workspace = true }
+biome_deserialize    = { workspace = true }
 biome_diagnostics    = { workspace = true }
 biome_json_factory   = { workspace = true }
 biome_json_syntax    = { workspace = true }
+biome_package        = { workspace = true }
+biome_project_layout = { workspace = true }
 biome_rowan          = { workspace = true }
 biome_rule_options   = { workspace = true }
 biome_string_case    = { workspace = true }
@@ -33,10 +36,10 @@ regex                = { workspace = true }
 rustc-hash           = { workspace = true }
 
 [dev-dependencies]
-biome_configuration = { workspace = true }
+biome_configuration = { path = "../biome_configuration" }
 biome_json_parser   = { path = "../biome_json_parser" }
 biome_test_utils    = { path = "../biome_test_utils" }
-criterion           = { package = "codspeed-criterion-compat", version = "*" }
+criterion           = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta               = { workspace = true, features = ["glob"] }
 tests_macros        = { path = "../tests_macros" }
 

@@ -47,34 +47,28 @@ CssRoot {
                                             },
                                             l_paren_token: L_PAREN@35..36 "(" [] [],
                                             items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssString {
-                                                                value_token: CSS_STRING_LITERAL@36..45 "\"inherit\"" [] [],
-                                                            },
-                                                        ],
-                                                    },
+                                                CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssString {
+                                                            value_token: CSS_STRING_LITERAL@36..45 "\"inherit\"" [] [],
+                                                        },
+                                                    ],
                                                 },
                                                 COMMA@45..47 "," [] [Whitespace(" ")],
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssString {
-                                                                value_token: CSS_STRING_LITERAL@47..56 "\"initial\"" [] [],
-                                                            },
-                                                        ],
-                                                    },
+                                                CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssString {
+                                                            value_token: CSS_STRING_LITERAL@47..56 "\"initial\"" [] [],
+                                                        },
+                                                    ],
                                                 },
                                                 COMMA@56..58 "," [] [Whitespace(" ")],
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssString {
-                                                                value_token: CSS_STRING_LITERAL@58..65 "\"unset\"" [] [],
-                                                            },
-                                                        ],
-                                                    },
+                                                CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssString {
+                                                            value_token: CSS_STRING_LITERAL@58..65 "\"unset\"" [] [],
+                                                        },
+                                                    ],
                                                 },
                                             ],
                                             r_paren_token: R_PAREN@65..66 ")" [] [],
@@ -125,23 +119,20 @@ CssRoot {
                         0: IDENT@28..35 "--value" [] []
                       1: L_PAREN@35..36 "(" [] []
                       2: CSS_PARAMETER_LIST@36..65
-                        0: CSS_PARAMETER@36..45
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@36..45
-                            0: CSS_COMPONENT_VALUE_LIST@36..45
-                              0: CSS_STRING@36..45
-                                0: CSS_STRING_LITERAL@36..45 "\"inherit\"" [] []
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@36..45
+                          0: CSS_COMPONENT_VALUE_LIST@36..45
+                            0: CSS_STRING@36..45
+                              0: CSS_STRING_LITERAL@36..45 "\"inherit\"" [] []
                         1: COMMA@45..47 "," [] [Whitespace(" ")]
-                        2: CSS_PARAMETER@47..56
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@47..56
-                            0: CSS_COMPONENT_VALUE_LIST@47..56
-                              0: CSS_STRING@47..56
-                                0: CSS_STRING_LITERAL@47..56 "\"initial\"" [] []
+                        2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@47..56
+                          0: CSS_COMPONENT_VALUE_LIST@47..56
+                            0: CSS_STRING@47..56
+                              0: CSS_STRING_LITERAL@47..56 "\"initial\"" [] []
                         3: COMMA@56..58 "," [] [Whitespace(" ")]
-                        4: CSS_PARAMETER@58..65
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@58..65
-                            0: CSS_COMPONENT_VALUE_LIST@58..65
-                              0: CSS_STRING@58..65
-                                0: CSS_STRING_LITERAL@58..65 "\"unset\"" [] []
+                        4: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@58..65
+                          0: CSS_COMPONENT_VALUE_LIST@58..65
+                            0: CSS_STRING@58..65
+                              0: CSS_STRING_LITERAL@58..65 "\"unset\"" [] []
                       3: R_PAREN@65..66 ")" [] []
                 1: (empty)
               1: SEMICOLON@66..67 ";" [] []

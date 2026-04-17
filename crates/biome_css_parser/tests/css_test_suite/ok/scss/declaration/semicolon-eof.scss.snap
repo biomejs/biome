@@ -26,11 +26,13 @@ CssRoot {
                 },
             },
             colon_token: COLON@6..8 ":" [] [Whitespace(" ")],
-            value: CssGenericComponentValueList [
-                CssIdentifier {
-                    value_token: IDENT@8..11 "red" [] [],
-                },
-            ],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    CssIdentifier {
+                        value_token: IDENT@8..11 "red" [] [],
+                    },
+                ],
+            },
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@11..12 ";" [] [],
         },
@@ -42,12 +44,14 @@ CssRoot {
                 },
             },
             colon_token: COLON@18..20 ":" [] [Whitespace(" ")],
-            value: CssGenericComponentValueList [
-                CssRegularDimension {
-                    value_token: CSS_NUMBER_LITERAL@20..22 "10" [] [],
-                    unit_token: IDENT@22..24 "px" [] [],
-                },
-            ],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    CssRegularDimension {
+                        value_token: CSS_NUMBER_LITERAL@20..22 "10" [] [],
+                        unit_token: IDENT@22..24 "px" [] [],
+                    },
+                ],
+            },
             modifiers: ScssVariableModifierList [],
             semicolon_token: missing (optional),
         },
@@ -68,9 +72,10 @@ CssRoot {
         1: CSS_IDENTIFIER@1..6
           0: IDENT@1..6 "color" [] []
       1: COLON@6..8 ":" [] [Whitespace(" ")]
-      2: CSS_GENERIC_COMPONENT_VALUE_LIST@8..11
-        0: CSS_IDENTIFIER@8..11
-          0: IDENT@8..11 "red" [] []
+      2: SCSS_EXPRESSION@8..11
+        0: SCSS_EXPRESSION_ITEM_LIST@8..11
+          0: CSS_IDENTIFIER@8..11
+            0: IDENT@8..11 "red" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@11..11
       4: SEMICOLON@11..12 ";" [] []
     1: SCSS_DECLARATION@12..24
@@ -79,10 +84,11 @@ CssRoot {
         1: CSS_IDENTIFIER@14..18
           0: IDENT@14..18 "size" [] []
       1: COLON@18..20 ":" [] [Whitespace(" ")]
-      2: CSS_GENERIC_COMPONENT_VALUE_LIST@20..24
-        0: CSS_REGULAR_DIMENSION@20..24
-          0: CSS_NUMBER_LITERAL@20..22 "10" [] []
-          1: IDENT@22..24 "px" [] []
+      2: SCSS_EXPRESSION@20..24
+        0: SCSS_EXPRESSION_ITEM_LIST@20..24
+          0: CSS_REGULAR_DIMENSION@20..24
+            0: CSS_NUMBER_LITERAL@20..22 "10" [] []
+            1: IDENT@22..24 "px" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@24..24
       4: (empty)
   2: EOF@24..25 "" [Newline("\n")] []

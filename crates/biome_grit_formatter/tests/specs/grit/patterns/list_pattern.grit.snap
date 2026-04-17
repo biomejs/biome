@@ -14,20 +14,7 @@ info: grit/patterns/list_pattern.grit
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Attribute Position: Auto
-Trailing newline: true
------
+# Formatted
 
 ```grit
 `var $x = [$numbers]` => `var firstPrimes = [$numbers]` where {

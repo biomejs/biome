@@ -1,18 +1,19 @@
 use std::{borrow::Cow, cmp::Ordering, iter::zip};
 
+use biome_analyze::shared::sort_attributes::{AttributeGroup, SortableAttribute};
 use biome_analyze::{
     Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
     declare_source_rule,
 };
 use biome_console::markup;
 use biome_deserialize::TextRange;
-use biome_diagnostics::{Applicability, category};
+use biome_diagnostics::Applicability;
 use biome_js_syntax::{
-    AnyJsxAttribute, JsxAttribute, JsxAttributeList, JsxOpeningElement, JsxSelfClosingElement,
+    AnyJsxAttribute, JsLanguage, JsxAttribute, JsxAttributeList, JsxOpeningElement,
+    JsxSelfClosingElement,
 };
-use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt, SyntaxToken};
 use biome_rule_options::use_sorted_attributes::{SortOrder, UseSortedAttributesOptions};
-use biome_string_case::StrLikeExtension;
 
 use crate::JsRuleAction;
 
@@ -82,38 +83,43 @@ declare_source_rule! {
 
 impl Rule for UseSortedAttributes {
     type Query = Ast<JsxAttributeList>;
-    type State = PropGroup;
+    type State = AttributeGroup<SortableJsxAttribute>;
     type Signals = Box<[Self::State]>;
     type Options = UseSortedAttributesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let props = ctx.query();
-        let mut current_prop_group = PropGroup::default();
+        let mut current_prop_group = AttributeGroup::default();
         let mut prop_groups = Vec::new();
         let options = ctx.options();
         let sort_by = options.sort_order.unwrap_or_default();
 
         let comparator = match sort_by {
-            SortOrder::Natural => PropElement::ascii_nat_cmp,
-            SortOrder::Lexicographic => PropElement::lexicographic_cmp,
+            SortOrder::Natural => SortableJsxAttribute::ascii_nat_cmp,
+            SortOrder::Lexicographic => SortableJsxAttribute::lexicographic_cmp,
         };
 
         // Convert to boolean-based comparator for is_sorted_by
-        let boolean_comparator =
-            |a: &PropElement, b: &PropElement| comparator(a, b) != Ordering::Greater;
+        let boolean_comparator = |a: &SortableJsxAttribute, b: &SortableJsxAttribute| {
+            comparator(a, b) != Ordering::Greater
+        };
 
         for prop in props {
             match prop {
                 AnyJsxAttribute::JsxAttribute(attr) => {
-                    current_prop_group.props.push(PropElement { prop: attr });
+                    current_prop_group.attrs.push(SortableJsxAttribute(attr));
                 }
-                // spread prop reset sort order
-                AnyJsxAttribute::JsxSpreadAttribute(_) => {
+                // spread or shorthand attribute resets sort order: it carries
+                // an opaque expression that may have side effects on the
+                // resulting prop set, so attributes on either side cannot be
+                // freely reordered across it.
+                AnyJsxAttribute::JsxSpreadAttribute(_)
+                | AnyJsxAttribute::JsxShorthandAttribute(_) => {
                     if !current_prop_group.is_empty()
                         && !current_prop_group.is_sorted(boolean_comparator)
                     {
                         prop_groups.push(current_prop_group);
-                        current_prop_group = PropGroup::default();
+                        current_prop_group = AttributeGroup::default();
                     } else {
                         // Reuse the same buffer
                         current_prop_group.clear();
@@ -130,7 +136,7 @@ impl Rule for UseSortedAttributes {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         Some(RuleDiagnostic::new(
-            category!("assist/source/useSortedAttributes"),
+            rule_category!(),
             Self::text_range(ctx, state)?,
             markup! {
                 "The attributes are not sorted. "
@@ -139,7 +145,7 @@ impl Rule for UseSortedAttributes {
     }
 
     fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
-        ctx.query().syntax().ancestors().find_map(|node| {
+        ctx.query().syntax().ancestors().skip(1).find_map(|node| {
             JsxOpeningElement::cast_ref(&node)
                 .map(|element| element.range())
                 .or_else(|| JsxSelfClosingElement::cast_ref(&node).map(|element| element.range()))
@@ -152,14 +158,14 @@ impl Rule for UseSortedAttributes {
         let sort_by = options.sort_order.unwrap_or_default();
 
         let comparator = match sort_by {
-            SortOrder::Natural => PropElement::ascii_nat_cmp,
-            SortOrder::Lexicographic => PropElement::lexicographic_cmp,
+            SortOrder::Natural => SortableJsxAttribute::ascii_nat_cmp,
+            SortOrder::Lexicographic => SortableJsxAttribute::lexicographic_cmp,
         };
 
-        for (PropElement { prop }, PropElement { prop: sorted_prop }) in
-            zip(state.props.iter(), state.get_sorted_props(comparator))
+        for (SortableJsxAttribute(attr), SortableJsxAttribute(sorted_attr)) in
+            zip(state.attrs.iter(), state.get_sorted_attributes(comparator)?)
         {
-            mutation.replace_node(prop.clone(), sorted_prop);
+            mutation.replace_node_discard_trivia(attr.clone(), sorted_attr);
         }
 
         Some(RuleAction::new(
@@ -172,65 +178,30 @@ impl Rule for UseSortedAttributes {
 }
 
 #[derive(PartialEq, Eq, Clone)]
-pub struct PropElement {
-    prop: JsxAttribute,
-}
+pub struct SortableJsxAttribute(JsxAttribute);
 
-impl PropElement {
-    pub fn ascii_nat_cmp(&self, other: &Self) -> Ordering {
-        let (Ok(self_name), Ok(other_name)) = (self.prop.name(), other.prop.name()) else {
-            return Ordering::Equal;
-        };
-        let (Ok(self_name), Ok(other_name)) = (self_name.name(), other_name.name()) else {
-            return Ordering::Equal;
-        };
+impl SortableAttribute for SortableJsxAttribute {
+    type Language = JsLanguage;
 
-        self_name
-            .text_trimmed()
-            .ascii_nat_cmp(other_name.text_trimmed())
+    fn name(&self) -> Option<SyntaxToken<Self::Language>> {
+        self.0.name().ok()?.name_token().ok()
     }
 
-    pub fn lexicographic_cmp(&self, other: &Self) -> Ordering {
-        let (Ok(self_name), Ok(other_name)) = (self.prop.name(), other.prop.name()) else {
-            return Ordering::Equal;
-        };
-        let (Ok(self_name), Ok(other_name)) = (self_name.name(), other_name.name()) else {
-            return Ordering::Equal;
-        };
-
-        self_name
-            .text_trimmed()
-            .lexicographic_cmp(other_name.text_trimmed())
-    }
-}
-
-#[derive(Clone, Default)]
-pub struct PropGroup {
-    props: Vec<PropElement>,
-}
-
-impl PropGroup {
-    fn is_empty(&self) -> bool {
-        self.props.is_empty()
+    fn node(&self) -> &impl AstNode<Language = Self::Language> {
+        &self.0
     }
 
-    fn is_sorted<F>(&self, comparator: F) -> bool
+    fn replace_token(
+        self,
+        prev_token: SyntaxToken<Self::Language>,
+        next_token: SyntaxToken<Self::Language>,
+    ) -> Option<Self>
     where
-        F: Fn(&PropElement, &PropElement) -> bool,
+        Self: Sized,
     {
-        self.props.is_sorted_by(comparator)
-    }
-
-    fn get_sorted_props<F>(&self, comparator: F) -> Vec<PropElement>
-    where
-        F: FnMut(&PropElement, &PropElement) -> Ordering,
-    {
-        let mut new_props = self.props.clone();
-        new_props.sort_by(comparator);
-        new_props
-    }
-
-    fn clear(&mut self) {
-        self.props.clear();
+        Some(Self(
+            self.0
+                .replace_token_discard_trivia(prev_token, next_token)?,
+        ))
     }
 }

@@ -763,11 +763,17 @@ impl FormatHtmlElementList {
                         // Take any borrowed `>` from the previous sibling element
                         let current_borrowed_r_angle = borrowed_sibling_r_angle.take();
 
+                        let next_can_borrow = next_is_adjacent_inline
+                            && matches!(
+                                children_iter.peek(),
+                                Some(HtmlChild::NonText(AnyHtmlElement::HtmlElement(_)))
+                            );
+
                         // Create the element formatter with borrowing options
                         let element_format = format_element_with_borrowing(
                             non_text,
                             current_borrowed_r_angle,
-                            next_is_adjacent_inline,
+                            next_can_borrow,
                         );
 
                         if needs_outer_group {
@@ -864,7 +870,9 @@ impl FormatHtmlElementList {
                         if next_is_adjacent_inline {
                             prev_inline_group_id = Some(non_text_group_id);
                             // Store the closing r_angle token from this element for the next sibling
-                            borrowed_sibling_r_angle = non_text.closing_r_angle_token();
+                            if next_can_borrow {
+                                borrowed_sibling_r_angle = non_text.closing_r_angle_token();
+                            }
                         } else {
                             prev_inline_group_id = None;
                         }

@@ -46,12 +46,17 @@ pub enum MarkdownSyntaxKind {
     MD_ORDERED_LIST_MARKER,
     MD_ERROR_LITERAL,
     MD_ENTITY_LITERAL,
+    MD_QUOTE_PRE_MARKER_INDENT,
+    MD_QUOTE_POST_MARKER_SPACE,
+    MD_INDENT_CHAR,
+    MD_LIST_POST_MARKER_SPACE,
     ERROR_TOKEN,
     NEWLINE,
     WHITESPACE,
     TAB,
     BOGUS,
     MD_BOGUS,
+    MD_BOGUS_BLOCK,
     MD_BOGUS_BULLET,
     MD_DOCUMENT,
     MD_BLOCK_LIST,
@@ -62,12 +67,14 @@ pub enum MarkdownSyntaxKind {
     MD_FENCED_CODE_BLOCK,
     MD_CODE_NAME_LIST,
     MD_HTML_BLOCK,
-    MD_LINK_BLOCK,
     MD_LINK_REFERENCE_DEFINITION,
     MD_LINK_LABEL,
     MD_LINK_DESTINATION,
     MD_LINK_TITLE,
     MD_QUOTE,
+    MD_QUOTE_PREFIX,
+    MD_QUOTE_INDENT,
+    MD_QUOTE_INDENT_LIST,
     MD_ORDERED_LIST_ITEM,
     MD_BULLET_LIST_ITEM,
     MD_BULLET_LIST,
@@ -98,6 +105,12 @@ pub enum MarkdownSyntaxKind {
     MD_INDENT,
     MD_THEMATIC_BREAK_BLOCK,
     MD_NEWLINE,
+    MD_INDENT_TOKEN,
+    MD_INDENT_TOKEN_LIST,
+    MD_LIST_MARKER_PREFIX,
+    MD_THEMATIC_BREAK_CHAR,
+    MD_THEMATIC_BREAK_PART_LIST,
+    MD_CONTINUATION_INDENT,
     #[doc(hidden)]
     __LAST,
 }
@@ -144,6 +157,10 @@ impl MarkdownSyntaxKind {
                 | MD_ORDERED_LIST_MARKER
                 | MD_ERROR_LITERAL
                 | MD_ENTITY_LITERAL
+                | MD_QUOTE_PRE_MARKER_INDENT
+                | MD_QUOTE_POST_MARKER_SPACE
+                | MD_INDENT_CHAR
+                | MD_LIST_POST_MARKER_SPACE
         )
     }
     pub const fn is_list(self) -> bool {
@@ -152,9 +169,12 @@ impl MarkdownSyntaxKind {
             MD_BLOCK_LIST
                 | MD_HASH_LIST
                 | MD_CODE_NAME_LIST
+                | MD_QUOTE_INDENT_LIST
                 | MD_BULLET_LIST
                 | MD_INLINE_ITEM_LIST
                 | MD_INDENTED_CODE_LINE_LIST
+                | MD_INDENT_TOKEN_LIST
+                | MD_THEMATIC_BREAK_PART_LIST
         )
     }
     pub fn from_keyword(ident: &str) -> Option<Self> {

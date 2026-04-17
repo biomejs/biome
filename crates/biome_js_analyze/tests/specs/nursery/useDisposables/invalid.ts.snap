@@ -1,0 +1,243 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+const disposable = {
+  [Symbol.dispose]() {
+    // do something
+  }
+};
+
+const asyncDisposable = {
+  async [Symbol.asyncDispose]() {
+    // do something
+  }
+};
+
+function createDisposable(): Disposable {
+  return {
+    [Symbol.dispose]() {
+      // do something
+    },
+  };
+}
+
+const createdDisposable = createDisposable();
+
+function createAsyncDisposable(): AsyncDisposable {
+  return {
+    async [Symbol.asyncDispose](): Promise<void> {
+      // do something
+    },
+  };
+}
+
+const createdAsyncDisposable = createAsyncDisposable();
+
+class DisposableClass implements Disposable {
+	[Symbol.dispose](): void {
+		// do something
+	}
+}
+
+const disposableInstance = new DisposableClass();
+
+class AsyncDisposableClass implements AsyncDisposable {
+	async [Symbol.asyncDispose](): Promise<void> {
+		// do something
+	}
+}
+
+const asyncDisposableInstance = new AsyncDisposableClass();
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:7 lint/nursery/useDisposables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Disposable object is assigned here but never disposed.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const disposable = {
+      │       ^^^^^^^^^^^^^^
+  > 3 │   [Symbol.dispose]() {
+  > 4 │     // do something
+  > 5 │   }
+  > 6 │ };
+      │ ^
+    7 │ 
+    8 │ const asyncDisposable = {
+  
+  i The object implements the Disposable interface, which is intended to be disposed after use with using syntax.
+  
+  i Not disposing the object properly can lead some resource or memory leak.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the using keyword to dispose the object when leaving the scope.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - const·disposable·=·{
+        2 │ + using·disposable·=·{
+     3  3 │     [Symbol.dispose]() {
+     4  4 │       // do something
+  
+
+```
+
+```
+invalid.ts:8:7 lint/nursery/useDisposables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Disposable object is assigned here but never disposed.
+  
+     6 │ };
+     7 │ 
+   > 8 │ const asyncDisposable = {
+       │       ^^^^^^^^^^^^^^^^^^^
+   > 9 │   async [Symbol.asyncDispose]() {
+  > 10 │     // do something
+  > 11 │   }
+  > 12 │ };
+       │ ^
+    13 │ 
+    14 │ function createDisposable(): Disposable {
+  
+  i The object implements the AsyncDisposable interface, which is intended to be disposed after use with await using syntax.
+  
+  i Not disposing the object properly can lead some resource or memory leak.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the using keyword to dispose the object when leaving the scope.
+  
+     6  6 │   };
+     7  7 │   
+     8    │ - const·asyncDisposable·=·{
+        8 │ + await·using·asyncDisposable·=·{
+     9  9 │     async [Symbol.asyncDispose]() {
+    10 10 │       // do something
+  
+
+```
+
+```
+invalid.ts:22:7 lint/nursery/useDisposables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Disposable object is assigned here but never disposed.
+  
+    20 │ }
+    21 │ 
+  > 22 │ const createdDisposable = createDisposable();
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ 
+    24 │ function createAsyncDisposable(): AsyncDisposable {
+  
+  i The object implements the Disposable interface, which is intended to be disposed after use with using syntax.
+  
+  i Not disposing the object properly can lead some resource or memory leak.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the using keyword to dispose the object when leaving the scope.
+  
+    20 20 │   }
+    21 21 │   
+    22    │ - const·createdDisposable·=·createDisposable();
+       22 │ + using·createdDisposable·=·createDisposable();
+    23 23 │   
+    24 24 │   function createAsyncDisposable(): AsyncDisposable {
+  
+
+```
+
+```
+invalid.ts:32:7 lint/nursery/useDisposables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Disposable object is assigned here but never disposed.
+  
+    30 │ }
+    31 │ 
+  > 32 │ const createdAsyncDisposable = createAsyncDisposable();
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ 
+    34 │ class DisposableClass implements Disposable {
+  
+  i The object implements the AsyncDisposable interface, which is intended to be disposed after use with await using syntax.
+  
+  i Not disposing the object properly can lead some resource or memory leak.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the using keyword to dispose the object when leaving the scope.
+  
+    30 30 │   }
+    31 31 │   
+    32    │ - const·createdAsyncDisposable·=·createAsyncDisposable();
+       32 │ + await·using·createdAsyncDisposable·=·createAsyncDisposable();
+    33 33 │   
+    34 34 │   class DisposableClass implements Disposable {
+  
+
+```
+
+```
+invalid.ts:40:7 lint/nursery/useDisposables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Disposable object is assigned here but never disposed.
+  
+    38 │ }
+    39 │ 
+  > 40 │ const disposableInstance = new DisposableClass();
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │ 
+    42 │ class AsyncDisposableClass implements AsyncDisposable {
+  
+  i The object implements the Disposable interface, which is intended to be disposed after use with using syntax.
+  
+  i Not disposing the object properly can lead some resource or memory leak.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the using keyword to dispose the object when leaving the scope.
+  
+    38 38 │   }
+    39 39 │   
+    40    │ - const·disposableInstance·=·new·DisposableClass();
+       40 │ + using·disposableInstance·=·new·DisposableClass();
+    41 41 │   
+    42 42 │   class AsyncDisposableClass implements AsyncDisposable {
+  
+
+```
+
+```
+invalid.ts:48:7 lint/nursery/useDisposables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Disposable object is assigned here but never disposed.
+  
+    46 │ }
+    47 │ 
+  > 48 │ const asyncDisposableInstance = new AsyncDisposableClass();
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    49 │ 
+  
+  i The object implements the AsyncDisposable interface, which is intended to be disposed after use with await using syntax.
+  
+  i Not disposing the object properly can lead some resource or memory leak.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the using keyword to dispose the object when leaving the scope.
+  
+    46 46 │   }
+    47 47 │   
+    48    │ - const·asyncDisposableInstance·=·new·AsyncDisposableClass();
+       48 │ + await·using·asyncDisposableInstance·=·new·AsyncDisposableClass();
+    49 49 │   
+  
+
+```

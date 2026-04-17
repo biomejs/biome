@@ -1,5 +1,5 @@
 use biome_js_syntax::{JsSyntaxNode, JsSyntaxToken};
-use biome_rowan::TriviaPieceKind;
+use biome_rowan::{TextRange, TriviaPieceKind};
 use std::ops::Deref;
 
 /// Represents a normalised JSDoc comment.
@@ -24,11 +24,15 @@ use std::ops::Deref;
 ///
 /// See https://jsdoc.app/ for the JSDoc reference.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct JsdocComment(String);
+pub struct JsdocComment {
+    content: String,
+
+    range: TextRange,
+}
 
 impl JsdocComment {
     /// Creates a normalised JSDoc comment from the given comment `text`.
-    pub fn from_comment_text(text: &str) -> Self {
+    pub fn new(text: &str, range: TextRange) -> Self {
         debug_assert!(text.starts_with("/**") && text.ends_with("*/"));
 
         let mut result = text[3..text.len() - 2]
@@ -50,7 +54,10 @@ impl JsdocComment {
             result.truncate(result.len() - 1);
         }
 
-        Self(result)
+        Self {
+            content: result,
+            range,
+        }
     }
 
     /// Returns whether the given text is a valid JSDoc comment.
@@ -62,15 +69,6 @@ impl JsdocComment {
             && text.starts_with("/**")
             && text.as_bytes().get(3).is_some_and(|c| *c != b'*')
             && text.ends_with("*/")
-    }
-
-    /// Execute a callback on all JSDoc comments preceding the given node.
-    // TODO: Remove this and replace it since we now expose the raw iterator
-    pub fn for_each<F>(node: &JsSyntaxNode, mut func: F)
-    where
-        F: FnMut(&str),
-    {
-        Self::get_jsdocs(node).for_each(|str: String| func(str.as_str()))
     }
 
     /// Returns an iterator over the given node's serialized JSDoc comments.
@@ -94,7 +92,7 @@ impl JsdocComment {
 
 impl AsRef<str> for JsdocComment {
     fn as_ref(&self) -> &str {
-        self.0.as_str()
+        self.content.as_str()
     }
 }
 
@@ -102,7 +100,7 @@ impl Deref for JsdocComment {
     type Target = str;
 
     fn deref(&self) -> &Self::Target {
-        self.0.as_str()
+        self.content.as_str()
     }
 }
 
@@ -132,7 +130,7 @@ impl TryFrom<JsSyntaxToken> for JsdocComment {
             .find_map(|trivia| match trivia.kind() {
                 TriviaPieceKind::MultiLineComment | TriviaPieceKind::SingleLineComment => {
                     let text = trivia.text();
-                    Self::text_is_jsdoc_comment(text).then(|| Self::from_comment_text(text))
+                    Self::text_is_jsdoc_comment(text).then(|| Self::new(text, trivia.text_range()))
                 }
                 _ => None,
             })
@@ -184,7 +182,7 @@ mod tests {
         );
         assert_jsdoc_comments(
             r"
-            /** 
+            /**
              * multiline
              * yay
              * @param foo - the fooness of great
@@ -192,7 +190,7 @@ mod tests {
             export function fizzbuzz(foo: any) {};
             ",
             vec![
-                r"/** 
+                r"/**
              * multiline
              * yay
              * @param foo - the fooness of great

@@ -75,23 +75,20 @@ inline-size
 @container ( WIDTH <= 150px ) {  }
 @container ( 150px <= WIDTH ) {  }
 
+@container scroll-state(scrolled: bottom) {  }
+
+@container scroll-state(stuck: top) {  }
+
+@container not scroll-state(stuck) {  }
+
+@container card scroll-state(scrolled: bottom) {  }
+
+@container   scroll-state(  scrolled:   bottom  )   {  }
+
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-Trailing newline: true
------
+# Formatted
 
 ```css
 @container name not (width <= 500px) {
@@ -147,6 +144,21 @@ Trailing newline: true
 @container (WIDTH <= 150px) {
 }
 @container (150px <= WIDTH) {
+}
+
+@container scroll-state(scrolled: bottom) {
+}
+
+@container scroll-state(stuck: top) {
+}
+
+@container not scroll-state(stuck) {
+}
+
+@container card scroll-state(scrolled: bottom) {
+}
+
+@container scroll-state(scrolled: bottom) {
 }
 
 ```

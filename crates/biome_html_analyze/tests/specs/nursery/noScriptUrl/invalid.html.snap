@@ -4,7 +4,7 @@ expression: invalid.html
 ---
 # Input
 ```html
-<!-- Invalid cases - should trigger the rule -->
+<!-- should generate diagnostics -->
 
 <a href="javascript:void(0)">Link</a>
 
@@ -22,7 +22,7 @@ invalid.html:3:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━�
 
   × Avoid using javascript: URLs, as they can be a security risk.
   
-    1 │ <!-- Invalid cases - should trigger the rule -->
+    1 │ <!-- should generate diagnostics -->
     2 │ 
   > 3 │ <a href="javascript:void(0)">Link</a>
       │        ^^^^^^^^^^^^^^^^^^^^^

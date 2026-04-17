@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
 expression: snapshot
 ---
 
@@ -755,6 +756,7 @@ at_rule_container_or_query_error.css:3:31 parse ━━━━━━━━━━�
   
   - ( <container-query> )
   - ( <size-feature> )
+  - scroll-state( <scroll-state-query> )
   - style( <style-query> )
   
 at_rule_container_or_query_error.css:8:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -772,6 +774,7 @@ at_rule_container_or_query_error.css:8:1 parse ━━━━━━━━━━━
   
   - ( <container-query> )
   - ( <size-feature> )
+  - scroll-state( <scroll-state-query> )
   - style( <style-query> )
   
 at_rule_container_or_query_error.css:11:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -788,6 +791,7 @@ at_rule_container_or_query_error.css:11:31 parse ━━━━━━━━━━�
   
   - ( <container-query> )
   - ( <size-feature> )
+  - scroll-state( <scroll-state-query> )
   - style( <style-query> )
   
 at_rule_container_or_query_error.css:15:51 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -804,6 +808,7 @@ at_rule_container_or_query_error.css:15:51 parse ━━━━━━━━━━�
   
   - ( <container-query> )
   - ( <size-feature> )
+  - scroll-state( <scroll-state-query> )
   - style( <style-query> )
   
 at_rule_container_or_query_error.css:19:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -820,6 +825,7 @@ at_rule_container_or_query_error.css:19:31 parse ━━━━━━━━━━�
   
   - ( <container-query> )
   - ( <size-feature> )
+  - scroll-state( <scroll-state-query> )
   - style( <style-query> )
   
 at_rule_container_or_query_error.css:23:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -836,6 +842,7 @@ at_rule_container_or_query_error.css:23:31 parse ━━━━━━━━━━�
   
   - ( <container-query> )
   - ( <size-feature> )
+  - scroll-state( <scroll-state-query> )
   - style( <style-query> )
   
 at_rule_container_or_query_error.css:27:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -852,6 +859,7 @@ at_rule_container_or_query_error.css:27:31 parse ━━━━━━━━━━�
   
   - ( <container-query> )
   - ( <size-feature> )
+  - scroll-state( <scroll-state-query> )
   - style( <style-query> )
   
 at_rule_container_or_query_error.css:31:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -868,6 +876,7 @@ at_rule_container_or_query_error.css:31:21 parse ━━━━━━━━━━�
   
   - ( <container-query> )
   - ( <size-feature> )
+  - scroll-state( <scroll-state-query> )
   - style( <style-query> )
   
 at_rule_container_or_query_error.css:34:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -885,6 +894,7 @@ at_rule_container_or_query_error.css:34:21 parse ━━━━━━━━━━�
   
   - ( <container-query> )
   - ( <size-feature> )
+  - scroll-state( <scroll-state-query> )
   - style( <style-query> )
   
 at_rule_container_or_query_error.css:35:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

@@ -1,0 +1,17 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+<a></a>
+<span></span>
+<button type="button">Click me</button>
+<iframe sandbox></iframe>
+<iframe sandbox=""></iframe>
+<iframe sandbox="allow-downloads"></iframe>
+<iframe sandbox="allow-downloads allow-scripts"></iframe>
+<iframe sandbox="allow-downloads allow-scripts allow-forms"></iframe>
+
+```

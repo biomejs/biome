@@ -17,8 +17,8 @@ pub use biome_js_type_info::ImportSymbol;
 pub use biome_resolver::ResolvedPath;
 pub use diagnostics::ModuleDiagnostic;
 pub use js_module_info::{
-    JsExport, JsImport, JsImportPath, JsImportPhase, JsModuleInfo, JsModuleInfoDiagnostic,
-    JsOwnExport, JsReexport, ModuleResolver, SerializedJsModuleInfo,
+    BindingTypeData, JsExport, JsImport, JsImportPath, JsImportPhase, JsModuleInfo,
+    JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleResolver, SerializedJsModuleInfo,
 };
 pub use module_graph::{
     ModuleDependencies, ModuleGraph, ModuleInfo, SUPPORTED_EXTENSIONS, SerializedModuleInfo,

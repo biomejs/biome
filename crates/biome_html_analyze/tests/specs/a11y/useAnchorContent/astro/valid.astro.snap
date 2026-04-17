@@ -3,9 +3,9 @@ source: crates/biome_html_analyze/tests/spec_tests.rs
 expression: valid.astro
 ---
 # Input
-```html
+```astro
 ---
-// Astro frontmatter
+// should not generate diagnostics
 ---
 
 <!-- Custom components should not trigger the rule -->
@@ -21,6 +21,7 @@ expression: valid.astro
 <a aria-hidden="false">content</a>
 <a><span aria-hidden="false">content</span></a>
 <a><img alt="description" /></a>
+<a><Image alt="description" /></a>
 <a title="Home">Home</a>
 
 <!-- Accessible via aria-label or title alone -->

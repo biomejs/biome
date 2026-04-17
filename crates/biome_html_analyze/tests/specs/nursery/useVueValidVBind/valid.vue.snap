@@ -1,14 +1,19 @@
 ---
 source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 77
 expression: valid.vue
 ---
 # Input
-```html
+```vue
 <!-- should not generate diagnostics -->
 
 <!-- Basic long-form and shorthand bindings with a simple argument -->
 <div v-bind:foo="bar"></div>
 <div :foo="bar"></div>
+
+<!-- Object syntax without an argument is valid -->
+<div v-bind="props"></div>
+<Foo v-bind="props" />
 
 <!-- Valid modifiers from the rule: prop, camel, sync, attr -->
 <div v-bind:foo.prop="bar"></div>
@@ -36,4 +41,5 @@ expression: valid.vue
 
 <!-- Edge-case: argument with hyphen / kebab-case -->
 <div v-bind:data-value="payload"></div>
+
 ```

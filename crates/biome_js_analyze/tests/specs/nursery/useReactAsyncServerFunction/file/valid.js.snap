@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+'use server';
+
+export async function serverFunction1() {
+	// ...
+}
+export const serverFunction2 = async function () {
+	// ...
+}
+export const serverFunction3 = async () => {
+	// ...
+}
+
+```

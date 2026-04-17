@@ -7,8 +7,8 @@ use biome_analyze::RuleCategoriesBuilder;
 use biome_configuration::{Configuration, ConfigurationPathHint};
 use biome_console::markup;
 use biome_deserialize::Merge;
-use biome_diagnostics::PrintDescription;
-use biome_fs::BiomePath;
+use biome_diagnostics::{PrintDescription, Severity};
+use biome_fs::{BiomePath, normalize_path};
 use biome_line_index::WideEncoding;
 use biome_lsp_converters::{PositionEncoding, negotiated_encoding};
 use biome_service::Workspace;
@@ -34,8 +34,7 @@ use camino::Utf8PathBuf;
 use futures::StreamExt;
 use futures::stream::futures_unordered::FuturesUnordered;
 use papaya::HashMap;
-use rustc_hash::FxBuildHasher;
-use rustc_hash::FxHashMap;
+use rustc_hash::{FxBuildHasher, FxHashMap};
 use serde_json::Value;
 use std::sync::Arc;
 use std::sync::RwLock;
@@ -67,6 +66,12 @@ pub(crate) struct ClientInformation {
 /// Key, uniquely identifying a LSP session.
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Debug)]
 pub(crate) struct SessionKey(pub u64);
+
+#[derive(Clone, Hash, PartialEq, Eq)]
+struct ConfigurationCacheKey {
+    base_path: Utf8PathBuf,
+    settings_path: Option<Utf8PathBuf>,
+}
 
 /// Represents the state of an LSP server session.
 pub(crate) struct Session {
@@ -114,6 +119,10 @@ pub(crate) struct Session {
     /// Lock used to synchronize multiple atomic operations to load the configuration file
     loading_operations:
         TokioRwLock<FxHashMap<Utf8PathBuf, tokio::sync::broadcast::Sender<ConfigurationStatus>>>,
+
+    /// Cached configuration status per base path to avoid reloading on every request.
+    configuration_status_by_path:
+        TokioRwLock<FxHashMap<ConfigurationCacheKey, ConfigurationStatus>>,
 }
 
 /// The parameters provided by the client in the "initialize" request
@@ -226,6 +235,7 @@ impl Session {
             initialized: AtomicBool::new(false),
             service_rx,
             loading_operations: Default::default(),
+            configuration_status_by_path: Default::default(),
             workspace_folders: Default::default(),
         }
     }
@@ -329,7 +339,8 @@ impl Session {
         self.projects
             .pin()
             .iter()
-            .find(|(project_path, _project_key)| path.starts_with(project_path.as_path()))
+            .filter(|(project_path, _project_key)| path.starts_with(project_path.as_path()))
+            .max_by_key(|(project_path, _project_key)| project_path.as_str().len())
             .map(|(_project_path, project_key)| *project_key)
     }
 
@@ -392,7 +403,7 @@ impl Session {
         let Some(doc) = self.document(&url) else {
             return Ok(());
         };
-        self.update_diagnostics_for_document(url, doc).await
+        self.update_diagnostics_for_document(url.clone(), doc).await
     }
 
     /// Computes diagnostics for the file matching the provided url and publishes
@@ -436,7 +447,7 @@ impl Session {
 
         if !file_features.supports_lint() && !file_features.supports_assist() {
             self.client
-                .publish_diagnostics(url, vec![], Some(doc.version))
+                .publish_diagnostics(url.clone(), vec![], Some(doc.version))
                 .await;
             return Ok(());
         }
@@ -458,8 +469,11 @@ impl Session {
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: Vec::new(),
-                pull_code_actions: false,
+                include_code_fix: false,
                 inline_config: self.inline_config(),
+                max_diagnostics: None,
+                diagnostic_level: Severity::Information,
+                enforce_assist: false,
             })?;
 
             let offset = if file_features.supports_full_html_support() {
@@ -507,7 +521,7 @@ impl Session {
         info!("Diagnostics sent to the client {}", diagnostics.len());
 
         self.client
-            .publish_diagnostics(url, diagnostics, Some(doc.version))
+            .publish_diagnostics(url.clone(), diagnostics, Some(doc.version))
             .await;
 
         Ok(())
@@ -601,6 +615,20 @@ impl Session {
         result
     }
 
+    /// Whether the client supports `codeAction/resolve` for deferred edit computation.
+    /// Whether the client supports `codeAction/resolve` for deferred edit computation.
+    ///
+    /// Per LSP spec, `resolveSupport.properties` lists which specific properties
+    /// the client can resolve. We only defer when `"edit"` is in that list.
+    pub(crate) fn supports_code_action_resolve(&self) -> bool {
+        self.initialize_params
+            .get()
+            .and_then(|c| c.client_capabilities.text_document.as_ref())
+            .and_then(|c| c.code_action.as_ref())
+            .and_then(|c| c.resolve_support.as_ref())
+            .is_some_and(|support| support.properties.iter().any(|p| p == "edit"))
+    }
+
     #[instrument(level = "info", skip(self))]
     pub(crate) fn can_register_code_action(&self) -> bool {
         let result = self
@@ -638,6 +666,12 @@ impl Session {
         } else {
             *workspace_folders = Some(added);
         }
+    }
+
+    /// Returns the root URI of the workspace as provided by the client
+    pub(crate) fn base_uri(&self) -> Option<Uri> {
+        let initialize_params = self.initialize_params.get()?;
+        initialize_params.root_uri.clone()
     }
 
     /// Returns the base path of the workspace on the filesystem if it has one
@@ -681,16 +715,98 @@ impl Session {
             .and_then(|s| s.configuration_path())
     }
 
+    /// Resolves the user-provided `configurationPath` setting to an absolute path.
+    ///
+    /// If the path is already absolute, it is returned as-is. If it is relative,
+    /// it is resolved against the appropriate workspace root:
+    ///
+    /// - When `file_path` is provided (e.g. from `did_open`), the workspace folder
+    ///   that contains the file is used as the base for resolution. This ensures
+    ///   that in a multi-root workspace, the relative path is resolved against the
+    ///   correct root rather than an arbitrary one.
+    /// - When `file_path` is `None` (e.g. from `load_workspace_settings`), each
+    ///   workspace folder is tried in order. The closest path to the `file_path` is used.
+    /// - If no workspace folders are registered, the session's `base_path()`
+    ///   (derived from the deprecated `root_uri` initialization parameter) is used
+    ///   as a fallback to keep backwards compatibility.
+    ///
+    /// Returns `None` if no `configurationPath` is set in the extension settings.
+    pub(crate) fn resolve_configuration_path(
+        &self,
+        file_path: Option<&Utf8PathBuf>,
+    ) -> Option<ConfigurationPathHint> {
+        let config_path = self.get_settings_configuration_path()?;
+
+        // Collect workspace folder roots as absolute Utf8PathBufs.
+        let workspace_roots: Vec<Utf8PathBuf> = self
+            .get_workspace_folders()
+            .unwrap_or_default()
+            .into_iter()
+            .filter_map(|folder| {
+                folder
+                    .uri
+                    .to_file_path()
+                    .and_then(|p| Utf8PathBuf::from_path_buf(p.to_path_buf()).ok())
+            })
+            .collect();
+
+        let hint_for_path = |path: Utf8PathBuf| {
+            Some(if workspace_roots.iter().any(|r| path.starts_with(r)) {
+                ConfigurationPathHint::FromUser(path)
+            } else {
+                ConfigurationPathHint::FromUserExternal(path)
+            })
+        };
+
+        if config_path.is_absolute() {
+            return hint_for_path(config_path);
+        }
+
+        if let Some(file_path) = file_path {
+            // Find the workspace folder that contains this file and resolve
+            // the relative config path against that folder.
+            if let Some(root) = workspace_roots
+                .iter()
+                .filter(|root| file_path.starts_with(*root))
+                .max_by_key(|root| root.as_str().len())
+            {
+                let joined = normalize_path(&root.join(config_path));
+                return hint_for_path(joined);
+            }
+        }
+
+        // No file context, or the file doesn't belong to any known workspace
+        // folder. Without a file to anchor against, we cannot determine which
+        // folder the relative path belongs to, so we fall back to the first
+        // registered workspace folder. This is a best-effort guess; the
+        // correct per-file resolution happens in `did_open` where the file
+        // path is available.
+        if let Some(root) = workspace_roots.first() {
+            let joined = normalize_path(&root.join(&config_path));
+            return hint_for_path(joined);
+        }
+
+        // Fall back to the (deprecated) root_uri base path.
+        if let Some(base) = self.base_path() {
+            let joined = normalize_path(&base.join(&config_path));
+            return hint_for_path(joined);
+        }
+
+        // Nothing to resolve against; return the path unchanged and let the
+        // downstream loader produce a meaningful error.
+        Some(ConfigurationPathHint::FromUserExternal(config_path))
+    }
+
     /// This function attempts to read the `biome.json` configuration file from
     /// the root URI and update the workspace settings accordingly
     #[tracing::instrument(level = "debug", skip(self))]
     pub(crate) async fn load_workspace_settings(self: &Arc<Self>, reload: bool) {
-        if let Some(config_path) = self.get_settings_configuration_path() {
+        if let Some(config_path) = self.resolve_configuration_path(None) {
             info!("Detected configuration path in the workspace settings.");
             self.set_configuration_status(ConfigurationStatus::Loading);
 
             let status = self
-                .load_biome_configuration_file(ConfigurationPathHint::FromUser(config_path), reload)
+                .load_biome_configuration_file(config_path, reload)
                 .await;
             debug!("Configuration status: {:?}", status);
             self.set_configuration_status(status);
@@ -814,12 +930,18 @@ impl Session {
         base_path: ConfigurationPathHint,
         reload: bool,
     ) -> ConfigurationStatus {
-        let current_status = self.configuration_status();
-        if current_status.is_loaded() && !reload {
-            return current_status;
-        }
         // Check if there's already an ongoing operation for this path
         let path_to_index = base_path.to_path_buf().unwrap_or_default();
+        let cache_key = ConfigurationCacheKey {
+            base_path: path_to_index.clone(),
+            settings_path: self.get_settings_configuration_path(),
+        };
+        if !reload {
+            let cached = self.configuration_status_by_path.read().await;
+            if let Some(status) = cached.get(&cache_key) {
+                return *status;
+            }
+        }
         {
             let operations = self.loading_operations.read().await;
 
@@ -861,6 +983,11 @@ impl Session {
             .load_biome_configuration_file_internal(base_path.clone(), reload)
             .await;
 
+        {
+            let mut cached = self.configuration_status_by_path.write().await;
+            cached.insert(cache_key, status);
+        }
+
         // Broadcast the result to any waiting tasks
         let _ = tx.send(status);
 
@@ -889,7 +1016,32 @@ impl Session {
             }
         };
         if !loaded_configuration.loaded_location.is_in_project() {
-            let message = PrintDescription(&ConfigurationOutsideProject).to_string();
+            let config_path = loaded_configuration
+                .file_path
+                .as_ref()
+                .map_or_else(|| "<unknown>".to_string(), |p| p.to_string());
+            let working_directory = match &base_path {
+                ConfigurationPathHint::FromLsp(path)
+                | ConfigurationPathHint::FromWorkspace(path) => path.to_string(),
+                ConfigurationPathHint::FromUser(path) => {
+                    let fs = self.workspace.fs();
+                    if fs.path_is_file(path) {
+                        path.parent()
+                            .map_or("<unknown>".to_string(), |p| p.to_string())
+                    } else {
+                        path.to_string()
+                    }
+                }
+                ConfigurationPathHint::FromUserExternal(_) => self
+                    .base_path()
+                    .map_or("<unknown>".to_string(), |p| p.to_string()),
+                ConfigurationPathHint::None => "<unknown>".to_string(),
+            };
+            let message = PrintDescription(&ConfigurationOutsideProject {
+                config_path,
+                working_directory,
+            })
+            .to_string();
             self.client.log_message(MessageType::INFO, message).await;
         }
 
@@ -951,12 +1103,27 @@ impl Session {
         // the working directory. Otherwise, the base path of the session is used, then the current
         // working directory is used as the last resort.
         debug!("Configuration path provided {:?}", &base_path);
-        let path = match &base_path {
+        let project_path = match &base_path {
             ConfigurationPathHint::FromLsp(path) | ConfigurationPathHint::FromWorkspace(path) => {
                 path.to_path_buf()
             }
             ConfigurationPathHint::FromUser(path) => {
-                if path.is_file() {
+                let workspace_root = self
+                    .get_workspace_folders()
+                    .unwrap_or_default()
+                    .into_iter()
+                    .filter_map(|folder| {
+                        folder
+                            .uri
+                            .to_file_path()
+                            .and_then(|p| Utf8PathBuf::from_path_buf(p.to_path_buf()).ok())
+                    })
+                    .filter(|root| path.starts_with(root))
+                    .max_by_key(|root| root.as_str().len());
+
+                if let Some(root) = workspace_root {
+                    root
+                } else if fs.path_is_file(path) {
                     path.parent()
                         .map_or(fs.working_directory().unwrap_or_default(), |p| {
                             p.to_path_buf()
@@ -971,11 +1138,11 @@ impl Session {
                 .unwrap_or_default(),
         };
 
-        let project_key = match self.project_for_path(&path) {
+        let project_key = match self.project_for_path(&project_path) {
             Some(project_key) => project_key,
             None => {
                 let register_result = self.workspace.open_project(OpenProjectParams {
-                    path: path.as_path().into(),
+                    path: project_path.as_path().into(),
                     open_uninitialized: true,
                 });
                 let OpenProjectResult { project_key } = match register_result {
@@ -1008,7 +1175,7 @@ impl Session {
             module_graph_resolution_kind: ModuleGraphResolutionKind::from(&scan_kind),
         });
 
-        self.insert_and_scan_project(project_key, path.into(), scan_kind, force)
+        self.insert_and_scan_project(project_key, project_path.into(), scan_kind, force)
             .await;
 
         if let Err(WorkspaceError::PluginErrors(error)) = result {
@@ -1062,12 +1229,21 @@ impl Session {
                 }
             }
             Some(settings) => {
+                let settings = settings
+                    .get(CONFIGURATION_SECTION)
+                    .cloned()
+                    .unwrap_or(settings);
                 let mut config = self.extension_settings.write().unwrap();
                 if let Err(err) = config.set_workspace_settings(settings) {
                     error!("Couldn't set client configuration: {}", err);
                 }
             }
         }
+        self.clear_configuration_cache().await;
+    }
+
+    pub(crate) async fn clear_configuration_cache(&self) {
+        self.configuration_status_by_path.write().await.clear();
     }
 
     /// Broadcast a shutdown signal to all active connections
@@ -1145,5 +1321,88 @@ impl Session {
             .map_or(PositionEncoding::Wide(WideEncoding::Utf16), |params| {
                 negotiated_encoding(&params.client_capabilities)
             })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_fs::MemoryFileSystem;
+    use biome_service::WorkspaceServer;
+    use crossbeam::channel::bounded;
+    use std::sync::Mutex;
+    use tokio::sync::Notify;
+    use tower_lsp_server::LanguageServer;
+    use tower_lsp_server::LspService;
+    use tower_lsp_server::jsonrpc::Result as JsonRpcResult;
+    use tower_lsp_server::ls_types::{InitializeParams, InitializeResult};
+
+    struct DummyServer;
+
+    impl LanguageServer for DummyServer {
+        async fn initialize(&self, _params: InitializeParams) -> JsonRpcResult<InitializeResult> {
+            Ok(InitializeResult::default())
+        }
+
+        async fn shutdown(&self) -> JsonRpcResult<()> {
+            Ok(())
+        }
+    }
+
+    fn create_test_session() -> Arc<Session> {
+        let (watcher_tx, _) = bounded(0);
+        let (service_tx, service_rx) = watch::channel(ServiceNotification::IndexUpdated);
+        let workspace = Arc::new(WorkspaceServer::new(
+            Arc::new(MemoryFileSystem::default()),
+            watcher_tx,
+            service_tx,
+            None,
+        ));
+        let cancellation = Arc::new(Notify::new());
+        let session_slot: Arc<Mutex<Option<Arc<Session>>>> = Arc::new(Mutex::new(None));
+
+        let slot = session_slot.clone();
+        let workspace = workspace.clone();
+        let cancellation = cancellation.clone();
+        let service_rx = service_rx.clone();
+
+        let (_service, _socket) = LspService::build(move |client| {
+            let session = Arc::new(Session::new(
+                SessionKey(0),
+                client,
+                workspace.clone(),
+                cancellation.clone(),
+                service_rx.clone(),
+            ));
+            *slot.lock().unwrap() = Some(session.clone());
+            DummyServer
+        })
+        .finish();
+
+        session_slot
+            .lock()
+            .unwrap()
+            .take()
+            .expect("session should be initialized")
+    }
+
+    #[tokio::test]
+    async fn project_for_path_prefers_most_specific_root() {
+        let session = create_test_session();
+
+        let root = BiomePath::new(Utf8PathBuf::from("workspace"));
+        let nested = BiomePath::new(Utf8PathBuf::from("workspace/packages/app"));
+        let root_key = ProjectKey::new();
+        let nested_key = ProjectKey::new();
+
+        session.projects.pin().insert(root, root_key);
+        session.projects.pin().insert(nested, nested_key);
+
+        let file_path = Utf8PathBuf::from("workspace/packages/app/src/main.js");
+        let selected = session
+            .project_for_path(file_path.as_path())
+            .expect("expected a project match");
+
+        assert_eq!(selected, nested_key);
     }
 }

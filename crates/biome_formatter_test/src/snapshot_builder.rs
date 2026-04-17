@@ -170,6 +170,34 @@ impl<'a> SnapshotBuilder<'a> {
         self
     }
 
+    /// Renders a `# Options` section with the raw JSON content of an options file.
+    pub fn with_options_json(mut self, json_content: &str) -> Self {
+        writeln!(self.snapshot, "# Options").unwrap();
+        writeln!(self.snapshot).unwrap();
+        writeln!(self.snapshot, "```json").unwrap();
+        self.snapshot.push_str(json_content);
+        if !json_content.ends_with('\n') {
+            writeln!(self.snapshot).unwrap();
+        }
+        writeln!(self.snapshot, "```").unwrap();
+        writeln!(self.snapshot).unwrap();
+
+        self
+    }
+
+    /// Renders a `# Formatted` section with the formatted output code.
+    pub fn with_formatted(mut self, output: &str) -> Self {
+        writeln!(self.snapshot, "# Formatted").unwrap();
+        writeln!(self.snapshot).unwrap();
+        self.write_extension();
+        self.snapshot.push_str(output);
+        writeln!(self.snapshot).unwrap();
+        writeln!(self.snapshot, "```").unwrap();
+        writeln!(self.snapshot).unwrap();
+
+        self
+    }
+
     pub fn with_lines_exceeding_max_width(mut self, output: &str, max_width: usize) -> Self {
         let mut lines_exceeding_max_width = output
             .lines()

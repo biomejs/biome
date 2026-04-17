@@ -16,7 +16,6 @@ use biome_service::configuration::load_editorconfig;
 use biome_service::workspace::ScanKind;
 use biome_service::{Workspace, WorkspaceError};
 use camino::Utf8PathBuf;
-use std::collections::BTreeSet;
 use std::ffi::OsString;
 use std::ops::{Deref, DerefMut};
 
@@ -96,6 +95,11 @@ pub(crate) trait TraversalCommand {
     /// Alias of [CommandRunner::command_name]
     fn command_name(&self) -> &'static str;
 
+    /// Alias of [CommandRunner::is_watch_mode]
+    fn is_watch_mode(&self) -> bool {
+        false
+    }
+
     /// Alias of [CommandRunner::minimal_scan_kind]
     fn minimal_scan_kind(&self) -> Option<ScanKind>;
 
@@ -149,6 +153,10 @@ where
 
     fn requires_crawling(&self) -> bool {
         true
+    }
+
+    fn is_watch_mode(&self) -> bool {
+        self.deref().is_watch_mode()
     }
 
     /// The [ScanKind] to use for this command
@@ -209,6 +217,6 @@ where
 
 pub(crate) struct TraverseResult {
     pub(crate) summary: TraversalSummary,
-    pub(crate) evaluated_paths: BTreeSet<BiomePath>,
+    pub(crate) evaluated_paths: Vec<BiomePath>,
     pub(crate) diagnostics: Vec<Error>,
 }

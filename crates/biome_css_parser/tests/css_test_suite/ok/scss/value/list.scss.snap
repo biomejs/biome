@@ -1,0 +1,341 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+$mylist: (alpha, beta, gamma, );
+$my-single-item-list: (alpha,);
+$box-shadow-first-two: 0 0.5em $background, 0 -0.5em $background;
+$list2: (1px solid,);
+// TODO(interpolation support): $no-whitespaces: $variable#{something};
+
+
+
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@0..1 "$" [] [],
+                name: CssIdentifier {
+                    value_token: IDENT@1..7 "mylist" [] [],
+                },
+            },
+            colon_token: COLON@7..9 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    ScssParenthesizedExpression {
+                        l_paren_token: L_PAREN@9..10 "(" [] [],
+                        expression: ScssListExpression {
+                            elements: ScssListExpressionElementList [
+                                ScssListExpressionElement {
+                                    value: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            CssIdentifier {
+                                                value_token: IDENT@10..15 "alpha" [] [],
+                                            },
+                                        ],
+                                    },
+                                },
+                                COMMA@15..17 "," [] [Whitespace(" ")],
+                                ScssListExpressionElement {
+                                    value: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            CssIdentifier {
+                                                value_token: IDENT@17..21 "beta" [] [],
+                                            },
+                                        ],
+                                    },
+                                },
+                                COMMA@21..23 "," [] [Whitespace(" ")],
+                                ScssListExpressionElement {
+                                    value: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            CssIdentifier {
+                                                value_token: IDENT@23..28 "gamma" [] [],
+                                            },
+                                        ],
+                                    },
+                                },
+                                COMMA@28..30 "," [] [Whitespace(" ")],
+                            ],
+                        },
+                        r_paren_token: R_PAREN@30..31 ")" [] [],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@31..32 ";" [] [],
+        },
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@32..34 "$" [Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@34..53 "my-single-item-list" [] [],
+                },
+            },
+            colon_token: COLON@53..55 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    ScssParenthesizedExpression {
+                        l_paren_token: L_PAREN@55..56 "(" [] [],
+                        expression: ScssListExpression {
+                            elements: ScssListExpressionElementList [
+                                ScssListExpressionElement {
+                                    value: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            CssIdentifier {
+                                                value_token: IDENT@56..61 "alpha" [] [],
+                                            },
+                                        ],
+                                    },
+                                },
+                                COMMA@61..62 "," [] [],
+                            ],
+                        },
+                        r_paren_token: R_PAREN@62..63 ")" [] [],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@63..64 ";" [] [],
+        },
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@64..66 "$" [Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@66..86 "box-shadow-first-two" [] [],
+                },
+            },
+            colon_token: COLON@86..88 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    ScssListExpression {
+                        elements: ScssListExpressionElementList [
+                            ScssListExpressionElement {
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@88..90 "0" [] [Whitespace(" ")],
+                                        },
+                                        CssRegularDimension {
+                                            value_token: CSS_NUMBER_LITERAL@90..93 "0.5" [] [],
+                                            unit_token: IDENT@93..96 "em" [] [Whitespace(" ")],
+                                        },
+                                        ScssIdentifier {
+                                            dollar_token: DOLLAR@96..97 "$" [] [],
+                                            name: CssIdentifier {
+                                                value_token: IDENT@97..107 "background" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                            COMMA@107..109 "," [] [Whitespace(" ")],
+                            ScssListExpressionElement {
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssBinaryExpression {
+                                            left: CssNumber {
+                                                value_token: CSS_NUMBER_LITERAL@109..111 "0" [] [Whitespace(" ")],
+                                            },
+                                            operator: MINUS@111..112 "-" [] [],
+                                            right: CssRegularDimension {
+                                                value_token: CSS_NUMBER_LITERAL@112..115 "0.5" [] [],
+                                                unit_token: IDENT@115..118 "em" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                        ScssIdentifier {
+                                            dollar_token: DOLLAR@118..119 "$" [] [],
+                                            name: CssIdentifier {
+                                                value_token: IDENT@119..129 "background" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@129..130 ";" [] [],
+        },
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@130..132 "$" [Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@132..137 "list2" [] [],
+                },
+            },
+            colon_token: COLON@137..139 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    ScssParenthesizedExpression {
+                        l_paren_token: L_PAREN@139..140 "(" [] [],
+                        expression: ScssListExpression {
+                            elements: ScssListExpressionElementList [
+                                ScssListExpressionElement {
+                                    value: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            CssRegularDimension {
+                                                value_token: CSS_NUMBER_LITERAL@140..141 "1" [] [],
+                                                unit_token: IDENT@141..144 "px" [] [Whitespace(" ")],
+                                            },
+                                            CssIdentifier {
+                                                value_token: IDENT@144..149 "solid" [] [],
+                                            },
+                                        ],
+                                    },
+                                },
+                                COMMA@149..150 "," [] [],
+                            ],
+                        },
+                        r_paren_token: R_PAREN@150..151 ")" [] [],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@151..152 ";" [] [],
+        },
+    ],
+    eof_token: EOF@152..228 "" [Newline("\n"), Comments("// TODO(interpolation ..."), Newline("\n"), Newline("\n"), Newline("\n"), Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..228
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..152
+    0: SCSS_DECLARATION@0..32
+      0: SCSS_IDENTIFIER@0..7
+        0: DOLLAR@0..1 "$" [] []
+        1: CSS_IDENTIFIER@1..7
+          0: IDENT@1..7 "mylist" [] []
+      1: COLON@7..9 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@9..31
+        0: SCSS_EXPRESSION_ITEM_LIST@9..31
+          0: SCSS_PARENTHESIZED_EXPRESSION@9..31
+            0: L_PAREN@9..10 "(" [] []
+            1: SCSS_LIST_EXPRESSION@10..30
+              0: SCSS_LIST_EXPRESSION_ELEMENT_LIST@10..30
+                0: SCSS_LIST_EXPRESSION_ELEMENT@10..15
+                  0: SCSS_EXPRESSION@10..15
+                    0: SCSS_EXPRESSION_ITEM_LIST@10..15
+                      0: CSS_IDENTIFIER@10..15
+                        0: IDENT@10..15 "alpha" [] []
+                1: COMMA@15..17 "," [] [Whitespace(" ")]
+                2: SCSS_LIST_EXPRESSION_ELEMENT@17..21
+                  0: SCSS_EXPRESSION@17..21
+                    0: SCSS_EXPRESSION_ITEM_LIST@17..21
+                      0: CSS_IDENTIFIER@17..21
+                        0: IDENT@17..21 "beta" [] []
+                3: COMMA@21..23 "," [] [Whitespace(" ")]
+                4: SCSS_LIST_EXPRESSION_ELEMENT@23..28
+                  0: SCSS_EXPRESSION@23..28
+                    0: SCSS_EXPRESSION_ITEM_LIST@23..28
+                      0: CSS_IDENTIFIER@23..28
+                        0: IDENT@23..28 "gamma" [] []
+                5: COMMA@28..30 "," [] [Whitespace(" ")]
+            2: R_PAREN@30..31 ")" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@31..31
+      4: SEMICOLON@31..32 ";" [] []
+    1: SCSS_DECLARATION@32..64
+      0: SCSS_IDENTIFIER@32..53
+        0: DOLLAR@32..34 "$" [Newline("\n")] []
+        1: CSS_IDENTIFIER@34..53
+          0: IDENT@34..53 "my-single-item-list" [] []
+      1: COLON@53..55 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@55..63
+        0: SCSS_EXPRESSION_ITEM_LIST@55..63
+          0: SCSS_PARENTHESIZED_EXPRESSION@55..63
+            0: L_PAREN@55..56 "(" [] []
+            1: SCSS_LIST_EXPRESSION@56..62
+              0: SCSS_LIST_EXPRESSION_ELEMENT_LIST@56..62
+                0: SCSS_LIST_EXPRESSION_ELEMENT@56..61
+                  0: SCSS_EXPRESSION@56..61
+                    0: SCSS_EXPRESSION_ITEM_LIST@56..61
+                      0: CSS_IDENTIFIER@56..61
+                        0: IDENT@56..61 "alpha" [] []
+                1: COMMA@61..62 "," [] []
+            2: R_PAREN@62..63 ")" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@63..63
+      4: SEMICOLON@63..64 ";" [] []
+    2: SCSS_DECLARATION@64..130
+      0: SCSS_IDENTIFIER@64..86
+        0: DOLLAR@64..66 "$" [Newline("\n")] []
+        1: CSS_IDENTIFIER@66..86
+          0: IDENT@66..86 "box-shadow-first-two" [] []
+      1: COLON@86..88 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@88..129
+        0: SCSS_EXPRESSION_ITEM_LIST@88..129
+          0: SCSS_LIST_EXPRESSION@88..129
+            0: SCSS_LIST_EXPRESSION_ELEMENT_LIST@88..129
+              0: SCSS_LIST_EXPRESSION_ELEMENT@88..107
+                0: SCSS_EXPRESSION@88..107
+                  0: SCSS_EXPRESSION_ITEM_LIST@88..107
+                    0: CSS_NUMBER@88..90
+                      0: CSS_NUMBER_LITERAL@88..90 "0" [] [Whitespace(" ")]
+                    1: CSS_REGULAR_DIMENSION@90..96
+                      0: CSS_NUMBER_LITERAL@90..93 "0.5" [] []
+                      1: IDENT@93..96 "em" [] [Whitespace(" ")]
+                    2: SCSS_IDENTIFIER@96..107
+                      0: DOLLAR@96..97 "$" [] []
+                      1: CSS_IDENTIFIER@97..107
+                        0: IDENT@97..107 "background" [] []
+              1: COMMA@107..109 "," [] [Whitespace(" ")]
+              2: SCSS_LIST_EXPRESSION_ELEMENT@109..129
+                0: SCSS_EXPRESSION@109..129
+                  0: SCSS_EXPRESSION_ITEM_LIST@109..129
+                    0: SCSS_BINARY_EXPRESSION@109..118
+                      0: CSS_NUMBER@109..111
+                        0: CSS_NUMBER_LITERAL@109..111 "0" [] [Whitespace(" ")]
+                      1: MINUS@111..112 "-" [] []
+                      2: CSS_REGULAR_DIMENSION@112..118
+                        0: CSS_NUMBER_LITERAL@112..115 "0.5" [] []
+                        1: IDENT@115..118 "em" [] [Whitespace(" ")]
+                    1: SCSS_IDENTIFIER@118..129
+                      0: DOLLAR@118..119 "$" [] []
+                      1: CSS_IDENTIFIER@119..129
+                        0: IDENT@119..129 "background" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@129..129
+      4: SEMICOLON@129..130 ";" [] []
+    3: SCSS_DECLARATION@130..152
+      0: SCSS_IDENTIFIER@130..137
+        0: DOLLAR@130..132 "$" [Newline("\n")] []
+        1: CSS_IDENTIFIER@132..137
+          0: IDENT@132..137 "list2" [] []
+      1: COLON@137..139 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@139..151
+        0: SCSS_EXPRESSION_ITEM_LIST@139..151
+          0: SCSS_PARENTHESIZED_EXPRESSION@139..151
+            0: L_PAREN@139..140 "(" [] []
+            1: SCSS_LIST_EXPRESSION@140..150
+              0: SCSS_LIST_EXPRESSION_ELEMENT_LIST@140..150
+                0: SCSS_LIST_EXPRESSION_ELEMENT@140..149
+                  0: SCSS_EXPRESSION@140..149
+                    0: SCSS_EXPRESSION_ITEM_LIST@140..149
+                      0: CSS_REGULAR_DIMENSION@140..144
+                        0: CSS_NUMBER_LITERAL@140..141 "1" [] []
+                        1: IDENT@141..144 "px" [] [Whitespace(" ")]
+                      1: CSS_IDENTIFIER@144..149
+                        0: IDENT@144..149 "solid" [] []
+                1: COMMA@149..150 "," [] []
+            2: R_PAREN@150..151 ")" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@151..151
+      4: SEMICOLON@151..152 ";" [] []
+  2: EOF@152..228 "" [Newline("\n"), Comments("// TODO(interpolation ..."), Newline("\n"), Newline("\n"), Newline("\n"), Newline("\n")] []
+
+```

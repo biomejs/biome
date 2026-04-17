@@ -17,22 +17,7 @@ info: json/array/multi_line.json
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Trailing commas: None
-Expand: Auto
-Bracket spacing: true
-Trailing newline: true
------
+# Formatted
 
 ```json
 {

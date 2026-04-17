@@ -1,0 +1,110 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: invalid.json
+---
+# Input
+```json
+{
+  "": "another value",
+  " ": "space as key",
+  "\t": "tab as key",
+  "\n": "newline as key",
+  "\n\n\n": "multi newline as key"
+}
+
+```
+
+# Diagnostics
+```
+invalid.json:2:3 lint/nursery/noEmptyObjectKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty object key.
+  
+    1 │ {
+  > 2 │   "": "another value",
+      │   ^^
+    3 │   " ": "space as key",
+    4 │   "\t": "tab as key",
+  
+  i Empty keys often cause confusion and may cause issues with parsers or processors. Either remove this property or provide a meaningful key name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:3:3 lint/nursery/noEmptyObjectKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty object key.
+  
+    1 │ {
+    2 │   "": "another value",
+  > 3 │   " ": "space as key",
+      │   ^^^
+    4 │   "\t": "tab as key",
+    5 │   "\n": "newline as key",
+  
+  i Empty keys often cause confusion and may cause issues with parsers or processors. Either remove this property or provide a meaningful key name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:4:3 lint/nursery/noEmptyObjectKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty object key.
+  
+    2 │   "": "another value",
+    3 │   " ": "space as key",
+  > 4 │   "\t": "tab as key",
+      │   ^^^^
+    5 │   "\n": "newline as key",
+    6 │   "\n\n\n": "multi newline as key"
+  
+  i Empty keys often cause confusion and may cause issues with parsers or processors. Either remove this property or provide a meaningful key name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:5:3 lint/nursery/noEmptyObjectKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty object key.
+  
+    3 │   " ": "space as key",
+    4 │   "\t": "tab as key",
+  > 5 │   "\n": "newline as key",
+      │   ^^^^
+    6 │   "\n\n\n": "multi newline as key"
+    7 │ }
+  
+  i Empty keys often cause confusion and may cause issues with parsers or processors. Either remove this property or provide a meaningful key name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:6:3 lint/nursery/noEmptyObjectKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty object key.
+  
+    4 │   "\t": "tab as key",
+    5 │   "\n": "newline as key",
+  > 6 │   "\n\n\n": "multi newline as key"
+      │   ^^^^^^^^
+    7 │ }
+    8 │ 
+  
+  i Empty keys often cause confusion and may cause issues with parsers or processors. Either remove this property or provide a meaningful key name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

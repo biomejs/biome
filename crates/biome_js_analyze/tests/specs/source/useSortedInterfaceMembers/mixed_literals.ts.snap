@@ -42,7 +42,7 @@ mixed_literals.ts:1:1 assist/source/useSortedInterfaceMembers  FIXABLE  ━━�
       2 │ + → 5:·number;
       3 │ + → 99:·boolean;
       4 │ + → apple:·number;
-    5 5 │   	"banana": string;
+    5 5 │     "banana": string;
     6   │ - → 5:·number;
     7   │ - → charlie:·object;
       6 │ + → charlie:·object;

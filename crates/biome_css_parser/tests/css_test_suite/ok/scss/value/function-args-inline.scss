@@ -1,0 +1,4 @@
+$value: fn($first: 1 + 2, $second: $a and $b, $rest...);
+$logic: fn($condition, $left, $right);
+$qualified: math.fn($x, $y...);
+$nested: fn(($name: 1), $args...);

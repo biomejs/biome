@@ -3,7 +3,8 @@ source: crates/biome_html_analyze/tests/spec_tests.rs
 expression: invalid.astro
 ---
 # Input
-```html
+```astro
+<!-- should generate diagnostics -->
 ---
 // Astro invalid cases - should trigger the rule
 ---
@@ -16,36 +17,16 @@ expression: invalid.astro
 
 # Diagnostics
 ```
-invalid.astro:5:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Avoid using javascript: URLs, as they can be a security risk.
-  
-    3 │ ---
-    4 │ 
-  > 5 │ <a href="javascript:void(0)">Void</a>
-      │        ^^^^^^^^^^^^^^^^^^^^^
-    6 │ <a href=" javascript:prompt('XSS') ">Prompt</a>
-    7 │ <a href="JAVASCRIPT:doSomething()">Uppercase</a>
-  
-  i Using javascript: URLs can lead to security vulnerabilities such as cross-site scripting (XSS).
-  
-  i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
 invalid.astro:6:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Avoid using javascript: URLs, as they can be a security risk.
   
-    5 │ <a href="javascript:void(0)">Void</a>
-  > 6 │ <a href=" javascript:prompt('XSS') ">Prompt</a>
-      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    7 │ <a href="JAVASCRIPT:doSomething()">Uppercase</a>
-    8 │ 
+    4 │ ---
+    5 │ 
+  > 6 │ <a href="javascript:void(0)">Void</a>
+      │        ^^^^^^^^^^^^^^^^^^^^^
+    7 │ <a href=" javascript:prompt('XSS') ">Prompt</a>
+    8 │ <a href="JAVASCRIPT:doSomething()">Uppercase</a>
   
   i Using javascript: URLs can lead to security vulnerabilities such as cross-site scripting (XSS).
   
@@ -61,11 +42,31 @@ invalid.astro:7:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━�
 
   × Avoid using javascript: URLs, as they can be a security risk.
   
-    5 │ <a href="javascript:void(0)">Void</a>
-    6 │ <a href=" javascript:prompt('XSS') ">Prompt</a>
-  > 7 │ <a href="JAVASCRIPT:doSomething()">Uppercase</a>
+    6 │ <a href="javascript:void(0)">Void</a>
+  > 7 │ <a href=" javascript:prompt('XSS') ">Prompt</a>
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ <a href="JAVASCRIPT:doSomething()">Uppercase</a>
+    9 │ 
+  
+  i Using javascript: URLs can lead to security vulnerabilities such as cross-site scripting (XSS).
+  
+  i Consider using regular URLs, or if you need to handle click events, use event handlers instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:8:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using javascript: URLs, as they can be a security risk.
+  
+    6 │ <a href="javascript:void(0)">Void</a>
+    7 │ <a href=" javascript:prompt('XSS') ">Prompt</a>
+  > 8 │ <a href="JAVASCRIPT:doSomething()">Uppercase</a>
       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    8 │ 
+    9 │ 
   
   i Using javascript: URLs can lead to security vulnerabilities such as cross-site scripting (XSS).
   

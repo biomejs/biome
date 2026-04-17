@@ -32,11 +32,13 @@ CssRoot {
                 },
             },
             colon_token: COLON@7..9 ":" [] [Whitespace(" ")],
-            value: CssGenericComponentValueList [
-                CssIdentifier {
-                    value_token: IDENT@9..14 "value" [] [],
-                },
-            ],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    CssIdentifier {
+                        value_token: IDENT@9..14 "value" [] [],
+                    },
+                ],
+            },
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@14..15 ";" [] [],
         },
@@ -61,9 +63,10 @@ CssRoot {
           1: CSS_IDENTIFIER@4..7
             0: IDENT@4..7 "var" [] []
       1: COLON@7..9 ":" [] [Whitespace(" ")]
-      2: CSS_GENERIC_COMPONENT_VALUE_LIST@9..14
-        0: CSS_IDENTIFIER@9..14
-          0: IDENT@9..14 "value" [] []
+      2: SCSS_EXPRESSION@9..14
+        0: SCSS_EXPRESSION_ITEM_LIST@9..14
+          0: CSS_IDENTIFIER@9..14
+            0: IDENT@9..14 "value" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@14..14
       4: SEMICOLON@14..15 ";" [] []
   2: EOF@15..17 "" [Newline("\n"), Newline("\n")] []

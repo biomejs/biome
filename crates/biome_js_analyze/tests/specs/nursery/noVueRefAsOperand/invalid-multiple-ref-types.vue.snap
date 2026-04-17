@@ -1,0 +1,174 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-multiple-ref-types.vue
+---
+# Input
+```vue
+/* should generate diagnostics */
+
+<script>
+import { ref, computed, toRef, toRefs, reactive, customRef, shallowRef } from 'vue'
+
+let count = ref(0)
+let cntcnt = computed(() => count.value + count.value)
+count++
+cntcnt++
+
+const state = { foo: 1 }
+const fooRef = toRef(state, 'foo')
+console.log(fooRef)
+`${fooRef}`
+
+const state2 = reactive({
+  foo2: 1,
+  bar2: 2
+});
+const refs = toRefs(state2)
+console.log(refs.foo2)
+const { foo2 } = toRefs(state2)
+console.log(`${foo2}`)
+
+const cref = customRef((track, trigger) => {
+  return {
+    get() {
+      track()
+      return 0
+    },
+    set(value) {
+      trigger()
+    }
+  }
+});
+console.log(`${cref}`)
+
+const foo = shallowRef({});
+const n = foo + 1
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-multiple-ref-types.vue:8:1 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+     6 │ let count = ref(0)
+     7 │ let cntcnt = computed(() => count.value + count.value)
+   > 8 │ count++
+       │ ^^^^^
+     9 │ cntcnt++
+    10 │ 
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-multiple-ref-types.vue:9:1 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+     7 │ let cntcnt = computed(() => count.value + count.value)
+     8 │ count++
+   > 9 │ cntcnt++
+       │ ^^^^^^
+    10 │ 
+    11 │ const state = { foo: 1 }
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-multiple-ref-types.vue:21:13 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+    19 │ });
+    20 │ const refs = toRefs(state2)
+  > 21 │ console.log(refs.foo2)
+       │             ^^^^^^^^^
+    22 │ const { foo2 } = toRefs(state2)
+    23 │ console.log(`${foo2}`)
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-multiple-ref-types.vue:23:16 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+    21 │ console.log(refs.foo2)
+    22 │ const { foo2 } = toRefs(state2)
+  > 23 │ console.log(`${foo2}`)
+       │                ^^^^
+    24 │ 
+    25 │ const cref = customRef((track, trigger) => {
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-multiple-ref-types.vue:36:16 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+    34 │   }
+    35 │ });
+  > 36 │ console.log(`${cref}`)
+       │                ^^^^
+    37 │ 
+    38 │ const foo = shallowRef({});
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-multiple-ref-types.vue:39:11 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+    38 │ const foo = shallowRef({});
+  > 39 │ const n = foo + 1
+       │           ^^^
+    40 │ </script>
+    41 │ 
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

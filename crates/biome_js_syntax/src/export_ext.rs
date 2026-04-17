@@ -2,15 +2,14 @@ use biome_rowan::{AstNode, SyntaxResult, Text, declare_node_union};
 
 use crate::{
     AnyJsBindingPattern, AnyJsDeclarationClause, AnyJsExportClause, AnyJsExportDefaultDeclaration,
-    AnyJsExportNamedSpecifier, AnyJsExpression, AnyTsIdentifierBinding, AnyTsType,
-    JsClassDeclaration, JsClassExportDefaultDeclaration, JsExport, JsExportNamedClause,
+    AnyJsExportNamedSpecifier, AnyJsExpression, AnyJsLiteralExportName, AnyTsIdentifierBinding,
+    AnyTsType, JsClassDeclaration, JsClassExportDefaultDeclaration, JsExport, JsExportNamedClause,
     JsFunctionDeclaration, JsFunctionExportDefaultDeclaration, JsIdentifierExpression,
-    JsImportAssertion, JsLiteralExportName, JsReferenceIdentifier, JsSyntaxToken,
-    TsEnumDeclaration, unescape_js_string,
+    JsImportAssertion, JsReferenceIdentifier, JsSyntaxToken, TsEnumDeclaration, unescape_js_string,
 };
 
 declare_node_union! {
-    pub AnyIdentifier = AnyJsBindingPattern | AnyTsIdentifierBinding | JsIdentifierExpression | JsLiteralExportName | JsReferenceIdentifier
+    pub AnyIdentifier = AnyJsBindingPattern | AnyTsIdentifierBinding | JsIdentifierExpression | AnyJsLiteralExportName | JsReferenceIdentifier
 }
 
 impl AnyIdentifier {
@@ -22,7 +21,7 @@ impl AnyIdentifier {
                 .name_token(),
             Self::AnyTsIdentifierBinding(id) => id.as_ts_identifier_binding()?.name_token(),
             Self::JsIdentifierExpression(id) => id.name().ok()?.value_token(),
-            Self::JsLiteralExportName(id) => id.value(),
+            Self::AnyJsLiteralExportName(id) => id.value(),
             Self::JsReferenceIdentifier(id) => id.value_token(),
         }
         .ok()
@@ -281,7 +280,7 @@ impl JsExport {
                                         };
                                     }
                                     ExportedItem {
-                                        identifier: Some(AnyIdentifier::JsLiteralExportName(
+                                        identifier: Some(AnyIdentifier::AnyJsLiteralExportName(
                                             exported_name,
                                         )),
                                         exported: specifier
@@ -380,7 +379,7 @@ impl AnyJsExportNamedSpecifier {
     /// ## Examples
     ///
     /// ```
-    /// use biome_js_syntax::{AnyJsExportNamedSpecifier, T};
+    /// use biome_js_syntax::{AnyJsExportNamedSpecifier, AnyJsLiteralExportName, T};
     /// use biome_js_factory::make;
     ///
     /// let specifier = make::js_export_named_shorthand_specifier(
@@ -393,7 +392,7 @@ impl AnyJsExportNamedSpecifier {
     /// let specifier = make::js_export_named_specifier(
     ///     make::js_reference_identifier(make::ident("a")),
     ///     make::token(T![as]),
-    ///     make::js_literal_export_name(make::ident("b")),
+    ///     AnyJsLiteralExportName::JsLiteralExportName(make::js_literal_export_name(make::ident("b"))),
     /// ).build();
     /// let export = AnyJsExportNamedSpecifier::from(specifier.clone());
     ///

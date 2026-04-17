@@ -74,7 +74,7 @@ invalid.ts:3:3 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━�
      1  1 │   switch (1) {
      2    │ - → case·1:
         2 │ + → case·1:·{
-     3  3 │   		enum E {}
+     3  3 │       enum E {}
      4    │ - → → break;
         4 │ + → → break;
         5 │ + → }
@@ -114,7 +114,7 @@ invalid.ts:9:3 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━�
      7  7 │   switch (1) {
      8    │ - → default:
         8 │ + → default:·{
-     9  9 │   		enum E {}
+     9  9 │       enum E {}
     10    │ - → → break;
        10 │ + → → break;
        11 │ + → }
@@ -154,7 +154,7 @@ invalid.ts:15:3 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━�
     13 13 │   switch (1) {
     14    │ - → case·1:
        14 │ + → case·1:·{
-    15 15 │   		interface I {}
+    15 15 │       interface I {}
     16    │ - → → break;
        16 │ + → → break;
        17 │ + → }
@@ -196,9 +196,9 @@ invalid.ts:21:3 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━�
     19 19 │   switch (1) {
     20    │ - → default:
        20 │ + → default:·{
-    21 21 │   		interface I {}
-    22 22 │   		{
-    23 23 │   		}
+    21 21 │       interface I {}
+    22 22 │       {
+    23 23 │       }
     24    │ - → → break;
        24 │ + → → break;
        25 │ + → }
@@ -238,7 +238,7 @@ invalid.ts:29:3 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━�
     27 27 │   switch (1) {
     28    │ - → case·1:
        28 │ + → case·1:·{
-    29 29 │   		type N = number;
+    29 29 │       type N = number;
     30    │ - → → break;
        30 │ + → → break;
        31 │ + → }
@@ -278,7 +278,7 @@ invalid.ts:35:3 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━�
     33 33 │   switch (1) {
     34    │ - → default:
        34 │ + → default:·{
-    35 35 │   		type N = number;
+    35 35 │       type N = number;
     36    │ - → → break;
        36 │ + → → break;
        37 │ + → }

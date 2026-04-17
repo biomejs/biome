@@ -9,10 +9,11 @@ use crate::{
 };
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
-    AttributePosition, BracketSameLine, BracketSpacing, Expand, IndentStyle, IndentWidth,
-    LineEnding, LineWidth, TrailingNewline,
+    AttributePosition, BracketSameLine, BracketSpacing, DelimiterSpacing, Expand, IndentStyle,
+    IndentWidth, LineEnding, LineWidth, TrailingNewline,
 };
 use biome_plugin_loader::Plugins;
+#[cfg(feature = "cli")]
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
@@ -109,61 +110,83 @@ impl schemars::JsonSchema for OverrideGlobs {
     }
 }
 
-#[derive(Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct OverrideFormatterConfiguration {
     // if `false`, it disables the feature. `true` by default
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(hide)]
+    #[cfg_attr(feature = "cli", bpaf(hide))]
     pub enabled: Option<FormatterEnabled>,
 
     /// Stores whether formatting should be allowed to proceed if a given file
     /// has syntax errors
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(hide)]
+    #[cfg_attr(feature = "cli", bpaf(hide))]
     pub format_with_errors: Option<FormatWithErrorsEnabled>,
 
     /// The indent style.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(long("indent-style"), argument("tab|space"))]
+    #[cfg_attr(feature = "cli", bpaf(long("indent-style"), argument("tab|space")))]
     pub indent_style: Option<IndentStyle>,
 
     /// The size of the indentation, 2 by default (deprecated, use `indent-width`)
     #[serde(skip_serializing_if = "Option::is_none")]
     #[deserializable(deprecated(use_instead = "formatter.indentWidth"))]
-    #[bpaf(long("indent-size"), argument("NUMBER"))]
+    #[cfg_attr(feature = "cli", bpaf(long("indent-size"), argument("NUMBER")))]
     pub indent_size: Option<IndentWidth>,
 
     /// The size of the indentation, 2 by default
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(long("indent-width"), argument("NUMBER"))]
+    #[cfg_attr(feature = "cli", bpaf(long("indent-width"), argument("NUMBER")))]
     pub indent_width: Option<IndentWidth>,
 
     /// The type of line ending.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(long("line-ending"), argument("lf|crlf|cr|auto"))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("line-ending"), argument("lf|crlf|cr|auto"))
+    )]
     pub line_ending: Option<LineEnding>,
 
     /// What's the max width of a line. Defaults to 80.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(long("line-width"), argument("NUMBER"))]
+    #[cfg_attr(feature = "cli", bpaf(long("line-width"), argument("NUMBER")))]
     pub line_width: Option<LineWidth>,
 
     /// The attribute position style.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(long("attribute-position"), argument("multiline|auto"))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("attribute-position"), argument("multiline|auto"))
+    )]
     pub attribute_position: Option<AttributePosition>,
 
     /// Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(long("bracket-same-line"), argument("true|false"))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("bracket-same-line"), argument("true|false"))
+    )]
     pub bracket_same_line: Option<BracketSameLine>,
 
     /// Whether to insert spaces around brackets in object literals. Defaults to true.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(long("bracket-spacing"), argument("true|false"))]
+    #[cfg_attr(feature = "cli", bpaf(long("bracket-spacing"), argument("true|false")))]
     pub bracket_spacing: Option<BracketSpacing>,
+
+    /// Whether to insert spaces inside delimiters (after the opening delimiter and before the
+    /// closing delimiter), such as parentheses, brackets, angle brackets, and template literal
+    /// interpolations. Spaces are not added before the opening delimiter, and empty delimiters
+    /// are not affected. Only applies when the content fits on a single line. The specific
+    /// delimiters affected depend on the language. Defaults to false.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("delimiter-spacing"), argument("true|false"))
+    )]
+    pub delimiter_spacing: Option<DelimiterSpacing>,
 
     /// Whether to expand arrays and objects on multiple lines.
     /// When set to `auto`, object literals are formatted on multiple lines if the first property has a newline,
@@ -172,7 +195,10 @@ pub struct OverrideFormatterConfiguration {
     /// When set to `never`, these literals are formatted on a single line if it fits in the line.
     /// When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(long("object-wrap"), argument("auto|always|never"))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("object-wrap"), argument("auto|always|never"))
+    )]
     pub expand: Option<Expand>,
 
     /// Whether to add a trailing newline at the end of the file.
@@ -186,27 +212,31 @@ pub struct OverrideFormatterConfiguration {
     ///
     /// Defaults to true.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(long("trailing-newline"), argument("true|false"))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("trailing-newline"), argument("true|false"))
+    )]
     pub trailing_newline: Option<TrailingNewline>,
 }
 
-#[derive(Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct OverrideLinterConfiguration {
     /// if `false`, it disables the feature and the linter won't be executed. `true` by default
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(hide)]
+    #[cfg_attr(feature = "cli", bpaf(hide))]
     pub enabled: Option<LinterEnabled>,
 
     /// List of rules
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(pure(Default::default()), hide)]
+    #[cfg_attr(feature = "cli", bpaf(pure(Default::default()), hide))]
     pub rules: Option<Rules>,
 
     /// List of rules
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(pure(Default::default()), optional, hide)]
+    #[cfg_attr(feature = "cli", bpaf(pure(Default::default()), optional, hide))]
     pub domains: Option<RuleDomains>,
 }
 
@@ -219,17 +249,21 @@ pub struct OverrideFilesConfiguration {
     pub max_size: Option<MaxSize>,
 }
 
-#[derive(Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct OverrideAssistConfiguration {
     /// if `false`, it disables the feature and the assist won't be executed. `true` by default
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(hide)]
+    #[cfg_attr(feature = "cli", bpaf(hide))]
     pub enabled: Option<AssistEnabled>,
 
     /// List of actions
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(pure(crate::analyzer::assist::Actions::default()), optional, hide)]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(pure(crate::analyzer::assist::Actions::default()), optional, hide)
+    )]
     pub actions: Option<crate::analyzer::assist::Actions>,
 }
