@@ -6,7 +6,7 @@ use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TokenText};
 use biome_rule_options::no_noninteractive_element_to_interactive_role::NoNoninteractiveElementToInteractiveRoleOptions;
 
-use crate::{Aria, HtmlRuleAction};
+use crate::{Aria, HtmlRuleAction, utils::is_html_tag};
 
 declare_lint_rule! {
     /// Enforce that interactive ARIA roles are not assigned to non-interactive HTML elements.
@@ -66,9 +66,7 @@ impl Rule for NoNoninteractiveElementToInteractiveRole {
         let node = ctx.query();
         let source_type = ctx.source_type::<HtmlFileSource>();
 
-        // Ignore custom components and namespaced elements
-        let element_name = node.tag_name()?;
-        if !source_type.is_html() && element_name.text().starts_with(|c: char| c.is_uppercase()) {
+        if node.is_custom_component() {
             return None;
         }
 
@@ -84,7 +82,7 @@ impl Rule for NoNoninteractiveElementToInteractiveRole {
         // Reason: `treeitem` has the superclass role `listitem`, which means it is made to be used on `<li>`
         // Ref: https://w3c.github.io/aria/#treeitem
         // Ref: https://www.w3.org/WAI/ARIA/apg/patterns/treeview/examples/treeview-1a/
-        if element_name.text() == "li" && role_attribute_value == "treeitem" {
+        if is_html_tag(node, source_type, "li") && role_attribute_value == "treeitem" {
             return None;
         }
 
@@ -93,13 +91,16 @@ impl Rule for NoNoninteractiveElementToInteractiveRole {
         {
             // <div> and <span> are considered neither interactive nor non-interactive, depending on the presence or absence of the role attribute.
             // We don't report <div> and <span> here, because we cannot determine whether they are interactive or non-interactive.
-            if ROLE_SENSITIVE_ELEMENTS.contains(&element_name.text()) {
+            if ROLE_SENSITIVE_ELEMENTS
+                .iter()
+                .any(|el| is_html_tag(node, source_type, el))
+            {
                 return None;
             }
 
             return Some(RuleState {
                 attribute_range: role_attribute.range(),
-                element_name,
+                element_name: node.tag_name()?,
             });
         }
 

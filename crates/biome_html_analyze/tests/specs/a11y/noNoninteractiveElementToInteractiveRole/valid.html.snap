@@ -12,6 +12,8 @@ expression: valid.html
 <area role="button" />
 <area role="menuitem" />
 <button className="foo" role="button"></button>
+<Button className="foo" role="button"></Button>
+<BUTTON className="foo" role="button"></BUTTON>
 <input role="button" />
 <input type="button" role="button" />
 <input type="checkbox" role="button" />

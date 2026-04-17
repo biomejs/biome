@@ -450,6 +450,14 @@ impl AnyHtmlTagElement {
             if matches { Some(attr) } else { None }
         })
     }
+
+    /// Returns `true` if the current element is actually a component.
+    ///
+    /// - `<Span />` is a component and it would return `true`
+    /// - `<span ></span>` is **not** component and it returns `false`
+    pub fn is_custom_component(&self) -> bool {
+        self.name().is_ok_and(|it| it.as_html_tag_name().is_none())
+    }
 }
 
 impl biome_aria::Element for AnyHtmlTagElement {
