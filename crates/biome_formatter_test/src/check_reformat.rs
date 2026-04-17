@@ -20,15 +20,15 @@ pub enum ReformatError {
 impl fmt::Display for ReformatError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ReformatError::SyntaxErrors(diagnostics) => {
+            Self::SyntaxErrors(diagnostics) => {
                 write!(
                     f,
                     "reformat: formatter output had syntax errors where input had none:\n{diagnostics}"
                 )
             }
-            ReformatError::Format(message) => write!(f, "reformat: {message}"),
-            ReformatError::Print(message) => write!(f, "reformat: {message}"),
-            ReformatError::OutputMismatch {
+            Self::Format(message) => write!(f, "reformat: {message}"),
+            Self::Print(message) => write!(f, "reformat: {message}"),
+            Self::OutputMismatch {
                 output_diff,
                 ir_diff,
             } => {
