@@ -110,8 +110,8 @@ enum PrettierSnapshotError {
 impl fmt::Display for PrettierSnapshotError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            PrettierSnapshotError::Format(message) => write!(f, "format: {message}"),
-            PrettierSnapshotError::Reformat(error) => write!(f, "{error}"),
+            Self::Format(message) => write!(f, "format: {message}"),
+            Self::Reformat(error) => write!(f, "{error}"),
         }
     }
 }
