@@ -3,7 +3,7 @@ use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule
 use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlElement, HtmlAttribute};
+use biome_html_syntax::{HtmlAttribute, element_ext::AnyHtmlTagElement};
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TokenText};
 use biome_rule_options::no_noninteractive_tabindex::NoNoninteractiveTabindexOptions;
 
@@ -64,7 +64,7 @@ pub struct RuleState {
 }
 
 impl Rule for NoNoninteractiveTabindex {
-    type Query = Aria<AnyHtmlElement>;
+    type Query = Aria<AnyHtmlTagElement>;
     type State = RuleState;
     type Signals = Option<Self::State>;
     type Options = NoNoninteractiveTabindexOptions;
@@ -78,11 +78,13 @@ impl Rule for NoNoninteractiveTabindex {
 
         let tabindex_attribute = node.find_attribute_by_name("tabindex")?;
 
-        let initializer = tabindex_attribute.initializer()?;
-        let value = initializer.value().ok()?;
-        let string_value = value.string_value()?;
+        let is_negative = tabindex_attribute
+            .initializer()
+            .and_then(|init| init.value().ok())
+            .and_then(|value| value.string_value())
+            .is_some_and(|value| is_negative_tabindex(&value));
 
-        if is_negative_tabindex(&string_value) {
+        if is_negative {
             return None;
         }
 
@@ -98,7 +100,7 @@ impl Rule for NoNoninteractiveTabindex {
             }
         }
 
-        let element_name = node.name()?;
+        let element_name = node.tag_name()?;
         let attribute_range = tabindex_attribute.range();
 
         Some(RuleState {
@@ -137,13 +139,8 @@ impl Rule for NoNoninteractiveTabindex {
     }
 }
 
-/// Verifies if number string is an integer less than 0.
-/// Non-integer numbers are considered valid.
+/// Returns `true` only for valid integers strictly less than 0.
 fn is_negative_tabindex(number_like_string: &str) -> bool {
-    let number_string_result = number_like_string.trim().parse::<i32>();
-    match number_string_result {
-        Ok(number) => number < 0,
-        Err(_) => true,
-    }
+    matches!(number_like_string.trim().parse::<i64>(), Ok(n) if n < 0)
 }
 

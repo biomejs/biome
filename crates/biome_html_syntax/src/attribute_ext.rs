@@ -79,12 +79,7 @@ impl Attribute for AnyHtmlAttribute {
 impl AnyHtmlAttribute {
     pub fn name(&self) -> Option<TokenText> {
         match self {
-            Self::HtmlAttribute(attr) => attr
-                .name()
-                .ok()?
-                .value_token()
-                .ok()
-                .map(|token| token.token_text()),
+            Self::HtmlAttribute(attr) => attr.name().ok()?.token_text_trimmed(),
             Self::AnySvelteDirective(_)
             | Self::AnyVueDirective(_)
             | Self::HtmlAttributeDoubleTextExpression(_)
