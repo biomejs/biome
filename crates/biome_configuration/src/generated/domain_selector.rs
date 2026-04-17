@@ -110,6 +110,7 @@ static TYPES_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noFloatingPromises"),
         RuleFilter::Rule("nursery", "noMisusedPromises"),
+        RuleFilter::Rule("nursery", "noRedundantTypeArguments"),
         RuleFilter::Rule("nursery", "noUnnecessaryConditions"),
         RuleFilter::Rule("nursery", "noUnsafePlusOperands"),
         RuleFilter::Rule("nursery", "useArraySortCompare"),
