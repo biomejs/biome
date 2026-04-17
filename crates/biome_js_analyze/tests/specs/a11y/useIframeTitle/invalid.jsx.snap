@@ -4,8 +4,8 @@ expression: invalid.jsx
 ---
 # Input
 ```jsx
+/* should generate diagnostics */
 <>
-	{/* invalid */}
 	<iframe />
 	<iframe></iframe>
 	<iframe title="" />
@@ -25,8 +25,8 @@ invalid.jsx:3:2 lint/a11y/useIframeTitle ━━━━━━━━━━━━━
 
   × Provide a title attribute when using iframe elements.
   
-    1 │ <>
-    2 │ 	{/* invalid */}
+    1 │ /* should generate diagnostics */
+    2 │ <>
   > 3 │ 	<iframe />
       │ 	^^^^^^^^^^
     4 │ 	<iframe></iframe>
@@ -42,7 +42,7 @@ invalid.jsx:4:2 lint/a11y/useIframeTitle ━━━━━━━━━━━━━
 
   × Provide a title attribute when using iframe elements.
   
-    2 │ 	{/* invalid */}
+    2 │ <>
     3 │ 	<iframe />
   > 4 │ 	<iframe></iframe>
       │ 	^^^^^^^^

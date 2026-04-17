@@ -1,1 +1,0 @@
-<div aria-activedescendant={someID} />;

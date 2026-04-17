@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 <>
     <div onClick={() => {}} />
     <div  {...spread} onClick={() => {}} />
