@@ -1,63 +1,58 @@
-use crate::{
-    a11y::{is_content_editable, is_hidden_from_screen_reader},
-    services::aria::Aria,
-};
-use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
+use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_js_syntax::jsx_ext::AnyJsxElement;
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_rowan::AstNode;
 use biome_rule_options::no_noninteractive_element_interactions::NoNoninteractiveElementInteractionsOptions;
+
+use crate::{
+    Aria,
+    a11y::{is_content_editable, is_hidden_from_screen_reader},
+};
 
 declare_lint_rule! {
     /// Disallow use event handlers on non-interactive elements.
     ///
     /// Non-interactive HTML elements indicate _content_ and _containers_ in the user interface.
-    /// Non-interactive elements include `<main>`, `<area>`, `<h1>` (,`<h2>`, etc), `<img>`, `<li>`, `<ul>` and `<ol>`.
+    /// Non-interactive elements include `<main>`, `<h1>` (,`<h2>`, etc), `<img>`, `<li>`, `<ul>` and `<ol>`.
     ///
     /// A Non-interactive element does not support event handlers(mouse and key handlers).
-    ///
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// ```jsx,expect_diagnostic
-    /// <div onClick={() => {}}>button</div>
+    /// ```html,expect_diagnostic
+    /// <div onclick="() => {}">button</div>
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```jsx
-    /// <button onClick={() => { }}>button</button>
+    /// ```html
+    /// <button onclick="() => { }">button</button>
     /// ```
     ///
-    /// ```jsx
+    /// ```html
     /// // Adding a role to element does not add behavior.
     /// // If not used semantic HTML elements like `button`, developers need to implement the expected behavior for role(like focusability and key press support)
     /// // See https://www.w3.org/WAI/ARIA/apg/
-    /// <div role="button" onClick={() => { }}>button</div>
+    /// <div role="button" onclick="() => { }">button</div>
     /// ```
     ///
-    /// ```jsx
+    /// ```html
     /// // The role="presentation" attribute removes the semantic meaning of an element, indicating that it should be ignored by assistive technologies.
     /// // Therefore, it's acceptable to add event handlers to elements with role="presentation" for visual effects or other purposes,
     /// // but users relying on assistive technologies may not be able to interact with these elements.
-    /// <div role="presentation" onClick={() => { }}>button</div>
+    /// <div role="presentation" onclick="() => { }">button</div>
     /// ```
     ///
-    /// ```jsx
+    /// ```html
     /// // Hidden from screen reader.
-    /// <div onClick={() => {}} aria-hidden />
+    /// <div onclick="() => {}" aria-hidden="true" />
     /// ```
     ///
-    /// ```jsx
+    /// ```svelte
     /// // Custom component is not checked.
     /// <SomeComponent onClick={() => {}}>button</SomeComponent>
-    /// ```
-    ///
-    /// ```jsx
-    /// // Spread attributes is not supported.
-    /// <div {...{"onClick":() => {}}}>button</div>
     /// ```
     ///
     /// ## Accessibility guidelines
@@ -72,16 +67,15 @@ declare_lint_rule! {
     /// - [Mozilla Developer Network - ARIA Techniques](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques/Using_the_button_role#Keyboard_and_focus)
     ///
     pub NoNoninteractiveElementInteractions {
-        version: "2.0.0",
+        version: "next",
         name: "noNoninteractiveElementInteractions",
-        language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("no-noninteractive-element-interactions").same()],
+        language: "html",
         recommended: false,
     }
 }
 
 impl Rule for NoNoninteractiveElementInteractions {
-    type Query = Aria<AnyJsxElement>;
+    type Query = Aria<AnyHtmlTagElement>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = NoNoninteractiveElementInteractionsOptions;
@@ -132,38 +126,47 @@ impl Rule for NoNoninteractiveElementInteractions {
     }
 }
 
-/// Ref: https://github.com/jsx-eslint/jsx-ast-utils/blob/v3.3.5/src/eventHandlers.js
 const INTERACTIVE_HANDLERS: &[&str] = &[
-    "onClick",
-    "onContextMenu",
-    "onDblClick",
-    "onDoubleClick",
-    "onDrag",
-    "onDragEnd",
-    "onDragEnter",
-    "onDragExit",
-    "onDragLeave",
-    "onDragOver",
-    "onDragStart",
-    "onDrop",
-    "onMouseDown",
-    "onMouseEnter",
-    "onMouseLeave",
-    "onMouseMove",
-    "onMouseOut",
-    "onMouseOver",
-    "onKeyDown",
-    "onKeyPress",
-    "onKeyUp",
-    "onFocus",
-    "onBlur",
-    "onLoad",
-    "onError",
+    "onclick",
+    "oncontextmenu",
+    "ondblclick",
+    "ondoubleclick",
+    "ondrag",
+    "ondragend",
+    "ondragenter",
+    "ondragexit",
+    "ondragleave",
+    "ondragover",
+    "ondragstart",
+    "ondrop",
+    "onmousedown",
+    "onmouseenter",
+    "onmouseleave",
+    "onmousemove",
+    "onmouseout",
+    "onmouseover",
+    "onkeydown",
+    "onkeypress",
+    "onkeyup",
+    "onfocus",
+    "onblur",
+    "onload",
+    "onerror",
 ];
 
 /// Check if the element contains event handler
-fn has_handler_props(element: &AnyJsxElement) -> bool {
-    INTERACTIVE_HANDLERS
-        .iter()
-        .any(|handler| element.find_attribute_by_name(handler).is_some())
+fn has_handler_props(element: &AnyHtmlTagElement) -> bool {
+    INTERACTIVE_HANDLERS.iter().any(|handler| {
+        if element.find_attribute_by_name(handler).is_some() {
+            return true;
+        }
+
+        let Some(handler_name) = handler.strip_prefix("on") else {
+            return false;
+        };
+
+        element
+            .find_vue_event_handling_directive(handler_name)
+            .is_some()
+    })
 }
