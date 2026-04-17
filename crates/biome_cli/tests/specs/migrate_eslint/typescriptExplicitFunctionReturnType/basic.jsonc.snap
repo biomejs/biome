@@ -1,0 +1,34 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: basic.jsonc
+---
+## ESLint Config
+
+```json
+{ "rules": { "@typescript-eslint/explicit-function-return-type": "error" } }
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"recommended": false,
+			"nursery": {
+				"useExplicitReturnType": "error",
+				"useExplicitType": "error"
+			}
+		}
+	}
+}
+
+```

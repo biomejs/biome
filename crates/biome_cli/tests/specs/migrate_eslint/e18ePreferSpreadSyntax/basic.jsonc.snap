@@ -1,0 +1,32 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: basic.jsonc
+---
+## ESLint Config
+
+```json
+{ "rules": { "e18e/prefer-spread-syntax": "error" } }
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"recommended": false,
+			"nursery": { "useSpread": "error" },
+			"style": { "useObjectSpread": "error" }
+		}
+	}
+}
+
+```

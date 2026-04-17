@@ -1,6 +1,6 @@
 use biome_analyze::{
-    GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleGroup, RuleMetadata,
-    RuleSourceKind, RuleSourceWithKind,
+    GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleGroup, RuleSourceKind,
+    RuleSourceWithKind,
 };
 use biome_rowan::syntax::Language;
 use biome_string_case::Case;
@@ -17,37 +17,109 @@ pub(crate) fn generate_migrate_eslint(mode: Mode) -> Result<()> {
     biome_css_analyze::visit_registry(&mut visitor);
     biome_html_analyze::visit_registry(&mut visitor);
     let mut lines = Vec::with_capacity(visitor.0.len());
-    for ((eslint_name, source_kind), (group_name, rule_metadata)) in visitor.0 {
-        let name = rule_metadata.name;
-        let name_ident = format_ident!("{}", Case::Snake.convert(name));
-        let group_ident = format_ident!("{group_name}");
-        let check_inspired = if source_kind.is_inspired() {
-            quote! {
-                if !options.include_inspired {
-                    results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
-                    return false;
+    for (eslint_name, mut mappings) in visitor.0 {
+        mappings.sort_by_key(|mapping| {
+            (
+                mapping.group_name,
+                mapping.rule_name,
+                mapping.source_kind.is_inspired(),
+            )
+        });
+        mappings.dedup_by(|left, right| {
+            left.group_name == right.group_name
+                && left.rule_name == right.rule_name
+                && left.source_kind == right.source_kind
+        });
+
+        if let [mapping] = mappings.as_slice() {
+            let name_ident = format_ident!("{}", Case::Snake.convert(mapping.rule_name));
+            let group_ident = format_ident!("{}", mapping.group_name);
+            let check_inspired = if mapping.source_kind.is_inspired() {
+                quote! {
+                    if !options.include_inspired {
+                        results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
+                        return false;
+                    }
                 }
-            }
-        } else {
-            quote! {}
-        };
-        let check_nursery = if group_name == "nursery" {
-            quote! {
-                if !options.include_nursery {
-                    results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
-                    return false;
+            } else {
+                quote! {}
+            };
+            let check_nursery = if mapping.group_name == "nursery" {
+                quote! {
+                    if !options.include_nursery {
+                        results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                        return false;
+                    }
                 }
-            }
-        } else {
-            quote! {}
-        };
+            } else {
+                quote! {}
+            };
+            lines.push(quote! {
+                #eslint_name => {
+                    #check_inspired
+                    #check_nursery
+                    let group = rules.#group_ident.get_or_insert_with(Default::default);
+                    let rule = group
+                        .unwrap_group_as_mut()
+                        .#name_ident
+                        .get_or_insert(Default::default());
+                    rule.set_level(rule.level().max(rule_severity.into()));
+                }
+            });
+            continue;
+        }
+
+        let mut migrations = Vec::with_capacity(mappings.len());
+        for mapping in mappings {
+            let name_ident = format_ident!("{}", Case::Snake.convert(mapping.rule_name));
+            let group_ident = format_ident!("{}", mapping.group_name);
+            let skip_inspired = if mapping.source_kind.is_inspired() {
+                quote! {
+                    if !options.include_inspired {
+                        skipped_inspired = true;
+                    } else
+                }
+            } else {
+                quote! {}
+            };
+            let skip_nursery = if mapping.group_name == "nursery" {
+                quote! {
+                    if !options.include_nursery {
+                        skipped_nursery = true;
+                    } else
+                }
+            } else {
+                quote! {}
+            };
+            migrations.push(quote! {
+                #skip_inspired
+                #skip_nursery
+                {
+                    let group = rules.#group_ident.get_or_insert_with(Default::default);
+                    let rule = group
+                        .unwrap_group_as_mut()
+                        .#name_ident
+                        .get_or_insert(Default::default());
+                    rule.set_level(rule.level().max(rule_severity.into()));
+                    migrated = true;
+                }
+            });
+        }
+
         lines.push(quote! {
             #eslint_name => {
-                #check_inspired
-                #check_nursery
-                let group = rules.#group_ident.get_or_insert_with(Default::default);
-                let rule = group.unwrap_group_as_mut().#name_ident.get_or_insert(Default::default());
-                rule.set_level(rule.level().max(rule_severity.into()));
+                let mut migrated = false;
+                let mut skipped_inspired = false;
+                let mut skipped_nursery = false;
+                #( #migrations )*
+                if !migrated {
+                    if skipped_inspired {
+                        results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
+                    } else if skipped_nursery {
+                        results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                    }
+                    return false;
+                }
             }
         });
     }
@@ -78,7 +150,14 @@ pub(crate) fn generate_migrate_eslint(mode: Mode) -> Result<()> {
 }
 
 #[derive(Default)]
-struct EslintLintRulesVisitor(BTreeMap<(Box<str>, RuleSourceKind), (&'static str, RuleMetadata)>);
+struct EslintLintRulesVisitor(BTreeMap<Box<str>, Vec<RuleMapping>>);
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+struct RuleMapping {
+    group_name: &'static str,
+    rule_name: &'static str,
+    source_kind: RuleSourceKind,
+}
 
 impl<L: Language> RegistryVisitor<L> for EslintLintRulesVisitor {
     fn record_category<C: GroupCategory<Language = L>>(&mut self) {
@@ -94,10 +173,14 @@ impl<L: Language> RegistryVisitor<L> for EslintLintRulesVisitor {
     {
         for RuleSourceWithKind { kind, source } in R::METADATA.sources {
             if source.is_eslint() || source.is_eslint_plugin() {
-                self.0.insert(
-                    (source.to_namespaced_rule_name().into_boxed_str(), *kind),
-                    (<R::Group as RuleGroup>::NAME, R::METADATA),
-                );
+                self.0
+                    .entry(source.to_namespaced_rule_name().into_boxed_str())
+                    .or_default()
+                    .push(RuleMapping {
+                        group_name: <R::Group as RuleGroup>::NAME,
+                        rule_name: R::METADATA.name,
+                        source_kind: *kind,
+                    });
             }
         }
     }
