@@ -77,11 +77,8 @@ declare_lint_rule! {
     }
 }
 
-/// Represents a part of the combined string that will replace the template.
 #[derive(Debug)]
 pub struct TemplateState {
-    /// String fragments that will be joined into the replacement literal.
-    fragments: Vec<String>,
     /// Whether any fragment contains a single quote.
     has_single_quote: bool,
     /// Whether any fragment contains a double quote.
@@ -105,7 +102,6 @@ impl Rule for NoUnnecessaryTemplateExpression {
         // Collect all elements and check whether each is flaggable.
         // We flag the template if every interpolation is a string literal expression
         // AND the text chunks don't contain literal newlines (which require the template syntax).
-        let mut fragments = Vec::new();
         let mut has_any_interpolation = false;
         let mut has_single_quote = false;
         let mut has_double_quote = false;
@@ -124,7 +120,6 @@ impl Rule for NoUnnecessaryTemplateExpression {
 
                     has_single_quote |= text.contains('\'');
                     has_double_quote |= text.contains('"');
-                    fragments.push(text.to_owned());
                 }
                 AnyJsTemplateElement::JsTemplateElement(elem) => {
                     has_any_interpolation = true;
@@ -141,7 +136,6 @@ impl Rule for NoUnnecessaryTemplateExpression {
                             let inner_text = inner.text();
                             has_single_quote |= inner_text.contains('\'');
                             has_double_quote |= inner_text.contains('"');
-                            fragments.push(inner_text.to_owned());
                         }
                         // Any expression that is not a string literal makes the template necessary
                         // (e.g. a number literal or a variable whose type we don't know).
@@ -158,7 +152,6 @@ impl Rule for NoUnnecessaryTemplateExpression {
         }
 
         Some(TemplateState {
-            fragments,
             has_single_quote,
             has_double_quote,
         })
@@ -181,13 +174,32 @@ impl Rule for NoUnnecessaryTemplateExpression {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
-        let template = ctx.query();
-        let mut mutation = ctx.root().begin();
-        let content = state.fragments.join("");
-
         // A string literal cannot represent both quote kinds without escaping.
         if state.has_single_quote && state.has_double_quote {
             return None;
+        }
+
+        let template = ctx.query();
+        let mut content = String::new();
+        for element in template.elements().iter() {
+            match element {
+                AnyJsTemplateElement::JsTemplateChunkElement(chunk) => {
+                    let token = chunk.template_chunk_token().ok()?;
+                    content.push_str(token.text_trimmed());
+                }
+                AnyJsTemplateElement::JsTemplateElement(elem) => {
+                    let expr = elem.expression().ok()?;
+                    let AnyJsExpression::AnyJsLiteralExpression(
+                        AnyJsLiteralExpression::JsStringLiteralExpression(string_lit),
+                    ) = &expr
+                    else {
+                        return None;
+                    };
+                    let value_token = string_lit.value_token().ok()?;
+                    let inner = inner_string_text(&value_token);
+                    content.push_str(inner.text());
+                }
+            }
         }
 
         let new_token = if state.has_single_quote {
@@ -204,6 +216,7 @@ impl Rule for NoUnnecessaryTemplateExpression {
         };
 
         let new_literal = make::js_string_literal_expression(new_token);
+        let mut mutation = ctx.root().begin();
 
         mutation.replace_node(
             AnyJsExpression::JsTemplateExpression(template.clone()),
