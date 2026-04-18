@@ -18,10 +18,6 @@ declare_lint_rule! {
     /// A template expression (or template literal) is unnecessary when it only contains
     /// string literal expressions that could be written as a regular string literal instead.
     ///
-    /// This rule is inspired by the
-    /// [`@typescript-eslint/no-unnecessary-template-expression`](https://typescript-eslint.io/rules/no-unnecessary-template-expression/)
-    /// rule. Unlike the TypeScript ESLint version, this rule only applies to cases that can
-    /// be verified syntactically, without type information.
     ///
     /// ## Examples
     ///
