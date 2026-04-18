@@ -48,18 +48,18 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
-    /// ### `androidPathRegex`
+    /// ### `androidPathPatterns`
     ///
-    /// A regular expression to identify Android-specific files.
+    /// A list of glob patterns to identify Android-specific files.
     ///
-    /// Default: `.*[.]android[.][jt]sx?`
+    /// Default: `["**/*.android.{js,jsx,ts,tsx}"]`
     ///
     /// In the following example, Android files use `.droid.jsx` as their suffix instead of the default `.android.js`:
     ///
     /// ```json,options
     /// {
     ///     "options": {
-    ///         "androidPathRegex": ".*[.]droid[.]jsx"
+    ///         "androidPathPatterns": ["**/*.droid.jsx"]
     ///     }
     /// }
     /// ```
@@ -72,18 +72,18 @@ declare_lint_rule! {
     /// import { ProgressBarAndroid } from "react-native";
     /// ```
     ///
-    /// ### `iosPathRegex`
+    /// ### `iosPathPatterns`
     ///
-    /// A regular expression to identify iOS-specific files.
+    /// A list of glob patterns to identify iOS-specific files.
     ///
-    /// Default: `.*[.]ios[.][jt]sx?`
+    /// Default: `["**/*.ios.{js,jsx,ts,tsx}"]`
     ///
     /// In the following example, iOS files use `.apple.jsx` as their suffix instead of the default `.ios.js`:
     ///
     /// ```json,options
     /// {
     ///     "options": {
-    ///         "iosPathRegex": ".*[.]apple[.]jsx"
+    ///         "iosPathPatterns": ["**/*.apple.jsx"]
     ///     }
     /// }
     /// ```
@@ -100,7 +100,7 @@ declare_lint_rule! {
         version: "next",
         name: "useReactNativePlatformComponents",
         language: "js",
-        sources: &[RuleSource::EslintReactNative("split-platform-components").same()],
+        sources: &[RuleSource::EslintReactNative("split-platform-components").inspired()],
         domains: &[RuleDomain::ReactNative],
         recommended: true,
         severity: Severity::Error,
@@ -129,41 +129,40 @@ impl Rule for UseReactNativePlatformComponents {
         let file_path = ctx.file_path().as_str();
         let options = ctx.options();
 
-        let is_android_file = options.android_path_regex.is_match(file_path);
-        let is_ios_file = options.ios_path_regex.is_match(file_path);
+        let is_android_file = options
+            .android_path_patterns
+            .iter()
+            .any(|glob| glob.is_match(file_path));
+        let is_ios_file = !is_android_file
+            && options
+                .ios_path_patterns
+                .iter()
+                .any(|glob| glob.is_match(file_path));
 
-        let mut android_components: Vec<(TextRange, TokenText)> = Vec::new();
-        let mut ios_components: Vec<(TextRange, TokenText)> = Vec::new();
-
-        for (range, name_text) in &component_names {
+        let mut has_android = false;
+        let mut has_ios = false;
+        for (_, name_text) in &component_names {
             let text = name_text.text();
-            if text.contains("Android") {
-                android_components.push((*range, name_text.clone()));
-            } else if text.contains("IOS") {
-                ios_components.push((*range, name_text.clone()));
-            }
+            has_android |= text.contains("Android");
+            has_ios |= text.contains("IOS");
         }
+        let has_conflict = has_android && has_ios;
 
-        let has_conflict = !android_components.is_empty() && !ios_components.is_empty();
         let mut results: Vec<RuleState> = Vec::new();
-
-        for (range, name) in android_components {
-            if !is_android_file {
+        for (range, name_text) in component_names {
+            let text = name_text.text();
+            if text.contains("Android") && !is_android_file {
                 results.push(RuleState {
                     kind: PlatformKind::Android,
                     range,
-                    name,
+                    name: name_text,
                     has_conflict,
                 });
-            }
-        }
-
-        for (range, name) in ios_components {
-            if !is_ios_file {
+            } else if text.contains("IOS") && !is_ios_file {
                 results.push(RuleState {
                     kind: PlatformKind::Ios,
                     range,
-                    name,
+                    name: name_text,
                     has_conflict,
                 });
             }

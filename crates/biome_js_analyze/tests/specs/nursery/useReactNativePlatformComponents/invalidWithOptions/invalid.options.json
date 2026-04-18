@@ -7,8 +7,8 @@
         "useReactNativePlatformComponents": {
           "level": "error",
           "options": {
-            "androidPathRegex": ".*[.]droid[.]jsx",
-            "iosPathRegex": ".*[.]apple[.]jsx"
+            "androidPathPatterns": ["**/*.droid.jsx"],
+            "iosPathPatterns": ["**/*.apple.jsx"]
           }
         }
       }
