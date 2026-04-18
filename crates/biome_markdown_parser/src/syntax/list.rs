@@ -40,9 +40,8 @@ use biome_parser::prelude::ParsedSyntax::{self, *};
 use biome_parser::prelude::{CompletedMarker, Marker, ParseDiagnostic, TokenSet};
 use biome_parser::{Parser, token_set};
 
-use biome_rowan::{TextRange, TextSize};
-
 use crate::MarkdownParser;
+use crate::lexer::MarkdownReLexContext;
 use crate::syntax::fenced_code_block::parse_fenced_code_block;
 use crate::syntax::header::{parse_header_content, parse_trailing_hashes};
 use crate::syntax::html_block::{at_html_block, parse_html_block};
@@ -58,6 +57,7 @@ use crate::syntax::{
     INDENT_CODE_BLOCK_SPACES, MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES, at_block_interrupt,
     at_indent_code_block, is_paragraph_like, is_whitespace_only,
 };
+use biome_rowan::{TextRange, TextSize};
 
 /// Tokens that start a new block (used for recovery)
 const BLOCK_RECOVERY_SET: TokenSet<MarkdownSyntaxKind> = token_set![
@@ -205,6 +205,21 @@ fn emit_list_post_marker_space(p: &mut MarkdownParser, preserve_tab: bool) -> bo
             p.bump_remap(MD_LIST_POST_MARKER_SPACE);
         }
         true
+    } else if text.starts_with(' ') || text.starts_with('\t') {
+        // The lexer bundled whitespace with content into one token (e.g. " Foo").
+        // Re-lex in ListPostMarker context to split out leading whitespace.
+        p.re_lex(MarkdownReLexContext::ListPostMarker);
+        let split_text = p.cur_text();
+        if split_text.bytes().all(|b| b == b' ' || b == b'\t') {
+            if !preserve_tab || split_text == " " {
+                p.bump_remap(MD_LIST_POST_MARKER_SPACE);
+            }
+            p.force_relex_regular();
+            true
+        } else {
+            p.force_relex_regular();
+            false
+        }
     } else {
         false
     }

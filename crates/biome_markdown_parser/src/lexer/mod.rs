@@ -48,6 +48,10 @@ pub enum MarkdownLexContext {
     /// separately. This allows the parser to consume trailing spaces as
     /// Whitespace trivia without swallowing the newline.
     HeadingContent,
+    /// After an ordered list marker (e.g. `1.`). Consumes only leading
+    /// spaces/tabs into a single token so the parser can capture them as
+    /// `MD_LIST_POST_MARKER_SPACE`.
+    ListPostMarker,
 }
 
 impl LexContext for MarkdownLexContext {
@@ -75,6 +79,9 @@ pub enum MarkdownReLexContext {
     ThematicBreakParts,
     /// Inside the code block list, where strings doesn't have particular meaning
     CodeInfoString,
+    /// After an ordered list marker. Splits leading whitespace from content
+    /// so the parser can capture it as `MD_LIST_POST_MARKER_SPACE`.
+    ListPostMarker,
 }
 
 /// An extremely fast, lookup table based, lossless Markdown lexer
@@ -144,6 +151,7 @@ impl<'src> Lexer<'src> for MarkdownLexer<'src> {
         if !kind.is_trivia()
             && kind != NEWLINE
             && kind != MD_HARD_LINE_LITERAL
+            && kind != UNICODE_BOM
             && !(kind == MD_TEXTUAL_LITERAL
                 && self.after_newline
                 && self.current_text_is_whitespace())
@@ -262,6 +270,8 @@ impl<'src> MarkdownLexer<'src> {
             WHS => {
                 if current == b'\n' || current == b'\r' {
                     self.consume_newline()
+                } else if matches!(context, MarkdownLexContext::ListPostMarker) {
+                    self.consume_list_post_marker_whitespace()
                 } else if matches!(context, MarkdownLexContext::ThematicBreakParts) {
                     // In ThematicBreakParts context, emit one MD_INDENT_CHAR per space/tab.
                     self.advance(1);
@@ -326,6 +336,13 @@ impl<'src> MarkdownLexer<'src> {
             // = at line start could be setext heading underline
             EQL if self.after_newline => self.consume_setext_underline_or_textual(),
             _ => {
+                if self.position == 0
+                    && let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM)
+                {
+                    self.unicode_bom_length = bom_size;
+                    return bom;
+                }
+
                 // Check for ordered list markers: digits followed by . or ) at line start
                 if current.is_ascii_digit()
                     && (self.after_newline || self.force_ordered_list_marker)
@@ -645,6 +662,24 @@ impl<'src> MarkdownLexer<'src> {
     }
 
     /// Consume a single whitespace character at line start as text.
+    /// Consumes all leading spaces/tabs after an ordered list marker into a
+    /// single token. Per CommonMark §5.2, 1–4 spaces after the marker
+    /// determine the continuation indent; the parser captures them as
+    /// `MD_LIST_POST_MARKER_SPACE`.
+    fn consume_list_post_marker_whitespace(&mut self) -> MarkdownSyntaxKind {
+        self.assert_at_char_boundary();
+
+        while let Some(byte) = self.current_byte() {
+            if byte == b' ' || byte == b'\t' {
+                self.advance(1);
+            } else {
+                break;
+            }
+        }
+
+        MD_TEXTUAL_LITERAL
+    }
+
     fn consume_single_whitespace_as_text(&mut self) -> MarkdownSyntaxKind {
         self.assert_at_char_boundary();
 
@@ -1410,6 +1445,7 @@ impl<'src> ReLexer<'src> for MarkdownLexer<'src> {
             MarkdownReLexContext::EmphasisInline => MarkdownLexContext::EmphasisInline,
             MarkdownReLexContext::ThematicBreakParts => MarkdownLexContext::ThematicBreakParts,
             MarkdownReLexContext::CodeInfoString => MarkdownLexContext::CodeInfoString,
+            MarkdownReLexContext::ListPostMarker => MarkdownLexContext::ListPostMarker,
         };
 
         let re_lexed_kind = match self.current_byte() {
