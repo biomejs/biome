@@ -4740,6 +4740,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoReactNativeDeepImportsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoReactNativeDeepImportsOptions" }
+			]
+		},
+		"NoReactNativeDeepImportsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoReactNativeLiteralColorsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6358,6 +6368,13 @@
 					"description": "Disallow the use of the deprecated __proto__ object property.\nSee https://biomejs.dev/linter/rules/no-proto",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoProtoConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noReactNativeDeepImports": {
+					"description": "Disallow deep imports from the react-native package.\nSee https://biomejs.dev/linter/rules/no-react-native-deep-imports",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReactNativeDeepImportsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9328,6 +9345,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoReactForwardRefOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoReactNativeDeepImportsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoReactNativeDeepImportsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
