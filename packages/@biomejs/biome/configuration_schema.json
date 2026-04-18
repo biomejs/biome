@@ -15115,15 +15115,17 @@
 		"UseReactNativePlatformComponentsOptions": {
 			"type": "object",
 			"properties": {
-				"androidPathRegex": {
-					"description": "A regular expression pattern to identify Android-specific files.\nDefaults to `.*[.]android[.][jt]sx?`.",
-					"$ref": "#/$defs/Regex",
-					"default": ".*[.]android[.][jt]sx?"
+				"androidPathPatterns": {
+					"description": "A list of glob patterns to identify Android-specific files.\nDefaults to `[\"**/*.android.{js,jsx,ts,tsx}\"]`.",
+					"type": "array",
+					"default": ["**/*.android.{js,jsx,ts,tsx}"],
+					"items": { "$ref": "#/$defs/NormalizedGlob" }
 				},
-				"iosPathRegex": {
-					"description": "A regular expression pattern to identify iOS-specific files.\nDefaults to `.*[.]ios[.][jt]sx?`.",
-					"$ref": "#/$defs/Regex",
-					"default": ".*[.]ios[.][jt]sx?"
+				"iosPathPatterns": {
+					"description": "A list of glob patterns to identify iOS-specific files.\nDefaults to `[\"**/*.ios.{js,jsx,ts,tsx}\"]`.",
+					"type": "array",
+					"default": ["**/*.ios.{js,jsx,ts,tsx}"],
+					"items": { "$ref": "#/$defs/NormalizedGlob" }
 				}
 			},
 			"additionalProperties": false

@@ -8049,15 +8049,15 @@ export type UseQwikLoaderLocationOptions = {};
 export type UseReactAsyncServerFunctionOptions = {};
 export interface UseReactNativePlatformComponentsOptions {
 	/**
-	* A regular expression pattern to identify Android-specific files.
-Defaults to `.*[.]android[.][jt]sx?`. 
+	* A list of glob patterns to identify Android-specific files.
+Defaults to `["**/*.android.{js,jsx,ts,tsx}"]`. 
 	 */
-	androidPathRegex?: Regex;
+	androidPathPatterns?: NormalizedGlob[];
 	/**
-	* A regular expression pattern to identify iOS-specific files.
-Defaults to `.*[.]ios[.][jt]sx?`. 
+	* A list of glob patterns to identify iOS-specific files.
+Defaults to `["**/*.ios.{js,jsx,ts,tsx}"]`. 
 	 */
-	iosPathRegex?: Regex;
+	iosPathPatterns?: NormalizedGlob[];
 }
 export type UseReduceTypeParameterOptions = {};
 export type UseRegexpExecOptions = {};
