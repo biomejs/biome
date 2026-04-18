@@ -67,10 +67,9 @@ impl Rule for NoReactNativeDeepImports {
         let import_path = node.inner_string_text()?;
         let import_path = import_path.text();
 
-        let Some(rest) = import_path.strip_prefix("react-native/") else {
-            return false;
-        };
-        if !rest.is_empty() {
+        if let Some(rest) = import_path.strip_prefix("react-native/")
+            && !rest.is_empty()
+        {
             return Some(module_name_token.text_trimmed_range());
         }
 
