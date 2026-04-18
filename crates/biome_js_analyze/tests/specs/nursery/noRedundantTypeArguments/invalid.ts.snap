@@ -1,0 +1,287 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+function defaultCall<T = number>() {}
+defaultCall<number>();
+
+function inferredCall<T>(value: T) {}
+inferredCall<number>(10);
+
+declare const x: number;
+inferredCall<number>(x);
+
+function inferredSecond<T, U>(first: T, second: U) {}
+inferredSecond<number, number>(10, 10);
+
+function tagged<T = number>(templates: TemplateStringsArray, value: T) {}
+tagged<number>`${1}`;
+
+class Box<T = number> {}
+new Box<number>();
+
+class Wrapped<T> {
+  constructor(value: T) {}
+}
+new Wrapped<number>(10);
+
+class Base<T = string> {}
+class Derived extends Base<string> {}
+
+interface Shape<T = string> {}
+class Impl implements Shape<string> {}
+
+type Alias<T = Map<string, string>> = T;
+type Value = Alias<Map<string, string>>;
+
+function withDefaultTail<T, U = string>(first: T, second: U) {}
+withDefaultTail<number, string>(1, "value");
+
+```
+
+# Diagnostics
+```
+invalid.ts:4:13 lint/nursery/noRedundantTypeArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This explicit type argument matches the corresponding default type parameter.
+  
+    3 │ function defaultCall<T = number>() {}
+  > 4 │ defaultCall<number>();
+      │             ^^^^^^
+    5 │ 
+    6 │ function inferredCall<T>(value: T) {}
+  
+  i Since the explicit type argument is the same as the default, it can be safely removed without changing the behavior of the code. Leaving it in is redundant and harms readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the redundant explicit type argument.
+  
+    4 │ defaultCall<number>();
+      │            --------   
+
+```
+
+```
+invalid.ts:7:14 lint/nursery/noRedundantTypeArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This explicit type argument can be inferred from the corresponding argument.
+  
+    6 │ function inferredCall<T>(value: T) {}
+  > 7 │ inferredCall<number>(10);
+      │              ^^^^^^
+    8 │ 
+    9 │ declare const x: number;
+  
+  i It's often preferable to let TypeScript infer the type argument to improve code readability and prevent extra churn when refactoring surrounding code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the redundant explicit type argument.
+  
+    7 │ inferredCall<number>(10);
+      │             --------     
+
+```
+
+```
+invalid.ts:10:14 lint/nursery/noRedundantTypeArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This explicit type argument can be inferred from the corresponding argument.
+  
+     9 │ declare const x: number;
+  > 10 │ inferredCall<number>(x);
+       │              ^^^^^^
+    11 │ 
+    12 │ function inferredSecond<T, U>(first: T, second: U) {}
+  
+  i It's often preferable to let TypeScript infer the type argument to improve code readability and prevent extra churn when refactoring surrounding code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the redundant explicit type argument.
+  
+    10 │ inferredCall<number>(x);
+       │             --------    
+
+```
+
+```
+invalid.ts:13:24 lint/nursery/noRedundantTypeArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This explicit type argument can be inferred from the corresponding argument.
+  
+    12 │ function inferredSecond<T, U>(first: T, second: U) {}
+  > 13 │ inferredSecond<number, number>(10, 10);
+       │                        ^^^^^^
+    14 │ 
+    15 │ function tagged<T = number>(templates: TemplateStringsArray, value: T) {}
+  
+  i It's often preferable to let TypeScript infer the type argument to improve code readability and prevent extra churn when refactoring surrounding code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the redundant explicit type argument.
+  
+    13 │ inferredSecond<number,·number>(10,·10);
+       │                      --------          
+
+```
+
+```
+invalid.ts:16:8 lint/nursery/noRedundantTypeArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This explicit type argument matches the corresponding default type parameter.
+  
+    15 │ function tagged<T = number>(templates: TemplateStringsArray, value: T) {}
+  > 16 │ tagged<number>`${1}`;
+       │        ^^^^^^
+    17 │ 
+    18 │ class Box<T = number> {}
+  
+  i Since the explicit type argument is the same as the default, it can be safely removed without changing the behavior of the code. Leaving it in is redundant and harms readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the redundant explicit type argument.
+  
+    16 │ tagged<number>`${1}`;
+       │       --------       
+
+```
+
+```
+invalid.ts:19:9 lint/nursery/noRedundantTypeArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This explicit type argument matches the corresponding default type parameter.
+  
+    18 │ class Box<T = number> {}
+  > 19 │ new Box<number>();
+       │         ^^^^^^
+    20 │ 
+    21 │ class Wrapped<T> {
+  
+  i Since the explicit type argument is the same as the default, it can be safely removed without changing the behavior of the code. Leaving it in is redundant and harms readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the redundant explicit type argument.
+  
+    19 │ new·Box<number>();
+       │        --------   
+
+```
+
+```
+invalid.ts:24:13 lint/nursery/noRedundantTypeArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This explicit type argument can be inferred from the corresponding argument.
+  
+    22 │   constructor(value: T) {}
+    23 │ }
+  > 24 │ new Wrapped<number>(10);
+       │             ^^^^^^
+    25 │ 
+    26 │ class Base<T = string> {}
+  
+  i It's often preferable to let TypeScript infer the type argument to improve code readability and prevent extra churn when refactoring surrounding code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the redundant explicit type argument.
+  
+    24 │ new·Wrapped<number>(10);
+       │            --------     
+
+```
+
+```
+invalid.ts:27:28 lint/nursery/noRedundantTypeArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This explicit type argument matches the corresponding default type parameter.
+  
+    26 │ class Base<T = string> {}
+  > 27 │ class Derived extends Base<string> {}
+       │                            ^^^^^^
+    28 │ 
+    29 │ interface Shape<T = string> {}
+  
+  i Since the explicit type argument is the same as the default, it can be safely removed without changing the behavior of the code. Leaving it in is redundant and harms readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the redundant explicit type argument.
+  
+    27 │ class·Derived·extends·Base<string>·{}
+       │                           --------   
+
+```
+
+```
+invalid.ts:30:29 lint/nursery/noRedundantTypeArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This explicit type argument matches the corresponding default type parameter.
+  
+    29 │ interface Shape<T = string> {}
+  > 30 │ class Impl implements Shape<string> {}
+       │                             ^^^^^^
+    31 │ 
+    32 │ type Alias<T = Map<string, string>> = T;
+  
+  i Since the explicit type argument is the same as the default, it can be safely removed without changing the behavior of the code. Leaving it in is redundant and harms readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the redundant explicit type argument.
+  
+    30 │ class·Impl·implements·Shape<string>·{}
+       │                            --------   
+
+```
+
+```
+invalid.ts:33:20 lint/nursery/noRedundantTypeArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This explicit type argument matches the corresponding default type parameter.
+  
+    32 │ type Alias<T = Map<string, string>> = T;
+  > 33 │ type Value = Alias<Map<string, string>>;
+       │                    ^^^^^^^^^^^^^^^^^^^
+    34 │ 
+    35 │ function withDefaultTail<T, U = string>(first: T, second: U) {}
+  
+  i Since the explicit type argument is the same as the default, it can be safely removed without changing the behavior of the code. Leaving it in is redundant and harms readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the redundant explicit type argument.
+  
+    33 │ type·Value·=·Alias<Map<string,·string>>;
+       │                   --------------------- 
+
+```
+
+```
+invalid.ts:36:25 lint/nursery/noRedundantTypeArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This explicit type argument matches the corresponding default type parameter.
+  
+    35 │ function withDefaultTail<T, U = string>(first: T, second: U) {}
+  > 36 │ withDefaultTail<number, string>(1, "value");
+       │                         ^^^^^^
+    37 │ 
+  
+  i Since the explicit type argument is the same as the default, it can be safely removed without changing the behavior of the code. Leaving it in is redundant and harms readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the redundant explicit type argument.
+  
+    36 │ withDefaultTail<number,·string>(1,·"value");
+       │                       --------              
+
+```

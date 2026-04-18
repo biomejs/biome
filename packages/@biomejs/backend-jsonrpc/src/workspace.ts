@@ -2318,6 +2318,11 @@ See https://biomejs.dev/linter/rules/no-redundant-default-export
 	 */
 	noRedundantDefaultExport?: NoRedundantDefaultExportConfiguration;
 	/**
+	* Disallow explicit type arguments that match a declaration's default type or can be inferred.
+See https://biomejs.dev/linter/rules/no-redundant-type-arguments 
+	 */
+	noRedundantTypeArguments?: NoRedundantTypeArgumentsConfiguration;
+	/**
 	* Disallow assignments in return statements.
 See https://biomejs.dev/linter/rules/no-return-assign 
 	 */
@@ -4387,6 +4392,9 @@ export type NoReactNativeRawTextConfiguration =
 export type NoRedundantDefaultExportConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoRedundantDefaultExportOptions;
+export type NoRedundantTypeArgumentsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoRedundantTypeArgumentsOptions;
 export type NoReturnAssignConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReturnAssignOptions;
@@ -6174,6 +6182,11 @@ export interface RuleWithNoRedundantDefaultExportOptions {
 	level: RulePlainConfiguration;
 	options?: NoRedundantDefaultExportOptions;
 }
+export interface RuleWithNoRedundantTypeArgumentsOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoRedundantTypeArgumentsOptions;
+}
 export interface RuleWithNoReturnAssignOptions {
 	level: RulePlainConfiguration;
 	options?: NoReturnAssignOptions;
@@ -7802,6 +7815,7 @@ export interface NoReactNativeRawTextOptions {
 	skip?: string[];
 }
 export type NoRedundantDefaultExportOptions = {};
+export type NoRedundantTypeArgumentsOptions = {};
 export type NoReturnAssignOptions = {};
 export interface NoRootTypeOptions {
 	/**
@@ -8977,6 +8991,7 @@ export type Category =
 	| "lint/nursery/noReactNativeDeepImports"
 	| "lint/nursery/noReactNativeRawText"
 	| "lint/nursery/noRedundantDefaultExport"
+	| "lint/nursery/noRedundantTypeArguments"
 	| "lint/nursery/noReturnAssign"
 	| "lint/nursery/noRootType"
 	| "lint/nursery/noScriptUrl"

@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.tsx
+---
+# Input
+```tsx
+/* should generate diagnostics */
+
+function Button<T = string>() {
+  return <div></div>;
+}
+
+const button = <Button<string> />;
+
+```
+
+# Diagnostics
+```
+invalid.tsx:7:24 lint/nursery/noRedundantTypeArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This explicit type argument matches the corresponding default type parameter.
+  
+    5 │ }
+    6 │ 
+  > 7 │ const button = <Button<string> />;
+      │                        ^^^^^^
+    8 │ 
+  
+  i Since the explicit type argument is the same as the default, it can be safely removed without changing the behavior of the code. Leaving it in is redundant and harms readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the redundant explicit type argument.
+  
+    7 │ const·button·=·<Button<string>·/>;
+      │                       ---------   
+
+```

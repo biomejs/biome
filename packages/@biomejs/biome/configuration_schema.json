@@ -4834,6 +4834,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoRedundantTypeArgumentsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoRedundantTypeArgumentsOptions" }
+			]
+		},
+		"NoRedundantTypeArgumentsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoRedundantUseStrictConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6396,6 +6406,13 @@
 					"description": "Checks if a default export exports the same symbol as a named export.\nSee https://biomejs.dev/linter/rules/no-redundant-default-export",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoRedundantDefaultExportConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noRedundantTypeArguments": {
+					"description": "Disallow explicit type arguments that match a declaration's default type or can be inferred.\nSee https://biomejs.dev/linter/rules/no-redundant-type-arguments",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoRedundantTypeArgumentsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9435,6 +9452,16 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoRedundantRolesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoRedundantTypeArgumentsOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoRedundantTypeArgumentsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

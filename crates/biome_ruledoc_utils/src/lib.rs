@@ -7,6 +7,7 @@ use std::sync::Arc;
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::JsFileSource;
+use biome_js_semantic::SemanticModel;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_module_graph::ModuleGraph;
 use biome_project_layout::ProjectLayout;
@@ -89,12 +90,16 @@ impl AnalyzerServicesBuilder {
         }
     }
 
-    pub fn build_for_js_file_source(&self, file_source: JsFileSource) -> JsAnalyzerServices {
+    pub fn build_for_js_file_source(
+        &self,
+        file_source: JsFileSource,
+        semantic_model: Option<SemanticModel>,
+    ) -> JsAnalyzerServices {
         JsAnalyzerServices::from((
             self.module_graph.clone(),
             self.project_layout.clone(),
             file_source,
-            None,
+            semantic_model,
         ))
     }
 }
