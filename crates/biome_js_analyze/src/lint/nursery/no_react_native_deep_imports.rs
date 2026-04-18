@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::AnyJsImportLike;
 use biome_rowan::TextRange;
+use biome_rule_options::no_react_native_deep_imports::NoReactNativeDeepImportsOptions;
 
 declare_lint_rule! {
     /// Disallow deep imports from the `react-native` package.
@@ -58,7 +59,7 @@ impl Rule for NoReactNativeDeepImports {
     type Query = Ast<AnyJsImportLike>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoReactNativeDeepImportsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
@@ -66,7 +67,10 @@ impl Rule for NoReactNativeDeepImports {
         let import_path = node.inner_string_text()?;
         let import_path = import_path.text();
 
-        if is_deep_react_native_import(import_path) {
+        let Some(rest) = import_path.strip_prefix("react-native/") else {
+            return false;
+        };
+        if !rest.is_empty() {
             return Some(module_name_token.text_trimmed_range());
         }
 
@@ -90,15 +94,4 @@ impl Rule for NoReactNativeDeepImports {
             }),
         )
     }
-}
-
-/// Returns `true` if the import path reaches into `react-native/` internals.
-///
-/// Paths like `react-native-foo` or `react-native-foo/bar` are different
-/// packages and are allowed. Only `react-native/...` with a subpath is flagged.
-fn is_deep_react_native_import(import_path: &str) -> bool {
-    let Some(rest) = import_path.strip_prefix("react-native/") else {
-        return false;
-    };
-    !rest.is_empty()
 }
