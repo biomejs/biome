@@ -1,3 +1,5 @@
+use crate::frameworks::is_framework_api_reference;
+use crate::services::semantic::Semantic;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -7,9 +9,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::no_react_native_literal_colors::NoReactNativeLiteralColorsOptions;
-
-use crate::frameworks::is_framework_api_reference;
-use crate::services::semantic::Semantic;
+use biome_string_case::StrLikeExtension;
 
 declare_lint_rule! {
     /// Disallow color literals in React Native styles.
@@ -132,7 +132,7 @@ impl AnyStyleSink {
                     .name()
                     .ok()
                     .and_then(|name| name.name())
-                    .is_some_and(|name| contains_ignore_ascii_case(name.text(), "color"))
+                    .is_some_and(|name| name.contains_ignore_ascii_case("color"))
             })
             .filter(|property| {
                 property
@@ -169,7 +169,7 @@ fn is_style_attribute(attribute: &JsxAttribute) -> bool {
         .name()
         .ok()
         .and_then(|name| name.name().ok())
-        .is_some_and(|token| contains_ignore_ascii_case(token.text_trimmed(), "style"))
+        .is_some_and(|token| token.text_trimmed().contains_ignore_ascii_case("style"))
 }
 
 /// Returns `true` when `call` is a call to `StyleSheet.create` where
@@ -191,86 +191,3 @@ fn is_stylesheet_create(call: &JsCallExpression, model: &biome_js_semantic::Sema
 }
 
 const REACT_NATIVE_PACKAGE_NAMES: &[&str] = &["react-native", "react-native-web"];
-
-/// Returns `true` when `needle` appears anywhere inside `haystack`, treating
-/// uppercase and lowercase ASCII letters as equal. For example, searching for
-/// `"color"` inside `"backgroundColor"` returns `true`.
-///
-/// Only ASCII letters are folded. Any other character (digits, punctuation,
-/// or non-ASCII letters like `É`) must match byte-for-byte.
-fn contains_ignore_ascii_case(haystack: &str, needle: &str) -> bool {
-    let haystack = haystack.as_bytes();
-    let needle = needle.as_bytes();
-    if needle.is_empty() {
-        return true;
-    }
-    if haystack.len() < needle.len() {
-        return false;
-    }
-    haystack
-        .windows(needle.len())
-        .any(|window| window.eq_ignore_ascii_case(needle))
-}
-
-#[cfg(test)]
-mod tests {
-    use super::contains_ignore_ascii_case;
-
-    #[test]
-    fn matches_exactly() {
-        assert!(contains_ignore_ascii_case("color", "color"));
-    }
-
-    #[test]
-    fn matches_at_start() {
-        assert!(contains_ignore_ascii_case("colorScheme", "color"));
-    }
-
-    #[test]
-    fn matches_at_end() {
-        assert!(contains_ignore_ascii_case("backgroundcolor", "color"));
-    }
-
-    #[test]
-    fn matches_in_the_middle() {
-        assert!(contains_ignore_ascii_case("myColorValue", "color"));
-    }
-
-    #[test]
-    fn ignores_ascii_case() {
-        assert!(contains_ignore_ascii_case("backgroundColor", "color"));
-        assert!(contains_ignore_ascii_case("BACKGROUNDCOLOR", "color"));
-        assert!(contains_ignore_ascii_case("background", "GROUND"));
-    }
-
-    #[test]
-    fn rejects_missing_needle() {
-        assert!(!contains_ignore_ascii_case("padding", "color"));
-    }
-
-    #[test]
-    fn empty_needle_always_matches() {
-        assert!(contains_ignore_ascii_case("anything", ""));
-        assert!(contains_ignore_ascii_case("", ""));
-    }
-
-    #[test]
-    fn needle_longer_than_haystack() {
-        assert!(!contains_ignore_ascii_case("hi", "hello"));
-        assert!(!contains_ignore_ascii_case("", "color"));
-    }
-
-    #[test]
-    fn non_ascii_is_not_case_folded() {
-        // "É" (U+00C9) and "é" (U+00E9) are two different bytes once
-        // encoded as UTF-8, so they must not be treated as equal.
-        assert!(!contains_ignore_ascii_case("café", "CAFÉ"));
-        assert!(contains_ignore_ascii_case("café", "café"));
-    }
-
-    #[test]
-    fn punctuation_and_digits_must_match_exactly() {
-        assert!(contains_ignore_ascii_case("color-2", "COLOR-2"));
-        assert!(!contains_ignore_ascii_case("color-2", "color_2"));
-    }
-}
