@@ -1,0 +1,70 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: invalidIgnoreMethods.js
+---
+# Input
+```js
+/* should generate diagnostics */
+class IgnoreMethods {
+    foo() {
+        return 1;
+    }
+
+    #bar() {
+        return 2;
+    }
+
+    baz() {
+        return 3;
+    }
+
+    ["foo"]() {
+        return 4;
+    }
+}
+
+```
+
+# Diagnostics
+```
+invalidIgnoreMethods.js:11:5 lint/nursery/useThisInClassMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Expected this to be used by class method baz.
+  
+     9 │     }
+    10 │ 
+  > 11 │     baz() {
+       │     ^^^
+    12 │         return 3;
+    13 │     }
+  
+  i Adding functions as class members can be a convenient way to organize code related to a class, but when those functions do not use instance state, it can be misleading to readers. Consider whether static or a module-level function would better communicate the intent of this code.
+  
+  i If this member does not depend on instance state, make it static or move it outside the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIgnoreMethods.js:15:5 lint/nursery/useThisInClassMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Expected this to be used by class method ["foo"].
+  
+    13 │     }
+    14 │ 
+  > 15 │     ["foo"]() {
+       │     ^^^^^^^
+    16 │         return 4;
+    17 │     }
+  
+  i Adding functions as class members can be a convenient way to organize code related to a class, but when those functions do not use instance state, it can be misleading to readers. Consider whether static or a module-level function would better communicate the intent of this code.
+  
+  i If this member does not depend on instance state, make it static or move it outside the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

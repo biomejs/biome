@@ -1,0 +1,96 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 520
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "linter": { "enabled": true } }
+```
+
+## `.eslintrc.json`
+
+```json
+{
+        "rules": {
+            "class-methods-use-this": ["error", {
+                "exceptMethods": ["render", "#serialize"],
+                "enforceForClassFields": false,
+                "ignoreOverrideMethods": true,
+                "ignoreClassesWithImplements": "public-fields"
+            }]
+        },
+        "overrides": [{
+            "files": ["severity-only.js"],
+            "rules": {
+                "class-methods-use-this": ["warn", {
+                    "enforceForClassFields": true
+                }]
+            }
+        }]
+    }
+```
+
+# Emitted Messages
+
+```block
+biome.json migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1    │ - {·"linter":·{·"enabled":·true·}·}
+       1 │ + {
+       2 │ + → "linter":·{
+       3 │ + → → "enabled":·true,
+       4 │ + → → "rules":·{
+       5 │ + → → → "recommended":·false,
+       6 │ + → → → "nursery":·{
+       7 │ + → → → → "useThisInClassMethods":·{
+       8 │ + → → → → → "level":·"error",
+       9 │ + → → → → → "options":·{
+      10 │ + → → → → → → "ignoreMethods":·["render",·"#serialize"],
+      11 │ + → → → → → → "ignoreOverrideMethods":·true,
+      12 │ + → → → → → → "ignoreClassesWithImplements":·"public-fields"
+      13 │ + → → → → → }
+      14 │ + → → → → }
+      15 │ + → → → }
+      16 │ + → → }
+      17 │ + → },
+      18 │ + → "overrides":·[
+      19 │ + → → {
+      20 │ + → → → "includes":·["severity-only.js"],
+      21 │ + → → → "linter":·{·"rules":·{·"nursery":·{·"useThisInClassMethods":·"warn"·}·}·}
+      22 │ + → → }
+      23 │ + → ]
+      24 │ + }
+      25 │ + 
+  
+
+```
+
+```block
+migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 1 ESLint rules found
+    - 1 can be migrated to Biome's rules (run with --write to migrate)
+    - 100% (1) of your ESLint rules are fully covered by Biome
+      - 100% (1) via direct migration to Biome rules
+  
+  
+
+```
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - biome.json: configuration needs migration.
+  
+  i Use --write to apply the changes.
+  
+  $ biome migrate --write
+  
+
+```

@@ -2652,6 +2652,11 @@ See https://biomejs.dev/linter/rules/use-test-hooks-on-top
 	 */
 	useTestHooksOnTop?: UseTestHooksOnTopConfiguration;
 	/**
+	* Enforce that class methods utilize this.
+See https://biomejs.dev/linter/rules/use-this-in-class-methods 
+	 */
+	useThisInClassMethods?: UseThisInClassMethodsConfiguration;
+	/**
 	* Enforce the use of the u or v flag for regular expressions.
 See https://biomejs.dev/linter/rules/use-unicode-regex 
 	 */
@@ -4635,6 +4640,9 @@ export type UseStringStartsEndsWithConfiguration =
 export type UseTestHooksOnTopConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTestHooksOnTopOptions;
+export type UseThisInClassMethodsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseThisInClassMethodsOptions;
 export type UseUnicodeRegexConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUnicodeRegexOptions;
@@ -6538,6 +6546,10 @@ export interface RuleWithUseTestHooksOnTopOptions {
 	level: RulePlainConfiguration;
 	options?: UseTestHooksOnTopOptions;
 }
+export interface RuleWithUseThisInClassMethodsOptions {
+	level: RulePlainConfiguration;
+	options?: UseThisInClassMethodsOptions;
+}
 export interface RuleWithUseUnicodeRegexOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -8200,6 +8212,31 @@ export interface UseSortedClassesOptions {
 export type UseSpreadOptions = {};
 export type UseStringStartsEndsWithOptions = {};
 export type UseTestHooksOnTopOptions = {};
+/**
+ * Options for the `useThisInClassMethods` rule.
+ */
+export interface UseThisInClassMethodsOptions {
+	/**
+	* Whether members of classes with an `implements` clause should be ignored.
+
+Defaults to `"none"`, which means implemented classes are checked like any other class.
+Use `"all"` to ignore every eligible member in such classes, or `"public-fields"`
+to ignore only public members in them. 
+	 */
+	ignoreClassesWithImplements?: IgnoreClassesWithImplements;
+	/**
+	* Method names that should be ignored by the rule.
+
+Defaults to `[]`. 
+	 */
+	ignoreMethods?: string[];
+	/**
+	* Whether methods marked with `override` should be ignored.
+
+Defaults to `false`. 
+	 */
+	ignoreOverrideMethods?: boolean;
+}
 export type UseUnicodeRegexOptions = {};
 export type UseVarsOnTopOptions = {};
 export interface UseVueConsistentDefinePropsDeclarationOptions {
@@ -8705,6 +8742,10 @@ export type MethodSignatureStyle = "property" | "method";
  */
 export type TestFunctionKind = "it" | "test";
 export type CheckInputType = "off" | "loose" | "strict";
+/**
+ * Controls how `useThisInClassMethods` treats classes that implement interfaces.
+ */
+export type IgnoreClassesWithImplements = "none" | "all" | "public-fields";
 export type DeclarationStyle = "type" | "runtime";
 export type VueDirectiveStyle = "shorthand" | "longhand";
 export type VueDirectiveStyle2 = "shorthand" | "longhand";
@@ -9223,6 +9264,7 @@ export type Category =
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useStringStartsEndsWith"
 	| "lint/nursery/useTestHooksOnTop"
+	| "lint/nursery/useThisInClassMethods"
 	| "lint/nursery/useUnicodeRegex"
 	| "lint/nursery/useUniqueArgumentNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"

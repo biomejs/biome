@@ -2087,6 +2087,26 @@
 			},
 			"additionalProperties": false
 		},
+		"IgnoreClassesWithImplements": {
+			"description": "Controls how `useThisInClassMethods` treats classes that implement interfaces.",
+			"oneOf": [
+				{
+					"description": "Check members in classes that implement interfaces the same way as any other class.",
+					"type": "string",
+					"const": "none"
+				},
+				{
+					"description": "Ignore every eligible instance member in classes that implement at least one interface.",
+					"type": "string",
+					"const": "all"
+				},
+				{
+					"description": "Ignore only public eligible members in classes that implement at least one interface.\n\nProtected and private members in those classes are still checked.",
+					"type": "string",
+					"const": "public-fields"
+				}
+			]
+		},
 		"ImportGroup": {
 			"anyOf": [
 				{ "type": "null" },
@@ -6959,6 +6979,13 @@
 					"description": "Enforce that lifecycle hooks appear before any test cases in the same block.\nSee https://biomejs.dev/linter/rules/use-test-hooks-on-top",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseTestHooksOnTopConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useThisInClassMethods": {
+					"description": "Enforce that class methods utilize this.\nSee https://biomejs.dev/linter/rules/use-this-in-class-methods",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseThisInClassMethodsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -12005,6 +12032,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseThisInClassMethodsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseThisInClassMethodsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseThrowNewErrorOptions": {
 			"type": "object",
 			"properties": {
@@ -15631,6 +15667,35 @@
 		},
 		"UseTestHooksOnTopOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseThisInClassMethodsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseThisInClassMethodsOptions" }
+			]
+		},
+		"UseThisInClassMethodsOptions": {
+			"description": "Options for the `useThisInClassMethods` rule.",
+			"type": "object",
+			"properties": {
+				"ignoreClassesWithImplements": {
+					"description": "Whether members of classes with an `implements` clause should be ignored.\n\nDefaults to `\"none\"`, which means implemented classes are checked like any other class.\nUse `\"all\"` to ignore every eligible member in such classes, or `\"public-fields\"`\nto ignore only public members in them.",
+					"anyOf": [
+						{ "$ref": "#/$defs/IgnoreClassesWithImplements" },
+						{ "type": "null" }
+					]
+				},
+				"ignoreMethods": {
+					"description": "Method names that should be ignored by the rule.\n\nDefaults to `[]`.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"ignoreOverrideMethods": {
+					"description": "Whether methods marked with `override` should be ignored.\n\nDefaults to `false`.",
+					"type": ["boolean", "null"]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseThrowNewErrorConfiguration": {
