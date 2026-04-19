@@ -1521,6 +1521,22 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
+        "ime-safe-form/require-ime-safe-submit" => {
+            if !options.include_inspired {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
+                return false;
+            }
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_composing_enter_key
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
         "import-access/eslint-plugin-import-access" => {
             let group = rules.correctness.get_or_insert_with(Default::default);
             let rule = group

@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: validCheckKeyCodeFalse.jsx
+---
+# Input
+```jsx
+// should not generate diagnostics
+
+const keyDown = <input onKeyDown={(e) => {
+    if (e.isComposing) {
+        return;
+    }
+
+    if (e.key === "Enter") {
+        submitForm();
+    }
+}} />;
+
+const keyUp = <input onKeyUp={(e) => {
+    if (e.isComposing) {
+        return;
+    }
+
+    if (e.key === "Enter") {
+        submitForm();
+    }
+}} />;
+
+```

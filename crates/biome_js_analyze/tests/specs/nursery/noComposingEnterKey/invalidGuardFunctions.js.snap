@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: invalidGuardFunctions.js
+---
+# Input
+```js
+input.addEventListener("keydown", (e) => {
+    if (guardIsComposing(e)) {
+        return;
+    }
+
+    if (e.key === "Enter") {
+        submit();
+    }
+});
+
+```
+
+# Diagnostics
+```
+invalidGuardFunctions.js:1:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in keydown without an IME composition guard.
+  
+   > 1 │ input.addEventListener("keydown", (e) => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 2 │     if (guardIsComposing(e)) {
+   > 3 │         return;
+   > 4 │     }
+   > 5 │ 
+   > 6 │     if (e.key === "Enter") {
+   > 7 │         submit();
+   > 8 │     }
+   > 9 │ });
+       │ ^^
+    10 │ 
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,133 @@
+// should not generate diagnostics
+
+form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    send();
+});
+
+input.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+        close();
+    }
+});
+
+input.addEventListener("keyup", (e) => {
+    if (e.key === "Escape") {
+        close();
+    }
+});
+
+input.addEventListener("keydown", (e) => {
+    switch (e.key) {
+        case "Escape":
+            close();
+            break;
+    }
+});
+
+btn.addEventListener("click", () => submit());
+
+input.addEventListener("keydown", (e) => {
+    if (e.isComposing || e.keyCode === 229) {
+        return;
+    }
+
+    if (e.key === "Enter") {
+        submit();
+    }
+});
+
+input.onkeydown = (e) => {
+    if (e.isComposing || e.keyCode === 229) {
+        return;
+    }
+
+    if (e.key === "Enter") {
+        submit();
+    }
+};
+
+input.addEventListener("keydown", (e) => {
+    setTimeout(() => {
+        if (e.key === "Enter") {
+            submit();
+        }
+    }, 0);
+});
+
+input.addEventListener("keydown", handleKeydown);
+input.addEventListener("keyup", handleKeyup);
+input.addEventListener("keypress", handleKeypress);
+input.onkeydown = handleKeydown;
+
+input.addEventListener("keydown", ({ key }) => {
+    if (key === "Enter") {
+        submit();
+    }
+});
+
+window.onkeydown = (e) => {
+    if (e.key === "Escape") {
+        close();
+    }
+};
+
+input.addEventListener("keypress", (e) => {
+    if (e.key === "Escape") {
+        close();
+    }
+});
+
+input.addEventListener("keyup", (e) => {
+    if (e.isComposing || e.keyCode === 229) {
+        return;
+    }
+
+    if (e.key === "Enter") {
+        submit();
+    }
+});
+
+input.onkeyup = (e) => {
+    if (e.isComposing || e.keyCode === 229) {
+        return;
+    }
+
+    if (e.key === "Enter") {
+        submit();
+    }
+};
+
+input.addEventListener("keydown", (e) => {
+    if (e.isComposing) {
+        return;
+    }
+
+    if (e.keyCode === 229) {
+        return;
+    }
+
+    if (e.key === "Enter") {
+        submit();
+    }
+});
+
+input.addEventListener("keydown", (e) => {
+    if (e.isComposing || 229 === e.keyCode) {
+        return;
+    }
+
+    if (e.key === "Enter") {
+        submit();
+    }
+});
+
+input.addEventListener("keydown", (e) => {
+    if (e.isComposing) {
+        return;
+    }
+
+    if (e.key === "Escape") {
+        close();
+    }
+});

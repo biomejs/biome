@@ -2053,6 +2053,11 @@ See https://biomejs.dev/linter/rules/no-component-hook-factories
 	 */
 	noComponentHookFactories?: NoComponentHookFactoriesConfiguration;
 	/**
+	* Enforce IME-safe Enter handling in keyboard event callbacks.
+See https://biomejs.dev/linter/rules/no-composing-enter-key 
+	 */
+	noComposingEnterKey?: NoComposingEnterKeyConfiguration;
+	/**
 	* Disallow conditional expect() calls inside tests.
 See https://biomejs.dev/linter/rules/no-conditional-expect 
 	 */
@@ -4228,6 +4233,9 @@ export type NoBeforeInteractiveScriptOutsideDocumentConfiguration =
 export type NoComponentHookFactoriesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoComponentHookFactoriesOptions;
+export type NoComposingEnterKeyConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoComposingEnterKeyOptions;
 export type NoConditionalExpectConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoConditionalExpectOptions;
@@ -5951,6 +5959,10 @@ export interface RuleWithNoBeforeInteractiveScriptOutsideDocumentOptions {
 export interface RuleWithNoComponentHookFactoriesOptions {
 	level: RulePlainConfiguration;
 	options?: NoComponentHookFactoriesOptions;
+}
+export interface RuleWithNoComposingEnterKeyOptions {
+	level: RulePlainConfiguration;
+	options?: NoComposingEnterKeyOptions;
 }
 export interface RuleWithNoConditionalExpectOptions {
 	level: RulePlainConfiguration;
@@ -7702,6 +7714,10 @@ export interface NoAmbiguousAnchorTextOptions {
 }
 export type NoBeforeInteractiveScriptOutsideDocumentOptions = {};
 export type NoComponentHookFactoriesOptions = {};
+export interface NoComposingEnterKeyOptions {
+	checkKeyCodeForSafari?: boolean;
+	guardFunctions?: string[];
+}
 export type NoConditionalExpectOptions = {};
 export type NoContinueOptions = {};
 export interface NoDeprecatedMediaTypeOptions {
@@ -9020,6 +9036,7 @@ export type Category =
 	| "lint/nursery/useFind"
 	| "lint/nursery/useGlobalThis"
 	| "lint/nursery/useIframeSandbox"
+	| "lint/nursery/noComposingEnterKey"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useImportsFirst"
 	| "lint/nursery/useInlineScriptId"

@@ -388,6 +388,8 @@ pub type UseHookAtTopLevel =
 pub type UseHtmlLang = <lint::a11y::use_html_lang::UseHtmlLang as biome_analyze::Rule>::Options;
 pub type UseIframeTitle =
     <lint::a11y::use_iframe_title::UseIframeTitle as biome_analyze::Rule>::Options;
+pub type NoComposingEnterKey =
+    <lint::nursery::no_composing_enter_key::NoComposingEnterKey as biome_analyze::Rule>::Options;
 pub type UseImportExtensions =
     <lint::correctness::use_import_extensions::UseImportExtensions as biome_analyze::Rule>::Options;
 pub type UseImportType =

@@ -2912,6 +2912,24 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoComposingEnterKeyConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoComposingEnterKeyOptions" }
+			]
+		},
+		"NoComposingEnterKeyOptions": {
+			"type": "object",
+			"properties": {
+				"checkKeyCodeForSafari": { "type": "boolean", "default": true },
+				"guardFunctions": {
+					"type": "array",
+					"default": [],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoConditionalExpectConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6028,6 +6046,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noComposingEnterKey": {
+					"description": "Enforce IME-safe Enter handling in keyboard event callbacks.\nSee https://biomejs.dev/linter/rules/no-composing-enter-key",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoComposingEnterKeyConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noConditionalExpect": {
 					"description": "Disallow conditional expect() calls inside tests.\nSee https://biomejs.dev/linter/rules/no-conditional-expect",
 					"anyOf": [
@@ -7763,6 +7788,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoComponentHookFactoriesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoComposingEnterKeyOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoComposingEnterKeyOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

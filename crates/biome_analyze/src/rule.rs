@@ -118,6 +118,8 @@ pub enum RuleSource<'a> {
     EslintImport(&'a str),
     /// Rules from [Eslint Plugin Import Access](https://github.com/uhyo/eslint-plugin-import-access)
     EslintImportAccess(&'a str),
+    /// Rules from [eslint-plugin-ime-safe-form](https://github.com/hiroya-uga/eslint-plugin-ime-safe-form)
+    EslintImeSafeForm(&'a str),
     /// Rules from [Eslint Plugin Jest](https://github.com/jest-community/eslint-plugin-jest)
     EslintJest(&'a str),
     /// Rules from [Eslint Plugin JSDOc](https://github.com/gajus/eslint-plugin-jsdoc)
@@ -216,6 +218,7 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::EslintGraphql(_) => write!(f, "GraphQL-ESLint"),
             Self::EslintImport(_) => write!(f, "eslint-plugin-import"),
             Self::EslintImportAccess(_) => write!(f, "eslint-plugin-import-access"),
+            Self::EslintImeSafeForm(_) => write!(f, "eslint-plugin-ime-safe-form"),
             Self::EslintJest(_) => write!(f, "eslint-plugin-jest"),
             Self::EslintJsDoc(_) => write!(f, "eslint-plugin-jsdoc"),
             Self::EslintJsxA11y(_) => write!(f, "eslint-plugin-jsx-a11y"),
@@ -304,6 +307,7 @@ impl<'a> RuleSource<'a> {
             | Self::EslintGraphql(rule_name)
             | Self::EslintImport(rule_name)
             | Self::EslintImportAccess(rule_name)
+            | Self::EslintImeSafeForm(rule_name)
             | Self::EslintJest(rule_name)
             | Self::EslintJsDoc(rule_name)
             | Self::EslintJsxA11y(rule_name)
@@ -360,6 +364,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintGraphql(_) => "@graphql-eslint",
             Self::EslintImport(_) => "import",
             Self::EslintImportAccess(_) => "import-access",
+            Self::EslintImeSafeForm(_) => "ime-safe-form",
             Self::EslintJest(_) => "jest",
             Self::EslintJsDoc(_) => "jsdoc",
             Self::EslintJsxA11y(_) => "jsx-a11y",
@@ -424,6 +429,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintGraphql(rule_name) => format!("https://the-guild.dev/graphql/eslint/rules/{rule_name}"),
             Self::EslintImport(rule_name) => format!("https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintImportAccess(_) => "https://github.com/uhyo/eslint-plugin-import-access".to_string(),
+            Self::EslintImeSafeForm(rule_name) => format!("https://github.com/hiroya-uga/eslint-plugin-ime-safe-form/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintJest(rule_name) => format!("https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintJsDoc(rule_name) => format!("https://github.com/gajus/eslint-plugin-jsdoc/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintJsxA11y(rule_name) => format!("https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/{rule_name}.md"),

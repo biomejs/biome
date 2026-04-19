@@ -275,6 +275,7 @@ define_categories! {
     "lint/nursery/useFind": "https://biomejs.dev/linter/rules/use-find",
     "lint/nursery/useGlobalThis": "https://biomejs.dev/linter/rules/use-global-this",
     "lint/nursery/useIframeSandbox": "https://biomejs.dev/linter/rules/use-iframe-sandbox",
+    "lint/nursery/noComposingEnterKey": "https://biomejs.dev/linter/rules/no-composing-enter-key",
     "lint/nursery/useImportRestrictions": "https://biomejs.dev/linter/rules/use-import-restrictions",
     "lint/nursery/useImportsFirst": "https://biomejs.dev/linter/rules/use-imports-first",
     "lint/nursery/useInlineScriptId": "https://biomejs.dev/linter/rules/use-inline-script-id",

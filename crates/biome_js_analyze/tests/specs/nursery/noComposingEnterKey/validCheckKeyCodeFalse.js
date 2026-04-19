@@ -1,0 +1,147 @@
+// should not generate diagnostics
+
+input.addEventListener("keydown", (e) => {
+    if (e.isComposing) {
+        return;
+    }
+
+    if (e.key === "Enter") {
+        submit();
+    }
+});
+
+input.addEventListener("keyup", (e) => {
+    if (e.isComposing) {
+        return;
+    }
+
+    if (e.key === "Enter") {
+        submit();
+    }
+});
+
+input.onkeydown = (e) => {
+    if (e.isComposing) {
+        return;
+    }
+
+    if (e.key === "Enter") {
+        submit();
+    }
+};
+
+input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+        if (e.isComposing) {
+            return;
+        }
+
+        submit();
+    }
+});
+
+input.addEventListener("keydown", (e) => {
+    if (!e.isComposing && e.key === "Enter") {
+        submit();
+    }
+});
+
+input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.isComposing) {
+        submit();
+    }
+});
+
+input.addEventListener("keydown", (e) => {
+    if (!e.isComposing) {
+        if (e.key === "Enter") {
+            submit();
+        }
+    }
+});
+
+input.addEventListener("keydown", (e) => {
+    if (e.isComposing) {
+        return;
+    }
+
+    switch (e.key) {
+        case "Enter":
+            submit();
+            break;
+    }
+});
+
+input.onkeyup = (e) => {
+    if (e.isComposing) {
+        return;
+    }
+
+    if (e.key === "Enter") {
+        submit();
+    }
+};
+
+input.addEventListener("keydown", (e) => {
+    if (e.isComposing) {
+        return;
+    }
+
+    if (e.keyCode === 13) {
+        submit();
+    }
+});
+
+input.addEventListener("keydown", (e) => {
+    if (e.isComposing) {
+        return;
+    }
+
+    if (e.which == 13) {
+        submit();
+    }
+});
+
+input.addEventListener("keydown", (e) => {
+    if (e.isComposing) {
+        console.log("composing");
+    }
+
+    if (e.key === "Enter") {
+        submit();
+    }
+});
+
+input.addEventListener("keydown", (e) => {
+    if (e.isComposing) {
+        return;
+    }
+
+    if (e.key !== "Enter") {
+        return;
+    }
+
+    submit();
+});
+
+input.addEventListener("keydown", (e) => {
+    if (e.isComposing) {
+        return;
+    }
+
+    if (e.keyCode != 13) {
+        return;
+    }
+
+    submit();
+});
+
+window.addEventListener("keydown", (e) => {
+    if (e.isComposing) {
+        return;
+    }
+
+    if (e.key === "Enter") {
+        submit();
+    }
+});

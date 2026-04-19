@@ -1,0 +1,1771 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: invalid.js
+---
+# Input
+```js
+input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+        submit();
+    }
+});
+
+input.addEventListener("keyup", (e) => {
+    if (e.key === "Enter") {
+        submit();
+    }
+});
+
+el.addEventListener("keydown", (e) => {
+    if ("Enter" === e.key) {
+        go();
+    }
+});
+
+input.addEventListener("keydown", (e) => {
+    if (e.code === "Enter") {
+        submit();
+    }
+});
+
+input.addEventListener("keydown", (e) => {
+    if (e.keyCode === 13) {
+        submit();
+    }
+});
+
+input.addEventListener("keydown", function (e) {
+    if (e.which == 13) {
+        send();
+    }
+});
+
+input.addEventListener("keyup", function (e) {
+    if (e.key === "Enter") {
+        submit();
+    }
+});
+
+input.addEventListener("keydown", async (e) => {
+    if (e.key === "Enter") {
+        await submit();
+    }
+});
+
+el.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+        go();
+    }
+});
+
+input.addEventListener("keydown", (e) => {
+    e.key === "Enter" ? submit() : null;
+});
+
+input.addEventListener("keydown", (e) => {
+    if (e.key == "Enter") {
+        submit();
+    }
+});
+
+input.addEventListener("keydown", (e) => {
+    const composing = e.isComposing;
+    if (e.key === "Enter") {
+        submit();
+    }
+});
+
+input.addEventListener("keydown", (e) => {
+    switch (e.key) {
+        case "Enter":
+            submit();
+            break;
+    }
+});
+
+input.addEventListener("keydown", (e) => {
+    switch (e.code) {
+        case "Enter":
+            submit();
+            break;
+    }
+});
+
+input.addEventListener("keydown", (e) => {
+    switch (e.keyCode) {
+        case 13:
+            submit();
+            break;
+    }
+});
+
+input.addEventListener("keydown", (e) => {
+    switch (e.which) {
+        case 13:
+            submit();
+            break;
+    }
+});
+
+input.onkeydown = (e) => {
+    if (e.key === "Enter") {
+        submit();
+    }
+};
+
+input.onkeydown = function (e) {
+    if (e.key === "Enter") {
+        submit();
+    }
+};
+
+input.onkeydown = (e) => {
+    if (e.code === "Enter") {
+        submit();
+    }
+};
+
+input.onkeydown = (e) => {
+    switch (e.key) {
+        case "Enter":
+            submit();
+            break;
+    }
+};
+
+input.onkeyup = (e) => {
+    if (e.key === "Enter") {
+        submit();
+    }
+};
+
+input.onkeyup = (e) => {
+    if (e.code === "Enter") {
+        submit();
+    }
+};
+
+window.onkeydown = (e) => {
+    if (e.key === "Enter") {
+        submit();
+    }
+};
+
+input.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+        submit();
+    }
+});
+
+input.addEventListener("keypress", (e) => {
+    if (e.keyCode === 13) {
+        submit();
+    }
+});
+
+input.addEventListener("keypress", (e) => {
+    if (e.isComposing) {
+        return;
+    }
+
+    if (e.key === "Enter") {
+        submit();
+    }
+});
+
+input.addEventListener("keydown", (e) => e.key === "Enter" && submit());
+input.addEventListener("keypress", (e) => e.key === "Enter" && submit());
+
+input.onkeyup = (e) => {
+    switch (e.key) {
+        case "Enter":
+            submit();
+            break;
+    }
+};
+
+input.onkeydown = (e) => {
+    if (e.keyCode === 13) {
+        submit();
+    }
+};
+
+input.onkeydown = (e) => {
+    if (e.which == 13) {
+        submit();
+    }
+};
+
+input.onkeyup = (e) => {
+    if (e.keyCode === 13) {
+        submit();
+    }
+};
+
+input.onkeyup = (e) => {
+    if (e.which == 13) {
+        submit();
+    }
+};
+
+input.onkeypress = (e) => {
+    if (e.code === "Enter") {
+        submit();
+    }
+};
+
+input.onkeypress = (e) => {
+    if (e.keyCode === 13) {
+        submit();
+    }
+};
+
+input.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") {
+        return;
+    }
+
+    submit();
+});
+
+input.addEventListener("keydown", (e) => {
+    if (e.keyCode != 13) {
+        return;
+    }
+
+    submit();
+});
+
+input.addEventListener("keyup", (e) => {
+    if (e.key !== "Enter") {
+        return;
+    }
+
+    submit();
+});
+
+input.addEventListener("keypress", (e) => {
+    if (e.key !== "Enter") {
+        return;
+    }
+
+    submit();
+});
+
+input.onkeydown = (e) => {
+    if (e.key !== "Enter") {
+        return;
+    }
+
+    submit();
+};
+
+input.onkeyup = (e) => {
+    if (e.key !== "Enter") {
+        return;
+    }
+
+    submit();
+};
+
+input.addEventListener("keydown", (e) => {
+    e.isComposing ? null : (e.key === "Enter" && submit());
+});
+
+input.onkeypress = (e) => {
+    if (e.isComposing) {
+        return;
+    }
+
+    if (e.key === "Enter") {
+        submit();
+    }
+};
+
+input.addEventListener("keypress", (e) => {
+    switch (e.key) {
+        case "Enter":
+            submit();
+            break;
+    }
+});
+
+input.addEventListener("keypress", (e) => {
+    switch (e.code) {
+        case "Enter":
+            submit();
+            break;
+    }
+});
+
+input.addEventListener("keypress", (e) => {
+    switch (e.keyCode) {
+        case 13:
+            submit();
+            break;
+    }
+});
+
+input.addEventListener("keypress", (e) => {
+    switch (e.which) {
+        case 13:
+            submit();
+            break;
+    }
+});
+
+input.onkeypress = (e) => {
+    switch (e.key) {
+        case "Enter":
+            submit();
+            break;
+    }
+};
+
+input.onkeypress = (e) => {
+    switch (e.keyCode) {
+        case 13:
+            submit();
+            break;
+    }
+};
+
+input.addEventListener("keyup", (e) => {
+    switch (e.code) {
+        case "Enter":
+            submit();
+            break;
+    }
+});
+
+input.onkeyup = (e) => {
+    switch (e.code) {
+        case "Enter":
+            submit();
+            break;
+    }
+};
+
+input.onkeydown = (e) => e.key === "Enter" && submit();
+input.onkeyup = (e) => e.key === "Enter" && submit();
+input.onkeypress = (e) => e.key === "Enter" && submit();
+
+input.addEventListener("keydown", (e) => {
+    if (e.isComposing) {
+        return;
+    }
+
+    if (e.key === "Enter") {
+        submit();
+    }
+});
+
+input.addEventListener("keyup", (e) => {
+    if (e.isComposing) {
+        return;
+    }
+
+    if (e.key === "Enter") {
+        submit();
+    }
+});
+
+input.onkeydown = (e) => {
+    if (e.isComposing) {
+        return;
+    }
+
+    if (e.key === "Enter") {
+        submit();
+    }
+};
+
+input.addEventListener("keydown", (e) => {
+    if (e.isComposing) {
+        return;
+    }
+
+    switch (e.key) {
+        case "Enter":
+            submit();
+            break;
+    }
+});
+
+input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+        submit();
+    }
+});
+
+window.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+        submit();
+    }
+});
+
+window.addEventListener("keyup", (e) => {
+    if (e.key === "Enter") {
+        submit();
+    }
+});
+
+window.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+        submit();
+    }
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in keydown without an IME composition guard.
+  
+  > 1 │ input.addEventListener("keydown", (e) => {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 2 │     if (e.key === "Enter") {
+  > 3 │         submit();
+  > 4 │     }
+  > 5 │ });
+      │ ^^
+    6 │ 
+    7 │ input.addEventListener("keyup", (e) => {
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in keyup without an IME composition guard.
+  
+     5 │ });
+     6 │ 
+   > 7 │ input.addEventListener("keyup", (e) => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 8 │     if (e.key === "Enter") {
+   > 9 │         submit();
+  > 10 │     }
+  > 11 │ });
+       │ ^^
+    12 │ 
+    13 │ el.addEventListener("keydown", (e) => {
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in keydown without an IME composition guard.
+  
+    11 │ });
+    12 │ 
+  > 13 │ el.addEventListener("keydown", (e) => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 14 │     if ("Enter" === e.key) {
+  > 15 │         go();
+  > 16 │     }
+  > 17 │ });
+       │ ^^
+    18 │ 
+    19 │ input.addEventListener("keydown", (e) => {
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in keydown without an IME composition guard.
+  
+    17 │ });
+    18 │ 
+  > 19 │ input.addEventListener("keydown", (e) => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 20 │     if (e.code === "Enter") {
+  > 21 │         submit();
+  > 22 │     }
+  > 23 │ });
+       │ ^^
+    24 │ 
+    25 │ input.addEventListener("keydown", (e) => {
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in keydown without an IME composition guard.
+  
+    23 │ });
+    24 │ 
+  > 25 │ input.addEventListener("keydown", (e) => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 26 │     if (e.keyCode === 13) {
+  > 27 │         submit();
+  > 28 │     }
+  > 29 │ });
+       │ ^^
+    30 │ 
+    31 │ input.addEventListener("keydown", function (e) {
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in keydown without an IME composition guard.
+  
+    29 │ });
+    30 │ 
+  > 31 │ input.addEventListener("keydown", function (e) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 32 │     if (e.which == 13) {
+  > 33 │         send();
+  > 34 │     }
+  > 35 │ });
+       │ ^^
+    36 │ 
+    37 │ input.addEventListener("keyup", function (e) {
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:37:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in keyup without an IME composition guard.
+  
+    35 │ });
+    36 │ 
+  > 37 │ input.addEventListener("keyup", function (e) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 38 │     if (e.key === "Enter") {
+  > 39 │         submit();
+  > 40 │     }
+  > 41 │ });
+       │ ^^
+    42 │ 
+    43 │ input.addEventListener("keydown", async (e) => {
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:43:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in keydown without an IME composition guard.
+  
+    41 │ });
+    42 │ 
+  > 43 │ input.addEventListener("keydown", async (e) => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 44 │     if (e.key === "Enter") {
+  > 45 │         await submit();
+  > 46 │     }
+  > 47 │ });
+       │ ^^
+    48 │ 
+    49 │ el.addEventListener("keydown", (e) => {
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:49:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in keydown without an IME composition guard.
+  
+    47 │ });
+    48 │ 
+  > 49 │ el.addEventListener("keydown", (e) => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 50 │     if (e.key === "Enter" && !e.shiftKey) {
+  > 51 │         go();
+  > 52 │     }
+  > 53 │ });
+       │ ^^
+    54 │ 
+    55 │ input.addEventListener("keydown", (e) => {
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:55:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in keydown without an IME composition guard.
+  
+    53 │ });
+    54 │ 
+  > 55 │ input.addEventListener("keydown", (e) => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 56 │     e.key === "Enter" ? submit() : null;
+  > 57 │ });
+       │ ^^
+    58 │ 
+    59 │ input.addEventListener("keydown", (e) => {
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:59:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in keydown without an IME composition guard.
+  
+    57 │ });
+    58 │ 
+  > 59 │ input.addEventListener("keydown", (e) => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 60 │     if (e.key == "Enter") {
+  > 61 │         submit();
+  > 62 │     }
+  > 63 │ });
+       │ ^^
+    64 │ 
+    65 │ input.addEventListener("keydown", (e) => {
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:65:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in keydown without an IME composition guard.
+  
+    63 │ });
+    64 │ 
+  > 65 │ input.addEventListener("keydown", (e) => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 66 │     const composing = e.isComposing;
+  > 67 │     if (e.key === "Enter") {
+  > 68 │         submit();
+  > 69 │     }
+  > 70 │ });
+       │ ^^
+    71 │ 
+    72 │ input.addEventListener("keydown", (e) => {
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:72:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in keydown without an IME composition guard.
+  
+    70 │ });
+    71 │ 
+  > 72 │ input.addEventListener("keydown", (e) => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 73 │     switch (e.key) {
+        ...
+  > 77 │     }
+  > 78 │ });
+       │ ^^
+    79 │ 
+    80 │ input.addEventListener("keydown", (e) => {
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:80:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in keydown without an IME composition guard.
+  
+    78 │ });
+    79 │ 
+  > 80 │ input.addEventListener("keydown", (e) => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 81 │     switch (e.code) {
+        ...
+  > 85 │     }
+  > 86 │ });
+       │ ^^
+    87 │ 
+    88 │ input.addEventListener("keydown", (e) => {
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:88:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in keydown without an IME composition guard.
+  
+    86 │ });
+    87 │ 
+  > 88 │ input.addEventListener("keydown", (e) => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 89 │     switch (e.keyCode) {
+        ...
+  > 93 │     }
+  > 94 │ });
+       │ ^^
+    95 │ 
+    96 │ input.addEventListener("keydown", (e) => {
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:96:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in keydown without an IME composition guard.
+  
+     94 │ });
+     95 │ 
+   > 96 │ input.addEventListener("keydown", (e) => {
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 97 │     switch (e.which) {
+         ...
+  > 101 │     }
+  > 102 │ });
+        │ ^^
+    103 │ 
+    104 │ input.onkeydown = (e) => {
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:104:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in onkeydown without an IME composition guard.
+  
+    102 │ });
+    103 │ 
+  > 104 │ input.onkeydown = (e) => {
+        │ ^^^^^^^^^^^^^^^
+    105 │     if (e.key === "Enter") {
+    106 │         submit();
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:110:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in onkeydown without an IME composition guard.
+  
+    108 │ };
+    109 │ 
+  > 110 │ input.onkeydown = function (e) {
+        │ ^^^^^^^^^^^^^^^
+    111 │     if (e.key === "Enter") {
+    112 │         submit();
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:116:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in onkeydown without an IME composition guard.
+  
+    114 │ };
+    115 │ 
+  > 116 │ input.onkeydown = (e) => {
+        │ ^^^^^^^^^^^^^^^
+    117 │     if (e.code === "Enter") {
+    118 │         submit();
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:122:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in onkeydown without an IME composition guard.
+  
+    120 │ };
+    121 │ 
+  > 122 │ input.onkeydown = (e) => {
+        │ ^^^^^^^^^^^^^^^
+    123 │     switch (e.key) {
+    124 │         case "Enter":
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:130:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in onkeyup without an IME composition guard.
+  
+    128 │ };
+    129 │ 
+  > 130 │ input.onkeyup = (e) => {
+        │ ^^^^^^^^^^^^^
+    131 │     if (e.key === "Enter") {
+    132 │         submit();
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:136:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in onkeyup without an IME composition guard.
+  
+    134 │ };
+    135 │ 
+  > 136 │ input.onkeyup = (e) => {
+        │ ^^^^^^^^^^^^^
+    137 │     if (e.code === "Enter") {
+    138 │         submit();
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:142:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in onkeydown without an IME composition guard.
+  
+    140 │ };
+    141 │ 
+  > 142 │ window.onkeydown = (e) => {
+        │ ^^^^^^^^^^^^^^^^
+    143 │     if (e.key === "Enter") {
+    144 │         submit();
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:148:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! keypress is deprecated for Enter handling.
+  
+    146 │ };
+    147 │ 
+  > 148 │ input.addEventListener("keypress", (e) => {
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 149 │     if (e.key === "Enter") {
+  > 150 │         submit();
+  > 151 │     }
+  > 152 │ });
+        │ ^^
+    153 │ 
+    154 │ input.addEventListener("keypress", (e) => {
+  
+  i Use keydown with an IME guard instead, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:154:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! keypress is deprecated for Enter handling.
+  
+    152 │ });
+    153 │ 
+  > 154 │ input.addEventListener("keypress", (e) => {
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 155 │     if (e.keyCode === 13) {
+  > 156 │         submit();
+  > 157 │     }
+  > 158 │ });
+        │ ^^
+    159 │ 
+    160 │ input.addEventListener("keypress", (e) => {
+  
+  i Use keydown with an IME guard instead, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:160:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! keypress is deprecated for Enter handling.
+  
+    158 │ });
+    159 │ 
+  > 160 │ input.addEventListener("keypress", (e) => {
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 161 │     if (e.isComposing) {
+         ...
+  > 167 │     }
+  > 168 │ });
+        │ ^^
+    169 │ 
+    170 │ input.addEventListener("keydown", (e) => e.key === "Enter" && submit());
+  
+  i Use keydown with an IME guard instead, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:170:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in keydown without an IME composition guard.
+  
+    168 │ });
+    169 │ 
+  > 170 │ input.addEventListener("keydown", (e) => e.key === "Enter" && submit());
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    171 │ input.addEventListener("keypress", (e) => e.key === "Enter" && submit());
+    172 │ 
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:171:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! keypress is deprecated for Enter handling.
+  
+    170 │ input.addEventListener("keydown", (e) => e.key === "Enter" && submit());
+  > 171 │ input.addEventListener("keypress", (e) => e.key === "Enter" && submit());
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    172 │ 
+    173 │ input.onkeyup = (e) => {
+  
+  i Use keydown with an IME guard instead, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:173:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in onkeyup without an IME composition guard.
+  
+    171 │ input.addEventListener("keypress", (e) => e.key === "Enter" && submit());
+    172 │ 
+  > 173 │ input.onkeyup = (e) => {
+        │ ^^^^^^^^^^^^^
+    174 │     switch (e.key) {
+    175 │         case "Enter":
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:181:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in onkeydown without an IME composition guard.
+  
+    179 │ };
+    180 │ 
+  > 181 │ input.onkeydown = (e) => {
+        │ ^^^^^^^^^^^^^^^
+    182 │     if (e.keyCode === 13) {
+    183 │         submit();
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:187:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in onkeydown without an IME composition guard.
+  
+    185 │ };
+    186 │ 
+  > 187 │ input.onkeydown = (e) => {
+        │ ^^^^^^^^^^^^^^^
+    188 │     if (e.which == 13) {
+    189 │         submit();
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:193:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in onkeyup without an IME composition guard.
+  
+    191 │ };
+    192 │ 
+  > 193 │ input.onkeyup = (e) => {
+        │ ^^^^^^^^^^^^^
+    194 │     if (e.keyCode === 13) {
+    195 │         submit();
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:199:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in onkeyup without an IME composition guard.
+  
+    197 │ };
+    198 │ 
+  > 199 │ input.onkeyup = (e) => {
+        │ ^^^^^^^^^^^^^
+    200 │     if (e.which == 13) {
+    201 │         submit();
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:205:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! onkeypress is deprecated for Enter handling.
+  
+    203 │ };
+    204 │ 
+  > 205 │ input.onkeypress = (e) => {
+        │ ^^^^^^^^^^^^^^^^
+    206 │     if (e.code === "Enter") {
+    207 │         submit();
+  
+  i Use keydown with an IME guard instead, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:211:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! onkeypress is deprecated for Enter handling.
+  
+    209 │ };
+    210 │ 
+  > 211 │ input.onkeypress = (e) => {
+        │ ^^^^^^^^^^^^^^^^
+    212 │     if (e.keyCode === 13) {
+    213 │         submit();
+  
+  i Use keydown with an IME guard instead, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:217:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in keydown without an IME composition guard.
+  
+    215 │ };
+    216 │ 
+  > 217 │ input.addEventListener("keydown", (e) => {
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 218 │     if (e.key !== "Enter") {
+         ...
+  > 222 │     submit();
+  > 223 │ });
+        │ ^^
+    224 │ 
+    225 │ input.addEventListener("keydown", (e) => {
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:225:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in keydown without an IME composition guard.
+  
+    223 │ });
+    224 │ 
+  > 225 │ input.addEventListener("keydown", (e) => {
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 226 │     if (e.keyCode != 13) {
+         ...
+  > 230 │     submit();
+  > 231 │ });
+        │ ^^
+    232 │ 
+    233 │ input.addEventListener("keyup", (e) => {
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:233:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in keyup without an IME composition guard.
+  
+    231 │ });
+    232 │ 
+  > 233 │ input.addEventListener("keyup", (e) => {
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 234 │     if (e.key !== "Enter") {
+         ...
+  > 238 │     submit();
+  > 239 │ });
+        │ ^^
+    240 │ 
+    241 │ input.addEventListener("keypress", (e) => {
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:241:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! keypress is deprecated for Enter handling.
+  
+    239 │ });
+    240 │ 
+  > 241 │ input.addEventListener("keypress", (e) => {
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 242 │     if (e.key !== "Enter") {
+         ...
+  > 246 │     submit();
+  > 247 │ });
+        │ ^^
+    248 │ 
+    249 │ input.onkeydown = (e) => {
+  
+  i Use keydown with an IME guard instead, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:249:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in onkeydown without an IME composition guard.
+  
+    247 │ });
+    248 │ 
+  > 249 │ input.onkeydown = (e) => {
+        │ ^^^^^^^^^^^^^^^
+    250 │     if (e.key !== "Enter") {
+    251 │         return;
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:257:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in onkeyup without an IME composition guard.
+  
+    255 │ };
+    256 │ 
+  > 257 │ input.onkeyup = (e) => {
+        │ ^^^^^^^^^^^^^
+    258 │     if (e.key !== "Enter") {
+    259 │         return;
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:265:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in keydown without an IME composition guard.
+  
+    263 │ };
+    264 │ 
+  > 265 │ input.addEventListener("keydown", (e) => {
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 266 │     e.isComposing ? null : (e.key === "Enter" && submit());
+  > 267 │ });
+        │ ^^
+    268 │ 
+    269 │ input.onkeypress = (e) => {
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:269:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! onkeypress is deprecated for Enter handling.
+  
+    267 │ });
+    268 │ 
+  > 269 │ input.onkeypress = (e) => {
+        │ ^^^^^^^^^^^^^^^^
+    270 │     if (e.isComposing) {
+    271 │         return;
+  
+  i Use keydown with an IME guard instead, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:279:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! keypress is deprecated for Enter handling.
+  
+    277 │ };
+    278 │ 
+  > 279 │ input.addEventListener("keypress", (e) => {
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 280 │     switch (e.key) {
+         ...
+  > 284 │     }
+  > 285 │ });
+        │ ^^
+    286 │ 
+    287 │ input.addEventListener("keypress", (e) => {
+  
+  i Use keydown with an IME guard instead, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:287:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! keypress is deprecated for Enter handling.
+  
+    285 │ });
+    286 │ 
+  > 287 │ input.addEventListener("keypress", (e) => {
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 288 │     switch (e.code) {
+         ...
+  > 292 │     }
+  > 293 │ });
+        │ ^^
+    294 │ 
+    295 │ input.addEventListener("keypress", (e) => {
+  
+  i Use keydown with an IME guard instead, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:295:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! keypress is deprecated for Enter handling.
+  
+    293 │ });
+    294 │ 
+  > 295 │ input.addEventListener("keypress", (e) => {
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 296 │     switch (e.keyCode) {
+         ...
+  > 300 │     }
+  > 301 │ });
+        │ ^^
+    302 │ 
+    303 │ input.addEventListener("keypress", (e) => {
+  
+  i Use keydown with an IME guard instead, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:303:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! keypress is deprecated for Enter handling.
+  
+    301 │ });
+    302 │ 
+  > 303 │ input.addEventListener("keypress", (e) => {
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 304 │     switch (e.which) {
+         ...
+  > 308 │     }
+  > 309 │ });
+        │ ^^
+    310 │ 
+    311 │ input.onkeypress = (e) => {
+  
+  i Use keydown with an IME guard instead, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:311:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! onkeypress is deprecated for Enter handling.
+  
+    309 │ });
+    310 │ 
+  > 311 │ input.onkeypress = (e) => {
+        │ ^^^^^^^^^^^^^^^^
+    312 │     switch (e.key) {
+    313 │         case "Enter":
+  
+  i Use keydown with an IME guard instead, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:319:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! onkeypress is deprecated for Enter handling.
+  
+    317 │ };
+    318 │ 
+  > 319 │ input.onkeypress = (e) => {
+        │ ^^^^^^^^^^^^^^^^
+    320 │     switch (e.keyCode) {
+    321 │         case 13:
+  
+  i Use keydown with an IME guard instead, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:327:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in keyup without an IME composition guard.
+  
+    325 │ };
+    326 │ 
+  > 327 │ input.addEventListener("keyup", (e) => {
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 328 │     switch (e.code) {
+         ...
+  > 332 │     }
+  > 333 │ });
+        │ ^^
+    334 │ 
+    335 │ input.onkeyup = (e) => {
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:335:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in onkeyup without an IME composition guard.
+  
+    333 │ });
+    334 │ 
+  > 335 │ input.onkeyup = (e) => {
+        │ ^^^^^^^^^^^^^
+    336 │     switch (e.code) {
+    337 │         case "Enter":
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:343:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in onkeydown without an IME composition guard.
+  
+    341 │ };
+    342 │ 
+  > 343 │ input.onkeydown = (e) => e.key === "Enter" && submit();
+        │ ^^^^^^^^^^^^^^^
+    344 │ input.onkeyup = (e) => e.key === "Enter" && submit();
+    345 │ input.onkeypress = (e) => e.key === "Enter" && submit();
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:344:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in onkeyup without an IME composition guard.
+  
+    343 │ input.onkeydown = (e) => e.key === "Enter" && submit();
+  > 344 │ input.onkeyup = (e) => e.key === "Enter" && submit();
+        │ ^^^^^^^^^^^^^
+    345 │ input.onkeypress = (e) => e.key === "Enter" && submit();
+    346 │ 
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:345:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! onkeypress is deprecated for Enter handling.
+  
+    343 │ input.onkeydown = (e) => e.key === "Enter" && submit();
+    344 │ input.onkeyup = (e) => e.key === "Enter" && submit();
+  > 345 │ input.onkeypress = (e) => e.key === "Enter" && submit();
+        │ ^^^^^^^^^^^^^^^^
+    346 │ 
+    347 │ input.addEventListener("keydown", (e) => {
+  
+  i Use keydown with an IME guard instead, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:347:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The IME guard is missing the Safari fallback event.keyCode === 229.
+  
+    345 │ input.onkeypress = (e) => e.key === "Enter" && submit();
+    346 │ 
+  > 347 │ input.addEventListener("keydown", (e) => {
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 348 │     if (e.isComposing) {
+         ...
+  > 354 │     }
+  > 355 │ });
+        │ ^^
+    356 │ 
+    357 │ input.addEventListener("keyup", (e) => {
+  
+  i Safari can dispatch the final keydown after composition ends, so event.isComposing alone can miss IME confirmation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:357:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The IME guard is missing the Safari fallback event.keyCode === 229.
+  
+    355 │ });
+    356 │ 
+  > 357 │ input.addEventListener("keyup", (e) => {
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 358 │     if (e.isComposing) {
+         ...
+  > 364 │     }
+  > 365 │ });
+        │ ^^
+    366 │ 
+    367 │ input.onkeydown = (e) => {
+  
+  i Safari can dispatch the final keydown after composition ends, so event.isComposing alone can miss IME confirmation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:367:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The IME guard is missing the Safari fallback event.keyCode === 229.
+  
+    365 │ });
+    366 │ 
+  > 367 │ input.onkeydown = (e) => {
+        │ ^^^^^^^^^^^^^^^
+    368 │     if (e.isComposing) {
+    369 │         return;
+  
+  i Safari can dispatch the final keydown after composition ends, so event.isComposing alone can miss IME confirmation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:377:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The IME guard is missing the Safari fallback event.keyCode === 229.
+  
+    375 │ };
+    376 │ 
+  > 377 │ input.addEventListener("keydown", (e) => {
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 378 │     if (e.isComposing) {
+         ...
+  > 386 │     }
+  > 387 │ });
+        │ ^^
+    388 │ 
+    389 │ input.addEventListener("keydown", (e) => {
+  
+  i Safari can dispatch the final keydown after composition ends, so event.isComposing alone can miss IME confirmation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:389:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in keydown without an IME composition guard.
+  
+    387 │ });
+    388 │ 
+  > 389 │ input.addEventListener("keydown", (e) => {
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 390 │     if (e.key === "Enter") {
+  > 391 │         submit();
+  > 392 │     }
+  > 393 │ });
+        │ ^^
+    394 │ 
+    395 │ window.addEventListener("keydown", (e) => {
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:395:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in keydown without an IME composition guard.
+  
+    393 │ });
+    394 │ 
+  > 395 │ window.addEventListener("keydown", (e) => {
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 396 │     if (e.key === "Enter") {
+  > 397 │         submit();
+  > 398 │     }
+  > 399 │ });
+        │ ^^
+    400 │ 
+    401 │ window.addEventListener("keyup", (e) => {
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:401:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Enter key detected in keyup without an IME composition guard.
+  
+    399 │ });
+    400 │ 
+  > 401 │ window.addEventListener("keyup", (e) => {
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 402 │     if (e.key === "Enter") {
+  > 403 │         submit();
+  > 404 │     }
+  > 405 │ });
+        │ ^^
+    406 │ 
+    407 │ window.addEventListener("keypress", (e) => {
+  
+  i Add an IME guard before checking Enter, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:407:1 lint/nursery/noComposingEnterKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! keypress is deprecated for Enter handling.
+  
+    405 │ });
+    406 │ 
+  > 407 │ window.addEventListener("keypress", (e) => {
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 408 │     if (e.key === "Enter") {
+  > 409 │         submit();
+  > 410 │     }
+  > 411 │ });
+        │ ^^
+    412 │ 
+  
+  i Use keydown with an IME guard instead, or handle submission via the submit event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
