@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 <div onMouseOver={() => {}} />;
 <div onMouseOut={() => {}} />;
 <div onMouseOver={() => {}} onFocus={undefined} />;

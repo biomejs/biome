@@ -85,7 +85,7 @@ CssRootItemList = AnyCssRootItem*
 
 AnyCssRootItem =
 	AnyCssRule
-	| ScssDeclaration
+	| ScssVariableDeclaration
 	| CssBogus
 
 CssRuleList = AnyCssRule*
@@ -500,7 +500,7 @@ CssDeclarationOrRuleList = AnyCssDeclarationOrRule*
 AnyCssDeclarationOrRule =
 	AnyCssRule
 	| CssDeclarationWithSemicolon
-	| ScssDeclaration
+	| ScssVariableDeclaration
 	| ScssNestingDeclaration
 	| CssEmptyDeclaration
 	| CssBogus
@@ -521,7 +521,7 @@ CssDeclarationOrAtRuleList = AnyCssDeclarationOrAtRule*
 
 AnyCssDeclarationOrAtRule =
 	CssDeclarationWithSemicolon
-	| ScssDeclaration
+	| ScssVariableDeclaration
 	| ScssNestingDeclaration
 	| CssEmptyDeclaration
 	| CssAtRule
@@ -556,7 +556,7 @@ CssDeclarationList = AnyCssDeclaration*
 
 AnyCssDeclaration =
 	CssDeclarationWithSemicolon
-	| ScssDeclaration
+	| ScssVariableDeclaration
 	| ScssNestingDeclaration
 	| CssEmptyDeclaration
 
@@ -1476,7 +1476,7 @@ CssPageAtRuleItemList = AnyCssPageAtRuleItem*
 
 AnyCssPageAtRuleItem =
 	CssDeclarationWithSemicolon
-	| ScssDeclaration
+	| ScssVariableDeclaration
 	| ScssNestingDeclaration
 	| CssEmptyDeclaration
 	| CssAtRule
@@ -1944,9 +1944,9 @@ AnyCssValue =
 	CssIdentifier
 	| CssCustomIdentifier
 	| CssDashedIdentifier
-	| ScssIdentifier
+	| ScssVariable
 	| ScssInterpolatedIdentifier
-	| ScssQualifiedName
+	| ScssModuleMemberAccess
 	| ScssParentSelectorValue
 	| CssString
 	| ScssInterpolatedString
@@ -2019,7 +2019,7 @@ CssFunction =
 AnyCssFunctionName =
 	CssIdentifier
 	| ScssInterpolatedIdentifier
-	| ScssQualifiedName
+	| ScssModuleMemberAccess
 
 // https://drafts.csswg.org/css-values-4/#url-value
 // <url> = <url()> | <src()>
@@ -2604,13 +2604,13 @@ ScssEachAtRule =
 
 // @each $key, $value in $map { color: $key; }
 //       ^^^^^^^^^^^^
-ScssEachBindingList = ScssIdentifier (',' ScssIdentifier)*
+ScssEachBindingList = ScssVariable (',' ScssVariable)*
 
 // @for $i from 1 through 3 { width: $i * 1px; }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ScssForAtRule =
 	'for'
-	variable: ScssIdentifier
+	variable: ScssVariable
 	'from'
 	lower_bound: ScssExpression
 	operator: ('to' | 'through')
@@ -2784,7 +2784,7 @@ AnyScssModuleConfiguration =
 // $primary: blue !default
 // ^^^^^^^^^^^^^^^^^^^^^^^
 ScssModuleConfiguration =
-	name: ScssIdentifier
+	name: ScssVariable
 	':'
 	value: ScssExpression
 	modifier: ScssVariableModifier?
@@ -2809,7 +2809,7 @@ ScssIncludeAtRule =
 
 AnyScssIncludeTarget =
 	CssIdentifier
-	| ScssQualifiedName
+	| ScssModuleMemberAccess
 
 // ($radius: 4px)
 // ^^^^^^^^^^^^^^
@@ -2836,7 +2836,7 @@ AnyScssParameter =
 // $args...
 // ^^^^^^^^
 ScssParameter =
-	name: ScssIdentifier
+	name: ScssVariable
 	default_value: ScssParameterDefaultValue?
 	ellipsis: '...'?
 
@@ -2935,8 +2935,8 @@ ScssErrorAtRule =
 
 // $variable: value;
 // ^^^^^^^^^^^^^^^^^
-ScssDeclaration =
-	name: AnyScssDeclarationName
+ScssVariableDeclaration =
+	name: AnyScssVariableDeclarationName
 	':'
 	value: ScssExpression
 	modifiers: ScssVariableModifierList
@@ -2944,16 +2944,16 @@ ScssDeclaration =
 
 // $var: 1
 // ^^^^
-AnyScssDeclarationName =
-	ScssIdentifier
-	| ScssNamespacedIdentifier
+AnyScssVariableDeclarationName =
+	ScssVariable
+	| ScssNamespacedVariable
 
 // ns.$var: 1;
 // ^^^^^^^
-ScssNamespacedIdentifier =
+ScssNamespacedVariable =
 	namespace: CssIdentifier
 	'.'
-	name: ScssIdentifier
+	name: ScssVariable
 
 // font: { family: sans-serif; size: 12px; }
 // ^^^^
@@ -2990,7 +2990,7 @@ AnyScssExpressionItem =
 // @include fn($name: 1);
 //             ^^^^^^^^
 ScssKeywordArgument =
-	name: ScssIdentifier
+	name: ScssVariable
 	':'
 	value: AnyScssExpression
 
@@ -3107,14 +3107,14 @@ ScssParentSelectorValue =
 
 // color: module.$var;
 //        ^^^^^^^^^^^
-ScssQualifiedName =
+ScssModuleMemberAccess =
 	module: CssIdentifier
 	'.'
 	member: AnyScssModuleMember
 
 AnyScssModuleMember =
 	CssIdentifier
-	| ScssIdentifier
+	| ScssVariable
 
 // $var: 1 !default !global;
 //         ^^^^^^^^^^^^^^^^
@@ -3128,4 +3128,4 @@ ScssVariableModifier =
 
 // $var: 1;
 // ^^^^
-ScssIdentifier = dollar: '$' name: CssIdentifier
+ScssVariable = dollar: '$' name: CssIdentifier

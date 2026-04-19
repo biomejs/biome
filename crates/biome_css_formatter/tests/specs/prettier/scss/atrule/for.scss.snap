@@ -1,0 +1,194 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/atrule/for.scss
+---
+
+# Input
+
+```scss
+@for $i from 1 through 8 {}
+@for $i from 1 through 8{}
+@for  $i  from  1  through  8  {}
+@for  $i
+from
+1
+through
+8
+{}
+@for
+$i
+from
+1
+through
+8
+{}
+@for
+$i
+from
+1
+through
+8
+{}
+@for
+
+$i
+
+from
+
+1
+
+through
+
+8
+
+{}
+@for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from 1 through 5 {}
+@for $i from $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1 through 5 {}
+@for $i from 1 through $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 {}
+@for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1 through $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 {}
+@for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1 end $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 {}
+@for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from ($var1 + $var1) through ($var-2 + $var-2) {}
+@for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from ($very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1 + $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1) through ($very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 + $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2) {}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -12,44 +12,24 @@
+ }
+ @for $i from 1 through 8 {
+ }
+-@for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+-  from 1
+-  through 5
+-{
++@for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from 1 through 5 {
+ }
+-@for $i
+-  from $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1
+-  through 5
+-{
++@for $i from $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1 through 5 {
+ }
+-@for $i
+-  from 1
+-  through $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2
+-{
++@for $i from 1 through $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 {
+ }
+-@for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+-  from $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1
+-  through $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2
+-{
++@for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1 through $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 {
+ }
+-@for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+-  from $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1
+-  end $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2
+-{
++@for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1 end $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 {}
++@for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from (
++  $var1 + $var1
++) through ($var-2 + $var-2) {
+ }
+-@for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+-  from ($var1 + $var1)
+-  through ($var-2 + $var-2)
+-{
+-}
+-@for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+-  from (
+-    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1 +
+-      $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1
+-  )
+-  through (
+-    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 +
+-      $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2
+-  )
+-{
++@for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from (
++  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1 +
++  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1
++) through (
++  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 +
++  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2
++) {
+ }
+```
+
+# Output
+
+```scss
+@for $i from 1 through 8 {
+}
+@for $i from 1 through 8 {
+}
+@for $i from 1 through 8 {
+}
+@for $i from 1 through 8 {
+}
+@for $i from 1 through 8 {
+}
+@for $i from 1 through 8 {
+}
+@for $i from 1 through 8 {
+}
+@for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from 1 through 5 {
+}
+@for $i from $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1 through 5 {
+}
+@for $i from 1 through $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 {
+}
+@for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1 through $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 {
+}
+@for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1 end $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 {}
+@for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from (
+  $var1 + $var1
+) through ($var-2 + $var-2) {
+}
+@for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from (
+  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1 +
+  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1
+) through (
+  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 +
+  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2
+) {
+}
+```
+
+# Errors
+```
+for.scss:41:273 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `to` or `through` in the `@for` range.
+  
+    39 │ @for $i from 1 through $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 {}
+    40 │ @for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1 through $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 {}
+  > 41 │ @for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1 end $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 {}
+       │                                                                                                                                                                                                                                                                                 ^
+    42 │ @for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from ($var1 + $var1) through ($var-2 + $var-2) {}
+    43 │ @for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from ($very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1 + $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1) through ($very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 + $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2) {}
+  
+  i Use `to` or `through` between the lower and upper bounds.
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   15: @for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from 1 through 5 {
+   17: @for $i from $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1 through 5 {
+   19: @for $i from 1 through $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 {
+   21: @for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1 through $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 {
+   23: @for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1 end $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 {}
+   24: @for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from (
+   28: @for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from (
+   29:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1 +
+   30:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var1
+   32:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2 +
+   33:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var-2
+```

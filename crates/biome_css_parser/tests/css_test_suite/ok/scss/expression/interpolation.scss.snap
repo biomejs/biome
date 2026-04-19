@@ -21,8 +21,8 @@ $list: #{1, 2, 3};
 CssRoot {
     bom_token: missing (optional),
     items: CssRootItemList [
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@0..1 "$" [] [],
                 name: CssIdentifier {
                     value_token: IDENT@1..7 "direct" [] [],
@@ -36,7 +36,7 @@ CssRoot {
                         l_curly_token: L_CURLY@10..11 "{" [] [],
                         value: ScssExpression {
                             items: ScssExpressionItemList [
-                                ScssIdentifier {
+                                ScssVariable {
                                     dollar_token: DOLLAR@11..12 "$" [] [],
                                     name: CssIdentifier {
                                         value_token: IDENT@12..16 "name" [] [],
@@ -51,8 +51,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@17..18 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@18..20 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@20..26 "binary" [] [],
@@ -84,8 +84,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@36..37 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@37..39 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@39..45 "nested" [] [],
@@ -105,7 +105,7 @@ CssRoot {
                                         expression: ScssExpression {
                                             items: ScssExpressionItemList [
                                                 ScssBinaryExpression {
-                                                    left: ScssIdentifier {
+                                                    left: ScssVariable {
                                                         dollar_token: DOLLAR@50..51 "$" [] [],
                                                         name: CssIdentifier {
                                                             value_token: IDENT@51..53 "a" [] [Whitespace(" ")],
@@ -134,8 +134,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@62..63 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@63..65 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@65..69 "call" [] [],
@@ -157,7 +157,7 @@ CssRoot {
                                     items: CssParameterList [
                                         ScssExpression {
                                             items: ScssExpressionItemList [
-                                                ScssIdentifier {
+                                                ScssVariable {
                                                     dollar_token: DOLLAR@81..82 "$" [] [],
                                                     name: CssIdentifier {
                                                         value_token: IDENT@82..85 "map" [] [],
@@ -185,8 +185,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@92..93 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@93..95 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@95..99 "list" [] [],
@@ -253,8 +253,8 @@ CssRoot {
 0: CSS_ROOT@0..113
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..112
-    0: SCSS_DECLARATION@0..18
-      0: SCSS_IDENTIFIER@0..7
+    0: SCSS_VARIABLE_DECLARATION@0..18
+      0: SCSS_VARIABLE@0..7
         0: DOLLAR@0..1 "$" [] []
         1: CSS_IDENTIFIER@1..7
           0: IDENT@1..7 "direct" [] []
@@ -266,15 +266,15 @@ CssRoot {
             1: L_CURLY@10..11 "{" [] []
             2: SCSS_EXPRESSION@11..16
               0: SCSS_EXPRESSION_ITEM_LIST@11..16
-                0: SCSS_IDENTIFIER@11..16
+                0: SCSS_VARIABLE@11..16
                   0: DOLLAR@11..12 "$" [] []
                   1: CSS_IDENTIFIER@12..16
                     0: IDENT@12..16 "name" [] []
             3: R_CURLY@16..17 "}" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@17..17
       4: SEMICOLON@17..18 ";" [] []
-    1: SCSS_DECLARATION@18..37
-      0: SCSS_IDENTIFIER@18..26
+    1: SCSS_VARIABLE_DECLARATION@18..37
+      0: SCSS_VARIABLE@18..26
         0: DOLLAR@18..20 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@20..26
           0: IDENT@20..26 "binary" [] []
@@ -295,8 +295,8 @@ CssRoot {
             3: R_CURLY@35..36 "}" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@36..36
       4: SEMICOLON@36..37 ";" [] []
-    2: SCSS_DECLARATION@37..63
-      0: SCSS_IDENTIFIER@37..45
+    2: SCSS_VARIABLE_DECLARATION@37..63
+      0: SCSS_VARIABLE@37..45
         0: DOLLAR@37..39 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@39..45
           0: IDENT@39..45 "nested" [] []
@@ -314,7 +314,7 @@ CssRoot {
                     1: SCSS_EXPRESSION@50..56
                       0: SCSS_EXPRESSION_ITEM_LIST@50..56
                         0: SCSS_BINARY_EXPRESSION@50..56
-                          0: SCSS_IDENTIFIER@50..53
+                          0: SCSS_VARIABLE@50..53
                             0: DOLLAR@50..51 "$" [] []
                             1: CSS_IDENTIFIER@51..53
                               0: IDENT@51..53 "a" [] [Whitespace(" ")]
@@ -328,8 +328,8 @@ CssRoot {
             3: R_CURLY@61..62 "}" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@62..62
       4: SEMICOLON@62..63 ";" [] []
-    3: SCSS_DECLARATION@63..93
-      0: SCSS_IDENTIFIER@63..69
+    3: SCSS_VARIABLE_DECLARATION@63..93
+      0: SCSS_VARIABLE@63..69
         0: DOLLAR@63..65 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@65..69
           0: IDENT@65..69 "call" [] []
@@ -348,7 +348,7 @@ CssRoot {
                   2: CSS_PARAMETER_LIST@81..90
                     0: SCSS_EXPRESSION@81..85
                       0: SCSS_EXPRESSION_ITEM_LIST@81..85
-                        0: SCSS_IDENTIFIER@81..85
+                        0: SCSS_VARIABLE@81..85
                           0: DOLLAR@81..82 "$" [] []
                           1: CSS_IDENTIFIER@82..85
                             0: IDENT@82..85 "map" [] []
@@ -361,8 +361,8 @@ CssRoot {
             3: R_CURLY@91..92 "}" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@92..92
       4: SEMICOLON@92..93 ";" [] []
-    4: SCSS_DECLARATION@93..112
-      0: SCSS_IDENTIFIER@93..99
+    4: SCSS_VARIABLE_DECLARATION@93..112
+      0: SCSS_VARIABLE@93..99
         0: DOLLAR@93..95 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@95..99
           0: IDENT@95..99 "list" [] []

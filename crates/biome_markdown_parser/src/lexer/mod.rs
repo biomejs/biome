@@ -15,6 +15,8 @@ use biome_unicode_table::lookup_byte;
 
 use crate::syntax::{MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES};
 
+const MAX_ORDERED_LIST_MARKER_DIGITS: usize = 9;
+
 /// Lexer context for different markdown parsing modes
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
 pub enum MarkdownLexContext {
@@ -272,13 +274,18 @@ impl<'src> MarkdownLexer<'src> {
                     // In link definition context, whitespace separates tokens.
                     // We consume it as textual literal so it's not treated as trivia by the parser.
                     self.consume_link_definition_whitespace()
-                } else if self.after_newline && matches!(current, b' ' | b'\t') {
+                } else if self.after_newline && is_space_or_tab_byte(current) {
                     // At line start, emit single whitespace tokens to allow
                     // indentation handling and quote marker spacing.
                     self.consume_single_whitespace_as_text()
-                } else if matches!(current, b' ' | b'\t') && self.is_after_block_quote_marker() {
+                } else if is_space_or_tab_byte(current) && self.is_after_block_quote_marker() {
                     // After a block quote marker, emit a single whitespace token
                     // so the parser can skip the optional space.
+                    self.consume_single_whitespace_as_text()
+                } else if is_space_or_tab_byte(current) && self.is_in_list_marker_whitespace() {
+                    // While consuming the leading whitespace after a list marker,
+                    // emit one space/tab per token so the parser can distinguish
+                    // the optional post-marker separator from content indent.
                     self.consume_single_whitespace_as_text()
                 } else if current == b' '
                     && !matches!(context, MarkdownLexContext::HeadingContent)
@@ -708,6 +715,118 @@ impl<'src> MarkdownLexer<'src> {
         }
 
         saw_marker
+    }
+
+    /// Returns true if the current whitespace is part of the leading
+    /// space/tab run immediately following a top-level list marker.
+    fn is_in_list_marker_whitespace(&self) -> bool {
+        let bytes = self.source.as_bytes();
+        let Some(&current) = bytes.get(self.position) else {
+            return false;
+        };
+        if !is_space_or_tab_byte(current) {
+            return false;
+        }
+
+        let before = &self.source[..self.position];
+        let last_newline_pos = before.rfind(['\n', '\r']);
+        let line_start = match last_newline_pos {
+            Some(pos) => {
+                let before_bytes = before.as_bytes();
+                if before_bytes.get(pos) == Some(&b'\r')
+                    && before_bytes.get(pos + 1) == Some(&b'\n')
+                {
+                    pos + 2
+                } else {
+                    pos + 1
+                }
+            }
+            None => 0,
+        };
+
+        let prefix = &bytes[line_start..self.position];
+        let mut idx = 0usize;
+        let mut indent = 0usize;
+
+        while prefix.get(idx).copied().is_some_and(is_space_or_tab_byte) {
+            if prefix[idx] == b'\t' {
+                indent += TAB_STOP_SPACES - (indent % TAB_STOP_SPACES);
+            } else {
+                indent += 1;
+            }
+            if indent > MAX_BLOCK_PREFIX_INDENT {
+                return false;
+            }
+            idx += 1;
+        }
+
+        if idx >= prefix.len() {
+            return false;
+        }
+
+        match lookup_byte(prefix[idx]) {
+            MIN | MUL | PLS => {
+                idx += 1;
+            }
+            ZER | DIG => {
+                let digit_start = idx;
+                while prefix.get(idx).copied().is_some_and(is_ascii_digit_byte) {
+                    idx += 1;
+                    if idx - digit_start > MAX_ORDERED_LIST_MARKER_DIGITS {
+                        return false;
+                    }
+                }
+
+                let Some(delimiter) = prefix.get(idx).copied() else {
+                    return false;
+                };
+                if !matches!(lookup_byte(delimiter), PRD | PNC) {
+                    return false;
+                }
+                idx += 1;
+            }
+            _ => return false,
+        }
+
+        let trailing = &prefix[idx..];
+        if trailing.is_empty() {
+            let mut saw_tab = current == b'\t';
+            let mut next = self.position + 1;
+            while bytes.get(next).copied().is_some_and(is_space_or_tab_byte) {
+                if bytes[next] == b'\t' {
+                    saw_tab = true;
+                }
+                next += 1;
+            }
+
+            if !saw_tab {
+                return false;
+            }
+
+            if current == b'\t' {
+                return !bytes
+                    .get(self.position + 1)
+                    .copied()
+                    .is_some_and(is_space_or_tab_byte);
+            }
+
+            return true;
+        }
+
+        if !trailing.iter().copied().all(is_space_or_tab_byte) || trailing[0] != b' ' {
+            return false;
+        }
+
+        let mut saw_tab = current == b'\t' || trailing.contains(&b'\t');
+        let mut next = self.position + 1;
+        while bytes.get(next).copied().is_some_and(is_space_or_tab_byte) {
+            if bytes[next] == b'\t' {
+                saw_tab = true;
+            }
+            next += 1;
+        }
+
+        saw_tab
     }
 
     /// Consumes thematic break, setext underline, or emphasis markers (*, -, _).
@@ -1268,6 +1387,16 @@ impl<'src> MarkdownLexer<'src> {
         self.advance(1);
         tok
     }
+}
+
+#[inline]
+fn is_space_or_tab_byte(byte: u8) -> bool {
+    matches!(lookup_byte(byte), WHS) && !matches!(byte, b'\n' | b'\r')
+}
+
+#[inline]
+fn is_ascii_digit_byte(byte: u8) -> bool {
+    matches!(lookup_byte(byte), ZER | DIG)
 }
 
 impl<'src> ReLexer<'src> for MarkdownLexer<'src> {

@@ -21,8 +21,8 @@ $gap: 1 !default bar !global;
 CssRoot {
     bom_token: missing (optional),
     items: CssRootItemList [
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@0..78 "$" [Comments("// Unexpected token b ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@78..83 "color" [] [],
@@ -49,7 +49,7 @@ CssRoot {
         },
         CssBogus {
             items: [
-                ScssIdentifier {
+                ScssVariable {
                     dollar_token: DOLLAR@101..182 "$" [Newline("\n"), Newline("\n"), Comments("// Unexpected token b ..."), Newline("\n")] [],
                     name: CssIdentifier {
                         value_token: IDENT@182..185 "gap" [] [],
@@ -94,8 +94,8 @@ CssRoot {
 0: CSS_ROOT@0..211
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..210
-    0: SCSS_DECLARATION@0..101
-      0: SCSS_IDENTIFIER@0..83
+    0: SCSS_VARIABLE_DECLARATION@0..101
+      0: SCSS_VARIABLE@0..83
         0: DOLLAR@0..78 "$" [Comments("// Unexpected token b ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@78..83
           0: IDENT@78..83 "color" [] []
@@ -112,7 +112,7 @@ CssRoot {
           1: GLOBAL_KW@94..100 "global" [] []
       4: SEMICOLON@100..101 ";" [] []
     1: CSS_BOGUS@101..210
-      0: SCSS_IDENTIFIER@101..185
+      0: SCSS_VARIABLE@101..185
         0: DOLLAR@101..182 "$" [Newline("\n"), Newline("\n"), Comments("// Unexpected token b ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@182..185
           0: IDENT@182..185 "gap" [] []

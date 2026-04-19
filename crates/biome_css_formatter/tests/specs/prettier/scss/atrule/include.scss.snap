@@ -1,0 +1,295 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/atrule/include.scss
+---
+
+# Input
+
+```scss
+@include mix(1px, 2px, $arg2: 10, 2px 4px 6px);
+@include mix(1px,2px,$arg2:10,2px 4px 6px);
+@include mix ( 1px , 2px , $arg2 : 10 , 2px 4px 6px );
+@include mix  (  1px  ,  2px  , $arg2  :  10  ,  2px  4px  6px  );
+@include mix(
+    1px,
+    2px,
+    $arg2: 10,
+    2px  4px  6px
+);
+@include
+mix(
+    1px,
+    2px,
+    $arg2: 10,
+    2px  4px  6px
+);
+@include
+mix
+(
+1px
+,
+2px
+,
+$arg2
+:
+10
+,
+2px
+4px
+6px
+)
+;
+@include
+
+mix
+
+(
+
+1px
+
+,
+
+2px
+
+,
+
+$arg2
+
+:
+
+10
+
+,
+
+2px
+
+4px
+
+6px
+
+)
+
+;
+@include mix($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg: 1px, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1: 2px, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, 2px 4px 6px);
+a {
+    @include global-variable-overriding;
+    @include mix($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg: 1px, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1: 2px, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, 2px 4px 6px);
+    @include apply-to-ie6-only {}
+    @include apply-to-ie6-only{}
+    @include apply-to-ie6-only
+        {}
+    @include
+        apply-to-ie6-only
+        {
+        }
+    @include
+
+        apply-to-ie6-only
+
+        {
+
+        }
+}
+
+a {
+@include section-type-1(
+$header: (margin: 0 0 $margin-base, text-align: left),
+$decoration: (type: base, margin: 0 auto -1px 0, primary-color: $brand-primary, secondary-color: $gray-light),
+$title: (margin: 0 0 $margin-small, color: false, font-size: $font-size-h3, font-weight: false, line-height: $line-height-h3)
+);
+}
+
+a {
+@include item-spotlight-properties-transition(
+"-title",
+(box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15))
+);
+}
+
+a {
+@include item-spotlight-properties-transition(
+"-title",
+(
+box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15),
+border-color: $brand-primary
+)
+);
+}
+
+a {
+@include item-spotlight-properties-transition(
+"-title",
+(
+box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15),
+border-color: $very-very-very-very-very-very-very-very-very-very-very-very-very-long-value
+)
+);
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -5,31 +5,19 @@
+ @include mix(1px, 2px, $arg2: 10, 2px 4px 6px);
+ @include mix(1px, 2px, $arg2: 10, 2px 4px 6px);
+ @include mix(1px, 2px, $arg2: 10, 2px 4px 6px);
++@include mix(1px, 2px, $arg2: 10, 2px 4px 6px);
+ @include mix(
+-  1px,
+-  2px,
+-  $arg2: 10,
+-
+-  2px 4px 6px
+-);
+-@include mix(
+-  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg:
+-    1px,
+-  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1:
+-    2px,
+-  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2:
+-    10,
++  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg: 1px,
++  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1: 2px,
++  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10,
+   2px 4px 6px
+ );
+ a {
+   @include global-variable-overriding;
+   @include mix(
+-    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg:
+-      1px,
+-    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1:
+-      2px,
+-    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2:
+-      10,
++    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg: 1px,
++    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1: 2px,
++    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10,
+     2px 4px 6px
+   );
+   @include apply-to-ie6-only {
+@@ -52,7 +40,7 @@
+     ),
+     $decoration: (
+       type: base,
+-      margin: 0 auto -1px 0,
++      margin: 0 auto - 1px 0,
+       primary-color: $brand-primary,
+       secondary-color: $gray-light,
+     ),
+@@ -90,8 +78,7 @@
+     "-title",
+     (
+       box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15),
+-      border-color:
+-        $very-very-very-very-very-very-very-very-very-very-very-very-very-long-value,
++      border-color: $very-very-very-very-very-very-very-very-very-very-very-very-very-long-value,
+     )
+   );
+ }
+```
+
+# Output
+
+```scss
+@include mix(1px, 2px, $arg2: 10, 2px 4px 6px);
+@include mix(1px, 2px, $arg2: 10, 2px 4px 6px);
+@include mix(1px, 2px, $arg2: 10, 2px 4px 6px);
+@include mix(1px, 2px, $arg2: 10, 2px 4px 6px);
+@include mix(1px, 2px, $arg2: 10, 2px 4px 6px);
+@include mix(1px, 2px, $arg2: 10, 2px 4px 6px);
+@include mix(1px, 2px, $arg2: 10, 2px 4px 6px);
+@include mix(1px, 2px, $arg2: 10, 2px 4px 6px);
+@include mix(
+  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg: 1px,
+  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1: 2px,
+  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10,
+  2px 4px 6px
+);
+a {
+  @include global-variable-overriding;
+  @include mix(
+    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg: 1px,
+    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1: 2px,
+    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10,
+    2px 4px 6px
+  );
+  @include apply-to-ie6-only {
+  }
+  @include apply-to-ie6-only {
+  }
+  @include apply-to-ie6-only {
+  }
+  @include apply-to-ie6-only {
+  }
+  @include apply-to-ie6-only {
+  }
+}
+
+a {
+  @include section-type-1(
+    $header: (
+      margin: 0 0 $margin-base,
+      text-align: left,
+    ),
+    $decoration: (
+      type: base,
+      margin: 0 auto - 1px 0,
+      primary-color: $brand-primary,
+      secondary-color: $gray-light,
+    ),
+    $title: (
+      margin: 0 0 $margin-small,
+      color: false,
+      font-size: $font-size-h3,
+      font-weight: false,
+      line-height: $line-height-h3,
+    )
+  );
+}
+
+a {
+  @include item-spotlight-properties-transition(
+    "-title",
+    (
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15),
+    )
+  );
+}
+
+a {
+  @include item-spotlight-properties-transition(
+    "-title",
+    (
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15),
+      border-color: $brand-primary,
+    )
+  );
+}
+
+a {
+  @include item-spotlight-properties-transition(
+    "-title",
+    (
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15),
+      border-color: $very-very-very-very-very-very-very-very-very-very-very-very-very-long-value,
+    )
+  );
+}
+```
+
+# Lines exceeding max width of 80 characters
+```
+   10:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg: 1px,
+   11:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1: 2px,
+   12:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10,
+   18:     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg: 1px,
+   19:     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1: 2px,
+   20:     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10,
+   81:       border-color: $very-very-very-very-very-very-very-very-very-very-very-very-very-long-value,
+```

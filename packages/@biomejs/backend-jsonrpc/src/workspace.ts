@@ -1131,6 +1131,7 @@ export type JsonTrailingCommas = "none" | "all";
 export type RuleDomain =
 	| "drizzle"
 	| "react"
+	| "reactNative"
 	| "test"
 	| "solid"
 	| "next"
@@ -2285,6 +2286,11 @@ See https://biomejs.dev/linter/rules/no-inline-styles
 	 */
 	noInlineStyles?: NoInlineStylesConfiguration;
 	/**
+	* Flags text nodes with a trailing $ before a JSX expression.
+See https://biomejs.dev/linter/rules/no-jsx-leaked-dollar 
+	 */
+	noJsxLeakedDollar?: NoJsxLeakedDollarConfiguration;
+	/**
 	* Disallow JSX namespace syntax.
 See https://biomejs.dev/linter/rules/no-jsx-namespace 
 	 */
@@ -2299,6 +2305,11 @@ See https://biomejs.dev/linter/rules/no-jsx-props-bind
 See https://biomejs.dev/linter/rules/no-leaked-render 
 	 */
 	noLeakedRender?: NoLeakedRenderConfiguration;
+	/**
+	* Disallow functions declared inside loops that capture unsafe outer variables.
+See https://biomejs.dev/linter/rules/no-loop-func 
+	 */
+	noLoopFunc?: NoLoopFuncConfiguration;
 	/**
 	* Detect return type annotations that are misleadingly wider than what the implementation actually returns.
 See https://biomejs.dev/linter/rules/no-misleading-return-type 
@@ -2385,6 +2396,21 @@ See https://biomejs.dev/linter/rules/no-proto
 	 */
 	noProto?: NoProtoConfiguration;
 	/**
+	* Disallow deep imports from the react-native package.
+See https://biomejs.dev/linter/rules/no-react-native-deep-imports 
+	 */
+	noReactNativeDeepImports?: NoReactNativeDeepImportsConfiguration;
+	/**
+	* Disallow color literals in React Native styles.
+See https://biomejs.dev/linter/rules/no-react-native-literal-colors 
+	 */
+	noReactNativeLiteralColors?: NoReactNativeLiteralColorsConfiguration;
+	/**
+	* Disallow raw text outside \<Text> components in React Native.
+See https://biomejs.dev/linter/rules/no-react-native-raw-text 
+	 */
+	noReactNativeRawText?: NoReactNativeRawTextConfiguration;
+	/**
 	* Checks if a default export exports the same symbol as a named export.
 See https://biomejs.dev/linter/rules/no-redundant-default-export 
 	 */
@@ -2444,6 +2470,11 @@ See https://biomejs.dev/linter/rules/no-unknown-attribute
 See https://biomejs.dev/linter/rules/no-unnecessary-conditions 
 	 */
 	noUnnecessaryConditions?: NoUnnecessaryConditionsConfiguration;
+	/**
+	* Disallow unnecessary template expressions.
+See https://biomejs.dev/linter/rules/no-unnecessary-template-expression 
+	 */
+	noUnnecessaryTemplateExpression?: NoUnnecessaryTemplateExpressionConfiguration;
 	/**
 	* Disallow + operations with operands that are known to be unsafe.
 See https://biomejs.dev/linter/rules/no-unsafe-plus-operands 
@@ -2543,6 +2574,16 @@ See https://biomejs.dev/linter/rules/use-destructuring
 See https://biomejs.dev/linter/rules/use-disposables 
 	 */
 	useDisposables?: UseDisposablesConfiguration;
+	/**
+	* Prefer .textContent over .innerText for DOM node text.
+See https://biomejs.dev/linter/rules/use-dom-node-text-content 
+	 */
+	useDomNodeTextContent?: UseDomNodeTextContentConfiguration;
+	/**
+	* Prefer querySelector() and querySelectorAll() over older DOM query APIs.
+See https://biomejs.dev/linter/rules/use-dom-query-selector 
+	 */
+	useDomQuerySelector?: UseDomQuerySelectorConfiguration;
 	/**
 	* Enforce that new Error() is thrown with the original error as cause.
 See https://biomejs.dev/linter/rules/use-error-cause 
@@ -4399,6 +4440,9 @@ export type NoIncrementDecrementConfiguration =
 export type NoInlineStylesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoInlineStylesOptions;
+export type NoJsxLeakedDollarConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoJsxLeakedDollarOptions;
 export type NoJsxNamespaceConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsxNamespaceOptions;
@@ -4408,6 +4452,9 @@ export type NoJsxPropsBindConfiguration =
 export type NoLeakedRenderConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoLeakedRenderOptions;
+export type NoLoopFuncConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoLoopFuncOptions;
 export type NoMisleadingReturnTypeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisleadingReturnTypeOptions;
@@ -4459,6 +4506,15 @@ export type NoPlaywrightWaitForTimeoutConfiguration =
 export type NoProtoConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoProtoOptions;
+export type NoReactNativeDeepImportsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoReactNativeDeepImportsOptions;
+export type NoReactNativeLiteralColorsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoReactNativeLiteralColorsOptions;
+export type NoReactNativeRawTextConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoReactNativeRawTextOptions;
 export type NoRedundantDefaultExportConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoRedundantDefaultExportOptions;
@@ -4495,6 +4551,9 @@ export type NoUnknownAttributeConfiguration =
 export type NoUnnecessaryConditionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnnecessaryConditionsOptions;
+export type NoUnnecessaryTemplateExpressionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnnecessaryTemplateExpressionOptions;
 export type NoUnsafePlusOperandsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnsafePlusOperandsOptions;
@@ -4552,6 +4611,12 @@ export type UseDestructuringConfiguration =
 export type UseDisposablesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDisposablesOptions;
+export type UseDomNodeTextContentConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseDomNodeTextContentOptions;
+export type UseDomQuerySelectorConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseDomQuerySelectorOptions;
 export type UseErrorCauseConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseErrorCauseOptions;
@@ -6161,6 +6226,11 @@ export interface RuleWithNoInlineStylesOptions {
 	level: RulePlainConfiguration;
 	options?: NoInlineStylesOptions;
 }
+export interface RuleWithNoJsxLeakedDollarOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoJsxLeakedDollarOptions;
+}
 export interface RuleWithNoJsxNamespaceOptions {
 	level: RulePlainConfiguration;
 	options?: NoJsxNamespaceOptions;
@@ -6172,6 +6242,10 @@ export interface RuleWithNoJsxPropsBindOptions {
 export interface RuleWithNoLeakedRenderOptions {
 	level: RulePlainConfiguration;
 	options?: NoLeakedRenderOptions;
+}
+export interface RuleWithNoLoopFuncOptions {
+	level: RulePlainConfiguration;
+	options?: NoLoopFuncOptions;
 }
 export interface RuleWithNoMisleadingReturnTypeOptions {
 	level: RulePlainConfiguration;
@@ -6247,6 +6321,18 @@ export interface RuleWithNoProtoOptions {
 	level: RulePlainConfiguration;
 	options?: NoProtoOptions;
 }
+export interface RuleWithNoReactNativeDeepImportsOptions {
+	level: RulePlainConfiguration;
+	options?: NoReactNativeDeepImportsOptions;
+}
+export interface RuleWithNoReactNativeLiteralColorsOptions {
+	level: RulePlainConfiguration;
+	options?: NoReactNativeLiteralColorsOptions;
+}
+export interface RuleWithNoReactNativeRawTextOptions {
+	level: RulePlainConfiguration;
+	options?: NoReactNativeRawTextOptions;
+}
 export interface RuleWithNoRedundantDefaultExportOptions {
 	level: RulePlainConfiguration;
 	options?: NoRedundantDefaultExportOptions;
@@ -6294,6 +6380,11 @@ export interface RuleWithNoUnknownAttributeOptions {
 export interface RuleWithNoUnnecessaryConditionsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnnecessaryConditionsOptions;
+}
+export interface RuleWithNoUnnecessaryTemplateExpressionOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoUnnecessaryTemplateExpressionOptions;
 }
 export interface RuleWithNoUnsafePlusOperandsOptions {
 	level: RulePlainConfiguration;
@@ -6376,6 +6467,16 @@ export interface RuleWithUseDisposablesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseDisposablesOptions;
+}
+export interface RuleWithUseDomNodeTextContentOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseDomNodeTextContentOptions;
+}
+export interface RuleWithUseDomQuerySelectorOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseDomQuerySelectorOptions;
 }
 export interface RuleWithUseErrorCauseOptions {
 	level: RulePlainConfiguration;
@@ -7852,9 +7953,11 @@ export interface NoIncrementDecrementOptions {
 	allowForLoopAfterthoughts?: boolean;
 }
 export type NoInlineStylesOptions = {};
+export type NoJsxLeakedDollarOptions = {};
 export type NoJsxNamespaceOptions = {};
 export type NoJsxPropsBindOptions = {};
 export type NoLeakedRenderOptions = {};
+export type NoLoopFuncOptions = {};
 export type NoMisleadingReturnTypeOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoMultiAssignOptions = {};
@@ -7872,6 +7975,14 @@ export type NoPlaywrightWaitForNavigationOptions = {};
 export type NoPlaywrightWaitForSelectorOptions = {};
 export type NoPlaywrightWaitForTimeoutOptions = {};
 export type NoProtoOptions = {};
+export type NoReactNativeDeepImportsOptions = {};
+export type NoReactNativeLiteralColorsOptions = {};
+export interface NoReactNativeRawTextOptions {
+	/**
+	 * Names of additional components that are allowed to contain raw text.
+	 */
+	skip?: string[];
+}
 export type NoRedundantDefaultExportOptions = {};
 export type NoReturnAssignOptions = {};
 export interface NoRootTypeOptions {
@@ -7903,6 +8014,7 @@ export interface NoUnknownAttributeOptions {
 	ignore?: string[];
 }
 export type NoUnnecessaryConditionsOptions = {};
+export type NoUnnecessaryTemplateExpressionOptions = {};
 export type NoUnsafePlusOperandsOptions = {};
 export interface NoUntrustedLicensesOptions {
 	/**
@@ -8016,6 +8128,8 @@ Default: `"it"`
 }
 export type UseDestructuringOptions = {};
 export type UseDisposablesOptions = {};
+export type UseDomNodeTextContentOptions = {};
+export type UseDomQuerySelectorOptions = {};
 /**
  * Options for the `useErrorCause` rule.
  */
@@ -9056,10 +9170,12 @@ export type Category =
 	| "lint/nursery/noImpliedEval"
 	| "lint/nursery/noIncrementDecrement"
 	| "lint/nursery/noInlineStyles"
+	| "lint/nursery/noJsxLeakedDollar"
 	| "lint/nursery/noJsxNamespace"
 	| "lint/nursery/noJsxPropsBind"
 	| "lint/nursery/noLeakedRender"
 	| "lint/nursery/noMisleadingReturnType"
+	| "lint/nursery/noLoopFunc"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noMultiAssign"
@@ -9077,6 +9193,9 @@ export type Category =
 	| "lint/nursery/noPlaywrightWaitForSelector"
 	| "lint/nursery/noPlaywrightWaitForTimeout"
 	| "lint/nursery/noProto"
+	| "lint/nursery/noReactNativeLiteralColors"
+	| "lint/nursery/noReactNativeDeepImports"
+	| "lint/nursery/noReactNativeRawText"
 	| "lint/nursery/noRedundantDefaultExport"
 	| "lint/nursery/noReturnAssign"
 	| "lint/nursery/noRootType"
@@ -9090,6 +9209,7 @@ export type Category =
 	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnusedClasses"
+	| "lint/nursery/noUnnecessaryTemplateExpression"
 	| "lint/nursery/noUnsafePlusOperands"
 	| "lint/nursery/noUntrustedLicenses"
 	| "lint/nursery/noUnwantedPolyfillio"
@@ -9112,6 +9232,8 @@ export type Category =
 	| "lint/nursery/useConsistentTestIt"
 	| "lint/nursery/useDestructuring"
 	| "lint/nursery/useDisposables"
+	| "lint/nursery/useDomQuerySelector"
+	| "lint/nursery/useDomNodeTextContent"
 	| "lint/nursery/useErrorCause"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExpect"

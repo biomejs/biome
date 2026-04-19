@@ -1,0 +1,43 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+for (var i = 0; i < 10; i++) {
+    const process = (event: Event) => {
+        return i + event.timeStamp;
+    };
+
+    queue.push(process);
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:21 lint/nursery/noLoopFunc ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function declared in a loop contains unsafe references to outer variables.
+  
+    1 │ /* should generate diagnostics */
+    2 │ for (var i = 0; i < 10; i++) {
+  > 3 │     const process = (event: Event) => {
+      │                     ^^^^^^^^^^^^^^^^^^^
+  > 4 │         return i + event.timeStamp;
+  > 5 │     };
+      │     ^
+    6 │ 
+    7 │     queue.push(process);
+  
+  i Loop-created functions often run after the loop continues, but captured outer bindings like var variables are reused instead of copied per iteration.
+  
+  i The following variables were detected: i
+  
+  i Move the function outside the loop, capture only per-iteration bindings, or avoid mutating the captured variable across iterations.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

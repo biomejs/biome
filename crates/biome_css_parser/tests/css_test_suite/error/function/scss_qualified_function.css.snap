@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -52,7 +51,7 @@ CssRoot {
                                         items: [
                                             CssBogusSupportsCondition {
                                                 items: [
-                                                    ScssQualifiedName {
+                                                    ScssModuleMemberAccess {
                                                         module: CssIdentifier {
                                                             value_token: IDENT@16..19 "mod" [] [],
                                                         },
@@ -111,7 +110,7 @@ CssRoot {
                                                         items: [
                                                             CssBogusSupportsCondition {
                                                                 items: [
-                                                                    ScssQualifiedName {
+                                                                    ScssModuleMemberAccess {
                                                                         module: CssIdentifier {
                                                                             value_token: IDENT@62..65 "mod" [] [],
                                                                         },
@@ -162,7 +161,7 @@ CssRoot {
                                                         value_token: IDENT@86..92 "module" [] [],
                                                     },
                                                     DOT@92..93 "." [] [],
-                                                    ScssIdentifier {
+                                                    ScssVariable {
                                                         dollar_token: DOLLAR@93..94 "$" [] [],
                                                         name: CssIdentifier {
                                                             value_token: IDENT@94..96 "fn" [] [],
@@ -220,7 +219,7 @@ CssRoot {
                 1: COLON@14..16 ":" [] [Whitespace(" ")]
                 2: CSS_BOGUS@16..28
                   0: CSS_BOGUS_SUPPORTS_CONDITION@16..28
-                    0: SCSS_QUALIFIED_NAME@16..22
+                    0: SCSS_MODULE_MEMBER_ACCESS@16..22
                       0: CSS_IDENTIFIER@16..19
                         0: IDENT@16..19 "mod" [] []
                       1: DOT@19..20 "." [] []
@@ -254,7 +253,7 @@ CssRoot {
                       0: CSS_STRING_LITERAL@54..62 "\"a.png\"" [] [Whitespace(" ")]
                     3: CSS_BOGUS@62..74
                       0: CSS_BOGUS_SUPPORTS_CONDITION@62..74
-                        0: SCSS_QUALIFIED_NAME@62..68
+                        0: SCSS_MODULE_MEMBER_ACCESS@62..68
                           0: CSS_IDENTIFIER@62..65
                             0: IDENT@62..65 "mod" [] []
                           1: DOT@65..66 "." [] []
@@ -281,7 +280,7 @@ CssRoot {
                     0: CSS_IDENTIFIER@86..92
                       0: IDENT@86..92 "module" [] []
                     1: DOT@92..93 "." [] []
-                    2: SCSS_IDENTIFIER@93..96
+                    2: SCSS_VARIABLE@93..96
                       0: DOLLAR@93..94 "$" [] []
                       1: CSS_IDENTIFIER@94..96
                         0: IDENT@94..96 "fn" [] []
@@ -321,7 +320,7 @@ scss_qualified_function.css:3:33 parse ━━━━━━━━━━━━━�
   
 scss_qualified_function.css:4:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × SCSS qualified names are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  × SCSS module member accesses are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     2 │   color: mod.fn(1, 2);
     3 │   background-image: url("a.png" mod.fn(test));

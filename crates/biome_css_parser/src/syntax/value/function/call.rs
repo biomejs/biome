@@ -2,7 +2,7 @@ use crate::parser::CssParser;
 use crate::syntax::css_modules::v_bind_not_allowed;
 use crate::syntax::parse_error::{expected_identifier, scss_only_syntax_error};
 use crate::syntax::scss::{
-    is_at_scss_qualified_name, is_nth_at_scss_qualified_name, parse_scss_function_name,
+    is_at_scss_module_member_access, is_nth_at_scss_module_member_access, parse_scss_function_name,
 };
 use crate::syntax::value::attr::{is_at_attr_function, parse_attr_function};
 use crate::syntax::value::r#if::{is_at_if_function, parse_if_function};
@@ -115,7 +115,7 @@ fn is_nth_at_function_with_context(
 ) -> bool {
     is_nth_at_identifier(p, n) && p.nth_at(n + 1, T!['('])
         || (context.is_scss_exclusive_syntax_allowed()
-            && is_nth_at_scss_qualified_name(p, n)
+            && is_nth_at_scss_module_member_access(p, n)
             && p.nth_at(n + 3, T!['(']))
 }
 
@@ -147,7 +147,7 @@ fn parse_function_with_context(p: &mut CssParser, context: ValueParsingContext) 
 
     let m = p.start();
 
-    if context.is_scss_exclusive_syntax_allowed() && is_at_scss_qualified_name(p) {
+    if context.is_scss_exclusive_syntax_allowed() && is_at_scss_module_member_access(p) {
         CssSyntaxFeatures::Scss
             .parse_exclusive_syntax(p, parse_scss_function_name, |p, marker| {
                 scss_only_syntax_error(p, "SCSS qualified function names", marker.range(p))

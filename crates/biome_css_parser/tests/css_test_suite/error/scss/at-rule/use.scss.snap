@@ -83,7 +83,7 @@ CssRoot {
                         l_paren_token: L_PAREN@66..67 "(" [] [],
                         items: ScssModuleConfigurationItemList [
                             ScssModuleConfiguration {
-                                name: ScssIdentifier {
+                                name: ScssVariable {
                                     dollar_token: DOLLAR@67..68 "$" [] [],
                                     name: CssIdentifier {
                                         value_token: IDENT@68..75 "primary" [] [],
@@ -114,7 +114,7 @@ CssRoot {
                         l_paren_token: L_PAREN@98..99 "(" [] [],
                         items: ScssModuleConfigurationItemList [
                             ScssModuleConfiguration {
-                                name: ScssIdentifier {
+                                name: ScssVariable {
                                     dollar_token: DOLLAR@99..100 "$" [] [],
                                     name: CssIdentifier {
                                         value_token: IDENT@100..107 "primary" [] [],
@@ -197,7 +197,7 @@ CssRoot {
             0: L_PAREN@66..67 "(" [] []
             1: SCSS_MODULE_CONFIGURATION_ITEM_LIST@67..76
               0: SCSS_MODULE_CONFIGURATION@67..76
-                0: SCSS_IDENTIFIER@67..75
+                0: SCSS_VARIABLE@67..75
                   0: DOLLAR@67..68 "$" [] []
                   1: CSS_IDENTIFIER@68..75
                     0: IDENT@68..75 "primary" [] []
@@ -219,7 +219,7 @@ CssRoot {
             0: L_PAREN@98..99 "(" [] []
             1: SCSS_MODULE_CONFIGURATION_ITEM_LIST@99..121
               0: SCSS_MODULE_CONFIGURATION@99..121
-                0: SCSS_IDENTIFIER@99..107
+                0: SCSS_VARIABLE@99..107
                   0: DOLLAR@99..100 "$" [] []
                   1: CSS_IDENTIFIER@100..107
                     0: IDENT@100..107 "primary" [] []
