@@ -32,8 +32,12 @@ pub(crate) fn parse_svelte_hash_block(p: &mut HtmlParser) -> ParsedSyntax {
         T![await] => parse_await_block(p, m),
         T![snippet] => parse_snippet_block(p, m),
         _ => {
-            m.abandon(p);
-            Absent
+            p.error(p.err_builder(
+                "Expected `if`, `each`, `key`, `await`, or `snippet`",
+                p.cur_range(),
+            ));
+            p.expect(T!['}']);
+            Present(m.complete(p, SVELTE_BOGUS_BLOCK))
         }
     }
 }
@@ -826,8 +830,12 @@ pub(crate) fn parse_svelte_at_block(p: &mut HtmlParser) -> ParsedSyntax {
         T![render] => parse_render_block(p, m),
         T![const] => parse_const_block(p, m),
         _ => {
-            m.abandon(p);
-            Absent
+            p.error(p.err_builder(
+                "Expected `render`, `html`, `const`, or `debug`",
+                p.cur_range(),
+            ));
+            p.expect(T!['}']);
+            Present(m.complete(p, SVELTE_BOGUS_BLOCK))
         }
     }
 }
