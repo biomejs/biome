@@ -157,16 +157,11 @@ const INTERACTIVE_HANDLERS: &[&str] = &[
 /// Check if the element contains event handler
 fn has_handler_props(element: &AnyHtmlTagElement) -> bool {
     INTERACTIVE_HANDLERS.iter().any(|handler| {
-        if element.find_attribute_by_name(handler).is_some() {
-            return true;
-        }
-
-        let Some(handler_name) = handler.strip_prefix("on") else {
-            return false;
-        };
-
-        element
-            .find_vue_event_handling_directive(handler_name)
-            .is_some()
+        element.find_attribute_by_name(handler).is_some()
+            || handler.strip_prefix("on").is_some_and(|handler_name| {
+                element
+                    .find_vue_event_handling_directive(handler_name)
+                    .is_some()
+            })
     })
 }
