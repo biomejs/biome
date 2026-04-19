@@ -64,7 +64,7 @@ impl Rule for UseIframeSandbox {
                     return true;
                 };
 
-                init.value().ok().is_none()
+                init.value().ok().is_none() || sandbox_attribute.is_value_null_or_undefined()
             })
             && !element.has_spread_prop()
         {
