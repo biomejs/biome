@@ -1,3 +1,5 @@
+use crate::Aria;
+use crate::a11y::is_hidden_from_screen_reader;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -7,9 +9,6 @@ use biome_html_syntax::HtmlFileSource;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_rowan::AstNode;
 use biome_rule_options::use_key_with_click_events::UseKeyWithClickEventsOptions;
-
-use crate::a11y::attribute_value_equals_ignore_case;
-use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Enforce that elements with `onclick` handlers also have at least one keyboard event handler.
@@ -73,12 +72,8 @@ declare_lint_rule! {
     }
 }
 
-/// Elements that are inherently keyboard-accessible and should not trigger this rule.
-/// Note: `<a>` is only interactive when it has an `href` attribute, so it's handled separately.
-const INTERACTIVE_ELEMENTS: &[&str] = &["button", "input", "option", "select", "textarea"];
-
 impl Rule for UseKeyWithClickEvents {
-    type Query = Ast<AnyHtmlTagElement>;
+    type Query = Aria<AnyHtmlTagElement>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = UseKeyWithClickEventsOptions;
@@ -86,56 +81,25 @@ impl Rule for UseKeyWithClickEvents {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
         let file_source = ctx.source_type::<HtmlFileSource>();
+        let aria_roles = ctx.aria_roles();
 
         // Only flag elements that have an onclick attribute
         element.find_attribute_by_name("onclick")?;
 
-        let element_name = element.name().ok()?;
         let is_html_file = file_source.is_html();
 
         // In Vue/Svelte/Astro, PascalCase tag names indicate custom components
         // and should be skipped. In HTML, all tag names are native elements
         // regardless of casing (e.g. <DIV> is a valid div).
-        if !is_html_file
-            && element_name
-                .token_text_trimmed()
-                .is_some_and(|text| text.starts_with(|c: char| c.is_uppercase()))
-        {
+        if !is_html_file && element.is_custom_component() {
             return None;
         }
 
-        // <a> is only interactive when it has an href attribute.
-        // A bare <a onclick> without href has Generic role, not Link.
-        if is_html_tag(element, file_source, "a")
-            && element.find_attribute_by_name("href").is_some()
-        {
+        if is_hidden_from_screen_reader(element) || aria_roles.is_presentation_role(element) {
             return None;
         }
 
-        // Skip inherently keyboard-accessible elements
-        if INTERACTIVE_ELEMENTS
-            .iter()
-            .any(|&n| is_html_tag(element, file_source, n))
-        {
-            return None;
-        }
-
-        // Skip elements hidden from screen readers (aria-hidden with truthy value)
-        if element
-            .find_attribute_by_name("aria-hidden")
-            .is_some_and(|attr| {
-                attr.value()
-                    .is_none_or(|v| !v.trim().eq_ignore_ascii_case("false"))
-            })
-        {
-            return None;
-        }
-
-        // Skip elements with presentation/none role
-        if element.find_attribute_by_name("role").is_some_and(|attr| {
-            attribute_value_equals_ignore_case(&attr, "presentation")
-                || attribute_value_equals_ignore_case(&attr, "none")
-        }) {
+        if !aria_roles.is_not_interactive_element(element) {
             return None;
         }
 

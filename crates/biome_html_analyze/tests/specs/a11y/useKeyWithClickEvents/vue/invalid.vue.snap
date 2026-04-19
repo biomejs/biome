@@ -27,7 +27,7 @@ invalid.vue:5:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━�
   
     4 │ <!-- div with onclick but no keyboard handler -->
   > 5 │ <div onclick="handleClick()"></div>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ 
     7 │ <!-- span with onclick but no keyboard handler -->
   
@@ -43,25 +43,9 @@ invalid.vue:8:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━�
   
      7 │ <!-- span with onclick but no keyboard handler -->
    > 8 │ <span onclick="handleClick()">text</span>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
      9 │ 
     10 │ <!-- <a> without href is not interactive -->
-  
-  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
-  
-
-```
-
-```
-invalid.vue:11:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Elements with onclick must also include at least one keyboard handler: onkeydown, onkeyup, or onkeypress.
-  
-    10 │ <!-- <a> without href is not interactive -->
-  > 11 │ <a onclick="handleClick()">bare link</a>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    12 │ </template>
-    13 │ 
   
   i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
   
