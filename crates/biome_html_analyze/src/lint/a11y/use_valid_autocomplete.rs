@@ -4,6 +4,7 @@ use biome_diagnostics::Severity;
 use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_valid_autocomplete::UseValidAutocompleteOptions;
+use phf::phf_set;
 
 use crate::utils::is_html_tag;
 
@@ -120,8 +121,7 @@ impl Rule for UseValidAutocomplete {
     }
 }
 
-// Sorted for binary search
-const VALID_AUTOCOMPLETE_VALUES: [&str; 55] = [
+const VALID_AUTOCOMPLETE_VALUES: phf::Set<&'static str> = phf_set! {
     "additional-name",
     "address-level1",
     "address-level2",
@@ -177,10 +177,9 @@ const VALID_AUTOCOMPLETE_VALUES: [&str; 55] = [
     "url",
     "username",
     "webauthn",
-];
+};
 
-// Sorted for binary search
-const BILLING_AND_SHIPPING_ADDRESS: &[&str; 11] = &[
+const BILLING_AND_SHIPPING_ADDRESS: phf::Set<&'static str> = phf_set! {
     "address-level1",
     "address-level2",
     "address-level3",
@@ -192,7 +191,7 @@ const BILLING_AND_SHIPPING_ADDRESS: &[&str; 11] = &[
     "country-name",
     "postal-code",
     "street-address",
-];
+};
 
 /// Checks if the autocomplete attribute values are valid
 fn is_valid_autocomplete(autocomplete_values: &[&str]) -> bool {
@@ -203,7 +202,7 @@ fn is_valid_autocomplete(autocomplete_values: &[&str]) -> bool {
             let first = autocomplete_values[0];
             first.is_empty()
                 || first.starts_with("section-")
-                || VALID_AUTOCOMPLETE_VALUES.binary_search(&first).is_ok()
+                || VALID_AUTOCOMPLETE_VALUES.contains(first)
         }
         2.. => {
             // SAFETY: the size of the slice is superior or equal to `2`
@@ -211,17 +210,11 @@ fn is_valid_autocomplete(autocomplete_values: &[&str]) -> bool {
             let second = autocomplete_values[1];
             first.starts_with("section-")
                 || ["billing", "shipping"].contains(&first)
-                    && (BILLING_AND_SHIPPING_ADDRESS.contains(&second)
-                        || VALID_AUTOCOMPLETE_VALUES.binary_search(&second).is_ok())
+                    && (BILLING_AND_SHIPPING_ADDRESS.contains(second)
+                        || VALID_AUTOCOMPLETE_VALUES.contains(second))
                 || autocomplete_values
                     .iter()
-                    .all(|val| VALID_AUTOCOMPLETE_VALUES.binary_search(val).is_ok())
+                    .all(|val| VALID_AUTOCOMPLETE_VALUES.contains(val))
         }
     }
-}
-
-#[test]
-fn test_order() {
-    assert!(VALID_AUTOCOMPLETE_VALUES.is_sorted());
-    assert!(BILLING_AND_SHIPPING_ADDRESS.is_sorted());
 }
