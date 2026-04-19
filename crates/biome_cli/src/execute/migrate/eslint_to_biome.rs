@@ -7,8 +7,8 @@ use super::{
     eslint_typescript,
 };
 use biome_analyze::RuleSource;
-use biome_configuration::analyzer::presets::PresetConfig;
 use biome_configuration::analyzer::SeverityOrGroup;
+use biome_configuration::analyzer::presets::PresetConfig;
 use biome_configuration::{self as biome_config};
 use biome_console::fmt::Display;
 use biome_console::markup;
