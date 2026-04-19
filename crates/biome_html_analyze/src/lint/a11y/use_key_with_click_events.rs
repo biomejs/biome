@@ -90,13 +90,17 @@ impl Rule for UseKeyWithClickEvents {
         // Only flag elements that have an onclick attribute
         element.find_attribute_by_name("onclick")?;
 
-        let element_name = element.name()?;
+        let element_name = element.name().ok()?;
         let is_html_file = file_source.is_html();
 
         // In Vue/Svelte/Astro, PascalCase tag names indicate custom components
         // and should be skipped. In HTML, all tag names are native elements
         // regardless of casing (e.g. <DIV> is a valid div).
-        if !is_html_file && element_name.text().starts_with(|c: char| c.is_uppercase()) {
+        if !is_html_file
+            && element_name
+                .token_text_trimmed()
+                .is_some_and(|text| text.starts_with(|c: char| c.is_uppercase()))
+        {
             return None;
         }
 
@@ -111,7 +115,7 @@ impl Rule for UseKeyWithClickEvents {
         // Skip inherently keyboard-accessible elements
         if INTERACTIVE_ELEMENTS
             .iter()
-            .any(|&n| is_html_tag(element, file_source))
+            .any(|&n| is_html_tag(element, file_source, n))
         {
             return None;
         }
