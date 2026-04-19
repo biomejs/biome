@@ -160,7 +160,10 @@ pub struct JsFormatterConfiguration {
     /// brackets (e.g., `foo< T >()`), JSX expression braces (e.g., `{ value }`), and the logical
     /// NOT operator (e.g., `! x`, but in chains only after the last one: `!! x`). Defaults to
     /// false.
-    #[bpaf(long("javascript-formatter-delimiter-spacing"), argument("true|false"))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("javascript-formatter-delimiter-spacing"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub delimiter_spacing: Option<DelimiterSpacing>,
 
