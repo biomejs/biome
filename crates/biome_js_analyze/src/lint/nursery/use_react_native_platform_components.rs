@@ -131,13 +131,13 @@ impl Rule for UseReactNativePlatformComponents {
 
         let is_android_file = options
             .android_path_patterns
-            .iter()
-            .any(|glob| glob.is_match(file_path));
+            .as_ref()
+            .is_some_and(|patterns| patterns.iter().any(|glob| glob.is_match(file_path)));
         let is_ios_file = !is_android_file
             && options
                 .ios_path_patterns
-                .iter()
-                .any(|glob| glob.is_match(file_path));
+                .as_ref()
+                .is_some_and(|patterns| patterns.iter().any(|glob| glob.is_match(file_path)));
 
         let mut has_android = false;
         let mut has_ios = false;
