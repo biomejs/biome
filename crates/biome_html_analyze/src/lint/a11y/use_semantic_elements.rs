@@ -9,6 +9,7 @@ use biome_diagnostics::Severity;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_html_syntax::{HtmlAttribute, HtmlFileSource};
 use biome_rowan::AstNode;
+use biome_rule_options::use_semantic_elements::UseSemanticElementsOptions;
 
 declare_lint_rule! {
     /// It detects the use of `role` attributes in HTML elements and suggests using semantic elements instead.
@@ -65,7 +66,7 @@ impl Rule for UseSemanticElements {
     type Query = Ast<AnyHtmlTagElement>;
     type State = HtmlAttribute;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseSemanticElementsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
