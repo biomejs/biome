@@ -1,13 +1,12 @@
-use crate::{JsRuleAction, services::aria::Aria};
-use biome_analyze::{
-    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
-};
+use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::jsx_ext::AnyJsxElement;
+use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_interactive_element_to_noninteractive_role::NoInteractiveElementToNoninteractiveRoleOptions;
+
+use crate::{Aria, HtmlRuleAction, utils::is_html_tag};
 
 declare_lint_rule! {
     /// Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements.
@@ -24,25 +23,24 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```jsx,expect_diagnostic
-    /// <input role="img" />;
+    /// ```html,expect_diagnostic
+    /// <input role="img" />
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```jsx
-    /// <input role="button" />;
+    /// ```html
+    /// <input role="button" />
     /// ```
     ///
-    /// ```jsx
-    /// <canvas role="img" />;
+    /// ```html
+    /// <canvas role="img"></canvas>
     /// ```
     ///
     pub NoInteractiveElementToNoninteractiveRole {
-        version: "1.3.0",
+        version: "next",
         name: "noInteractiveElementToNoninteractiveRole",
-        language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("no-interactive-element-to-noninteractive-role").same()],
+        language: "html",
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -50,25 +48,32 @@ declare_lint_rule! {
 }
 
 impl Rule for NoInteractiveElementToNoninteractiveRole {
-    type Query = Aria<AnyJsxElement>;
+    type Query = Aria<AnyHtmlTagElement>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = NoInteractiveElementToNoninteractiveRoleOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        if !node.is_element() {
+        let source_type = ctx.source_type::<HtmlFileSource>();
+
+        if node.is_custom_component() {
             return None;
         }
+
         let role_attribute = node.find_attribute_by_name("role")?;
-        let role_attribute_static_value = role_attribute.as_static_value()?;
+        let role_attribute_static_value = role_attribute
+            .initializer()?
+            .value()
+            .ok()?
+            .as_static_value()?;
         let role_attribute_value = role_attribute_static_value.text();
-        let element_name = node.name().ok()?.as_jsx_name()?.value_token().ok()?;
-        let element_name = element_name.text_trimmed();
 
         // `hr` implicitly maps to `separator`, and `presentation`/`none` is explicitly
         // allowed on separators.
-        if element_name == "hr" && matches!(role_attribute_value, "presentation" | "none") {
+        if is_html_tag(node, source_type, "hr")
+            && matches!(role_attribute_value, "presentation" | "none")
+        {
             return None;
         }
 
@@ -78,23 +83,27 @@ impl Rule for NoInteractiveElementToNoninteractiveRole {
         {
             // <div> and <span> are considered neither interactive nor non-interactive, depending on the presence or absence of the role attribute.
             // We don't report <div> and <span> here, because we cannot determine whether they are interactive or non-interactive.
-            let role_sensitive_elements = ["div", "span", "source"];
-            if role_sensitive_elements.contains(&element_name) {
+
+            if ROLE_SENSITIVE_ELEMENTS
+                .iter()
+                .any(|el| is_html_tag(node, source_type, el))
+            {
                 return None;
             }
 
             // A <svg> element can be given an "img" to make it non-interactive for a11y reasons.
-            if element_name == "svg" && role_attribute_value == "img" {
+            if is_html_tag(node, source_type, "svg") && role_attribute_value == "img" {
                 return None;
             }
 
             // A <canvas> element can be given an "img" to make it non-interactive for a11y reasons.
-            if element_name == "canvas" && role_attribute_value == "img" {
+            if is_html_tag(node, source_type, "canvas") && role_attribute_value == "img" {
                 return None;
             }
 
             // a tag without href is considered non-interactive
-            if element_name == "a" && node.find_attribute_by_name("href").is_none() {
+            if is_html_tag(node, source_type, "a") && node.find_attribute_by_name("href").is_none()
+            {
                 return None;
             }
 
@@ -123,13 +132,13 @@ impl Rule for NoInteractiveElementToNoninteractiveRole {
         )
     }
 
-    fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
+    fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<HtmlRuleAction> {
         let node = ctx.query();
         let role_attribute = node.find_attribute_by_name("role")?;
 
         let mut mutation = ctx.root().begin();
         mutation.remove_node(role_attribute);
-        Some(JsRuleAction::new(
+        Some(HtmlRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Remove the "<Emphasis>"role"</Emphasis>" attribute." }.to_owned(),
@@ -137,3 +146,5 @@ impl Rule for NoInteractiveElementToNoninteractiveRole {
         ))
     }
 }
+
+static ROLE_SENSITIVE_ELEMENTS: [&str; 3] = ["div", "span", "source"];
