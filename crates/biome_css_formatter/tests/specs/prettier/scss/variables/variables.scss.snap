@@ -1,0 +1,198 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/variables/variables.scss
+---
+
+# Input
+
+```scss
+.foo {
+  --#{$prop}: 10px;
+  #{$prop}: 10px;
+  prop1: var(--#{$var});
+  prop2: var(#{$var}, --my-#{$var}, pink);
+  prop3: calc(var(--#{$var}) * 1px);
+  prop4: var(--spacer#{(1) + 2});
+}
+
+@supports (--#{$prop}: green) {
+  body {
+    color: var(--#{$var});
+  }
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,6 @@
+ .foo {
+-  --#{$prop}: 10px;
++  --
++  #{$prop}: 10px;
+   #{$prop}: 10px;
+   prop1: var(--#{$var});
+   prop2: var(#{$var}, --my-#{$var}, pink);
+@@ -7,7 +8,7 @@
+   prop4: var(--spacer#{(1) + 2});
+ }
+ 
+-@supports (--#{$prop}: green) {
++@supports (--# {$prop}: green) {
+   body {
+     color: var(--#{$var});
+   }
+```
+
+# Output
+
+```scss
+.foo {
+  --
+  #{$prop}: 10px;
+  #{$prop}: 10px;
+  prop1: var(--#{$var});
+  prop2: var(#{$var}, --my-#{$var}, pink);
+  prop3: calc(var(--#{$var}) * 1px);
+  prop4: var(--spacer#{(1) + 2});
+}
+
+@supports (--# {$prop}: green) {
+  body {
+    color: var(--#{$var});
+  }
+}
+```
+
+# Errors
+```
+variables.scss:2:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a declaration, or an at rule but instead found '--'.
+  
+    1 │ .foo {
+  > 2 │   --#{$prop}: 10px;
+      │   ^^
+    3 │   #{$prop}: 10px;
+    4 │   prop1: var(--#{$var});
+  
+  i Expected a declaration, or an at rule here.
+  
+    1 │ .foo {
+  > 2 │   --#{$prop}: 10px;
+      │   ^^
+    3 │   #{$prop}: 10px;
+    4 │   prop1: var(--#{$var});
+  
+variables.scss:10:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+     8 │ }
+     9 │ 
+  > 10 │ @supports (--#{$prop}: green) {
+       │            ^^^
+    11 │   body {
+    12 │     color: var(--#{$var});
+  
+  i Expected one of:
+  
+  - not <supports-in-parens>
+  - <supports-in-parens>
+  - <supports-in-parens> and <supports-in-parens>
+  - <supports-in-parens> or <supports-in-parens>
+  
+variables.scss:10:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `{`
+  
+     8 │ }
+     9 │ 
+  > 10 │ @supports (--#{$prop}: green) {
+       │               ^
+    11 │   body {
+    12 │     color: var(--#{$var});
+  
+  i Remove {
+  
+variables.scss:10:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a qualified rule, or an at rule but instead found '$'.
+  
+     8 │ }
+     9 │ 
+  > 10 │ @supports (--#{$prop}: green) {
+       │                ^
+    11 │   body {
+    12 │     color: var(--#{$var});
+  
+  i Expected a qualified rule, or an at rule here.
+  
+     8 │ }
+     9 │ 
+  > 10 │ @supports (--#{$prop}: green) {
+       │                ^
+    11 │   body {
+    12 │     color: var(--#{$var});
+  
+variables.scss:10:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `}`
+  
+     8 │ }
+     9 │ 
+  > 10 │ @supports (--#{$prop}: green) {
+       │                     ^
+    11 │   body {
+    12 │     color: var(--#{$var});
+  
+  i Remove }
+  
+variables.scss:10:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `:`
+  
+     8 │ }
+     9 │ 
+  > 10 │ @supports (--#{$prop}: green) {
+       │                      ^
+    11 │   body {
+    12 │     color: var(--#{$var});
+  
+  i Remove :
+  
+variables.scss:10:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+     8 │ }
+     9 │ 
+  > 10 │ @supports (--#{$prop}: green) {
+       │                             ^
+    11 │   body {
+    12 │     color: var(--#{$var});
+  
+  i Remove )
+  
+variables.scss:15:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+  
+    13 │   }
+    14 │ }
+  > 15 │ 
+       │ 
+  
+  i the file ends here
+  
+    13 │   }
+    14 │ }
+  > 15 │ 
+       │ 
+  
+
+```

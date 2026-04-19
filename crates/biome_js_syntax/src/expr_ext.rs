@@ -1367,6 +1367,13 @@ impl AnyJsExpression {
         .as_ref()
         .and_then(Self::inner_expression)
     }
+
+    pub fn is_string_literal(&self) -> bool {
+        matches!(
+            self,
+            Self::AnyJsLiteralExpression(AnyJsLiteralExpression::JsStringLiteralExpression(_),)
+        )
+    }
 }
 
 /// Returns `true` if this node is a transparent wrapper expression.

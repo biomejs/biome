@@ -4,8 +4,9 @@ use crate::syntax::block::ParseBlockBody;
 use crate::syntax::declaration::parse_declaration_with_semicolon;
 use crate::syntax::parse_error::{expected_any_declaration_or_at_rule, scss_only_syntax_error};
 use crate::syntax::scss::{
-    is_at_scss_declaration, is_at_scss_interpolated_property, is_at_scss_nesting_declaration,
-    parse_scss_declaration, parse_scss_nesting_declaration, try_parse_scss_nesting_declaration,
+    is_at_scss_interpolated_property, is_at_scss_nesting_declaration,
+    is_at_scss_variable_declaration, parse_scss_nesting_declaration,
+    parse_scss_variable_declaration, try_parse_scss_nesting_declaration,
 };
 use crate::syntax::{
     CssSyntaxFeatures, is_at_any_declaration_with_semicolon, is_at_metavariable,
@@ -47,7 +48,7 @@ fn is_at_declaration_or_rule_item(p: &mut CssParser) -> bool {
         || is_at_top_level_qualified_rule(p)
         || is_at_nested_qualified_rule(p)
         || is_at_scss_nesting_declaration(p)
-        || is_at_scss_declaration(p)
+        || is_at_scss_variable_declaration(p)
         || is_at_scss_interpolated_property(p)
         || is_at_any_declaration_with_semicolon(p)
         || is_at_metavariable(p)
@@ -113,10 +114,10 @@ impl ParseNodeList for DeclarationOrRuleList {
             }
 
             parse_scss_nesting_declaration(p)
-        } else if is_at_scss_declaration(p) {
+        } else if is_at_scss_variable_declaration(p) {
             CssSyntaxFeatures::Scss.parse_exclusive_syntax(
                 p,
-                parse_scss_declaration,
+                parse_scss_variable_declaration,
                 |p, marker| {
                     scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p))
                 },

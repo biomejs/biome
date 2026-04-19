@@ -1,12 +1,12 @@
 use crate::TestFormatLanguage;
-use crate::check_reformat::CheckReformat;
+use crate::check_reformat::{CheckReformat, ReformatError};
 use crate::snapshot_builder::{SnapshotBuilder, SnapshotOutput};
 use crate::utils::{PrettierDiff, get_prettier_diff, strip_prettier_placeholders};
-use biome_formatter::{FormatLanguage, FormatOptions};
+use biome_formatter::{FormatLanguage, FormatOptions, Printed};
 use biome_parser::AnyParse;
 use biome_rowan::{TextRange, TextSize};
 use camino::Utf8Path;
-use std::{fs::read_to_string, ops::Range};
+use std::{fmt, fs::read_to_string, ops::Range};
 
 const PRETTIER_IGNORE: &str = "prettier-ignore";
 const BIOME_IGNORE: &str = "biome-ignore format: prettier ignore";
@@ -96,6 +96,26 @@ where
     format_language: L::FormatLanguage,
 }
 
+enum FormatAttempt {
+    Formatted(String),
+    Failed(PrettierSnapshotError),
+}
+
+#[derive(Debug)]
+enum PrettierSnapshotError {
+    Format(String),
+    Reformat(ReformatError),
+}
+
+impl fmt::Display for PrettierSnapshotError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Format(message) => write!(f, "format: {message}"),
+            Self::Reformat(error) => write!(f, "{error}"),
+        }
+    }
+}
+
 impl<'a, L> PrettierSnapshot<'a, L>
 where
     L: TestFormatLanguage,
@@ -112,98 +132,166 @@ where
         }
     }
 
-    fn formatted(&self, parsed: &AnyParse) -> Option<String> {
-        let has_errors = parsed.has_errors();
+    fn format_for_snapshot(&self, parsed: &AnyParse) -> Option<FormatAttempt> {
         let syntax = parsed.syntax();
+        let printed = match self.run_formatter(&syntax) {
+            Some(Ok(printed)) => printed,
+            Some(Err(error)) => return Some(FormatAttempt::Failed(error)),
+            None => return None,
+        };
 
-        let range = self.test_file.range();
+        let formatted = match self.finish_formatted_output(parsed, &syntax, printed) {
+            Ok(formatted) => formatted,
+            Err(error) => return Some(FormatAttempt::Failed(error)),
+        };
 
-        let result = match range {
-            (Some(start), Some(end)) => {
-                // Skip the reversed range tests as its impossible
-                // to create a reversed TextRange anyway
-                if end < start {
-                    return None;
-                }
+        Some(FormatAttempt::Formatted(
+            formatted.replace(BIOME_IGNORE, PRETTIER_IGNORE),
+        ))
+    }
 
-                self.language.format_range(
+    fn run_formatter(
+        &self,
+        syntax: &biome_rowan::SyntaxNode<L::ServiceLanguage>,
+    ) -> Option<Result<Printed, PrettierSnapshotError>> {
+        match self.test_file.range() {
+            (Some(start), Some(end)) => self.format_range_once(syntax, start, end),
+            _ => Some(self.format_node_once(syntax)),
+        }
+    }
+
+    fn format_range_once(
+        &self,
+        syntax: &biome_rowan::SyntaxNode<L::ServiceLanguage>,
+        start: usize,
+        end: usize,
+    ) -> Option<Result<Printed, PrettierSnapshotError>> {
+        // Skip reversed range tests because TextRange cannot represent them.
+        if end < start {
+            return None;
+        }
+
+        Some(
+            self.language
+                .format_range(
                     self.format_language.clone(),
-                    &syntax,
+                    syntax,
                     TextRange::new(
                         TextSize::try_from(start).unwrap(),
                         TextSize::try_from(end).unwrap(),
                     ),
                 )
-            }
-            _ => self
-                .language
-                .format_node(self.format_language.clone(), &syntax)
-                .map(|formatted| formatted.print().unwrap()),
-        };
+                .map_err(|err| PrettierSnapshotError::Format(err.to_string())),
+        )
+    }
 
-        let formatted = result.expect("formatting failed");
-        let formatted = match range {
-            (Some(_), Some(_)) => {
-                let range = formatted
-                    .range()
-                    .expect("the result of format_range should have a range");
-
-                let formatted = formatted.as_code();
-                let mut output_code = self.test_file.parse_input.clone();
-                output_code.replace_range(Range::<usize>::from(range), formatted);
-                output_code
-            }
-            _ => {
-                let formatted = formatted.into_code();
-
-                if !has_errors {
-                    let check_reformat = CheckReformat::new(
-                        &syntax,
-                        &formatted,
-                        self.test_file.file_name(),
-                        &self.language,
-                        self.format_language.clone(),
-                    );
-                    check_reformat.check_reformat();
-                }
-
+    fn format_node_once(
+        &self,
+        syntax: &biome_rowan::SyntaxNode<L::ServiceLanguage>,
+    ) -> Result<Printed, PrettierSnapshotError> {
+        self.language
+            .format_node(self.format_language.clone(), syntax)
+            .map_err(|err| PrettierSnapshotError::Format(err.to_string()))
+            .and_then(|formatted| {
                 formatted
-            }
-        };
+                    .print()
+                    .map_err(|err| PrettierSnapshotError::Format(err.to_string()))
+            })
+    }
 
-        let formatted = formatted.replace(BIOME_IGNORE, PRETTIER_IGNORE);
+    fn finish_formatted_output(
+        &self,
+        parsed: &AnyParse,
+        syntax: &biome_rowan::SyntaxNode<L::ServiceLanguage>,
+        printed: Printed,
+    ) -> Result<String, PrettierSnapshotError> {
+        match self.test_file.range() {
+            (Some(_), Some(_)) => Ok(self.apply_range_format(printed)),
+            _ => self.finish_file_format(parsed, syntax, printed),
+        }
+    }
 
-        Some(formatted)
+    fn apply_range_format(&self, printed: Printed) -> String {
+        let range = printed
+            .range()
+            .expect("the result of format_range should have a range");
+
+        let formatted = printed.as_code();
+        let mut output_code = self.test_file.parse_input.clone();
+        output_code.replace_range(Range::<usize>::from(range), formatted);
+        output_code
+    }
+
+    fn finish_file_format(
+        &self,
+        parsed: &AnyParse,
+        syntax: &biome_rowan::SyntaxNode<L::ServiceLanguage>,
+        printed: Printed,
+    ) -> Result<String, PrettierSnapshotError> {
+        let formatted = printed.into_code();
+
+        if !parsed.has_errors() {
+            self.verify_reformat(syntax, &formatted)?;
+        }
+
+        Ok(formatted)
+    }
+
+    fn verify_reformat(
+        &self,
+        syntax: &biome_rowan::SyntaxNode<L::ServiceLanguage>,
+        formatted: &str,
+    ) -> Result<(), PrettierSnapshotError> {
+        let check_reformat = CheckReformat::new(
+            syntax,
+            formatted,
+            self.test_file.file_name(),
+            &self.language,
+            self.format_language.clone(),
+        );
+
+        check_reformat
+            .check_reformat()
+            .map_err(PrettierSnapshotError::Reformat)
     }
 
     pub fn test(self) {
         let parsed = self.language.parse(self.test_file().parse_input());
-
-        let formatted = match self.formatted(&parsed) {
-            Some(formatted) => formatted,
+        let attempt = match self.format_for_snapshot(&parsed) {
+            Some(attempt) => attempt,
             None => return,
         };
 
         let relative_file_name = self.test_file().relative_file_name();
         let input_file = self.test_file().input_file();
 
-        let prettier_diff = get_prettier_diff(input_file, relative_file_name, &formatted);
+        match attempt {
+            FormatAttempt::Formatted(formatted) => {
+                let prettier_diff = get_prettier_diff(input_file, relative_file_name, &formatted);
+                let prettier_diff = match prettier_diff {
+                    PrettierDiff::Diff(prettier_diff) => prettier_diff,
+                    PrettierDiff::Same => return,
+                };
 
-        let prettier_diff = match prettier_diff {
-            PrettierDiff::Diff(prettier_diff) => prettier_diff,
-            PrettierDiff::Same => return,
-        };
+                let mut builder = SnapshotBuilder::new(input_file)
+                    .with_input(&self.test_file().input_code)
+                    .with_prettier_diff(&prettier_diff)
+                    .with_output(SnapshotOutput::new(&formatted))
+                    .with_errors(&parsed, &self.test_file().parse_input);
 
-        let mut builder = SnapshotBuilder::new(input_file)
-            .with_input(&self.test_file().input_code)
-            .with_prettier_diff(&prettier_diff)
-            .with_output(SnapshotOutput::new(&formatted))
-            .with_errors(&parsed, &self.test_file().parse_input);
+                let max_width = self.format_language.options().line_width().value() as usize;
+                builder = builder.with_lines_exceeding_max_width(&formatted, max_width);
 
-        let max_width = self.format_language.options().line_width().value() as usize;
-        builder = builder.with_lines_exceeding_max_width(&formatted, max_width);
-
-        builder.finish(relative_file_name);
+                builder.finish(relative_file_name);
+            }
+            FormatAttempt::Failed(error) => {
+                SnapshotBuilder::new(input_file)
+                    .with_input(&self.test_file().input_code)
+                    .with_errors(&parsed, &self.test_file().parse_input)
+                    .with_error(&error.to_string())
+                    .finish(relative_file_name);
+            }
+        }
     }
 
     fn test_file(&self) -> &PrettierTestFile<'_> {

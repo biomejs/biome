@@ -18,8 +18,8 @@ $also_mixed: [x / y, z];
 CssRoot {
     bom_token: missing (optional),
     items: CssRootItemList [
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@0..1 "$" [] [],
                 name: CssIdentifier {
                     value_token: IDENT@1..5 "list" [] [],
@@ -54,8 +54,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@17..18 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@18..20 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@20..30 "also_mixed" [] [],
@@ -101,8 +101,8 @@ CssRoot {
 0: CSS_ROOT@0..44
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..43
-    0: SCSS_DECLARATION@0..18
-      0: SCSS_IDENTIFIER@0..5
+    0: SCSS_VARIABLE_DECLARATION@0..18
+      0: SCSS_VARIABLE@0..5
         0: DOLLAR@0..1 "$" [] []
         1: CSS_IDENTIFIER@1..5
           0: IDENT@1..5 "list" [] []
@@ -125,8 +125,8 @@ CssRoot {
             2: R_BRACK@16..17 "]" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@17..17
       4: SEMICOLON@17..18 ";" [] []
-    1: SCSS_DECLARATION@18..43
-      0: SCSS_IDENTIFIER@18..30
+    1: SCSS_VARIABLE_DECLARATION@18..43
+      0: SCSS_VARIABLE@18..30
         0: DOLLAR@18..20 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@20..30
           0: IDENT@20..30 "also_mixed" [] []

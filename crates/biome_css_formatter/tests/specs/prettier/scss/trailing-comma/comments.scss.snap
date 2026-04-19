@@ -1,0 +1,79 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/trailing-comma/comments.scss
+---
+
+# Input
+
+```scss
+.simplification {
+  foo: (
+    calc(), // It is a comment
+  );
+}
+
+.simplification {
+  foo: (
+    calc() // It is a comment
+  );
+}
+
+$z-indexes: (
+  header: 1035,
+  header: 1035,
+  overlay: 1202, // TODO
+  header: 1035,
+  header: 1035,
+);
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,6 +1,6 @@
+ .simplification {
+   foo: (
+-    calc() // It is a comment
++    calc(), // It is a comment
+   );
+ }
+ 
+@@ -13,8 +13,7 @@
+ $z-indexes: (
+   header: 1035,
+   header: 1035,
+-  overlay: 1202,
+-  // TODO
++  overlay: 1202, // TODO
+   header: 1035,
+   header: 1035,
+ );
+```
+
+# Output
+
+```scss
+.simplification {
+  foo: (
+    calc(), // It is a comment
+  );
+}
+
+.simplification {
+  foo: (
+    calc() // It is a comment
+  );
+}
+
+$z-indexes: (
+  header: 1035,
+  header: 1035,
+  overlay: 1202, // TODO
+  header: 1035,
+  header: 1035,
+);
+```

@@ -40,7 +40,7 @@ CssRoot {
                                                 l_curly_token: L_CURLY@16..17 "{" [] [],
                                                 value: ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@17..18 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@18..22 "name" [] [],
@@ -79,7 +79,7 @@ CssRoot {
                                                 l_curly_token: L_CURLY@40..41 "{" [] [],
                                                 value: ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@41..42 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@42..46 "side" [] [],
@@ -118,7 +118,7 @@ CssRoot {
                                                 l_curly_token: L_CURLY@65..66 "{" [] [],
                                                 value: ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@66..67 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@67..71 "slot" [] [],
@@ -177,7 +177,7 @@ CssRoot {
                         1: L_CURLY@16..17 "{" [] []
                         2: SCSS_EXPRESSION@17..22
                           0: SCSS_EXPRESSION_ITEM_LIST@17..22
-                            0: SCSS_IDENTIFIER@17..22
+                            0: SCSS_VARIABLE@17..22
                               0: DOLLAR@17..18 "$" [] []
                               1: CSS_IDENTIFIER@18..22
                                 0: IDENT@18..22 "name" [] []
@@ -202,7 +202,7 @@ CssRoot {
                         1: L_CURLY@40..41 "{" [] []
                         2: SCSS_EXPRESSION@41..46
                           0: SCSS_EXPRESSION_ITEM_LIST@41..46
-                            0: SCSS_IDENTIFIER@41..46
+                            0: SCSS_VARIABLE@41..46
                               0: DOLLAR@41..42 "$" [] []
                               1: CSS_IDENTIFIER@42..46
                                 0: IDENT@42..46 "side" [] []
@@ -227,7 +227,7 @@ CssRoot {
                         1: L_CURLY@65..66 "{" [] []
                         2: SCSS_EXPRESSION@66..71
                           0: SCSS_EXPRESSION_ITEM_LIST@66..71
-                            0: SCSS_IDENTIFIER@66..71
+                            0: SCSS_VARIABLE@66..71
                               0: DOLLAR@66..67 "$" [] []
                               1: CSS_IDENTIFIER@67..71
                                 0: IDENT@67..71 "slot" [] []

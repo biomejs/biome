@@ -300,7 +300,10 @@ fn emit_post_marker_space(p: &mut MarkdownParser, preserve_tab: bool) -> bool {
             // When preserve_tab is true (e.g. indented code in quote), the tab still
             // semantically counts as the optional post-marker separator, but remains
             // in the stream so the child block can claim it as indentation.
-            if !preserve_tab {
+            if !preserve_tab
+                || !quote_tab_has_following_indent(p)
+                || quote_tab_starts_nested_prefix(p)
+            {
                 p.bump_remap(MD_QUOTE_POST_MARKER_SPACE);
             }
             true
@@ -558,6 +561,23 @@ pub(crate) fn at_quote_indented_code_start(p: &MarkdownParser) -> bool {
     column >= INDENT_CODE_BLOCK_SPACES
 }
 
+fn quote_tab_starts_nested_prefix(p: &mut MarkdownParser) -> bool {
+    p.lookahead(|p| {
+        p.bump(MD_TEXTUAL_LITERAL);
+        p.at(T![>]) || (p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == ">")
+    })
+}
+
+fn quote_tab_has_following_indent(p: &mut MarkdownParser) -> bool {
+    p.lookahead(|p| {
+        p.bump(MD_TEXTUAL_LITERAL);
+        p.source_after_current()
+            .chars()
+            .next()
+            .is_some_and(|c| c == ' ' || c == '\t')
+    })
+}
+
 fn parse_quote_indented_code_block(p: &mut MarkdownParser, depth: usize) -> ParsedSyntax {
     let m = p.start();
     let content = p.start();
@@ -641,7 +661,8 @@ pub(crate) fn emit_optional_marker_space(p: &mut MarkdownParser, preserve_tab: b
         return true;
     }
     if text == "\t" {
-        if !preserve_tab {
+        if !preserve_tab || !quote_tab_has_following_indent(p) || quote_tab_starts_nested_prefix(p)
+        {
             p.bump_remap(MD_QUOTE_POST_MARKER_SPACE);
         }
         return true;

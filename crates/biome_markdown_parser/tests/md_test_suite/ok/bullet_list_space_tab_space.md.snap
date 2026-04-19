@@ -1,0 +1,85 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+- 	 foo
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@0..1 "-" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@1..2 " " [] [],
+                        content_indent: MdIndentTokenList [
+                            MdIndentToken {
+                                md_indent_char_token: MD_INDENT_CHAR@2..3 "\t" [] [],
+                            },
+                            MdIndentToken {
+                                md_indent_char_token: MD_INDENT_CHAR@3..4 " " [] [],
+                            },
+                        ],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@4..7 "foo" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@7..8 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@8..8 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..8
+  0: (empty)
+  1: MD_BLOCK_LIST@0..8
+    0: MD_BULLET_LIST_ITEM@0..8
+      0: MD_BULLET_LIST@0..8
+        0: MD_BULLET@0..8
+          0: MD_LIST_MARKER_PREFIX@0..4
+            0: MD_INDENT_TOKEN_LIST@0..0
+            1: MINUS@0..1 "-" [] []
+            2: MD_LIST_POST_MARKER_SPACE@1..2 " " [] []
+            3: MD_INDENT_TOKEN_LIST@2..4
+              0: MD_INDENT_TOKEN@2..3
+                0: MD_INDENT_CHAR@2..3 "\t" [] []
+              1: MD_INDENT_TOKEN@3..4
+                0: MD_INDENT_CHAR@3..4 " " [] []
+          1: MD_BLOCK_LIST@4..8
+            0: MD_PARAGRAPH@4..8
+              0: MD_INLINE_ITEM_LIST@4..8
+                0: MD_TEXTUAL@4..7
+                  0: MD_TEXTUAL_LITERAL@4..7 "foo" [] []
+                1: MD_TEXTUAL@7..8
+                  0: MD_TEXTUAL_LITERAL@7..8 "\n" [] []
+              1: (empty)
+  2: EOF@8..8 "" [] []
+
+```

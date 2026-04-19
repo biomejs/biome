@@ -29,8 +29,8 @@ $mixed-list: 1 2, 3 4;
 CssRoot {
     bom_token: missing (optional),
     items: CssRootItemList [
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@0..1 "$" [] [],
                 name: CssIdentifier {
                     value_token: IDENT@1..11 "space-list" [] [],
@@ -53,8 +53,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@18..19 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@19..21 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@21..39 "space-list-strings" [] [],
@@ -77,8 +77,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@52..53 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@53..55 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@55..72 "nested-space-list" [] [],
@@ -120,8 +120,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@85..86 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@86..88 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@88..98 "mixed-list" [] [],
@@ -259,8 +259,8 @@ CssRoot {
 0: CSS_ROOT@0..185
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..180
-    0: SCSS_DECLARATION@0..19
-      0: SCSS_IDENTIFIER@0..11
+    0: SCSS_VARIABLE_DECLARATION@0..19
+      0: SCSS_VARIABLE@0..11
         0: DOLLAR@0..1 "$" [] []
         1: CSS_IDENTIFIER@1..11
           0: IDENT@1..11 "space-list" [] []
@@ -275,8 +275,8 @@ CssRoot {
             0: CSS_NUMBER_LITERAL@17..18 "3" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@18..18
       4: SEMICOLON@18..19 ";" [] []
-    1: SCSS_DECLARATION@19..53
-      0: SCSS_IDENTIFIER@19..39
+    1: SCSS_VARIABLE_DECLARATION@19..53
+      0: SCSS_VARIABLE@19..39
         0: DOLLAR@19..21 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@21..39
           0: IDENT@21..39 "space-list-strings" [] []
@@ -291,8 +291,8 @@ CssRoot {
             0: CSS_STRING_LITERAL@49..52 "\"c\"" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@52..52
       4: SEMICOLON@52..53 ";" [] []
-    2: SCSS_DECLARATION@53..86
-      0: SCSS_IDENTIFIER@53..72
+    2: SCSS_VARIABLE_DECLARATION@53..86
+      0: SCSS_VARIABLE@53..72
         0: DOLLAR@53..55 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@55..72
           0: IDENT@55..72 "nested-space-list" [] []
@@ -319,8 +319,8 @@ CssRoot {
             2: R_PAREN@84..85 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@85..85
       4: SEMICOLON@85..86 ";" [] []
-    3: SCSS_DECLARATION@86..109
-      0: SCSS_IDENTIFIER@86..98
+    3: SCSS_VARIABLE_DECLARATION@86..109
+      0: SCSS_VARIABLE@86..98
         0: DOLLAR@86..88 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@88..98
           0: IDENT@88..98 "mixed-list" [] []

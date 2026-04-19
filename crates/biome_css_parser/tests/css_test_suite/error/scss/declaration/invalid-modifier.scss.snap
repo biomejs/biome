@@ -29,7 +29,7 @@ CssRoot {
     items: CssRootItemList [
         CssBogus {
             items: [
-                ScssIdentifier {
+                ScssVariable {
                     dollar_token: DOLLAR@0..42 "$" [Comments("// Invalid modifier - ..."), Newline("\n")] [],
                     name: CssIdentifier {
                         value_token: IDENT@42..47 "width" [] [],
@@ -59,7 +59,7 @@ CssRoot {
         },
         CssBogus {
             items: [
-                ScssIdentifier {
+                ScssVariable {
                     dollar_token: DOLLAR@63..104 "$" [Newline("\n"), Newline("\n"), Comments("// Invalid modifier - ..."), Newline("\n")] [],
                     name: CssIdentifier {
                         value_token: IDENT@104..110 "height" [] [],
@@ -89,7 +89,7 @@ CssRoot {
         },
         CssBogus {
             items: [
-                ScssIdentifier {
+                ScssVariable {
                     dollar_token: DOLLAR@125..165 "$" [Newline("\n"), Newline("\n"), Comments("// Invalid modifier - ..."), Newline("\n")] [],
                     name: CssIdentifier {
                         value_token: IDENT@165..174 "font-size" [] [],
@@ -119,7 +119,7 @@ CssRoot {
         },
         CssBogus {
             items: [
-                ScssIdentifier {
+                ScssVariable {
                     dollar_token: DOLLAR@188..221 "$" [Newline("\n"), Newline("\n"), Comments("// Multiple invalid m ..."), Newline("\n")] [],
                     name: CssIdentifier {
                         value_token: IDENT@221..227 "margin" [] [],
@@ -165,7 +165,7 @@ CssRoot {
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..250
     0: CSS_BOGUS@0..63
-      0: SCSS_IDENTIFIER@0..47
+      0: SCSS_VARIABLE@0..47
         0: DOLLAR@0..42 "$" [Comments("// Invalid modifier - ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@42..47
           0: IDENT@42..47 "width" [] []
@@ -181,7 +181,7 @@ CssRoot {
           1: IDENT@56..62 "random" [] []
       4: SEMICOLON@62..63 ";" [] []
     1: CSS_BOGUS@63..125
-      0: SCSS_IDENTIFIER@63..110
+      0: SCSS_VARIABLE@63..110
         0: DOLLAR@63..104 "$" [Newline("\n"), Newline("\n"), Comments("// Invalid modifier - ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@104..110
           0: IDENT@104..110 "height" [] []
@@ -197,7 +197,7 @@ CssRoot {
           1: IDENT@118..124 "defalt" [] []
       4: SEMICOLON@124..125 ";" [] []
     2: CSS_BOGUS@125..188
-      0: SCSS_IDENTIFIER@125..174
+      0: SCSS_VARIABLE@125..174
         0: DOLLAR@125..165 "$" [Newline("\n"), Newline("\n"), Comments("// Invalid modifier - ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@165..174
           0: IDENT@165..174 "font-size" [] []
@@ -213,7 +213,7 @@ CssRoot {
           1: IDENT@182..187 "globl" [] []
       4: SEMICOLON@187..188 ";" [] []
     3: CSS_BOGUS@188..250
-      0: SCSS_IDENTIFIER@188..227
+      0: SCSS_VARIABLE@188..227
         0: DOLLAR@188..221 "$" [Newline("\n"), Newline("\n"), Comments("// Multiple invalid m ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@221..227
           0: IDENT@221..227 "margin" [] []

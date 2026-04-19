@@ -4172,6 +4172,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoJsxLeakedDollarConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoJsxLeakedDollarOptions" }
+			]
+		},
+		"NoJsxLeakedDollarOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoJsxLiteralsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -4258,6 +4268,13 @@
 			]
 		},
 		"NoLeakedRenderOptions": { "type": "object" },
+		"NoLoopFuncConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoLoopFuncOptions" }
+			]
+		},
+		"NoLoopFuncOptions": { "type": "object", "additionalProperties": false },
 		"NoMagicNumbersConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -4750,6 +4767,43 @@
 		},
 		"NoReactForwardRefOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"NoReactNativeDeepImportsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoReactNativeDeepImportsOptions" }
+			]
+		},
+		"NoReactNativeDeepImportsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoReactNativeLiteralColorsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoReactNativeLiteralColorsOptions" }
+			]
+		},
+		"NoReactNativeLiteralColorsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoReactNativeRawTextConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoReactNativeRawTextOptions" }
+			]
+		},
+		"NoReactNativeRawTextOptions": {
+			"type": "object",
+			"properties": {
+				"skip": {
+					"description": "Names of additional components that are allowed to contain raw text.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoReactPropAssignmentsConfiguration": {
@@ -5401,6 +5455,16 @@
 			]
 		},
 		"NoUnnecessaryConditionsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoUnnecessaryTemplateExpressionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnnecessaryTemplateExpressionOptions" }
+			]
+		},
+		"NoUnnecessaryTemplateExpressionOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -6275,6 +6339,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noJsxLeakedDollar": {
+					"description": "Flags text nodes with a trailing $ before a JSX expression.\nSee https://biomejs.dev/linter/rules/no-jsx-leaked-dollar",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoJsxLeakedDollarConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noJsxNamespace": {
 					"description": "Disallow JSX namespace syntax.\nSee https://biomejs.dev/linter/rules/no-jsx-namespace",
 					"anyOf": [
@@ -6293,6 +6364,13 @@
 					"description": "Prevent problematic leaked values from being rendered.\nSee https://biomejs.dev/linter/rules/no-leaked-render",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoLeakedRenderConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noLoopFunc": {
+					"description": "Disallow functions declared inside loops that capture unsafe outer variables.\nSee https://biomejs.dev/linter/rules/no-loop-func",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoLoopFuncConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6415,6 +6493,27 @@
 						{ "type": "null" }
 					]
 				},
+				"noReactNativeDeepImports": {
+					"description": "Disallow deep imports from the react-native package.\nSee https://biomejs.dev/linter/rules/no-react-native-deep-imports",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReactNativeDeepImportsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noReactNativeLiteralColors": {
+					"description": "Disallow color literals in React Native styles.\nSee https://biomejs.dev/linter/rules/no-react-native-literal-colors",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReactNativeLiteralColorsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noReactNativeRawText": {
+					"description": "Disallow raw text outside \\<Text> components in React Native.\nSee https://biomejs.dev/linter/rules/no-react-native-raw-text",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReactNativeRawTextConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noRedundantDefaultExport": {
 					"description": "Checks if a default export exports the same symbol as a named export.\nSee https://biomejs.dev/linter/rules/no-redundant-default-export",
 					"anyOf": [
@@ -6496,6 +6595,13 @@
 					"description": "Disallow unnecessary type-based conditions that can be statically determined as redundant.\nSee https://biomejs.dev/linter/rules/no-unnecessary-conditions",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnnecessaryConditionsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnnecessaryTemplateExpression": {
+					"description": "Disallow unnecessary template expressions.\nSee https://biomejs.dev/linter/rules/no-unnecessary-template-expression",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnnecessaryTemplateExpressionConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6633,6 +6739,20 @@
 					"description": "Detects a disposable object assigned to a variable without using or await using syntax.\nSee https://biomejs.dev/linter/rules/use-disposables",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseDisposablesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useDomNodeTextContent": {
+					"description": "Prefer .textContent over .innerText for DOM node text.\nSee https://biomejs.dev/linter/rules/use-dom-node-text-content",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseDomNodeTextContentConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useDomQuerySelector": {
+					"description": "Prefer querySelector() and querySelectorAll() over older DOM query APIs.\nSee https://biomejs.dev/linter/rules/use-dom-query-selector",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseDomQuerySelectorConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7479,6 +7599,11 @@
 					"description": "React library rules",
 					"type": "string",
 					"const": "react"
+				},
+				{
+					"description": "React Native framework rules",
+					"type": "string",
+					"const": "reactNative"
 				},
 				{ "description": "Testing rules", "type": "string", "const": "test" },
 				{
@@ -8913,6 +9038,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoJsxLeakedDollarOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoJsxLeakedDollarOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoJsxLiteralsOptions": {
 			"type": "object",
 			"properties": {
@@ -8963,6 +9098,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoLeakedRenderOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoLoopFuncOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoLoopFuncOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9427,6 +9571,33 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoReactForwardRefOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoReactNativeDeepImportsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoReactNativeDeepImportsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoReactNativeLiteralColorsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoReactNativeLiteralColorsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoReactNativeRawTextOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoReactNativeRawTextOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9943,6 +10114,16 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnnecessaryConditionsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUnnecessaryTemplateExpressionOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnnecessaryTemplateExpressionOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -10883,6 +11064,26 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseDisposablesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseDomNodeTextContentOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseDomNodeTextContentOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseDomQuerySelectorOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseDomQuerySelectorOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -14254,6 +14455,26 @@
 			]
 		},
 		"UseDisposablesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseDomNodeTextContentConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseDomNodeTextContentOptions" }
+			]
+		},
+		"UseDomNodeTextContentOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseDomQuerySelectorConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseDomQuerySelectorOptions" }
+			]
+		},
+		"UseDomQuerySelectorOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

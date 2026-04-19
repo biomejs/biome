@@ -1,0 +1,61 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: scss/comments/if-eslit-at-rule-decloration.scss
+---
+
+# Input
+
+```scss
+@function _normalize-include($section) {
+// Check if $section is in the $include list.
+  @if index($_normalize-include, $section) {
+    @return true;
+  }
+// If $include is set to (all), make sure $section is not in $exclude.
+  @else if not index($_normalize-exclude, $section) and index($_normalize-include, all) {
+    @return true;
+  }
+  @return false;
+}
+
+```
+
+
+# Error
+```text
+reformat: output mismatch
+Differences (-re-formatted|+formatted):
+ @function _normalize-include($section) {
+   // Check if $section is in the $include list.
+   @if index($_normalize-include, $section) {
+     @return true;
+-  } @else if not index($_normalize-exclude, $section) and // If $include is set to (all), make sure $section is not in $exclude.
++  } // If $include is set to (all), make sure $section is not in $exclude.
++  @else if not index($_normalize-exclude, $section) and
+   index($_normalize-include, all) {
+     @return true;
+   }
+   @return false;
+
+IR differences:
+Differences (-re-formatted IR|+formatted IR):
+     ]),
+     " {",
+     indent([hard_line_break, "@return true;"]),
+     hard_line_break,
+-    "}",
+-    line_suffix([
+-      " // If $include is set to (all), make sure $section is not in $exclude."
+-    ]),
+-    expand_parent,
+-    " @else if ",
++    "} // If $include is set to (all), make sure $section is not in $exclude.",
++    hard_line_break,
++    "@else if ",
+     group([
+       "not index",
+       group([
+         "(",
+
+```
