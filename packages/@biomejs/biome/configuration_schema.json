@@ -15117,13 +15117,13 @@
 			"properties": {
 				"androidPathPatterns": {
 					"description": "A list of glob patterns to identify Android-specific files.\nDefaults to `[\"**/*.android.{js,jsx,ts,tsx}\"]`.",
-					"type": "array",
+					"type": ["array", "null"],
 					"default": ["**/*.android.{js,jsx,ts,tsx}"],
 					"items": { "$ref": "#/$defs/NormalizedGlob" }
 				},
 				"iosPathPatterns": {
 					"description": "A list of glob patterns to identify iOS-specific files.\nDefaults to `[\"**/*.ios.{js,jsx,ts,tsx}\"]`.",
-					"type": "array",
+					"type": ["array", "null"],
 					"default": ["**/*.ios.{js,jsx,ts,tsx}"],
 					"items": { "$ref": "#/$defs/NormalizedGlob" }
 				}
