@@ -744,6 +744,18 @@ export interface JsFormatterConfiguration {
 	 */
 	bracketSpacing?: BracketSpacing;
 	/**
+	* Whether to insert spaces inside delimiters (after the opening delimiter and before the
+closing delimiter). Only applies when the content fits on a single line. Spaces are not
+added before the opening delimiter (e.g., `function f()` stays `function f()`, not
+`function f ()`), and empty delimiters are not affected (e.g., `fn()` stays `fn()`).
+For JavaScript and TypeScript, affects parentheses (e.g., `foo( a, b )`), square brackets
+(e.g., `[ a, b ]`), template literal interpolations (e.g., `${ expr }`), TypeScript angle
+brackets (e.g., `foo< T >()`), JSX expression braces (e.g., `{ value }`), and the logical
+NOT operator (e.g., `! x`, but in chains only after the last one: `!! x`). Defaults to
+false. 
+	 */
+	delimiterSpacing?: DelimiterSpacing;
+	/**
 	 * Control the formatter for JavaScript (and its super languages) files.
 	 */
 	enabled?: Bool;

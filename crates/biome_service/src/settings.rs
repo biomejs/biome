@@ -1658,6 +1658,12 @@ impl OverrideSettingPattern {
         if let Some(bracket_spacing) = js_formatter.bracket_spacing.or(formatter.bracket_spacing) {
             options.set_bracket_spacing(bracket_spacing);
         }
+        if let Some(delimiter_spacing) = js_formatter
+            .delimiter_spacing
+            .or(formatter.delimiter_spacing)
+        {
+            options.set_delimiter_spacing(delimiter_spacing);
+        }
         if let Some(bracket_same_line) = js_formatter.bracket_same_line {
             options.set_bracket_same_line(bracket_same_line);
         }

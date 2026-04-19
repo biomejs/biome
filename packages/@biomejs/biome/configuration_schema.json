@@ -2219,6 +2219,10 @@
 					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
 				},
+				"delimiterSpacing": {
+					"description": "Whether to insert spaces inside delimiters (after the opening delimiter and before the\nclosing delimiter). Only applies when the content fits on a single line. Spaces are not\nadded before the opening delimiter (e.g., `function f()` stays `function f()`, not\n`function f ()`), and empty delimiters are not affected (e.g., `fn()` stays `fn()`).\nFor JavaScript and TypeScript, affects parentheses (e.g., `foo( a, b )`), square brackets\n(e.g., `[ a, b ]`), template literal interpolations (e.g., `${ expr }`), TypeScript angle\nbrackets (e.g., `foo< T >()`), JSX expression braces (e.g., `{ value }`), and the logical\nNOT operator (e.g., `! x`, but in chains only after the last one: `!! x`). Defaults to\nfalse.",
+					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
+				},
 				"enabled": {
 					"description": "Control the formatter for JavaScript (and its super languages) files.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
