@@ -167,6 +167,13 @@ impl Rule for UseSemanticElements {
                 }
                 .to_owned(),
             )
+            .footer_list(
+                markup! { "Replace with one of these elements:" },
+                role.base_html_elements()
+                    .iter()
+                    .chain(role.related_html_elements())
+                    .map(|element| element.to_string()),
+            )
             .note(markup! {
                 "For examples and more information, see " <Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles">"WAI-ARIA Roles"</Hyperlink>
             }),

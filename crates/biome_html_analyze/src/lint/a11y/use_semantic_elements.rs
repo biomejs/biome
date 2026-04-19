@@ -1,3 +1,4 @@
+use crate::utils::is_html_tag;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -5,7 +6,8 @@ use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_deserialize::TextRange;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlElement, HtmlAttribute, HtmlFileSource};
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_html_syntax::{HtmlAttribute, HtmlFileSource};
 use biome_rowan::AstNode;
 
 declare_lint_rule! {
@@ -60,7 +62,7 @@ declare_lint_rule! {
 }
 
 impl Rule for UseSemanticElements {
-    type Query = Ast<AnyHtmlElement>;
+    type Query = Ast<AnyHtmlTagElement>;
     type State = HtmlAttribute;
     type Signals = Option<Self::State>;
     type Options = ();
@@ -91,32 +93,20 @@ impl Rule for UseSemanticElements {
             return None;
         }
 
-        let element_name = node.name()?;
-        let is_html = ctx.source_type::<HtmlFileSource>().is_html();
+        let source_type = ctx.source_type::<HtmlFileSource>();
+        let is_html = source_type.is_html();
         let is_already_semantic =
             semantic_elements
                 .iter()
                 .chain(related_elements.iter())
                 .any(|instance| {
-                    let name_matches = if is_html {
-                        instance
-                            .element
-                            .as_str()
-                            .eq_ignore_ascii_case(element_name.text())
-                    } else {
-                        instance.element.as_str() == element_name.text()
-                    };
-                    name_matches
+                    is_html_tag(node, source_type, instance.element.as_str())
                         && instance.attributes.iter().all(|required_attr| {
                             node.find_attribute_by_name(required_attr.attribute.as_str())
-                                .and_then(|attr| {
-                                    attr.initializer()?.value().ok()?.string_value()
-                                })
+                                .and_then(|attr| attr.initializer()?.value().ok()?.string_value())
                                 .is_some_and(|value| {
                                     if is_html {
-                                        value
-                                            .text()
-                                            .eq_ignore_ascii_case(required_attr.value)
+                                        value.text().eq_ignore_ascii_case(required_attr.value)
                                     } else {
                                         value.text() == required_attr.value
                                     }
