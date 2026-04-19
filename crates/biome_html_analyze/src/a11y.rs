@@ -183,6 +183,17 @@ pub(crate) fn html_self_closing_element_has_non_empty_attribute(
         .is_some_and(|attr| has_non_empty_value(&attr))
 }
 
+/// Check if the element is `contentEditable`
+///
+/// Ref:
+/// - https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contenteditable
+/// - https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/v6.10.0/src/util/isContentEditable.js
+pub(crate) fn is_content_editable(element: &AnyHtmlTagElement) -> bool {
+    element
+        .find_attribute_by_name("contenteditable")
+        .is_some_and(|attribute| is_strict_true_value(&attribute))
+}
+
 #[cfg(test)]
 #[path = "a11y_tests.rs"]
 mod tests;

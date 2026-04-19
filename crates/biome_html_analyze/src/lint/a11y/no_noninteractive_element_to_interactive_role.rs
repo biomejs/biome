@@ -12,10 +12,10 @@ declare_lint_rule! {
     /// Enforce that interactive ARIA roles are not assigned to non-interactive HTML elements.
     ///
     /// Non-interactive HTML elements indicate _content_ and _containers_ in the user interface.
-    /// Non-interactive elements include `<main>`, `<area>`, `<h1>` (,`<h2>`, etc), `<img>`, `<li>`, `<ul>` and `<ol>`.
+    /// Non-interactive elements include `<main>`, `<h1>` (,`<h2>`, etc), `<img>`, `<li>`, `<ul>` and `<ol>`.
     ///
     /// Interactive HTML elements indicate _controls_ in the user interface.
-    /// Interactive elements include `<a href>`, `<button>`, `<input>`, `<select>`, `<textarea>`.
+    /// Interactive elements include `<a href>`, `<area>`, `<button>`, `<input>`, `<select>`, `<textarea>`.
     ///
     /// [WAI-ARIA roles](https://www.w3.org/TR/wai-aria-1.1/#usage_intro) should not be used to convert a non-interactive element to an interactive element.
     /// Interactive ARIA roles include `button`, `link`, `checkbox`, `menuitem`, `menuitemcheckbox`, `menuitemradio`, `option`, `radio`, `searchbox`, `switch` and `textbox`.
