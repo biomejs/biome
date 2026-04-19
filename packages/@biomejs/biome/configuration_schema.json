@@ -4160,6 +4160,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoJsxLeakedSemicolonConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoJsxLeakedSemicolonOptions" }
+			]
+		},
+		"NoJsxLeakedSemicolonOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoJsxLiteralsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6235,6 +6245,13 @@
 					"description": "Disallow the use of inline styles.\nSee https://biomejs.dev/linter/rules/no-inline-styles",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoInlineStylesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noJsxLeakedSemicolon": {
+					"description": "Flags text nodes with a leading ; after a JSX element.\nSee https://biomejs.dev/linter/rules/no-jsx-leaked-semicolon",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoJsxLeakedSemicolonConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8848,6 +8865,16 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoIrregularWhitespaceOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoJsxLeakedSemicolonOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoJsxLeakedSemicolonOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

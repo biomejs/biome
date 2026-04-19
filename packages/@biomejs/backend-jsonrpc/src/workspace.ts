@@ -2198,6 +2198,11 @@ See https://biomejs.dev/linter/rules/no-inline-styles
 	 */
 	noInlineStyles?: NoInlineStylesConfiguration;
 	/**
+	* Flags text nodes with a leading ; after a JSX element.
+See https://biomejs.dev/linter/rules/no-jsx-leaked-semicolon 
+	 */
+	noJsxLeakedSemicolon?: NoJsxLeakedSemicolonConfiguration;
+	/**
 	* Disallow JSX namespace syntax.
 See https://biomejs.dev/linter/rules/no-jsx-namespace 
 	 */
@@ -4320,6 +4325,9 @@ export type NoIncrementDecrementConfiguration =
 export type NoInlineStylesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoInlineStylesOptions;
+export type NoJsxLeakedSemicolonConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoJsxLeakedSemicolonOptions;
 export type NoJsxNamespaceConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsxNamespaceOptions;
@@ -6080,6 +6088,11 @@ export interface RuleWithNoInlineStylesOptions {
 	level: RulePlainConfiguration;
 	options?: NoInlineStylesOptions;
 }
+export interface RuleWithNoJsxLeakedSemicolonOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoJsxLeakedSemicolonOptions;
+}
 export interface RuleWithNoJsxNamespaceOptions {
 	level: RulePlainConfiguration;
 	options?: NoJsxNamespaceOptions;
@@ -7785,6 +7798,7 @@ export interface NoIncrementDecrementOptions {
 	allowForLoopAfterthoughts?: boolean;
 }
 export type NoInlineStylesOptions = {};
+export type NoJsxLeakedSemicolonOptions = {};
 export type NoJsxNamespaceOptions = {};
 export type NoJsxPropsBindOptions = {};
 export type NoLeakedRenderOptions = {};
@@ -8965,6 +8979,7 @@ export type Category =
 	| "lint/nursery/noImpliedEval"
 	| "lint/nursery/noIncrementDecrement"
 	| "lint/nursery/noInlineStyles"
+	| "lint/nursery/noJsxLeakedSemicolon"
 	| "lint/nursery/noJsxNamespace"
 	| "lint/nursery/noJsxPropsBind"
 	| "lint/nursery/noLeakedRender"
