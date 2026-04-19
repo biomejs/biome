@@ -5,12 +5,12 @@ use biome_deserialize::{
 };
 use biome_deserialize_macros::Merge;
 use biome_rowan::Text;
-use bpaf::Bpaf;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::str::FromStr;
 
 /// A preset configuration for enabling a set of rules.
-#[derive(Clone, Debug, Eq, PartialEq, Bpaf, Merge)]
+#[cfg_attr(feature = "cli", derive(bpaf::Bpaf))]
+#[derive(Clone, Debug, Eq, PartialEq, Merge)]
 pub enum PresetConfig {
     FromAnalyzer(RulePreset),
     All,
