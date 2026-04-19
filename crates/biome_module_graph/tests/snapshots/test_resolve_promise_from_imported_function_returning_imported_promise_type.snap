@@ -62,7 +62,6 @@ Imports {
 ```
 PromisedResult  => BindingTypeData {
   Types Module(0) TypeId(4),
-  Exported Ranges: (12..26)
 }
 ```
 
@@ -119,7 +118,6 @@ Imports {
 ```
 returnPromiseResult => BindingTypeData {
   Types Module(0) TypeId(7),
-  Exported Ranges: (215..234)
 }
 ```
 

@@ -410,6 +410,9 @@ fn svelte_directive_value_token(
 ) -> Option<SyntaxToken<HtmlLanguage>> {
     match &directive.property().ok()? {
         AnySvelteBindingProperty::SvelteLiteral(l) => l.value_token().ok(),
+        AnySvelteBindingProperty::SvelteMemberProperty(property) => {
+            property.member().ok()?.ident_token().ok()
+        }
         AnySvelteBindingProperty::SvelteName(n) => n.ident_token().ok(),
     }
 }

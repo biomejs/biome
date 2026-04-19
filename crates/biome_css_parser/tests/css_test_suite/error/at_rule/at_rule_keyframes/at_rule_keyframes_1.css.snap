@@ -670,6 +670,7 @@ at_rule_keyframes_1.css:28:8 parse ━━━━━━━━━━━━━━━
   - from
   - to
   - a percentage
+  - a timeline-range-name (cover, contain, entry, exit, entry-crossing, exit-crossing)
   
 at_rule_keyframes_1.css:31:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -687,6 +688,7 @@ at_rule_keyframes_1.css:31:8 parse ━━━━━━━━━━━━━━━
   - from
   - to
   - a percentage
+  - a timeline-range-name (cover, contain, entry, exit, entry-crossing, exit-crossing)
   
 at_rule_keyframes_1.css:31:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

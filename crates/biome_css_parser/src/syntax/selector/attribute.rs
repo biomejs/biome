@@ -2,8 +2,9 @@ use crate::parser::CssParser;
 use crate::syntax::parse_error::{
     expected_any_attribute_matcher_name, expected_any_attribute_modifier, expected_identifier,
 };
+use crate::syntax::scss::{is_at_scss_interpolated_string, parse_scss_interpolated_string};
 use crate::syntax::selector::{is_nth_at_namespace, parse_namespace, selector_lex_context};
-use crate::syntax::{is_at_identifier, parse_regular_identifier, parse_string};
+use crate::syntax::{is_at_identifier, is_at_string, parse_regular_identifier, parse_string};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::diagnostic::expected_token;
@@ -92,7 +93,7 @@ fn parse_attribute_matcher(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn is_at_attribute_matcher_value(p: &mut CssParser) -> bool {
-    is_at_identifier(p) || p.at(CSS_STRING_LITERAL)
+    is_at_identifier(p) || is_at_string(p) || is_at_scss_interpolated_string(p)
 }
 #[inline]
 fn parse_attribute_matcher_value(p: &mut CssParser) -> ParsedSyntax {
@@ -102,7 +103,9 @@ fn parse_attribute_matcher_value(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    if p.at(CSS_STRING_LITERAL) {
+    if is_at_scss_interpolated_string(p) {
+        parse_scss_interpolated_string(p).ok();
+    } else if is_at_string(p) {
         parse_string(p).ok();
     } else {
         parse_regular_identifier(p).ok();

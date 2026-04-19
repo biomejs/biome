@@ -38,7 +38,7 @@ invalid.html:3:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━�
     1 │ <!-- should generate diagnostics -->
     2 │ <iframe />
   > 3 │ <iframe></iframe>
-      │ ^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^
     4 │ <iframe title></iframe>
     5 │ <iframe title=""></iframe>
   
@@ -55,7 +55,7 @@ invalid.html:4:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━�
     2 │ <iframe />
     3 │ <iframe></iframe>
   > 4 │ <iframe title></iframe>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^
     5 │ <iframe title=""></iframe>
     6 │ <IFRAME></IFRAME>
   
@@ -72,7 +72,7 @@ invalid.html:5:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━�
     3 │ <iframe></iframe>
     4 │ <iframe title></iframe>
   > 5 │ <iframe title=""></iframe>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^
     6 │ <IFRAME></IFRAME>
     7 │ 
   
@@ -89,7 +89,7 @@ invalid.html:6:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━�
     4 │ <iframe title></iframe>
     5 │ <iframe title=""></iframe>
   > 6 │ <IFRAME></IFRAME>
-      │ ^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^
     7 │ 
   
   i Screen readers rely on the title set on an iframe to describe the content being displayed.

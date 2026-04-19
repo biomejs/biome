@@ -1,4 +1,4 @@
-use crate::MdFormatContext;
+use crate::MarkdownFormatContext;
 use biome_formatter::{
     Buffer, Format, FormatResult,
     prelude::{Formatter, text},
@@ -19,8 +19,8 @@ pub struct FormatMarkdownVerbatimNode<'node> {
     node: &'node MarkdownSyntaxNode,
 }
 
-impl Format<MdFormatContext> for FormatMarkdownVerbatimNode<'_> {
-    fn fmt(&self, f: &mut Formatter<MdFormatContext>) -> FormatResult<()> {
+impl Format<MarkdownFormatContext> for FormatMarkdownVerbatimNode<'_> {
+    fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
         // Track all tokens in the node so the formatter knows they've been seen
         for element in self.node.descendants_with_tokens(Direction::Next) {
             match element {

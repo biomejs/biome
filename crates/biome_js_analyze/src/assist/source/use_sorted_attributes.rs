@@ -109,8 +109,12 @@ impl Rule for UseSortedAttributes {
                 AnyJsxAttribute::JsxAttribute(attr) => {
                     current_prop_group.attrs.push(SortableJsxAttribute(attr));
                 }
-                // spread prop reset sort order
-                AnyJsxAttribute::JsxSpreadAttribute(_) => {
+                // spread or shorthand attribute resets sort order: it carries
+                // an opaque expression that may have side effects on the
+                // resulting prop set, so attributes on either side cannot be
+                // freely reordered across it.
+                AnyJsxAttribute::JsxSpreadAttribute(_)
+                | AnyJsxAttribute::JsxShorthandAttribute(_) => {
                     if !current_prop_group.is_empty()
                         && !current_prop_group.is_sorted(boolean_comparator)
                     {

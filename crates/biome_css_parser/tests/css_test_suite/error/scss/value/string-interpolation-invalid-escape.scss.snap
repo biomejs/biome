@@ -1,0 +1,267 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+.box {
+  first_chunk: "foo \0 #{$bar} baz";
+  later_chunk: "#{$bar} baz \0 qux";
+  color: red;
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..5 "box" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@5..6 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@6..20 "first_chunk" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@20..22 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssInterpolatedString {
+                                            opening_quote_token: SCSS_STRING_QUOTE@22..23 "\"" [] [],
+                                            parts: ScssInterpolatedStringPartList [
+                                                ScssStringText {
+                                                    value_token: SCSS_STRING_CONTENT_LITERAL@23..30 "foo \\0 " [] [],
+                                                },
+                                                ScssInterpolation {
+                                                    hash_token: HASH@30..31 "#" [] [],
+                                                    l_curly_token: L_CURLY@31..32 "{" [] [],
+                                                    value: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            ScssIdentifier {
+                                                                dollar_token: DOLLAR@32..33 "$" [] [],
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@33..36 "bar" [] [],
+                                                                },
+                                                            },
+                                                        ],
+                                                    },
+                                                    r_curly_token: R_CURLY@36..37 "}" [] [],
+                                                },
+                                                ScssStringText {
+                                                    value_token: SCSS_STRING_CONTENT_LITERAL@37..41 " baz" [] [],
+                                                },
+                                            ],
+                                            closing_quote_token: SCSS_STRING_QUOTE@41..42 "\"" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@42..43 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@43..57 "later_chunk" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@57..59 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssInterpolatedString {
+                                            opening_quote_token: SCSS_STRING_QUOTE@59..60 "\"" [] [],
+                                            parts: ScssInterpolatedStringPartList [
+                                                ScssInterpolation {
+                                                    hash_token: HASH@60..61 "#" [] [],
+                                                    l_curly_token: L_CURLY@61..62 "{" [] [],
+                                                    value: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            ScssIdentifier {
+                                                                dollar_token: DOLLAR@62..63 "$" [] [],
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@63..66 "bar" [] [],
+                                                                },
+                                                            },
+                                                        ],
+                                                    },
+                                                    r_curly_token: R_CURLY@66..67 "}" [] [],
+                                                },
+                                                ScssStringText {
+                                                    value_token: SCSS_STRING_CONTENT_LITERAL@67..78 " baz \\0 qux" [] [],
+                                                },
+                                            ],
+                                            closing_quote_token: SCSS_STRING_QUOTE@78..79 "\"" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@79..80 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@80..88 "color" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@88..90 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@90..93 "red" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@93..94 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@94..96 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@96..97 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..97
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..96
+    0: CSS_QUALIFIED_RULE@0..96
+      0: CSS_SELECTOR_LIST@0..5
+        0: CSS_COMPOUND_SELECTOR@0..5
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..5
+            0: CSS_CLASS_SELECTOR@0..5
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..5
+                0: IDENT@1..5 "box" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@5..96
+        0: L_CURLY@5..6 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@6..94
+          0: CSS_DECLARATION_WITH_SEMICOLON@6..43
+            0: CSS_DECLARATION@6..42
+              0: CSS_GENERIC_PROPERTY@6..42
+                0: CSS_IDENTIFIER@6..20
+                  0: IDENT@6..20 "first_chunk" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@20..22 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@22..42
+                  0: SCSS_EXPRESSION_ITEM_LIST@22..42
+                    0: SCSS_INTERPOLATED_STRING@22..42
+                      0: SCSS_STRING_QUOTE@22..23 "\"" [] []
+                      1: SCSS_INTERPOLATED_STRING_PART_LIST@23..41
+                        0: SCSS_STRING_TEXT@23..30
+                          0: SCSS_STRING_CONTENT_LITERAL@23..30 "foo \\0 " [] []
+                        1: SCSS_INTERPOLATION@30..37
+                          0: HASH@30..31 "#" [] []
+                          1: L_CURLY@31..32 "{" [] []
+                          2: SCSS_EXPRESSION@32..36
+                            0: SCSS_EXPRESSION_ITEM_LIST@32..36
+                              0: SCSS_IDENTIFIER@32..36
+                                0: DOLLAR@32..33 "$" [] []
+                                1: CSS_IDENTIFIER@33..36
+                                  0: IDENT@33..36 "bar" [] []
+                          3: R_CURLY@36..37 "}" [] []
+                        2: SCSS_STRING_TEXT@37..41
+                          0: SCSS_STRING_CONTENT_LITERAL@37..41 " baz" [] []
+                      2: SCSS_STRING_QUOTE@41..42 "\"" [] []
+              1: (empty)
+            1: SEMICOLON@42..43 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@43..80
+            0: CSS_DECLARATION@43..79
+              0: CSS_GENERIC_PROPERTY@43..79
+                0: CSS_IDENTIFIER@43..57
+                  0: IDENT@43..57 "later_chunk" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@57..59 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@59..79
+                  0: SCSS_EXPRESSION_ITEM_LIST@59..79
+                    0: SCSS_INTERPOLATED_STRING@59..79
+                      0: SCSS_STRING_QUOTE@59..60 "\"" [] []
+                      1: SCSS_INTERPOLATED_STRING_PART_LIST@60..78
+                        0: SCSS_INTERPOLATION@60..67
+                          0: HASH@60..61 "#" [] []
+                          1: L_CURLY@61..62 "{" [] []
+                          2: SCSS_EXPRESSION@62..66
+                            0: SCSS_EXPRESSION_ITEM_LIST@62..66
+                              0: SCSS_IDENTIFIER@62..66
+                                0: DOLLAR@62..63 "$" [] []
+                                1: CSS_IDENTIFIER@63..66
+                                  0: IDENT@63..66 "bar" [] []
+                          3: R_CURLY@66..67 "}" [] []
+                        1: SCSS_STRING_TEXT@67..78
+                          0: SCSS_STRING_CONTENT_LITERAL@67..78 " baz \\0 qux" [] []
+                      2: SCSS_STRING_QUOTE@78..79 "\"" [] []
+              1: (empty)
+            1: SEMICOLON@79..80 ";" [] []
+          2: CSS_DECLARATION_WITH_SEMICOLON@80..94
+            0: CSS_DECLARATION@80..93
+              0: CSS_GENERIC_PROPERTY@80..93
+                0: CSS_IDENTIFIER@80..88
+                  0: IDENT@80..88 "color" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@88..90 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@90..93
+                  0: SCSS_EXPRESSION_ITEM_LIST@90..93
+                    0: CSS_IDENTIFIER@90..93
+                      0: IDENT@90..93 "red" [] []
+              1: (empty)
+            1: SEMICOLON@93..94 ";" [] []
+        2: R_CURLY@94..96 "}" [Newline("\n")] []
+  2: EOF@96..97 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+string-interpolation-invalid-escape.scss:2:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid escape sequence
+  
+    1 │ .box {
+  > 2 │   first_chunk: "foo \0 #{$bar} baz";
+      │                     ^^^
+    3 │   later_chunk: "#{$bar} baz \0 qux";
+    4 │   color: red;
+  
+string-interpolation-invalid-escape.scss:3:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid escape sequence
+  
+    1 │ .box {
+    2 │   first_chunk: "foo \0 #{$bar} baz";
+  > 3 │   later_chunk: "#{$bar} baz \0 qux";
+      │                             ^^^
+    4 │   color: red;
+    5 │ }
+  
+```

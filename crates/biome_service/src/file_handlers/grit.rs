@@ -427,13 +427,17 @@ fn lint(params: LintParams) -> LintResults {
     let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u32);
     let errors = diagnostics
         .iter()
-        .filter(|diag| diag.severity() <= Severity::Error)
+        .filter(|diag| diag.severity() >= Severity::Error)
         .count();
 
     LintResults {
         diagnostics,
         errors,
         skipped_diagnostics,
+        // safe to hardcode them to zero because we don't have a linting step, and all parse
+        // diagnostics are errors
+        infos: 0,
+        warnings: 0,
     }
 }
 

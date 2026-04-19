@@ -1,0 +1,193 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+- aaa
+
+    ```js
+    const a = 1;
+    ```
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@0..1 "-" [] [],
+                        post_marker_space_token: missing (optional),
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@1..5 " aaa" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@5..6 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@6..7 "\n" [] [],
+                        },
+                        MdContinuationIndent {
+                            indent: MdIndentTokenList [
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@7..8 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@8..9 " " [] [],
+                                },
+                            ],
+                        },
+                        MdFencedCodeBlock {
+                            indent: MdIndentTokenList [
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@9..10 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@10..11 " " [] [],
+                                },
+                            ],
+                            l_fence: TRIPLE_BACKTICK@11..14 "```" [] [],
+                            code_list: MdCodeNameList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@14..16 "js" [] [],
+                                },
+                            ],
+                            content: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@16..17 "\n" [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@17..18 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@18..19 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@19..20 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@20..21 " " [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@21..33 "const a = 1;" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@33..34 "\n" [] [],
+                                },
+                            ],
+                            r_fence_indent: MdIndentTokenList [
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@34..35 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@35..36 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@36..37 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@37..38 " " [] [],
+                                },
+                            ],
+                            r_fence: TRIPLE_BACKTICK@38..41 "```" [] [],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@41..42 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@42..42 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..42
+  0: (empty)
+  1: MD_BLOCK_LIST@0..42
+    0: MD_BULLET_LIST_ITEM@0..41
+      0: MD_BULLET_LIST@0..41
+        0: MD_BULLET@0..41
+          0: MD_LIST_MARKER_PREFIX@0..1
+            0: MD_INDENT_TOKEN_LIST@0..0
+            1: MINUS@0..1 "-" [] []
+            2: (empty)
+            3: MD_INDENT_TOKEN_LIST@1..1
+          1: MD_BLOCK_LIST@1..41
+            0: MD_PARAGRAPH@1..6
+              0: MD_INLINE_ITEM_LIST@1..6
+                0: MD_TEXTUAL@1..5
+                  0: MD_TEXTUAL_LITERAL@1..5 " aaa" [] []
+                1: MD_TEXTUAL@5..6
+                  0: MD_TEXTUAL_LITERAL@5..6 "\n" [] []
+              1: (empty)
+            1: MD_NEWLINE@6..7
+              0: NEWLINE@6..7 "\n" [] []
+            2: MD_CONTINUATION_INDENT@7..9
+              0: MD_INDENT_TOKEN_LIST@7..9
+                0: MD_INDENT_TOKEN@7..8
+                  0: MD_INDENT_CHAR@7..8 " " [] []
+                1: MD_INDENT_TOKEN@8..9
+                  0: MD_INDENT_CHAR@8..9 " " [] []
+            3: MD_FENCED_CODE_BLOCK@9..41
+              0: MD_INDENT_TOKEN_LIST@9..11
+                0: MD_INDENT_TOKEN@9..10
+                  0: MD_INDENT_CHAR@9..10 " " [] []
+                1: MD_INDENT_TOKEN@10..11
+                  0: MD_INDENT_CHAR@10..11 " " [] []
+              1: TRIPLE_BACKTICK@11..14 "```" [] []
+              2: MD_CODE_NAME_LIST@14..16
+                0: MD_TEXTUAL@14..16
+                  0: MD_TEXTUAL_LITERAL@14..16 "js" [] []
+              3: MD_INLINE_ITEM_LIST@16..34
+                0: MD_TEXTUAL@16..17
+                  0: MD_TEXTUAL_LITERAL@16..17 "\n" [] []
+                1: MD_INDENT_TOKEN@17..18
+                  0: MD_INDENT_CHAR@17..18 " " [] []
+                2: MD_INDENT_TOKEN@18..19
+                  0: MD_INDENT_CHAR@18..19 " " [] []
+                3: MD_INDENT_TOKEN@19..20
+                  0: MD_INDENT_CHAR@19..20 " " [] []
+                4: MD_INDENT_TOKEN@20..21
+                  0: MD_INDENT_CHAR@20..21 " " [] []
+                5: MD_TEXTUAL@21..33
+                  0: MD_TEXTUAL_LITERAL@21..33 "const a = 1;" [] []
+                6: MD_TEXTUAL@33..34
+                  0: MD_TEXTUAL_LITERAL@33..34 "\n" [] []
+              4: MD_INDENT_TOKEN_LIST@34..38
+                0: MD_INDENT_TOKEN@34..35
+                  0: MD_INDENT_CHAR@34..35 " " [] []
+                1: MD_INDENT_TOKEN@35..36
+                  0: MD_INDENT_CHAR@35..36 " " [] []
+                2: MD_INDENT_TOKEN@36..37
+                  0: MD_INDENT_CHAR@36..37 " " [] []
+                3: MD_INDENT_TOKEN@37..38
+                  0: MD_INDENT_CHAR@37..38 " " [] []
+              5: TRIPLE_BACKTICK@38..41 "```" [] []
+    1: MD_NEWLINE@41..42
+      0: NEWLINE@41..42 "\n" [] []
+  2: EOF@42..42 "" [] []
+
+```

@@ -43,6 +43,7 @@ use crate::syntax::parse_any_block_with_indent_code_policy;
 use crate::syntax::parse_error::quote_nesting_too_deep;
 use crate::syntax::{
     INDENT_CODE_BLOCK_SPACES, MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES, is_paragraph_like,
+    is_whitespace_only,
 };
 
 /// Check if we're at the start of a block quote (`>`).
@@ -82,21 +83,21 @@ pub(crate) fn parse_quote(p: &mut MarkdownParser) -> ParsedSyntax {
         let range = p.cur_range();
         p.error(quote_nesting_too_deep(p, range, max_nesting_depth));
         p.state_mut().quote_depth_exceeded = true;
+        // Wrap recovery tokens in MdBogusBlock (a valid AnyMdBlock child)
+        // so they don't attach as Skipped trivia on normal content nodes.
+        let bogus_m = p.start();
         p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
-        if p.at(T![>]) {
-            p.parse_as_skipped_trivia_tokens(|p| p.bump(T![>]));
-        } else if p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == ">" {
-            p.parse_as_skipped_trivia_tokens(|p| p.bump_remap(T![>]));
-        }
+        try_bump_quote_marker(p);
         let has_indented_code = at_quote_indented_code_start(p);
-        skip_optional_marker_space(p, has_indented_code);
-        return Absent;
+        emit_optional_marker_space(p, has_indented_code);
+        return Present(bogus_m.complete(p, MD_BOGUS_BLOCK));
     }
 
     let m = p.start();
     p.state_mut().block_quote_depth += 1;
 
     let marker_space = emit_quote_prefix_node(p);
+    relex_after_quote_prefix_consumed(p);
     p.set_virtual_line_start();
 
     parse_quote_block_list(p);
@@ -123,6 +124,68 @@ fn emit_quote_prefix_node(p: &mut MarkdownParser) -> bool {
 
     prefix_m.complete(p, MD_QUOTE_PREFIX);
     marker_space
+}
+
+/// After consuming a quote prefix, selectively re-lex the current token as if
+/// it were at line start when the remaining line could form a thematic break.
+///
+/// Re-lexing unconditionally perturbs ordinary quoted text tokenization by
+/// splitting leading spaces into separate tokens. We only need line-start
+/// semantics here for thematic-break candidates like `> ---`.
+///
+/// A candidate is any line whose non-whitespace bytes are all the **same**
+/// thematic break character (`-`, `*`, or `_`). Per CommonMark §4.1, mixing
+/// different break characters (e.g. `_*-`) does **not** form a thematic break.
+fn force_relex_thematic_break_after_quote_prefix(p: &mut MarkdownParser) {
+    let is_thematic_break_candidate = p.at(T![-])
+        || p.at(T![*])
+        || p.at(UNDERSCORE)
+        || p.at(DOUBLE_UNDERSCORE)
+        || (p.at(MD_TEXTUAL_LITERAL) && is_thematic_break_candidate_text(p.cur_text()));
+
+    if is_thematic_break_candidate {
+        p.force_relex_at_line_start();
+    }
+}
+
+fn relex_after_quote_prefix_consumed(p: &mut MarkdownParser) {
+    force_relex_thematic_break_after_quote_prefix(p);
+}
+
+/// Check if `text` could be a thematic break: all non-whitespace bytes must be
+/// the **same** thematic break character (`-`, `*`, or `_`).
+fn is_thematic_break_candidate_text(text: &str) -> bool {
+    use biome_unicode_table::{
+        Dispatch::{IDT, MIN, MUL, WHS},
+        lookup_byte,
+    };
+
+    let mut break_char: Option<u8> = None;
+    for &b in text.as_bytes() {
+        let dispatched = lookup_byte(b);
+        // Skip whitespace (space, tab, etc.) via the shared lookup table.
+        if dispatched == WHS {
+            continue;
+        }
+        // Match thematic break characters via dispatch variants:
+        // MIN = `-`, MUL = `*`, IDT = `_` (IDT also covers letters, so
+        // narrow to `b'_'` explicitly).
+        let is_break_char = matches!(dispatched, MIN | MUL) || (dispatched == IDT && b == b'_');
+        if is_break_char {
+            if let Some(expected) = break_char {
+                // Mixed break characters like `_*-` are not valid.
+                if b != expected {
+                    return false;
+                }
+            } else {
+                break_char = Some(b);
+            }
+        } else {
+            // Any other non-whitespace byte disqualifies the line.
+            return false;
+        }
+    }
+    break_char.is_some()
 }
 
 /// Emit one quote prefix token sequence: [indent?] `>` [optional space/tab].
@@ -196,11 +259,6 @@ fn emit_quote_pre_marker_indents(p: &mut MarkdownParser) {
     }
 
     indent_list_m.complete(p, MD_QUOTE_INDENT_LIST);
-}
-
-/// Check if text contains only spaces and tabs.
-fn is_whitespace_only(text: &str) -> bool {
-    !text.is_empty() && text.chars().all(|c| c == ' ' || c == '\t')
 }
 
 /// Calculate indent width accounting for tab expansion (CommonMark §2.2).
@@ -278,6 +336,7 @@ impl QuoteBlockList {
         {
             if has_quote_prefix(p, self.depth) {
                 consume_quote_prefix(p, self.depth);
+                relex_after_quote_prefix_consumed(p);
                 self.line_started_with_prefix = true;
             } else {
                 return false;
@@ -537,15 +596,30 @@ fn parse_code_block_newline(p: &mut MarkdownParser, depth: usize) -> bool {
         return false;
     }
 
-    consume_quote_prefix(p, depth);
+    let continues_code_block = p.lookahead(|p| {
+        consume_quote_prefix(p, depth);
 
-    // Blank lines (consecutive newlines) are allowed in indented code
+        // Blank lines (consecutive newlines) are allowed in indented code.
+        if p.at(NEWLINE) {
+            return true;
+        }
+
+        at_quote_indented_code_start(p)
+    });
+
+    if !continues_code_block {
+        return false;
+    }
+
+    consume_quote_prefix(p, depth);
+    relex_after_quote_prefix_consumed(p);
+
+    // Blank lines (consecutive newlines) are allowed in indented code.
     if p.at(NEWLINE) {
         return true;
     }
 
-    // Next line must still be indented to continue the code block
-    at_quote_indented_code_start(p)
+    true
 }
 
 /// Parse a single textual token in an indented code block.
@@ -553,25 +627,6 @@ fn parse_code_block_textual(p: &mut MarkdownParser) {
     let text_m = p.start();
     p.bump_remap(MD_TEXTUAL_LITERAL);
     text_m.complete(p, MD_TEXTUAL);
-}
-
-pub(crate) fn skip_optional_marker_space(p: &mut MarkdownParser, preserve_tab: bool) -> bool {
-    if !p.at(MD_TEXTUAL_LITERAL) {
-        return false;
-    }
-
-    let text = p.cur_text();
-    if text == " " {
-        p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
-        return true;
-    }
-    if text == "\t" {
-        if !preserve_tab {
-            p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
-        }
-        return true;
-    }
-    false
 }
 
 /// Emit the optional space/tab after a `>` quote marker as an explicit CST node.

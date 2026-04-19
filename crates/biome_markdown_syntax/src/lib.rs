@@ -1,5 +1,6 @@
 #![deny(clippy::use_self)]
 
+pub mod emphasis_ext;
 pub mod file_source;
 #[macro_use]
 mod generated;

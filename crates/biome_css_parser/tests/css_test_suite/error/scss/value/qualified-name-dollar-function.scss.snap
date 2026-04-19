@@ -47,44 +47,38 @@ CssRoot {
                                 colon_token: COLON@15..17 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
-                                        ScssQualifiedName {
-                                            module: CssIdentifier {
-                                                value_token: IDENT@17..21 "math" [] [],
-                                            },
-                                            dot_token: DOT@21..22 "." [] [],
-                                            member: ScssIdentifier {
-                                                dollar_token: DOLLAR@22..23 "$" [] [],
-                                                name: CssIdentifier {
-                                                    value_token: IDENT@23..26 "div" [] [],
+                                        CssFunction {
+                                            name: ScssQualifiedName {
+                                                module: CssIdentifier {
+                                                    value_token: IDENT@17..21 "math" [] [],
+                                                },
+                                                dot_token: DOT@21..22 "." [] [],
+                                                member: ScssIdentifier {
+                                                    dollar_token: DOLLAR@22..23 "$" [] [],
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@23..26 "div" [] [],
+                                                    },
                                                 },
                                             },
-                                        },
-                                        ScssParenthesizedExpression {
                                             l_paren_token: L_PAREN@26..27 "(" [] [],
-                                            expression: ScssListExpression {
-                                                elements: ScssListExpressionElementList [
-                                                    ScssListExpressionElement {
-                                                        value: ScssExpression {
-                                                            items: ScssExpressionItemList [
-                                                                CssRegularDimension {
-                                                                    value_token: CSS_NUMBER_LITERAL@27..29 "10" [] [],
-                                                                    unit_token: IDENT@29..31 "px" [] [],
-                                                                },
-                                                            ],
+                                            items: CssParameterList [
+                                                ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssRegularDimension {
+                                                            value_token: CSS_NUMBER_LITERAL@27..29 "10" [] [],
+                                                            unit_token: IDENT@29..31 "px" [] [],
                                                         },
-                                                    },
-                                                    COMMA@31..33 "," [] [Whitespace(" ")],
-                                                    ScssListExpressionElement {
-                                                        value: ScssExpression {
-                                                            items: ScssExpressionItemList [
-                                                                CssNumber {
-                                                                    value_token: CSS_NUMBER_LITERAL@33..34 "2" [] [],
-                                                                },
-                                                            ],
+                                                    ],
+                                                },
+                                                COMMA@31..33 "," [] [Whitespace(" ")],
+                                                ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@33..34 "2" [] [],
                                                         },
-                                                    },
-                                                ],
-                                            },
+                                                    ],
+                                                },
+                                            ],
                                             r_paren_token: R_PAREN@34..35 ")" [] [],
                                         },
                                     ],
@@ -103,46 +97,40 @@ CssRoot {
                                 colon_token: COLON@44..46 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
-                                        ScssQualifiedName {
-                                            module: CssIdentifier {
-                                                value_token: IDENT@46..49 "map" [] [],
-                                            },
-                                            dot_token: DOT@49..50 "." [] [],
-                                            member: ScssIdentifier {
-                                                dollar_token: DOLLAR@50..51 "$" [] [],
-                                                name: CssIdentifier {
-                                                    value_token: IDENT@51..54 "get" [] [],
+                                        CssFunction {
+                                            name: ScssQualifiedName {
+                                                module: CssIdentifier {
+                                                    value_token: IDENT@46..49 "map" [] [],
+                                                },
+                                                dot_token: DOT@49..50 "." [] [],
+                                                member: ScssIdentifier {
+                                                    dollar_token: DOLLAR@50..51 "$" [] [],
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@51..54 "get" [] [],
+                                                    },
                                                 },
                                             },
-                                        },
-                                        ScssParenthesizedExpression {
                                             l_paren_token: L_PAREN@54..55 "(" [] [],
-                                            expression: ScssListExpression {
-                                                elements: ScssListExpressionElementList [
-                                                    ScssListExpressionElement {
-                                                        value: ScssExpression {
-                                                            items: ScssExpressionItemList [
-                                                                ScssIdentifier {
-                                                                    dollar_token: DOLLAR@55..56 "$" [] [],
-                                                                    name: CssIdentifier {
-                                                                        value_token: IDENT@56..59 "map" [] [],
-                                                                    },
-                                                                },
-                                                            ],
+                                            items: CssParameterList [
+                                                ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        ScssIdentifier {
+                                                            dollar_token: DOLLAR@55..56 "$" [] [],
+                                                            name: CssIdentifier {
+                                                                value_token: IDENT@56..59 "map" [] [],
+                                                            },
                                                         },
-                                                    },
-                                                    COMMA@59..61 "," [] [Whitespace(" ")],
-                                                    ScssListExpressionElement {
-                                                        value: ScssExpression {
-                                                            items: ScssExpressionItemList [
-                                                                CssIdentifier {
-                                                                    value_token: IDENT@61..62 "a" [] [],
-                                                                },
-                                                            ],
+                                                    ],
+                                                },
+                                                COMMA@59..61 "," [] [Whitespace(" ")],
+                                                ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@61..62 "a" [] [],
                                                         },
-                                                    },
-                                                ],
-                                            },
+                                                    ],
+                                                },
+                                            ],
                                             r_paren_token: R_PAREN@62..63 ")" [] [],
                                         },
                                     ],
@@ -188,31 +176,28 @@ CssRoot {
                 1: COLON@15..17 ":" [] [Whitespace(" ")]
                 2: SCSS_EXPRESSION@17..35
                   0: SCSS_EXPRESSION_ITEM_LIST@17..35
-                    0: SCSS_QUALIFIED_NAME@17..26
-                      0: CSS_IDENTIFIER@17..21
-                        0: IDENT@17..21 "math" [] []
-                      1: DOT@21..22 "." [] []
-                      2: SCSS_IDENTIFIER@22..26
-                        0: DOLLAR@22..23 "$" [] []
-                        1: CSS_IDENTIFIER@23..26
-                          0: IDENT@23..26 "div" [] []
-                    1: SCSS_PARENTHESIZED_EXPRESSION@26..35
-                      0: L_PAREN@26..27 "(" [] []
-                      1: SCSS_LIST_EXPRESSION@27..34
-                        0: SCSS_LIST_EXPRESSION_ELEMENT_LIST@27..34
-                          0: SCSS_LIST_EXPRESSION_ELEMENT@27..31
-                            0: SCSS_EXPRESSION@27..31
-                              0: SCSS_EXPRESSION_ITEM_LIST@27..31
-                                0: CSS_REGULAR_DIMENSION@27..31
-                                  0: CSS_NUMBER_LITERAL@27..29 "10" [] []
-                                  1: IDENT@29..31 "px" [] []
-                          1: COMMA@31..33 "," [] [Whitespace(" ")]
-                          2: SCSS_LIST_EXPRESSION_ELEMENT@33..34
-                            0: SCSS_EXPRESSION@33..34
-                              0: SCSS_EXPRESSION_ITEM_LIST@33..34
-                                0: CSS_NUMBER@33..34
-                                  0: CSS_NUMBER_LITERAL@33..34 "2" [] []
-                      2: R_PAREN@34..35 ")" [] []
+                    0: CSS_FUNCTION@17..35
+                      0: SCSS_QUALIFIED_NAME@17..26
+                        0: CSS_IDENTIFIER@17..21
+                          0: IDENT@17..21 "math" [] []
+                        1: DOT@21..22 "." [] []
+                        2: SCSS_IDENTIFIER@22..26
+                          0: DOLLAR@22..23 "$" [] []
+                          1: CSS_IDENTIFIER@23..26
+                            0: IDENT@23..26 "div" [] []
+                      1: L_PAREN@26..27 "(" [] []
+                      2: CSS_PARAMETER_LIST@27..34
+                        0: SCSS_EXPRESSION@27..31
+                          0: SCSS_EXPRESSION_ITEM_LIST@27..31
+                            0: CSS_REGULAR_DIMENSION@27..31
+                              0: CSS_NUMBER_LITERAL@27..29 "10" [] []
+                              1: IDENT@29..31 "px" [] []
+                        1: COMMA@31..33 "," [] [Whitespace(" ")]
+                        2: SCSS_EXPRESSION@33..34
+                          0: SCSS_EXPRESSION_ITEM_LIST@33..34
+                            0: CSS_NUMBER@33..34
+                              0: CSS_NUMBER_LITERAL@33..34 "2" [] []
+                      3: R_PAREN@34..35 ")" [] []
               1: (empty)
             1: SEMICOLON@35..36 ";" [] []
           1: CSS_DECLARATION_WITH_SEMICOLON@36..64
@@ -223,32 +208,29 @@ CssRoot {
                 1: COLON@44..46 ":" [] [Whitespace(" ")]
                 2: SCSS_EXPRESSION@46..63
                   0: SCSS_EXPRESSION_ITEM_LIST@46..63
-                    0: SCSS_QUALIFIED_NAME@46..54
-                      0: CSS_IDENTIFIER@46..49
-                        0: IDENT@46..49 "map" [] []
-                      1: DOT@49..50 "." [] []
-                      2: SCSS_IDENTIFIER@50..54
-                        0: DOLLAR@50..51 "$" [] []
-                        1: CSS_IDENTIFIER@51..54
-                          0: IDENT@51..54 "get" [] []
-                    1: SCSS_PARENTHESIZED_EXPRESSION@54..63
-                      0: L_PAREN@54..55 "(" [] []
-                      1: SCSS_LIST_EXPRESSION@55..62
-                        0: SCSS_LIST_EXPRESSION_ELEMENT_LIST@55..62
-                          0: SCSS_LIST_EXPRESSION_ELEMENT@55..59
-                            0: SCSS_EXPRESSION@55..59
-                              0: SCSS_EXPRESSION_ITEM_LIST@55..59
-                                0: SCSS_IDENTIFIER@55..59
-                                  0: DOLLAR@55..56 "$" [] []
-                                  1: CSS_IDENTIFIER@56..59
-                                    0: IDENT@56..59 "map" [] []
-                          1: COMMA@59..61 "," [] [Whitespace(" ")]
-                          2: SCSS_LIST_EXPRESSION_ELEMENT@61..62
-                            0: SCSS_EXPRESSION@61..62
-                              0: SCSS_EXPRESSION_ITEM_LIST@61..62
-                                0: CSS_IDENTIFIER@61..62
-                                  0: IDENT@61..62 "a" [] []
-                      2: R_PAREN@62..63 ")" [] []
+                    0: CSS_FUNCTION@46..63
+                      0: SCSS_QUALIFIED_NAME@46..54
+                        0: CSS_IDENTIFIER@46..49
+                          0: IDENT@46..49 "map" [] []
+                        1: DOT@49..50 "." [] []
+                        2: SCSS_IDENTIFIER@50..54
+                          0: DOLLAR@50..51 "$" [] []
+                          1: CSS_IDENTIFIER@51..54
+                            0: IDENT@51..54 "get" [] []
+                      1: L_PAREN@54..55 "(" [] []
+                      2: CSS_PARAMETER_LIST@55..62
+                        0: SCSS_EXPRESSION@55..59
+                          0: SCSS_EXPRESSION_ITEM_LIST@55..59
+                            0: SCSS_IDENTIFIER@55..59
+                              0: DOLLAR@55..56 "$" [] []
+                              1: CSS_IDENTIFIER@56..59
+                                0: IDENT@56..59 "map" [] []
+                        1: COMMA@59..61 "," [] [Whitespace(" ")]
+                        2: SCSS_EXPRESSION@61..62
+                          0: SCSS_EXPRESSION_ITEM_LIST@61..62
+                            0: CSS_IDENTIFIER@61..62
+                              0: IDENT@61..62 "a" [] []
+                      3: R_PAREN@62..63 ")" [] []
               1: (empty)
             1: SEMICOLON@63..64 ";" [] []
         2: R_CURLY@64..66 "}" [Newline("\n")] []

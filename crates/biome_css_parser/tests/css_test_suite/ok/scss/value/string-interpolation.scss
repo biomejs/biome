@@ -1,0 +1,11 @@
+.box {
+  content: "foo #{$bar} baz";
+  path: '#{$name}.scss';
+  suffix: "icon-#{$name}";
+  only: "#{$value}";
+  adjacent: "#{$scheme}#{$host}";
+  nested: "#{"bar"}";
+  escaped: "foo \#{$bar} baz";
+  background: url(#{$raw});
+  asset: url("https://#{$host}/#{$path}");
+}

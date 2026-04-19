@@ -1,6 +1,7 @@
 use crate::{
-    AnyJsExportNamedSpecifier, AnyJsName, JsIdentifierAssignment, JsLiteralExportName,
-    JsReferenceIdentifier, JsSyntaxKind, JsSyntaxToken, JsxReferenceIdentifier, inner_string_text,
+    AnyJsExportNamedSpecifier, AnyJsLiteralExportName, AnyJsName, JsIdentifierAssignment,
+    JsLiteralExportName, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxToken,
+    JsxReferenceIdentifier, inner_string_text,
 };
 use biome_rowan::{
     AstNode, SyntaxError, SyntaxNodeOptionExt, SyntaxResult, TokenText, declare_node_union,
@@ -76,6 +77,29 @@ impl JsLiteralExportName {
         self.inner_string_text()
             .map(|x| x.text() == "default")
             .unwrap_or(false)
+    }
+}
+
+impl AnyJsLiteralExportName {
+    pub fn value(&self) -> SyntaxResult<JsSyntaxToken> {
+        match self {
+            Self::JsLiteralExportName(name) => name.value(),
+            Self::JsMetavariable(name) => name.value_token(),
+        }
+    }
+
+    pub fn inner_string_text(&self) -> SyntaxResult<TokenText> {
+        match self {
+            Self::JsLiteralExportName(name) => name.inner_string_text(),
+            Self::JsMetavariable(name) => Ok(name.value_token()?.token_text_trimmed()),
+        }
+    }
+
+    pub fn is_default(&self) -> bool {
+        match self {
+            Self::JsLiteralExportName(name) => name.is_default(),
+            Self::JsMetavariable(_) => false,
+        }
     }
 }
 

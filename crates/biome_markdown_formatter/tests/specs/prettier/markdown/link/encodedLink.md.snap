@@ -41,13 +41,6 @@ info: markdown/link/encodedLink.md
  ![link](https://www.google.fr/foo->bar)
  ![link](https://www.google.fr/foo-%3Ebar)
  ![link](https://www.google.fr/foo-<bar)
-@@ -12,4 +12,4 @@
- [link]: https://www.google.fr/foo->bar
- [link]: https://www.google.fr/foo-%3Ebar
- [link]: https://www.google.fr/foo-<bar
--[link]: https://www.google.fr/foo-%3Cbar
-+[link]: https://www.google.fr/foo-%3Cbar
-\ No newline at end of file
 ```
 
 # Output
@@ -67,4 +60,5 @@ info: markdown/link/encodedLink.md
 [link]: https://www.google.fr/foo->bar
 [link]: https://www.google.fr/foo-%3Ebar
 [link]: https://www.google.fr/foo-<bar
-[link]: https://www.google.fr/foo-%3Cbar```
+[link]: https://www.google.fr/foo-%3Cbar
+```

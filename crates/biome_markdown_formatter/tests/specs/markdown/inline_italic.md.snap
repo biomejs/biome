@@ -1,0 +1,59 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/inline_italic.md
+---
+
+# Input
+
+```md
+a*b*c
+
+a_b_c
+
+*foo*
+
+_foo_
+
+(*foo*)
+
+![foo *bar*]
+
+[foo *bar*]: train.jpg "train & tracks"
+
+![*foo* bar][]
+
+[*foo* bar]: /url "title"
+
+![foo *bar*][foobar]
+
+[FOOBAR]: train.jpg "train & tracks"
+
+```
+
+
+# Formatted
+
+```md
+a*b*c
+
+a_b_c
+
+_foo_
+
+_foo_
+
+(_foo_)
+
+![foo *bar*]
+
+[foo *bar*]: train.jpg "train & tracks"
+
+![*foo* bar][]
+
+[*foo* bar]: /url "title"
+
+![foo *bar*][foobar]
+
+[FOOBAR]: train.jpg "train & tracks"
+
+```

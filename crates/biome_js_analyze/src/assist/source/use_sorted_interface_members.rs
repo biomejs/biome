@@ -71,7 +71,7 @@ declare_source_rule! {
         name: "useSortedInterfaceMembers",
         language: "ts",
         recommended: false,
-        sources: &[RuleSource::EslintPerfectionist("sort-interfaces").inspired()],
+        sources: &[RuleSource::EslintPerfectionist("sort-interfaces").inspired(), RuleSource::EslintTypescriptSortKeys("interface").inspired()],
         fix_kind: FixKind::Safe,
     }
 }

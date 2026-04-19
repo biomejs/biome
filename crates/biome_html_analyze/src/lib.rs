@@ -7,8 +7,10 @@ pub mod options;
 mod registry;
 mod services;
 mod suppression_action;
+mod utils;
 
 pub use crate::registry::visit_registry;
+pub use crate::services::aria::{Aria, AriaServices};
 pub use crate::services::module_graph::{HtmlModuleGraph, HtmlModuleGraphService};
 use crate::suppression_action::HtmlSuppressionAction;
 
@@ -23,6 +25,7 @@ use biome_analyze::{
     LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
     to_analyzer_suppressions,
 };
+use biome_aria::AriaRoles;
 use biome_deserialize::TextRange;
 use biome_diagnostics::Error;
 use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
@@ -123,6 +126,7 @@ where
     }
 
     services.insert_service(source_type);
+    services.insert_service(Arc::new(AriaRoles));
     if let Some(module_graph) = html_services.module_graph {
         services.insert_service(module_graph);
     }
@@ -156,7 +160,9 @@ where
 #[cfg(test)]
 mod tests {
     use crate::analyze;
-    use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleFilter};
+    use biome_analyze::{
+        ActionFilter, AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleFilter,
+    };
     use biome_console::fmt::{Formatter, Termcolor};
     use biome_console::{Markup, markup};
     use biome_diagnostics::termcolor::NoColor;
@@ -207,7 +213,7 @@ mod tests {
                     eprintln!("{text}");
                 }
 
-                for action in signal.actions() {
+                for action in signal.actions(ActionFilter::all()) {
                     let new_code = action.mutation.commit();
                     eprintln!("{new_code}");
                 }

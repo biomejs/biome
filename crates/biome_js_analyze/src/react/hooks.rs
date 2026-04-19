@@ -233,7 +233,7 @@ impl StableReactHookConfiguration {
 }
 
 /// Represents a potentially stable React hook result member.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum ReactHookResultMember {
     Key(TokenText),
     Index(u8),

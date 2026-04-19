@@ -77,3 +77,15 @@ switch (value4) {
 declare const value5: (string & { foo: 'bar' }) | '1' | 1 | null | undefined;
 switch (value5) {
 }
+
+type Status = "loading" | "ready" | "error";
+declare const p: Pick<{s: Status}, "s">;
+switch (p.s) { case "loading": break; case "ready": break; }
+
+function switchReq(x: Required<{kind?: "a" | "b" | "c"}>) {
+	switch (x.kind) { case "a": break; case "b": break; }
+}
+
+function switchRo(x: Readonly<{kind: "x" | "y" | "z"}>) {
+	switch (x.kind) { case "x": break; }
+}

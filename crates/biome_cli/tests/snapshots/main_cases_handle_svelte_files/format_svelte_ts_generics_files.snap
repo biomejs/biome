@@ -1,0 +1,47 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.svelte`
+
+```svelte
+<script lang="ts" generics="T extends Record<string, unknown>, U extends FormPath<T>">
+import     type     { FormPath }     from "sveltekit-superforms";
+const hello  :      string      = "world";
+</script>
+<div></div>
+```
+
+# Termination Message
+
+```block
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.svelte format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1 1 │   <script lang="ts" generics="T extends Record<string, unknown>, U extends FormPath<T>">
+    2   │ - import·····type·····{·FormPath·}·····from·"sveltekit-superforms";
+    3   │ - const·hello··:······string······=·"world";
+      2 │ + import·type·{·FormPath·}·from·"sveltekit-superforms";
+      3 │ + const·hello:·string·=·"world";
+    4 4 │   </script>
+    5 5 │   <div></div>
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```

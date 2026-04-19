@@ -10,6 +10,6 @@
   },
   "type": "module",
   "dependencies": {
-    "happy-dom": "^20.8.4"
+    "happy-dom": "^20.8.9"
   }
 }

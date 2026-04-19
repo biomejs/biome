@@ -9,7 +9,7 @@ use crate::syntax::scss::{
 use biome_css_syntax::CssSyntaxKind::{
     CSS_BOGUS_PROPERTY_VALUE, EOF, SCSS_ARBITRARY_ARGUMENT, SCSS_EXPRESSION,
     SCSS_EXPRESSION_ITEM_LIST, SCSS_KEYWORD_ARGUMENT, SCSS_LIST_EXPRESSION,
-    SCSS_LIST_EXPRESSION_ELEMENT, SCSS_LIST_EXPRESSION_ELEMENT_LIST,
+    SCSS_LIST_EXPRESSION_ELEMENT, SCSS_LIST_EXPRESSION_ELEMENT_LIST, SCSS_STRING_QUOTE,
 };
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
@@ -82,7 +82,7 @@ pub(crate) fn parse_required_scss_value_until(
 /// $map: (a: 1);
 /// ```
 ///
-/// Docs: https://sass-lang.com/documentation/values/maps
+/// Docs: https://sass-lang.com/documentation/syntax/structure
 #[inline]
 pub(crate) fn parse_scss_expression_until(
     p: &mut CssParser,
@@ -99,7 +99,9 @@ pub(crate) fn parse_scss_expression_until(
 /// @include foo($args..., $kw: 1);
 /// ```
 ///
-/// Docs: https://sass-lang.com/documentation/at-rules/mixin
+/// Docs:
+/// - https://sass-lang.com/documentation/at-rules/mixin/
+/// - https://sass-lang.com/documentation/at-rules/function/
 #[inline]
 pub(crate) fn parse_scss_expression_in_args_until(
     p: &mut CssParser,
@@ -127,6 +129,14 @@ pub(super) fn parse_scss_inner_expression_until(
 }
 
 #[inline]
+pub(crate) fn parse_scss_inner_expression_in_string_until(
+    p: &mut CssParser,
+    end_ts: TokenSet<CssSyntaxKind>,
+) -> ParsedSyntax {
+    parse_scss_expression_with_options(p, ScssExpressionOptions::value_in_string(end_ts))
+}
+
+#[inline]
 pub(crate) fn complete_empty_scss_expression(p: &mut CssParser) -> CompletedMarker {
     let expression = p.start();
     let expression_items = p.start();
@@ -142,7 +152,7 @@ pub(crate) fn complete_empty_scss_expression(p: &mut CssParser) -> CompletedMark
 /// $map: (a: 1, b: 2);
 /// ```
 ///
-/// Docs: https://sass-lang.com/documentation/values/maps
+/// Docs: https://sass-lang.com/documentation/syntax/structure
 #[inline]
 fn parse_scss_expression_with_options(
     p: &mut CssParser,
@@ -208,6 +218,9 @@ fn is_at_scss_expression_sequence_end(p: &mut CssParser, options: ScssExpression
     p.at(EOF)
         || is_at_scss_expression_end(p, options)
         || (options.comma_separates_list() && p.at(T![,]))
+        || (options.stops_at_string_quote
+            && p.at(SCSS_STRING_QUOTE)
+            && !p.is_at_scss_interpolated_string())
 }
 
 #[inline]
@@ -279,6 +292,7 @@ fn parse_scss_keyword_argument(p: &mut CssParser, options: ScssExpressionOptions
             allows_keyword_arguments: false,
             allows_ellipsis: false,
             stops_before_variable_modifiers: false,
+            stops_at_string_quote: false,
         },
     )
     .or_add_diagnostic(p, expected_component_value);

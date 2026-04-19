@@ -1,0 +1,110 @@
+<div>
+  <p>Hello</p>
+</div>
+
+<div class="container">
+  <span>content</span>
+</div>
+
+<div>
+simple content
+</div>
+
+<p>single tag paragraph</p>
+
+<hr>
+
+<hr/>
+
+<br />
+
+<!-- HTML comment -->
+
+<!--
+  multi-line
+  comment
+-->
+
+<nav>
+  <ul>
+    <li>Item 1</li>
+    <li>Item 2</li>
+  </ul>
+</nav>
+
+<table>
+  <tr>
+    <td>cell</td>
+  </tr>
+</table>
+
+<details>
+  <summary>Click me</summary>
+  <p>Hidden content</p>
+</details>
+
+<script>
+  console.log("hello");
+</script>
+
+<style>
+  .foo { color: red; }
+</style>
+
+<pre>
+  preformatted text
+    with indentation
+</pre>
+
+ <div>
+  up to three spaces indent
+ </div>
+
+  <div>
+   two spaces indent
+  </div>
+
+   <div>
+    three spaces indent
+   </div>
+
+Some text before.
+
+<div>
+  block after paragraph
+</div>
+
+<div>
+  block before paragraph
+</div>
+
+Some text after.
+
+<div>first</div>
+
+<div>second</div>
+
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE html>
+
+<![CDATA[
+  some cdata content
+]]>
+
+<custom-element>
+  web component
+</custom-element>
+
+<div id="a" class="b" data-x="y">
+  tag with attributes
+</div>
+
+</div>
+
+</section>
+
+<textarea>
+  form content
+  with multiple lines
+</textarea>

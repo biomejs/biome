@@ -1,6 +1,6 @@
 use biome_analyze::{Ast, RuleSource};
 use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
-use biome_console::{MarkupBuf, markup};
+use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsAssignment, AnyJsAssignmentPattern, AnyJsCallArgument,
@@ -115,21 +115,6 @@ pub struct RuleState {
     message: NoThenPropertyMessage,
 }
 
-impl RuleState {
-    fn diagnostic_message(&self) -> MarkupBuf {
-        match self.message {
-            NoThenPropertyMessage::Object => {
-                markup! { "Do not add "<Emphasis>"then"</Emphasis>" to an object." }.to_owned()
-            }
-            NoThenPropertyMessage::Export => {
-                markup! { "Do not export "<Emphasis>"then"</Emphasis>"."}.to_owned()
-            }
-            NoThenPropertyMessage::Class => {
-                markup! {"Do not add "<Emphasis>"then"</Emphasis>" to a class." }.to_owned()
-            }
-        }
-    }
-}
 impl Rule for NoThenProperty {
     type Query = Ast<NoThenPropertyQuery>;
     type State = RuleState;
@@ -151,11 +136,33 @@ impl Rule for NoThenProperty {
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            state.range,
-            state.diagnostic_message(),
-        ))
+        Some(
+            RuleDiagnostic::new(rule_category!(), state.range, match state.message {
+                NoThenPropertyMessage::Object => {
+                    markup! { "This object defines a "<Emphasis>"then"</Emphasis>" property." }
+                }
+                NoThenPropertyMessage::Export => {
+                    markup! { "This export exposes the name "<Emphasis>"then"</Emphasis>"." }
+                }
+                NoThenPropertyMessage::Class => {
+                    markup! { "This class defines a "<Emphasis>"then"</Emphasis>" member." }
+                }
+            })
+                .note(markup! {
+                    "Values with a "<Emphasis>"then"</Emphasis>" property can be treated like promises by "<Emphasis>"await"</Emphasis>" and dynamic imports, which can cause unexpected behavior."
+                })
+                .note(match state.message {
+                    NoThenPropertyMessage::Object => markup! {
+                        "Rename this property to something other than "<Emphasis>"then"</Emphasis>" unless you intentionally need a thenable object."
+                    },
+                    NoThenPropertyMessage::Export => markup! {
+                        "Export this value under a different name, or rename the declaration so it does not expose "<Emphasis>"then"</Emphasis>"."
+                    },
+                    NoThenPropertyMessage::Class => markup! {
+                        "Rename this member to something other than "<Emphasis>"then"</Emphasis>" unless you intentionally need a thenable class."
+                    },
+                }),
+        )
     }
 }
 
@@ -398,7 +405,7 @@ fn process_js_export_named_clause(node: &JsExport) -> Option<RuleState> {
                 if id.syntax().text_trimmed() == "then" {
                     return Some(RuleState {
                         range: id.range(),
-                        message: NoThenPropertyMessage::Object,
+                        message: NoThenPropertyMessage::Export,
                     });
                 }
             }

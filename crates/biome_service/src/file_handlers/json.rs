@@ -1,6 +1,7 @@
 use super::{
-    AnalyzerVisitorBuilder, CodeActionsParams, DocumentFileSource, EnabledForPath,
-    ExtensionHandler, ParseResult, ProcessFixAll, ProcessLint, SearchCapabilities, search,
+    AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams, DocumentFileSource,
+    EnabledForPath, ExtensionHandler, ParseResult, ProcessFixAll, ProcessLint, SearchCapabilities,
+    search,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
@@ -12,10 +13,13 @@ use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
     Settings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
 };
+use crate::workspace::FixFileMode;
 use crate::workspace::{CodeAction, FixFileResult, GetSyntaxTreeResult, PullActionsResult};
 use crate::{WorkspaceError, extension_error};
 use biome_analyze::options::PreferredQuote;
-use biome_analyze::{AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never};
+use biome_analyze::{
+    ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
+};
 use biome_configuration::Configuration;
 use biome_configuration::json::{
     JsonAllowCommentsEnabled, JsonAllowTrailingCommasEnabled, JsonAssistConfiguration,
@@ -509,11 +513,7 @@ fn lint(params: LintParams) -> LintResults {
         .to_json_file_source()
         .or(JsonFileSource::try_from(params.path.as_path()).ok())
     else {
-        return LintResults {
-            errors: 0,
-            diagnostics: vec![],
-            skipped_diagnostics: 0,
-        };
+        return LintResults::default();
     };
     let root: JsonRoot = params.parse.tree();
 
@@ -524,14 +524,18 @@ fn lint(params: LintParams) -> LintResults {
         params.suppression_reason.as_deref(),
     );
 
-    let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
-            .with_only(params.only)
-            .with_skip(params.skip)
-            .with_path(params.path.as_path())
-            .with_enabled_selectors(params.enabled_selectors)
-            .with_project_layout(params.project_layout.clone())
-            .finish();
+    let AnalyzerVisitorResult {
+        enabled_rules,
+        disabled_rules,
+        analyzer_options,
+        ..
+    } = AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
+        .with_only(params.only)
+        .with_skip(params.skip)
+        .with_path(params.path.as_path())
+        .with_enabled_selectors(params.enabled_selectors)
+        .with_project_layout(params.project_layout.clone())
+        .finish();
 
     let filter = AnalysisFilter {
         categories: params.categories,
@@ -597,6 +601,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         action_offset,
         document_services: _,
         working_directory,
+        compute_actions,
     } = params;
 
     let _ = debug_span!("Code actions JSON",  range =? range, path =? path).entered();
@@ -609,14 +614,18 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     );
     let mut actions = Vec::new();
     let project_layout_for_services = project_layout.clone();
-    let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
-            .with_only(only)
-            .with_skip(skip)
-            .with_path(path.as_path())
-            .with_enabled_selectors(rules)
-            .with_project_layout(project_layout)
-            .finish();
+    let AnalyzerVisitorResult {
+        enabled_rules,
+        disabled_rules,
+        analyzer_options,
+        ..
+    } = AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
+        .with_only(only)
+        .with_skip(skip)
+        .with_path(path.as_path())
+        .with_enabled_selectors(rules)
+        .with_project_layout(project_layout)
+        .finish();
 
     let filter = AnalysisFilter {
         categories,
@@ -643,16 +652,34 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         services,
         &plugins,
         |signal| {
-            actions.extend(signal.actions().into_code_action_iter().map(|item| {
-                CodeAction {
-                    category: item.category.clone(),
-                    rule_name: item
-                        .rule_name
-                        .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
-                    suggestion: item.suggestion,
-                    offset: action_offset,
-                }
-            }));
+            if compute_actions {
+                actions.extend(
+                    signal
+                        .actions(ActionFilter::all())
+                        .into_code_action_iter()
+                        .map(|item| CodeAction {
+                            category: item.category.clone(),
+                            rule_name: item
+                                .rule_name
+                                .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
+                            applicability: Some(item.suggestion.applicability),
+                            suggestion: Some(item.suggestion),
+                            offset: action_offset,
+                        }),
+                );
+            } else {
+                actions.extend(signal.actions_metadata().into_iter().map(|meta| {
+                    CodeAction {
+                        category: meta.category,
+                        rule_name: meta
+                            .rule_name
+                            .map(|(g, r)| (Cow::Borrowed(g), Cow::Borrowed(r))),
+                        applicability: Some(meta.applicability),
+                        suggestion: None,
+                        offset: action_offset,
+                    }
+                }));
+            }
 
             ControlFlow::<Never>::Continue(())
         },
@@ -661,7 +688,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     PullActionsResult { actions }
 }
 
-#[instrument(level = "debug", skip(params))]
+#[instrument(level = "debug", skip_all)]
 fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     let mut tree: JsonRoot = params.parse.tree();
 
@@ -676,14 +703,18 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
         &params.document_file_source,
         params.suppression_reason.as_deref(),
     );
-    let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
-            .with_only(params.only)
-            .with_skip(params.skip)
-            .with_path(params.biome_path.as_path())
-            .with_enabled_selectors(params.enabled_rules)
-            .with_project_layout(params.project_layout.clone())
-            .finish();
+    let AnalyzerVisitorResult {
+        enabled_rules,
+        disabled_rules,
+        analyzer_options,
+        fixable_rules,
+    } = AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
+        .with_only(params.only)
+        .with_skip(params.skip)
+        .with_path(params.biome_path.as_path())
+        .with_enabled_selectors(params.enabled_rules)
+        .with_project_layout(params.project_layout.clone())
+        .finish();
 
     let filter = AnalysisFilter {
         categories: params.rule_categories,
@@ -705,6 +736,65 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
         rules,
         tree.syntax().text_range_with_trivia().len().into(),
     );
+
+    if matches!(params.fix_file_mode, FixFileMode::ApplySuppressions) {
+        loop {
+            let services = JsonAnalyzeServices {
+                file_source,
+                configuration_provider: params
+                    .settings
+                    .full_source()
+                    .map(|s| s as std::sync::Arc<dyn ExtendedConfigurationProvider>),
+                project_layout: Some(params.project_layout.clone()),
+            };
+            let mut pending_actions = Vec::new();
+
+            let (_, _) = analyze(
+                &tree,
+                filter,
+                &analyzer_options,
+                services,
+                &params.plugins,
+                |signal| process_fix_all.collect_signal(signal, &mut pending_actions),
+            );
+
+            let result = process_fix_all.process_batch_actions(pending_actions, |root| {
+                tree = match JsonRoot::cast(root) {
+                    Some(tree) => tree,
+                    None => return None,
+                };
+                Some(tree.syntax().text_range_with_trivia().len().into())
+            })?;
+
+            if result.is_none() {
+                return process_fix_all.finish(
+                    || {
+                        Ok(if params.should_format {
+                            Either::Left(format_node(
+                                params.settings.format_options::<JsonLanguage>(
+                                    params.biome_path,
+                                    &params.document_file_source,
+                                ),
+                                tree.syntax(),
+                            ))
+                        } else {
+                            Either::Right(tree.syntax().to_string())
+                        })
+                    },
+                    params.embeds_initial_indent,
+                );
+            }
+        }
+    }
+
+    // Phase 1: fix loop with fixable-only rules
+    let fixable_filter = AnalysisFilter {
+        categories: params.rule_categories,
+        enabled_rules: Some(fixable_rules.as_slice()),
+        disabled_rules: &disabled_rules,
+        range: None,
+    };
+
     loop {
         let services = JsonAnalyzeServices {
             file_source,
@@ -714,18 +804,22 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
                 .map(|s| s as std::sync::Arc<dyn ExtendedConfigurationProvider>),
             project_layout: Some(params.project_layout.clone()),
         };
-        let (action, _) = analyze(
+        let mut pending_actions = Vec::new();
+
+        let (_, _) = analyze(
             &tree,
-            filter,
+            fixable_filter,
             &analyzer_options,
             services,
             &params.plugins,
-            |signal| process_fix_all.process_signal(signal),
+            |signal| process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions),
         );
 
-        let plugin_text_edit = action.as_ref().and_then(|a| a.text_edit.clone());
-
-        let result = process_fix_all.process_action(action, |root| {
+        let plugin_text_edit = pending_actions
+            .iter()
+            .find_map(|action| action.text_edit.clone());
+        pending_actions.retain(|action| action.text_edit.is_none());
+        let result = process_fix_all.process_batch_actions(pending_actions, |root| {
             tree = match JsonRoot::cast(root) {
                 Some(tree) => tree,
                 None => return None,
@@ -745,22 +839,45 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
                 continue;
             }
 
-            return process_fix_all.finish(
-                || {
-                    Ok(if params.should_format {
-                        Either::Left(format_node(
-                            params.settings.format_options::<JsonLanguage>(
-                                params.biome_path,
-                                &params.document_file_source,
-                            ),
-                            tree.syntax(),
-                        ))
-                    } else {
-                        Either::Right(tree.syntax().to_string())
-                    })
-                },
-                params.embeds_initial_indent,
-            );
+            break;
         }
     }
+
+    // Phase 2: all rules for final diagnostics
+    {
+        let services = JsonAnalyzeServices {
+            file_source,
+            configuration_provider: params
+                .settings
+                .full_source()
+                .map(|s| s as std::sync::Arc<dyn ExtendedConfigurationProvider>),
+            project_layout: Some(params.project_layout.clone()),
+        };
+
+        let (_, _) = analyze(
+            &tree,
+            filter,
+            &analyzer_options,
+            services,
+            &params.plugins,
+            |signal| process_fix_all.collect_diagnostic_only(signal),
+        );
+    }
+
+    process_fix_all.finish(
+        || {
+            Ok(if params.should_format {
+                Either::Left(format_node(
+                    params.settings.format_options::<JsonLanguage>(
+                        params.biome_path,
+                        &params.document_file_source,
+                    ),
+                    tree.syntax(),
+                ))
+            } else {
+                Either::Right(tree.syntax().to_string())
+            })
+        },
+        params.embeds_initial_indent,
+    )
 }
