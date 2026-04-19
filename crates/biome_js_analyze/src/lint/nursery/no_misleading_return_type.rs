@@ -526,6 +526,10 @@ fn is_literal_of_primitive(ty: &Type) -> bool {
     }
 }
 
+fn is_single_literal_primitive_return(returns: &[Type]) -> bool {
+    returns.len() == 1 && is_literal_of_primitive(&returns[0])
+}
+
 /// Checks whether annotation differs from returns only by property-level
 /// literal widening that contextual typing would handle.
 fn is_only_property_literal_widening(annotation: &Type, returns: &[Type]) -> bool {
@@ -778,9 +782,8 @@ fn build_narrowed_annotation_description(
 
     // A widening variant would keep the narrowed annotation misleading, unless
     // the single-literal-primitive bailout upstream would hide it.
-    let single_literal_bailout_applies = covered_count == 1
-        && returns.len() == 1
-        && is_literal_of_primitive(&returns[0]);
+    let single_literal_bailout_applies =
+        covered_count == 1 && is_single_literal_primitive_return(returns);
 
     if has_widening_variant && !single_literal_bailout_applies {
         return None;
