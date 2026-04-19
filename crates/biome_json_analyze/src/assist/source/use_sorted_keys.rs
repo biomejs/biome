@@ -2,10 +2,10 @@ use crate::JsonRuleAction;
 use crate::utils::is_package_json;
 use biome_analyze::utils::{is_separated_list_sorted_by, sorted_separated_list_by};
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, context::RuleContext, declare_source_rule, RuleSource
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
+    declare_source_rule,
 };
 use biome_console::markup;
-use biome_diagnostics::category;
 use biome_json_factory::make;
 use biome_json_syntax::{
     AnyJsonValue, JsonLanguage, JsonMemberList, JsonObjectValue, T, TextRange,
@@ -224,11 +224,8 @@ impl Rule for UseSortedKeys {
                 "The members are not sorted by key."
             }
         };
-        let mut diagnostic = RuleDiagnostic::new(
-            category!("assist/source/useSortedKeys"),
-            Self::text_range(ctx, state),
-            message,
-        );
+        let mut diagnostic =
+            RuleDiagnostic::new(rule_category!(), Self::text_range(ctx, state), message);
 
         if is_package_json(path) {
             diagnostic = diagnostic.note(markup! {

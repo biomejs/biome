@@ -2258,6 +2258,31 @@ pub fn is_in_boolean_context(node: &JsSyntaxNode) -> Option<bool> {
                 .syntax()
                 == node,
         ),
+        JsSyntaxKind::JS_LOGICAL_EXPRESSION => {
+            let operator = parent
+                .clone()
+                .cast::<JsLogicalExpression>()?
+                .operator()
+                .ok()?;
+
+            if matches!(
+                operator,
+                JsLogicalOperator::LogicalOr | JsLogicalOperator::LogicalAnd
+            ) {
+                is_in_boolean_context(&parent)
+            } else {
+                None
+            }
+        }
+        JsSyntaxKind::JS_UNARY_EXPRESSION => {
+            let unary = parent.cast::<JsUnaryExpression>()?;
+
+            if unary.operator().ok()? == JsUnaryOperator::LogicalNot {
+                Some(true)
+            } else {
+                None
+            }
+        }
         _ => None,
     }
 }

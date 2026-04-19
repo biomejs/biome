@@ -1603,6 +1603,20 @@ impl CssKeyframesPercentageSelector {
         )
     }
 }
+impl CssKeyframesRangeSelector {
+    pub fn with_name_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_percentage(self, element: CssPercentage) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl CssKeyframesScopeFunction {
     pub fn with_scope_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -2638,7 +2652,7 @@ impl CssQualifiedRule {
     }
 }
 impl CssQueryFeatureBoolean {
-    pub fn with_name(self, element: CssIdentifier) -> Self {
+    pub fn with_name(self, element: AnyCssQueryFeatureName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
@@ -2646,7 +2660,7 @@ impl CssQueryFeatureBoolean {
     }
 }
 impl CssQueryFeaturePlain {
-    pub fn with_name(self, element: CssIdentifier) -> Self {
+    pub fn with_name(self, element: AnyCssQueryFeatureName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
@@ -2666,7 +2680,7 @@ impl CssQueryFeaturePlain {
     }
 }
 impl CssQueryFeatureRange {
-    pub fn with_left(self, element: CssIdentifier) -> Self {
+    pub fn with_left(self, element: AnyCssQueryFeatureName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
@@ -2706,7 +2720,7 @@ impl CssQueryFeatureRangeInterval {
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_name(self, element: CssIdentifier) -> Self {
+    pub fn with_name(self, element: AnyCssQueryFeatureName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
@@ -2738,7 +2752,7 @@ impl CssQueryFeatureReverseRange {
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_right(self, element: CssIdentifier) -> Self {
+    pub fn with_right(self, element: AnyCssQueryFeatureName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
@@ -4131,6 +4145,34 @@ impl ScssInterpolatedIdentifier {
         )
     }
 }
+impl ScssInterpolatedIdentifierHyphen {
+    pub fn with_minus_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
+impl ScssInterpolatedString {
+    pub fn with_opening_quote_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_parts(self, element: ScssInterpolatedStringPartList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_closing_quote_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+        )
+    }
+}
 impl ScssInterpolation {
     pub fn with_hash_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -4524,6 +4566,14 @@ impl ScssShowClause {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl ScssStringText {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
 }

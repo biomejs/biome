@@ -1,0 +1,193 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+$plain: "plain";
+$plain_line_continuation: "a\
+b";
+$plain_hex_escape_with_newline: "\41
+b";
+$interpolated: "hello #{$name}";
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@0..1 "$" [] [],
+                name: CssIdentifier {
+                    value_token: IDENT@1..6 "plain" [] [],
+                },
+            },
+            colon_token: COLON@6..8 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    CssString {
+                        value_token: CSS_STRING_LITERAL@8..15 "\"plain\"" [] [],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@15..16 ";" [] [],
+        },
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@16..18 "$" [Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@18..41 "plain_line_continuation" [] [],
+                },
+            },
+            colon_token: COLON@41..43 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    CssString {
+                        value_token: CSS_STRING_LITERAL@43..49 "\"a\\\nb\"" [] [],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@49..50 ";" [] [],
+        },
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@50..52 "$" [Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@52..81 "plain_hex_escape_with_newline" [] [],
+                },
+            },
+            colon_token: COLON@81..83 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    CssString {
+                        value_token: CSS_STRING_LITERAL@83..90 "\"\\41\nb\"" [] [],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@90..91 ";" [] [],
+        },
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@91..93 "$" [Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@93..105 "interpolated" [] [],
+                },
+            },
+            colon_token: COLON@105..107 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    ScssInterpolatedString {
+                        opening_quote_token: SCSS_STRING_QUOTE@107..108 "\"" [] [],
+                        parts: ScssInterpolatedStringPartList [
+                            ScssStringText {
+                                value_token: SCSS_STRING_CONTENT_LITERAL@108..114 "hello " [] [],
+                            },
+                            ScssInterpolation {
+                                hash_token: HASH@114..115 "#" [] [],
+                                l_curly_token: L_CURLY@115..116 "{" [] [],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssIdentifier {
+                                            dollar_token: DOLLAR@116..117 "$" [] [],
+                                            name: CssIdentifier {
+                                                value_token: IDENT@117..121 "name" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                                r_curly_token: R_CURLY@121..122 "}" [] [],
+                            },
+                        ],
+                        closing_quote_token: SCSS_STRING_QUOTE@122..123 "\"" [] [],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@123..124 ";" [] [],
+        },
+    ],
+    eof_token: EOF@124..125 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..125
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..124
+    0: SCSS_DECLARATION@0..16
+      0: SCSS_IDENTIFIER@0..6
+        0: DOLLAR@0..1 "$" [] []
+        1: CSS_IDENTIFIER@1..6
+          0: IDENT@1..6 "plain" [] []
+      1: COLON@6..8 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@8..15
+        0: SCSS_EXPRESSION_ITEM_LIST@8..15
+          0: CSS_STRING@8..15
+            0: CSS_STRING_LITERAL@8..15 "\"plain\"" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@15..15
+      4: SEMICOLON@15..16 ";" [] []
+    1: SCSS_DECLARATION@16..50
+      0: SCSS_IDENTIFIER@16..41
+        0: DOLLAR@16..18 "$" [Newline("\n")] []
+        1: CSS_IDENTIFIER@18..41
+          0: IDENT@18..41 "plain_line_continuation" [] []
+      1: COLON@41..43 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@43..49
+        0: SCSS_EXPRESSION_ITEM_LIST@43..49
+          0: CSS_STRING@43..49
+            0: CSS_STRING_LITERAL@43..49 "\"a\\\nb\"" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@49..49
+      4: SEMICOLON@49..50 ";" [] []
+    2: SCSS_DECLARATION@50..91
+      0: SCSS_IDENTIFIER@50..81
+        0: DOLLAR@50..52 "$" [Newline("\n")] []
+        1: CSS_IDENTIFIER@52..81
+          0: IDENT@52..81 "plain_hex_escape_with_newline" [] []
+      1: COLON@81..83 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@83..90
+        0: SCSS_EXPRESSION_ITEM_LIST@83..90
+          0: CSS_STRING@83..90
+            0: CSS_STRING_LITERAL@83..90 "\"\\41\nb\"" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@90..90
+      4: SEMICOLON@90..91 ";" [] []
+    3: SCSS_DECLARATION@91..124
+      0: SCSS_IDENTIFIER@91..105
+        0: DOLLAR@91..93 "$" [Newline("\n")] []
+        1: CSS_IDENTIFIER@93..105
+          0: IDENT@93..105 "interpolated" [] []
+      1: COLON@105..107 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@107..123
+        0: SCSS_EXPRESSION_ITEM_LIST@107..123
+          0: SCSS_INTERPOLATED_STRING@107..123
+            0: SCSS_STRING_QUOTE@107..108 "\"" [] []
+            1: SCSS_INTERPOLATED_STRING_PART_LIST@108..122
+              0: SCSS_STRING_TEXT@108..114
+                0: SCSS_STRING_CONTENT_LITERAL@108..114 "hello " [] []
+              1: SCSS_INTERPOLATION@114..122
+                0: HASH@114..115 "#" [] []
+                1: L_CURLY@115..116 "{" [] []
+                2: SCSS_EXPRESSION@116..121
+                  0: SCSS_EXPRESSION_ITEM_LIST@116..121
+                    0: SCSS_IDENTIFIER@116..121
+                      0: DOLLAR@116..117 "$" [] []
+                      1: CSS_IDENTIFIER@117..121
+                        0: IDENT@117..121 "name" [] []
+                3: R_CURLY@121..122 "}" [] []
+            2: SCSS_STRING_QUOTE@122..123 "\"" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@123..123
+      4: SEMICOLON@123..124 ";" [] []
+  2: EOF@124..125 "" [Newline("\n")] []
+
+```

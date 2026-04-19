@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 240
 info: css/scss/at-rule/supports-general-enclosed.scss
 ---
 
@@ -36,7 +37,7 @@ info: css/scss/at-rule/supports-general-enclosed.scss
 	}
 }
 
-@supports foo(url("a.svg"namespace.fn(test))) {
+@supports foo(url("a.svg" namespace.fn(test))) {
 	.c {
 		color: green;
 	}

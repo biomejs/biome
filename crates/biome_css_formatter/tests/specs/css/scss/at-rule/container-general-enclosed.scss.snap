@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 240
 info: css/scss/at-rule/container-general-enclosed.scss
 ---
 
@@ -38,7 +39,7 @@ info: css/scss/at-rule/container-general-enclosed.scss
   .b { color: blue; }
 }
 
-@container (foo(url("a.svg"namespace.fn(test)))) {
+@container (foo(url("a.svg" namespace.fn(test)))) {
 	.c {
 		color: green;
 	}
@@ -50,7 +51,7 @@ info: css/scss/at-rule/container-general-enclosed.scss
 @container main-layout or(test) {
 }
 
-@container main-layout foo(url("a.svg"fn(test))) {
+@container main-layout foo(url("a.svg" fn(test))) {
 }
 
 ```

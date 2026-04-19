@@ -1,0 +1,6 @@
+$plain: "plain";
+$plain_line_continuation: "a\
+b";
+$plain_hex_escape_with_newline: "\41
+b";
+$interpolated: "hello #{$name}";

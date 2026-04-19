@@ -75,7 +75,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoDuplicateSelectors {
-        version: "next",
+        version: "2.4.9",
         name: "noDuplicateSelectors",
         language: "css",
         recommended: false,

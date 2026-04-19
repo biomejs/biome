@@ -79,21 +79,3 @@ info: markdown/list/issue-17652.md
    1. Another
    2. List
 ```
-
-# Errors
-```
-issue-17652.md:11:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected an ordered list item
-  
-     9 │    2. List
-    10 │ 
-  > 11 │ 1. Some text, and code block below, with newline after code block
-       │ ^^
-    12 │ 
-    13 │    1. Another
-  
-  i Ordered list items start with a number followed by `.` or `)` at the beginning of a line
-  
-
-```

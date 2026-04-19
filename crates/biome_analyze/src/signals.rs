@@ -2,8 +2,9 @@ use crate::categories::{
     SUPPRESSION_INLINE_ACTION_CATEGORY, SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY,
 };
 use crate::{
-    AnalyzerDiagnostic, AnalyzerOptions, OtherActionCategory, PluginActionData, Queryable,
-    RuleDiagnostic, RuleGroup, ServiceBag, SuppressionAction,
+    AnalyzerDiagnostic, AnalyzerOptions, FixKind, GroupCategory, OtherActionCategory,
+    PluginActionData, Queryable, RuleCategory, RuleDiagnostic, RuleGroup, ServiceBag,
+    SuppressionAction,
     categories::ActionCategory,
     context::RuleContext,
     registry::{RuleLanguage, RuleRoot},
@@ -13,16 +14,82 @@ use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::{Applicability, CodeSuggestion, Error, advice::CodeSuggestionAdvice};
 use biome_rowan::{BatchMutation, Language, SyntaxNode, TextRange};
 use biome_text_edit::TextEdit;
+use enumflags2::{BitFlag, BitFlags, bitflags};
 use std::borrow::Cow;
 use std::iter::FusedIterator;
 use std::marker::PhantomData;
 use std::vec::IntoIter;
 
+/// Select which action categories should be computed by the analyzer.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub struct ActionFilter(pub BitFlags<ActionKind>);
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[bitflags]
+#[repr(u8)]
+pub enum ActionKind {
+    RuleFix = 1 << 0,
+    InlineSuppression = 1 << 1,
+    ToplevelSuppression = 1 << 2,
+}
+
+impl ActionFilter {
+    pub fn all() -> Self {
+        let all: BitFlags<ActionKind> = ActionKind::all();
+        Self(all)
+    }
+
+    pub fn rule_fix() -> Self {
+        let mut filter = ActionKind::empty();
+        filter.insert(ActionKind::RuleFix);
+        Self(filter)
+    }
+
+    pub fn inline_suppression() -> Self {
+        let mut filter = ActionKind::empty();
+        filter.insert(ActionKind::InlineSuppression);
+        Self(filter)
+    }
+
+    pub fn toplevel_suppression() -> Self {
+        let mut filter = ActionKind::empty();
+        filter.insert(ActionKind::ToplevelSuppression);
+        Self(filter)
+    }
+
+    pub fn has_actions(&self) -> bool {
+        !self.0.is_empty()
+    }
+
+    pub fn is_rule_fix(&self) -> bool {
+        self.0.contains(ActionKind::RuleFix)
+    }
+
+    pub fn is_inline_suppression(&self) -> bool {
+        self.0.contains(ActionKind::InlineSuppression)
+    }
+    pub fn is_toplevel_suppression(&self) -> bool {
+        self.0.contains(ActionKind::ToplevelSuppression)
+    }
+}
+
+/// Lightweight description of an available action, without the expensive
+/// [`BatchMutation`]. Used by `codeAction/resolve` to defer edit computation.
+#[derive(Debug, Clone)]
+pub struct ActionMetadata {
+    pub rule_name: Option<(&'static str, &'static str)>,
+    pub category: ActionCategory,
+    pub applicability: Applicability,
+}
+
 /// Event raised by the analyzer when a [Rule](crate::Rule)
 /// emits a diagnostic, a code action, or both
 pub trait AnalyzerSignal<L: Language> {
     fn diagnostic(&self) -> Option<AnalyzerDiagnostic>;
-    fn actions(&self) -> AnalyzerActionIter<L>;
+    fn actions(&self, filter: ActionFilter) -> AnalyzerActionIter<L>;
+    /// Returns lightweight metadata about available actions without computing
+    /// mutations. This is cheap — no [`BatchMutation`] or tree clones.
+    fn actions_metadata(&self) -> Vec<ActionMetadata>;
     fn transformations(&self) -> AnalyzerTransformationIter<L>;
 }
 
@@ -86,12 +153,17 @@ where
         Some(AnalyzerDiagnostic::from_error(error))
     }
 
-    fn actions(&self) -> AnalyzerActionIter<L> {
-        if let Some(action) = (self.action)() {
-            AnalyzerActionIter::new([action])
-        } else {
-            AnalyzerActionIter::new(vec![])
+    fn actions(&self, filter: ActionFilter) -> AnalyzerActionIter<L> {
+        if filter.is_rule_fix()
+            && let Some(action) = (self.action)()
+        {
+            return AnalyzerActionIter::new([action]);
         }
+        AnalyzerActionIter::new(vec![])
+    }
+
+    fn actions_metadata(&self) -> Vec<ActionMetadata> {
+        Vec::new()
     }
 
     fn transformations(&self) -> AnalyzerTransformationIter<L> {
@@ -142,7 +214,11 @@ impl<L: Language> AnalyzerSignal<L> for PluginSignal<L> {
         Some(AnalyzerDiagnostic::from(self.diagnostic.clone()))
     }
 
-    fn actions(&self) -> AnalyzerActionIter<L> {
+    fn actions(&self, filter: ActionFilter) -> AnalyzerActionIter<L> {
+        if !filter.is_rule_fix() {
+            return AnalyzerActionIter::new(vec![]);
+        }
+
         let Some(action_data) = &self.plugin_action else {
             return AnalyzerActionIter::new(vec![]);
         };
@@ -162,6 +238,10 @@ impl<L: Language> AnalyzerSignal<L> for PluginSignal<L> {
             mutation: BatchMutation::new(root.clone()),
             text_edit: Some((action_data.source_range, text_edit)),
         }])
+    }
+
+    fn actions_metadata(&self) -> Vec<ActionMetadata> {
+        Vec::new()
     }
 
     fn transformations(&self) -> AnalyzerTransformationIter<L> {
@@ -470,17 +550,21 @@ where
         })
     }
 
-    fn actions(&self) -> AnalyzerActionIter<RuleLanguage<R>> {
+    fn actions(&self, filter: ActionFilter) -> AnalyzerActionIter<RuleLanguage<R>> {
         let globals = self.options.globals();
 
-        let configured_applicability = if let Some(fix_kind) = self.options.rule_fix_kind::<R>() {
-            match fix_kind {
-                crate::FixKind::None => {
-                    // The action is disabled
-                    return AnalyzerActionIter::new(vec![]);
+        // When fix is set to "none", disable the rule fix but still allow
+        // suppression actions.
+        let fix_disabled = matches!(self.options.rule_fix_kind::<R>(), Some(FixKind::None));
+        let configured_applicability = if filter.is_rule_fix() && !fix_disabled {
+            if let Some(fix_kind) = self.options.rule_fix_kind::<R>() {
+                match fix_kind {
+                    FixKind::None => None,
+                    FixKind::Safe => Some(Applicability::Always),
+                    FixKind::Unsafe => Some(Applicability::MaybeIncorrect),
                 }
-                crate::FixKind::Safe => Some(Applicability::Always),
-                crate::FixKind::Unsafe => Some(Applicability::MaybeIncorrect),
+            } else {
+                None
             }
         } else {
             None
@@ -504,7 +588,10 @@ where
         .ok();
         let mut actions = Vec::new();
         if let Some(ctx) = ctx {
-            if let Some(action) = R::action(&ctx, &self.state) {
+            if filter.is_rule_fix()
+                && !fix_disabled
+                && let Some(action) = R::action(&ctx, &self.state)
+            {
                 actions.push(AnalyzerAction {
                     rule_name: Some((<R::Group as RuleGroup>::NAME, R::METADATA.name)),
                     applicability: configured_applicability.unwrap_or(action.applicability()),
@@ -513,8 +600,10 @@ where
                     message: action.message,
                     text_edit: None,
                 });
-            };
-            if let Some(text_range) = R::text_range(&ctx, &self.state)
+            }
+
+            if filter.is_inline_suppression()
+                && let Some(text_range) = R::text_range(&ctx, &self.state)
                 && let Some(suppression_action) = R::inline_suppression(
                     &ctx,
                     &text_range,
@@ -533,8 +622,9 @@ where
                 actions.push(action);
             }
 
-            if let Some(suppression_action) =
-                R::top_level_suppression(&ctx, self.suppression_action)
+            if filter.is_toplevel_suppression()
+                && let Some(suppression_action) =
+                    R::top_level_suppression(&ctx, self.suppression_action)
             {
                 let action = AnalyzerAction {
                     rule_name: Some((<R::Group as RuleGroup>::NAME, R::METADATA.name)),
@@ -551,6 +641,54 @@ where
         } else {
             AnalyzerActionIter::new(vec![])
         }
+    }
+
+    fn actions_metadata(&self) -> Vec<ActionMetadata> {
+        let rule_name = Some((<R::Group as RuleGroup>::NAME, R::METADATA.name));
+        let rule_category = <<R::Group as RuleGroup>::Category as GroupCategory>::CATEGORY;
+        let has_suppression = matches!(
+            rule_category,
+            RuleCategory::Lint | RuleCategory::Action | RuleCategory::Syntax
+        );
+
+        let mut metadata = Vec::new();
+
+        // Rule fix metadata — only if the rule declares a fix
+        let fix_kind = self.options.rule_fix_kind::<R>();
+        let is_disabled = matches!(fix_kind, Some(FixKind::None));
+        if !is_disabled && R::METADATA.fix_kind != FixKind::None {
+            let applicability = match fix_kind {
+                Some(FixKind::Safe) => Applicability::Always,
+                Some(FixKind::Unsafe) => Applicability::MaybeIncorrect,
+                _ => match R::METADATA.fix_kind {
+                    FixKind::Safe => Applicability::Always,
+                    _ => Applicability::MaybeIncorrect,
+                },
+            };
+            let action_category =
+                R::METADATA.action_category(rule_category, <R::Group as RuleGroup>::NAME);
+            metadata.push(ActionMetadata {
+                rule_name,
+                category: action_category,
+                applicability,
+            });
+        }
+
+        // Suppression metadata
+        if has_suppression {
+            metadata.push(ActionMetadata {
+                rule_name,
+                category: ActionCategory::Other(OtherActionCategory::InlineSuppression),
+                applicability: Applicability::Always,
+            });
+            metadata.push(ActionMetadata {
+                rule_name,
+                category: ActionCategory::Other(OtherActionCategory::ToplevelSuppression),
+                applicability: Applicability::Always,
+            });
+        }
+
+        metadata
     }
 
     fn transformations(&self) -> AnalyzerTransformationIter<RuleLanguage<R>> {

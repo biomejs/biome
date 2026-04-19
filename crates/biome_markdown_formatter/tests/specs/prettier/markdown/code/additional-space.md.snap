@@ -59,19 +59,17 @@ info: markdown/code/additional-space.md
 -   yarn install
 -   ```
 -
--   To check your version of Yarn and ensure it's installed you can type:
++    ```sh
++    yarn install
++    ```
+    To check your version of Yarn and ensure it's installed you can type:
 -
 -   ```sh
 -   yarn --version
 -   ```
 +    ```sh
-+    yarn install
-+    ```
-+    To check your version of Yarn and ensure it's installed you can type:
-+    ```sh
 +    yarn --version
 +    ```
-\ No newline at end of file
 ```
 
 # Output
@@ -95,10 +93,11 @@ info: markdown/code/additional-space.md
     ```sh
     yarn install
     ```
-    To check your version of Yarn and ensure it's installed you can type:
+   To check your version of Yarn and ensure it's installed you can type:
     ```sh
     yarn --version
-    ``````
+    ```
+```
 
 # Lines exceeding max width of 80 characters
 ```

@@ -2,7 +2,10 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use crate::execute::migrate::unsupported_rules::UNSUPPORTED_RULES;
 
-use super::{eslint_any_rule_to_biome::migrate_eslint_any_rule, eslint_eslint, eslint_typescript};
+use super::{
+    eslint_any_rule_to_biome::migrate_eslint_any_rule, eslint_eslint, eslint_jest,
+    eslint_typescript,
+};
 use biome_analyze::RuleSource;
 use biome_configuration::analyzer::SeverityOrGroup;
 use biome_configuration::{self as biome_config};
@@ -48,6 +51,8 @@ pub(crate) enum UnsupportedRuleReason {
     KnownSourceNotImplemented,
     /// The rule belongs to an unknown source, and is therefore not implemented in Biome.
     UnknownSource,
+    /// The rule is covered by a different rule, and is therefore not implemented as its own rule in Biome.
+    CoveredByRule(&'static str),
 }
 
 impl Display for UnsupportedRuleReason {
@@ -67,6 +72,9 @@ impl Display for UnsupportedRuleReason {
             }
             Self::UnknownSource => fmt.write_markup(markup! {
                 "These rules originate from an eslint plugin or other tool that Biome doesn't know about."
+            }),
+            Self::CoveredByRule(rule) => fmt.write_markup(markup! {
+                "Covered by the "<Emphasis>{rule}</Emphasis>" rule."
             }),
         }
     }
@@ -224,6 +232,7 @@ impl biome_diagnostics::Diagnostic for MigrationResults {
             let mut formatter_option = Vec::new();
             let mut known_source_not_implemented = Vec::new();
             let mut unknown_source = Vec::new();
+            let mut covered_by_rule = Vec::new();
 
             for (rule, reason) in &self.unsupported {
                 match reason {
@@ -236,6 +245,7 @@ impl biome_diagnostics::Diagnostic for MigrationResults {
                         known_source_not_implemented.push(rule);
                     }
                     UnsupportedRuleReason::UnknownSource => unknown_source.push(rule),
+                    UnsupportedRuleReason::CoveredByRule(_) => covered_by_rule.push((rule, reason)),
                 }
             }
 
@@ -304,6 +314,22 @@ impl biome_diagnostics::Diagnostic for MigrationResults {
                 let list: Vec<_> = unknown_source
                     .iter()
                     .map(|item| *item as &dyn biome_console::fmt::Display)
+                    .collect();
+                visitor.record_list(list.as_slice())?;
+            }
+
+            if !covered_by_rule.is_empty() {
+                visitor.record_log(
+                    biome_diagnostics::LogCategory::Info,
+                    &markup! { "These rules are covered by another rule, but they require manual migration:" },
+                )?;
+                let list: Vec<_> = covered_by_rule
+                    .iter()
+                    .map(|(rule, reason)| UnsupportedRuleDisplay { rule, reason })
+                    .collect();
+                let list: Vec<_> = list
+                    .iter()
+                    .map(|item| item as &dyn biome_console::fmt::Display)
                     .collect();
                 visitor.record_list(list.as_slice())?;
             }
@@ -388,6 +414,8 @@ impl<'a> TryFrom<&'a EslintRuleName> for RuleSource<'a> {
             Some("react-refresh") => RuleSource::EslintReactRefresh,
             Some("react-x") => RuleSource::EslintReactX,
             Some("@eslint-react") => RuleSource::EslintReactXyz,
+            Some("react-jsx") => RuleSource::EslintReactJsx,
+            Some("react-dom") => RuleSource::EslintReactDom,
             Some("regexp") => RuleSource::EslintRegexp,
             Some("solid") => RuleSource::EslintSolid,
             Some("sonarjs") => RuleSource::EslintSonarJs,
@@ -399,6 +427,7 @@ impl<'a> TryFrom<&'a EslintRuleName> for RuleSource<'a> {
             Some("vue") => RuleSource::EslintVueJs,
             Some("turbo") => RuleSource::EslintTurbo,
             Some("@html-eslint") => RuleSource::HtmlEslint,
+            Some("typescript-sort-keys") => RuleSource::EslintTypescriptSortKeys,
             Some(_) => return Err("Unknown ESLint rule source"),
         };
 
@@ -444,6 +473,16 @@ impl eslint_eslint::AnyConfigData {
             Self::Legacy(config) => config.into_biome_config(options),
         }
     }
+}
+
+pub(crate) fn merge_biome_config_with_eslint(
+    mut biome_config: biome_config::Configuration,
+    eslint_config: eslint_eslint::AnyConfigData,
+    options: &MigrationOptions,
+) -> (biome_config::Configuration, MigrationResults) {
+    let (eslint_biome_config, results) = eslint_config.into_biome_config(options);
+    biome_config.merge_with(eslint_biome_config);
+    (biome_config, results)
 }
 
 impl eslint_eslint::FlatConfigData {
@@ -652,6 +691,29 @@ fn migrate_eslint_rule(
                 }
             }
         }
+        eslint_eslint::Rule::JestConsistentTestIt(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                let severity = conf.severity();
+                let group = rules.nursery.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    let rule_options =
+                        if let eslint_eslint::RuleConf::Option(_, rule_options) = conf {
+                            rule_options.into()
+                        } else {
+                            eslint_jest::ConsistentTestItOptions::default().into()
+                        };
+                    group.use_consistent_test_it =
+                        Some(biome_config::RuleFixConfiguration::WithOptions(
+                            biome_config::RuleWithFixOptions {
+                                level: severity.into(),
+                                fix: None,
+                                options: rule_options,
+                            },
+                        ));
+                }
+                results.add(&name, RuleMigrationResult::Migrated);
+            }
+        }
         eslint_eslint::Rule::Jsxa11yArioaRoles(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
                 && let eslint_eslint::RuleConf::Option(severity, rule_options) = conf
@@ -787,8 +849,155 @@ fn to_biome_includes(
 mod tests {
     use super::*;
     use biome_configuration::OverrideGlobs;
+    use camino::Utf8Path;
     use eslint_eslint::*;
     use std::borrow::Cow;
+    use std::fs::read_to_string;
+
+    mod test_utils {
+        use super::*;
+        use biome_deserialize::json::deserialize_from_json_str;
+        use biome_deserialize_macros::Deserializable;
+        use biome_json_formatter::{context::JsonFormatOptions, format_node};
+        use biome_json_parser::{JsonParserOptions, parse_json};
+
+        #[derive(Debug, Default, Deserializable)]
+        pub(super) struct MigratorSpec {
+            #[deserializable(rename = "eslint")]
+            pub(super) eslint_config: LegacyConfigData,
+            #[deserializable(rename = "biome")]
+            pub(super) biome_config: biome_config::Configuration,
+        }
+
+        fn deserialize_legacy_config(input: &str) -> LegacyConfigData {
+            let (config, diagnostics) = deserialize_from_json_str::<LegacyConfigData>(
+                input,
+                JsonParserOptions::default()
+                    .with_allow_comments()
+                    .with_allow_trailing_commas(),
+                "",
+            )
+            .consume();
+            assert!(
+                diagnostics.is_empty(),
+                "unexpected diagnostics: {diagnostics:#?}"
+            );
+            config.expect("legacy ESLint config should deserialize")
+        }
+
+        fn deserialize_biome_config(input: &str) -> biome_config::Configuration {
+            let (config, diagnostics) = deserialize_from_json_str::<biome_config::Configuration>(
+                input,
+                JsonParserOptions::default()
+                    .with_allow_comments()
+                    .with_allow_trailing_commas(),
+                "",
+            )
+            .consume();
+            assert!(
+                diagnostics.is_empty(),
+                "unexpected diagnostics: {diagnostics:#?}"
+            );
+            config.expect("Biome config should deserialize")
+        }
+
+        pub(super) fn deserialize_migrator_spec(input: &str) -> MigratorSpec {
+            let (spec, diagnostics) = deserialize_from_json_str::<MigratorSpec>(
+                input,
+                JsonParserOptions::default()
+                    .with_allow_comments()
+                    .with_allow_trailing_commas(),
+                "",
+            )
+            .consume();
+            assert!(
+                diagnostics.is_empty(),
+                "unexpected diagnostics: {diagnostics:#?}"
+            );
+            spec.expect("migrator spec should deserialize")
+        }
+
+        fn format_json(input: &str) -> String {
+            let parsed = parse_json(
+                input,
+                JsonParserOptions::default()
+                    .with_allow_comments()
+                    .with_allow_trailing_commas(),
+            );
+            format_node(JsonFormatOptions::default(), &parsed.syntax())
+                .expect("JSON should format")
+                .print()
+                .expect("formatted JSON should print")
+                .as_code()
+                .to_string()
+        }
+
+        pub(super) fn format_serialized_json(value: &impl serde::Serialize) -> String {
+            let serialized = serde_json::to_string(value).expect("value should serialize to JSON");
+            format_json(&serialized)
+        }
+
+        pub(super) fn build_legacy_migration_snapshot(
+            eslint_config: &str,
+            biome_config_before: &str,
+            options: MigrationOptions,
+        ) -> String {
+            let eslint_config_data = deserialize_legacy_config(eslint_config);
+            let biome_config_before_data = deserialize_biome_config(biome_config_before);
+            let biome_config_before_snapshot = format_json(biome_config_before);
+            let eslint_config_snapshot = format_json(eslint_config);
+            let (biome_config_after, _) = merge_biome_config_with_eslint(
+                biome_config_before_data,
+                AnyConfigData::Legacy(eslint_config_data),
+                &options,
+            );
+            let biome_config_after_snapshot = format_serialized_json(&biome_config_after);
+
+            // Ensure the migrated output still deserializes as a valid Biome config.
+            deserialize_biome_config(&biome_config_after_snapshot);
+
+            format!(
+                "## ESLint Config\n\n```json\n{}\n```\n\n## Biome Config Before Migration\n\n```json\n{}\n```\n\n## Biome Config After Migration\n\n```json\n{}\n```\n",
+                eslint_config_snapshot, biome_config_before_snapshot, biome_config_after_snapshot,
+            )
+        }
+    }
+
+    use test_utils::{
+        MigratorSpec, build_legacy_migration_snapshot, deserialize_migrator_spec,
+        format_serialized_json,
+    };
+
+    tests_macros::gen_tests! {"tests/specs/migrate_eslint/**/*.{json,jsonc}", crate::execute::migrate::eslint_to_biome::tests::run_migrator_spec_test, "module"}
+
+    fn run_migrator_spec_test(input: &'static str, _: &str, _: &str, _: &str) {
+        let input_file = Utf8Path::new(input);
+        let file_name = input_file.file_name().unwrap();
+        let input_code = read_to_string(input_file)
+            .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
+        let raw_spec: serde_json::Value =
+            serde_json::from_str(&input_code).expect("migrator spec should be valid JSON");
+        let MigratorSpec {
+            eslint_config: _,
+            biome_config: _,
+        } = deserialize_migrator_spec(&input_code);
+
+        let snapshot = build_legacy_migration_snapshot(
+            &format_serialized_json(&raw_spec["eslint"]),
+            &format_serialized_json(&raw_spec["biome"]),
+            MigrationOptions {
+                include_inspired: true,
+                include_nursery: true,
+            },
+        );
+
+        insta::with_settings!({
+            prepend_module_to_snapshot => false,
+            snapshot_path => input_file.parent().unwrap(),
+        }, {
+            insta::assert_snapshot!(file_name, snapshot, file_name);
+        });
+    }
 
     #[test]
     fn flat_config_single_config_object() {

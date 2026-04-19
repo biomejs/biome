@@ -68,6 +68,10 @@ AI assistance isn't always perfect, even when used with the utmost care.
 
 Please be respectful to maintainers and disclose AI assistance.
 
+Please do not use AI to write pull request descriptions or contributor communication for this project. Maintainers have limited review bandwidth, and unnecessarily long or low-signal explanations can slow down the review process.
+
+If we believe AI-generated communication was used, we may close the pull request at our discretion. Repeated attempts to contest that decision in comments or re-open the PR may affect whether we accept future contributions from the same contributor.
+
 ## Asking questions, making proposals
 
 If you have any questions, proposals, or feedback, open a [GitHub discussion](https://github.com/biomejs/biome/discussions).

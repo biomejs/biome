@@ -237,7 +237,7 @@ CssAttributeMatcher =
 CssAttributeMatcherValue =
  name: AnyCssAttributeMatcherValue
 
-AnyCssAttributeMatcherValue = CssString | CssIdentifier
+AnyCssAttributeMatcherValue = CssString | CssIdentifier | ScssInterpolatedString
 
 // :nth-type(2) {}
 // ^^^^^^^^^^^^
@@ -349,6 +349,7 @@ CssPseudoValueList = (AnyCssPseudoValue (',' AnyCssPseudoValue)*)
 AnyCssPseudoValue =
 	CssIdentifier
 	| CssString
+	| ScssInterpolatedString
 
 // :nth-child(2n+1 of li, .test) {}
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1199,6 +1200,7 @@ CssKeyframesSelectorList =  (AnyCssKeyframesSelector (',' AnyCssKeyframesSelecto
 AnyCssKeyframesSelector =
 	CssKeyframesIdentSelector
 	| CssKeyframesPercentageSelector
+	| CssKeyframesRangeSelector
 	| CssBogusSelector
 
 // @keyframes "something" { from {} to {} }
@@ -1212,6 +1214,14 @@ CssKeyframesIdentSelector =
 //                          ^^^  ^^^
 CssKeyframesPercentageSelector =
 	selector: CssPercentage
+
+// @keyframes reveal { entry 0% {} exit 100% {} }
+//                     ^^^^^^^^^   ^^^^^^^^^^
+// Scroll-driven animations: <timeline-range-name> <percentage>
+// Valid names: cover, contain, entry, exit, entry-crossing, exit-crossing
+CssKeyframesRangeSelector =
+	name: ('cover' | 'contain' | 'entry' | 'exit' | 'entry-crossing' | 'exit-crossing')
+	percentage: CssPercentage
 
 // https://drafts.csswg.org/mediaqueries-5/#media-query
 // <media-query> = <media-condition>
@@ -1354,22 +1364,26 @@ AnyCssQueryFeature =
 	| CssQueryFeatureReverseRange
 	| CssQueryFeatureRangeInterval
 
+AnyCssQueryFeatureName =
+	CssIdentifier
+	| ScssInterpolatedIdentifier
+
 // @container (--responsive: true) {  }
 //             ^^^^^^^^^^^^^^^^^^
 CssQueryFeaturePlain =
-	name: CssIdentifier
+	name: AnyCssQueryFeatureName
 	':'
 	value: AnyCssQueryFeatureValue
 
 // @container (any-hover) {  }
 //             ^^^^^^^^^
 CssQueryFeatureBoolean =
-	name: CssIdentifier
+	name: AnyCssQueryFeatureName
 
 // @media (width <= 500px) {  }
 //         ^^^^^^^^^^^^^^
 CssQueryFeatureRange =
-	left: CssIdentifier
+	left: AnyCssQueryFeatureName
 	comparison: CssQueryFeatureRangeComparison
 	right: AnyCssQueryFeatureValue
 
@@ -1378,14 +1392,14 @@ CssQueryFeatureRange =
 CssQueryFeatureReverseRange =
 	left: AnyCssQueryFeatureValue
 	comparison: CssQueryFeatureRangeComparison
-	right: CssIdentifier
+	right: AnyCssQueryFeatureName
 
 // @media (500px <= width <= 500px) {  }
 //         ^^^^^^^^^^^^^^^^^^^^^^^
 CssQueryFeatureRangeInterval =
 	left: AnyCssQueryFeatureValue
 	left_comparison: CssQueryFeatureRangeComparison
-	name: CssIdentifier
+	name: AnyCssQueryFeatureName
 	right_comparison: CssQueryFeatureRangeComparison
 	right: AnyCssQueryFeatureValue
 
@@ -1402,6 +1416,8 @@ AnyCssQueryFeatureValue =
 	| CssIdentifier
 	| CssRatio
 	| AnyCssFunction
+	| ScssInterpolatedIdentifier
+	| ScssInterpolation
 
 // https://drafts.csswg.org/css-page/#at-ruledef-page
 // @page = @page <page-selector-list>? { <declaration-rule-list> }
@@ -1675,7 +1691,7 @@ CssImportAtRule =
 //             ^^^^^^^^^^^^
 // @import "./test.scss";
 //         ^^^^^^^^^^^^^
-AnyCssImportUrl = CssUrlFunction | CssString
+AnyCssImportUrl = CssUrlFunction | CssString | ScssInterpolatedString
 
 AnyCssImportLayer =
 	CssImportAnonymousLayer
@@ -1929,9 +1945,11 @@ AnyCssValue =
 	| CssCustomIdentifier
 	| CssDashedIdentifier
 	| ScssIdentifier
+	| ScssInterpolatedIdentifier
 	| ScssQualifiedName
 	| ScssParentSelectorValue
 	| CssString
+	| ScssInterpolatedString
 	| CssNumber
 	| AnyCssDimension
 	| CssRatio
@@ -2000,6 +2018,7 @@ CssFunction =
 
 AnyCssFunctionName =
 	CssIdentifier
+	| ScssInterpolatedIdentifier
 	| ScssQualifiedName
 
 // https://drafts.csswg.org/css-values-4/#url-value
@@ -2029,6 +2048,7 @@ AnyCssUrlModifier =
 AnyCssUrlValue =
 	CssUrlValueRaw
 	| CssString
+	| ScssInterpolatedString
 
 CssParameterList = AnyCssExpression (',' AnyCssExpression)* ','?
 
@@ -2686,6 +2706,7 @@ ScssImportItemList =
 
 AnyScssImportItem =
 	CssString
+	| ScssInterpolatedString
 	| ScssPlainImport
 
 // "theme.css" print
@@ -2836,9 +2857,15 @@ ScssInterpolatedIdentifier =
 
 ScssInterpolatedIdentifierPartList = AnyScssInterpolatedIdentifierPart*
 
+// #{$a}-#{$b}
+//      ^
+ScssInterpolatedIdentifierHyphen =
+	'-'
+
 AnyScssInterpolatedIdentifierPart =
 	CssIdentifier
 	| CssCustomIdentifier
+	| ScssInterpolatedIdentifierHyphen
 	| ScssInterpolation
 
 // @if $theme == dark { color: white; } @else { color: black; }
@@ -3008,6 +3035,26 @@ ScssInterpolation =
 	'{'
 	value: AnyScssExpression
 	'}'
+
+// "foo #{$bar} baz"
+// ^^^^^^^^^^^^^^^^^
+ScssInterpolatedString =
+	opening_quote: 'scss_string_quote'
+	parts: ScssInterpolatedStringPartList
+	closing_quote: 'scss_string_quote'
+
+// "foo #{$bar} baz"
+//  ^^^^^^^^^^^^^^^
+ScssInterpolatedStringPartList = AnyScssInterpolatedStringPart*
+
+AnyScssInterpolatedStringPart =
+	ScssInterpolation
+	| ScssStringText
+
+// "foo #{$bar} baz"
+//  ^^^^       ^^^^
+ScssStringText =
+	value: 'scss_string_content_literal'
 
 // box-shadow: 1px, 2px, 3px;
 //             ^^^^^^^^^^^^^

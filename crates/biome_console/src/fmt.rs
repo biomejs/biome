@@ -1,4 +1,12 @@
-use std::{borrow::Cow, fmt, io, time::Duration};
+use std::{
+    borrow::Cow,
+    fmt, io,
+    num::{
+        NonZeroI8, NonZeroI16, NonZeroI32, NonZeroI64, NonZeroI128, NonZeroIsize, NonZeroU8,
+        NonZeroU16, NonZeroU32, NonZeroU64, NonZeroU128, NonZeroUsize,
+    },
+    time::Duration,
+};
 
 pub use crate::write::{HTML, Termcolor, Write};
 use crate::{Markup, MarkupElement, markup};
@@ -211,6 +219,18 @@ impl_std_display!(u32);
 impl_std_display!(u64);
 impl_std_display!(u128);
 impl_std_display!(usize);
+impl_std_display!(NonZeroI8);
+impl_std_display!(NonZeroI16);
+impl_std_display!(NonZeroI32);
+impl_std_display!(NonZeroI64);
+impl_std_display!(NonZeroI128);
+impl_std_display!(NonZeroIsize);
+impl_std_display!(NonZeroU8);
+impl_std_display!(NonZeroU16);
+impl_std_display!(NonZeroU32);
+impl_std_display!(NonZeroU64);
+impl_std_display!(NonZeroU128);
+impl_std_display!(NonZeroUsize);
 
 impl Display for Duration {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {

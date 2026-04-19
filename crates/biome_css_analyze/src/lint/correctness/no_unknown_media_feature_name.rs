@@ -5,11 +5,11 @@ use biome_console::markup;
 use biome_css_syntax::{
     AnyCssMediaAndCombinableCondition, AnyCssMediaCondition, AnyCssMediaInParens,
     AnyCssMediaOrCombinableCondition, AnyCssMediaQuery, AnyCssMediaTypeCondition,
-    AnyCssMediaTypeQuery, AnyCssQueryFeature, CssMediaAndCondition, CssMediaConditionQuery,
-    CssMediaOrCondition, CssMediaQueryList,
+    AnyCssMediaTypeQuery, AnyCssQueryFeature, AnyCssQueryFeatureName, CssMediaAndCondition,
+    CssMediaConditionQuery, CssMediaOrCondition, CssMediaQueryList,
 };
 use biome_diagnostics::Severity;
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::no_unknown_media_feature_name::NoUnknownMediaFeatureNameOptions;
 
 use crate::utils::is_media_feature_name;
@@ -224,11 +224,15 @@ fn has_invalid_media_feature_name(any_css_media_in_parens: AnyCssMediaInParens) 
         let any_css_media_in_parens = any_css_media_in_parens_stack.pop()?;
         match any_css_media_in_parens {
             AnyCssMediaInParens::CssMediaFeatureInParens(css_media_feature_in_parens) => {
-                let feature_name = get_feature_name(css_media_feature_in_parens.feature().ok()?)?;
-                if is_media_feature_name(&feature_name) {
-                    continue;
+                match get_feature_name(css_media_feature_in_parens.feature().ok()?)? {
+                    MediaFeatureName::Literal(feature_name) => {
+                        if is_media_feature_name(feature_name.text()) {
+                            continue;
+                        }
+                        return Some(true);
+                    }
+                    MediaFeatureName::Dynamic => {}
                 }
-                return Some(true);
             }
             AnyCssMediaInParens::CssMediaConditionInParens(css_media_condition_in_parens) => {
                 match css_media_condition_in_parens.condition().ok()? {
@@ -292,23 +296,39 @@ fn has_invalid_media_feature_name(any_css_media_in_parens: AnyCssMediaInParens) 
     Some(false)
 }
 
-fn get_feature_name(any_css_query_feature: AnyCssQueryFeature) -> Option<String> {
-    let value_token = match any_css_query_feature {
+#[derive(Debug, Clone, Eq, PartialEq)]
+enum MediaFeatureName {
+    Literal(TokenText),
+    Dynamic,
+}
+
+fn get_feature_name(any_css_query_feature: AnyCssQueryFeature) -> Option<MediaFeatureName> {
+    let name = match any_css_query_feature {
         AnyCssQueryFeature::CssQueryFeaturePlain(css_query_feature_plain) => {
-            css_query_feature_plain.name().ok()?.value_token()
+            css_query_feature_plain.name().ok()?
         }
         AnyCssQueryFeature::CssQueryFeatureRange(css_query_feature_range) => {
-            css_query_feature_range.left().ok()?.value_token()
+            css_query_feature_range.left().ok()?
         }
         AnyCssQueryFeature::CssQueryFeatureReverseRange(css_query_feature_reversed_range) => {
-            css_query_feature_reversed_range.right().ok()?.value_token()
+            css_query_feature_reversed_range.right().ok()?
         }
         AnyCssQueryFeature::CssQueryFeatureRangeInterval(css_query_feature_range_interval) => {
-            css_query_feature_range_interval.name().ok()?.value_token()
+            css_query_feature_range_interval.name().ok()?
         }
         AnyCssQueryFeature::CssQueryFeatureBoolean(css_query_feature_boolean) => {
-            css_query_feature_boolean.name().ok()?.value_token()
+            css_query_feature_boolean.name().ok()?
         }
     };
-    Some(value_token.ok()?.text().to_string().trim().to_string())
+
+    media_feature_name_from_query_name(name)
+}
+
+fn media_feature_name_from_query_name(name: AnyCssQueryFeatureName) -> Option<MediaFeatureName> {
+    match name {
+        AnyCssQueryFeatureName::CssIdentifier(identifier) => Some(MediaFeatureName::Literal(
+            identifier.value_token().ok()?.token_text_trimmed(),
+        )),
+        AnyCssQueryFeatureName::ScssInterpolatedIdentifier(_) => Some(MediaFeatureName::Dynamic),
+    }
 }

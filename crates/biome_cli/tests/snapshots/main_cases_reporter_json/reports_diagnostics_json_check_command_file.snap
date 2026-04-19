@@ -165,7 +165,7 @@ expression: redactor(content)
 		},
 		{
 			"severity": "error",
-			"message": "Shouldn't redeclare 'z'. Consider to delete it or rename it.",
+			"message": "'z' is redeclared in the same scope.",
 			"category": "lint/suspicious/noRedeclare",
 			"location": {
 				"path": "index.ts",
@@ -176,13 +176,13 @@ expression: redactor(content)
 				{
 					"start": { "line": 1, "column": 10 },
 					"end": { "line": 1, "column": 11 },
-					"text": "'z' is defined here:"
+					"text": "Remove the duplicate declaration or rename one of the variables."
 				}
 			]
 		},
 		{
 			"severity": "error",
-			"message": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+			"message": "'f' is redeclared in the same scope.",
 			"category": "lint/suspicious/noRedeclare",
 			"location": {
 				"path": "index.ts",
@@ -193,7 +193,7 @@ expression: redactor(content)
 				{
 					"start": { "line": 8, "column": 5 },
 					"end": { "line": 8, "column": 6 },
-					"text": "'f' is defined here:"
+					"text": "Remove the duplicate declaration or rename one of the variables."
 				}
 			]
 		},
@@ -265,7 +265,7 @@ expression: redactor(content)
 		},
 		{
 			"severity": "error",
-			"message": "Shouldn't redeclare 'z'. Consider to delete it or rename it.",
+			"message": "'z' is redeclared in the same scope.",
 			"category": "lint/suspicious/noRedeclare",
 			"location": {
 				"path": "main.ts",
@@ -276,13 +276,13 @@ expression: redactor(content)
 				{
 					"start": { "line": 1, "column": 10 },
 					"end": { "line": 1, "column": 11 },
-					"text": "'z' is defined here:"
+					"text": "Remove the duplicate declaration or rename one of the variables."
 				}
 			]
 		},
 		{
 			"severity": "error",
-			"message": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+			"message": "'f' is redeclared in the same scope.",
 			"category": "lint/suspicious/noRedeclare",
 			"location": {
 				"path": "main.ts",
@@ -293,7 +293,7 @@ expression: redactor(content)
 				{
 					"start": { "line": 8, "column": 5 },
 					"end": { "line": 8, "column": 6 },
-					"text": "'f' is defined here:"
+					"text": "Remove the duplicate declaration or rename one of the variables."
 				}
 			]
 		},

@@ -1,5 +1,8 @@
 @import "theme";
 
+@import "#{$file}.scss";
+@import "#{$file}.css" print;
+
 @import "rounded-corners", "text-shadow";
 
 @import "theme.scss";
@@ -15,6 +18,8 @@
 @import "print.css" print, screen;
 
 @import "print.css" print, "spacing";
+
+@import url("foo.css"), "#{$bar}";
 
 @import "http://example.com/theme";
 

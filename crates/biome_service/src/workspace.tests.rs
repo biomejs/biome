@@ -8,7 +8,7 @@ use biome_configuration::analyzer::{RuleGroup, RuleSelector};
 use biome_configuration::{
     Configuration, FilesConfiguration, OverrideGlobs, OverridePattern, Overrides,
 };
-use biome_diagnostics::Diagnostic;
+use biome_diagnostics::{Diagnostic, Severity};
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_js_syntax::{JsFileSource, TextSize};
 use biome_plugin_loader::{PluginConfiguration, Plugins};
@@ -325,6 +325,9 @@ fn correctly_pulls_lint_diagnostics() {
         vec![RuleSelector::Rule(RuleGroup::Style.as_str(), "useDeprecatedReason").into()],
         vec![],
         true,
+        None,
+        Severity::Hint,
+        false,
     );
     assert!(result.is_ok());
     let diagnostics = result.unwrap().diagnostics;
@@ -555,12 +558,15 @@ fn plugins_are_loaded_and_used_during_analysis() {
             only: Vec::new(),
             skip: Vec::new(),
             enabled_rules: Vec::new(),
-            pull_code_actions: true,
+            include_code_fix: true,
             inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
         })
         .unwrap();
     assert_debug_snapshot!(result.diagnostics);
-    assert_eq!(result.errors, 0);
+    assert_eq!(result.errors, 1);
 }
 
 #[test]
@@ -626,8 +632,11 @@ language css;
             only: Vec::new(),
             skip: Vec::new(),
             enabled_rules: Vec::new(),
-            pull_code_actions: true,
+            include_code_fix: true,
             inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
         })
         .unwrap();
     assert_debug_snapshot!(result.diagnostics);
@@ -693,12 +702,15 @@ fn plugins_may_use_invalid_span() {
             only: Vec::new(),
             skip: Vec::new(),
             enabled_rules: Vec::new(),
-            pull_code_actions: true,
+            include_code_fix: true,
             inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
         })
         .unwrap();
     assert_debug_snapshot!(result.diagnostics);
-    assert_eq!(result.errors, 0);
+    assert_eq!(result.errors, 1);
 }
 
 #[test]
@@ -825,8 +837,11 @@ const hasOwn = Object.hasOwn({ foo: 'bar' }, 'foo');"#,
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: Vec::new(),
-                pull_code_actions: true,
+                include_code_fix: true,
                 inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: Severity::Hint,
+                enforce_assist: false,
             })
             .unwrap();
         // Filter only diagnostics with category name "plugin"
@@ -938,8 +953,11 @@ fn correctly_scope_plugin_with_includes() {
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: Vec::new(),
-                pull_code_actions: true,
+                include_code_fix: true,
                 inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: Severity::Hint,
+                enforce_assist: false,
             })
             .unwrap();
 

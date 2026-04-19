@@ -55,7 +55,7 @@ declare_lint_rule! {
         version: "2.1.0",
         name: "noMagicNumbers",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("no-magic-numbers").same()],
+        sources: &[RuleSource::Eslint("no-magic-numbers").inspired(), RuleSource::EslintTypeScript("no-magic-numbers").same()],
         recommended: false,
     }
 }
@@ -407,5 +407,9 @@ const ALWAYS_IGNORED_IN_ARITHMETIC_OPERATIONS: &[&str] = &[
 ];
 
 fn is_allowed_number(numeric_literal: &AnyJsNumericLiteral) -> bool {
-    ALWAYS_IGNORED_IN_ARITHMETIC_OPERATIONS.contains(&numeric_literal.to_trimmed_string().as_str())
+    match numeric_literal {
+        AnyJsNumericLiteral::JsNumberLiteralExpression(expr) => expr.value_token(),
+        AnyJsNumericLiteral::JsBigintLiteralExpression(expr) => expr.value_token(),
+    }
+    .is_ok_and(|token| ALWAYS_IGNORED_IN_ARITHMETIC_OPERATIONS.contains(&token.text_trimmed()))
 }

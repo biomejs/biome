@@ -215,6 +215,43 @@ impl Server {
         Ok(())
     }
 
+    /// Like [`Self::initialize`] but advertises `codeAction/resolve` support.
+    #[expect(deprecated)]
+    async fn initialize_with_resolve_support(&mut self) -> Result<()> {
+        let _res: InitializeResult = self
+            .request(
+                "initialize",
+                "_init",
+                InitializeParams {
+                    process_id: None,
+                    root_path: None,
+                    root_uri: Some(uri!("")),
+                    initialization_options: None,
+                    capabilities: ClientCapabilities {
+                        text_document: Some(TextDocumentClientCapabilities {
+                            code_action: Some(CodeActionClientCapabilities {
+                                resolve_support: Some(CodeActionCapabilityResolveSupport {
+                                    properties: vec!["edit".to_string()],
+                                }),
+                                ..Default::default()
+                            }),
+                            ..Default::default()
+                        }),
+                        ..Default::default()
+                    },
+                    trace: None,
+                    workspace_folders: None,
+                    client_info: None,
+                    locale: None,
+                    work_done_progress_params: Default::default(),
+                },
+            )
+            .await?
+            .context("initialize returned None")?;
+
+        Ok(())
+    }
+
     /// It creates two projects, one at folder `test_one` and the other in `test_two`.
     ///
     /// Hence, the two roots will be `/workspace/test_one` and `/workspace/test_two`
@@ -1422,6 +1459,103 @@ async fn pull_quick_fixes() -> Result<()> {
 }
 
 #[tokio::test]
+async fn pull_quick_fixes_with_resolve() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize_with_resolve_support().await?;
+    server.initialized().await?;
+
+    server.open_document("if(a === -0) {}").await?;
+
+    // Phase 1: request code actions — should return unresolved actions (no edit)
+    let res: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 6,
+                    },
+                    end: Position {
+                        line: 0,
+                        character: 6,
+                    },
+                },
+                context: CodeActionContext {
+                    diagnostics: vec![fixable_diagnostic(0)?],
+                    only: Some(vec![CodeActionKind::QUICKFIX]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    // All actions should have data (resolve token) and no edit
+    assert!(!res.is_empty(), "expected at least one code action");
+    for action_or_command in &res {
+        let CodeActionOrCommand::CodeAction(action) = action_or_command else {
+            panic!("expected CodeAction, got Command");
+        };
+        assert!(
+            action.edit.is_none(),
+            "expected no edit in unresolved action, got edit in: {}",
+            action.title
+        );
+        assert!(
+            action.data.is_some(),
+            "expected resolve data in action: {}",
+            action.title
+        );
+    }
+
+    // Phase 2: resolve the first action (the quickfix)
+    let first_action = match &res[0] {
+        CodeActionOrCommand::CodeAction(action) => action.clone(),
+        _ => panic!("expected CodeAction"),
+    };
+
+    let resolved: CodeAction = server
+        .request("codeAction/resolve", "resolve_code_action", first_action)
+        .await?
+        .context("codeAction/resolve returned None")?;
+
+    // The resolved action should now have an edit
+    assert!(resolved.edit.is_some(), "expected edit in resolved action");
+
+    // Verify it's the correct fix (replace -0 with 0)
+    let edit = resolved.edit.unwrap();
+    let changes = edit.changes.unwrap();
+    let edits = &changes[&uri!("document.js")];
+    assert_eq!(edits.len(), 1);
+    assert_eq!(edits[0].new_text, "");
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn pull_biome_quick_fixes() -> Result<()> {
     let factory = ServerFactory::default();
     let (service, client) = factory.create().into_inner();
@@ -2316,6 +2450,245 @@ if(a === -0) {}
             expected_line_suppression_action,
             expected_toplevel_suppression_action
         ]
+    );
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn pull_organize_imports_when_only_filter_is_set_issue_9741() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize_with_resolve_support().await?;
+    server.initialized().await?;
+
+    server
+        .open_document(
+            r#"
+import z from "zod";
+import { test } from "./test";
+import { describe } from "node:test";
+
+export { describe, test, z };
+"#,
+        )
+        .await?;
+
+    // Request code actions with only: ["source.organizeImports.biome"]
+    // This is what editors like Zed send when configured with
+    // "code_actions_on_format": { "source.organizeImports.biome": true }
+    let res: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 0,
+                    },
+                    end: Position {
+                        line: 6,
+                        character: 0,
+                    },
+                },
+                context: CodeActionContext {
+                    diagnostics: vec![Diagnostic {
+                        range: Range {
+                            start: Position {
+                                line: 1,
+                                character: 0,
+                            },
+                            end: Position {
+                                line: 1,
+                                character: 19,
+                            },
+                        },
+                        severity: Some(DiagnosticSeverity::INFORMATION),
+                        code: Some(NumberOrString::String(String::from(
+                            "assist/source/organizeImports",
+                        ))),
+                        source: Some(String::from("biome")),
+                        message: String::from("The imports and exports are not sorted."),
+                        ..Default::default()
+                    }],
+                    only: Some(vec![CodeActionKind::new("source.organizeImports.biome")]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    // The response must contain the organize imports action.
+    // Before the fix for #9741, this returned an empty array because the
+    // "source.organizeImports.biome" filter was not matching the action category.
+    assert!(
+        !res.is_empty(),
+        "Expected at least one code action, but got an empty response"
+    );
+
+    let action = match &res[0] {
+        CodeActionOrCommand::CodeAction(action) => action,
+        other => panic!("Expected CodeAction, got {:?}", other),
+    };
+
+    assert_eq!(action.title, "Apply safe fix for organizeImports");
+    assert_eq!(
+        action.kind,
+        Some(CodeActionKind::new("source.organizeImports.biome"))
+    );
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn resolve_organize_imports_action_issue_9812() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize_with_resolve_support().await?;
+    server.initialized().await?;
+
+    server
+        .open_document(
+            r#"
+import z from "zod";
+import { test } from "./test";
+import { describe } from "node:test";
+
+export { describe, test, z };
+"#,
+        )
+        .await?;
+
+    // Request code actions with only: ["source.organizeImports.biome"]
+    // This is less to behave like #9741's test, and more to make it so that I only get a single
+    // code action back from the server.
+    let res: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 0,
+                    },
+                    end: Position {
+                        line: 6,
+                        character: 0,
+                    },
+                },
+                context: CodeActionContext {
+                    diagnostics: vec![Diagnostic {
+                        range: Range {
+                            start: Position {
+                                line: 1,
+                                character: 0,
+                            },
+                            end: Position {
+                                line: 1,
+                                character: 19,
+                            },
+                        },
+                        severity: Some(DiagnosticSeverity::INFORMATION),
+                        code: Some(NumberOrString::String(String::from(
+                            "assist/source/organizeImports",
+                        ))),
+                        source: Some(String::from("biome")),
+                        message: String::from("The imports and exports are not sorted."),
+                        ..Default::default()
+                    }],
+                    only: Some(vec![CodeActionKind::new("source.organizeImports.biome")]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    // This is already fixed and proven in #9741
+    assert!(
+        !res.is_empty(),
+        "Expected at least one code action, but got an empty response"
+    );
+
+    let action = match &res[0] {
+        CodeActionOrCommand::CodeAction(action) => action,
+        other => panic!("Expected CodeAction, got {:?}", other),
+    };
+
+    assert_eq!(action.title, "Apply safe fix for organizeImports");
+    assert_eq!(
+        action.kind,
+        Some(CodeActionKind::new("source.organizeImports.biome"))
+    );
+    // With resolve support, the edit should be deferred so we need to call resolve in order to get
+    // the changes back.
+    assert!(
+        action.edit.is_none(),
+        "expected no edit in unresolved action"
+    );
+
+    // With the changes in #9812 this now succeeds, if you comment out the changes in #9812 this
+    // part will fail with an `Internal error: The rule doesn't exist`.
+    let action_to_resolve = action.clone();
+    let resolved: CodeAction = server
+        .request(
+            "codeAction/resolve",
+            "resolve_code_action",
+            action_to_resolve,
+        )
+        .await?
+        .context("codeAction/resolve returned None")?;
+
+    assert!(resolved.edit.is_some(), "expected edit in resolved action");
+    let edit = resolved.edit.unwrap();
+    let changes = edit.changes.unwrap();
+    let edits = &changes[&uri!("document.js")];
+    assert!(
+        !edits.is_empty(),
+        "expected at least one text edit for the organize imports fix"
     );
 
     server.close_document().await?;
@@ -3651,8 +4024,11 @@ export function bar() {
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
-                pull_code_actions: false,
+                include_code_fix: false,
                 inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
             },
         )
         .await?
@@ -3682,8 +4058,11 @@ export function bar() {
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
-                pull_code_actions: false,
+                include_code_fix: false,
                 inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
             },
         )
         .await?
@@ -3709,8 +4088,11 @@ export function bar() {
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
-                pull_code_actions: false,
+                include_code_fix: false,
                 inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
             },
         )
         .await?
@@ -3740,8 +4122,11 @@ export function bar() {
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
-                pull_code_actions: false,
+                include_code_fix: false,
                 inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
             },
         )
         .await?
@@ -3867,8 +4252,11 @@ export function bar() {
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
-                pull_code_actions: false,
+                include_code_fix: false,
                 inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
             },
         )
         .await?
@@ -3902,8 +4290,11 @@ export function bar() {
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
-                pull_code_actions: false,
+                include_code_fix: false,
                 inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
             },
         )
         .await?
@@ -3934,8 +4325,11 @@ export function bar() {
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
-                pull_code_actions: false,
+                include_code_fix: false,
                 inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
             },
         )
         .await?
@@ -5057,7 +5451,16 @@ async fn relative_configuration_path_resolves_against_correct_workspace_folder()
         })
         .await?;
 
-    // Open a file in test_two — its config disables the formatter.
+    // Open a file in test_one first, so a project is already open.
+    server
+        .open_named_document(
+            r#"statement(   );"#,
+            uri!("test_one/document.js"),
+            "javascript",
+        )
+        .await?;
+
+    // Now open a file in test_two — its config disables the formatter.
     server
         .open_named_document(
             r#"statement(   );"#,

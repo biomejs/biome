@@ -30,7 +30,9 @@ const SCSS_MODULE_MEMBER_RECOVERY_SET: TokenSet<CssSyntaxKind> =
 ///                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 /// ```
 ///
-/// Docs: https://sass-lang.com/documentation/at-rules/use/#configuration
+/// Docs:
+/// - https://sass-lang.com/documentation/at-rules/use/#configuration
+/// - https://sass-lang.com/documentation/at-rules/forward/#configuring-modules
 #[inline]
 pub(super) fn parse_scss_module_configuration_list(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_scss_module_configuration_list(p) {
@@ -65,7 +67,9 @@ fn parse_scss_module_configuration_item_list(p: &mut CssParser) {
 ///                    ^^^^^^^^^^^^^^^^^^^^^^^
 /// ```
 ///
-/// Docs: https://sass-lang.com/documentation/at-rules/use/#configuration
+/// Docs:
+/// - https://sass-lang.com/documentation/at-rules/use/#configuration
+/// - https://sass-lang.com/documentation/at-rules/forward/#configuring-modules
 #[inline]
 fn parse_scss_module_configuration(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_scss_identifier(p) {
@@ -94,10 +98,12 @@ fn parse_scss_module_configuration(p: &mut CssParser) -> ParsedSyntax {
 ///                                  ^^^^^^^^^
 /// ```
 ///
-/// Docs: https://sass-lang.com/documentation/at-rules/forward/#configuring-modules
+/// Docs:
+/// - https://sass-lang.com/documentation/at-rules/use/#configuration
+/// - https://sass-lang.com/documentation/at-rules/forward/#configuring-modules
 #[inline]
 fn parse_scss_module_configuration_modifier(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_scss_module_configuration_modifier_start(p) {
+    if !is_at_scss_module_configuration_modifier(p) {
         return Absent;
     }
 
@@ -128,7 +134,7 @@ fn parse_scss_module_configuration_modifier(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn is_at_scss_module_configuration_modifier_start(p: &mut CssParser) -> bool {
+fn is_at_scss_module_configuration_modifier(p: &mut CssParser) -> bool {
     p.at(T![!])
 }
 
