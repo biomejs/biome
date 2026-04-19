@@ -5,5 +5,8 @@
 #![doc = r" To add a new rule, create a `.rs` file in the group subdirectory"]
 #![doc = r" and run `cargo check`. The build system will automatically discover"]
 #![doc = r" and register your rule."]
+
+mod use_key_with_click_events;
+
 use biome_analyze_macros::declare_group_from_fs;
 declare_group_from_fs! { category : "lint" , group : "a11y" }

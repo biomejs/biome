@@ -3,11 +3,13 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlElement, HtmlFileSource};
+use biome_html_syntax::HtmlFileSource;
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_rowan::AstNode;
 use biome_rule_options::use_key_with_click_events::UseKeyWithClickEventsOptions;
 
 use crate::a11y::attribute_value_equals_ignore_case;
+use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Enforce that elements with `onclick` handlers also have at least one keyboard event handler.
@@ -73,12 +75,10 @@ declare_lint_rule! {
 
 /// Elements that are inherently keyboard-accessible and should not trigger this rule.
 /// Note: `<a>` is only interactive when it has an `href` attribute, so it's handled separately.
-const INTERACTIVE_ELEMENTS: &[&str] = &[
-    "button", "input", "option", "select", "textarea",
-];
+const INTERACTIVE_ELEMENTS: &[&str] = &["button", "input", "option", "select", "textarea"];
 
 impl Rule for UseKeyWithClickEvents {
-    type Query = Ast<AnyHtmlElement>;
+    type Query = Ast<AnyHtmlTagElement>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = UseKeyWithClickEventsOptions;
@@ -100,22 +100,19 @@ impl Rule for UseKeyWithClickEvents {
             return None;
         }
 
-        let name_matches = |name: &str| -> bool {
-            if is_html_file {
-                element_name.eq_ignore_ascii_case(name)
-            } else {
-                element_name.text() == name
-            }
-        };
-
         // <a> is only interactive when it has an href attribute.
         // A bare <a onclick> without href has Generic role, not Link.
-        if name_matches("a") && element.find_attribute_by_name("href").is_some() {
+        if is_html_tag(element, file_source, "a")
+            && element.find_attribute_by_name("href").is_some()
+        {
             return None;
         }
 
         // Skip inherently keyboard-accessible elements
-        if INTERACTIVE_ELEMENTS.iter().any(|&n| name_matches(n)) {
+        if INTERACTIVE_ELEMENTS
+            .iter()
+            .any(|&n| is_html_tag(element, file_source))
+        {
             return None;
         }
 
@@ -131,13 +128,10 @@ impl Rule for UseKeyWithClickEvents {
         }
 
         // Skip elements with presentation/none role
-        if element
-            .find_attribute_by_name("role")
-            .is_some_and(|attr| {
-                attribute_value_equals_ignore_case(&attr, "presentation")
-                    || attribute_value_equals_ignore_case(&attr, "none")
-            })
-        {
+        if element.find_attribute_by_name("role").is_some_and(|attr| {
+            attribute_value_equals_ignore_case(&attr, "presentation")
+                || attribute_value_equals_ignore_case(&attr, "none")
+        }) {
             return None;
         }
 
