@@ -168,6 +168,7 @@ declare_source_rule! {
     /// - `:PACKAGE:`: bare and scoped packages (`lib`, `@scoped/lib`)
     /// - `:ALIAS:`: path aliases starting with `#`, `@/`, `~`, `$`, or `%`
     /// - `:PATH:`: absolute and relative paths
+    /// - `:STYLE:`: paths ending with a style extension such as `.css` and `.scss`
     ///
     /// #### Type-only matcher
     ///
@@ -327,7 +328,7 @@ declare_source_rule! {
     /// import { render } from "react-dom/client";
     /// ```
     ///
-    /// ### Place CSS/style imports last
+    /// ### Place style imports last
     ///
     /// The following example groups style imports together and place them after other imports.
     /// Because groups are matched in order, the first group has to exclude style imports.
@@ -337,9 +338,9 @@ declare_source_rule! {
     /// {
     ///     "options": {
     ///         "groups": [
-    ///             ["**", "!**/*.css", "!**/*.scss"],
+    ///             ["**", "!:STYLE:"],
     ///             ":BLANK_LINE:",
-    ///             ["**/*.css", "**/*.scss"]
+    ///             [":STYLE:"]
     ///         ]
     ///     }
     /// }

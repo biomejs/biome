@@ -1,0 +1,70 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: style-grouping.js
+---
+# Input
+```js
+import A from "./a.js"
+import "./style.css"
+import B from "./b.js"
+import "./style.sass"
+import C from "./c.js"
+import "./style.scss"
+import D from "./d.js"
+import "./style.styl"
+import E from "./e.js"
+import "./style.pcss"
+import F from "./f.js"
+import "./style.sss"
+import G from "./g.js"
+import "./not-a-style.csssssss"
+import H from "./h.js"
+
+```
+
+# Diagnostics
+```
+style-grouping.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+  > 1 │ import A from "./a.js"
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    2 │ import "./style.css"
+    3 │ import B from "./b.js"
+  
+  i Safe fix: Organize Imports (Biome)
+  
+     1    │ - import·A·from·"./a.js"
+     2    │ - import·"./style.css"
+     3    │ - import·B·from·"./b.js"
+     4    │ - import·"./style.sass"
+     5    │ - import·C·from·"./c.js"
+     6    │ - import·"./style.scss"
+     7    │ - import·D·from·"./d.js"
+     8    │ - import·"./style.styl"
+     9    │ - import·E·from·"./e.js"
+    10    │ - import·"./style.pcss"
+    11    │ - import·F·from·"./f.js"
+    12    │ - import·"./style.sss"
+        1 │ + import·"./style.css"
+        2 │ + import·"./style.pcss"
+        3 │ + import·"./style.sass"
+        4 │ + import·"./style.scss"
+        5 │ + import·"./style.sss"
+        6 │ + import·"./style.styl"
+        7 │ + import·A·from·"./a.js"
+        8 │ + import·B·from·"./b.js"
+        9 │ + import·C·from·"./c.js"
+       10 │ + import·D·from·"./d.js"
+       11 │ + import·E·from·"./e.js"
+       12 │ + import·F·from·"./f.js"
+    13 13 │   import G from "./g.js"
+    14    │ - import·"./not-a-style.csssssss"
+    15    │ - import·H·from·"./h.js"
+       14 │ + import·H·from·"./h.js"
+       15 │ + import·"./not-a-style.csssssss"
+    16 16 │   
+  
+
+```
