@@ -8,7 +8,7 @@ use biome_console::{
     markup,
 };
 use biome_diagnostics::termcolor::{ColorChoice, WriteColor};
-use biome_diagnostics::{PrintDescription, termcolor};
+use biome_diagnostics::{PrintDescription, Severity, termcolor};
 use biome_flags::biome_env;
 use biome_fs::OsFileSystem;
 use biome_resolver::FsWithResolverProxy;
@@ -230,6 +230,12 @@ impl Display for RageConfiguration<'_> {
                         .unwrap();
 
                     let status = if !diagnostics.is_empty() {
+                        let max_severity = diagnostics
+                            .iter()
+                            .map(|d| d.severity())
+                            .max()
+                            .unwrap_or_default();
+
                         for diagnostic in diagnostics {
                             (markup! {
                                  {KeyValuePair::new("Error", markup!{
@@ -238,9 +244,17 @@ impl Display for RageConfiguration<'_> {
                             })
                             .fmt(fmt)?;
                         }
-                        markup!(<Dim>"Loaded with errors"</Dim>)
+                        match max_severity {
+                            Severity::Hint | Severity::Information => {
+                                markup!(<Dim>"Loaded successfully."</Dim>)
+                            }
+                            Severity::Warning => markup!(<Dim>"Loaded with warnings."</Dim>),
+                            Severity::Fatal | Severity::Error => {
+                                markup!(<Dim>"Loaded with errors."</Dim>)
+                            }
+                        }
                     } else {
-                        markup!(<Dim>"Loaded successfully"</Dim>)
+                        markup!(<Dim>"Loaded successfully."</Dim>)
                     };
 
                     let config_path = file_path.as_ref().map_or_else(

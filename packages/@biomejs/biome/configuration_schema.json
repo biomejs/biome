@@ -196,6 +196,10 @@
 						{ "type": "null" }
 					]
 				},
+				"preset": {
+					"description": "Enables a particular rule preset",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
+				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
@@ -359,6 +363,10 @@
 		"Actions": {
 			"type": "object",
 			"properties": {
+				"preset": {
+					"description": "The actions preset to use.",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
+				},
 				"recommended": {
 					"description": "It enables the assist actions recommended by Biome. `true` by default.",
 					"type": ["boolean", "null"]
@@ -687,6 +695,10 @@
 						{ "$ref": "#/$defs/NoVoidConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"preset": {
+					"description": "Enables a particular rule preset",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
 				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
@@ -1250,6 +1262,10 @@
 						{ "$ref": "#/$defs/NoVueSetupPropsReactivityLossConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"preset": {
+					"description": "Enables a particular rule preset",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
 				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
@@ -6668,6 +6684,10 @@
 						{ "type": "null" }
 					]
 				},
+				"preset": {
+					"description": "Enables a particular rule preset",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
+				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
@@ -7436,6 +7456,10 @@
 						{ "type": "null" }
 					]
 				},
+				"preset": {
+					"description": "Enables a particular rule preset",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
+				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
@@ -7491,6 +7515,11 @@
 		"Plugins": {
 			"type": "array",
 			"items": { "$ref": "#/$defs/PluginConfiguration" }
+		},
+		"PresetConfig": {
+			"description": "A preset configuration for enabling a set of rules.",
+			"type": "string",
+			"enum": ["recommended", "all", "none"]
 		},
 		"PropertyAssignmentMode": {
 			"description": "Specifies whether property assignments on function parameters are allowed or denied.",
@@ -12372,6 +12401,10 @@
 						{ "type": "null" }
 					]
 				},
+				"preset": {
+					"description": "The rule presets to use.",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
+				},
 				"recommended": {
 					"description": "It enables the lint rules recommended by Biome. `true` by default.",
 					"type": ["boolean", "null"]
@@ -12436,6 +12469,10 @@
 						{ "$ref": "#/$defs/NoSecretsConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"preset": {
+					"description": "Enables a particular rule preset",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
 				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
@@ -12541,6 +12578,10 @@
 						{ "$ref": "#/$defs/OrganizeImportsConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"preset": {
+					"description": "Enables a particular rule preset",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
 				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
@@ -12827,6 +12868,10 @@
 						{ "$ref": "#/$defs/NoYodaExpressionConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"preset": {
+					"description": "Enables a particular rule preset",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
 				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
@@ -13787,6 +13832,10 @@
 						{ "$ref": "#/$defs/NoWithConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"preset": {
+					"description": "Enables a particular rule preset",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
 				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",

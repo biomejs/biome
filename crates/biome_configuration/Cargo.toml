@@ -28,7 +28,6 @@ biome_console              = { workspace = true }
 biome_deserialize          = { workspace = true }
 biome_deserialize_macros   = { workspace = true }
 biome_diagnostics          = { workspace = true }
-biome_flags                = { workspace = true }
 biome_formatter            = { workspace = true, features = ["serde"] }
 biome_glob                 = { workspace = true, features = ["schema"] }
 biome_html_formatter       = { workspace = true, features = ["serde"] }

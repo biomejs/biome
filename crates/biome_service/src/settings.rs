@@ -347,6 +347,10 @@ impl Settings {
         self.linter.recommended_enabled()
     }
 
+    pub fn linter_all_enabled(&self) -> bool {
+        self.linter.all_enabled()
+    }
+
     pub fn is_assist_enabled(&self) -> bool {
         self.assist.is_enabled()
     }
@@ -630,9 +634,23 @@ impl LinterSettings {
     pub fn recommended_enabled(&self) -> bool {
         self.rules
             .as_ref()
-            .and_then(|rules| rules.recommended)
+            .and_then(|rules| {
+                rules.recommended.or(Some(
+                    rules
+                        .preset
+                        .as_ref()
+                        .is_some_and(|preset| preset.is_recommended()),
+                ))
+            })
             // If there isn't a clear value, we default to true
             .unwrap_or(true)
+    }
+
+    pub fn all_enabled(&self) -> bool {
+        self.rules
+            .as_ref()
+            .and_then(|rules| rules.preset.as_ref())
+            .is_some_and(|preset| preset.is_all())
     }
 }
 

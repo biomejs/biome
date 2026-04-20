@@ -14,7 +14,6 @@ pub fn generate_group_struct(
     kind: RuleCategory,
 ) -> TokenStream {
     let mut lines_recommended_rule = Vec::new();
-    let mut lines_recommended_rule_as_filter = Vec::new();
     let mut lines_non_domain_rule_as_filter = Vec::new();
     let mut lines_all_rule_as_filter = Vec::new();
     let mut lines_rule = Vec::new();
@@ -23,6 +22,7 @@ pub fn generate_group_struct(
     let mut rule_disabled_check_line = Vec::new();
     let mut get_rule_configuration_line = Vec::new();
     let mut rule_identifiers = Vec::new();
+    let mut preset_rules_map: BTreeMap<String, Vec<TokenStream>> = BTreeMap::new();
 
     for (index, (rule, metadata)) in rules.iter().enumerate() {
         let summary = {
@@ -94,14 +94,28 @@ pub fn generate_group_struct(
             &format!("{}Options", &to_capitalized(rule)),
             Span::call_site(),
         );
+        // Populate the preset map from both `metadata.recommended` (legacy)
+        // and `metadata.rule_presets` (new). Both feed into the same map.
         if metadata.recommended && metadata.domains.is_empty() {
-            lines_recommended_rule_as_filter.push(quote! {
-                RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[#rule_position])
-            });
+            preset_rules_map
+                .entry("Recommended".to_string())
+                .or_default()
+                .push(quote! {
+                    RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[#rule_position])
+                });
 
             lines_recommended_rule.push(quote! {
                 #rule
             });
+        }
+        for preset in metadata.rule_presets {
+            let preset_name = format!("{preset:?}");
+            preset_rules_map
+                .entry(preset_name)
+                .or_default()
+                .push(quote! {
+                    RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[#rule_position])
+                });
         }
         if metadata.domains.is_empty() {
             lines_non_domain_rule_as_filter.push(quote! {
@@ -153,6 +167,34 @@ pub fn generate_group_struct(
         rule_identifiers.push(rule_identifier);
     }
 
+    // Generate per-preset constants and match arms for preset_as_filters.
+    // Every RulePreset variant must have a match arm, even if no rules declare it.
+    // The "Recommended" entry is populated from both `metadata.recommended` (legacy bool)
+    // and `metadata.rule_presets` (new), so they share a single constant.
+    let all_preset_variants = &["Recommended"];
+    let mut preset_const_declarations = Vec::new();
+    let mut preset_match_arms = Vec::new();
+    for variant_name in all_preset_variants {
+        let variant_name = variant_name.to_string();
+        let const_name = Ident::new(
+            &format!("{}_RULES_AS_FILTERS", Case::Constant.convert(&variant_name)),
+            Span::call_site(),
+        );
+        let preset_variant = Ident::new(&variant_name, Span::call_site());
+        let filters = preset_rules_map
+            .get(&variant_name)
+            .cloned()
+            .unwrap_or_default();
+        preset_const_declarations.push(quote! {
+            const #const_name: &'static [RuleFilter<'static>] = &[
+                #( #filters ),*
+            ];
+        });
+        preset_match_arms.push(quote! {
+            RulePreset::#preset_variant => Self::#const_name
+        });
+    }
+
     let group_pascal_ident = Ident::new(&to_capitalized(group), Span::call_site());
 
     let get_configuration_function = if kind == RuleCategory::Action {
@@ -186,6 +228,10 @@ pub fn generate_group_struct(
                 #[serde(skip_serializing_if = "Option::is_none")]
                 pub recommended: Option<bool>,
 
+                /// Enables a particular rule preset
+                #[serde(skip_serializing_if = "Option::is_none")]
+                pub preset: Option<PresetConfig>,
+
                 #( #schema_lines_rules ),*
             }
 
@@ -196,22 +242,36 @@ pub fn generate_group_struct(
                     #( #lines_rule ),*
                 ];
 
-                const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
-                    #( #lines_recommended_rule_as_filter ),*
+                const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
+                    #( #lines_all_rule_as_filter ),*
                 ];
+
+                #( #preset_const_declarations )*
 
                 pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
                     Self::RECOMMENDED_RULES_AS_FILTERS
                 }
 
+                pub(crate) fn preset_as_filters(preset: PresetConfig) -> &'static [RuleFilter<'static>] {
+                    match preset {
+                        PresetConfig::None => &[],
+                        PresetConfig::All => Self::ALL_RULES_AS_FILTERS,
+                        PresetConfig::FromAnalyzer(analyzer) => match analyzer {
+                            #( #preset_match_arms ),*
+                        }
+                    }
+                }
+
                 /// Retrieves the recommended rules
-                pub(crate) fn is_recommended_true(&self) -> bool {
-                    // we should inject recommended rules only when they are set to "true"
-                    matches!(self.recommended, Some(true))
+                fn is_preset_recommended(&self) -> bool {
+                    if matches!(self.recommended, Some(true)) {
+                        return true
+                    }
+                    self.preset.as_ref().is_some_and(|p| p.is_recommended())
                 }
 
                 pub(crate) fn is_recommended_unset(&self) -> bool {
-                    self.recommended.is_none()
+                    self.recommended.is_none() && self.preset.is_none()
                 }
 
                 pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
@@ -236,13 +296,21 @@ pub fn generate_group_struct(
                 // because that will make specific rules cannot be enabled later.
                 pub(crate) fn collect_preset_rules(
                     &self,
-                    parent_is_recommended: bool,
+                    parent_preset: PresetConfig,
                     enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
                 ) {
-                    // The order of the if-else branches MATTERS!
-                    if self.is_recommended_true() || self.is_recommended_unset() && parent_is_recommended {
-                        enabled_rules.extend(Self::recommended_rules_as_filters());
-                    }
+                    // Resolve the effective preset: group's own takes priority, then parent.
+                    let effective_preset = if let Some(preset) = &self.preset {
+                        preset.clone()
+                    } else if matches!(self.recommended, Some(true)) {
+                        PresetConfig::FromAnalyzer(RulePreset::Recommended)
+                    } else if self.recommended.is_none() {
+                        parent_preset
+                    } else {
+                        // recommended: false
+                        PresetConfig::None
+                    };
+                    enabled_rules.extend(Self::preset_as_filters(effective_preset));
                 }
 
                 #get_configuration_function
@@ -259,6 +327,10 @@ pub fn generate_group_struct(
                 #[serde(skip_serializing_if = "Option::is_none")]
                 pub recommended: Option<bool>,
 
+                /// Enables a particular rule preset
+                #[serde(skip_serializing_if = "Option::is_none")]
+                pub preset: Option<PresetConfig>,
+
                 #( #schema_lines_rules ),*
             }
 
@@ -270,10 +342,6 @@ pub fn generate_group_struct(
                     #( #lines_rule ),*
                 ];
 
-                const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
-                    #( #lines_recommended_rule_as_filter ),*
-                ];
-
                 const NON_DOMAIN_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
                     #( #lines_non_domain_rule_as_filter ),*
                 ];
@@ -282,16 +350,20 @@ pub fn generate_group_struct(
                     #( #lines_all_rule_as_filter ),*
                 ];
 
+                #( #preset_const_declarations )*
+
             }
 
             impl RuleGroupExt for #group_pascal_ident {
-                fn is_recommended_true(&self) -> bool {
-                    // we should inject recommended rules only when they are set to "true"
-                    matches!(self.recommended, Some(true))
+                fn is_preset_recommended(&self) -> bool {
+                    if matches!(self.recommended, Some(true)) {
+                        return true
+                    }
+                    self.preset.as_ref().is_some_and(|p| p.is_recommended())
                 }
 
                 fn is_recommended_unset(&self) -> bool {
-                    self.recommended.is_none()
+                    self.recommended.is_none() && self.preset.is_none()
                 }
 
 
@@ -324,18 +396,36 @@ pub fn generate_group_struct(
                     Self::ALL_RULES_AS_FILTERS
                 }
 
+                fn preset_as_filters(preset: PresetConfig) -> &'static [RuleFilter<'static>] {
+                    match preset {
+                        PresetConfig::None => &[],
+                        PresetConfig::All => Self::all_rules_as_filters(),
+                        PresetConfig::FromAnalyzer(analyzer) => match analyzer {
+                            #( #preset_match_arms ),*
+                        }
+                    }
+                }
+
                 /// Select preset rules
                 // Preset rules shouldn't populate disabled rules
                 // because that will make specific rules cannot be enabled later.
                 fn collect_preset_rules(
                     &self,
-                    parent_is_recommended: bool,
+                    parent_preset: PresetConfig,
                     enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
                 ) {
-                    // The order of the if-else branches MATTERS!
-                    if self.is_recommended_true() || self.is_recommended_unset() && parent_is_recommended {
-                        enabled_rules.extend(Self::recommended_rules_as_filters());
-                    }
+                    // Resolve the effective preset: group's own takes priority, then parent.
+                    let effective_preset = if let Some(preset) = &self.preset {
+                        preset.clone()
+                    } else if matches!(self.recommended, Some(true)) {
+                        PresetConfig::FromAnalyzer(RulePreset::Recommended)
+                    } else if self.recommended.is_none() {
+                        parent_preset
+                    } else {
+                        // recommended: false
+                        PresetConfig::None
+                    };
+                    enabled_rules.extend(Self::preset_as_filters(effective_preset));
                 }
 
                 fn set_recommended(&mut self, value: Option<bool>) {
@@ -349,6 +439,7 @@ pub fn generate_group_struct(
                 fn from(value: GroupPlainConfiguration) -> Self {
                     Self {
                         recommended: None,
+                        preset: None,
                         #( #rule_identifiers: Some(value.into()), )*
                     }
                 }
