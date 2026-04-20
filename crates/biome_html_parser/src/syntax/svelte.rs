@@ -36,6 +36,11 @@ pub(crate) fn parse_svelte_hash_block(p: &mut HtmlParser) -> ParsedSyntax {
                 "Expected `if`, `each`, `key`, `await`, or `snippet`",
                 p.cur_range(),
             ));
+
+            if !p.at(T!['}']) {
+                let _ = ParseRecoveryTokenSet::new(HTML_BOGUS, token_set![T!['}']]).recover(p);
+            }
+
             p.expect(T!['}']);
             Present(m.complete(p, SVELTE_BOGUS_BLOCK))
         }
@@ -834,6 +839,11 @@ pub(crate) fn parse_svelte_at_block(p: &mut HtmlParser) -> ParsedSyntax {
                 "Expected `render`, `html`, `const`, or `debug`",
                 p.cur_range(),
             ));
+
+            if !p.at(T!['}']) {
+                let _ = ParseRecoveryTokenSet::new(HTML_BOGUS, token_set![T!['}']]).recover(p);
+            }
+
             p.expect(T!['}']);
             Present(m.complete(p, SVELTE_BOGUS_BLOCK))
         }

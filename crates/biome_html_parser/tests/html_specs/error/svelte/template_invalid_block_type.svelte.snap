@@ -21,11 +21,11 @@ HtmlRoot {
         SvelteBogusBlock {
             items: [
                 SV_CURLY_HASH@0..2 "{#" [] [],
-            ],
-        },
-        HtmlBogusElement {
-            items: [
-                IDENT@2..19 "notarealblocktype" [] [],
+                HtmlBogus {
+                    items: [
+                        IDENT@2..19 "notarealblocktype" [] [],
+                    ],
+                },
                 R_CURLY@19..20 "}" [] [],
             ],
         },
@@ -42,11 +42,11 @@ HtmlRoot {
   1: (empty)
   2: (empty)
   3: HTML_ELEMENT_LIST@0..20
-    0: SVELTE_BOGUS_BLOCK@0..2
+    0: SVELTE_BOGUS_BLOCK@0..20
       0: SV_CURLY_HASH@0..2 "{#" [] []
-    1: HTML_BOGUS_ELEMENT@2..20
-      0: IDENT@2..19 "notarealblocktype" [] []
-      1: R_CURLY@19..20 "}" [] []
+      1: HTML_BOGUS@2..19
+        0: IDENT@2..19 "notarealblocktype" [] []
+      2: R_CURLY@19..20 "}" [] []
   4: EOF@20..20 "" [] []
 
 ```
