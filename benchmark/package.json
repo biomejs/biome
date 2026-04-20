@@ -15,6 +15,6 @@
     "@typescript-eslint/parser": "8.54.0",
     "dprint": "0.53.2",
     "eslint": "9.39.4",
-    "prettier": "3.8.1"
+    "prettier": "3.8.3"
   }
 }
