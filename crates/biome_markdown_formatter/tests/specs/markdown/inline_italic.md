@@ -19,3 +19,5 @@ _foo_
 ![foo *bar*][foobar]
 
 [FOOBAR]: train.jpg "train & tracks"
+
+_*foo bar baz bim bam*_

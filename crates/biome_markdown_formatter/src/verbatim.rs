@@ -6,10 +6,6 @@ use biome_formatter::{
 use biome_markdown_syntax::MarkdownSyntaxNode;
 use biome_rowan::{Direction, SyntaxElement};
 
-pub fn format_verbatim_node(node: &MarkdownSyntaxNode) -> FormatMarkdownVerbatimNode<'_> {
-    FormatMarkdownVerbatimNode { node }
-}
-
 pub fn format_suppressed_node(node: &MarkdownSyntaxNode) -> FormatMarkdownVerbatimNode<'_> {
     FormatMarkdownVerbatimNode { node }
 }

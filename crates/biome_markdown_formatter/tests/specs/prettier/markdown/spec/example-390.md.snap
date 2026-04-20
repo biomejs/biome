@@ -1,12 +1,12 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: markdown/spec/example-424.md
+info: markdown/spec/example-390.md
 ---
 
 # Input
 
 ```md
-foo __*__
+*foo [*bar*](/url)*
 
 ```
 
@@ -17,12 +17,12 @@ foo __*__
 --- Prettier
 +++ Biome
 @@ -1 +1 @@
--foo **\***
-+foo __*__
+-*foo [*bar*](/url)*
++*foo [_bar_](/url)*
 ```
 
 # Output
 
 ```md
-foo __*__
+*foo [_bar_](/url)*
 ```

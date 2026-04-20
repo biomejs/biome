@@ -1,7 +1,7 @@
-use crate::prelude::*;
+use crate::{markdown::lists::inline_item_list::FormatMdFormatInlineItemListOptions, prelude::*};
 use biome_formatter::{FormatRuleWithOptions, write};
 use biome_markdown_syntax::{
-    MarkdownSyntaxKind, MdInlineItalic, MdInlineItalicFields, MdReferenceImage,
+    MarkdownSyntaxKind, MdInlineItalic, MdInlineItalicFields, MdReferenceImage, MdReferenceLink,
 };
 use biome_rowan::AstNode;
 #[derive(Debug, Clone, Default)]
@@ -19,18 +19,25 @@ impl FormatNodeRule<MdInlineItalic> for FormatMdInlineItalic {
         let l_fence = l_fence?;
         let r_fence = r_fence?;
 
-        // Nested italic anywhere in the subtree → keep entire node verbatim.
-        // Normalizing to `_` could create `__` (bold) adjacency: `_*foo*_` → `__foo__`.
         if node
             .syntax()
             .descendants()
             .skip(1)
             .any(|d| d.kind() == MarkdownSyntaxKind::MD_INLINE_ITALIC)
         {
-            // TODO: instead of format_verbatim_node, pass options to child formatters so
-            // other normalizations (bold, code, etc.) still run inside nested italic content.
-            // See example-383.md for a case where Prettier handles escapes inside italic.
-            return format_verbatim_node(node.syntax()).fmt(f);
+            return write!(
+                f,
+                [
+                    l_fence.format(),
+                    content
+                        .format()
+                        .with_options(FormatMdFormatInlineItemListOptions {
+                            keep_fences_in_italics: true,
+                            ..Default::default()
+                        }),
+                    r_fence.format()
+                ]
+            );
         }
 
         // Inside reference images the alt text doubles as the reference label.
