@@ -1,0 +1,1111 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+<div onclick="() => void 0"></div>
+<div onclick="() => void 0" role={undefined}></div>
+<div onkeyup="() => void 0" aria-hidden={false}></div>
+
+<!-- Static elements; no inherent role -->
+<a onclick="() => void 0"></a>
+<a onclick="() => {}"></a>
+<a tabindex="0" onclick="() => void 0"></a>
+<area onclick="() => {}" />
+<b onclick="() => {}"></b>
+<base onclick="() => {}" />
+<bdi onclick="() => {}"></bdi>
+<bdo onclick="() => {}"></bdo>
+<body onclick="() => {}"></body>
+<cite onclick="() => {}"></cite>
+<col onclick="() => {}" />
+<colgroup onclick="() => {}"></colgroup>
+<data onclick="() => {}"></data>
+<div onclick="() => {}"></div>
+<head onclick="() => {}"></head>
+<header onclick="() => {}"></header>
+<hgroup onclick="() => {}"></hgroup>
+<i onclick="() => {}"></i>
+<kbd onclick="() => {}"></kbd>
+
+<map onclick="() => {}"></map>
+<meta onclick="() => {}" />
+<noscript onclick="() => {}"></noscript>
+<object onclick="() => {}"></object>
+<picture onclick="() => {}"></picture>
+<q onclick="() => {}"></q>
+<rp onclick="() => {}"></rp>
+<rt onclick="() => {}"></rt>
+<s onclick="() => {}"></s>
+<samp onclick="() => {}"></samp>
+<script onclick="() => {}"></script>
+<section onclick="() => {}"></section>
+<small onclick="() => {}"></small>
+<source onclick="() => {}" />
+<span onclick="() => {}"></span>
+<style onclick="() => {}"></style>
+<title onclick="() => {}"></title>
+<track onclick="() => {}" />
+<u onclick="() => {}"></u>
+<var onclick="() => {}"></var>
+<wbr onclick="() => {}" />
+
+<!-- Handlers -->
+<div onkeydown="() => {}"></div>
+<div onkeypress="() => {}"></div>
+<div onkeyup="() => {}"></div>
+<div onclick="() => {}"></div>
+<div onmousedown="() => {}"></div>
+<div onmouseup="() => {}"></div>
+
+<!-- Presentation is a special case role that indicates intentional static semantics -->
+<div role="presentation" onclick="() => {}"></div>
+<div role="presentation" onkeydown="() => {}"></div>
+
+<!-- HTML elements attributed with an abstract role -->
+<div role="command" onclick="() => {}"></div>
+<div role="composite" onclick="() => {}"></div>
+<div role="input" onclick="() => {}"></div>
+<div role="landmark" onclick="() => {}"></div>
+<div role="range" onclick="() => {}"></div>
+<div role="roletype" onclick="() => {}"></div>
+<div role="sectionhead" onclick="() => {}"></div>
+<div role="select" onclick="() => {}"></div>
+<div role="structure" onclick="() => {}"></div>
+<div role="widget" onclick="() => {}"></div>
+<div role="window" onclick="() => {}"></div>
+
+```
+
+# Diagnostics
+```
+invalid.astro:2:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div onclick="() => void 0"></div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <div onclick="() => void 0" role={undefined}></div>
+    4 │ <div onkeyup="() => void 0" aria-hidden={false}></div>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:3:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div onclick="() => void 0"></div>
+  > 3 │ <div onclick="() => void 0" role={undefined}></div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ <div onkeyup="() => void 0" aria-hidden={false}></div>
+    5 │ 
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:4:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    2 │ <div onclick="() => void 0"></div>
+    3 │ <div onclick="() => void 0" role={undefined}></div>
+  > 4 │ <div onkeyup="() => void 0" aria-hidden={false}></div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ <!-- Static elements; no inherent role -->
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:7:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    6 │ <!-- Static elements; no inherent role -->
+  > 7 │ <a onclick="() => void 0"></a>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ <a onclick="() => {}"></a>
+    9 │ <a tabindex="0" onclick="() => void 0"></a>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:8:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+     6 │ <!-- Static elements; no inherent role -->
+     7 │ <a onclick="() => void 0"></a>
+   > 8 │ <a onclick="() => {}"></a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+     9 │ <a tabindex="0" onclick="() => void 0"></a>
+    10 │ <area onclick="() => {}" />
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:9:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+     7 │ <a onclick="() => void 0"></a>
+     8 │ <a onclick="() => {}"></a>
+   > 9 │ <a tabindex="0" onclick="() => void 0"></a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ <area onclick="() => {}" />
+    11 │ <b onclick="() => {}"></b>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:10:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+     8 │ <a onclick="() => {}"></a>
+     9 │ <a tabindex="0" onclick="() => void 0"></a>
+  > 10 │ <area onclick="() => {}" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ <b onclick="() => {}"></b>
+    12 │ <base onclick="() => {}" />
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:11:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+     9 │ <a tabindex="0" onclick="() => void 0"></a>
+    10 │ <area onclick="() => {}" />
+  > 11 │ <b onclick="() => {}"></b>
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    12 │ <base onclick="() => {}" />
+    13 │ <bdi onclick="() => {}"></bdi>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:12:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    10 │ <area onclick="() => {}" />
+    11 │ <b onclick="() => {}"></b>
+  > 12 │ <base onclick="() => {}" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ <bdi onclick="() => {}"></bdi>
+    14 │ <bdo onclick="() => {}"></bdo>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:13:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    11 │ <b onclick="() => {}"></b>
+    12 │ <base onclick="() => {}" />
+  > 13 │ <bdi onclick="() => {}"></bdi>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ <bdo onclick="() => {}"></bdo>
+    15 │ <body onclick="() => {}"></body>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:14:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    12 │ <base onclick="() => {}" />
+    13 │ <bdi onclick="() => {}"></bdi>
+  > 14 │ <bdo onclick="() => {}"></bdo>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ <body onclick="() => {}"></body>
+    16 │ <cite onclick="() => {}"></cite>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:15:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    13 │ <bdi onclick="() => {}"></bdi>
+    14 │ <bdo onclick="() => {}"></bdo>
+  > 15 │ <body onclick="() => {}"></body>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ <cite onclick="() => {}"></cite>
+    17 │ <col onclick="() => {}" />
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:16:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    14 │ <bdo onclick="() => {}"></bdo>
+    15 │ <body onclick="() => {}"></body>
+  > 16 │ <cite onclick="() => {}"></cite>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ <col onclick="() => {}" />
+    18 │ <colgroup onclick="() => {}"></colgroup>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:17:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    15 │ <body onclick="() => {}"></body>
+    16 │ <cite onclick="() => {}"></cite>
+  > 17 │ <col onclick="() => {}" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ <colgroup onclick="() => {}"></colgroup>
+    19 │ <data onclick="() => {}"></data>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:18:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    16 │ <cite onclick="() => {}"></cite>
+    17 │ <col onclick="() => {}" />
+  > 18 │ <colgroup onclick="() => {}"></colgroup>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ <data onclick="() => {}"></data>
+    20 │ <div onclick="() => {}"></div>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:19:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    17 │ <col onclick="() => {}" />
+    18 │ <colgroup onclick="() => {}"></colgroup>
+  > 19 │ <data onclick="() => {}"></data>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ <div onclick="() => {}"></div>
+    21 │ <head onclick="() => {}"></head>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:20:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    18 │ <colgroup onclick="() => {}"></colgroup>
+    19 │ <data onclick="() => {}"></data>
+  > 20 │ <div onclick="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ <head onclick="() => {}"></head>
+    22 │ <header onclick="() => {}"></header>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:21:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    19 │ <data onclick="() => {}"></data>
+    20 │ <div onclick="() => {}"></div>
+  > 21 │ <head onclick="() => {}"></head>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ <header onclick="() => {}"></header>
+    23 │ <hgroup onclick="() => {}"></hgroup>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:22:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    20 │ <div onclick="() => {}"></div>
+    21 │ <head onclick="() => {}"></head>
+  > 22 │ <header onclick="() => {}"></header>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ <hgroup onclick="() => {}"></hgroup>
+    24 │ <i onclick="() => {}"></i>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:23:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    21 │ <head onclick="() => {}"></head>
+    22 │ <header onclick="() => {}"></header>
+  > 23 │ <hgroup onclick="() => {}"></hgroup>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ <i onclick="() => {}"></i>
+    25 │ <kbd onclick="() => {}"></kbd>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:24:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    22 │ <header onclick="() => {}"></header>
+    23 │ <hgroup onclick="() => {}"></hgroup>
+  > 24 │ <i onclick="() => {}"></i>
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    25 │ <kbd onclick="() => {}"></kbd>
+    26 │ 
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:25:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    23 │ <hgroup onclick="() => {}"></hgroup>
+    24 │ <i onclick="() => {}"></i>
+  > 25 │ <kbd onclick="() => {}"></kbd>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ 
+    27 │ <map onclick="() => {}"></map>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:27:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    25 │ <kbd onclick="() => {}"></kbd>
+    26 │ 
+  > 27 │ <map onclick="() => {}"></map>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ <meta onclick="() => {}" />
+    29 │ <noscript onclick="() => {}"></noscript>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:28:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    27 │ <map onclick="() => {}"></map>
+  > 28 │ <meta onclick="() => {}" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ <noscript onclick="() => {}"></noscript>
+    30 │ <object onclick="() => {}"></object>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:29:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    27 │ <map onclick="() => {}"></map>
+    28 │ <meta onclick="() => {}" />
+  > 29 │ <noscript onclick="() => {}"></noscript>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ <object onclick="() => {}"></object>
+    31 │ <picture onclick="() => {}"></picture>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:30:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    28 │ <meta onclick="() => {}" />
+    29 │ <noscript onclick="() => {}"></noscript>
+  > 30 │ <object onclick="() => {}"></object>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ <picture onclick="() => {}"></picture>
+    32 │ <q onclick="() => {}"></q>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:31:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    29 │ <noscript onclick="() => {}"></noscript>
+    30 │ <object onclick="() => {}"></object>
+  > 31 │ <picture onclick="() => {}"></picture>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ <q onclick="() => {}"></q>
+    33 │ <rp onclick="() => {}"></rp>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:32:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    30 │ <object onclick="() => {}"></object>
+    31 │ <picture onclick="() => {}"></picture>
+  > 32 │ <q onclick="() => {}"></q>
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    33 │ <rp onclick="() => {}"></rp>
+    34 │ <rt onclick="() => {}"></rt>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:33:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    31 │ <picture onclick="() => {}"></picture>
+    32 │ <q onclick="() => {}"></q>
+  > 33 │ <rp onclick="() => {}"></rp>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    34 │ <rt onclick="() => {}"></rt>
+    35 │ <s onclick="() => {}"></s>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:34:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    32 │ <q onclick="() => {}"></q>
+    33 │ <rp onclick="() => {}"></rp>
+  > 34 │ <rt onclick="() => {}"></rt>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    35 │ <s onclick="() => {}"></s>
+    36 │ <samp onclick="() => {}"></samp>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:35:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    33 │ <rp onclick="() => {}"></rp>
+    34 │ <rt onclick="() => {}"></rt>
+  > 35 │ <s onclick="() => {}"></s>
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    36 │ <samp onclick="() => {}"></samp>
+    37 │ <script onclick="() => {}"></script>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:36:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    34 │ <rt onclick="() => {}"></rt>
+    35 │ <s onclick="() => {}"></s>
+  > 36 │ <samp onclick="() => {}"></samp>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ <script onclick="() => {}"></script>
+    38 │ <section onclick="() => {}"></section>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:37:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    35 │ <s onclick="() => {}"></s>
+    36 │ <samp onclick="() => {}"></samp>
+  > 37 │ <script onclick="() => {}"></script>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    38 │ <section onclick="() => {}"></section>
+    39 │ <small onclick="() => {}"></small>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:38:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    36 │ <samp onclick="() => {}"></samp>
+    37 │ <script onclick="() => {}"></script>
+  > 38 │ <section onclick="() => {}"></section>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    39 │ <small onclick="() => {}"></small>
+    40 │ <source onclick="() => {}" />
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:39:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    37 │ <script onclick="() => {}"></script>
+    38 │ <section onclick="() => {}"></section>
+  > 39 │ <small onclick="() => {}"></small>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │ <source onclick="() => {}" />
+    41 │ <span onclick="() => {}"></span>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:40:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    38 │ <section onclick="() => {}"></section>
+    39 │ <small onclick="() => {}"></small>
+  > 40 │ <source onclick="() => {}" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │ <span onclick="() => {}"></span>
+    42 │ <style onclick="() => {}"></style>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:41:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    39 │ <small onclick="() => {}"></small>
+    40 │ <source onclick="() => {}" />
+  > 41 │ <span onclick="() => {}"></span>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    42 │ <style onclick="() => {}"></style>
+    43 │ <title onclick="() => {}"></title>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:42:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    40 │ <source onclick="() => {}" />
+    41 │ <span onclick="() => {}"></span>
+  > 42 │ <style onclick="() => {}"></style>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ <title onclick="() => {}"></title>
+    44 │ <track onclick="() => {}" />
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:43:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    41 │ <span onclick="() => {}"></span>
+    42 │ <style onclick="() => {}"></style>
+  > 43 │ <title onclick="() => {}"></title>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ <track onclick="() => {}" />
+    45 │ <u onclick="() => {}"></u>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:44:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    42 │ <style onclick="() => {}"></style>
+    43 │ <title onclick="() => {}"></title>
+  > 44 │ <track onclick="() => {}" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    45 │ <u onclick="() => {}"></u>
+    46 │ <var onclick="() => {}"></var>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:45:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    43 │ <title onclick="() => {}"></title>
+    44 │ <track onclick="() => {}" />
+  > 45 │ <u onclick="() => {}"></u>
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    46 │ <var onclick="() => {}"></var>
+    47 │ <wbr onclick="() => {}" />
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:46:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    44 │ <track onclick="() => {}" />
+    45 │ <u onclick="() => {}"></u>
+  > 46 │ <var onclick="() => {}"></var>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    47 │ <wbr onclick="() => {}" />
+    48 │ 
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:47:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    45 │ <u onclick="() => {}"></u>
+    46 │ <var onclick="() => {}"></var>
+  > 47 │ <wbr onclick="() => {}" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    48 │ 
+    49 │ <!-- Handlers -->
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:50:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    49 │ <!-- Handlers -->
+  > 50 │ <div onkeydown="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    51 │ <div onkeypress="() => {}"></div>
+    52 │ <div onkeyup="() => {}"></div>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:51:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    49 │ <!-- Handlers -->
+    50 │ <div onkeydown="() => {}"></div>
+  > 51 │ <div onkeypress="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    52 │ <div onkeyup="() => {}"></div>
+    53 │ <div onclick="() => {}"></div>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:52:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    50 │ <div onkeydown="() => {}"></div>
+    51 │ <div onkeypress="() => {}"></div>
+  > 52 │ <div onkeyup="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    53 │ <div onclick="() => {}"></div>
+    54 │ <div onmousedown="() => {}"></div>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:53:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    51 │ <div onkeypress="() => {}"></div>
+    52 │ <div onkeyup="() => {}"></div>
+  > 53 │ <div onclick="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    54 │ <div onmousedown="() => {}"></div>
+    55 │ <div onmouseup="() => {}"></div>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:54:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    52 │ <div onkeyup="() => {}"></div>
+    53 │ <div onclick="() => {}"></div>
+  > 54 │ <div onmousedown="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    55 │ <div onmouseup="() => {}"></div>
+    56 │ 
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:58:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    57 │ <!-- Presentation is a special case role that indicates intentional static semantics -->
+  > 58 │ <div role="presentation" onclick="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    59 │ <div role="presentation" onkeydown="() => {}"></div>
+    60 │ 
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:59:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    57 │ <!-- Presentation is a special case role that indicates intentional static semantics -->
+    58 │ <div role="presentation" onclick="() => {}"></div>
+  > 59 │ <div role="presentation" onkeydown="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    60 │ 
+    61 │ <!-- HTML elements attributed with an abstract role -->
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:62:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    61 │ <!-- HTML elements attributed with an abstract role -->
+  > 62 │ <div role="command" onclick="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    63 │ <div role="composite" onclick="() => {}"></div>
+    64 │ <div role="input" onclick="() => {}"></div>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:63:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    61 │ <!-- HTML elements attributed with an abstract role -->
+    62 │ <div role="command" onclick="() => {}"></div>
+  > 63 │ <div role="composite" onclick="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    64 │ <div role="input" onclick="() => {}"></div>
+    65 │ <div role="landmark" onclick="() => {}"></div>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:64:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    62 │ <div role="command" onclick="() => {}"></div>
+    63 │ <div role="composite" onclick="() => {}"></div>
+  > 64 │ <div role="input" onclick="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    65 │ <div role="landmark" onclick="() => {}"></div>
+    66 │ <div role="range" onclick="() => {}"></div>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:65:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    63 │ <div role="composite" onclick="() => {}"></div>
+    64 │ <div role="input" onclick="() => {}"></div>
+  > 65 │ <div role="landmark" onclick="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    66 │ <div role="range" onclick="() => {}"></div>
+    67 │ <div role="roletype" onclick="() => {}"></div>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:66:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    64 │ <div role="input" onclick="() => {}"></div>
+    65 │ <div role="landmark" onclick="() => {}"></div>
+  > 66 │ <div role="range" onclick="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    67 │ <div role="roletype" onclick="() => {}"></div>
+    68 │ <div role="sectionhead" onclick="() => {}"></div>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:67:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    65 │ <div role="landmark" onclick="() => {}"></div>
+    66 │ <div role="range" onclick="() => {}"></div>
+  > 67 │ <div role="roletype" onclick="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    68 │ <div role="sectionhead" onclick="() => {}"></div>
+    69 │ <div role="select" onclick="() => {}"></div>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:68:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    66 │ <div role="range" onclick="() => {}"></div>
+    67 │ <div role="roletype" onclick="() => {}"></div>
+  > 68 │ <div role="sectionhead" onclick="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    69 │ <div role="select" onclick="() => {}"></div>
+    70 │ <div role="structure" onclick="() => {}"></div>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:69:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    67 │ <div role="roletype" onclick="() => {}"></div>
+    68 │ <div role="sectionhead" onclick="() => {}"></div>
+  > 69 │ <div role="select" onclick="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    70 │ <div role="structure" onclick="() => {}"></div>
+    71 │ <div role="widget" onclick="() => {}"></div>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:70:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    68 │ <div role="sectionhead" onclick="() => {}"></div>
+    69 │ <div role="select" onclick="() => {}"></div>
+  > 70 │ <div role="structure" onclick="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    71 │ <div role="widget" onclick="() => {}"></div>
+    72 │ <div role="window" onclick="() => {}"></div>
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:71:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    69 │ <div role="select" onclick="() => {}"></div>
+    70 │ <div role="structure" onclick="() => {}"></div>
+  > 71 │ <div role="widget" onclick="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    72 │ <div role="window" onclick="() => {}"></div>
+    73 │ 
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.astro:72:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    70 │ <div role="structure" onclick="() => {}"></div>
+    71 │ <div role="widget" onclick="() => {}"></div>
+  > 72 │ <div role="window" onclick="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    73 │ 
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
