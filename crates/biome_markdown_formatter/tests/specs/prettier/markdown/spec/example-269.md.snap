@@ -29,13 +29,14 @@ info: markdown/spec/example-269.md
 -- b
 -- c
 -- d
-+ - b
-+  - c
-+   - d
- - e
+-- e
 -- f
 -- g
 -- h
++ - b
++  - c
++   - d
++    - e
 +   - f
 +  - g
 + - h
@@ -49,7 +50,7 @@ info: markdown/spec/example-269.md
  - b
   - c
    - d
-- e
+    - e
    - f
   - g
  - h

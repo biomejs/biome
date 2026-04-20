@@ -41,7 +41,7 @@ Environment:
 
 Biome Configuration:
   Error:                        Expected an array, an object, or a literal but instead found '}'.
-  Status:                       Loaded with errors
+  Status:                       Loaded with errors.
   Path:                         biome.json
   Formatter enabled:            true
   Linter enabled:               true

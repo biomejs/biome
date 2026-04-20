@@ -30,8 +30,8 @@ $map-trailing: (b: 1, c:);
 CssRoot {
     bom_token: missing (optional),
     items: CssRootItemList [
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@0..52 "$" [Comments("// Missing RHS in bin ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@52..63 "missing-rhs" [] [],
@@ -52,8 +52,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@69..70 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@70..112 "$" [Newline("\n"), Newline("\n"), Comments("// Dangling unary cha ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@112..126 "dangling-unary" [] [],
@@ -74,8 +74,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@134..135 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@135..187 "$" [Newline("\n"), Newline("\n"), Comments("// Missing keyword ar ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@187..194 "kw-args" [] [],
@@ -93,7 +93,7 @@ CssRoot {
                             ScssExpression {
                                 items: ScssExpressionItemList [
                                     ScssKeywordArgument {
-                                        name: ScssIdentifier {
+                                        name: ScssVariable {
                                             dollar_token: DOLLAR@200..201 "$" [] [],
                                             name: CssIdentifier {
                                                 value_token: IDENT@201..202 "x" [] [],
@@ -108,7 +108,7 @@ CssRoot {
                             ScssExpression {
                                 items: ScssExpressionItemList [
                                     ScssKeywordArgument {
-                                        name: ScssIdentifier {
+                                        name: ScssVariable {
                                             dollar_token: DOLLAR@206..207 "$" [] [],
                                             name: CssIdentifier {
                                                 value_token: IDENT@207..208 "y" [] [],
@@ -133,8 +133,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@212..213 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@213..267 "$" [Newline("\n"), Newline("\n"), Comments("// Map pair missing v ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@267..278 "map-missing" [] [],
@@ -183,8 +183,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@291..292 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@292..337 "$" [Newline("\n"), Newline("\n"), Comments("// Map pair trailing  ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@337..349 "map-trailing" [] [],
@@ -244,8 +244,8 @@ CssRoot {
 0: CSS_ROOT@0..363
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..362
-    0: SCSS_DECLARATION@0..70
-      0: SCSS_IDENTIFIER@0..63
+    0: SCSS_VARIABLE_DECLARATION@0..70
+      0: SCSS_VARIABLE@0..63
         0: DOLLAR@0..52 "$" [Comments("// Missing RHS in bin ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@52..63
           0: IDENT@52..63 "missing-rhs" [] []
@@ -259,8 +259,8 @@ CssRoot {
             2: (empty)
       3: SCSS_VARIABLE_MODIFIER_LIST@69..69
       4: SEMICOLON@69..70 ";" [] []
-    1: SCSS_DECLARATION@70..135
-      0: SCSS_IDENTIFIER@70..126
+    1: SCSS_VARIABLE_DECLARATION@70..135
+      0: SCSS_VARIABLE@70..126
         0: DOLLAR@70..112 "$" [Newline("\n"), Newline("\n"), Comments("// Dangling unary cha ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@112..126
           0: IDENT@112..126 "dangling-unary" [] []
@@ -274,8 +274,8 @@ CssRoot {
               1: (empty)
       3: SCSS_VARIABLE_MODIFIER_LIST@134..134
       4: SEMICOLON@134..135 ";" [] []
-    2: SCSS_DECLARATION@135..213
-      0: SCSS_IDENTIFIER@135..194
+    2: SCSS_VARIABLE_DECLARATION@135..213
+      0: SCSS_VARIABLE@135..194
         0: DOLLAR@135..187 "$" [Newline("\n"), Newline("\n"), Comments("// Missing keyword ar ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@187..194
           0: IDENT@187..194 "kw-args" [] []
@@ -290,7 +290,7 @@ CssRoot {
               0: SCSS_EXPRESSION@200..204
                 0: SCSS_EXPRESSION_ITEM_LIST@200..204
                   0: SCSS_KEYWORD_ARGUMENT@200..204
-                    0: SCSS_IDENTIFIER@200..202
+                    0: SCSS_VARIABLE@200..202
                       0: DOLLAR@200..201 "$" [] []
                       1: CSS_IDENTIFIER@201..202
                         0: IDENT@201..202 "x" [] []
@@ -300,7 +300,7 @@ CssRoot {
               2: SCSS_EXPRESSION@206..211
                 0: SCSS_EXPRESSION_ITEM_LIST@206..211
                   0: SCSS_KEYWORD_ARGUMENT@206..211
-                    0: SCSS_IDENTIFIER@206..208
+                    0: SCSS_VARIABLE@206..208
                       0: DOLLAR@206..207 "$" [] []
                       1: CSS_IDENTIFIER@207..208
                         0: IDENT@207..208 "y" [] []
@@ -312,8 +312,8 @@ CssRoot {
             3: R_PAREN@211..212 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@212..212
       4: SEMICOLON@212..213 ";" [] []
-    3: SCSS_DECLARATION@213..292
-      0: SCSS_IDENTIFIER@213..278
+    3: SCSS_VARIABLE_DECLARATION@213..292
+      0: SCSS_VARIABLE@213..278
         0: DOLLAR@213..267 "$" [Newline("\n"), Newline("\n"), Comments("// Map pair missing v ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@267..278
           0: IDENT@267..278 "map-missing" [] []
@@ -344,8 +344,8 @@ CssRoot {
             2: R_PAREN@290..291 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@291..291
       4: SEMICOLON@291..292 ";" [] []
-    4: SCSS_DECLARATION@292..362
-      0: SCSS_IDENTIFIER@292..349
+    4: SCSS_VARIABLE_DECLARATION@292..362
+      0: SCSS_VARIABLE@292..349
         0: DOLLAR@292..337 "$" [Newline("\n"), Newline("\n"), Comments("// Map pair trailing  ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@337..349
           0: IDENT@337..349 "map-trailing" [] []

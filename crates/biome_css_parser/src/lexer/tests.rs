@@ -1,15 +1,24 @@
 #![cfg(test)]
 #![expect(unused_mut, unused_variables)]
 
-use super::{CssLexer, TextSize};
 use crate::lexer::CssLexContext;
-use biome_css_syntax::CssSyntaxKind::EOF;
 use crate::CssParserOptions;
-use biome_parser::lexer::Lexer;
+use biome_css_syntax::CssFileSource;
+use biome_css_syntax::{
+    CssSyntaxKind::{self, EOF},
+    T, TextRange,
+};
+use biome_parser::lexer::{Lexer, LexerWithCheckpoint};
 use quickcheck_macros::quickcheck;
 use std::sync::mpsc::channel;
 use std::thread;
 use std::time::Duration;
+
+use super::{
+    source_cursor::SourceCursor,
+    scan_cursor::{CssScanCursor, StringBodyScanStop, UrlBodyStartScan},
+    CssLexer, TextSize,
+};
 
 // Assert the result of lexing a piece of source code,
 // and make sure the tokens yielded are fully lossless and the source can be reconstructed from only the tokens
@@ -106,6 +115,589 @@ fn empty() {
     assert_lex! {
         "",
     }
+}
+
+#[test]
+fn rewind_restores_lexer_source_cursor_position() {
+    let mut lexer = CssLexer::from_str("url(foo)");
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::Regular),
+        CssSyntaxKind::URL_KW
+    );
+    assert_eq!(lexer.position(), 3);
+    assert_eq!(lexer.current_byte(), Some(b'('));
+
+    let checkpoint = lexer.checkpoint();
+
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
+    assert_eq!(lexer.position(), 4);
+    assert_eq!(lexer.current_byte(), Some(b'f'));
+
+    lexer.rewind(checkpoint);
+
+    assert_eq!(lexer.position(), 3);
+    assert_eq!(lexer.current_byte(), Some(b'('));
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
+    assert_eq!(
+        lexer.current_range(),
+        TextRange::new(TextSize::from(3), TextSize::from(4))
+    );
+}
+
+#[test]
+fn url_body_context_emits_raw_url_value() {
+    let mut lexer = CssLexer::from_str("url(foo#{$x}.css)");
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::Regular),
+        CssSyntaxKind::URL_KW
+    );
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::UrlBody {
+            scss_exclusive_syntax_allowed: true,
+        }),
+        CssSyntaxKind::CSS_URL_VALUE_RAW_LITERAL
+    );
+    assert_eq!(
+        lexer.current_range(),
+        TextRange::new(TextSize::from(4), TextSize::from(16))
+    );
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T![')']);
+}
+
+#[test]
+fn url_body_context_falls_back_for_interpolated_function() {
+    let mut lexer = CssLexer::from_str("url(#{name}(bar))");
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::Regular),
+        CssSyntaxKind::URL_KW
+    );
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::UrlBody {
+            scss_exclusive_syntax_allowed: true,
+        }),
+        T![#]
+    );
+    assert_eq!(
+        lexer.current_range(),
+        TextRange::new(TextSize::from(4), TextSize::from(5))
+    );
+
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T!['{']);
+    assert_eq!(
+        lexer.next_token(CssLexContext::Regular),
+        CssSyntaxKind::IDENT
+    );
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T!['}']);
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
+    assert_eq!(
+        lexer.next_token(CssLexContext::Regular),
+        CssSyntaxKind::IDENT
+    );
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T![')']);
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T![')']);
+}
+
+#[test]
+fn url_body_context_reuses_pending_raw_scan_after_leading_trivia() {
+    let mut lexer = CssLexer::from_str("url( foo)");
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::Regular),
+        CssSyntaxKind::URL_KW
+    );
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::UrlBody {
+            scss_exclusive_syntax_allowed: false,
+        }),
+        CssSyntaxKind::WHITESPACE
+    );
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::UrlBody {
+            scss_exclusive_syntax_allowed: false,
+        }),
+        CssSyntaxKind::CSS_URL_VALUE_RAW_LITERAL
+    );
+    assert_eq!(
+        lexer.current_range(),
+        TextRange::new(TextSize::from(5), TextSize::from(8))
+    );
+
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T![')']);
+}
+
+#[test]
+fn url_body_context_drops_stale_pending_raw_scan_after_regular_fallback() {
+    let mut lexer = CssLexer::from_str("url( foo)");
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::Regular),
+        CssSyntaxKind::URL_KW
+    );
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::UrlBody {
+            scss_exclusive_syntax_allowed: false,
+        }),
+        CssSyntaxKind::WHITESPACE
+    );
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::Regular),
+        CssSyntaxKind::IDENT
+    );
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::UrlBody {
+            scss_exclusive_syntax_allowed: false,
+        }),
+        T![')']
+    );
+}
+
+#[test]
+fn url_body_context_skips_scss_line_comment_trivia_before_interpolated_function() {
+    let mut lexer =
+        CssLexer::from_str("url(// comment\n#{name}(bar))").with_source_type(CssFileSource::scss());
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::Regular),
+        CssSyntaxKind::URL_KW
+    );
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::UrlBody {
+            scss_exclusive_syntax_allowed: true,
+        }),
+        CssSyntaxKind::COMMENT
+    );
+    assert_eq!(
+        lexer.next_token(CssLexContext::UrlBody {
+            scss_exclusive_syntax_allowed: true,
+        }),
+        CssSyntaxKind::NEWLINE
+    );
+    assert_eq!(
+        lexer.next_token(CssLexContext::UrlBody {
+            scss_exclusive_syntax_allowed: true,
+        }),
+        T![#]
+    );
+}
+
+#[test]
+fn url_body_context_preserves_protocol_relative_url_in_scss() {
+    let mut lexer =
+        CssLexer::from_str("url(//cdn.example.com/app.css)").with_source_type(CssFileSource::scss());
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::Regular),
+        CssSyntaxKind::URL_KW
+    );
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::UrlBody {
+            scss_exclusive_syntax_allowed: true,
+        }),
+        CssSyntaxKind::CSS_URL_VALUE_RAW_LITERAL
+    );
+    assert_eq!(
+        lexer.current_range(),
+        TextRange::new(TextSize::from(4), TextSize::from(29))
+    );
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T![')']);
+}
+
+#[test]
+fn url_body_context_handles_escaped_non_ascii_in_raw_url() {
+    let mut lexer = CssLexer::from_str("url(foo\\ébar)").with_source_type(CssFileSource::scss());
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::Regular),
+        CssSyntaxKind::URL_KW
+    );
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T!['(']);
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::UrlBody {
+            scss_exclusive_syntax_allowed: true,
+        }),
+        CssSyntaxKind::CSS_URL_VALUE_RAW_LITERAL
+    );
+    assert_eq!(
+        lexer.current_range(),
+        TextRange::new(TextSize::from(4), TextSize::from(13))
+    );
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T![')']);
+}
+
+#[test]
+fn css_scan_cursor_reports_interpolated_function_shape() {
+    let cursor = CssScanCursor::new(SourceCursor::new("foo#{1 + 1}(bar)", 0), true, true);
+
+    assert!(cursor.is_at_scss_interpolated_function());
+}
+
+#[test]
+fn css_scan_cursor_respects_line_comment_config_in_url_body_scanning() {
+    let source = "// comment\nfoo)";
+
+    let scss_cursor = CssScanCursor::new(SourceCursor::new(source, 0), true, true);
+    let css_cursor = CssScanCursor::new(SourceCursor::new(source, 0), false, false);
+
+    let scss_scan = scss_cursor.scan_url_body_start(false);
+    let css_scan = css_cursor.scan_url_body_start(false);
+
+    assert!(matches!(
+        scss_scan,
+        UrlBodyStartScan::RawValue(scan) if scan.start == 11
+    ));
+    assert!(matches!(
+        css_scan,
+        UrlBodyStartScan::RawValue(scan) if scan.start == 0
+    ));
+}
+
+#[test]
+fn css_scan_cursor_scans_plain_string_without_interpolation_mode() {
+    let cursor = CssScanCursor::new(SourceCursor::new("\"a#{b}\"", 1), true, true);
+    let scan = cursor.scan_plain_string_body(super::CssStringQuote::Double);
+
+    assert!(matches!(
+        scan.stop,
+        StringBodyScanStop::ClosingQuote { .. }
+    ));
+}
+
+#[test]
+fn css_scan_cursor_treats_form_feed_as_string_newline() {
+    let cursor = CssScanCursor::new(SourceCursor::new("\"a\u{000C}b\"", 1), true, true);
+    let scan = cursor.scan_plain_string_body(super::CssStringQuote::Double);
+
+    assert_eq!(
+        scan.stop,
+        StringBodyScanStop::Newline {
+            position: 2,
+            len: 1,
+        }
+    );
+    assert!(scan.invalid_escape_ranges.is_empty());
+}
+
+#[test]
+fn css_scan_cursor_treats_backslash_form_feed_as_line_continuation() {
+    let cursor = CssScanCursor::new(SourceCursor::new("\"a\\\u{000C}b\"", 1), true, true);
+    let scan = cursor.scan_plain_string_body(super::CssStringQuote::Double);
+
+    assert!(matches!(
+        scan.stop,
+        StringBodyScanStop::ClosingQuote { position: 5 }
+    ));
+    assert!(scan.invalid_escape_ranges.is_empty());
+}
+
+#[test]
+fn css_scan_cursor_identifier_mode_controls_slash_consumption() {
+    let mut cursor = CssScanCursor::new(SourceCursor::new("/foo", 0), true, true);
+    let mut buf = [0u8; 8];
+
+    let scan = cursor.consume_ident_sequence(&mut buf);
+    assert_eq!(scan.count, 0);
+    assert_eq!(scan.stop_byte, Some(b'/'));
+    assert_eq!(cursor.position(), 0);
+
+    let mut cursor = CssScanCursor::new(SourceCursor::new("/foo", 0), true, true);
+    let mut buf = [0u8; 8];
+
+    let scan = cursor.consume_ident_sequence_with_slash(&mut buf);
+    assert_eq!(scan.count, 4);
+    assert_eq!(&buf[..scan.count], b"/foo");
+    assert_eq!(cursor.position(), 4);
+}
+
+#[test]
+fn css_scan_cursor_does_not_treat_backslash_form_feed_as_identifier_escape() {
+    let mut cursor = CssScanCursor::new(SourceCursor::new("\\\u{000C}foo", 0), true, true);
+    let mut buf = [0u8; 8];
+
+    assert!(!cursor.is_ident_start());
+    let scan = cursor.consume_ident_sequence(&mut buf);
+    assert_eq!(scan.count, 0);
+    assert_eq!(scan.stop_byte, Some(b'\\'));
+    assert_eq!(cursor.position(), 0);
+}
+
+#[test]
+fn css_scan_cursor_consumes_identifier_sequence_with_escape() {
+    let mut cursor = CssScanCursor::new(SourceCursor::new(r#"\66 oo-bar"#, 0), true, true);
+    let mut buf = [0u8; 16];
+
+    let scan = cursor.consume_ident_sequence(&mut buf);
+
+    assert!(scan.count > 0);
+    assert!(scan.only_ascii_used);
+    assert_eq!(&buf[..scan.count], b"foo-bar");
+    assert_eq!(scan.position, 10);
+    assert_eq!(scan.stop_byte, None);
+    assert_eq!(cursor.position(), 10);
+}
+
+#[test]
+fn css_scan_cursor_consumes_identifier_sequence_with_slash_mode() {
+    let mut cursor = CssScanCursor::new(SourceCursor::new("w/2", 0), true, true);
+    let mut buf = [0u8; 16];
+
+    let scan = cursor.consume_ident_sequence_with_slash(&mut buf);
+
+    assert_eq!(&buf[..scan.count], b"w/2");
+    assert!(scan.only_ascii_used);
+    assert_eq!(scan.position, 3);
+    assert_eq!(scan.stop_byte, None);
+    assert_eq!(cursor.position(), 3);
+}
+
+#[test]
+fn css_scan_cursor_consumes_identifier_sequence_tracks_non_ascii_transition() {
+    let mut cursor = CssScanCursor::new(SourceCursor::new("abécd ", 0), true, true);
+    let mut buf = [0u8; 16];
+
+    let scan = cursor.consume_ident_sequence(&mut buf);
+
+    assert_eq!(&buf[..scan.count], b"ab");
+    assert!(!scan.only_ascii_used);
+    assert_eq!(scan.position, 6);
+    assert_eq!(scan.stop_byte, Some(b' '));
+    assert_eq!(cursor.position(), 6);
+}
+
+#[test]
+fn css_lexer_consumes_identifier_sequence_with_escape() {
+    let mut lexer = CssLexer::from_str(r#"\66 oo-bar"#);
+    let mut buf = [0u8; 16];
+
+    let (count, only_ascii_used) =
+        lexer.consume_ident_sequence(&mut buf, false);
+
+    assert!(count > 0);
+    assert!(only_ascii_used);
+    assert_eq!(&buf[..count], b"foo-bar");
+    assert_eq!(lexer.position(), 10);
+    assert_eq!(lexer.current_byte(), None);
+}
+
+#[test]
+fn css_lexer_consumes_identifier_sequence_with_slash_mode() {
+    let mut lexer = CssLexer::from_str("w/2");
+    let mut buf = [0u8; 16];
+
+    let (count, only_ascii_used) =
+        lexer.consume_ident_sequence(&mut buf, true);
+
+    assert_eq!(&buf[..count], b"w/2");
+    assert!(only_ascii_used);
+    assert_eq!(lexer.position(), 3);
+    assert_eq!(lexer.current_byte(), None);
+}
+
+#[test]
+fn css_lexer_consumes_identifier_sequence_stops_before_slash_when_disabled() {
+    let mut lexer = CssLexer::from_str("w/2");
+    let mut buf = [0u8; 16];
+
+    let (count, only_ascii_used) =
+        lexer.consume_ident_sequence(&mut buf, false);
+
+    assert_eq!(&buf[..count], b"w");
+    assert!(only_ascii_used);
+    assert_eq!(lexer.position(), 1);
+    assert_eq!(lexer.current_byte(), Some(b'/'));
+}
+
+#[test]
+fn css_lexer_consumes_identifier_sequence_tracks_non_ascii_transition() {
+    let mut lexer = CssLexer::from_str("abécd ");
+    let mut buf = [0u8; 16];
+
+    let (count, only_ascii_used) =
+        lexer.consume_ident_sequence(&mut buf, false);
+
+    assert_eq!(&buf[..count], b"ab");
+    assert!(!only_ascii_used);
+    assert_eq!(lexer.position(), 6);
+    assert_eq!(lexer.current_byte(), Some(b' '));
+}
+
+#[test]
+fn css_lexer_tailwind_identifier_sequence_stops_before_hyphen_star_suffix() {
+    let mut lexer = CssLexer::from_str("--color-*")
+        .with_options(CssParserOptions::default().allow_tailwind_directives());
+    let mut buf = [0u8; 16];
+
+    let (count, only_ascii_used) = lexer.consume_ident_sequence(&mut buf, false);
+
+    assert_eq!(&buf[..count], b"--color");
+    assert!(only_ascii_used);
+    assert_eq!(lexer.position(), 7);
+    assert_eq!(lexer.current_byte(), Some(b'-'));
+}
+
+#[test]
+fn css_lexer_tailwind_identifier_sequence_keeps_double_hyphen_before_star() {
+    let mut lexer = CssLexer::from_str("--*")
+        .with_options(CssParserOptions::default().allow_tailwind_directives());
+    let mut buf = [0u8; 16];
+
+    let (count, only_ascii_used) = lexer.consume_ident_sequence(&mut buf, false);
+
+    assert_eq!(&buf[..count], b"--");
+    assert!(only_ascii_used);
+    assert_eq!(lexer.position(), 2);
+    assert_eq!(lexer.current_byte(), Some(b'*'));
+}
+
+#[test]
+fn css_lexer_tailwind_identifier_sequence_does_not_rewind_into_escaped_hyphen_before_star() {
+    let mut lexer = CssLexer::from_str(r"--foo\2d*")
+        .with_options(CssParserOptions::default().allow_tailwind_directives());
+    let mut buf = [0u8; 16];
+
+    let (count, only_ascii_used) = lexer.consume_ident_sequence(&mut buf, false);
+
+    assert_eq!(&buf[..count], b"--foo-");
+    assert!(only_ascii_used);
+    assert_eq!(lexer.position(), 8);
+    assert_eq!(lexer.current_byte(), Some(b'*'));
+}
+
+#[test]
+fn css_lexer_tailwind_identifier_sequence_keeps_count_when_buffer_fills_before_suffix_hyphen() {
+    let mut lexer = CssLexer::from_str("ab-*")
+        .with_options(CssParserOptions::default().allow_tailwind_directives());
+    let mut buf = [0u8; 2];
+
+    let (count, only_ascii_used) = lexer.consume_ident_sequence(&mut buf, false);
+
+    assert_eq!(&buf[..count], b"ab");
+    assert!(only_ascii_used);
+    assert_eq!(count, 2);
+    assert_eq!(lexer.position(), 2);
+    assert_eq!(lexer.current_byte(), Some(b'-'));
+}
+
+#[test]
+fn lexer_scan_cursor_at_detects_interpolated_function_from_offset() {
+    let lexer =
+        CssLexer::from_str("xxfoo#{1 + 1}(bar)").with_source_type(CssFileSource::scss());
+
+    assert!(lexer.scan_cursor_at(2).is_at_scss_interpolated_function());
+}
+
+#[test]
+fn lexer_helper_handles_escaped_quote_inside_string() {
+    let lexer = CssLexer::from_str(r#"foo#{"a\"b"}(bar)"#).with_source_type(CssFileSource::scss());
+
+    assert!(lexer.is_at_scss_interpolated_function(0));
+}
+
+#[test]
+fn lexer_helper_handles_non_ascii_escape_inside_string() {
+    let lexer = CssLexer::from_str(r#"foo#{"a\é"}(bar)"#).with_source_type(CssFileSource::scss());
+
+    assert!(lexer.is_at_scss_interpolated_function(0));
+}
+
+#[test]
+fn lexer_helper_ignores_line_comment_inside_interpolation_body() {
+    let lexer = CssLexer::from_str("foo#{// comment with } and \"quote\"\nname}(bar)")
+        .with_source_type(CssFileSource::scss());
+
+    assert!(lexer.is_at_scss_interpolated_function(0));
+}
+
+#[test]
+fn same_quote_nested_string_in_interpolation_reuses_cached_first_chunk_scan() {
+    let mut lexer =
+        CssLexer::from_str("\"a#{\"b#{c}d\"}e\"").with_source_type(CssFileSource::scss());
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::Regular),
+        CssSyntaxKind::SCSS_STRING_QUOTE
+    );
+    assert!(lexer.has_pending_scss_string_start());
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::ScssString(super::CssStringQuote::Double)),
+        CssSyntaxKind::SCSS_STRING_CONTENT_LITERAL
+    );
+    assert_eq!(
+        lexer.current_range(),
+        TextRange::new(TextSize::from(1), TextSize::from(2))
+    );
+    assert!(!lexer.has_pending_scss_string_start());
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::ScssString(super::CssStringQuote::Double)),
+        T![#]
+    );
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T!['{']);
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::ScssStringInterpolation(
+            super::CssStringQuote::Double,
+        )),
+        CssSyntaxKind::SCSS_STRING_QUOTE
+    );
+    assert!(lexer.has_pending_scss_string_start());
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::ScssString(super::CssStringQuote::Double)),
+        CssSyntaxKind::SCSS_STRING_CONTENT_LITERAL
+    );
+    assert_eq!(
+        lexer.current_range(),
+        TextRange::new(TextSize::from(5), TextSize::from(6))
+    );
+    assert!(!lexer.has_pending_scss_string_start());
+
+    assert_eq!(
+        lexer.next_token(CssLexContext::ScssString(super::CssStringQuote::Double)),
+        T![#]
+    );
+}
+
+#[test]
+fn css_scan_cursor_consumes_identifier_escape_as_a_single_part() {
+    let mut cursor = CssScanCursor::new(SourceCursor::new(r"\61 bc", 0), false, false);
+    let mut buf = [0u8; 8];
+    let scan = cursor.consume_ident_sequence(&mut buf);
+
+    assert_eq!(scan.count, 3);
+    assert_eq!(&buf[..scan.count], b"abc");
+    assert_eq!(cursor.position(), 6);
+}
+
+#[test]
+fn css_scan_cursor_scans_raw_url_value_until_closing_paren() {
+    let cursor = CssScanCursor::new(SourceCursor::new(r"foo\)bar)", 0), false, false);
+    let scan = cursor
+        .scan_url_raw_value()
+        .expect("expected raw url scan");
+
+    assert_eq!(scan.start, 0);
+    assert_eq!(scan.end, 8);
+    assert!(scan.terminated);
 }
 
 #[test]

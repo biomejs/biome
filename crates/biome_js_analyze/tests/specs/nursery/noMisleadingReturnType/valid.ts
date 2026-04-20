@@ -143,3 +143,13 @@ class OverloadedMethods {
         return "idle";
     }
 }
+
+// Mutable bindings where inferred union contains base type + literal (not misleading)
+declare function getStr(): string;
+function letReassignStr(): string { let s = "default"; if (Math.random() > 0.5) s = getStr(); return s; }
+declare function getNum(): number;
+const arrowLetReassign = (): number => { let n = 0; if (Math.random() > 0.5) n = getNum(); return n; };
+
+// Nested object widening without as const — tsc widens `true` to `boolean` at any depth
+function nestedObj(): { inner: { flag: boolean } } { return { inner: { flag: true } }; }
+function nestedTuple(): [{ ok: boolean }] { return [{ ok: true }]; }

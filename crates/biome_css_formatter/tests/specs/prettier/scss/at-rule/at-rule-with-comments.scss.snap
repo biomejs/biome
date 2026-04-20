@@ -1,0 +1,49 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/at-rule-with-comments.scss
+---
+
+# Input
+
+```scss
+.ag-theme-balham {
+    @include ag-theme-balham(
+        (
+            foreground-color: $custom-foreground-color,
+            disabled-foreground-color: null, // TODO some comment
+        )
+    );
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,8 +2,7 @@
+   @include ag-theme-balham(
+     (
+       foreground-color: $custom-foreground-color,
+-      disabled-foreground-color: null,
+-      // TODO some comment
++      disabled-foreground-color: null, // TODO some comment
+     )
+   );
+ }
+```
+
+# Output
+
+```scss
+.ag-theme-balham {
+  @include ag-theme-balham(
+    (
+      foreground-color: $custom-foreground-color,
+      disabled-foreground-color: null, // TODO some comment
+    )
+  );
+}
+```

@@ -6,15 +6,23 @@ info: markdown/fenced_code_block_info_string.md
 # Input
 
 ```md
-```js    
+```js
 console.log("hello");
 ```
 
-```    
+```
 some code
 ```
 
 ```rust
+    fn main() {}
+```
+
+```rust,ignore
+    fn main() {}
+```
+
+```rust,  ignore   expect_diagnostics
     fn main() {}
 ```
 
@@ -33,6 +41,14 @@ some code
 ```
 
 ```rust
+    fn main() {}
+```
+
+```rust,ignore
+    fn main() {}
+```
+
+```rust,  ignore   expect_diagnostics
     fn main() {}
 ```
 

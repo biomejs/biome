@@ -20,12 +20,13 @@ use crate::syntax::parse_error::{
 use crate::syntax::property::color::{is_at_color, parse_color};
 use crate::syntax::property::unicode_range::{is_at_unicode_range, parse_unicode_range};
 use crate::syntax::scss::{
-    add_scss_variable_member_function_name_diagnostic, is_at_any_scss_value,
-    is_at_scss_declaration, is_at_scss_function, is_at_scss_identifier,
+    add_scss_variable_member_function_name_diagnostic, is_at_any_scss_value, is_at_scss_function,
     is_at_scss_interpolated_function_or_value, is_at_scss_interpolated_string,
-    is_at_scss_parent_selector_value, is_at_scss_qualified_name, parse_scss_declaration,
-    parse_scss_function, parse_scss_identifier, parse_scss_interpolated_function_or_value,
-    parse_scss_interpolated_string, parse_scss_parent_selector_value, parse_scss_qualified_name,
+    is_at_scss_module_member_access, is_at_scss_parent_selector_value, is_at_scss_variable,
+    is_at_scss_variable_declaration, parse_scss_function,
+    parse_scss_interpolated_function_or_value, parse_scss_interpolated_string,
+    parse_scss_module_member_access, parse_scss_parent_selector_value, parse_scss_variable,
+    parse_scss_variable_declaration,
 };
 use crate::syntax::selector::SelectorList;
 use crate::syntax::selector::is_nth_at_selector;
@@ -95,7 +96,7 @@ struct RootItemList;
 
 #[inline]
 pub(crate) fn is_at_root_item_list_element(p: &mut CssParser) -> bool {
-    is_at_at_rule(p) || is_at_scss_declaration(p) || is_at_qualified_rule(p)
+    is_at_at_rule(p) || is_at_scss_variable_declaration(p) || is_at_qualified_rule(p)
 }
 
 struct RootItemListParseRecovery;
@@ -118,10 +119,10 @@ impl ParseNodeList for RootItemList {
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         if is_at_at_rule(p) {
             parse_at_rule(p)
-        } else if is_at_scss_declaration(p) {
+        } else if is_at_scss_variable_declaration(p) {
             CssSyntaxFeatures::Scss.parse_exclusive_syntax(
                 p,
-                parse_scss_declaration,
+                parse_scss_variable_declaration,
                 |p, marker| {
                     scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p))
                 },
@@ -501,15 +502,15 @@ fn parse_any_exclusive_scss_value(p: &mut CssParser) -> ParsedSyntax {
         CssSyntaxFeatures::Scss.parse_exclusive_syntax(p, parse_scss_function, |p, m| {
             scss_only_syntax_error(p, "SCSS qualified function names", m.range(p))
         })
-    } else if is_at_scss_identifier(p) {
-        CssSyntaxFeatures::Scss.parse_exclusive_syntax(p, parse_scss_identifier, |p, m| {
+    } else if is_at_scss_variable(p) {
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(p, parse_scss_variable, |p, m| {
             scss_only_syntax_error(p, "SCSS variables", m.range(p))
         })
-    } else if is_at_scss_qualified_name(p) {
+    } else if is_at_scss_module_member_access(p) {
         let has_dollar_member = p.nth_at(2, T![$]);
         CssSyntaxFeatures::Scss
-            .parse_exclusive_syntax(p, parse_scss_qualified_name, |p, m| {
-                scss_only_syntax_error(p, "SCSS qualified names", m.range(p))
+            .parse_exclusive_syntax(p, parse_scss_module_member_access, |p, m| {
+                scss_only_syntax_error(p, "SCSS module member accesses", m.range(p))
             })
             .map(|marker| {
                 add_scss_variable_member_function_name_diagnostic(p, has_dollar_member, marker)

@@ -1,0 +1,140 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: css/pseudo-call/indent.css
+---
+
+# Input
+
+```css
+:where(input:not([type="button"], [type="reset"], [type="submit"]), textarea, select) {
+    /* CSS here */
+}
+
+.foooooooooooooooooooo :where(input:not([type="button"], [type="reset"], [type="submit"]), textarea, select) {
+    /* CSS here */
+}
+
+:is(input:not([type="button"], [type="reset"], [type="submit"]), textarea, select) {
+    /* CSS here */
+}
+
+.foooooooooooooooooooo :is(input:not([type="button"], [type="reset"], [type="submit"]), textarea, select) {
+    /* CSS here */
+}
+
+:not(input:not([type="button"], [type="reset"], [type="submit"]), textarea, select) {
+    /* CSS here */
+}
+
+.foooooooooooooooooooo :not(input:not([type="button"], [type="reset"], [type="submit"]), textarea, select) {
+    /* CSS here */
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,8 +1,8 @@
+ :where(
+-  input:not([type="button"], [type="reset"], [type="submit"]),
+-  textarea,
+-  select
+-) {
++    input:not([type="button"], [type="reset"], [type="submit"]),
++    textarea,
++    select
++  ) {
+   /* CSS here */
+ }
+ 
+@@ -16,10 +16,10 @@
+ }
+ 
+ :is(
+-  input:not([type="button"], [type="reset"], [type="submit"]),
+-  textarea,
+-  select
+-) {
++    input:not([type="button"], [type="reset"], [type="submit"]),
++    textarea,
++    select
++  ) {
+   /* CSS here */
+ }
+ 
+@@ -33,10 +33,10 @@
+ }
+ 
+ :not(
+-  input:not([type="button"], [type="reset"], [type="submit"]),
+-  textarea,
+-  select
+-) {
++    input:not([type="button"], [type="reset"], [type="submit"]),
++    textarea,
++    select
++  ) {
+   /* CSS here */
+ }
+ 
+```
+
+# Output
+
+```css
+:where(
+    input:not([type="button"], [type="reset"], [type="submit"]),
+    textarea,
+    select
+  ) {
+  /* CSS here */
+}
+
+.foooooooooooooooooooo
+  :where(
+    input:not([type="button"], [type="reset"], [type="submit"]),
+    textarea,
+    select
+  ) {
+  /* CSS here */
+}
+
+:is(
+    input:not([type="button"], [type="reset"], [type="submit"]),
+    textarea,
+    select
+  ) {
+  /* CSS here */
+}
+
+.foooooooooooooooooooo
+  :is(
+    input:not([type="button"], [type="reset"], [type="submit"]),
+    textarea,
+    select
+  ) {
+  /* CSS here */
+}
+
+:not(
+    input:not([type="button"], [type="reset"], [type="submit"]),
+    textarea,
+    select
+  ) {
+  /* CSS here */
+}
+
+.foooooooooooooooooooo
+  :not(
+    input:not([type="button"], [type="reset"], [type="submit"]),
+    textarea,
+    select
+  ) {
+  /* CSS here */
+}
+```

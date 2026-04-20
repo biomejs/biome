@@ -8,6 +8,8 @@ use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_valid_lang::UseValidLangOptions;
 
+use crate::utils::is_html_tag;
+
 declare_lint_rule! {
     /// Ensure that the attribute passed to the `lang` attribute is a correct ISO language and/or country.
     ///
@@ -62,14 +64,9 @@ impl Rule for UseValidLang {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let element_text = node.name().ok()?.token_text_trimmed()?;
         let source_type = ctx.source_type::<HtmlFileSource>();
-        let matches_tag = if source_type.is_html() {
-            element_text.eq_ignore_ascii_case("html")
-        } else {
-            element_text == "html"
-        };
-        if !matches_tag {
+
+        if !is_html_tag(node, source_type, "html") {
             return None;
         }
 

@@ -73,9 +73,9 @@
     "vitest": "4.1.2"
   },
   "peerDependencies": {
-    "@biomejs/wasm-bundler": "^2.4.11",
-    "@biomejs/wasm-nodejs": "^2.4.11",
-    "@biomejs/wasm-web": "^2.4.11"
+    "@biomejs/wasm-bundler": "^2.4.12",
+    "@biomejs/wasm-nodejs": "^2.4.12",
+    "@biomejs/wasm-web": "^2.4.12"
   },
   "peerDependenciesMeta": {
     "@biomejs/wasm-bundler": {

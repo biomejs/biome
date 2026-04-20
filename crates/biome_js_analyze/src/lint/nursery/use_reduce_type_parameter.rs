@@ -51,7 +51,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseReduceTypeParameter {
-        version: "next",
+        version: "2.4.12",
         name: "useReduceTypeParameter",
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("prefer-reduce-type-parameter").inspired()],

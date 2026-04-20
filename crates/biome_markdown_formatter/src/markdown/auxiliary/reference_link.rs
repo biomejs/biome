@@ -1,6 +1,6 @@
 use crate::markdown::lists::inline_item_list::FormatMdFormatInlineItemListOptions;
 use crate::prelude::*;
-use crate::shared::{TextPrintMode, TrimMode};
+use crate::shared::TextPrintMode;
 use biome_formatter::write;
 use biome_markdown_syntax::{MdReferenceLink, MdReferenceLinkFields};
 
@@ -21,8 +21,9 @@ impl FormatNodeRule<MdReferenceLink> for FormatMdReferenceLink {
                 l_brack_token.format(),
                 text.format()
                     .with_options(FormatMdFormatInlineItemListOptions {
-                        print_mode: TextPrintMode::Trim(TrimMode::All),
-                        keep_fences_in_italics: true
+                        print_mode: TextPrintMode::trim_all(),
+                        keep_fences_in_italics: true,
+                        inside_list: false,
                     }),
                 r_brack_token.format(),
             ]

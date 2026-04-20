@@ -22,9 +22,9 @@ use tracing::{debug, error};
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct SvelteFileHandler;
 
-// https://regex101.com/r/E4n4hh/6
+// https://regex101.com/r/oV6XMO/1
 pub static SVELTE_FENCE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"(?ixs)(?<opening><script(?:\s.*?)?>)\r?\n?(?<script>(?U:.*))</script>"#).unwrap()
+    Regex::new(r#"(?ixs)(?<opening><script(?:\s+(?:[^>"']*|"[^"]*"|'[^']*')*)?>)\r?\n?(?<script>(?U:.*))</script>"#).unwrap()
 });
 
 impl SvelteFileHandler {
@@ -204,4 +204,70 @@ fn fix_all(mut params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
         params.embeds_initial_indent = 1;
     }
     javascript::fix_all(params)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::SvelteFileHandler;
+
+    #[test]
+    fn svelte_file_source_simple_ts() {
+        let src = r#"<script lang="ts">
+import type { Foo } from "bar";
+</script>"#;
+        assert!(SvelteFileHandler::file_source(src).is_typescript());
+    }
+
+    #[test]
+    fn svelte_file_source_simple_js() {
+        let src = r#"<script>
+import { foo } from "bar";
+</script>"#;
+        assert!(!SvelteFileHandler::file_source(src).is_typescript());
+    }
+
+    #[test]
+    fn svelte_file_source_context_module_ts() {
+        let src = r#"<script context="module" lang="ts">
+import type { Foo } from "bar";
+</script>"#;
+        assert!(SvelteFileHandler::file_source(src).is_typescript());
+    }
+
+    #[test]
+    fn svelte_file_source_generics_ts() {
+        let src = r#"<script lang="ts" generics="T extends Record<string, unknown>, U extends FormPath<T>">
+import type { FormPath } from "sveltekit-superforms";
+</script>"#;
+        assert!(SvelteFileHandler::file_source(src).is_typescript());
+    }
+
+    #[test]
+    fn svelte_file_source_generics_with_single_quotes_ts() {
+        let src = r#"<script lang="ts" generics='T extends Record<string, unknown>'>
+import type { Foo } from "bar";
+</script>"#;
+        assert!(SvelteFileHandler::file_source(src).is_typescript());
+    }
+
+    #[test]
+    fn svelte_file_source_generics_before_lang_ts() {
+        let src = r#"<script generics="T extends Record<string, unknown>" lang="ts">
+import type { Foo } from "bar";
+</script>"#;
+        assert!(SvelteFileHandler::file_source(src).is_typescript());
+    }
+
+    #[test]
+    fn svelte_input_with_generics() {
+        let src = r#"<script lang="ts" generics="T extends Record<string, unknown>">
+import type { Foo } from "bar";
+</script>"#;
+        let input = SvelteFileHandler::input(src);
+        assert_eq!(
+            input,
+            r#"import type { Foo } from "bar";
+"#
+        );
+    }
 }

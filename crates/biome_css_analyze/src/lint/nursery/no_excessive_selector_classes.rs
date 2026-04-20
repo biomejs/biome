@@ -89,7 +89,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoExcessiveSelectorClasses {
-        version: "next",
+        version: "2.4.12",
         name: "noExcessiveSelectorClasses",
         language: "css",
         recommended: false,

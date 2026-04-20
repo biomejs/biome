@@ -3,9 +3,11 @@ use biome_analyze::{
     declare_lint_rule,
 };
 use biome_console::markup;
-use biome_html_syntax::{HtmlElement, HtmlRoot};
+use biome_html_syntax::{HtmlElement, HtmlFileSource, HtmlRoot};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 use biome_rule_options::use_vue_valid_template_root::UseVueValidTemplateRootOptions;
+
+use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Enforce valid Vue `<template>` root usage.
@@ -60,19 +62,17 @@ impl Rule for UseVueValidTemplateRoot {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let root = ctx.query();
-        // Find top-level `<template>` elements only
-        let element = root
-            .html()
-            .into_iter()
-            .filter_map(|el| HtmlElement::cast(el.into_syntax()))
-            .find(|el| {
-                el.opening_element()
-                    .ok()
-                    .and_then(|op| op.name().ok())
-                    .and_then(|name| name.token_text_trimmed())
-                    .is_some_and(|text| text == "template")
-            })?;
+        let source_type = ctx.source_type::<HtmlFileSource>();
 
+        // Find top-level `<template>` elements only
+        let element = root.html().into_iter().find(|el| {
+            if let Some(element) = el.clone().as_any_html_tag_element() {
+                return is_html_tag(&element, source_type, "template");
+            }
+            false
+        })?;
+
+        let element = HtmlElement::cast(element.into_syntax())?;
         let has_src = element.find_attribute_by_name("src").is_some();
         let has_non_whitespace_content = !element.children().is_empty();
 

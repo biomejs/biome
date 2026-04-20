@@ -347,6 +347,10 @@ impl Settings {
         self.linter.recommended_enabled()
     }
 
+    pub fn linter_all_enabled(&self) -> bool {
+        self.linter.all_enabled()
+    }
+
     pub fn is_assist_enabled(&self) -> bool {
         self.assist.is_enabled()
     }
@@ -630,9 +634,23 @@ impl LinterSettings {
     pub fn recommended_enabled(&self) -> bool {
         self.rules
             .as_ref()
-            .and_then(|rules| rules.recommended)
+            .and_then(|rules| {
+                rules.recommended.or(Some(
+                    rules
+                        .preset
+                        .as_ref()
+                        .is_some_and(|preset| preset.is_recommended()),
+                ))
+            })
             // If there isn't a clear value, we default to true
             .unwrap_or(true)
+    }
+
+    pub fn all_enabled(&self) -> bool {
+        self.rules
+            .as_ref()
+            .and_then(|rules| rules.preset.as_ref())
+            .is_some_and(|preset| preset.is_all())
     }
 }
 
@@ -1657,6 +1675,12 @@ impl OverrideSettingPattern {
         }
         if let Some(bracket_spacing) = js_formatter.bracket_spacing.or(formatter.bracket_spacing) {
             options.set_bracket_spacing(bracket_spacing);
+        }
+        if let Some(delimiter_spacing) = js_formatter
+            .delimiter_spacing
+            .or(formatter.delimiter_spacing)
+        {
+            options.set_delimiter_spacing(delimiter_spacing);
         }
         if let Some(bracket_same_line) = js_formatter.bracket_same_line {
             options.set_bracket_same_line(bracket_same_line);

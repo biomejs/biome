@@ -1,0 +1,289 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/variables/postcss-8-improment.scss
+---
+
+# Input
+
+```scss
+/*
+This test is copied from `postcss@8` release note
+
+https://github.com/postcss/postcss/releases/tag/8.0.0
+*/
+
+:root {
+  --empty: ;
+  --JSON: [1, "2", {"three": {"a":1}}, [4]];
+  --javascript: function(rule) { console.log(rule) };
+}
+
+@supports (--element(".minwidth", { "minWidth": 300 })) {
+  [--self] {
+    background: greenyellow;
+  }
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -6,11 +6,14 @@
+ 
+ :root {
+   --empty: ;
+-  --JSON: [1, "2", {"three": {"a": 1}}, [4]];
+-  --javascript: function(rule) {console.log(rule)};
++  --JSON: [1, "2", {"three": {"a":1}}, [4]];
++  --javascript: function(rule) { console.log(rule;
++  )
++}
++;
+ }
+ 
+-@supports (--element(".minwidth", {"minWidth": 300})) {
++@supports (--element(".minwidth", { "minWidth": 300 })) {
+   [--self] {
+     background: greenyellow;
+   }
+```
+
+# Output
+
+```scss
+/*
+This test is copied from `postcss@8` release note
+
+https://github.com/postcss/postcss/releases/tag/8.0.0
+*/
+
+:root {
+  --empty: ;
+  --JSON: [1, "2", {"three": {"a":1}}, [4]];
+  --javascript: function(rule) { console.log(rule;
+  )
+}
+;
+}
+
+@supports (--element(".minwidth", { "minWidth": 300 })) {
+  [--self] {
+    background: greenyellow;
+  }
+}
+```
+
+# Errors
+```
+postcss-8-improment.scss:8:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+     7 │ :root {
+   > 8 │   --empty: ;
+       │            ^
+     9 │   --JSON: [1, "2", {"three": {"a":1}}, [4]];
+    10 │   --javascript: function(rule) { console.log(rule) };
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+postcss-8-improment.scss:9:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '1'.
+  
+     7 │ :root {
+     8 │   --empty: ;
+   > 9 │   --JSON: [1, "2", {"three": {"a":1}}, [4]];
+       │            ^
+    10 │   --javascript: function(rule) { console.log(rule) };
+    11 │ }
+  
+  i Expected an identifier here.
+  
+     7 │ :root {
+     8 │   --empty: ;
+   > 9 │   --JSON: [1, "2", {"three": {"a":1}}, [4]];
+       │            ^
+    10 │   --javascript: function(rule) { console.log(rule) };
+    11 │ }
+  
+postcss-8-improment.scss:9:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '"2"'.
+  
+     7 │ :root {
+     8 │   --empty: ;
+   > 9 │   --JSON: [1, "2", {"three": {"a":1}}, [4]];
+       │               ^^^
+    10 │   --javascript: function(rule) { console.log(rule) };
+    11 │ }
+  
+  i Expected an identifier here.
+  
+     7 │ :root {
+     8 │   --empty: ;
+   > 9 │   --JSON: [1, "2", {"three": {"a":1}}, [4]];
+       │               ^^^
+    10 │   --javascript: function(rule) { console.log(rule) };
+    11 │ }
+  
+postcss-8-improment.scss:9:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '{"three": {"a":1}}'.
+  
+     7 │ :root {
+     8 │   --empty: ;
+   > 9 │   --JSON: [1, "2", {"three": {"a":1}}, [4]];
+       │                    ^^^^^^^^^^^^^^^^^^
+    10 │   --javascript: function(rule) { console.log(rule) };
+    11 │ }
+  
+  i Expected an identifier here.
+  
+     7 │ :root {
+     8 │   --empty: ;
+   > 9 │   --JSON: [1, "2", {"three": {"a":1}}, [4]];
+       │                    ^^^^^^^^^^^^^^^^^^
+    10 │   --javascript: function(rule) { console.log(rule) };
+    11 │ }
+  
+postcss-8-improment.scss:9:40 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '[4'.
+  
+     7 │ :root {
+     8 │   --empty: ;
+   > 9 │   --JSON: [1, "2", {"three": {"a":1}}, [4]];
+       │                                        ^^
+    10 │   --javascript: function(rule) { console.log(rule) };
+    11 │ }
+  
+  i Expected an identifier here.
+  
+     7 │ :root {
+     8 │   --empty: ;
+   > 9 │   --JSON: [1, "2", {"three": {"a":1}}, [4]];
+       │                                        ^^
+    10 │   --javascript: function(rule) { console.log(rule) };
+    11 │ }
+  
+postcss-8-improment.scss:9:43 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found ']'.
+  
+     7 │ :root {
+     8 │   --empty: ;
+   > 9 │   --JSON: [1, "2", {"three": {"a":1}}, [4]];
+       │                                           ^
+    10 │   --javascript: function(rule) { console.log(rule) };
+    11 │ }
+  
+  i Expected a SCSS expression here.
+  
+     7 │ :root {
+     8 │   --empty: ;
+   > 9 │   --JSON: [1, "2", {"three": {"a":1}}, [4]];
+       │                                           ^
+    10 │   --javascript: function(rule) { console.log(rule) };
+    11 │ }
+  
+postcss-8-improment.scss:10:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found '{ console.log(rule'.
+  
+     8 │   --empty: ;
+     9 │   --JSON: [1, "2", {"three": {"a":1}}, [4]];
+  > 10 │   --javascript: function(rule) { console.log(rule) };
+       │                                ^^^^^^^^^^^^^^^^^^
+    11 │ }
+    12 │ 
+  
+  i Expected a SCSS expression here.
+  
+     8 │   --empty: ;
+     9 │   --JSON: [1, "2", {"three": {"a":1}}, [4]];
+  > 10 │   --javascript: function(rule) { console.log(rule) };
+       │                                ^^^^^^^^^^^^^^^^^^
+    11 │ }
+    12 │ 
+  
+postcss-8-improment.scss:10:50 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a declaration, or an at rule but instead found ')'.
+  
+     8 │   --empty: ;
+     9 │   --JSON: [1, "2", {"three": {"a":1}}, [4]];
+  > 10 │   --javascript: function(rule) { console.log(rule) };
+       │                                                  ^
+    11 │ }
+    12 │ 
+  
+  i Expected a declaration, or an at rule here.
+  
+     8 │   --empty: ;
+     9 │   --JSON: [1, "2", {"three": {"a":1}}, [4]];
+  > 10 │   --javascript: function(rule) { console.log(rule) };
+       │                                                  ^
+    11 │ }
+    12 │ 
+  
+postcss-8-improment.scss:10:53 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a qualified rule, or an at rule but instead found ';
+    }'.
+  
+     8 │   --empty: ;
+     9 │   --JSON: [1, "2", {"three": {"a":1}}, [4]];
+  > 10 │   --javascript: function(rule) { console.log(rule) };
+       │                                                     ^
+  > 11 │ }
+       │ ^
+    12 │ 
+    13 │ @supports (--element(".minwidth", { "minWidth": 300 })) {
+  
+  i Expected a qualified rule, or an at rule here.
+  
+     8 │   --empty: ;
+     9 │   --JSON: [1, "2", {"three": {"a":1}}, [4]];
+  > 10 │   --javascript: function(rule) { console.log(rule) };
+       │                                                     ^
+  > 11 │ }
+       │ ^
+    12 │ 
+    13 │ @supports (--element(".minwidth", { "minWidth": 300 })) {
+  
+postcss-8-improment.scss:13:47 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    11 │ }
+    12 │ 
+  > 13 │ @supports (--element(".minwidth", { "minWidth": 300 })) {
+       │                                               ^^^^^
+    14 │   [--self] {
+    15 │     background: greenyellow;
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+
+```

@@ -2,11 +2,13 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlElement, HtmlAttribute};
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_html_syntax::{HtmlAttribute, HtmlFileSource};
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_header_scope::NoHeaderScopeOptions;
 
 use crate::HtmlRuleAction;
+use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// The scope prop should be used only on `<th>` elements.
@@ -50,16 +52,17 @@ declare_lint_rule! {
 }
 
 impl Rule for NoHeaderScope {
-    type Query = Ast<AnyHtmlElement>;
+    type Query = Ast<AnyHtmlTagElement>;
     type State = HtmlAttribute;
     type Signals = Option<Self::State>;
     type Options = NoHeaderScopeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
+        let source_type = ctx.source_type::<HtmlFileSource>();
 
         // Check if element is NOT a th element and has a scope attribute
-        if is_th_element(element)? {
+        if is_html_tag(element, source_type, "th") {
             return None;
         }
 
@@ -96,9 +99,4 @@ impl Rule for NoHeaderScope {
             mutation,
         ))
     }
-}
-
-// Helper function to check if element is a th element
-fn is_th_element(element: &AnyHtmlElement) -> Option<bool> {
-    Some(element.name()?.text().eq_ignore_ascii_case("th"))
 }

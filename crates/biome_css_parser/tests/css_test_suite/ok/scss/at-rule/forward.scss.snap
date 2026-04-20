@@ -51,7 +51,7 @@ CssRoot {
                 visibility_clause: ScssShowClause {
                     show_token: SHOW_KW@36..41 "show" [] [Whitespace(" ")],
                     members: ScssModuleMemberList [
-                        ScssIdentifier {
+                        ScssVariable {
                             dollar_token: DOLLAR@41..42 "$" [] [],
                             name: CssIdentifier {
                                 value_token: IDENT@42..47 "color" [] [],
@@ -78,7 +78,7 @@ CssRoot {
                 visibility_clause: ScssHideClause {
                     hide_token: HIDE_KW@75..80 "hide" [] [Whitespace(" ")],
                     members: ScssModuleMemberList [
-                        ScssIdentifier {
+                        ScssVariable {
                             dollar_token: DOLLAR@80..81 "$" [] [],
                             name: CssIdentifier {
                                 value_token: IDENT@81..88 "private" [] [],
@@ -128,7 +128,7 @@ CssRoot {
                         l_paren_token: L_PAREN@159..160 "(" [] [],
                         items: ScssModuleConfigurationItemList [
                             ScssModuleConfiguration {
-                                name: ScssIdentifier {
+                                name: ScssVariable {
                                     dollar_token: DOLLAR@160..161 "$" [] [],
                                     name: CssIdentifier {
                                         value_token: IDENT@161..168 "spacing" [] [],
@@ -172,7 +172,7 @@ CssRoot {
                 visibility_clause: ScssShowClause {
                     show_token: SHOW_KW@214..219 "show" [] [Whitespace(" ")],
                     members: ScssModuleMemberList [
-                        ScssIdentifier {
+                        ScssVariable {
                             dollar_token: DOLLAR@219..220 "$" [] [],
                             name: CssIdentifier {
                                 value_token: IDENT@220..225 "color" [] [],
@@ -190,7 +190,7 @@ CssRoot {
                         l_paren_token: L_PAREN@239..240 "(" [] [],
                         items: ScssModuleConfigurationItemList [
                             ScssModuleConfiguration {
-                                name: ScssIdentifier {
+                                name: ScssVariable {
                                     dollar_token: DOLLAR@240..241 "$" [] [],
                                     name: CssIdentifier {
                                         value_token: IDENT@241..248 "spacing" [] [],
@@ -245,7 +245,7 @@ CssRoot {
         3: SCSS_SHOW_CLAUSE@36..55
           0: SHOW_KW@36..41 "show" [] [Whitespace(" ")]
           1: SCSS_MODULE_MEMBER_LIST@41..55
-            0: SCSS_IDENTIFIER@41..47
+            0: SCSS_VARIABLE@41..47
               0: DOLLAR@41..42 "$" [] []
               1: CSS_IDENTIFIER@42..47
                 0: IDENT@42..47 "color" [] []
@@ -264,7 +264,7 @@ CssRoot {
         3: SCSS_HIDE_CLAUSE@75..104
           0: HIDE_KW@75..80 "hide" [] [Whitespace(" ")]
           1: SCSS_MODULE_MEMBER_LIST@80..104
-            0: SCSS_IDENTIFIER@80..88
+            0: SCSS_VARIABLE@80..88
               0: DOLLAR@80..81 "$" [] []
               1: CSS_IDENTIFIER@81..88
                 0: IDENT@81..88 "private" [] []
@@ -301,7 +301,7 @@ CssRoot {
             0: L_PAREN@159..160 "(" [] []
             1: SCSS_MODULE_CONFIGURATION_ITEM_LIST@160..182
               0: SCSS_MODULE_CONFIGURATION@160..182
-                0: SCSS_IDENTIFIER@160..168
+                0: SCSS_VARIABLE@160..168
                   0: DOLLAR@160..161 "$" [] []
                   1: CSS_IDENTIFIER@161..168
                     0: IDENT@161..168 "spacing" [] []
@@ -330,7 +330,7 @@ CssRoot {
         3: SCSS_SHOW_CLAUSE@214..234
           0: SHOW_KW@214..219 "show" [] [Whitespace(" ")]
           1: SCSS_MODULE_MEMBER_LIST@219..234
-            0: SCSS_IDENTIFIER@219..225
+            0: SCSS_VARIABLE@219..225
               0: DOLLAR@219..220 "$" [] []
               1: CSS_IDENTIFIER@220..225
                 0: IDENT@220..225 "color" [] []
@@ -343,7 +343,7 @@ CssRoot {
             0: L_PAREN@239..240 "(" [] []
             1: SCSS_MODULE_CONFIGURATION_ITEM_LIST@240..253
               0: SCSS_MODULE_CONFIGURATION@240..253
-                0: SCSS_IDENTIFIER@240..248
+                0: SCSS_VARIABLE@240..248
                   0: DOLLAR@240..241 "$" [] []
                   1: CSS_IDENTIFIER@241..248
                     0: IDENT@241..248 "spacing" [] []

@@ -1,0 +1,241 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// ESM default import from internal path
+import View from "react-native/Libraries/Components/View/View";
+
+// ESM named import from internal path
+import { something } from "react-native/Libraries/Utilities/Platform";
+
+// ESM type import from internal path
+import type { RootTag } from "react-native/Libraries/Types/RootTagTypes";
+
+// CJS require from internal path
+const Platform = require("react-native/Libraries/Utilities/Platform");
+
+// CJS destructured require from internal path
+const { View: V } = require("react-native/Libraries/Components/View/View");
+
+// Dynamic import from internal path
+import("react-native/Libraries/Utilities/Platform");
+
+// Deep import from src directory
+import Foo from "react-native/src/private/specs/modules/NativeAppearance";
+
+// Side-effect import of internal path
+import "react-native/Libraries/Core/InitializeCore";
+
+// Namespace import from internal path
+import * as Internals from "react-native/Libraries/Renderer/shims/ReactNativeViewConfigRegistry";
+
+// Single-level deep import
+import something from "react-native/index";
+
+```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
+# Diagnostics
+```
+invalid.js:4:18 lint/nursery/noReactNativeDeepImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Deep imports from react-native are not allowed.
+  
+    3 │ // ESM default import from internal path
+  > 4 │ import View from "react-native/Libraries/Components/View/View";
+      │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ // ESM named import from internal path
+  
+  i React Native's internal file structure is not part of the public API and may change between versions without warning.
+  
+  i Import from the top-level react-native entry point instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:27 lint/nursery/noReactNativeDeepImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Deep imports from react-native are not allowed.
+  
+    6 │ // ESM named import from internal path
+  > 7 │ import { something } from "react-native/Libraries/Utilities/Platform";
+      │                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ // ESM type import from internal path
+  
+  i React Native's internal file structure is not part of the public API and may change between versions without warning.
+  
+  i Import from the top-level react-native entry point instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:30 lint/nursery/noReactNativeDeepImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Deep imports from react-native are not allowed.
+  
+     9 │ // ESM type import from internal path
+  > 10 │ import type { RootTag } from "react-native/Libraries/Types/RootTagTypes";
+       │                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ // CJS require from internal path
+  
+  i React Native's internal file structure is not part of the public API and may change between versions without warning.
+  
+  i Import from the top-level react-native entry point instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:26 lint/nursery/noReactNativeDeepImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Deep imports from react-native are not allowed.
+  
+    12 │ // CJS require from internal path
+  > 13 │ const Platform = require("react-native/Libraries/Utilities/Platform");
+       │                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ // CJS destructured require from internal path
+  
+  i React Native's internal file structure is not part of the public API and may change between versions without warning.
+  
+  i Import from the top-level react-native entry point instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:29 lint/nursery/noReactNativeDeepImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Deep imports from react-native are not allowed.
+  
+    15 │ // CJS destructured require from internal path
+  > 16 │ const { View: V } = require("react-native/Libraries/Components/View/View");
+       │                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 
+    18 │ // Dynamic import from internal path
+  
+  i React Native's internal file structure is not part of the public API and may change between versions without warning.
+  
+  i Import from the top-level react-native entry point instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:8 lint/nursery/noReactNativeDeepImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Deep imports from react-native are not allowed.
+  
+    18 │ // Dynamic import from internal path
+  > 19 │ import("react-native/Libraries/Utilities/Platform");
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ 
+    21 │ // Deep import from src directory
+  
+  i React Native's internal file structure is not part of the public API and may change between versions without warning.
+  
+  i Import from the top-level react-native entry point instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:17 lint/nursery/noReactNativeDeepImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Deep imports from react-native are not allowed.
+  
+    21 │ // Deep import from src directory
+  > 22 │ import Foo from "react-native/src/private/specs/modules/NativeAppearance";
+       │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ 
+    24 │ // Side-effect import of internal path
+  
+  i React Native's internal file structure is not part of the public API and may change between versions without warning.
+  
+  i Import from the top-level react-native entry point instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:8 lint/nursery/noReactNativeDeepImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Deep imports from react-native are not allowed.
+  
+    24 │ // Side-effect import of internal path
+  > 25 │ import "react-native/Libraries/Core/InitializeCore";
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ 
+    27 │ // Namespace import from internal path
+  
+  i React Native's internal file structure is not part of the public API and may change between versions without warning.
+  
+  i Import from the top-level react-native entry point instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:28:28 lint/nursery/noReactNativeDeepImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Deep imports from react-native are not allowed.
+  
+    27 │ // Namespace import from internal path
+  > 28 │ import * as Internals from "react-native/Libraries/Renderer/shims/ReactNativeViewConfigRegistry";
+       │                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ 
+    30 │ // Single-level deep import
+  
+  i React Native's internal file structure is not part of the public API and may change between versions without warning.
+  
+  i Import from the top-level react-native entry point instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:23 lint/nursery/noReactNativeDeepImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Deep imports from react-native are not allowed.
+  
+    30 │ // Single-level deep import
+  > 31 │ import something from "react-native/index";
+       │                       ^^^^^^^^^^^^^^^^^^^^
+    32 │ 
+  
+  i React Native's internal file structure is not part of the public API and may change between versions without warning.
+  
+  i Import from the top-level react-native entry point instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

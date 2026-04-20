@@ -28,7 +28,7 @@ invalid.astro:2:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━
   
     1 │ <!-- should generate diagnostics -->
   > 2 │ <button aria-hidden="true">Click me</button>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     3 │ <a href="/" aria-hidden="true">link</a>
     4 │ <input aria-hidden="true" />
   
@@ -49,7 +49,7 @@ invalid.astro:3:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━
     1 │ <!-- should generate diagnostics -->
     2 │ <button aria-hidden="true">Click me</button>
   > 3 │ <a href="/" aria-hidden="true">link</a>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     4 │ <input aria-hidden="true" />
     5 │ <div tabindex="0" aria-hidden="true"></div>
   
@@ -91,7 +91,7 @@ invalid.astro:5:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━
     3 │ <a href="/" aria-hidden="true">link</a>
     4 │ <input aria-hidden="true" />
   > 5 │ <div tabindex="0" aria-hidden="true"></div>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ <select aria-hidden="true"><option>opt</option></select>
     7 │ <textarea aria-hidden="true">text</textarea>
   
@@ -112,7 +112,7 @@ invalid.astro:6:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━
     4 │ <input aria-hidden="true" />
     5 │ <div tabindex="0" aria-hidden="true"></div>
   > 6 │ <select aria-hidden="true"><option>opt</option></select>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     7 │ <textarea aria-hidden="true">text</textarea>
     8 │ <div contenteditable="true" aria-hidden="true">editable</div>
   
@@ -133,7 +133,7 @@ invalid.astro:7:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━
     5 │ <div tabindex="0" aria-hidden="true"></div>
     6 │ <select aria-hidden="true"><option>opt</option></select>
   > 7 │ <textarea aria-hidden="true">text</textarea>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     8 │ <div contenteditable="true" aria-hidden="true">editable</div>
     9 │ <div contenteditable aria-hidden="true">editable bare attr</div>
   
@@ -154,7 +154,7 @@ invalid.astro:8:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━
      6 │ <select aria-hidden="true"><option>opt</option></select>
      7 │ <textarea aria-hidden="true">text</textarea>
    > 8 │ <div contenteditable="true" aria-hidden="true">editable</div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
      9 │ <div contenteditable aria-hidden="true">editable bare attr</div>
     10 │ <div contenteditable="" aria-hidden="true">editable empty string</div>
   
@@ -175,7 +175,7 @@ invalid.astro:9:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━
      7 │ <textarea aria-hidden="true">text</textarea>
      8 │ <div contenteditable="true" aria-hidden="true">editable</div>
    > 9 │ <div contenteditable aria-hidden="true">editable bare attr</div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     10 │ <div contenteditable="" aria-hidden="true">editable empty string</div>
     11 │ <area href="/" aria-hidden="true" />
   
@@ -196,7 +196,7 @@ invalid.astro:10:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
      8 │ <div contenteditable="true" aria-hidden="true">editable</div>
      9 │ <div contenteditable aria-hidden="true">editable bare attr</div>
   > 10 │ <div contenteditable="" aria-hidden="true">editable empty string</div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     11 │ <area href="/" aria-hidden="true" />
     12 │ <details aria-hidden="true">details</details>
   
@@ -238,7 +238,7 @@ invalid.astro:12:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
     10 │ <div contenteditable="" aria-hidden="true">editable empty string</div>
     11 │ <area href="/" aria-hidden="true" />
   > 12 │ <details aria-hidden="true">details</details>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     13 │ <summary aria-hidden="true">summary</summary>
     14 │ 
   
@@ -259,7 +259,7 @@ invalid.astro:13:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
     11 │ <area href="/" aria-hidden="true" />
     12 │ <details aria-hidden="true">details</details>
   > 13 │ <summary aria-hidden="true">summary</summary>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     14 │ 
   
   i aria-hidden should not be set to true on focusable elements because this can lead to confusing behavior for screen reader users.

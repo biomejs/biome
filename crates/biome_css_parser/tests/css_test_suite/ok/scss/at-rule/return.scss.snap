@@ -39,7 +39,7 @@ CssRoot {
                 value: ScssExpression {
                     items: ScssExpressionItemList [
                         ScssBinaryExpression {
-                            left: ScssIdentifier {
+                            left: ScssVariable {
                                 dollar_token: DOLLAR@20..21 "$" [] [],
                                 name: CssIdentifier {
                                     value_token: IDENT@21..27 "width" [] [Whitespace(" ")],
@@ -82,7 +82,7 @@ CssRoot {
         1: SCSS_EXPRESSION@20..30
           0: SCSS_EXPRESSION_ITEM_LIST@20..30
             0: SCSS_BINARY_EXPRESSION@20..30
-              0: SCSS_IDENTIFIER@20..27
+              0: SCSS_VARIABLE@20..27
                 0: DOLLAR@20..21 "$" [] []
                 1: CSS_IDENTIFIER@21..27
                   0: IDENT@21..27 "width" [] [Whitespace(" ")]

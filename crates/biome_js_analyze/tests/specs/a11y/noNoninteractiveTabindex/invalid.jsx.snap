@@ -4,6 +4,7 @@ expression: invalid.jsx
 ---
 # Input
 ```jsx
+/* should generate diagnostics */
 <>
 	<div tabIndex="0"></div>
 	<div role="article" tabIndex="0"></div>
@@ -14,63 +15,64 @@ expression: invalid.jsx
 
 # Diagnostics
 ```
-invalid.jsx:2:7 lint/a11y/noNoninteractiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:3:7 lint/a11y/noNoninteractiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The HTML element div is non-interactive. Do not use tabIndex.
   
-    1 │ <>
-  > 2 │ 	<div tabIndex="0"></div>
+    1 │ /* should generate diagnostics */
+    2 │ <>
+  > 3 │ 	<div tabIndex="0"></div>
       │ 	     ^^^^^^^^^^^^
-    3 │ 	<div role="article" tabIndex="0"></div>
-    4 │ 	<article tabIndex={0} />
+    4 │ 	<div role="article" tabIndex="0"></div>
+    5 │ 	<article tabIndex={0} />
   
   i Adding non-interactive elements to the keyboard navigation flow can confuse users.
   
   i Unsafe fix: Remove the tabIndex attribute.
   
-    2 │ → <div·tabIndex="0"></div>
+    3 │ → <div·tabIndex="0"></div>
       │        ------------       
 
 ```
 
 ```
-invalid.jsx:3:22 lint/a11y/noNoninteractiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:4:22 lint/a11y/noNoninteractiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The HTML element div is non-interactive. Do not use tabIndex.
   
-    1 │ <>
-    2 │ 	<div tabIndex="0"></div>
-  > 3 │ 	<div role="article" tabIndex="0"></div>
+    2 │ <>
+    3 │ 	<div tabIndex="0"></div>
+  > 4 │ 	<div role="article" tabIndex="0"></div>
       │ 	                    ^^^^^^^^^^^^
-    4 │ 	<article tabIndex={0} />
-    5 │ </>;
+    5 │ 	<article tabIndex={0} />
+    6 │ </>;
   
   i Adding non-interactive elements to the keyboard navigation flow can confuse users.
   
   i Unsafe fix: Remove the tabIndex attribute.
   
-    3 │ → <div·role="article"·tabIndex="0"></div>
+    4 │ → <div·role="article"·tabIndex="0"></div>
       │                       ------------       
 
 ```
 
 ```
-invalid.jsx:4:11 lint/a11y/noNoninteractiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:5:11 lint/a11y/noNoninteractiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The HTML element article is non-interactive. Do not use tabIndex.
   
-    2 │ 	<div tabIndex="0"></div>
-    3 │ 	<div role="article" tabIndex="0"></div>
-  > 4 │ 	<article tabIndex={0} />
+    3 │ 	<div tabIndex="0"></div>
+    4 │ 	<div role="article" tabIndex="0"></div>
+  > 5 │ 	<article tabIndex={0} />
       │ 	         ^^^^^^^^^^^^
-    5 │ </>;
-    6 │ 
+    6 │ </>;
+    7 │ 
   
   i Adding non-interactive elements to the keyboard navigation flow can confuse users.
   
   i Unsafe fix: Remove the tabIndex attribute.
   
-    4 │ → <article·tabIndex={0}·/>
+    5 │ → <article·tabIndex={0}·/>
       │            -------------  
 
 ```

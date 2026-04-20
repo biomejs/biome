@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: skipOptionMemberName.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+
+const Title = ({ children }) => <Title.Text>{children}</Title.Text>;
+Title.Text = ({ children }) => <Text>{children}</Text>;
+export const A = () => <Title.Text>This is the title</Title.Text>;
+
+```

@@ -25,13 +25,18 @@ impl FormatNodeRule<JsIfStatement> for FormatJsIfStatement {
         let r_paren_token = r_paren_token?;
         let consequent = consequent?;
 
+        let should_insert_space = f.options().delimiter_spacing().value();
+
         write!(
             f,
             [group(&format_args![
                 if_token.format(),
                 space(),
                 l_paren_token.format(),
-                group(&soft_block_indent(&test.format())),
+                group(&soft_block_indent_with_maybe_space(
+                    &test.format(),
+                    should_insert_space
+                )),
                 r_paren_token.format(),
                 FormatStatementBody::new(&consequent),
             ]),]

@@ -1,6 +1,5 @@
 ---
 source: crates/biome_html_analyze/tests/spec_tests.rs
-assertion_line: 77
 expression: invalid.html
 ---
 # Input
@@ -20,7 +19,7 @@ invalid.html:2:1 lint/a11y/useAriaActivedescendantWithTabindex ━━━━━�
   
     1 │ <!-- should generate diagnostics -->
   > 2 │ <div aria-activedescendant="some-id"></div>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     3 │ <span aria-activedescendant="some-id"></span>
     4 │ <a aria-activedescendant="some-id"></a>
   
@@ -40,7 +39,7 @@ invalid.html:3:1 lint/a11y/useAriaActivedescendantWithTabindex ━━━━━�
     1 │ <!-- should generate diagnostics -->
     2 │ <div aria-activedescendant="some-id"></div>
   > 3 │ <span aria-activedescendant="some-id"></span>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     4 │ <a aria-activedescendant="some-id"></a>
     5 │ 
   
@@ -60,7 +59,7 @@ invalid.html:4:1 lint/a11y/useAriaActivedescendantWithTabindex ━━━━━�
     2 │ <div aria-activedescendant="some-id"></div>
     3 │ <span aria-activedescendant="some-id"></span>
   > 4 │ <a aria-activedescendant="some-id"></a>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     5 │ 
   
   i aria-activedescendant is used to manage focus within a composite widget.

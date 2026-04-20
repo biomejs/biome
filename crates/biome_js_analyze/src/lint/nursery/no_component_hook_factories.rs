@@ -74,7 +74,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoComponentHookFactories {
-        version: "next",
+        version: "2.4.12",
         name: "noComponentHookFactories",
         language: "jsx",
         sources: &[RuleSource::EslintReactHooks("component-hook-factories").same(), RuleSource::EslintReactX("component-hook-factories").same(), RuleSource::EslintReactXyz("component-hook-factories").same()],
@@ -108,6 +108,14 @@ impl Rule for NoComponentHookFactories {
         match node {
             AnyComponentLikeDeclaration::AnyPotentialReactComponentDeclaration(decl) => {
                 let syntax = decl.syntax();
+
+                if matches!(
+                    decl,
+                    AnyPotentialReactComponentDeclaration::JsMethodObjectMember(_)
+                        | AnyPotentialReactComponentDeclaration::JsMethodClassMember(_)
+                ) {
+                    return None;
+                }
 
                 // Hooks are cheap to detect by name; check before the heavier component detection.
                 if let Some(token) =
@@ -272,9 +280,9 @@ fn is_hoc_like(function: &AnyJsFunction) -> bool {
         AnyJsArrowFunctionParameters::AnyJsBinding(_) => return false,
     };
 
-    items.into_iter().any(|param| {
-        is_pascal_case_param(param).unwrap_or(false)
-    })
+    items
+        .into_iter()
+        .any(|param| is_pascal_case_param(param).unwrap_or(false))
 }
 
 fn is_pascal_case_param(param: SyntaxResult<AnyJsParameter>) -> Option<bool> {

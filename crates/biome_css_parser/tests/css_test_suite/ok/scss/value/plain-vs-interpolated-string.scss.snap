@@ -22,8 +22,8 @@ $interpolated: "hello #{$name}";
 CssRoot {
     bom_token: missing (optional),
     items: CssRootItemList [
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@0..1 "$" [] [],
                 name: CssIdentifier {
                     value_token: IDENT@1..6 "plain" [] [],
@@ -40,8 +40,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@15..16 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@16..18 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@18..41 "plain_line_continuation" [] [],
@@ -58,8 +58,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@49..50 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@50..52 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@52..81 "plain_hex_escape_with_newline" [] [],
@@ -76,8 +76,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@90..91 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@91..93 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@93..105 "interpolated" [] [],
@@ -97,7 +97,7 @@ CssRoot {
                                 l_curly_token: L_CURLY@115..116 "{" [] [],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
-                                        ScssIdentifier {
+                                        ScssVariable {
                                             dollar_token: DOLLAR@116..117 "$" [] [],
                                             name: CssIdentifier {
                                                 value_token: IDENT@117..121 "name" [] [],
@@ -126,8 +126,8 @@ CssRoot {
 0: CSS_ROOT@0..125
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..124
-    0: SCSS_DECLARATION@0..16
-      0: SCSS_IDENTIFIER@0..6
+    0: SCSS_VARIABLE_DECLARATION@0..16
+      0: SCSS_VARIABLE@0..6
         0: DOLLAR@0..1 "$" [] []
         1: CSS_IDENTIFIER@1..6
           0: IDENT@1..6 "plain" [] []
@@ -138,8 +138,8 @@ CssRoot {
             0: CSS_STRING_LITERAL@8..15 "\"plain\"" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@15..15
       4: SEMICOLON@15..16 ";" [] []
-    1: SCSS_DECLARATION@16..50
-      0: SCSS_IDENTIFIER@16..41
+    1: SCSS_VARIABLE_DECLARATION@16..50
+      0: SCSS_VARIABLE@16..41
         0: DOLLAR@16..18 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@18..41
           0: IDENT@18..41 "plain_line_continuation" [] []
@@ -150,8 +150,8 @@ CssRoot {
             0: CSS_STRING_LITERAL@43..49 "\"a\\\nb\"" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@49..49
       4: SEMICOLON@49..50 ";" [] []
-    2: SCSS_DECLARATION@50..91
-      0: SCSS_IDENTIFIER@50..81
+    2: SCSS_VARIABLE_DECLARATION@50..91
+      0: SCSS_VARIABLE@50..81
         0: DOLLAR@50..52 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@52..81
           0: IDENT@52..81 "plain_hex_escape_with_newline" [] []
@@ -162,8 +162,8 @@ CssRoot {
             0: CSS_STRING_LITERAL@83..90 "\"\\41\nb\"" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@90..90
       4: SEMICOLON@90..91 ";" [] []
-    3: SCSS_DECLARATION@91..124
-      0: SCSS_IDENTIFIER@91..105
+    3: SCSS_VARIABLE_DECLARATION@91..124
+      0: SCSS_VARIABLE@91..105
         0: DOLLAR@91..93 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@93..105
           0: IDENT@93..105 "interpolated" [] []
@@ -180,7 +180,7 @@ CssRoot {
                 1: L_CURLY@115..116 "{" [] []
                 2: SCSS_EXPRESSION@116..121
                   0: SCSS_EXPRESSION_ITEM_LIST@116..121
-                    0: SCSS_IDENTIFIER@116..121
+                    0: SCSS_VARIABLE@116..121
                       0: DOLLAR@116..117 "$" [] []
                       1: CSS_IDENTIFIER@117..121
                         0: IDENT@117..121 "name" [] []

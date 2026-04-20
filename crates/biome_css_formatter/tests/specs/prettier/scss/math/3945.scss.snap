@@ -1,0 +1,3101 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/math/3945.scss
+---
+
+# Input
+
+```scss
+
+.foo {
+  prop: -($grid-gutter-width / 2);
+  prop1: -(  $grid-gutter-width  /  2  );
+  prop2: -$grid-gutter-width / 2;
+  prop3: +($grid-gutter-width / 2);
+  prop4: 10px/8px; /* Plain CSS, no division */
+  prop5: $width / 2; /* Uses a variable, does division */
+  prop6: round(1.5) / 2; /* Uses a function, does division */
+  prop7: (500px / 2); /* Uses parentheses, does division */
+  prop8: 5px + 8px / 2px; //* Uses +, does division */
+  prop9: (italic bold 10px/8px); /* In a list, parentheses don't count */
+  prop10: #010203 + #040506;
+  prop11: #010203 * 2;
+  prop12: rgba(255, 0, 0, 0.75) + rgba(0, 255, 0, 0.75);
+  prop13: progid:DXImageTransform.Microsoft.gradient(enabled='false', startColorstr='#{ie-hex-str($green)}', endColorstr='#{ie-hex-str($translucent-red)}');
+  prop14: e + -resize;
+  prop15: sans- + "serif";
+  prop16: 1em + (2em * 3);
+  prop17: rotate(-2deg);
+  prop18:  rotate(  -2deg  )  ;
+  _:_;
+  prop19: 10 - ($grid-gutter-width / 2);
+  prop20: 10 + -($grid-gutter-width / 2);
+  prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+  prop22: - ( $grid-gutter-width / 2 ) ;
+  prop23:  -  (  $grid-gutter-width  /  2  )  ;
+  prop24: -$grid-gutter-width;
+  prop25: + ( $grid-gutter-width / 2 ) ;
+  prop26:  +  (  $grid-gutter-width  /  2  )  ;
+  prop27: +$grid-gutter-width;
+  prop28: --($grid-gutter-width / 2);
+  prop28: ++($grid-gutter-width / 2);
+  prop29:  rotate(  -  2deg  )  ;
+}
+
+$last:nth($juggler,length($juggler));
+$x:if($last%2==0,1/2,3/2);
+$new:pow($last,$x);
+$sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+$new-entry:();
+$new-entry : ( ) ;
+$new-entry  :  (  )  ;
+$new-entry
+:
+(
+)
+;
+
+body:before {
+  content: quote(to-string(fibonacci(100), ' \A '));
+  white-space: pre-wrap;
+}
+
+width: ((100% - (($numPerRow - 1) * $margin)) / $numPerRow);
+width
+:
+(
+(
+100%
+-
+(
+(
+$numPerRow
+-
+1
+)
+*
+$margin
+)
+)
+/
+$numPerRow
+)
+;
+
+a:nth-child(#{$numPerRow}n) {
+  margin-right: 0;
+  margin-bottom: 0;
+}
+
+@function em($pixels, $context: $browser-context) {
+  @return #{ $pixels / $context }em
+}
+
+.navigation {
+  @extend %updated-#{$flag};
+  @extend .selected-#{$flag};
+  @extend %#{$item};
+}
+
+.icon-#{$icon-name} {
+  background-image: '/images/#{$icon-name}.svg';
+}
+
+$extmods:(eot:"?",svg:"#" + str-replace($name," ","_"));
+
+@mixin keyframes {@-moz-keyframes{@content;}@-webkit-keyframes{@content;}}
+
+@function gcd($a,$b){
+  // From: http://rosettacode.org/wiki/Greatest_common_divisor#JavaScript
+  @if ($b != 0) {
+    @return gcd($b,$a % $b);
+  }@else{
+    @return abs($a);
+  }
+}
+
+$colors: (
+primary: (
+base: #00abc9,
+light: #daf1f6,
+dark: #12799a
+),
+secondary: (
+base: #424d55,
+light: #ccc,
+lightest: #efefef,
+dark: #404247
+),
+success: (
+base: #bbd33e,
+light: #eaf0c6
+)
+);
+
+@function color($color, $tone: "base") {
+@return map-get(map-get($colors, $color), $tone);
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,6 +1,6 @@
+ .foo {
+   prop: -($grid-gutter-width / 2);
+-  prop1: -($grid-gutter-width / 2);
++  prop1: -(  $grid-gutter-width  /  2  );
+   prop2: -$grid-gutter-width / 2;
+   prop3: +($grid-gutter-width / 2);
+   prop4: 10px/8px; /* Plain CSS, no division */
+@@ -17,43 +17,61 @@
+   prop15: sans- + "serif";
+   prop16: 1em + (2em * 3);
+   prop17: rotate(-2deg);
+-  prop18: rotate(-2deg);
+-  _: _;
++  prop18:  rotate(  -2deg  )  ;
++  _:_;
+   prop19: 10 - ($grid-gutter-width / 2);
+   prop20: 10 + -($grid-gutter-width / 2);
+-  prop21: 10 + -($grid-gutter-width / 2);
+-  prop22: -($grid-gutter-width / 2);
+-  prop23: -($grid-gutter-width / 2);
++  prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
++  prop22: - ( $grid-gutter-width / 2 ) ;
++  prop23:  -  (  $grid-gutter-width  /  2  )  ;
+   prop24: -$grid-gutter-width;
+-  prop25: +($grid-gutter-width / 2);
+-  prop26: +($grid-gutter-width / 2);
++  prop25: + ( $grid-gutter-width / 2 ) ;
++  prop26:  +  (  $grid-gutter-width  /  2  )  ;
+   prop27: +$grid-gutter-width;
+   prop28: --($grid-gutter-width / 2);
+   prop28: ++($grid-gutter-width / 2);
+-  prop29: rotate(-2deg);
++  prop29:  rotate(  -  2deg  )  ;
+ }
+ 
+-$last: nth($juggler, length($juggler));
+-$x: if($last%2==0, 1/2, 3/2);
+-$new: pow($last, $x);
+-$sequence:
+-  1,
+-  1 1,
+-  2 1,
+-  1 2 1 1,
+-  1 1 1 2 2 1;
+-$new-entry: ();
+-$new-entry: ();
+-$new-entry: ();
+-$new-entry: ();
++$last:nth($juggler,length($juggler));
++$x:if($last%2==0,1/2,3/2);
++$new:pow($last,$x);
++$sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
++$new-entry:();
++$new-entry : ( ) ;
++$new-entry  :  (  )  ;
++$new-entry
++:
++(
++)
++;
+ 
+ body:before {
+-  content: quote(to-string(fibonacci(100), " \A "));
++  content: quote(to-string(fibonacci(100), ' \A '));
+   white-space: pre-wrap;
+ }
+ 
+ width: ((100% - (($numPerRow - 1) * $margin)) / $numPerRow);
+-width: ((100% - (($numPerRow - 1) * $margin)) / $numPerRow);
++width
++:
++(
++(
++100%
++-
++(
++(
++$numPerRow
++-
++1
++)
++*
++$margin
++)
++)
++/
++$numPerRow
++)
++;
+ 
+ a:nth-child(#{$numPerRow}n) {
+   margin-right: 0;
+@@ -61,7 +79,7 @@
+ }
+ 
+ @function em($pixels, $context: $browser-context) {
+-  @return #{$pixels / $context}em;
++  @return #{ $pixels / $context }em
+ }
+ 
+ .navigation {
+@@ -71,50 +89,40 @@
+ }
+ 
+ .icon-#{$icon-name} {
+-  background-image: "/images/#{$icon-name}.svg";
++  background-image: '/images/#{$icon-name}.svg';
+ }
+ 
+-$extmods: (
+-  eot: "?",
+-  svg: "#" + str-replace($name, " ", "_"),
+-);
++$extmods:(eot:"?",svg:"#" + str-replace($name," ","_"));
+ 
+-@mixin keyframes {
+-  @-moz-keyframes {
+-    @content;
+-  }
+-  @-webkit-keyframes {
+-    @content;
+-  }
+-}
++@mixin keyframes {@-moz-keyframes{@content;}@-webkit-keyframes{@content;}}
+ 
+-@function gcd($a, $b) {
++@function gcd($a,$b){
+   // From: http://rosettacode.org/wiki/Greatest_common_divisor#JavaScript
+   @if ($b != 0) {
+-    @return gcd($b, $a % $b);
+-  } @else {
++    @return gcd($b,$a % $b);
++  }@else{
+     @return abs($a);
+   }
+ }
+ 
+ $colors: (
+-  primary: (
+-    base: #00abc9,
+-    light: #daf1f6,
+-    dark: #12799a,
+-  ),
+-  secondary: (
+-    base: #424d55,
+-    light: #ccc,
+-    lightest: #efefef,
+-    dark: #404247,
+-  ),
+-  success: (
+-    base: #bbd33e,
+-    light: #eaf0c6,
+-  ),
++primary: (
++base: #00abc9,
++light: #daf1f6,
++dark: #12799a
++),
++secondary: (
++base: #424d55,
++light: #ccc,
++lightest: #efefef,
++dark: #404247
++),
++success: (
++base: #bbd33e,
++light: #eaf0c6
++)
+ );
+ 
+ @function color($color, $tone: "base") {
+-  @return map-get(map-get($colors, $color), $tone);
++@return map-get(map-get($colors, $color), $tone);
+ }
+```
+
+# Output
+
+```scss
+.foo {
+  prop: -($grid-gutter-width / 2);
+  prop1: -(  $grid-gutter-width  /  2  );
+  prop2: -$grid-gutter-width / 2;
+  prop3: +($grid-gutter-width / 2);
+  prop4: 10px/8px; /* Plain CSS, no division */
+  prop5: $width / 2; /* Uses a variable, does division */
+  prop6: round(1.5) / 2; /* Uses a function, does division */
+  prop7: (500px / 2); /* Uses parentheses, does division */
+  prop8: 5px + 8px / 2px; //* Uses +, does division */
+  prop9: (italic bold 10px/8px); /* In a list, parentheses don't count */
+  prop10: #010203 + #040506;
+  prop11: #010203 * 2;
+  prop12: rgba(255, 0, 0, 0.75) + rgba(0, 255, 0, 0.75);
+  prop13: progid:DXImageTransform.Microsoft.gradient(enabled='false', startColorstr='#{ie-hex-str($green)}', endColorstr='#{ie-hex-str($translucent-red)}');
+  prop14: e + -resize;
+  prop15: sans- + "serif";
+  prop16: 1em + (2em * 3);
+  prop17: rotate(-2deg);
+  prop18:  rotate(  -2deg  )  ;
+  _:_;
+  prop19: 10 - ($grid-gutter-width / 2);
+  prop20: 10 + -($grid-gutter-width / 2);
+  prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+  prop22: - ( $grid-gutter-width / 2 ) ;
+  prop23:  -  (  $grid-gutter-width  /  2  )  ;
+  prop24: -$grid-gutter-width;
+  prop25: + ( $grid-gutter-width / 2 ) ;
+  prop26:  +  (  $grid-gutter-width  /  2  )  ;
+  prop27: +$grid-gutter-width;
+  prop28: --($grid-gutter-width / 2);
+  prop28: ++($grid-gutter-width / 2);
+  prop29:  rotate(  -  2deg  )  ;
+}
+
+$last:nth($juggler,length($juggler));
+$x:if($last%2==0,1/2,3/2);
+$new:pow($last,$x);
+$sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+$new-entry:();
+$new-entry : ( ) ;
+$new-entry  :  (  )  ;
+$new-entry
+:
+(
+)
+;
+
+body:before {
+  content: quote(to-string(fibonacci(100), ' \A '));
+  white-space: pre-wrap;
+}
+
+width: ((100% - (($numPerRow - 1) * $margin)) / $numPerRow);
+width
+:
+(
+(
+100%
+-
+(
+(
+$numPerRow
+-
+1
+)
+*
+$margin
+)
+)
+/
+$numPerRow
+)
+;
+
+a:nth-child(#{$numPerRow}n) {
+  margin-right: 0;
+  margin-bottom: 0;
+}
+
+@function em($pixels, $context: $browser-context) {
+  @return #{ $pixels / $context }em
+}
+
+.navigation {
+  @extend %updated-#{$flag};
+  @extend .selected-#{$flag};
+  @extend %#{$item};
+}
+
+.icon-#{$icon-name} {
+  background-image: '/images/#{$icon-name}.svg';
+}
+
+$extmods:(eot:"?",svg:"#" + str-replace($name," ","_"));
+
+@mixin keyframes {@-moz-keyframes{@content;}@-webkit-keyframes{@content;}}
+
+@function gcd($a,$b){
+  // From: http://rosettacode.org/wiki/Greatest_common_divisor#JavaScript
+  @if ($b != 0) {
+    @return gcd($b,$a % $b);
+  }@else{
+    @return abs($a);
+  }
+}
+
+$colors: (
+primary: (
+base: #00abc9,
+light: #daf1f6,
+dark: #12799a
+),
+secondary: (
+base: #424d55,
+light: #ccc,
+lightest: #efefef,
+dark: #404247
+),
+success: (
+base: #bbd33e,
+light: #eaf0c6
+)
+);
+
+@function color($color, $tone: "base") {
+@return map-get(map-get($colors, $color), $tone);
+}
+```
+
+# Errors
+```
+3945.scss:16:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found ':DXImageTransform.Microsoft.gradient(enabled='false''.
+  
+    14 │   prop11: #010203 * 2;
+    15 │   prop12: rgba(255, 0, 0, 0.75) + rgba(0, 255, 0, 0.75);
+  > 16 │   prop13: progid:DXImageTransform.Microsoft.gradient(enabled='false', startColorstr='#{ie-hex-str($green)}', endColorstr='#{ie-hex-str($translucent-red)}');
+       │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │   prop14: e + -resize;
+    18 │   prop15: sans- + "serif";
+  
+  i Expected a SCSS expression here.
+  
+    14 │   prop11: #010203 * 2;
+    15 │   prop12: rgba(255, 0, 0, 0.75) + rgba(0, 255, 0, 0.75);
+  > 16 │   prop13: progid:DXImageTransform.Microsoft.gradient(enabled='false', startColorstr='#{ie-hex-str($green)}', endColorstr='#{ie-hex-str($translucent-red)}');
+       │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │   prop14: e + -resize;
+    18 │   prop15: sans- + "serif";
+  
+3945.scss:16:84 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found '='#'.
+  
+    14 │   prop11: #010203 * 2;
+    15 │   prop12: rgba(255, 0, 0, 0.75) + rgba(0, 255, 0, 0.75);
+  > 16 │   prop13: progid:DXImageTransform.Microsoft.gradient(enabled='false', startColorstr='#{ie-hex-str($green)}', endColorstr='#{ie-hex-str($translucent-red)}');
+       │                                                                                    ^^^
+    17 │   prop14: e + -resize;
+    18 │   prop15: sans- + "serif";
+  
+  i Expected a SCSS expression here.
+  
+    14 │   prop11: #010203 * 2;
+    15 │   prop12: rgba(255, 0, 0, 0.75) + rgba(0, 255, 0, 0.75);
+  > 16 │   prop13: progid:DXImageTransform.Microsoft.gradient(enabled='false', startColorstr='#{ie-hex-str($green)}', endColorstr='#{ie-hex-str($translucent-red)}');
+       │                                                                                    ^^^
+    17 │   prop14: e + -resize;
+    18 │   prop15: sans- + "serif";
+  
+3945.scss:16:98 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `(`
+  
+    14 │   prop11: #010203 * 2;
+    15 │   prop12: rgba(255, 0, 0, 0.75) + rgba(0, 255, 0, 0.75);
+  > 16 │   prop13: progid:DXImageTransform.Microsoft.gradient(enabled='false', startColorstr='#{ie-hex-str($green)}', endColorstr='#{ie-hex-str($translucent-red)}');
+       │                                                                                                  ^
+    17 │   prop14: e + -resize;
+    18 │   prop15: sans- + "serif";
+  
+  i Remove (
+  
+3945.scss:16:100 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `green`
+  
+    14 │   prop11: #010203 * 2;
+    15 │   prop12: rgba(255, 0, 0, 0.75) + rgba(0, 255, 0, 0.75);
+  > 16 │   prop13: progid:DXImageTransform.Microsoft.gradient(enabled='false', startColorstr='#{ie-hex-str($green)}', endColorstr='#{ie-hex-str($translucent-red)}');
+       │                                                                                                    ^^^^^
+    17 │   prop14: e + -resize;
+    18 │   prop15: sans- + "serif";
+  
+  i Remove green
+  
+3945.scss:16:105 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    14 │   prop11: #010203 * 2;
+    15 │   prop12: rgba(255, 0, 0, 0.75) + rgba(0, 255, 0, 0.75);
+  > 16 │   prop13: progid:DXImageTransform.Microsoft.gradient(enabled='false', startColorstr='#{ie-hex-str($green)}', endColorstr='#{ie-hex-str($translucent-red)}');
+       │                                                                                                         ^
+    17 │   prop14: e + -resize;
+    18 │   prop15: sans- + "serif";
+  
+  i Remove )
+  
+3945.scss:16:123 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `#`
+  
+    14 │   prop11: #010203 * 2;
+    15 │   prop12: rgba(255, 0, 0, 0.75) + rgba(0, 255, 0, 0.75);
+  > 16 │   prop13: progid:DXImageTransform.Microsoft.gradient(enabled='false', startColorstr='#{ie-hex-str($green)}', endColorstr='#{ie-hex-str($translucent-red)}');
+       │                                                                                                                           ^
+    17 │   prop14: e + -resize;
+    18 │   prop15: sans- + "serif";
+  
+  i Remove #
+  
+3945.scss:16:154 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+    14 │   prop11: #010203 * 2;
+    15 │   prop12: rgba(255, 0, 0, 0.75) + rgba(0, 255, 0, 0.75);
+  > 16 │   prop13: progid:DXImageTransform.Microsoft.gradient(enabled='false', startColorstr='#{ie-hex-str($green)}', endColorstr='#{ie-hex-str($translucent-red)}');
+       │                                                                                                                                                          ^^^
+    17 │   prop14: e + -resize;
+    18 │   prop15: sans- + "serif";
+  
+  i The closing quote must be on the same line.
+  
+3945.scss:17:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `prop14`
+  
+    15 │   prop12: rgba(255, 0, 0, 0.75) + rgba(0, 255, 0, 0.75);
+    16 │   prop13: progid:DXImageTransform.Microsoft.gradient(enabled='false', startColorstr='#{ie-hex-str($green)}', endColorstr='#{ie-hex-str($translucent-red)}');
+  > 17 │   prop14: e + -resize;
+       │   ^^^^^^
+    18 │   prop15: sans- + "serif";
+    19 │   prop16: 1em + (2em * 3);
+  
+  i Remove prop14
+  
+3945.scss:17:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    15 │   prop12: rgba(255, 0, 0, 0.75) + rgba(0, 255, 0, 0.75);
+    16 │   prop13: progid:DXImageTransform.Microsoft.gradient(enabled='false', startColorstr='#{ie-hex-str($green)}', endColorstr='#{ie-hex-str($translucent-red)}');
+  > 17 │   prop14: e + -resize;
+       │                      ^
+    18 │   prop15: sans- + "serif";
+    19 │   prop16: 1em + (2em * 3);
+  
+  i Remove ;
+  
+3945.scss:18:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `prop15`
+  
+    16 │   prop13: progid:DXImageTransform.Microsoft.gradient(enabled='false', startColorstr='#{ie-hex-str($green)}', endColorstr='#{ie-hex-str($translucent-red)}');
+    17 │   prop14: e + -resize;
+  > 18 │   prop15: sans- + "serif";
+       │   ^^^^^^
+    19 │   prop16: 1em + (2em * 3);
+    20 │   prop17: rotate(-2deg);
+  
+  i Remove prop15
+  
+3945.scss:18:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '"serif"'.
+  
+    16 │   prop13: progid:DXImageTransform.Microsoft.gradient(enabled='false', startColorstr='#{ie-hex-str($green)}', endColorstr='#{ie-hex-str($translucent-red)}');
+    17 │   prop14: e + -resize;
+  > 18 │   prop15: sans- + "serif";
+       │                   ^^^^^^^
+    19 │   prop16: 1em + (2em * 3);
+    20 │   prop17: rotate(-2deg);
+  
+  i Expected a compound selector here.
+  
+    16 │   prop13: progid:DXImageTransform.Microsoft.gradient(enabled='false', startColorstr='#{ie-hex-str($green)}', endColorstr='#{ie-hex-str($translucent-red)}');
+    17 │   prop14: e + -resize;
+  > 18 │   prop15: sans- + "serif";
+       │                   ^^^^^^^
+    19 │   prop16: 1em + (2em * 3);
+    20 │   prop17: rotate(-2deg);
+  
+3945.scss:19:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `prop16`
+  
+    17 │   prop14: e + -resize;
+    18 │   prop15: sans- + "serif";
+  > 19 │   prop16: 1em + (2em * 3);
+       │   ^^^^^^
+    20 │   prop17: rotate(-2deg);
+    21 │   prop18:  rotate(  -2deg  )  ;
+  
+  i Remove prop16
+  
+3945.scss:19:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    17 │   prop14: e + -resize;
+    18 │   prop15: sans- + "serif";
+  > 19 │   prop16: 1em + (2em * 3);
+       │           ^
+    20 │   prop17: rotate(-2deg);
+    21 │   prop18:  rotate(  -2deg  )  ;
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+3945.scss:19:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `em`
+  
+    17 │   prop14: e + -resize;
+    18 │   prop15: sans- + "serif";
+  > 19 │   prop16: 1em + (2em * 3);
+       │            ^^
+    20 │   prop17: rotate(-2deg);
+    21 │   prop18:  rotate(  -2deg  )  ;
+  
+  i Remove em
+  
+3945.scss:19:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '('.
+  
+    17 │   prop14: e + -resize;
+    18 │   prop15: sans- + "serif";
+  > 19 │   prop16: 1em + (2em * 3);
+       │                 ^
+    20 │   prop17: rotate(-2deg);
+    21 │   prop18:  rotate(  -2deg  )  ;
+  
+  i Expected a compound selector here.
+  
+    17 │   prop14: e + -resize;
+    18 │   prop15: sans- + "serif";
+  > 19 │   prop16: 1em + (2em * 3);
+       │                 ^
+    20 │   prop17: rotate(-2deg);
+    21 │   prop18:  rotate(  -2deg  )  ;
+  
+3945.scss:19:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `em`
+  
+    17 │   prop14: e + -resize;
+    18 │   prop15: sans- + "serif";
+  > 19 │   prop16: 1em + (2em * 3);
+       │                   ^^
+    20 │   prop17: rotate(-2deg);
+    21 │   prop18:  rotate(  -2deg  )  ;
+  
+  i Remove em
+  
+3945.scss:19:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '3'.
+  
+    17 │   prop14: e + -resize;
+    18 │   prop15: sans- + "serif";
+  > 19 │   prop16: 1em + (2em * 3);
+       │                        ^
+    20 │   prop17: rotate(-2deg);
+    21 │   prop18:  rotate(  -2deg  )  ;
+  
+  i Expected a compound selector here.
+  
+    17 │   prop14: e + -resize;
+    18 │   prop15: sans- + "serif";
+  > 19 │   prop16: 1em + (2em * 3);
+       │                        ^
+    20 │   prop17: rotate(-2deg);
+    21 │   prop18:  rotate(  -2deg  )  ;
+  
+3945.scss:20:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `prop17`
+  
+    18 │   prop15: sans- + "serif";
+    19 │   prop16: 1em + (2em * 3);
+  > 20 │   prop17: rotate(-2deg);
+       │   ^^^^^^
+    21 │   prop18:  rotate(  -2deg  )  ;
+    22 │   _:_;
+  
+  i Remove prop17
+  
+3945.scss:20:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `(`
+  
+    18 │   prop15: sans- + "serif";
+    19 │   prop16: 1em + (2em * 3);
+  > 20 │   prop17: rotate(-2deg);
+       │                 ^
+    21 │   prop18:  rotate(  -2deg  )  ;
+    22 │   _:_;
+  
+  i Remove (
+  
+3945.scss:20:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `deg`
+  
+    18 │   prop15: sans- + "serif";
+    19 │   prop16: 1em + (2em * 3);
+  > 20 │   prop17: rotate(-2deg);
+       │                    ^^^
+    21 │   prop18:  rotate(  -2deg  )  ;
+    22 │   _:_;
+  
+  i Remove deg
+  
+3945.scss:20:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    18 │   prop15: sans- + "serif";
+    19 │   prop16: 1em + (2em * 3);
+  > 20 │   prop17: rotate(-2deg);
+       │                       ^
+    21 │   prop18:  rotate(  -2deg  )  ;
+    22 │   _:_;
+  
+  i Remove )
+  
+3945.scss:21:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `prop18`
+  
+    19 │   prop16: 1em + (2em * 3);
+    20 │   prop17: rotate(-2deg);
+  > 21 │   prop18:  rotate(  -2deg  )  ;
+       │   ^^^^^^
+    22 │   _:_;
+    23 │   prop19: 10 - ($grid-gutter-width / 2);
+  
+  i Remove prop18
+  
+3945.scss:21:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `(`
+  
+    19 │   prop16: 1em + (2em * 3);
+    20 │   prop17: rotate(-2deg);
+  > 21 │   prop18:  rotate(  -2deg  )  ;
+       │                  ^
+    22 │   _:_;
+    23 │   prop19: 10 - ($grid-gutter-width / 2);
+  
+  i Remove (
+  
+3945.scss:21:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `deg`
+  
+    19 │   prop16: 1em + (2em * 3);
+    20 │   prop17: rotate(-2deg);
+  > 21 │   prop18:  rotate(  -2deg  )  ;
+       │                       ^^^
+    22 │   _:_;
+    23 │   prop19: 10 - ($grid-gutter-width / 2);
+  
+  i Remove deg
+  
+3945.scss:21:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    19 │   prop16: 1em + (2em * 3);
+    20 │   prop17: rotate(-2deg);
+  > 21 │   prop18:  rotate(  -2deg  )  ;
+       │                            ^
+    22 │   _:_;
+    23 │   prop19: 10 - ($grid-gutter-width / 2);
+  
+  i Remove )
+  
+3945.scss:22:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `_`
+  
+    20 │   prop17: rotate(-2deg);
+    21 │   prop18:  rotate(  -2deg  )  ;
+  > 22 │   _:_;
+       │   ^
+    23 │   prop19: 10 - ($grid-gutter-width / 2);
+    24 │   prop20: 10 + -($grid-gutter-width / 2);
+  
+  i Remove _
+  
+3945.scss:22:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    20 │   prop17: rotate(-2deg);
+    21 │   prop18:  rotate(  -2deg  )  ;
+  > 22 │   _:_;
+       │      ^
+    23 │   prop19: 10 - ($grid-gutter-width / 2);
+    24 │   prop20: 10 + -($grid-gutter-width / 2);
+  
+  i Remove ;
+  
+3945.scss:23:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `prop19`
+  
+    21 │   prop18:  rotate(  -2deg  )  ;
+    22 │   _:_;
+  > 23 │   prop19: 10 - ($grid-gutter-width / 2);
+       │   ^^^^^^
+    24 │   prop20: 10 + -($grid-gutter-width / 2);
+    25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+  
+  i Remove prop19
+  
+3945.scss:23:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    21 │   prop18:  rotate(  -2deg  )  ;
+    22 │   _:_;
+  > 23 │   prop19: 10 - ($grid-gutter-width / 2);
+       │           ^^
+    24 │   prop20: 10 + -($grid-gutter-width / 2);
+    25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+3945.scss:23:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `grid-gutter-width`
+  
+    21 │   prop18:  rotate(  -2deg  )  ;
+    22 │   _:_;
+  > 23 │   prop19: 10 - ($grid-gutter-width / 2);
+       │                  ^^^^^^^^^^^^^^^^^
+    24 │   prop20: 10 + -($grid-gutter-width / 2);
+    25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+  
+  i Remove grid-gutter-width
+  
+3945.scss:23:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '/'.
+  
+    21 │   prop18:  rotate(  -2deg  )  ;
+    22 │   _:_;
+  > 23 │   prop19: 10 - ($grid-gutter-width / 2);
+       │                                    ^
+    24 │   prop20: 10 + -($grid-gutter-width / 2);
+    25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+  
+  i Expected a compound selector here.
+  
+    21 │   prop18:  rotate(  -2deg  )  ;
+    22 │   _:_;
+  > 23 │   prop19: 10 - ($grid-gutter-width / 2);
+       │                                    ^
+    24 │   prop20: 10 + -($grid-gutter-width / 2);
+    25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+  
+3945.scss:24:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `prop20`
+  
+    22 │   _:_;
+    23 │   prop19: 10 - ($grid-gutter-width / 2);
+  > 24 │   prop20: 10 + -($grid-gutter-width / 2);
+       │   ^^^^^^
+    25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+    26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+  
+  i Remove prop20
+  
+3945.scss:24:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    22 │   _:_;
+    23 │   prop19: 10 - ($grid-gutter-width / 2);
+  > 24 │   prop20: 10 + -($grid-gutter-width / 2);
+       │           ^^
+    25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+    26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+3945.scss:24:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `+`
+  
+    22 │   _:_;
+    23 │   prop19: 10 - ($grid-gutter-width / 2);
+  > 24 │   prop20: 10 + -($grid-gutter-width / 2);
+       │              ^
+    25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+    26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+  
+  i Remove +
+  
+3945.scss:24:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '-'.
+  
+    22 │   _:_;
+    23 │   prop19: 10 - ($grid-gutter-width / 2);
+  > 24 │   prop20: 10 + -($grid-gutter-width / 2);
+       │                ^
+    25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+    26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+  
+  i Expected a relative selector here.
+  
+    22 │   _:_;
+    23 │   prop19: 10 - ($grid-gutter-width / 2);
+  > 24 │   prop20: 10 + -($grid-gutter-width / 2);
+       │                ^
+    25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+    26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+  
+3945.scss:24:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `grid-gutter-width`
+  
+    22 │   _:_;
+    23 │   prop19: 10 - ($grid-gutter-width / 2);
+  > 24 │   prop20: 10 + -($grid-gutter-width / 2);
+       │                   ^^^^^^^^^^^^^^^^^
+    25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+    26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+  
+  i Remove grid-gutter-width
+  
+3945.scss:24:37 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '/'.
+  
+    22 │   _:_;
+    23 │   prop19: 10 - ($grid-gutter-width / 2);
+  > 24 │   prop20: 10 + -($grid-gutter-width / 2);
+       │                                     ^
+    25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+    26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+  
+  i Expected a compound selector here.
+  
+    22 │   _:_;
+    23 │   prop19: 10 - ($grid-gutter-width / 2);
+  > 24 │   prop20: 10 + -($grid-gutter-width / 2);
+       │                                     ^
+    25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+    26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+  
+3945.scss:25:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `prop21`
+  
+    23 │   prop19: 10 - ($grid-gutter-width / 2);
+    24 │   prop20: 10 + -($grid-gutter-width / 2);
+  > 25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+       │   ^^^^^^
+    26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+    27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+  
+  i Remove prop21
+  
+3945.scss:25:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    23 │   prop19: 10 - ($grid-gutter-width / 2);
+    24 │   prop20: 10 + -($grid-gutter-width / 2);
+  > 25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+       │            ^^
+    26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+    27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+3945.scss:25:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `+`
+  
+    23 │   prop19: 10 - ($grid-gutter-width / 2);
+    24 │   prop20: 10 + -($grid-gutter-width / 2);
+  > 25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+       │                ^
+    26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+    27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+  
+  i Remove +
+  
+3945.scss:25:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '-'.
+  
+    23 │   prop19: 10 - ($grid-gutter-width / 2);
+    24 │   prop20: 10 + -($grid-gutter-width / 2);
+  > 25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+       │                   ^
+    26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+    27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+  
+  i Expected a relative selector here.
+  
+    23 │   prop19: 10 - ($grid-gutter-width / 2);
+    24 │   prop20: 10 + -($grid-gutter-width / 2);
+  > 25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+       │                   ^
+    26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+    27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+  
+3945.scss:25:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `grid-gutter-width`
+  
+    23 │   prop19: 10 - ($grid-gutter-width / 2);
+    24 │   prop20: 10 + -($grid-gutter-width / 2);
+  > 25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+       │                          ^^^^^^^^^^^^^^^^^
+    26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+    27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+  
+  i Remove grid-gutter-width
+  
+3945.scss:25:45 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '/'.
+  
+    23 │   prop19: 10 - ($grid-gutter-width / 2);
+    24 │   prop20: 10 + -($grid-gutter-width / 2);
+  > 25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+       │                                             ^
+    26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+    27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+  
+  i Expected a compound selector here.
+  
+    23 │   prop19: 10 - ($grid-gutter-width / 2);
+    24 │   prop20: 10 + -($grid-gutter-width / 2);
+  > 25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+       │                                             ^
+    26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+    27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+  
+3945.scss:26:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `prop22`
+  
+    24 │   prop20: 10 + -($grid-gutter-width / 2);
+    25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+  > 26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+       │   ^^^^^^
+    27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+    28 │   prop24: -$grid-gutter-width;
+  
+  i Remove prop22
+  
+3945.scss:26:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    24 │   prop20: 10 + -($grid-gutter-width / 2);
+    25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+  > 26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+       │           ^
+    27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+    28 │   prop24: -$grid-gutter-width;
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+3945.scss:26:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `grid-gutter-width`
+  
+    24 │   prop20: 10 + -($grid-gutter-width / 2);
+    25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+  > 26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+       │                ^^^^^^^^^^^^^^^^^
+    27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+    28 │   prop24: -$grid-gutter-width;
+  
+  i Remove grid-gutter-width
+  
+3945.scss:26:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '/'.
+  
+    24 │   prop20: 10 + -($grid-gutter-width / 2);
+    25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+  > 26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+       │                                  ^
+    27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+    28 │   prop24: -$grid-gutter-width;
+  
+  i Expected a compound selector here.
+  
+    24 │   prop20: 10 + -($grid-gutter-width / 2);
+    25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+  > 26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+       │                                  ^
+    27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+    28 │   prop24: -$grid-gutter-width;
+  
+3945.scss:27:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `prop23`
+  
+    25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+    26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+  > 27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+       │   ^^^^^^
+    28 │   prop24: -$grid-gutter-width;
+    29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+  
+  i Remove prop23
+  
+3945.scss:27:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+    26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+  > 27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+       │            ^
+    28 │   prop24: -$grid-gutter-width;
+    29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+3945.scss:27:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `grid-gutter-width`
+  
+    25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+    26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+  > 27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+       │                   ^^^^^^^^^^^^^^^^^
+    28 │   prop24: -$grid-gutter-width;
+    29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+  
+  i Remove grid-gutter-width
+  
+3945.scss:27:38 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '/'.
+  
+    25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+    26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+  > 27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+       │                                      ^
+    28 │   prop24: -$grid-gutter-width;
+    29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+  
+  i Expected a compound selector here.
+  
+    25 │   prop21:  10  +  -  (  $grid-gutter-width  /  2  )  ;
+    26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+  > 27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+       │                                      ^
+    28 │   prop24: -$grid-gutter-width;
+    29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+  
+3945.scss:28:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `prop24`
+  
+    26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+    27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+  > 28 │   prop24: -$grid-gutter-width;
+       │   ^^^^^^
+    29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+    30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+  
+  i Remove prop24
+  
+3945.scss:28:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+    27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+  > 28 │   prop24: -$grid-gutter-width;
+       │           ^
+    29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+    30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+3945.scss:28:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `grid-gutter-width`
+  
+    26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+    27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+  > 28 │   prop24: -$grid-gutter-width;
+       │             ^^^^^^^^^^^^^^^^^
+    29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+    30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+  
+  i Remove grid-gutter-width
+  
+3945.scss:28:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    26 │   prop22: - ( $grid-gutter-width / 2 ) ;
+    27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+  > 28 │   prop24: -$grid-gutter-width;
+       │                              ^
+    29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+    30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+  
+  i Remove ;
+  
+3945.scss:29:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `prop25`
+  
+    27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+    28 │   prop24: -$grid-gutter-width;
+  > 29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+       │   ^^^^^^
+    30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+    31 │   prop27: +$grid-gutter-width;
+  
+  i Remove prop25
+  
+3945.scss:29:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+    28 │   prop24: -$grid-gutter-width;
+  > 29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+       │           ^
+    30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+    31 │   prop27: +$grid-gutter-width;
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+3945.scss:29:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '('.
+  
+    27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+    28 │   prop24: -$grid-gutter-width;
+  > 29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+       │             ^
+    30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+    31 │   prop27: +$grid-gutter-width;
+  
+  i Expected a compound selector here.
+  
+    27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+    28 │   prop24: -$grid-gutter-width;
+  > 29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+       │             ^
+    30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+    31 │   prop27: +$grid-gutter-width;
+  
+3945.scss:29:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `grid-gutter-width`
+  
+    27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+    28 │   prop24: -$grid-gutter-width;
+  > 29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+       │                ^^^^^^^^^^^^^^^^^
+    30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+    31 │   prop27: +$grid-gutter-width;
+  
+  i Remove grid-gutter-width
+  
+3945.scss:29:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '/'.
+  
+    27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+    28 │   prop24: -$grid-gutter-width;
+  > 29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+       │                                  ^
+    30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+    31 │   prop27: +$grid-gutter-width;
+  
+  i Expected a compound selector here.
+  
+    27 │   prop23:  -  (  $grid-gutter-width  /  2  )  ;
+    28 │   prop24: -$grid-gutter-width;
+  > 29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+       │                                  ^
+    30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+    31 │   prop27: +$grid-gutter-width;
+  
+3945.scss:30:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `prop26`
+  
+    28 │   prop24: -$grid-gutter-width;
+    29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+  > 30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+       │   ^^^^^^
+    31 │   prop27: +$grid-gutter-width;
+    32 │   prop28: --($grid-gutter-width / 2);
+  
+  i Remove prop26
+  
+3945.scss:30:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    28 │   prop24: -$grid-gutter-width;
+    29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+  > 30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+       │            ^
+    31 │   prop27: +$grid-gutter-width;
+    32 │   prop28: --($grid-gutter-width / 2);
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+3945.scss:30:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '('.
+  
+    28 │   prop24: -$grid-gutter-width;
+    29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+  > 30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+       │               ^
+    31 │   prop27: +$grid-gutter-width;
+    32 │   prop28: --($grid-gutter-width / 2);
+  
+  i Expected a compound selector here.
+  
+    28 │   prop24: -$grid-gutter-width;
+    29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+  > 30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+       │               ^
+    31 │   prop27: +$grid-gutter-width;
+    32 │   prop28: --($grid-gutter-width / 2);
+  
+3945.scss:30:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `grid-gutter-width`
+  
+    28 │   prop24: -$grid-gutter-width;
+    29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+  > 30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+       │                   ^^^^^^^^^^^^^^^^^
+    31 │   prop27: +$grid-gutter-width;
+    32 │   prop28: --($grid-gutter-width / 2);
+  
+  i Remove grid-gutter-width
+  
+3945.scss:30:38 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '/'.
+  
+    28 │   prop24: -$grid-gutter-width;
+    29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+  > 30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+       │                                      ^
+    31 │   prop27: +$grid-gutter-width;
+    32 │   prop28: --($grid-gutter-width / 2);
+  
+  i Expected a compound selector here.
+  
+    28 │   prop24: -$grid-gutter-width;
+    29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+  > 30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+       │                                      ^
+    31 │   prop27: +$grid-gutter-width;
+    32 │   prop28: --($grid-gutter-width / 2);
+  
+3945.scss:31:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `prop27`
+  
+    29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+    30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+  > 31 │   prop27: +$grid-gutter-width;
+       │   ^^^^^^
+    32 │   prop28: --($grid-gutter-width / 2);
+    33 │   prop28: ++($grid-gutter-width / 2);
+  
+  i Remove prop27
+  
+3945.scss:31:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+    30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+  > 31 │   prop27: +$grid-gutter-width;
+       │           ^
+    32 │   prop28: --($grid-gutter-width / 2);
+    33 │   prop28: ++($grid-gutter-width / 2);
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+3945.scss:31:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '$'.
+  
+    29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+    30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+  > 31 │   prop27: +$grid-gutter-width;
+       │            ^
+    32 │   prop28: --($grid-gutter-width / 2);
+    33 │   prop28: ++($grid-gutter-width / 2);
+  
+  i Expected a compound selector here.
+  
+    29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+    30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+  > 31 │   prop27: +$grid-gutter-width;
+       │            ^
+    32 │   prop28: --($grid-gutter-width / 2);
+    33 │   prop28: ++($grid-gutter-width / 2);
+  
+3945.scss:31:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `grid-gutter-width`
+  
+    29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+    30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+  > 31 │   prop27: +$grid-gutter-width;
+       │             ^^^^^^^^^^^^^^^^^
+    32 │   prop28: --($grid-gutter-width / 2);
+    33 │   prop28: ++($grid-gutter-width / 2);
+  
+  i Remove grid-gutter-width
+  
+3945.scss:31:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    29 │   prop25: + ( $grid-gutter-width / 2 ) ;
+    30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+  > 31 │   prop27: +$grid-gutter-width;
+       │                              ^
+    32 │   prop28: --($grid-gutter-width / 2);
+    33 │   prop28: ++($grid-gutter-width / 2);
+  
+  i Remove ;
+  
+3945.scss:32:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `prop28`
+  
+    30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+    31 │   prop27: +$grid-gutter-width;
+  > 32 │   prop28: --($grid-gutter-width / 2);
+       │   ^^^^^^
+    33 │   prop28: ++($grid-gutter-width / 2);
+    34 │   prop29:  rotate(  -  2deg  )  ;
+  
+  i Remove prop28
+  
+3945.scss:32:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+    31 │   prop27: +$grid-gutter-width;
+  > 32 │   prop28: --($grid-gutter-width / 2);
+       │           ^
+    33 │   prop28: ++($grid-gutter-width / 2);
+    34 │   prop29:  rotate(  -  2deg  )  ;
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+3945.scss:32:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `grid-gutter-width`
+  
+    30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+    31 │   prop27: +$grid-gutter-width;
+  > 32 │   prop28: --($grid-gutter-width / 2);
+       │               ^^^^^^^^^^^^^^^^^
+    33 │   prop28: ++($grid-gutter-width / 2);
+    34 │   prop29:  rotate(  -  2deg  )  ;
+  
+  i Remove grid-gutter-width
+  
+3945.scss:32:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '/'.
+  
+    30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+    31 │   prop27: +$grid-gutter-width;
+  > 32 │   prop28: --($grid-gutter-width / 2);
+       │                                 ^
+    33 │   prop28: ++($grid-gutter-width / 2);
+    34 │   prop29:  rotate(  -  2deg  )  ;
+  
+  i Expected a compound selector here.
+  
+    30 │   prop26:  +  (  $grid-gutter-width  /  2  )  ;
+    31 │   prop27: +$grid-gutter-width;
+  > 32 │   prop28: --($grid-gutter-width / 2);
+       │                                 ^
+    33 │   prop28: ++($grid-gutter-width / 2);
+    34 │   prop29:  rotate(  -  2deg  )  ;
+  
+3945.scss:33:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `prop28`
+  
+    31 │   prop27: +$grid-gutter-width;
+    32 │   prop28: --($grid-gutter-width / 2);
+  > 33 │   prop28: ++($grid-gutter-width / 2);
+       │   ^^^^^^
+    34 │   prop29:  rotate(  -  2deg  )  ;
+    35 │ }
+  
+  i Remove prop28
+  
+3945.scss:33:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    31 │   prop27: +$grid-gutter-width;
+    32 │   prop28: --($grid-gutter-width / 2);
+  > 33 │   prop28: ++($grid-gutter-width / 2);
+       │           ^
+    34 │   prop29:  rotate(  -  2deg  )  ;
+    35 │ }
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+3945.scss:33:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '+'.
+  
+    31 │   prop27: +$grid-gutter-width;
+    32 │   prop28: --($grid-gutter-width / 2);
+  > 33 │   prop28: ++($grid-gutter-width / 2);
+       │            ^
+    34 │   prop29:  rotate(  -  2deg  )  ;
+    35 │ }
+  
+  i Expected a compound selector here.
+  
+    31 │   prop27: +$grid-gutter-width;
+    32 │   prop28: --($grid-gutter-width / 2);
+  > 33 │   prop28: ++($grid-gutter-width / 2);
+       │            ^
+    34 │   prop29:  rotate(  -  2deg  )  ;
+    35 │ }
+  
+3945.scss:33:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '('.
+  
+    31 │   prop27: +$grid-gutter-width;
+    32 │   prop28: --($grid-gutter-width / 2);
+  > 33 │   prop28: ++($grid-gutter-width / 2);
+       │             ^
+    34 │   prop29:  rotate(  -  2deg  )  ;
+    35 │ }
+  
+  i Expected a compound selector here.
+  
+    31 │   prop27: +$grid-gutter-width;
+    32 │   prop28: --($grid-gutter-width / 2);
+  > 33 │   prop28: ++($grid-gutter-width / 2);
+       │             ^
+    34 │   prop29:  rotate(  -  2deg  )  ;
+    35 │ }
+  
+3945.scss:33:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `grid-gutter-width`
+  
+    31 │   prop27: +$grid-gutter-width;
+    32 │   prop28: --($grid-gutter-width / 2);
+  > 33 │   prop28: ++($grid-gutter-width / 2);
+       │               ^^^^^^^^^^^^^^^^^
+    34 │   prop29:  rotate(  -  2deg  )  ;
+    35 │ }
+  
+  i Remove grid-gutter-width
+  
+3945.scss:33:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '/'.
+  
+    31 │   prop27: +$grid-gutter-width;
+    32 │   prop28: --($grid-gutter-width / 2);
+  > 33 │   prop28: ++($grid-gutter-width / 2);
+       │                                 ^
+    34 │   prop29:  rotate(  -  2deg  )  ;
+    35 │ }
+  
+  i Expected a compound selector here.
+  
+    31 │   prop27: +$grid-gutter-width;
+    32 │   prop28: --($grid-gutter-width / 2);
+  > 33 │   prop28: ++($grid-gutter-width / 2);
+       │                                 ^
+    34 │   prop29:  rotate(  -  2deg  )  ;
+    35 │ }
+  
+3945.scss:34:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `prop29`
+  
+    32 │   prop28: --($grid-gutter-width / 2);
+    33 │   prop28: ++($grid-gutter-width / 2);
+  > 34 │   prop29:  rotate(  -  2deg  )  ;
+       │   ^^^^^^
+    35 │ }
+    36 │ 
+  
+  i Remove prop29
+  
+3945.scss:34:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `(`
+  
+    32 │   prop28: --($grid-gutter-width / 2);
+    33 │   prop28: ++($grid-gutter-width / 2);
+  > 34 │   prop29:  rotate(  -  2deg  )  ;
+       │                  ^
+    35 │ }
+    36 │ 
+  
+  i Remove (
+  
+3945.scss:34:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `deg`
+  
+    32 │   prop28: --($grid-gutter-width / 2);
+    33 │   prop28: ++($grid-gutter-width / 2);
+  > 34 │   prop29:  rotate(  -  2deg  )  ;
+       │                         ^^^
+    35 │ }
+    36 │ 
+  
+  i Remove deg
+  
+3945.scss:34:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    32 │   prop28: --($grid-gutter-width / 2);
+    33 │   prop28: ++($grid-gutter-width / 2);
+  > 34 │   prop29:  rotate(  -  2deg  )  ;
+       │                              ^
+    35 │ }
+    36 │ 
+  
+  i Remove )
+  
+3945.scss:37:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `last`
+  
+    35 │ }
+    36 │ 
+  > 37 │ $last:nth($juggler,length($juggler));
+       │  ^^^^
+    38 │ $x:if($last%2==0,1/2,3/2);
+    39 │ $new:pow($last,$x);
+  
+  i Remove last
+  
+3945.scss:37:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `(`
+  
+    35 │ }
+    36 │ 
+  > 37 │ $last:nth($juggler,length($juggler));
+       │          ^
+    38 │ $x:if($last%2==0,1/2,3/2);
+    39 │ $new:pow($last,$x);
+  
+  i Remove (
+  
+3945.scss:37:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `juggler`
+  
+    35 │ }
+    36 │ 
+  > 37 │ $last:nth($juggler,length($juggler));
+       │            ^^^^^^^
+    38 │ $x:if($last%2==0,1/2,3/2);
+    39 │ $new:pow($last,$x);
+  
+  i Remove juggler
+  
+3945.scss:37:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `(`
+  
+    35 │ }
+    36 │ 
+  > 37 │ $last:nth($juggler,length($juggler));
+       │                          ^
+    38 │ $x:if($last%2==0,1/2,3/2);
+    39 │ $new:pow($last,$x);
+  
+  i Remove (
+  
+3945.scss:37:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `juggler`
+  
+    35 │ }
+    36 │ 
+  > 37 │ $last:nth($juggler,length($juggler));
+       │                            ^^^^^^^
+    38 │ $x:if($last%2==0,1/2,3/2);
+    39 │ $new:pow($last,$x);
+  
+  i Remove juggler
+  
+3945.scss:37:35 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    35 │ }
+    36 │ 
+  > 37 │ $last:nth($juggler,length($juggler));
+       │                                   ^
+    38 │ $x:if($last%2==0,1/2,3/2);
+    39 │ $new:pow($last,$x);
+  
+  i Remove )
+  
+3945.scss:38:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `x`
+  
+    37 │ $last:nth($juggler,length($juggler));
+  > 38 │ $x:if($last%2==0,1/2,3/2);
+       │  ^
+    39 │ $new:pow($last,$x);
+    40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+  
+  i Remove x
+  
+3945.scss:38:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `(`
+  
+    37 │ $last:nth($juggler,length($juggler));
+  > 38 │ $x:if($last%2==0,1/2,3/2);
+       │      ^
+    39 │ $new:pow($last,$x);
+    40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+  
+  i Remove (
+  
+3945.scss:38:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `last`
+  
+    37 │ $last:nth($juggler,length($juggler));
+  > 38 │ $x:if($last%2==0,1/2,3/2);
+       │        ^^^^
+    39 │ $new:pow($last,$x);
+    40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+  
+  i Remove last
+  
+3945.scss:38:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `%`
+  
+    37 │ $last:nth($juggler,length($juggler));
+  > 38 │ $x:if($last%2==0,1/2,3/2);
+       │            ^
+    39 │ $new:pow($last,$x);
+    40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+  
+  i Remove %
+  
+3945.scss:38:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '1/2'.
+  
+    37 │ $last:nth($juggler,length($juggler));
+  > 38 │ $x:if($last%2==0,1/2,3/2);
+       │                  ^^^
+    39 │ $new:pow($last,$x);
+    40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+  
+  i Expected a relative selector here.
+  
+    37 │ $last:nth($juggler,length($juggler));
+  > 38 │ $x:if($last%2==0,1/2,3/2);
+       │                  ^^^
+    39 │ $new:pow($last,$x);
+    40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+  
+3945.scss:38:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '3/2);
+    $'.
+  
+    37 │ $last:nth($juggler,length($juggler));
+  > 38 │ $x:if($last%2==0,1/2,3/2);
+       │                      ^^^^^
+  > 39 │ $new:pow($last,$x);
+       │ ^
+    40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+    41 │ $new-entry:();
+  
+  i Expected a relative selector here.
+  
+    37 │ $last:nth($juggler,length($juggler));
+  > 38 │ $x:if($last%2==0,1/2,3/2);
+       │                      ^^^^^
+  > 39 │ $new:pow($last,$x);
+       │ ^
+    40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+    41 │ $new-entry:();
+  
+3945.scss:39:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `new`
+  
+    37 │ $last:nth($juggler,length($juggler));
+    38 │ $x:if($last%2==0,1/2,3/2);
+  > 39 │ $new:pow($last,$x);
+       │  ^^^
+    40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+    41 │ $new-entry:();
+  
+  i Remove new
+  
+3945.scss:39:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `(`
+  
+    37 │ $last:nth($juggler,length($juggler));
+    38 │ $x:if($last%2==0,1/2,3/2);
+  > 39 │ $new:pow($last,$x);
+       │         ^
+    40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+    41 │ $new-entry:();
+  
+  i Remove (
+  
+3945.scss:39:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `last`
+  
+    37 │ $last:nth($juggler,length($juggler));
+    38 │ $x:if($last%2==0,1/2,3/2);
+  > 39 │ $new:pow($last,$x);
+       │           ^^^^
+    40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+    41 │ $new-entry:();
+  
+  i Remove last
+  
+3945.scss:39:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '$'.
+  
+    37 │ $last:nth($juggler,length($juggler));
+    38 │ $x:if($last%2==0,1/2,3/2);
+  > 39 │ $new:pow($last,$x);
+       │                ^
+    40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+    41 │ $new-entry:();
+  
+  i Expected a relative selector here.
+  
+    37 │ $last:nth($juggler,length($juggler));
+    38 │ $x:if($last%2==0,1/2,3/2);
+  > 39 │ $new:pow($last,$x);
+       │                ^
+    40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+    41 │ $new-entry:();
+  
+3945.scss:39:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `x`
+  
+    37 │ $last:nth($juggler,length($juggler));
+    38 │ $x:if($last%2==0,1/2,3/2);
+  > 39 │ $new:pow($last,$x);
+       │                 ^
+    40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+    41 │ $new-entry:();
+  
+  i Remove x
+  
+3945.scss:39:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    37 │ $last:nth($juggler,length($juggler));
+    38 │ $x:if($last%2==0,1/2,3/2);
+  > 39 │ $new:pow($last,$x);
+       │                  ^
+    40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+    41 │ $new-entry:();
+  
+  i Remove )
+  
+3945.scss:40:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `sequence`
+  
+    38 │ $x:if($last%2==0,1/2,3/2);
+    39 │ $new:pow($last,$x);
+  > 40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+       │  ^^^^^^^^
+    41 │ $new-entry:();
+    42 │ $new-entry : ( ) ;
+  
+  i Remove sequence
+  
+3945.scss:40:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    38 │ $x:if($last%2==0,1/2,3/2);
+    39 │ $new:pow($last,$x);
+  > 40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+       │           ^
+    41 │ $new-entry:();
+    42 │ $new-entry : ( ) ;
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+3945.scss:40:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '1 1'.
+  
+    38 │ $x:if($last%2==0,1/2,3/2);
+    39 │ $new:pow($last,$x);
+  > 40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+       │             ^^^
+    41 │ $new-entry:();
+    42 │ $new-entry : ( ) ;
+  
+  i Expected a relative selector here.
+  
+    38 │ $x:if($last%2==0,1/2,3/2);
+    39 │ $new:pow($last,$x);
+  > 40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+       │             ^^^
+    41 │ $new-entry:();
+    42 │ $new-entry : ( ) ;
+  
+3945.scss:40:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '2 1'.
+  
+    38 │ $x:if($last%2==0,1/2,3/2);
+    39 │ $new:pow($last,$x);
+  > 40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+       │                 ^^^
+    41 │ $new-entry:();
+    42 │ $new-entry : ( ) ;
+  
+  i Expected a relative selector here.
+  
+    38 │ $x:if($last%2==0,1/2,3/2);
+    39 │ $new:pow($last,$x);
+  > 40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+       │                 ^^^
+    41 │ $new-entry:();
+    42 │ $new-entry : ( ) ;
+  
+3945.scss:40:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '1 2 1 1'.
+  
+    38 │ $x:if($last%2==0,1/2,3/2);
+    39 │ $new:pow($last,$x);
+  > 40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+       │                     ^^^^^^^
+    41 │ $new-entry:();
+    42 │ $new-entry : ( ) ;
+  
+  i Expected a relative selector here.
+  
+    38 │ $x:if($last%2==0,1/2,3/2);
+    39 │ $new:pow($last,$x);
+  > 40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+       │                     ^^^^^^^
+    41 │ $new-entry:();
+    42 │ $new-entry : ( ) ;
+  
+3945.scss:40:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '1 1 1 2 2 1;
+    $'.
+  
+    38 │ $x:if($last%2==0,1/2,3/2);
+    39 │ $new:pow($last,$x);
+  > 40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+       │                              ^^^^^^^^^^^^
+  > 41 │ $new-entry:();
+       │ ^
+    42 │ $new-entry : ( ) ;
+    43 │ $new-entry  :  (  )  ;
+  
+  i Expected a relative selector here.
+  
+    38 │ $x:if($last%2==0,1/2,3/2);
+    39 │ $new:pow($last,$x);
+  > 40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+       │                              ^^^^^^^^^^^^
+  > 41 │ $new-entry:();
+       │ ^
+    42 │ $new-entry : ( ) ;
+    43 │ $new-entry  :  (  )  ;
+  
+3945.scss:41:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `new-entry`
+  
+    39 │ $new:pow($last,$x);
+    40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+  > 41 │ $new-entry:();
+       │  ^^^^^^^^^
+    42 │ $new-entry : ( ) ;
+    43 │ $new-entry  :  (  )  ;
+  
+  i Remove new-entry
+  
+3945.scss:41:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    39 │ $new:pow($last,$x);
+    40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+  > 41 │ $new-entry:();
+       │            ^
+    42 │ $new-entry : ( ) ;
+    43 │ $new-entry  :  (  )  ;
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+3945.scss:42:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `new-entry`
+  
+    40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+    41 │ $new-entry:();
+  > 42 │ $new-entry : ( ) ;
+       │  ^^^^^^^^^
+    43 │ $new-entry  :  (  )  ;
+    44 │ $new-entry
+  
+  i Remove new-entry
+  
+3945.scss:42:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
+    41 │ $new-entry:();
+  > 42 │ $new-entry : ( ) ;
+       │              ^
+    43 │ $new-entry  :  (  )  ;
+    44 │ $new-entry
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+3945.scss:43:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `new-entry`
+  
+    41 │ $new-entry:();
+    42 │ $new-entry : ( ) ;
+  > 43 │ $new-entry  :  (  )  ;
+       │  ^^^^^^^^^
+    44 │ $new-entry
+    45 │ :
+  
+  i Remove new-entry
+  
+3945.scss:43:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    41 │ $new-entry:();
+    42 │ $new-entry : ( ) ;
+  > 43 │ $new-entry  :  (  )  ;
+       │                ^
+    44 │ $new-entry
+    45 │ :
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+3945.scss:44:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `new-entry`
+  
+    42 │ $new-entry : ( ) ;
+    43 │ $new-entry  :  (  )  ;
+  > 44 │ $new-entry
+       │  ^^^^^^^^^
+    45 │ :
+    46 │ (
+  
+  i Remove new-entry
+  
+3945.scss:46:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    44 │ $new-entry
+    45 │ :
+  > 46 │ (
+       │ ^
+    47 │ )
+    48 │ ;
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+3945.scss:50:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `body`
+  
+    48 │ ;
+    49 │ 
+  > 50 │ body:before {
+       │ ^^^^
+    51 │   content: quote(to-string(fibonacci(100), ' \A '));
+    52 │   white-space: pre-wrap;
+  
+  i Remove body
+  
+3945.scss:84:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `;` but instead found `}`
+  
+    82 │ @function em($pixels, $context: $browser-context) {
+    83 │   @return #{ $pixels / $context }em
+  > 84 │ }
+       │ ^
+    85 │ 
+    86 │ .navigation {
+  
+  i Remove }
+  
+3945.scss:98:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '{'.
+  
+     96 │ $extmods:(eot:"?",svg:"#" + str-replace($name," ","_"));
+     97 │ 
+   > 98 │ @mixin keyframes {@-moz-keyframes{@content;}@-webkit-keyframes{@content;}}
+        │                                  ^
+     99 │ 
+    100 │ @function gcd($a,$b){
+  
+  i Expected an identifier here.
+  
+     96 │ $extmods:(eot:"?",svg:"#" + str-replace($name," ","_"));
+     97 │ 
+   > 98 │ @mixin keyframes {@-moz-keyframes{@content;}@-webkit-keyframes{@content;}}
+        │                                  ^
+     99 │ 
+    100 │ @function gcd($a,$b){
+  
+3945.scss:98:35 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+     96 │ $extmods:(eot:"?",svg:"#" + str-replace($name," ","_"));
+     97 │ 
+   > 98 │ @mixin keyframes {@-moz-keyframes{@content;}@-webkit-keyframes{@content;}}
+        │                                   ^^^^^^^^^
+     99 │ 
+    100 │ @function gcd($a,$b){
+  
+  i Expected one of:
+  
+  - from
+  - to
+  - a percentage
+  - a timeline-range-name (cover, contain, entry, exit, entry-crossing, exit-crossing)
+  
+3945.scss:98:44 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `}`
+  
+     96 │ $extmods:(eot:"?",svg:"#" + str-replace($name," ","_"));
+     97 │ 
+   > 98 │ @mixin keyframes {@-moz-keyframes{@content;}@-webkit-keyframes{@content;}}
+        │                                            ^
+     99 │ 
+    100 │ @function gcd($a,$b){
+  
+  i Remove }
+  
+3945.scss:98:45 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+     96 │ $extmods:(eot:"?",svg:"#" + str-replace($name," ","_"));
+     97 │ 
+   > 98 │ @mixin keyframes {@-moz-keyframes{@content;}@-webkit-keyframes{@content;}}
+        │                                             ^^^^^^^^^^^^^^^^^^
+     99 │ 
+    100 │ @function gcd($a,$b){
+  
+  i Expected one of:
+  
+  - from
+  - to
+  - a percentage
+  - a timeline-range-name (cover, contain, entry, exit, entry-crossing, exit-crossing)
+  
+3945.scss:98:64 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a declaration item but instead found '@content;'.
+  
+     96 │ $extmods:(eot:"?",svg:"#" + str-replace($name," ","_"));
+     97 │ 
+   > 98 │ @mixin keyframes {@-moz-keyframes{@content;}@-webkit-keyframes{@content;}}
+        │                                                                ^^^^^^^^^
+     99 │ 
+    100 │ @function gcd($a,$b){
+  
+  i Expected a declaration item here.
+  
+     96 │ $extmods:(eot:"?",svg:"#" + str-replace($name," ","_"));
+     97 │ 
+   > 98 │ @mixin keyframes {@-moz-keyframes{@content;}@-webkit-keyframes{@content;}}
+        │                                                                ^^^^^^^^^
+     99 │ 
+    100 │ @function gcd($a,$b){
+  
+3945.scss:130:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+  
+    128 │ @return map-get(map-get($colors, $color), $tone);
+    129 │ }
+  > 130 │ 
+        │ 
+  
+  i the file ends here
+  
+    128 │ @return map-get(map-get($colors, $color), $tone);
+    129 │ }
+  > 130 │ 
+        │ 
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   15:   prop13: progid:DXImageTransform.Microsoft.gradient(enabled='false', startColorstr='#{ie-hex-str($green)}', endColorstr='#{ie-hex-str($translucent-red)}');
+```

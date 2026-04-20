@@ -70,7 +70,7 @@ invalid.html:4:1 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━�
     2 │ <meta charset="UTF-8" aria-hidden="false" />
     3 │ <meta charset="UTF-8" role="meta" />
   > 4 │ <html aria-required="true"></html>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     5 │ <script aria-label="script"></script>
     6 │ <script role="script"></script>
   
@@ -91,7 +91,7 @@ invalid.html:5:1 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━�
     3 │ <meta charset="UTF-8" role="meta" />
     4 │ <html aria-required="true"></html>
   > 5 │ <script aria-label="script"></script>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ <script role="script"></script>
     7 │ <style aria-labelledby="id"></style>
   
@@ -112,7 +112,7 @@ invalid.html:6:1 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━�
     4 │ <html aria-required="true"></html>
     5 │ <script aria-label="script"></script>
   > 6 │ <script role="script"></script>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^
     7 │ <style aria-labelledby="id"></style>
     8 │ <style role="style"></style>
   
@@ -133,7 +133,7 @@ invalid.html:7:1 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━�
     5 │ <script aria-label="script"></script>
     6 │ <script role="script"></script>
   > 7 │ <style aria-labelledby="id"></style>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     8 │ <style role="style"></style>
     9 │ <meta charset="UTF-8" role="meta" aria-hidden="true" />
   
@@ -154,7 +154,7 @@ invalid.html:8:1 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━�
      6 │ <script role="script"></script>
      7 │ <style aria-labelledby="id"></style>
    > 8 │ <style role="style"></style>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^
      9 │ <meta charset="UTF-8" role="meta" aria-hidden="true" />
     10 │ <meta charset="UTF-8" aria-foo="bar" aria-hidden="true" />
   
@@ -238,7 +238,7 @@ invalid.html:12:1 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━�
     10 │ <meta charset="UTF-8" aria-foo="bar" aria-hidden="true" />
     11 │ <META charset="UTF-8" role="meta" />
   > 12 │ <STYLE ROLE="style"></STYLE>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^
     13 │ <SCRIPT ARIA-LABEL="script"></SCRIPT>
     14 │ 
   
@@ -259,7 +259,7 @@ invalid.html:13:1 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━�
     11 │ <META charset="UTF-8" role="meta" />
     12 │ <STYLE ROLE="style"></STYLE>
   > 13 │ <SCRIPT ARIA-LABEL="script"></SCRIPT>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     14 │ 
   
   i Using aria-* on elements that do not support them can cause issues with screen readers.

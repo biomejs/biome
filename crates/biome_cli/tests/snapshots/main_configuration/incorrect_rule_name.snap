@@ -48,6 +48,7 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   i Known keys:
   
   - recommended
+  - preset
   - noChildrenProp
   - noConstAssign
   - noConstantCondition
@@ -144,6 +145,7 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   i Known keys:
   
   - recommended
+  - preset
   - noCommonJs
   - noDefaultExport
   - noDescendingSpecificity
