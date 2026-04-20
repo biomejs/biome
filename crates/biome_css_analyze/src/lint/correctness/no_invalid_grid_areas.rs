@@ -56,7 +56,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("named-grid-areas-no-invalid").same()],
+        sources: &[RuleSource::Stylelint("named-grid-areas-no-invalid").same(), RuleSource::EslintCss("no-invalid-named-grid-areas").same()],
     }
 }
 
