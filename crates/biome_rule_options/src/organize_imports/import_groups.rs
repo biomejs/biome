@@ -1,5 +1,3 @@
-use std::os::unix::ffi::OsStrExt;
-
 use biome_deserialize::{Deserializable, DeserializationContext, Text};
 use biome_deserialize_macros::Deserializable;
 use biome_glob::{CandidatePath, Glob};
@@ -388,11 +386,10 @@ impl PredefinedSourceMatcher {
             Self::ProtocolPackage => source_kind == ImportSourceKind::ProtocolPackage,
             Self::Style => std::path::Path::new(source)
                 .extension()
-                .map(|extension| extension.as_bytes())
                 .is_some_and(|extension| {
                     matches!(
-                        extension,
-                        b"css" | b"pcss" | b"sass" | b"scss" | b"sss" | b"styl"
+                        extension.as_encoded_bytes(),
+                        b"css" | b"less" | b"pcss" | b"sass" | b"scss" | b"sss" | b"styl"
                     )
                 }),
             Self::Url => source_kind == ImportSourceKind::Url,
