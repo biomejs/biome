@@ -1,0 +1,164 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+const Invalid1 = () => <div>// invalid</div>;
+const Invalid2 = () => <>// invalid</>;
+const Invalid3 = () => <div>/* invalid */</div>;
+const Invalid4 = () => (
+	<div>
+    // invalid
+	</div>
+);
+const Invalid5 = () => (
+	<div>
+		abcdef
+		/* invalid */
+		foo
+	</div>
+);
+const Invalid6 = () => (
+	<div>
+		{'abcdef'}
+        // invalid
+		{'foo'}
+	</div>
+);
+const Invalid7 = () => <span>/*</span>;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:29 lint/nursery/noJsxLeakedComment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected comment syntax in a text node.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const Invalid1 = () => <div>// invalid</div>;
+      │                             ^^^^^^^^^^
+    3 │ const Invalid2 = () => <>// invalid</>;
+    4 │ const Invalid3 = () => <div>/* invalid */</div>;
+  
+  i This comment syntax will be rendered as text. Wrap comments inside JSX children with braces or remove them entirely.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:3:26 lint/nursery/noJsxLeakedComment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected comment syntax in a text node.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const Invalid1 = () => <div>// invalid</div>;
+  > 3 │ const Invalid2 = () => <>// invalid</>;
+      │                          ^^^^^^^^^^
+    4 │ const Invalid3 = () => <div>/* invalid */</div>;
+    5 │ const Invalid4 = () => (
+  
+  i This comment syntax will be rendered as text. Wrap comments inside JSX children with braces or remove them entirely.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:4:29 lint/nursery/noJsxLeakedComment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected comment syntax in a text node.
+  
+    2 │ const Invalid1 = () => <div>// invalid</div>;
+    3 │ const Invalid2 = () => <>// invalid</>;
+  > 4 │ const Invalid3 = () => <div>/* invalid */</div>;
+      │                             ^^^^^^^^^^^^^
+    5 │ const Invalid4 = () => (
+    6 │ 	<div>
+  
+  i This comment syntax will be rendered as text. Wrap comments inside JSX children with braces or remove them entirely.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:7:5 lint/nursery/noJsxLeakedComment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected comment syntax in a text node.
+  
+    5 │ const Invalid4 = () => (
+    6 │ 	<div>
+  > 7 │     // invalid
+      │     ^^^^^^^^^^
+    8 │ 	</div>
+    9 │ );
+  
+  i This comment syntax will be rendered as text. Wrap comments inside JSX children with braces or remove them entirely.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:13:3 lint/nursery/noJsxLeakedComment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected comment syntax in a text node.
+  
+    11 │ 	<div>
+    12 │ 		abcdef
+  > 13 │ 		/* invalid */
+       │ 		^^^^^^^^^^^^^
+    14 │ 		foo
+    15 │ 	</div>
+  
+  i This comment syntax will be rendered as text. Wrap comments inside JSX children with braces or remove them entirely.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:20:9 lint/nursery/noJsxLeakedComment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected comment syntax in a text node.
+  
+    18 │ 	<div>
+    19 │ 		{'abcdef'}
+  > 20 │         // invalid
+       │         ^^^^^^^^^^
+    21 │ 		{'foo'}
+    22 │ 	</div>
+  
+  i This comment syntax will be rendered as text. Wrap comments inside JSX children with braces or remove them entirely.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:24:30 lint/nursery/noJsxLeakedComment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected comment syntax in a text node.
+  
+    22 │ 	</div>
+    23 │ );
+  > 24 │ const Invalid7 = () => <span>/*</span>;
+       │                              ^^
+    25 │ 
+  
+  i This comment syntax will be rendered as text. Wrap comments inside JSX children with braces or remove them entirely.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

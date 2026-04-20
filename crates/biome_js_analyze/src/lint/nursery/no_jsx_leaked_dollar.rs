@@ -71,7 +71,7 @@ declare_lint_rule! {
         recommended: false,
         fix_kind: FixKind::Unsafe,
         severity: Severity::Warning,
-        domains: &[RuleDomain::React],
+        domains: &[RuleDomain::Qwik, RuleDomain::React],
         sources: &[RuleSource::EslintReactJsx("no-leaked-dollar").same(), RuleSource::EslintReactXyz("jsx-no-leaked-dollar").same()],
     }
 }
