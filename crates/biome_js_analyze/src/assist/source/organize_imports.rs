@@ -168,7 +168,8 @@ declare_source_rule! {
     /// - `:PACKAGE:`: bare and scoped packages (`lib`, `@scoped/lib`)
     /// - `:ALIAS:`: path aliases starting with `#`, `@/`, `~`, `$`, or `%`
     /// - `:PATH:`: absolute and relative paths
-    /// - `:STYLE:`: paths ending with a style extension such as `.css`, `.scss` and `.less`
+    /// - `:STYLE:`: paths ending with the following style extensions:
+    ///   `.css`, `.less`, `.pcss`, `.sass`, `.scss`, `.sss` and `.styl`
     ///
     /// #### Type-only matcher
     ///
