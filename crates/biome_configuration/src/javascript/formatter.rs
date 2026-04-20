@@ -166,7 +166,6 @@ pub struct JsFormatterConfiguration {
             long("javascript-formatter-delimiter-spacing"),
             argument("auto|always|never")
         )
-    )
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub delimiter_spacing: Option<DelimiterSpacing>,
