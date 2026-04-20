@@ -2652,6 +2652,7 @@
 				":PACKAGE:",
 				":PACKAGE_WITH_PROTOCOL:",
 				":PATH:",
+				":STYLE:",
 				":URL:",
 				"!:ALIAS:",
 				"!:BUN:",
@@ -2659,6 +2660,7 @@
 				"!:PACKAGE:",
 				"!:PACKAGE_WITH_PROTOCOL:",
 				"!:PATH:",
+				"!:STYLE:",
 				"!:URL:"
 			]
 		},

@@ -8963,6 +8963,7 @@ export type NegatablePredefinedSourceMatcher =
 	| ":PACKAGE:"
 	| ":PACKAGE_WITH_PROTOCOL:"
 	| ":PATH:"
+	| ":STYLE:"
 	| ":URL:"
 	| "!:ALIAS:"
 	| "!:BUN:"
@@ -8970,6 +8971,7 @@ export type NegatablePredefinedSourceMatcher =
 	| "!:PACKAGE:"
 	| "!:PACKAGE_WITH_PROTOCOL:"
 	| "!:PATH:"
+	| "!:STYLE:"
 	| "!:URL:";
 /**
  * Glob to match against import sources.
