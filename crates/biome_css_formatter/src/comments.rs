@@ -128,7 +128,9 @@ fn handle_scss_map_trailing_separator_comment(
         return CommentPlacement::Default(comment);
     };
 
-    let Some(preceding_pair) = comment.preceding_node().and_then(ScssMapExpressionPair::cast_ref)
+    let Some(preceding_pair) = comment
+        .preceding_node()
+        .and_then(ScssMapExpressionPair::cast_ref)
     else {
         return CommentPlacement::Default(comment);
     };
@@ -149,7 +151,8 @@ fn handle_scss_map_trailing_separator_comment(
     // live on the trailing separator path, e.g. `a: b, /* comment */)`.
     let comment_range = comment.piece().text_range();
     let is_pair_trailing_comment = preceding_pair.syntax().last_token().is_some_and(|token| {
-        token.trailing_trivia()
+        token
+            .trailing_trivia()
             .pieces()
             .any(|piece| piece.is_comments() && piece.text_range() == comment_range)
     });

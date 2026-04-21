@@ -50,17 +50,26 @@ impl<'a> ScssMapLayout<'a> {
         // - inline comments after the last comma like `a: b, /* end */)`
         //
         // Avoid printing those comments a second time at the end of the node.
-        f.context().comments().has_dangling_comments(self.node.syntax())
+        f.context()
+            .comments()
+            .has_dangling_comments(self.node.syntax())
             && (self.node.pairs().len() == 0 || self.has_inline_closing_comments(f))
     }
 
     fn is_comment_only_map(&self, f: &CssFormatter) -> bool {
-        self.node.pairs().len() == 0 && f.context().comments().has_dangling_comments(self.node.syntax())
+        self.node.pairs().len() == 0
+            && f.context()
+                .comments()
+                .has_dangling_comments(self.node.syntax())
     }
 
     fn has_inline_closing_comments(&self, f: &CssFormatter) -> bool {
         self.node.pairs().len() > 0
-            && !f.context().comments().dangling_comments(self.node.syntax()).is_empty()
+            && !f
+                .context()
+                .comments()
+                .dangling_comments(self.node.syntax())
+                .is_empty()
             && f.context()
                 .comments()
                 .dangling_comments(self.node.syntax())
@@ -139,14 +148,19 @@ impl<'a> ScssMapLayout<'a> {
         )
     }
 
-    fn fmt_trailing_comma(&self, has_inline_closing_comments: bool) -> impl Format<CssFormatContext> {
+    fn fmt_trailing_comma(
+        &self,
+        has_inline_closing_comments: bool,
+    ) -> impl Format<CssFormatContext> {
         let group_id = self.group_id;
 
         format_with(move |f| {
             if has_inline_closing_comments {
                 write!(f, [token(",")])
             } else {
-                if_group_breaks(&token(",")).with_group_id(Some(group_id)).fmt(f)
+                if_group_breaks(&token(","))
+                    .with_group_id(Some(group_id))
+                    .fmt(f)
             }
         })
     }

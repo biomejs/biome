@@ -1,7 +1,5 @@
 use crate::prelude::*;
-use crate::utils::scss_map::{
-    scss_map_context, ScssMapOuterParenthesizedValuePayloadKind,
-};
+use crate::utils::scss_map::{ScssMapOuterParenthesizedValuePayloadKind, scss_map_context};
 use biome_css_syntax::{ScssParenthesizedExpression, ScssParenthesizedExpressionFields};
 use biome_formatter::{format_args, write};
 
@@ -52,7 +50,10 @@ impl FormatNodeRule<ScssParenthesizedExpression> for FormatScssParenthesizedExpr
 
         let trailing_comma = format_with(|f| {
             if should_print_trailing_comma {
-                write!(f, [if_group_breaks(&token(",")).with_group_id(Some(group_id))])
+                write!(
+                    f,
+                    [if_group_breaks(&token(",")).with_group_id(Some(group_id))]
+                )
             } else {
                 Ok(())
             }
