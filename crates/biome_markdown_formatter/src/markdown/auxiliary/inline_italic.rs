@@ -1,7 +1,7 @@
 use crate::{markdown::lists::inline_item_list::FormatMdFormatInlineItemListOptions, prelude::*};
 use biome_formatter::{FormatRuleWithOptions, write};
 use biome_markdown_syntax::{
-    MarkdownSyntaxKind, MdInlineItalic, MdInlineItalicFields, MdReferenceImage, MdReferenceLink,
+    MarkdownSyntaxKind, MdInlineItalic, MdInlineItalicFields, MdReferenceImage,
 };
 use biome_rowan::AstNode;
 #[derive(Debug, Clone, Default)]
