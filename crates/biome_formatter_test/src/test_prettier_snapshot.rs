@@ -74,7 +74,7 @@ impl<'a> PrettierTestFile<'a> {
             .expect("failed to get file extension")
     }
 
-    pub fn relative_file_name(&self) -> &'static str {
+    pub fn relative_file_name(&self) -> String {
         self.input_file
             .strip_prefix(self.root_path)
             .unwrap_or_else(|_| {
@@ -84,6 +84,7 @@ impl<'a> PrettierTestFile<'a> {
                 )
             })
             .as_str()
+            .replace('\\', "/")
     }
 
     pub fn root_path(&self) -> &Utf8Path {
@@ -277,11 +278,11 @@ where
     }
 
     pub fn test(self) {
-        let relative_name = self.test_file().relative_file_name();
+        let relative_file_name = self.test_file().relative_file_name();
         let ignored = load_ignored_tests(self.test_file().root_path());
         if ignored
             .iter()
-            .any(|pattern| relative_name.starts_with(pattern.as_str()))
+            .any(|pattern| relative_file_name.starts_with(pattern.as_str()))
         {
             self.cleanup_snapshots();
             return;
@@ -293,12 +294,12 @@ where
             None => return,
         };
 
-        let relative_file_name = self.test_file().relative_file_name();
         let input_file = self.test_file().input_file();
 
         match attempt {
             FormatAttempt::Formatted(formatted) => {
-                let prettier_diff = get_prettier_diff(input_file, relative_file_name, &formatted);
+                let prettier_diff =
+                    get_prettier_diff(input_file, &relative_file_name, &formatted);
                 let prettier_diff = match prettier_diff {
                     PrettierDiff::Diff(prettier_diff) => prettier_diff,
                     PrettierDiff::Same => return,
@@ -313,14 +314,14 @@ where
                 let max_width = self.format_language.options().line_width().value() as usize;
                 builder = builder.with_lines_exceeding_max_width(&formatted, max_width);
 
-                builder.finish(relative_file_name);
+                builder.finish(&relative_file_name);
             }
             FormatAttempt::Failed(error) => {
                 SnapshotBuilder::new(input_file)
                     .with_input(&self.test_file().input_code)
                     .with_errors(&parsed, &self.test_file().parse_input)
                     .with_error(&error.to_string())
-                    .finish(relative_file_name);
+                    .finish(&relative_file_name);
             }
         }
     }

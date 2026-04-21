@@ -61,7 +61,7 @@ impl<'a> SpecTestFile<'a> {
         &self.input_file
     }
 
-    pub fn relative_file_name(&self) -> &str {
+    pub fn relative_file_name(&self) -> String {
         self.input_file
             .strip_prefix(self.root_path)
             .unwrap_or_else(|_| {
@@ -71,6 +71,7 @@ impl<'a> SpecTestFile<'a> {
                 )
             })
             .as_str()
+            .replace('\\', "/")
     }
 
     fn range(&self) -> Option<TextRange> {
@@ -356,6 +357,6 @@ impl<'a> SpecSnapshot<'a> {
             .with_unimplemented(&printed)
             .with_lines_exceeding_max_width(&output_code, line_width);
 
-        snapshot_builder.finish(self.test_file.relative_file_name());
+        snapshot_builder.finish(&self.test_file.relative_file_name());
     }
 }

@@ -44,7 +44,7 @@ impl FromStr for ReportType {
 }
 
 struct DiffReportItem {
-    file_name: &'static str,
+    file_name: String,
     biome_formatted_result: String,
     prettier_formatted_result: String,
 }
@@ -84,13 +84,13 @@ impl DiffReport {
 
     pub fn report(
         &self,
-        file_name: &'static str,
+        file_name: &str,
         biome_formatted_result: &str,
         prettier_formatted_result: &str,
     ) {
         if matches!(env::var("REPORT_PRETTIER"), Ok(value) if value == "1") {
             self.state.lock().unwrap().push(DiffReportItem {
-                file_name,
+                file_name: file_name.to_owned(),
                 biome_formatted_result: biome_formatted_result.to_owned(),
                 prettier_formatted_result: prettier_formatted_result.to_owned(),
             });
@@ -144,7 +144,7 @@ impl DiffReport {
         incompatible_only: bool,
     ) {
         let mut state = self.state.lock().unwrap();
-        state.sort_by_key(|DiffReportItem { file_name, .. }| *file_name);
+        state.sort_by(|a, b| a.file_name.cmp(&b.file_name));
 
         let mut report_metric_data = PrettierCompatibilityMetricData::default();
         let mut file_ratio_sum = 0_f64;
