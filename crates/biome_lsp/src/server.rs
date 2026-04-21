@@ -191,16 +191,16 @@ impl LSPServer {
                             kind: Some(WatchKind::all()),
                         },
                         FileSystemWatcher {
-                            glob_pattern: GlobPattern::String(base_path.map_or_else(
+                            glob_pattern: GlobPattern::String(base_path.as_ref().map_or_else(
                                 || "**/.editorconfig".to_string(),
                                 |p| format!("{}/.editorconfig", p.as_path().as_str()),
                             )),
                             kind: Some(WatchKind::all()),
                         },
                         FileSystemWatcher {
-                            glob_pattern: GlobPattern::String(format!(
-                                "{}/pnpm-workspace.yaml",
-                                base_path.as_path().as_str()
+                            glob_pattern: GlobPattern::String(base_path.as_ref().map_or_else(
+                                || "**/pnpm-workspace.yaml".to_string(),
+                                |p| format!("{}/pnpm-workspace.yaml", p.as_path().as_str()),
                             )),
                             kind: Some(WatchKind::all()),
                         },
