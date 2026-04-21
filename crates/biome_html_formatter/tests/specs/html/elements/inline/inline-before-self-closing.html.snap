@@ -1,0 +1,25 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: elements/inline/inline-before-self-closing.html
+---
+
+# Input
+
+```html
+<code>cubing.js</code><br>
+<span>foo</span><br>
+<b>bar</b><br>
+<a>link</a><img>
+
+```
+
+
+# Formatted
+
+```html
+<code>cubing.js</code><br>
+<span>foo</span><br>
+<b>bar</b><br>
+<a>link</a><img>
+
+```

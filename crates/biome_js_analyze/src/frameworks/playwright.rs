@@ -1,5 +1,7 @@
+use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsExpression, JsCallArguments, JsCallExpression, JsObjectExpression, JsSyntaxKind,
+    binding_ext::AnyJsBindingDeclaration,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TokenText};
 
@@ -206,15 +208,39 @@ fn is_expect_expression(expr: &AnyJsExpression) -> bool {
             if let Ok(name) = id.name()
                 && let Ok(token) = name.value_token()
             {
-                return token.text_trimmed() == "expect";
+                let text = token.text_trimmed();
+                return text == "expect"
+                // support chai-style `assert` syntax from Vitest
+                || text == "assert"
+                // Include `expectTypeOf`/`assertType` for type assertions from `expect-type`
+                || text == "expectTypeOf"
+                || text == "assertType";
             }
             false
         }
         AnyJsExpression::JsStaticMemberExpression(member) => {
-            // expect.soft(), expect.poll(), expect(...).method(), expect(...).not.method()
             if let Ok(object) = member.object() {
-                // Recursively check the object - this handles chained member expressions
-                // like expect(page).not where the object is itself a member expression
+                // When the object is a bare `expect` identifier, only allow known
+                // assertion-qualifying members. This prevents asymmetric matchers
+                // (https://vitest.dev/api/expect.html#expect-stringcontaining)
+                // and utilities like `expect.extend()` from being counted as
+                // assertions.
+                if let AnyJsExpression::JsIdentifierExpression(id) = &object
+                    && let Ok(name) = id.name()
+                    && let Ok(token) = name.value_token()
+                    && token.text_trimmed() == "expect"
+                {
+                    if let Ok(member_name) = member.member()
+                        && let Some(js_name) = member_name.as_js_name()
+                        && let Ok(member_token) = js_name.value_token()
+                    {
+                        return matches!(
+                            member_token.text_trimmed(),
+                            "soft" | "poll" | "assertions" | "hasAssertions"
+                        );
+                    }
+                    return false;
+                }
                 return is_expect_expression(&object);
             }
             false
@@ -345,6 +371,48 @@ pub(crate) fn is_playwright_call_chain(expr: &AnyJsExpression) -> bool {
 
         _ => false,
     }
+}
+
+/// Like `is_playwright_call_chain`, but also resolves identifiers through the
+/// semantic model to handle extracted Playwright locators:
+/// ```js
+/// const loc = page.locator('.item');
+/// expect(loc).toBeVisible(); // still recognized as Playwright
+/// ```
+pub(crate) fn is_playwright_call_chain_or_resolved(
+    expr: &AnyJsExpression,
+    model: &SemanticModel,
+) -> bool {
+    if is_playwright_call_chain(expr) {
+        return true;
+    }
+    let AnyJsExpression::JsIdentifierExpression(id) = expr else {
+        return false;
+    };
+    let Ok(reference) = id.name() else {
+        return false;
+    };
+    let Some(binding) = model.binding(&reference) else {
+        return false;
+    };
+    // If the variable has been reassigned we can't trust the initializer.
+    if binding.all_writes().next().is_some() {
+        return false;
+    }
+    let Some(decl) = binding.tree().declaration() else {
+        return false;
+    };
+    let decl = decl.parent_binding_pattern_declaration().unwrap_or(decl);
+    let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) = decl else {
+        return false;
+    };
+    let Some(initializer) = declarator.initializer() else {
+        return false;
+    };
+    let Ok(init_expr) = initializer.expression() else {
+        return false;
+    };
+    is_playwright_call_chain(&init_expr)
 }
 
 /// Checks if an object expression has a boolean property with the given key and value.

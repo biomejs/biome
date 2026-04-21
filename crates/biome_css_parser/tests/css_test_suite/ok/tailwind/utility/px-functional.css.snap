@@ -47,18 +47,16 @@ CssRoot {
                                             },
                                             l_paren_token: L_PAREN@40..41 "(" [] [],
                                             items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            TwValueThemeReference {
-                                                                reference: CssDashedIdentifier {
-                                                                    value_token: IDENT@41..57 "--padding-inline" [] [],
-                                                                },
-                                                                minus_token: MINUS@57..58 "-" [] [],
-                                                                star_token: STAR@58..59 "*" [] [],
+                                                CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        TwValueThemeReference {
+                                                            reference: CssDashedIdentifier {
+                                                                value_token: IDENT@41..57 "--padding-inline" [] [],
                                                             },
-                                                        ],
-                                                    },
+                                                            minus_token: MINUS@57..58 "-" [] [],
+                                                            star_token: STAR@58..59 "*" [] [],
+                                                        },
+                                                    ],
                                                 },
                                             ],
                                             r_paren_token: R_PAREN@59..60 ")" [] [],
@@ -109,14 +107,13 @@ CssRoot {
                         0: IDENT@33..40 "--value" [] []
                       1: L_PAREN@40..41 "(" [] []
                       2: CSS_PARAMETER_LIST@41..59
-                        0: CSS_PARAMETER@41..59
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@41..59
-                            0: CSS_COMPONENT_VALUE_LIST@41..59
-                              0: TW_VALUE_THEME_REFERENCE@41..59
-                                0: CSS_DASHED_IDENTIFIER@41..57
-                                  0: IDENT@41..57 "--padding-inline" [] []
-                                1: MINUS@57..58 "-" [] []
-                                2: STAR@58..59 "*" [] []
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@41..59
+                          0: CSS_COMPONENT_VALUE_LIST@41..59
+                            0: TW_VALUE_THEME_REFERENCE@41..59
+                              0: CSS_DASHED_IDENTIFIER@41..57
+                                0: IDENT@41..57 "--padding-inline" [] []
+                              1: MINUS@57..58 "-" [] []
+                              2: STAR@58..59 "*" [] []
                       3: R_PAREN@59..60 ")" [] []
                 1: (empty)
               1: SEMICOLON@60..61 ";" [] []

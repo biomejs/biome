@@ -1,0 +1,5 @@
+.card {
+	/* biome-ignore format: preserve the nested declaration formatting */
+	background: linear-gradient( 90deg, red,   blue ); /* keep this trailing comment after the suppressed declaration */
+	color: red;
+}

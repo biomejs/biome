@@ -21,7 +21,6 @@ impl ImportGroups {
     /// If no group contains `candidate`, then the returned value corresponds to the index of the implicit group.
     /// The index of the implicit group correspond to the number of groups.
     pub fn index(&self, candidate: &ImportCandidate<'_>) -> u16 {
-        candidate.source.as_str();
         self.0
             .iter()
             .position(|group| group.contains(candidate))
@@ -47,7 +46,7 @@ impl biome_deserialize::Merge for ImportGroups {
 
 pub struct ImportCandidate<'a> {
     pub has_type_token: bool,
-    pub source: ImportSourceCandidate<'a>,
+    pub source: Option<ImportSourceCandidate<'a>>,
 }
 impl ImportCandidate<'_> {
     /// Match against a list of matchers where negated matchers are handled as exceptions.
@@ -132,14 +131,20 @@ impl GroupMatcher {
     pub fn is_match(&self, candidate: &ImportCandidate<'_>) -> bool {
         match self {
             Self::Import(matcher) => matcher.is_match(candidate),
-            Self::Source(matcher) => matcher.is_match(&candidate.source),
+            Self::Source(matcher) => candidate
+                .source
+                .as_ref()
+                .is_some_and(|src| matcher.is_match(src)),
         }
     }
 
     pub fn is_raw_match(&self, candidate: &ImportCandidate<'_>) -> bool {
         match self {
             Self::Import(matcher) => matcher.is_match(candidate),
-            Self::Source(matcher) => matcher.is_raw_match(&candidate.source),
+            Self::Source(matcher) => candidate
+                .source
+                .as_ref()
+                .is_some_and(|src| matcher.is_raw_match(src)),
         }
     }
 }
@@ -171,10 +176,12 @@ impl ImportMatcher {
             .r#type
             .is_none_or(|r#type| candidate.has_type_token == r#type);
         matches_type
-            && self
-                .source
-                .as_ref()
-                .is_none_or(|src| src.is_match(&candidate.source))
+            && self.source.as_ref().is_none_or(|src| {
+                candidate
+                    .source
+                    .as_ref()
+                    .is_some_and(|candidate_source| src.is_match(candidate_source))
+            })
     }
 }
 
@@ -354,6 +361,8 @@ pub enum PredefinedSourceMatcher {
     ProtocolPackage,
     #[serde(rename = ":PATH:")]
     Path,
+    #[serde(rename = ":STYLE:")]
+    Style,
     #[serde(rename = ":URL:")]
     Url,
 }
@@ -375,6 +384,14 @@ impl PredefinedSourceMatcher {
             Self::Package => source_kind == ImportSourceKind::Package,
             Self::Path => source_kind == ImportSourceKind::Path,
             Self::ProtocolPackage => source_kind == ImportSourceKind::ProtocolPackage,
+            Self::Style => std::path::Path::new(source)
+                .extension()
+                .is_some_and(|extension| {
+                    matches!(
+                        extension.as_encoded_bytes(),
+                        b"css" | b"less" | b"pcss" | b"sass" | b"scss" | b"sss" | b"styl"
+                    )
+                }),
             Self::Url => source_kind == ImportSourceKind::Url,
         }
     }
@@ -389,6 +406,7 @@ impl std::fmt::Display for PredefinedSourceMatcher {
             Self::Package => ":PACKAGE:",
             Self::ProtocolPackage => ":PACKAGE_WITH_PROTOCOL:",
             Self::Path => ":PATH:",
+            Self::Style => ":STYLE:",
             Self::Url => ":URL:",
         };
         f.write_str(repr)
@@ -404,6 +422,7 @@ impl std::str::FromStr for PredefinedSourceMatcher {
             ":PACKAGE:" => Ok(Self::Package),
             ":PACKAGE_WITH_PROTOCOL:" => Ok(Self::ProtocolPackage),
             ":PATH:" => Ok(Self::Path),
+            ":STYLE:" => Ok(Self::Style),
             ":URL:" => Ok(Self::Url),
             _ => Err("invalid predefined group"),
         }

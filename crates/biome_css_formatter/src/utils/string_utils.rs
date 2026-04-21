@@ -131,6 +131,37 @@ struct StringInformation {
     preferred_quote: QuoteStyle,
 }
 
+pub(crate) fn preferred_quote_style_for_contents(
+    contents: impl Iterator<Item = impl AsRef<str>>,
+    chosen_quote: QuoteStyle,
+) -> QuoteStyle {
+    let alternate_quote = chosen_quote.other();
+    let chosen_quote_byte = chosen_quote.as_byte();
+    let alternate_quote_byte = alternate_quote.as_byte();
+
+    let (chosen_quote_count, alternate_quote_count) =
+        contents.fold((0u32, 0u32), |(chosen_count, alternate_count), content| {
+            content.as_ref().bytes().fold(
+                (chosen_count, alternate_count),
+                |(chosen_count, alternate_count), current_character| {
+                    if current_character == chosen_quote_byte {
+                        (chosen_count + 1, alternate_count)
+                    } else if current_character == alternate_quote_byte {
+                        (chosen_count, alternate_count + 1)
+                    } else {
+                        (chosen_count, alternate_count)
+                    }
+                },
+            )
+        });
+
+    if chosen_quote_count > alternate_quote_count {
+        alternate_quote
+    } else {
+        chosen_quote
+    }
+}
+
 impl FormatLiteralStringToken<'_> {
     /// This function determines which quotes should be used inside to enclose the string.
     /// The function take as a input the string **without quotes**.
@@ -169,33 +200,14 @@ impl FormatLiteralStringToken<'_> {
         }
 
         let literal = self.token().text_trimmed();
-        let alternate_quote = chosen_quote.other();
-        let chosen_quote_byte = chosen_quote.as_byte();
-        let alternate_quote_byte = alternate_quote.as_byte();
-
         let quoteless = &literal[1..literal.len() - 1];
-        let (chosen_quote_count, alternate_quote_count) = quoteless.bytes().fold(
-            (0u32, 0u32),
-            |(chosen_quote_count, alternate_quote_count), current_character| {
-                if current_character == chosen_quote_byte {
-                    (chosen_quote_count + 1, alternate_quote_count)
-                } else if current_character == alternate_quote_byte {
-                    (chosen_quote_count, alternate_quote_count + 1)
-                } else {
-                    (chosen_quote_count, alternate_quote_count)
-                }
-            },
-        );
-
+        let preferred_quote =
+            preferred_quote_style_for_contents(std::iter::once(quoteless), chosen_quote);
         let current_quote = literal.bytes().next().and_then(QuoteStyle::from_byte);
 
         StringInformation {
             current_quote,
-            preferred_quote: if chosen_quote_count > alternate_quote_count {
-                alternate_quote
-            } else {
-                chosen_quote
-            },
+            preferred_quote,
         }
     }
 }

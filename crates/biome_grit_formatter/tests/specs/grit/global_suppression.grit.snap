@@ -16,26 +16,19 @@ info: grit/global_suppression.grit
 	}
 }
 
+// biome-ignore-all format: intentional
+`const value = $value`
+
+// Biome format should keep this comment
+
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Attribute Position: Auto
-Trailing newline: true
------
+# Formatted
 
 ```grit
 // biome-ignore-all format:test
+
 
 `const names = [$names]` where {
 			if 		($names[0] <: $names[-1]) {
@@ -43,4 +36,10 @@ Trailing newline: true
 		$names[-1]
 	}
 }
+
+// biome-ignore-all format: intentional
+`const value = $value`
+
+// Biome format should keep this comment
+
 ```

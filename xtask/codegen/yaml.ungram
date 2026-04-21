@@ -66,7 +66,7 @@ YamlDirective = value: 'directive_literal'
 
 // https://yaml.org/spec/1.2.2/#rule-s-l+block-node
 AnyYamlBlockNode =
-	AnyYamlBlockInBlockNode
+	YamlBlockInBlockNode
 	| YamlFlowInBlockNode
 	| YamlBogusBlockNode
 
@@ -91,13 +91,13 @@ YamlAliasNode = value: 'alias_literal'
 // e.g {a: b, c: [d, {e: f}]}
 // https://yaml.org/spec/1.2.2/#rule-c-flow-json-node
 YamlFlowJsonNode =
-	properties: AnyYamlPropertiesCombination?
-	content: AnyYamlJsonContent?
+	properties: YamlPropertyList
+	content: AnyYamlJsonContent
 
 // Plain YAML node
 // https://yaml.org/spec/1.2.2/#rule-ns-flow-yaml-node
 YamlFlowYamlNode =
-	properties: AnyYamlPropertiesCombination?
+	properties: YamlPropertyList
 	content: YamlPlainScalar?
 
 // Yaml in JSON style
@@ -155,7 +155,12 @@ YamlFlowMapImplicitEntry =
 	value: AnyYamlFlowNode?
 
 // https://yaml.org/spec/1.2.2/#rule-s-l+block-in-block
-AnyYamlBlockInBlockNode =
+// Unlike flow nodes, properties are put outside the markers to prevent ambiguities with mapping keys' properties
+YamlBlockInBlockNode =
+	properties: YamlPropertyList
+	content: AnyYamlBlockInBlockContent
+
+AnyYamlBlockInBlockContent =
 	YamlBlockSequence
 	| YamlBlockMapping
 	| YamlFoldedScalar
@@ -169,7 +174,6 @@ AnyYamlBlockInBlockNode =
 YamlBlockSequence =
 	// Indent block
 	'sequence_start'
-	properties: AnyYamlPropertiesCombination?
 	entries: YamlBlockSequenceEntryList
 	// Dedent block, that is, go back to parent block's scope
 	'sequence_end'
@@ -182,7 +186,6 @@ YamlBlockSequence =
 YamlBlockMapping =
 	// Indent block
 	'mapping_start'
-	properties: AnyYamlPropertiesCombination?
 	entries: YamlBlockMapEntryList
 	// Dedent block, that is, go back to parent block's scope
 	'mapping_end'
@@ -192,7 +195,6 @@ YamlBlockMapping =
 //  456
 // https://yaml.org/spec/1.2.2/#rule-c-l+literal
 YamlLiteralScalar =
-	properties: AnyYamlPropertiesCombination?
 	'|'
 	headers: YamlBlockHeaderList
 	content: YamlBlockContent
@@ -202,7 +204,6 @@ YamlLiteralScalar =
 //  456
 // https://yaml.org/spec/1.2.2/#rule-c-l+folded
 YamlFoldedScalar =
-	properties: AnyYamlPropertiesCombination?
 	'>'
 	headers: YamlBlockHeaderList
 	content: YamlBlockContent
@@ -280,17 +281,9 @@ YamlIndentationIndicator = 'indentation_indicator'
 YamlBlockContent = value: 'block_content_literal'
 
 // https://yaml.org/spec/1.2.2/#rule-c-ns-properties
-AnyYamlPropertiesCombination =
-	YamlPropertiesTagFirst
-	| YamlPropertiesAnchorFirst
+YamlPropertyList = AnyYamlProperty*
 
-YamlPropertiesTagFirst =
-	tag: YamlTagProperty
-	anchor: YamlAnchorProperty?
-
-YamlPropertiesAnchorFirst =
-	anchor: YamlAnchorProperty
-	tag: YamlTagProperty?
+AnyYamlProperty = YamlTagProperty | YamlAnchorProperty
 
 // &abc
 // https://yaml.org/spec/1.2.2/#rule-c-ns-anchor-property

@@ -4,6 +4,10 @@
 <div v-bind:foo="bar"></div>
 <div :foo="bar"></div>
 
+<!-- Object syntax without an argument is valid -->
+<div v-bind="props"></div>
+<Foo v-bind="props" />
+
 <!-- Valid modifiers from the rule: prop, camel, sync, attr -->
 <div v-bind:foo.prop="bar"></div>
 <div v-bind:foo.camel="bar"></div>

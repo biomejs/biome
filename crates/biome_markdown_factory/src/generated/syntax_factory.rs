@@ -14,7 +14,7 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
         children: ParsedChildren<Self::Kind>,
     ) -> RawSyntaxNode<Self::Kind> {
         match kind {
-            MD_BOGUS => RawSyntaxNode::new(kind, children.into_iter().map(Some)),
+            MD_BOGUS | MD_BOGUS_BLOCK => RawSyntaxNode::new(kind, children.into_iter().map(Some)),
             MD_AUTOLINK => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
@@ -53,10 +53,7 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && matches!(
-                        element.kind(),
-                        T ! [-] | T ! [*] | T ! [+] | MD_ORDERED_LIST_MARKER
-                    )
+                    && MdListMarkerPrefix::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -95,6 +92,25 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                     );
                 }
                 slots.into_node(MD_BULLET_LIST_ITEM, children)
+            }
+            MD_CONTINUATION_INDENT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && MdIndentTokenList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        MD_CONTINUATION_INDENT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(MD_CONTINUATION_INDENT, children)
             }
             MD_DOCUMENT => {
                 let mut elements = (&children).into_iter();
@@ -150,8 +166,15 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
             }
             MD_FENCED_CODE_BLOCK => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<6usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && MdIndentTokenList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
                 if let Some(element) = &current_element
                     && matches!(element.kind(), T!["```"] | T ! [~~~])
                 {
@@ -168,6 +191,13 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                 slots.next_slot();
                 if let Some(element) = &current_element
                     && MdInlineItemList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && MdIndentTokenList::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -225,8 +255,15 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
             }
             MD_HEADER => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && MdIndentTokenList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
                 if let Some(element) = &current_element
                     && MdHashList::can_cast(element.kind())
                 {
@@ -258,8 +295,15 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
             }
             MD_HTML_BLOCK => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && MdIndentTokenList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
                 if let Some(element) = &current_element
                     && MdInlineItemList::can_cast(element.kind())
                 {
@@ -312,6 +356,25 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                     );
                 }
                 slots.into_node(MD_INDENT_CODE_BLOCK, children)
+            }
+            MD_INDENT_TOKEN => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == MD_INDENT_CHAR
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        MD_INDENT_TOKEN.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(MD_INDENT_TOKEN, children)
             }
             MD_INLINE_CODE => {
                 let mut elements = (&children).into_iter();
@@ -560,39 +623,6 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                 }
                 slots.into_node(MD_INLINE_LINK, children)
             }
-            MD_LINK_BLOCK => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element
-                    && MdTextual::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && MdTextual::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && MdTextual::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        MD_LINK_BLOCK.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(MD_LINK_BLOCK, children)
-            }
             MD_LINK_DESTINATION => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
@@ -633,8 +663,15 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
             }
             MD_LINK_REFERENCE_DEFINITION => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<6usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<7usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && MdIndentTokenList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
                 if let Some(element) = &current_element
                     && element.kind() == T!['[']
                 {
@@ -703,6 +740,49 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                     );
                 }
                 slots.into_node(MD_LINK_TITLE, children)
+            }
+            MD_LIST_MARKER_PREFIX => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && MdIndentTokenList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && matches!(
+                        element.kind(),
+                        T ! [-] | T ! [*] | T ! [+] | MD_ORDERED_LIST_MARKER
+                    )
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == MD_LIST_POST_MARKER_SPACE
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && MdIndentTokenList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        MD_LIST_MARKER_PREFIX.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(MD_LIST_MARKER_PREFIX, children)
             }
             MD_NEWLINE => {
                 let mut elements = (&children).into_iter();
@@ -773,7 +853,7 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && element.kind() == T ! [>]
+                    && MdQuotePrefix::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -790,6 +870,58 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                     return RawSyntaxNode::new(MD_QUOTE.to_bogus(), children.into_iter().map(Some));
                 }
                 slots.into_node(MD_QUOTE, children)
+            }
+            MD_QUOTE_INDENT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == MD_QUOTE_PRE_MARKER_INDENT
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        MD_QUOTE_INDENT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(MD_QUOTE_INDENT, children)
+            }
+            MD_QUOTE_PREFIX => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && MdQuoteIndentList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [>]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == MD_QUOTE_POST_MARKER_SPACE
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        MD_QUOTE_PREFIX.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(MD_QUOTE_PREFIX, children)
             }
             MD_REFERENCE_IMAGE => {
                 let mut elements = (&children).into_iter();
@@ -980,7 +1112,7 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && element.kind() == MD_THEMATIC_BREAK_LITERAL
+                    && MdThematicBreakPartList::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -994,12 +1126,42 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                 }
                 slots.into_node(MD_THEMATIC_BREAK_BLOCK, children)
             }
+            MD_THEMATIC_BREAK_CHAR => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && matches!(element.kind(), T ! [*] | T ! [-] | T!["_"])
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        MD_THEMATIC_BREAK_CHAR.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(MD_THEMATIC_BREAK_CHAR, children)
+            }
             MD_BLOCK_LIST => Self::make_node_list_syntax(kind, children, AnyMdBlock::can_cast),
-            MD_BULLET_LIST => Self::make_node_list_syntax(kind, children, MdBullet::can_cast),
+            MD_BULLET_LIST => {
+                Self::make_node_list_syntax(kind, children, AnyMdBulletListMember::can_cast)
+            }
             MD_CODE_NAME_LIST => Self::make_node_list_syntax(kind, children, MdTextual::can_cast),
             MD_HASH_LIST => Self::make_node_list_syntax(kind, children, MdHash::can_cast),
+            MD_INDENT_TOKEN_LIST => {
+                Self::make_node_list_syntax(kind, children, MdIndentToken::can_cast)
+            }
             MD_INLINE_ITEM_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyMdInline::can_cast)
+            }
+            MD_QUOTE_INDENT_LIST => {
+                Self::make_node_list_syntax(kind, children, MdQuoteIndent::can_cast)
+            }
+            MD_THEMATIC_BREAK_PART_LIST => {
+                Self::make_node_list_syntax(kind, children, AnyMdThematicBreakPart::can_cast)
             }
             _ => unreachable!("Is {:?} a token?", kind),
         }

@@ -1,0 +1,154 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidFnTest.js
+---
+# Input
+```js
+/* should generate diagnostics */
+// function="test": top-level tests must use test()
+
+it("foo", () => {});
+it.skip("foo", () => {});
+it.only("foo", () => {});
+xit("foo", () => {});
+fit("foo", () => {});
+
+```
+
+# Diagnostics
+```
+invalidFnTest.js:4:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function it is inconsistent with the configured preferred function test.
+  
+    2 │ // function="test": top-level tests must use test()
+    3 │ 
+  > 4 │ it("foo", () => {});
+      │ ^^
+    5 │ it.skip("foo", () => {});
+    6 │ it.only("foo", () => {});
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use test instead.
+  
+    2 2 │   // function="test": top-level tests must use test()
+    3 3 │   
+    4   │ - it("foo",·()·=>·{});
+      4 │ + test("foo",·()·=>·{});
+    5 5 │   it.skip("foo", () => {});
+    6 6 │   it.only("foo", () => {});
+  
+
+```
+
+```
+invalidFnTest.js:5:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function it is inconsistent with the configured preferred function test.
+  
+    4 │ it("foo", () => {});
+  > 5 │ it.skip("foo", () => {});
+      │ ^^
+    6 │ it.only("foo", () => {});
+    7 │ xit("foo", () => {});
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use test instead.
+  
+    3 3 │   
+    4 4 │   it("foo", () => {});
+    5   │ - it.skip("foo",·()·=>·{});
+      5 │ + test.skip("foo",·()·=>·{});
+    6 6 │   it.only("foo", () => {});
+    7 7 │   xit("foo", () => {});
+  
+
+```
+
+```
+invalidFnTest.js:6:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function it is inconsistent with the configured preferred function test.
+  
+    4 │ it("foo", () => {});
+    5 │ it.skip("foo", () => {});
+  > 6 │ it.only("foo", () => {});
+      │ ^^
+    7 │ xit("foo", () => {});
+    8 │ fit("foo", () => {});
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use test instead.
+  
+    4 4 │   it("foo", () => {});
+    5 5 │   it.skip("foo", () => {});
+    6   │ - it.only("foo",·()·=>·{});
+      6 │ + test.only("foo",·()·=>·{});
+    7 7 │   xit("foo", () => {});
+    8 8 │   fit("foo", () => {});
+  
+
+```
+
+```
+invalidFnTest.js:7:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function xit is inconsistent with the configured preferred function xtest.
+  
+    5 │ it.skip("foo", () => {});
+    6 │ it.only("foo", () => {});
+  > 7 │ xit("foo", () => {});
+      │ ^^^
+    8 │ fit("foo", () => {});
+    9 │ 
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use xtest instead.
+  
+    5 5 │   it.skip("foo", () => {});
+    6 6 │   it.only("foo", () => {});
+    7   │ - xit("foo",·()·=>·{});
+      7 │ + xtest("foo",·()·=>·{});
+    8 8 │   fit("foo", () => {});
+    9 9 │   
+  
+
+```
+
+```
+invalidFnTest.js:8:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function fit is inconsistent with the configured preferred function test.only.
+  
+    6 │ it.only("foo", () => {});
+    7 │ xit("foo", () => {});
+  > 8 │ fit("foo", () => {});
+      │ ^^^
+    9 │ 
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use test.only instead.
+  
+    6 6 │   it.only("foo", () => {});
+    7 7 │   xit("foo", () => {});
+    8   │ - fit("foo",·()·=>·{});
+      8 │ + test.only("foo",·()·=>·{});
+    9 9 │   
+  
+
+```

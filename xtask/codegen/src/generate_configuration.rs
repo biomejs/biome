@@ -11,8 +11,8 @@ use proc_macro2::{Ident, Literal, Span};
 use quote::{format_ident, quote};
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
-use xtask_codegen::update;
 use xtask_codegen::{generate_analyzer_rule_options, get_analyzer_rule_options_path};
+use xtask_codegen::{to_capitalized, update};
 use xtask_glue::*;
 
 // ======= LINT ======
@@ -345,23 +345,28 @@ fn generate_for_groups(
         let group_pascal_ident = quote::format_ident!("{}", &Case::Pascal.convert(group_name));
         let group_ident = quote::format_ident!("{}", group_name);
 
-        let global_recommended = if group_name == "nursery" {
-            quote! { !self.is_recommended_false() && biome_flags::is_unstable() }
+        if group_name == "nursery" {
+            // Nursery rules are never enabled via presets — only individually.
+            group_as_default_rules.push(quote! {
+                if let Some(group) = self.#group_ident.as_ref() {
+                    enabled_rules.extend(&group.get_enabled_rules());
+                    disabled_rules.extend(&group.get_disabled_rules());
+                }
+            });
         } else {
-            quote! { !self.is_recommended_false() }
-        };
-        group_as_default_rules.push(quote! {
-            if let Some(group) = self.#group_ident.as_ref() {
-                group.collect_preset_rules(
-                    #global_recommended,
-                    &mut enabled_rules,
-                );
-                enabled_rules.extend(&group.get_enabled_rules());
-                disabled_rules.extend(&group.get_disabled_rules());
-            } else if #global_recommended {
-                enabled_rules.extend(#group_pascal_ident::recommended_rules_as_filters());
-            }
-        });
+            group_as_default_rules.push(quote! {
+                if let Some(group) = self.#group_ident.as_ref() {
+                    group.collect_preset_rules(
+                        self.preset(),
+                        &mut enabled_rules,
+                    );
+                    enabled_rules.extend(&group.get_enabled_rules());
+                    disabled_rules.extend(&group.get_disabled_rules());
+                } else if !self.preset().is_none() {
+                    enabled_rules.extend(#group_pascal_ident::preset_as_filters(self.preset()));
+                }
+            });
+        }
 
         group_as_disabled_rules.push(quote! {
             if let Some(group) = self.#group_ident.as_ref() {
@@ -372,13 +377,6 @@ fn generate_for_groups(
         group_pascal_idents.push(group_pascal_ident);
         group_idents.push(group_ident.clone());
         group_strings.push(Literal::string(group_name));
-        // if kind == RuleCategory::Action {
-        //     struct_groups.push(generate_group_struct(group_name, &rules, kind));
-        //     // struct_groups.push(quote! {
-        //     //     biome_configuration_macros::assist_group_struct!(#group_name);
-        //     // });
-        // } else {
-        // }
         rule_group_names.extend(rules.keys().map(|rule_name| RuleGroup {
             rule_name,
             group_name,
@@ -493,6 +491,8 @@ fn generate_for_groups(
             use biome_diagnostics::{Category, Severity};
             use rustc_hash::FxHashSet;
             use serde::{Deserialize, Serialize};
+            use crate::analyzer::presets::PresetConfig;
+            use biome_analyze::RulePreset;
             #[cfg(feature = "schema")]
             use schemars::JsonSchema;
 
@@ -565,6 +565,10 @@ fn generate_for_groups(
                 #[serde(skip_serializing_if = "Option::is_none")]
                 pub recommended: Option<bool>,
 
+                /// The actions preset to use.
+                #[serde(skip_serializing_if = "Option::is_none")]
+                pub preset: Option<PresetConfig>,
+
                 #(
                     #[deserializable(rename = #group_strings)]
                     #[serde(skip_serializing_if = "Option::is_none")]
@@ -588,10 +592,16 @@ fn generate_for_groups(
 
                 #severity_fn
 
-                // Note: In top level, it is only considered _not_ recommended
-                // when the recommended option is false
-                pub(crate) const fn is_recommended_false(&self) -> bool {
-                    matches!(self.recommended, Some(false))
+
+                /// Returns the current preset. Defaults to the recommended set
+                pub(crate) fn preset(&self) -> PresetConfig {
+                    if matches!(self.recommended, Some(false)) {
+                        PresetConfig::None
+                    } else if let Some(preset) = &self.preset {
+                        preset.clone()
+                    } else {
+                        PresetConfig::default()
+                    }
                 }
 
 
@@ -632,6 +642,8 @@ fn generate_for_groups(
             use biome_diagnostics::{Category, Severity};
             use rustc_hash::FxHashSet;
             use serde::{Deserialize, Serialize};
+            use crate::analyzer::presets::PresetConfig;
+            use biome_analyze::RulePreset;
             #[cfg(feature = "schema")]
             use schemars::JsonSchema;
 
@@ -704,6 +716,10 @@ fn generate_for_groups(
                 #[serde(skip_serializing_if = "Option::is_none")]
                 pub recommended: Option<bool>,
 
+                /// The rule presets to use.
+                #[serde(skip_serializing_if = "Option::is_none")]
+                pub preset: Option<PresetConfig>,
+
                 #(
                     #[deserializable(rename = #group_strings)]
                     #[serde(skip_serializing_if = "Option::is_none")]
@@ -739,10 +755,15 @@ fn generate_for_groups(
                     )*
                 }
 
-                // Note: In top level, it is only considered _not_ recommended
-                // when the recommended option is false
-                pub(crate) const fn is_recommended_false(&self) -> bool {
-                    matches!(self.recommended, Some(false))
+                /// Returns the current preset. Defaults to the recommended set
+                pub(crate) fn preset(&self) -> PresetConfig {
+                    if matches!(self.recommended, Some(false)) {
+                        PresetConfig::None
+                    } else if let Some(preset) = &self.preset {
+                        preset.clone()
+                    } else {
+                        PresetConfig::default()
+                    }
                 }
 
 
@@ -846,6 +867,50 @@ fn generate_for_groups(
     };
     update(path, &xtask_glue::reformat(configuration)?, mode)?;
     update(file_name, &xtask_glue::reformat(push_rules)?, mode)?;
+
+    // Generate the options type-check test file for lint rules
+    if kind == RuleCategory::Lint {
+        let mut push_statements = String::new();
+        for rg in &rule_group_names {
+            let snake_name = Case::Snake.convert(rg.rule_name);
+            let options_type_name = format!("{}Options", to_capitalized(rg.rule_name));
+            push_statements.push_str(&format!(
+                "result.push((\"{group}\", \"{rule}\", TypeId::of::<biome_rule_options::{module}::{options}>()));\n",
+                group = rg.group_name,
+                rule = rg.rule_name,
+                module = snake_name,
+                options = options_type_name,
+            ));
+        }
+
+        let options_check = format!(
+            "\
+#![expect(clippy::vec_init_then_push)]
+use std::any::TypeId;
+
+/// Returns a list of `(group, rule, config_side_type_id)` for every lint rule.
+///
+/// The `TypeId` is derived from the rule name convention:
+/// `biome_rule_options::{{snake_case_name}}::{{PascalCaseName}}Options`
+///
+/// This is the type that the configuration layer uses when constructing
+/// [`RuleOptions`](biome_analyze::options::RuleOptions). If the rule's
+/// `type Options` doesn't match, the `debug_assert_eq!` inside
+/// `RuleOptions::value()` will fire at runtime.
+pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, TypeId)> {{
+    let mut result = Vec::new();
+{push_statements}    result
+}}
+"
+        );
+
+        let options_check_file = push_directory.join("linter_options_check.rs");
+        update(
+            &options_check_file,
+            &xtask_glue::reformat(options_check)?,
+            mode,
+        )?;
+    }
 
     Ok(())
 }

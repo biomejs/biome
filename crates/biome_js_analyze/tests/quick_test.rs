@@ -1,12 +1,14 @@
 use biome_analyze::options::JsxRuntime;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleFilter,
+    ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
+    RuleFilter,
 };
 use biome_deserialize::TextRange;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, print_diagnostic_to_string};
 use biome_fs::TemporaryFs;
 use biome_js_analyze::{JsAnalyzerServices, analyze};
 use biome_js_parser::{JsParserOptions, parse};
+use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::JsFileSource;
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
@@ -51,16 +53,19 @@ export function f(options: PostcssOptions) {
         .with_file_path(file_path.clone())
         .with_configuration(
             AnalyzerConfiguration::default().with_jsx_runtime(JsxRuntime::ReactClassic),
-        );
+        )
+        .with_working_directory(fs.working_directory.clone());
     let rule_filter = RuleFilter::Rule("correctness", "noUnusedImports");
 
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 
     let project_layout = project_layout_with_top_level_dependencies(dependencies);
+    let semantic_model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
     let services = crate::JsAnalyzerServices::from((
         module_graph_for_test_file(file_path.as_path(), project_layout.as_ref()),
         project_layout,
         JsFileSource::tsx(),
+        Some(semantic_model),
     ));
 
     analyze(
@@ -83,7 +88,7 @@ export function f(options: PostcssOptions) {
                 eprintln!("{text}");
             }
 
-            for action in signal.actions() {
+            for action in signal.actions(ActionFilter::all()) {
                 let new_code = action.mutation.commit();
                 eprintln!("new code!!!");
                 eprintln!("{new_code}");

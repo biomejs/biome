@@ -3,6 +3,7 @@
 pub(crate) mod alias_node;
 pub(crate) mod anchor_property;
 pub(crate) mod block_content;
+pub(crate) mod block_in_block_node;
 pub(crate) mod block_keep_indicator;
 pub(crate) mod block_map_explicit_entry;
 pub(crate) mod block_map_implicit_entry;
@@ -24,8 +25,6 @@ pub(crate) mod folded_scalar;
 pub(crate) mod indentation_indicator;
 pub(crate) mod literal_scalar;
 pub(crate) mod plain_scalar;
-pub(crate) mod properties_anchor_first;
-pub(crate) mod properties_tag_first;
 pub(crate) mod root;
 pub(crate) mod single_quoted_scalar;
 pub(crate) mod tag_property;

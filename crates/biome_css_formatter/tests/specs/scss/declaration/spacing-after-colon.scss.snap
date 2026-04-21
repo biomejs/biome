@@ -1,0 +1,34 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/declaration/spacing-after-colon.scss
+---
+
+# Input
+
+```scss
+.test{
+  font:bold{color:red;}
+  font: bold{family:serif;}
+  font:
+  bold{family:sans-serif;}
+}
+
+```
+
+
+# Formatted
+
+```scss
+.test {
+	font:bold {
+		color: red;
+	}
+	font: bold {
+		family: serif;
+	}
+	font: bold {
+		family: sans-serif;
+	}
+}
+
+```

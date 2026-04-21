@@ -31,7 +31,7 @@ invalid_properties_value_shorthand.js:2:13 lint/style/useNumberNamespace  FIXABL
     1 1 │   const options = {
     2   │ - → normalize:·parseFloat,
       2 │ + → normalize:·Number.parseFloat,
-    3 3 │   	parseInt,
+    3 3 │     parseInt,
     4 4 │   };
   
 

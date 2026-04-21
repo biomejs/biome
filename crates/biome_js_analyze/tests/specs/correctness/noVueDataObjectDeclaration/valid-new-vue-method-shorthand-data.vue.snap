@@ -3,7 +3,8 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid-new-vue-method-shorthand-data.vue
 ---
 # Input
-```ts
+```vue
+<script>
 /* should not generate diagnostics */
 // new Vue with method shorthand `data`
 new Vue({
@@ -14,5 +15,6 @@ new Vue({
 		};
 	}
 });
+</script>
 
 ```

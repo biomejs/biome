@@ -4,6 +4,7 @@ expression: invalid.html
 ---
 # Input
 ```html
+<!-- should generate diagnostics -->
 <script src=""></script>
 
 <script src="" type=""></script>
@@ -12,14 +13,15 @@ expression: invalid.html
 
 # Diagnostics
 ```
-invalid.html:1:1 lint/nursery/noSyncScripts ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:2:1 lint/nursery/noSyncScripts ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected synchronous script.
   
-  > 1 │ <script src=""></script>
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <script src=""></script>
       │ ^^^^^^^^^^^^^^^
-    2 │ 
-    3 │ <script src="" type=""></script>
+    3 │ 
+    4 │ <script src="" type=""></script>
   
   i Synchronous scripts can impact your webpage performance. Add the "async" or "defer" attribute.
   
@@ -29,15 +31,15 @@ invalid.html:1:1 lint/nursery/noSyncScripts ━━━━━━━━━━━━
 ```
 
 ```
-invalid.html:3:1 lint/nursery/noSyncScripts ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:4:1 lint/nursery/noSyncScripts ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected synchronous script.
   
-    1 │ <script src=""></script>
-    2 │ 
-  > 3 │ <script src="" type=""></script>
+    2 │ <script src=""></script>
+    3 │ 
+  > 4 │ <script src="" type=""></script>
       │ ^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ 
+    5 │ 
   
   i Synchronous scripts can impact your webpage performance. Add the "async" or "defer" attribute.
   

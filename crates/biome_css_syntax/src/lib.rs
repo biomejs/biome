@@ -14,7 +14,10 @@ pub use self::generated::*;
 pub use biome_rowan::{
     SyntaxNodeText, TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent,
 };
-pub use file_source::{CssFileLanguage, CssFileSource, CssVariant, EmbeddingKind};
+pub use file_source::{
+    CssFileLanguage, CssFileSource, CssVariant, EmbeddingHtmlKind, EmbeddingKind,
+    EmbeddingStyleApplicability,
+};
 pub use syntax_node::*;
 
 use crate::CssSyntaxKind::*;
@@ -104,7 +107,6 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
                 | CSS_BOGUS_UNICODE_RANGE_VALUE
                 | CSS_BOGUS_SUPPORTS_CONDITION
                 | CSS_BOGUS_FUNCTION_PARAMETER
-                | CSS_BOGUS_TYPE
         )
     }
 
@@ -144,7 +146,6 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
             }
             kind if AnyCssAttrName::can_cast(*kind) => CSS_BOGUS_ATTR_NAME,
             kind if AnyCssFunctionParameter::can_cast(*kind) => CSS_BOGUS_FUNCTION_PARAMETER,
-            kind if AnyCssType::can_cast(*kind) => CSS_BOGUS_TYPE,
 
             _ => CSS_BOGUS,
         }

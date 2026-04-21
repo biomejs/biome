@@ -19,7 +19,6 @@ use biome_fs::{BiomePath, FileSystem, OpenOptions};
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_rowan::AstNode;
 use std::cmp::Ordering;
-use std::collections::BTreeSet;
 
 pub(crate) struct DefaultFinalizer;
 
@@ -115,7 +114,10 @@ impl Finalizer for DefaultFinalizer {
                 working_directory: fs.working_directory().clone(),
                 evaluated_paths: evaluated_paths.clone(),
             };
-            reporter.write(&mut console_reporter_writer, &mut ConsoleReporterVisitor)?;
+            reporter.write(
+                &mut console_reporter_writer,
+                &mut ConsoleReporterVisitor { concise: false },
+            )?;
         }
 
         // Processing emitted error diagnostics, exit with a non-zero code
@@ -156,7 +158,7 @@ struct PrintToReporter<'a> {
     cli_options: &'a CliOptions,
     diagnostics_payload: &'a DiagnosticsPayload,
     summary: TraversalSummary,
-    evaluated_paths: BTreeSet<BiomePath>,
+    evaluated_paths: Vec<BiomePath>,
     file_reporter_writer: &'a mut FileReporterWriter,
     console: &'a mut dyn Console,
     fs: &'a dyn FileSystem,
@@ -178,7 +180,7 @@ fn print_to_reporter(params: PrintToReporter) -> Result<(), CliDiagnostic> {
 
     let mut console_reporter_writer = ConsoleReporterWriter(console);
     match cli_reporter.kind {
-        CliReporterKind::Default => {
+        CliReporterKind::Default | CliReporterKind::Concise => {
             let reporter = ConsoleReporter {
                 summary,
                 diagnostics_payload,
@@ -188,9 +190,19 @@ fn print_to_reporter(params: PrintToReporter) -> Result<(), CliDiagnostic> {
                 evaluated_paths: evaluated_paths.clone(),
             };
             if cli_reporter.is_file_report() {
-                reporter.write(file_reporter_writer, &mut ConsoleReporterVisitor)?;
+                reporter.write(
+                    file_reporter_writer,
+                    &mut ConsoleReporterVisitor {
+                        concise: matches!(cli_reporter.kind, CliReporterKind::Concise),
+                    },
+                )?;
             } else {
-                reporter.write(&mut console_reporter_writer, &mut ConsoleReporterVisitor)?;
+                reporter.write(
+                    &mut console_reporter_writer,
+                    &mut ConsoleReporterVisitor {
+                        concise: matches!(cli_reporter.kind, CliReporterKind::Concise),
+                    },
+                )?;
             }
         }
         CliReporterKind::Summary => {
@@ -219,8 +231,15 @@ fn print_to_reporter(params: PrintToReporter) -> Result<(), CliDiagnostic> {
                 verbose: cli_options.verbose,
                 working_directory: fs.working_directory().clone(),
             };
+
+            let writer: &mut dyn ReporterWriter = if cli_reporter.is_file_report() {
+                file_reporter_writer
+            } else {
+                &mut console_reporter_writer
+            };
+
             let mut buffer = JsonReporterVisitor::new(summary);
-            reporter.write(&mut console_reporter_writer, &mut buffer)?;
+            reporter.write(writer, &mut buffer)?;
             let root = buffer.to_json();
             if cli_reporter.kind == CliReporterKind::JsonPretty {
                 let formatted =
@@ -229,12 +248,12 @@ fn print_to_reporter(params: PrintToReporter) -> Result<(), CliDiagnostic> {
                         .print()
                         .expect("To print the JSON report");
 
-                console_reporter_writer.log(markup! {
+                writer.log(markup! {
                     {formatted.as_code()}
                 });
             } else {
                 let code = root.to_string();
-                console_reporter_writer.log(markup! {
+                writer.log(markup! {
                     {code}
                 });
             }

@@ -13,34 +13,14 @@ let b = {
 	set foo(a) {}
 	set bar(a, ) {}
 }
+let c = {
+	set veryLongPropertyNameHere(veryLongParameterNameThatExceedsTheLineWidthLimit) {}
+}
 
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
-Trailing newline: true
------
+# Formatted
 
 ```js
 let a = {
@@ -50,5 +30,13 @@ let b = {
 	set foo(a) {}
 	set bar(a, ) {}
 }
+let c = {
+	set veryLongPropertyNameHere(veryLongParameterNameThatExceedsTheLineWidthLimit) {},
+};
 
+```
+
+# Lines exceeding max width of 80 characters
+```
+    9: 	set veryLongPropertyNameHere(veryLongParameterNameThatExceedsTheLineWidthLimit) {},
 ```

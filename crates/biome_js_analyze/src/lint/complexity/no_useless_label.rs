@@ -58,7 +58,7 @@ impl Rule for NoUselessLabel {
             _ => None,
         }?;
         let label = label_token.text_trimmed();
-        for parent in stmt.syntax().ancestors() {
+        for parent in stmt.syntax().ancestors().skip(1) {
             if is_breakable_statement_kind(parent.kind()) {
                 if let Some(labeled_stmt) = JsLabeledStatement::cast(parent.parent()?)
                     && labeled_stmt.label_token().ok()?.text_trimmed() == label

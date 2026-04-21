@@ -1,8 +1,7 @@
+<!-- should generate diagnostics -->
 ---
 // Astro frontmatter
 ---
-
-<!-- Native anchors without accessible content should trigger -->
 <a></a>
 <a>    </a>
 <a aria-hidden="true">content</a>
@@ -15,6 +14,12 @@
 
 <!-- Image with empty alt attribute -->
 <a><img alt="" /></a>
+
+<!-- Image component without alt attribute -->
+<a><Image /></a>
+
+<!-- Image component with empty alt attribute -->
+<a><Image alt="" /></a>
 
 <!-- Void elements that never provide accessible content -->
 <a><br /></a>

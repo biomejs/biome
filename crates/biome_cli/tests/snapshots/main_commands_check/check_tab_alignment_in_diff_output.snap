@@ -1,0 +1,56 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "json": { "formatter": { "trailingCommas": "all" } } }
+```
+
+## `file.jsonc`
+
+```jsonc
+{
+	"$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+	"json": {
+		"formatter": { "trailingCommas": "all" }
+	}
+}
+
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.jsonc format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    2 2 │     "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+    3 3 │     "json": {
+    4   │ - → → "formatter":·{·"trailingCommas":·"all"·}
+    5   │ - → }
+      4 │ + → → "formatter":·{·"trailingCommas":·"all"·},
+      5 │ + → },
+    6 6 │   }
+    7 7 │   
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```

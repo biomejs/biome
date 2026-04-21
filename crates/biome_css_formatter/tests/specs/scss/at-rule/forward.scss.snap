@@ -1,0 +1,57 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/at-rule/forward.scss
+---
+
+# Input
+
+```scss
+@forward"theme";
+
+@forward "theme"show
+$color,
+button;
+
+@forward
+"theme"
+hide
+$private,
+internal-mixin;
+
+@forward "theme"as
+theme-*;
+
+@forward "theme" with(
+$spacing:4px !default,
+$radius: 2px
+);
+
+@forward "theme" as theme-* show
+$color,
+button
+with(
+$spacing:4px
+);
+
+```
+
+
+# Formatted
+
+```scss
+@forward "theme";
+
+@forward "theme" show $color, button;
+
+@forward "theme" hide $private, internal-mixin;
+
+@forward "theme" as theme-*;
+
+@forward "theme" with (
+	$spacing: 4px !default,
+	$radius: 2px
+);
+
+@forward "theme" as theme-* show $color, button with ($spacing: 4px);
+
+```

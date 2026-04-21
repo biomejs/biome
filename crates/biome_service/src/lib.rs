@@ -14,8 +14,10 @@ pub mod workspace_types;
 mod scanner;
 mod utils;
 
-#[cfg(test)]
-mod test_utils;
+mod embed;
+
+#[cfg(feature = "testing")]
+pub mod test_utils;
 
 use camino::Utf8Path;
 use std::ops::Deref;

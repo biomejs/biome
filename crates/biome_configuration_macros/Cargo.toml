@@ -26,7 +26,7 @@ biome_json_analyze    = { workspace = true }
 biome_json_syntax     = { workspace = true }
 biome_string_case     = { workspace = true }
 proc-macro2           = { workspace = true }
-pulldown-cmark        = { version = "0.13.0" }
+pulldown-cmark        = { version = "0.13.3" }
 quote                 = { workspace = true }
 
 [lints]

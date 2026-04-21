@@ -1,0 +1,177 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: commentTrivia.ts
+---
+# Input
+```ts
+// Test cases for comment trivia preservation around ||
+// Using types that are safe for replacement (only truthy or nullish)
+
+declare const a: object | null;
+declare const b: object | undefined;
+
+// Comments should be preserved when replacing || with ??
+const x = a /* inline comment */ || {};
+const y = a || /* inline comment */ {};
+const z = a /* before */ || /* after */ {};
+
+// Leading and trailing comments on the operator
+const w = b
+  // line comment before
+  || {};
+
+const v = b ||
+  // line comment after
+  {};
+
+```
+
+# Diagnostics
+```
+commentTrivia.ts:8:34 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+     7 │ // Comments should be preserved when replacing || with ??
+   > 8 │ const x = a /* inline comment */ || {};
+       │                                  ^^
+     9 │ const y = a || /* inline comment */ {};
+    10 │ const z = a /* before */ || /* after */ {};
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+     6  6 │   
+     7  7 │   // Comments should be preserved when replacing || with ??
+     8    │ - const·x·=·a·/*·inline·comment·*/·||·{};
+        8 │ + const·x·=·a·/*·inline·comment·*/·??·{};
+     9  9 │   const y = a || /* inline comment */ {};
+    10 10 │   const z = a /* before */ || /* after */ {};
+  
+
+```
+
+```
+commentTrivia.ts:9:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+     7 │ // Comments should be preserved when replacing || with ??
+     8 │ const x = a /* inline comment */ || {};
+   > 9 │ const y = a || /* inline comment */ {};
+       │             ^^
+    10 │ const z = a /* before */ || /* after */ {};
+    11 │ 
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+     7  7 │   // Comments should be preserved when replacing || with ??
+     8  8 │   const x = a /* inline comment */ || {};
+     9    │ - const·y·=·a·||·/*·inline·comment·*/·{};
+        9 │ + const·y·=·a·??·/*·inline·comment·*/·{};
+    10 10 │   const z = a /* before */ || /* after */ {};
+    11 11 │   
+  
+
+```
+
+```
+commentTrivia.ts:10:26 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+     8 │ const x = a /* inline comment */ || {};
+     9 │ const y = a || /* inline comment */ {};
+  > 10 │ const z = a /* before */ || /* after */ {};
+       │                          ^^
+    11 │ 
+    12 │ // Leading and trailing comments on the operator
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+     8  8 │   const x = a /* inline comment */ || {};
+     9  9 │   const y = a || /* inline comment */ {};
+    10    │ - const·z·=·a·/*·before·*/·||·/*·after·*/·{};
+       10 │ + const·z·=·a·/*·before·*/·??·/*·after·*/·{};
+    11 11 │   
+    12 12 │   // Leading and trailing comments on the operator
+  
+
+```
+
+```
+commentTrivia.ts:15:3 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    13 │ const w = b
+    14 │   // line comment before
+  > 15 │   || {};
+       │   ^^
+    16 │ 
+    17 │ const v = b ||
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+    13 13 │   const w = b
+    14 14 │     // line comment before
+    15    │ - ··||·{};
+       15 │ + ··??·{};
+    16 16 │   
+    17 17 │   const v = b ||
+  
+
+```
+
+```
+commentTrivia.ts:17:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    15 │   || {};
+    16 │ 
+  > 17 │ const v = b ||
+       │             ^^
+    18 │   // line comment after
+    19 │   {};
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+    15 15 │     || {};
+    16 16 │   
+    17    │ - const·v·=·b·||
+       17 │ + const·v·=·b·??
+    18 18 │     // line comment after
+    19 19 │     {};
+  
+
+```

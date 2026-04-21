@@ -711,6 +711,60 @@ impl FromStr for BracketSpacing {
     }
 }
 
+/// Whether to insert spaces inside delimiters (after the opening delimiter and before the closing
+/// delimiter), such as parentheses, brackets, angle brackets, and template literal interpolations.
+/// Spaces are not added before the opening delimiter, and empty delimiters are not affected.
+/// Only applies when the content fits on a single line; when content breaks across multiple lines,
+/// no extra spaces are added. The specific delimiters affected depend on the language.
+#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct DelimiterSpacing(bool);
+
+impl DelimiterSpacing {
+    /// Return the boolean value for this [DelimiterSpacing]
+    pub fn value(&self) -> bool {
+        self.0
+    }
+}
+
+impl From<bool> for DelimiterSpacing {
+    fn from(value: bool) -> Self {
+        Self(value)
+    }
+}
+
+impl std::fmt::Display for DelimiterSpacing {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::write!(f, "{:?}", self.value())
+    }
+}
+
+impl biome_console::fmt::Display for DelimiterSpacing {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+        fmt.write_str(&self.0.to_string())
+    }
+}
+
+impl FromStr for DelimiterSpacing {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let value = bool::from_str(s);
+
+        match value {
+            Ok(value) => Ok(Self(value)),
+            Err(_) => Err(
+                "Value not supported for DelimiterSpacing. Supported values are 'true' and 'false'.",
+            ),
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
@@ -1033,13 +1087,28 @@ impl<Context> Formatted<Context> {
     where
         F: FnMut(TextRange) -> Option<Document>,
     {
+        let mut last_start_resolved = false;
         self.document.transform(move |element| match element {
-            FormatElement::Tag(Tag::StartEmbedded(range)) => fn_format_embedded(*range)
-                .map(|document| FormatElement::Interned(Interned::new(document.into_elements()))),
+            FormatElement::Tag(Tag::StartEmbedded(range)) => match fn_format_embedded(*range) {
+                Some(document) => {
+                    last_start_resolved = true;
+                    Some(FormatElement::Interned(Interned::new(
+                        document.into_elements(),
+                    )))
+                }
+                None => {
+                    // Keep the StartEmbedded tag so it stays paired with EndEmbedded.
+                    last_start_resolved = false;
+                    None
+                }
+            },
             FormatElement::Tag(Tag::EndEmbedded) => {
-                // FIXME: this might not play well for all cases, so we need to figure out
-                // a nicer way to replace the tag
-                Some(FormatElement::Line(LineMode::Hard))
+                if last_start_resolved {
+                    Some(FormatElement::Line(LineMode::Hard))
+                } else {
+                    // Keep EndEmbedded paired with the unresolved StartEmbedded.
+                    None
+                }
             }
             _ => None,
         });

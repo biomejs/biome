@@ -3,18 +3,18 @@ use biome_html_syntax::{
 };
 use biome_js_syntax::{
     AnyJsIdentifierUsage, AnyJsRoot, JsReferenceIdentifier, JsStaticMemberExpression,
+    JsxReferenceIdentifier,
 };
 use biome_rowan::{AstNode, TextRange, TokenText, WalkEvent};
-use rustc_hash::FxHashMap;
 
 #[derive(Debug, Clone, Default)]
 pub struct EmbeddedValueReferences {
-    pub references: Vec<FxHashMap<TextRange, TokenText>>,
+    pub references: Vec<Vec<(TextRange, TokenText)>>,
 }
 
 #[derive(Debug)]
 pub(crate) struct EmbeddedValueReferencesBuilder {
-    references: FxHashMap<TextRange, TokenText>,
+    references: Vec<(TextRange, TokenText)>,
 }
 
 impl EmbeddedValueReferences {
@@ -30,8 +30,12 @@ impl EmbeddedValueReferences {
 impl EmbeddedValueReferencesBuilder {
     fn new() -> Self {
         Self {
-            references: FxHashMap::default(),
+            references: Vec::default(),
         }
+    }
+
+    pub(crate) fn register_reference(&mut self, range: TextRange, text: TokenText) {
+        self.references.push((range, text));
     }
 
     /// Visit a non-source snippet to track value references
@@ -41,7 +45,9 @@ impl EmbeddedValueReferencesBuilder {
         for event in preorder {
             match event {
                 WalkEvent::Enter(node) => {
-                    if let Some(reference) = JsReferenceIdentifier::cast_ref(&node) {
+                    if let Some(reference) = JsxReferenceIdentifier::cast_ref(&node) {
+                        self.visit_jsx_reference_identifier(reference);
+                    } else if let Some(reference) = JsReferenceIdentifier::cast_ref(&node) {
                         self.visit_reference_identifier(reference);
                     } else if let Some(member) = JsStaticMemberExpression::cast_ref(&node) {
                         self.visit_static_member_expression(member);
@@ -99,8 +105,7 @@ impl EmbeddedValueReferencesBuilder {
             AnyHtmlTagName::HtmlComponentName(component) => {
                 // Track simple component: <Component>
                 if let Ok(token) = component.value_token() {
-                    self.references
-                        .insert(token.text_trimmed_range(), token.token_text_trimmed());
+                    self.register_reference(token.text_trimmed_range(), token.token_text_trimmed());
                 }
             }
             AnyHtmlTagName::HtmlMemberName(member) => {
@@ -121,15 +126,13 @@ impl EmbeddedValueReferencesBuilder {
             AnyHtmlComponentObjectName::HtmlTagName(tag) => {
                 // For member expressions starting with lowercase (unusual but possible)
                 if let Ok(token) = tag.value_token() {
-                    self.references
-                        .insert(token.text_trimmed_range(), token.token_text_trimmed());
+                    self.register_reference(token.text_trimmed_range(), token.token_text_trimmed());
                 }
             }
             AnyHtmlComponentObjectName::HtmlComponentName(component) => {
                 // Track the component name
                 if let Ok(token) = component.value_token() {
-                    self.references
-                        .insert(token.text_trimmed_range(), token.token_text_trimmed());
+                    self.register_reference(token.text_trimmed_range(), token.token_text_trimmed());
                 }
             }
             AnyHtmlComponentObjectName::HtmlMemberName(member) => {
@@ -142,13 +145,22 @@ impl EmbeddedValueReferencesBuilder {
         }
     }
 
+    fn visit_jsx_reference_identifier(&mut self, reference: JsxReferenceIdentifier) -> Option<()> {
+        let name_token = reference.value_token().ok()?;
+        self.register_reference(
+            name_token.text_trimmed_range(),
+            name_token.token_text_trimmed(),
+        );
+        Some(())
+    }
+
     fn visit_reference_identifier(&mut self, reference: JsReferenceIdentifier) -> Option<()> {
         let usage = AnyJsIdentifierUsage::from(reference.clone());
         if usage.is_only_type() {
             return None;
         }
         let name_token = reference.value_token().ok()?;
-        self.references.insert(
+        self.register_reference(
             name_token.text_trimmed_range(),
             name_token.token_text_trimmed(),
         );
@@ -177,7 +189,7 @@ mod tests {
 
     fn contains_reference(service: &EmbeddedValueReferences, reference: &str) -> bool {
         for refs in service.references.iter() {
-            if refs.values().any(|token| {
+            if refs.iter().any(|(_, token)| {
                 let text = token.text();
                 text == reference
             }) {
@@ -232,11 +244,11 @@ mod tests {
 
     #[test]
     fn tracks_html_element_names() {
-        use biome_html_parser::{HtmlParseOptions, parse_html};
+        use biome_html_parser::{HtmlParserOptions, parse_html};
 
         let source = r#"<Component /><AvatarPrimitive.Fallback />"#;
         // Enable Vue parsing so component names are parsed correctly
-        let parsed = parse_html(source, HtmlParseOptions::default().with_vue());
+        let parsed = parse_html(source, HtmlParserOptions::default().with_vue());
 
         println!("Diagnostics: {:?}", parsed.diagnostics());
         println!("Has errors: {}", !parsed.diagnostics().is_empty());

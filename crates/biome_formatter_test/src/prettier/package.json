@@ -6,5 +6,6 @@
 	"dependencies": {
 		"prettier": "3.8.1"
 	},
-  "private": true
+	"private": true,
+	"type": "commonjs"
 }

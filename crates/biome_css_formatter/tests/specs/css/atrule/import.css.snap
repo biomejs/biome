@@ -176,20 +176,7 @@ st.css');
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-Trailing newline: true
------
+# Formatted
 
 ```css
 @import url("./style.css");
@@ -341,7 +328,7 @@ st.css");
 @import url("./test.css") /* Comment */
 	layer(/* Comment */ /* Comment */ default) /* Comment */
 	supports(
-		/* Comment */ /* Comment */ /* Comment */ display: flex /* Comment */
+		/* Comment */ display /* Comment */ /* Comment */: flex /* Comment */
 	) /* Comment */
 	screen /* Comment */ and /* Comment */ (
 		/* Comment */ /* Comment */ /* Comment */ min-width: 400px /* Comment */

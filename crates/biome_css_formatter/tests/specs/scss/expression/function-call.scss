@@ -1,0 +1,50 @@
+.calls{
+ one-positional-arg:one-positional-arg( a
+ );
+ two-positional-args:two-positional-args( a,
+b
+  );
+ one-keyword-arg:one-keyword-arg($a: z
+  );
+	two-keyword-args:two-keyword-args(  $a:
+y,  $b:
+z
+  );
+mixed-args:mixed-args(  y,
+  $b:
+z );
+interpolated-start:#{1 + 1}foo( arg );
+interpolated-mid:foo#{1 + 1}bar( arg );
+interpolated-end:foo#{1 + 1}( arg );
+interpolated-full:#{foo}( arg );
+ var-spread:max( $numbers	... );
+prop:fn(value
+  ...);
+many-params:fn(  a,
+b, c,
+  d, e,
+  f,
+g,
+h,
+  i,
+j,
+k,
+l,
+  m,
+n,
+  o,  p);
+long-name-few-params:really-long-function-name-with-hyphens(  a, b);
+long-name-few-keyword-params:very-long-function-name-with-kw($short:1,  $long-parameter-name:2);
+  many-params-long-name:extremely-long-function-name-with-hyphens( a,  b,  c,
+  d,  e,
+f,  g,
+  h, i,
+  j );
+nested-values:call(  ( a:1, b:2),  (  1 2,
+  3  4),  foo( bar(1,
+  2,
+3) ) );
+mixed-ellipsis-kw:mix( $a, $b,
+  $c...,  $very-long-keyword-name:map-get($map,
+key ));
+  }

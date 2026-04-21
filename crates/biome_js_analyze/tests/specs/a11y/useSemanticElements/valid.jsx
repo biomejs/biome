@@ -31,7 +31,7 @@ export const Component2 = () => (
     <div role="combobox"></div>
     <div role="listbox"></div>
     <div role="option"></div>
-</>
+</>;
 
 <>
 	<Div role="combobox"></Div>
@@ -41,4 +41,29 @@ export const Component2 = () => (
 	>
 		{children}
 	</Card>
-</>
+</>;
+
+/* status role should not generate diagnostics (see #9245) */
+<>
+    <div role="status"></div>
+</>;
+
+{/* Semantic elements with a matching role should not be flagged (issue #5212) */}
+<>
+	<nav role="navigation"></nav>
+	<footer role="contentinfo"></footer>
+	<aside role="complementary"></aside>
+	<article role="article"></article>
+	<button role="button"></button>
+	<form role="form"></form>
+	<main role="main"></main>
+	<table role="table"></table>
+	<hr role="separator" />
+	{/* Constrained elements: tag + matching attributes should not be flagged */}
+	<input role="checkbox" type="checkbox" />
+	<input role="radio" type="radio" />
+	<input role="searchbox" type="search" />
+	<input role="textbox" type="text" />
+	<th role="columnheader" scope="col"></th>
+	<th role="rowheader" scope="row"></th>
+</>;

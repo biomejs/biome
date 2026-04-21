@@ -1,0 +1,86 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: recordInvalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// Awaiting a Record value that is a string (not a Promise)
+const config: Record<string, string> = {};
+await config["key"];
+
+// Awaiting a Record function value that returns a non-Promise
+const getters: Record<string, () => number> = {};
+await getters["count"]();
+
+// Awaiting a Record function value with optional chaining that returns a non-Promise
+// The ?.() call on (() => number) | undefined resolves to number | undefined,
+// which is not a Promise and should be flagged.
+const computers: Record<string, (() => number) | undefined> = {};
+await computers["sum"]?.();
+
+```
+
+# Diagnostics
+```
+recordInvalid.ts:5:1 lint/nursery/useAwaitThenable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i `await` used on a non-Promise value.
+  
+    3 │ // Awaiting a Record value that is a string (not a Promise)
+    4 │ const config: Record<string, string> = {};
+  > 5 │ await config["key"];
+      │ ^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ // Awaiting a Record function value that returns a non-Promise
+  
+  i This may happen if you accidentally used `await` on a synchronous value.
+  
+  i Please ensure the value is not a custom "thenable" implementation before removing the `await`: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#thenables
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+recordInvalid.ts:9:1 lint/nursery/useAwaitThenable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i `await` used on a non-Promise value.
+  
+     7 │ // Awaiting a Record function value that returns a non-Promise
+     8 │ const getters: Record<string, () => number> = {};
+   > 9 │ await getters["count"]();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ // Awaiting a Record function value with optional chaining that returns a non-Promise
+  
+  i This may happen if you accidentally used `await` on a synchronous value.
+  
+  i Please ensure the value is not a custom "thenable" implementation before removing the `await`: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#thenables
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+recordInvalid.ts:15:1 lint/nursery/useAwaitThenable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i `await` used on a non-Promise value.
+  
+    13 │ // which is not a Promise and should be flagged.
+    14 │ const computers: Record<string, (() => number) | undefined> = {};
+  > 15 │ await computers["sum"]?.();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+  
+  i This may happen if you accidentally used `await` on a synchronous value.
+  
+  i Please ensure the value is not a custom "thenable" implementation before removing the `await`: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#thenables
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

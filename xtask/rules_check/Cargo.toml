@@ -36,7 +36,7 @@ biome_rowan           = { workspace = true }
 biome_ruledoc_utils   = { workspace = true }
 biome_service         = { workspace = true }
 camino                = { workspace = true }
-pulldown-cmark        = "0.13.0"
+pulldown-cmark        = "0.13.3"
 
 [lints]
 workspace = true

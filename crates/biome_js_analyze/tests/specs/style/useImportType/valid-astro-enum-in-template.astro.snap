@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-astro-enum-in-template.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+---
+import { Component, FooEnum } from './types';
+---
+<main>
+  <Component />
+  {FooEnum.Foo}
+</main>
+
+```

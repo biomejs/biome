@@ -100,6 +100,7 @@ impl Rule for NoThisInStatic {
         let static_method = this_super_expression
             .syntax()
             .ancestors()
+            .skip(1)
             .find(|x| {
                 AnyJsControlFlowRoot::can_cast(x.kind())
                     && !JsArrowFunctionExpression::can_cast(x.kind())

@@ -1,0 +1,13 @@
+/* EC-001: variable reassigned after Playwright init — should NOT flag */
+
+test("reassigned to non-playwright", async ({ page }) => {
+    let loc = page.locator(".item");
+    loc = document.querySelector(".item");
+    expect(loc).toBeVisible();
+});
+
+test("reassigned to another playwright locator", async ({ page }) => {
+    let loc = page.locator(".old");
+    loc = page.locator(".new");
+    expect(loc).toBeVisible();
+});

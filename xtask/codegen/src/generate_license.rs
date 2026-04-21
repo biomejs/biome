@@ -113,9 +113,7 @@ fn create_data(license_list: LicenseList) -> io::Result<TokenStream> {
             pub(crate) license_id: &'static str,
             #[expect(unused)]
             pub(crate) see_also: &'static [&'static str],
-            #[expect(unused)]
             pub(crate) is_osi_approved: bool,
-            #[expect(unused)]
             pub(crate) is_fsf_libre: bool,
         }
 

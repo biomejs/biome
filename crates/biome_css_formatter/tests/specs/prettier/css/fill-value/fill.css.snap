@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
 info: css/fill-value/fill.css
 ---
 
@@ -11,6 +12,39 @@ div {
   $fontFamily: "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
+/* #4460 */
+.SearchBox {
+  box-shadow: 0 1rem 6rem rgba(0, 0, 0, 0.18), 0 0.3rem 1rem rgba(0, 0, 0, 0.17);
+}
+
+.SearchBox {
+  @include foo {
+    margin-left: sg-layout-width(logo-shopify) / 2 * -1 + sg-offset-x(page-nav) / 2;
+  }
+}
+
+.SearchBox {
+  box-shadow: 0 1rem 6rem rgba(0, 0, 0, 0.18), 0 0.3rem 1rem rgba(0, 0, 0, 0.17) !important;
+}
+
+.demo {
+  background-position: 0 0, 0 spacing(tight), spacing(tight) -1 * spacing(tight), -1 * spacing(tight) 0;
+}
+
+/* #4604 */
+.this-will-not-wrap {
+  background: transparent url(/long/path/to/dummy-image.svg) -1000px center no-repeat;
+}
+
+.this-will-wrap-correctly {
+  background: transparent url(/long/path/to/dummy-image.svg) 1000px center no-repeat;
+}
+
+.this-will-also-wrap-but-incorrectly {
+  background: transparent url(/even/longer/path/to/dummy-image.svg) -1000px center no-repeat;
+}
+
+
 ```
 
 
@@ -19,7 +53,7 @@ div {
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,11 +1,4 @@
+@@ -1,13 +1,6 @@
  div {
 -  border-left: 1px solid
 -    mix($warningBackgroundColors, $warningBorderColors, 50%);
@@ -33,6 +67,31 @@ div {
 +  border-left: 1px solid mix($warningBackgroundColors, $warningBorderColors, 50%);
 +  $fontFamily: "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
  }
+ 
+ /* #4460 */
+@@ -19,8 +12,7 @@
+ 
+ .SearchBox {
+   @include foo {
+-    margin-left: sg-layout-width(logo-shopify) / 2 * -1 +
+-      sg-offset-x(page-nav) / 2;
++    margin-left: sg-layout-width(logo-shopify) / 2 * -1 + sg-offset-x(page-nav) / 2;
+   }
+ }
+ 
+@@ -31,11 +23,7 @@
+ }
+ 
+ .demo {
+-  background-position:
+-    0 0,
+-    0 spacing(tight),
+-    spacing(tight) -1 * spacing(tight),
+-    -1 * spacing(tight) 0;
++  background-position: 0 0, 0 spacing(tight), spacing(tight) -1 * spacing(tight), -1 * spacing(tight) 0;
+ }
+ 
+ /* #4604 */
 ```
 
 # Output
@@ -41,6 +100,45 @@ div {
 div {
   border-left: 1px solid mix($warningBackgroundColors, $warningBorderColors, 50%);
   $fontFamily: "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* #4460 */
+.SearchBox {
+  box-shadow:
+    0 1rem 6rem rgba(0, 0, 0, 0.18),
+    0 0.3rem 1rem rgba(0, 0, 0, 0.17);
+}
+
+.SearchBox {
+  @include foo {
+    margin-left: sg-layout-width(logo-shopify) / 2 * -1 + sg-offset-x(page-nav) / 2;
+  }
+}
+
+.SearchBox {
+  box-shadow:
+    0 1rem 6rem rgba(0, 0, 0, 0.18),
+    0 0.3rem 1rem rgba(0, 0, 0, 0.17) !important;
+}
+
+.demo {
+  background-position: 0 0, 0 spacing(tight), spacing(tight) -1 * spacing(tight), -1 * spacing(tight) 0;
+}
+
+/* #4604 */
+.this-will-not-wrap {
+  background: transparent url(/long/path/to/dummy-image.svg) -1000px center
+    no-repeat;
+}
+
+.this-will-wrap-correctly {
+  background: transparent url(/long/path/to/dummy-image.svg) 1000px center
+    no-repeat;
+}
+
+.this-will-also-wrap-but-incorrectly {
+  background: transparent url(/even/longer/path/to/dummy-image.svg) -1000px
+    center no-repeat;
 }
 ```
 
@@ -56,8 +154,6 @@ fill.css:2:30 parse ━━━━━━━━━━━━━━━━━━━━
     3 │   $fontFamily: "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
     4 │ }
   
-  i SCSS only syntax
-  
 fill.css:2:56 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × SCSS variables are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
@@ -67,8 +163,6 @@ fill.css:2:56 parse ━━━━━━━━━━━━━━━━━━━━
       │                                                        ^^^^^^^^^^^^^^^^^^^^
     3 │   $fontFamily: "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
     4 │ }
-  
-  i SCSS only syntax
   
 fill.css:3:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -81,7 +175,46 @@ fill.css:3:3 parse ━━━━━━━━━━━━━━━━━━━━�
     4 │ }
     5 │ 
   
-  i SCSS only syntax
+fill.css:13:52 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    11 │ .SearchBox {
+    12 │   @include foo {
+  > 13 │     margin-left: sg-layout-width(logo-shopify) / 2 * -1 + sg-offset-x(page-nav) / 2;
+       │                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │   }
+    15 │ }
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+fill.css:22:65 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    21 │ .demo {
+  > 22 │   background-position: 0 0, 0 spacing(tight), spacing(tight) -1 * spacing(tight), -1 * spacing(tight) 0;
+       │                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ }
+    24 │ 
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
   
 
 ```
@@ -90,4 +223,6 @@ fill.css:3:3 parse ━━━━━━━━━━━━━━━━━━━━�
 ```
     2:   border-left: 1px solid mix($warningBackgroundColors, $warningBorderColors, 50%);
     3:   $fontFamily: "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
+   15:     margin-left: sg-layout-width(logo-shopify) / 2 * -1 + sg-offset-x(page-nav) / 2;
+   26:   background-position: 0 0, 0 spacing(tight), spacing(tight) -1 * spacing(tight), -1 * spacing(tight) 0;
 ```

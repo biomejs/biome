@@ -29,13 +29,18 @@ impl FormatNodeRule<JsSwitchStatement> for FormatJsSwitchStatement {
             Ok(())
         });
 
+        let should_insert_space = f.options().delimiter_spacing().value();
+
         write![
             f,
             [
                 switch_token.format(),
                 space(),
                 l_paren_token.format(),
-                group(&soft_block_indent(&discriminant.format())),
+                group(&soft_block_indent_with_maybe_space(
+                    &discriminant.format(),
+                    should_insert_space
+                )),
                 r_paren_token.format(),
                 space(),
                 l_curly_token.format(),

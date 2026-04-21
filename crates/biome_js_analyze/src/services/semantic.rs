@@ -88,7 +88,6 @@ where
         N::unwrap_cast(node.clone())
     }
 }
-
 pub struct SemanticModelBuilderVisitor {
     extractor: SemanticEventExtractor,
     builder: SemanticModelBuilder,
@@ -123,6 +122,11 @@ impl Visitor for SemanticModelBuilderVisitor {
     }
 
     fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
+        // If a pre-built SemanticModel was already inserted (e.g. by the workspace
+        // open_file/change_file cycle), skip building a new one.
+        if ctx.services.get_service::<SemanticModel>().is_some() {
+            return;
+        }
         let model = self.builder.build();
         ctx.services.insert_service(model);
     }

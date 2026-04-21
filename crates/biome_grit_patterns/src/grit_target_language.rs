@@ -24,6 +24,12 @@ use crate::grit_json_parser::GritJsonParser;
 use crate::grit_target_node::{GritTargetNode, GritTargetSyntaxKind};
 use crate::grit_tree::GritTargetTree;
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum GritNodePatternSource {
+    LegacyTreeSitter,
+    Native,
+}
+
 /// Generates the `GritTargetLanguage` enum.
 ///
 /// This enum contains a variant for every language that we support running Grit
@@ -111,15 +117,35 @@ macro_rules! generate_target_language {
                 }
             }
 
+            pub fn resolve_node_pattern_name(
+                &self,
+                name: &str,
+            ) -> Option<(GritTargetSyntaxKind, GritNodePatternSource)> {
+                match self {
+                    $(Self::$language(lang) => lang
+                        .legacy_kind_by_name(name)
+                        .map(|kind| (kind.into(), GritNodePatternSource::LegacyTreeSitter))
+                        .or_else(|| {
+                            lang.native_kind_by_name(name)
+                                .map(|kind| (kind.into(), GritNodePatternSource::Native))
+                        })),+
+                }
+            }
+
             pub fn name_for_kind(&self, name: GritTargetSyntaxKind) -> &'static str {
                 match self {
                     $(Self::$language(lang) => lang.name_for_kind(name)),+
                 }
             }
 
-            pub fn named_slots_for_kind(&self, kind: GritTargetSyntaxKind) -> &'static [(&'static str, u32)] {
+            pub fn named_slots_for_node(
+                &self,
+                node_name: &str,
+                kind: GritTargetSyntaxKind,
+                source: GritNodePatternSource,
+            ) -> &'static [(&'static str, u32)] {
                 match self {
-                    $(Self::$language(lang) => lang.named_slots_for_kind(kind)),+
+                    $(Self::$language(lang) => lang.named_slots_for_node(node_name, kind, source)),+
                 }
             }
 
@@ -181,7 +207,9 @@ macro_rules! generate_target_language {
             fn is_metavariable(&self, node: &GritTargetNode) -> bool {
                 node.kind() == self.metavariable_kind()
                     || (self.is_alternative_metavariable_kind(node.kind())
-                        && self.exact_replaced_variable_regex().is_match(node.text()))
+                        && self
+                            .exact_replaced_variable_regex()
+                            .is_match(node.text().trim()))
             }
 
             fn align_padding<'a>(
@@ -317,7 +345,16 @@ trait GritTargetLanguageImpl {
     /// For compatibility with existing Grit snippets (as well as the online
     /// Grit playground), node names should be aligned with TreeSitter's
     /// `ts_language_symbol_for_name()`.
-    fn kind_by_name(&self, node_name: &str) -> Option<Self::Kind>;
+    fn kind_by_name(&self, node_name: &str) -> Option<Self::Kind> {
+        self.legacy_kind_by_name(node_name)
+            .or_else(|| self.native_kind_by_name(node_name))
+    }
+
+    fn legacy_kind_by_name(&self, _node_name: &str) -> Option<Self::Kind> {
+        None
+    }
+
+    fn native_kind_by_name(&self, node_name: &str) -> Option<Self::Kind>;
 
     /// Returns the node name for a given syntax kind.
     ///
@@ -333,7 +370,12 @@ trait GritTargetLanguageImpl {
     /// For compatibility with existing Grit snippets (as well as the online
     /// Grit playground), node names should be aligned with TreeSitter's
     /// `ts_language_field_name_for_id()`.
-    fn named_slots_for_kind(&self, kind: GritTargetSyntaxKind) -> &'static [(&'static str, u32)];
+    fn named_slots_for_node(
+        &self,
+        node_name: &str,
+        kind: GritTargetSyntaxKind,
+        source: GritNodePatternSource,
+    ) -> &'static [(&'static str, u32)];
 
     /// Strings that provide context for parsing snippets.
     ///

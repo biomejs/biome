@@ -95,6 +95,18 @@ impl ReactCreateElementCall {
             None
         }
     }
+
+    pub fn is_custom_component(&self) -> bool {
+        if let Some(any_js_expression) = self.element_type.as_any_js_expression()
+            && let Some(literal_expression) = any_js_expression.as_any_js_literal_expression()
+        {
+            return literal_expression
+                .as_js_string_literal_expression()
+                .is_none();
+        }
+
+        true
+    }
 }
 
 impl ReactApiCall for ReactCreateElementCall {
@@ -278,7 +290,7 @@ fn is_react_export(binding: &Binding, lib: ReactLibrary) -> bool {
 }
 
 fn is_named_react_export(binding: &Binding, lib: ReactLibrary, name: &str) -> Option<bool> {
-    let ident = JsIdentifierBinding::cast_ref(binding.syntax())?;
+    let ident = JsIdentifierBinding::cast_ref(&binding.syntax())?;
     let import_specifier = ident.parent::<AnyJsNamedImportSpecifier>()?;
     let name_token = match &import_specifier {
         AnyJsNamedImportSpecifier::JsNamedImportSpecifier(named_import) => {

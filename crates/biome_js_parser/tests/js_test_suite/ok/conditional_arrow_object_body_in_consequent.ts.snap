@@ -1,0 +1,211 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```ts
+const slotFn = isFirstMount
+  ? i => ({ [CONTENT_SLOT]: i })
+  : i => wrapSlotExpr(newExprs[i]);
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@0..6 "const" [] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@6..13 "slotFn" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@13..15 "=" [] [Whitespace(" ")],
+                            expression: JsConditionalExpression {
+                                test: JsIdentifierExpression {
+                                    name: JsReferenceIdentifier {
+                                        value_token: IDENT@15..27 "isFirstMount" [] [],
+                                    },
+                                },
+                                question_mark_token: QUESTION@27..32 "?" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                consequent: JsArrowFunctionExpression {
+                                    async_token: missing (optional),
+                                    type_parameters: missing (optional),
+                                    parameters: JsIdentifierBinding {
+                                        name_token: IDENT@32..34 "i" [] [Whitespace(" ")],
+                                    },
+                                    return_type_annotation: missing (optional),
+                                    fat_arrow_token: FAT_ARROW@34..37 "=>" [] [Whitespace(" ")],
+                                    body: JsParenthesizedExpression {
+                                        l_paren_token: L_PAREN@37..38 "(" [] [],
+                                        expression: JsObjectExpression {
+                                            l_curly_token: L_CURLY@38..40 "{" [] [Whitespace(" ")],
+                                            members: JsObjectMemberList [
+                                                JsPropertyObjectMember {
+                                                    name: JsComputedMemberName {
+                                                        l_brack_token: L_BRACK@40..41 "[" [] [],
+                                                        expression: JsIdentifierExpression {
+                                                            name: JsReferenceIdentifier {
+                                                                value_token: IDENT@41..53 "CONTENT_SLOT" [] [],
+                                                            },
+                                                        },
+                                                        r_brack_token: R_BRACK@53..54 "]" [] [],
+                                                    },
+                                                    colon_token: COLON@54..56 ":" [] [Whitespace(" ")],
+                                                    value: JsIdentifierExpression {
+                                                        name: JsReferenceIdentifier {
+                                                            value_token: IDENT@56..58 "i" [] [Whitespace(" ")],
+                                                        },
+                                                    },
+                                                },
+                                            ],
+                                            r_curly_token: R_CURLY@58..59 "}" [] [],
+                                        },
+                                        r_paren_token: R_PAREN@59..60 ")" [] [],
+                                    },
+                                },
+                                colon_token: COLON@60..65 ":" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                alternate: JsArrowFunctionExpression {
+                                    async_token: missing (optional),
+                                    type_parameters: missing (optional),
+                                    parameters: JsIdentifierBinding {
+                                        name_token: IDENT@65..67 "i" [] [Whitespace(" ")],
+                                    },
+                                    return_type_annotation: missing (optional),
+                                    fat_arrow_token: FAT_ARROW@67..70 "=>" [] [Whitespace(" ")],
+                                    body: JsCallExpression {
+                                        callee: JsIdentifierExpression {
+                                            name: JsReferenceIdentifier {
+                                                value_token: IDENT@70..82 "wrapSlotExpr" [] [],
+                                            },
+                                        },
+                                        optional_chain_token: missing (optional),
+                                        type_arguments: missing (optional),
+                                        arguments: JsCallArguments {
+                                            l_paren_token: L_PAREN@82..83 "(" [] [],
+                                            args: JsCallArgumentList [
+                                                JsComputedMemberExpression {
+                                                    object: JsIdentifierExpression {
+                                                        name: JsReferenceIdentifier {
+                                                            value_token: IDENT@83..91 "newExprs" [] [],
+                                                        },
+                                                    },
+                                                    optional_chain_token: missing (optional),
+                                                    l_brack_token: L_BRACK@91..92 "[" [] [],
+                                                    member: JsIdentifierExpression {
+                                                        name: JsReferenceIdentifier {
+                                                            value_token: IDENT@92..93 "i" [] [],
+                                                        },
+                                                    },
+                                                    r_brack_token: R_BRACK@93..94 "]" [] [],
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@94..95 ")" [] [],
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@95..96 ";" [] [],
+        },
+    ],
+    eof_token: EOF@96..97 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..97
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..96
+    0: JS_VARIABLE_STATEMENT@0..96
+      0: JS_VARIABLE_DECLARATION@0..95
+        0: (empty)
+        1: CONST_KW@0..6 "const" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@6..95
+          0: JS_VARIABLE_DECLARATOR@6..95
+            0: JS_IDENTIFIER_BINDING@6..13
+              0: IDENT@6..13 "slotFn" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@13..95
+              0: EQ@13..15 "=" [] [Whitespace(" ")]
+              1: JS_CONDITIONAL_EXPRESSION@15..95
+                0: JS_IDENTIFIER_EXPRESSION@15..27
+                  0: JS_REFERENCE_IDENTIFIER@15..27
+                    0: IDENT@15..27 "isFirstMount" [] []
+                1: QUESTION@27..32 "?" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+                2: JS_ARROW_FUNCTION_EXPRESSION@32..60
+                  0: (empty)
+                  1: (empty)
+                  2: JS_IDENTIFIER_BINDING@32..34
+                    0: IDENT@32..34 "i" [] [Whitespace(" ")]
+                  3: (empty)
+                  4: FAT_ARROW@34..37 "=>" [] [Whitespace(" ")]
+                  5: JS_PARENTHESIZED_EXPRESSION@37..60
+                    0: L_PAREN@37..38 "(" [] []
+                    1: JS_OBJECT_EXPRESSION@38..59
+                      0: L_CURLY@38..40 "{" [] [Whitespace(" ")]
+                      1: JS_OBJECT_MEMBER_LIST@40..58
+                        0: JS_PROPERTY_OBJECT_MEMBER@40..58
+                          0: JS_COMPUTED_MEMBER_NAME@40..54
+                            0: L_BRACK@40..41 "[" [] []
+                            1: JS_IDENTIFIER_EXPRESSION@41..53
+                              0: JS_REFERENCE_IDENTIFIER@41..53
+                                0: IDENT@41..53 "CONTENT_SLOT" [] []
+                            2: R_BRACK@53..54 "]" [] []
+                          1: COLON@54..56 ":" [] [Whitespace(" ")]
+                          2: JS_IDENTIFIER_EXPRESSION@56..58
+                            0: JS_REFERENCE_IDENTIFIER@56..58
+                              0: IDENT@56..58 "i" [] [Whitespace(" ")]
+                      2: R_CURLY@58..59 "}" [] []
+                    2: R_PAREN@59..60 ")" [] []
+                3: COLON@60..65 ":" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+                4: JS_ARROW_FUNCTION_EXPRESSION@65..95
+                  0: (empty)
+                  1: (empty)
+                  2: JS_IDENTIFIER_BINDING@65..67
+                    0: IDENT@65..67 "i" [] [Whitespace(" ")]
+                  3: (empty)
+                  4: FAT_ARROW@67..70 "=>" [] [Whitespace(" ")]
+                  5: JS_CALL_EXPRESSION@70..95
+                    0: JS_IDENTIFIER_EXPRESSION@70..82
+                      0: JS_REFERENCE_IDENTIFIER@70..82
+                        0: IDENT@70..82 "wrapSlotExpr" [] []
+                    1: (empty)
+                    2: (empty)
+                    3: JS_CALL_ARGUMENTS@82..95
+                      0: L_PAREN@82..83 "(" [] []
+                      1: JS_CALL_ARGUMENT_LIST@83..94
+                        0: JS_COMPUTED_MEMBER_EXPRESSION@83..94
+                          0: JS_IDENTIFIER_EXPRESSION@83..91
+                            0: JS_REFERENCE_IDENTIFIER@83..91
+                              0: IDENT@83..91 "newExprs" [] []
+                          1: (empty)
+                          2: L_BRACK@91..92 "[" [] []
+                          3: JS_IDENTIFIER_EXPRESSION@92..93
+                            0: JS_REFERENCE_IDENTIFIER@92..93
+                              0: IDENT@92..93 "i" [] []
+                          4: R_BRACK@93..94 "]" [] []
+                      2: R_PAREN@94..95 ")" [] []
+      1: SEMICOLON@95..96 ";" [] []
+  4: EOF@96..97 "" [Newline("\n")] []
+
+```

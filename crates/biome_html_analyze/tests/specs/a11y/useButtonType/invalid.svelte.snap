@@ -3,7 +3,7 @@ source: crates/biome_html_analyze/tests/spec_tests.rs
 expression: invalid.svelte
 ---
 # Input
-```html
+```svelte
 <!-- should generate diagnostics -->
 
 <button>Do something</button>
@@ -24,7 +24,7 @@ invalid.svelte:3:1 lint/a11y/useButtonType ━━━━━━━━━━━━�
     1 │ <!-- should generate diagnostics -->
     2 │ 
   > 3 │ <button>Do something</button>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^
     4 │ <button />
     5 │ <button type="incorrectType">Do something</button>
   
@@ -61,7 +61,7 @@ invalid.svelte:5:1 lint/a11y/useButtonType ━━━━━━━━━━━━�
     3 │ <button>Do something</button>
     4 │ <button />
   > 5 │ <button type="incorrectType">Do something</button>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ <button type="incorrectType" />
     7 │ <button type>Do something</button>
   
@@ -99,7 +99,7 @@ invalid.svelte:7:1 lint/a11y/useButtonType ━━━━━━━━━━━━�
     5 │ <button type="incorrectType">Do something</button>
     6 │ <button type="incorrectType" />
   > 7 │ <button type>Do something</button>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^
     8 │ <button type="" />
     9 │ 
   

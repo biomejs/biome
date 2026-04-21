@@ -1,0 +1,37 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/declaration/string-interpolation.scss
+---
+
+# Input
+
+```scss
+.box{
+content:"foo #{$bar} baz";
+path:'#{$name}.scss';
+suffix:"icon-#{$name}";
+only:"#{$value}";
+adjacent:"#{$scheme}#{$host}";
+escaped:"foo \#{$bar} baz";
+background:url(#{$raw});
+asset:url("https://#{$host}/#{$path}");
+}
+
+```
+
+
+# Formatted
+
+```scss
+.box {
+	content: "foo #{$bar} baz";
+	path: "#{$name}.scss";
+	suffix: "icon-#{$name}";
+	only: "#{$value}";
+	adjacent: "#{$scheme}#{$host}";
+	escaped: "foo \#{$bar} baz";
+	background: url(#{$raw});
+	asset: url("https://#{$host}/#{$path}");
+}
+
+```

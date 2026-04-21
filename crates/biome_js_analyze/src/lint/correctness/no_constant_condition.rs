@@ -130,13 +130,21 @@ impl Rule for NoConstantCondition {
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            state,
-            markup! {
-                "Unexpected constant condition."
-            },
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                state,
+                markup! {
+                    "This condition always evaluates to the same value."
+                },
+            )
+            .note(markup! {
+                "Constant conditions make branches and loops harder to reason about because they cannot react to runtime values."
+            })
+            .note(markup! {
+                "Replace it with a condition that depends on changing values, or remove the condition if it is intentional."
+            }),
+        )
     }
 }
 
@@ -160,7 +168,7 @@ impl ConditionalStatement {
     }
     // Checks if the self statement is in a generator function
     fn is_in_generator_function(&self) -> bool {
-        self.syntax().ancestors().any(|node| {
+        self.syntax().ancestors().skip(1).any(|node| {
             match JsFunctionDeclaration::try_cast(node) {
                 Ok(func_decl) => func_decl.star_token(),
                 Err(node) => {

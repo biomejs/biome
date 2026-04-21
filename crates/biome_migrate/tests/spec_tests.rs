@@ -1,4 +1,4 @@
-use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
+use biome_analyze::{ActionFilter, AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::{DiagnosticExt, Severity};
 use biome_json_parser::{JsonParserOptions, parse_json};
@@ -79,11 +79,9 @@ pub(crate) fn analyze_and_snap(
     let (_, errors) =
         biome_migrate::migrate_configuration(&root, filter, input_file, true, |event| {
             if let Some(mut diag) = event.diagnostic() {
-                for action in event.actions() {
-                    if !action.is_suppression() {
-                        check_code_action(input_file, input_code, &action, parse_options);
-                        diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
-                    }
+                for action in event.actions(ActionFilter::rule_fix()) {
+                    check_code_action(input_file, input_code, &action, parse_options);
+                    diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                 }
 
                 let error = diag.with_severity(Severity::Warning);
@@ -91,11 +89,9 @@ pub(crate) fn analyze_and_snap(
                 return ControlFlow::Continue(());
             }
 
-            for action in event.actions() {
-                if !action.is_suppression() {
-                    check_code_action(input_file, input_code, &action, parse_options);
-                    code_fixes.push(code_fix_to_string(input_code, action));
-                }
+            for action in event.actions(ActionFilter::rule_fix()) {
+                check_code_action(input_file, input_code, &action, parse_options);
+                code_fixes.push(code_fix_to_string(input_code, action));
             }
 
             ControlFlow::<Never>::Continue(())

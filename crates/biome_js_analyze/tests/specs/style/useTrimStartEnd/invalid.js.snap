@@ -162,11 +162,11 @@ invalid.js:8:3 lint/style/useTrimStartEnd  FIXABLE  ━━━━━━━━━�
   i Safe fix: Replace trimRight with trimEnd.
   
      6  6 │   foo
-     7  7 │   	// comment
+     7  7 │     // comment
      8    │ - → .trimRight·/*·comment·*/
         8 │ + → .trimEnd·/*·comment·*/
-     9  9 │   	/* comment */
-    10 10 │   	()
+     9  9 │     /* comment */
+    10 10 │     ()
   
 
 ```

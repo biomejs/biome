@@ -1,0 +1,94 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div
+  /* block comment
+  class="foo"
+>text</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..4 "div" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: missing (required),
+            },
+            children: HtmlElementList [],
+            closing_element: missing (required),
+        },
+    ],
+    eof_token: EOF@4..50 "" [Newline("\n"), Whitespace("  "), Comments("/* block comment\n  cl ...")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..50
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..4
+    0: HTML_ELEMENT@0..4
+      0: HTML_OPENING_ELEMENT@0..4
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..4
+          0: HTML_LITERAL@1..4 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@4..4
+        3: (empty)
+      1: HTML_ELEMENT_LIST@4..4
+      2: (empty)
+  4: EOF@4..50 "" [Newline("\n"), Whitespace("  "), Comments("/* block comment\n  cl ...")] []
+
+```
+
+## Diagnostics
+
+```
+unterminated_js_multiline_comment.svelte:2:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unterminated block comment, expected `*/`
+  
+    1 │ <div
+  > 2 │   /* block comment
+      │   ^^^^^^^^^^^^^^^^
+  > 3 │   class="foo"
+  > 4 │ >text</div>
+  > 5 │ 
+      │ 
+  
+unterminated_js_multiline_comment.svelte:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `>` but instead the file ends
+  
+    3 │   class="foo"
+    4 │ >text</div>
+  > 5 │ 
+      │ 
+  
+  i the file ends here
+  
+    3 │   class="foo"
+    4 │ >text</div>
+  > 5 │ 
+      │ 
+  
+```

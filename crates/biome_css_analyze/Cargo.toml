@@ -27,11 +27,14 @@ biome_css_syntax         = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
+biome_module_graph       = { workspace = true }
+biome_project_layout     = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_rule_options       = { workspace = true }
 biome_string_case        = { workspace = true }
 biome_suppression        = { workspace = true }
 camino                   = { workspace = true }
+phf                      = { workspace = true }
 regex                    = { workspace = true }
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
@@ -39,11 +42,12 @@ serde                    = { workspace = true, features = ["derive"] }
 
 [dev-dependencies]
 biome_css_parser    = { path = "../biome_css_parser" }
-biome_fs            = { workspace = true }
-biome_plugin_loader = { workspace = true }
+biome_css_syntax    = { path = "../biome_css_syntax", features = ["scss"] }
+biome_fs            = { path = "../biome_fs" }
+biome_plugin_loader = { path = "../biome_plugin_loader" }
 biome_test_utils    = { path = "../biome_test_utils" }
 camino              = { workspace = true }
-criterion           = { package = "codspeed-criterion-compat", version = "*" }
+criterion           = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta               = { workspace = true, features = ["glob"] }
 tests_macros        = { path = "../tests_macros" }
 

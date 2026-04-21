@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_directive.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+"use strict";
+import { foo } from "foo";
+import { bar } from "bar";
+const baz = 1;
+
+```

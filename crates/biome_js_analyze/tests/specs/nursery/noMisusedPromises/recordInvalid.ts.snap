@@ -1,0 +1,112 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: recordInvalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// Record with async function values used in void-return context
+const handlers: Record<string, (() => Promise<void>) | undefined> = {};
+[1, 2, 3].forEach(async (n) => {
+	await handlers[n.toString()]?.();
+});
+
+// Record with Promise values used directly in conditionals
+const cache: Record<string, Promise<string>> = {};
+if (cache["key"]) {
+	console.log("cached");
+}
+
+while (cache["other"]) {
+	break;
+}
+
+const val = cache["key"] ? "yes" : "no";
+
+```
+
+# Diagnostics
+```
+recordInvalid.ts:5:19 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a Promise, but no return value was expected.
+  
+    3 │ // Record with async function values used in void-return context
+    4 │ const handlers: Record<string, (() => Promise<void>) | undefined> = {};
+  > 5 │ [1, 2, 3].forEach(async (n) => {
+      │                   ^^^^^^^^^^^^^^
+  > 6 │ 	await handlers[n.toString()]?.();
+  > 7 │ });
+      │ ^
+    8 │ 
+    9 │ // Record with Promise values used directly in conditionals
+  
+  i This may not have the desired result if you expect the Promise to be `await`-ed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+recordInvalid.ts:11:5 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A Promise was found where a conditional was expected.
+  
+     9 │ // Record with Promise values used directly in conditionals
+    10 │ const cache: Record<string, Promise<string>> = {};
+  > 11 │ if (cache["key"]) {
+       │     ^^^^^^^^^^^^
+    12 │ 	console.log("cached");
+    13 │ }
+  
+  i A Promise is always truthy, so this is most likely a mistake.
+  
+  i You may have intended to `await` the Promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+recordInvalid.ts:15:8 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A Promise was found where a conditional was expected.
+  
+    13 │ }
+    14 │ 
+  > 15 │ while (cache["other"]) {
+       │        ^^^^^^^^^^^^^^
+    16 │ 	break;
+    17 │ }
+  
+  i A Promise is always truthy, so this is most likely a mistake.
+  
+  i You may have intended to `await` the Promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+recordInvalid.ts:19:13 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A Promise was found where a conditional was expected.
+  
+    17 │ }
+    18 │ 
+  > 19 │ const val = cache["key"] ? "yes" : "no";
+       │             ^^^^^^^^^^^^
+    20 │ 
+  
+  i A Promise is always truthy, so this is most likely a mistake.
+  
+  i You may have intended to `await` the Promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

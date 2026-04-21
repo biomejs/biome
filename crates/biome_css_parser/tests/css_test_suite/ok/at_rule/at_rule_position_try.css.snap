@@ -83,14 +83,12 @@ CssRoot {
                                             },
                                             l_paren_token: L_PAREN@108..109 "(" [] [],
                                             items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssIdentifier {
-                                                                value_token: IDENT@109..115 "bottom" [] [],
-                                                            },
-                                                        ],
-                                                    },
+                                                CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@109..115 "bottom" [] [],
+                                                        },
+                                                    ],
                                                 },
                                             ],
                                             r_paren_token: R_PAREN@115..116 ")" [] [],
@@ -222,11 +220,10 @@ CssRoot {
                         0: IDENT@102..108 "anchor" [] []
                       1: L_PAREN@108..109 "(" [] []
                       2: CSS_PARAMETER_LIST@109..115
-                        0: CSS_PARAMETER@109..115
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@109..115
-                            0: CSS_COMPONENT_VALUE_LIST@109..115
-                              0: CSS_IDENTIFIER@109..115
-                                0: IDENT@109..115 "bottom" [] []
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@109..115
+                          0: CSS_COMPONENT_VALUE_LIST@109..115
+                            0: CSS_IDENTIFIER@109..115
+                              0: IDENT@109..115 "bottom" [] []
                       3: R_PAREN@115..116 ")" [] []
                 1: (empty)
               1: SEMICOLON@116..117 ";" [] []

@@ -1546,7 +1546,7 @@ impl SyntaxFactory for JsSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && JsLiteralExportName::can_cast(element.kind())
+                    && AnyJsLiteralExportName::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -1814,7 +1814,7 @@ impl SyntaxFactory for JsSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && JsLiteralExportName::can_cast(element.kind())
+                    && AnyJsLiteralExportName::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -1887,7 +1887,7 @@ impl SyntaxFactory for JsSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && JsLiteralExportName::can_cast(element.kind())
+                    && AnyJsLiteralExportName::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -3670,7 +3670,7 @@ impl SyntaxFactory for JsSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && JsLiteralExportName::can_cast(element.kind())
+                    && AnyJsLiteralExportName::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -6057,6 +6057,39 @@ impl SyntaxFactory for JsSyntaxFactory {
                     );
                 }
                 slots.into_node(JSX_SELF_CLOSING_ELEMENT, children)
+            }
+            JSX_SHORTHAND_ATTRIBUTE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['{']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && JsReferenceIdentifier::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['}']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        JSX_SHORTHAND_ATTRIBUTE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(JSX_SHORTHAND_ATTRIBUTE, children)
             }
             JSX_SPREAD_ATTRIBUTE => {
                 let mut elements = (&children).into_iter();

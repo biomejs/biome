@@ -3,7 +3,8 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-define.vue
 ---
 # Input
-```ts
+```vue
+<script>
 /* should generate diagnostics */
 import { defineComponent } from 'vue';
 
@@ -20,26 +21,42 @@ export default defineComponent({
     short: (val, oldVal) => console.log('new: %s, old: %s', val, oldVal)
   }
 })
+</script>
 
 ```
-
-_Note: The parser emitted 1 diagnostics which are not shown here._
 
 # Diagnostics
 ```
-invalid-define.vue:6:10 lint/nursery/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-define.vue:15:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `short`
+  
+    13 │ 			}
+    14 │     }
+  > 15 │     short: (val, oldVal) => console.log('new: %s, old: %s', val, oldVal)
+       │     ^^^^^
+    16 │   }
+    17 │ })
+  
+  i Remove short
+  
+
+```
+
+```
+invalid-define.vue:7:10 lint/nursery/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Found arrow function in Vue watcher definition.
   
-     4 │ export default defineComponent({
-     5 │   watch: {
-   > 6 │     foo: (val, oldVal) => {
+     5 │ export default defineComponent({
+     6 │   watch: {
+   > 7 │     foo: (val, oldVal) => {
        │          ^^^^^^^^^^^^^^^^^^
-   > 7 │       console.log('new: %s, old: %s', val, oldVal)
-   > 8 │     },
+   > 8 │       console.log('new: %s, old: %s', val, oldVal)
+   > 9 │     },
        │     ^
-     9 │     bar: {
-    10 │ 			handler: (val, oldVal) => {
+    10 │     bar: {
+    11 │ 			handler: (val, oldVal) => {
   
   i Using an arrow function here means that the `this` context will not refer to the Vue instance, which is probably not what you want.
   
@@ -47,30 +64,30 @@ invalid-define.vue:6:10 lint/nursery/noVueArrowFuncInWatch  FIXABLE  ━━━�
   
   i Unsafe fix: Rewrite the arrow function into a function expression.
   
-     4  4 │   export default defineComponent({
-     5  5 │     watch: {
-     6    │ - ····foo:·(val,·oldVal)·=>·{
-        6 │ + ····foo:·function(val,·oldVal)·{
-     7  7 │         console.log('new: %s, old: %s', val, oldVal)
-     8  8 │       },
+     5  5 │   export default defineComponent({
+     6  6 │     watch: {
+     7    │ - ····foo:·(val,·oldVal)·=>·{
+        7 │ + ····foo:·function(val,·oldVal)·{
+     8  8 │         console.log('new: %s, old: %s', val, oldVal)
+     9  9 │       },
   
 
 ```
 
 ```
-invalid-define.vue:10:13 lint/nursery/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-define.vue:11:13 lint/nursery/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Found arrow function in Vue watcher definition.
   
-     8 │     },
-     9 │     bar: {
-  > 10 │ 			handler: (val, oldVal) => {
+     9 │     },
+    10 │     bar: {
+  > 11 │ 			handler: (val, oldVal) => {
        │ 			         ^^^^^^^^^^^^^^^^^^
-  > 11 │ 				console.log('new: %s, old: %s', val, oldVal)
-  > 12 │ 			}
+  > 12 │ 				console.log('new: %s, old: %s', val, oldVal)
+  > 13 │ 			}
        │ 			^
-    13 │     }
-    14 │     short: (val, oldVal) => console.log('new: %s, old: %s', val, oldVal)
+    14 │     }
+    15 │     short: (val, oldVal) => console.log('new: %s, old: %s', val, oldVal)
   
   i Using an arrow function here means that the `this` context will not refer to the Vue instance, which is probably not what you want.
   
@@ -78,27 +95,27 @@ invalid-define.vue:10:13 lint/nursery/noVueArrowFuncInWatch  FIXABLE  ━━━�
   
   i Unsafe fix: Rewrite the arrow function into a function expression.
   
-     8  8 │       },
-     9  9 │       bar: {
-    10    │ - → → → handler:·(val,·oldVal)·=>·{
-       10 │ + → → → handler:·function(val,·oldVal)·{
-    11 11 │   				console.log('new: %s, old: %s', val, oldVal)
-    12 12 │   			}
+     9  9 │       },
+    10 10 │       bar: {
+    11    │ - → → → handler:·(val,·oldVal)·=>·{
+       11 │ + → → → handler:·function(val,·oldVal)·{
+    12 12 │           console.log('new: %s, old: %s', val, oldVal)
+    13 13 │         }
   
 
 ```
 
 ```
-invalid-define.vue:14:12 lint/nursery/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-define.vue:15:12 lint/nursery/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Found arrow function in Vue watcher definition.
   
-    12 │ 			}
-    13 │     }
-  > 14 │     short: (val, oldVal) => console.log('new: %s, old: %s', val, oldVal)
+    13 │ 			}
+    14 │     }
+  > 15 │     short: (val, oldVal) => console.log('new: %s, old: %s', val, oldVal)
        │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    15 │   }
-    16 │ })
+    16 │   }
+    17 │ })
   
   i Using an arrow function here means that the `this` context will not refer to the Vue instance, which is probably not what you want.
   
@@ -106,14 +123,14 @@ invalid-define.vue:14:12 lint/nursery/noVueArrowFuncInWatch  FIXABLE  ━━━�
   
   i Unsafe fix: Rewrite the arrow function into a function expression.
   
-    12 12 │   			}
-    13 13 │       }
-    14    │ - ····short:·(val,·oldVal)·=>·console.log('new:·%s,·old:·%s',·val,·oldVal)
-       14 │ + ····short:·function(val,·oldVal)·{
-       15 │ + return·console.log('new:·%s,·old:·%s',·val,·oldVal)
-       16 │ + }
-    15 17 │     }
-    16 18 │   })
+    13 13 │   			}
+    14 14 │       }
+    15    │ - ····short:·(val,·oldVal)·=>·console.log('new:·%s,·old:·%s',·val,·oldVal)
+       15 │ + ····short:·function(val,·oldVal)·{
+       16 │ + return·console.log('new:·%s,·old:·%s',·val,·oldVal)
+       17 │ + }
+    16 18 │     }
+    17 19 │   })
   
 
 ```

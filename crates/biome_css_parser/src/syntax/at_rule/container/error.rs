@@ -23,8 +23,37 @@ pub(crate) fn expected_any_container_query_in_parens(
         &[
             "( <container-query> )",
             "( <size-feature> )",
+            "scroll-state( <scroll-state-query> )",
             "style( <style-query> )",
         ],
+        range,
+    )
+    .into_diagnostic(p)
+}
+
+pub(crate) fn expected_any_container_scroll_state_query(
+    p: &CssParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    expect_one_of(
+        &[
+            "not <scroll-state-in-parens>",
+            "<scroll-state-in-parens>",
+            "<scroll-state-feature>",
+            "<scroll-state-in-parens> and <scroll-state-in-parens>",
+            "<scroll-state-in-parens> or <scroll-state-in-parens>",
+        ],
+        range,
+    )
+    .into_diagnostic(p)
+}
+
+pub(crate) fn expected_any_container_scroll_state_in_parens(
+    p: &CssParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    expect_one_of(
+        &["( <scroll-state-query> )", "( <scroll-state-feature> )"],
         range,
     )
     .into_diagnostic(p)

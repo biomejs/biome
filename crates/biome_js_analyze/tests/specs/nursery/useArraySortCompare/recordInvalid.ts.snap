@@ -1,0 +1,56 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: recordInvalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// Record with array values sorted without a comparator
+const groups: Record<string, number[]> = {};
+groups["a"].sort();
+groups["b"].toSorted();
+
+```
+
+# Diagnostics
+```
+recordInvalid.ts:5:1 lint/nursery/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Compare function missing.
+  
+    3 │ // Record with array values sorted without a comparator
+    4 │ const groups: Record<string, number[]> = {};
+  > 5 │ groups["a"].sort();
+      │ ^^^^^^^^^^^^^^^^^^
+    6 │ groups["b"].toSorted();
+    7 │ 
+  
+  i When called without a compare function, Array#sort() and Array#toSorted() converts all non-undefined array elements into strings and then compares said strings based off their UTF-16 code units.
+  
+  i Add a compare function to prevent unexpected sorting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+recordInvalid.ts:6:1 lint/nursery/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Compare function missing.
+  
+    4 │ const groups: Record<string, number[]> = {};
+    5 │ groups["a"].sort();
+  > 6 │ groups["b"].toSorted();
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+  
+  i When called without a compare function, Array#sort() and Array#toSorted() converts all non-undefined array elements into strings and then compares said strings based off their UTF-16 code units.
+  
+  i Add a compare function to prevent unexpected sorting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

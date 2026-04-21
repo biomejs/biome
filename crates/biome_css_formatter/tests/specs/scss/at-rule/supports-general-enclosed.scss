@@ -1,0 +1,11 @@
+@supports foo(bar: baz) {
+  .a { color: red; }
+}
+
+@supports (foo(bar: baz)) and (display: grid) {
+  .b { display: grid; }
+}
+
+@supports foo(url("a.svg" namespace.fn(test))) {
+  .c { color: green; }
+}

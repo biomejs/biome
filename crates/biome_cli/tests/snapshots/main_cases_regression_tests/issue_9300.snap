@@ -1,0 +1,21 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `form.astro`
+
+```astro
+<form.Field></form.Field>
+```
+
+## `form.svelte`
+
+```svelte
+<form.Field></form.Field>
+```
+
+# Emitted Messages
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+```

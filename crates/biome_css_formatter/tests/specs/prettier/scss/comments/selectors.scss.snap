@@ -1,0 +1,250 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/comments/selectors.scss
+---
+
+# Input
+
+```scss
+.powerPathNavigator .helm button.pressedButton, // comment 1
+.powerPathNavigator .helm button:active:not(.disabledButton),
+.powerPathNavigator table.powerPathInfo th:active,
+.powerPathNavigator table.powerPathInfo th:active + th:last-child {
+}
+
+// comment 2
+.powerPathNavigator .helm button.pressedButton,
+.powerPathNavigator .helm button:active:not(.disabledButton) {
+}
+
+.foo,
+// comment 3
+.bar {
+  display: block;
+}
+
+.field
+  {
+  &[data-field-id="1"], // comment 4
+  &[data-field-id="2"], // comment 5
+  &[data-field-id="3"], // comment 6
+  {
+    background: green;
+  }
+}
+
+// comment 7
+.field
+// comment 8
+{ // comment 9
+  // comment 10
+  &[data-field-id="1"], // comment 11
+  // comment 12
+  &[data-field-id="2"] // comment 13
+  // comment 14
+  , // comment 15
+  // comment 16
+  &[data-field-id="3"], // comment 17
+  // comment 18
+  { // comment 19
+    // comment 20
+    background: green;
+    // comment 21
+  } // comment 22
+  // comment 23
+}
+// comment 24
+
+.foo
+// comment 25
+.bar
+// comment 26
+{}
+
+.foo
+// comment 27
++
+// comment 28
+.bar
+// comment 29
+{}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,6 @@
+-.powerPathNavigator .helm button.pressedButton, // comment 1
++.powerPathNavigator
++  .helm
++  button.pressedButton, // comment 1
+ .powerPathNavigator .helm button:active:not(.disabledButton),
+ .powerPathNavigator table.powerPathInfo th:active,
+ .powerPathNavigator table.powerPathInfo th:active + th:last-child {
+@@ -11,7 +13,7 @@
+ 
+ .foo,
+ // comment 3
+-.bar {
++  .bar {
+   display: block;
+ }
+ 
+@@ -25,8 +27,7 @@
+ }
+ 
+ // comment 7
+-.field
+-// comment 8
++.field // comment 8
+ {
+   // comment 9
+   // comment 10
+@@ -38,8 +39,7 @@
+   // comment 16
+   &[data-field-id="3"], // comment 17
+   // comment 18
+-  {
+-    // comment 19
++  { // comment 19
+     // comment 20
+     background: green;
+     // comment 21
+@@ -50,16 +50,13 @@
+ 
+ .foo
+ // comment 25
+-.bar
+-// comment 26
++.bar // comment 26
+ {
+ }
+ 
+ .foo
+-// comment 27
+-+
+-// comment 28
+-.bar
+-// comment 29
++  + // comment 27
++  // comment 28
++  .bar // comment 29
+ {
+ }
+```
+
+# Output
+
+```scss
+.powerPathNavigator
+  .helm
+  button.pressedButton, // comment 1
+.powerPathNavigator .helm button:active:not(.disabledButton),
+.powerPathNavigator table.powerPathInfo th:active,
+.powerPathNavigator table.powerPathInfo th:active + th:last-child {
+}
+
+// comment 2
+.powerPathNavigator .helm button.pressedButton,
+.powerPathNavigator .helm button:active:not(.disabledButton) {
+}
+
+.foo,
+// comment 3
+  .bar {
+  display: block;
+}
+
+.field {
+  &[data-field-id="1"], // comment 4
+  &[data-field-id="2"], // comment 5
+  &[data-field-id="3"], // comment 6
+  {
+    background: green;
+  }
+}
+
+// comment 7
+.field // comment 8
+{
+  // comment 9
+  // comment 10
+  &[data-field-id="1"], // comment 11
+  // comment 12
+  &[data-field-id="2"] // comment 13
+  // comment 14
+  , // comment 15
+  // comment 16
+  &[data-field-id="3"], // comment 17
+  // comment 18
+  { // comment 19
+    // comment 20
+    background: green;
+    // comment 21
+  } // comment 22
+  // comment 23
+}
+// comment 24
+
+.foo
+// comment 25
+.bar // comment 26
+{
+}
+
+.foo
+  + // comment 27
+  // comment 28
+  .bar // comment 29
+{
+}
+```
+
+# Errors
+```
+selectors.scss:23:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '{'.
+  
+    21 │   &[data-field-id="2"], // comment 5
+    22 │   &[data-field-id="3"], // comment 6
+  > 23 │   {
+       │   ^
+    24 │     background: green;
+    25 │   }
+  
+  i Expected a relative selector here.
+  
+    21 │   &[data-field-id="2"], // comment 5
+    22 │   &[data-field-id="3"], // comment 6
+  > 23 │   {
+       │   ^
+    24 │     background: green;
+    25 │   }
+  
+selectors.scss:41:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a relative selector but instead found '{'.
+  
+    39 │   &[data-field-id="3"], // comment 17
+    40 │   // comment 18
+  > 41 │   { // comment 19
+       │   ^
+    42 │     // comment 20
+    43 │     background: green;
+  
+  i Expected a relative selector here.
+  
+    39 │   &[data-field-id="3"], // comment 17
+    40 │   // comment 18
+  > 41 │   { // comment 19
+       │   ^
+    42 │     // comment 20
+    43 │     background: green;
+  
+
+```
