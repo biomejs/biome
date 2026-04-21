@@ -1,0 +1,60 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/expression/map-values.scss
+---
+
+# Input
+
+```scss
+$mapValueScalar:(key:(value),);
+$mapValueList:(key:(#d82d2d,#666),other-key:(#52bf4a,#fff),);
+$mapValueMap:(key:(other-key:other-other-value),);
+$mapValueScalarBroken:(key:(very-very-very-very-very-very-very-very-very-very-very-very-very-long-scalar),);
+$mapValueListBroken:(key:(very-very-very-very-very-very-long-list-item-1,very-very-very-very-very-very-long-list-item-2,very-very-very-very-very-very-long-list-item-3),);
+$mapValueMapBroken:(key:((very-very-very-very-very-very-very-very-long-map-key:very-very-very-very-very-very-very-very-long-map-value,other-key:other-other-value)),);
+
+```
+
+
+# Formatted
+
+```scss
+$mapValueScalar: (
+	key: (value),
+);
+$mapValueList: (
+	key: (#d82d2d, #666),
+	other-key: (#52bf4a, #fff),
+);
+$mapValueMap: (
+	key: (
+		other-key: other-other-value,
+	),
+);
+$mapValueScalarBroken: (
+	key: (
+		very-very-very-very-very-very-very-very-very-very-very-very-very-long-scalar
+	),
+);
+$mapValueListBroken: (
+	key: (
+			very-very-very-very-very-very-long-list-item-1,
+			very-very-very-very-very-very-long-list-item-2,
+			very-very-very-very-very-very-long-list-item-3,
+	),
+);
+$mapValueMapBroken: (
+	key: (
+		(
+			very-very-very-very-very-very-very-very-long-map-key: very-very-very-very-very-very-very-very-long-map-value,
+			other-key: other-other-value,
+		)
+	),
+);
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   28: 			very-very-very-very-very-very-very-very-long-map-key: very-very-very-very-very-very-very-very-long-map-value,
+```

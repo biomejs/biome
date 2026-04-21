@@ -1,0 +1,55 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/expression/map-expansion.scss
+---
+
+# Input
+
+```scss
+$compact:(("key":"value"):"hello world");
+$longListKey:(("list","long long long long long long long long long long long long long list"):"hello world");
+$longMapKey:(("key":"value","long long long long long long long long long long long long long map":"value",):"hello world");
+$nestedMapInKey:(fn((a:b)):c,);
+$longPairs:(very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key:very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key:very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,);
+
+```
+
+
+# Formatted
+
+```scss
+$compact: (
+	("key": "value"): "hello world",
+);
+$longListKey: (
+	(
+			"list",
+			"long long long long long long long long long long long long long list"
+	): "hello world",
+);
+$longMapKey: (
+	(
+		"key": "value",
+		"long long long long long long long long long long long long long map":
+			"value",
+	): "hello world",
+);
+$nestedMapInKey: (
+	fn(
+		(
+			a: b,
+		)
+	): c,
+);
+$longPairs: (
+	very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
+	very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,
+);
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   25: 	very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
+   26: 	very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,
+```
