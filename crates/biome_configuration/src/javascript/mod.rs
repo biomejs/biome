@@ -37,7 +37,7 @@ pub struct JsConfiguration {
     pub assist: Option<JsAssistConfiguration>,
 
     /// Module/dependency resolver options
-    #[bpaf(external(js_resolver_configuration), optional)]
+    #[cfg_attr(feature = "cli", bpaf(external(js_resolver_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub resolver: Option<JsResolverConfiguration>,
 
@@ -60,9 +60,8 @@ pub struct JsConfiguration {
 }
 
 /// Resolver options specific to JavaScript files
-#[derive(
-    Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
-)]
+#[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
+#[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct JsResolverConfiguration {
@@ -89,7 +88,7 @@ pub struct JsResolverConfiguration {
     ///   string entries.
     ///
     /// Default: `false`.
-    #[bpaf(hide)]
+    #[cfg_attr(feature = "cli", bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub experimental_pnpm_catalogs: Option<ExperimentalPnpmCatalogsEnabled>,
 }

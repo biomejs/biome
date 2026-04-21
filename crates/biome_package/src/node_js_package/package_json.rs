@@ -257,7 +257,9 @@ fn parse_catalog_mapping_entry(
 
 /// Narrows a block node to a `YamlBlockMapping` if it represents a mapping.
 fn as_catalog_block_mapping(node: &AnyYamlBlockNode) -> Option<YamlBlockMapping> {
-    node.as_any_yaml_block_in_block_node()?
+    node.as_yaml_block_in_block_node()?
+        .content()
+        .ok()?
         .as_yaml_block_mapping()
         .cloned()
 }
@@ -288,7 +290,7 @@ fn extract_catalog_scalar_from_implicit_key(key: &AnyYamlMappingImplicitKey) -> 
     }
 
     if let Some(flow_json) = key.as_yaml_flow_json_node()
-        && let Some(content) = flow_json.content()
+        && let Ok(content) = flow_json.content()
     {
         return match content {
             AnyYamlJsonContent::YamlDoubleQuotedScalar(scalar) => scalar
@@ -319,7 +321,7 @@ fn extract_catalog_scalar_from_flow_node(node: &AnyYamlFlowNode) -> Option<Box<s
     }
 
     if let Some(flow_json) = node.as_yaml_flow_json_node()
-        && let Some(content) = flow_json.content()
+        && let Ok(content) = flow_json.content()
     {
         return match content {
             AnyYamlJsonContent::YamlDoubleQuotedScalar(scalar) => scalar
@@ -347,8 +349,8 @@ fn extract_catalog_scalar_from_block_node(node: &AnyYamlBlockNode) -> Option<Box
         return extract_catalog_scalar_from_flow_node(&flow_node);
     }
 
-    if let Some(block) = node.as_any_yaml_block_in_block_node()
-        && let Some(mapping) = block.as_yaml_block_mapping()
+    if let Some(block) = node.as_yaml_block_in_block_node()
+        && let Some(mapping) = block.content().ok().and_then(|c| c.as_yaml_block_mapping().cloned())
         && mapping.entries().is_empty()
     {
         return None;
