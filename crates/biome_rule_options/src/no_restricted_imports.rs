@@ -251,7 +251,7 @@ impl PatternOptions {
             let source = ImportSource::from(ComparableToken {
                 token: import_source_text.clone(),
             });
-            let candidate = ImportSourceCandidate::new(&source);
+            let candidate = ImportSourceCandidate::new(&source, false);
             if group.is_match(&candidate) {
                 return check_import_restrictions(
                     self,

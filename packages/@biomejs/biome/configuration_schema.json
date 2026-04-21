@@ -2647,6 +2647,7 @@
 			"type": "string",
 			"enum": [
 				":ALIAS:",
+				":BARE:",
 				":BUN:",
 				":NODE:",
 				":PACKAGE:",
@@ -2655,6 +2656,7 @@
 				":STYLE:",
 				":URL:",
 				"!:ALIAS:",
+				"!:BARE:",
 				"!:BUN:",
 				"!:NODE:",
 				"!:PACKAGE:",

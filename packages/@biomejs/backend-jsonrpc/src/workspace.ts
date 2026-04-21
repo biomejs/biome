@@ -8958,6 +8958,7 @@ export type Modifiers = RestrictedModifier[];
 export type Scope = "any" | "global";
 export type NegatablePredefinedSourceMatcher =
 	| ":ALIAS:"
+	| ":BARE:"
 	| ":BUN:"
 	| ":NODE:"
 	| ":PACKAGE:"
@@ -8966,6 +8967,7 @@ export type NegatablePredefinedSourceMatcher =
 	| ":STYLE:"
 	| ":URL:"
 	| "!:ALIAS:"
+	| "!:BARE:"
 	| "!:BUN:"
 	| "!:NODE:"
 	| "!:PACKAGE:"

@@ -351,6 +351,8 @@ impl schemars::JsonSchema for NegatablePredefinedSourceMatcher {
 pub enum PredefinedSourceMatcher {
     #[serde(rename = ":ALIAS:")]
     Alias,
+    #[serde(rename = ":BARE:")]
+    Bare,
     #[serde(rename = ":BUN:")]
     Bun,
     #[serde(rename = ":NODE:")]
@@ -372,6 +374,7 @@ impl PredefinedSourceMatcher {
         let source = candidate.as_str();
         match self {
             Self::Alias => source_kind == ImportSourceKind::Alias,
+            Self::Bare => candidate.is_bare,
             Self::Bun => {
                 (source_kind == ImportSourceKind::Package && source == "bun")
                     || (source_kind == ImportSourceKind::ProtocolPackage
@@ -401,6 +404,7 @@ impl std::fmt::Display for PredefinedSourceMatcher {
         let repr = match self {
             // Don't forget to update `impl std::str::FromStr for PredefinedSourceMatcher`
             Self::Alias => ":ALIAS:",
+            Self::Bare => ":BARE:",
             Self::Bun => ":BUN:",
             Self::Node => ":NODE:",
             Self::Package => ":PACKAGE:",
@@ -417,6 +421,7 @@ impl std::str::FromStr for PredefinedSourceMatcher {
     fn from_str(value: &str) -> Result<Self, Self::Err> {
         match value {
             ":ALIAS:" => Ok(Self::Alias),
+            ":BARE:" => Ok(Self::Bare),
             ":BUN:" => Ok(Self::Bun),
             ":NODE:" => Ok(Self::Node),
             ":PACKAGE:" => Ok(Self::Package),
@@ -457,13 +462,18 @@ impl ImportSourceGlob {
 pub struct ImportSourceCandidate<'a> {
     source: &'a ImportSource<ComparableToken>,
     path_candidate: CandidatePath<'a>,
+    /// Whether the underlying import is a bare (side-effect) import, e.g. `import "polyfill"`.
+    /// Required by the `:BARE:` predefined matcher, which is kind-based rather than
+    /// source-text-based but still dispatches through the source-matcher machinery.
+    is_bare: bool,
 }
 impl<'a> ImportSourceCandidate<'a> {
     /// Create a new candidate for matching from the given path.
-    pub fn new(source: &'a ImportSource<ComparableToken>) -> Self {
+    pub fn new(source: &'a ImportSource<ComparableToken>, is_bare: bool) -> Self {
         Self {
             source,
             path_candidate: CandidatePath::new(source.inner().token.text()),
+            is_bare,
         }
     }
 
