@@ -4,9 +4,10 @@ use crate::test_utils::setup_workspace_and_open_project;
 use crate::workspace::{FileContent, OpenFileParams, UpdateSettingsParams};
 use biome_configuration::{Configuration, HtmlConfiguration};
 use biome_fs::{BiomePath, MemoryFileSystem};
+use biome_parser::prelude::ParseDiagnostic;
 use camino::{Utf8Path, Utf8PathBuf};
 
-fn assert_no_diagnostics(file: &str, content: &str) {
+fn prepare(file: &str, content: &str) -> Vec<ParseDiagnostic> {
     let fs = MemoryFileSystem::default();
     fs.insert(Utf8PathBuf::from(file), content);
 
@@ -39,13 +40,25 @@ fn assert_no_diagnostics(file: &str, content: &str) {
         })
         .unwrap();
 
-    let diagnostics = workspace
+    workspace
         .get_parse_diagnostics(Utf8Path::new(file))
-        .unwrap();
+        .unwrap()
+}
 
+fn assert_no_diagnostics(file: &str, content: &str) {
+    let diagnostics = prepare(file, content);
     assert!(
         diagnostics.is_empty(),
         "Expected no parse errors for typed Svelte snippet, got: {diagnostics:#?}"
+    );
+}
+
+fn assert_diagnostics(file: &str, content: &str) {
+    let diagnostics = prepare(file, content);
+
+    assert!(
+        !diagnostics.is_empty(),
+        "Expected diagnostics, but none were emitted"
     );
 }
 
@@ -66,4 +79,23 @@ fn snippet_svelte_ts_parsing() {
 "#;
 
     assert_no_diagnostics(FILE_PATH, FILE_CONTENT);
+}
+
+#[test]
+fn snippet_svelte_incorrect() {
+    const FILE_PATH: &str = "/project/file.svelte";
+    const FILE_CONTENT: &str = r#"<script lang="ts">
+	let name = $state('world');
+</script>
+
+<h1>Hello {name}!</h1>
+
+{#snippet add}
+	{a} + {b} = {a + b}
+{/snippet}
+
+{@render add(1, 2)}
+"#;
+
+    assert_diagnostics(FILE_PATH, FILE_CONTENT);
 }

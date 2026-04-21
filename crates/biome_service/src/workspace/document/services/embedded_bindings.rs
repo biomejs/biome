@@ -6,7 +6,7 @@ use biome_js_syntax::{
     AnyJsModuleItem, AnyJsObjectAssignmentPatternMember, AnyJsObjectBindingPatternMember,
     AnyJsObjectMember, AnyJsRoot, AnyJsStatement, AnyTsIdentifierBinding, AnyTsType,
     JsAssignmentExpression, JsCallExpression, JsExport, JsImport, JsModuleItemList,
-    JsSnippetSignatureTemplateRoot, JsVariableStatement,
+    JsSvelteSnippetRoot, JsVariableStatement,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, TokenText, WalkEvent};
 use std::collections::VecDeque;
@@ -72,7 +72,7 @@ impl EmbeddedBuilder {
                         && host_file_source.is_svelte()
                     {
                         self.visit_svelte_const_assignment(&assign, embed_block_kind);
-                    } else if let Some(root) = JsSnippetSignatureTemplateRoot::cast_ref(&node)
+                    } else if let Some(root) = JsSvelteSnippetRoot::cast_ref(&node)
                         && host_file_source.is_svelte()
                     {
                         self.visit_svelte_snippet_declaration(&root, embed_block_kind);
@@ -104,7 +104,7 @@ impl EmbeddedBuilder {
     /// Registers the bindings that are declared inside a `#snippet` block
     fn visit_svelte_snippet_declaration(
         &mut self,
-        root: &JsSnippetSignatureTemplateRoot,
+        root: &JsSvelteSnippetRoot,
         embed_block_kind: Option<&EmbedBlockKind>,
     ) -> Option<()> {
         let EmbedBlockKind::Svelte(SvelteBlockKind::Snippet) = embed_block_kind? else {
@@ -118,7 +118,7 @@ impl EmbeddedBuilder {
             self.register_binding(token.text_trimmed_range(), token.token_text_trimmed());
         }
 
-        if let Some(parameters) = root.parameters() {
+        if let Ok(parameters) = root.parameters() {
             for param in parameters.items().iter().flatten() {
                 if let Some(formal) = param
                     .as_any_js_formal_parameter()

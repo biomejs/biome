@@ -121,7 +121,7 @@ fn parse_snippet_signature(p: &mut JsParser, m: Marker) -> CompletedMarker {
         TypeContext::default(),
         SignatureFlags::empty(),
     )
-    .ok();
+    .or_add_diagnostic(p, js_parse_error::expected_class_parameters);
 
     if !p.at(EOF) {
         p.error(js_parse_error::template_expression_trailing_code(
@@ -133,5 +133,5 @@ fn parse_snippet_signature(p: &mut JsParser, m: Marker) -> CompletedMarker {
         }
     }
 
-    m.complete(p, JS_SNIPPET_SIGNATURE_TEMPLATE_ROOT)
+    m.complete(p, JS_SVELTE_SNIPPET_ROOT)
 }

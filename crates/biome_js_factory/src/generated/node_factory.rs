@@ -3321,38 +3321,6 @@ pub fn js_shorthand_property_object_member(
         [Some(SyntaxElement::Node(name.into_syntax()))],
     ))
 }
-pub fn js_snippet_signature_template_root(
-    name: AnyJsBinding,
-    eof_token: SyntaxToken,
-) -> JsSnippetSignatureTemplateRootBuilder {
-    JsSnippetSignatureTemplateRootBuilder {
-        name,
-        eof_token,
-        parameters: None,
-    }
-}
-pub struct JsSnippetSignatureTemplateRootBuilder {
-    name: AnyJsBinding,
-    eof_token: SyntaxToken,
-    parameters: Option<JsParameters>,
-}
-impl JsSnippetSignatureTemplateRootBuilder {
-    pub fn with_parameters(mut self, parameters: JsParameters) -> Self {
-        self.parameters = Some(parameters);
-        self
-    }
-    pub fn build(self) -> JsSnippetSignatureTemplateRoot {
-        JsSnippetSignatureTemplateRoot::unwrap_cast(SyntaxNode::new_detached(
-            JsSyntaxKind::JS_SNIPPET_SIGNATURE_TEMPLATE_ROOT,
-            [
-                Some(SyntaxElement::Node(self.name.into_syntax())),
-                self.parameters
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.eof_token)),
-            ],
-        ))
-    }
-}
 pub fn js_spread(dotdotdot_token: SyntaxToken, argument: AnyJsExpression) -> JsSpread {
     JsSpread::unwrap_cast(SyntaxNode::new_detached(
         JsSyntaxKind::JS_SPREAD,
@@ -3422,6 +3390,20 @@ pub fn js_super_expression(super_token: SyntaxToken) -> JsSuperExpression {
     JsSuperExpression::unwrap_cast(SyntaxNode::new_detached(
         JsSyntaxKind::JS_SUPER_EXPRESSION,
         [Some(SyntaxElement::Token(super_token))],
+    ))
+}
+pub fn js_svelte_snippet_root(
+    name: AnyJsBinding,
+    parameters: JsParameters,
+    eof_token: SyntaxToken,
+) -> JsSvelteSnippetRoot {
+    JsSvelteSnippetRoot::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JS_SVELTE_SNIPPET_ROOT,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(parameters.into_syntax())),
+            Some(SyntaxElement::Token(eof_token)),
+        ],
     ))
 }
 pub fn js_switch_statement(
