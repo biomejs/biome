@@ -350,7 +350,10 @@ fn extract_catalog_scalar_from_block_node(node: &AnyYamlBlockNode) -> Option<Box
     }
 
     if let Some(block) = node.as_yaml_block_in_block_node()
-        && let Some(mapping) = block.content().ok().and_then(|c| c.as_yaml_block_mapping().cloned())
+        && let Some(mapping) = block
+            .content()
+            .ok()
+            .and_then(|c| c.as_yaml_block_mapping().cloned())
         && mapping.entries().is_empty()
     {
         return None;
