@@ -26,26 +26,6 @@ impl FormatNodeRule<ScssMapExpression> for FormatScssMapExpression {
     }
 }
 
-/// Returns `true` when the map expression should force a multiline layout.
-///
-/// A single-pair map stays inline only when the map itself is the direct key of
-/// an enclosing pair, e.g. `("key": "value"): ...`.
-///
-/// Multi-pair maps, values, and nested maps inside a larger key all expand.
-fn should_expand_map_expression(node: &ScssMapExpression) -> bool {
-    let pair_count = node.pairs().len();
-
-    if pair_count == 0 {
-        return false;
-    }
-
-    if pair_count > 1 {
-        return true;
-    }
-
-    !is_scss_map_key(node)
-}
-
 struct ScssMapLayout<'a> {
     node: &'a ScssMapExpression,
     group_id: GroupId,
@@ -170,4 +150,24 @@ impl<'a> ScssMapLayout<'a> {
             }
         })
     }
+}
+
+/// Returns `true` when the map expression should force a multiline layout.
+///
+/// A single-pair map stays inline only when the map itself is the direct key of
+/// an enclosing pair, e.g. `("key": "value"): ...`.
+///
+/// Multi-pair maps, values, and nested maps inside a larger key all expand.
+fn should_expand_map_expression(node: &ScssMapExpression) -> bool {
+    let pair_count = node.pairs().len();
+
+    if pair_count == 0 {
+        return false;
+    }
+
+    if pair_count > 1 {
+        return true;
+    }
+
+    !is_scss_map_key(node)
 }
