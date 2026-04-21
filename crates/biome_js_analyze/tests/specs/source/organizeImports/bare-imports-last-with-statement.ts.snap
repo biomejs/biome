@@ -1,0 +1,51 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: bare-imports-last-with-statement.ts
+---
+# Input
+```ts
+import { A } from "a";
+import "./first";
+import { B } from "b";
+
+const sentinel = true;
+
+import { C } from "c";
+import "./second";
+import { D } from "d";
+
+```
+
+# Diagnostics
+```
+bare-imports-last-with-statement.ts:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+  > 1 │ import { A } from "a";
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    2 │ import "./first";
+    3 │ import { B } from "b";
+  
+  i Safe fix: Organize Imports (Biome)
+  
+     1  1 │   import { A } from "a";
+     2    │ - import·"./first";
+     3    │ - import·{·B·}·from·"b";
+        2 │ + import·{·B·}·from·"b";
+        3 │ + 
+        4 │ + import·"./first";
+     4  5 │   
+     5  6 │   const sentinel = true;
+     6  7 │   
+     7  8 │   import { C } from "c";
+     8    │ - import·"./second";
+     9    │ - import·{·D·}·from·"d";
+        9 │ + import·{·D·}·from·"d";
+       10 │ + 
+       11 │ + import·"./second";
+    10 12 │   
+  
+
+```

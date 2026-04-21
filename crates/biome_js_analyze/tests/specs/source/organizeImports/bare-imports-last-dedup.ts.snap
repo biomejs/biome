@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: bare-imports-last-dedup.ts
+---
+# Input
+```ts
+import { A } from "a";
+import "./polyfills";
+import { B } from "b";
+import "./polyfills";
+
+```
+
+# Diagnostics
+```
+bare-imports-last-dedup.ts:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+  > 1 │ import { A } from "a";
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    2 │ import "./polyfills";
+    3 │ import { B } from "b";
+  
+  i Safe fix: Organize Imports (Biome)
+  
+    1 1 │   import { A } from "a";
+    2   │ - import·"./polyfills";
+    3   │ - import·{·B·}·from·"b";
+    4   │ - import·"./polyfills";
+      2 │ + import·{·B·}·from·"b";
+      3 │ + 
+      4 │ + import·"./polyfills";
+    5 5 │   
+  
+
+```

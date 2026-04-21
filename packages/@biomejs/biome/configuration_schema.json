@@ -421,6 +421,20 @@
 				}
 			]
 		},
+		"BareImportsPosition": {
+			"oneOf": [
+				{
+					"description": "Bare (side-effect) imports keep their original position and form their own chunks.",
+					"type": "string",
+					"const": "preserve"
+				},
+				{
+					"description": "Bare (side-effect) imports are grouped together and placed after all other imports.",
+					"type": "string",
+					"const": "last"
+				}
+			]
+		},
 		"Bool": { "type": "boolean" },
 		"BracketSameLine": {
 			"description": "Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).",
@@ -7030,6 +7044,12 @@
 		"OrganizeImportsOptions": {
 			"type": "object",
 			"properties": {
+				"bareImports": {
+					"anyOf": [
+						{ "$ref": "#/$defs/BareImportsPosition" },
+						{ "type": "null" }
+					]
+				},
 				"groups": {
 					"anyOf": [{ "$ref": "#/$defs/ImportGroups" }, { "type": "null" }]
 				},

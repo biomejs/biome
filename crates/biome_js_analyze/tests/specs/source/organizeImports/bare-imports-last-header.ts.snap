@@ -1,0 +1,42 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: bare-imports-last-header.ts
+---
+# Input
+```ts
+// Copyright (c) 2024 ACME Corp. Licensed under MIT.
+import "./polyfills";
+import { B } from "b";
+import { A } from "a";
+import "./styles.css";
+
+```
+
+# Diagnostics
+```
+bare-imports-last-header.ts:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+    1 │ // Copyright (c) 2024 ACME Corp. Licensed under MIT.
+  > 2 │ import "./polyfills";
+      │ ^^^^^^^^^^^^^^^^^^^^^
+    3 │ import { B } from "b";
+    4 │ import { A } from "a";
+  
+  i Safe fix: Organize Imports (Biome)
+  
+    1 1 │   // Copyright (c) 2024 ACME Corp. Licensed under MIT.
+    2   │ - import·"./polyfills";
+      2 │ + 
+      3 │ + import·{·A·}·from·"a";
+    3 4 │   import { B } from "b";
+    4   │ - import·{·A·}·from·"a";
+      5 │ + 
+      6 │ + import·"./polyfills";
+    5 7 │   import "./styles.css";
+    6 8 │   
+  
+
+```

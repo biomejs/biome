@@ -75,7 +75,7 @@ impl PartialOrd for ImportKey {
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[enumflags2::bitflags]
-#[repr(u8)]
+#[repr(u16)]
 pub enum ImportStatementKind {
     NamespaceType = 1 << 0,
     DefaultType = 1 << 1,
@@ -85,6 +85,8 @@ pub enum ImportStatementKind {
     Default = 1 << 5,
     DefaultNamed = 1 << 6,
     Named = 1 << 7,
+    /// Bare (side-effect) import, e.g. `import "polyfill";`.
+    Bare = 1 << 8,
 }
 impl ImportStatementKind {
     pub fn has_type_token(self) -> bool {
@@ -98,6 +100,7 @@ impl ImportStatementKind {
             Self::DefaultNamed => kinds.contains(Self::Named),
             Self::Named => kinds.intersects(Self::DefaultNamed | Self::Named | Self::Default),
             Self::NamedType => kinds.contains(Self::NamedType),
+            Self::Bare => kinds.contains(Self::Bare),
             _ => false,
         }
     }
@@ -119,16 +122,37 @@ impl ImportInfo {
         match item {
             AnyJsModuleItem::AnyJsStatement(_) => None,
             AnyJsModuleItem::JsExport(export) => Self::from_export(export),
-            AnyJsModuleItem::JsImport(import) => Self::from_import(import),
+            AnyJsModuleItem::JsImport(import) => Self::from_import(import, false),
+        }
+    }
+
+    /// Same as [`ImportInfo::from_module_item`], but also returns [`ImportInfo`] for
+    /// bare (side-effect) imports. Used when the `bareImports` option is set to `"last"`.
+    pub fn from_module_item_including_bare(
+        item: &AnyJsModuleItem,
+    ) -> Option<(Self, Option<JsNamedSpecifiers>, Option<JsImportAssertion>)> {
+        match item {
+            AnyJsModuleItem::AnyJsStatement(_) => None,
+            AnyJsModuleItem::JsExport(export) => Self::from_export(export),
+            AnyJsModuleItem::JsImport(import) => Self::from_import(import, true),
         }
     }
 
     fn from_import(
         value: &JsImport,
+        include_bare: bool,
     ) -> Option<(Self, Option<JsNamedSpecifiers>, Option<JsImportAssertion>)> {
         let (kind, named_specifiers, source, attributes) = match value.import_clause().ok()? {
-            AnyJsImportClause::JsImportBareClause(_) => {
-                return None;
+            AnyJsImportClause::JsImportBareClause(clause) => {
+                if !include_bare {
+                    return None;
+                }
+                (
+                    ImportStatementKind::Bare,
+                    None,
+                    clause.source(),
+                    clause.assertion(),
+                )
             }
             AnyJsImportClause::JsImportCombinedClause(clause) => {
                 let (kind, named_specifiers) = match clause.specifier().ok()? {

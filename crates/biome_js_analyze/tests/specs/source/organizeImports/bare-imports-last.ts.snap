@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: bare-imports-last.ts
+---
+# Input
+```ts
+import "./polyfills";
+import { Button } from "@/components/Button";
+import "./styles.css";
+import { render } from "react-dom";
+
+```
+
+# Diagnostics
+```
+bare-imports-last.ts:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+  > 1 │ import "./polyfills";
+      │ ^^^^^^^^^^^^^^^^^^^^^
+    2 │ import { Button } from "@/components/Button";
+    3 │ import "./styles.css";
+  
+  i Safe fix: Organize Imports (Biome)
+  
+    1   │ - import·"./polyfills";
+      1 │ + import·{·render·}·from·"react-dom";
+    2 2 │   import { Button } from "@/components/Button";
+    3   │ - import·"./styles.css";
+    4   │ - import·{·render·}·from·"react-dom";
+      3 │ + 
+      4 │ + import·"./polyfills";
+      5 │ + import·"./styles.css";
+    5 6 │   
+  
+
+```

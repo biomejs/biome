@@ -17,6 +17,13 @@ impl ImportGroups {
         self.0.is_empty()
     }
 
+    /// Returns the number of explicit groups configured by the user (including blank-line
+    /// separators). Used by synthetic groups (e.g. the trailing bare-imports group) to
+    /// compute an index strictly greater than any user-defined group.
+    pub fn explicit_group_count(&self) -> u16 {
+        self.0.len() as u16
+    }
+
     /// Returns the index of the first group containing `candidate`.
     /// If no group contains `candidate`, then the returned value corresponds to the index of the implicit group.
     /// The index of the implicit group correspond to the number of groups.

@@ -17,8 +17,11 @@ use biome_js_syntax::{
 use biome_rowan::{
     AstNode, BatchMutationExt, TextRange, TriviaPieceKind, chain_trivia_pieces, declare_node_union,
 };
-use biome_rule_options::{organize_imports::OrganizeImportsOptions, sort_order::SortOrder};
-use import_key::{ImportInfo, ImportKey};
+use biome_rule_options::{
+    organize_imports::{BareImportsPosition, OrganizeImportsOptions},
+    sort_order::SortOrder,
+};
+use import_key::{ImportInfo, ImportKey, ImportStatementKind};
 use rustc_hash::FxHashMap;
 use specifiers_attributes::{
     are_import_attributes_sorted, merge_export_from_specifiers, merge_export_specifiers,
@@ -90,6 +93,7 @@ declare_source_rule! {
     /// - `groups` allows to group imports and exports before sorting them;
     ///   It allows expressing custom order between imports or exports.
     /// - `identifierOrder` allows changing how named specifiers and attributes are sorted
+    /// - `bareImports` controls the placement of side-effect (bare) imports such as `import "polyfill"`
     ///
     /// ### `groups`
     ///
@@ -223,6 +227,31 @@ declare_source_rule! {
     ///
     /// Note that this order doesn't change how import and export sources are sorted.
     ///
+    /// ### `bareImports`
+    ///
+    /// By default, [bare imports](#chunks) (also called side-effect imports) each form their own
+    /// chunk and are never moved. Set `bareImports` to `"last"` to disable that behavior, collect
+    /// all bare imports, and place them after every other import with a blank line separator:
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "bareImports": "last"
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```ts,use_options,expect_diagnostic
+    /// import "./polyfills";
+    /// import { Button } from "@/components/Button";
+    /// import "./styles.css";
+    /// import { render } from "react-dom";
+    /// ```
+    ///
+    /// Duplicate bare imports from the same source are merged.
+    /// The default value `"preserve"` keeps today's behavior and is byte-identical to not
+    /// setting the option.
+    ///
     ///
     /// ## Common configurations
     ///
@@ -301,6 +330,27 @@ declare_source_rule! {
     /// import lib from "lib";
     /// import { useState } from "react";
     /// import { render } from "react-dom/client";
+    /// ```
+    ///
+    /// ### Place side-effect imports last
+    ///
+    /// The following example uses the `bareImports` option to group bare (side-effect)
+    /// imports at the bottom of the import list. This is useful, for example, to enforce
+    /// that web-component or polyfill registrations run after all binding imports:
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "bareImports": "last"
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```ts,use_options,expect_diagnostic
+    /// import "./register-my-component";
+    /// import { render } from "react-dom";
+    /// import "./polyfill";
+    /// import { Button } from "@/components/Button";
     /// ```
     ///
     /// ### Place CSS/style imports last
@@ -503,6 +553,8 @@ declare_source_rule! {
     /// - Any statement that is not an import or an export
     /// - Bare imports also called side-effect imports (`import "polyfill"`);
     ///   Each forms its own chunk.
+    ///   Set [`bareImports`](#bareimports) to `"last"` to disable this rule and sort
+    ///   bare imports together at the end of the surrounding chunk instead.
     /// - A comment followed by a blank line that we call a **detached comment**;
     ///   See the [comment handling section](#comment-handling) for more details.
     ///
@@ -765,11 +817,20 @@ impl Rule for OrganizeImports {
         let options = ctx.options();
         let groups = options.groups.as_ref();
         let sort_order = options.identifier_order.unwrap_or_default();
+        let bare_imports_last =
+            options.bare_imports.unwrap_or_default() == BareImportsPosition::Last;
+        let bare_group_index: Option<u16> = bare_imports_last
+            .then(|| groups.map_or(1, |g| g.explicit_group_count() + 1));
         let mut chunk: Option<ChunkBuilder> = None;
         let mut prev_kind: Option<JsSyntaxKind> = None;
         let mut prev_group = 0;
         for item in root.items() {
-            if let Some((info, specifiers, attributes)) = ImportInfo::from_module_item(&item) {
+            let info_result = if bare_imports_last {
+                ImportInfo::from_module_item_including_bare(&item)
+            } else {
+                ImportInfo::from_module_item(&item)
+            };
+            if let Some((info, specifiers, attributes)) = info_result {
                 let prev_is_distinct = prev_kind.is_some_and(|kind| kind != item.syntax().kind());
                 // A detached comment marks the start of a new chunk
                 if prev_is_distinct || has_detached_leading_comment(item.syntax()) {
@@ -777,9 +838,15 @@ impl Rule for OrganizeImports {
                     report_unsorted_chunk(chunk.take(), &mut result);
                     prev_group = 0;
                 }
-                let key = ImportKey::new(info, groups);
+                let mut key = ImportKey::new(info, groups);
+                if key.kind == ImportStatementKind::Bare
+                    && let Some(idx) = bare_group_index
+                {
+                    key.group = idx;
+                }
                 let blank_line_separated_groups = groups
-                    .is_some_and(|groups| groups.separated_by_blank_line(prev_group, key.group));
+                    .is_some_and(|groups| groups.separated_by_blank_line(prev_group, key.group))
+                    || (bare_group_index == Some(key.group) && prev_group != key.group);
                 let starts_chunk = chunk.is_none();
                 let leading_newline_count = leading_newlines(item.syntax()).count();
                 let are_specifiers_unsorted =
@@ -875,6 +942,10 @@ impl Rule for OrganizeImports {
         let options = ctx.options();
         let groups = options.groups.as_ref();
         let sort_order = options.identifier_order.unwrap_or_default();
+        let bare_imports_last =
+            options.bare_imports.unwrap_or_default() == BareImportsPosition::Last;
+        let bare_group_index: Option<u16> = bare_imports_last
+            .then(|| groups.map_or(1, |g| g.explicit_group_count() + 1));
         let root = ctx.query();
         let items = root.items().into_syntax();
         let mut organized_items: FxHashMap<u32, AnyJsModuleItem> = FxHashMap::default();
@@ -984,10 +1055,20 @@ impl Rule for OrganizeImports {
                             .skip(slot_indexes.start as usize)
                             .take(slot_indexes.len())
                             .filter_map(|item| {
-                                let info = ImportInfo::from_module_item(&item)?.0;
+                                let info = if bare_imports_last {
+                                    ImportInfo::from_module_item_including_bare(&item)?.0
+                                } else {
+                                    ImportInfo::from_module_item(&item)?.0
+                                };
                                 let item = organized_items.remove(&info.slot_index).unwrap_or(item);
+                                let mut key = ImportKey::new(info, groups);
+                                if key.kind == ImportStatementKind::Bare
+                                    && let Some(idx) = bare_group_index
+                                {
+                                    key.group = idx;
+                                }
                                 Some(KeyedItem {
-                                    key: ImportKey::new(info, groups),
+                                    key,
                                     was_merged: false,
                                     item: Some(item),
                                 })
@@ -1037,9 +1118,10 @@ impl Rule for OrganizeImports {
                         let mut new_item = new_item.into_syntax();
                         let old_item = old_item.into_node()?;
                         let blank_line_separated_groups = index != 0
-                            && groups.is_some_and(|groups| {
+                            && (groups.is_some_and(|groups| {
                                 groups.separated_by_blank_line(prev_group, key.group)
-                            });
+                            }) || (bare_group_index == Some(key.group)
+                                && prev_group != key.group));
                         prev_group = key.group;
                         // Don't make any change if it is the same node and no change have to be done
                         if !blank_line_separated_groups && index == key.slot_index && !was_merged {
@@ -1280,6 +1362,13 @@ fn merge(
                     )
                     .build();
                     item2.clone().with_import_clause(merged_clause.into())
+                }
+                (
+                    AnyJsImportClause::JsImportBareClause(_),
+                    AnyJsImportClause::JsImportBareClause(_),
+                ) => {
+                    // Same-source bare (side-effect) imports deduplicate by keeping one.
+                    item2.clone()
                 }
                 _ => return None,
             };

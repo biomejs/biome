@@ -1,0 +1,43 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: bare-imports-last-with-groups.ts
+---
+# Input
+```ts
+import "./register-components";
+import { useState } from "react";
+import { Button } from "@/components/Button";
+import "./styles.css";
+import path from "node:path";
+
+```
+
+# Diagnostics
+```
+bare-imports-last-with-groups.ts:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+  > 1 │ import "./register-components";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ import { useState } from "react";
+    3 │ import { Button } from "@/components/Button";
+  
+  i Safe fix: Organize Imports (Biome)
+  
+    1   │ - import·"./register-components";
+      1 │ + import·path·from·"node:path";
+      2 │ + 
+    2 3 │   import { useState } from "react";
+      4 │ + 
+    3 5 │   import { Button } from "@/components/Button";
+    4   │ - import·"./styles.css";
+    5   │ - import·path·from·"node:path";
+      6 │ + 
+      7 │ + import·"./register-components";
+      8 │ + import·"./styles.css";
+    6 9 │   
+  
+
+```

@@ -14,4 +14,28 @@ pub struct OrganizeImportsOptions {
     pub groups: Option<ImportGroups>,
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
     pub identifier_order: Option<SortOrder>,
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub bare_imports: Option<BareImportsPosition>,
+}
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Default,
+    Eq,
+    PartialEq,
+    serde::Deserialize,
+    serde::Serialize,
+    biome_deserialize_macros::Deserializable,
+    biome_deserialize_macros::Merge,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub enum BareImportsPosition {
+    /// Bare (side-effect) imports keep their original position and form their own chunks.
+    #[default]
+    Preserve,
+    /// Bare (side-effect) imports are grouped together and placed after all other imports.
+    Last,
 }
