@@ -1,0 +1,21 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "style": {
+        "noRestrictedImports": {
+          "level": "error",
+          "options": {
+            "patterns": [
+              {
+                "group": [":BARE:"],
+                "message": "Side-effect imports are not allowed in this file."
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

@@ -251,7 +251,15 @@ impl PatternOptions {
             let source = ImportSource::from(ComparableToken {
                 token: import_source_text.clone(),
             });
-            let candidate = ImportSourceCandidate::new(&source, false);
+            let is_bare = match node {
+                AnyJsImportLike::JsModuleSource(module_source) => module_source
+                    .syntax()
+                    .parent()
+                    .is_some_and(|parent| parent.kind() == JsSyntaxKind::JS_IMPORT_BARE_CLAUSE),
+                AnyJsImportLike::JsCallExpression(_)
+                | AnyJsImportLike::JsImportCallExpression(_) => false,
+            };
+            let candidate = ImportSourceCandidate::new(&source, is_bare);
             if group.is_match(&candidate) {
                 return check_import_restrictions(
                     self,
