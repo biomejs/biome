@@ -298,8 +298,7 @@ where
 
         match attempt {
             FormatAttempt::Formatted(formatted) => {
-                let prettier_diff =
-                    get_prettier_diff(input_file, &relative_file_name, &formatted);
+                let prettier_diff = get_prettier_diff(input_file, &relative_file_name, &formatted);
                 let prettier_diff = match prettier_diff {
                     PrettierDiff::Diff(prettier_diff) => prettier_diff,
                     PrettierDiff::Same => return,

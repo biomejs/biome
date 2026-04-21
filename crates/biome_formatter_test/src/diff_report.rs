@@ -194,7 +194,7 @@ impl DiffReport {
 
             let single_file_metric_data = SingleFileMetricData {
                 diff,
-                filename: (*file_name).to_string(),
+                filename: (*file_name).clone(),
                 single_file_compatibility: ratio,
             };
 
