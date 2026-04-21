@@ -1036,3 +1036,7 @@ fn register_svelte_destructured_bindings(
 
     Some(())
 }
+
+#[cfg(test)]
+#[path = "parse_embedded_nodes.tests.rs"]
+mod tests;

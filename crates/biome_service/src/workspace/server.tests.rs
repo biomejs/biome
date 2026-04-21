@@ -2,7 +2,7 @@ use super::*;
 use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
 use biome_configuration::{
-    FormatterConfiguration, HtmlConfiguration, JsConfiguration,
+    FormatterConfiguration, JsConfiguration,
     javascript::{JsFormatterConfiguration, JsParserConfiguration},
 };
 use biome_formatter::{IndentStyle, LineWidth};
@@ -1390,72 +1390,4 @@ const Table = () => {
         .unwrap();
 
     insta::assert_snapshot!(result.as_code());
-}
-
-#[test]
-fn snippet_svelte_ts_parsing() {
-    const FILE_PATH: &str = "/project/file.svelte";
-    const FILE_CONTENT: &str = r#"<script lang="ts">
-	let name = $state('world');
-</script>
-
-<h1>Hello {name}!</h1>
-
-{#snippet add(a: any, b: float)}
-	{a} + {b} = {a + b}
-{/snippet}
-
-{@render add(1, 2)}
-"#;
-
-    let fs = MemoryFileSystem::default();
-    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
-
-    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
-
-    workspace
-        .update_settings(UpdateSettingsParams {
-            project_key,
-            workspace_directory: None,
-            configuration: Configuration {
-                html: Some(HtmlConfiguration {
-                    experimental_full_support_enabled: Some(true.into()),
-                    ..Default::default()
-                }),
-                ..Default::default()
-            },
-            extended_configurations: vec![],
-            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
-        })
-        .unwrap();
-
-    workspace
-        .scan_project(ScanProjectParams {
-            project_key,
-            watch: false,
-            force: false,
-            scan_kind: ScanKind::Project,
-            verbose: false,
-        })
-        .unwrap();
-
-    workspace
-        .open_file(OpenFileParams {
-            project_key,
-            path: BiomePath::new(FILE_PATH),
-            content: FileContent::FromServer,
-            document_file_source: None,
-            persist_node_cache: false,
-            inline_config: None,
-        })
-        .unwrap();
-
-    let diagnostics = workspace
-        ._get_parse_diagnostics(Utf8Path::new(FILE_PATH))
-        .unwrap();
-
-    assert!(
-        diagnostics.is_empty(),
-        "Expected no parse errors for typed Svelte snippet, got: {diagnostics:#?}"
-    );
 }

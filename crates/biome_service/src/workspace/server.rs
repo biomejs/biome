@@ -614,7 +614,7 @@ impl WorkspaceServer {
     }
 
     /// Retrieves all diagnostics that belong to a document. It contains diagnostics that belong to embedded snippets too
-    fn _get_parse_diagnostics(
+    pub fn get_parse_diagnostics(
         &self,
         path: &Utf8Path,
     ) -> Result<Vec<ParseDiagnostic>, WorkspaceError> {
