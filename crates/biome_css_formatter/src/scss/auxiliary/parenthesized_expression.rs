@@ -1,7 +1,5 @@
 use crate::prelude::*;
-use crate::utils::scss_map::{
-    scss_map_context, ScssMapOuterParenthesizedValuePayloadKind,
-};
+use crate::utils::scss_map::{ScssMapOuterParenthesizedValuePayloadKind, scss_map_context};
 use biome_css_syntax::{ScssParenthesizedExpression, ScssParenthesizedExpressionFields};
 use biome_formatter::{format_args, write};
 
