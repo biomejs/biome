@@ -89,6 +89,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
             is_source: false,
             is_function_signature: false,
             kind: biome_js_syntax::SvelteFileKind::Component,
+            is_const_block: false,
         });
     }
 
