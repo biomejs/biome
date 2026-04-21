@@ -1044,6 +1044,22 @@ fn handle_line_continuation(
         return InlineNewlineAction::Break;
     }
 
+    // Inside a nested list item (depth >= 2), break the paragraph when the
+    // continuation line's indent drops to or below the marker column.
+    // Such lines belong to a parent item, not lazy continuation.
+    // We only check nesting depth, not marker_indent alone, because a
+    // top-level list with leading whitespace (e.g. `  1.  text`) still
+    // allows lazy continuation at indent 0 per CommonMark §5.2.
+    if required_indent > 0 && p.state().list_nesting_depth >= 2 {
+        let marker_indent = p.state().list_item_marker_indent;
+        if marker_indent > 0 {
+            let indent = p.line_start_leading_indent();
+            if indent < required_indent && indent <= marker_indent {
+                return InlineNewlineAction::Break;
+            }
+        }
+    }
+
     if required_indent > 0 && p.state().list_nesting_depth >= 2 {
         let marker_indent = p.state().list_item_marker_indent;
         if marker_indent > 0 {

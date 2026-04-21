@@ -32,6 +32,10 @@ impl BiomeEnv {
 
     pub const ENV_VARIABLES: &[&BiomeEnvVariable] = &[
         &BiomeEnvVariable::new(
+            "BIOME_DISTRIBUTION",
+            "Override the detected distribution channel of Biome. Acceptable values: npm, homebrew or standalone",
+        ),
+        &BiomeEnvVariable::new(
             "BIOME_LOG_PATH",
             "The directory where the logs of the Biome Daemon are stored.",
         ),

@@ -2,13 +2,12 @@ pub mod import_key;
 pub mod specifiers_attributes;
 mod util;
 
-use crate::JsRuleAction;
+use crate::{JsRuleAction, assist::source::organize_imports::import_key::ImportStatementKind};
 use biome_analyze::{
     ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource, SourceActionKind,
     context::RuleContext, declare_source_rule,
 };
 use biome_console::markup;
-use biome_diagnostics::category;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsCombinedSpecifier, AnyJsExportClause, AnyJsImportClause, AnyJsModuleItem, JsModule,
@@ -21,7 +20,7 @@ use biome_rule_options::{
     organize_imports::{BareImportsPosition, OrganizeImportsOptions},
     sort_order::SortOrder,
 };
-use import_key::{ImportInfo, ImportKey, ImportStatementKind};
+use import_key::{ImportInfo, ImportKey};
 use rustc_hash::FxHashMap;
 use specifiers_attributes::{
     are_import_attributes_sorted, merge_export_from_specifiers, merge_export_specifiers,
@@ -92,6 +91,8 @@ declare_source_rule! {
     ///
     /// - `groups` allows to group imports and exports before sorting them;
     ///   It allows expressing custom order between imports or exports.
+    /// - `sortBareImports` allows sorting bare imports (also called side-effect imports);
+    ///   By default the action doesn't sort them.
     /// - `identifierOrder` allows changing how named specifiers and attributes are sorted
     /// - `bareImports` controls the placement of side-effect (bare) imports such as `import "polyfill"`
     ///
@@ -171,6 +172,8 @@ declare_source_rule! {
     /// - `:PACKAGE:`: bare and scoped packages (`lib`, `@scoped/lib`)
     /// - `:ALIAS:`: path aliases starting with `#`, `@/`, `~`, `$`, or `%`
     /// - `:PATH:`: absolute and relative paths
+    /// - `:STYLE:`: paths ending with the following style extensions:
+    ///   `.css`, `.less`, `.pcss`, `.sass`, `.scss`, `.sss` and `.styl`
     ///
     /// #### Type-only matcher
     ///
@@ -203,6 +206,29 @@ declare_source_rule! {
     /// ```ts,ignore
     /// import { V } from "@my/lib";
     /// import type { T } from "@my/lib";
+    /// ```
+    ///
+    /// ### `sortBareImports`
+    ///
+    /// By default, _bare imports_, also called _side-effect imports_, aren't sorted with other imports.
+    /// Setting `sortBareImports` to `true`, allow sorting them with other imports.
+    ///
+    /// :::caution
+    /// This can lead to issues because bare imports often signal the presence of side-effects.
+    /// Thus changing their order can change the behavior of your code.
+    /// :::
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "sortBareImports": true
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,use_options,expect_diagnostic
+    /// import "./file";
+    /// import { A } from "my-package";
     /// ```
     ///
     /// ### `identifierOrder`
@@ -353,7 +379,7 @@ declare_source_rule! {
     /// import { Button } from "@/components/Button";
     /// ```
     ///
-    /// ### Place CSS/style imports last
+    /// ### Place style imports last
     ///
     /// The following example groups style imports together and place them after other imports.
     /// Because groups are matched in order, the first group has to exclude style imports.
@@ -363,9 +389,9 @@ declare_source_rule! {
     /// {
     ///     "options": {
     ///         "groups": [
-    ///             ["**", "!**/*.css", "!**/*.scss"],
+    ///             ["**", "!:STYLE:"],
     ///             ":BLANK_LINE:",
-    ///             ["**/*.css", "**/*.scss"]
+    ///             [":STYLE:"]
     ///         ]
     ///     }
     /// }
@@ -447,8 +473,8 @@ declare_source_rule! {
     /// ```
     ///
     /// Note that you may want to use the lint rule
-    /// [`useImportType`](https://biomejs.dev/linter/rules/use-import-type/)
-    /// and its [`style`](https://biomejs.dev/linter/rules/use-import-type/#style)
+    /// [`useImportType`](https://next.biomejs.dev/linter/rules/use-import-type/)
+    /// and its [`style`](https://next.biomejs.dev/linter/rules/use-import-type/#style)
     /// to enforce the use of `import type` instead of `import { type }`.
     ///
     /// With the following configuration...
@@ -553,8 +579,9 @@ declare_source_rule! {
     /// - Any statement that is not an import or an export
     /// - Bare imports also called side-effect imports (`import "polyfill"`);
     ///   Each forms its own chunk.
-    ///   Set [`bareImports`](#bareimports) to `"last"` to disable this rule and sort
-    ///   bare imports together at the end of the surrounding chunk instead.
+    ///   Set [`sortBareImports`](#sortbareimports) to `true` to disable this rule and sort
+    ///   bare imports together with their neighbors, or set [`bareImports`](#bareimports) to
+    ///   `"last"` to also move all bare imports to the end of the surrounding chunk.
     /// - A comment followed by a blank line that we call a **detached comment**;
     ///   See the [comment handling section](#comment-handling) for more details.
     ///
@@ -597,14 +624,15 @@ declare_source_rule! {
     ///
     /// When two imports share the same source, they are ordered by kind:
     ///
-    /// 1. Namespace type import / Namespace type export
-    /// 2. Default type import
-    /// 3. Named type import / Named type export
-    /// 4. Namespace import / Namespace export
-    /// 5. Combined default and namespace import
-    /// 6. Default import
-    /// 7. Combined default and named import
-    /// 8. Named import / Named export
+    /// 1. Bare imports
+    /// 2. Namespace type import / Namespace type export
+    /// 3. Default type import
+    /// 4. Named type import / Named type export
+    /// 5. Namespace import / Namespace export
+    /// 6. Combined default and namespace import
+    /// 7. Default import
+    /// 8. Combined default and named import
+    /// 9. Named import / Named export
     ///
     /// Imports and exports with attributes (`with { ... }`) are always placed first.
     /// For example, the following code...
@@ -755,7 +783,11 @@ declare_source_rule! {
         language: "js",
         recommended: true,
         fix_kind: FixKind::Safe,
-        sources: &[RuleSource::Eslint("sort-imports").inspired(), RuleSource::Eslint("no-duplicate-imports").inspired(), RuleSource::EslintImport("order").inspired()],
+        sources: &[
+            RuleSource::Eslint("sort-imports").inspired(),
+            RuleSource::Eslint("no-duplicate-imports").inspired(),
+            RuleSource::EslintImport("order").inspired()
+        ],
     }
 }
 
@@ -780,7 +812,7 @@ impl Rule for OrganizeImports {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         Some(RuleDiagnostic::new(
-            category!("assist/source/organizeImports"),
+            rule_category!(),
             Self::text_range(ctx, state),
             markup! {
                 "The imports and exports are not sorted."
@@ -819,25 +851,32 @@ impl Rule for OrganizeImports {
         let sort_order = options.identifier_order.unwrap_or_default();
         let bare_imports_last =
             options.bare_imports.unwrap_or_default() == BareImportsPosition::Last;
+        // `bareImports: "last"` implies that bare imports participate in the sort.
+        let sort_bare_imports = bare_imports_last || options.sort_bare_imports.unwrap_or_default();
         let bare_group_index: Option<u16> = bare_imports_last
             .then(|| groups.map_or(1, |g| g.explicit_group_count() + 1));
         let mut chunk: Option<ChunkBuilder> = None;
         let mut prev_kind: Option<JsSyntaxKind> = None;
+        let mut prev_is_bare_import = false;
         let mut prev_group = 0;
         for item in root.items() {
-            let info_result = if bare_imports_last {
-                ImportInfo::from_module_item_including_bare(&item)
-            } else {
-                ImportInfo::from_module_item(&item)
-            };
-            if let Some((info, specifiers, attributes)) = info_result {
-                let prev_is_distinct = prev_kind.is_some_and(|kind| kind != item.syntax().kind());
-                // A detached comment marks the start of a new chunk
-                if prev_is_distinct || has_detached_leading_comment(item.syntax()) {
+            let current_kind = item.syntax().kind();
+            if let Some((info, specifiers, attributes)) = ImportInfo::from_module_item(&item) {
+                let prev_is_distinct = prev_kind.is_some_and(|kind| kind != current_kind);
+                // switching of kind (import/statement/export) marks the start of a new chunk.
+                if prev_is_distinct
+                    // A detached comment marks the start of a new chunk
+                    || has_detached_leading_comment(item.syntax())
+                    // bare imports marks the start of a new chunk if they are ignored in the sort.
+                    || (!sort_bare_imports && (
+                        prev_is_bare_import || info.kind == ImportStatementKind::Bare
+                    ))
+                {
                     // The chunk ends, here
                     report_unsorted_chunk(chunk.take(), &mut result);
                     prev_group = 0;
                 }
+                prev_is_bare_import = info.kind == ImportStatementKind::Bare;
                 let mut key = ImportKey::new(info, groups);
                 if key.kind == ImportStatementKind::Bare
                     && let Some(idx) = bare_group_index
@@ -857,7 +896,7 @@ impl Rule for OrganizeImports {
                 });
                 let newline_issue = if leading_newline_count == 1
                     // A chunk must start with a blank line (two newlines)
-                    // if an export or a statement precedes it.
+                    // if a distinct kind (import/statement/export) precedes it.
                     && ((starts_chunk && prev_is_distinct) ||
                     // Some groups must be separated by a blank line
                     blank_line_separated_groups)
@@ -901,12 +940,8 @@ impl Rule for OrganizeImports {
                     chunk = Some(ChunkBuilder::new(key));
                 }
             } else if chunk.is_some() {
-                // This is either
-                // - a bare (side-effect) import
-                // - a buggy import or export
-                // - a statement
-                //
-                // In any case, the chunk ends here
+                // This is either a buggy import/export or a statement.
+                // So, the chunk ends here.
                 report_unsorted_chunk(chunk.take(), &mut result);
                 prev_group = 0;
                 // A statement must be separated of a chunk with a blank line
@@ -917,8 +952,9 @@ impl Rule for OrganizeImports {
                         slot_index: statement.syntax().index() as u32,
                     });
                 }
+                prev_is_bare_import = false;
             }
-            prev_kind = Some(item.syntax().kind());
+            prev_kind = Some(current_kind);
         }
         // Report the last chunk
         report_unsorted_chunk(chunk.take(), &mut result);
@@ -1055,11 +1091,7 @@ impl Rule for OrganizeImports {
                             .skip(slot_indexes.start as usize)
                             .take(slot_indexes.len())
                             .filter_map(|item| {
-                                let info = if bare_imports_last {
-                                    ImportInfo::from_module_item_including_bare(&item)?.0
-                                } else {
-                                    ImportInfo::from_module_item(&item)?.0
-                                };
+                                let info = ImportInfo::from_module_item(&item)?.0;
                                 let item = organized_items.remove(&info.slot_index).unwrap_or(item);
                                 let mut key = ImportKey::new(info, groups);
                                 if key.kind == ImportStatementKind::Bare

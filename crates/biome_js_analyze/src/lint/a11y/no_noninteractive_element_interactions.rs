@@ -108,7 +108,7 @@ impl Rule for NoNoninteractiveElementInteractions {
         }
 
         // Non-interactive elements what contains event handler should be reported.
-        if has_handler_props(element) && aria_roles.is_not_interactive_element(element) {
+        if aria_roles.is_not_interactive_element(element) {
             return Some(());
         };
 

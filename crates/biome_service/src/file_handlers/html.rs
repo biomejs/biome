@@ -36,7 +36,7 @@ use biome_formatter::{
     LineWidth, Printed, TrailingNewline,
 };
 use biome_fs::BiomePath;
-use biome_html_analyze::analyze;
+use biome_html_analyze::{HtmlAnalyzerServices, analyze};
 use biome_html_factory::make::ident;
 use biome_html_formatter::context::SelfCloseVoidElements;
 use biome_html_formatter::{
@@ -540,6 +540,7 @@ fn lint(params: LintParams) -> LintResults {
     let workspace_settings = &params.settings;
     let analyzer_options = workspace_settings.analyzer_options::<HtmlLanguage>(
         params.path,
+        params.working_directory,
         &params.language,
         params.suppression_reason.as_deref(),
     );
@@ -568,10 +569,18 @@ fn lint(params: LintParams) -> LintResults {
     let mut process_lint = ProcessLint::new(&params);
 
     let source_type = params.language.to_html_file_source().unwrap_or_default();
-    let (_, analyze_diagnostics) =
-        analyze(&tree, filter, &analyzer_options, source_type, |signal| {
-            process_lint.process_signal(signal)
-        });
+    let html_services = HtmlAnalyzerServices {
+        module_graph: Some(params.module_graph.clone()),
+        project_layout: Some(params.project_layout.clone()),
+    };
+    let (_, analyze_diagnostics) = analyze(
+        &tree,
+        filter,
+        &analyzer_options,
+        source_type,
+        html_services,
+        |signal| process_lint.process_signal(signal),
+    );
 
     process_lint.into_result(
         params
@@ -587,7 +596,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
         settings,
         path,
-        module_graph: _,
+        module_graph,
         project_layout,
         language,
         only,
@@ -598,6 +607,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         categories,
         action_offset,
         document_services: _,
+        working_directory,
         compute_actions,
     } = params;
     let _ = debug_span!("Code actions HTML", range =? range, path =? path).entered();
@@ -609,8 +619,12 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             actions: Vec::new(),
         };
     };
-    let analyzer_options =
-        settings.analyzer_options::<HtmlLanguage>(path, &language, suppression_reason.as_deref());
+    let analyzer_options = settings.analyzer_options::<HtmlLanguage>(
+        path,
+        working_directory,
+        &language,
+        suppression_reason.as_deref(),
+    );
     let mut actions = Vec::new();
     let AnalyzerVisitorResult {
         enabled_rules,
@@ -622,7 +636,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         .with_skip(skip)
         .with_path(path.as_path())
         .with_enabled_selectors(rules)
-        .with_project_layout(project_layout)
+        .with_project_layout(project_layout.clone())
         .finish();
 
     let filter = AnalysisFilter {
@@ -632,38 +646,50 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
     };
 
-    analyze(&tree, filter, &analyzer_options, source_type, |signal| {
-        if compute_actions {
-            actions.extend(
-                signal
-                    .actions(ActionFilter::all())
-                    .into_code_action_iter()
-                    .map(|item| CodeAction {
-                        category: item.category.clone(),
-                        rule_name: item
-                            .rule_name
-                            .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
-                        applicability: Some(item.suggestion.applicability),
-                        suggestion: Some(item.suggestion),
-                        offset: action_offset,
-                    }),
-            );
-        } else {
-            actions.extend(signal.actions_metadata().into_iter().map(|meta| {
-                CodeAction {
-                    category: meta.category,
-                    rule_name: meta
-                        .rule_name
-                        .map(|(g, r)| (Cow::Borrowed(g), Cow::Borrowed(r))),
-                    applicability: Some(meta.applicability),
-                    suggestion: None,
-                    offset: action_offset,
-                }
-            }));
-        }
+    let html_services = HtmlAnalyzerServices {
+        module_graph: Some(module_graph),
+        project_layout: Some(project_layout),
+    };
 
-        ControlFlow::<Never>::Continue(())
-    });
+    analyze(
+        &tree,
+        filter,
+        &analyzer_options,
+        source_type,
+        html_services,
+        |signal| {
+            if compute_actions {
+                actions.extend(
+                    signal
+                        .actions(ActionFilter::all())
+                        .into_code_action_iter()
+                        .map(|item| CodeAction {
+                            category: item.category.clone(),
+                            rule_name: item
+                                .rule_name
+                                .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
+                            applicability: Some(item.suggestion.applicability),
+                            suggestion: Some(item.suggestion),
+                            offset: action_offset,
+                        }),
+                );
+            } else {
+                actions.extend(signal.actions_metadata().into_iter().map(|meta| {
+                    CodeAction {
+                        category: meta.category,
+                        rule_name: meta
+                            .rule_name
+                            .map(|(g, r)| (Cow::Borrowed(g), Cow::Borrowed(r))),
+                        applicability: Some(meta.applicability),
+                        suggestion: None,
+                        offset: action_offset,
+                    }
+                }));
+            }
+
+            ControlFlow::<Never>::Continue(())
+        },
+    );
 
     PullActionsResult { actions }
 }
@@ -679,6 +705,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         .as_linter_rules(params.biome_path.as_path());
     let analyzer_options = params.settings.analyzer_options::<HtmlLanguage>(
         params.biome_path,
+        params.working_directory,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
     );
@@ -716,10 +743,19 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     if matches!(params.fix_file_mode, FixFileMode::ApplySuppressions) {
         loop {
             let mut pending_actions = Vec::new();
+            let html_services = HtmlAnalyzerServices {
+                module_graph: Some(params.module_graph.clone()),
+                project_layout: Some(params.project_layout.clone()),
+            };
 
-            let (_, _) = analyze(&tree, filter, &analyzer_options, source_type, |signal| {
-                process_fix_all.collect_signal(signal, &mut pending_actions)
-            });
+            let (_, _) = analyze(
+                &tree,
+                filter,
+                &analyzer_options,
+                source_type,
+                html_services,
+                |signal| process_fix_all.collect_signal(signal, &mut pending_actions),
+            );
 
             let result = process_fix_all.process_batch_actions(pending_actions, |root| {
                 tree = match HtmlRoot::cast(root) {
@@ -765,12 +801,17 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
 
     loop {
         let mut pending_actions = Vec::new();
+        let html_services = HtmlAnalyzerServices {
+            module_graph: Some(params.module_graph.clone()),
+            project_layout: Some(params.project_layout.clone()),
+        };
 
         let (_, _) = analyze(
             &tree,
             fixable_filter,
             &analyzer_options,
             source_type,
+            html_services,
             |signal| process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions),
         );
 
@@ -789,9 +830,18 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
 
     // Phase 2: all rules for final diagnostics
     {
-        let (_, _) = analyze(&tree, filter, &analyzer_options, source_type, |signal| {
-            process_fix_all.collect_diagnostic_only(signal)
-        });
+        let html_services = HtmlAnalyzerServices {
+            module_graph: Some(params.module_graph.clone()),
+            project_layout: Some(params.project_layout.clone()),
+        };
+        let (_, _) = analyze(
+            &tree,
+            filter,
+            &analyzer_options,
+            source_type,
+            html_services,
+            |signal| process_fix_all.collect_diagnostic_only(signal),
+        );
     }
 
     process_fix_all.finish(

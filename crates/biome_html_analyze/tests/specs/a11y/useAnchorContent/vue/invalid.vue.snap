@@ -4,8 +4,8 @@ expression: invalid.vue
 ---
 # Input
 ```vue
+<!-- should generate diagnostics -->
 <template>
-  <!-- Native anchors without accessible content should trigger -->
   <a></a>
   <a>    </a>
   <a aria-hidden="true">content</a>
@@ -35,8 +35,8 @@ invalid.vue:3:3 lint/a11y/useAnchorContent ━━━━━━━━━━━━�
 
   × Provide screen reader accessible content when using a elements.
   
-    1 │ <template>
-    2 │   <!-- Native anchors without accessible content should trigger -->
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
   > 3 │   <a></a>
       │   ^^^^^^^
     4 │   <a>    </a>
@@ -58,7 +58,7 @@ invalid.vue:4:3 lint/a11y/useAnchorContent ━━━━━━━━━━━━�
 
   × Provide screen reader accessible content when using a elements.
   
-    2 │   <!-- Native anchors without accessible content should trigger -->
+    2 │ <template>
     3 │   <a></a>
   > 4 │   <a>    </a>
       │   ^^^^^^^^^^^

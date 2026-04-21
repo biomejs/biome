@@ -242,8 +242,10 @@ define_categories! {
     "lint/nursery/noTernary": "https://biomejs.dev/linter/rules/no-ternary",
     "lint/nursery/noTopLevelLiterals": "https://biomejs.dev/linter/rules/no-top-level-literals",
     "lint/nursery/noUndeclaredEnvVars": "https://biomejs.dev/linter/rules/no-undeclared-env-vars",
+    "lint/nursery/noUndeclaredClasses": "https://biomejs.dev/linter/rules/no-undeclared-classes",
     "lint/nursery/noUnknownAttribute": "https://biomejs.dev/linter/rules/no-unknown-attribute",
     "lint/nursery/noUnnecessaryConditions": "https://biomejs.dev/linter/rules/no-unnecessary-conditions",
+    "lint/nursery/noUnusedClasses": "https://biomejs.dev/linter/rules/no-unused-classes",
     "lint/nursery/noUnnecessaryTemplateExpression": "https://biomejs.dev/linter/rules/no-unnecessary-template-expression",
     "lint/nursery/noUnsafePlusOperands": "https://biomejs.dev/linter/rules/no-unsafe-plus-operands",
     "lint/nursery/noUntrustedLicenses": "https://biomejs.dev/linter/rules/no-untrusted-licenses",
@@ -527,11 +529,14 @@ define_categories! {
     // end lint rules
     // start assist actions
     "assist/source/noDuplicateClasses": "https://biomejs.dev/assist/actions/no-duplicate-classes",
+    "assist/source/organizeImports": "https://biomejs.dev/assist/actions/organize-imports",
+    "assist/source/useSortedAttributes": "https://biomejs.dev/assist/actions/use-sorted-attributes",
     "assist/source/useSortedInterfaceMembers": "https://biomejs.dev/assist/actions/use-sorted-interface-members",
     "assist/source/useSortedKeys": "https://biomejs.dev/assist/actions/use-sorted-keys",
+    "assist/source/useSortedPackageJson": "https://biomejs.dev/assist/actions/use-sorted-package-json",
     "assist/source/useSortedProperties": "https://biomejs.dev/assist/actions/use-sorted-properties",
-    "assist/source/useSortedAttributes": "https://biomejs.dev/assist/actions/use-sorted-attributes",
-    "assist/source/organizeImports": "https://biomejs.dev/assist/actions/organize-imports",
+    "assist/source/useSortedTypeFields": "https://biomejs.dev/assist/actions/use-sorted-type-fields",
+    "assist/source/useSortedSelectionSet": "https://biomejs.dev/assist/use-sorted-selection-set",
     // end assist actions
     ; // start syntax rules
     "syntax/correctness/noTypeOnlyImportAttributes",
@@ -550,6 +555,7 @@ define_categories! {
     "configuration",
     "assist",
     "migrate",
+    "upgrade",
     "deserialize",
     "plugin",
     "project",

@@ -1,3 +1,4 @@
+use crate::css_module_info::CssClassReference;
 use std::{borrow::Cow, sync::Arc};
 
 use biome_js_semantic::{Reference, ScopeId, SemanticModel, TsBindingReference};
@@ -71,6 +72,10 @@ pub(super) struct JsModuleInfoCollector {
 
     /// Whether to enable type inference when finalizing the module info
     infer_types: bool,
+
+    /// CSS class references from JSX `className` or `class` attributes
+    /// (static string literals only).
+    pub(super) referenced_classes: Vec<CssClassReference>,
 }
 
 /// Intermediary representation for an exported symbol.
@@ -139,6 +144,7 @@ impl JsModuleInfoCollector {
             static_imports: IndexMap::new(),
             diagnostics: Vec::new(),
             infer_types: false,
+            referenced_classes: Vec::new(),
         }
     }
 
@@ -1078,6 +1084,7 @@ impl JsModuleInfo {
             types: collector.types.into(),
             diagnostics: collector.diagnostics.into_iter().map(Into::into).collect(),
             infer_types: collector.infer_types,
+            referenced_classes: collector.referenced_classes,
         }))
     }
 }

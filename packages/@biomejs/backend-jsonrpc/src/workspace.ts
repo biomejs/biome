@@ -176,6 +176,14 @@ export interface FormatterConfiguration {
 	 * Whether to insert spaces around brackets in object literals. Defaults to true.
 	 */
 	bracketSpacing?: BracketSpacing;
+	/**
+	* Whether to insert spaces inside delimiters (after the opening delimiter and before the
+closing delimiter), such as parentheses, brackets, angle brackets, and template literal
+interpolations. Spaces are not added before the opening delimiter, and empty delimiters
+are not affected. Only applies when the content fits on a single line. The specific
+delimiters affected depend on the language. Defaults to false. 
+	 */
+	delimiterSpacing?: DelimiterSpacing;
 	enabled?: Bool;
 	/**
 	* Whether to expand arrays and objects on multiple lines.
@@ -397,6 +405,10 @@ specified in the ignore file.
 }
 export interface Actions {
 	/**
+	 * The actions preset to use.
+	 */
+	preset?: PresetConfig;
+	/**
 	 * It enables the assist actions recommended by Biome. `true` by default.
 	 */
 	recommended?: boolean;
@@ -491,6 +503,14 @@ export type AttributePosition = "auto" | "multiline";
  */
 export type BracketSameLine = boolean;
 export type BracketSpacing = boolean;
+/**
+	* Whether to insert spaces inside delimiters (after the opening delimiter and before the closing
+delimiter), such as parentheses, brackets, angle brackets, and template literal interpolations.
+Spaces are not added before the opening delimiter, and empty delimiters are not affected.
+Only applies when the content fits on a single line; when content breaks across multiple lines,
+no extra spaces are added. The specific delimiters affected depend on the language. 
+	 */
+export type DelimiterSpacing = boolean;
 export type Expand = "auto" | "always" | "never";
 export type IndentStyle = "tab" | "space";
 export type IndentWidth = number;
@@ -728,6 +748,18 @@ export interface JsFormatterConfiguration {
 	 */
 	bracketSpacing?: BracketSpacing;
 	/**
+	* Whether to insert spaces inside delimiters (after the opening delimiter and before the
+closing delimiter). Only applies when the content fits on a single line. Spaces are not
+added before the opening delimiter (e.g., `function f()` stays `function f()`, not
+`function f ()`), and empty delimiters are not affected (e.g., `fn()` stays `fn()`).
+For JavaScript and TypeScript, affects parentheses (e.g., `foo( a, b )`), square brackets
+(e.g., `[ a, b ]`), template literal interpolations (e.g., `${ expr }`), TypeScript angle
+brackets (e.g., `foo< T >()`), JSX expression braces (e.g., `{ value }`), and the logical
+NOT operator (e.g., `! x`, but in chains only after the last one: `!! x`). Defaults to
+false. 
+	 */
+	delimiterSpacing?: DelimiterSpacing;
+	/**
 	 * Control the formatter for JavaScript (and its super languages) files.
 	 */
 	enabled?: Bool;
@@ -920,6 +952,10 @@ export interface Rules {
 	nursery?: SeverityOrNursery;
 	performance?: SeverityOrPerformance;
 	/**
+	 * The rule presets to use.
+	 */
+	preset?: PresetConfig;
+	/**
 	 * It enables the lint rules recommended by Biome. `true` by default.
 	 */
 	recommended?: boolean;
@@ -978,8 +1014,26 @@ match these patterns.
 	 */
 	plugins?: Plugins;
 }
-export type PluginConfiguration = string;
+/**
+	* Configuration for a single plugin entry.
+
+Can be either a plain path string or an object with path and options:
+
+```json
+{
+  "plugins": [
+    "simple-plugin.grit",
+    { "path": "scoped-plugin.grit", "includes": ["src/**/*.ts"] }
+  ]
+}
+``` 
+	 */
+export type PluginConfiguration = string | PluginWithOptions;
 export type VcsClientKind = "git";
+/**
+ * A preset configuration for enabling a set of rules.
+ */
+export type PresetConfig = "recommended" | "all" | "none";
 /**
  * A list of rules that belong to this group
  */
@@ -995,11 +1049,15 @@ See https://biomejs.dev/assist/actions/organize-imports
 	 */
 	organizeImports?: OrganizeImportsConfiguration;
 	/**
+	 * Enables a particular rule preset
+	 */
+	preset?: PresetConfig;
+	/**
 	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
-	* Enforce attribute sorting in JSX elements.
+	* Enforce attribute sorting in HTML elements.
 See https://biomejs.dev/assist/actions/use-sorted-attributes 
 	 */
 	useSortedAttributes?: UseSortedAttributesConfiguration;
@@ -1014,10 +1072,25 @@ See https://biomejs.dev/assist/actions/use-sorted-keys
 	 */
 	useSortedKeys?: UseSortedKeysConfiguration;
 	/**
+	* Organize package.json fields according to established conventions.
+See https://biomejs.dev/assist/actions/use-sorted-package-json 
+	 */
+	useSortedPackageJson?: UseSortedPackageJsonConfiguration;
+	/**
 	* Enforce ordering of CSS properties and nested rules.
 See https://biomejs.dev/assist/actions/use-sorted-properties 
 	 */
 	useSortedProperties?: UseSortedPropertiesConfiguration;
+	/**
+	* Sort GraphQL selection sets.
+See https://biomejs.dev/assist/actions/use-sorted-selection-set 
+	 */
+	useSortedSelectionSet?: UseSortedSelectionSetConfiguration;
+	/**
+	* Sort fields in GraphQL type definitions alphabetically.
+See https://biomejs.dev/assist/actions/use-sorted-type-fields 
+	 */
+	useSortedTypeFields?: UseSortedTypeFieldsConfiguration;
 }
 export type QuoteStyle = "double" | "single";
 /**
@@ -1123,6 +1196,14 @@ export interface OverrideFormatterConfiguration {
 	 * Whether to insert spaces around brackets in object literals. Defaults to true.
 	 */
 	bracketSpacing?: BracketSpacing;
+	/**
+	* Whether to insert spaces inside delimiters (after the opening delimiter and before the
+closing delimiter), such as parentheses, brackets, angle brackets, and template literal
+interpolations. Spaces are not added before the opening delimiter, and empty delimiters
+are not affected. Only applies when the content fits on a single line. The specific
+delimiters affected depend on the language. Defaults to false. 
+	 */
+	delimiterSpacing?: DelimiterSpacing;
 	enabled?: Bool;
 	/**
 	* Whether to expand arrays and objects on multiple lines.
@@ -1187,6 +1268,20 @@ export interface OverrideLinterConfiguration {
 	 */
 	rules?: Rules;
 }
+/**
+ * Plugin path with additional options.
+ */
+export interface PluginWithOptions {
+	/**
+	* A list of glob patterns. The plugin will only run on files matching
+these patterns. Use negated globs (e.g., `!**/*.test.ts`) for exclusions. 
+	 */
+	includes?: NormalizedGlob[];
+	/**
+	 * The path to the plugin.
+	 */
+	path: string;
+}
 export type NoDuplicateClassesConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithNoDuplicateClassesOptions;
@@ -1202,9 +1297,18 @@ export type UseSortedInterfaceMembersConfiguration =
 export type UseSortedKeysConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedKeysOptions;
+export type UseSortedPackageJsonConfiguration =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithUseSortedPackageJsonOptions;
 export type UseSortedPropertiesConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedPropertiesOptions;
+export type UseSortedSelectionSetConfiguration =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithUseSortedSelectionSetOptions;
+export type UseSortedTypeFieldsConfiguration =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithUseSortedTypeFieldsOptions;
 export type GroupPlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 /**
  * A list of rules that belong to this group
@@ -1261,7 +1365,7 @@ See https://biomejs.dev/linter/rules/no-noninteractive-element-to-interactive-ro
 	 */
 	noNoninteractiveElementToInteractiveRole?: NoNoninteractiveElementToInteractiveRoleConfiguration;
 	/**
-	* Enforce that tabIndex is not assigned to non-interactive HTML elements.
+	* Enforce that tabindex is not assigned to non-interactive HTML elements.
 See https://biomejs.dev/linter/rules/no-noninteractive-tabindex 
 	 */
 	noNoninteractiveTabindex?: NoNoninteractiveTabindexConfiguration;
@@ -1291,6 +1395,10 @@ See https://biomejs.dev/linter/rules/no-svg-without-title
 	 */
 	noSvgWithoutTitle?: NoSvgWithoutTitleConfiguration;
 	/**
+	 * Enables a particular rule preset
+	 */
+	preset?: PresetConfig;
+	/**
 	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
@@ -1305,7 +1413,7 @@ See https://biomejs.dev/linter/rules/use-anchor-content
 	 */
 	useAnchorContent?: UseAnchorContentConfiguration;
 	/**
-	* Enforce that tabIndex is assigned to non-interactive HTML elements with aria-activedescendant.
+	* Enforce that tabindex is assigned to non-interactive HTML elements with aria-activedescendant.
 See https://biomejs.dev/linter/rules/use-aria-activedescendant-with-tabindex 
 	 */
 	useAriaActivedescendantWithTabindex?: UseAriaActivedescendantWithTabindexConfiguration;
@@ -1335,7 +1443,7 @@ See https://biomejs.dev/linter/rules/use-generic-font-names
 	 */
 	useGenericFontNames?: UseGenericFontNamesConfiguration;
 	/**
-	* Enforce that heading elements (h1, h2, etc.) have content and that the content is accessible to screen readers. Accessible means that it is not hidden using the aria-hidden prop.
+	* Enforce that heading elements (h1, h2, etc.) have content and that the content is accessible to screen readers.
 See https://biomejs.dev/linter/rules/use-heading-content 
 	 */
 	useHeadingContent?: UseHeadingContentConfiguration;
@@ -1355,7 +1463,7 @@ See https://biomejs.dev/linter/rules/use-key-with-click-events
 	 */
 	useKeyWithClickEvents?: UseKeyWithClickEventsConfiguration;
 	/**
-	* Enforce onMouseOver / onMouseOut are accompanied by onFocus / onBlur.
+	* Enforce that onmouseover is accompanied by onfocus and onmouseout by onblur.
 See https://biomejs.dev/linter/rules/use-key-with-mouse-events 
 	 */
 	useKeyWithMouseEvents?: UseKeyWithMouseEventsConfiguration;
@@ -1574,6 +1682,10 @@ See https://biomejs.dev/linter/rules/no-useless-undefined-initialization
 See https://biomejs.dev/linter/rules/no-void 
 	 */
 	noVoid?: NoVoidConfiguration;
+	/**
+	 * Enables a particular rule preset
+	 */
+	preset?: PresetConfig;
 	/**
 	 * Enables the recommended rules for this group
 	 */
@@ -1943,6 +2055,10 @@ See https://biomejs.dev/linter/rules/no-vue-reserved-props
 See https://biomejs.dev/linter/rules/no-vue-setup-props-reactivity-loss 
 	 */
 	noVueSetupPropsReactivityLoss?: NoVueSetupPropsReactivityLossConfiguration;
+	/**
+	 * Enables a particular rule preset
+	 */
+	preset?: PresetConfig;
 	/**
 	 * Enables the recommended rules for this group
 	 */
@@ -2363,6 +2479,11 @@ See https://biomejs.dev/linter/rules/no-top-level-literals
 	 */
 	noTopLevelLiterals?: NoTopLevelLiteralsConfiguration;
 	/**
+	* Reports CSS class names in HTML class attributes that are not defined in any \<style> block or linked stylesheet available to the file.
+See https://biomejs.dev/linter/rules/no-undeclared-classes 
+	 */
+	noUndeclaredClasses?: NoUndeclaredClassesConfiguration;
+	/**
 	* Disallow the use of undeclared environment variables.
 See https://biomejs.dev/linter/rules/no-undeclared-env-vars 
 	 */
@@ -2393,6 +2514,11 @@ See https://biomejs.dev/linter/rules/no-untrusted-licenses
 	 */
 	noUntrustedLicenses?: NoUntrustedLicensesConfiguration;
 	/**
+	* Reports CSS class selectors that are never referenced in any JSX or HTML file.
+See https://biomejs.dev/linter/rules/no-unused-classes 
+	 */
+	noUnusedClasses?: NoUnusedClassesConfiguration;
+	/**
 	* Disallow redundant return statements.
 See https://biomejs.dev/linter/rules/no-useless-return 
 	 */
@@ -2422,6 +2548,10 @@ See https://biomejs.dev/linter/rules/no-vue-ref-as-operand
 See https://biomejs.dev/linter/rules/no-vue-v-if-with-v-for 
 	 */
 	noVueVIfWithVFor?: NoVueVIfWithVForConfiguration;
+	/**
+	 * Enables a particular rule preset
+	 */
+	preset?: PresetConfig;
 	/**
 	 * Enables the recommended rules for this group
 	 */
@@ -2772,6 +2902,10 @@ See https://biomejs.dev/linter/rules/no-unwanted-polyfillio
 	 */
 	noUnwantedPolyfillio?: NoUnwantedPolyfillioConfiguration;
 	/**
+	 * Enables a particular rule preset
+	 */
+	preset?: PresetConfig;
+	/**
 	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
@@ -2820,6 +2954,10 @@ See https://biomejs.dev/linter/rules/no-global-eval
 See https://biomejs.dev/linter/rules/no-secrets 
 	 */
 	noSecrets?: NoSecretsConfiguration;
+	/**
+	 * Enables a particular rule preset
+	 */
+	preset?: PresetConfig;
 	/**
 	 * Enables the recommended rules for this group
 	 */
@@ -2964,6 +3102,10 @@ See https://biomejs.dev/linter/rules/no-value-at-rule
 See https://biomejs.dev/linter/rules/no-yoda-expression 
 	 */
 	noYodaExpression?: NoYodaExpressionConfiguration;
+	/**
+	 * Enables a particular rule preset
+	 */
+	preset?: PresetConfig;
 	/**
 	 * Enables the recommended rules for this group
 	 */
@@ -3649,6 +3791,10 @@ See https://biomejs.dev/linter/rules/no-with
 	 */
 	noWith?: NoWithConfiguration;
 	/**
+	 * Enables a particular rule preset
+	 */
+	preset?: PresetConfig;
+	/**
 	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
@@ -3750,9 +3896,21 @@ export interface RuleAssistWithUseSortedKeysOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedKeysOptions;
 }
+export interface RuleAssistWithUseSortedPackageJsonOptions {
+	level: RuleAssistPlainConfiguration;
+	options: UseSortedPackageJsonOptions;
+}
 export interface RuleAssistWithUseSortedPropertiesOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedPropertiesOptions;
+}
+export interface RuleAssistWithUseSortedSelectionSetOptions {
+	level: RuleAssistPlainConfiguration;
+	options: UseSortedSelectionSetOptions;
+}
+export interface RuleAssistWithUseSortedTypeFieldsOptions {
+	level: RuleAssistPlainConfiguration;
+	options: UseSortedTypeFieldsOptions;
 }
 export type NoAccessKeyConfiguration =
 	| RulePlainConfiguration
@@ -4429,6 +4587,9 @@ export type NoTernaryConfiguration =
 export type NoTopLevelLiteralsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTopLevelLiteralsOptions;
+export type NoUndeclaredClassesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUndeclaredClassesOptions;
 export type NoUndeclaredEnvVarsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUndeclaredEnvVarsOptions;
@@ -4447,6 +4608,9 @@ export type NoUnsafePlusOperandsConfiguration =
 export type NoUntrustedLicensesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUntrustedLicensesOptions;
+export type NoUnusedClassesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnusedClassesOptions;
 export type NoUselessReturnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessReturnOptions;
@@ -5233,8 +5397,20 @@ export interface NoDuplicateClassesOptions {
 	functions?: string[];
 }
 export interface OrganizeImportsOptions {
+	/**
+	 * Groups to change how imports and exports are sorted.
+	 */
 	groups?: ImportGroups;
+	/**
+	* Order used for sorting identifiers within imports and exports.
+
+Default: `natural`. 
+	 */
 	identifierOrder?: SortOrder;
+	/**
+	 * If `true`, bare imports such as `import "module"` are sorted with other imports.
+	 */
+	sortBareImports?: boolean;
 }
 export interface UseSortedAttributesOptions {
 	sortOrder?: SortOrder;
@@ -5249,7 +5425,10 @@ followed by nested values (multi-line objects, multi-line arrays).
 	groupByNesting?: boolean;
 	sortOrder?: SortOrder;
 }
+export type UseSortedPackageJsonOptions = {};
 export type UseSortedPropertiesOptions = {};
+export type UseSortedSelectionSetOptions = {};
+export type UseSortedTypeFieldsOptions = {};
 export type RulePlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 export interface RuleWithNoAccessKeyOptions {
 	fix?: FixKind;
@@ -5336,7 +5515,6 @@ export interface RuleWithUseAnchorContentOptions {
 	options?: UseAnchorContentOptions;
 }
 export interface RuleWithUseAriaActivedescendantWithTabindexOptions {
-	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseAriaActivedescendantWithTabindexOptions;
 }
@@ -6235,6 +6413,10 @@ export interface RuleWithNoTopLevelLiteralsOptions {
 	level: RulePlainConfiguration;
 	options?: NoTopLevelLiteralsOptions;
 }
+export interface RuleWithNoUndeclaredClassesOptions {
+	level: RulePlainConfiguration;
+	options?: NoUndeclaredClassesOptions;
+}
 export interface RuleWithNoUndeclaredEnvVarsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUndeclaredEnvVarsOptions;
@@ -6259,6 +6441,10 @@ export interface RuleWithNoUnsafePlusOperandsOptions {
 export interface RuleWithNoUntrustedLicensesOptions {
 	level: RulePlainConfiguration;
 	options?: NoUntrustedLicensesOptions;
+}
+export interface RuleWithNoUnusedClassesOptions {
+	level: RulePlainConfiguration;
+	options?: NoUnusedClassesOptions;
 }
 export interface RuleWithNoUselessReturnOptions {
 	fix?: FixKind;
@@ -7663,6 +7849,10 @@ export type NoUnusedLabelsOptions = {};
 export type NoUnusedPrivateClassMembersOptions = {};
 export interface NoUnusedVariablesOptions {
 	/**
+	 * An object defining ignored identifiers for different language constructs.
+	 */
+	ignore?: NoUnusedVariablesOptionsIgnore;
+	/**
 	 * Whether to ignore unused variables from an object destructuring with a spread.
 	 */
 	ignoreRestSiblings?: boolean;
@@ -7855,6 +8045,10 @@ export type NoShadowOptions = {};
 export type NoSyncScriptsOptions = {};
 export type NoTernaryOptions = {};
 export type NoTopLevelLiteralsOptions = {};
+/**
+ * Options for the `noUndeclaredClasses` rule.
+ */
+export type NoUndeclaredClassesOptions = {};
 export interface NoUndeclaredEnvVarsOptions {
 	/**
 	* Environment variables that should always be allowed.
@@ -7904,6 +8098,7 @@ Defaults to `false`.
 	 */
 	requireOsiApproved?: boolean;
 }
+export type NoUnusedClassesOptions = {};
 export type NoUselessReturnOptions = {};
 export type NoUselessTypeConversionOptions = {};
 export type NoVueArrowFuncInWatchOptions = {};
@@ -8527,6 +8722,36 @@ export type Visibility = "public" | "package" | "private";
  */
 export type CustomRestrictedElements = Record<string, string>;
 export type DependencyAvailability = boolean | string[];
+export interface NoUnusedVariablesOptionsIgnore {
+	/**
+	 * An array of identifiers to ignore. Use "*" to ignore all identifiers.
+	 */
+	*?: string[];
+	/**
+	 * An array of class names to ignore. Use "*" to ignore all identifiers.
+	 */
+	class?: string[];
+	/**
+	 * An array of function names to ignore. Use "*" to ignore all identifiers.
+	 */
+	function?: string[];
+	/**
+	 * An array of interface names to ignore. Use "*" to ignore all identifiers.
+	 */
+	interface?: string[];
+	/**
+	 * An array of type aliases to ignore. Use "*" to ignore all identifiers.
+	 */
+	typeAlias?: string[];
+	/**
+	 * An array of type parameters to ignore. Use "*" to ignore all identifiers.
+	 */
+	typeParameter?: string[];
+	/**
+	 * An array of variable names to ignore. Use "*" to ignore all identifiers.
+	 */
+	variable?: string[];
+}
 export interface Hook {
 	/**
 	* The "position" of the closure function, starting from zero.
@@ -8738,6 +8963,7 @@ export type NegatablePredefinedSourceMatcher =
 	| ":PACKAGE:"
 	| ":PACKAGE_WITH_PROTOCOL:"
 	| ":PATH:"
+	| ":STYLE:"
 	| ":URL:"
 	| "!:ALIAS:"
 	| "!:BUN:"
@@ -8745,6 +8971,7 @@ export type NegatablePredefinedSourceMatcher =
 	| "!:PACKAGE:"
 	| "!:PACKAGE_WITH_PROTOCOL:"
 	| "!:PATH:"
+	| "!:STYLE:"
 	| "!:URL:";
 /**
  * Glob to match against import sources.
@@ -9028,8 +9255,10 @@ export type Category =
 	| "lint/nursery/noTernary"
 	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/noUndeclaredEnvVars"
+	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
+	| "lint/nursery/noUnusedClasses"
 	| "lint/nursery/noUnnecessaryTemplateExpression"
 	| "lint/nursery/noUnsafePlusOperands"
 	| "lint/nursery/noUntrustedLicenses"
@@ -9311,11 +9540,14 @@ export type Category =
 	| "lint/suspicious/useStaticResponseMethods"
 	| "lint/suspicious/useStrictMode"
 	| "assist/source/noDuplicateClasses"
+	| "assist/source/organizeImports"
+	| "assist/source/useSortedAttributes"
 	| "assist/source/useSortedInterfaceMembers"
 	| "assist/source/useSortedKeys"
+	| "assist/source/useSortedPackageJson"
 	| "assist/source/useSortedProperties"
-	| "assist/source/useSortedAttributes"
-	| "assist/source/organizeImports"
+	| "assist/source/useSortedTypeFields"
+	| "assist/source/useSortedSelectionSet"
 	| "syntax/correctness/noTypeOnlyImportAttributes"
 	| "syntax/correctness/noSuperWithoutExtends"
 	| "syntax/correctness/noInitializerWithDefinite"
@@ -9329,6 +9561,7 @@ export type Category =
 	| "configuration"
 	| "assist"
 	| "migrate"
+	| "upgrade"
 	| "deserialize"
 	| "plugin"
 	| "project"
@@ -9598,6 +9831,11 @@ export type EmbeddingKind =
 				 * Whether the script is inside Astro frontmatter
 				 */
 				frontmatter: boolean;
+				/**
+	* Whether this snippet is from a class-related attribute
+(e.g., `class:list={...}` or `class={...}`) 
+	 */
+				is_class_attribute: boolean;
 			};
 	  }
 	| {
@@ -9675,8 +9913,17 @@ export type HtmlVariant =
 	| "Svelte";
 export type GritVariant = "Standard";
 export type MarkdownVariant = "Standard";
-export type EmbeddingHtmlKind = "None" | "Html" | "Vue" | "Astro" | "Svelte";
+export type EmbeddingHtmlKind =
+	| "None"
+	| "Html"
+	| { Vue: { applicability: EmbeddingStyleApplicability } }
+	| { Astro: { applicability: EmbeddingStyleApplicability } }
+	| { Svelte: { applicability: EmbeddingStyleApplicability } };
 export type HtmlTextExpressions = "None" | "Single" | "Double";
+/**
+ * How the CSS is applied inside a snippet
+ */
+export type EmbeddingStyleApplicability = "Local" | "Global" | "Unknown";
 export interface OpenFileResult {
 	diagnostics: Diagnostic[];
 }
@@ -9775,7 +10022,8 @@ export interface GetModuleGraphResult {
 }
 export type SerializedModuleInfo =
 	| { js: SerializedJsModuleInfo }
-	| { css: SerializedCssModuleInfo };
+	| { css: SerializedCssModuleInfo }
+	| { html: SerializedHtmlModuleInfo };
 export interface SerializedJsModuleInfo {
 	/**
 	 * Dynamic imports.
@@ -9785,6 +10033,10 @@ export interface SerializedJsModuleInfo {
 	 * Exported symbols.
 	 */
 	exports: string[];
+	/**
+	 * CSS class names referenced in JSX `className` or `class` attributes.
+	 */
+	referencedClasses: string[];
 	/**
 	* Map of all the paths from static imports in the module.
 
@@ -9811,11 +10063,25 @@ Maps from the local imported name to the absolute path it resolves to.
 }
 export interface SerializedCssModuleInfo {
 	/**
+	 * Set of all CSS class names defined in this file.
+	 */
+	classes: string[];
+	/**
 	* Map of all static imports found in the module.
 
 Maps from the local imported name to the absolute path it resolves to. 
 	 */
 	imports: string[];
+}
+export interface SerializedHtmlModuleInfo {
+	/**
+	 * CSS class names referenced in `class` attributes.
+	 */
+	referencedClasses: string[];
+	/**
+	 * CSS class names defined in `<style>` blocks.
+	 */
+	styleClasses: string[];
 }
 export interface PullDiagnosticsParams {
 	categories: RuleCategories;

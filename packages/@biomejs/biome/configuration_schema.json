@@ -155,7 +155,7 @@
 					]
 				},
 				"noNoninteractiveTabindex": {
-					"description": "Enforce that tabIndex is not assigned to non-interactive HTML elements.\nSee https://biomejs.dev/linter/rules/no-noninteractive-tabindex",
+					"description": "Enforce that tabindex is not assigned to non-interactive HTML elements.\nSee https://biomejs.dev/linter/rules/no-noninteractive-tabindex",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoNoninteractiveTabindexConfiguration" },
 						{ "type": "null" }
@@ -196,6 +196,10 @@
 						{ "type": "null" }
 					]
 				},
+				"preset": {
+					"description": "Enables a particular rule preset",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
+				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
@@ -215,7 +219,7 @@
 					]
 				},
 				"useAriaActivedescendantWithTabindex": {
-					"description": "Enforce that tabIndex is assigned to non-interactive HTML elements with aria-activedescendant.\nSee https://biomejs.dev/linter/rules/use-aria-activedescendant-with-tabindex",
+					"description": "Enforce that tabindex is assigned to non-interactive HTML elements with aria-activedescendant.\nSee https://biomejs.dev/linter/rules/use-aria-activedescendant-with-tabindex",
 					"anyOf": [
 						{
 							"$ref": "#/$defs/UseAriaActivedescendantWithTabindexConfiguration"
@@ -259,7 +263,7 @@
 					]
 				},
 				"useHeadingContent": {
-					"description": "Enforce that heading elements (h1, h2, etc.) have content and that the content is accessible to screen readers. Accessible means that it is not hidden using the aria-hidden prop.\nSee https://biomejs.dev/linter/rules/use-heading-content",
+					"description": "Enforce that heading elements (h1, h2, etc.) have content and that the content is accessible to screen readers.\nSee https://biomejs.dev/linter/rules/use-heading-content",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseHeadingContentConfiguration" },
 						{ "type": "null" }
@@ -287,7 +291,7 @@
 					]
 				},
 				"useKeyWithMouseEvents": {
-					"description": "Enforce onMouseOver / onMouseOut are accompanied by onFocus / onBlur.\nSee https://biomejs.dev/linter/rules/use-key-with-mouse-events",
+					"description": "Enforce that onmouseover is accompanied by onfocus and onmouseout by onblur.\nSee https://biomejs.dev/linter/rules/use-key-with-mouse-events",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseKeyWithMouseEventsConfiguration" },
 						{ "type": "null" }
@@ -359,6 +363,10 @@
 		"Actions": {
 			"type": "object",
 			"properties": {
+				"preset": {
+					"description": "The actions preset to use.",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
+				},
 				"recommended": {
 					"description": "It enables the assist actions recommended by Biome. `true` by default.",
 					"type": ["boolean", "null"]
@@ -701,6 +709,10 @@
 						{ "$ref": "#/$defs/NoVoidConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"preset": {
+					"description": "Enables a particular rule preset",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
 				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
@@ -1265,6 +1277,10 @@
 						{ "type": "null" }
 					]
 				},
+				"preset": {
+					"description": "Enables a particular rule preset",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
+				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
@@ -1547,6 +1563,10 @@
 				}
 			]
 		},
+		"DelimiterSpacing": {
+			"description": "Whether to insert spaces inside delimiters (after the opening delimiter and before the closing\ndelimiter), such as parentheses, brackets, angle brackets, and template literal interpolations.\nSpaces are not added before the opening delimiter, and empty delimiters are not affected.\nOnly applies when the content fits on a single line; when content breaks across multiple lines,\nno extra spaces are added. The specific delimiters affected depend on the language.",
+			"type": "boolean"
+		},
 		"DependencyAvailability": {
 			"oneOf": [
 				{
@@ -1683,6 +1703,10 @@
 				"bracketSpacing": {
 					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
+				},
+				"delimiterSpacing": {
+					"description": "Whether to insert spaces inside delimiters (after the opening delimiter and before the\nclosing delimiter), such as parentheses, brackets, angle brackets, and template literal\ninterpolations. Spaces are not added before the opening delimiter, and empty delimiters\nare not affected. Only applies when the content fits on a single line. The specific\ndelimiters affected depend on the language. Defaults to false.",
+					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
 				},
 				"enabled": {
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
@@ -2225,6 +2249,10 @@
 					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
 				},
+				"delimiterSpacing": {
+					"description": "Whether to insert spaces inside delimiters (after the opening delimiter and before the\nclosing delimiter). Only applies when the content fits on a single line. Spaces are not\nadded before the opening delimiter (e.g., `function f()` stays `function f()`, not\n`function f ()`), and empty delimiters are not affected (e.g., `fn()` stays `fn()`).\nFor JavaScript and TypeScript, affects parentheses (e.g., `foo( a, b )`), square brackets\n(e.g., `[ a, b ]`), template literal interpolations (e.g., `${ expr }`), TypeScript angle\nbrackets (e.g., `foo< T >()`), JSX expression braces (e.g., `{ value }`), and the logical\nNOT operator (e.g., `! x`, but in chains only after the last one: `!! x`). Defaults to\nfalse.",
+					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
+				},
 				"enabled": {
 					"description": "Control the formatter for JavaScript (and its super languages) files.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
@@ -2638,6 +2666,7 @@
 				":PACKAGE:",
 				":PACKAGE_WITH_PROTOCOL:",
 				":PATH:",
+				":STYLE:",
 				":URL:",
 				"!:ALIAS:",
 				"!:BUN:",
@@ -2645,6 +2674,7 @@
 				"!:PACKAGE:",
 				"!:PACKAGE_WITH_PROTOCOL:",
 				"!:PATH:",
+				"!:STYLE:",
 				"!:URL:"
 			]
 		},
@@ -5238,6 +5268,17 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUndeclaredClassesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUndeclaredClassesOptions" }
+			]
+		},
+		"NoUndeclaredClassesOptions": {
+			"description": "Options for the `noUndeclaredClasses` rule.",
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUndeclaredDependenciesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5570,6 +5611,16 @@
 			},
 			"additionalProperties": false
 		},
+		"NoUnusedClassesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnusedClassesOptions" }
+			]
+		},
+		"NoUnusedClassesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUnusedExpressionsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5645,9 +5696,57 @@
 		"NoUnusedVariablesOptions": {
 			"type": "object",
 			"properties": {
+				"ignore": {
+					"description": "An object defining ignored identifiers for different language constructs.",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnusedVariablesOptionsIgnore" },
+						{ "type": "null" }
+					]
+				},
 				"ignoreRestSiblings": {
 					"description": "Whether to ignore unused variables from an object destructuring with a spread.",
 					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
+		"NoUnusedVariablesOptionsIgnore": {
+			"type": "object",
+			"properties": {
+				"*": {
+					"description": "An array of identifiers to ignore. Use \"*\" to ignore all identifiers.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"class": {
+					"description": "An array of class names to ignore. Use \"*\" to ignore all identifiers.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"function": {
+					"description": "An array of function names to ignore. Use \"*\" to ignore all identifiers.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"interface": {
+					"description": "An array of interface names to ignore. Use \"*\" to ignore all identifiers.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"typeAlias": {
+					"description": "An array of type aliases to ignore. Use \"*\" to ignore all identifiers.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"typeParameter": {
+					"description": "An array of type parameters to ignore. Use \"*\" to ignore all identifiers.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"variable": {
+					"description": "An array of variable names to ignore. Use \"*\" to ignore all identifiers.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
 				}
 			},
 			"additionalProperties": false
@@ -6503,6 +6602,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUndeclaredClasses": {
+					"description": "Reports CSS class names in HTML class attributes that are not defined in any \\<style> block or linked stylesheet available to the file.\nSee https://biomejs.dev/linter/rules/no-undeclared-classes",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUndeclaredClassesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUndeclaredEnvVars": {
 					"description": "Disallow the use of undeclared environment variables.\nSee https://biomejs.dev/linter/rules/no-undeclared-env-vars",
 					"anyOf": [
@@ -6542,6 +6648,13 @@
 					"description": "Disallow dependencies with untrusted licenses.\nSee https://biomejs.dev/linter/rules/no-untrusted-licenses",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUntrustedLicensesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnusedClasses": {
+					"description": "Reports CSS class selectors that are never referenced in any JSX or HTML file.\nSee https://biomejs.dev/linter/rules/no-unused-classes",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnusedClassesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6586,6 +6699,10 @@
 						{ "$ref": "#/$defs/NoVueVIfWithVForConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"preset": {
+					"description": "Enables a particular rule preset",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
 				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
@@ -7045,16 +7162,23 @@
 			"type": "object",
 			"properties": {
 				"bareImports": {
+					"description": "Controls the placement of bare (side-effect) imports such as `import \"polyfill\"`.\n\nImplies `sortBareImports: true` when set to `\"last\"`.",
 					"anyOf": [
 						{ "$ref": "#/$defs/BareImportsPosition" },
 						{ "type": "null" }
 					]
 				},
 				"groups": {
+					"description": "Groups to change how imports and exports are sorted.",
 					"anyOf": [{ "$ref": "#/$defs/ImportGroups" }, { "type": "null" }]
 				},
 				"identifierOrder": {
+					"description": "Order used for sorting identifiers within imports and exports.\n\nDefault: `natural`.",
 					"anyOf": [{ "$ref": "#/$defs/SortOrder" }, { "type": "null" }]
+				},
+				"sortBareImports": {
+					"description": "If `true`, bare imports such as `import \"module\"` are sorted with other imports.",
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -7097,6 +7221,10 @@
 				"bracketSpacing": {
 					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
+				},
+				"delimiterSpacing": {
+					"description": "Whether to insert spaces inside delimiters (after the opening delimiter and before the\nclosing delimiter), such as parentheses, brackets, angle brackets, and template literal\ninterpolations. Spaces are not added before the opening delimiter, and empty delimiters\nare not affected. Only applies when the content fits on a single line. The specific\ndelimiters affected depend on the language. Defaults to false.",
+					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
 				},
 				"enabled": {
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
@@ -7351,6 +7479,10 @@
 						{ "type": "null" }
 					]
 				},
+				"preset": {
+					"description": "Enables a particular rule preset",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
+				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
@@ -7379,10 +7511,38 @@
 			},
 			"additionalProperties": false
 		},
-		"PluginConfiguration": { "anyOf": [{ "type": "string" }] },
+		"PluginConfiguration": {
+			"description": "Configuration for a single plugin entry.\n\nCan be either a plain path string or an object with path and options:\n\n```json\n{\n  \"plugins\": [\n    \"simple-plugin.grit\",\n    { \"path\": \"scoped-plugin.grit\", \"includes\": [\"src/**/*.ts\"] }\n  ]\n}\n```",
+			"anyOf": [
+				{ "description": "A plain path to the plugin.", "type": "string" },
+				{
+					"description": "A path with additional options.",
+					"$ref": "#/$defs/PluginWithOptions"
+				}
+			]
+		},
+		"PluginWithOptions": {
+			"description": "Plugin path with additional options.",
+			"type": "object",
+			"properties": {
+				"includes": {
+					"description": "A list of glob patterns. The plugin will only run on files matching\nthese patterns. Use negated globs (e.g., `!**/*.test.ts`) for exclusions.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/$defs/NormalizedGlob" }
+				},
+				"path": { "description": "The path to the plugin.", "type": "string" }
+			},
+			"additionalProperties": false,
+			"required": ["path"]
+		},
 		"Plugins": {
 			"type": "array",
 			"items": { "$ref": "#/$defs/PluginConfiguration" }
+		},
+		"PresetConfig": {
+			"description": "A preset configuration for enabling a set of rules.",
+			"type": "string",
+			"enum": ["recommended", "all", "none"]
 		},
 		"PropertyAssignmentMode": {
 			"description": "Specifies whether property assignments on function parameters are allowed or denied.",
@@ -7447,11 +7607,35 @@
 			},
 			"required": ["level", "options"]
 		},
+		"RuleAssistWithUseSortedPackageJsonOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSortedPackageJsonOptions" }
+			},
+			"required": ["level", "options"]
+		},
 		"RuleAssistWithUseSortedPropertiesOptions": {
 			"type": "object",
 			"properties": {
 				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseSortedPropertiesOptions" }
+			},
+			"required": ["level", "options"]
+		},
+		"RuleAssistWithUseSortedSelectionSetOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSortedSelectionSetOptions" }
+			},
+			"required": ["level", "options"]
+		},
+		"RuleAssistWithUseSortedTypeFieldsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSortedTypeFieldsOptions" }
 			},
 			"required": ["level", "options"]
 		},
@@ -9851,6 +10035,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoUndeclaredClassesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUndeclaredClassesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoUndeclaredDependenciesOptions": {
 			"type": "object",
 			"properties": {
@@ -10065,6 +10258,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUntrustedLicensesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUnusedClassesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnusedClassesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -10554,7 +10756,6 @@
 		"RuleWithUseAriaActivedescendantWithTabindexOptions": {
 			"type": "object",
 			"properties": {
-				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": {
 					"$ref": "#/$defs/UseAriaActivedescendantWithTabindexOptions"
@@ -12223,6 +12424,10 @@
 						{ "type": "null" }
 					]
 				},
+				"preset": {
+					"description": "The rule presets to use.",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
+				},
 				"recommended": {
 					"description": "It enables the lint rules recommended by Biome. `true` by default.",
 					"type": ["boolean", "null"]
@@ -12287,6 +12492,10 @@
 						{ "$ref": "#/$defs/NoSecretsConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"preset": {
+					"description": "Enables a particular rule preset",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
 				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
@@ -12393,12 +12602,16 @@
 						{ "type": "null" }
 					]
 				},
+				"preset": {
+					"description": "Enables a particular rule preset",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
+				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useSortedAttributes": {
-					"description": "Enforce attribute sorting in JSX elements.\nSee https://biomejs.dev/assist/actions/use-sorted-attributes",
+					"description": "Enforce attribute sorting in HTML elements.\nSee https://biomejs.dev/assist/actions/use-sorted-attributes",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseSortedAttributesConfiguration" },
 						{ "type": "null" }
@@ -12418,10 +12631,31 @@
 						{ "type": "null" }
 					]
 				},
+				"useSortedPackageJson": {
+					"description": "Organize package.json fields according to established conventions.\nSee https://biomejs.dev/assist/actions/use-sorted-package-json",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSortedPackageJsonConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSortedProperties": {
 					"description": "Enforce ordering of CSS properties and nested rules.\nSee https://biomejs.dev/assist/actions/use-sorted-properties",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseSortedPropertiesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useSortedSelectionSet": {
+					"description": "Sort GraphQL selection sets.\nSee https://biomejs.dev/assist/actions/use-sorted-selection-set",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSortedSelectionSetConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useSortedTypeFields": {
+					"description": "Sort fields in GraphQL type definitions alphabetically.\nSee https://biomejs.dev/assist/actions/use-sorted-type-fields",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSortedTypeFieldsConfiguration" },
 						{ "type": "null" }
 					]
 				}
@@ -12657,6 +12891,10 @@
 						{ "$ref": "#/$defs/NoYodaExpressionConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"preset": {
+					"description": "Enables a particular rule preset",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
 				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
@@ -13617,6 +13855,10 @@
 						{ "$ref": "#/$defs/NoWithConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"preset": {
+					"description": "Enables a particular rule preset",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
 				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
@@ -15372,6 +15614,16 @@
 			},
 			"additionalProperties": false
 		},
+		"UseSortedPackageJsonConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/$defs/RuleAssistWithUseSortedPackageJsonOptions" }
+			]
+		},
+		"UseSortedPackageJsonOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseSortedPropertiesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
@@ -15379,6 +15631,26 @@
 			]
 		},
 		"UseSortedPropertiesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseSortedSelectionSetConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/$defs/RuleAssistWithUseSortedSelectionSetOptions" }
+			]
+		},
+		"UseSortedSelectionSetOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseSortedTypeFieldsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/$defs/RuleAssistWithUseSortedTypeFieldsOptions" }
+			]
+		},
+		"UseSortedTypeFieldsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

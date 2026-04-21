@@ -368,6 +368,8 @@ pub enum PredefinedSourceMatcher {
     ProtocolPackage,
     #[serde(rename = ":PATH:")]
     Path,
+    #[serde(rename = ":STYLE:")]
+    Style,
     #[serde(rename = ":URL:")]
     Url,
 }
@@ -389,6 +391,14 @@ impl PredefinedSourceMatcher {
             Self::Package => source_kind == ImportSourceKind::Package,
             Self::Path => source_kind == ImportSourceKind::Path,
             Self::ProtocolPackage => source_kind == ImportSourceKind::ProtocolPackage,
+            Self::Style => std::path::Path::new(source)
+                .extension()
+                .is_some_and(|extension| {
+                    matches!(
+                        extension.as_encoded_bytes(),
+                        b"css" | b"less" | b"pcss" | b"sass" | b"scss" | b"sss" | b"styl"
+                    )
+                }),
             Self::Url => source_kind == ImportSourceKind::Url,
         }
     }
@@ -403,6 +413,7 @@ impl std::fmt::Display for PredefinedSourceMatcher {
             Self::Package => ":PACKAGE:",
             Self::ProtocolPackage => ":PACKAGE_WITH_PROTOCOL:",
             Self::Path => ":PATH:",
+            Self::Style => ":STYLE:",
             Self::Url => ":URL:",
         };
         f.write_str(repr)
@@ -418,6 +429,7 @@ impl std::str::FromStr for PredefinedSourceMatcher {
             ":PACKAGE:" => Ok(Self::Package),
             ":PACKAGE_WITH_PROTOCOL:" => Ok(Self::ProtocolPackage),
             ":PATH:" => Ok(Self::Path),
+            ":STYLE:" => Ok(Self::Style),
             ":URL:" => Ok(Self::Url),
             _ => Err("invalid predefined group"),
         }

@@ -39,8 +39,9 @@ use biome_css_parser::parse_css_with_offset_and_cache;
 use biome_css_syntax::{CssFileSource, CssLanguage, EmbeddingKind};
 use biome_formatter::prelude::{Document, Interned, LineMode, Tag};
 use biome_formatter::{
-    AttributePosition, BracketSameLine, BracketSpacing, Expand, FormatElement, FormatError,
-    IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle, TrailingNewline,
+    AttributePosition, BracketSameLine, BracketSpacing, DelimiterSpacing, Expand, FormatElement,
+    FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
+    TrailingNewline,
 };
 use biome_fs::BiomePath;
 use biome_graphql_parser::parse_graphql_with_offset_and_cache;
@@ -88,6 +89,7 @@ pub struct JsFormatterSettings {
     pub semicolons: Option<Semicolons>,
     pub arrow_parentheses: Option<ArrowParentheses>,
     pub bracket_spacing: Option<BracketSpacing>,
+    pub delimiter_spacing: Option<DelimiterSpacing>,
     pub bracket_same_line: Option<BracketSameLine>,
     pub line_ending: Option<LineEnding>,
     pub line_width: Option<LineWidth>,
@@ -113,6 +115,7 @@ impl From<JsFormatterConfiguration> for JsFormatterSettings {
             enabled: value.enabled,
             line_width: value.line_width,
             bracket_spacing: value.bracket_spacing,
+            delimiter_spacing: value.delimiter_spacing,
             attribute_position: value.attribute_position,
             indent_width: value.indent_width,
             indent_style: value.indent_style,
@@ -272,6 +275,12 @@ impl ServiceLanguage for JsLanguage {
             language
                 .bracket_spacing
                 .or(global.bracket_spacing)
+                .unwrap_or_default(),
+        )
+        .with_delimiter_spacing(
+            language
+                .delimiter_spacing
+                .or(global.delimiter_spacing)
                 .unwrap_or_default(),
         )
         .with_bracket_same_line(
@@ -957,6 +966,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
     let tree = params.parse.tree();
     let analyzer_options = params.settings.analyzer_options::<JsLanguage>(
         params.path,
+        params.working_directory,
         &params.language,
         params.suppression_reason.as_deref(),
     );
@@ -1037,13 +1047,18 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         categories,
         action_offset,
         document_services,
+        working_directory,
         compute_actions,
     } = params;
     let _ = debug_span!("Code actions JavaScript", range =? range, path =? path).entered();
     let tree = parse.tree();
     let _ = trace_span!("Parsed file").entered();
-    let analyzer_options =
-        settings.analyzer_options::<JsLanguage>(path, &language, suppression_reason.as_deref());
+    let analyzer_options = settings.analyzer_options::<JsLanguage>(
+        path,
+        working_directory,
+        &language,
+        suppression_reason.as_deref(),
+    );
     let mut actions = Vec::new();
     let AnalyzerVisitorResult {
         enabled_rules,
@@ -1134,6 +1149,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         .as_linter_rules(params.biome_path.as_path());
     let analyzer_options = params.settings.analyzer_options::<JsLanguage>(
         params.biome_path,
+        params.working_directory,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
     );
@@ -1265,6 +1281,10 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             |signal| process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions),
         );
 
+        let plugin_text_edit = pending_actions
+            .iter()
+            .find_map(|action| action.text_edit.clone());
+        pending_actions.retain(|action| action.text_edit.is_none());
         let result = process_fix_all.process_batch_actions(pending_actions, |root| {
             tree = match AnyJsRoot::cast(root) {
                 Some(tree) => tree,
@@ -1274,6 +1294,17 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         })?;
 
         if result.is_none() {
+            if let Some(new_text) = process_fix_all
+                .apply_plugin_text_edit(plugin_text_edit, &tree.syntax().to_string())?
+            {
+                let options = params
+                    .settings
+                    .parse_options::<JsLanguage>(params.biome_path, &params.document_file_source);
+                let parse = biome_js_parser::parse(&new_text, file_source, options);
+                tree = parse.tree();
+                continue;
+            }
+
             break;
         }
     }
@@ -1471,10 +1502,15 @@ pub(crate) fn pull_diagnostics_and_actions(
         plugins,
         diagnostic_offset,
         document_services,
+        working_directory,
     } = params;
     let tree = parse.tree();
-    let analyzer_options =
-        settings.analyzer_options::<JsLanguage>(path, &language, suppression_reason.as_deref());
+    let analyzer_options = settings.analyzer_options::<JsLanguage>(
+        path,
+        working_directory,
+        &language,
+        suppression_reason.as_deref(),
+    );
     let AnalyzerVisitorResult {
         enabled_rules,
         disabled_rules,

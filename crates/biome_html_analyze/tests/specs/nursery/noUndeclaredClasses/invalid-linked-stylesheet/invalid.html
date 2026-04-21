@@ -1,0 +1,13 @@
+<!-- should generate diagnostics -->
+<!doctype html>
+<html>
+<head>
+	<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+	<!-- ghost is not in styles.css -->
+	<div class="ghost">Not defined anywhere</div>
+	<!-- card is defined, so only ghost is flagged -->
+	<div class="card">Valid class</div>
+</body>
+</html>
