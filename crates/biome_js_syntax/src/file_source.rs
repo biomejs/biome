@@ -139,6 +139,9 @@ pub enum EmbeddingKind {
     Svelte {
         /// Where the bindings are defined
         is_source: bool,
+
+        /// Whether this is the declaration of a function, usually declared in `#snippet`
+        is_function_signature: bool,
     },
     #[default]
     None,
@@ -168,6 +171,15 @@ impl EmbeddingKind {
     }
     pub const fn is_svelte(&self) -> bool {
         matches!(self, Self::Svelte { .. })
+    }
+    pub const fn is_svelte_function_signature(&self) -> bool {
+        matches!(
+            self,
+            Self::Svelte {
+                is_function_signature: true,
+                ..
+            }
+        )
     }
 }
 
@@ -258,7 +270,10 @@ impl JsFileSource {
 
     /// Svelte file definition
     pub fn svelte() -> Self {
-        Self::js_module().with_embedding_kind(EmbeddingKind::Svelte { is_source: true })
+        Self::js_module().with_embedding_kind(EmbeddingKind::Svelte {
+            is_source: true,
+            is_function_signature: false,
+        })
     }
 
     pub const fn with_module_kind(mut self, kind: ModuleKind) -> Self {
@@ -332,12 +347,13 @@ impl JsFileSource {
     pub const fn is_embedded_source(&self) -> bool {
         matches!(
             self.embedding_kind,
-            EmbeddingKind::Svelte { is_source: true }
-                | EmbeddingKind::Vue {
-                    is_source: true,
-                    ..
-                }
-                | EmbeddingKind::Astro { frontmatter: true }
+            EmbeddingKind::Svelte {
+                is_source: true,
+                ..
+            } | EmbeddingKind::Vue {
+                is_source: true,
+                ..
+            } | EmbeddingKind::Astro { frontmatter: true }
         )
     }
 
@@ -348,12 +364,13 @@ impl JsFileSource {
     pub const fn is_template_expression(&self) -> bool {
         matches!(
             self.embedding_kind,
-            EmbeddingKind::Svelte { is_source: false }
-                | EmbeddingKind::Vue {
-                    allow_statements: false,
-                    ..
-                }
-                | EmbeddingKind::Astro { frontmatter: false }
+            EmbeddingKind::Svelte {
+                is_source: false,
+                ..
+            } | EmbeddingKind::Vue {
+                allow_statements: false,
+                ..
+            } | EmbeddingKind::Astro { frontmatter: false }
         )
     }
 

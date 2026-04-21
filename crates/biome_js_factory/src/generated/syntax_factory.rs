@@ -4806,6 +4806,39 @@ impl SyntaxFactory for JsSyntaxFactory {
                 }
                 slots.into_node(JS_SHORTHAND_PROPERTY_OBJECT_MEMBER, children)
             }
+            JS_SNIPPET_SIGNATURE_TEMPLATE_ROOT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && AnyJsBinding::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && JsParameters::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![EOF]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        JS_SNIPPET_SIGNATURE_TEMPLATE_ROOT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(JS_SNIPPET_SIGNATURE_TEMPLATE_ROOT, children)
+            }
             JS_SPREAD => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();

@@ -76,7 +76,10 @@ impl SvelteFileHandler {
                 Some(
                     JsFileSource::from(language)
                         .with_variant(variant)
-                        .with_embedding_kind(EmbeddingKind::Svelte { is_source: true }),
+                        .with_embedding_kind(EmbeddingKind::Svelte {
+                            is_source: true,
+                            is_function_signature: false,
+                        }),
                 )
             })
             .map_or(JsFileSource::js_module(), |fs| fs)

@@ -566,6 +566,11 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::JsShorthandPropertyObjectMember::new_unchecked(node) };
                     $body
                 }
+                $crate::JsSyntaxKind::JS_SNIPPET_SIGNATURE_TEMPLATE_ROOT => {
+                    let $pattern =
+                        unsafe { $crate::JsSnippetSignatureTemplateRoot::new_unchecked(node) };
+                    $body
+                }
                 $crate::JsSyntaxKind::JS_SPREAD => {
                     let $pattern = unsafe { $crate::JsSpread::new_unchecked(node) };
                     $body

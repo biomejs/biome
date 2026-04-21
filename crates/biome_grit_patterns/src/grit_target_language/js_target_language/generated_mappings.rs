@@ -387,6 +387,9 @@ pub fn native_kind_by_name(node_name: &str) -> Option<JsSyntaxKind> {
         "JsShorthandPropertyObjectMember" => lang::JsShorthandPropertyObjectMember::KIND_SET
             .iter()
             .next(),
+        "JsSnippetSignatureTemplateRoot" => {
+            lang::JsSnippetSignatureTemplateRoot::KIND_SET.iter().next()
+        }
         "JsSpread" => lang::JsSpread::KIND_SET.iter().next(),
         "JsStaticInitializationBlockClassMember" => {
             lang::JsStaticInitializationBlockClassMember::KIND_SET
@@ -797,6 +800,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "JsSetterObjectMember" => &[("name", 1), ("parameter", 3), ("body", 6)],
         "JsShorthandNamedImportSpecifier" => &[("local_name", 1)],
         "JsShorthandPropertyObjectMember" => &[("name", 0)],
+        "JsSnippetSignatureTemplateRoot" => &[("name", 0), ("parameters", 1)],
         "JsSpread" => &[("argument", 1)],
         "JsStaticInitializationBlockClassMember" => &[("statements", 2)],
         "JsStaticMemberAssignment" => &[("object", 0), ("member", 2)],

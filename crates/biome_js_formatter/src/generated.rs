@@ -4473,6 +4473,38 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsShorthandPropertyObjectM
         FormatOwnedWithRule :: new (self , crate :: js :: objects :: shorthand_property_object_member :: FormatJsShorthandPropertyObjectMember :: default ())
     }
 }
+impl FormatRule<biome_js_syntax::JsSnippetSignatureTemplateRoot>
+    for crate::js::auxiliary::snippet_signature_template_root::FormatJsSnippetSignatureTemplateRoot
+{
+    type Context = JsFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_js_syntax::JsSnippetSignatureTemplateRoot,
+        f: &mut JsFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_js_syntax::JsSnippetSignatureTemplateRoot>::fmt(self, node, f)
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::JsSnippetSignatureTemplateRoot {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::JsSnippetSignatureTemplateRoot,
+        crate::js::auxiliary::snippet_signature_template_root::FormatJsSnippetSignatureTemplateRoot,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: js :: auxiliary :: snippet_signature_template_root :: FormatJsSnippetSignatureTemplateRoot :: default ())
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::JsSnippetSignatureTemplateRoot {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::JsSnippetSignatureTemplateRoot,
+        crate::js::auxiliary::snippet_signature_template_root::FormatJsSnippetSignatureTemplateRoot,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: js :: auxiliary :: snippet_signature_template_root :: FormatJsSnippetSignatureTemplateRoot :: default ())
+    }
+}
 impl FormatRule<biome_js_syntax::JsSpread> for crate::js::auxiliary::spread::FormatJsSpread {
     type Context = JsFormatContext;
     #[inline(always)]

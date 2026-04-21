@@ -20,6 +20,7 @@ pub(crate) mod name;
 pub(crate) mod private_name;
 pub(crate) mod reference_identifier;
 pub(crate) mod script;
+pub(crate) mod snippet_signature_template_root;
 pub(crate) mod spread;
 pub(crate) mod static_modifier;
 pub(crate) mod template_chunk_element;
