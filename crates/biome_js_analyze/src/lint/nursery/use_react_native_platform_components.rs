@@ -110,7 +110,7 @@ declare_lint_rule! {
 impl Rule for UseReactNativePlatformComponents {
     type Query = Ast<AnyJsImportLike>;
     type State = RuleState;
-    type Signals = Box<[Self::State]>;
+    type Signals = Vec<Self::State>;
     type Options = UseReactNativePlatformComponentsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -118,26 +118,26 @@ impl Rule for UseReactNativePlatformComponents {
 
         let module_name = node.inner_string_text();
         if module_name.as_ref().map(|t| t.text()) != Some("react-native") {
-            return Box::default();
+            return vec![];
         }
 
         let component_names = collect_imported_names(node);
         if component_names.is_empty() {
-            return Box::default();
+            return vec![];
         }
 
         let file_path = ctx.file_path().as_str();
         let options = ctx.options();
 
         let is_android_file = options
-            .android_path_patterns
-            .as_ref()
-            .is_some_and(|patterns| patterns.iter().any(|glob| glob.is_match(file_path)));
+            .android_path_patterns()
+            .iter()
+            .any(|glob| glob.is_match(file_path));
         let is_ios_file = !is_android_file
             && options
-                .ios_path_patterns
-                .as_ref()
-                .is_some_and(|patterns| patterns.iter().any(|glob| glob.is_match(file_path)));
+                .ios_path_patterns()
+                .iter()
+                .any(|glob| glob.is_match(file_path));
 
         let mut has_android = false;
         let mut has_ios = false;
@@ -168,7 +168,7 @@ impl Rule for UseReactNativePlatformComponents {
             }
         }
 
-        results.into_boxed_slice()
+        results
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
