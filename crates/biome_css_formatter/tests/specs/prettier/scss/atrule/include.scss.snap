@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
 info: scss/atrule/include.scss
 ---
 
@@ -134,46 +135,22 @@ border-color: $very-very-very-very-very-very-very-very-very-very-very-very-very-
 ```diff
 --- Prettier
 +++ Biome
-@@ -5,31 +5,19 @@
+@@ -5,13 +5,7 @@
  @include mix(1px, 2px, $arg2: 10, 2px 4px 6px);
  @include mix(1px, 2px, $arg2: 10, 2px 4px 6px);
  @include mix(1px, 2px, $arg2: 10, 2px 4px 6px);
-+@include mix(1px, 2px, $arg2: 10, 2px 4px 6px);
- @include mix(
+-@include mix(
 -  1px,
 -  2px,
 -  $arg2: 10,
 -
 -  2px 4px 6px
 -);
--@include mix(
--  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg:
--    1px,
--  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1:
--    2px,
--  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2:
--    10,
-+  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg: 1px,
-+  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1: 2px,
-+  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10,
-   2px 4px 6px
- );
- a {
-   @include global-variable-overriding;
-   @include mix(
--    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg:
--      1px,
--    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1:
--      2px,
--    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2:
--      10,
-+    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg: 1px,
-+    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1: 2px,
-+    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10,
-     2px 4px 6px
-   );
-   @include apply-to-ie6-only {
-@@ -52,7 +40,7 @@
++@include mix(1px, 2px, $arg2: 10, 2px 4px 6px);
+ @include mix(
+   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg:
+     1px,
+@@ -52,7 +46,7 @@
      ),
      $decoration: (
        type: base,
@@ -182,7 +159,7 @@ border-color: $very-very-very-very-very-very-very-very-very-very-very-very-very-
        primary-color: $brand-primary,
        secondary-color: $gray-light,
      ),
-@@ -90,8 +78,7 @@
+@@ -90,8 +84,7 @@
      "-title",
      (
        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15),
@@ -206,17 +183,23 @@ border-color: $very-very-very-very-very-very-very-very-very-very-very-very-very-
 @include mix(1px, 2px, $arg2: 10, 2px 4px 6px);
 @include mix(1px, 2px, $arg2: 10, 2px 4px 6px);
 @include mix(
-  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg: 1px,
-  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1: 2px,
-  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10,
+  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg:
+    1px,
+  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1:
+    2px,
+  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2:
+    10,
   2px 4px 6px
 );
 a {
   @include global-variable-overriding;
   @include mix(
-    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg: 1px,
-    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1: 2px,
-    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10,
+    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg:
+      1px,
+    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1:
+      2px,
+    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2:
+      10,
     2px 4px 6px
   );
   @include apply-to-ie6-only {
@@ -285,11 +268,11 @@ a {
 
 # Lines exceeding max width of 80 characters
 ```
-   10:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg: 1px,
-   11:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1: 2px,
-   12:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10,
-   18:     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg: 1px,
-   19:     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1: 2px,
-   20:     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10,
-   81:       border-color: $very-very-very-very-very-very-very-very-very-very-very-very-very-long-value,
+   10:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg:
+   12:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1:
+   14:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2:
+   21:     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg:
+   23:     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1:
+   25:     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2:
+   87:       border-color: $very-very-very-very-very-very-very-very-very-very-very-very-very-long-value,
 ```

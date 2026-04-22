@@ -1,7 +1,7 @@
 use crate::prelude::*;
-use crate::utils::scss_expression::unwrap_single_expression_item;
+use crate::utils::scss_expression::value_manages_its_own_breaking;
 use crate::utils::scss_map::{is_in_scss_map_key, is_scss_map_value};
-use biome_css_syntax::{AnyScssExpression, ScssMapExpressionPair, ScssMapExpressionPairFields};
+use biome_css_syntax::{ScssMapExpressionPair, ScssMapExpressionPairFields};
 use biome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
@@ -52,26 +52,4 @@ impl FormatNodeRule<ScssMapExpressionPair> for FormatScssMapExpressionPair {
             ])]
         )
     }
-}
-
-/// Returns `true` when the expression value can break internally without
-/// needing the enclosing `key: value` pair to also break after the colon.
-///
-/// Parenthesized, list, and map values own their internal layout, so the pair
-/// formatter keeps `key: (` on the same line and lets the child decide where to
-/// break.
-fn value_manages_its_own_breaking(value: &AnyScssExpression) -> bool {
-    matches!(
-        value,
-        AnyScssExpression::ScssListExpression(_)
-            | AnyScssExpression::ScssMapExpression(_)
-            | AnyScssExpression::ScssParenthesizedExpression(_)
-    ) || unwrap_single_expression_item(value).is_some_and(|item| {
-        matches!(
-            item,
-            biome_css_syntax::AnyScssExpressionItem::ScssListExpression(_)
-                | biome_css_syntax::AnyScssExpressionItem::ScssMapExpression(_)
-                | biome_css_syntax::AnyScssExpressionItem::ScssParenthesizedExpression(_)
-        )
-    })
 }

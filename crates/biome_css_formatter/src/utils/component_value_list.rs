@@ -1,7 +1,10 @@
 use crate::CssFormatter;
 use crate::comments::CssComments;
 use crate::prelude::*;
-use biome_css_syntax::{CssGenericDelimiter, CssGenericProperty, CssLanguage, CssSyntaxKind};
+use biome_css_syntax::{
+    CssFunction, CssGenericDelimiter, CssGenericProperty, CssLanguage, CssSyntaxKind,
+    ScssIncludeArgumentList,
+};
 use biome_formatter::{CstFormatContext, format_args, write};
 use biome_formatter::{FormatOptions, FormatResult};
 use biome_rowan::{AstNode, AstNodeList, TextSize};
@@ -22,6 +25,16 @@ where
         .map(|token| token.kind());
 
     matches!(token_kind, Some(CssSyntaxKind::COMMA))
+}
+
+/// Returns `true` for comma-separated call arguments like `rgba(0, 0, 0, 0.5)`
+/// or `@include mix(1px, 2px, $arg: 3px)`.
+fn is_call_argument_list<N, I>(list: &N) -> bool
+where
+    N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
+    I: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
+{
+    list.parent::<CssFunction>().is_some() || list.parent::<ScssIncludeArgumentList>().is_some()
 }
 
 /// Applies a Prettier-like wrapping strategy for comma-separated *declaration values* when using
@@ -466,8 +479,8 @@ where
             ValueListLayout::OneGroupPerLine
         }
     } else if is_comma_separated
-        && value_count > 12
         && text_size >= TextSize::from(f.options().line_width().value() as u32)
+        && (value_count > 12 || is_call_argument_list(list))
     {
         ValueListLayout::OnePerLine
     } else {
