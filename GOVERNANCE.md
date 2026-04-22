@@ -156,8 +156,8 @@ Contractors are people that might work within the Biome project for an arbitrary
 During the period of the collaboration, contractors may have access to one or more of the following rights:
 - Merge rights to one of more repositories of the GitHub org (same rights of [maintainers](#maintainer)).
   - People should be added as external collaborators using the correct GitHub roles.
-- The ability to merge PRs without approval, as long as post-merge reviews are addressed in another PR. Collaborators are considered masters in their craft, so their contributions should be considered in line with Biome values and their work.
-- Access to the `#maintaners` channel on Discord.
+- The ability to merge PRs without approval, as long as post-merge reviews are addressed in another PR. Contractors are considered masters in their craft, so their contributions should be considered in line with Biome values and their work.
+- Access to the `#maintainers` channel on Discord.
 
 During the period of the collaboration, contractors:
 - Don't have voting rights.
