@@ -1,18 +1,18 @@
-use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
+use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsxAttributeValue, jsx_ext::AnyJsxElement};
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_rowan::AstNode;
 use biome_rule_options::use_focusable_interactive::UseFocusableInteractiveOptions;
 
-use crate::services::aria::Aria;
+use crate::Aria;
 
 declare_lint_rule! {
     /// Elements with an interactive role and interaction handlers must be focusable.
     ///
-    /// HTML elements with interactive roles must have `tabIndex` defined to ensure they are
-    /// focusable. Without tabIndex, assistive technologies may not recognize these elements as
+    /// HTML elements with interactive roles must have `tabindex` defined to ensure they are
+    /// focusable. Without `tabindex`, assistive technologies may not recognize these elements as
     /// interactive.
     /// You could also consider switching from an interactive role to its semantic HTML element
     /// instead.
@@ -21,54 +21,53 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```jsx,expect_diagnostic
-    /// <div role="button" />
+    /// ```html,expect_diagnostic
+    /// <div role="button"></div>
     /// ```
     ///
-    /// ```jsx,expect_diagnostic
-    /// <div role="tab" />
+    /// ```html,expect_diagnostic
+    /// <div role="tab"></div>
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```jsx
-    /// <div role="button" tabIndex={0} />
+    /// ```html
+    /// <div role="button" tabindex="0"></div>
     /// ```
     ///
-    /// ```jsx
-    /// <div />
+    /// ```html
+    /// <div></div>
     /// ```
     ///
     pub UseFocusableInteractive {
-        version: "1.8.0",
+        version: "next",
         name: "useFocusableInteractive",
-        language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("interactive-supports-focus").same()],
+        language: "html",
         recommended: true,
         severity: Severity::Error,
     }
 }
 
 impl Rule for UseFocusableInteractive {
-    type Query = Aria<AnyJsxElement>;
+    type Query = Aria<AnyHtmlTagElement>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = UseFocusableInteractiveOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        if !node.is_element() {
+
+        if node.is_custom_component() {
             return None;
         }
 
         if ctx.aria_roles().is_not_interactive_element(node) {
             let role_attribute = node.find_attribute_by_name("role");
             if let Some(role_attribute) = role_attribute {
-                let tabindex_attribute = node.find_attribute_by_name("tabIndex");
+                let tabindex_attribute = node.find_attribute_by_name("tabindex");
                 let role_attribute_value = role_attribute.initializer()?.value().ok()?;
-                if attribute_has_interactive_role(&role_attribute_value)?
-                    && tabindex_attribute.is_none()
-                {
+                let role = AriaRole::from_roles(role_attribute_value.as_static_value()?.text())?;
+                if role.is_interactive() && !role.is_composite() && tabindex_attribute.is_none() {
                     return Some(());
                 }
             }
@@ -91,14 +90,8 @@ impl Rule for UseFocusableInteractive {
                 "A non-interactive HTML element that is not focusable may not be reachable for users that rely on keyboard navigation, even with an added role like "<Emphasis>{role_attribute_value.to_trimmed_string()}</Emphasis>"."
             })
             .note(markup! {
-                "Add a "<Emphasis>"tabIndex"</Emphasis>" attribute to make this element focusable."
+                "Add a "<Emphasis>"tabindex"</Emphasis>" attribute to make this element focusable."
             }),
         )
     }
-}
-
-/// Checks if the given role attribute value is interactive or not based on ARIA roles.
-fn attribute_has_interactive_role(role_attribute_value: &AnyJsxAttributeValue) -> Option<bool> {
-    let role = AriaRole::from_roles(role_attribute_value.as_static_value()?.text())?;
-    Some(role.is_interactive() && !role.is_composite())
 }
