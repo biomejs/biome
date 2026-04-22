@@ -73,3 +73,60 @@ function mapObject(): object { return new Map(); }
 function setObject(): object { return new Set(); }
 function weakMapObject(): object { return new WeakMap(); }
 function errorObject(): object { return new Error(); }
+
+function objectWider(): object { return { retry: true }; }
+
+class Foo { x = 1; }
+function objectFromClass(): object { return new Foo(); }
+
+function variantObject(b: boolean): object { if (b) return { a: 1 }; return { b: 2 }; }
+
+function mixedBareAndCast(b: boolean): object { if (b) return {} as object; return { a: 1 }; }
+
+declare const apiResponse: { a: number };
+function resolvedObject(): object { return apiResponse; }
+
+function castNarrowLiteral(): object { return {} as { a: number }; }
+type NarrowShape = { a: number };
+function castNarrowAlias(): object { return {} as NarrowShape; }
+class MyLocalClass { y = 1; }
+function castLocalClass(): object { return new MyLocalClass() as MyLocalClass; }
+interface MyLocalInterface { z: string; }
+function castLocalInterface(): object { return { z: "x" } as MyLocalInterface; }
+
+type NarrowIntersection = { a: number } & { b: string };
+function castNarrowIntersection(): object { return {} as NarrowIntersection; }
+function inlineNarrowIntersection(): object {
+    return {} as ({ a: number } & { b: string });
+}
+
+async function asyncObjectWider(): Promise<object> { return { a: 1 }; }
+
+class ObjectMethodClass { m(): object { return { a: 1 }; } }
+
+const objectMethodObj = { m(): object { return { a: 1 }; } };
+
+function asConstObjectAnnotation(): object { return { a: 1 } as const; }
+
+function arrayReturn(): object { return [1, 2, 3]; }
+function arrayEmpty(): object { return []; }
+function regexpReturn(): object { return /foo/; }
+function fnExprReturn(): object { return (): void => {}; }
+function fnDeclReturn(): object { function bar() {} return bar; }
+
+function satisfiesNarrow(): object { return { a: 1 } satisfies { a: number }; }
+function angleNarrow(): object { return <{ a: number }>{ a: 1 }; }
+function identifierBoundNarrow(): object { const x = { a: 1 }; return x; }
+
+function mixedEmptyAndNonEmpty(b: boolean): object { if (b) return {}; return { a: 1 }; }
+function spreadReturn(x: { a: number }): object { return { ...x }; }
+
+type ObjectAndNarrowShape = object & { a: number };
+function intersectionNarrowMember(): object { return {} as object & { a: number }; }
+function intersectionNarrowAlias(): object { return {} as ObjectAndNarrowShape; }
+
+interface NarrowInterface { a: number; }
+function narrowInterfaceCast(): object { return {} as NarrowInterface; }
+interface InterfaceExtending extends NarrowInterface {}
+function extendingInterfaceCast(): object { return {} as InterfaceExtending; }
+function conditionalOneBranchNarrow(): object { return {} as (true extends true ? object : { a: 1 }); }

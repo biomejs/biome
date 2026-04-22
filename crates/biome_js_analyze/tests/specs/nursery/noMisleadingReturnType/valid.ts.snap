@@ -165,4 +165,97 @@ class StoreClass { get status(): string { if (Math.random() > 0.5) return "loadi
 const storeObj = { get status(): string { if (Math.random() > 0.5) return "loading"; return "idle"; }, set status(v: string) {} };
 class StaticStore { static get status(): string { if (Math.random() > 0.5) return "loading"; return "idle"; } static set status(v: string) {} }
 
+function asObjectCast(): object { return {} as object; }
+function angleObjectCast(): object { return <object>{}; }
+
+function parenObjectCast(): object { return {} as (object); }
+type ObjectAlias = object;
+function aliasedObjectCast(): object { return {} as ObjectAlias; }
+type NestedObjectAlias = ObjectAlias;
+function nestedAliasedObjectCast(): object { return {} as NestedObjectAlias; }
+
+function multiObjectCast(b: boolean): object {
+    if (b) return {} as object;
+    return {} as object;
+}
+
+namespace NS {
+    export type Obj = object;
+}
+function qualifiedObjectCast(): object { return {} as NS.Obj; }
+
+function inlineIntersectionObjectCast(): object { return {} as (object & {}); }
+type ObjectAndEmpty = object & {};
+function aliasedIntersectionObjectCast(): object { return {} as ObjectAndEmpty; }
+
+function ternaryBothBranchesObjectCast(b: boolean): object {
+    return b ? ({} as object) : ({} as object);
+}
+
+function doubleCastObject(): object { return {} as unknown as object; }
+
+const arrowBodyObjectCast = (): object => ({} as object);
+
+type ObjectAliasL1 = object;
+type ObjectAliasL2 = ObjectAliasL1;
+type ObjectAliasL3 = ObjectAliasL2;
+type ObjectAliasL4 = ObjectAliasL3;
+type ObjectAliasL5 = ObjectAliasL4;
+function deepAliasObjectCast(): object { return {} as ObjectAliasL5; }
+
+type ObjectAliasL6 = ObjectAliasL5;
+type ObjectAliasL7 = ObjectAliasL6;
+function veryDeepAliasObjectCast(): object { return {} as ObjectAliasL7; }
+
+async function asyncObjectCast(): Promise<object> { return {} as object; }
+class ClassObjectCast { m(): object { return {} as object; } }
+const objectObjectCast = { m(): object { return {} as object; } };
+class ClassGetterObjectCast { get o(): object { return {} as object; } }
+const objectGetterObjectCast = { get o(): object { return {} as object; } };
+
+function intersectionUnknownObjectCast(): object {
+    return {} as (unknown & object);
+}
+
+type OuterObjectAlias = object;
+function outerWithInnerCast(): number {
+    function inner(): object { return {} as OuterObjectAlias; }
+    return inner() as unknown as number;
+}
+
+async function awaitObjectCast(): Promise<object> { return await ({} as object); }
+function nonNullObjectCast(): object { return ({} as object)!; }
+declare const maybeObj: object | undefined;
+function logicalFallbackObjectCast(): object { return maybeObj ?? ({} as object); }
+
+function identifierBoundToObjectCast(): object { const x = {} as object; return x; }
+
+function bareEmptyObject(): object { return {}; }
+function parenthesizedBareEmpty(): object { return (({})); }
+function identifierBoundToEmpty(): object { const x = {}; return x; }
+function arrowBodyBareEmpty(): object { return {}; }
+const arrowExprBareEmpty = (): object => ({});
+async function asyncBareEmpty(): Promise<object> { return {}; }
+function multipleBareEmptyObjects(b: boolean): object { if (b) return {}; return {}; }
+function mixedBareEmptyAndObjectCast(b: boolean): object { if (b) return {}; return {} as object; }
+
+function emptyObjectTypeCast(): object { return {} as {}; }
+function parenEmptyObjectTypeCast(): object { return {} as ({}); }
+function doubleEmptyObjectTypeCast(): object { return {} as {} as {}; }
+
+type ObjectAliasA = object;
+type ObjectAliasB = object;
+function intersectionOfAliasesToObject(): object { return {} as (ObjectAliasA & ObjectAliasB); }
+function intersectionNonPrimitiveUnknown(): object { return {} as (object & unknown); }
+
+interface EmptyInterface {}
+function emptyInterfaceCast(): object { return {} as EmptyInterface; }
+class EmptyClass {}
+function emptyClassCast(): object { return {} as EmptyClass; }
+
+type AlwaysObjectCond = true extends true ? object : object;
+function condAliasTrust(): object { return {} as AlwaysObjectCond; }
+function inlineConditionalBothObject(): object { return {} as (true extends true ? object : object); }
+function unionOfConditionals(): object { return {} as ((true extends true ? object : object) | object); }
+
 ```

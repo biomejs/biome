@@ -1,10 +1,14 @@
 use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsFunction, AnyJsFunctionBody, AnyJsGetter, JsFunctionBody,
-    JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember, JsMethodObjectMember,
-    JsReturnStatement, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, JsVariableStatement,
-    TsAsExpression, TsMethodSignatureClassMember, TsTypeAssertionExpression,
+    AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsFunctionBody, AnyJsGetter,
+    AnyTsCastExpression, AnyTsIdentifierBinding, AnyTsType, JsArrowFunctionExpression,
+    JsClassDeclaration, JsConstructorClassMember, JsFunctionBody, JsFunctionDeclaration,
+    JsFunctionExpression, JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember,
+    JsMethodObjectMember, JsReturnStatement, JsSetterClassMember, JsSetterObjectMember,
+    JsSyntaxNode, JsVariableDeclarator, JsVariableStatement, TsAsExpression,
+    TsInterfaceDeclaration, TsMethodSignatureClassMember, TsReferenceType,
+    TsTypeAliasDeclaration, TsTypeAssertionExpression,
 };
 use biome_js_type_info::{Literal, Type, TypeData};
 use biome_rowan::{AstNode, TextRange, TokenText, declare_node_union};
@@ -38,6 +42,10 @@ declare_lint_rule! {
     ///
     /// ```ts,expect_diagnostic,file=invalid4.ts
     /// const obj = { getMode(b: boolean): string { if (b) return "dark"; return "light"; } };
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic,file=invalid5.ts
+    /// function makeData(): object { return { retry: true }; }
     /// ```
     ///
     /// ### Valid
@@ -256,47 +264,58 @@ fn run_for_member_with_body(
         return_ty.clone()
     };
 
-    let (returns, has_any_const_return) = collect_return_info(ctx, body);
+    let info = collect_return_info(ctx, body);
 
-    if returns.is_empty() {
+    if info.types.is_empty() {
         return None;
     }
 
-    if returns.len() == 1 && !has_any_const_return && is_literal_of_primitive(&returns[0]) {
+    if info.is_single_primitive_literal() {
+        return None;
+    }
+
+    if info.all_opt_into_object() && matches!(&*effective_return_ty, TypeData::ObjectKeyword) {
         return None;
     }
 
     if matches!(&*effective_return_ty, TypeData::Boolean)
-        && returns.iter().any(|ty| matches!(&**ty, TypeData::Literal(lit) if matches!(lit.as_ref(), Literal::Boolean(b) if b.as_bool())))
-        && returns.iter().any(|ty| matches!(&**ty, TypeData::Literal(lit) if matches!(lit.as_ref(), Literal::Boolean(b) if !b.as_bool())))
+        && has_boolean_literal(&info.types, true)
+        && has_boolean_literal(&info.types, false)
     {
         return None;
     }
 
-    if returns.iter().any(is_any_contaminated) {
+    if info.types.iter().any(is_any_contaminated) {
         return None;
     }
 
     if includes_undefined(&effective_return_ty)
-        && !returns.iter().any(includes_undefined)
+        && !info.types.iter().any(includes_undefined)
     {
         return None;
     }
 
-    if returns.iter().any(is_intersection_with_type_param) {
+    if info.types.iter().any(is_intersection_with_type_param) {
         return None;
     }
 
-    if !has_any_const_return
-        && is_only_property_literal_widening(&effective_return_ty, &returns)
+    if !info.has_any_const
+        && is_only_property_literal_widening(&effective_return_ty, &info.types)
     {
         return None;
     }
 
     let is_misleading = if effective_return_ty.is_union() {
-        is_union_wider_than_returns(&effective_return_ty, &returns)
+        is_union_wider_than_returns(&effective_return_ty, &info.types)
+    } else if matches!(&*effective_return_ty, TypeData::ObjectKeyword) {
+        // For `: object`, any narrower branch is enough; bare `{}` doesn't count.
+        info.has_narrower_than_object
+            || info
+                .types
+                .iter()
+                .any(|inferred| is_wider_than(&effective_return_ty, inferred))
     } else {
-        returns
+        info.types
             .iter()
             .all(|inferred| is_wider_than(&effective_return_ty, inferred))
     };
@@ -307,7 +326,7 @@ fn run_for_member_with_body(
 
     Some(RuleState {
         annotation_range,
-        returns,
+        returns: info.types,
     })
 }
 
@@ -315,24 +334,25 @@ fn is_class_method_overload_implementation(method: &JsMethodClassMember) -> bool
     let name = method
         .name()
         .ok()
-        .and_then(|n| n.as_js_literal_member_name().cloned())
-        .and_then(|n| n.value().ok())
-        .map(|t| t.token_text_trimmed());
+        .and_then(|member_name| member_name.as_js_literal_member_name().cloned())
+        .and_then(|literal_name| literal_name.name().ok());
     let Some(name) = name else { return false };
 
     let Some(member_list) = method.syntax().parent() else {
         return false;
     };
 
-    member_list.children().any(|child| {
-        child.kind() == JsSyntaxKind::TS_METHOD_SIGNATURE_CLASS_MEMBER
-            && TsMethodSignatureClassMember::cast(child)
-                .and_then(|sig| sig.name().ok())
-                .and_then(|n| n.as_js_literal_member_name().cloned())
-                .and_then(|n| n.value().ok())
-                .map(|t| t.token_text_trimmed())
-                .is_some_and(|sig_name| sig_name == name)
-    })
+    member_list
+        .children()
+        .filter_map(TsMethodSignatureClassMember::cast)
+        .any(|signature| {
+            signature
+                .name()
+                .ok()
+                .and_then(|member_name| member_name.as_js_literal_member_name().cloned())
+                .and_then(|literal_name| literal_name.name().ok())
+                .is_some_and(|sibling_name| sibling_name == name)
+        })
 }
 
 fn extract_return_type(func_type: &Type) -> Option<Type> {
@@ -605,35 +625,76 @@ fn build_inferred_description(returns: &[Type]) -> Option<String> {
     Some(result)
 }
 
-/// Collects return types and tracks `as const` usage from a function body.
+/// Per-body accumulator for the misleading-return check.
+struct ReturnInfo {
+    types: Vec<Type>,
+    has_any_const: bool,
+    object_keyword_casts: usize,
+    has_narrower_than_object: bool,
+}
+
+impl ReturnInfo {
+    /// Single-return whose inferred type is a primitive literal and no `as const`.
+    fn is_single_primitive_literal(&self) -> bool {
+        self.types.len() == 1 && !self.has_any_const && is_literal_of_primitive(&self.types[0])
+    }
+
+    /// Every return carries an explicit `object`-keyword cast (and no `as const`).
+    fn all_opt_into_object(&self) -> bool {
+        !self.has_any_const && self.object_keyword_casts == self.types.len()
+    }
+}
+
+/// Returns the bool if `ty` is a boolean literal type.
+fn as_boolean_literal(ty: &Type) -> Option<bool> {
+    let TypeData::Literal(lit) = &**ty else {
+        return None;
+    };
+    let Literal::Boolean(b) = lit.as_ref() else {
+        return None;
+    };
+    Some(b.as_bool())
+}
+
+/// Whether any type in `types` is the boolean literal `value`.
+fn has_boolean_literal(types: &[Type], value: bool) -> bool {
+    types.iter().any(|ty| as_boolean_literal(ty) == Some(value))
+}
+
+/// Walks the function body and populates a [`ReturnInfo`].
 fn collect_return_info(
     ctx: &RuleContext<NoMisleadingReturnType>,
     body: &AnyJsFunctionBody,
-) -> (Vec<Type>, bool) {
-    let mut has_any_const = false;
-
-    let types = match body {
-        AnyJsFunctionBody::JsFunctionBody(block) => {
-            collect_block_returns(ctx, block, &mut has_any_const)
-        }
-        AnyJsFunctionBody::AnyJsExpression(expr) => {
-            if has_const_assertion(expr) {
-                has_any_const = true;
-            }
-            vec![infer_expression_type(ctx, expr)]
-        }
+) -> ReturnInfo {
+    let mut info = ReturnInfo {
+        types: Vec::new(),
+        has_any_const: false,
+        object_keyword_casts: 0,
+        has_narrower_than_object: false,
     };
 
-    (types, has_any_const)
+    match body {
+        AnyJsFunctionBody::JsFunctionBody(block) => collect_block_returns(ctx, block, &mut info),
+        AnyJsFunctionBody::AnyJsExpression(expr) => {
+            if has_const_assertion(expr) {
+                info.has_any_const = true;
+            } else if has_object_keyword_assertion(expr) {
+                info.object_keyword_casts += 1;
+            } else if has_narrow_cast(expr) || object_literal_has_any_member(expr) {
+                info.has_narrower_than_object = true;
+            }
+            info.types.push(infer_expression_type(ctx, expr));
+        }
+    }
+
+    info
 }
 
 fn collect_block_returns(
     ctx: &RuleContext<NoMisleadingReturnType>,
     block: &JsFunctionBody,
-    has_any_const: &mut bool,
-) -> Vec<Type> {
-    let mut returns = Vec::new();
-
+    info: &mut ReturnInfo,
+) {
     for node in block
         .syntax()
         .pruned_descendents(|n| !is_nested_function_like(n))
@@ -645,13 +706,337 @@ fn collect_block_returns(
             && let Some(expr) = AnyJsExpression::cast(arg.syntax().clone())
         {
             if has_const_assertion(&expr) {
-                *has_any_const = true;
+                info.has_any_const = true;
+            } else if has_object_keyword_assertion(&expr) {
+                info.object_keyword_casts += 1;
+            } else if has_narrow_cast(&expr) || object_literal_has_any_member(&expr) {
+                info.has_narrower_than_object = true;
             }
-            returns.push(infer_expression_type(ctx, &expr));
+            info.types.push(infer_expression_type(ctx, &expr));
         }
     }
+}
 
-    returns
+/// Whether the return is an object literal with any member. Bare `{}` is
+/// equivalent to `object`, so it returns `false`; spreads count because
+/// type-info drops them today.
+fn object_literal_has_any_member(expression: &AnyJsExpression) -> bool {
+    let mut current = expression.clone();
+    loop {
+        match current {
+            AnyJsExpression::JsParenthesizedExpression(paren) => match paren.expression() {
+                Ok(inner) => current = inner,
+                Err(_) => return false,
+            },
+            AnyJsExpression::JsObjectExpression(object) => {
+                return object.members().into_iter().next().is_some();
+            }
+            _ => return false,
+        }
+    }
+}
+
+/// Whether the expression has a cast whose target is strictly narrower
+/// than `object`. Walks parens and ternary branches, mirroring
+/// [`has_object_keyword_assertion`].
+fn has_narrow_cast(expression: &AnyJsExpression) -> bool {
+    let mut stack = vec![expression.clone()];
+    while let Some(current) = stack.pop() {
+        if let Some(cast) = AnyTsCastExpression::cast(current.syntax().clone()) {
+            let Some(cast_type) = cast.cast_type() else {
+                continue;
+            };
+            if !cast_target_trustworthy(&cast_type, &cast) {
+                return true;
+            }
+            continue;
+        }
+        match current {
+            AnyJsExpression::JsParenthesizedExpression(paren) => {
+                if let Ok(inner) = paren.expression() {
+                    stack.push(inner);
+                }
+            }
+            AnyJsExpression::JsConditionalExpression(conditional) => {
+                if let Ok(consequent) = conditional.consequent() {
+                    stack.push(consequent);
+                }
+                if let Ok(alternate) = conditional.alternate() {
+                    stack.push(alternate);
+                }
+            }
+            _ => {}
+        }
+    }
+    false
+}
+
+/// Whether the expression is a type assertion that opts into `object` widening.
+/// Ternary branches must each carry their own trustworthy cast.
+fn has_object_keyword_assertion(expression: &AnyJsExpression) -> bool {
+    let mut stack = vec![expression.clone()];
+    while let Some(current_expression) = stack.pop() {
+        if let Some(cast) = AnyTsCastExpression::cast(current_expression.syntax().clone()) {
+            let Some(cast_type) = cast.cast_type() else {
+                return false;
+            };
+            if !cast_target_trustworthy(&cast_type, &cast) {
+                return false;
+            }
+            continue;
+        }
+        match current_expression {
+            AnyJsExpression::JsParenthesizedExpression(parenthesized_expression) => {
+                let Ok(inner_expression) = parenthesized_expression.expression() else {
+                    return false;
+                };
+                stack.push(inner_expression);
+            }
+            AnyJsExpression::JsConditionalExpression(conditional_expression) => {
+                let Ok(consequent) = conditional_expression.consequent() else {
+                    return false;
+                };
+                let Ok(alternate) = conditional_expression.alternate() else {
+                    return false;
+                };
+                stack.push(consequent);
+                stack.push(alternate);
+            }
+            _ => return false,
+        }
+    }
+    true
+}
+
+/// Whether the cast target reduces to the `object` keyword. Atomic targets
+/// decide inline; compound shapes delegate to [`walk_compound_cast_target`].
+fn cast_target_trustworthy(cast_target: &AnyTsType, anchor: &AnyTsCastExpression) -> bool {
+    match cast_target.clone().omit_parentheses() {
+        AnyTsType::TsNonPrimitiveType(_)
+        | AnyTsType::TsUnknownType(_)
+        | AnyTsType::TsAnyType(_) => true,
+        AnyTsType::TsObjectType(object_type) => {
+            object_type.members().into_iter().next().is_none()
+        }
+        unwrapped @ (AnyTsType::TsReferenceType(_)
+        | AnyTsType::TsIntersectionType(_)
+        | AnyTsType::TsUnionType(_)
+        | AnyTsType::TsConditionalType(_)) => walk_compound_cast_target(unwrapped, anchor),
+        _ => false,
+    }
+}
+
+/// Iterative walker for compound cast targets. Intersections require every
+/// member trustworthy, unions require one. Bounded by
+/// [`MAX_TYPE_TRAVERSAL_ITERATIONS`]; on timeout we trust — tsc rejects
+/// structurally incompatible casts anyway.
+fn walk_compound_cast_target(root: AnyTsType, anchor: &AnyTsCastExpression) -> bool {
+    enum Task {
+        Visit(AnyTsType),
+        /// AND the top `N` results (intersection).
+        AllOf(usize),
+        /// OR the top `N` results (union).
+        AnyOf(usize),
+    }
+
+    let mut tasks: Vec<Task> = vec![Task::Visit(root)];
+    let mut results: Vec<bool> = Vec::new();
+    let mut iterations: usize = 0;
+
+    while let Some(task) = tasks.pop() {
+        iterations += 1;
+        if iterations > MAX_TYPE_TRAVERSAL_ITERATIONS {
+            return true;
+        }
+        match task {
+            Task::Visit(ty) => match ty.omit_parentheses() {
+                AnyTsType::TsNonPrimitiveType(_)
+                | AnyTsType::TsUnknownType(_)
+                | AnyTsType::TsAnyType(_) => results.push(true),
+                AnyTsType::TsObjectType(object_type) => {
+                    results.push(object_type.members().into_iter().next().is_none());
+                }
+                AnyTsType::TsReferenceType(reference_type) => {
+                    let Some(name) = reference_type_name(&reference_type) else {
+                        results.push(true);
+                        continue;
+                    };
+                    match find_named_type_declaration(&name, anchor) {
+                        Some(FoundDeclaration::TypeAlias(body)) => {
+                            tasks.push(Task::Visit(body));
+                        }
+                        Some(FoundDeclaration::ObjectEquivalentNominal) => results.push(true),
+                        Some(FoundDeclaration::NarrowNominal) => results.push(false),
+                        None => results.push(true),
+                    }
+                }
+                AnyTsType::TsIntersectionType(intersection) => {
+                    let members: Vec<_> = intersection
+                        .types()
+                        .into_iter()
+                        .filter_map(|member_result| member_result.ok())
+                        .collect();
+                    if members.is_empty() {
+                        results.push(false);
+                    } else {
+                        tasks.push(Task::AllOf(members.len()));
+                        for member in members {
+                            tasks.push(Task::Visit(member));
+                        }
+                    }
+                }
+                AnyTsType::TsUnionType(union_type) => {
+                    let members: Vec<_> = union_type
+                        .types()
+                        .into_iter()
+                        .filter_map(|member_result| member_result.ok())
+                        .collect();
+                    if members.is_empty() {
+                        results.push(false);
+                    } else {
+                        tasks.push(Task::AnyOf(members.len()));
+                        for member in members {
+                            tasks.push(Task::Visit(member));
+                        }
+                    }
+                }
+                AnyTsType::TsConditionalType(conditional) => {
+                    // Branch is unknowable statically — both must trust.
+                    match (conditional.true_type(), conditional.false_type()) {
+                        (Ok(true_branch), Ok(false_branch)) => {
+                            tasks.push(Task::AllOf(2));
+                            tasks.push(Task::Visit(false_branch));
+                            tasks.push(Task::Visit(true_branch));
+                        }
+                        _ => results.push(false),
+                    }
+                }
+                _ => results.push(false),
+            },
+            Task::AllOf(count) => {
+                let split = results.len().saturating_sub(count);
+                let all = results.drain(split..).all(|result| result);
+                results.push(all);
+            }
+            Task::AnyOf(count) => {
+                let split = results.len().saturating_sub(count);
+                let any = results.drain(split..).any(|result| result);
+                results.push(any);
+            }
+        }
+    }
+    results.pop().unwrap_or(true)
+}
+
+/// Shape of a named declaration.
+enum FoundDeclaration {
+    TypeAlias(AnyTsType),
+    /// Empty class or interface with no base types — equivalent to `object`.
+    ObjectEquivalentNominal,
+    /// Class or interface that narrows `object` (has members or base types).
+    NarrowNominal,
+}
+
+declare_node_union! {
+    AnyNamedTypeDecl =
+        TsTypeAliasDeclaration
+        | JsClassDeclaration
+        | TsInterfaceDeclaration
+}
+
+impl AnyNamedTypeDecl {
+    /// Whether this declaration's binding name matches `name`.
+    fn matches_name(&self, name: &TokenText) -> bool {
+        let token = match self {
+            Self::TsTypeAliasDeclaration(alias) => {
+                let Ok(binding) = alias.binding_identifier() else {
+                    return false;
+                };
+                let AnyTsIdentifierBinding::TsIdentifierBinding(binding) = binding else {
+                    return false;
+                };
+                binding.name_token().ok()
+            }
+            Self::TsInterfaceDeclaration(interface) => {
+                let Ok(binding) = interface.id() else {
+                    return false;
+                };
+                let AnyTsIdentifierBinding::TsIdentifierBinding(binding) = binding else {
+                    return false;
+                };
+                binding.name_token().ok()
+            }
+            Self::JsClassDeclaration(class) => {
+                let Ok(binding) = class.id() else {
+                    return false;
+                };
+                let AnyJsBinding::JsIdentifierBinding(binding) = binding else {
+                    return false;
+                };
+                binding.name_token().ok()
+            }
+        };
+        token.is_some_and(|token| token.token_text_trimmed() == *name)
+    }
+}
+
+/// Finds the matching type alias, class, or interface declaration reachable
+/// by walking `anchor`'s ancestors. Same-file only.
+fn find_named_type_declaration(
+    name: &TokenText,
+    anchor: &AnyTsCastExpression,
+) -> Option<FoundDeclaration> {
+    for ancestor in anchor.syntax().ancestors() {
+        let found = ancestor
+            .children()
+            .filter_map(AnyNamedTypeDecl::cast)
+            .find(|declaration| declaration.matches_name(name));
+        if let Some(declaration) = found {
+            return match declaration {
+                AnyNamedTypeDecl::TsTypeAliasDeclaration(alias) => {
+                    alias.ty().ok().map(FoundDeclaration::TypeAlias)
+                }
+                AnyNamedTypeDecl::JsClassDeclaration(class) => {
+                    Some(if is_empty_class(&class) {
+                        FoundDeclaration::ObjectEquivalentNominal
+                    } else {
+                        FoundDeclaration::NarrowNominal
+                    })
+                }
+                AnyNamedTypeDecl::TsInterfaceDeclaration(interface) => {
+                    Some(if is_empty_interface(&interface) {
+                        FoundDeclaration::ObjectEquivalentNominal
+                    } else {
+                        FoundDeclaration::NarrowNominal
+                    })
+                }
+            };
+        }
+    }
+    None
+}
+
+/// Whether the class has no members, no `extends`, and no `implements`.
+fn is_empty_class(class: &JsClassDeclaration) -> bool {
+    class.members().into_iter().next().is_none()
+        && class.extends_clause().is_none()
+        && class.implements_clause().is_none()
+}
+
+/// Whether the interface has no members and no `extends` clause.
+fn is_empty_interface(interface: &TsInterfaceDeclaration) -> bool {
+    interface.members().into_iter().next().is_none() && interface.extends_clause().is_none()
+}
+
+/// Extracts the textual name of a reference type expression.
+fn reference_type_name(reference_type: &TsReferenceType) -> Option<TokenText> {
+    reference_type
+        .name()
+        .ok()?
+        .as_js_reference_identifier()?
+        .value_token()
+        .ok()
+        .map(|token| token.token_text_trimmed())
 }
 
 /// Gets the type of a return expression. For identifiers bound to an
@@ -681,11 +1066,10 @@ fn resolve_identifier_initializer_type(
         .and_then(|n| n.value_token().ok())
         .map(|t| t.token_text_trimmed())?;
 
-    let body_node = id_expr
+    let body = id_expr
         .syntax()
         .ancestors()
-        .find(|ancestor| ancestor.kind() == JsSyntaxKind::JS_FUNCTION_BODY)?;
-    let body = JsFunctionBody::cast(body_node)?;
+        .find_map(JsFunctionBody::cast)?;
 
     for stmt in body.statements() {
         let var_stmt = JsVariableStatement::cast(stmt.into_syntax());
@@ -723,19 +1107,14 @@ fn resolve_identifier_initializer_type(
 fn unwrap_type_wrappers(expr: &AnyJsExpression) -> AnyJsExpression {
     let mut current = expr.clone();
     loop {
+        if let Some(cast) = AnyTsCastExpression::cast(current.syntax().clone()) {
+            let Some(inner) = cast.inner_expression() else {
+                return current;
+            };
+            current = inner;
+            continue;
+        }
         match &current {
-            AnyJsExpression::TsAsExpression(e) => match e.expression() {
-                Ok(inner) => current = inner,
-                Err(_) => return current,
-            },
-            AnyJsExpression::TsSatisfiesExpression(e) => match e.expression() {
-                Ok(inner) => current = inner,
-                Err(_) => return current,
-            },
-            AnyJsExpression::TsTypeAssertionExpression(e) => match e.expression() {
-                Ok(inner) => current = inner,
-                Err(_) => return current,
-            },
             AnyJsExpression::JsParenthesizedExpression(e) => match e.expression() {
                 Ok(inner) => current = inner,
                 Err(_) => return current,
@@ -779,14 +1158,11 @@ fn identifier_refers_to_const_assertion(
         .map(|t| t.token_text_trimmed());
     let Some(name) = name else { return false };
 
-    let enclosing_body = id_expr
+    let Some(body) = id_expr
         .syntax()
         .ancestors()
-        .find(|ancestor| ancestor.kind() == JsSyntaxKind::JS_FUNCTION_BODY);
-    let Some(body_node) = enclosing_body else {
-        return false;
-    };
-    let Some(body) = JsFunctionBody::cast(body_node) else {
+        .find_map(JsFunctionBody::cast)
+    else {
         return false;
     };
 
@@ -867,20 +1243,22 @@ fn is_const_reference_type(ty: &Option<biome_js_syntax::AnyTsType>) -> bool {
         })
 }
 
+declare_node_union! {
+    AnyNestedFunctionLike =
+        JsFunctionExpression
+        | JsArrowFunctionExpression
+        | JsFunctionDeclaration
+        | JsConstructorClassMember
+        | JsMethodClassMember
+        | JsMethodObjectMember
+        | JsGetterClassMember
+        | JsGetterObjectMember
+        | JsSetterClassMember
+        | JsSetterObjectMember
+}
+
 fn is_nested_function_like(node: &JsSyntaxNode) -> bool {
-    matches!(
-        node.kind(),
-        JsSyntaxKind::JS_FUNCTION_EXPRESSION
-            | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
-            | JsSyntaxKind::JS_FUNCTION_DECLARATION
-            | JsSyntaxKind::JS_CONSTRUCTOR_CLASS_MEMBER
-            | JsSyntaxKind::JS_METHOD_CLASS_MEMBER
-            | JsSyntaxKind::JS_METHOD_OBJECT_MEMBER
-            | JsSyntaxKind::JS_GETTER_CLASS_MEMBER
-            | JsSyntaxKind::JS_GETTER_OBJECT_MEMBER
-            | JsSyntaxKind::JS_SETTER_CLASS_MEMBER
-            | JsSyntaxKind::JS_SETTER_OBJECT_MEMBER
-    )
+    AnyNestedFunctionLike::can_cast(node.kind())
 }
 
 /// Follows generic constraints iteratively: `T extends U extends string` → `string`.
@@ -900,6 +1278,21 @@ fn resolve_generic_chain(ty: &Type) -> Type {
         }
     }
     current
+}
+
+/// Whether the inferred type reveals structure hidden by `: object`. Empty
+/// object shapes don't count — they're equivalent to `object`.
+fn is_strictly_narrower_than_object_keyword(inferred: &TypeData) -> bool {
+    match inferred {
+        TypeData::Object(obj) => !obj.members.is_empty(),
+        TypeData::InstanceOf(_) | TypeData::Tuple(_) | TypeData::Function(_) => true,
+        TypeData::Literal(lit) => match lit.as_ref() {
+            Literal::RegExp(_) => true,
+            Literal::Object(obj) => !obj.members().is_empty(),
+            _ => false,
+        },
+        _ => false,
+    }
 }
 
 /// Compares non-union type pairs using a work stack. Compound types
@@ -966,6 +1359,12 @@ fn is_nonunion_wider(annotated: &Type, inferred: &Type) -> bool {
                 }
                 _ => return false,
             },
+
+            (TypeData::ObjectKeyword, inferred_data)
+                if is_strictly_narrower_than_object_keyword(inferred_data) =>
+            {
+                found_wider = true;
+            }
 
             (TypeData::Tuple(ann_tuple), TypeData::Tuple(inf_tuple)) => {
                 let ann_elems = ann_tuple.elements();
@@ -1192,7 +1591,8 @@ fn types_match(a: &Type, b: &Type) -> bool {
             | (TypeData::Null, TypeData::Null)
             | (TypeData::Undefined, TypeData::Undefined)
             | (TypeData::VoidKeyword, TypeData::VoidKeyword)
-            | (TypeData::NeverKeyword, TypeData::NeverKeyword) => return true,
+            | (TypeData::NeverKeyword, TypeData::NeverKeyword)
+            | (TypeData::ObjectKeyword, TypeData::ObjectKeyword) => return true,
 
             (TypeData::Literal(a_lit), TypeData::Literal(b_lit)) => return a_lit == b_lit,
 
