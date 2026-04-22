@@ -9625,6 +9625,10 @@ Source-level embeds (`<script>`) use `true`; directives and text expressions use
 	| {
 			Svelte: {
 				/**
+				 * Whether this is the declaration of a function, usually declared in `#snippet`
+				 */
+				is_function_signature: boolean;
+				/**
 				 * Where the bindings are defined
 				 */
 				is_source: boolean;

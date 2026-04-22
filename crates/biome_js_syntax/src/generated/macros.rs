@@ -597,6 +597,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::JsSuperExpression::new_unchecked(node) };
                     $body
                 }
+                $crate::JsSyntaxKind::JS_SVELTE_SNIPPET_ROOT => {
+                    let $pattern = unsafe { $crate::JsSvelteSnippetRoot::new_unchecked(node) };
+                    $body
+                }
                 $crate::JsSyntaxKind::JS_SWITCH_STATEMENT => {
                     let $pattern = unsafe { $crate::JsSwitchStatement::new_unchecked(node) };
                     $body

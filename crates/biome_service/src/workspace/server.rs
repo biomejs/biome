@@ -55,6 +55,7 @@ use biome_json_syntax::JsonFileSource;
 use biome_module_graph::{ModuleDependencies, ModuleDiagnostic, ModuleGraph};
 use biome_package::PackageType;
 use biome_parser::AnyParse;
+use biome_parser::diagnostic::ParseDiagnostic;
 use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
 use biome_plugin_loader::{PluginConfiguration, Plugins};
 use biome_project_layout::ProjectLayout;
@@ -610,6 +611,29 @@ impl WorkspaceServer {
             // about updating service data.
             Ok(InternalOpenFileResult::default())
         }
+    }
+
+    /// Retrieves all diagnostics that belong to a document. It contains diagnostics that belong to embedded snippets too
+    pub fn get_parse_diagnostics(
+        &self,
+        path: &Utf8Path,
+    ) -> Result<Vec<ParseDiagnostic>, WorkspaceError> {
+        self.documents
+            .pin()
+            .get(path)
+            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))
+            .map(|doc| {
+                let mut diagnostics = Vec::new();
+                if let Some(Ok(parse)) = &doc.syntax {
+                    diagnostics.extend(parse.diagnostics().to_vec());
+                };
+
+                for snippet in &doc.embedded_snippets {
+                    diagnostics.extend(snippet.diagnostics().to_vec())
+                }
+
+                diagnostics
+            })
     }
 
     /// Retrieves the parser result for a given file.

@@ -6,7 +6,7 @@ use biome_js_syntax::{
     AnyJsModuleItem, AnyJsObjectAssignmentPatternMember, AnyJsObjectBindingPatternMember,
     AnyJsObjectMember, AnyJsRoot, AnyJsStatement, AnyTsIdentifierBinding, AnyTsType,
     JsAssignmentExpression, JsCallExpression, JsExport, JsImport, JsModuleItemList,
-    JsVariableStatement,
+    JsSvelteSnippetRoot, JsVariableStatement,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, TokenText, WalkEvent};
 use std::collections::VecDeque;
@@ -72,6 +72,10 @@ impl EmbeddedBuilder {
                         && host_file_source.is_svelte()
                     {
                         self.visit_svelte_const_assignment(&assign, embed_block_kind);
+                    } else if let Some(root) = JsSvelteSnippetRoot::cast_ref(&node)
+                        && host_file_source.is_svelte()
+                    {
+                        self.visit_svelte_snippet_declaration(&root, embed_block_kind);
                     }
                 }
                 WalkEvent::Leave(_) => {}
@@ -95,6 +99,38 @@ impl EmbeddedBuilder {
         let token = ident.name_token().ok()?;
         self.register_binding(token.text_trimmed_range(), token.token_text_trimmed());
         Some(())
+    }
+
+    /// Registers the bindings that are declared inside a `#snippet` block
+    fn visit_svelte_snippet_declaration(
+        &mut self,
+        root: &JsSvelteSnippetRoot,
+        embed_block_kind: Option<&EmbedBlockKind>,
+    ) -> Option<()> {
+        let EmbedBlockKind::Svelte(SvelteBlockKind::Snippet) = embed_block_kind? else {
+            return None;
+        };
+
+        if let Ok(name) = root.name()
+            && let Some(name) = name.as_js_identifier_binding()
+            && let Ok(token) = name.name_token()
+        {
+            self.register_binding(token.text_trimmed_range(), token.token_text_trimmed());
+        }
+
+        if let Ok(parameters) = root.parameters() {
+            for param in parameters.items().iter().flatten() {
+                if let Some(formal) = param
+                    .as_any_js_formal_parameter()
+                    .and_then(|fp| fp.as_js_formal_parameter())
+                    && let Ok(binding) = formal.binding()
+                {
+                    self.visit_any_js_binding_pattern(&binding);
+                }
+            }
+        }
+
+        None
     }
 
     /// Visits expression statements that are defined, usually, in `snippet` and `render` functions.
@@ -496,38 +532,39 @@ impl EmbeddedBuilder {
             }
 
             let id = declarator.id().ok()?;
+            self.visit_any_js_binding_pattern(&id)?;
+        }
 
-            match id {
-                AnyJsBindingPattern::AnyJsBinding(binding) => {
-                    let identifier = binding.as_js_identifier_binding()?;
-                    let token = identifier.name_token().ok()?;
-                    self.register_binding(token.text_trimmed_range(), token.token_text_trimmed());
-                }
-                AnyJsBindingPattern::JsArrayBindingPattern(array_binding_pattern) => {
-                    for element in array_binding_pattern.elements().iter().flatten() {
-                        match element {
-                            AnyJsArrayBindingPatternElement::JsArrayBindingPatternElement(
-                                element,
-                            ) => {
-                                self.visit_any_js_binding_pattern(VecDeque::from([element
-                                    .pattern()
-                                    .ok()?]))?;
-                            }
-                            AnyJsArrayBindingPatternElement::JsArrayBindingPatternRestElement(
-                                rest,
-                            ) => {
-                                self.visit_any_js_binding_pattern(VecDeque::from([rest
-                                    .pattern()
-                                    .ok()?]))?;
-                            }
-                            AnyJsArrayBindingPatternElement::JsArrayHole(_) => {}
+        Some(())
+    }
+
+    fn visit_any_js_binding_pattern(&mut self, binding: &AnyJsBindingPattern) -> Option<()> {
+        match binding {
+            AnyJsBindingPattern::AnyJsBinding(binding) => {
+                let identifier = binding.as_js_identifier_binding()?;
+                let token = identifier.name_token().ok()?;
+                self.register_binding(token.text_trimmed_range(), token.token_text_trimmed());
+            }
+            AnyJsBindingPattern::JsArrayBindingPattern(array_binding_pattern) => {
+                for element in array_binding_pattern.elements().iter().flatten() {
+                    match element {
+                        AnyJsArrayBindingPatternElement::JsArrayBindingPatternElement(element) => {
+                            self.track_any_js_binding_pattern(VecDeque::from([element
+                                .pattern()
+                                .ok()?]))?;
                         }
+                        AnyJsArrayBindingPatternElement::JsArrayBindingPatternRestElement(rest) => {
+                            self.track_any_js_binding_pattern(VecDeque::from([rest
+                                .pattern()
+                                .ok()?]))?;
+                        }
+                        AnyJsArrayBindingPatternElement::JsArrayHole(_) => {}
                     }
                 }
-                AnyJsBindingPattern::JsObjectBindingPattern(object_binding_pattern) => {
-                    for property in object_binding_pattern.properties().iter().flatten() {
-                        self.visit_object_binding_pattern_member(property)?;
-                    }
+            }
+            AnyJsBindingPattern::JsObjectBindingPattern(object_binding_pattern) => {
+                for property in object_binding_pattern.properties().iter().flatten() {
+                    self.visit_object_binding_pattern_member(property)?;
                 }
             }
         }
@@ -636,7 +673,7 @@ impl EmbeddedBuilder {
             AnyJsObjectBindingPatternMember::JsBogusBinding(_) => {}
             AnyJsObjectBindingPatternMember::JsMetavariable(_) => {}
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(property) => {
-                self.visit_any_js_binding_pattern(VecDeque::from([property.pattern().ok()?]))?;
+                self.track_any_js_binding_pattern(VecDeque::from([property.pattern().ok()?]))?;
             }
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(rest) => {
                 let binding = rest.binding().ok()?;
@@ -655,7 +692,7 @@ impl EmbeddedBuilder {
         Some(())
     }
 
-    fn visit_any_js_binding_pattern(
+    fn track_any_js_binding_pattern(
         &mut self,
         mut queue: VecDeque<AnyJsBindingPattern>,
     ) -> Option<()> {

@@ -13,6 +13,7 @@ use biome_js_semantic::SemanticModelOptions;
 use biome_js_syntax::{AnyJsRoot, JsLanguage};
 use biome_json_syntax::JsonLanguage;
 use biome_parser::AnyParse;
+use biome_parser::diagnostic::ParseDiagnostic;
 use biome_rowan::{AstNode, SyntaxNodeWithOffset, TextRange, TextSize};
 use std::marker::PhantomData;
 
@@ -141,6 +142,14 @@ impl AnyEmbeddedSnippet {
             Self::Js(_, services) => services,
             Self::Css(_, services) => services,
             Self::Json(_, services) => services,
+        }
+    }
+
+    pub fn diagnostics(&self) -> &[ParseDiagnostic] {
+        match self {
+            Self::Js(snippet, _) => snippet.parse.diagnostics(),
+            Self::Css(snippet, _) => snippet.parse.diagnostics(),
+            Self::Json(snippet, _) => snippet.parse.diagnostics(),
         }
     }
 }

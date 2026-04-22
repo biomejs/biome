@@ -1,8 +1,8 @@
 use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsFunction, AnyJsFunctionBody, JsFunctionBody, JsGetterClassMember,
-    JsGetterObjectMember, JsLiteralMemberName, JsMethodClassMember, JsMethodObjectMember,
+    AnyJsExpression, AnyJsFunction, AnyJsFunctionBody, AnyJsGetter, JsFunctionBody,
+    JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember, JsMethodObjectMember,
     JsReturnStatement, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, JsVariableStatement,
     TsAsExpression, TsMethodSignatureClassMember, TsTypeAssertionExpression,
 };
@@ -101,7 +101,7 @@ impl Rule for NoMisleadingReturnType {
                     return None;
                 }
                 let annotation = method.return_type_annotation()?;
-                let name = literal_member_name_text(method.name().ok()?.as_js_literal_member_name()?)?;
+                let name = method.name().ok()?.as_js_literal_member_name()?.name().ok()?;
                 let func_type = ctx.type_of_member(method.syntax(), name.text());
                 run_for_member(ctx, annotation.range(), &func_type, method.async_token().is_some(), &method.body().ok()?)
             }
@@ -110,19 +110,27 @@ impl Rule for NoMisleadingReturnType {
                     return None;
                 }
                 let annotation = method.return_type_annotation()?;
-                let name = literal_member_name_text(method.name().ok()?.as_js_literal_member_name()?)?;
+                let name = method.name().ok()?.as_js_literal_member_name()?.name().ok()?;
                 let func_type = ctx.type_of_member(method.syntax(), name.text());
                 run_for_member(ctx, annotation.range(), &func_type, method.async_token().is_some(), &method.body().ok()?)
             }
             AnyFunctionLikeWithReturnType::JsGetterClassMember(getter) => {
                 let annotation = getter.return_type()?;
-                let name = literal_member_name_text(getter.name().ok()?.as_js_literal_member_name()?)?;
+                let any_getter = AnyJsGetter::from(getter.clone());
+                let name = any_getter.member_name()?;
+                if any_getter.has_matching_setter(&name) {
+                    return None;
+                }
                 let func_type = ctx.type_of_member(getter.syntax(), name.text());
                 run_for_member(ctx, annotation.range(), &func_type, false, &getter.body().ok()?)
             }
             AnyFunctionLikeWithReturnType::JsGetterObjectMember(getter) => {
                 let annotation = getter.return_type()?;
-                let name = literal_member_name_text(getter.name().ok()?.as_js_literal_member_name()?)?;
+                let any_getter = AnyJsGetter::from(getter.clone());
+                let name = any_getter.member_name()?;
+                if any_getter.has_matching_setter(&name) {
+                    return None;
+                }
                 let func_type = ctx.type_of_member(getter.syntax(), name.text());
                 run_for_member(ctx, annotation.range(), &func_type, false, &getter.body().ok()?)
             }
@@ -301,10 +309,6 @@ fn run_for_member_with_body(
         annotation_range,
         returns,
     })
-}
-
-fn literal_member_name_text(name: &JsLiteralMemberName) -> Option<TokenText> {
-    Some(name.value().ok()?.token_text_trimmed())
 }
 
 fn is_class_method_overload_implementation(method: &JsMethodClassMember) -> bool {

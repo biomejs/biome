@@ -1,6 +1,5 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 249
 info: scss/map/comment.scss
 ---
 
@@ -41,8 +40,9 @@ $map: (
 # Error
 ```text
 reformat: output mismatch
-Differences (-re-formatted|+formatted):
-     key: value,
+--- re-formatted
++++ formatted
+@@ -15,7 +15,8 @@
    ),
  );
  
@@ -56,8 +56,9 @@ Differences (-re-formatted|+formatted):
 +;
 
 IR differences:
-Differences (-re-formatted IR|+formatted IR):
-   ";",
+--- re-formatted IR
++++ formatted IR
+@@ -49,12 +49,15 @@
    empty_line,
    "$map: ",
    group(["(", indent([soft_line_break, group([])]), soft_line_break, ")"]),
@@ -76,5 +77,6 @@ Differences (-re-formatted IR|+formatted IR):
    ";",
    hard_line_break
  ]
+\ No newline at end of file
 
 ```
