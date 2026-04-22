@@ -1,8 +1,6 @@
-use crate::Aria;
 use crate::a11y::is_hidden_from_screen_reader;
-use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
-};
+use crate::{Aria, utils::is_html_tag};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::HtmlFileSource;
@@ -11,7 +9,7 @@ use biome_rowan::AstNode;
 use biome_rule_options::use_key_with_click_events::UseKeyWithClickEventsOptions;
 
 declare_lint_rule! {
-    /// Enforce that elements with `onclick` handlers also have at least one keyboard event handler.
+    /// Enforce elements with a click event handler to also have at least one keyboard event handler.
     ///
     /// Coding for the keyboard is important for users with physical disabilities who cannot use a mouse,
     /// AT compatibility, and screen reader users. This rule checks that interactive elements with an
@@ -21,33 +19,26 @@ declare_lint_rule! {
     /// `<input>`, `<select>`, `<textarea>`, or `<a>` with an `href` attribute) or elements that are
     /// hidden from assistive technologies.
     ///
-    /// :::note
-    /// In `.html` files, this rule matches element names case-insensitively (e.g., `<DIV>`, `<Div>`).
-    ///
-    /// In component-based frameworks (Vue, Svelte, Astro), only lowercase element names are checked.
-    /// PascalCase variants like `<Div>` are assumed to be custom components and are ignored.
-    /// :::
-    ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```html,expect_diagnostic
-    /// <div onclick="handleClick()" />
+    /// <div onclick="handleClick()"></div>
     /// ```
     ///
     /// ### Valid
     ///
     /// ```html
-    /// <div onclick="handleClick()" onkeydown="handleKeyDown()" />
+    /// <div onclick="handleClick()" onkeydown="handleKeyDown()"></div>
     /// ```
     ///
     /// ```html
-    /// <div onclick="handleClick()" onkeyup="handleKeyUp()" />
+    /// <div onclick="handleClick()" onkeyup="handleKeyUp()"></div>
     /// ```
     ///
     /// ```html
-    /// <div onclick="handleClick()" onkeypress="handleKeyPress()" />
+    /// <div onclick="handleClick()" onkeypress="handleKeyPress()"></div>
     /// ```
     ///
     /// ```html
@@ -80,18 +71,16 @@ impl Rule for UseKeyWithClickEvents {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
-        let file_source = ctx.source_type::<HtmlFileSource>();
         let aria_roles = ctx.aria_roles();
 
         // Only flag elements that have an onclick attribute
-        element.find_attribute_by_name("onclick")?;
+        if element.find_attribute_by_name("onclick").is_none()
+            && element.find_vue_event_handling_directive("click").is_none()
+        {
+            return None;
+        }
 
-        let is_html_file = file_source.is_html();
-
-        // In Vue/Svelte/Astro, PascalCase tag names indicate custom components
-        // and should be skipped. In HTML, all tag names are native elements
-        // regardless of casing (e.g. <DIV> is a valid div).
-        if !is_html_file && element.is_custom_component() {
+        if element.is_custom_component() {
             return None;
         }
 
@@ -100,13 +89,25 @@ impl Rule for UseKeyWithClickEvents {
         }
 
         if !aria_roles.is_not_interactive_element(element) {
-            return None;
+            let source_type = ctx.source_type::<HtmlFileSource>();
+            if !is_html_tag(element, source_type, "a")
+                || element.find_attribute_by_name("href").is_some()
+            {
+                return None;
+            }
         }
 
         // Check for keyboard event handlers
         if element.find_attribute_by_name("onkeydown").is_some()
+            || element
+                .find_vue_event_handling_directive("keydown")
+                .is_some()
             || element.find_attribute_by_name("onkeyup").is_some()
+            || element.find_vue_event_handling_directive("keyup").is_some()
             || element.find_attribute_by_name("onkeypress").is_some()
+            || element
+                .find_vue_event_handling_directive("keypress")
+                .is_some()
         {
             return None;
         }

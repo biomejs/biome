@@ -284,7 +284,7 @@
 					]
 				},
 				"useKeyWithClickEvents": {
-					"description": "Enforce that elements with onclick handlers also have at least one keyboard event handler.\nSee https://biomejs.dev/linter/rules/use-key-with-click-events",
+					"description": "Enforce elements with a click event handler to also have at least one keyboard event handler.\nSee https://biomejs.dev/linter/rules/use-key-with-click-events",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseKeyWithClickEventsConfiguration" },
 						{ "type": "null" }

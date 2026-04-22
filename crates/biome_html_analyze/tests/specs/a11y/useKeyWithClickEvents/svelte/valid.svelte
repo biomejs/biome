@@ -2,6 +2,7 @@
 
 <!-- onclick with keyboard handlers -->
 <div onclick="handleClick()" onkeydown="handleKeyDown()"></div>
+<div onclick={handleClick} onkeydown={handleKeyDown}></div>
 
 <!-- inherently keyboard-accessible elements -->
 <button onclick="handleClick()">Submit</button>

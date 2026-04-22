@@ -1493,7 +1493,7 @@ See https://biomejs.dev/linter/rules/use-iframe-title
 	 */
 	useIframeTitle?: UseIframeTitleConfiguration;
 	/**
-	* Enforce that elements with onclick handlers also have at least one keyboard event handler.
+	* Enforce elements with a click event handler to also have at least one keyboard event handler.
 See https://biomejs.dev/linter/rules/use-key-with-click-events 
 	 */
 	useKeyWithClickEvents?: UseKeyWithClickEventsConfiguration;

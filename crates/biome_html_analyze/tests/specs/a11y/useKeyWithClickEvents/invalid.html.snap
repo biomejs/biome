@@ -7,7 +7,7 @@ expression: invalid.html
 <!-- should generate diagnostics -->
 
 <!-- div with onclick but no keyboard handler -->
-<div onclick="handleClick()" />
+<div onclick="handleClick()"></div>
 <div onclick="handleClick()">content</div>
 
 <!-- span with onclick but no keyboard handler -->
@@ -43,8 +43,8 @@ invalid.html:4:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━�
   × Elements with onclick must also include at least one keyboard handler: onkeydown, onkeyup, or onkeypress.
   
     3 │ <!-- div with onclick but no keyboard handler -->
-  > 4 │ <div onclick="handleClick()" />
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 4 │ <div onclick="handleClick()"></div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     5 │ <div onclick="handleClick()">content</div>
     6 │ 
   
@@ -59,7 +59,7 @@ invalid.html:5:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━�
   × Elements with onclick must also include at least one keyboard handler: onkeydown, onkeyup, or onkeypress.
   
     3 │ <!-- div with onclick but no keyboard handler -->
-    4 │ <div onclick="handleClick()" />
+    4 │ <div onclick="handleClick()"></div>
   > 5 │ <div onclick="handleClick()">content</div>
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ 
@@ -160,6 +160,21 @@ invalid.html:26:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     27 │ 
     28 │ <!-- <a> without href is NOT interactive — should flag -->
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+```
+
+```
+invalid.html:29:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Elements with onclick must also include at least one keyboard handler: onkeydown, onkeyup, or onkeypress.
+  
+    28 │ <!-- <a> without href is NOT interactive — should flag -->
+  > 29 │ <a onclick="handleClick()">bare link</a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ 
   
   i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
   

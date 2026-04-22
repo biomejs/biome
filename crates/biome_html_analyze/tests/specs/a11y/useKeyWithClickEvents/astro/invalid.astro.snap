@@ -73,3 +73,18 @@ invalid.astro:15:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━�
   
 
 ```
+
+```
+invalid.astro:18:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Elements with onclick must also include at least one keyboard handler: onkeydown, onkeyup, or onkeypress.
+  
+    17 │ <!-- <a> without href is not interactive -->
+  > 18 │ <a onclick="handleClick()">bare link</a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ 
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+```

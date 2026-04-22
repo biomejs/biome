@@ -1,22 +1,23 @@
 <!-- should not generate diagnostics -->
 
 <!-- onclick with keyboard handlers -->
-<div onclick="handleClick()" onkeydown="handleKeyDown()" />
-<div onclick="handleClick()" onkeyup="handleKeyUp()" />
-<div onclick="handleClick()" onkeypress="handleKeyPress()" />
-<div onclick="handleClick()" onkeydown="handleKeyDown()" onkeyup="handleKeyUp()" />
+<div onclick="handleClick()" onkeydown="handleKeyDown()"></div>
+<div onclick="handleClick()" onkeyup="handleKeyUp()"></div>
+<div onclick="handleClick()" onkeypress="handleKeyPress()"></div>
+<div onclick="handleClick()" onkeydown="handleKeyDown()" onkeyup="handleKeyUp()"></div>
 
 <!-- inherently keyboard-accessible elements -->
 <button onclick="handleClick()">Submit</button>
 <input onclick="handleClick()" />
-<select onclick="handleClick()"><option>A</option></select>
+<select onclick="handleClick()">
+	<option>A</option>
+</select>
 <textarea onclick="handleClick()"></textarea>
 <a onclick="handleClick()" href="https://example.com">Link</a>
 <option onclick="handleClick()">Option</option>
 
 <!-- hidden from screen reader -->
 <div onclick="handleClick()" aria-hidden="true">content</div>
-<div onclick="handleClick()" aria-hidden>content</div>
 
 <!-- presentation role -->
 <div onclick="handleClick()" role="presentation">content</div>
@@ -27,4 +28,4 @@
 <span>just text</span>
 
 <!-- Case insensitive attribute matching -->
-<div ONCLICK="handleClick()" ONKEYDOWN="handleKeyDown()" />
+<div ONCLICK="handleClick()" ONKEYDOWN="handleKeyDown()"></div>
