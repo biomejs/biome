@@ -67,6 +67,10 @@ declare_lint_rule! {
     ///
     /// ## Known limitations
     ///
+    /// Suggested replacement types are only shown when their textual
+    /// representation is up to 80 characters long. Longer unions fall back to
+    /// a generic note without the specific suggestion.
+    ///
     /// When a return uses a type assertion such as `as T`, the rule does
     /// not flag the return unless it can prove that `T` is narrower than
     /// `object`. Trusted cases include `unknown`, `any`, `typeof` queries,
