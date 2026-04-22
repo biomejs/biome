@@ -8064,12 +8064,12 @@ export type UseReactAsyncServerFunctionOptions = {};
 export interface UseReactNativePlatformComponentsOptions {
 	/**
 	* A list of glob patterns to identify Android-specific files.
-Defaults to `["**/*.android.{js,jsx,ts,tsx}"]`. 
+Defaults to `["**\/*.android.{js,jsx,ts,tsx}"]`. 
 	 */
 	androidPathPatterns?: NormalizedGlob[];
 	/**
 	* A list of glob patterns to identify iOS-specific files.
-Defaults to `["**/*.ios.{js,jsx,ts,tsx}"]`. 
+Defaults to `["**\/*.ios.{js,jsx,ts,tsx}"]`. 
 	 */
 	iosPathPatterns?: NormalizedGlob[];
 }
