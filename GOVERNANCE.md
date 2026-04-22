@@ -154,7 +154,7 @@ Contractors are people that might work within the Biome project for an arbitrary
 - Monthly compensations are paid at the end of each month, unless a contract states otherwise.
 
 During the period of the collaboration, contractors may have access to one or more of the following rights:
-- Merge rights to one of more repositories of the GitHub org (same rights of [maintainers](#maintainer)).
+- Merge rights to one or more repositories of the GitHub org (same rights of [maintainers](#maintainer)).
   - People should be added as external collaborators using the correct GitHub roles.
 - The ability to merge PRs without approval, as long as post-merge reviews are addressed in another PR. Contractors are considered masters in their craft, so their contributions should be considered in line with Biome values and their work.
 - Access to the `#maintainers` channel on Discord.
