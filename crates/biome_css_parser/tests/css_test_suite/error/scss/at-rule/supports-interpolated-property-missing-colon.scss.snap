@@ -43,7 +43,7 @@ CssRoot {
                                             l_curly_token: L_CURLY@12..13 "{" [] [],
                                             value: ScssExpression {
                                                 items: ScssExpressionItemList [
-                                                    ScssIdentifier {
+                                                    ScssVariable {
                                                         dollar_token: DOLLAR@13..14 "$" [] [],
                                                         name: CssIdentifier {
                                                             value_token: IDENT@14..18 "name" [] [],
@@ -133,7 +133,7 @@ CssRoot {
                                             l_curly_token: L_CURLY@72..73 "{" [] [],
                                             value: ScssExpression {
                                                 items: ScssExpressionItemList [
-                                                    ScssIdentifier {
+                                                    ScssVariable {
                                                         dollar_token: DOLLAR@73..74 "$" [] [],
                                                         name: CssIdentifier {
                                                             value_token: IDENT@74..78 "side" [] [],
@@ -231,7 +231,7 @@ CssRoot {
                       1: L_CURLY@12..13 "{" [] []
                       2: SCSS_EXPRESSION@13..18
                         0: SCSS_EXPRESSION_ITEM_LIST@13..18
-                          0: SCSS_IDENTIFIER@13..18
+                          0: SCSS_VARIABLE@13..18
                             0: DOLLAR@13..14 "$" [] []
                             1: CSS_IDENTIFIER@14..18
                               0: IDENT@14..18 "name" [] []
@@ -289,7 +289,7 @@ CssRoot {
                       1: L_CURLY@72..73 "{" [] []
                       2: SCSS_EXPRESSION@73..78
                         0: SCSS_EXPRESSION_ITEM_LIST@73..78
-                          0: SCSS_IDENTIFIER@73..78
+                          0: SCSS_VARIABLE@73..78
                             0: DOLLAR@73..74 "$" [] []
                             1: CSS_IDENTIFIER@74..78
                               0: IDENT@74..78 "side" [] []

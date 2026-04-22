@@ -169,8 +169,8 @@ $escaped: (\escaped, "escaped\"quote", 'escaped\'quote');
 CssRoot {
     bom_token: missing (optional),
     items: CssRootItemList [
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@0..46 "$" [Comments("// Advanced list synt ..."), Newline("\n"), Newline("\n"), Comments("// Empty list"), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@46..51 "empty" [] [],
@@ -189,8 +189,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@55..56 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@56..90 "$" [Newline("\n"), Newline("\n"), Comments("// Single item list w ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@90..102 "single-comma" [] [],
@@ -222,8 +222,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@111..112 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@112..149 "$" [Newline("\n"), Newline("\n"), Comments("// Single item list w ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@149..161 "single-space" [] [],
@@ -248,8 +248,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@169..170 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@170..197 "$" [Newline("\n"), Newline("\n"), Comments("// Space-separated list"), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@197..207 "space-list" [] [],
@@ -278,8 +278,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@218..219 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@219..246 "$" [Newline("\n"), Newline("\n"), Comments("// Comma-separated list"), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@246..256 "comma-list" [] [],
@@ -346,8 +346,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@271..272 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@272..292 "$" [Newline("\n"), Newline("\n"), Comments("// Mixed nesting"), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@292..297 "mixed" [] [],
@@ -407,8 +407,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@314..315 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@315..346 "$" [Newline("\n"), Newline("\n"), Comments("// List with trailing ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@346..354 "trailing" [] [],
@@ -460,8 +460,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@366..367 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@367..397 "$" [Newline("\n"), Newline("\n"), Comments("// List with interpol ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@397..409 "interpolated" [] [],
@@ -492,7 +492,7 @@ CssRoot {
                                                 l_curly_token: L_CURLY@416..417 "{" [] [],
                                                 value: ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@417..418 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@418..421 "var" [] [],
@@ -524,8 +524,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@426..427 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@427..429 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@429..447 "interpolated-space" [] [],
@@ -542,7 +542,7 @@ CssRoot {
                         l_curly_token: L_CURLY@452..453 "{" [] [],
                         value: ScssExpression {
                             items: ScssExpressionItemList [
-                                ScssIdentifier {
+                                ScssVariable {
                                     dollar_token: DOLLAR@453..454 "$" [] [],
                                     name: CssIdentifier {
                                         value_token: IDENT@454..457 "var" [] [],
@@ -560,8 +560,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@460..461 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@461..489 "$" [Newline("\n"), Comments("// List with calculat ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@489..501 "calculations" [] [],
@@ -634,8 +634,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@536..537 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@537..563 "$" [Newline("\n"), Newline("\n"), Comments("// List with functions"), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@563..572 "functions" [] [],
@@ -742,8 +742,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@627..628 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@628..654 "$" [Newline("\n"), Newline("\n"), Comments("// Deeply nested lists"), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@654..660 "nested" [] [],
@@ -866,8 +866,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@686..687 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@687..689 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@689..693 "deep" [] [],
@@ -1052,8 +1052,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@731..732 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@732..753 "$" [Newline("\n"), Newline("\n"), Comments("// List with maps"), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@753..762 "with-maps" [] [],
@@ -1134,8 +1134,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@792..793 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@793..821 "$" [Newline("\n"), Newline("\n"), Comments("// List with mixed types"), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@821..832 "mixed-types" [] [],
@@ -1201,7 +1201,7 @@ CssRoot {
                                 ScssListExpressionElement {
                                     value: ScssExpression {
                                         items: ScssExpressionItemList [
-                                            ScssIdentifier {
+                                            ScssVariable {
                                                 dollar_token: DOLLAR@879..883 "$" [Newline("\n"), Whitespace("  ")] [],
                                                 name: CssIdentifier {
                                                     value_token: IDENT@883..891 "variable" [] [],
@@ -1220,8 +1220,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@894..895 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@895..926 "$" [Newline("\n"), Newline("\n"), Comments("// List with quoted s ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@926..932 "quoted" [] [],
@@ -1282,8 +1282,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@958..959 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@959..992 "$" [Newline("\n"), Newline("\n"), Comments("// List with unquoted ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@992..1000 "unquoted" [] [],
@@ -1460,8 +1460,8 @@ CssRoot {
                 r_curly_token: R_CURLY@1127..1129 "}" [Newline("\n")] [],
             },
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@1129..1178 "$" [Newline("\n"), Newline("\n"), Comments("// List in variable w ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@1178..1186 "brackets" [] [],
@@ -1496,8 +1496,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@1197..1265 ";" [] [Whitespace(" "), Comments("// Note: SCSS doesn't ...")],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@1265..1267 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@1267..1279 "parens-comma" [] [],
@@ -1548,8 +1548,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@1290..1291 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@1291..1293 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@1293..1305 "parens-space" [] [],
@@ -1580,8 +1580,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@1314..1315 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@1315..1337 "$" [Newline("\n"), Newline("\n"), Comments("// Multi-line list"), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@1337..1352 "multiline-comma" [] [],
@@ -1643,8 +1643,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@1393..1394 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@1394..1397 "$" [Newline("\n"), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@1397..1412 "multiline-space" [] [],
@@ -1678,8 +1678,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@1449..1450 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@1450..1511 "$" [Newline("\n"), Newline("\n"), Comments("// List with operator ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@1511..1525 "with-operators" [] [],
@@ -1711,8 +1711,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@1538..1539 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@1539..1541 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@1541..1554 "parenthesized" [] [],
@@ -1760,8 +1760,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@1571..1572 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@1572..1605 "$" [Newline("\n"), Newline("\n"), Comments("// List with negative ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@1605..1614 "negatives" [] [],
@@ -1812,8 +1812,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@1628..1629 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@1629..1631 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@1631..1645 "negative-space" [] [],
@@ -1842,8 +1842,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@1655..1656 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@1656..1678 "$" [Newline("\n"), Newline("\n"), Comments("// List with units"), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@1678..1683 "units" [] [],
@@ -1873,8 +1873,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@1703..1704 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@1704..1738 "$" [Newline("\n"), Newline("\n"), Comments("// Complex expression ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@1738..1749 "expressions" [] [],
@@ -1919,14 +1919,14 @@ CssRoot {
                                                 expression: ScssExpression {
                                                     items: ScssExpressionItemList [
                                                         ScssBinaryExpression {
-                                                            left: ScssIdentifier {
+                                                            left: ScssVariable {
                                                                 dollar_token: DOLLAR@1767..1768 "$" [] [],
                                                                 name: CssIdentifier {
                                                                     value_token: IDENT@1768..1770 "a" [] [Whitespace(" ")],
                                                                 },
                                                             },
                                                             operator: STAR@1770..1772 "*" [] [Whitespace(" ")],
-                                                            right: ScssIdentifier {
+                                                            right: ScssVariable {
                                                                 dollar_token: DOLLAR@1772..1773 "$" [] [],
                                                                 name: CssIdentifier {
                                                                     value_token: IDENT@1773..1774 "b" [] [],
@@ -1975,8 +1975,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@1792..1793 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@1793..1824 "$" [Newline("\n"), Newline("\n"), Comments("// List with special  ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@1824..1831 "special" [] [],
@@ -2038,8 +2038,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@1875..1876 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@1876..1905 "$" [Newline("\n"), Newline("\n"), Comments("// List with color va ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@1905..1911 "colors" [] [],
@@ -2151,8 +2151,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@1954..1955 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@1955..1984 "$" [Newline("\n"), Newline("\n"), Comments("// List with CSS keyw ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@1984..1992 "keywords" [] [],
@@ -2234,8 +2234,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@2054..2055 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@2055..2098 "$" [Newline("\n"), Newline("\n"), Comments("// Slash-separated (f ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@2098..2102 "font" [] [],
@@ -2259,8 +2259,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@2112..2113 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@2113..2115 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@2115..2124 "font-list" [] [],
@@ -2332,8 +2332,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@2156..2157 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@2157..2177 "$" [Newline("\n"), Newline("\n"), Comments("// List with URL"), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@2177..2181 "urls" [] [],
@@ -2402,8 +2402,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@2223..2224 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@2224..2258 "$" [Newline("\n"), Newline("\n"), Comments("// List with custom p ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@2258..2264 "custom" [] [],
@@ -2454,8 +2454,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@2293..2294 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@2294..2317 "$" [Newline("\n"), Newline("\n"), Comments("// List with attr()"), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@2317..2322 "attrs" [] [],
@@ -2514,8 +2514,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@2356..2357 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@2357..2392 "$" [Newline("\n"), Newline("\n"), Comments("// Nested space and c ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@2392..2406 "complex-nested" [] [],
@@ -2575,8 +2575,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@2423..2424 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@2424..2445 "$" [Newline("\n"), Newline("\n"), Comments("// List with calc"), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@2445..2450 "calcs" [] [],
@@ -2659,8 +2659,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@2490..2491 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@2491..2530 "$" [Newline("\n"), Newline("\n"), Comments("// Empty items in lis ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@2530..2536 "sparse" [] [],
@@ -2707,8 +2707,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@2545..2593 ";" [] [Whitespace(" "), Comments("// Note: This might b ...")],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@2593..2631 "$" [Newline("\n"), Newline("\n"), Comments("// List with importan ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@2631..2645 "with-important" [] [],
@@ -2753,8 +2753,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@2669..2670 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@2670..2693 "$" [Newline("\n"), Newline("\n"), Comments("// Unicode in lists"), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@2693..2700 "unicode" [] [],
@@ -2815,8 +2815,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@2737..2738 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@2738..2772 "$" [Newline("\n"), Newline("\n"), Comments("// Escaped characters ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@2772..2779 "escaped" [] [],
@@ -2878,8 +2878,8 @@ CssRoot {
 0: CSS_ROOT@0..2832
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..2828
-    0: SCSS_DECLARATION@0..56
-      0: SCSS_IDENTIFIER@0..51
+    0: SCSS_VARIABLE_DECLARATION@0..56
+      0: SCSS_VARIABLE@0..51
         0: DOLLAR@0..46 "$" [Comments("// Advanced list synt ..."), Newline("\n"), Newline("\n"), Comments("// Empty list"), Newline("\n")] []
         1: CSS_IDENTIFIER@46..51
           0: IDENT@46..51 "empty" [] []
@@ -2892,8 +2892,8 @@ CssRoot {
             2: R_PAREN@54..55 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@55..55
       4: SEMICOLON@55..56 ";" [] []
-    1: SCSS_DECLARATION@56..112
-      0: SCSS_IDENTIFIER@56..102
+    1: SCSS_VARIABLE_DECLARATION@56..112
+      0: SCSS_VARIABLE@56..102
         0: DOLLAR@56..90 "$" [Newline("\n"), Newline("\n"), Comments("// Single item list w ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@90..102
           0: IDENT@90..102 "single-comma" [] []
@@ -2913,8 +2913,8 @@ CssRoot {
             2: R_PAREN@110..111 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@111..111
       4: SEMICOLON@111..112 ";" [] []
-    2: SCSS_DECLARATION@112..170
-      0: SCSS_IDENTIFIER@112..161
+    2: SCSS_VARIABLE_DECLARATION@112..170
+      0: SCSS_VARIABLE@112..161
         0: DOLLAR@112..149 "$" [Newline("\n"), Newline("\n"), Comments("// Single item list w ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@149..161
           0: IDENT@149..161 "single-space" [] []
@@ -2930,8 +2930,8 @@ CssRoot {
             2: R_PAREN@168..169 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@169..169
       4: SEMICOLON@169..170 ";" [] []
-    3: SCSS_DECLARATION@170..219
-      0: SCSS_IDENTIFIER@170..207
+    3: SCSS_VARIABLE_DECLARATION@170..219
+      0: SCSS_VARIABLE@170..207
         0: DOLLAR@170..197 "$" [Newline("\n"), Newline("\n"), Comments("// Space-separated list"), Newline("\n")] []
         1: CSS_IDENTIFIER@197..207
           0: IDENT@197..207 "space-list" [] []
@@ -2950,8 +2950,8 @@ CssRoot {
             0: IDENT@217..218 "e" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@218..218
       4: SEMICOLON@218..219 ";" [] []
-    4: SCSS_DECLARATION@219..272
-      0: SCSS_IDENTIFIER@219..256
+    4: SCSS_VARIABLE_DECLARATION@219..272
+      0: SCSS_VARIABLE@219..256
         0: DOLLAR@219..246 "$" [Newline("\n"), Newline("\n"), Comments("// Comma-separated list"), Newline("\n")] []
         1: CSS_IDENTIFIER@246..256
           0: IDENT@246..256 "comma-list" [] []
@@ -2991,8 +2991,8 @@ CssRoot {
                       0: IDENT@270..271 "e" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@271..271
       4: SEMICOLON@271..272 ";" [] []
-    5: SCSS_DECLARATION@272..315
-      0: SCSS_IDENTIFIER@272..297
+    5: SCSS_VARIABLE_DECLARATION@272..315
+      0: SCSS_VARIABLE@272..297
         0: DOLLAR@272..292 "$" [Newline("\n"), Newline("\n"), Comments("// Mixed nesting"), Newline("\n")] []
         1: CSS_IDENTIFIER@292..297
           0: IDENT@292..297 "mixed" [] []
@@ -3029,8 +3029,8 @@ CssRoot {
             2: R_PAREN@313..314 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@314..314
       4: SEMICOLON@314..315 ";" [] []
-    6: SCSS_DECLARATION@315..367
-      0: SCSS_IDENTIFIER@315..354
+    6: SCSS_VARIABLE_DECLARATION@315..367
+      0: SCSS_VARIABLE@315..354
         0: DOLLAR@315..346 "$" [Newline("\n"), Newline("\n"), Comments("// List with trailing ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@346..354
           0: IDENT@346..354 "trailing" [] []
@@ -3062,8 +3062,8 @@ CssRoot {
             2: R_PAREN@365..366 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@366..366
       4: SEMICOLON@366..367 ";" [] []
-    7: SCSS_DECLARATION@367..427
-      0: SCSS_IDENTIFIER@367..409
+    7: SCSS_VARIABLE_DECLARATION@367..427
+      0: SCSS_VARIABLE@367..409
         0: DOLLAR@367..397 "$" [Newline("\n"), Newline("\n"), Comments("// List with interpol ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@397..409
           0: IDENT@397..409 "interpolated" [] []
@@ -3088,7 +3088,7 @@ CssRoot {
                         1: L_CURLY@416..417 "{" [] []
                         2: SCSS_EXPRESSION@417..421
                           0: SCSS_EXPRESSION_ITEM_LIST@417..421
-                            0: SCSS_IDENTIFIER@417..421
+                            0: SCSS_VARIABLE@417..421
                               0: DOLLAR@417..418 "$" [] []
                               1: CSS_IDENTIFIER@418..421
                                 0: IDENT@418..421 "var" [] []
@@ -3102,8 +3102,8 @@ CssRoot {
             2: R_PAREN@425..426 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@426..426
       4: SEMICOLON@426..427 ";" [] []
-    8: SCSS_DECLARATION@427..461
-      0: SCSS_IDENTIFIER@427..447
+    8: SCSS_VARIABLE_DECLARATION@427..461
+      0: SCSS_VARIABLE@427..447
         0: DOLLAR@427..429 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@429..447
           0: IDENT@429..447 "interpolated-space" [] []
@@ -3117,7 +3117,7 @@ CssRoot {
             1: L_CURLY@452..453 "{" [] []
             2: SCSS_EXPRESSION@453..457
               0: SCSS_EXPRESSION_ITEM_LIST@453..457
-                0: SCSS_IDENTIFIER@453..457
+                0: SCSS_VARIABLE@453..457
                   0: DOLLAR@453..454 "$" [] []
                   1: CSS_IDENTIFIER@454..457
                     0: IDENT@454..457 "var" [] []
@@ -3126,8 +3126,8 @@ CssRoot {
             0: IDENT@459..460 "c" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@460..460
       4: SEMICOLON@460..461 ";" [] []
-    9: SCSS_DECLARATION@461..537
-      0: SCSS_IDENTIFIER@461..501
+    9: SCSS_VARIABLE_DECLARATION@461..537
+      0: SCSS_VARIABLE@461..501
         0: DOLLAR@461..489 "$" [Newline("\n"), Comments("// List with calculat ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@489..501
           0: IDENT@489..501 "calculations" [] []
@@ -3174,8 +3174,8 @@ CssRoot {
             2: R_PAREN@535..536 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@536..536
       4: SEMICOLON@536..537 ";" [] []
-    10: SCSS_DECLARATION@537..628
-      0: SCSS_IDENTIFIER@537..572
+    10: SCSS_VARIABLE_DECLARATION@537..628
+      0: SCSS_VARIABLE@537..572
         0: DOLLAR@537..563 "$" [Newline("\n"), Newline("\n"), Comments("// List with functions"), Newline("\n")] []
         1: CSS_IDENTIFIER@563..572
           0: IDENT@563..572 "functions" [] []
@@ -3243,8 +3243,8 @@ CssRoot {
             2: R_PAREN@626..627 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@627..627
       4: SEMICOLON@627..628 ";" [] []
-    11: SCSS_DECLARATION@628..687
-      0: SCSS_IDENTIFIER@628..660
+    11: SCSS_VARIABLE_DECLARATION@628..687
+      0: SCSS_VARIABLE@628..660
         0: DOLLAR@628..654 "$" [Newline("\n"), Newline("\n"), Comments("// Deeply nested lists"), Newline("\n")] []
         1: CSS_IDENTIFIER@654..660
           0: IDENT@654..660 "nested" [] []
@@ -3317,8 +3317,8 @@ CssRoot {
             2: R_PAREN@685..686 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@686..686
       4: SEMICOLON@686..687 ";" [] []
-    12: SCSS_DECLARATION@687..732
-      0: SCSS_IDENTIFIER@687..693
+    12: SCSS_VARIABLE_DECLARATION@687..732
+      0: SCSS_VARIABLE@687..693
         0: DOLLAR@687..689 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@689..693
           0: IDENT@689..693 "deep" [] []
@@ -3427,8 +3427,8 @@ CssRoot {
             2: R_PAREN@730..731 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@731..731
       4: SEMICOLON@731..732 ";" [] []
-    13: SCSS_DECLARATION@732..793
-      0: SCSS_IDENTIFIER@732..762
+    13: SCSS_VARIABLE_DECLARATION@732..793
+      0: SCSS_VARIABLE@732..762
         0: DOLLAR@732..753 "$" [Newline("\n"), Newline("\n"), Comments("// List with maps"), Newline("\n")] []
         1: CSS_IDENTIFIER@753..762
           0: IDENT@753..762 "with-maps" [] []
@@ -3477,8 +3477,8 @@ CssRoot {
             2: R_PAREN@791..792 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@792..792
       4: SEMICOLON@792..793 ";" [] []
-    14: SCSS_DECLARATION@793..895
-      0: SCSS_IDENTIFIER@793..832
+    14: SCSS_VARIABLE_DECLARATION@793..895
+      0: SCSS_VARIABLE@793..832
         0: DOLLAR@793..821 "$" [Newline("\n"), Newline("\n"), Comments("// List with mixed types"), Newline("\n")] []
         1: CSS_IDENTIFIER@821..832
           0: IDENT@821..832 "mixed-types" [] []
@@ -3522,7 +3522,7 @@ CssRoot {
                 10: SCSS_LIST_EXPRESSION_ELEMENT@879..891
                   0: SCSS_EXPRESSION@879..891
                     0: SCSS_EXPRESSION_ITEM_LIST@879..891
-                      0: SCSS_IDENTIFIER@879..891
+                      0: SCSS_VARIABLE@879..891
                         0: DOLLAR@879..883 "$" [Newline("\n"), Whitespace("  ")] []
                         1: CSS_IDENTIFIER@883..891
                           0: IDENT@883..891 "variable" [] []
@@ -3530,8 +3530,8 @@ CssRoot {
             2: R_PAREN@892..894 ")" [Newline("\n")] []
       3: SCSS_VARIABLE_MODIFIER_LIST@894..894
       4: SEMICOLON@894..895 ";" [] []
-    15: SCSS_DECLARATION@895..959
-      0: SCSS_IDENTIFIER@895..932
+    15: SCSS_VARIABLE_DECLARATION@895..959
+      0: SCSS_VARIABLE@895..932
         0: DOLLAR@895..926 "$" [Newline("\n"), Newline("\n"), Comments("// List with quoted s ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@926..932
           0: IDENT@926..932 "quoted" [] []
@@ -3568,8 +3568,8 @@ CssRoot {
             2: R_PAREN@957..958 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@958..958
       4: SEMICOLON@958..959 ";" [] []
-    16: SCSS_DECLARATION@959..1018
-      0: SCSS_IDENTIFIER@959..1000
+    16: SCSS_VARIABLE_DECLARATION@959..1018
+      0: SCSS_VARIABLE@959..1000
         0: DOLLAR@959..992 "$" [Newline("\n"), Newline("\n"), Comments("// List with unquoted ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@992..1000
           0: IDENT@992..1000 "unquoted" [] []
@@ -3678,8 +3678,8 @@ CssRoot {
               1: (empty)
             1: SEMICOLON@1126..1127 ";" [] []
         2: R_CURLY@1127..1129 "}" [Newline("\n")] []
-    18: SCSS_DECLARATION@1129..1265
-      0: SCSS_IDENTIFIER@1129..1186
+    18: SCSS_VARIABLE_DECLARATION@1129..1265
+      0: SCSS_VARIABLE@1129..1186
         0: DOLLAR@1129..1178 "$" [Newline("\n"), Newline("\n"), Comments("// List in variable w ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@1178..1186
           0: IDENT@1178..1186 "brackets" [] []
@@ -3702,8 +3702,8 @@ CssRoot {
             2: R_BRACK@1196..1197 "]" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@1197..1197
       4: SEMICOLON@1197..1265 ";" [] [Whitespace(" "), Comments("// Note: SCSS doesn't ...")]
-    19: SCSS_DECLARATION@1265..1291
-      0: SCSS_IDENTIFIER@1265..1279
+    19: SCSS_VARIABLE_DECLARATION@1265..1291
+      0: SCSS_VARIABLE@1265..1279
         0: DOLLAR@1265..1267 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@1267..1279
           0: IDENT@1267..1279 "parens-comma" [] []
@@ -3734,8 +3734,8 @@ CssRoot {
             2: R_PAREN@1289..1290 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@1290..1290
       4: SEMICOLON@1290..1291 ";" [] []
-    20: SCSS_DECLARATION@1291..1315
-      0: SCSS_IDENTIFIER@1291..1305
+    20: SCSS_VARIABLE_DECLARATION@1291..1315
+      0: SCSS_VARIABLE@1291..1305
         0: DOLLAR@1291..1293 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@1293..1305
           0: IDENT@1293..1305 "parens-space" [] []
@@ -3755,8 +3755,8 @@ CssRoot {
             2: R_PAREN@1313..1314 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@1314..1314
       4: SEMICOLON@1314..1315 ";" [] []
-    21: SCSS_DECLARATION@1315..1394
-      0: SCSS_IDENTIFIER@1315..1352
+    21: SCSS_VARIABLE_DECLARATION@1315..1394
+      0: SCSS_VARIABLE@1315..1352
         0: DOLLAR@1315..1337 "$" [Newline("\n"), Newline("\n"), Comments("// Multi-line list"), Newline("\n")] []
         1: CSS_IDENTIFIER@1337..1352
           0: IDENT@1337..1352 "multiline-comma" [] []
@@ -3794,8 +3794,8 @@ CssRoot {
             2: R_PAREN@1391..1393 ")" [Newline("\n")] []
       3: SCSS_VARIABLE_MODIFIER_LIST@1393..1393
       4: SEMICOLON@1393..1394 ";" [] []
-    22: SCSS_DECLARATION@1394..1450
-      0: SCSS_IDENTIFIER@1394..1412
+    22: SCSS_VARIABLE_DECLARATION@1394..1450
+      0: SCSS_VARIABLE@1394..1412
         0: DOLLAR@1394..1397 "$" [Newline("\n"), Newline("\n")] []
         1: CSS_IDENTIFIER@1397..1412
           0: IDENT@1397..1412 "multiline-space" [] []
@@ -3817,8 +3817,8 @@ CssRoot {
             2: R_PAREN@1447..1449 ")" [Newline("\n")] []
       3: SCSS_VARIABLE_MODIFIER_LIST@1449..1449
       4: SEMICOLON@1449..1450 ";" [] []
-    23: SCSS_DECLARATION@1450..1539
-      0: SCSS_IDENTIFIER@1450..1525
+    23: SCSS_VARIABLE_DECLARATION@1450..1539
+      0: SCSS_VARIABLE@1450..1525
         0: DOLLAR@1450..1511 "$" [Newline("\n"), Newline("\n"), Comments("// List with operator ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@1511..1525
           0: IDENT@1511..1525 "with-operators" [] []
@@ -3839,8 +3839,8 @@ CssRoot {
               0: IDENT@1537..1538 "d" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@1538..1538
       4: SEMICOLON@1538..1539 ";" [] []
-    24: SCSS_DECLARATION@1539..1572
-      0: SCSS_IDENTIFIER@1539..1554
+    24: SCSS_VARIABLE_DECLARATION@1539..1572
+      0: SCSS_VARIABLE@1539..1554
         0: DOLLAR@1539..1541 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@1541..1554
           0: IDENT@1541..1554 "parenthesized" [] []
@@ -3871,8 +3871,8 @@ CssRoot {
             2: R_PAREN@1570..1571 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@1571..1571
       4: SEMICOLON@1571..1572 ";" [] []
-    25: SCSS_DECLARATION@1572..1629
-      0: SCSS_IDENTIFIER@1572..1614
+    25: SCSS_VARIABLE_DECLARATION@1572..1629
+      0: SCSS_VARIABLE@1572..1614
         0: DOLLAR@1572..1605 "$" [Newline("\n"), Newline("\n"), Comments("// List with negative ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@1605..1614
           0: IDENT@1605..1614 "negatives" [] []
@@ -3903,8 +3903,8 @@ CssRoot {
             2: R_PAREN@1627..1628 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@1628..1628
       4: SEMICOLON@1628..1629 ";" [] []
-    26: SCSS_DECLARATION@1629..1656
-      0: SCSS_IDENTIFIER@1629..1645
+    26: SCSS_VARIABLE_DECLARATION@1629..1656
+      0: SCSS_VARIABLE@1629..1645
         0: DOLLAR@1629..1631 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@1631..1645
           0: IDENT@1631..1645 "negative-space" [] []
@@ -3923,8 +3923,8 @@ CssRoot {
               0: CSS_NUMBER_LITERAL@1654..1655 "3" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@1655..1655
       4: SEMICOLON@1655..1656 ";" [] []
-    27: SCSS_DECLARATION@1656..1704
-      0: SCSS_IDENTIFIER@1656..1683
+    27: SCSS_VARIABLE_DECLARATION@1656..1704
+      0: SCSS_VARIABLE@1656..1683
         0: DOLLAR@1656..1678 "$" [Newline("\n"), Newline("\n"), Comments("// List with units"), Newline("\n")] []
         1: CSS_IDENTIFIER@1678..1683
           0: IDENT@1678..1683 "units" [] []
@@ -3945,8 +3945,8 @@ CssRoot {
             1: IDENT@1701..1703 "vh" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@1703..1703
       4: SEMICOLON@1703..1704 ";" [] []
-    28: SCSS_DECLARATION@1704..1793
-      0: SCSS_IDENTIFIER@1704..1749
+    28: SCSS_VARIABLE_DECLARATION@1704..1793
+      0: SCSS_VARIABLE@1704..1749
         0: DOLLAR@1704..1738 "$" [Newline("\n"), Newline("\n"), Comments("// Complex expression ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@1738..1749
           0: IDENT@1738..1749 "expressions" [] []
@@ -3980,12 +3980,12 @@ CssRoot {
                         1: SCSS_EXPRESSION@1767..1774
                           0: SCSS_EXPRESSION_ITEM_LIST@1767..1774
                             0: SCSS_BINARY_EXPRESSION@1767..1774
-                              0: SCSS_IDENTIFIER@1767..1770
+                              0: SCSS_VARIABLE@1767..1770
                                 0: DOLLAR@1767..1768 "$" [] []
                                 1: CSS_IDENTIFIER@1768..1770
                                   0: IDENT@1768..1770 "a" [] [Whitespace(" ")]
                               1: STAR@1770..1772 "*" [] [Whitespace(" ")]
-                              2: SCSS_IDENTIFIER@1772..1774
+                              2: SCSS_VARIABLE@1772..1774
                                 0: DOLLAR@1772..1773 "$" [] []
                                 1: CSS_IDENTIFIER@1773..1774
                                   0: IDENT@1773..1774 "b" [] []
@@ -4010,8 +4010,8 @@ CssRoot {
             2: R_PAREN@1790..1792 ")" [Newline("\n")] []
       3: SCSS_VARIABLE_MODIFIER_LIST@1792..1792
       4: SEMICOLON@1792..1793 ";" [] []
-    29: SCSS_DECLARATION@1793..1876
-      0: SCSS_IDENTIFIER@1793..1831
+    29: SCSS_VARIABLE_DECLARATION@1793..1876
+      0: SCSS_VARIABLE@1793..1831
         0: DOLLAR@1793..1824 "$" [Newline("\n"), Newline("\n"), Comments("// List with special  ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@1824..1831
           0: IDENT@1824..1831 "special" [] []
@@ -4049,8 +4049,8 @@ CssRoot {
             2: R_PAREN@1873..1875 ")" [Newline("\n")] []
       3: SCSS_VARIABLE_MODIFIER_LIST@1875..1875
       4: SEMICOLON@1875..1876 ";" [] []
-    30: SCSS_DECLARATION@1876..1955
-      0: SCSS_IDENTIFIER@1876..1911
+    30: SCSS_VARIABLE_DECLARATION@1876..1955
+      0: SCSS_VARIABLE@1876..1911
         0: DOLLAR@1876..1905 "$" [Newline("\n"), Newline("\n"), Comments("// List with color va ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@1905..1911
           0: IDENT@1905..1911 "colors" [] []
@@ -4120,8 +4120,8 @@ CssRoot {
             2: R_PAREN@1953..1954 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@1954..1954
       4: SEMICOLON@1954..1955 ";" [] []
-    31: SCSS_DECLARATION@1955..2055
-      0: SCSS_IDENTIFIER@1955..1992
+    31: SCSS_VARIABLE_DECLARATION@1955..2055
+      0: SCSS_VARIABLE@1955..1992
         0: DOLLAR@1955..1984 "$" [Newline("\n"), Newline("\n"), Comments("// List with CSS keyw ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@1984..1992
           0: IDENT@1984..1992 "keywords" [] []
@@ -4171,8 +4171,8 @@ CssRoot {
             2: R_PAREN@2052..2054 ")" [Newline("\n")] []
       3: SCSS_VARIABLE_MODIFIER_LIST@2054..2054
       4: SEMICOLON@2054..2055 ";" [] []
-    32: SCSS_DECLARATION@2055..2113
-      0: SCSS_IDENTIFIER@2055..2102
+    32: SCSS_VARIABLE_DECLARATION@2055..2113
+      0: SCSS_VARIABLE@2055..2102
         0: DOLLAR@2055..2098 "$" [Newline("\n"), Newline("\n"), Comments("// Slash-separated (f ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@2098..2102
           0: IDENT@2098..2102 "font" [] []
@@ -4188,8 +4188,8 @@ CssRoot {
               0: CSS_NUMBER_LITERAL@2109..2112 "1.5" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@2112..2112
       4: SEMICOLON@2112..2113 ";" [] []
-    33: SCSS_DECLARATION@2113..2157
-      0: SCSS_IDENTIFIER@2113..2124
+    33: SCSS_VARIABLE_DECLARATION@2113..2157
+      0: SCSS_VARIABLE@2113..2124
         0: DOLLAR@2113..2115 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@2115..2124
           0: IDENT@2115..2124 "font-list" [] []
@@ -4235,8 +4235,8 @@ CssRoot {
             2: R_PAREN@2155..2156 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@2156..2156
       4: SEMICOLON@2156..2157 ";" [] []
-    34: SCSS_DECLARATION@2157..2224
-      0: SCSS_IDENTIFIER@2157..2181
+    34: SCSS_VARIABLE_DECLARATION@2157..2224
+      0: SCSS_VARIABLE@2157..2181
         0: DOLLAR@2157..2177 "$" [Newline("\n"), Newline("\n"), Comments("// List with URL"), Newline("\n")] []
         1: CSS_IDENTIFIER@2177..2181
           0: IDENT@2177..2181 "urls" [] []
@@ -4282,8 +4282,8 @@ CssRoot {
             2: R_PAREN@2222..2223 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@2223..2223
       4: SEMICOLON@2223..2224 ";" [] []
-    35: SCSS_DECLARATION@2224..2294
-      0: SCSS_IDENTIFIER@2224..2264
+    35: SCSS_VARIABLE_DECLARATION@2224..2294
+      0: SCSS_VARIABLE@2224..2264
         0: DOLLAR@2224..2258 "$" [Newline("\n"), Newline("\n"), Comments("// List with custom p ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@2258..2264
           0: IDENT@2258..2264 "custom" [] []
@@ -4314,8 +4314,8 @@ CssRoot {
             2: R_PAREN@2292..2293 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@2293..2293
       4: SEMICOLON@2293..2294 ";" [] []
-    36: SCSS_DECLARATION@2294..2357
-      0: SCSS_IDENTIFIER@2294..2322
+    36: SCSS_VARIABLE_DECLARATION@2294..2357
+      0: SCSS_VARIABLE@2294..2322
         0: DOLLAR@2294..2317 "$" [Newline("\n"), Newline("\n"), Comments("// List with attr()"), Newline("\n")] []
         1: CSS_IDENTIFIER@2317..2322
           0: IDENT@2317..2322 "attrs" [] []
@@ -4354,8 +4354,8 @@ CssRoot {
             2: R_PAREN@2355..2356 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@2356..2356
       4: SEMICOLON@2356..2357 ";" [] []
-    37: SCSS_DECLARATION@2357..2424
-      0: SCSS_IDENTIFIER@2357..2406
+    37: SCSS_VARIABLE_DECLARATION@2357..2424
+      0: SCSS_VARIABLE@2357..2406
         0: DOLLAR@2357..2392 "$" [Newline("\n"), Newline("\n"), Comments("// Nested space and c ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@2392..2406
           0: IDENT@2392..2406 "complex-nested" [] []
@@ -4392,8 +4392,8 @@ CssRoot {
             2: R_PAREN@2422..2423 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@2423..2423
       4: SEMICOLON@2423..2424 ";" [] []
-    38: SCSS_DECLARATION@2424..2491
-      0: SCSS_IDENTIFIER@2424..2450
+    38: SCSS_VARIABLE_DECLARATION@2424..2491
+      0: SCSS_VARIABLE@2424..2450
         0: DOLLAR@2424..2445 "$" [Newline("\n"), Newline("\n"), Comments("// List with calc"), Newline("\n")] []
         1: CSS_IDENTIFIER@2445..2450
           0: IDENT@2445..2450 "calcs" [] []
@@ -4446,8 +4446,8 @@ CssRoot {
             2: R_PAREN@2489..2490 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@2490..2490
       4: SEMICOLON@2490..2491 ";" [] []
-    39: SCSS_DECLARATION@2491..2593
-      0: SCSS_IDENTIFIER@2491..2536
+    39: SCSS_VARIABLE_DECLARATION@2491..2593
+      0: SCSS_VARIABLE@2491..2536
         0: DOLLAR@2491..2530 "$" [Newline("\n"), Newline("\n"), Comments("// Empty items in lis ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@2530..2536
           0: IDENT@2530..2536 "sparse" [] []
@@ -4476,8 +4476,8 @@ CssRoot {
             2: R_PAREN@2544..2545 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@2545..2545
       4: SEMICOLON@2545..2593 ";" [] [Whitespace(" "), Comments("// Note: This might b ...")]
-    40: SCSS_DECLARATION@2593..2670
-      0: SCSS_IDENTIFIER@2593..2645
+    40: SCSS_VARIABLE_DECLARATION@2593..2670
+      0: SCSS_VARIABLE@2593..2645
         0: DOLLAR@2593..2631 "$" [Newline("\n"), Newline("\n"), Comments("// List with importan ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@2631..2645
           0: IDENT@2631..2645 "with-important" [] []
@@ -4505,8 +4505,8 @@ CssRoot {
             2: R_PAREN@2668..2669 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@2669..2669
       4: SEMICOLON@2669..2670 ";" [] []
-    41: SCSS_DECLARATION@2670..2738
-      0: SCSS_IDENTIFIER@2670..2700
+    41: SCSS_VARIABLE_DECLARATION@2670..2738
+      0: SCSS_VARIABLE@2670..2700
         0: DOLLAR@2670..2693 "$" [Newline("\n"), Newline("\n"), Comments("// Unicode in lists"), Newline("\n")] []
         1: CSS_IDENTIFIER@2693..2700
           0: IDENT@2693..2700 "unicode" [] []
@@ -4543,8 +4543,8 @@ CssRoot {
             2: R_PAREN@2736..2737 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@2737..2737
       4: SEMICOLON@2737..2738 ";" [] []
-    42: SCSS_DECLARATION@2738..2828
-      0: SCSS_IDENTIFIER@2738..2779
+    42: SCSS_VARIABLE_DECLARATION@2738..2828
+      0: SCSS_VARIABLE@2738..2779
         0: DOLLAR@2738..2772 "$" [Newline("\n"), Newline("\n"), Comments("// Escaped characters ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@2772..2779
           0: IDENT@2772..2779 "escaped" [] []

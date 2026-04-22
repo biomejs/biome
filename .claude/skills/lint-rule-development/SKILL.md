@@ -107,6 +107,8 @@ impl Rule for UseMyRuleName {
 }
 ```
 
+Note: It's critically important to follow the guidelines in the `High Quality Diagnostics` section below when writing diagnostics.
+
 ### The Three Diagnostic Pillars (REQUIRED)
 
 Every diagnostic **must** follow the three pillars defined in `crates/biome_analyze/CONTRIBUTING.md`:

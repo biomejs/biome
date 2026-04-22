@@ -109,6 +109,14 @@ impl Rule for NoComponentHookFactories {
             AnyComponentLikeDeclaration::AnyPotentialReactComponentDeclaration(decl) => {
                 let syntax = decl.syntax();
 
+                if matches!(
+                    decl,
+                    AnyPotentialReactComponentDeclaration::JsMethodObjectMember(_)
+                        | AnyPotentialReactComponentDeclaration::JsMethodClassMember(_)
+                ) {
+                    return None;
+                }
+
                 // Hooks are cheap to detect by name; check before the heavier component detection.
                 if let Some(token) =
                     get_simple_binding_token(decl).filter(|t| is_react_hook_name(t.text_trimmed()))
@@ -272,9 +280,9 @@ fn is_hoc_like(function: &AnyJsFunction) -> bool {
         AnyJsArrowFunctionParameters::AnyJsBinding(_) => return false,
     };
 
-    items.into_iter().any(|param| {
-        is_pascal_case_param(param).unwrap_or(false)
-    })
+    items
+        .into_iter()
+        .any(|param| is_pascal_case_param(param).unwrap_or(false))
 }
 
 fn is_pascal_case_param(param: SyntaxResult<AnyJsParameter>) -> Option<bool> {

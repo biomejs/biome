@@ -65,8 +65,12 @@ impl Format<JsFormatContext> for FormatAnyJsParameters {
                 )
             }
             ParameterLayout::Hug => {
+                let should_insert_space_around_delimiters = f.options().delimiter_spacing().value();
                 if !parentheses_not_needed {
                     write!(f, [l_paren_token.format()])?;
+                    if should_insert_space_around_delimiters {
+                        write!(f, [space()])?;
+                    }
                 } else {
                     write!(f, [format_removed(&l_paren_token)])?;
                 }
@@ -80,6 +84,9 @@ impl Format<JsFormatContext> for FormatAnyJsParameters {
                 )?;
 
                 if !parentheses_not_needed {
+                    if should_insert_space_around_delimiters {
+                        write!(f, [space()])?;
+                    }
                     write!(f, [&r_paren_token.format()])?;
                 } else {
                     write!(f, [format_removed(&r_paren_token)])?;
@@ -88,6 +95,7 @@ impl Format<JsFormatContext> for FormatAnyJsParameters {
                 Ok(())
             }
             ParameterLayout::Default => {
+                let should_insert_space_around_delimiters = f.options().delimiter_spacing().value();
                 if !parentheses_not_needed {
                     write!(f, [l_paren_token.format()])?;
                 } else {
@@ -96,10 +104,10 @@ impl Format<JsFormatContext> for FormatAnyJsParameters {
 
                 write!(
                     f,
-                    [soft_block_indent(&FormatJsAnyParameterList::with_layout(
-                        &list,
-                        ParameterLayout::Default,
-                    ))]
+                    [soft_block_indent_with_maybe_space(
+                        &FormatJsAnyParameterList::with_layout(&list, ParameterLayout::Default,),
+                        should_insert_space_around_delimiters
+                    )]
                 )?;
 
                 if !parentheses_not_needed {

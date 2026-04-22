@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: ts-declaration.d.ts
+---
+# Input
+```ts
+import B from "b";
+import A from "a";
+
+export { A, B };
+
+```
+
+# Diagnostics
+```
+ts-declaration.d.ts:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+  > 1 │ import B from "b";
+      │ ^^^^^^^^^^^^^^^^^^
+    2 │ import A from "a";
+    3 │ 
+  
+  i Safe fix: Organize Imports (Biome)
+  
+    1   │ - import·B·from·"b";
+    2   │ - import·A·from·"a";
+      1 │ + import·A·from·"a";
+      2 │ + import·B·from·"b";
+    3 3 │   
+    4 4 │   export { A, B };
+  
+
+```

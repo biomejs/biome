@@ -1,0 +1,116 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/comments/custom-properties.scss
+---
+
+# Input
+
+```scss
+/* custom properties set & @apply rule */
+:root {
+    /* comments 192 */ --centered /* comments 193 */ : /* comments 194 */ {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    };
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,9 +1,8 @@
+ /* custom properties set & @apply rule */
+ :root {
+-  /* comments 192 */
+-  --centered/* comments 193 */ : /* comments 194 */ {
++  /* comments 192 */ --centered /* comments 193 */ : /* comments 194 */ {
+     display: flex;
+     align-items: center;
+     justify-content: center;
+-  };
++  }
+ }
+```
+
+# Output
+
+```scss
+/* custom properties set & @apply rule */
+:root {
+  /* comments 192 */ --centered /* comments 193 */ : /* comments 194 */ {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+```
+
+# Errors
+```
+custom-properties.scss:3:75 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ /* custom properties set & @apply rule */
+    2 │ :root {
+  > 3 │     /* comments 192 */ --centered /* comments 193 */ : /* comments 194 */ {
+      │                                                                           ^
+    4 │         display: flex;
+    5 │         align-items: center;
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+
+```

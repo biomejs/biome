@@ -23,6 +23,22 @@ impl FormatNodeRule<JsForOfStatement> for FormatJsForOfStatement {
 
         let body = body?;
 
+        let l_paren = format_with(|f: &mut JsFormatter| {
+            if f.options().delimiter_spacing().value() {
+                write!(f, [l_paren_token.format(), space()])
+            } else {
+                write!(f, [l_paren_token.format()])
+            }
+        });
+
+        let r_paren = format_with(|f: &mut JsFormatter| {
+            if f.options().delimiter_spacing().value() {
+                write!(f, [space(), r_paren_token.format()])
+            } else {
+                write!(f, [r_paren_token.format()])
+            }
+        });
+
         let format_inner = format_with(|f| {
             write!(f, [for_token.format()])?;
 
@@ -34,13 +50,13 @@ impl FormatNodeRule<JsForOfStatement> for FormatJsForOfStatement {
                 f,
                 [
                     space(),
-                    l_paren_token.format(),
+                    l_paren,
                     initializer.format(),
                     space(),
                     of_token.format(),
                     space(),
                     expression.format(),
-                    r_paren_token.format(),
+                    r_paren,
                     FormatStatementBody::new(&body)
                 ]
             )

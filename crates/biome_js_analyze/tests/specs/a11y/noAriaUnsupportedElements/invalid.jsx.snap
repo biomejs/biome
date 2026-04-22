@@ -4,6 +4,7 @@ expression: invalid.jsx
 ---
 # Input
 ```jsx
+/* should generate diagnostics */
 <>
 	<meta charset="UTF-8" aria-hidden="false" />
 	<meta charset="UTF-8" role="meta" />
@@ -19,43 +20,23 @@ expression: invalid.jsx
 
 # Diagnostics
 ```
-invalid.jsx:2:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:3:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
   
-    1 │ <>
-  > 2 │ 	<meta charset="UTF-8" aria-hidden="false" />
+    1 │ /* should generate diagnostics */
+    2 │ <>
+  > 3 │ 	<meta charset="UTF-8" aria-hidden="false" />
       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ 	<meta charset="UTF-8" role="meta" />
-    4 │ 	<html aria-required="true" />
+    4 │ 	<meta charset="UTF-8" role="meta" />
+    5 │ 	<html aria-required="true" />
   
   i Using aria-* on elements that do not support them can cause issues with screen readers.
   
   i Unsafe fix: Remove the aria-hidden="false"  attribute.
   
-    2 │ → <meta·charset="UTF-8"·aria-hidden="false"·/>
+    3 │ → <meta·charset="UTF-8"·aria-hidden="false"·/>
       │                         --------------------  
-
-```
-
-```
-invalid.jsx:3:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
-  
-    1 │ <>
-    2 │ 	<meta charset="UTF-8" aria-hidden="false" />
-  > 3 │ 	<meta charset="UTF-8" role="meta" />
-      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ 	<html aria-required="true" />
-    5 │ 	<html role="html"></html>
-  
-  i Using role on elements that do not support them can cause issues with screen readers.
-  
-  i Unsafe fix: Remove the role="meta"  attribute.
-  
-    3 │ → <meta·charset="UTF-8"·role="meta"·/>
-      │                         ------------  
 
 ```
 
@@ -64,19 +45,19 @@ invalid.jsx:4:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━
 
   × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
   
-    2 │ 	<meta charset="UTF-8" aria-hidden="false" />
-    3 │ 	<meta charset="UTF-8" role="meta" />
-  > 4 │ 	<html aria-required="true" />
-      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │ 	<html role="html"></html>
-    6 │ 	<script aria-label="script"></script>
+    2 │ <>
+    3 │ 	<meta charset="UTF-8" aria-hidden="false" />
+  > 4 │ 	<meta charset="UTF-8" role="meta" />
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 	<html aria-required="true" />
+    6 │ 	<html role="html"></html>
   
-  i Using aria-* on elements that do not support them can cause issues with screen readers.
+  i Using role on elements that do not support them can cause issues with screen readers.
   
-  i Unsafe fix: Remove the aria-required="true"  attribute.
+  i Unsafe fix: Remove the role="meta"  attribute.
   
-    4 │ → <html·aria-required="true"·/>
-      │         ---------------------  
+    4 │ → <meta·charset="UTF-8"·role="meta"·/>
+      │                         ------------  
 
 ```
 
@@ -85,19 +66,19 @@ invalid.jsx:5:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━
 
   × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
   
-    3 │ 	<meta charset="UTF-8" role="meta" />
-    4 │ 	<html aria-required="true" />
-  > 5 │ 	<html role="html"></html>
-      │ 	^^^^^^^^^^^^^^^^^^
-    6 │ 	<script aria-label="script"></script>
-    7 │ 	<script role="script"></script>
+    3 │ 	<meta charset="UTF-8" aria-hidden="false" />
+    4 │ 	<meta charset="UTF-8" role="meta" />
+  > 5 │ 	<html aria-required="true" />
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 	<html role="html"></html>
+    7 │ 	<script aria-label="script"></script>
   
-  i Using role on elements that do not support them can cause issues with screen readers.
+  i Using aria-* on elements that do not support them can cause issues with screen readers.
   
-  i Unsafe fix: Remove the role="html" attribute.
+  i Unsafe fix: Remove the aria-required="true"  attribute.
   
-    5 │ → <html·role="html"></html>
-      │         -----------        
+    5 │ → <html·aria-required="true"·/>
+      │         ---------------------  
 
 ```
 
@@ -106,19 +87,19 @@ invalid.jsx:6:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━
 
   × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
   
-    4 │ 	<html aria-required="true" />
-    5 │ 	<html role="html"></html>
-  > 6 │ 	<script aria-label="script"></script>
-      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    7 │ 	<script role="script"></script>
-    8 │ 	<style aria-labelledby></style>
+    4 │ 	<meta charset="UTF-8" role="meta" />
+    5 │ 	<html aria-required="true" />
+  > 6 │ 	<html role="html"></html>
+      │ 	^^^^^^^^^^^^^^^^^^
+    7 │ 	<script aria-label="script"></script>
+    8 │ 	<script role="script"></script>
   
-  i Using aria-* on elements that do not support them can cause issues with screen readers.
+  i Using role on elements that do not support them can cause issues with screen readers.
   
-  i Unsafe fix: Remove the aria-label="script" attribute.
+  i Unsafe fix: Remove the role="html" attribute.
   
-    6 │ → <script·aria-label="script"></script>
-      │           -------------------          
+    6 │ → <html·role="html"></html>
+      │         -----------        
 
 ```
 
@@ -127,19 +108,19 @@ invalid.jsx:7:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━
 
   × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
   
-    5 │ 	<html role="html"></html>
-    6 │ 	<script aria-label="script"></script>
-  > 7 │ 	<script role="script"></script>
-      │ 	^^^^^^^^^^^^^^^^^^^^^^
-    8 │ 	<style aria-labelledby></style>
-    9 │ 	<style role="style"></style>
+    5 │ 	<html aria-required="true" />
+    6 │ 	<html role="html"></html>
+  > 7 │ 	<script aria-label="script"></script>
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 	<script role="script"></script>
+    9 │ 	<style aria-labelledby></style>
   
-  i Using role on elements that do not support them can cause issues with screen readers.
+  i Using aria-* on elements that do not support them can cause issues with screen readers.
   
-  i Unsafe fix: Remove the role="script" attribute.
+  i Unsafe fix: Remove the aria-label="script" attribute.
   
-    7 │ → <script·role="script"></script>
-      │           -------------          
+    7 │ → <script·aria-label="script"></script>
+      │           -------------------          
 
 ```
 
@@ -148,19 +129,19 @@ invalid.jsx:8:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━
 
   × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
   
-     6 │ 	<script aria-label="script"></script>
-     7 │ 	<script role="script"></script>
-   > 8 │ 	<style aria-labelledby></style>
-       │ 	^^^^^^^^^^^^^^^^^^^^^^^
-     9 │ 	<style role="style"></style>
-    10 │ </>;
+     6 │ 	<html role="html"></html>
+     7 │ 	<script aria-label="script"></script>
+   > 8 │ 	<script role="script"></script>
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 	<style aria-labelledby></style>
+    10 │ 	<style role="style"></style>
   
-  i Using aria-* on elements that do not support them can cause issues with screen readers.
+  i Using role on elements that do not support them can cause issues with screen readers.
   
-  i Unsafe fix: Remove the aria-labelledby attribute.
+  i Unsafe fix: Remove the role="script" attribute.
   
-    8 │ → <style·aria-labelledby></style>
-      │          ---------------         
+    8 │ → <script·role="script"></script>
+      │           -------------          
 
 ```
 
@@ -169,18 +150,39 @@ invalid.jsx:9:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━
 
   × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
   
-     7 │ 	<script role="script"></script>
-     8 │ 	<style aria-labelledby></style>
-   > 9 │ 	<style role="style"></style>
+     7 │ 	<script aria-label="script"></script>
+     8 │ 	<script role="script"></script>
+   > 9 │ 	<style aria-labelledby></style>
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 	<style role="style"></style>
+    11 │ </>;
+  
+  i Using aria-* on elements that do not support them can cause issues with screen readers.
+  
+  i Unsafe fix: Remove the aria-labelledby attribute.
+  
+    9 │ → <style·aria-labelledby></style>
+      │          ---------------         
+
+```
+
+```
+invalid.jsx:10:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
+  
+     8 │ 	<script role="script"></script>
+     9 │ 	<style aria-labelledby></style>
+  > 10 │ 	<style role="style"></style>
        │ 	^^^^^^^^^^^^^^^^^^^^
-    10 │ </>;
-    11 │ 
+    11 │ </>;
+    12 │ 
   
   i Using role on elements that do not support them can cause issues with screen readers.
   
   i Unsafe fix: Remove the role="style" attribute.
   
-    9 │ → <style·role="style"></style>
-      │          ------------         
+    10 │ → <style·role="style"></style>
+       │          ------------         
 
 ```

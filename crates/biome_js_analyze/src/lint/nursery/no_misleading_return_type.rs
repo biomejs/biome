@@ -77,6 +77,9 @@ pub struct RuleState {
     returns: Vec<Type>,
 }
 
+/// Maximum iterations for type graph traversal to guard against infinite loops on cyclic types.
+const MAX_TYPE_TRAVERSAL_ITERATIONS: usize = 50;
+
 impl Rule for NoMisleadingReturnType {
     type Query = Typed<AnyFunctionLikeWithReturnType>;
     type State = RuleState;
@@ -394,116 +397,146 @@ fn is_intersection_with_type_param(ty: &Type) -> bool {
 }
 
 fn is_literal_of_primitive(ty: &Type) -> bool {
-    matches!(&**ty, TypeData::Literal(lit) if lit.is_primitive())
+    match &**ty {
+        TypeData::Literal(lit) => lit.is_primitive(),
+        // The type resolver may wrap a single literal in a Union for mutable
+        // bindings.  Treat a one-element union of a primitive literal the same.
+        TypeData::Union(_) => {
+            let mut iter = ty.flattened_union_variants();
+            matches!(
+                (iter.next(), iter.next()),
+                (Some(v), None) if matches!(&*v, TypeData::Literal(lit) if lit.is_primitive())
+            )
+        }
+        _ => false,
+    }
 }
 
 /// Checks whether annotation differs from returns only by property-level
 /// literal widening that contextual typing would handle.
 fn is_only_property_literal_widening(annotation: &Type, returns: &[Type]) -> bool {
-    if let TypeData::Tuple(ann_tuple) = &**annotation {
-        return returns.iter().all(|inferred| {
-            let TypeData::Tuple(inf_tuple) = &**inferred else {
+    returns.iter().all(|inferred| {
+        let mut stack: Vec<(Type, Type)> = vec![(annotation.clone(), inferred.clone())];
+        let mut has_widening = false;
+        let mut iterations = 0usize;
+
+        while let Some((annotated, inferred)) = stack.pop() {
+            iterations += 1;
+            if iterations > MAX_TYPE_TRAVERSAL_ITERATIONS {
+                return false;
+            }
+
+            if let TypeData::Tuple(annotated_tuple) = &*annotated {
+                let TypeData::Tuple(inferred_tuple) = &*inferred else {
+                    return false;
+                };
+                let annotated_elements = annotated_tuple.elements();
+                let inferred_elements = inferred_tuple.elements();
+                if annotated_elements.len() != inferred_elements.len()
+                    || annotated_elements.is_empty()
+                {
+                    return false;
+                }
+                for (annotated_element, inferred_element) in
+                    annotated_elements.iter().zip(inferred_elements.iter())
+                {
+                    match (
+                        annotated.resolve(&annotated_element.ty),
+                        inferred.resolve(&inferred_element.ty),
+                    ) {
+                        (Some(annotated_type), Some(inferred_type)) => {
+                            if types_match(&annotated_type, &inferred_type) {
+                                continue;
+                            }
+                            if is_base_type_of_literal(&annotated_type, &inferred_type) {
+                                has_widening = true;
+                            } else {
+                                stack.push((annotated_type, inferred_type));
+                            }
+                        }
+                        _ => return false,
+                    }
+                }
+                continue;
+            }
+
+            let TypeData::Object(annotated_object) = &*annotated else {
                 return false;
             };
-            let ann_elems = ann_tuple.elements();
-            let inf_elems = inf_tuple.elements();
-            if ann_elems.len() != inf_elems.len() || ann_elems.is_empty() {
+            if annotated_object.members.is_empty() {
                 return false;
             }
-            let mut has_widening = false;
-            for (ann_elem, inf_elem) in ann_elems.iter().zip(inf_elems.iter()) {
-                let ann_ty = annotation.resolve(&ann_elem.ty);
-                let inf_ty = inferred.resolve(&inf_elem.ty);
-                match (ann_ty, inf_ty) {
-                    (Some(a), Some(b)) => {
-                        if types_match(&a, &b) {
-                            continue;
-                        }
-                        if is_base_type_of_literal(&a, &b) {
-                            has_widening = true;
-                        } else {
-                            return false;
-                        }
-                    }
+
+            let inferred_members = match &*inferred {
+                TypeData::Object(object) => &object.members,
+                TypeData::Literal(literal) => match literal.as_ref() {
+                    Literal::Object(object_literal) => object_literal.members(),
                     _ => return false,
-                }
-            }
-            has_widening
-        });
-    }
-
-    let (TypeData::Object(ann_obj), _) = (&**annotation, ()) else {
-        return false;
-    };
-
-    if ann_obj.members.is_empty() {
-        return false;
-    }
-
-    returns.iter().all(|inferred| {
-        let inf_members = match &**inferred {
-            TypeData::Object(obj) => &obj.members,
-            TypeData::Literal(lit) => match lit.as_ref() {
-                Literal::Object(obj_lit) => obj_lit.members(),
+                },
                 _ => return false,
-            },
-            _ => return false,
-        };
+            };
+            if inferred_members.is_empty() {
+                return false;
+            }
 
-        if inf_members.is_empty() {
-            return false;
-        }
-
-        let mut has_widening = false;
-
-        let ann_index_sig = ann_obj.members.iter().find(|m| {
-            matches!(m.kind, biome_js_type_info::TypeMemberKind::IndexSignature(_))
-        });
-        if let Some(sig_member) = ann_index_sig
-            && let Some(sig_value_ty) = annotation.resolve(&sig_member.ty) {
-                let mut sig_has_widening = false;
-                let all_ok = inf_members.iter().all(|inf_m| {
-                    if let Some(inf_ty) = annotation.resolve(&inf_m.ty) {
-                        if types_match(&sig_value_ty, &inf_ty) {
+            let annotated_index_signature = annotated_object.members.iter().find(|member| {
+                matches!(
+                    member.kind,
+                    biome_js_type_info::TypeMemberKind::IndexSignature(_)
+                )
+            });
+            if let Some(index_signature_member) = annotated_index_signature
+                && let Some(index_signature_value_type) =
+                    annotated.resolve(&index_signature_member.ty)
+            {
+                let mut index_signature_has_widening = false;
+                let all_inferred_covered = inferred_members.iter().all(|inferred_member| {
+                    if let Some(inferred_type) = inferred.resolve(&inferred_member.ty) {
+                        if types_match(&index_signature_value_type, &inferred_type) {
                             return true;
                         }
-                        if is_base_type_of_literal(&sig_value_ty, &inf_ty) {
-                            sig_has_widening = true;
+                        if is_base_type_of_literal(&index_signature_value_type, &inferred_type) {
+                            index_signature_has_widening = true;
                             return true;
                         }
                     }
                     false
                 });
-                return all_ok && sig_has_widening;
+                if !(all_inferred_covered && index_signature_has_widening) {
+                    return false;
+                }
+                has_widening = true;
+                continue;
             }
 
-        for ann_member in ann_obj.members.iter() {
-            let ann_name = match &ann_member.kind {
-                biome_js_type_info::TypeMemberKind::Named(name)
-                | biome_js_type_info::TypeMemberKind::NamedOptional(name) => name,
-                _ => continue,
-            };
-
-            let inf_member = inf_members.iter().find(|m| m.kind.has_name(ann_name));
-            let Some(inf_member) = inf_member else {
-                return false;
-            };
-
-            let ann_ty = annotation.resolve(&ann_member.ty);
-            let inf_ty = annotation.resolve(&inf_member.ty);
-
-            match (ann_ty, inf_ty) {
-                (Some(a), Some(b)) => {
-                    if types_match(&a, &b) {
-                        continue;
+            for annotated_member in annotated_object.members.iter() {
+                let annotated_name = match &annotated_member.kind {
+                    biome_js_type_info::TypeMemberKind::Named(name)
+                    | biome_js_type_info::TypeMemberKind::NamedOptional(name) => name,
+                    _ => continue,
+                };
+                let Some(inferred_member) = inferred_members
+                    .iter()
+                    .find(|member| member.kind.has_name(annotated_name))
+                else {
+                    return false;
+                };
+                match (
+                    annotated.resolve(&annotated_member.ty),
+                    inferred.resolve(&inferred_member.ty),
+                ) {
+                    (Some(annotated_type), Some(inferred_type)) => {
+                        if types_match(&annotated_type, &inferred_type) {
+                            continue;
+                        }
+                        if is_base_type_of_literal(&annotated_type, &inferred_type) {
+                            has_widening = true;
+                        } else {
+                            stack.push((annotated_type, inferred_type));
+                        }
                     }
-                    if is_base_type_of_literal(&a, &b) {
-                        has_widening = true;
-                    } else {
-                        return false;
-                    }
+                    _ => return false,
                 }
-                _ => return false,
             }
         }
 
@@ -876,7 +909,7 @@ fn is_nonunion_wider(annotated: &Type, inferred: &Type) -> bool {
 
     while let Some((ann, inf)) = stack.pop() {
         iterations += 1;
-        if iterations > 50 {
+        if iterations > MAX_TYPE_TRAVERSAL_ITERATIONS {
             return false;
         }
 
@@ -1035,12 +1068,29 @@ fn is_wider_than(annotated: &Type, inferred: &Type) -> bool {
 
         (TypeData::Union(_), _) => is_union_wider(annotated, &current),
         (_, TypeData::Union(_)) => {
-            current
+            // When the annotation's base type already appears as a variant in the
+            // inferred union, any literal subtypes are subsumed by it — the union
+            // collapses to the base type (e.g., 0 | number = number).  In that
+            // case the annotation is not wider than the inferred type.
+            let (has_base_variant, all_subsumed, all_covered, any_wider) = current
                 .flattened_union_variants()
-                .all(|v| types_match(annotated, &v) || is_nonunion_wider(annotated, &v))
-                && current
-                    .flattened_union_variants()
-                    .any(|v| is_nonunion_wider(annotated, &v))
+                .fold(
+                    (false, true, true, false),
+                    |(has_base_variant, all_subsumed, all_covered, any_wider), v| {
+                        let matches = types_match(annotated, &v);
+                        let wider = is_nonunion_wider(annotated, &v);
+                        (
+                            has_base_variant || matches,
+                            all_subsumed && (matches || is_base_type_of_literal(annotated, &v)),
+                            all_covered && (matches || wider),
+                            any_wider || wider,
+                        )
+                    },
+                );
+            if has_base_variant && all_subsumed {
+                return false;
+            }
+            all_covered && any_wider
         }
         _ => is_nonunion_wider(annotated, &current),
     }

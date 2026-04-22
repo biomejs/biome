@@ -1,0 +1,33 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/trailing-comma/variable.scss
+---
+
+# Input
+
+```scss
+$test: 1,;
+$margin: 0, 2em, 0, 1.5em,;
+
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,2 @@
+-$test: 1;
+-$margin: 0, 2em, 0, 1.5em;
++$test: 1,;
++$margin: 0, 2em, 0, 1.5em,;
+```
+
+# Output
+
+```scss
+$test: 1,;
+$margin: 0, 2em, 0, 1.5em,;
+```

@@ -191,14 +191,19 @@ fn emit_indent_char_list(p: &mut MarkdownParser, max_columns: usize) -> usize {
 }
 
 /// Consume the first whitespace token after the list marker as MD_LIST_POST_MARKER_SPACE.
-/// Returns true if a space was consumed.
-fn emit_list_post_marker_space(p: &mut MarkdownParser) -> bool {
+/// Returns true if a space/tab separator was recognized.
+fn emit_list_post_marker_space(p: &mut MarkdownParser, preserve_tab: bool) -> bool {
     if !p.at(MD_TEXTUAL_LITERAL) {
         return false;
     }
     let text = p.cur_text();
-    if text == " " || text == "\t" {
+    if text == " " {
         p.bump_remap(MD_LIST_POST_MARKER_SPACE);
+        true
+    } else if text == "\t" {
+        if !preserve_tab {
+            p.bump_remap(MD_LIST_POST_MARKER_SPACE);
+        }
         true
     } else {
         false
@@ -834,12 +839,19 @@ fn parse_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankInfo) {
 
     // Post-marker space (first whitespace token after marker)
     if !setext_marker {
-        emit_list_post_marker_space(p);
+        emit_list_post_marker_space(p, spaces_after_marker > INDENT_CODE_BLOCK_SPACES);
     }
 
-    // Content indent (remaining whitespace tokens on first line)
+    // Content indent (remaining whitespace tokens on first line).
+    // For first-line indented code, only the 4-column code indent is consumed
+    // here so any additional padding remains in the code content.
     if !setext_marker && !first_line_empty && spaces_after_marker > 1 {
-        emit_indent_char_list(p, 0);
+        let max_columns = if spaces_after_marker > INDENT_CODE_BLOCK_SPACES {
+            INDENT_CODE_BLOCK_SPACES
+        } else {
+            0
+        };
+        emit_indent_char_list(p, max_columns);
     } else {
         // Empty first line or no content indent -- emit empty MdIndentTokenList
         let empty_m = p.start();
@@ -1149,11 +1161,18 @@ fn parse_ordered_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankI
     });
 
     // Post-marker space
-    emit_list_post_marker_space(p);
+    emit_list_post_marker_space(p, spaces_after_marker > INDENT_CODE_BLOCK_SPACES);
 
-    // Content indent
+    // Content indent.
+    // For first-line indented code, only the 4-column code indent is consumed
+    // here so any additional padding remains in the code content.
     if !first_line_empty && spaces_after_marker > 1 {
-        emit_indent_char_list(p, 0);
+        let max_columns = if spaces_after_marker > INDENT_CODE_BLOCK_SPACES {
+            INDENT_CODE_BLOCK_SPACES
+        } else {
+            0
+        };
+        emit_indent_char_list(p, max_columns);
     } else {
         let empty_m = p.start();
         empty_m.complete(p, MD_INDENT_TOKEN_LIST);
