@@ -6,7 +6,7 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsFunction, JsFileSource, Language, TextRange, TsAsExpression, TsReferenceType,
+    AnyJsFunction, JsFileSource, JsSyntaxToken, Language, TsAsExpression, TsReferenceType,
 };
 use biome_rowan::AstNode;
 use biome_rule_options::no_undeclared_variables::NoUndeclaredVariablesOptions;
@@ -64,7 +64,7 @@ declare_lint_rule! {
 
 impl Rule for NoUndeclaredVariables {
     type Query = SemanticServices;
-    type State = (TextRange, Box<str>);
+    type State = JsSyntaxToken;
     type Signals = Box<[Self::State]>;
     type Options = NoUndeclaredVariablesOptions;
 
@@ -121,20 +121,18 @@ impl Rule for NoUndeclaredVariables {
                     return None;
                 }
 
-                let span = token.text_trimmed_range();
-                let text = text.into();
-                Some((span, text))
+                Some(token)
             })
             .collect::<Vec<_>>()
             .into_boxed_slice()
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, (span, name): &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(_ctx: &RuleContext<Self>, token: &Self::State) -> Option<RuleDiagnostic> {
         Some(RuleDiagnostic::new(
             rule_category!(),
-            *span,
+            token.text_trimmed_range(),
             markup! {
-                "The "<Emphasis>{name.as_ref()}</Emphasis>" variable is undeclared."
+                "The "<Emphasis>{token.text_trimmed()}</Emphasis>" variable is undeclared."
             },
         ).note(markup! {
             "By default, Biome recognizes browser and Node.js globals.\nYou can ignore more globals using the "<Hyperlink href="https://biomejs.dev/reference/configuration/#javascriptglobals">"javascript.globals"</Hyperlink>" configuration."
