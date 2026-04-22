@@ -5028,7 +5028,20 @@
 				{ "$ref": "#/$defs/RuleWithNoShadowOptions" }
 			]
 		},
-		"NoShadowOptions": { "type": "object", "additionalProperties": false },
+		"NoShadowOptions": {
+			"type": "object",
+			"properties": {
+				"ignoreFunctionTypeParameterNameValueShadow": {
+					"description": "Ignore parameter names in function type annotations.\n\nFunction type parameters (e.g. `(x: string) => void`) only create\nbindings within the type scope and rarely cause confusion.\n\nDefaults to `true`.",
+					"type": ["boolean", "null"]
+				},
+				"ignoreTypeValueShadow": {
+					"description": "Ignore cases where a type and a value share the same name.\n\nTypes and values live in separate namespaces in TypeScript, so a\nvariable named `Foo` and a `type Foo` cannot collide at runtime.\n\nDefaults to `true`.",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoShadowRestrictedNamesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },

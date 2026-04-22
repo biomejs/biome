@@ -7863,7 +7863,26 @@ The values of the list are case-insensitive.
 	disallow?: string[];
 }
 export type NoScriptUrlOptions = {};
-export type NoShadowOptions = {};
+export interface NoShadowOptions {
+	/**
+	* Ignore parameter names in function type annotations.
+
+Function type parameters (e.g. `(x: string) => void`) only create
+bindings within the type scope and rarely cause confusion.
+
+Defaults to `true`. 
+	 */
+	ignoreFunctionTypeParameterNameValueShadow?: boolean;
+	/**
+	* Ignore cases where a type and a value share the same name.
+
+Types and values live in separate namespaces in TypeScript, so a
+variable named `Foo` and a `type Foo` cannot collide at runtime.
+
+Defaults to `true`. 
+	 */
+	ignoreTypeValueShadow?: boolean;
+}
 export type NoSyncScriptsOptions = {};
 export type NoTernaryOptions = {};
 export type NoTopLevelLiteralsOptions = {};
