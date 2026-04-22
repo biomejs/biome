@@ -126,11 +126,11 @@ impl RuleState {
 }
 
 impl biome_console::fmt::Display for RuleState {
-    fn fmt(&self, f: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+    fn fmt(&self, formatter: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
         match self.description_kind() {
-            Some(DescriptionKind::Inferred) => write_inferred(f, &self.returns),
+            Some(DescriptionKind::Inferred) => write_inferred(formatter, &self.returns),
             Some(DescriptionKind::Narrowed) => {
-                write_narrowed(f, &self.effective_return_ty, &self.returns)
+                write_narrowed(formatter, &self.effective_return_ty, &self.returns)
             }
             None => Ok(()),
         }
