@@ -1,0 +1,63 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/parens/2.scss
+---
+
+# Input
+
+```scss
+$icons: (
+  cal-day-group:
+    (
+      left: 253,
+      top: 73,
+    ),
+
+
+  /* Should preserve empty lines */
+  cal-week-group:
+    (
+      left: 1,
+      top: 169,
+    )
+);
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -3,10 +3,9 @@
+     left: 253,
+     top: 73,
+   ),
+-
+   /* Should preserve empty lines */
+   cal-week-group: (
+-      left: 1,
+-      top: 169,
+-    ),
++    left: 1,
++    top: 169,
++  ),
+ );
+```
+
+# Output
+
+```scss
+$icons: (
+  cal-day-group: (
+    left: 253,
+    top: 73,
+  ),
+  /* Should preserve empty lines */
+  cal-week-group: (
+    left: 1,
+    top: 169,
+  ),
+);
+```

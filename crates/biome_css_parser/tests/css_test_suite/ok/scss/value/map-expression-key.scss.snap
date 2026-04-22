@@ -21,8 +21,8 @@ $map: (
 CssRoot {
     bom_token: missing (optional),
     items: CssRootItemList [
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@0..1 "$" [] [],
                 name: CssIdentifier {
                     value_token: IDENT@1..5 "size" [] [],
@@ -39,8 +39,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@8..9 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@9..11 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@11..14 "map" [] [],
@@ -60,7 +60,7 @@ CssRoot {
                                             expression: ScssExpression {
                                                 items: ScssExpressionItemList [
                                                     ScssBinaryExpression {
-                                                        left: ScssIdentifier {
+                                                        left: ScssVariable {
                                                             dollar_token: DOLLAR@21..22 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@22..27 "size" [] [Whitespace(" ")],
@@ -138,8 +138,8 @@ CssRoot {
 0: CSS_ROOT@0..57
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..56
-    0: SCSS_DECLARATION@0..9
-      0: SCSS_IDENTIFIER@0..5
+    0: SCSS_VARIABLE_DECLARATION@0..9
+      0: SCSS_VARIABLE@0..5
         0: DOLLAR@0..1 "$" [] []
         1: CSS_IDENTIFIER@1..5
           0: IDENT@1..5 "size" [] []
@@ -150,8 +150,8 @@ CssRoot {
             0: CSS_NUMBER_LITERAL@7..8 "2" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@8..8
       4: SEMICOLON@8..9 ";" [] []
-    1: SCSS_DECLARATION@9..56
-      0: SCSS_IDENTIFIER@9..14
+    1: SCSS_VARIABLE_DECLARATION@9..56
+      0: SCSS_VARIABLE@9..14
         0: DOLLAR@9..11 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@11..14
           0: IDENT@11..14 "map" [] []
@@ -169,7 +169,7 @@ CssRoot {
                       1: SCSS_EXPRESSION@21..30
                         0: SCSS_EXPRESSION_ITEM_LIST@21..30
                           0: SCSS_BINARY_EXPRESSION@21..30
-                            0: SCSS_IDENTIFIER@21..27
+                            0: SCSS_VARIABLE@21..27
                               0: DOLLAR@21..22 "$" [] []
                               1: CSS_IDENTIFIER@22..27
                                 0: IDENT@22..27 "size" [] [Whitespace(" ")]

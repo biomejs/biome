@@ -157,7 +157,7 @@ CssRoot {
                                     items: ScssExpressionItemList [
                                         ScssUnaryExpression {
                                             operator: MINUS@70..71 "-" [] [],
-                                            expression: ScssIdentifier {
+                                            expression: ScssVariable {
                                                 dollar_token: DOLLAR@71..72 "$" [] [],
                                                 name: CssIdentifier {
                                                     value_token: IDENT@72..73 "x" [] [],
@@ -182,7 +182,7 @@ CssRoot {
                                     items: ScssExpressionItemList [
                                         ScssUnaryExpression {
                                             operator: PLUS@80..81 "+" [] [],
-                                            expression: ScssIdentifier {
+                                            expression: ScssVariable {
                                                 dollar_token: DOLLAR@81..82 "$" [] [],
                                                 name: CssIdentifier {
                                                     value_token: IDENT@82..83 "x" [] [],
@@ -491,7 +491,7 @@ CssRoot {
                   0: SCSS_EXPRESSION_ITEM_LIST@70..73
                     0: SCSS_UNARY_EXPRESSION@70..73
                       0: MINUS@70..71 "-" [] []
-                      1: SCSS_IDENTIFIER@71..73
+                      1: SCSS_VARIABLE@71..73
                         0: DOLLAR@71..72 "$" [] []
                         1: CSS_IDENTIFIER@72..73
                           0: IDENT@72..73 "x" [] []
@@ -507,7 +507,7 @@ CssRoot {
                   0: SCSS_EXPRESSION_ITEM_LIST@80..83
                     0: SCSS_UNARY_EXPRESSION@80..83
                       0: PLUS@80..81 "+" [] []
-                      1: SCSS_IDENTIFIER@81..83
+                      1: SCSS_VARIABLE@81..83
                         0: DOLLAR@81..82 "$" [] []
                         1: CSS_IDENTIFIER@82..83
                           0: IDENT@82..83 "x" [] []

@@ -83,7 +83,7 @@ CssRoot {
                                 l_curly_token: L_CURLY@28..29 "{" [] [],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
-                                        ScssIdentifier {
+                                        ScssVariable {
                                             dollar_token: DOLLAR@29..30 "$" [] [],
                                             name: CssIdentifier {
                                                 value_token: IDENT@30..34 "file" [] [],
@@ -117,7 +117,7 @@ CssRoot {
                                     l_curly_token: L_CURLY@53..54 "{" [] [],
                                     value: ScssExpression {
                                         items: ScssExpressionItemList [
-                                            ScssIdentifier {
+                                            ScssVariable {
                                                 dollar_token: DOLLAR@54..55 "$" [] [],
                                                 name: CssIdentifier {
                                                     value_token: IDENT@55..59 "file" [] [],
@@ -347,7 +347,7 @@ CssRoot {
                                 l_curly_token: L_CURLY@362..363 "{" [] [],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
-                                        ScssIdentifier {
+                                        ScssVariable {
                                             dollar_token: DOLLAR@363..364 "$" [] [],
                                             name: CssIdentifier {
                                                 value_token: IDENT@364..367 "bar" [] [],
@@ -563,7 +563,7 @@ CssRoot {
                 1: L_CURLY@28..29 "{" [] []
                 2: SCSS_EXPRESSION@29..34
                   0: SCSS_EXPRESSION_ITEM_LIST@29..34
-                    0: SCSS_IDENTIFIER@29..34
+                    0: SCSS_VARIABLE@29..34
                       0: DOLLAR@29..30 "$" [] []
                       1: CSS_IDENTIFIER@30..34
                         0: IDENT@30..34 "file" [] []
@@ -586,7 +586,7 @@ CssRoot {
                   1: L_CURLY@53..54 "{" [] []
                   2: SCSS_EXPRESSION@54..59
                     0: SCSS_EXPRESSION_ITEM_LIST@54..59
-                      0: SCSS_IDENTIFIER@54..59
+                      0: SCSS_VARIABLE@54..59
                         0: DOLLAR@54..55 "$" [] []
                         1: CSS_IDENTIFIER@55..59
                           0: IDENT@55..59 "file" [] []
@@ -742,7 +742,7 @@ CssRoot {
                 1: L_CURLY@362..363 "{" [] []
                 2: SCSS_EXPRESSION@363..367
                   0: SCSS_EXPRESSION_ITEM_LIST@363..367
-                    0: SCSS_IDENTIFIER@363..367
+                    0: SCSS_VARIABLE@363..367
                       0: DOLLAR@363..364 "$" [] []
                       1: CSS_IDENTIFIER@364..367
                         0: IDENT@364..367 "bar" [] []

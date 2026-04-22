@@ -69,7 +69,7 @@ CssRoot {
                 condition: ScssExpression {
                     items: ScssExpressionItemList [
                         ScssBinaryExpression {
-                            left: ScssIdentifier {
+                            left: ScssVariable {
                                 dollar_token: DOLLAR@29..30 "$" [] [],
                                 name: CssIdentifier {
                                     value_token: IDENT@30..36 "theme" [] [Whitespace(" ")],
@@ -121,7 +121,7 @@ CssRoot {
                 condition: ScssExpression {
                     items: ScssExpressionItemList [
                         ScssBinaryExpression {
-                            left: ScssIdentifier {
+                            left: ScssVariable {
                                 dollar_token: DOLLAR@75..76 "$" [] [],
                                 name: CssIdentifier {
                                     value_token: IDENT@76..82 "state" [] [Whitespace(" ")],
@@ -233,7 +233,7 @@ CssRoot {
         1: SCSS_EXPRESSION@29..44
           0: SCSS_EXPRESSION_ITEM_LIST@29..44
             0: SCSS_BINARY_EXPRESSION@29..44
-              0: SCSS_IDENTIFIER@29..36
+              0: SCSS_VARIABLE@29..36
                 0: DOLLAR@29..30 "$" [] []
                 1: CSS_IDENTIFIER@30..36
                   0: IDENT@30..36 "theme" [] [Whitespace(" ")]
@@ -267,7 +267,7 @@ CssRoot {
         1: SCSS_EXPRESSION@75..93
           0: SCSS_EXPRESSION_ITEM_LIST@75..93
             0: SCSS_BINARY_EXPRESSION@75..93
-              0: SCSS_IDENTIFIER@75..82
+              0: SCSS_VARIABLE@75..82
                 0: DOLLAR@75..76 "$" [] []
                 1: CSS_IDENTIFIER@76..82
                   0: IDENT@76..82 "state" [] [Whitespace(" ")]

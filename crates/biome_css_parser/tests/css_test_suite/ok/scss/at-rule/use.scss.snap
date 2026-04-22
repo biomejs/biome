@@ -85,7 +85,7 @@ CssRoot {
                         l_paren_token: L_PAREN@93..94 "(" [] [],
                         items: ScssModuleConfigurationItemList [
                             ScssModuleConfiguration {
-                                name: ScssIdentifier {
+                                name: ScssVariable {
                                     dollar_token: DOLLAR@94..95 "$" [] [],
                                     name: CssIdentifier {
                                         value_token: IDENT@95..102 "primary" [] [],
@@ -106,7 +106,7 @@ CssRoot {
                             },
                             COMMA@117..119 "," [] [Whitespace(" ")],
                             ScssModuleConfiguration {
-                                name: ScssIdentifier {
+                                name: ScssVariable {
                                     dollar_token: DOLLAR@119..120 "$" [] [],
                                     name: CssIdentifier {
                                         value_token: IDENT@120..127 "spacing" [] [],
@@ -149,7 +149,7 @@ CssRoot {
                         l_paren_token: L_PAREN@163..164 "(" [] [],
                         items: ScssModuleConfigurationItemList [
                             ScssModuleConfiguration {
-                                name: ScssIdentifier {
+                                name: ScssVariable {
                                     dollar_token: DOLLAR@164..165 "$" [] [],
                                     name: CssIdentifier {
                                         value_token: IDENT@165..172 "primary" [] [],
@@ -229,7 +229,7 @@ CssRoot {
             0: L_PAREN@93..94 "(" [] []
             1: SCSS_MODULE_CONFIGURATION_ITEM_LIST@94..132
               0: SCSS_MODULE_CONFIGURATION@94..117
-                0: SCSS_IDENTIFIER@94..102
+                0: SCSS_VARIABLE@94..102
                   0: DOLLAR@94..95 "$" [] []
                   1: CSS_IDENTIFIER@95..102
                     0: IDENT@95..102 "primary" [] []
@@ -243,7 +243,7 @@ CssRoot {
                   1: DEFAULT_KW@110..117 "default" [] []
               1: COMMA@117..119 "," [] [Whitespace(" ")]
               2: SCSS_MODULE_CONFIGURATION@119..132
-                0: SCSS_IDENTIFIER@119..127
+                0: SCSS_VARIABLE@119..127
                   0: DOLLAR@119..120 "$" [] []
                   1: CSS_IDENTIFIER@120..127
                     0: IDENT@120..127 "spacing" [] []
@@ -272,7 +272,7 @@ CssRoot {
             0: L_PAREN@163..164 "(" [] []
             1: SCSS_MODULE_CONFIGURATION_ITEM_LIST@164..178
               0: SCSS_MODULE_CONFIGURATION@164..178
-                0: SCSS_IDENTIFIER@164..172
+                0: SCSS_VARIABLE@164..172
                   0: DOLLAR@164..165 "$" [] []
                   1: CSS_IDENTIFIER@165..172
                     0: IDENT@165..172 "primary" [] []

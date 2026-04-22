@@ -3,7 +3,6 @@
 mod a11y;
 mod assist;
 mod lint;
-pub mod options;
 mod registry;
 mod services;
 mod suppression_action;

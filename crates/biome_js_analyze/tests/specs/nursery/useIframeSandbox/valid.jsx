@@ -11,10 +11,10 @@ const Valid1 = () => (
 	</>
 );
 
+const prop = "allow-downloads allow-scripts allow-forms"
+const Valid2 = () => <iframe sandbox={prop} />;
+
 const props = {
 	sandbox: "allow-downloads",
 };
-
-const Invalid2 = () => {
-	return <iframe {...props} />;
-}
+const Valid3 = () => <iframe {...props} />;

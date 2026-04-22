@@ -33,7 +33,7 @@ CssRoot {
             at_token: AT@0..1 "@" [] [],
             rule: ScssForAtRule {
                 for_token: FOR_KW@1..5 "for" [] [Whitespace(" ")],
-                variable: ScssIdentifier {
+                variable: ScssVariable {
                     dollar_token: DOLLAR@5..6 "$" [] [],
                     name: CssIdentifier {
                         value_token: IDENT@6..8 "i" [] [Whitespace(" ")],
@@ -68,7 +68,7 @@ CssRoot {
                                     value: ScssExpression {
                                         items: ScssExpressionItemList [
                                             ScssBinaryExpression {
-                                                left: ScssIdentifier {
+                                                left: ScssVariable {
                                                     dollar_token: DOLLAR@36..37 "$" [] [],
                                                     name: CssIdentifier {
                                                         value_token: IDENT@37..39 "i" [] [Whitespace(" ")],
@@ -96,7 +96,7 @@ CssRoot {
             at_token: AT@47..50 "@" [Newline("\n"), Newline("\n")] [],
             rule: ScssForAtRule {
                 for_token: FOR_KW@50..54 "for" [] [Whitespace(" ")],
-                variable: ScssIdentifier {
+                variable: ScssVariable {
                     dollar_token: DOLLAR@54..55 "$" [] [],
                     name: CssIdentifier {
                         value_token: IDENT@55..60 "step" [] [Whitespace(" ")],
@@ -106,7 +106,7 @@ CssRoot {
                 lower_bound: ScssExpression {
                     items: ScssExpressionItemList [
                         ScssBinaryExpression {
-                            left: ScssIdentifier {
+                            left: ScssVariable {
                                 dollar_token: DOLLAR@65..66 "$" [] [],
                                 name: CssIdentifier {
                                     value_token: IDENT@66..72 "start" [] [Whitespace(" ")],
@@ -123,7 +123,7 @@ CssRoot {
                 upper_bound: ScssExpression {
                     items: ScssExpressionItemList [
                         ScssBinaryExpression {
-                            left: ScssIdentifier {
+                            left: ScssVariable {
                                 dollar_token: DOLLAR@79..80 "$" [] [],
                                 name: CssIdentifier {
                                     value_token: IDENT@80..84 "end" [] [Whitespace(" ")],
@@ -148,7 +148,7 @@ CssRoot {
                                     colon_token: COLON@98..100 ":" [] [Whitespace(" ")],
                                     value: ScssExpression {
                                         items: ScssExpressionItemList [
-                                            ScssIdentifier {
+                                            ScssVariable {
                                                 dollar_token: DOLLAR@100..101 "$" [] [],
                                                 name: CssIdentifier {
                                                     value_token: IDENT@101..105 "step" [] [],
@@ -188,7 +188,7 @@ CssRoot {
                         at_token: AT@117..121 "@" [Newline("\n"), Whitespace("  ")] [],
                         rule: ScssForAtRule {
                             for_token: FOR_KW@121..125 "for" [] [Whitespace(" ")],
-                            variable: ScssIdentifier {
+                            variable: ScssVariable {
                                 dollar_token: DOLLAR@125..126 "$" [] [],
                                 name: CssIdentifier {
                                     value_token: IDENT@126..133 "column" [] [Whitespace(" ")],
@@ -222,7 +222,7 @@ CssRoot {
                                                 colon_token: COLON@161..163 ":" [] [Whitespace(" ")],
                                                 value: ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@163..164 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@164..170 "column" [] [],
@@ -259,7 +259,7 @@ CssRoot {
       0: AT@0..1 "@" [] []
       1: SCSS_FOR_AT_RULE@1..47
         0: FOR_KW@1..5 "for" [] [Whitespace(" ")]
-        1: SCSS_IDENTIFIER@5..8
+        1: SCSS_VARIABLE@5..8
           0: DOLLAR@5..6 "$" [] []
           1: CSS_IDENTIFIER@6..8
             0: IDENT@6..8 "i" [] [Whitespace(" ")]
@@ -285,7 +285,7 @@ CssRoot {
                   2: SCSS_EXPRESSION@36..44
                     0: SCSS_EXPRESSION_ITEM_LIST@36..44
                       0: SCSS_BINARY_EXPRESSION@36..44
-                        0: SCSS_IDENTIFIER@36..39
+                        0: SCSS_VARIABLE@36..39
                           0: DOLLAR@36..37 "$" [] []
                           1: CSS_IDENTIFIER@37..39
                             0: IDENT@37..39 "i" [] [Whitespace(" ")]
@@ -300,7 +300,7 @@ CssRoot {
       0: AT@47..50 "@" [Newline("\n"), Newline("\n")] []
       1: SCSS_FOR_AT_RULE@50..108
         0: FOR_KW@50..54 "for" [] [Whitespace(" ")]
-        1: SCSS_IDENTIFIER@54..60
+        1: SCSS_VARIABLE@54..60
           0: DOLLAR@54..55 "$" [] []
           1: CSS_IDENTIFIER@55..60
             0: IDENT@55..60 "step" [] [Whitespace(" ")]
@@ -308,7 +308,7 @@ CssRoot {
         3: SCSS_EXPRESSION@65..76
           0: SCSS_EXPRESSION_ITEM_LIST@65..76
             0: SCSS_BINARY_EXPRESSION@65..76
-              0: SCSS_IDENTIFIER@65..72
+              0: SCSS_VARIABLE@65..72
                 0: DOLLAR@65..66 "$" [] []
                 1: CSS_IDENTIFIER@66..72
                   0: IDENT@66..72 "start" [] [Whitespace(" ")]
@@ -319,7 +319,7 @@ CssRoot {
         5: SCSS_EXPRESSION@79..88
           0: SCSS_EXPRESSION_ITEM_LIST@79..88
             0: SCSS_BINARY_EXPRESSION@79..88
-              0: SCSS_IDENTIFIER@79..84
+              0: SCSS_VARIABLE@79..84
                 0: DOLLAR@79..80 "$" [] []
                 1: CSS_IDENTIFIER@80..84
                   0: IDENT@80..84 "end" [] [Whitespace(" ")]
@@ -337,7 +337,7 @@ CssRoot {
                   1: COLON@98..100 ":" [] [Whitespace(" ")]
                   2: SCSS_EXPRESSION@100..105
                     0: SCSS_EXPRESSION_ITEM_LIST@100..105
-                      0: SCSS_IDENTIFIER@100..105
+                      0: SCSS_VARIABLE@100..105
                         0: DOLLAR@100..101 "$" [] []
                         1: CSS_IDENTIFIER@101..105
                           0: IDENT@101..105 "step" [] []
@@ -361,7 +361,7 @@ CssRoot {
             0: AT@117..121 "@" [Newline("\n"), Whitespace("  ")] []
             1: SCSS_FOR_AT_RULE@121..175
               0: FOR_KW@121..125 "for" [] [Whitespace(" ")]
-              1: SCSS_IDENTIFIER@125..133
+              1: SCSS_VARIABLE@125..133
                 0: DOLLAR@125..126 "$" [] []
                 1: CSS_IDENTIFIER@126..133
                   0: IDENT@126..133 "column" [] [Whitespace(" ")]
@@ -386,7 +386,7 @@ CssRoot {
                         1: COLON@161..163 ":" [] [Whitespace(" ")]
                         2: SCSS_EXPRESSION@163..170
                           0: SCSS_EXPRESSION_ITEM_LIST@163..170
-                            0: SCSS_IDENTIFIER@163..170
+                            0: SCSS_VARIABLE@163..170
                               0: DOLLAR@163..164 "$" [] []
                               1: CSS_IDENTIFIER@164..170
                                 0: IDENT@164..170 "column" [] []

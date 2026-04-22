@@ -11,9 +11,11 @@ use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsCombinedSpecifier, AnyJsExportClause, AnyJsImportClause, AnyJsModuleItem, JsModule,
-    JsSyntaxKind, T,
+    JsModuleItemList, JsSyntaxKind, T, TsDeclarationModule, TsModuleBlock,
 };
-use biome_rowan::{AstNode, BatchMutationExt, TextRange, TriviaPieceKind, chain_trivia_pieces};
+use biome_rowan::{
+    AstNode, BatchMutationExt, TextRange, TriviaPieceKind, chain_trivia_pieces, declare_node_union,
+};
 use biome_rule_options::{organize_imports::OrganizeImportsOptions, sort_order::SortOrder};
 use import_key::{ImportInfo, ImportKey};
 use rustc_hash::FxHashMap;
@@ -166,6 +168,8 @@ declare_source_rule! {
     /// - `:PACKAGE:`: bare and scoped packages (`lib`, `@scoped/lib`)
     /// - `:ALIAS:`: path aliases starting with `#`, `@/`, `~`, `$`, or `%`
     /// - `:PATH:`: absolute and relative paths
+    /// - `:STYLE:`: paths ending with the following style extensions:
+    ///   `.css`, `.less`, `.pcss`, `.sass`, `.scss`, `.sss` and `.styl`
     ///
     /// #### Type-only matcher
     ///
@@ -325,7 +329,7 @@ declare_source_rule! {
     /// import { render } from "react-dom/client";
     /// ```
     ///
-    /// ### Place CSS/style imports last
+    /// ### Place style imports last
     ///
     /// The following example groups style imports together and place them after other imports.
     /// Because groups are matched in order, the first group has to exclude style imports.
@@ -335,9 +339,9 @@ declare_source_rule! {
     /// {
     ///     "options": {
     ///         "groups": [
-    ///             ["**", "!**/*.css", "!**/*.scss"],
+    ///             ["**", "!:STYLE:"],
     ///             ":BLANK_LINE:",
-    ///             ["**/*.css", "**/*.scss"]
+    ///             [":STYLE:"]
     ///         ]
     ///     }
     /// }
@@ -735,7 +739,7 @@ declare_source_rule! {
 }
 
 impl Rule for OrganizeImports {
-    type Query = Ast<JsModule>;
+    type Query = Ast<AnyJsModule>;
     type State = Box<[Issue]>;
     type Signals = Option<Self::State>;
     type Options = OrganizeImportsOptions;
@@ -1146,6 +1150,19 @@ impl Rule for OrganizeImports {
             "Organize Imports (Biome)",
             mutation,
         ))
+    }
+}
+
+declare_node_union! {
+    pub AnyJsModule = JsModule | TsDeclarationModule | TsModuleBlock
+}
+impl AnyJsModule {
+    pub fn items(&self) -> JsModuleItemList {
+        match self {
+            Self::JsModule(js_module) => js_module.items(),
+            Self::TsDeclarationModule(ts_declaration_module) => ts_declaration_module.items(),
+            Self::TsModuleBlock(ts_module_block) => ts_module_block.items(),
+        }
     }
 }
 

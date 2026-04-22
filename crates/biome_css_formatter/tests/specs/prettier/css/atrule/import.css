@@ -6,6 +6,11 @@
 @import "common.css" screen projection;
 @import url('landscape.css') screen and (orientation:landscape);
 
+@import (multiple) "foo.less";
+
+/* This isn't valid CSS, SCSS or Less, but we should be lenient and make sure
+/* that nothing is lost when printing. */
+@import "one" two "three";
 
 #main {
     @import "example";
@@ -38,6 +43,12 @@
 
 }
 
+@import "test.less" {}
+@import "test.less" {
+    a: b;
+    c: d;
+}
+
 @import url('foo');
 $dir: 'fonts';
 
@@ -61,6 +72,9 @@ $dir: 'fonts';
 @import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection,tv;
 @import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection tv;
 @import url('landscape.css') screen and (orientation:landscape);
+@import "rounded-corners", "text-shadow";
+@import 'rounded-corners', 'text-shadow';
+$family: unquote("Droid+Sans");
 @import url("http://fonts.googleapis.com/css?family=#{$family}");
 @import url( "foo.css");
 @import url("foo.css" );

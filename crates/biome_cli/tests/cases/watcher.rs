@@ -11,7 +11,7 @@ fn lint_watch_reruns_on_event() {
     let mut fs = TemporaryFs::new("lint_watch_reruns_on_event");
     fs.create_file(
         "biome.json",
-        r#"{"linter":{"rules":{"recommended":false,"suspicious":{"noVar":"error"}}}}"#,
+        r#"{"linter":{"rules":{"preset":"recommended","suspicious":{"noVar":"error"}}}}"#,
     );
     fs.create_file("good.js", "const x = 1;\n");
     let bad_path = fs.create_file("bad.js", "var y = 2;\n");

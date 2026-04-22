@@ -1,0 +1,426 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/map/2554.scss
+---
+
+# Input
+
+```scss
+$map: (key: value, other-key: other-value);
+$map: (key: value, other-key: other-value) !default;
+$map: (key: value, other-key: other-value)  !default;
+$map: (key: value, other-key: other-value)
+!default;
+$map:
+(key: value, other-key: other-value)
+!default;
+$map: ( key : value , other-key : other-value);
+$map: (  key  :  value  ,  other-key  :  other-value  );
+$map: (
+  key: value,
+  other-key: other-value
+);
+$map: (
+key: value,
+other-key: other-value
+);
+$map: (
+key
+:
+value,
+other-key
+:
+other-value
+);
+$map: (
+key
+:
+value
+,
+other-key
+:
+other-value
+);
+$map: (very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value, very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value);
+$map: ( very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key : very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value , very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key : very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value );
+$map: (  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key  :  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value  ,  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value  );
+$map: (
+  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
+  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value
+);
+$map: (
+very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
+very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value
+);
+$map:
+(
+very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key
+:
+very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value
+,
+very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key
+:
+very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value
+);
+$map: (
+  key: (#d82d2d, #666),
+  other-key: (#52bf4a, #fff),
+  other-other-key: (#c23435, #fff)
+);
+$map: (
+key: (#d82d2d, #666),
+other-key: (#52bf4a, #fff),
+other-other-key: (#c23435, #fff)
+);
+$map: (
+  key : ( #d82d2d , #666 ),
+  other-key : ( #52bf4a , #fff ),
+  other-other-key : ( #c23435 , #fff )
+);
+$map: (
+  key  : (  #d82d2d  ,  #666  )  ,
+  other-key  :  (  #52bf4a  ,  #fff  ),
+  other-other-key  :  (  #c23435  ,  #fff  )
+);
+$map: (
+key
+:
+(
+#d82d2d,
+#666
+)
+,
+other-key
+:
+(
+#52bf4a,
+#fff
+)
+,
+other-other-key
+:
+(
+#c23435
+,
+#fff
+)
+);
+$map: map-merge($map, ($key: $value));
+$map: map-merge( $map , ( $key : $value ) );
+$map: map-merge(  $map  ,  (  $key  :  $value  )  );
+$map: map-merge(
+  $map,
+  ($key:  $value)
+);
+$map: map-merge(
+$map,
+($key:  $value)
+);
+$map:
+map-merge(
+$map
+,
+(
+$key
+:
+$value
+)
+);
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -43,110 +43,53 @@
+   other-key: other-value,
+ );
+ $map: (
+-  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key:
+-    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
+-  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key:
+-    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,
++  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
++  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,
+ );
+ $map: (
+-  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key:
+-    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
+-  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key:
+-    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,
++  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
++  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,
+ );
+ $map: (
+-  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key:
+-    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
+-  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key:
+-    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,
++  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
++  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,
+ );
+ $map: (
+-  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key:
+-    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
+-  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key:
+-    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,
++  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
++  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,
+ );
+ $map: (
+-  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key:
+-    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
+-  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key:
+-    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,
++  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
++  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,
+ );
+ $map: (
+-  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key:
+-    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
+-  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key:
+-    very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,
++  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
++  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,
+ );
+ $map: (
+-  key: (
+-    #d82d2d,
+-    #666,
+-  ),
+-  other-key: (
+-    #52bf4a,
+-    #fff,
+-  ),
+-  other-other-key: (
+-    #c23435,
+-    #fff,
+-  ),
++  key: (#d82d2d, #666),
++  other-key: (#52bf4a, #fff),
++  other-other-key: (#c23435, #fff),
+ );
+ $map: (
+-  key: (
+-    #d82d2d,
+-    #666,
+-  ),
+-  other-key: (
+-    #52bf4a,
+-    #fff,
+-  ),
+-  other-other-key: (
+-    #c23435,
+-    #fff,
+-  ),
++  key: (#d82d2d, #666),
++  other-key: (#52bf4a, #fff),
++  other-other-key: (#c23435, #fff),
+ );
+ $map: (
+-  key: (
+-    #d82d2d,
+-    #666,
+-  ),
+-  other-key: (
+-    #52bf4a,
+-    #fff,
+-  ),
+-  other-other-key: (
+-    #c23435,
+-    #fff,
+-  ),
++  key: (#d82d2d, #666),
++  other-key: (#52bf4a, #fff),
++  other-other-key: (#c23435, #fff),
+ );
+ $map: (
+-  key: (
+-    #d82d2d,
+-    #666,
+-  ),
+-  other-key: (
+-    #52bf4a,
+-    #fff,
+-  ),
+-  other-other-key: (
+-    #c23435,
+-    #fff,
+-  ),
++  key: (#d82d2d, #666),
++  other-key: (#52bf4a, #fff),
++  other-other-key: (#c23435, #fff),
+ );
+ $map: (
+-  key: (
+-    #d82d2d,
+-    #666,
+-  ),
+-  other-key: (
+-    #52bf4a,
+-    #fff,
+-  ),
+-  other-other-key: (
+-    #c23435,
+-    #fff,
+-  ),
++  key: (#d82d2d, #666),
++  other-key: (#52bf4a, #fff),
++  other-other-key: (#c23435, #fff),
+ );
+ $map: map-merge(
+   $map,
+```
+
+# Output
+
+```scss
+$map: (
+  key: value,
+  other-key: other-value,
+);
+$map: (
+  key: value,
+  other-key: other-value,
+) !default;
+$map: (
+  key: value,
+  other-key: other-value,
+) !default;
+$map: (
+  key: value,
+  other-key: other-value,
+) !default;
+$map: (
+  key: value,
+  other-key: other-value,
+) !default;
+$map: (
+  key: value,
+  other-key: other-value,
+);
+$map: (
+  key: value,
+  other-key: other-value,
+);
+$map: (
+  key: value,
+  other-key: other-value,
+);
+$map: (
+  key: value,
+  other-key: other-value,
+);
+$map: (
+  key: value,
+  other-key: other-value,
+);
+$map: (
+  key: value,
+  other-key: other-value,
+);
+$map: (
+  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
+  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,
+);
+$map: (
+  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
+  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,
+);
+$map: (
+  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
+  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,
+);
+$map: (
+  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
+  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,
+);
+$map: (
+  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
+  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,
+);
+$map: (
+  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
+  very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,
+);
+$map: (
+  key: (#d82d2d, #666),
+  other-key: (#52bf4a, #fff),
+  other-other-key: (#c23435, #fff),
+);
+$map: (
+  key: (#d82d2d, #666),
+  other-key: (#52bf4a, #fff),
+  other-other-key: (#c23435, #fff),
+);
+$map: (
+  key: (#d82d2d, #666),
+  other-key: (#52bf4a, #fff),
+  other-other-key: (#c23435, #fff),
+);
+$map: (
+  key: (#d82d2d, #666),
+  other-key: (#52bf4a, #fff),
+  other-other-key: (#c23435, #fff),
+);
+$map: (
+  key: (#d82d2d, #666),
+  other-key: (#52bf4a, #fff),
+  other-other-key: (#c23435, #fff),
+);
+$map: map-merge(
+  $map,
+  (
+    $key: $value,
+  )
+);
+$map: map-merge(
+  $map,
+  (
+    $key: $value,
+  )
+);
+$map: map-merge(
+  $map,
+  (
+    $key: $value,
+  )
+);
+$map: map-merge(
+  $map,
+  (
+    $key: $value,
+  )
+);
+$map: map-merge(
+  $map,
+  (
+    $key: $value,
+  )
+);
+$map: map-merge(
+  $map,
+  (
+    $key: $value,
+  )
+);
+```
+
+# Lines exceeding max width of 80 characters
+```
+   46:   very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
+   47:   very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,
+   50:   very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
+   51:   very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,
+   54:   very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
+   55:   very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,
+   58:   very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
+   59:   very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,
+   62:   very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
+   63:   very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,
+   66:   very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-value,
+   67:   very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-key: very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-verylong-other-value,
+```

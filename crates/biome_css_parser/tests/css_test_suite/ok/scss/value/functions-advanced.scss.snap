@@ -801,7 +801,7 @@ CssRoot {
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
                                                         ScssKeywordArgument {
-                                                            name: ScssIdentifier {
+                                                            name: ScssVariable {
                                                                 dollar_token: DOLLAR@5819..5820 "$" [] [],
                                                                 name: CssIdentifier {
                                                                     value_token: IDENT@5820..5823 "top" [] [],
@@ -823,7 +823,7 @@ CssRoot {
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
                                                         ScssKeywordArgument {
-                                                            name: ScssIdentifier {
+                                                            name: ScssVariable {
                                                                 dollar_token: DOLLAR@5831..5832 "$" [] [],
                                                                 name: CssIdentifier {
                                                                     value_token: IDENT@5832..5838 "bottom" [] [],
@@ -1176,7 +1176,7 @@ CssRoot {
                                                             items: CssParameterList [
                                                                 ScssExpression {
                                                                     items: ScssExpressionItemList [
-                                                                        ScssIdentifier {
+                                                                        ScssVariable {
                                                                             dollar_token: DOLLAR@6125..6126 "$" [] [],
                                                                             name: CssIdentifier {
                                                                                 value_token: IDENT@6126..6130 "size" [] [],
@@ -1192,7 +1192,7 @@ CssRoot {
                                                 COMMA@6131..6133 "," [] [Whitespace(" ")],
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@6133..6134 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@6134..6138 "size" [] [],
@@ -1237,7 +1237,7 @@ CssRoot {
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
                                                         ScssKeywordArgument {
-                                                            name: ScssIdentifier {
+                                                            name: ScssVariable {
                                                                 dollar_token: DOLLAR@6166..6167 "$" [] [],
                                                                 name: CssIdentifier {
                                                                     value_token: IDENT@6167..6170 "top" [] [],
@@ -1611,7 +1611,7 @@ CssRoot {
                         0: SCSS_EXPRESSION@5819..5829
                           0: SCSS_EXPRESSION_ITEM_LIST@5819..5829
                             0: SCSS_KEYWORD_ARGUMENT@5819..5829
-                              0: SCSS_IDENTIFIER@5819..5823
+                              0: SCSS_VARIABLE@5819..5823
                                 0: DOLLAR@5819..5820 "$" [] []
                                 1: CSS_IDENTIFIER@5820..5823
                                   0: IDENT@5820..5823 "top" [] []
@@ -1625,7 +1625,7 @@ CssRoot {
                         2: SCSS_EXPRESSION@5831..5844
                           0: SCSS_EXPRESSION_ITEM_LIST@5831..5844
                             0: SCSS_KEYWORD_ARGUMENT@5831..5844
-                              0: SCSS_IDENTIFIER@5831..5838
+                              0: SCSS_VARIABLE@5831..5838
                                 0: DOLLAR@5831..5832 "$" [] []
                                 1: CSS_IDENTIFIER@5832..5838
                                   0: IDENT@5832..5838 "bottom" [] []
@@ -1850,7 +1850,7 @@ CssRoot {
                               2: CSS_PARAMETER_LIST@6125..6130
                                 0: SCSS_EXPRESSION@6125..6130
                                   0: SCSS_EXPRESSION_ITEM_LIST@6125..6130
-                                    0: SCSS_IDENTIFIER@6125..6130
+                                    0: SCSS_VARIABLE@6125..6130
                                       0: DOLLAR@6125..6126 "$" [] []
                                       1: CSS_IDENTIFIER@6126..6130
                                         0: IDENT@6126..6130 "size" [] []
@@ -1858,7 +1858,7 @@ CssRoot {
                         1: COMMA@6131..6133 "," [] [Whitespace(" ")]
                         2: SCSS_EXPRESSION@6133..6138
                           0: SCSS_EXPRESSION_ITEM_LIST@6133..6138
-                            0: SCSS_IDENTIFIER@6133..6138
+                            0: SCSS_VARIABLE@6133..6138
                               0: DOLLAR@6133..6134 "$" [] []
                               1: CSS_IDENTIFIER@6134..6138
                                 0: IDENT@6134..6138 "size" [] []
@@ -1887,7 +1887,7 @@ CssRoot {
                         0: SCSS_EXPRESSION@6166..6185
                           0: SCSS_EXPRESSION_ITEM_LIST@6166..6185
                             0: SCSS_KEYWORD_ARGUMENT@6166..6185
-                              0: SCSS_IDENTIFIER@6166..6170
+                              0: SCSS_VARIABLE@6166..6170
                                 0: DOLLAR@6166..6167 "$" [] []
                                 1: CSS_IDENTIFIER@6167..6170
                                   0: IDENT@6167..6170 "top" [] []

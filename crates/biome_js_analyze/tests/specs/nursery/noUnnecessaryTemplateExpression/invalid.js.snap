@@ -1,0 +1,312 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// Single string literal interpolation
+const a = `${'hello'}`;
+const b = `${"world"}`;
+const c = `${''}`;
+
+// Multiple string literal interpolations (all can be combined)
+const d = `${'hello'}${'world'}`;
+const e = `${'hello'} ${'world'}`;
+
+// String literal interpolation with surrounding text
+const f = `prefix_${'suffix'}`;
+const g = `${'prefix'}_suffix`;
+const h = `before_${'middle'}_after`;
+
+// Nested quotes - single in double and vice versa
+const i = `${"it's fine"}`;
+const j = `${'use "double" inside'}`;
+
+// Both quote kinds present: diagnostic should remain, safe fix should not
+const k = `${'"'}${"'"'}`;
+
+```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
+# Diagnostics
+```
+invalid.js:4:11 lint/nursery/noUnnecessaryTemplateExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This template expression is unnecessary.
+  
+    3 │ // Single string literal interpolation
+  > 4 │ const a = `${'hello'}`;
+      │           ^^^^^^^^^^^^
+    5 │ const b = `${"world"}`;
+    6 │ const c = `${''}`;
+  
+  i The template only contains string literal expressions. A regular string literal can be used instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the template expression with a string literal.
+  
+     2  2 │   
+     3  3 │   // Single string literal interpolation
+     4    │ - const·a·=·`${'hello'}`;
+        4 │ + const·a·=·"hello";
+     5  5 │   const b = `${"world"}`;
+     6  6 │   const c = `${''}`;
+  
+
+```
+
+```
+invalid.js:5:11 lint/nursery/noUnnecessaryTemplateExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This template expression is unnecessary.
+  
+    3 │ // Single string literal interpolation
+    4 │ const a = `${'hello'}`;
+  > 5 │ const b = `${"world"}`;
+      │           ^^^^^^^^^^^^
+    6 │ const c = `${''}`;
+    7 │ 
+  
+  i The template only contains string literal expressions. A regular string literal can be used instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the template expression with a string literal.
+  
+    5 │ const·b·=·`${"world"}`;
+      │           ---       -- 
+
+```
+
+```
+invalid.js:6:11 lint/nursery/noUnnecessaryTemplateExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This template expression is unnecessary.
+  
+    4 │ const a = `${'hello'}`;
+    5 │ const b = `${"world"}`;
+  > 6 │ const c = `${''}`;
+      │           ^^^^^^^
+    7 │ 
+    8 │ // Multiple string literal interpolations (all can be combined)
+  
+  i The template only contains string literal expressions. A regular string literal can be used instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the template expression with a string literal.
+  
+     4  4 │   const a = `${'hello'}`;
+     5  5 │   const b = `${"world"}`;
+     6    │ - const·c·=·`${''}`;
+        6 │ + const·c·=·"";
+     7  7 │   
+     8  8 │   // Multiple string literal interpolations (all can be combined)
+  
+
+```
+
+```
+invalid.js:9:11 lint/nursery/noUnnecessaryTemplateExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This template expression is unnecessary.
+  
+     8 │ // Multiple string literal interpolations (all can be combined)
+   > 9 │ const d = `${'hello'}${'world'}`;
+       │           ^^^^^^^^^^^^^^^^^^^^^^
+    10 │ const e = `${'hello'} ${'world'}`;
+    11 │ 
+  
+  i The template only contains string literal expressions. A regular string literal can be used instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the template expression with a string literal.
+  
+     7  7 │   
+     8  8 │   // Multiple string literal interpolations (all can be combined)
+     9    │ - const·d·=·`${'hello'}${'world'}`;
+        9 │ + const·d·=·"helloworld";
+    10 10 │   const e = `${'hello'} ${'world'}`;
+    11 11 │   
+  
+
+```
+
+```
+invalid.js:10:11 lint/nursery/noUnnecessaryTemplateExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This template expression is unnecessary.
+  
+     8 │ // Multiple string literal interpolations (all can be combined)
+     9 │ const d = `${'hello'}${'world'}`;
+  > 10 │ const e = `${'hello'} ${'world'}`;
+       │           ^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ // String literal interpolation with surrounding text
+  
+  i The template only contains string literal expressions. A regular string literal can be used instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the template expression with a string literal.
+  
+     8  8 │   // Multiple string literal interpolations (all can be combined)
+     9  9 │   const d = `${'hello'}${'world'}`;
+    10    │ - const·e·=·`${'hello'}·${'world'}`;
+       10 │ + const·e·=·"hello·world";
+    11 11 │   
+    12 12 │   // String literal interpolation with surrounding text
+  
+
+```
+
+```
+invalid.js:13:11 lint/nursery/noUnnecessaryTemplateExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This template expression is unnecessary.
+  
+    12 │ // String literal interpolation with surrounding text
+  > 13 │ const f = `prefix_${'suffix'}`;
+       │           ^^^^^^^^^^^^^^^^^^^^
+    14 │ const g = `${'prefix'}_suffix`;
+    15 │ const h = `before_${'middle'}_after`;
+  
+  i The template only contains string literal expressions. A regular string literal can be used instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the template expression with a string literal.
+  
+    11 11 │   
+    12 12 │   // String literal interpolation with surrounding text
+    13    │ - const·f·=·`prefix_${'suffix'}`;
+       13 │ + const·f·=·"prefix_suffix";
+    14 14 │   const g = `${'prefix'}_suffix`;
+    15 15 │   const h = `before_${'middle'}_after`;
+  
+
+```
+
+```
+invalid.js:14:11 lint/nursery/noUnnecessaryTemplateExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This template expression is unnecessary.
+  
+    12 │ // String literal interpolation with surrounding text
+    13 │ const f = `prefix_${'suffix'}`;
+  > 14 │ const g = `${'prefix'}_suffix`;
+       │           ^^^^^^^^^^^^^^^^^^^^
+    15 │ const h = `before_${'middle'}_after`;
+    16 │ 
+  
+  i The template only contains string literal expressions. A regular string literal can be used instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the template expression with a string literal.
+  
+    12 12 │   // String literal interpolation with surrounding text
+    13 13 │   const f = `prefix_${'suffix'}`;
+    14    │ - const·g·=·`${'prefix'}_suffix`;
+       14 │ + const·g·=·"prefix_suffix";
+    15 15 │   const h = `before_${'middle'}_after`;
+    16 16 │   
+  
+
+```
+
+```
+invalid.js:15:11 lint/nursery/noUnnecessaryTemplateExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This template expression is unnecessary.
+  
+    13 │ const f = `prefix_${'suffix'}`;
+    14 │ const g = `${'prefix'}_suffix`;
+  > 15 │ const h = `before_${'middle'}_after`;
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ // Nested quotes - single in double and vice versa
+  
+  i The template only contains string literal expressions. A regular string literal can be used instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the template expression with a string literal.
+  
+    13 13 │   const f = `prefix_${'suffix'}`;
+    14 14 │   const g = `${'prefix'}_suffix`;
+    15    │ - const·h·=·`before_${'middle'}_after`;
+       15 │ + const·h·=·"before_middle_after";
+    16 16 │   
+    17 17 │   // Nested quotes - single in double and vice versa
+  
+
+```
+
+```
+invalid.js:18:11 lint/nursery/noUnnecessaryTemplateExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This template expression is unnecessary.
+  
+    17 │ // Nested quotes - single in double and vice versa
+  > 18 │ const i = `${"it's fine"}`;
+       │           ^^^^^^^^^^^^^^^^
+    19 │ const j = `${'use "double" inside'}`;
+    20 │ 
+  
+  i The template only contains string literal expressions. A regular string literal can be used instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the template expression with a string literal.
+  
+    18 │ const·i·=·`${"it's·fine"}`;
+       │           ---           -- 
+
+```
+
+```
+invalid.js:19:11 lint/nursery/noUnnecessaryTemplateExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This template expression is unnecessary.
+  
+    17 │ // Nested quotes - single in double and vice versa
+    18 │ const i = `${"it's fine"}`;
+  > 19 │ const j = `${'use "double" inside'}`;
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ 
+    21 │ // Both quote kinds present: diagnostic should remain, safe fix should not
+  
+  i The template only contains string literal expressions. A regular string literal can be used instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace the template expression with a string literal.
+  
+    19 │ const·j·=·`${'use·"double"·inside'}`;
+       │           ---                     -- 
+
+```
+
+```
+invalid.js:22:11 lint/nursery/noUnnecessaryTemplateExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This template expression is unnecessary.
+  
+    21 │ // Both quote kinds present: diagnostic should remain, safe fix should not
+  > 22 │ const k = `${'"'}${"'"'}`;
+       │           ^^^^^^^^^^^^
+    23 │ 
+  
+  i The template only contains string literal expressions. A regular string literal can be used instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

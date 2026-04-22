@@ -41,7 +41,7 @@ Environment:
   NODE_PACKAGE_MANAGER:         unset
 
 Biome Configuration:
-  Status:                       Loaded successfully
+  Status:                       Loaded successfully.
   Path:                         biome.jsonc
   Formatter enabled:            false
   Linter enabled:               true

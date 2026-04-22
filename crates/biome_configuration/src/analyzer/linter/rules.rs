@@ -1,9 +1,11 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
+use crate::analyzer::presets::PresetConfig;
 use crate::analyzer::{
     GroupPlainConfiguration, RuleConfiguration, RuleFixConfiguration, RuleGroupExt,
     RulePlainConfiguration, SeverityOrGroup,
 };
+use biome_analyze::RulePreset;
 use biome_analyze::{RuleFilter, options::RuleOptions};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::{Category, Severity};
@@ -232,12 +234,14 @@ pub enum RuleName {
     NoInvalidPositionAtImportRule,
     NoInvalidUseBeforeDeclaration,
     NoIrregularWhitespace,
+    NoJsxLeakedDollar,
     NoJsxLiterals,
     NoJsxNamespace,
     NoJsxPropsBind,
     NoLabelVar,
     NoLabelWithoutControl,
     NoLeakedRender,
+    NoLoopFunc,
     NoMagicNumbers,
     NoMisleadingCharacterClass,
     NoMisleadingInstantiator,
@@ -287,6 +291,9 @@ pub enum RuleName {
     NoQwikUseVisibleTask,
     NoReExportAll,
     NoReactForwardRef,
+    NoReactNativeDeepImports,
+    NoReactNativeLiteralColors,
+    NoReactNativeRawText,
     NoReactPropAssignments,
     NoReactSpecificProps,
     NoRedeclare,
@@ -343,6 +350,7 @@ pub enum RuleName {
     NoUnknownUnit,
     NoUnmatchableAnbSelector,
     NoUnnecessaryConditions,
+    NoUnnecessaryTemplateExpression,
     NoUnreachable,
     NoUnreachableSuper,
     NoUnresolvedImports,
@@ -441,6 +449,8 @@ pub enum RuleName {
     UseDeprecatedReason,
     UseDestructuring,
     UseDisposables,
+    UseDomNodeTextContent,
+    UseDomQuerySelector,
     UseEnumInitializers,
     UseErrorCause,
     UseErrorMessage,
@@ -724,12 +734,14 @@ impl RuleName {
             Self::NoInvalidPositionAtImportRule => "noInvalidPositionAtImportRule",
             Self::NoInvalidUseBeforeDeclaration => "noInvalidUseBeforeDeclaration",
             Self::NoIrregularWhitespace => "noIrregularWhitespace",
+            Self::NoJsxLeakedDollar => "noJsxLeakedDollar",
             Self::NoJsxLiterals => "noJsxLiterals",
             Self::NoJsxNamespace => "noJsxNamespace",
             Self::NoJsxPropsBind => "noJsxPropsBind",
             Self::NoLabelVar => "noLabelVar",
             Self::NoLabelWithoutControl => "noLabelWithoutControl",
             Self::NoLeakedRender => "noLeakedRender",
+            Self::NoLoopFunc => "noLoopFunc",
             Self::NoMagicNumbers => "noMagicNumbers",
             Self::NoMisleadingCharacterClass => "noMisleadingCharacterClass",
             Self::NoMisleadingInstantiator => "noMisleadingInstantiator",
@@ -781,6 +793,9 @@ impl RuleName {
             Self::NoQwikUseVisibleTask => "noQwikUseVisibleTask",
             Self::NoReExportAll => "noReExportAll",
             Self::NoReactForwardRef => "noReactForwardRef",
+            Self::NoReactNativeDeepImports => "noReactNativeDeepImports",
+            Self::NoReactNativeLiteralColors => "noReactNativeLiteralColors",
+            Self::NoReactNativeRawText => "noReactNativeRawText",
             Self::NoReactPropAssignments => "noReactPropAssignments",
             Self::NoReactSpecificProps => "noReactSpecificProps",
             Self::NoRedeclare => "noRedeclare",
@@ -837,6 +852,7 @@ impl RuleName {
             Self::NoUnknownUnit => "noUnknownUnit",
             Self::NoUnmatchableAnbSelector => "noUnmatchableAnbSelector",
             Self::NoUnnecessaryConditions => "noUnnecessaryConditions",
+            Self::NoUnnecessaryTemplateExpression => "noUnnecessaryTemplateExpression",
             Self::NoUnreachable => "noUnreachable",
             Self::NoUnreachableSuper => "noUnreachableSuper",
             Self::NoUnresolvedImports => "noUnresolvedImports",
@@ -935,6 +951,8 @@ impl RuleName {
             Self::UseDeprecatedReason => "useDeprecatedReason",
             Self::UseDestructuring => "useDestructuring",
             Self::UseDisposables => "useDisposables",
+            Self::UseDomNodeTextContent => "useDomNodeTextContent",
+            Self::UseDomQuerySelector => "useDomQuerySelector",
             Self::UseEnumInitializers => "useEnumInitializers",
             Self::UseErrorCause => "useErrorCause",
             Self::UseErrorMessage => "useErrorMessage",
@@ -1216,12 +1234,14 @@ impl RuleName {
             Self::NoInvalidPositionAtImportRule => RuleGroup::Correctness,
             Self::NoInvalidUseBeforeDeclaration => RuleGroup::Correctness,
             Self::NoIrregularWhitespace => RuleGroup::Suspicious,
+            Self::NoJsxLeakedDollar => RuleGroup::Nursery,
             Self::NoJsxLiterals => RuleGroup::Style,
             Self::NoJsxNamespace => RuleGroup::Nursery,
             Self::NoJsxPropsBind => RuleGroup::Nursery,
             Self::NoLabelVar => RuleGroup::Suspicious,
             Self::NoLabelWithoutControl => RuleGroup::A11y,
             Self::NoLeakedRender => RuleGroup::Nursery,
+            Self::NoLoopFunc => RuleGroup::Nursery,
             Self::NoMagicNumbers => RuleGroup::Style,
             Self::NoMisleadingCharacterClass => RuleGroup::Suspicious,
             Self::NoMisleadingInstantiator => RuleGroup::Suspicious,
@@ -1271,6 +1291,9 @@ impl RuleName {
             Self::NoQwikUseVisibleTask => RuleGroup::Correctness,
             Self::NoReExportAll => RuleGroup::Performance,
             Self::NoReactForwardRef => RuleGroup::Suspicious,
+            Self::NoReactNativeDeepImports => RuleGroup::Nursery,
+            Self::NoReactNativeLiteralColors => RuleGroup::Nursery,
+            Self::NoReactNativeRawText => RuleGroup::Nursery,
             Self::NoReactPropAssignments => RuleGroup::Correctness,
             Self::NoReactSpecificProps => RuleGroup::Suspicious,
             Self::NoRedeclare => RuleGroup::Suspicious,
@@ -1327,6 +1350,7 @@ impl RuleName {
             Self::NoUnknownUnit => RuleGroup::Correctness,
             Self::NoUnmatchableAnbSelector => RuleGroup::Correctness,
             Self::NoUnnecessaryConditions => RuleGroup::Nursery,
+            Self::NoUnnecessaryTemplateExpression => RuleGroup::Nursery,
             Self::NoUnreachable => RuleGroup::Correctness,
             Self::NoUnreachableSuper => RuleGroup::Correctness,
             Self::NoUnresolvedImports => RuleGroup::Correctness,
@@ -1425,6 +1449,8 @@ impl RuleName {
             Self::UseDeprecatedReason => RuleGroup::Style,
             Self::UseDestructuring => RuleGroup::Nursery,
             Self::UseDisposables => RuleGroup::Nursery,
+            Self::UseDomNodeTextContent => RuleGroup::Nursery,
+            Self::UseDomQuerySelector => RuleGroup::Nursery,
             Self::UseEnumInitializers => RuleGroup::Style,
             Self::UseErrorCause => RuleGroup::Nursery,
             Self::UseErrorMessage => RuleGroup::Suspicious,
@@ -1713,12 +1739,14 @@ impl std::str::FromStr for RuleName {
             "noInvalidPositionAtImportRule" => Ok(Self::NoInvalidPositionAtImportRule),
             "noInvalidUseBeforeDeclaration" => Ok(Self::NoInvalidUseBeforeDeclaration),
             "noIrregularWhitespace" => Ok(Self::NoIrregularWhitespace),
+            "noJsxLeakedDollar" => Ok(Self::NoJsxLeakedDollar),
             "noJsxLiterals" => Ok(Self::NoJsxLiterals),
             "noJsxNamespace" => Ok(Self::NoJsxNamespace),
             "noJsxPropsBind" => Ok(Self::NoJsxPropsBind),
             "noLabelVar" => Ok(Self::NoLabelVar),
             "noLabelWithoutControl" => Ok(Self::NoLabelWithoutControl),
             "noLeakedRender" => Ok(Self::NoLeakedRender),
+            "noLoopFunc" => Ok(Self::NoLoopFunc),
             "noMagicNumbers" => Ok(Self::NoMagicNumbers),
             "noMisleadingCharacterClass" => Ok(Self::NoMisleadingCharacterClass),
             "noMisleadingInstantiator" => Ok(Self::NoMisleadingInstantiator),
@@ -1770,6 +1798,9 @@ impl std::str::FromStr for RuleName {
             "noQwikUseVisibleTask" => Ok(Self::NoQwikUseVisibleTask),
             "noReExportAll" => Ok(Self::NoReExportAll),
             "noReactForwardRef" => Ok(Self::NoReactForwardRef),
+            "noReactNativeDeepImports" => Ok(Self::NoReactNativeDeepImports),
+            "noReactNativeLiteralColors" => Ok(Self::NoReactNativeLiteralColors),
+            "noReactNativeRawText" => Ok(Self::NoReactNativeRawText),
             "noReactPropAssignments" => Ok(Self::NoReactPropAssignments),
             "noReactSpecificProps" => Ok(Self::NoReactSpecificProps),
             "noRedeclare" => Ok(Self::NoRedeclare),
@@ -1826,6 +1857,7 @@ impl std::str::FromStr for RuleName {
             "noUnknownUnit" => Ok(Self::NoUnknownUnit),
             "noUnmatchableAnbSelector" => Ok(Self::NoUnmatchableAnbSelector),
             "noUnnecessaryConditions" => Ok(Self::NoUnnecessaryConditions),
+            "noUnnecessaryTemplateExpression" => Ok(Self::NoUnnecessaryTemplateExpression),
             "noUnreachable" => Ok(Self::NoUnreachable),
             "noUnreachableSuper" => Ok(Self::NoUnreachableSuper),
             "noUnresolvedImports" => Ok(Self::NoUnresolvedImports),
@@ -1924,6 +1956,8 @@ impl std::str::FromStr for RuleName {
             "useDeprecatedReason" => Ok(Self::UseDeprecatedReason),
             "useDestructuring" => Ok(Self::UseDestructuring),
             "useDisposables" => Ok(Self::UseDisposables),
+            "useDomNodeTextContent" => Ok(Self::UseDomNodeTextContent),
+            "useDomQuerySelector" => Ok(Self::UseDomQuerySelector),
             "useEnumInitializers" => Ok(Self::UseEnumInitializers),
             "useErrorCause" => Ok(Self::UseErrorCause),
             "useErrorMessage" => Ok(Self::UseErrorMessage),
@@ -2074,6 +2108,9 @@ pub struct Rules {
     #[doc = r" It enables the lint rules recommended by Biome. `true` by default."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
+    #[doc = r" The rule presets to use."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub preset: Option<PresetConfig>,
     #[deserializable(rename = "a11y")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub a11y: Option<SeverityOrGroup<A11y>>,
@@ -2252,8 +2289,15 @@ impl Rules {
             group.set_recommended(None);
         }
     }
-    pub(crate) const fn is_recommended_false(&self) -> bool {
-        matches!(self.recommended, Some(false))
+    #[doc = r" Returns the current preset. Defaults to the recommended set"]
+    pub(crate) fn preset(&self) -> PresetConfig {
+        if matches!(self.recommended, Some(false)) {
+            PresetConfig::None
+        } else if let Some(preset) = &self.preset {
+            preset.clone()
+        } else {
+            PresetConfig::default()
+        }
     }
     #[doc = r" It returns the enabled rules by default."]
     #[doc = r""]
@@ -2262,63 +2306,57 @@ impl Rules {
         let mut enabled_rules = FxHashSet::default();
         let mut disabled_rules = FxHashSet::default();
         if let Some(group) = self.a11y.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(A11y::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(A11y::preset_as_filters(self.preset()));
         }
         if let Some(group) = self.complexity.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(Complexity::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(Complexity::preset_as_filters(self.preset()));
         }
         if let Some(group) = self.correctness.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(Correctness::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(Correctness::preset_as_filters(self.preset()));
         }
         if let Some(group) = self.nursery.as_ref() {
-            group.collect_preset_rules(
-                !self.is_recommended_false() && biome_flags::is_unstable(),
-                &mut enabled_rules,
-            );
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() && biome_flags::is_unstable() {
-            enabled_rules.extend(Nursery::recommended_rules_as_filters());
         }
         if let Some(group) = self.performance.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(Performance::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(Performance::preset_as_filters(self.preset()));
         }
         if let Some(group) = self.security.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(Security::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(Security::preset_as_filters(self.preset()));
         }
         if let Some(group) = self.style.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(Style::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(Style::preset_as_filters(self.preset()));
         }
         if let Some(group) = self.suspicious.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(Suspicious::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(Suspicious::preset_as_filters(self.preset()));
         }
         enabled_rules.difference(&disabled_rules).copied().collect()
     }

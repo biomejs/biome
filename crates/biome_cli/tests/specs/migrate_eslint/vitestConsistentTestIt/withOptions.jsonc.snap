@@ -29,7 +29,7 @@ expression: withOptions.jsonc
 {
 	"linter": {
 		"rules": {
-			"recommended": false,
+			"preset": "none",
 			"nursery": {
 				"useConsistentTestIt": {
 					"level": "error",

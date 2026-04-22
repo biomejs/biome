@@ -50,6 +50,7 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   i Known keys:
   
   - recommended
+  - preset
   - noCommonJs
   - noDefaultExport
   - noDescendingSpecificity

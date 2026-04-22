@@ -71,10 +71,24 @@ impl FormatNodeRule<JsCallArguments> for FormatJsCallArguments {
             || is_react_hook_with_deps_array(node, f.comments())
             || (is_test_call? && is_first_arg_string_literal_or_template)
         {
+            let l_paren = format_with(|f: &mut JsFormatter| {
+                if f.options().delimiter_spacing().value() {
+                    write!(f, [l_paren_token.format(), space()])
+                } else {
+                    write!(f, [l_paren_token.format()])
+                }
+            });
+            let r_paren = format_with(|f: &mut JsFormatter| {
+                if f.options().delimiter_spacing().value() {
+                    write!(f, [space(), r_paren_token.format()])
+                } else {
+                    write!(f, [r_paren_token.format()])
+                }
+            });
             return write!(
                 f,
                 [
-                    l_paren_token.format(),
+                    l_paren,
                     format_with(|f| {
                         f.join_with(space())
                             .entries(
@@ -83,7 +97,7 @@ impl FormatNodeRule<JsCallArguments> for FormatJsCallArguments {
                             )
                             .finish()
                     }),
-                    r_paren_token.format()
+                    r_paren
                 ]
             );
         }
@@ -124,13 +138,15 @@ impl FormatNodeRule<JsCallArguments> for FormatJsCallArguments {
         if let Some(group_layout) = arguments_grouped_layout(&args, f.comments()) {
             write_grouped_arguments(node, arguments, group_layout, f)
         } else if is_long_curried_call(call_expression.as_ref()) {
+            let should_insert_space = f.options().delimiter_spacing().value();
             write!(
                 f,
                 [
                     l_paren_token.format(),
-                    soft_block_indent(&format_once(|f| {
-                        write_arguments_multi_line(arguments.iter(), f)
-                    })),
+                    soft_block_indent_with_maybe_space(
+                        &format_once(|f| { write_arguments_multi_line(arguments.iter(), f) }),
+                        should_insert_space
+                    ),
                     r_paren_token.format(),
                 ]
             )
@@ -385,6 +401,8 @@ fn write_grouped_arguments(
         grouped_arg.will_break(f)
     };
 
+    let should_insert_space = f.options().delimiter_spacing().value();
+
     // We now cache them the delimiters tokens. This is needed because `[biome_formatter::best_fitting]` will try to
     // print each version first
     // tokens on the left
@@ -455,9 +473,16 @@ fn write_grouped_arguments(
             [
                 l_paren,
                 format_with(|f| {
+                    if should_insert_space {
+                        write!(f, [space()])?;
+                    }
                     f.join_with(soft_line_break_or_space())
                         .entries(grouped.iter())
-                        .finish()
+                        .finish()?;
+                    if should_insert_space {
+                        write!(f, [space()])?;
+                    }
+                    Ok(())
                 }),
                 r_paren
             ]
@@ -469,21 +494,24 @@ fn write_grouped_arguments(
         // This back tracking is required because testing if the grouped argument breaks would also return `true`
         // if any content of the function body breaks. But, as far as this is concerned, it's only interested if
         // any content in the signature breaks.
-        if matches!(result, Err(FormatError::PoorLayout)) {
-            drop(buffer);
-            f.restore_state_snapshot(snapshot);
+        match result {
+            Ok(()) => {
+                buffer.write_element(FormatElement::Tag(Tag::EndBestFittingEntry))?;
+                buffer.into_vec()
+            }
+            Err(FormatError::PoorLayout) => {
+                drop(buffer);
+                f.restore_state_snapshot(snapshot);
 
-            let mut most_expanded_iter = most_expanded.into_iter();
-            // Skip over the StartBestFittingEntry/EndBestFittingEntry items.
-            most_expanded_iter.next();
-            most_expanded_iter.next_back();
+                let mut most_expanded_iter = most_expanded.into_iter();
+                // Skip over the StartBestFittingEntry/EndBestFittingEntry items.
+                most_expanded_iter.next();
+                most_expanded_iter.next_back();
 
-            return f.write_elements(most_expanded_iter);
+                return f.write_elements(most_expanded_iter);
+            }
+            Err(err) => return Err(err),
         }
-
-        buffer.write_element(FormatElement::Tag(Tag::EndBestFittingEntry))?;
-
-        buffer.into_vec()
     };
 
     // Write the second variant that forces the group of the first/last argument to expand.
@@ -497,21 +525,28 @@ fn write_grouped_arguments(
             [
                 l_paren,
                 format_with(|f| {
+                    if should_insert_space {
+                        write!(f, [space()])?;
+                    }
                     let mut joiner = f.join_with(soft_line_break_or_space());
 
                     match group_layout {
                         GroupedCallArgumentLayout::GroupedFirstArgument => {
                             joiner.entry(&group(&grouped[0]).should_expand(true));
-                            joiner.entries(&grouped[1..]).finish()
+                            joiner.entries(&grouped[1..]).finish()?;
                         }
                         GroupedCallArgumentLayout::GroupedLastArgument => {
                             let last_index = grouped.len() - 1;
                             joiner.entries(&grouped[..last_index]);
                             joiner
                                 .entry(&group(&grouped[last_index]).should_expand(true))
-                                .finish()
+                                .finish()?;
                         }
                     }
+                    if should_insert_space {
+                        write!(f, [space()])?;
+                    }
+                    Ok(())
                 }),
                 r_paren
             ]
@@ -731,28 +766,32 @@ struct FormatAllArgsBrokenOut<'a> {
 impl Format<JsFormatContext> for FormatAllArgsBrokenOut<'_> {
     fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
         let is_inside_import = self.node.parent::<JsImportCallExpression>().is_some();
+        let should_insert_space = f.options().delimiter_spacing().value();
 
         write!(
             f,
             [group(&format_args![
                 self.l_paren,
-                soft_block_indent(&format_with(|f| {
-                    for (index, entry) in self.args.iter().enumerate() {
-                        if index > 0 {
-                            match entry.leading_lines() {
-                                0 | 1 => write!(f, [soft_line_break_or_space()])?,
-                                _ => write!(f, [empty_line()])?,
+                soft_block_indent_with_maybe_space(
+                    &format_with(|f| {
+                        for (index, entry) in self.args.iter().enumerate() {
+                            if index > 0 {
+                                match entry.leading_lines() {
+                                    0 | 1 => write!(f, [soft_line_break_or_space()])?,
+                                    _ => write!(f, [empty_line()])?,
+                                }
                             }
+
+                            write!(f, [entry])?;
                         }
 
-                        write!(f, [entry])?;
-                    }
-
-                    if !is_inside_import {
-                        write!(f, [FormatTrailingCommas::All])?;
-                    }
-                    Ok(())
-                })),
+                        if !is_inside_import {
+                            write!(f, [FormatTrailingCommas::All])?;
+                        }
+                        Ok(())
+                    }),
+                    should_insert_space
+                ),
                 self.r_paren,
             ])
             .should_expand(self.expand)]

@@ -1,0 +1,56 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: scss/comments/lists.scss
+---
+
+# Input
+
+```scss
+$my-list:
+  'foo', // Foo
+  'bar'; // Bar
+
+$my-list2:
+  a // a
+  b
+  c;
+
+```
+
+
+# Error
+```text
+reformat: output mismatch
+Differences (-re-formatted|+formatted):
+ $my-list:
+   "foo", // Foo
+   "bar"; // Bar
+ 
+-$my-list2: a b c; // a
++$my-list2: // a
++  a b c;
+
+IR differences:
+Differences (-re-formatted IR|+formatted IR):
+   ";",
+   line_suffix([" // Bar"]),
+   expand_parent,
+   empty_line,
+-  "$my-list2",
+-  line_suffix([" // a"]),
+-  expand_parent,
+-  ": ",
++  "$my-list2: ",
+   indent([
+-    group([
++    group(expand: propagated, [
+       fill([
+-        ["a"],
++        ["// a", hard_line_break, "a"],
+         [soft_line_break_or_space],
+         ["b"],
+         [soft_line_break_or_space],
+         ["c"]
+
+```

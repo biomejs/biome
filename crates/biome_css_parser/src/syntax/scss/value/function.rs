@@ -1,7 +1,7 @@
 use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_identifier;
 use crate::syntax::scss::{
-    is_at_scss_interpolation, is_nth_at_scss_interpolation, is_nth_at_scss_qualified_name,
+    is_at_scss_interpolation, is_nth_at_scss_interpolation, is_nth_at_scss_module_member_access,
     parse_scss_function_name, parse_scss_identifier_or_interpolation,
     parse_scss_interpolated_identifier,
 };
@@ -25,7 +25,7 @@ pub(crate) fn is_at_scss_function(p: &mut CssParser) -> bool {
 
 #[inline]
 pub(crate) fn is_nth_at_scss_function(p: &mut CssParser, n: usize) -> bool {
-    if !is_nth_at_scss_qualified_name(p, n) {
+    if !is_nth_at_scss_module_member_access(p, n) {
         return false;
     }
 
