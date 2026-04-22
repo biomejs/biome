@@ -12,7 +12,7 @@ use biome_rowan::AstNode;
 use biome_rule_options::use_semantic_elements::UseSemanticElementsOptions;
 
 declare_lint_rule! {
-    /// It detects the use of `role` attributes in HTML elements and suggests using semantic elements instead.
+    /// Enforces using semantic DOM elements over the ARIA `role` property.
     ///
     /// The `role` attribute is used to define the purpose of an element, but it should be used as a last resort.
     /// Using semantic elements like `<button>`, `<nav>` and others are more accessible and provide better semantics.
@@ -122,15 +122,14 @@ impl Rule for UseSemanticElements {
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let role_attribute = state;
-        let role_value = role_attribute.initializer()?.value().ok()?.string_value()?;
+        let role_value = state.initializer()?.value().ok()?.string_value()?;
         let role_value = role_value.trim();
         let role = AriaRole::from_roles(role_value)?;
 
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                role_attribute.range(),
+                state.range(),
                 markup! {
                     "The elements with this role can be changed to semantic elements."
                 },

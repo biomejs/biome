@@ -1,4 +1,3 @@
-use biome_console::fmt::Formatter;
 use std::str::FromStr;
 
 include!(concat!(env!("OUT_DIR"), "/roles_and_attributes.rs"));
@@ -264,18 +263,6 @@ impl std::fmt::Display for HtmlElementInstance {
             write!(f, " {attribute}")?;
         }
         write!(f, ">")
-    }
-}
-
-impl biome_console::fmt::Display for HtmlElementInstance {
-    fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
-        fmt.write_str("<")?;
-        write!(fmt, "{}", self.element)?;
-        for attribute in self.attributes {
-            write!(fmt, " {attribute}")?;
-        }
-        fmt.write_str(">")?;
-        Ok(())
     }
 }
 

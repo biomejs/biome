@@ -11,7 +11,7 @@ use biome_rowan::AstNode;
 use biome_rule_options::use_semantic_elements::UseSemanticElementsOptions;
 
 declare_lint_rule! {
-    /// It detects the use of `role` attributes in JSX elements and suggests using semantic elements instead.
+    /// Enforces using semantic DOM elements over the ARIA `role` property.
     ///
     /// The `role` attribute is used to define the purpose of an element, but it should be used as a last resort.
     /// Using semantic elements like `<button>`, `<nav>` and others are more accessible and provide better semantics.

@@ -305,7 +305,7 @@
 					]
 				},
 				"useSemanticElements": {
-					"description": "It detects the use of role attributes in HTML elements and suggests using semantic elements instead.\nSee https://biomejs.dev/linter/rules/use-semantic-elements",
+					"description": "Enforces using semantic DOM elements over the ARIA role property.\nSee https://biomejs.dev/linter/rules/use-semantic-elements",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseSemanticElementsConfiguration" },
 						{ "type": "null" }
