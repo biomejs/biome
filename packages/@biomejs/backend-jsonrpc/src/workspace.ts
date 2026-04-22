@@ -1493,7 +1493,7 @@ See https://biomejs.dev/linter/rules/use-iframe-title
 	 */
 	useIframeTitle?: UseIframeTitleConfiguration;
 	/**
-	* Enforce onClick is accompanied by at least one of the following: onKeyUp, onKeyDown, onKeyPress.
+	* Enforce elements with a click event handler to also have at least one keyboard event handler.
 See https://biomejs.dev/linter/rules/use-key-with-click-events 
 	 */
 	useKeyWithClickEvents?: UseKeyWithClickEventsConfiguration;
