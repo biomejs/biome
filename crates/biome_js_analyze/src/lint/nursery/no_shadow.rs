@@ -139,6 +139,13 @@ fn check_shadowing(model: &SemanticModel, binding: Binding) -> Option<ShadowedBi
         return None;
     }
 
+    if is_in_function_type(&binding) {
+        // Parameters in function type annotations (e.g. `(x: string) => void`)
+        // only create bindings within the type scope. They should not be
+        // treated as shadowing outer variables.
+        return None;
+    }
+
     let name = get_binding_name(&binding)?;
     let binding_hoisted_scope = model
         .scope_hoisted_to(&binding.syntax())
@@ -291,28 +298,43 @@ fn is_inside_function_parameters(binding: &Binding) -> bool {
         .any(|ancestor| ancestor.cast::<JsParameterList>().is_some())
 }
 
+fn get_parameter_parent_function(binding: &Binding) -> Option<AnyJsParameterParentFunction> {
+    let id = binding.syntax().cast::<JsIdentifierBinding>()?;
+    id.parent::<JsFormalParameter>()
+        .and_then(|p| p.parent_function())
+        .or_else(|| {
+            id.parent::<JsRestParameter>()
+                .and_then(|p| p.parent_function())
+        })
+}
+
 /// Returns true if the binding is a parameter inside a TypeScript overload
 /// signature (constructor, method, or function overload declaration without a
 /// body). These parameters are type-only and should not be considered as
 /// shadowing outer variables.
 fn is_in_overload_signature(binding: &Binding) -> bool {
-    let node = binding.syntax();
-    let parent_function = node.clone().cast::<JsIdentifierBinding>().and_then(|id| {
-        id.parent::<JsFormalParameter>()
-            .and_then(|p| p.parent_function())
-            .or_else(|| {
-                id.parent::<JsRestParameter>()
-                    .and_then(|p| p.parent_function())
-            })
-    });
     matches!(
-        parent_function,
+        get_parameter_parent_function(binding),
         Some(
             AnyJsParameterParentFunction::TsConstructorSignatureClassMember(_)
                 | AnyJsParameterParentFunction::TsMethodSignatureClassMember(_)
                 | AnyJsParameterParentFunction::TsSetterSignatureClassMember(_)
                 | AnyJsParameterParentFunction::TsDeclareFunctionDeclaration(_)
                 | AnyJsParameterParentFunction::TsDeclareFunctionExportDefaultDeclaration(_)
+        )
+    )
+}
+
+fn is_in_function_type(binding: &Binding) -> bool {
+    matches!(
+        get_parameter_parent_function(binding),
+        Some(
+            AnyJsParameterParentFunction::TsFunctionType(_)
+                | AnyJsParameterParentFunction::TsConstructorType(_)
+                | AnyJsParameterParentFunction::TsCallSignatureTypeMember(_)
+                | AnyJsParameterParentFunction::TsMethodSignatureTypeMember(_)
+                | AnyJsParameterParentFunction::TsSetterSignatureTypeMember(_)
+                | AnyJsParameterParentFunction::TsConstructSignatureTypeMember(_)
         )
     )
 }
