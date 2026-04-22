@@ -5,7 +5,10 @@ use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_rowan::AstNode;
 use biome_rule_options::no_static_element_interactions::NoStaticElementInteractionsOptions;
 
-use crate::{Aria, a11y::is_hidden_from_screen_reader};
+use crate::{
+    Aria,
+    a11y::{has_event_handler, is_hidden_from_screen_reader},
+};
 
 declare_lint_rule! {
     /// Enforce that static, visible elements (such as `<div>`) that have click handlers use the valid role attribute.
@@ -77,8 +80,7 @@ impl Rule for NoStaticElementInteractions {
             return None;
         }
 
-        // Check if the element has any interactive event handlers.
-        if has_handler_props(node) {
+        if has_event_handler(EVENT_HANDLER_TYPES, node) {
             return Some(());
         }
 
@@ -91,50 +93,20 @@ impl Rule for NoStaticElementInteractions {
             rule_category!(),
             node.range(),
             markup! {
-                "Static Elements should not be interactive."
+                "Unexpected event handler on static element."
             },
         ).note(
             markup! {
-                "To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value."
+                "Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value."
             }
         ))
     }
 }
 
-const INTERACTIVE_HANDLERS: &[&str] = &[
-    "onclick",
-    "oncontextmenu",
-    "ondblclick",
-    "ondoubleclick",
-    "ondrag",
-    "ondragend",
-    "ondragenter",
-    "ondragexit",
-    "ondragleave",
-    "ondragover",
-    "ondragstart",
-    "ondrop",
-    "onmousedown",
-    "onmouseenter",
-    "onmouseleave",
-    "onmousemove",
-    "onmouseout",
-    "onmouseover",
-    "onkeydown",
-    "onkeypress",
-    "onkeyup",
-    "onfocus",
-    "onblur",
-];
+// Only check the focus, keyboard and mouse event handler types.
+const EVENT_HANDLER_TYPES: &[&str] = &["focus", "keyboard", "mouse"];
 
-/// Check if the element contains event handler
-fn has_handler_props(element: &AnyHtmlTagElement) -> bool {
-    INTERACTIVE_HANDLERS.iter().any(|handler| {
-        element.find_attribute_by_name(handler).is_some()
-            || handler.strip_prefix("on").is_some_and(|handler_name| {
-                element
-                    .find_vue_event_handling_directive(handler_name)
-                    .is_some()
-            })
-    })
+#[test]
+fn test_order() {
+    assert!(EVENT_HANDLER_TYPES.is_sorted());
 }

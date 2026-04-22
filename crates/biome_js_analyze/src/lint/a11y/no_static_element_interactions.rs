@@ -1,4 +1,4 @@
-use crate::a11y::is_hidden_from_screen_reader;
+use crate::a11y::{has_event_handler, is_hidden_from_screen_reader};
 use crate::services::aria::Aria;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
@@ -60,38 +60,6 @@ declare_lint_rule! {
     }
 }
 
-const EVENT_TO_HANDLERS: &[(&str, &[&str])] = &[
-    ("keyboard", &["onKeyDown", "onKeyUp", "onKeyPress"]),
-    ("focus", &["onFocus", "onBlur"]),
-    (
-        "mouse",
-        &[
-            "onClick",
-            "onContextMenu",
-            "onDblClick",
-            "onDoubleClick",
-            "onDrag",
-            "onDragEnd",
-            "onDragEnter",
-            "onDragLeave",
-            "onDragExit",
-            "onDragOver",
-            "onDragStart",
-            "onDrop",
-            "onMouseDown",
-            "onMouseEnter",
-            "onMouseLeave",
-            "onMouseMove",
-            "onMouseOut",
-            "onMouseOver",
-            "onMouseUp",
-        ],
-    ),
-];
-
-// no-static-element-interactions rule checks only focus, keyboard and mouse categories.
-const CATEGORIES_TO_CHECK: &[&str] = &["focus", "keyboard", "mouse"];
-
 impl Rule for NoStaticElementInteractions {
     type Query = Aria<AnyJsxElement>;
     type State = ();
@@ -114,30 +82,11 @@ impl Rule for NoStaticElementInteractions {
             return None;
         }
 
-        // Check if the element has any interactive event handlers.
-        if !CATEGORIES_TO_CHECK.iter().any(|&category| {
-            if let Some(handlers) = EVENT_TO_HANDLERS
-                .iter()
-                .find(|&&(cat, _)| cat == category)
-                .map(|&(_, handlers)| handlers)
-            {
-                handlers.iter().any(|&handler| {
-                    if let Some(value) = node.find_attribute_by_name(handler) {
-                        value
-                            .as_static_value()
-                            .is_none_or(|value| value.text() != "null")
-                    } else {
-                        false
-                    }
-                })
-            } else {
-                false
-            }
-        }) {
-            return None;
+        if has_event_handler(EVENT_HANDLER_TYPES, node) {
+            return Some(());
         }
 
-        Some(())
+        None
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
@@ -145,9 +94,21 @@ impl Rule for NoStaticElementInteractions {
         Some(RuleDiagnostic::new(
             rule_category!(),
             node.range(),
-            markup! {{"Static Elements should not be interactive."}},
+            markup! {
+                "Unexpected event handler on static element."
+            },
         ).note(
-            markup! {{"To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value."}}
+            markup! {
+                "Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value."
+            }
         ))
     }
+}
+
+// Only check the focus, keyboard and mouse event handler types.
+const EVENT_HANDLER_TYPES: &[&str] = &["focus", "keyboard", "mouse"];
+
+#[test]
+fn test_order() {
+    assert!(EVENT_HANDLER_TYPES.is_sorted());
 }

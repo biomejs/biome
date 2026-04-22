@@ -82,7 +82,7 @@ expression: invalid.svelte
 ```
 invalid.svelte:2:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     1 │ <!-- should generate diagnostics -->
   > 2 │ <div onclick={() => void 0}></div>
@@ -90,7 +90,7 @@ invalid.svelte:2:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     3 │ <div onclick={() => void 0} role={undefined}></div>
     4 │ <div onclick={() => void 0} {...props}></div>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -98,7 +98,7 @@ invalid.svelte:2:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:3:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     1 │ <!-- should generate diagnostics -->
     2 │ <div onclick={() => void 0}></div>
@@ -107,7 +107,7 @@ invalid.svelte:3:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     4 │ <div onclick={() => void 0} {...props}></div>
     5 │ <div onkeyup={() => void 0} aria-hidden={false}></div>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -115,7 +115,7 @@ invalid.svelte:3:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:4:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     2 │ <div onclick={() => void 0}></div>
     3 │ <div onclick={() => void 0} role={undefined}></div>
@@ -124,7 +124,7 @@ invalid.svelte:4:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     5 │ <div onkeyup={() => void 0} aria-hidden={false}></div>
     6 │ 
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -132,7 +132,7 @@ invalid.svelte:4:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:5:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     3 │ <div onclick={() => void 0} role={undefined}></div>
     4 │ <div onclick={() => void 0} {...props}></div>
@@ -141,7 +141,7 @@ invalid.svelte:5:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     6 │ 
     7 │ <!-- Static elements; no inherent role -->
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -149,7 +149,7 @@ invalid.svelte:5:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:8:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
      7 │ <!-- Static elements; no inherent role -->
    > 8 │ <a onclick={() => void 0}></a>
@@ -157,7 +157,7 @@ invalid.svelte:8:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
      9 │ <a onclick={() => {}}></a>
     10 │ <a tabindex="0" onclick={() => void 0}></a>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -165,7 +165,7 @@ invalid.svelte:8:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:9:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
      7 │ <!-- Static elements; no inherent role -->
      8 │ <a onclick={() => void 0}></a>
@@ -174,7 +174,7 @@ invalid.svelte:9:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     10 │ <a tabindex="0" onclick={() => void 0}></a>
     11 │ <area onclick={() => {}} />
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -182,7 +182,7 @@ invalid.svelte:9:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:10:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
      8 │ <a onclick={() => void 0}></a>
      9 │ <a onclick={() => {}}></a>
@@ -191,7 +191,7 @@ invalid.svelte:10:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     11 │ <area onclick={() => {}} />
     12 │ <b onclick={() => {}}></b>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -199,7 +199,7 @@ invalid.svelte:10:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:11:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
      9 │ <a onclick={() => {}}></a>
     10 │ <a tabindex="0" onclick={() => void 0}></a>
@@ -208,7 +208,7 @@ invalid.svelte:11:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     12 │ <b onclick={() => {}}></b>
     13 │ <base onclick={() => {}} />
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -216,7 +216,7 @@ invalid.svelte:11:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:12:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     10 │ <a tabindex="0" onclick={() => void 0}></a>
     11 │ <area onclick={() => {}} />
@@ -225,7 +225,7 @@ invalid.svelte:12:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     13 │ <base onclick={() => {}} />
     14 │ <bdi onclick={() => {}}></bdi>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -233,7 +233,7 @@ invalid.svelte:12:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:13:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     11 │ <area onclick={() => {}} />
     12 │ <b onclick={() => {}}></b>
@@ -242,7 +242,7 @@ invalid.svelte:13:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     14 │ <bdi onclick={() => {}}></bdi>
     15 │ <bdo onclick={() => {}}></bdo>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -250,7 +250,7 @@ invalid.svelte:13:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:14:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     12 │ <b onclick={() => {}}></b>
     13 │ <base onclick={() => {}} />
@@ -259,7 +259,7 @@ invalid.svelte:14:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     15 │ <bdo onclick={() => {}}></bdo>
     16 │ <body onclick={() => {}}></body>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -267,7 +267,7 @@ invalid.svelte:14:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:15:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     13 │ <base onclick={() => {}} />
     14 │ <bdi onclick={() => {}}></bdi>
@@ -276,7 +276,7 @@ invalid.svelte:15:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     16 │ <body onclick={() => {}}></body>
     17 │ <cite onclick={() => {}}></cite>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -284,7 +284,7 @@ invalid.svelte:15:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:16:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     14 │ <bdi onclick={() => {}}></bdi>
     15 │ <bdo onclick={() => {}}></bdo>
@@ -293,7 +293,7 @@ invalid.svelte:16:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     17 │ <cite onclick={() => {}}></cite>
     18 │ <col onclick={() => {}} />
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -301,7 +301,7 @@ invalid.svelte:16:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:17:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     15 │ <bdo onclick={() => {}}></bdo>
     16 │ <body onclick={() => {}}></body>
@@ -310,7 +310,7 @@ invalid.svelte:17:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     18 │ <col onclick={() => {}} />
     19 │ <colgroup onclick={() => {}}></colgroup>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -318,7 +318,7 @@ invalid.svelte:17:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:18:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     16 │ <body onclick={() => {}}></body>
     17 │ <cite onclick={() => {}}></cite>
@@ -327,7 +327,7 @@ invalid.svelte:18:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     19 │ <colgroup onclick={() => {}}></colgroup>
     20 │ <data onclick={() => {}}></data>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -335,7 +335,7 @@ invalid.svelte:18:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:19:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     17 │ <cite onclick={() => {}}></cite>
     18 │ <col onclick={() => {}} />
@@ -344,7 +344,7 @@ invalid.svelte:19:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     20 │ <data onclick={() => {}}></data>
     21 │ <div onclick={() => {}}></div>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -352,7 +352,7 @@ invalid.svelte:19:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:20:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     18 │ <col onclick={() => {}} />
     19 │ <colgroup onclick={() => {}}></colgroup>
@@ -361,7 +361,7 @@ invalid.svelte:20:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     21 │ <div onclick={() => {}}></div>
     22 │ <head onclick={() => {}}></head>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -369,7 +369,7 @@ invalid.svelte:20:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:21:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     19 │ <colgroup onclick={() => {}}></colgroup>
     20 │ <data onclick={() => {}}></data>
@@ -378,7 +378,7 @@ invalid.svelte:21:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     22 │ <head onclick={() => {}}></head>
     23 │ <header onclick={() => {}}></header>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -386,7 +386,7 @@ invalid.svelte:21:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:22:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     20 │ <data onclick={() => {}}></data>
     21 │ <div onclick={() => {}}></div>
@@ -395,7 +395,7 @@ invalid.svelte:22:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     23 │ <header onclick={() => {}}></header>
     24 │ <hgroup onclick={() => {}}></hgroup>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -403,7 +403,7 @@ invalid.svelte:22:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:23:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     21 │ <div onclick={() => {}}></div>
     22 │ <head onclick={() => {}}></head>
@@ -412,7 +412,7 @@ invalid.svelte:23:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     24 │ <hgroup onclick={() => {}}></hgroup>
     25 │ <i onclick={() => {}}></i>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -420,7 +420,7 @@ invalid.svelte:23:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:24:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     22 │ <head onclick={() => {}}></head>
     23 │ <header onclick={() => {}}></header>
@@ -429,7 +429,7 @@ invalid.svelte:24:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     25 │ <i onclick={() => {}}></i>
     26 │ <kbd onclick={() => {}}></kbd>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -437,7 +437,7 @@ invalid.svelte:24:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:25:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     23 │ <header onclick={() => {}}></header>
     24 │ <hgroup onclick={() => {}}></hgroup>
@@ -446,7 +446,7 @@ invalid.svelte:25:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     26 │ <kbd onclick={() => {}}></kbd>
     27 │ 
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -454,7 +454,7 @@ invalid.svelte:25:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:26:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     24 │ <hgroup onclick={() => {}}></hgroup>
     25 │ <i onclick={() => {}}></i>
@@ -463,7 +463,7 @@ invalid.svelte:26:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     27 │ 
     28 │ <map onclick={() => {}}></map>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -471,7 +471,7 @@ invalid.svelte:26:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:28:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     26 │ <kbd onclick={() => {}}></kbd>
     27 │ 
@@ -480,7 +480,7 @@ invalid.svelte:28:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     29 │ <meta onclick={() => {}} />
     30 │ <noscript onclick={() => {}}></noscript>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -488,7 +488,7 @@ invalid.svelte:28:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:29:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     28 │ <map onclick={() => {}}></map>
   > 29 │ <meta onclick={() => {}} />
@@ -496,7 +496,7 @@ invalid.svelte:29:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     30 │ <noscript onclick={() => {}}></noscript>
     31 │ <object onclick={() => {}}></object>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -504,7 +504,7 @@ invalid.svelte:29:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:30:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     28 │ <map onclick={() => {}}></map>
     29 │ <meta onclick={() => {}} />
@@ -513,7 +513,7 @@ invalid.svelte:30:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     31 │ <object onclick={() => {}}></object>
     32 │ <picture onclick={() => {}}></picture>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -521,7 +521,7 @@ invalid.svelte:30:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:31:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     29 │ <meta onclick={() => {}} />
     30 │ <noscript onclick={() => {}}></noscript>
@@ -530,7 +530,7 @@ invalid.svelte:31:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     32 │ <picture onclick={() => {}}></picture>
     33 │ <q onclick={() => {}}></q>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -538,7 +538,7 @@ invalid.svelte:31:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:32:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     30 │ <noscript onclick={() => {}}></noscript>
     31 │ <object onclick={() => {}}></object>
@@ -547,7 +547,7 @@ invalid.svelte:32:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     33 │ <q onclick={() => {}}></q>
     34 │ <rp onclick={() => {}}></rp>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -555,7 +555,7 @@ invalid.svelte:32:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:33:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     31 │ <object onclick={() => {}}></object>
     32 │ <picture onclick={() => {}}></picture>
@@ -564,7 +564,7 @@ invalid.svelte:33:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     34 │ <rp onclick={() => {}}></rp>
     35 │ <rt onclick={() => {}}></rt>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -572,7 +572,7 @@ invalid.svelte:33:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:34:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     32 │ <picture onclick={() => {}}></picture>
     33 │ <q onclick={() => {}}></q>
@@ -581,7 +581,7 @@ invalid.svelte:34:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     35 │ <rt onclick={() => {}}></rt>
     36 │ <s onclick={() => {}}></s>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -589,7 +589,7 @@ invalid.svelte:34:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:35:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     33 │ <q onclick={() => {}}></q>
     34 │ <rp onclick={() => {}}></rp>
@@ -598,7 +598,7 @@ invalid.svelte:35:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     36 │ <s onclick={() => {}}></s>
     37 │ <samp onclick={() => {}}></samp>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -606,7 +606,7 @@ invalid.svelte:35:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:36:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     34 │ <rp onclick={() => {}}></rp>
     35 │ <rt onclick={() => {}}></rt>
@@ -615,7 +615,7 @@ invalid.svelte:36:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     37 │ <samp onclick={() => {}}></samp>
     38 │ <section onclick={() => {}}></section>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -623,7 +623,7 @@ invalid.svelte:36:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:37:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     35 │ <rt onclick={() => {}}></rt>
     36 │ <s onclick={() => {}}></s>
@@ -632,7 +632,7 @@ invalid.svelte:37:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     38 │ <section onclick={() => {}}></section>
     39 │ <small onclick={() => {}}></small>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -640,7 +640,7 @@ invalid.svelte:37:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:38:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     36 │ <s onclick={() => {}}></s>
     37 │ <samp onclick={() => {}}></samp>
@@ -649,7 +649,7 @@ invalid.svelte:38:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     39 │ <small onclick={() => {}}></small>
     40 │ <source onclick={() => {}} />
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -657,7 +657,7 @@ invalid.svelte:38:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:39:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     37 │ <samp onclick={() => {}}></samp>
     38 │ <section onclick={() => {}}></section>
@@ -666,7 +666,7 @@ invalid.svelte:39:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     40 │ <source onclick={() => {}} />
     41 │ <span onclick={() => {}}></span>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -674,7 +674,7 @@ invalid.svelte:39:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:40:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     38 │ <section onclick={() => {}}></section>
     39 │ <small onclick={() => {}}></small>
@@ -683,7 +683,7 @@ invalid.svelte:40:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     41 │ <span onclick={() => {}}></span>
     42 │ <title onclick={() => {}}></title>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -691,7 +691,7 @@ invalid.svelte:40:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:41:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     39 │ <small onclick={() => {}}></small>
     40 │ <source onclick={() => {}} />
@@ -700,7 +700,7 @@ invalid.svelte:41:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     42 │ <title onclick={() => {}}></title>
     43 │ <track onclick={() => {}} />
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -708,7 +708,7 @@ invalid.svelte:41:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:42:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     40 │ <source onclick={() => {}} />
     41 │ <span onclick={() => {}}></span>
@@ -717,7 +717,7 @@ invalid.svelte:42:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     43 │ <track onclick={() => {}} />
     44 │ <u onclick={() => {}}></u>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -725,7 +725,7 @@ invalid.svelte:42:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:43:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     41 │ <span onclick={() => {}}></span>
     42 │ <title onclick={() => {}}></title>
@@ -734,7 +734,7 @@ invalid.svelte:43:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     44 │ <u onclick={() => {}}></u>
     45 │ <var onclick={() => {}}></var>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -742,7 +742,7 @@ invalid.svelte:43:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:44:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     42 │ <title onclick={() => {}}></title>
     43 │ <track onclick={() => {}} />
@@ -751,7 +751,7 @@ invalid.svelte:44:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     45 │ <var onclick={() => {}}></var>
     46 │ <wbr onclick={() => {}} />
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -759,7 +759,7 @@ invalid.svelte:44:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:45:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     43 │ <track onclick={() => {}} />
     44 │ <u onclick={() => {}}></u>
@@ -768,7 +768,7 @@ invalid.svelte:45:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     46 │ <wbr onclick={() => {}} />
     47 │ 
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -776,7 +776,7 @@ invalid.svelte:45:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:46:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     44 │ <u onclick={() => {}}></u>
     45 │ <var onclick={() => {}}></var>
@@ -785,7 +785,7 @@ invalid.svelte:46:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     47 │ 
     48 │ <!-- Handlers -->
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -793,7 +793,7 @@ invalid.svelte:46:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:49:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     48 │ <!-- Handlers -->
   > 49 │ <div onkeydown={() => {}}></div>
@@ -801,7 +801,7 @@ invalid.svelte:49:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     50 │ <div onkeypress={() => {}}></div>
     51 │ <div onkeyup={() => {}}></div>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -809,7 +809,7 @@ invalid.svelte:49:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:50:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     48 │ <!-- Handlers -->
     49 │ <div onkeydown={() => {}}></div>
@@ -818,7 +818,7 @@ invalid.svelte:50:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     51 │ <div onkeyup={() => {}}></div>
     52 │ <div onclick={() => {}}></div>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -826,7 +826,7 @@ invalid.svelte:50:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:51:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     49 │ <div onkeydown={() => {}}></div>
     50 │ <div onkeypress={() => {}}></div>
@@ -835,7 +835,7 @@ invalid.svelte:51:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     52 │ <div onclick={() => {}}></div>
     53 │ <div onmousedown={() => {}}></div>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -843,7 +843,7 @@ invalid.svelte:51:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:52:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     50 │ <div onkeypress={() => {}}></div>
     51 │ <div onkeyup={() => {}}></div>
@@ -852,7 +852,7 @@ invalid.svelte:52:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     53 │ <div onmousedown={() => {}}></div>
     54 │ <div onmouseup={() => {}}></div>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -860,7 +860,7 @@ invalid.svelte:52:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:53:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     51 │ <div onkeyup={() => {}}></div>
     52 │ <div onclick={() => {}}></div>
@@ -869,7 +869,24 @@ invalid.svelte:53:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     54 │ <div onmouseup={() => {}}></div>
     55 │ 
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.svelte:54:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    52 │ <div onclick={() => {}}></div>
+    53 │ <div onmousedown={() => {}}></div>
+  > 54 │ <div onmouseup={() => {}}></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    55 │ 
+    56 │ <!-- Presentation is a special case role that indicates intentional static semantics -->
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -877,7 +894,7 @@ invalid.svelte:53:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:57:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     56 │ <!-- Presentation is a special case role that indicates intentional static semantics -->
   > 57 │ <div role="presentation" onclick={() => {}}></div>
@@ -885,7 +902,7 @@ invalid.svelte:57:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     58 │ <div role="presentation" onkeydown={() => {}}></div>
     59 │ 
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -893,7 +910,7 @@ invalid.svelte:57:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:58:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     56 │ <!-- Presentation is a special case role that indicates intentional static semantics -->
     57 │ <div role="presentation" onclick={() => {}}></div>
@@ -902,7 +919,7 @@ invalid.svelte:58:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     59 │ 
     60 │ <!-- HTML elements attributed with an abstract role -->
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -910,7 +927,7 @@ invalid.svelte:58:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:61:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     60 │ <!-- HTML elements attributed with an abstract role -->
   > 61 │ <div role="command" onclick={() => {}}></div>
@@ -918,7 +935,7 @@ invalid.svelte:61:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     62 │ <div role="composite" onclick={() => {}}></div>
     63 │ <div role="input" onclick={() => {}}></div>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -926,7 +943,7 @@ invalid.svelte:61:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:62:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     60 │ <!-- HTML elements attributed with an abstract role -->
     61 │ <div role="command" onclick={() => {}}></div>
@@ -935,7 +952,7 @@ invalid.svelte:62:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     63 │ <div role="input" onclick={() => {}}></div>
     64 │ <div role="landmark" onclick={() => {}}></div>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -943,7 +960,7 @@ invalid.svelte:62:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:63:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     61 │ <div role="command" onclick={() => {}}></div>
     62 │ <div role="composite" onclick={() => {}}></div>
@@ -952,7 +969,7 @@ invalid.svelte:63:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     64 │ <div role="landmark" onclick={() => {}}></div>
     65 │ <div role="range" onclick={() => {}}></div>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -960,7 +977,7 @@ invalid.svelte:63:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:64:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     62 │ <div role="composite" onclick={() => {}}></div>
     63 │ <div role="input" onclick={() => {}}></div>
@@ -969,7 +986,7 @@ invalid.svelte:64:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     65 │ <div role="range" onclick={() => {}}></div>
     66 │ <div role="roletype" onclick={() => {}}></div>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -977,7 +994,7 @@ invalid.svelte:64:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:65:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     63 │ <div role="input" onclick={() => {}}></div>
     64 │ <div role="landmark" onclick={() => {}}></div>
@@ -986,7 +1003,7 @@ invalid.svelte:65:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     66 │ <div role="roletype" onclick={() => {}}></div>
     67 │ <div role="sectionhead" onclick={() => {}}></div>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -994,7 +1011,7 @@ invalid.svelte:65:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:66:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     64 │ <div role="landmark" onclick={() => {}}></div>
     65 │ <div role="range" onclick={() => {}}></div>
@@ -1003,7 +1020,7 @@ invalid.svelte:66:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     67 │ <div role="sectionhead" onclick={() => {}}></div>
     68 │ <div role="select" onclick={() => {}}></div>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -1011,7 +1028,7 @@ invalid.svelte:66:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:67:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     65 │ <div role="range" onclick={() => {}}></div>
     66 │ <div role="roletype" onclick={() => {}}></div>
@@ -1020,7 +1037,7 @@ invalid.svelte:67:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     68 │ <div role="select" onclick={() => {}}></div>
     69 │ <div role="structure" onclick={() => {}}></div>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -1028,7 +1045,7 @@ invalid.svelte:67:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:68:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     66 │ <div role="roletype" onclick={() => {}}></div>
     67 │ <div role="sectionhead" onclick={() => {}}></div>
@@ -1037,7 +1054,7 @@ invalid.svelte:68:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     69 │ <div role="structure" onclick={() => {}}></div>
     70 │ <div role="widget" onclick={() => {}}></div>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -1045,7 +1062,7 @@ invalid.svelte:68:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:69:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     67 │ <div role="sectionhead" onclick={() => {}}></div>
     68 │ <div role="select" onclick={() => {}}></div>
@@ -1054,7 +1071,7 @@ invalid.svelte:69:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     70 │ <div role="widget" onclick={() => {}}></div>
     71 │ <div role="window" onclick={() => {}}></div>
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -1062,7 +1079,7 @@ invalid.svelte:69:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:70:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     68 │ <div role="select" onclick={() => {}}></div>
     69 │ <div role="structure" onclick={() => {}}></div>
@@ -1071,7 +1088,7 @@ invalid.svelte:70:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
     71 │ <div role="window" onclick={() => {}}></div>
     72 │ 
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```
@@ -1079,7 +1096,7 @@ invalid.svelte:70:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.svelte:71:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Static Elements should not be interactive.
+  × Unexpected event handler on static element.
   
     69 │ <div role="structure" onclick={() => {}}></div>
     70 │ <div role="widget" onclick={() => {}}></div>
@@ -1087,7 +1104,7 @@ invalid.svelte:71:1 lint/a11y/noStaticElementInteractions ━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     72 │ 
   
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
 
 ```

@@ -451,45 +451,6 @@ impl AnyHtmlTagElement {
         })
     }
 
-    pub fn find_vue_event_handling_directive(
-        &self,
-        name_to_lookup: &str,
-    ) -> Option<AnyHtmlAttribute> {
-        self.attributes().iter().find_map(|attr| {
-            let matches = match &attr {
-                AnyHtmlAttribute::AnyVueDirective(vue) => match vue {
-                    // @name="..."
-                    AnyVueDirective::VueVOnShorthandDirective(d) => d
-                        .arg()
-                        .ok()
-                        .and_then(|arg| arg.as_vue_static_argument().cloned())
-                        .and_then(|s| s.name_token().ok())
-                        .is_some_and(|t| t.text_trimmed().eq_ignore_ascii_case(name_to_lookup)),
-
-                    // v-on:name="..."
-                    AnyVueDirective::VueDirective(d) => {
-                        let is_event_handling = d
-                            .name_token()
-                            .is_ok_and(|t| t.text_trimmed().eq_ignore_ascii_case("v-on"));
-                        is_event_handling
-                            && d.arg()
-                                .and_then(|arg| arg.arg().ok())
-                                .and_then(|arg| arg.as_vue_static_argument().cloned())
-                                .and_then(|s| s.name_token().ok())
-                                .is_some_and(|t| {
-                                    t.text_trimmed().eq_ignore_ascii_case(name_to_lookup)
-                                })
-                    }
-
-                    _ => false,
-                },
-
-                _ => false,
-            };
-            if matches { Some(attr) } else { None }
-        })
-    }
-
     /// Returns `true` if the current element is actually a component.
     ///
     /// - `<Span />` is a component and it would return `true`

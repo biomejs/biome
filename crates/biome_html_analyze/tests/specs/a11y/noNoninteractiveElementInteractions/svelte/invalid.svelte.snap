@@ -101,7 +101,7 @@ expression: invalid.svelte
 ```
 invalid.svelte:2:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     1 │ <!-- should generate diagnostics -->
   > 2 │ <div onclick={() => {}} />
@@ -109,7 +109,7 @@ invalid.svelte:2:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━
     3 │ <main onclick={() => void 0} />
     4 │ <article onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -117,7 +117,7 @@ invalid.svelte:2:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━
 ```
 invalid.svelte:3:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     1 │ <!-- should generate diagnostics -->
     2 │ <div onclick={() => {}} />
@@ -126,7 +126,7 @@ invalid.svelte:3:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━
     4 │ <article onclick={() => {}} />
     5 │ <aside onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -134,7 +134,7 @@ invalid.svelte:3:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━
 ```
 invalid.svelte:4:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     2 │ <div onclick={() => {}} />
     3 │ <main onclick={() => void 0} />
@@ -143,7 +143,7 @@ invalid.svelte:4:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━
     5 │ <aside onclick={() => {}} />
     6 │ <blockquote onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -151,7 +151,7 @@ invalid.svelte:4:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━
 ```
 invalid.svelte:5:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     3 │ <main onclick={() => void 0} />
     4 │ <article onclick={() => {}} />
@@ -160,7 +160,7 @@ invalid.svelte:5:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━
     6 │ <blockquote onclick={() => {}} />
     7 │ 
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -168,7 +168,7 @@ invalid.svelte:5:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━
 ```
 invalid.svelte:6:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     4 │ <article onclick={() => {}} />
     5 │ <aside onclick={() => {}} />
@@ -177,7 +177,7 @@ invalid.svelte:6:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━
     7 │ 
     8 │ <body onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -185,7 +185,7 @@ invalid.svelte:6:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━
 ```
 invalid.svelte:8:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
      6 │ <blockquote onclick={() => {}} />
      7 │ 
@@ -194,7 +194,7 @@ invalid.svelte:8:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━
      9 │ <br onclick={() => {}} />
     10 │ <caption onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -202,7 +202,7 @@ invalid.svelte:8:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━
 ```
 invalid.svelte:9:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
      8 │ <body onclick={() => {}} />
    > 9 │ <br onclick={() => {}} />
@@ -210,7 +210,7 @@ invalid.svelte:9:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━
     10 │ <caption onclick={() => {}} />
     11 │ <dd onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -218,7 +218,7 @@ invalid.svelte:9:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━
 ```
 invalid.svelte:10:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
      8 │ <body onclick={() => {}} />
      9 │ <br onclick={() => {}} />
@@ -227,7 +227,7 @@ invalid.svelte:10:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     11 │ <dd onclick={() => {}} />
     12 │ <details onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -235,7 +235,7 @@ invalid.svelte:10:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:11:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
      9 │ <br onclick={() => {}} />
     10 │ <caption onclick={() => {}} />
@@ -244,7 +244,7 @@ invalid.svelte:11:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     12 │ <details onclick={() => {}} />
     13 │ <dfn onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -252,7 +252,7 @@ invalid.svelte:11:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:12:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     10 │ <caption onclick={() => {}} />
     11 │ <dd onclick={() => {}} />
@@ -261,7 +261,7 @@ invalid.svelte:12:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     13 │ <dfn onclick={() => {}} />
     14 │ <dl onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -269,7 +269,7 @@ invalid.svelte:12:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:13:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     11 │ <dd onclick={() => {}} />
     12 │ <details onclick={() => {}} />
@@ -278,7 +278,7 @@ invalid.svelte:13:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     14 │ <dl onclick={() => {}} />
     15 │ <dir onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -286,7 +286,7 @@ invalid.svelte:13:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:15:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     13 │ <dfn onclick={() => {}} />
     14 │ <dl onclick={() => {}} />
@@ -295,7 +295,7 @@ invalid.svelte:15:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     16 │ <dt onclick={() => {}} />
     17 │ <fieldset onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -303,7 +303,7 @@ invalid.svelte:15:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:16:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     14 │ <dl onclick={() => {}} />
     15 │ <dir onclick={() => {}} />
@@ -312,7 +312,7 @@ invalid.svelte:16:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     17 │ <fieldset onclick={() => {}} />
     18 │ <figcaption onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -320,7 +320,7 @@ invalid.svelte:16:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:17:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     15 │ <dir onclick={() => {}} />
     16 │ <dt onclick={() => {}} />
@@ -329,7 +329,7 @@ invalid.svelte:17:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     18 │ <figcaption onclick={() => {}} />
     19 │ <figure onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -337,7 +337,7 @@ invalid.svelte:17:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:18:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     16 │ <dt onclick={() => {}} />
     17 │ <fieldset onclick={() => {}} />
@@ -346,7 +346,7 @@ invalid.svelte:18:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     19 │ <figure onclick={() => {}} />
     20 │ <footer onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -354,7 +354,7 @@ invalid.svelte:18:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:19:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     17 │ <fieldset onclick={() => {}} />
     18 │ <figcaption onclick={() => {}} />
@@ -363,7 +363,7 @@ invalid.svelte:19:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     20 │ <footer onclick={() => {}} />
     21 │ <form onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -371,7 +371,7 @@ invalid.svelte:19:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:20:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     18 │ <figcaption onclick={() => {}} />
     19 │ <figure onclick={() => {}} />
@@ -380,7 +380,7 @@ invalid.svelte:20:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     21 │ <form onclick={() => {}} />
     22 │ <frame onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -388,7 +388,7 @@ invalid.svelte:20:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:21:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     19 │ <figure onclick={() => {}} />
     20 │ <footer onclick={() => {}} />
@@ -397,7 +397,7 @@ invalid.svelte:21:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     22 │ <frame onclick={() => {}} />
     23 │ <h1 onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -405,7 +405,7 @@ invalid.svelte:21:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:22:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     20 │ <footer onclick={() => {}} />
     21 │ <form onclick={() => {}} />
@@ -414,7 +414,7 @@ invalid.svelte:22:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     23 │ <h1 onclick={() => {}} />
     24 │ <h2 onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -422,7 +422,7 @@ invalid.svelte:22:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:23:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     21 │ <form onclick={() => {}} />
     22 │ <frame onclick={() => {}} />
@@ -431,7 +431,7 @@ invalid.svelte:23:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     24 │ <h2 onclick={() => {}} />
     25 │ <h3 onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -439,7 +439,7 @@ invalid.svelte:23:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:24:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     22 │ <frame onclick={() => {}} />
     23 │ <h1 onclick={() => {}} />
@@ -448,7 +448,7 @@ invalid.svelte:24:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     25 │ <h3 onclick={() => {}} />
     26 │ <h4 onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -456,7 +456,7 @@ invalid.svelte:24:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:25:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     23 │ <h1 onclick={() => {}} />
     24 │ <h2 onclick={() => {}} />
@@ -465,7 +465,7 @@ invalid.svelte:25:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     26 │ <h4 onclick={() => {}} />
     27 │ <h5 onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -473,7 +473,7 @@ invalid.svelte:25:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:26:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     24 │ <h2 onclick={() => {}} />
     25 │ <h3 onclick={() => {}} />
@@ -482,7 +482,7 @@ invalid.svelte:26:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     27 │ <h5 onclick={() => {}} />
     28 │ <h6 onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -490,7 +490,7 @@ invalid.svelte:26:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:27:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     25 │ <h3 onclick={() => {}} />
     26 │ <h4 onclick={() => {}} />
@@ -499,7 +499,7 @@ invalid.svelte:27:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     28 │ <h6 onclick={() => {}} />
     29 │ <iframe onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -507,7 +507,7 @@ invalid.svelte:27:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:28:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     26 │ <h4 onclick={() => {}} />
     27 │ <h5 onclick={() => {}} />
@@ -516,7 +516,7 @@ invalid.svelte:28:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     29 │ <iframe onclick={() => {}} />
     30 │ <img onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -524,7 +524,7 @@ invalid.svelte:28:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:29:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     27 │ <h5 onclick={() => {}} />
     28 │ <h6 onclick={() => {}} />
@@ -533,7 +533,7 @@ invalid.svelte:29:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     30 │ <img onclick={() => {}} />
     31 │ <label onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -541,7 +541,7 @@ invalid.svelte:29:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:30:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     28 │ <h6 onclick={() => {}} />
     29 │ <iframe onclick={() => {}} />
@@ -550,7 +550,7 @@ invalid.svelte:30:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     31 │ <label onclick={() => {}} />
     32 │ <legend onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -558,7 +558,7 @@ invalid.svelte:30:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:31:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     29 │ <iframe onclick={() => {}} />
     30 │ <img onclick={() => {}} />
@@ -567,7 +567,7 @@ invalid.svelte:31:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     32 │ <legend onclick={() => {}} />
     33 │ <li onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -575,7 +575,7 @@ invalid.svelte:31:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:32:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     30 │ <img onclick={() => {}} />
     31 │ <label onclick={() => {}} />
@@ -584,7 +584,7 @@ invalid.svelte:32:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     33 │ <li onclick={() => {}} />
     34 │ <mark onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -592,7 +592,7 @@ invalid.svelte:32:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:33:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     31 │ <label onclick={() => {}} />
     32 │ <legend onclick={() => {}} />
@@ -601,7 +601,7 @@ invalid.svelte:33:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     34 │ <mark onclick={() => {}} />
     35 │ <marquee onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -609,7 +609,7 @@ invalid.svelte:33:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:34:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     32 │ <legend onclick={() => {}} />
     33 │ <li onclick={() => {}} />
@@ -618,7 +618,7 @@ invalid.svelte:34:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     35 │ <marquee onclick={() => {}} />
     36 │ <menu onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -626,7 +626,7 @@ invalid.svelte:34:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:35:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     33 │ <li onclick={() => {}} />
     34 │ <mark onclick={() => {}} />
@@ -635,7 +635,7 @@ invalid.svelte:35:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     36 │ <menu onclick={() => {}} />
     37 │ <meter onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -643,7 +643,7 @@ invalid.svelte:35:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:36:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     34 │ <mark onclick={() => {}} />
     35 │ <marquee onclick={() => {}} />
@@ -652,7 +652,7 @@ invalid.svelte:36:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     37 │ <meter onclick={() => {}} />
     38 │ <nav onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -660,7 +660,7 @@ invalid.svelte:36:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:37:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     35 │ <marquee onclick={() => {}} />
     36 │ <menu onclick={() => {}} />
@@ -669,7 +669,7 @@ invalid.svelte:37:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     38 │ <nav onclick={() => {}} />
     39 │ <ol onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -677,7 +677,7 @@ invalid.svelte:37:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:38:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     36 │ <menu onclick={() => {}} />
     37 │ <meter onclick={() => {}} />
@@ -686,7 +686,7 @@ invalid.svelte:38:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     39 │ <ol onclick={() => {}} />
     40 │ <optgroup onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -694,7 +694,7 @@ invalid.svelte:38:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:39:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     37 │ <meter onclick={() => {}} />
     38 │ <nav onclick={() => {}} />
@@ -703,7 +703,7 @@ invalid.svelte:39:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     40 │ <optgroup onclick={() => {}} />
     41 │ <output onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -711,7 +711,7 @@ invalid.svelte:39:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:40:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     38 │ <nav onclick={() => {}} />
     39 │ <ol onclick={() => {}} />
@@ -720,7 +720,7 @@ invalid.svelte:40:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     41 │ <output onclick={() => {}} />
     42 │ <p onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -728,7 +728,7 @@ invalid.svelte:40:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:41:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     39 │ <ol onclick={() => {}} />
     40 │ <optgroup onclick={() => {}} />
@@ -737,7 +737,7 @@ invalid.svelte:41:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     42 │ <p onclick={() => {}} />
     43 │ <pre onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -745,7 +745,7 @@ invalid.svelte:41:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:42:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     40 │ <optgroup onclick={() => {}} />
     41 │ <output onclick={() => {}} />
@@ -754,7 +754,7 @@ invalid.svelte:42:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     43 │ <pre onclick={() => {}} />
     44 │ <progress onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -762,7 +762,7 @@ invalid.svelte:42:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:43:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     41 │ <output onclick={() => {}} />
     42 │ <p onclick={() => {}} />
@@ -771,7 +771,7 @@ invalid.svelte:43:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     44 │ <progress onclick={() => {}} />
     45 │ <ruby onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -779,7 +779,7 @@ invalid.svelte:43:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:44:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     42 │ <p onclick={() => {}} />
     43 │ <pre onclick={() => {}} />
@@ -788,7 +788,7 @@ invalid.svelte:44:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     45 │ <ruby onclick={() => {}} />
     46 │ <section onclick={() => {}} aria-label="Aardvark" />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -796,7 +796,7 @@ invalid.svelte:44:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:45:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     43 │ <pre onclick={() => {}} />
     44 │ <progress onclick={() => {}} />
@@ -805,7 +805,7 @@ invalid.svelte:45:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     46 │ <section onclick={() => {}} aria-label="Aardvark" />
     47 │ <section onclick={() => {}} aria-labelledby="js_1" />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -813,7 +813,7 @@ invalid.svelte:45:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:46:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     44 │ <progress onclick={() => {}} />
     45 │ <ruby onclick={() => {}} />
@@ -822,7 +822,7 @@ invalid.svelte:46:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     47 │ <section onclick={() => {}} aria-labelledby="js_1" />
     48 │ <table onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -830,7 +830,7 @@ invalid.svelte:46:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:47:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     45 │ <ruby onclick={() => {}} />
     46 │ <section onclick={() => {}} aria-label="Aardvark" />
@@ -839,7 +839,7 @@ invalid.svelte:47:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     48 │ <table onclick={() => {}} />
     49 │ <tbody onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -847,7 +847,7 @@ invalid.svelte:47:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:48:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     46 │ <section onclick={() => {}} aria-label="Aardvark" />
     47 │ <section onclick={() => {}} aria-labelledby="js_1" />
@@ -856,7 +856,7 @@ invalid.svelte:48:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     49 │ <tbody onclick={() => {}} />
     50 │ <td onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -864,7 +864,7 @@ invalid.svelte:48:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:49:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     47 │ <section onclick={() => {}} aria-labelledby="js_1" />
     48 │ <table onclick={() => {}} />
@@ -873,7 +873,7 @@ invalid.svelte:49:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     50 │ <td onclick={() => {}} />
     51 │ <tfoot onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -881,7 +881,7 @@ invalid.svelte:49:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:50:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     48 │ <table onclick={() => {}} />
     49 │ <tbody onclick={() => {}} />
@@ -890,7 +890,7 @@ invalid.svelte:50:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     51 │ <tfoot onclick={() => {}} />
     52 │ <thead onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -898,7 +898,7 @@ invalid.svelte:50:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:51:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     49 │ <tbody onclick={() => {}} />
     50 │ <td onclick={() => {}} />
@@ -907,7 +907,7 @@ invalid.svelte:51:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     52 │ <thead onclick={() => {}} />
     53 │ <time onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -915,7 +915,7 @@ invalid.svelte:51:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:52:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     50 │ <td onclick={() => {}} />
     51 │ <tfoot onclick={() => {}} />
@@ -924,7 +924,7 @@ invalid.svelte:52:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     53 │ <time onclick={() => {}} />
     54 │ <ul onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -932,7 +932,7 @@ invalid.svelte:52:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:53:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     51 │ <tfoot onclick={() => {}} />
     52 │ <thead onclick={() => {}} />
@@ -941,7 +941,7 @@ invalid.svelte:53:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     54 │ <ul onclick={() => {}} />
     55 │ <ul contenteditable="false" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -949,7 +949,7 @@ invalid.svelte:53:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:54:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     52 │ <thead onclick={() => {}} />
     53 │ <time onclick={() => {}} />
@@ -958,7 +958,7 @@ invalid.svelte:54:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     55 │ <ul contenteditable="false" onclick={() => {}} />
     56 │ <div role="alert" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -966,7 +966,7 @@ invalid.svelte:54:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:55:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     53 │ <time onclick={() => {}} />
     54 │ <ul onclick={() => {}} />
@@ -975,7 +975,7 @@ invalid.svelte:55:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     56 │ <div role="alert" onclick={() => {}} />
     57 │ <div role="alertdialog" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -983,7 +983,7 @@ invalid.svelte:55:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:56:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     54 │ <ul onclick={() => {}} />
     55 │ <ul contenteditable="false" onclick={() => {}} />
@@ -992,7 +992,7 @@ invalid.svelte:56:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     57 │ <div role="alertdialog" onclick={() => {}} />
     58 │ <div role="application" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1000,7 +1000,7 @@ invalid.svelte:56:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:57:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     55 │ <ul contenteditable="false" onclick={() => {}} />
     56 │ <div role="alert" onclick={() => {}} />
@@ -1009,7 +1009,7 @@ invalid.svelte:57:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     58 │ <div role="application" onclick={() => {}} />
     59 │ <div role="banner" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1017,7 +1017,7 @@ invalid.svelte:57:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:58:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     56 │ <div role="alert" onclick={() => {}} />
     57 │ <div role="alertdialog" onclick={() => {}} />
@@ -1026,7 +1026,7 @@ invalid.svelte:58:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     59 │ <div role="banner" onclick={() => {}} />
     60 │ <div role="cell" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1034,7 +1034,7 @@ invalid.svelte:58:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:59:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     57 │ <div role="alertdialog" onclick={() => {}} />
     58 │ <div role="application" onclick={() => {}} />
@@ -1043,7 +1043,7 @@ invalid.svelte:59:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     60 │ <div role="cell" onclick={() => {}} />
     61 │ <div role="complementary" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1051,7 +1051,7 @@ invalid.svelte:59:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:60:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     58 │ <div role="application" onclick={() => {}} />
     59 │ <div role="banner" onclick={() => {}} />
@@ -1060,7 +1060,7 @@ invalid.svelte:60:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     61 │ <div role="complementary" onclick={() => {}} />
     62 │ <div role="contentinfo" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1068,7 +1068,7 @@ invalid.svelte:60:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:61:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     59 │ <div role="banner" onclick={() => {}} />
     60 │ <div role="cell" onclick={() => {}} />
@@ -1077,7 +1077,7 @@ invalid.svelte:61:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     62 │ <div role="contentinfo" onclick={() => {}} />
     63 │ <div role="definition" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1085,7 +1085,7 @@ invalid.svelte:61:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:62:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     60 │ <div role="cell" onclick={() => {}} />
     61 │ <div role="complementary" onclick={() => {}} />
@@ -1094,7 +1094,7 @@ invalid.svelte:62:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     63 │ <div role="definition" onclick={() => {}} />
     64 │ <div role="dialog" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1102,7 +1102,7 @@ invalid.svelte:62:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:63:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     61 │ <div role="complementary" onclick={() => {}} />
     62 │ <div role="contentinfo" onclick={() => {}} />
@@ -1111,7 +1111,7 @@ invalid.svelte:63:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     64 │ <div role="dialog" onclick={() => {}} />
     65 │ <div role="directory" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1119,7 +1119,7 @@ invalid.svelte:63:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:64:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     62 │ <div role="contentinfo" onclick={() => {}} />
     63 │ <div role="definition" onclick={() => {}} />
@@ -1128,7 +1128,7 @@ invalid.svelte:64:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     65 │ <div role="directory" onclick={() => {}} />
     66 │ <div role="document" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1136,7 +1136,7 @@ invalid.svelte:64:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:65:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     63 │ <div role="definition" onclick={() => {}} />
     64 │ <div role="dialog" onclick={() => {}} />
@@ -1145,7 +1145,7 @@ invalid.svelte:65:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     66 │ <div role="document" onclick={() => {}} />
     67 │ <div role="feed" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1153,7 +1153,7 @@ invalid.svelte:65:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:66:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     64 │ <div role="dialog" onclick={() => {}} />
     65 │ <div role="directory" onclick={() => {}} />
@@ -1162,7 +1162,7 @@ invalid.svelte:66:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     67 │ <div role="feed" onclick={() => {}} />
     68 │ <div role="figure" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1170,7 +1170,7 @@ invalid.svelte:66:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:67:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     65 │ <div role="directory" onclick={() => {}} />
     66 │ <div role="document" onclick={() => {}} />
@@ -1179,7 +1179,7 @@ invalid.svelte:67:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     68 │ <div role="figure" onclick={() => {}} />
     69 │ <div role="form" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1187,7 +1187,7 @@ invalid.svelte:67:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:68:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     66 │ <div role="document" onclick={() => {}} />
     67 │ <div role="feed" onclick={() => {}} />
@@ -1196,7 +1196,7 @@ invalid.svelte:68:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     69 │ <div role="form" onclick={() => {}} />
     70 │ <div role="group" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1204,7 +1204,7 @@ invalid.svelte:68:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:69:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     67 │ <div role="feed" onclick={() => {}} />
     68 │ <div role="figure" onclick={() => {}} />
@@ -1213,7 +1213,7 @@ invalid.svelte:69:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     70 │ <div role="group" onclick={() => {}} />
     71 │ <div role="heading" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1221,7 +1221,7 @@ invalid.svelte:69:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:70:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     68 │ <div role="figure" onclick={() => {}} />
     69 │ <div role="form" onclick={() => {}} />
@@ -1230,7 +1230,7 @@ invalid.svelte:70:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     71 │ <div role="heading" onclick={() => {}} />
     72 │ <div role="img" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1238,7 +1238,7 @@ invalid.svelte:70:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:71:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     69 │ <div role="form" onclick={() => {}} />
     70 │ <div role="group" onclick={() => {}} />
@@ -1247,7 +1247,7 @@ invalid.svelte:71:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     72 │ <div role="img" onclick={() => {}} />
     73 │ <div role="list" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1255,7 +1255,7 @@ invalid.svelte:71:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:72:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     70 │ <div role="group" onclick={() => {}} />
     71 │ <div role="heading" onclick={() => {}} />
@@ -1264,7 +1264,7 @@ invalid.svelte:72:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     73 │ <div role="list" onclick={() => {}} />
     74 │ <div role="listitem" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1272,7 +1272,7 @@ invalid.svelte:72:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:73:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     71 │ <div role="heading" onclick={() => {}} />
     72 │ <div role="img" onclick={() => {}} />
@@ -1281,7 +1281,7 @@ invalid.svelte:73:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     74 │ <div role="listitem" onclick={() => {}} />
     75 │ <div role="log" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1289,7 +1289,7 @@ invalid.svelte:73:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:74:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     72 │ <div role="img" onclick={() => {}} />
     73 │ <div role="list" onclick={() => {}} />
@@ -1298,7 +1298,7 @@ invalid.svelte:74:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     75 │ <div role="log" onclick={() => {}} />
     76 │ <div role="main" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1306,7 +1306,7 @@ invalid.svelte:74:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:75:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     73 │ <div role="list" onclick={() => {}} />
     74 │ <div role="listitem" onclick={() => {}} />
@@ -1315,7 +1315,7 @@ invalid.svelte:75:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     76 │ <div role="main" onclick={() => {}} />
     77 │ <div role="marquee" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1323,7 +1323,7 @@ invalid.svelte:75:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:76:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     74 │ <div role="listitem" onclick={() => {}} />
     75 │ <div role="log" onclick={() => {}} />
@@ -1332,7 +1332,7 @@ invalid.svelte:76:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     77 │ <div role="marquee" onclick={() => {}} />
     78 │ <div role="math" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1340,7 +1340,7 @@ invalid.svelte:76:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:77:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     75 │ <div role="log" onclick={() => {}} />
     76 │ <div role="main" onclick={() => {}} />
@@ -1349,7 +1349,7 @@ invalid.svelte:77:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     78 │ <div role="math" onclick={() => {}} />
     79 │ <div role="navigation" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1357,7 +1357,7 @@ invalid.svelte:77:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:78:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     76 │ <div role="main" onclick={() => {}} />
     77 │ <div role="marquee" onclick={() => {}} />
@@ -1366,7 +1366,7 @@ invalid.svelte:78:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     79 │ <div role="navigation" onclick={() => {}} />
     80 │ <div role="note" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1374,7 +1374,7 @@ invalid.svelte:78:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:79:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     77 │ <div role="marquee" onclick={() => {}} />
     78 │ <div role="math" onclick={() => {}} />
@@ -1383,7 +1383,7 @@ invalid.svelte:79:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     80 │ <div role="note" onclick={() => {}} />
     81 │ <div role="region" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1391,7 +1391,7 @@ invalid.svelte:79:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:80:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     78 │ <div role="math" onclick={() => {}} />
     79 │ <div role="navigation" onclick={() => {}} />
@@ -1400,7 +1400,7 @@ invalid.svelte:80:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     81 │ <div role="region" onclick={() => {}} />
     82 │ <div role="rowgroup" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1408,7 +1408,7 @@ invalid.svelte:80:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:81:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     79 │ <div role="navigation" onclick={() => {}} />
     80 │ <div role="note" onclick={() => {}} />
@@ -1417,7 +1417,7 @@ invalid.svelte:81:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     82 │ <div role="rowgroup" onclick={() => {}} />
     83 │ <div role="search" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1425,7 +1425,7 @@ invalid.svelte:81:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:82:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     80 │ <div role="note" onclick={() => {}} />
     81 │ <div role="region" onclick={() => {}} />
@@ -1434,7 +1434,7 @@ invalid.svelte:82:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     83 │ <div role="search" onclick={() => {}} />
     84 │ <div role="status" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1442,7 +1442,7 @@ invalid.svelte:82:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:83:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     81 │ <div role="region" onclick={() => {}} />
     82 │ <div role="rowgroup" onclick={() => {}} />
@@ -1451,7 +1451,7 @@ invalid.svelte:83:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     84 │ <div role="status" onclick={() => {}} />
     85 │ <div role="table" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1459,7 +1459,7 @@ invalid.svelte:83:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:84:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     82 │ <div role="rowgroup" onclick={() => {}} />
     83 │ <div role="search" onclick={() => {}} />
@@ -1468,7 +1468,7 @@ invalid.svelte:84:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     85 │ <div role="table" onclick={() => {}} />
     86 │ <div role="tabpanel" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1476,7 +1476,7 @@ invalid.svelte:84:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:85:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     83 │ <div role="search" onclick={() => {}} />
     84 │ <div role="status" onclick={() => {}} />
@@ -1485,7 +1485,7 @@ invalid.svelte:85:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     86 │ <div role="tabpanel" onclick={() => {}} />
     87 │ <div role="term" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1493,7 +1493,7 @@ invalid.svelte:85:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:86:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     84 │ <div role="status" onclick={() => {}} />
     85 │ <div role="table" onclick={() => {}} />
@@ -1502,7 +1502,7 @@ invalid.svelte:86:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     87 │ <div role="term" onclick={() => {}} />
     88 │ <div role="timer" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1510,7 +1510,7 @@ invalid.svelte:86:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:87:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     85 │ <div role="table" onclick={() => {}} />
     86 │ <div role="tabpanel" onclick={() => {}} />
@@ -1519,7 +1519,7 @@ invalid.svelte:87:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     88 │ <div role="timer" onclick={() => {}} />
     89 │ <div role="tooltip" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1527,7 +1527,7 @@ invalid.svelte:87:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:88:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     86 │ <div role="tabpanel" onclick={() => {}} />
     87 │ <div role="term" onclick={() => {}} />
@@ -1536,7 +1536,7 @@ invalid.svelte:88:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     89 │ <div role="tooltip" onclick={() => {}} />
     90 │ <div role="progressbar" onclick={() => {}} />
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1544,7 +1544,7 @@ invalid.svelte:88:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:89:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     87 │ <div role="term" onclick={() => {}} />
     88 │ <div role="timer" onclick={() => {}} />
@@ -1553,7 +1553,7 @@ invalid.svelte:89:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
     90 │ <div role="progressbar" onclick={() => {}} />
     91 │ 
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```
@@ -1561,7 +1561,7 @@ invalid.svelte:89:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.svelte:90:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Non-interactive element should not have event handler.
+  i Unexpected event handler on non-interactive element.
   
     88 │ <div role="timer" onclick={() => {}} />
     89 │ <div role="tooltip" onclick={() => {}} />
@@ -1569,7 +1569,7 @@ invalid.svelte:90:1 lint/a11y/noNoninteractiveElementInteractions ━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     91 │ 
   
-  i Consider replace semantically interactive element like <button/> or <a href/>.
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
 
 ```

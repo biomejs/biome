@@ -6,7 +6,7 @@ use biome_rule_options::no_noninteractive_element_interactions::NoNoninteractive
 
 use crate::{
     Aria,
-    a11y::{is_content_editable, is_hidden_from_screen_reader},
+    a11y::{has_event_handler, is_content_editable, is_hidden_from_screen_reader},
 };
 
 declare_lint_rule! {
@@ -92,7 +92,7 @@ impl Rule for NoNoninteractiveElementInteractions {
         let role = aria_roles.get_role_by_element_name(element);
         let has_interactive_role = role.is_some_and(|role| role.is_interactive());
 
-        if !has_handler_props(element)
+        if !has_event_handler(EVENT_HANDLER_TYPES, element)
             || is_content_editable(element)
             || aria_roles.is_presentation_role(element)
             || is_hidden_from_screen_reader(element)
@@ -116,52 +116,20 @@ impl Rule for NoNoninteractiveElementInteractions {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Non-interactive element should not have event handler."
+                    "Unexpected event handler on non-interactive element."
                 },
             )
             .note(markup! {
-                "Consider replace semantically interactive element like "<Emphasis>"<button/>"</Emphasis>" or "<Emphasis>"<a href/>"</Emphasis>"."
+                "Non-interactive element should not have event handler. Consider replace semantically interactive element like "<Emphasis>"<button/>"</Emphasis>" or "<Emphasis>"<a href/>"</Emphasis>"."
             })
         )
     }
 }
 
-const INTERACTIVE_HANDLERS: &[&str] = &[
-    "onclick",
-    "oncontextmenu",
-    "ondblclick",
-    "ondoubleclick",
-    "ondrag",
-    "ondragend",
-    "ondragenter",
-    "ondragexit",
-    "ondragleave",
-    "ondragover",
-    "ondragstart",
-    "ondrop",
-    "onmousedown",
-    "onmouseenter",
-    "onmouseleave",
-    "onmousemove",
-    "onmouseout",
-    "onmouseover",
-    "onkeydown",
-    "onkeypress",
-    "onkeyup",
-    "onfocus",
-    "onblur",
-    "onload",
-    "onerror",
-];
+// Only check the focus, image, keyboard and mouse event handler types.
+const EVENT_HANDLER_TYPES: &[&str] = &["focus", "image", "keyboard", "mouse"];
 
-/// Check if the element contains event handler
-fn has_handler_props(element: &AnyHtmlTagElement) -> bool {
-    INTERACTIVE_HANDLERS.iter().any(|handler| {
-        element.find_attribute_by_name(handler).is_some()
-            || handler.strip_prefix("on").is_some_and(|handler_name| {
-                element
-                    .find_vue_event_handling_directive(handler_name)
-                    .is_some()
-            })
-    })
+#[test]
+fn test_order() {
+    assert!(EVENT_HANDLER_TYPES.is_sorted());
 }
