@@ -129,11 +129,13 @@ impl Rule for NoUselessEscapeInRegex {
                                     // `ClassSetReservedPunctuator`: reserved as individual
                                     // characters inside a `v`-mode character class, so the
                                     // escape is always required.
+                                    // https://tc39.es/ecma262/#prod-ClassSetReservedPunctuator
                                     b'&' | b'!' | b'#' | b'%' | b',' | b':' | b';'
                                     | b'<' | b'=' | b'>' | b'@' | b'`' | b'~' if has_v_flag => {}
                                     // Characters that form a `ClassSetReservedDoublePunctuator`
                                     // only when doubled. Escape is useless unless part of a
                                     // doubled pair.
+                                    // https://tc39.es/ecma262/#prod-ClassSetReservedDoublePunctuator
                                     b'$' | b'*' | b'+' | b'.' | b'?' if has_v_flag => {
                                         // SAFETY: there is at least one preceding character (`[`)
                                         if bytes[index-1] != *escaped && byte_it.next().is_none_or(|(_, byte)| byte != escaped) {
