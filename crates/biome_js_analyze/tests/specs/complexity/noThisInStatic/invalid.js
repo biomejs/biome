@@ -37,3 +37,19 @@ const E = class extends f() {
         return this.CONSTANT + super.ANOTHER_CONSTANT;
     }
 }
+
+// Polymorphic static method: replacing `this` with the base class name
+// would break subclass behavior at runtime
+class Base {
+    constructor(public name) {}
+
+    static create(name) {
+        return new this(name);
+    }
+}
+
+class Sub extends Base {
+    greet() {
+        return `Hi, ${this.name}`;
+    }
+}
