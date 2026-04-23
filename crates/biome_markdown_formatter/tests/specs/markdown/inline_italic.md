@@ -21,3 +21,17 @@ _foo_
 [FOOBAR]: train.jpg "train & tracks"
 
 _*foo bar baz bim bam*_
+
+*(*foo*)*
+
+_foo _bar_ baz_
+
+__foo_ bar_
+
+*foo *bar**
+
+*foo [*bar*](/url)*
+
+*foo _bar* baz_
+
+*foo __bar *baz bim__ bam*
