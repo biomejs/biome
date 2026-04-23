@@ -47,7 +47,7 @@ info: tsx/delimiter_spacing/jsx_expression_attrs.tsx
 
 ```json
 {
-  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
   "javascript": {
     "formatter": {
       "delimiterSpacing": true

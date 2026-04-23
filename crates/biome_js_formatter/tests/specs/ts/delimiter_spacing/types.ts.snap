@@ -720,7 +720,7 @@ class H4 {
 
 ```json
 {
-  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
   "javascript": {
     "formatter": {
       "delimiterSpacing": true

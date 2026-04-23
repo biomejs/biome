@@ -78,7 +78,7 @@ a.foo<T, U>().bar<V, R>();
 
 ```json
 {
-  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
   "javascript": {
     "formatter": {
       "delimiterSpacing": true
