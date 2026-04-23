@@ -39,7 +39,7 @@ use biome_js_analyze::METADATA as js_metadata;
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{
     AnyJsModuleItem, EmbeddingKind, JsFileSource, JsLanguage, JsxAttribute, JsxAttributeList,
-    Language, LanguageVariant, TextRange, TextSize,
+    Language, LanguageVariant, SvelteFileKind, TextRange, TextSize,
 };
 use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
@@ -619,6 +619,8 @@ pub(crate) struct DiagnosticsAndActionsParams<'a> {
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) diagnostic_offset: Option<TextSize>,
     pub(crate) document_services: &'a DocumentServices,
+    // Services attached to the current embedded snippet, when diagnostics are run on snippets.
+    pub(crate) snippet_services: Option<&'a DocumentServices>,
 }
 
 #[derive(Debug, Default)]
@@ -1108,6 +1110,8 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) document_services: &'a DocumentServices,
     /// When `false`, actions are returned with `suggestion: None` (no mutations computed).
     pub(crate) compute_actions: bool,
+    // Services attached to the current embedded snippet, when actions are run on snippets.
+    pub(crate) snippet_services: Option<&'a DocumentServices>,
 }
 
 pub(crate) struct UpdateSnippetsNodes {
@@ -1256,14 +1260,23 @@ impl Features {
         }
     }
 
-    /// Returns the [Capabilities] associated with a [BiomePath]
+    /// Returns the [Capabilities] associated with a document source.
     pub(crate) fn get_capabilities(&self, language_hint: DocumentFileSource) -> Capabilities {
         match language_hint {
             // TODO: remove match once we remove vue/astro/svelte handlers
             DocumentFileSource::Js(source) => match source.as_embedding_kind() {
                 EmbeddingKind::Astro { .. } => self.astro.capabilities(),
                 EmbeddingKind::Vue { .. } => self.vue.capabilities(),
-                EmbeddingKind::Svelte { .. } => self.svelte.capabilities(),
+                // `.svelte.ts` / `.svelte.js` are full JS/TS modules with Svelte
+                // semantics; `.svelte` component documents still use the Svelte handler.
+                EmbeddingKind::Svelte {
+                    kind: SvelteFileKind::SourceModule,
+                    ..
+                } => self.js.capabilities(),
+                EmbeddingKind::Svelte {
+                    kind: SvelteFileKind::Component,
+                    ..
+                } => self.svelte.capabilities(),
                 EmbeddingKind::None => self.js.capabilities(),
             },
             DocumentFileSource::Json(_) => self.json.capabilities(),
@@ -2227,5 +2240,70 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
             analyzer_options,
             fixable_rules,
         }
+    }
+}
+#[cfg(test)]
+mod tests {
+    use super::{DocumentFileSource, Features};
+    use camino::Utf8Path;
+
+    #[test]
+    fn markdown_file_source_detection_and_capabilities() {
+        let source = DocumentFileSource::from_path(Utf8Path::new("docs/readme.md"), false);
+        assert!(matches!(source, DocumentFileSource::Markdown(_)));
+
+        let language_source = DocumentFileSource::from_language_id("markdown");
+        assert!(matches!(language_source, DocumentFileSource::Markdown(_)));
+
+        assert!(DocumentFileSource::can_parse(Utf8Path::new(
+            "docs/readme.md"
+        )));
+        assert!(DocumentFileSource::can_read(Utf8Path::new(
+            "docs/readme.md"
+        )));
+        assert!(!DocumentFileSource::can_contain_embeds(
+            Utf8Path::new("docs/readme.md"),
+            false
+        ));
+    }
+
+    #[test]
+    fn markdown_features_provide_formatter_capabilities() {
+        let features = Features::new();
+        let path = Utf8Path::new("doc.md");
+        let capabilities = features.get_capabilities(DocumentFileSource::from_path(path, false));
+
+        assert!(capabilities.formatter.format.is_some());
+        assert!(capabilities.parser.parse.is_some());
+    }
+
+    #[test]
+    fn svelte_source_modules_use_js_capabilities() {
+        let features = Features::new();
+        let path = Utf8Path::new("file.svelte.js");
+        let capabilities = features.get_capabilities(DocumentFileSource::from_path(path, false));
+
+        assert!(capabilities.analyzer.rename.is_some());
+        assert!(capabilities.analyzer.pull_diagnostics_and_actions.is_some());
+    }
+
+    #[test]
+    fn svelte_typescript_source_modules_use_js_capabilities() {
+        let features = Features::new();
+        let path = Utf8Path::new("file.svelte.ts");
+        let capabilities = features.get_capabilities(DocumentFileSource::from_path(path, false));
+
+        assert!(capabilities.analyzer.rename.is_some());
+        assert!(capabilities.analyzer.pull_diagnostics_and_actions.is_some());
+    }
+
+    #[test]
+    fn svelte_component_files_keep_svelte_capabilities() {
+        let features = Features::new();
+        let path = Utf8Path::new("file.svelte");
+        let capabilities = features.get_capabilities(DocumentFileSource::from_path(path, false));
+
+        assert!(capabilities.analyzer.rename.is_none());
+        assert!(capabilities.analyzer.pull_diagnostics_and_actions.is_none());
     }
 }

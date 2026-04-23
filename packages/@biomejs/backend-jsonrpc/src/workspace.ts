@@ -2577,6 +2577,11 @@ See https://biomejs.dev/linter/rules/use-react-async-server-function
 	 */
 	useReactAsyncServerFunction?: UseReactAsyncServerFunctionConfiguration;
 	/**
+	* Ensure that platform-specific React Native components are only imported in files named for that platform.
+See https://biomejs.dev/linter/rules/use-react-native-platform-components 
+	 */
+	useReactNativePlatformComponents?: UseReactNativePlatformComponentsConfiguration;
+	/**
 	* Enforce using a type parameter on Array#reduce instead of casting the initial value.
 See https://biomejs.dev/linter/rules/use-reduce-type-parameter 
 	 */
@@ -4555,6 +4560,9 @@ export type UseQwikLoaderLocationConfiguration =
 export type UseReactAsyncServerFunctionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseReactAsyncServerFunctionOptions;
+export type UseReactNativePlatformComponentsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseReactNativePlatformComponentsOptions;
 export type UseReduceTypeParameterConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseReduceTypeParameterOptions;
@@ -6415,6 +6423,10 @@ export interface RuleWithUseReactAsyncServerFunctionOptions {
 	level: RulePlainConfiguration;
 	options?: UseReactAsyncServerFunctionOptions;
 }
+export interface RuleWithUseReactNativePlatformComponentsOptions {
+	level: RulePlainConfiguration;
+	options?: UseReactNativePlatformComponentsOptions;
+}
 export interface RuleWithUseReduceTypeParameterOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -8049,6 +8061,18 @@ Default: `false`
 export type UsePlaywrightValidDescribeCallbackOptions = {};
 export type UseQwikLoaderLocationOptions = {};
 export type UseReactAsyncServerFunctionOptions = {};
+export interface UseReactNativePlatformComponentsOptions {
+	/**
+	* A list of glob patterns to identify Android-specific files.
+Defaults to `["**\/*.android.{js,jsx,ts,tsx}"]`. 
+	 */
+	androidPathPatterns?: NormalizedGlob[];
+	/**
+	* A list of glob patterns to identify iOS-specific files.
+Defaults to `["**\/*.ios.{js,jsx,ts,tsx}"]`. 
+	 */
+	iosPathPatterns?: NormalizedGlob[];
+}
 export type UseReduceTypeParameterOptions = {};
 export type UseRegexpExecOptions = {};
 export type UseRegexpTestOptions = {};
@@ -9079,6 +9103,7 @@ export type Category =
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useReactAsyncServerFunction"
+	| "lint/nursery/useReactNativePlatformComponents"
 	| "lint/nursery/useReduceTypeParameter"
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useRegexpTest"
@@ -9632,6 +9657,13 @@ Source-level embeds (`<script>`) use `true`; directives and text expressions use
 				 * Where the bindings are defined
 				 */
 				is_source: boolean;
+				/**
+	* `kind` models whether the Svelte file is a component document or a
+source module. That distinction controls whether downstream code
+extracts `<script>` content or treats the file as a standalone JS/TS
+module, while `is_source` still tracks where bindings come from. 
+	 */
+				kind: SvelteFileKind;
 			};
 	  };
 export type Language =
@@ -9679,6 +9711,7 @@ export type HtmlVariant =
 	| "Svelte";
 export type GritVariant = "Standard";
 export type MarkdownVariant = "Standard";
+export type SvelteFileKind = "Component" | "SourceModule";
 export type EmbeddingHtmlKind = "None" | "Html" | "Vue" | "Astro" | "Svelte";
 export type HtmlTextExpressions = "None" | "Single" | "Double";
 export interface OpenFileResult {

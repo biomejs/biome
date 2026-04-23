@@ -2,6 +2,7 @@ use super::{document::Document, *};
 use crate::Watcher;
 use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
+use crate::file_handlers::svelte::SvelteFileHandler;
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DiagnosticsAndActionsParams, DocumentFileSource, Features,
     FixAllParams, FormatEmbedNode, LintParams, LintResults, ParseResult, UpdateSnippetsNodes,
@@ -49,7 +50,7 @@ use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName, PathKind, normalize_path};
 use biome_grit_patterns::{CompilePatternOptions, GritQuery, compile_pattern_with_options};
 use biome_html_syntax::HtmlRoot;
-use biome_js_syntax::{AnyJsRoot, LanguageVariant, ModuleKind};
+use biome_js_syntax::{AnyJsRoot, EmbeddingKind, LanguageVariant, ModuleKind};
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
 use biome_module_graph::{ModuleDependencies, ModuleDiagnostic, ModuleGraph};
@@ -169,6 +170,21 @@ impl WorkspaceServer {
         editor: Option<Configuration>,
     ) -> SettingsWithEditor<'a> {
         SettingsHandle::new(settings, editor)
+    }
+
+    /// LSP language ids cover broad languages (`javascript`, `typescript`) but
+    /// not path-specific framework variants like `.svelte.ts`.
+    fn should_prefer_path_source(
+        document_file_source: DocumentFileSource,
+        path_source: DocumentFileSource,
+    ) -> bool {
+        match (document_file_source, path_source) {
+            (DocumentFileSource::Js(_), DocumentFileSource::Html(_)) => true,
+            (DocumentFileSource::Js(_), DocumentFileSource::Js(path_source)) => {
+                !matches!(path_source.as_embedding_kind(), EmbeddingKind::None)
+            }
+            _ => false,
+        }
     }
 
     /// Starts the watcher.
@@ -334,16 +350,16 @@ impl WorkspaceServer {
             .ok_or_else(WorkspaceError::no_project)?;
 
         let mut source = if let Some(document_file_source) = document_file_source {
-            // TODO: remove once HTML full support is stable
-            // document_file_source is given by the LSP, and we have to change it if full support is enabled.
-            // The workspace knows that, but the LSP doesn't, so we have to do the modification here
-            if document_file_source.is_javascript_like()
-                && matches!(path.extension(), Some("astro" | "vue" | "svelte" | "html"))
-            {
-                DocumentFileSource::from_path(
-                    &path,
-                    settings.experimental_full_html_support_enabled(),
-                )
+            let path_source = DocumentFileSource::from_path(
+                &path,
+                settings.experimental_full_html_support_enabled(),
+            );
+            // LSP language ids cannot encode path-specific framework variants like
+            // `.svelte.ts` / `.svelte.js`, and HTML full support can also upgrade
+            // JS-like hints to HTML. Prefer the path-derived source only when it
+            // carries richer semantics than the editor-provided JS hint.
+            if Self::should_prefer_path_source(document_file_source, path_source) {
+                path_source
             } else {
                 document_file_source
             }
@@ -444,9 +460,16 @@ impl WorkspaceServer {
                         services = CssDocumentServices::default()
                             .with_css_semantic_model(&any_parse.tree())
                             .into();
-                    } else if language.is_javascript_like() {
+                    } else if let DocumentFileSource::Js(source_type) = language {
+                        let source_type = if source_type.is_svelte_component() {
+                            // Component files infer JS/TS from `<script ...>` content.
+                            // Source modules (`.svelte.ts` / `.svelte.js`) already carry source type.
+                            SvelteFileHandler::file_source(&content)
+                        } else {
+                            source_type
+                        };
                         services = JsDocumentServices::default()
-                            .with_js_semantic_model(&any_parse.tree())
+                            .with_js_semantic_model(&any_parse.tree(), &source_type)
                             .into();
                     }
                 }
@@ -1639,9 +1662,16 @@ impl Workspace for WorkspaceServer {
                 services = CssDocumentServices::default()
                     .with_css_semantic_model(&parsed.any_parse.tree())
                     .into();
-            } else if document_source.is_javascript_like() {
+            } else if let DocumentFileSource::Js(source_type) = document_source {
+                let source_type = if source_type.is_svelte_component() {
+                    // Component files infer JS/TS from `<script ...>` content.
+                    // Source modules (`.svelte.ts` / `.svelte.js`) already carry source type.
+                    SvelteFileHandler::file_source(&content)
+                } else {
+                    source_type
+                };
                 services = JsDocumentServices::default()
-                    .with_js_semantic_model(&parsed.any_parse.tree())
+                    .with_js_semantic_model(&parsed.any_parse.tree(), &source_type)
                     .into();
             }
         }
@@ -1872,8 +1902,9 @@ impl Workspace for WorkspaceServer {
                 .filter(|diag| diag.severity() >= Severity::Error)
                 .count();
 
-            for embedded_node in embedded_snippets {
+            for embedded_node in &embedded_snippets {
                 let diagnostics: Vec<_> = embedded_node
+                    .clone()
                     .into_serde_diagnostics()
                     .into_iter()
                     .filter(|diag| diag.severity() >= diagnostic_level)
@@ -1961,9 +1992,10 @@ impl Workspace for WorkspaceServer {
                 plugins: plugins.clone(),
                 diagnostic_offset: None,
                 document_services: &services,
+                snippet_services: None,
             });
 
-            for embedded_node in embedded_snippets {
+            for embedded_node in &embedded_snippets {
                 let Some(file_source) = self.get_source(embedded_node.file_source_index()) else {
                     continue;
                 };
@@ -1975,7 +2007,7 @@ impl Workspace for WorkspaceServer {
                 };
 
                 let snippet_result = pull_diagnostics_and_actions(DiagnosticsAndActionsParams {
-                    parse: embedded_node.parse().clone(),
+                    parse: embedded_node.parse(),
                     settings: &handle,
                     path: &path,
                     only: &only,
@@ -1989,6 +2021,7 @@ impl Workspace for WorkspaceServer {
                     plugins: plugins.clone(),
                     diagnostic_offset: Some(embedded_node.content_offset()),
                     document_services: &services,
+                    snippet_services: Some(embedded_node.as_snippet_services()),
                 });
 
                 final_result.diagnostics.extend(snippet_result.diagnostics);
@@ -2063,9 +2096,10 @@ impl Workspace for WorkspaceServer {
             action_offset: None,
             document_services: &services,
             compute_actions,
+            snippet_services: None,
         });
 
-        for embedded_snippet in embedded_snippets {
+        for embedded_snippet in &embedded_snippets {
             let Some(file_source) = self.get_source(embedded_snippet.file_source_index()) else {
                 continue;
             };
@@ -2091,6 +2125,7 @@ impl Workspace for WorkspaceServer {
                 action_offset: Some(embedded_snippet.content_offset()),
                 document_services: &services,
                 compute_actions,
+                snippet_services: Some(embedded_snippet.as_snippet_services()),
             });
 
             result.actions.extend(embedded_actions_result.actions);

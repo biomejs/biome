@@ -10,7 +10,7 @@ use biome_css_syntax::{AnyCssRoot, CssLanguage};
 use biome_diagnostics::Error;
 use biome_diagnostics::serde::Diagnostic as SerdeDiagnostic;
 use biome_js_semantic::SemanticModelOptions;
-use biome_js_syntax::{AnyJsRoot, JsLanguage};
+use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage};
 use biome_json_syntax::JsonLanguage;
 use biome_parser::AnyParse;
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -382,14 +382,33 @@ impl CssDocumentServices {
 pub struct JsDocumentServices {
     /// Semantic model that belongs to the file
     pub(crate) semantic_model: Option<biome_js_semantic::SemanticModel>,
+    /// Source type used to build the semantic model.
+    pub(crate) source_type: Option<JsFileSource>,
 }
 
 impl JsDocumentServices {
-    pub fn with_js_semantic_model(mut self, root: &AnyJsRoot) -> Self {
+    pub fn with_js_semantic_model(mut self, root: &AnyJsRoot, source_type: &JsFileSource) -> Self {
         self.semantic_model = Some(biome_js_semantic::semantic_model(
             root,
-            SemanticModelOptions::default(),
+            SemanticModelOptions::from(source_type),
         ));
+        self.source_type = Some(*source_type);
         self
+    }
+
+    /// Builds document services for a JS snippet and includes semantic data only
+    /// when analyzer-backed features are enabled.
+    pub fn from_js_snippet(
+        root: &AnyJsRoot,
+        source_type: &JsFileSource,
+        is_analyzer_enabled: bool,
+    ) -> DocumentServices {
+        if is_analyzer_enabled {
+            Self::default()
+                .with_js_semantic_model(root, source_type)
+                .into()
+        } else {
+            DocumentServices::none()
+        }
     }
 }

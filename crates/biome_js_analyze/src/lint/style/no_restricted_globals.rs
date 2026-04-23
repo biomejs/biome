@@ -4,7 +4,7 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::{Binding, BindingExtensions};
-use biome_js_syntax::{AnyJsIdentifierUsage, TextRange};
+use biome_js_syntax::{AnyJsIdentifierUsage, JsSyntaxToken};
 use biome_rowan::AstNode;
 use biome_rule_options::no_restricted_globals::NoRestrictedGlobalsOptions;
 use rustc_hash::FxHashMap;
@@ -64,7 +64,7 @@ const RESTRICTED_GLOBALS: [&str; 2] = ["event", "error"];
 
 impl Rule for NoRestrictedGlobals {
     type Query = SemanticServices;
-    type State = (TextRange, Box<str>, Option<Box<str>>);
+    type State = JsSyntaxToken;
     type Signals = Box<[Self::State]>;
     type Options = NoRestrictedGlobalsOptions;
 
@@ -97,27 +97,25 @@ impl Rule for NoRestrictedGlobals {
                 let token = token.ok()?;
                 let text = token.text_trimmed();
 
-                is_restricted(text, &binding, options.denied_globals.as_ref()).map(|message| {
-                    (
-                        token.text_trimmed_range(),
-                        text.to_string().into_boxed_str(),
-                        message.map(|m| m.into_boxed_str()),
-                    )
-                })
+                if is_restricted(text, &binding, options.denied_globals.as_ref()) {
+                    Some(token)
+                } else {
+                    None
+                }
             })
             .collect::<Vec<_>>()
             .into_boxed_slice()
     }
 
-    fn diagnostic(
-        _ctx: &RuleContext<Self>,
-        (span, text, message): &Self::State,
-    ) -> Option<RuleDiagnostic> {
+    fn diagnostic(_ctx: &RuleContext<Self>, token: &Self::State) -> Option<RuleDiagnostic> {
+        let text = token.text_trimmed();
+        let message = custom_restricted_message(text, _ctx.options().denied_globals.as_ref());
+
         let mut diag = RuleDiagnostic::new(
             rule_category!(),
-            *span,
+            token.text_trimmed_range(),
             markup! {
-                "Do not use the global variable "<Emphasis>{text.as_ref()}</Emphasis>"."
+                "Do not use the global variable "<Emphasis>{text}</Emphasis>"."
             },
         );
 
@@ -135,18 +133,23 @@ fn is_restricted(
     name: &str,
     binding: &Option<Binding>,
     denied_globals: Option<&FxHashMap<Box<str>, Box<str>>>,
-) -> Option<Option<String>> {
+) -> bool {
     if binding.is_some() {
-        return None;
+        return false;
     }
 
     if RESTRICTED_GLOBALS.contains(&name) {
-        return Some(None);
+        return true;
     }
 
-    if let Some(message) = denied_globals.and_then(|denied_globals| denied_globals.get(name)) {
-        return Some(Some(message.to_string()));
-    }
+    denied_globals.is_some_and(|denied_globals| denied_globals.contains_key(name))
+}
 
-    None
+fn custom_restricted_message<'a>(
+    name: &str,
+    denied_globals: Option<&'a FxHashMap<Box<str>, Box<str>>>,
+) -> Option<&'a str> {
+    denied_globals
+        .and_then(|denied_globals| denied_globals.get(name))
+        .map(|message| message.as_ref())
 }

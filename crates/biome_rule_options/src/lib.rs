@@ -434,6 +434,7 @@ pub mod use_qwik_method_usage;
 pub mod use_qwik_valid_lexical_scope;
 pub mod use_react_async_server_function;
 pub mod use_react_function_components;
+pub mod use_react_native_platform_components;
 pub mod use_readonly_class_properties;
 pub mod use_reduce_type_parameter;
 pub mod use_regex_literals;

@@ -37,46 +37,71 @@ $map: (
 ```
 
 
-# Error
-```text
-reformat: output mismatch
---- re-formatted
-+++ formatted
-@@ -15,7 +15,8 @@
-   ),
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,21 +1,22 @@
+ $map: (
+-  /* comment */ key1: value,
+-
++  /* comment */
++  key1: value,
+   // comment
+   key2: value,
+-
+-  /* comment */ /* comment */ key3: value,
+-
++  /* comment */ /* comment */
++  key3: value,
+   /* comment */
+   key4: (
+-      key: value,
+-      key: value,
+-      key: value,
+-      key: value,
+-      key: value,
+-    )
++    key: value,
++    key: value,
++    key: value,
++    key: value,
++    key: value,
++  ),
  );
  
--$map: () /* comment */;
-+$map: ()/* comment */;
+ $map: (/* comment */);
  
--$map: ();
--// comment
-+$map: ()
+-$map: (// comment);
++$map: (
 +  // comment
-+;
++);
+```
 
-IR differences:
---- re-formatted IR
-+++ formatted IR
-@@ -49,12 +49,15 @@
-   empty_line,
-   "$map: ",
-   group(["(", indent([soft_line_break, group([])]), soft_line_break, ")"]),
--  " /* comment */;",
-+  group([indent([soft_line_break, "/* comment */"]), soft_line_break]),
-+  ";",
-   empty_line,
-   "$map: ",
-   group(["(", indent([soft_line_break, group([])]), soft_line_break, ")"]),
--  line_suffix([hard_line_break, "// comment"]),
--  expand_parent,
-+  group(expand: propagated, [
-+    indent([soft_line_break, "// comment", hard_line_break]),
-+    soft_line_break
-+  ]),
-   ";",
-   hard_line_break
- ]
-\ No newline at end of file
+# Output
 
+```scss
+$map: (
+  /* comment */
+  key1: value,
+  // comment
+  key2: value,
+  /* comment */ /* comment */
+  key3: value,
+  /* comment */
+  key4: (
+    key: value,
+    key: value,
+    key: value,
+    key: value,
+    key: value,
+  ),
+);
+
+$map: (/* comment */);
+
+$map: (
+  // comment
+);
 ```

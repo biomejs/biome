@@ -313,6 +313,13 @@ struct ChildrenMeta {
     /// `true` if children contains a block-like element
     has_block_element: bool,
 
+    /// `true` if children contains any non-text child (element, expression, etc.)
+    has_non_text_child: bool,
+
+    /// `true` if children contains text (Word) content
+    /// Comments are not included.
+    has_word: bool,
+
     /// `true` if there are multiple non-text children
     multiple_block_elements: bool,
 }
@@ -326,6 +333,7 @@ impl FormatHtmlElementList {
         for child in children {
             match child {
                 HtmlChild::NonText(element) => {
+                    meta.has_non_text_child = true;
                     // Check if this is a block element
                     let display = get_element_css_display(element);
                     if display.is_block_like() {
@@ -334,7 +342,14 @@ impl FormatHtmlElementList {
                     }
                 }
                 HtmlChild::Verbatim(_) => {
+                    meta.has_non_text_child = true;
                     block_element_count += 1;
+                }
+                HtmlChild::Comment(_) => {
+                    meta.has_non_text_child = true;
+                }
+                HtmlChild::Word(_) => {
+                    meta.has_word = true;
                 }
                 _ => {}
             }
@@ -400,12 +415,24 @@ impl FormatHtmlElementList {
                 }
             }
 
-            // Force multiline if there was a leading newline AND there are block elements
-            // This respects the user's intent to break when they have:
+            // Force multiline if there was a leading newline AND:
+            // - There are block elements (original behavior), OR
+            // - Children are exclusively non-text (no mixed text content)
+            //
+            // The first case handles block elements mixed with text:
+            // <div>a<div>b</div>c</div>
+            //
+            // The second case preserves the user's intent to break non-text children:
             // <div>
-            //   <div>...</div>
+            //   <span>...</span>
             // </div>
-            if had_leading_newline && children_meta.has_block_element {
+            // <div>
+            //   {expression}
+            // </div>
+            if had_leading_newline
+                && (children_meta.has_block_element
+                    || (children_meta.has_non_text_child && !children_meta.has_word))
+            {
                 force_multiline = true;
             }
 

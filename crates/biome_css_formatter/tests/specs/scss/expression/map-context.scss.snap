@@ -1,0 +1,55 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/expression/map-context.scss
+---
+
+# Input
+
+```scss
+$nestedValueCall:(key:fn((a,b)),);
+$nestedValueParen:(key:(fn((a,b))),);
+$nestedValueMultiArg:(key:foo((a,b),(c,d)),);
+$doubleParenListValue:(key:((a,b)),);
+$doubleParenMapValue:(key:((a:b)),);
+$doubleParenMapValueBroken:(key:((very-very-very-very-very-very-very-very-long-map-key:very-very-very-very-very-very-very-very-long-map-value,other-key:other-other-value)),);
+
+```
+
+
+# Formatted
+
+```scss
+$nestedValueCall: (
+	key: fn((a, b)),
+);
+$nestedValueParen: (
+	key: (fn((a, b))),
+);
+$nestedValueMultiArg: (
+	key: foo((a, b), (c, d)),
+);
+$doubleParenListValue: (
+	key: ((a, b)),
+);
+$doubleParenMapValue: (
+	key: (
+		(
+			a: b,
+		)
+	),
+);
+$doubleParenMapValueBroken: (
+	key: (
+		(
+			very-very-very-very-very-very-very-very-long-map-key: very-very-very-very-very-very-very-very-long-map-value,
+			other-key: other-other-value,
+		)
+	),
+);
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   23: 			very-very-very-very-very-very-very-very-long-map-key: very-very-very-very-very-very-very-very-long-map-value,
+```

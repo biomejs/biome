@@ -7,7 +7,7 @@ use crate::file_handlers::{DocumentFileSource, ParseEmbedResult};
 use crate::settings::SettingsWithEditor;
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
 use crate::workspace::{
-    AnyEmbeddedSnippet, CssDocumentServices, DocumentServices, EmbeddedSnippet, JsDocumentServices,
+    AnyEmbeddedSnippet, CssDocumentServices, EmbeddedSnippet, JsDocumentServices,
 };
 use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
 use biome_css_syntax::{CssFileSource, CssLanguage, TextSize};
@@ -21,7 +21,7 @@ use biome_html_syntax::{
     VueVOnShorthandDirective, VueVSlotShorthandDirective,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
-use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage};
+use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, SvelteFileKind};
 use biome_json_parser::parse_json_with_offset_and_cache;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
@@ -789,6 +789,7 @@ fn parse_matched_embed(
                         js_source = js_source.with_embedding_kind(EmbeddingKind::Svelte {
                             is_source: true,
                             is_function_signature: false,
+                            kind: SvelteFileKind::Component,
                         });
                     } else if ctx.host_file_source.is_vue() {
                         js_source = js_source.with_embedding_kind(EmbeddingKind::Vue {
@@ -811,6 +812,7 @@ fn parse_matched_embed(
                         js_source = js_source.with_embedding_kind(EmbeddingKind::Svelte {
                             is_source: false,
                             is_function_signature,
+                            kind: SvelteFileKind::Component,
                         });
                     } else if ctx.host_file_source.is_vue() {
                         js_source = js_source.with_embedding_kind(EmbeddingKind::Vue {
@@ -843,6 +845,7 @@ fn parse_matched_embed(
                             js_source = js_source.with_embedding_kind(EmbeddingKind::Svelte {
                                 is_source: false,
                                 is_function_signature: false,
+                                kind: SvelteFileKind::Component,
                             });
                         }
                     }
@@ -882,17 +885,13 @@ fn parse_matched_embed(
                 content.content_offset,
             );
 
-            // Source-level embeds get full services; expression-level don't
-            let js_services = if is_source_level
-                && (ctx.settings.as_ref().is_linter_enabled()
-                    || ctx.settings.as_ref().is_assist_enabled())
-            {
-                JsDocumentServices::default()
-                    .with_js_semantic_model(&snippet.tree())
-                    .into()
-            } else {
-                DocumentServices::none()
-            };
+            // Source-level embeds get full services; expression-level doesn't
+            let js_services = JsDocumentServices::from_js_snippet(
+                &snippet.tree(),
+                &js_source,
+                ctx.settings.as_ref().is_linter_enabled()
+                    || ctx.settings.as_ref().is_assist_enabled(),
+            );
 
             Some(ParsedEmbed {
                 node: ((snippet, js_services).into(), doc_source),

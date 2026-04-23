@@ -12,7 +12,9 @@ use biome_fs::BiomePath;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse_js_with_cache};
-use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, TextRange, TextSize};
+use biome_js_syntax::{
+    EmbeddingKind, JsFileSource, JsLanguage, SvelteFileKind, TextRange, TextSize,
+};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
 use regex::{Match, Regex};
@@ -79,6 +81,7 @@ impl SvelteFileHandler {
                         .with_embedding_kind(EmbeddingKind::Svelte {
                             is_source: true,
                             is_function_signature: false,
+                            kind: SvelteFileKind::Component,
                         }),
                 )
             })
@@ -129,21 +132,33 @@ impl ExtensionHandler for SvelteFileHandler {
 
 fn parse(
     _rome_path: &BiomePath,
-    _file_source: DocumentFileSource,
+    file_source: DocumentFileSource,
     text: &str,
     _settings: &SettingsWithEditor,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let script = SvelteFileHandler::input(text);
-    let file_source = SvelteFileHandler::file_source(text);
+    let source_type = file_source.to_js_file_source().unwrap_or_default();
+    let (script, script_file_source) = if source_type.is_svelte_source_module() {
+        (text, source_type)
+    } else {
+        (
+            SvelteFileHandler::input(text),
+            SvelteFileHandler::file_source(text),
+        )
+    };
 
-    debug!("Parsing file with language {:?}", file_source);
+    debug!("Parsing file with language {:?}", script_file_source);
 
-    let parse = parse_js_with_cache(script, file_source, JsParserOptions::default(), cache);
+    let parse = parse_js_with_cache(
+        script,
+        script_file_source,
+        JsParserOptions::default(),
+        cache,
+    );
 
     ParseResult {
         any_parse: parse.into(),
-        language: Some(file_source.into()),
+        language: Some(file_source),
     }
 }
 

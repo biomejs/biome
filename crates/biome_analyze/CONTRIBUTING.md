@@ -204,12 +204,15 @@ When writing a rule, you must adhere to the following **pillars**:
 
 1. Explain to the user **what** the error is.
    Generally, this is the message of the diagnostic.
+   Example: "Foo is missing from this Bar."
 
-2. Explain to the user ***why*** the error is triggered.
+2. Explain to the user ***why*** the error is triggered. It should be motivation for the user to fix the error.
    Generally, this is implemented with an additional output node.
+   Example: "Without Foo, the Bar will not work as expected, because of this and that."
 
 3. Tell the user **what** they **should do**. Generally, this is implemented using a [code action](#code-actions).
    If a code action is not applicable a note should tell the user what they should do to fix the error.
+   Example: "Add a Foo by doing this and that."
 
 #### Placement of New Rules
 
@@ -945,7 +948,7 @@ impl Rule for ForLoopCountReferences {
     type Query = Semantic<JsForStatement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = ForLoopCountReferencesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
@@ -1004,8 +1007,8 @@ Taking previous example and modifying it a bit we can apply diagnostic for each 
 impl Rule for ForLoopCountReferences {
     type Query = Semantic<JsForStatement>;
     type State = TextRange;
-    type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Signals = Option<Box<[Self::State]>>;
+    type Options = ForLoopCountReferencesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

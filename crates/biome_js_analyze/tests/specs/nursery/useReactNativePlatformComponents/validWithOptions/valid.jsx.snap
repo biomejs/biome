@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+
+// Platform-agnostic components are fine regardless of custom options
+import { View, Text, ScrollView } from "react-native";
+
+const { View: MyView } = require("react-native");
+
+```

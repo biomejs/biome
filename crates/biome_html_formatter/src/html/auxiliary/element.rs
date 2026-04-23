@@ -138,7 +138,6 @@ impl FormatHtmlElement {
             // third one is either `HtmlRoot` or another `HtmlElement`
             .nth(2)
             .is_some_and(|ancestor| HtmlRoot::can_cast(ancestor.kind()));
-        // If `<template>` is at the root level, force multiline formatting of its children.
         let is_template_element = get_tag_name_text(&tag_name)
             .is_some_and(|tt| tt.to_ascii_lowercase_cow() == "template");
 
@@ -175,8 +174,28 @@ impl FormatHtmlElement {
                 .ok()
                 .is_some_and(|tok| tok.has_leading_whitespace_or_newline());
 
-        let forces_break_children =
-            should_force_break_content || (is_root_element_list && is_template_element);
+        // Check if there is a newline between the opening tag and the first child.
+        // This is distinct from `content_has_leading_whitespace` which also matches spaces.
+        let content_has_leading_newline = opening_element
+            .r_angle_token()
+            .ok()
+            .is_some_and(|tok| tok.trailing_trivia().pieces().any(|p| p.is_newline()))
+            || children
+                .syntax()
+                .first_token()
+                .is_some_and(|tok| tok.leading_trivia().pieces().any(|p| p.is_newline()));
+
+        let forces_break_children = should_force_break_content
+            // If `<template>` is at the root level, always force multiline formatting of its children.
+            || (is_root_element_list && is_template_element)
+            // Nested `<template>` elements with a leading newline
+            // and direct element children should also force multiline, since `<template>` acts
+            // as a structural container in frameworks like Vue/Svelte.
+            // Without a leading newline (e.g. `<template #body><p>foo</p></template>`),
+            // the children stay inline.
+            || (is_template_element
+                && content_has_leading_newline
+                && has_non_text_child(&children));
 
         // "Borrowing" in this context refers to tokens in nodes that would normally be
         // formatted by that node's formatter, but are instead formatted by a sibling

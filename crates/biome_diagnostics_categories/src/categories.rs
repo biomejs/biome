@@ -293,6 +293,7 @@ define_categories! {
     "lint/nursery/useQwikMethodUsage": "https://biomejs.dev/linter/rules/use-qwik-method-usage",
     "lint/nursery/useQwikValidLexicalScope": "https://biomejs.dev/linter/rules/use-qwik-valid-lexical-scope",
     "lint/nursery/useReactAsyncServerFunction": "https://biomejs.dev/linter/rules/use-react-async-server-function",
+    "lint/nursery/useReactNativePlatformComponents": "https://biomejs.dev/linter/rules/use-react-native-platform-components",
     "lint/nursery/useReduceTypeParameter": "https://biomejs.dev/linter/rules/use-reduce-type-parameter",
     "lint/nursery/useRegexpExec": "https://biomejs.dev/linter/rules/use-regexp-exec",
     "lint/nursery/useRegexpTest": "https://biomejs.dev/linter/rules/use-regexp-test",

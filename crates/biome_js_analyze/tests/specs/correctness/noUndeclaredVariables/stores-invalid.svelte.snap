@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: stores-invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+	$count;
+</script>
+
+```
+
+# Diagnostics
+```
+stores-invalid.svelte:3:2 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The $count variable is undeclared.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script>
+  > 3 │ 	$count;
+      │ 	^^^^^^
+    4 │ </script>
+    5 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
