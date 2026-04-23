@@ -97,7 +97,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseReactNativePlatformComponents {
-        version: "next",
+        version: "2.4.13",
         name: "useReactNativePlatformComponents",
         language: "js",
         sources: &[RuleSource::EslintReactNative("split-platform-components").inspired()],

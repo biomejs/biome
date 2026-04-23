@@ -1,5 +1,172 @@
 # @biomejs/biome
 
+## 2.4.13
+
+### Patch Changes
+
+- [#9969](https://github.com/biomejs/biome/pull/9969) [`c5eb92b`](https://github.com/biomejs/biome/commit/c5eb92ba288ba13698b37e43617eed5339ad7007) Thanks [@officialasishkumar](https://github.com/officialasishkumar)! - Added the nursery rule [`noUnnecessaryTemplateExpression`](https://biomejs.dev/linter/rules/no-unnecessary-template-expression/), which disallows template literals that only contain string literal expressions. These can be replaced with a simpler string literal.
+
+  For example, the following code triggers the rule:
+
+  ```js
+  const a = `${"hello"}`; // can be 'hello'
+  const b = `${"prefix"}_suffix`; // can be 'prefix_suffix'
+  const c = `${"a"}${"b"}`; // can be 'ab'
+  ```
+
+- [#10037](https://github.com/biomejs/biome/pull/10037) [`f785e8c`](https://github.com/biomejs/biome/commit/f785e8c604879dd3dd17b53aae0e2feef4026c82) Thanks [@minseong0324](https://github.com/minseong0324)! - Fixed [#9810](https://github.com/biomejs/biome/issues/9810): [`noMisleadingReturnType`](https://biomejs.dev/linter/rules/no-misleading-return-type/) no longer reports false positives on a getter with a matching setter in the same namespace.
+
+  ```ts
+  class Store {
+    get status(): string {
+      if (Math.random() > 0.5) return "loading";
+      return "idle";
+    }
+    set status(v: string) {}
+  }
+  ```
+
+- [#10084](https://github.com/biomejs/biome/pull/10084) [`5e2f90c`](https://github.com/biomejs/biome/commit/5e2f90c045b4bd7006c96a9df123303d6c24e1d8) Thanks [@jiwon79](https://github.com/jiwon79)! - Fixed [#10034](https://github.com/biomejs/biome/issues/10034): [`noUselessEscapeInRegex`](https://biomejs.dev/linter/rules/no-useless-escape-in-regex/) no longer flags escapes of `ClassSetReservedPunctuator` characters (`&`, `!`, `#`, `%`, `,`, `:`, `;`, `<`, `=`, `>`, `@`, `` ` ``, `~`) inside `v`-flag character classes as useless. These characters are reserved as individual code points in `v`-mode, so the escape is required.
+
+  The following pattern is now considered valid:
+
+  ```js
+  /[a-z\&]/v;
+  ```
+
+- [#10063](https://github.com/biomejs/biome/pull/10063) [`c9ffa16`](https://github.com/biomejs/biome/commit/c9ffa16491c9f8c003eb945796911564fc981b71) Thanks [@Netail](https://github.com/Netail)! - Added extra rule sources from ESLint CSS. `biome migrate eslint` should do a bit better detecting rules in your eslint configurations.
+
+- [#10035](https://github.com/biomejs/biome/pull/10035) [`946b50e`](https://github.com/biomejs/biome/commit/946b50e173e8c89a2d2b303cb159a05cbd068767) Thanks [@Netail](https://github.com/Netail)! - Fixed [#10032](https://github.com/biomejs/biome/issues/10032): [useIframeSandbox](https://biomejs.dev/linter/rules/use-iframe-sandbox/) now flags if there's no initializer value.
+
+- [#9865](https://github.com/biomejs/biome/pull/9865) [`68fb8d4`](https://github.com/biomejs/biome/commit/68fb8d468c01732c4283a336eca42223983df09b) Thanks [@dyc3](https://github.com/dyc3)! - Added the new nursery rule [`useDomNodeTextContent`](https://biomejs.dev/linter/rules/use-dom-node-text-content/), which prefers `textContent` over `innerText` for DOM node text access and destructuring.
+
+  For example, the following snippet triggers the rule:
+
+  ```js
+  const foo = node.innerText;
+  ```
+
+- [#10023](https://github.com/biomejs/biome/pull/10023) [`bd1e74f`](https://github.com/biomejs/biome/commit/bd1e74fd80b0cadafd091513950275e0ff75d80f) Thanks [@ematipico](https://github.com/ematipico)! - Added a new nursery rule [`noReactNativeDeepImports`](https://biomejs.dev/linter/rules/no-react-native-deep-imports/) that disallows deep imports from the `react-native` package. Internal paths like `react-native/Libraries/...` are not part of the public API and may change between versions.
+
+  For example, the following code triggers the rule:
+
+  ```js
+  import View from "react-native/Libraries/Components/View/View";
+  ```
+
+- [#9885](https://github.com/biomejs/biome/pull/9885) [`3dce737`](https://github.com/biomejs/biome/commit/3dce737e5050cfda7d2b9be8f809aee417f01196) Thanks [@dyc3](https://github.com/dyc3)! - Added a new nursery rule [`useDomQuerySelector`](https://biomejs.dev/linter/rules/use-dom-query-selector/) that prefers `querySelector()` and `querySelectorAll()` over older DOM query methods such as `getElementById()` and `getElementsByClassName()`.
+
+- [#9995](https://github.com/biomejs/biome/pull/9995) [`4da9caf`](https://github.com/biomejs/biome/commit/4da9caf8281473177fac3332610c710b31e89546) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#9994](https://github.com/biomejs/biome/issues/9994): Biome now parses nested CSS rules correctly when declarations follow them inside embedded snippets.
+
+- [#10009](https://github.com/biomejs/biome/pull/10009) [`b41cc5a`](https://github.com/biomejs/biome/commit/b41cc5a58c74fd6b237352c1772e64e74fcc7546) Thanks [@Jayllyz](https://github.com/Jayllyz)! - Fixed [#10004](https://github.com/biomejs/biome/issues/10004): [`noComponentHookFactories`](https://biomejs.dev/linter/rules/no-component-hook-factories/) no longer reports false positives for object methods and class methods.
+
+- [#9988](https://github.com/biomejs/biome/pull/9988) [`eabf54a`](https://github.com/biomejs/biome/commit/eabf54ad03c6c1d63753a641c8ad1ef385e42d2b) Thanks [@Netail](https://github.com/Netail)! - Tweaked the diagnostics range for [useAltText](https://biomejs.dev/linter/rules/use-alt-text), [useButtonType](https://biomejs.dev/linter/rules/use-button-type), [useHtmlLang](https://biomejs.dev/linter/rules/use-html-lang), [useIframeTitle](https://biomejs.dev/linter/rules/use-iframe-title), [useValidAriaRole](https://biomejs.dev/linter/rules/use-valid-aria-role) & [useIfameSandbox](https://biomejs.dev/linter/rules/use-iframe-sandbox) to report on the opening tag instead of the full tag.
+
+- [#10043](https://github.com/biomejs/biome/pull/10043) [`fc65902`](https://github.com/biomejs/biome/commit/fc65902f17cd548ae38ff916462291b51a32e356) Thanks [@mujpao](https://github.com/mujpao)! - Fixed [#10003](https://github.com/biomejs/biome/issues/10003): Biome no longer panics when parsing Svelte files containing `{#}`.
+
+- [#9815](https://github.com/biomejs/biome/pull/9815) [`5cc83b1`](https://github.com/biomejs/biome/commit/5cc83b177830bc21dc4d6e18343f58eca4ee0de6) Thanks [@dyc3](https://github.com/dyc3)! - Added the new nursery rule [`noLoopFunc`](https://biomejs.dev/linter/rules/no-loop-func/). When enabled, it warns when a function declared inside a loop captures outer variables that can change across iterations.
+
+- [#9702](https://github.com/biomejs/biome/pull/9702) [`ef470ba`](https://github.com/biomejs/biome/commit/ef470ba2db119aa52c24f918bcef451cf2770ccb) Thanks [@ryan-m-walker](https://github.com/ryan-m-walker)! - Added the nursery rule [`useRegexpTest`](https://biomejs.dev/linter/rules/use-regexp-test/) that enforces `RegExp.prototype.test()` over `String.prototype.match()` and `RegExp.prototype.exec()` in boolean contexts. `test()` returns a boolean directly, avoiding unnecessary computation of match results.
+
+  **Invalid**
+
+  ```js
+  if ("hello world".match(/hello/)) {
+  }
+  ```
+
+  **Valid**
+
+  ```js
+  if (/hello/.test("hello world")) {
+  }
+  ```
+
+- [#9743](https://github.com/biomejs/biome/pull/9743) [`245307d`](https://github.com/biomejs/biome/commit/245307dc4ee7af87f62873162107b608084d40f3) Thanks [@leetdavid](https://github.com/leetdavid)! - Fixed [#2245](https://github.com/biomejs/biome/issues/2245): Svelte `<script>` tag language detection when the `generics` attribute contains `>` characters (e.g., `<script lang="ts" generics="T extends Record<string, unknown>">`). Biome now correctly recognizes TypeScript in such script blocks.
+
+- [#10046](https://github.com/biomejs/biome/pull/10046) [`0707de7`](https://github.com/biomejs/biome/commit/0707de7d72f0c5e14f4d5c91524ad2a9d1f50b34) Thanks [@Conaclos](https://github.com/Conaclos)! - Fixed [#10038](https://github.com/biomejs/biome/issues/10038): [`organizeImports`](https://biomejs.dev/assist/actions/organize-imports/) now sorts imports in TypeScript modules and declaration files.
+
+  ```diff
+    declare module "mymodule" {
+  -  	import type { B } from "b";
+    	import type { A } from "a";
+  +  	import type { B } from "b";
+    }
+  ```
+
+- [#10012](https://github.com/biomejs/biome/pull/10012) [`94ccca9`](https://github.com/biomejs/biome/commit/94ccca96800e73732b3f26d7eb21a5e3e025e51e) Thanks [@ematipico](https://github.com/ematipico)! - Added the nursery rule [`noReactNativeLiteralColors`](https://biomejs.dev/linter/rules/no-react-native-literal-colors/), which disallows color literals inside React Native styles.
+
+  The rule belongs to the `reactNative` domain. It reports properties whose name contains `color` and whose value is a string literal when they appear inside a `StyleSheet.create(...)` call or inside a JSX attribute whose name contains `style`.
+
+  ```jsx
+  // Invalid
+  const Hello = () => <Text style={{ backgroundColor: "#FFFFFF" }}>hi</Text>;
+
+  const styles = StyleSheet.create({
+    text: { color: "red" },
+  });
+  ```
+
+  ```jsx
+  // Valid
+  const red = "#f00";
+  const styles = StyleSheet.create({
+    text: { color: red },
+  });
+  ```
+
+- [#10005](https://github.com/biomejs/biome/pull/10005) [`131019e`](https://github.com/biomejs/biome/commit/131019e161b69fd755742ba509b1c51fcb2af183) Thanks [@ematipico](https://github.com/ematipico)! - Added the nursery rule [`noReactNativeRawText`](https://biomejs.dev/linter/rules/no-react-native-raw-text/), which disallows raw text outside of `<Text>` components in React Native.
+
+  The rule belongs to the new `reactNative` domain.
+
+  ```jsx
+  // Invalid
+  <View>some text</View>
+  <View>{'some text'}</View>
+  ```
+
+  ```jsx
+  // Valid
+  <View>
+    <Text>some text</Text>
+  </View>
+  ```
+
+  Additional components can be allowlisted through the `skip` option:
+
+  ```json
+  {
+    "options": {
+      "skip": ["Title"]
+    }
+  }
+  ```
+
+- [#9911](https://github.com/biomejs/biome/pull/9911) [`1603f78`](https://github.com/biomejs/biome/commit/1603f7893c9e249439fc3c22c02ec1a363cc54b9) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`noJsxLeakedDollar`](https://biomejs.dev/linter/rules/no-jsx-leaked-dollar), which flags text nodes with a trailing `$` if the next sibling node is a JSX expression. This could be an unintentional mistake, resulting in a '$' being rendered as text in the output.
+
+  **Invalid**:
+
+  ```jsx
+  function MyComponent({ user }) {
+    return <div>Hello ${user.name}</div>;
+  }
+  ```
+
+- [#9999](https://github.com/biomejs/biome/pull/9999) [`f42405f`](https://github.com/biomejs/biome/commit/f42405fca77302bbbca573474c59ae49f027f75d) Thanks [@minseong0324](https://github.com/minseong0324)! - Fixed `noMisleadingReturnType` incorrectly flagging functions with reassigned `let` variables.
+
+- [#10075](https://github.com/biomejs/biome/pull/10075) [`295f97f`](https://github.com/biomejs/biome/commit/295f97fd538779eb9cc35b5bf54d37a90e0b5e9b) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [`#9983`](https://github.com/biomejs/biome/issues/9983): Biome now parses functions declared inside Svelte `#snippet` blocks without throwing errors.
+
+- [#10006](https://github.com/biomejs/biome/pull/10006) [`cf4c1c9`](https://github.com/biomejs/biome/commit/cf4c1c943a53612648d052d843aaf977652c79d6) Thanks [@minseong0324](https://github.com/minseong0324)! - Fixed [#9810](https://github.com/biomejs/biome/issues/9810): `noMisleadingReturnType` incorrectly flagging nested object literals with widened properties.
+
+- [#10033](https://github.com/biomejs/biome/pull/10033) [`11ddc05`](https://github.com/biomejs/biome/commit/11ddc05713a1cb85b6748c865ee9dda91235a5d1) Thanks [@ematipico](https://github.com/ematipico)! - Added the nursery rule [`useReactNativePlatformComponents`](https://biomejs.dev/linter/rules/use-react-native-platform-components/) that ensures platform-specific React Native components (e.g. `ProgressBarAndroid`, `ActivityIndicatorIOS`) are only imported in files with a matching platform suffix. It also reports when Android and iOS components are mixed in the same file.
+
+  The following code triggers the rule when the file does not have an `.android.js` suffix:
+
+  ```js
+  // file.js
+  import { ProgressBarAndroid } from "react-native";
+  ```
+
 ## 2.4.12
 
 ### Patch Changes

@@ -73,7 +73,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoLoopFunc {
-        version: "next",
+        version: "2.4.13",
         name: "noLoopFunc",
         language: "js",
         recommended: false,
