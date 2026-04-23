@@ -38,7 +38,7 @@ invalid.jsx:3:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━�
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     4 │ 
   
-  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
+  i Consider adding a "for" or "htmlFor" attribute to the label element or moving the input element to inside the label element.
   
 
 ```
