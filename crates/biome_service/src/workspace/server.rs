@@ -1904,7 +1904,8 @@ impl Workspace for WorkspaceServer {
 
             for embedded_node in &embedded_snippets {
                 let diagnostics: Vec<_> = embedded_node
-                    .clone().into_serde_diagnostics()
+                    .clone()
+                    .into_serde_diagnostics()
                     .into_iter()
                     .filter(|diag| diag.severity() >= diagnostic_level)
                     .collect();

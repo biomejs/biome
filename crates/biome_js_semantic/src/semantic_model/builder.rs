@@ -1,7 +1,7 @@
 use super::*;
 use biome_js_syntax::{
-    AnyJsRoot, JsIdentifierAssignment, JsSyntaxNode, TextRange, TsConditionalType,
-    TsTypeParameterName,
+    AnyJsDeclaration, AnyJsRoot, JsExport, JsIdentifierAssignment, JsSyntaxNode, TextRange,
+    TsConditionalType, TsTypeParameterName,
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::SyntaxNodePtr;

@@ -81,8 +81,7 @@ impl SvelteFileHandler {
                         .with_embedding_kind(EmbeddingKind::Svelte {
                             is_source: true,
                             is_function_signature: false,
-                                                        kind: SvelteFileKind::Component,
-
+                            kind: SvelteFileKind::Component,
                         }),
                 )
             })

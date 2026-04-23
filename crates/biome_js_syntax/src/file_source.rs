@@ -314,8 +314,7 @@ impl JsFileSource {
         Self::js_module().with_embedding_kind(EmbeddingKind::Svelte {
             is_source: true,
             is_function_signature: false,
-                        kind: SvelteFileKind::Component,
-
+            kind: SvelteFileKind::Component,
         })
     }
 
@@ -509,6 +508,7 @@ impl JsFileSource {
 
             return Ok(source.with_embedding_kind(EmbeddingKind::Svelte {
                 is_source: true,
+                is_function_signature: false,
                 kind: SvelteFileKind::SourceModule,
             }));
         }
