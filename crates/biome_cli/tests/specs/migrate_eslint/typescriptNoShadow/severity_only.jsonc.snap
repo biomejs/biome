@@ -21,7 +21,10 @@ expression: severity_only.jsonc
 ```json
 {
 	"linter": {
-		"rules": { "recommended": false, "nursery": { "noShadow": "error" } }
+		"rules": {
+			"recommended": false,
+			"nursery": { "noShadow": { "level": "error", "options": {} } }
+		}
 	}
 }
 

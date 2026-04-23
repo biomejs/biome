@@ -114,8 +114,7 @@ declare_lint_rule! {
         severity: Severity::Warning,
         sources: &[
             RuleSource::Eslint("no-shadow").same(),
-            // TODO: uncomment when we can handle the test cases from typescript-eslint
-            // RuleSource::EslintTypeScript("no-shadow"),
+            RuleSource::EslintTypeScript("no-shadow").same(),
         ],
     }
 }

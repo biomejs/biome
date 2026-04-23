@@ -800,23 +800,21 @@ fn migrate_eslint_rule(
             }
         }
         eslint_eslint::Rule::TypeScriptNoShadow(conf) => {
-            if !opts.include_nursery {
-                results.add(&name, RuleMigrationResult::Nursery);
-            } else {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                let severity = conf.severity();
                 let group = rules.nursery.get_or_insert_with(Default::default);
                 if let SeverityOrGroup::Group(group) = group {
-                    if let eslint_eslint::RuleConf::Option(severity, rule_options) = conf {
-                        group.no_shadow = Some(biome_config::RuleConfiguration::WithOptions(
-                            biome_config::RuleWithOptions {
-                                level: severity.into(),
-                                options: rule_options.into(),
-                            },
-                        ));
-                    } else {
-                        let rule = group.no_shadow.get_or_insert(Default::default());
-                        rule.set_level(rule.level().max(conf.severity().into()));
-                    }
+                    dbg!(&conf);
+                    let options =
+                        eslint_typescript::NoShadowOptions::from(conf.option_or_default());
+                    group.no_shadow = Some(biome_config::RuleConfiguration::WithOptions(
+                        biome_config::RuleWithOptions {
+                            level: severity.into(),
+                            options: options.into(),
+                        },
+                    ));
                 }
+                results.add(&name, RuleMigrationResult::Migrated);
             }
         }
         eslint_eslint::Rule::UnicornFilenameCase(conf) => {
