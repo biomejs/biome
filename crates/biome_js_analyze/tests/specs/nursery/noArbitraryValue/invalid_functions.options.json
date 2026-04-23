@@ -1,0 +1,15 @@
+{
+	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"linter": {
+		"rules": {
+			"nursery": {
+				"noArbitraryValue": {
+					"level": "error",
+					"options": {
+						"functions": ["clsx", "cn", "classnames", "tw", "tw.*"]
+					}
+				}
+			}
+		}
+	}
+}

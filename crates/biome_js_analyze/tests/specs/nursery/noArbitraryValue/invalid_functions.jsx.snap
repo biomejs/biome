@@ -1,0 +1,111 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: invalid_functions.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+clsx("w-[400px]");
+cn("text-[#555]");
+classnames("w-[400px]", "text-red-500");
+cn({ "w-[400px]": isActive });
+tw`w-[400px]`;
+tw.div`text-[#555]`;
+
+```
+
+# Diagnostics
+```
+invalid_functions.jsx:2:9 lint/nursery/noArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid arbitrary values in Tailwind CSS classes.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ clsx("w-[400px]");
+      │         ^^^^^^^
+    3 │ cn("text-[#555]");
+    4 │ classnames("w-[400px]", "text-red-500");
+  
+  i Arbitrary values bypass the design system. Use a design token instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_functions.jsx:3:10 lint/nursery/noArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid arbitrary values in Tailwind CSS classes.
+  
+    1 │ /* should generate diagnostics */
+    2 │ clsx("w-[400px]");
+  > 3 │ cn("text-[#555]");
+      │          ^^^^^^
+    4 │ classnames("w-[400px]", "text-red-500");
+    5 │ cn({ "w-[400px]": isActive });
+  
+  i Arbitrary values bypass the design system. Use a design token instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_functions.jsx:4:15 lint/nursery/noArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid arbitrary values in Tailwind CSS classes.
+  
+    2 │ clsx("w-[400px]");
+    3 │ cn("text-[#555]");
+  > 4 │ classnames("w-[400px]", "text-red-500");
+      │               ^^^^^^^
+    5 │ cn({ "w-[400px]": isActive });
+    6 │ tw`w-[400px]`;
+  
+  i Arbitrary values bypass the design system. Use a design token instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_functions.jsx:5:9 lint/nursery/noArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid arbitrary values in Tailwind CSS classes.
+  
+    3 │ cn("text-[#555]");
+    4 │ classnames("w-[400px]", "text-red-500");
+  > 5 │ cn({ "w-[400px]": isActive });
+      │         ^^^^^^^
+    6 │ tw`w-[400px]`;
+    7 │ tw.div`text-[#555]`;
+  
+  i Arbitrary values bypass the design system. Use a design token instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_functions.jsx:6:6 lint/nursery/noArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid arbitrary values in Tailwind CSS classes.
+  
+    4 │ classnames("w-[400px]", "text-red-500");
+    5 │ cn({ "w-[400px]": isActive });
+  > 6 │ tw`w-[400px]`;
+      │      ^^^^^^^
+    7 │ tw.div`text-[#555]`;
+    8 │ 
+  
+  i Arbitrary values bypass the design system. Use a design token instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
