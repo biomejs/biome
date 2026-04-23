@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNodeImport.js
+---
+# Input
+```js
+import process from "node:process";
+process.env;
+process.env.BAR;
+
+```
+
+# Diagnostics
+```
+invalidNodeImport.js:2:1 lint/style/noProcessEnv ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use process.env.
+  
+    1 │ import process from "node:process";
+  > 2 │ process.env;
+      │ ^^^^^^^^^^^
+    3 │ process.env.BAR;
+    4 │ 
+  
+  i Use a centralized configuration file instead for better maintainability and deployment consistency.
+  
+
+```
+
+```
+invalidNodeImport.js:3:1 lint/style/noProcessEnv ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use process.env.
+  
+    1 │ import process from "node:process";
+    2 │ process.env;
+  > 3 │ process.env.BAR;
+      │ ^^^^^^^^^^^
+    4 │ 
+  
+  i Use a centralized configuration file instead for better maintainability and deployment consistency.
+  
+
+```

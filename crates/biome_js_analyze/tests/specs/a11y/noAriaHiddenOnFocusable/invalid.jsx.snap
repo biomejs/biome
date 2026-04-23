@@ -4,6 +4,7 @@ expression: invalid.jsx
 ---
 # Input
 ```jsx
+/* should generate diagnostics */
 <>
   <div aria-hidden="true" tabIndex="0" />
   <input aria-hidden="true" />
@@ -16,43 +17,23 @@ expression: invalid.jsx
 
 # Diagnostics
 ```
-invalid.jsx:2:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Disallow aria-hidden="true" from being set on focusable elements.
-  
-    1 │ <>
-  > 2 │   <div aria-hidden="true" tabIndex="0" />
-      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │   <input aria-hidden="true" />
-    4 │   <a href="/" aria-hidden="true" />
-  
-  i aria-hidden should not be set to true on focusable elements because this can lead to confusing behavior for screen reader users.
-  
-  i Unsafe fix: Remove the aria-hidden attribute from the element.
-  
-    2 │ ··<div·aria-hidden="true"·tabIndex="0"·/>
-      │        -------------------               
-
-```
-
-```
 invalid.jsx:3:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Disallow aria-hidden="true" from being set on focusable elements.
   
-    1 │ <>
-    2 │   <div aria-hidden="true" tabIndex="0" />
-  > 3 │   <input aria-hidden="true" />
-      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │   <a href="/" aria-hidden="true" />
-    5 │   <button aria-hidden="true" />
+    1 │ /* should generate diagnostics */
+    2 │ <>
+  > 3 │   <div aria-hidden="true" tabIndex="0" />
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │   <input aria-hidden="true" />
+    5 │   <a href="/" aria-hidden="true" />
   
   i aria-hidden should not be set to true on focusable elements because this can lead to confusing behavior for screen reader users.
   
   i Unsafe fix: Remove the aria-hidden attribute from the element.
   
-    3 │ ··<input·aria-hidden="true"·/>
-      │          -------------------  
+    3 │ ··<div·aria-hidden="true"·tabIndex="0"·/>
+      │        -------------------               
 
 ```
 
@@ -61,19 +42,19 @@ invalid.jsx:4:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
 
   × Disallow aria-hidden="true" from being set on focusable elements.
   
-    2 │   <div aria-hidden="true" tabIndex="0" />
-    3 │   <input aria-hidden="true" />
-  > 4 │   <a href="/" aria-hidden="true" />
-      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │   <button aria-hidden="true" />
-    6 │   <textarea aria-hidden="true" />
+    2 │ <>
+    3 │   <div aria-hidden="true" tabIndex="0" />
+  > 4 │   <input aria-hidden="true" />
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │   <a href="/" aria-hidden="true" />
+    6 │   <button aria-hidden="true" />
   
   i aria-hidden should not be set to true on focusable elements because this can lead to confusing behavior for screen reader users.
   
   i Unsafe fix: Remove the aria-hidden attribute from the element.
   
-    4 │ ··<a·href="/"·aria-hidden="true"·/>
-      │               -------------------  
+    4 │ ··<input·aria-hidden="true"·/>
+      │          -------------------  
 
 ```
 
@@ -82,19 +63,19 @@ invalid.jsx:5:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
 
   × Disallow aria-hidden="true" from being set on focusable elements.
   
-    3 │   <input aria-hidden="true" />
-    4 │   <a href="/" aria-hidden="true" />
-  > 5 │   <button aria-hidden="true" />
-      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    6 │   <textarea aria-hidden="true" />
-    7 │   <p tabIndex="0" aria-hidden="true">text</p>
+    3 │   <div aria-hidden="true" tabIndex="0" />
+    4 │   <input aria-hidden="true" />
+  > 5 │   <a href="/" aria-hidden="true" />
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │   <button aria-hidden="true" />
+    7 │   <textarea aria-hidden="true" />
   
   i aria-hidden should not be set to true on focusable elements because this can lead to confusing behavior for screen reader users.
   
   i Unsafe fix: Remove the aria-hidden attribute from the element.
   
-    5 │ ··<button·aria-hidden="true"·/>
-      │           -------------------  
+    5 │ ··<a·href="/"·aria-hidden="true"·/>
+      │               -------------------  
 
 ```
 
@@ -103,19 +84,19 @@ invalid.jsx:6:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
 
   × Disallow aria-hidden="true" from being set on focusable elements.
   
-    4 │   <a href="/" aria-hidden="true" />
-    5 │   <button aria-hidden="true" />
-  > 6 │   <textarea aria-hidden="true" />
-      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    7 │   <p tabIndex="0" aria-hidden="true">text</p>
-    8 │ </>
+    4 │   <input aria-hidden="true" />
+    5 │   <a href="/" aria-hidden="true" />
+  > 6 │   <button aria-hidden="true" />
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │   <textarea aria-hidden="true" />
+    8 │   <p tabIndex="0" aria-hidden="true">text</p>
   
   i aria-hidden should not be set to true on focusable elements because this can lead to confusing behavior for screen reader users.
   
   i Unsafe fix: Remove the aria-hidden attribute from the element.
   
-    6 │ ··<textarea·aria-hidden="true"·/>
-      │             -------------------  
+    6 │ ··<button·aria-hidden="true"·/>
+      │           -------------------  
 
 ```
 
@@ -124,17 +105,38 @@ invalid.jsx:7:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
 
   × Disallow aria-hidden="true" from being set on focusable elements.
   
-    5 │   <button aria-hidden="true" />
-    6 │   <textarea aria-hidden="true" />
-  > 7 │   <p tabIndex="0" aria-hidden="true">text</p>
-      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    8 │ </>
+    5 │   <a href="/" aria-hidden="true" />
+    6 │   <button aria-hidden="true" />
+  > 7 │   <textarea aria-hidden="true" />
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │   <p tabIndex="0" aria-hidden="true">text</p>
+    9 │ </>
   
   i aria-hidden should not be set to true on focusable elements because this can lead to confusing behavior for screen reader users.
   
   i Unsafe fix: Remove the aria-hidden attribute from the element.
   
-    7 │ ··<p·tabIndex="0"·aria-hidden="true">text</p>
+    7 │ ··<textarea·aria-hidden="true"·/>
+      │             -------------------  
+
+```
+
+```
+invalid.jsx:8:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Disallow aria-hidden="true" from being set on focusable elements.
+  
+    6 │   <button aria-hidden="true" />
+    7 │   <textarea aria-hidden="true" />
+  > 8 │   <p tabIndex="0" aria-hidden="true">text</p>
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    9 │ </>
+  
+  i aria-hidden should not be set to true on focusable elements because this can lead to confusing behavior for screen reader users.
+  
+  i Unsafe fix: Remove the aria-hidden attribute from the element.
+  
+    8 │ ··<p·tabIndex="0"·aria-hidden="true">text</p>
       │                   ------------------         
 
 ```

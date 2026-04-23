@@ -100,6 +100,40 @@
 /[[\-]\-]/v;
 /[\^]/v;
 
+// https://github.com/biomejs/biome/issues/10034
+// `ClassSetReservedPunctuator` characters (& ! # % , : ; < = > @ ` ~) are
+// reserved as individual characters in v-mode char classes, so escaping them
+// is never useless — even a single occurrence requires it.
+/[a-z\&]/v;
+/[\&]/v;
+/[\!]/v;
+/[\#]/v;
+/[\%]/v;
+/[\,]/v;
+/[\:]/v;
+/[\;]/v;
+/[\<]/v;
+/[\=]/v;
+/[\>]/v;
+/[\@]/v;
+/[\`]/v;
+/[\~]/v;
+// Doubled escapes of the same characters are also fully valid.
+/[\&\&]/v;
+/[\!\!]/v;
+/[\#\#]/v;
+/[\%\%]/v;
+/[\,\,]/v;
+/[\:\:]/v;
+/[\;\;]/v;
+/[\<\<]/v;
+/[\=\=]/v;
+/[\>\>]/v;
+/[\@\@]/v;
+/[\`\`]/v;
+/[\~\~]/v;
+/[\&\&&\&]/v;
+
 /[z-]/;
 
 // Edge case

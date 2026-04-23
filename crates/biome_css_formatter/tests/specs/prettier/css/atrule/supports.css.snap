@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
 info: css/atrule/supports.css
 ---
 
@@ -390,6 +391,16 @@ B
 @supports (transform-style: preserve-3d) or ((-moz-transform-style: preserve-3d) or
           ((-o-transform-style: preserve-3d) or (-webkit-transform-style: preserve-3d))) {}
 
+/* #8201 */
+@supports (--element(".minwidth", {"minWidth": 300})) {
+  [--self] {
+    background: greenyellow;
+  }
+}
+@supports ({"example": 1}) {
+  * { background: red; }
+}
+
 ```
 
 
@@ -626,7 +637,7 @@ B
  @supports not (transform-origin: 10em 10em 10em) {
  }
  @supports not (not (transform-origin: 2px)) {
-@@ -256,20 +254,23 @@
+@@ -256,21 +254,24 @@
  }
  @supports (display: table-cell) and (display: list-item) and (display: run-in) {
  }
@@ -656,6 +667,16 @@ B
 +      (-webkit-transform-style: preserve-3d)
 +    )
    ) {
+ }
+ 
+@@ -281,7 +282,5 @@
+   }
+ }
+ @supports ({"example": 1}) {
+-  * {
+-    background: red;
+-  }
++  * { background: red; }
  }
 ```
 
@@ -937,6 +958,16 @@ B
       (-webkit-transform-style: preserve-3d)
     )
   ) {
+}
+
+/* #8201 */
+@supports (--element(".minwidth", {"minWidth": 300})) {
+  [--self] {
+    background: greenyellow;
+  }
+}
+@supports ({"example": 1}) {
+  * { background: red; }
 }
 ```
 
@@ -1282,6 +1313,140 @@ supports.css:372:45 parse ━━━━━━━━━━━━━━━━━━
     374 │ @supports not (not (transform-origin: 2px)) {}
   
   i Remove )
+  
+supports.css:386:46 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    385 │ /* #8201 */
+  > 386 │ @supports (--element(".minwidth", {"minWidth": 300})) {
+        │                                              ^^^^^
+    387 │   [--self] {
+    388 │     background: greenyellow;
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+supports.css:391:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    389 │   }
+    390 │ }
+  > 391 │ @supports ({"example": 1}) {
+        │            ^
+    392 │   * { background: red; }
+    393 │ }
+  
+  i Expected one of:
+  
+  - not <supports-in-parens>
+  - <supports-in-parens>
+  - <supports-in-parens> and <supports-in-parens>
+  - <supports-in-parens> or <supports-in-parens>
+  
+supports.css:391:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a qualified rule, or an at rule but instead found '"example"'.
+  
+    389 │   }
+    390 │ }
+  > 391 │ @supports ({"example": 1}) {
+        │             ^^^^^^^^^
+    392 │   * { background: red; }
+    393 │ }
+  
+  i Expected a qualified rule, or an at rule here.
+  
+    389 │   }
+    390 │ }
+  > 391 │ @supports ({"example": 1}) {
+        │             ^^^^^^^^^
+    392 │   * { background: red; }
+    393 │ }
+  
+supports.css:391:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    389 │   }
+    390 │ }
+  > 391 │ @supports ({"example": 1}) {
+        │                        ^
+    392 │   * { background: red; }
+    393 │ }
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+supports.css:394:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+  
+    392 │   * { background: red; }
+    393 │ }
+  > 394 │ 
+        │ 
+  
+  i the file ends here
+  
+    392 │   * { background: red; }
+    393 │ }
+  > 394 │ 
+        │ 
   
 
 ```

@@ -1,12 +1,12 @@
 use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlElement, HtmlAttribute, HtmlElementList};
+use biome_html_syntax::{AnyHtmlElement, HtmlAttribute, HtmlElementList, HtmlFileSource};
 use biome_rowan::AstNode;
 use biome_rule_options::no_svg_without_title::NoSvgWithoutTitleOptions;
 use biome_string_case::StrLikeExtension;
 
-use crate::a11y::is_aria_hidden_true;
+use crate::{a11y::is_aria_hidden_true, utils::is_html_tag};
 
 const NAME_REQUIRED_ROLES: &[&str] = &["img", "image", "graphics-document", "graphics-symbol"];
 
@@ -128,12 +128,14 @@ impl Rule for NoSvgWithoutTitle {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
+        let source_type = ctx.source_type::<HtmlFileSource>();
 
-        if node.name()? != "svg" {
+        let tag_element = node.clone().as_any_html_tag_element()?;
+        if !is_html_tag(&tag_element, source_type, "svg") {
             return None;
         }
 
-        if is_aria_hidden_true(node) {
+        if is_aria_hidden_true(&tag_element) {
             return None;
         }
 

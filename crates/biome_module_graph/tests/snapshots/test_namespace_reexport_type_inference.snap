@@ -55,6 +55,7 @@ Exports {
       Specifier: "./source.ts"
       Resolved path: "/src/source.ts"
       Import Symbol: All
+      Exported range: (0..36)
     ))
   }
 }
@@ -96,11 +97,6 @@ Imports {
 ```
 alpha => BindingTypeData {
   Types Module(0) TypeId(1),
-  JsDoc(
-    @description
-    I am a jsdoc
-  ),
-  Exported Ranges: (114..119)
 }
 ```
 

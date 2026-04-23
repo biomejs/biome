@@ -1,5 +1,4 @@
 /* should not generate diagnostics */
-
 <>
 	<svg>
 		<title>Pass</title>

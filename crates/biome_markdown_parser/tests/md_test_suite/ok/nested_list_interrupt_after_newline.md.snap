@@ -1,5 +1,6 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 131
 expression: snapshot
 ---
 
@@ -43,8 +44,15 @@ MdDocument {
                             md_bullet_list: MdBulletList [
                                 MdBullet {
                                     prefix: MdListMarkerPrefix {
-                                        pre_marker_indent: MdIndentTokenList [],
-                                        marker: MINUS@6..9 "-" [Skipped(" "), Skipped(" ")] [],
+                                        pre_marker_indent: MdIndentTokenList [
+                                            MdIndentToken {
+                                                md_indent_char_token: MD_INDENT_CHAR@6..7 " " [] [],
+                                            },
+                                            MdIndentToken {
+                                                md_indent_char_token: MD_INDENT_CHAR@7..8 " " [] [],
+                                            },
+                                        ],
+                                        marker: MINUS@8..9 "-" [] [],
                                         post_marker_space_token: missing (optional),
                                         content_indent: MdIndentTokenList [],
                                     },
@@ -99,8 +107,12 @@ MdDocument {
               0: MD_BULLET_LIST@6..14
                 0: MD_BULLET@6..14
                   0: MD_LIST_MARKER_PREFIX@6..9
-                    0: MD_INDENT_TOKEN_LIST@6..6
-                    1: MINUS@6..9 "-" [Skipped(" "), Skipped(" ")] []
+                    0: MD_INDENT_TOKEN_LIST@6..8
+                      0: MD_INDENT_TOKEN@6..7
+                        0: MD_INDENT_CHAR@6..7 " " [] []
+                      1: MD_INDENT_TOKEN@7..8
+                        0: MD_INDENT_CHAR@7..8 " " [] []
+                    1: MINUS@8..9 "-" [] []
                     2: (empty)
                     3: MD_INDENT_TOKEN_LIST@9..9
                   1: MD_BLOCK_LIST@9..14

@@ -1,0 +1,7 @@
+@media (#{$feature}) {.box {color:red;}}
+
+@media (#{$feature}: #{$value}) {.box {color:red;}}
+
+@media (#{$min} <= width <= #{$max}) {.box {color:red;}}
+
+@container (#{$feature}: #{$value}) {.box {color:red;}}

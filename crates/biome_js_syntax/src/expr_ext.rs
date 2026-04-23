@@ -1367,6 +1367,13 @@ impl AnyJsExpression {
         .as_ref()
         .and_then(Self::inner_expression)
     }
+
+    pub fn is_string_literal(&self) -> bool {
+        matches!(
+            self,
+            Self::AnyJsLiteralExpression(AnyJsLiteralExpression::JsStringLiteralExpression(_),)
+        )
+    }
 }
 
 /// Returns `true` if this node is a transparent wrapper expression.
@@ -2258,6 +2265,31 @@ pub fn is_in_boolean_context(node: &JsSyntaxNode) -> Option<bool> {
                 .syntax()
                 == node,
         ),
+        JsSyntaxKind::JS_LOGICAL_EXPRESSION => {
+            let operator = parent
+                .clone()
+                .cast::<JsLogicalExpression>()?
+                .operator()
+                .ok()?;
+
+            if matches!(
+                operator,
+                JsLogicalOperator::LogicalOr | JsLogicalOperator::LogicalAnd
+            ) {
+                is_in_boolean_context(&parent)
+            } else {
+                None
+            }
+        }
+        JsSyntaxKind::JS_UNARY_EXPRESSION => {
+            let unary = parent.cast::<JsUnaryExpression>()?;
+
+            if unary.operator().ok()? == JsUnaryOperator::LogicalNot {
+                Some(true)
+            } else {
+                None
+            }
+        }
         _ => None,
     }
 }

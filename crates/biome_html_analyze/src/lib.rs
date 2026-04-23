@@ -3,9 +3,9 @@
 mod a11y;
 mod assist;
 mod lint;
-pub mod options;
 mod registry;
 mod suppression_action;
+mod utils;
 
 pub use crate::registry::visit_registry;
 use crate::suppression_action::HtmlSuppressionAction;
@@ -129,7 +129,9 @@ where
 #[cfg(test)]
 mod tests {
     use crate::analyze;
-    use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleFilter};
+    use biome_analyze::{
+        ActionFilter, AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleFilter,
+    };
     use biome_console::fmt::{Formatter, Termcolor};
     use biome_console::{Markup, markup};
     use biome_diagnostics::termcolor::NoColor;
@@ -179,7 +181,7 @@ mod tests {
                     eprintln!("{text}");
                 }
 
-                for action in signal.actions() {
+                for action in signal.actions(ActionFilter::all()) {
                     let new_code = action.mutation.commit();
                     eprintln!("{new_code}");
                 }

@@ -262,6 +262,7 @@ impl LSPServer {
                                 .map(|item| CodeActionKind::from(*item))
                                 .collect::<Vec<_>>(),
                         ),
+                        resolve_provider: Some(self.session.supports_code_action_resolve()),
                         ..Default::default()
                     }
                 ))))
@@ -445,7 +446,10 @@ impl LanguageServer for LSPServer {
 
         self.session
             .update_workspace_folders(params.event.added, params.event.removed);
+        self.session.clear_configuration_cache().await;
         self.session.load_workspace_settings(true).await;
+        self.setup_capabilities().await;
+        self.session.update_all_diagnostics().await;
     }
 
     async fn code_action(&self, params: CodeActionParams) -> LspResult<Option<CodeActionResponse>> {
@@ -454,6 +458,20 @@ impl LanguageServer for LSPServer {
         });
 
         self.map_op_error(result).await
+    }
+
+    async fn code_action_resolve(&self, params: CodeAction) -> LspResult<CodeAction> {
+        let result = biome_diagnostics::panic::catch_unwind(move || {
+            handlers::analysis::code_action_resolve(&self.session, params)
+        });
+
+        match result {
+            Ok(result) => match result {
+                Ok(action) => Ok(action),
+                Err(err) => Err(into_lsp_error(err)),
+            },
+            Err(err) => Err(into_lsp_error(err)),
+        }
     }
 
     async fn formatting(

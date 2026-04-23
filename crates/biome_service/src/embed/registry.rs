@@ -4,6 +4,7 @@ use crate::workspace::DocumentFileSource;
 use biome_html_syntax::ScriptType;
 
 /// Returned by the registry when a detector matches.
+#[derive(Debug)]
 pub(crate) struct EmbedMatch {
     pub guest: GuestLanguage,
 }

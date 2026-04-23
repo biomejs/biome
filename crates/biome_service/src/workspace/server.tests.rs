@@ -562,6 +562,69 @@ fn no_diagnostics_for_unsupported_script_types() {
     );
 }
 
+/// Regression test for https://github.com/biomejs/biome/issues/9140.
+///
+/// Astro allows JSX-style attribute shorthand: `<div {prop} />` is sugar for
+/// `<div prop={prop} />`. The HTML/Astro parser forwards JSX-bearing template
+/// expressions to the JS parser with `EmbeddingKind::Astro { frontmatter: false }`,
+/// and the JS parser must accept the shorthand only in that embedding context.
+/// In a regular `.jsx` file the same syntax remains a parse error (covered by
+/// `crates/biome_js_parser/tests/js_test_suite/error/jsx_shorthand_attribute_outside_astro.jsx`).
+#[test]
+fn astro_jsx_shorthand_attribute() {
+    const FILE_CONTENT: &str = r#"---
+const items = ['a', 'b'];
+---
+<ul>
+  {items.map((item) => <li {item}>row</li>)}
+</ul>
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/file.astro"), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/file.astro"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics_and_actions(PullDiagnosticsAndActionsParams {
+            path: BiomePath::new("/project/file.astro"),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    assert!(
+        result.diagnostics.is_empty(),
+        "Expected no diagnostics for Astro JSX shorthand attribute, got: {:#?}",
+        result.diagnostics
+    );
+}
+
 #[test]
 fn format_js_with_embedded_css() {
     const FILE_PATH: &str = "/project/file.js";
@@ -628,6 +691,361 @@ const Bar = styled(Component)`
     	color: red;
     `;
     ");
+}
+
+#[test]
+fn issue_9975() {
+    const FILE_PATH: &str = "/project/file.ts";
+    const FILE_CONTENT: &str = r#"styled.div`
+  svg:first-of-type {
+    margin-left: 0;
+  }
+`;
+
+styled.div`
+  div:not(:last-child) {
+    border-bottom: 1px solid black;
+  }
+`;"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            categories: RuleCategories::default(),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+
+    assert_eq!(result.parse_errors, 0);
+    assert!(
+        result.diagnostics.is_empty(),
+        "Expected no diagnostics for styled nested selectors, got: {:#?}",
+        result.diagnostics
+    );
+}
+
+#[test]
+fn issue_9625() {
+    const FILE_PATH: &str = "/project/file.js";
+    const FILE_CONTENT: &str = r#"const Portfolio = styled.div`
+    display: flex;
+  align-items: center;
+`;
+
+const PortfolioIcon = styled.div`
+  ${({ theme }) => css``
+  };
+`;"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                formatter: Some(FormatterConfiguration {
+                    indent_style: Some(IndentStyle::Space),
+                    ..Default::default()
+                }),
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code(), @r"
+    const Portfolio = styled.div`
+      display: flex;
+      align-items: center;
+    `;
+
+    const PortfolioIcon = styled.div`
+      ${({ theme }) => css``};
+    `;
+    ");
+}
+
+#[test]
+fn issue_9994() {
+    const FILE_PATH: &str = "/project/file.js";
+    const FILE_CONTENT: &str = r#"styled.div`
+  div:first-of-type {
+    color: black;
+  }
+  background: black;
+`;
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let diagnostics = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            categories: Default::default(),
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Error,
+            enforce_assist: false,
+        })
+        .unwrap();
+
+    assert!(
+        diagnostics.diagnostics.is_empty(),
+        "Expected no diagnostics for issue #9994, got: {:#?}",
+        diagnostics.diagnostics
+    );
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code(), @r#"
+    styled.div`
+    	div:first-of-type {
+    		color: black;
+    	}
+    	background: black;
+    `;
+    "#);
+}
+
+#[test]
+fn issue_9113() {
+    const FILE_PATH: &str = "/project/file.ts";
+    const FILE_CONTENT: &str = r#"import styled from 'styled-components';
+
+const Wrapper = styled.div`
+  height: 20px;
+
+  @media screen and (min-width: 768px) {
+    height: 40px;
+  }
+`;
+
+const Container = styled.div`
+	     	display: grid;
+	grid-template-rows: auto;
+	grid-gap: 2px;
+	margin: 4px 4px 0;
+
+    /* top level seems fine */
+	grid-template-columns: repeat(3, 1fr);
+
+    	  @media (min-width: 480px) {
+    		    grid-template-columns: repeat(4, 1fr);
+	}
+
+	   @media (min-width: 640px) {
+		  grid-template-columns: repeat(5, 1fr);
+	}
+
+    	@media (min-width: 780px) {
+    		grid-template-columns: repeat(6, 1fr);
+    	}
+`;"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            categories: Default::default(),
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Error,
+            enforce_assist: false,
+        })
+        .unwrap();
+
+    assert!(
+        result.diagnostics.is_empty(),
+        "Expected no diagnostics for embedded CSS, got: {:#?}",
+        result.diagnostics
+    );
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code(), @r#"
+    import styled from "styled-components";
+
+    const Wrapper = styled.div`
+    	height: 20px;
+
+    	@media screen and (min-width: 768px) {
+    		height: 40px;
+    	}
+    `;
+
+    const Container = styled.div`
+    	display: grid;
+    	grid-template-rows: auto;
+    	grid-gap: 2px;
+    	margin: 4px 4px 0;
+
+    	/* top level seems fine */
+    	grid-template-columns: repeat(3, 1fr);
+
+    	@media (min-width: 480px) {
+    		grid-template-columns: repeat(4, 1fr);
+    	}
+
+    	@media (min-width: 640px) {
+    		grid-template-columns: repeat(5, 1fr);
+    	}
+
+    	@media (min-width: 780px) {
+    		grid-template-columns: repeat(6, 1fr);
+    	}
+    `;
+    "#);
 }
 
 #[test]
@@ -741,6 +1159,194 @@ const bulkUpsertTransactionsMutation = graphql(`
 console.log(`test`) // plain template as call argument
 
 const highlight = foo`some tagged template` // unknown tagged template
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code());
+}
+
+/// Parenthesized expressions before a graphql tagged template used to crash
+/// the formatter because the syntax rewriter removes parentheses, shifting
+/// text ranges. The embedding service stores original ranges but the formatter
+/// used transformed ranges, causing a mismatch that left orphaned
+/// StartEmbedded tags in the document.
+///
+/// See: https://github.com/biomejs/biome/issues/9484
+#[test]
+fn issue_9484_parens_before_graphql_call() {
+    const FILE_PATH: &str = "/project/file.js";
+    const FILE_CONTENT: &str = r#"import {graphql} from "@generated/gql.js";
+
+const a = {}
+console.log((a))
+
+const fetchFileUploadUrlQuery =
+graphql(`
+  query Q {
+    field
+  }
+`);
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code());
+}
+
+/// After `format_embedded()` replaces StartEmbedded tags with embedded content
+/// containing hard line breaks, `propagate_expand()` must be called again so
+/// that enclosing groups learn they need to expand. Without it, elements like
+/// `IndentIfGroupBreaks` around the call arguments would not indent because
+/// the group mode would still be flat.
+#[test]
+fn issue_9484_propagate_expand_after_embed() {
+    const FILE_PATH: &str = "/project/file.js";
+    // Short call where graphql fits on one line without embedding,
+    // but embedded formatting inserts hard lines that must expand the group.
+    const FILE_CONTENT: &str = r#"const x = foo(graphql`query { a }`, b)
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code());
+}
+
+/// Parenthesized JSX return combined with a graphql tagged template literal
+/// triggered the same range mismatch as issue_9484_parens_before_graphql_call.
+///
+/// See: https://github.com/biomejs/biome/issues/9484
+#[test]
+fn issue_9484_parens_jsx_with_graphql_tag() {
+    const FILE_PATH: &str = "/project/file.tsx";
+    const FILE_CONTENT: &str = r#"import { graphql, useLazyLoadQuery } from 'react-relay';
+
+export const Page = () => {
+  return (<div></div>);
+};
+
+const Table = () => {
+  const query = useLazyLoadQuery(graphql`
+      query Q {
+        field
+      }
+    `, {});
+  return <div></div>;
+};
 "#;
 
     let fs = MemoryFileSystem::default();

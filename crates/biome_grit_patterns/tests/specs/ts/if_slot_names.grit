@@ -1,0 +1,4 @@
+or {
+  if_statement(condition = $test, consequence = $cons),
+  JsIfStatement(test = $test, consequent = $cons),
+}

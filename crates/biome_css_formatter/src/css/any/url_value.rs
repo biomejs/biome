@@ -10,6 +10,7 @@ impl FormatRule<AnyCssUrlValue> for FormatAnyCssUrlValue {
         match node {
             AnyCssUrlValue::CssString(node) => node.format().fmt(f),
             AnyCssUrlValue::CssUrlValueRaw(node) => node.format().fmt(f),
+            AnyCssUrlValue::ScssInterpolatedString(node) => node.format().fmt(f),
         }
     }
 }

@@ -1,0 +1,74 @@
+/* should not generate diagnostics */
+<>
+	<area aria-label="foo" />
+	<area aria-labelledby="id1" />
+	<area aria-hidden />
+	<area aria-hidden={true} />
+	<area alt="" />
+	<area alt="This is descriptive!" />
+	<area alt={altText} />
+	<Area />
+</>;
+
+<>
+	<img alt="foo" />
+	<img alt={"foo"} />
+	<img alt={alt} />
+	<img alt="foo" salt={undefined} />
+	<img {...this.props} alt="foo" />
+	<a />
+	<div />
+	<img alt={function (e) { }} />
+	<div alt={function (e) { }} />
+	<img alt={() => void 0} />
+	<Img />
+	<Component>test</Component>
+	<img alt={alt || "Alt text"} />
+	<img alt={photo.caption} />;
+	<img alt={bar()} />;
+	<img alt={foo.bar || ""} />
+	<img alt={bar() || ""} />
+	<img alt={foo.bar() || ""} />
+	<img alt="" />
+	<img alt={`${undefined}`} />
+	<img alt=" " />
+	<img alt="" role="presentation" />
+	<img alt="" role="none" />
+	<img alt="" role={`presentation`} />
+	<img alt="" role={"presentation"} />
+	<img alt="this is lit..." role="presentation" />
+	<img alt={error ? "not working" : "working"} />
+	<img alt={undefined ? "working" : "not working"} />
+	<img alt={plugin.name + " Logo"} />
+	<img aria-label="foo" />
+	<img aria-labelledby="id1" />
+	<img aria-hidden />
+	<img aria-hidden={true} />
+	<img alt="alt tag" src="" {...(flag && { referrerPolicy: 'no-referrer' })}></img>
+	<img src="test" alt="this is a cool image" {...restProps}></img>
+	<img alt={alt || ""} {...props} />
+</>;
+
+<>
+	<input />
+	<input type="foo" />
+	<input type="image" aria-label="foo" />
+	<input type="image" aria-labelledby="id1" />
+	<input type="image" aria-hidden />
+	<input type="image" aria-hidden={true} />
+	<input type="image" alt="" />
+	<input type="image" alt="This is descriptive!" />
+	<input type="image" alt={altText} />
+	<Input type="image" />
+</>;
+
+<>
+	<object aria-label="foo" />
+	<object aria-labelledby="id1" />
+	<object aria-hidden />
+	<object aria-hidden={true} />
+	<object>Foo</object>
+	<object><p>This is descriptive!</p></object>
+	<Object />
+	<object title="An object" />
+</>;

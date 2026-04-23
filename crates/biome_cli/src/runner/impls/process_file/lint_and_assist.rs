@@ -26,6 +26,8 @@ impl ProcessFile for LintAssistProcessFile {
         ctx: &Ctx,
         workspace_file: &mut WorkspaceFile,
         features_supported: &FeaturesSupported,
+        max_diagnostics: u32,
+        diagnostic_level: Severity,
     ) -> Result<FileStatus, Message>
     where
         Ctx: CrawlerContext,
@@ -101,14 +103,22 @@ impl ProcessFile for LintAssistProcessFile {
 
         let pull_diagnostics_result = workspace_file
             .guard()
-            .pull_diagnostics(categories, only, skip, true)
+            .pull_diagnostics(
+                categories,
+                only,
+                skip,
+                true,
+                Some(max_diagnostics),
+                diagnostic_level,
+                execution.should_enforce_assist(),
+            )
             .with_file_path_and_code(
                 workspace_file.path.to_string(),
                 execution.as_diagnostic_category(),
             )?;
 
         let skip_parse_errors = execution.should_skip_parse_errors();
-        if pull_diagnostics_result.errors > 0 && skip_parse_errors {
+        if pull_diagnostics_result.parse_errors > 0 && skip_parse_errors {
             ctx.push_message(Message::from(
                 SkippedDiagnostic.with_file_path(workspace_file.path.to_string()),
             ));
@@ -130,31 +140,27 @@ impl ProcessFile for LintAssistProcessFile {
                 }
             };
 
+            let diagnostics: Vec<Error> = pull_diagnostics_result
+                .diagnostics
+                .into_iter()
+                .map(|d| {
+                    if let Some(offset) = offset {
+                        d.with_offset(TextSize::from(offset))
+                    } else {
+                        d
+                    }
+                })
+                .map(Error::from)
+                .collect();
+
             ctx.push_message(Message::Diagnostics {
                 file_path: workspace_file.path.to_string(),
                 content: input,
-                diagnostics: pull_diagnostics_result
-                    .diagnostics
-                    .into_iter()
-                    .map(|d| {
-                        if let Some(offset) = offset {
-                            d.with_offset(TextSize::from(offset))
-                        } else {
-                            d
-                        }
-                    })
-                    .map(|diagnostic| {
-                        let category = diagnostic.category();
-                        if let Some(category) = category
-                            && category.name().starts_with("assist/")
-                            && execution.should_enforce_assist()
-                        {
-                            return diagnostic.with_severity(Severity::Error);
-                        }
-                        Error::from(diagnostic)
-                    })
-                    .collect(),
+                diagnostics,
                 skipped_diagnostics: pull_diagnostics_result.skipped_diagnostics as u32,
+                errors: pull_diagnostics_result.errors,
+                warnings: pull_diagnostics_result.warnings,
+                infos: pull_diagnostics_result.infos,
             });
         }
 

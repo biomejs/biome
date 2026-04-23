@@ -1,4 +1,4 @@
-use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
+use biome_analyze::{ActionFilter, AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_html_parser::parse_html;
 use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
@@ -96,7 +96,7 @@ pub(crate) fn analyze_and_snap(
 
     let (_, errors) = biome_html_analyze::analyze(&root, filter, &options, source_type, |event| {
         if let Some(mut diag) = event.diagnostic() {
-            for action in event.actions() {
+            for action in event.actions(ActionFilter::all()) {
                 if check_action_type.is_suppression() {
                     if action.is_suppression() {
                         check_code_action(input_file, input_code, source_type, &action);
@@ -112,7 +112,7 @@ pub(crate) fn analyze_and_snap(
             return ControlFlow::Continue(());
         }
 
-        for action in event.actions() {
+        for action in event.actions(ActionFilter::all()) {
             if check_action_type.is_suppression() {
                 if action.category.matches("quickfix.suppressRule") {
                     check_code_action(input_file, input_code, source_type, &action);

@@ -16,6 +16,7 @@ use crate::a11y::{
     html_self_closing_element_has_non_empty_attribute,
     html_self_closing_element_has_truthy_aria_hidden,
 };
+use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Enforce that anchors have content and that the content is accessible to screen readers.
@@ -102,30 +103,23 @@ impl Rule for UseAnchorContent {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
+        let source_type = ctx.source_type::<HtmlFileSource>();
 
         // Check if element is an anchor tag
-        // In HTML files, tag names are case-insensitive
-        // In component frameworks (Vue, Svelte, Astro), only lowercase is checked
-        let element_name = node.name()?;
-        let source_type = ctx.source_type::<HtmlFileSource>();
-        let is_anchor = if source_type.is_html() {
-            element_name.text().eq_ignore_ascii_case("a")
-        } else {
-            element_name.text() == "a"
-        };
-        if !is_anchor {
+        let tag_element = node.clone().as_any_html_tag_element()?;
+        if !is_html_tag(&tag_element, source_type, "a") {
             return None;
         }
 
         // Check if the anchor itself has aria-hidden attribute
-        if let Some(aria_hidden_attr) = get_truthy_aria_hidden_attribute(node) {
+        if let Some(aria_hidden_attr) = get_truthy_aria_hidden_attribute(&tag_element) {
             return Some(UseAnchorContentState {
                 aria_hidden_attribute: Some(aria_hidden_attr),
             });
         }
 
         // Check if anchor has accessible name via aria-label or title
-        if has_accessible_name(node) {
+        if has_accessible_name(&tag_element) {
             return None;
         }
 
@@ -213,10 +207,7 @@ fn has_accessible_content(html_child_list: &HtmlElementList, is_astro: bool) -> 
             let tag_text = element.name().ok().and_then(|n| n.token_text_trimmed());
 
             match tag_text.as_ref().map(|t| t.as_ref()) {
-                Some(name)
-                    if name.eq_ignore_ascii_case("img")
-                        || (is_astro && name == "Image") =>
-                {
+                Some(name) if name.eq_ignore_ascii_case("img") || (is_astro && name == "Image") => {
                     html_self_closing_element_has_non_empty_attribute(element, "alt")
                 }
                 Some(name)

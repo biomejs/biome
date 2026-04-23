@@ -7,10 +7,9 @@ use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_vue_valid_v_bind::UseVueValidVBindOptions;
 
 declare_lint_rule! {
-    /// Forbids `v-bind` directives with missing arguments or invalid modifiers.
+    /// Forbids `v-bind` directives with missing values or invalid modifiers.
     ///
     /// This rule reports v-bind directives in the following cases:
-    /// - The directive does not have an argument. E.g. `<div v-bind></div>`
     /// - The directive does not have a value. E.g. `<div v-bind:aaa></div>`
     /// - The directive has invalid modifiers. E.g. `<div v-bind:aaa.bbb="ccc"></div>`
     ///
@@ -46,7 +45,6 @@ const VALID_MODIFIERS: &[&str] = &["prop", "camel", "sync", "attr"];
 
 pub enum ViolationKind {
     MissingValue,
-    MissingArgument,
     InvalidModifier(TextRange),
 }
 
@@ -66,10 +64,6 @@ impl Rule for UseVueValidVBind {
 
                 if vue_directive.initializer().is_none() {
                     return Some(ViolationKind::MissingValue);
-                }
-
-                if vue_directive.arg().is_none() {
-                    return Some(ViolationKind::MissingArgument);
                 }
 
                 if let Some(invalid_range) = find_invalid_modifiers(&vue_directive.modifiers()) {
@@ -109,18 +103,6 @@ impl Rule for UseVueValidVBind {
                         "v-bind directives require a value."
                 }).note(markup! {
                         "Add a value to the directive, e.g. "<Emphasis>"v-bind:foo=\"bar\""</Emphasis>"."
-                }),
-                ViolationKind::MissingArgument => RuleDiagnostic::new(
-                    rule_category!(),
-                    ctx.query().range(),
-                    markup! {
-                        "This v-bind directive is missing an argument."
-                    },
-                )
-                .note(markup! {
-                        "v-bind directives require an argument to specify which attribute to bind to."
-                }).note(markup! {
-                        "For example, use " <Emphasis>"v-bind:foo"</Emphasis> " to bind to the " <Emphasis>"foo"</Emphasis> " attribute."
                 }),
                 ViolationKind::InvalidModifier(invalid_range) =>
                     RuleDiagnostic::new(

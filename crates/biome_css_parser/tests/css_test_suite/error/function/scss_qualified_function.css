@@ -1,4 +1,5 @@
-.foo {
+.bad {
   color: mod.fn(1, 2);
-  background-image: url(mod.fn.svg);
+  background-image: url("a.png" mod.fn(test));
+  value: module.$fn();
 }

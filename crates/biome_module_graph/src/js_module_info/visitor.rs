@@ -7,7 +7,6 @@ use biome_js_syntax::{
     JsIdentifierBinding, JsVariableDeclaratorList, TsExportAssignmentClause, unescape_js_string,
 };
 use biome_js_type_info::{ImportSymbol, TypeData, TypeReference, TypeResolver};
-use biome_jsdoc_comment::JsdocComment;
 use biome_resolver::{ResolveOptions, resolve};
 use biome_rowan::{AstNode, TokenText, WalkEvent};
 use camino::Utf8Path;
@@ -53,7 +52,7 @@ impl<'a> JsModuleVisitor<'a> {
     }
 
     pub fn collect_info(self) -> JsModuleInfo {
-        let mut collector = JsModuleInfoCollector::default();
+        let mut collector = JsModuleInfoCollector::new(self.semantic_model.clone());
 
         let iter = self.root.syntax().preorder();
         for event in iter {
@@ -64,8 +63,6 @@ impl<'a> JsModuleVisitor<'a> {
                     } else if let Some(export) = biome_js_syntax::JsExport::cast_ref(&node) {
                         self.visit_export(export, &mut collector);
                     }
-
-                    collector.push_node(&node);
                 }
                 WalkEvent::Leave(node) => {
                     collector.leave_node(&node);
@@ -276,11 +273,8 @@ impl<'a> JsModuleVisitor<'a> {
             specifier: specifier.into(),
             symbol: ImportSymbol::All,
         };
-        let jsdoc_comment = node
-            .syntax()
-            .parent()
-            .and_then(|parent| JsdocComment::try_from(parent).ok());
 
+        let export_range = node.syntax().parent().map(|p| p.text_trimmed_range());
         if let Some(export_as) = node.export_as() {
             let export_name = export_as
                 .exported_name()
@@ -291,13 +285,13 @@ impl<'a> JsModuleVisitor<'a> {
                 export_name,
                 reexport: JsReexport {
                     import,
-                    jsdoc_comment,
+                    export_range,
                 },
             });
         } else {
             collector.register_blanket_reexport(JsReexport {
                 import,
-                jsdoc_comment,
+                export_range,
             });
         }
 
@@ -339,7 +333,7 @@ impl<'a> JsModuleVisitor<'a> {
                         resolved_path: resolved_path.clone(),
                         symbol: ImportSymbol::Named(imported_name),
                     },
-                    jsdoc_comment: None,
+                    export_range: None,
                 },
             });
         }

@@ -143,7 +143,7 @@ invalid.html:16:1 lint/a11y/useAltText ━━━━━━━━━━━━━�
   
     15 │ <!-- object without title -->
   > 16 │ <object data="movie.swf"></object>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
     17 │ <object data="document.pdf" type="application/pdf"></object>
     18 │ 
   
@@ -162,7 +162,7 @@ invalid.html:17:1 lint/a11y/useAltText ━━━━━━━━━━━━━�
     15 │ <!-- object without title -->
     16 │ <object data="movie.swf"></object>
   > 17 │ <object data="document.pdf" type="application/pdf"></object>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     18 │ 
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.

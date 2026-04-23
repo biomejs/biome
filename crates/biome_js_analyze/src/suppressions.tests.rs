@@ -1,5 +1,5 @@
 use super::*;
-use biome_analyze::{AnalyzerOptions, Never, RuleCategoriesBuilder, RuleFilter};
+use biome_analyze::{ActionFilter, AnalyzerOptions, Never, RuleCategoriesBuilder, RuleFilter};
 use biome_diagnostics::category;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, print_diagnostic_to_string};
 use biome_js_parser::{JsParserOptions, parse};
@@ -49,7 +49,7 @@ fn quick_test() {
                 eprintln!("{text}");
             }
 
-            for action in signal.actions() {
+            for action in signal.actions(ActionFilter::all()) {
                 let new_code = action.mutation.commit();
                 eprintln!("new code!!!");
                 eprintln!("{new_code}");

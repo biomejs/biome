@@ -21,7 +21,6 @@ use biome_package::TurboJson;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{TextRange, TokenText};
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
-use rustc_hash::FxHashMap;
 use std::ops::Deref;
 use std::sync::{Arc, LazyLock};
 
@@ -53,8 +52,8 @@ pub struct JsAnalyzerServices {
     module_graph: Arc<ModuleGraph>,
     project_layout: Arc<ProjectLayout>,
     source_type: JsFileSource,
-    embedded_bindings: Vec<FxHashMap<TextRange, TokenText>>,
-    embedded_value_references: Vec<FxHashMap<TextRange, TokenText>>,
+    embedded_bindings: Vec<Vec<(TextRange, TokenText)>>,
+    embedded_value_references: Vec<Vec<(TextRange, TokenText)>>,
     semantic_model: Option<SemanticModel>,
 }
 
@@ -118,11 +117,11 @@ impl From<&AnyJsRoot> for JsAnalyzerServices {
 }
 
 impl JsAnalyzerServices {
-    pub fn set_embedded_bindings(&mut self, bindings: Vec<FxHashMap<TextRange, TokenText>>) {
+    pub fn set_embedded_bindings(&mut self, bindings: Vec<Vec<(TextRange, TokenText)>>) {
         self.embedded_bindings = bindings;
     }
 
-    pub fn set_embedded_value_references(&mut self, refs: Vec<FxHashMap<TextRange, TokenText>>) {
+    pub fn set_embedded_value_references(&mut self, refs: Vec<Vec<(TextRange, TokenText)>>) {
         self.embedded_value_references = refs;
     }
 }

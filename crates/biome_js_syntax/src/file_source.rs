@@ -162,6 +162,9 @@ pub enum EmbeddingKind {
         /// extracts `<script>` content or treats the file as a standalone JS/TS
         /// module, while `is_source` still tracks where bindings come from.
         kind: SvelteFileKind,
+
+        /// Whether this is the declaration of a function, usually declared in `#snippet`
+        is_function_signature: bool,
     },
     #[default]
     None,
@@ -191,6 +194,15 @@ impl EmbeddingKind {
     }
     pub const fn is_svelte(&self) -> bool {
         matches!(self, Self::Svelte { .. })
+    }
+    pub const fn is_svelte_function_signature(&self) -> bool {
+        matches!(
+            self,
+            Self::Svelte {
+                is_function_signature: true,
+                ..
+            }
+        )
     }
     pub const fn is_svelte_component(&self) -> bool {
         matches!(
@@ -301,7 +313,9 @@ impl JsFileSource {
     pub fn svelte() -> Self {
         Self::js_module().with_embedding_kind(EmbeddingKind::Svelte {
             is_source: true,
-            kind: SvelteFileKind::Component,
+            is_function_signature: false,
+                        kind: SvelteFileKind::Component,
+
         })
     }
 

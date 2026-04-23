@@ -1,0 +1,277 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/atrule/while.scss
+---
+
+# Input
+
+```scss
+@while $i > 0 {}
+@while $i>0{}
+@while  $i  >  0  {}
+@while $i
+    >
+    0
+    {}
+@while
+    $i
+    >
+    0
+    {}
+@while
+$i
+>
+0
+{
+}
+@while
+
+$i
+
+>
+
+0
+
+{
+
+}
+@while ($i > 0) {}
+@while ($i>0){}
+@while ( $i > 0 ) {}
+@while  (  $i  >  0  )  {}
+@while (
+    $i > 0
+) {}
+@while
+    ($i > 0) {}
+@while
+(
+$i
+>
+0
+)
+{
+}
+@while
+
+(
+
+$i
+
+>
+
+0
+
+)
+
+{
+
+}
+@while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var > 1 {}
+@while 1 > $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var {}
+@while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var > $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var {}
+@while (($i) > (0)) {}
+@while (($i)>(0)){}
+@while  (  (  $i  )  >  (  0  )  )  {}
+@while (($i)
+    >
+    (0)
+) {}
+@while
+(
+(
+$i
+)
+>
+(
+0
+)
+)
+{
+}
+@while
+
+(
+
+(
+
+$i
+
+)
+
+>
+
+(
+
+0
+
+)
+
+)
+
+{
+
+}
+@while ($very-very-very-very-very-very-very-very-very-very-very-very-long-var > 1) {}
+@while (1 > $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var) {}
+@while ($very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var > 1) {}
+@while ($very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var > $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var) {}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,6 +1,6 @@
+ @while $i > 0 {
+ }
+-@while $i>0 {
++@while $i > 0 {
+ }
+ @while $i > 0 {
+ }
+@@ -14,7 +14,7 @@
+ }
+ @while ($i > 0) {
+ }
+-@while ($i>0) {
++@while ($i > 0) {
+ }
+ @while ($i > 0) {
+ }
+@@ -29,20 +29,17 @@
+ @while ($i > 0) {
+ }
+ @while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
+-  1
+-{
++1 {
+ }
+ @while 1 >
+-  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+-{
++$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var {
+ }
+ @while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
+-  $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+-{
++$other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var {
+ }
+ @while (($i) > (0)) {
+ }
+-@while (($i) >(0)) {
++@while (($i) > (0)) {
+ }
+ @while (($i) > (0)) {
+ }
+@@ -58,16 +55,16 @@
+ }
+ @while (
+   1 >
+-    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
++  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+ ) {
+ }
+ @while (
+   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
+-    1
++  1
+ ) {
+ }
+ @while (
+   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
+-    $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
++  $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+ ) {
+ }
+```
+
+# Output
+
+```scss
+@while $i > 0 {
+}
+@while $i > 0 {
+}
+@while $i > 0 {
+}
+@while $i > 0 {
+}
+@while $i > 0 {
+}
+@while $i > 0 {
+}
+@while $i > 0 {
+}
+@while ($i > 0) {
+}
+@while ($i > 0) {
+}
+@while ($i > 0) {
+}
+@while ($i > 0) {
+}
+@while ($i > 0) {
+}
+@while ($i > 0) {
+}
+@while ($i > 0) {
+}
+@while ($i > 0) {
+}
+@while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
+1 {
+}
+@while 1 >
+$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var {
+}
+@while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
+$other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var {
+}
+@while (($i) > (0)) {
+}
+@while (($i) > (0)) {
+}
+@while (($i) > (0)) {
+}
+@while (($i) > (0)) {
+}
+@while (($i) > (0)) {
+}
+@while (($i) > (0)) {
+}
+@while (
+  $very-very-very-very-very-very-very-very-very-very-very-very-long-var > 1
+) {
+}
+@while (
+  1 >
+  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+) {
+}
+@while (
+  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
+  1
+) {
+}
+@while (
+  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
+  $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+) {
+}
+```
+
+# Lines exceeding max width of 80 characters
+```
+   31: @while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
+   35: $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var {
+   37: @while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
+   38: $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var {
+   58:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+   62:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
+   67:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
+   68:   $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+```

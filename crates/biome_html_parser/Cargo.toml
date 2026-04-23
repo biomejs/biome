@@ -29,7 +29,7 @@ tracing             = { workspace = true }
 biome_string_case = { path = "../biome_string_case" }
 biome_test_utils  = { path = "../biome_test_utils" }
 camino            = { workspace = true }
-criterion         = { package = "codspeed-criterion-compat", version = "*" }
+criterion         = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta             = { workspace = true }
 quickcheck        = { workspace = true }
 quickcheck_macros = { workspace = true }

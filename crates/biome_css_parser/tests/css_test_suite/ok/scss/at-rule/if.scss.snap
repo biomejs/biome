@@ -48,7 +48,7 @@ CssRoot {
                 condition: ScssExpression {
                     items: ScssExpressionItemList [
                         ScssBinaryExpression {
-                            left: ScssIdentifier {
+                            left: ScssVariable {
                                 dollar_token: DOLLAR@4..5 "$" [] [],
                                 name: CssIdentifier {
                                     value_token: IDENT@5..11 "theme" [] [Whitespace(" ")],
@@ -96,7 +96,7 @@ CssRoot {
                 condition: ScssExpression {
                     items: ScssExpressionItemList [
                         ScssBinaryExpression {
-                            left: ScssIdentifier {
+                            left: ScssVariable {
                                 dollar_token: DOLLAR@44..45 "$" [] [],
                                 name: CssIdentifier {
                                     value_token: IDENT@45..51 "theme" [] [Whitespace(" ")],
@@ -172,7 +172,7 @@ CssRoot {
                 condition: ScssExpression {
                     items: ScssExpressionItemList [
                         ScssBinaryExpression {
-                            left: ScssIdentifier {
+                            left: ScssVariable {
                                 dollar_token: DOLLAR@110..111 "$" [] [],
                                 name: CssIdentifier {
                                     value_token: IDENT@111..117 "theme" [] [Whitespace(" ")],
@@ -218,7 +218,7 @@ CssRoot {
                         condition: ScssExpression {
                             items: ScssExpressionItemList [
                                 ScssBinaryExpression {
-                                    left: ScssIdentifier {
+                                    left: ScssVariable {
                                         dollar_token: DOLLAR@154..155 "$" [] [],
                                         name: CssIdentifier {
                                             value_token: IDENT@155..161 "theme" [] [Whitespace(" ")],
@@ -313,7 +313,7 @@ CssRoot {
                             if_token: IF_KW@227..230 "if" [] [Whitespace(" ")],
                             condition: ScssExpression {
                                 items: ScssExpressionItemList [
-                                    ScssIdentifier {
+                                    ScssVariable {
                                         dollar_token: DOLLAR@230..231 "$" [] [],
                                         name: CssIdentifier {
                                             value_token: IDENT@231..239 "compact" [] [Whitespace(" ")],
@@ -400,7 +400,7 @@ CssRoot {
         1: SCSS_EXPRESSION@4..19
           0: SCSS_EXPRESSION_ITEM_LIST@4..19
             0: SCSS_BINARY_EXPRESSION@4..19
-              0: SCSS_IDENTIFIER@4..11
+              0: SCSS_VARIABLE@4..11
                 0: DOLLAR@4..5 "$" [] []
                 1: CSS_IDENTIFIER@5..11
                   0: IDENT@5..11 "theme" [] [Whitespace(" ")]
@@ -431,7 +431,7 @@ CssRoot {
         1: SCSS_EXPRESSION@44..59
           0: SCSS_EXPRESSION_ITEM_LIST@44..59
             0: SCSS_BINARY_EXPRESSION@44..59
-              0: SCSS_IDENTIFIER@44..51
+              0: SCSS_VARIABLE@44..51
                 0: DOLLAR@44..45 "$" [] []
                 1: CSS_IDENTIFIER@45..51
                   0: IDENT@45..51 "theme" [] [Whitespace(" ")]
@@ -480,7 +480,7 @@ CssRoot {
         1: SCSS_EXPRESSION@110..125
           0: SCSS_EXPRESSION_ITEM_LIST@110..125
             0: SCSS_BINARY_EXPRESSION@110..125
-              0: SCSS_IDENTIFIER@110..117
+              0: SCSS_VARIABLE@110..117
                 0: DOLLAR@110..111 "$" [] []
                 1: CSS_IDENTIFIER@111..117
                   0: IDENT@111..117 "theme" [] [Whitespace(" ")]
@@ -511,7 +511,7 @@ CssRoot {
             1: SCSS_EXPRESSION@154..170
               0: SCSS_EXPRESSION_ITEM_LIST@154..170
                 0: SCSS_BINARY_EXPRESSION@154..170
-                  0: SCSS_IDENTIFIER@154..161
+                  0: SCSS_VARIABLE@154..161
                     0: DOLLAR@154..155 "$" [] []
                     1: CSS_IDENTIFIER@155..161
                       0: IDENT@155..161 "theme" [] [Whitespace(" ")]
@@ -572,7 +572,7 @@ CssRoot {
               0: IF_KW@227..230 "if" [] [Whitespace(" ")]
               1: SCSS_EXPRESSION@230..239
                 0: SCSS_EXPRESSION_ITEM_LIST@230..239
-                  0: SCSS_IDENTIFIER@230..239
+                  0: SCSS_VARIABLE@230..239
                     0: DOLLAR@230..231 "$" [] []
                     1: CSS_IDENTIFIER@231..239
                       0: IDENT@231..239 "compact" [] [Whitespace(" ")]

@@ -4,7 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_syntax::AnyJsxAttribute;
 use biome_js_syntax::{JsxAttributeList, JsxOpeningElement, JsxSelfClosingElement};
-use biome_rowan::{AstNode, declare_node_union};
+use biome_rowan::{AstNode, TokenText, declare_node_union};
 use biome_rule_options::no_duplicated_spread_props::NoDuplicatedSpreadPropsOptions;
 use std::collections::HashSet;
 
@@ -41,7 +41,7 @@ declare_lint_rule! {
 
 impl Rule for NoDuplicatedSpreadProps {
     type Query = Ast<NoDuplicatedSpreadPropsQuery>;
-    type State = String;
+    type State = TokenText;
     type Signals = Option<Self::State>;
     type Options = NoDuplicatedSpreadPropsOptions;
 
@@ -67,7 +67,7 @@ impl Rule for NoDuplicatedSpreadProps {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "The expression "<Emphasis>{state}</Emphasis>" has spread more than once."
+                    "The expression "<Emphasis>{state.text()}</Emphasis>" has spread more than once."
                 },
             )
             .note(markup! {
@@ -83,7 +83,7 @@ declare_node_union! {
         | JsxSelfClosingElement
 }
 
-fn validate_attributes(list: &JsxAttributeList) -> Option<String> {
+fn validate_attributes(list: &JsxAttributeList) -> Option<TokenText> {
     let mut seen_spreads = HashSet::new();
 
     for attribute in list {
@@ -93,7 +93,7 @@ fn validate_attributes(list: &JsxAttributeList) -> Option<String> {
             && let Some(name) = express.name().ok()
             && let Some(value_token) = name.value_token().ok()
         {
-            let text = value_token.text_trimmed().to_string();
+            let text = value_token.token_text_trimmed();
             if !seen_spreads.insert(text.clone()) {
                 return Some(text);
             }

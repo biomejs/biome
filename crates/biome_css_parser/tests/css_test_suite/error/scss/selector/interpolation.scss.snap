@@ -41,7 +41,7 @@ CssRoot {
                         CssBogusSubSelector {
                             items: [
                                 DOT@0..1 "." [] [],
-                                CssBogus {
+                                CssBogusSupportsCondition {
                                     items: [
                                         CssBogus {
                                             items: [
@@ -56,7 +56,7 @@ CssRoot {
                                                             items: [
                                                                 CssBogus {
                                                                     items: [
-                                                                        ScssIdentifier {
+                                                                        ScssVariable {
                                                                             dollar_token: DOLLAR@7..8 "$" [] [],
                                                                             name: CssIdentifier {
                                                                                 value_token: IDENT@8..13 "name" [] [Whitespace(" ")],
@@ -336,7 +336,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@0..27
             0: CSS_BOGUS_SUB_SELECTOR@0..27
               0: DOT@0..1 "." [] []
-              1: CSS_BOGUS@1..27
+              1: CSS_BOGUS_SUPPORTS_CONDITION@1..27
                 0: CSS_BOGUS@1..27
                   0: CSS_CUSTOM_IDENTIFIER@1..5
                     0: IDENT@1..5 "foo-" [] []
@@ -345,7 +345,7 @@ CssRoot {
                     1: L_CURLY@6..7 "{" [] []
                     2: CSS_BOGUS@7..27
                       0: CSS_BOGUS@7..27
-                        0: SCSS_IDENTIFIER@7..13
+                        0: SCSS_VARIABLE@7..13
                           0: DOLLAR@7..8 "$" [] []
                           1: CSS_IDENTIFIER@8..13
                             0: IDENT@8..13 "name" [] [Whitespace(" ")]

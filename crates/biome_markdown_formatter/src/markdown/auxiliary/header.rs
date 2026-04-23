@@ -1,8 +1,9 @@
 use crate::markdown::auxiliary::paragraph::FormatMdParagraphOptions;
 use crate::prelude::*;
-use crate::verbatim::format_verbatim_node;
+use crate::shared::{TextPrintMode, TrimMode};
 use biome_formatter::write;
 use biome_markdown_syntax::{MdHeader, MdHeaderFields};
+use biome_rowan::AstNode;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdHeader;
@@ -15,18 +16,17 @@ impl FormatNodeRule<MdHeader> for FormatMdHeader {
             after,
         } = node.as_fields();
 
-        write!(f, [format_verbatim_node(indent.syntax())])?;
-
-        write!(f, [before.format()])?;
+        write!(f, [indent.format(), before.format()])?;
 
         if let Some(content) = content {
             write!(
                 f,
                 [
                     space(),
-                    content
-                        .format()
-                        .with_options(FormatMdParagraphOptions { trim_start: true })
+                    content.format().with_options(FormatMdParagraphOptions {
+                        trim_mode: TextPrintMode::Trim(TrimMode::Start),
+                        inside_list: false,
+                    })
                 ]
             )?;
         }

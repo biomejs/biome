@@ -20,8 +20,8 @@ $missing-rhs: #{1 + };
 CssRoot {
     bom_token: missing (optional),
     items: CssRootItemList [
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@0..1 "$" [] [],
                 name: CssIdentifier {
                     value_token: IDENT@1..9 "unclosed" [] [],
@@ -35,7 +35,7 @@ CssRoot {
                         l_curly_token: L_CURLY@12..13 "{" [] [],
                         value: ScssExpression {
                             items: ScssExpressionItemList [
-                                ScssIdentifier {
+                                ScssVariable {
                                     dollar_token: DOLLAR@13..14 "$" [] [],
                                     name: CssIdentifier {
                                         value_token: IDENT@14..18 "name" [] [],
@@ -50,8 +50,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@18..19 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@19..21 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@21..26 "empty" [] [],
@@ -71,8 +71,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@31..32 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@32..34 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@34..45 "missing-rhs" [] [],
@@ -113,8 +113,8 @@ CssRoot {
 0: CSS_ROOT@0..56
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..55
-    0: SCSS_DECLARATION@0..19
-      0: SCSS_IDENTIFIER@0..9
+    0: SCSS_VARIABLE_DECLARATION@0..19
+      0: SCSS_VARIABLE@0..9
         0: DOLLAR@0..1 "$" [] []
         1: CSS_IDENTIFIER@1..9
           0: IDENT@1..9 "unclosed" [] []
@@ -126,15 +126,15 @@ CssRoot {
             1: L_CURLY@12..13 "{" [] []
             2: SCSS_EXPRESSION@13..18
               0: SCSS_EXPRESSION_ITEM_LIST@13..18
-                0: SCSS_IDENTIFIER@13..18
+                0: SCSS_VARIABLE@13..18
                   0: DOLLAR@13..14 "$" [] []
                   1: CSS_IDENTIFIER@14..18
                     0: IDENT@14..18 "name" [] []
             3: (empty)
       3: SCSS_VARIABLE_MODIFIER_LIST@18..18
       4: SEMICOLON@18..19 ";" [] []
-    1: SCSS_DECLARATION@19..32
-      0: SCSS_IDENTIFIER@19..26
+    1: SCSS_VARIABLE_DECLARATION@19..32
+      0: SCSS_VARIABLE@19..26
         0: DOLLAR@19..21 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@21..26
           0: IDENT@21..26 "empty" [] []
@@ -148,8 +148,8 @@ CssRoot {
             3: R_CURLY@30..31 "}" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@31..31
       4: SEMICOLON@31..32 ";" [] []
-    2: SCSS_DECLARATION@32..55
-      0: SCSS_IDENTIFIER@32..45
+    2: SCSS_VARIABLE_DECLARATION@32..55
+      0: SCSS_VARIABLE@32..45
         0: DOLLAR@32..34 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@34..45
           0: IDENT@34..45 "missing-rhs" [] []

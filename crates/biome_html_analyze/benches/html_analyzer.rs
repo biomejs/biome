@@ -2,7 +2,7 @@ use std::{collections::HashMap, fs, path::Path};
 
 use biome_analyze::options::JsxRuntime;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
+    ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
     RuleCategoriesBuilder,
 };
 use biome_html_parser::{HtmlParserOptions, parse_html};
@@ -115,7 +115,7 @@ fn bench_analyzer(criterion: &mut Criterion) {
                                 file_source,
                                 |event| {
                                     black_box(event.diagnostic());
-                                    black_box(event.actions());
+                                    black_box(event.actions(ActionFilter::all()));
                                     ControlFlow::<Never>::Continue(())
                                 },
                             );
@@ -158,7 +158,7 @@ fn bench_analyzer(criterion: &mut Criterion) {
                     file_source,
                     |event| {
                         black_box(event.diagnostic());
-                        black_box(event.actions());
+                        black_box(event.actions(ActionFilter::all()));
                         ControlFlow::<Never>::Continue(())
                     },
                 );
