@@ -1,0 +1,32 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-svelte-interpolation.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+  let counter = 0;
+</script>
+
+<p>{counter = counter + 1}</p>
+
+```
+
+# Diagnostics
+```
+invalid-svelte-interpolation.svelte:6:5 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━
+
+  × The assignment should not be in an expression.
+  
+    4 │ </script>
+    5 │ 
+  > 6 │ <p>{counter = counter + 1}</p>
+      │     ^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+  
+  i The use of assignments in expressions is confusing.
+    Expressions are often considered as side-effect free.
+  
+
+```

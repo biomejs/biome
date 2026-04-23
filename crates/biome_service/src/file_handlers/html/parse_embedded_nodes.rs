@@ -789,6 +789,7 @@ fn parse_matched_embed(
                         js_source = js_source.with_embedding_kind(EmbeddingKind::Svelte {
                             is_source: true,
                             is_function_signature: false,
+                            const_block: false,
                         });
                     } else if ctx.host_file_source.is_vue() {
                         js_source = js_source.with_embedding_kind(EmbeddingKind::Vue {
@@ -808,9 +809,12 @@ fn parse_matched_embed(
                     } else if ctx.host_file_source.is_svelte() {
                         let is_function_signature =
                             matches!(block_kind, EmbedBlockKind::Svelte(SvelteBlockKind::Snippet));
+                        let const_block =
+                            matches!(block_kind, EmbedBlockKind::Svelte(SvelteBlockKind::Const));
                         js_source = js_source.with_embedding_kind(EmbeddingKind::Svelte {
                             is_source: false,
                             is_function_signature,
+                            const_block,
                         });
                     } else if ctx.host_file_source.is_vue() {
                         js_source = js_source.with_embedding_kind(EmbeddingKind::Vue {
@@ -843,6 +847,7 @@ fn parse_matched_embed(
                             js_source = js_source.with_embedding_kind(EmbeddingKind::Svelte {
                                 is_source: false,
                                 is_function_signature: false,
+                                const_block: false,
                             });
                         }
                     }

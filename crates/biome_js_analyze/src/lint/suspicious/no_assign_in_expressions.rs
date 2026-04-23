@@ -71,6 +71,12 @@ impl Rule for NoAssignInExpressions {
         if file_source.is_vue_event_handler() {
             return None;
         }
+        // Skip assignments in Svelte `{@const name = value}` blocks.
+        // These are declarations (scoped to the enclosing block), not
+        // accidental uses of `=` in place of a comparison.
+        if file_source.is_svelte_const_block() {
+            return None;
+        }
 
         let assign = ctx.query();
         let mut ancestor = assign

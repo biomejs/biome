@@ -142,6 +142,11 @@ pub enum EmbeddingKind {
 
         /// Whether this is the declaration of a function, usually declared in `#snippet`
         is_function_signature: bool,
+
+        /// Whether this embed is the expression of a `{@const name = value}`
+        /// block. Those assignments are declarations, not accidental side
+        /// effects, so rules like `noAssignInExpressions` should skip them.
+        const_block: bool,
     },
     #[default]
     None,
@@ -177,6 +182,15 @@ impl EmbeddingKind {
             self,
             Self::Svelte {
                 is_function_signature: true,
+                ..
+            }
+        )
+    }
+    pub const fn is_svelte_const_block(&self) -> bool {
+        matches!(
+            self,
+            Self::Svelte {
+                const_block: true,
                 ..
             }
         )
@@ -273,6 +287,7 @@ impl JsFileSource {
         Self::js_module().with_embedding_kind(EmbeddingKind::Svelte {
             is_source: true,
             is_function_signature: false,
+            const_block: false,
         })
     }
 
@@ -377,6 +392,12 @@ impl JsFileSource {
     /// Returns true if this is a Vue event handler (v-on directive)
     pub const fn is_vue_event_handler(&self) -> bool {
         self.embedding_kind.is_vue_event_handler()
+    }
+
+    /// Returns true if this embed is the expression of a Svelte
+    /// `{@const name = value}` block.
+    pub const fn is_svelte_const_block(&self) -> bool {
+        self.embedding_kind.is_svelte_const_block()
     }
 
     pub const fn as_embedding_kind(&self) -> &EmbeddingKind {

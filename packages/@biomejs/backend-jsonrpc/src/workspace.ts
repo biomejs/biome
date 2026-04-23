@@ -9650,6 +9650,12 @@ Source-level embeds (`<script>`) use `true`; directives and text expressions use
 	| {
 			Svelte: {
 				/**
+	* Whether this embed is the expression of a `{@const name = value}`
+block. Those assignments are declarations, not accidental side
+effects, so rules like `noAssignInExpressions` should skip them. 
+	 */
+				const_block: boolean;
+				/**
 				 * Whether this is the declaration of a function, usually declared in `#snippet`
 				 */
 				is_function_signature: boolean;
