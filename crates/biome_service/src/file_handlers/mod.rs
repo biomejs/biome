@@ -2250,15 +2250,15 @@ mod tests {
     #[test]
     fn markdown_file_source_detection_and_capabilities() {
         let source = DocumentFileSource::from_path(Utf8Path::new("docs/readme.md"), false);
-        assert!(matches!(source, DocumentFileSource::Unknown));
+        assert!(matches!(source, DocumentFileSource::Markdown(_)));
 
         let language_source = DocumentFileSource::from_language_id("markdown");
-        assert!(matches!(language_source, DocumentFileSource::Unknown));
+        assert!(matches!(language_source, DocumentFileSource::Markdown(_)));
 
-        assert!(!DocumentFileSource::can_parse(Utf8Path::new(
+        assert!(DocumentFileSource::can_parse(Utf8Path::new(
             "docs/readme.md"
         )));
-        assert!(!DocumentFileSource::can_read(Utf8Path::new(
+        assert!(DocumentFileSource::can_read(Utf8Path::new(
             "docs/readme.md"
         )));
         assert!(!DocumentFileSource::can_contain_embeds(
@@ -2273,8 +2273,8 @@ mod tests {
         let path = Utf8Path::new("doc.md");
         let capabilities = features.get_capabilities(DocumentFileSource::from_path(path, false));
 
-        assert!(capabilities.formatter.format.is_none());
-        assert!(capabilities.parser.parse.is_none());
+        assert!(capabilities.formatter.format.is_some());
+        assert!(capabilities.parser.parse.is_some());
     }
 
     #[test]
