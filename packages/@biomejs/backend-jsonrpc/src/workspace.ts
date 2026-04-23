@@ -2359,6 +2359,11 @@ See https://biomejs.dev/linter/rules/use-yield
  */
 export interface Nursery {
 	/**
+	* Disallow arbitrary values in Tailwind CSS utility classes.
+See https://biomejs.dev/linter/rules/no-arbitrary-value 
+	 */
+	noArbitraryValue?: NoArbitraryValueConfiguration;
+	/**
 	* Require stringification to avoid values that only use the default object representation.
 See https://biomejs.dev/linter/rules/no-base-to-string 
 	 */
@@ -4632,6 +4637,9 @@ export type UseVueValidVTextConfiguration =
 export type UseYieldConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseYieldOptions;
+export type NoArbitraryValueConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoArbitraryValueOptions;
 export type NoBaseToStringConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoBaseToStringOptions;
@@ -6467,6 +6475,10 @@ export interface RuleWithUseYieldOptions {
 	level: RulePlainConfiguration;
 	options?: UseYieldOptions;
 }
+export interface RuleWithNoArbitraryValueOptions {
+	level: RulePlainConfiguration;
+	options?: NoArbitraryValueOptions;
+}
 export interface RuleWithNoBaseToStringOptions {
 	level: RulePlainConfiguration;
 	options?: NoBaseToStringOptions;
@@ -8251,6 +8263,16 @@ export type UseVueValidVOnceOptions = {};
 export type UseVueValidVPreOptions = {};
 export type UseVueValidVTextOptions = {};
 export type UseYieldOptions = {};
+export interface NoArbitraryValueOptions {
+	/**
+	 * Additional attributes that will be checked.
+	 */
+	attributes?: string[];
+	/**
+	 * Names of the functions or tagged templates that will be checked.
+	 */
+	functions?: string[];
+}
 export interface NoBaseToStringOptions {
 	ignoredTypeNames?: string[];
 }
@@ -9674,6 +9696,7 @@ export type Category =
 	| "lint/correctness/useVueValidVPre"
 	| "lint/correctness/useVueValidVText"
 	| "lint/correctness/useYield"
+	| "lint/nursery/noArbitraryValue"
 	| "lint/nursery/noRestrictedDependencies"
 	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noColorInvalidHex"

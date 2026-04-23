@@ -1,0 +1,8 @@
+/* should not generate diagnostics */
+<div className="w-4 text-red-500 bg-white" />;
+<div className="hover:px-2" />;
+<div className="[&:nth-child(3)]:px-2" />;
+<div className="has-[:checked]:bg-red-500" />;
+<div class="p-4 text-lg font-bold" />;
+<div className={`p-4 ${condition ? "text-lg" : "text-sm"}`} />;
+<div className={`${prefix} text-lg`} />;
