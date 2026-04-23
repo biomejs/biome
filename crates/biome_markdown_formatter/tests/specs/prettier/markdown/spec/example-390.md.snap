@@ -18,11 +18,11 @@ info: markdown/spec/example-390.md
 +++ Biome
 @@ -1 +1 @@
 -*foo [*bar*](/url)*
-+*foo [_bar_](/url)*
++_foo [*bar*](/url)_
 ```
 
 # Output
 
 ```md
-*foo [_bar_](/url)*
+_foo [*bar*](/url)_
 ```

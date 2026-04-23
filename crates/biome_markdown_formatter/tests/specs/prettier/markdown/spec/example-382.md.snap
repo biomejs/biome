@@ -18,11 +18,11 @@ __foo_ bar_
 +++ Biome
 @@ -1 +1 @@
 -\__foo_ bar\_
-+__foo_ bar_
++_*foo* bar_
 ```
 
 # Output
 
 ```md
-__foo_ bar_
+_*foo* bar_
 ```
