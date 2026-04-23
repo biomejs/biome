@@ -31,7 +31,9 @@ just new-json-lintrule myRuleName
 just new-graphql-lintrule myRuleName
 ```
 
-This creates a file in `crates/biome_js_analyze/src/lint/nursery/use_my_rule_name.rs`
+This creates a file in `crates/biome_<language>_analyze/src/lint/nursery/use_my_rule_name.rs`
+
+All new lint rules **must** be placed in the `nursery` group, and require a patch changeset. Use the changeset skill to learn more about writing good changesets.
 
 ### Implement the Rule
 
