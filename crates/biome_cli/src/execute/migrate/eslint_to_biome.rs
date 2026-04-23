@@ -806,13 +806,12 @@ fn migrate_eslint_rule(
                 let group = rules.nursery.get_or_insert_with(Default::default);
                 if let SeverityOrGroup::Group(group) = group {
                     if let eslint_eslint::RuleConf::Option(severity, rule_options) = conf {
-                        group.no_shadow =
-                            Some(biome_config::RuleConfiguration::WithOptions(
-                                biome_config::RuleWithOptions {
-                                    level: severity.into(),
-                                    options: rule_options.into(),
-                                },
-                            ));
+                        group.no_shadow = Some(biome_config::RuleConfiguration::WithOptions(
+                            biome_config::RuleWithOptions {
+                                level: severity.into(),
+                                options: rule_options.into(),
+                            },
+                        ));
                     } else {
                         let rule = group.no_shadow.get_or_insert(Default::default());
                         rule.set_level(rule.level().max(conf.severity().into()));
