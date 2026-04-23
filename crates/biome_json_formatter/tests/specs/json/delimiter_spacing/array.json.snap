@@ -9,7 +9,8 @@ info: json/delimiter_spacing/array.json
 {
 	"array": [1, 2, 3],
 	"boundaryFits": ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"],
-	"boundaryBreaks": ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"]
+	"boundaryBreaks": ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"],
+  "empty": []
 }
 
 ```
@@ -36,7 +37,8 @@ info: json/delimiter_spacing/array.json
 	"boundaryFits": [ "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" ],
 	"boundaryBreaks": [
 		"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-	]
+	],
+	"empty": []
 }
 
 ```
