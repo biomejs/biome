@@ -62,13 +62,13 @@ declare_lint_rule! {
 pub enum NoUnresolvedImportsState {
     UnresolvedPath {
         range: TextRange,
-        specifier: Box<str>,
+        specifier: TokenText,
         resolve_error: ResolveError,
     },
     UnresolvedSymbol {
         range: TextRange,
-        specifier: Box<str>,
-        export_name: Box<str>,
+        specifier: TokenText,
+        export_name: Text,
     },
 }
 
@@ -82,8 +82,8 @@ impl NoUnresolvedImportsState {
 
     fn specifier(&self) -> &str {
         match self {
-            Self::UnresolvedPath { specifier, .. } => specifier,
-            Self::UnresolvedSymbol { specifier, .. } => specifier,
+            Self::UnresolvedPath { specifier, .. } => specifier.text(),
+            Self::UnresolvedSymbol { specifier, .. } => specifier.text(),
         }
     }
 }
@@ -127,7 +127,7 @@ impl Rule for NoUnresolvedImports {
 
                 return vec![NoUnresolvedImportsState::UnresolvedPath {
                     range: node.syntax().text_trimmed_range(),
-                    specifier: specifier.as_ref().into(),
+                    specifier,
                     resolve_error: *resolve_error,
                 }];
             }
@@ -194,7 +194,7 @@ impl Rule for NoUnresolvedImports {
                 })
             }
             NoUnresolvedImportsState::UnresolvedSymbol { export_name, .. }
-                if export_name.as_ref() == "default" =>
+                if export_name.text() == "default" =>
             {
                 let specifier_kind = if specifier.starts_with('.') {
                     "path"
@@ -222,7 +222,7 @@ impl Rule for NoUnresolvedImports {
                     rule_category!(),
                     range,
                     markup! {
-                        "The "{specifier_kind}" "<Emphasis>{specifier}</Emphasis>" has no export named "<Emphasis>{export_name}</Emphasis>"."
+                        "The "{specifier_kind}" "<Emphasis>{specifier}</Emphasis>" has no export named "<Emphasis>{format_args!("{}", export_name)}</Emphasis>"."
                     },
                 )
                 .note(markup! {
@@ -258,8 +258,8 @@ fn get_unresolved_imports_from_module_source(
         (!has_exported_symbol(&imported_name, options)).then(|| {
             NoUnresolvedImportsState::UnresolvedSymbol {
                 range,
-                specifier: options.specifier.as_ref().into(),
-                export_name: imported_name.into(),
+                specifier: options.specifier.clone(),
+                export_name: imported_name,
             }
         })
     })
