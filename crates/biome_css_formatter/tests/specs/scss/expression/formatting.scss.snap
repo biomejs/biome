@@ -1,0 +1,137 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/expression/formatting.scss
+---
+
+# Input
+
+```scss
+$map	:(
+a:1 , b:2	);
+	$list:1,
+2
+
+,
+  3;
+
+
+$bin:1+2;
+	$unary1  : -1;
+
+  $unary2:not	$flag;
+   $kw:foo(
+
+$a:1, $b:2  );
+
+
+$varargs:foo(  $args...);
+
+ $paren:(
+1+2);
+ $qualified:  module.$var;
+
+$parent:  &;
+
+	$colon:  :
+;
+
+
+$list-space:1
+2
+3;
+
+	$list-mixed:1
+2,  3 4;
+
+$paren-nested:( (1+2)*3 );
+
+$comparison:$a<=$b  and	$c>= $d;
+
+
+
+$logic:not($a
+or $b );
+
+$fn-long:long-function-name( $a,
+  $b,
+$c,  $d );
+   $complex-args:foo( $a:(1	2,  3
+4 ),
+$b:map-get($map,
+key ));
+
+$interpolation  :"#{$a}-#{$b}";
+$interpolated-ident  :#{$a}-#{$b};
+ $calc:calc( 100% - $gutter*2);
+  $math:1+2*3%4/5;
+ $map-nested:(a:(b:1,
+  c:2), d:3);
+  $fn-nested:foo( bar($a,$b) , baz( $c:1));
+
+.a{
+  font:{
+size:12px;
+  }
+}
+
+```
+
+
+# Formatted
+
+```scss
+$map: (
+	a: 1,
+	b: 2,
+);
+$list: 1, 2, 3;
+
+$bin: 1 + 2;
+$unary1: -1;
+
+$unary2: not $flag;
+$kw: foo($a: 1, $b: 2);
+
+$varargs: foo($args...);
+
+$paren: (1 + 2);
+$qualified: module.$var;
+
+$parent: &;
+
+$colon:  :
+;
+
+$list-space: 1 2 3;
+
+$list-mixed: 1 2, 3 4;
+
+$paren-nested: ((1 + 2) * 3);
+
+$comparison: $a <= $b and $c >= $d;
+
+$logic: not($a or $b);
+
+$fn-long: long-function-name($a, $b, $c, $d);
+$complex-args: foo($a: (1 2, 3 4), $b: map-get($map, key));
+
+$interpolation: "#{$a}-#{$b}";
+$interpolated-ident: #{$a}-#{$b};
+$calc: calc(100% - $gutter * 2);
+$math: 1 + 2 * 3% 4 / 5;
+$map-nested: (
+	a: (
+		b: 1,
+		c: 2,
+	),
+	d: 3,
+);
+$fn-nested: foo(bar($a, $b), baz($c: 1));
+
+.a {
+	font: {
+		size: 12px;
+	}
+}
+
+```

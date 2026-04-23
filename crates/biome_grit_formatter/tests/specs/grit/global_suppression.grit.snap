@@ -16,6 +16,11 @@ info: grit/global_suppression.grit
 	}
 }
 
+// biome-ignore-all format: intentional
+`const value = $value`
+
+// Biome format should keep this comment
+
 ```
 
 
@@ -24,10 +29,17 @@ info: grit/global_suppression.grit
 ```grit
 // biome-ignore-all format:test
 
+
 `const names = [$names]` where {
 			if 		($names[0] <: $names[-1]) {
 		$names =>
 		$names[-1]
 	}
 }
+
+// biome-ignore-all format: intentional
+`const value = $value`
+
+// Biome format should keep this comment
+
 ```

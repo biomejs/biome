@@ -172,31 +172,31 @@ impl Format<JsFormatContext> for FormatTemplateElement {
             }
         });
 
-        let should_insert_space = f.options().delimiter_spacing().value();
+        let dollar_curly = format_with(|f: &mut JsFormatter| {
+            if f.options().delimiter_spacing().value() {
+                write!(f, [self.element.dollar_curly_token().format(), space()])
+            } else {
+                write!(f, [self.element.dollar_curly_token().format()])
+            }
+        });
 
-        if should_insert_space {
-            write!(
-                f,
-                [group(&format_args![
-                    self.element.dollar_curly_token().format(),
-                    space(),
-                    format_indented,
-                    line_suffix_boundary(),
-                    space(),
-                    self.element.r_curly_token().format()
-                ])]
-            )
-        } else {
-            write!(
-                f,
-                [group(&format_args![
-                    self.element.dollar_curly_token().format(),
-                    format_indented,
-                    line_suffix_boundary(),
-                    self.element.r_curly_token().format()
-                ])]
-            )
-        }
+        let r_curly = format_with(|f: &mut JsFormatter| {
+            if f.options().delimiter_spacing().value() {
+                write!(f, [space(), self.element.r_curly_token().format()])
+            } else {
+                write!(f, [self.element.r_curly_token().format()])
+            }
+        });
+
+        write!(
+            f,
+            [group(&format_args![
+                dollar_curly,
+                format_indented,
+                line_suffix_boundary(),
+                r_curly
+            ])]
+        )
     }
 }
 

@@ -1,6 +1,7 @@
 use proc_macro::TokenStream;
 
 mod group_macro;
+mod rule_source_variant_index;
 
 /// Declares an analyzer group by reading rule files from the filesystem.
 ///
@@ -26,4 +27,9 @@ mod group_macro;
 #[proc_macro]
 pub fn declare_group_from_fs(input: TokenStream) -> TokenStream {
     group_macro::declare_group_from_fs_impl(input)
+}
+
+#[proc_macro_derive(RuleSourceVariantIndex)]
+pub fn rule_source_variant_index(input: TokenStream) -> TokenStream {
+    rule_source_variant_index::rule_source_variant_index_impl(input)
 }

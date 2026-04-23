@@ -27,42 +27,35 @@ info: markdown/list/combined-lists.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,11 +1,13 @@
--- hello1
-+* hello1
+@@ -2,10 +2,12 @@
  
--- hello2
-+* hello2
+ - hello2
+ 
 +
+ - hello3
+ 
+ - hello4
+ 
 +
-+* hello3
+ - hello5
  
--- hello3
-+* hello4
- 
--- hello4
- 
--- hello5
-+* hello5
- 
--- hello6
-+* hello6
-\ No newline at end of file
+ - hello6
 ```
 
 # Output
 
 ```md
-* hello1
+- hello1
 
-* hello2
-
-
-* hello3
-
-* hello4
+- hello2
 
 
-* hello5
+- hello3
 
-* hello6```
+- hello4
+
+
+- hello5
+
+- hello6
+```

@@ -1,56 +1,96 @@
 mod formatter;
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
+#[cfg(feature = "cli")]
 use bpaf::Bpaf;
 pub use formatter::*;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
 pub type ExperimentalEmbeddedSnippetsEnabled = Bool<false>;
+pub type ExperimentalPnpmCatalogsEnabled = Bool<false>;
 
 /// A set of options applied to the JavaScript files
-#[derive(
-    Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
-)]
+#[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
+#[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct JsConfiguration {
     /// Parsing options
-    #[bpaf(external(js_parser_configuration), optional)]
+    #[cfg_attr(feature = "cli", bpaf(external(js_parser_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub parser: Option<JsParserConfiguration>,
 
     /// Formatting options
-    #[bpaf(external(js_formatter_configuration), optional)]
+    #[cfg_attr(feature = "cli", bpaf(external(js_formatter_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub formatter: Option<JsFormatterConfiguration>,
 
     /// Linter options
-    #[bpaf(external(js_linter_configuration), optional)]
+    #[cfg_attr(feature = "cli", bpaf(external(js_linter_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub linter: Option<JsLinterConfiguration>,
 
     /// Assist options
-    #[bpaf(external(js_assist_configuration), optional)]
+    #[cfg_attr(feature = "cli", bpaf(external(js_assist_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub assist: Option<JsAssistConfiguration>,
+
+    /// Module/dependency resolver options
+    #[cfg_attr(feature = "cli", bpaf(external(js_resolver_configuration), optional))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub resolver: Option<JsResolverConfiguration>,
 
     /// A list of global bindings that should be ignored by the analyzers
     ///
     /// If defined here, they should not emit diagnostics.
-    #[bpaf(pure(Default::default()), hide)]
+    #[cfg_attr(feature = "cli", bpaf(pure(Default::default()), hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub globals: Option<rustc_hash::FxHashSet<Box<str>>>,
 
     /// Indicates the type of runtime or transformation used for interpreting JSX.
-    #[bpaf(hide)]
+    #[cfg_attr(feature = "cli", bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub jsx_runtime: Option<JsxRuntime>,
 
     /// Enables support for embedding snippets.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(hide)]
+    #[cfg_attr(feature = "cli", bpaf(hide))]
     pub experimental_embedded_snippets_enabled: Option<ExperimentalEmbeddedSnippetsEnabled>,
+}
+
+/// Resolver options specific to JavaScript files
+#[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
+#[cfg_attr(feature = "cli", derive(Bpaf))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct JsResolverConfiguration {
+    /// Enables pnpm workspace catalog resolution for JavaScript package manifests.
+    ///
+    /// Opt-in:
+    /// - Set `javascript.resolver.experimentalPnpmCatalogs` to `true`.
+    ///
+    /// Scope:
+    /// - Resolves `catalog:` and `catalog:<name>` dependency versions from
+    ///   `package.json`.
+    /// - Applies to `dependencies`, `devDependencies`, and `peerDependencies`.
+    ///
+    /// Fail-safe behavior:
+    /// - If `pnpm-workspace.yaml` is missing, unreadable, or cannot be parsed,
+    ///   Biome silently falls back to the default behavior (as if this option
+    ///   were disabled).
+    /// - Unknown keys and unsupported value shapes in `pnpm-workspace.yaml` are
+    ///   ignored.
+    ///
+    /// Limitations:
+    /// - Only `pnpm-workspace.yaml` is read.
+    /// - Biome only reads top-level `catalog` / `catalogs` mappings and scalar
+    ///   string entries.
+    ///
+    /// Default: `false`.
+    #[cfg_attr(feature = "cli", bpaf(hide))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub experimental_pnpm_catalogs: Option<ExperimentalPnpmCatalogsEnabled>,
 }
 
 pub type UnsafeParameterDecoratorsEnabled = Bool<false>;
@@ -58,37 +98,40 @@ pub type JsxEverywhere = Bool<true>;
 pub type JsGritMetavariable = Bool<false>;
 
 /// Options that changes how the JavaScript parser behaves
-#[derive(
-    Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
-)]
+#[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
+#[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct JsParserConfiguration {
     /// It enables the experimental and unsafe parsing of parameter decorators
     ///
     /// These decorators belong to an old proposal, and they are subject to change.
-    #[bpaf(hide)]
+    #[cfg_attr(feature = "cli", bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub unsafe_parameter_decorators_enabled: Option<UnsafeParameterDecoratorsEnabled>,
 
     /// Enables parsing of Grit metavariables.
     /// Defaults to `false`.
-    #[bpaf(hide)]
+    #[cfg_attr(feature = "cli", bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub grit_metavariables: Option<JsGritMetavariable>,
 
     /// When enabled, files like `.js`/`.mjs`/`.cjs` may contain JSX syntax.
     ///
     /// Defaults to `true`.
-    #[bpaf(long("jsx-everywhere"), argument("true|false"), optional)]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("jsx-everywhere"), argument("true|false"), optional)
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub jsx_everywhere: Option<JsxEverywhere>,
 }
 
 /// Indicates the type of runtime or transformation used for interpreting JSX.
 #[derive(
-    Bpaf, Clone, Copy, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
+    Clone, Copy, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
 )]
+#[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum JsxRuntime {
@@ -123,14 +166,16 @@ impl FromStr for JsxRuntime {
 pub type JsLinterEnabled = Bool<true>;
 
 /// Linter options specific to the JavaScript linter
-#[derive(
-    Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
-)]
+#[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
+#[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct JsLinterConfiguration {
     /// Control the linter for JavaScript (and its super languages) files.
-    #[bpaf(long("javascript-linter-enabled"), argument("true|false"))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("javascript-linter-enabled"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<JsLinterEnabled>,
 }
@@ -138,14 +183,16 @@ pub struct JsLinterConfiguration {
 pub type JsAssistEnabled = Bool<true>;
 
 /// Assist options specific to the JavaScript assist
-#[derive(
-    Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
-)]
+#[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
+#[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct JsAssistConfiguration {
     /// Control the assist for JavaScript (and its super languages) files.
-    #[bpaf(long("javascript-assist-enabled"), argument("true|false"))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("javascript-assist-enabled"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<JsAssistEnabled>,
 }

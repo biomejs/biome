@@ -17,8 +17,8 @@ $map: ($a: $b, $c: 1);
 CssRoot {
     bom_token: missing (optional),
     items: CssRootItemList [
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@0..1 "$" [] [],
                 name: CssIdentifier {
                     value_token: IDENT@1..4 "map" [] [],
@@ -33,7 +33,7 @@ CssRoot {
                             ScssMapExpressionPair {
                                 key: ScssExpression {
                                     items: ScssExpressionItemList [
-                                        ScssIdentifier {
+                                        ScssVariable {
                                             dollar_token: DOLLAR@7..8 "$" [] [],
                                             name: CssIdentifier {
                                                 value_token: IDENT@8..9 "a" [] [],
@@ -44,7 +44,7 @@ CssRoot {
                                 colon_token: COLON@9..11 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
-                                        ScssIdentifier {
+                                        ScssVariable {
                                             dollar_token: DOLLAR@11..12 "$" [] [],
                                             name: CssIdentifier {
                                                 value_token: IDENT@12..13 "b" [] [],
@@ -57,7 +57,7 @@ CssRoot {
                             ScssMapExpressionPair {
                                 key: ScssExpression {
                                     items: ScssExpressionItemList [
-                                        ScssIdentifier {
+                                        ScssVariable {
                                             dollar_token: DOLLAR@15..16 "$" [] [],
                                             name: CssIdentifier {
                                                 value_token: IDENT@16..17 "c" [] [],
@@ -93,8 +93,8 @@ CssRoot {
 0: CSS_ROOT@0..23
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..22
-    0: SCSS_DECLARATION@0..22
-      0: SCSS_IDENTIFIER@0..4
+    0: SCSS_VARIABLE_DECLARATION@0..22
+      0: SCSS_VARIABLE@0..4
         0: DOLLAR@0..1 "$" [] []
         1: CSS_IDENTIFIER@1..4
           0: IDENT@1..4 "map" [] []
@@ -107,14 +107,14 @@ CssRoot {
               0: SCSS_MAP_EXPRESSION_PAIR@7..13
                 0: SCSS_EXPRESSION@7..9
                   0: SCSS_EXPRESSION_ITEM_LIST@7..9
-                    0: SCSS_IDENTIFIER@7..9
+                    0: SCSS_VARIABLE@7..9
                       0: DOLLAR@7..8 "$" [] []
                       1: CSS_IDENTIFIER@8..9
                         0: IDENT@8..9 "a" [] []
                 1: COLON@9..11 ":" [] [Whitespace(" ")]
                 2: SCSS_EXPRESSION@11..13
                   0: SCSS_EXPRESSION_ITEM_LIST@11..13
-                    0: SCSS_IDENTIFIER@11..13
+                    0: SCSS_VARIABLE@11..13
                       0: DOLLAR@11..12 "$" [] []
                       1: CSS_IDENTIFIER@12..13
                         0: IDENT@12..13 "b" [] []
@@ -122,7 +122,7 @@ CssRoot {
               2: SCSS_MAP_EXPRESSION_PAIR@15..20
                 0: SCSS_EXPRESSION@15..17
                   0: SCSS_EXPRESSION_ITEM_LIST@15..17
-                    0: SCSS_IDENTIFIER@15..17
+                    0: SCSS_VARIABLE@15..17
                       0: DOLLAR@15..16 "$" [] []
                       1: CSS_IDENTIFIER@16..17
                         0: IDENT@16..17 "c" [] []

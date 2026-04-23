@@ -10,6 +10,7 @@ use crate::JsSyntaxFeature::TypeScript;
 use crate::lexer::{JsLexContext, JsReLexContext, JsSyntaxKind, T};
 use crate::syntax::expr::{
     ExpressionContext, is_nth_at_identifier_or_keyword, parse_expression, parse_name,
+    parse_reference_identifier,
 };
 use crate::syntax::js_parse_error::{expected_expression, expected_identifier};
 use crate::syntax::jsx::jsx_parse_errors::{
@@ -499,7 +500,9 @@ impl ParseNodeList for JsxAttributeList {
     const LIST_KIND: Self::Kind = JsSyntaxKind::JSX_ATTRIBUTE_LIST;
 
     fn parse_element(&mut self, p: &mut JsParser) -> ParsedSyntax {
-        if matches!(p.cur(), T!['{'] | T![...]) {
+        if is_at_jsx_shorthand_attribute(p) {
+            parse_jsx_shorthand_attribute(p)
+        } else if matches!(p.cur(), T!['{'] | T![...]) {
             parse_jsx_spread_attribute(p)
         } else if is_at_metavariable(p) {
             parse_metavariable(p)
@@ -579,6 +582,32 @@ fn parse_jsx_spread_attribute(p: &mut JsParser) -> ParsedSyntax {
     p.expect(T!['}']);
 
     Present(m.complete(p, JSX_SPREAD_ATTRIBUTE))
+}
+
+/// Returns `true` when the parser is positioned at a JSX shorthand attribute
+/// of the form `{ ident }`. Shorthand attributes only exist inside Astro
+/// templates (the JSX-like body of an `.astro` file), so the check is gated
+/// on the JS source's embedding kind.
+fn is_at_jsx_shorthand_attribute(p: &mut JsParser) -> bool {
+    if !p.source_type.as_embedding_kind().is_astro() {
+        return false;
+    }
+    // `{` followed by an identifier and a closing `}` — anything else
+    // (spread, expression, etc.) is handled by other branches or recovered.
+    p.at(T!['{']) && is_nth_at_identifier_or_keyword(p, 1) && p.nth_at(2, T!['}'])
+}
+
+fn parse_jsx_shorthand_attribute(p: &mut JsParser) -> ParsedSyntax {
+    if !p.at(T!['{']) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.expect(T!['{']);
+    parse_reference_identifier(p).or_add_diagnostic(p, expected_identifier);
+    p.expect(T!['}']);
+
+    Present(m.complete(p, JSX_SHORTHAND_ATTRIBUTE))
 }
 
 fn parse_jsx_attribute_initializer_clause(p: &mut JsParser) -> ParsedSyntax {

@@ -11,7 +11,6 @@ use biome_analyze::{
     declare_source_rule,
 };
 use biome_console::markup;
-use biome_diagnostics::category;
 use biome_json_factory::make;
 use biome_json_syntax::{JsonMember, JsonMemberList, JsonObjectValue, JsonRoot, T};
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TokenText};
@@ -255,7 +254,7 @@ declare_source_rule! {
         name: "useSortedPackageJson",
         language: "json",
         fix_kind: FixKind::Safe,
-        sources: &[RuleSource::SortPackageJson.same()],
+        sources: &[RuleSource::SortPackageJson.same(), RuleSource::EslintPackageJson("sort-collections").inspired(), RuleSource::EslintPackageJsonDependencies("alphabetically-sorted-dependencies").inspired(), RuleSource::Sherif("unordered-dependencies").inspired()],
     }
 }
 
@@ -289,7 +288,7 @@ impl Rule for UseSortedPackageJson {
         let object = value.as_json_object_value()?;
 
         Some(RuleDiagnostic::new(
-            category!("assist/source/useSortedPackageJson"),
+            rule_category!(),
             object.range(),
             markup! {
                 "package.json fields can be organized."

@@ -1,8 +1,10 @@
 pub mod assist;
 pub mod linter;
+pub mod presets;
 
 use crate::analyzer::assist::Actions;
 pub use crate::analyzer::linter::*;
+use crate::analyzer::presets::PresetConfig;
 use biome_analyze::options::RuleOptions;
 use biome_analyze::{FixKind, Rule, RuleCategory, RuleDomain, RuleFilter};
 use biome_deserialize::{
@@ -715,6 +717,22 @@ impl RuleSelector {
         }
     }
 
+    pub fn from_group_and_rule(group: &str, rule: &str) -> Option<Self> {
+        if let Ok(group) = linter::RuleGroup::from_str(group)
+            && let Some(rule) = Rules::has_rule(group, rule)
+        {
+            return Some(Self::Rule(group.as_str(), rule));
+        }
+
+        if let Ok(group) = assist::RuleGroup::from_str(group)
+            && let Some(rule) = Actions::has_rule(group, rule)
+        {
+            return Some(Self::Rule(group.as_str(), rule));
+        }
+
+        None
+    }
+
     pub fn match_rule<R>(&self) -> bool
     where
         R: Rule,
@@ -924,12 +942,14 @@ impl<'de> serde::Deserialize<'de> for DomainSelector {
 
 pub trait RuleGroupExt: Default + Merge + Debug + From<GroupPlainConfiguration> {
     /// Retrieves the recommended rules
-    fn is_recommended_true(&self) -> bool;
+    fn is_preset_recommended(&self) -> bool;
     fn is_recommended_unset(&self) -> bool;
     fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>>;
     fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>>;
     /// Checks if, given a rule name, matches one of the rules contained in this category
     fn has_rule(rule_name: &str) -> Option<&'static str>;
+    /// Returns the rule filters that belong to the given analyzer preset
+    fn preset_as_filters(preset: PresetConfig) -> &'static [RuleFilter<'static>];
     /// Select preset rules
     // Preset rules shouldn't populate disabled rules
     // because that will make specific rules cannot be enabled later.
@@ -940,7 +960,7 @@ pub trait RuleGroupExt: Default + Merge + Debug + From<GroupPlainConfiguration> 
     fn all_rules_as_filters() -> &'static [RuleFilter<'static>];
     fn collect_preset_rules(
         &self,
-        parent_is_recommended: bool,
+        parent_preset: PresetConfig,
         enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     );
     fn get_rule_configuration(
@@ -1101,7 +1121,7 @@ where
 
     pub(crate) fn collect_preset_rules(
         &self,
-        parent_is_recommended: bool,
+        parent_preset: PresetConfig,
         enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
         match self {
@@ -1110,7 +1130,7 @@ where
                     enabled_rules.extend(G::non_domain_rules_as_filters());
                 }
             }
-            Self::Group(group) => group.collect_preset_rules(parent_is_recommended, enabled_rules),
+            Self::Group(group) => group.collect_preset_rules(parent_preset, enabled_rules),
         }
     }
 }
@@ -1168,6 +1188,42 @@ impl<G: Deserializable> Deserializable for SeverityOrGroup<G> {
 mod test {
     use crate::analyzer::RuleSelector;
     use std::str::FromStr;
+
+    #[test]
+    fn from_group_and_rule_valid() {
+        let selector = RuleSelector::from_group_and_rule("style", "useConst");
+        assert_eq!(selector, Some(RuleSelector::Rule("style", "useConst")));
+    }
+
+    #[test]
+    fn from_group_and_rule_invalid_rule() {
+        assert_eq!(RuleSelector::from_group_and_rule("style", "notARule"), None);
+    }
+
+    #[test]
+    fn from_group_and_rule_invalid_group() {
+        assert_eq!(
+            RuleSelector::from_group_and_rule("notAGroup", "useConst"),
+            None
+        );
+    }
+
+    #[test]
+    fn from_group_and_rule_assist() {
+        let selector = RuleSelector::from_group_and_rule("source", "organizeImports");
+        assert_eq!(
+            selector,
+            Some(RuleSelector::Rule("source", "organizeImports"))
+        );
+    }
+
+    #[test]
+    fn from_group_and_rule_assist_invalid_rule() {
+        assert_eq!(
+            RuleSelector::from_group_and_rule("source", "notARule"),
+            None
+        );
+    }
 
     #[test]
     fn lsp_filter_to_rule_selector() {

@@ -1,0 +1,251 @@
+---
+source: crates/biome_js_semantic/src/tests/format.rs
+expression: content
+---
+## Source
+
+```
+import { foo } from "bar";
+
+const { a, b: renamed } = foo;
+
+let count = 0;
+
+/**
+ * Adds two numbers.
+ * @param x - first operand
+ * @param y - second operand
+ */
+function add(x, y) {
+    return x + y;
+}
+
+/** A simple counter. */
+class Counter {
+    constructor(initial) {
+        this.value = initial;
+    }
+    increment() {
+        this.value++;
+    }
+}
+
+function outer() {
+    let local = 1;
+    return () => {
+        count++;
+        return local + count;
+    };
+}
+
+for (let i = 0; i < 10; i++) {
+    console.log(i);
+}
+
+try {
+    add(a, renamed);
+} catch (e) {
+    console.log(e);
+}
+
+export default outer;
+export { add, Counter };
+```
+
+## Semantic Model
+
+```
+Scope {
+  id: ScopeId(1) @ 1..636
+  children: [
+    Binding {
+      Id: BindingId(0) @ 10..13
+      Scope: ScopeId(1)
+      Imported: true
+      Exported: false
+      Kind: Import
+      ident: foo
+    }
+    Binding {
+      Id: BindingId(1) @ 37..38
+      Scope: ScopeId(1)
+      Imported: false
+      Exported: false
+      Kind: Value
+      ident: a
+    }
+    Binding {
+      Id: BindingId(2) @ 43..50
+      Scope: ScopeId(1)
+      Imported: false
+      Exported: false
+      Kind: Value
+      ident: renamed
+    }
+    Binding {
+      Id: BindingId(3) @ 65..70
+      Scope: ScopeId(1)
+      Imported: false
+      Exported: false
+      Kind: Value
+      ident: count
+    }
+    Scope {
+      id: ScopeId(2) @ 163..203
+      children: [
+        Binding {
+          Id: BindingId(5) @ 176..177
+          Scope: ScopeId(2)
+          Imported: false
+          Exported: false
+          Kind: Value
+          ident: x
+          JsDoc Comments: Adds two numbers.
+@param x - first operand
+@param y - second operand
+        }
+        Binding {
+          Id: BindingId(6) @ 179..180
+          Scope: ScopeId(2)
+          Imported: false
+          Exported: false
+          Kind: Value
+          ident: y
+          JsDoc Comments: Adds two numbers.
+@param x - first operand
+@param y - second operand
+        }
+        Scope {
+          id: ScopeId(3) @ 182..203
+          children: []
+        }
+      ]
+    }
+    Binding {
+      Id: BindingId(4) @ 172..175
+      Scope: ScopeId(2)
+      Imported: false
+      Exported: true
+      Kind: HoistedValue
+      ident: add
+      JsDoc Comments: Adds two numbers.
+@param x - first operand
+@param y - second operand
+    }
+    Scope {
+      id: ScopeId(4) @ 230..356
+      children: [
+        Scope {
+          id: ScopeId(5) @ 250..308
+          children: [
+            Binding {
+              Id: BindingId(8) @ 262..269
+              Scope: ScopeId(5)
+              Imported: false
+              Exported: false
+              Kind: Value
+              ident: initial
+              JsDoc Comments: A simple counter.
+            }
+            Scope {
+              id: ScopeId(6) @ 271..308
+              children: []
+            }
+          ]
+        }
+        Scope {
+          id: ScopeId(7) @ 313..354
+          children: [
+            Scope {
+              id: ScopeId(8) @ 325..354
+              children: []
+            }
+          ]
+        }
+      ]
+    }
+    Binding {
+      Id: BindingId(7) @ 236..243
+      Scope: ScopeId(4)
+      Imported: false
+      Exported: true
+      Kind: Class
+      ident: Counter
+      JsDoc Comments: A simple counter.
+    }
+    Scope {
+      id: ScopeId(9) @ 358..470
+      children: [
+        Scope {
+          id: ScopeId(10) @ 375..470
+          children: [
+            Binding {
+              Id: BindingId(10) @ 385..390
+              Scope: ScopeId(10)
+              Imported: false
+              Exported: false
+              Kind: Value
+              ident: local
+            }
+            Scope {
+              id: ScopeId(11) @ 407..467
+              children: [
+                Scope {
+                  id: ScopeId(12) @ 413..467
+                  children: []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+    Binding {
+      Id: BindingId(9) @ 367..372
+      Scope: ScopeId(9)
+      Imported: false
+      Exported: true
+      Kind: HoistedValue
+      ident: outer
+    }
+    Scope {
+      id: ScopeId(13) @ 472..524
+      children: [
+        Binding {
+          Id: BindingId(11) @ 481..482
+          Scope: ScopeId(13)
+          Imported: false
+          Exported: false
+          Kind: Value
+          ident: i
+        }
+        Scope {
+          id: ScopeId(14) @ 501..524
+          children: []
+        }
+      ]
+    }
+    Scope {
+      id: ScopeId(15) @ 530..554
+      children: []
+    }
+    Scope {
+      id: ScopeId(16) @ 555..588
+      children: [
+        Binding {
+          Id: BindingId(12) @ 562..563
+          Scope: ScopeId(16)
+          Imported: false
+          Exported: false
+          Kind: Value
+          ident: e
+        }
+        Scope {
+          id: ScopeId(17) @ 565..588
+          children: []
+        }
+      ]
+    }
+  ]
+}
+```

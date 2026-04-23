@@ -1,11 +1,8 @@
-use std::sync::Arc;
-
 use biome_js_semantic::{JsDeclarationKind, ScopeId};
 use biome_js_syntax::TextRange;
 use biome_js_type_info::TypeReference;
-use biome_rowan::{Text, TextSize};
-
-use biome_jsdoc_comment::JsdocComment;
+use biome_rowan::Text;
+use std::sync::Arc;
 
 use super::{JsModuleInfoInner, scope::JsScope};
 
@@ -13,33 +10,10 @@ use super::{JsModuleInfoInner, scope::JsScope};
 #[derive(Clone, Debug)]
 pub struct JsBindingData {
     pub name: Text,
-    pub references: Vec<JsBindingReference>,
     pub scope_id: ScopeId,
     pub declaration_kind: JsDeclarationKind,
     pub ty: TypeReference,
-    pub jsdoc: Option<JsdocComment>,
-    pub export_ranges: Vec<TextRange>,
     pub range: TextRange,
-}
-
-#[derive(Clone, Copy, Debug)]
-pub enum JsBindingReferenceKind {
-    Read { _hoisted: bool },
-    Write { _hoisted: bool },
-}
-
-/// Internal type with all the semantic data of a specific reference
-#[derive(Clone, Debug)]
-pub struct JsBindingReference {
-    pub range_start: TextSize,
-    pub kind: JsBindingReferenceKind,
-}
-
-impl JsBindingReference {
-    #[inline(always)]
-    pub fn is_write(&self) -> bool {
-        matches!(self.kind, JsBindingReferenceKind::Write { .. })
-    }
 }
 
 /// Provides access to all semantic data of a specific binding.
@@ -74,11 +48,7 @@ impl JsBinding {
     /// Returns whether the binding is exported.
     pub fn is_exported(&self) -> bool {
         // Check if there are export ranges in the type augmentation data
-        let binding_range = self.semantic_binding.syntax().text_trimmed_range();
-        self.data
-            .binding_type_data
-            .get(&binding_range)
-            .is_some_and(|data| !data.export_ranges.is_empty())
+        !self.semantic_binding.export_ranges().is_empty()
     }
 
     /// Returns whether the binding is imported.

@@ -18,11 +18,11 @@ info: markdown/spec/example-442.md
 +++ Biome
 @@ -1 +1 @@
 -*foo \_\_bar *baz bim\_\_ bam\*
-+*foo __bar *baz bim__ bam*
++_foo **bar *baz bim** bam_
 ```
 
 # Output
 
 ```md
-*foo __bar *baz bim__ bam*
+_foo **bar *baz bim** bam_
 ```

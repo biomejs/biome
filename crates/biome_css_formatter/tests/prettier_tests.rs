@@ -7,7 +7,13 @@ use std::env;
 
 mod language;
 
-tests_macros::gen_tests! {"tests/specs/prettier/{css}/**/*.{css}", crate::test_snapshot, ""}
+mod css {
+    tests_macros::gen_tests! {"tests/specs/prettier/{css}/**/*.{css}", crate::test_snapshot, ""}
+}
+
+mod scss {
+    tests_macros::gen_tests! {"tests/specs/prettier/{scss}/**/*.{scss}", crate::test_snapshot, ""}
+}
 
 fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
     countme::enable(true);

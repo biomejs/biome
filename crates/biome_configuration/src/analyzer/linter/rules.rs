@@ -1,9 +1,11 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
+use crate::analyzer::presets::PresetConfig;
 use crate::analyzer::{
     GroupPlainConfiguration, RuleConfiguration, RuleFixConfiguration, RuleGroupExt,
     RulePlainConfiguration, SeverityOrGroup,
 };
+use biome_analyze::RulePreset;
 use biome_analyze::{RuleFilter, options::RuleOptions};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::{Category, Severity};
@@ -116,6 +118,7 @@ pub enum RuleName {
     NoCommentText,
     NoCommonJs,
     NoCompareNegZero,
+    NoComponentHookFactories,
     NoConditionalExpect,
     NoConfusingLabels,
     NoConfusingVoidType,
@@ -185,6 +188,7 @@ pub enum RuleName {
     NoExcessiveLinesPerFile,
     NoExcessiveLinesPerFunction,
     NoExcessiveNestedTestSuites,
+    NoExcessiveSelectorClasses,
     NoExplicitAny,
     NoExportedImports,
     NoExportsInTest,
@@ -208,10 +212,12 @@ pub enum RuleName {
     NoHeadImportInDocument,
     NoHeaderScope,
     NoHexColors,
+    NoIdenticalTestTitle,
     NoImgElement,
     NoImplicitAnyLet,
     NoImplicitBoolean,
     NoImplicitCoercions,
+    NoImpliedEval,
     NoImportAssign,
     NoImportCycles,
     NoImportantInKeyframe,
@@ -228,14 +234,18 @@ pub enum RuleName {
     NoInvalidPositionAtImportRule,
     NoInvalidUseBeforeDeclaration,
     NoIrregularWhitespace,
+    NoJsxLeakedDollar,
     NoJsxLiterals,
+    NoJsxNamespace,
     NoJsxPropsBind,
     NoLabelVar,
     NoLabelWithoutControl,
     NoLeakedRender,
+    NoLoopFunc,
     NoMagicNumbers,
     NoMisleadingCharacterClass,
     NoMisleadingInstantiator,
+    NoMisleadingReturnType,
     NoMisplacedAssertion,
     NoMisrefactoredShorthandAssign,
     NoMissingVarFunction,
@@ -281,6 +291,9 @@ pub enum RuleName {
     NoQwikUseVisibleTask,
     NoReExportAll,
     NoReactForwardRef,
+    NoReactNativeDeepImports,
+    NoReactNativeLiteralColors,
+    NoReactNativeRawText,
     NoReactPropAssignments,
     NoReactSpecificProps,
     NoRedeclare,
@@ -337,6 +350,7 @@ pub enum RuleName {
     NoUnknownUnit,
     NoUnmatchableAnbSelector,
     NoUnnecessaryConditions,
+    NoUnnecessaryTemplateExpression,
     NoUnreachable,
     NoUnreachableSuper,
     NoUnresolvedImports,
@@ -344,6 +358,7 @@ pub enum RuleName {
     NoUnsafeFinally,
     NoUnsafeNegation,
     NoUnsafeOptionalChaining,
+    NoUnsafePlusOperands,
     NoUntrustedLicenses,
     NoUnusedClasses,
     NoUnusedExpressions,
@@ -374,6 +389,7 @@ pub enum RuleName {
     NoUselessTernary,
     NoUselessThisAlias,
     NoUselessTypeConstraint,
+    NoUselessTypeConversion,
     NoUselessUndefined,
     NoUselessUndefinedInitialization,
     NoValueAtRule,
@@ -422,6 +438,7 @@ pub enum RuleName {
     UseConsistentMemberAccessibility,
     UseConsistentMethodSignatures,
     UseConsistentObjectDefinitions,
+    UseConsistentTestIt,
     UseConsistentTypeDefinitions,
     UseConst,
     UseDateNow,
@@ -431,6 +448,9 @@ pub enum RuleName {
     UseDeprecatedDate,
     UseDeprecatedReason,
     UseDestructuring,
+    UseDisposables,
+    UseDomNodeTextContent,
+    UseDomQuerySelector,
     UseEnumInitializers,
     UseErrorCause,
     UseErrorMessage,
@@ -438,6 +458,7 @@ pub enum RuleName {
     UseExhaustiveSwitchCases,
     UseExpect,
     UseExplicitLengthCheck,
+    UseExplicitReturnType,
     UseExplicitType,
     UseExponentiationOperator,
     UseExportType,
@@ -460,6 +481,7 @@ pub enum RuleName {
     UseHeadingContent,
     UseHookAtTopLevel,
     UseHtmlLang,
+    UseIframeSandbox,
     UseIframeTitle,
     UseImageSize,
     UseImportExtensions,
@@ -496,12 +518,16 @@ pub enum RuleName {
     UseParseIntRadix,
     UsePlaywrightValidDescribeCallback,
     UseQwikClasslist,
+    UseQwikLoaderLocation,
     UseQwikMethodUsage,
     UseQwikValidLexicalScope,
+    UseReactAsyncServerFunction,
     UseReactFunctionComponents,
     UseReadonlyClassProperties,
+    UseReduceTypeParameter,
     UseRegexLiterals,
     UseRegexpExec,
+    UseRegexpTest,
     UseRequiredScripts,
     UseScopedStyles,
     UseSelfClosingElements,
@@ -517,6 +543,7 @@ pub enum RuleName {
     UseSpread,
     UseStaticResponseMethods,
     UseStrictMode,
+    UseStringStartsEndsWith,
     UseSymbolDescription,
     UseTemplate,
     UseThrowNewError,
@@ -534,6 +561,7 @@ pub enum RuleName {
     UseValidForDirection,
     UseValidLang,
     UseValidTypeof,
+    UseVarsOnTop,
     UseVueConsistentDefinePropsDeclaration,
     UseVueConsistentVBindStyle,
     UseVueConsistentVOnStyle,
@@ -588,6 +616,7 @@ impl RuleName {
             Self::NoCommentText => "noCommentText",
             Self::NoCommonJs => "noCommonJs",
             Self::NoCompareNegZero => "noCompareNegZero",
+            Self::NoComponentHookFactories => "noComponentHookFactories",
             Self::NoConditionalExpect => "noConditionalExpect",
             Self::NoConfusingLabels => "noConfusingLabels",
             Self::NoConfusingVoidType => "noConfusingVoidType",
@@ -657,6 +686,7 @@ impl RuleName {
             Self::NoExcessiveLinesPerFile => "noExcessiveLinesPerFile",
             Self::NoExcessiveLinesPerFunction => "noExcessiveLinesPerFunction",
             Self::NoExcessiveNestedTestSuites => "noExcessiveNestedTestSuites",
+            Self::NoExcessiveSelectorClasses => "noExcessiveSelectorClasses",
             Self::NoExplicitAny => "noExplicitAny",
             Self::NoExportedImports => "noExportedImports",
             Self::NoExportsInTest => "noExportsInTest",
@@ -680,10 +710,12 @@ impl RuleName {
             Self::NoHeadImportInDocument => "noHeadImportInDocument",
             Self::NoHeaderScope => "noHeaderScope",
             Self::NoHexColors => "noHexColors",
+            Self::NoIdenticalTestTitle => "noIdenticalTestTitle",
             Self::NoImgElement => "noImgElement",
             Self::NoImplicitAnyLet => "noImplicitAnyLet",
             Self::NoImplicitBoolean => "noImplicitBoolean",
             Self::NoImplicitCoercions => "noImplicitCoercions",
+            Self::NoImpliedEval => "noImpliedEval",
             Self::NoImportAssign => "noImportAssign",
             Self::NoImportCycles => "noImportCycles",
             Self::NoImportantInKeyframe => "noImportantInKeyframe",
@@ -702,14 +734,18 @@ impl RuleName {
             Self::NoInvalidPositionAtImportRule => "noInvalidPositionAtImportRule",
             Self::NoInvalidUseBeforeDeclaration => "noInvalidUseBeforeDeclaration",
             Self::NoIrregularWhitespace => "noIrregularWhitespace",
+            Self::NoJsxLeakedDollar => "noJsxLeakedDollar",
             Self::NoJsxLiterals => "noJsxLiterals",
+            Self::NoJsxNamespace => "noJsxNamespace",
             Self::NoJsxPropsBind => "noJsxPropsBind",
             Self::NoLabelVar => "noLabelVar",
             Self::NoLabelWithoutControl => "noLabelWithoutControl",
             Self::NoLeakedRender => "noLeakedRender",
+            Self::NoLoopFunc => "noLoopFunc",
             Self::NoMagicNumbers => "noMagicNumbers",
             Self::NoMisleadingCharacterClass => "noMisleadingCharacterClass",
             Self::NoMisleadingInstantiator => "noMisleadingInstantiator",
+            Self::NoMisleadingReturnType => "noMisleadingReturnType",
             Self::NoMisplacedAssertion => "noMisplacedAssertion",
             Self::NoMisrefactoredShorthandAssign => "noMisrefactoredShorthandAssign",
             Self::NoMissingVarFunction => "noMissingVarFunction",
@@ -757,6 +793,9 @@ impl RuleName {
             Self::NoQwikUseVisibleTask => "noQwikUseVisibleTask",
             Self::NoReExportAll => "noReExportAll",
             Self::NoReactForwardRef => "noReactForwardRef",
+            Self::NoReactNativeDeepImports => "noReactNativeDeepImports",
+            Self::NoReactNativeLiteralColors => "noReactNativeLiteralColors",
+            Self::NoReactNativeRawText => "noReactNativeRawText",
             Self::NoReactPropAssignments => "noReactPropAssignments",
             Self::NoReactSpecificProps => "noReactSpecificProps",
             Self::NoRedeclare => "noRedeclare",
@@ -813,6 +852,7 @@ impl RuleName {
             Self::NoUnknownUnit => "noUnknownUnit",
             Self::NoUnmatchableAnbSelector => "noUnmatchableAnbSelector",
             Self::NoUnnecessaryConditions => "noUnnecessaryConditions",
+            Self::NoUnnecessaryTemplateExpression => "noUnnecessaryTemplateExpression",
             Self::NoUnreachable => "noUnreachable",
             Self::NoUnreachableSuper => "noUnreachableSuper",
             Self::NoUnresolvedImports => "noUnresolvedImports",
@@ -820,6 +860,7 @@ impl RuleName {
             Self::NoUnsafeFinally => "noUnsafeFinally",
             Self::NoUnsafeNegation => "noUnsafeNegation",
             Self::NoUnsafeOptionalChaining => "noUnsafeOptionalChaining",
+            Self::NoUnsafePlusOperands => "noUnsafePlusOperands",
             Self::NoUntrustedLicenses => "noUntrustedLicenses",
             Self::NoUnusedClasses => "noUnusedClasses",
             Self::NoUnusedExpressions => "noUnusedExpressions",
@@ -850,6 +891,7 @@ impl RuleName {
             Self::NoUselessTernary => "noUselessTernary",
             Self::NoUselessThisAlias => "noUselessThisAlias",
             Self::NoUselessTypeConstraint => "noUselessTypeConstraint",
+            Self::NoUselessTypeConversion => "noUselessTypeConversion",
             Self::NoUselessUndefined => "noUselessUndefined",
             Self::NoUselessUndefinedInitialization => "noUselessUndefinedInitialization",
             Self::NoValueAtRule => "noValueAtRule",
@@ -898,6 +940,7 @@ impl RuleName {
             Self::UseConsistentMemberAccessibility => "useConsistentMemberAccessibility",
             Self::UseConsistentMethodSignatures => "useConsistentMethodSignatures",
             Self::UseConsistentObjectDefinitions => "useConsistentObjectDefinitions",
+            Self::UseConsistentTestIt => "useConsistentTestIt",
             Self::UseConsistentTypeDefinitions => "useConsistentTypeDefinitions",
             Self::UseConst => "useConst",
             Self::UseDateNow => "useDateNow",
@@ -907,6 +950,9 @@ impl RuleName {
             Self::UseDeprecatedDate => "useDeprecatedDate",
             Self::UseDeprecatedReason => "useDeprecatedReason",
             Self::UseDestructuring => "useDestructuring",
+            Self::UseDisposables => "useDisposables",
+            Self::UseDomNodeTextContent => "useDomNodeTextContent",
+            Self::UseDomQuerySelector => "useDomQuerySelector",
             Self::UseEnumInitializers => "useEnumInitializers",
             Self::UseErrorCause => "useErrorCause",
             Self::UseErrorMessage => "useErrorMessage",
@@ -914,6 +960,7 @@ impl RuleName {
             Self::UseExhaustiveSwitchCases => "useExhaustiveSwitchCases",
             Self::UseExpect => "useExpect",
             Self::UseExplicitLengthCheck => "useExplicitLengthCheck",
+            Self::UseExplicitReturnType => "useExplicitReturnType",
             Self::UseExplicitType => "useExplicitType",
             Self::UseExponentiationOperator => "useExponentiationOperator",
             Self::UseExportType => "useExportType",
@@ -936,6 +983,7 @@ impl RuleName {
             Self::UseHeadingContent => "useHeadingContent",
             Self::UseHookAtTopLevel => "useHookAtTopLevel",
             Self::UseHtmlLang => "useHtmlLang",
+            Self::UseIframeSandbox => "useIframeSandbox",
             Self::UseIframeTitle => "useIframeTitle",
             Self::UseImageSize => "useImageSize",
             Self::UseImportExtensions => "useImportExtensions",
@@ -972,12 +1020,16 @@ impl RuleName {
             Self::UseParseIntRadix => "useParseIntRadix",
             Self::UsePlaywrightValidDescribeCallback => "usePlaywrightValidDescribeCallback",
             Self::UseQwikClasslist => "useQwikClasslist",
+            Self::UseQwikLoaderLocation => "useQwikLoaderLocation",
             Self::UseQwikMethodUsage => "useQwikMethodUsage",
             Self::UseQwikValidLexicalScope => "useQwikValidLexicalScope",
+            Self::UseReactAsyncServerFunction => "useReactAsyncServerFunction",
             Self::UseReactFunctionComponents => "useReactFunctionComponents",
             Self::UseReadonlyClassProperties => "useReadonlyClassProperties",
+            Self::UseReduceTypeParameter => "useReduceTypeParameter",
             Self::UseRegexLiterals => "useRegexLiterals",
             Self::UseRegexpExec => "useRegexpExec",
+            Self::UseRegexpTest => "useRegexpTest",
             Self::UseRequiredScripts => "useRequiredScripts",
             Self::UseScopedStyles => "useScopedStyles",
             Self::UseSelfClosingElements => "useSelfClosingElements",
@@ -993,6 +1045,7 @@ impl RuleName {
             Self::UseSpread => "useSpread",
             Self::UseStaticResponseMethods => "useStaticResponseMethods",
             Self::UseStrictMode => "useStrictMode",
+            Self::UseStringStartsEndsWith => "useStringStartsEndsWith",
             Self::UseSymbolDescription => "useSymbolDescription",
             Self::UseTemplate => "useTemplate",
             Self::UseThrowNewError => "useThrowNewError",
@@ -1010,6 +1063,7 @@ impl RuleName {
             Self::UseValidForDirection => "useValidForDirection",
             Self::UseValidLang => "useValidLang",
             Self::UseValidTypeof => "useValidTypeof",
+            Self::UseVarsOnTop => "useVarsOnTop",
             Self::UseVueConsistentDefinePropsDeclaration => {
                 "useVueConsistentDefinePropsDeclaration"
             }
@@ -1064,6 +1118,7 @@ impl RuleName {
             Self::NoCommentText => RuleGroup::Suspicious,
             Self::NoCommonJs => RuleGroup::Style,
             Self::NoCompareNegZero => RuleGroup::Suspicious,
+            Self::NoComponentHookFactories => RuleGroup::Nursery,
             Self::NoConditionalExpect => RuleGroup::Nursery,
             Self::NoConfusingLabels => RuleGroup::Suspicious,
             Self::NoConfusingVoidType => RuleGroup::Suspicious,
@@ -1133,6 +1188,7 @@ impl RuleName {
             Self::NoExcessiveLinesPerFile => RuleGroup::Nursery,
             Self::NoExcessiveLinesPerFunction => RuleGroup::Complexity,
             Self::NoExcessiveNestedTestSuites => RuleGroup::Complexity,
+            Self::NoExcessiveSelectorClasses => RuleGroup::Nursery,
             Self::NoExplicitAny => RuleGroup::Suspicious,
             Self::NoExportedImports => RuleGroup::Style,
             Self::NoExportsInTest => RuleGroup::Suspicious,
@@ -1156,10 +1212,12 @@ impl RuleName {
             Self::NoHeadImportInDocument => RuleGroup::Suspicious,
             Self::NoHeaderScope => RuleGroup::A11y,
             Self::NoHexColors => RuleGroup::Nursery,
+            Self::NoIdenticalTestTitle => RuleGroup::Nursery,
             Self::NoImgElement => RuleGroup::Performance,
             Self::NoImplicitAnyLet => RuleGroup::Suspicious,
             Self::NoImplicitBoolean => RuleGroup::Style,
             Self::NoImplicitCoercions => RuleGroup::Complexity,
+            Self::NoImpliedEval => RuleGroup::Nursery,
             Self::NoImportAssign => RuleGroup::Suspicious,
             Self::NoImportCycles => RuleGroup::Suspicious,
             Self::NoImportantInKeyframe => RuleGroup::Suspicious,
@@ -1176,14 +1234,18 @@ impl RuleName {
             Self::NoInvalidPositionAtImportRule => RuleGroup::Correctness,
             Self::NoInvalidUseBeforeDeclaration => RuleGroup::Correctness,
             Self::NoIrregularWhitespace => RuleGroup::Suspicious,
+            Self::NoJsxLeakedDollar => RuleGroup::Nursery,
             Self::NoJsxLiterals => RuleGroup::Style,
+            Self::NoJsxNamespace => RuleGroup::Nursery,
             Self::NoJsxPropsBind => RuleGroup::Nursery,
             Self::NoLabelVar => RuleGroup::Suspicious,
             Self::NoLabelWithoutControl => RuleGroup::A11y,
             Self::NoLeakedRender => RuleGroup::Nursery,
+            Self::NoLoopFunc => RuleGroup::Nursery,
             Self::NoMagicNumbers => RuleGroup::Style,
             Self::NoMisleadingCharacterClass => RuleGroup::Suspicious,
             Self::NoMisleadingInstantiator => RuleGroup::Suspicious,
+            Self::NoMisleadingReturnType => RuleGroup::Nursery,
             Self::NoMisplacedAssertion => RuleGroup::Suspicious,
             Self::NoMisrefactoredShorthandAssign => RuleGroup::Suspicious,
             Self::NoMissingVarFunction => RuleGroup::Correctness,
@@ -1229,6 +1291,9 @@ impl RuleName {
             Self::NoQwikUseVisibleTask => RuleGroup::Correctness,
             Self::NoReExportAll => RuleGroup::Performance,
             Self::NoReactForwardRef => RuleGroup::Suspicious,
+            Self::NoReactNativeDeepImports => RuleGroup::Nursery,
+            Self::NoReactNativeLiteralColors => RuleGroup::Nursery,
+            Self::NoReactNativeRawText => RuleGroup::Nursery,
             Self::NoReactPropAssignments => RuleGroup::Correctness,
             Self::NoReactSpecificProps => RuleGroup::Suspicious,
             Self::NoRedeclare => RuleGroup::Suspicious,
@@ -1285,6 +1350,7 @@ impl RuleName {
             Self::NoUnknownUnit => RuleGroup::Correctness,
             Self::NoUnmatchableAnbSelector => RuleGroup::Correctness,
             Self::NoUnnecessaryConditions => RuleGroup::Nursery,
+            Self::NoUnnecessaryTemplateExpression => RuleGroup::Nursery,
             Self::NoUnreachable => RuleGroup::Correctness,
             Self::NoUnreachableSuper => RuleGroup::Correctness,
             Self::NoUnresolvedImports => RuleGroup::Correctness,
@@ -1292,6 +1358,7 @@ impl RuleName {
             Self::NoUnsafeFinally => RuleGroup::Correctness,
             Self::NoUnsafeNegation => RuleGroup::Suspicious,
             Self::NoUnsafeOptionalChaining => RuleGroup::Correctness,
+            Self::NoUnsafePlusOperands => RuleGroup::Nursery,
             Self::NoUntrustedLicenses => RuleGroup::Nursery,
             Self::NoUnusedClasses => RuleGroup::Nursery,
             Self::NoUnusedExpressions => RuleGroup::Suspicious,
@@ -1322,6 +1389,7 @@ impl RuleName {
             Self::NoUselessTernary => RuleGroup::Complexity,
             Self::NoUselessThisAlias => RuleGroup::Complexity,
             Self::NoUselessTypeConstraint => RuleGroup::Complexity,
+            Self::NoUselessTypeConversion => RuleGroup::Nursery,
             Self::NoUselessUndefined => RuleGroup::Complexity,
             Self::NoUselessUndefinedInitialization => RuleGroup::Complexity,
             Self::NoValueAtRule => RuleGroup::Style,
@@ -1370,6 +1438,7 @@ impl RuleName {
             Self::UseConsistentMemberAccessibility => RuleGroup::Style,
             Self::UseConsistentMethodSignatures => RuleGroup::Nursery,
             Self::UseConsistentObjectDefinitions => RuleGroup::Style,
+            Self::UseConsistentTestIt => RuleGroup::Nursery,
             Self::UseConsistentTypeDefinitions => RuleGroup::Style,
             Self::UseConst => RuleGroup::Style,
             Self::UseDateNow => RuleGroup::Complexity,
@@ -1379,6 +1448,9 @@ impl RuleName {
             Self::UseDeprecatedDate => RuleGroup::Suspicious,
             Self::UseDeprecatedReason => RuleGroup::Style,
             Self::UseDestructuring => RuleGroup::Nursery,
+            Self::UseDisposables => RuleGroup::Nursery,
+            Self::UseDomNodeTextContent => RuleGroup::Nursery,
+            Self::UseDomQuerySelector => RuleGroup::Nursery,
             Self::UseEnumInitializers => RuleGroup::Style,
             Self::UseErrorCause => RuleGroup::Nursery,
             Self::UseErrorMessage => RuleGroup::Suspicious,
@@ -1386,6 +1458,7 @@ impl RuleName {
             Self::UseExhaustiveSwitchCases => RuleGroup::Nursery,
             Self::UseExpect => RuleGroup::Nursery,
             Self::UseExplicitLengthCheck => RuleGroup::Style,
+            Self::UseExplicitReturnType => RuleGroup::Nursery,
             Self::UseExplicitType => RuleGroup::Nursery,
             Self::UseExponentiationOperator => RuleGroup::Style,
             Self::UseExportType => RuleGroup::Style,
@@ -1408,6 +1481,7 @@ impl RuleName {
             Self::UseHeadingContent => RuleGroup::A11y,
             Self::UseHookAtTopLevel => RuleGroup::Correctness,
             Self::UseHtmlLang => RuleGroup::A11y,
+            Self::UseIframeSandbox => RuleGroup::Nursery,
             Self::UseIframeTitle => RuleGroup::A11y,
             Self::UseImageSize => RuleGroup::Correctness,
             Self::UseImportExtensions => RuleGroup::Correctness,
@@ -1444,12 +1518,16 @@ impl RuleName {
             Self::UseParseIntRadix => RuleGroup::Correctness,
             Self::UsePlaywrightValidDescribeCallback => RuleGroup::Nursery,
             Self::UseQwikClasslist => RuleGroup::Correctness,
+            Self::UseQwikLoaderLocation => RuleGroup::Nursery,
             Self::UseQwikMethodUsage => RuleGroup::Correctness,
             Self::UseQwikValidLexicalScope => RuleGroup::Correctness,
+            Self::UseReactAsyncServerFunction => RuleGroup::Nursery,
             Self::UseReactFunctionComponents => RuleGroup::Style,
             Self::UseReadonlyClassProperties => RuleGroup::Style,
+            Self::UseReduceTypeParameter => RuleGroup::Nursery,
             Self::UseRegexLiterals => RuleGroup::Complexity,
             Self::UseRegexpExec => RuleGroup::Nursery,
+            Self::UseRegexpTest => RuleGroup::Nursery,
             Self::UseRequiredScripts => RuleGroup::Nursery,
             Self::UseScopedStyles => RuleGroup::Nursery,
             Self::UseSelfClosingElements => RuleGroup::Style,
@@ -1465,6 +1543,7 @@ impl RuleName {
             Self::UseSpread => RuleGroup::Nursery,
             Self::UseStaticResponseMethods => RuleGroup::Suspicious,
             Self::UseStrictMode => RuleGroup::Suspicious,
+            Self::UseStringStartsEndsWith => RuleGroup::Nursery,
             Self::UseSymbolDescription => RuleGroup::Style,
             Self::UseTemplate => RuleGroup::Style,
             Self::UseThrowNewError => RuleGroup::Style,
@@ -1482,6 +1561,7 @@ impl RuleName {
             Self::UseValidForDirection => RuleGroup::Correctness,
             Self::UseValidLang => RuleGroup::A11y,
             Self::UseValidTypeof => RuleGroup::Correctness,
+            Self::UseVarsOnTop => RuleGroup::Nursery,
             Self::UseVueConsistentDefinePropsDeclaration => RuleGroup::Nursery,
             Self::UseVueConsistentVBindStyle => RuleGroup::Nursery,
             Self::UseVueConsistentVOnStyle => RuleGroup::Nursery,
@@ -1539,6 +1619,7 @@ impl std::str::FromStr for RuleName {
             "noCommentText" => Ok(Self::NoCommentText),
             "noCommonJs" => Ok(Self::NoCommonJs),
             "noCompareNegZero" => Ok(Self::NoCompareNegZero),
+            "noComponentHookFactories" => Ok(Self::NoComponentHookFactories),
             "noConditionalExpect" => Ok(Self::NoConditionalExpect),
             "noConfusingLabels" => Ok(Self::NoConfusingLabels),
             "noConfusingVoidType" => Ok(Self::NoConfusingVoidType),
@@ -1610,6 +1691,7 @@ impl std::str::FromStr for RuleName {
             "noExcessiveLinesPerFile" => Ok(Self::NoExcessiveLinesPerFile),
             "noExcessiveLinesPerFunction" => Ok(Self::NoExcessiveLinesPerFunction),
             "noExcessiveNestedTestSuites" => Ok(Self::NoExcessiveNestedTestSuites),
+            "noExcessiveSelectorClasses" => Ok(Self::NoExcessiveSelectorClasses),
             "noExplicitAny" => Ok(Self::NoExplicitAny),
             "noExportedImports" => Ok(Self::NoExportedImports),
             "noExportsInTest" => Ok(Self::NoExportsInTest),
@@ -1633,10 +1715,12 @@ impl std::str::FromStr for RuleName {
             "noHeadImportInDocument" => Ok(Self::NoHeadImportInDocument),
             "noHeaderScope" => Ok(Self::NoHeaderScope),
             "noHexColors" => Ok(Self::NoHexColors),
+            "noIdenticalTestTitle" => Ok(Self::NoIdenticalTestTitle),
             "noImgElement" => Ok(Self::NoImgElement),
             "noImplicitAnyLet" => Ok(Self::NoImplicitAnyLet),
             "noImplicitBoolean" => Ok(Self::NoImplicitBoolean),
             "noImplicitCoercions" => Ok(Self::NoImplicitCoercions),
+            "noImpliedEval" => Ok(Self::NoImpliedEval),
             "noImportAssign" => Ok(Self::NoImportAssign),
             "noImportCycles" => Ok(Self::NoImportCycles),
             "noImportantInKeyframe" => Ok(Self::NoImportantInKeyframe),
@@ -1655,14 +1739,18 @@ impl std::str::FromStr for RuleName {
             "noInvalidPositionAtImportRule" => Ok(Self::NoInvalidPositionAtImportRule),
             "noInvalidUseBeforeDeclaration" => Ok(Self::NoInvalidUseBeforeDeclaration),
             "noIrregularWhitespace" => Ok(Self::NoIrregularWhitespace),
+            "noJsxLeakedDollar" => Ok(Self::NoJsxLeakedDollar),
             "noJsxLiterals" => Ok(Self::NoJsxLiterals),
+            "noJsxNamespace" => Ok(Self::NoJsxNamespace),
             "noJsxPropsBind" => Ok(Self::NoJsxPropsBind),
             "noLabelVar" => Ok(Self::NoLabelVar),
             "noLabelWithoutControl" => Ok(Self::NoLabelWithoutControl),
             "noLeakedRender" => Ok(Self::NoLeakedRender),
+            "noLoopFunc" => Ok(Self::NoLoopFunc),
             "noMagicNumbers" => Ok(Self::NoMagicNumbers),
             "noMisleadingCharacterClass" => Ok(Self::NoMisleadingCharacterClass),
             "noMisleadingInstantiator" => Ok(Self::NoMisleadingInstantiator),
+            "noMisleadingReturnType" => Ok(Self::NoMisleadingReturnType),
             "noMisplacedAssertion" => Ok(Self::NoMisplacedAssertion),
             "noMisrefactoredShorthandAssign" => Ok(Self::NoMisrefactoredShorthandAssign),
             "noMissingVarFunction" => Ok(Self::NoMissingVarFunction),
@@ -1710,6 +1798,9 @@ impl std::str::FromStr for RuleName {
             "noQwikUseVisibleTask" => Ok(Self::NoQwikUseVisibleTask),
             "noReExportAll" => Ok(Self::NoReExportAll),
             "noReactForwardRef" => Ok(Self::NoReactForwardRef),
+            "noReactNativeDeepImports" => Ok(Self::NoReactNativeDeepImports),
+            "noReactNativeLiteralColors" => Ok(Self::NoReactNativeLiteralColors),
+            "noReactNativeRawText" => Ok(Self::NoReactNativeRawText),
             "noReactPropAssignments" => Ok(Self::NoReactPropAssignments),
             "noReactSpecificProps" => Ok(Self::NoReactSpecificProps),
             "noRedeclare" => Ok(Self::NoRedeclare),
@@ -1766,6 +1857,7 @@ impl std::str::FromStr for RuleName {
             "noUnknownUnit" => Ok(Self::NoUnknownUnit),
             "noUnmatchableAnbSelector" => Ok(Self::NoUnmatchableAnbSelector),
             "noUnnecessaryConditions" => Ok(Self::NoUnnecessaryConditions),
+            "noUnnecessaryTemplateExpression" => Ok(Self::NoUnnecessaryTemplateExpression),
             "noUnreachable" => Ok(Self::NoUnreachable),
             "noUnreachableSuper" => Ok(Self::NoUnreachableSuper),
             "noUnresolvedImports" => Ok(Self::NoUnresolvedImports),
@@ -1773,6 +1865,7 @@ impl std::str::FromStr for RuleName {
             "noUnsafeFinally" => Ok(Self::NoUnsafeFinally),
             "noUnsafeNegation" => Ok(Self::NoUnsafeNegation),
             "noUnsafeOptionalChaining" => Ok(Self::NoUnsafeOptionalChaining),
+            "noUnsafePlusOperands" => Ok(Self::NoUnsafePlusOperands),
             "noUntrustedLicenses" => Ok(Self::NoUntrustedLicenses),
             "noUnusedClasses" => Ok(Self::NoUnusedClasses),
             "noUnusedExpressions" => Ok(Self::NoUnusedExpressions),
@@ -1803,6 +1896,7 @@ impl std::str::FromStr for RuleName {
             "noUselessTernary" => Ok(Self::NoUselessTernary),
             "noUselessThisAlias" => Ok(Self::NoUselessThisAlias),
             "noUselessTypeConstraint" => Ok(Self::NoUselessTypeConstraint),
+            "noUselessTypeConversion" => Ok(Self::NoUselessTypeConversion),
             "noUselessUndefined" => Ok(Self::NoUselessUndefined),
             "noUselessUndefinedInitialization" => Ok(Self::NoUselessUndefinedInitialization),
             "noValueAtRule" => Ok(Self::NoValueAtRule),
@@ -1851,6 +1945,7 @@ impl std::str::FromStr for RuleName {
             "useConsistentMemberAccessibility" => Ok(Self::UseConsistentMemberAccessibility),
             "useConsistentMethodSignatures" => Ok(Self::UseConsistentMethodSignatures),
             "useConsistentObjectDefinitions" => Ok(Self::UseConsistentObjectDefinitions),
+            "useConsistentTestIt" => Ok(Self::UseConsistentTestIt),
             "useConsistentTypeDefinitions" => Ok(Self::UseConsistentTypeDefinitions),
             "useConst" => Ok(Self::UseConst),
             "useDateNow" => Ok(Self::UseDateNow),
@@ -1860,6 +1955,9 @@ impl std::str::FromStr for RuleName {
             "useDeprecatedDate" => Ok(Self::UseDeprecatedDate),
             "useDeprecatedReason" => Ok(Self::UseDeprecatedReason),
             "useDestructuring" => Ok(Self::UseDestructuring),
+            "useDisposables" => Ok(Self::UseDisposables),
+            "useDomNodeTextContent" => Ok(Self::UseDomNodeTextContent),
+            "useDomQuerySelector" => Ok(Self::UseDomQuerySelector),
             "useEnumInitializers" => Ok(Self::UseEnumInitializers),
             "useErrorCause" => Ok(Self::UseErrorCause),
             "useErrorMessage" => Ok(Self::UseErrorMessage),
@@ -1867,6 +1965,7 @@ impl std::str::FromStr for RuleName {
             "useExhaustiveSwitchCases" => Ok(Self::UseExhaustiveSwitchCases),
             "useExpect" => Ok(Self::UseExpect),
             "useExplicitLengthCheck" => Ok(Self::UseExplicitLengthCheck),
+            "useExplicitReturnType" => Ok(Self::UseExplicitReturnType),
             "useExplicitType" => Ok(Self::UseExplicitType),
             "useExponentiationOperator" => Ok(Self::UseExponentiationOperator),
             "useExportType" => Ok(Self::UseExportType),
@@ -1889,6 +1988,7 @@ impl std::str::FromStr for RuleName {
             "useHeadingContent" => Ok(Self::UseHeadingContent),
             "useHookAtTopLevel" => Ok(Self::UseHookAtTopLevel),
             "useHtmlLang" => Ok(Self::UseHtmlLang),
+            "useIframeSandbox" => Ok(Self::UseIframeSandbox),
             "useIframeTitle" => Ok(Self::UseIframeTitle),
             "useImageSize" => Ok(Self::UseImageSize),
             "useImportExtensions" => Ok(Self::UseImportExtensions),
@@ -1925,12 +2025,16 @@ impl std::str::FromStr for RuleName {
             "useParseIntRadix" => Ok(Self::UseParseIntRadix),
             "usePlaywrightValidDescribeCallback" => Ok(Self::UsePlaywrightValidDescribeCallback),
             "useQwikClasslist" => Ok(Self::UseQwikClasslist),
+            "useQwikLoaderLocation" => Ok(Self::UseQwikLoaderLocation),
             "useQwikMethodUsage" => Ok(Self::UseQwikMethodUsage),
             "useQwikValidLexicalScope" => Ok(Self::UseQwikValidLexicalScope),
+            "useReactAsyncServerFunction" => Ok(Self::UseReactAsyncServerFunction),
             "useReactFunctionComponents" => Ok(Self::UseReactFunctionComponents),
             "useReadonlyClassProperties" => Ok(Self::UseReadonlyClassProperties),
+            "useReduceTypeParameter" => Ok(Self::UseReduceTypeParameter),
             "useRegexLiterals" => Ok(Self::UseRegexLiterals),
             "useRegexpExec" => Ok(Self::UseRegexpExec),
+            "useRegexpTest" => Ok(Self::UseRegexpTest),
             "useRequiredScripts" => Ok(Self::UseRequiredScripts),
             "useScopedStyles" => Ok(Self::UseScopedStyles),
             "useSelfClosingElements" => Ok(Self::UseSelfClosingElements),
@@ -1946,6 +2050,7 @@ impl std::str::FromStr for RuleName {
             "useSpread" => Ok(Self::UseSpread),
             "useStaticResponseMethods" => Ok(Self::UseStaticResponseMethods),
             "useStrictMode" => Ok(Self::UseStrictMode),
+            "useStringStartsEndsWith" => Ok(Self::UseStringStartsEndsWith),
             "useSymbolDescription" => Ok(Self::UseSymbolDescription),
             "useTemplate" => Ok(Self::UseTemplate),
             "useThrowNewError" => Ok(Self::UseThrowNewError),
@@ -1963,6 +2068,7 @@ impl std::str::FromStr for RuleName {
             "useValidForDirection" => Ok(Self::UseValidForDirection),
             "useValidLang" => Ok(Self::UseValidLang),
             "useValidTypeof" => Ok(Self::UseValidTypeof),
+            "useVarsOnTop" => Ok(Self::UseVarsOnTop),
             "useVueConsistentDefinePropsDeclaration" => {
                 Ok(Self::UseVueConsistentDefinePropsDeclaration)
             }
@@ -2002,6 +2108,9 @@ pub struct Rules {
     #[doc = r" It enables the lint rules recommended by Biome. `true` by default."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
+    #[doc = r" The rule presets to use."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub preset: Option<PresetConfig>,
     #[deserializable(rename = "a11y")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub a11y: Option<SeverityOrGroup<A11y>>,
@@ -2180,8 +2289,15 @@ impl Rules {
             group.set_recommended(None);
         }
     }
-    pub(crate) const fn is_recommended_false(&self) -> bool {
-        matches!(self.recommended, Some(false))
+    #[doc = r" Returns the current preset. Defaults to the recommended set"]
+    pub(crate) fn preset(&self) -> PresetConfig {
+        if matches!(self.recommended, Some(false)) {
+            PresetConfig::None
+        } else if let Some(preset) = &self.preset {
+            preset.clone()
+        } else {
+            PresetConfig::default()
+        }
     }
     #[doc = r" It returns the enabled rules by default."]
     #[doc = r""]
@@ -2190,63 +2306,57 @@ impl Rules {
         let mut enabled_rules = FxHashSet::default();
         let mut disabled_rules = FxHashSet::default();
         if let Some(group) = self.a11y.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(A11y::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(A11y::preset_as_filters(self.preset()));
         }
         if let Some(group) = self.complexity.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(Complexity::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(Complexity::preset_as_filters(self.preset()));
         }
         if let Some(group) = self.correctness.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(Correctness::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(Correctness::preset_as_filters(self.preset()));
         }
         if let Some(group) = self.nursery.as_ref() {
-            group.collect_preset_rules(
-                !self.is_recommended_false() && biome_flags::is_unstable(),
-                &mut enabled_rules,
-            );
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() && biome_flags::is_unstable() {
-            enabled_rules.extend(Nursery::recommended_rules_as_filters());
         }
         if let Some(group) = self.performance.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(Performance::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(Performance::preset_as_filters(self.preset()));
         }
         if let Some(group) = self.security.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(Security::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(Security::preset_as_filters(self.preset()));
         }
         if let Some(group) = self.style.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(Style::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(Style::preset_as_filters(self.preset()));
         }
         if let Some(group) = self.suspicious.as_ref() {
-            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
+            group.collect_preset_rules(self.preset(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if !self.is_recommended_false() {
-            enabled_rules.extend(Suspicious::recommended_rules_as_filters());
+        } else if !self.preset().is_none() {
+            enabled_rules.extend(Suspicious::preset_as_filters(self.preset()));
         }
         enabled_rules.difference(&disabled_rules).copied().collect()
     }

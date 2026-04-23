@@ -1,0 +1,10 @@
+/* should generate diagnostics */
+.foo {}
+div.foo {}
+
+/* a comment */
+.foo, /* a comment */
+.bar,
+/* a comment */
+.foo
+{}

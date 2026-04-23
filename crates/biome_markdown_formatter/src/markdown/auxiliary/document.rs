@@ -1,4 +1,6 @@
+use crate::markdown::lists::block_list::FormatMdBlockListOptions;
 use crate::prelude::*;
+use crate::shared::TextPrintMode;
 use biome_formatter::write;
 use biome_markdown_syntax::{MdDocument, MdDocumentFields};
 
@@ -16,6 +18,18 @@ impl FormatNodeRule<MdDocument> for FormatMdDocument {
             write!(f, [bom.format()])?;
         }
 
-        write!(f, [value.format(), format_removed(&eof_token?)])
+        write!(
+            f,
+            [
+                value.format().with_options(FormatMdBlockListOptions {
+                    paragraph_print_mode: TextPrintMode::Pristine,
+                    trim: true
+                }),
+                format_removed(&eof_token?)
+            ]
+        )?;
+
+        // when trimming, we remove the last newline, so we add it back here
+        write!(f, [hard_line_break()])
     }
 }

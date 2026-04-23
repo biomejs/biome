@@ -1,0 +1,90 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.astro
+---
+# Input
+```astro
+---
+---
+<!-- should generate diagnostics -->
+
+<!-- div with onclick but no keyboard handler -->
+<div onclick="handleClick()"></div>
+
+<!-- span with onclick but no keyboard handler -->
+<span onclick="handleClick()">text</span>
+
+<!-- self-closing elements -->
+<input onclick="handleClick()" />
+
+<!-- different element types -->
+<section onclick="handleClick()">content</section>
+
+<!-- <a> without href is not interactive -->
+<a onclick="handleClick()">bare link</a>
+
+```
+
+# Diagnostics
+```
+invalid.astro:6:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Elements with onclick must also include at least one keyboard handler: onkeydown, onkeyup, or onkeypress.
+  
+    5 │ <!-- div with onclick but no keyboard handler -->
+  > 6 │ <div onclick="handleClick()"></div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ <!-- span with onclick but no keyboard handler -->
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+```
+
+```
+invalid.astro:9:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Elements with onclick must also include at least one keyboard handler: onkeydown, onkeyup, or onkeypress.
+  
+     8 │ <!-- span with onclick but no keyboard handler -->
+   > 9 │ <span onclick="handleClick()">text</span>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ <!-- self-closing elements -->
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+```
+
+```
+invalid.astro:15:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Elements with onclick must also include at least one keyboard handler: onkeydown, onkeyup, or onkeypress.
+  
+    14 │ <!-- different element types -->
+  > 15 │ <section onclick="handleClick()">content</section>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ <!-- <a> without href is not interactive -->
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+```
+
+```
+invalid.astro:18:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Elements with onclick must also include at least one keyboard handler: onkeydown, onkeyup, or onkeypress.
+  
+    17 │ <!-- <a> without href is not interactive -->
+  > 18 │ <a onclick="handleClick()">bare link</a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ 
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+```

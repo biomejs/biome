@@ -43,7 +43,7 @@ serde_json           = { workspace = true, optional = true }
 
 [dev-dependencies]
 biome_test_utils = { path = "../biome_test_utils" }
-criterion        = { package = "codspeed-criterion-compat", version = "*" }
+criterion        = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta            = { workspace = true }
 tests_macros     = { path = "../tests_macros" }
 

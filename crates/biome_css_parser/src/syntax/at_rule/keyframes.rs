@@ -2,6 +2,7 @@ use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::parse_error::{
     expected_keyframes_item, expected_keyframes_item_selector,
+    expected_percentage_after_timeline_range_name,
 };
 use crate::syntax::block::{ParseBlockBody, parse_declaration_block};
 use crate::syntax::css_modules::{
@@ -322,17 +323,39 @@ fn is_at_keyframes_selector_list_end(p: &mut CssParser) -> bool {
 /// A set of tokens representing the keyframes item selectors `from` and `to`.
 const KEYFRAMES_ITEM_SELECTOR_IDENT_SET: TokenSet<CssSyntaxKind> = token_set!(T![from], T![to]);
 
+/// A set of tokens representing timeline-range-name keywords for scroll-driven animations.
+///
+/// Valid timeline-range-names per the CSS Scroll-driven Animations spec:
+/// `cover`, `contain`, `entry`, `exit`, `entry-crossing`, `exit-crossing`.
+const TIMELINE_RANGE_NAME_SET: TokenSet<CssSyntaxKind> = token_set!(
+    T![cover],
+    T![contain],
+    T![entry],
+    T![exit],
+    T![entry_crossing],
+    T![exit_crossing]
+);
+
+/// Checks if the current token is a timeline-range-name keyword.
+fn is_at_timeline_range_name(p: &mut CssParser) -> bool {
+    p.at_ts(TIMELINE_RANGE_NAME_SET)
+}
+
 /// Checks if the current parser position is at a keyframes item selector.
 ///
 /// This function determines if the parser is currently positioned at the start of a keyframes item selector,
-/// which can be either `from`, `to`, or a percentage dimension.
+/// which can be `from`, `to`, a percentage dimension, or a timeline-range-name followed by a percentage.
 fn is_at_keyframes_item_selector(p: &mut CssParser) -> bool {
-    p.at_ts(KEYFRAMES_ITEM_SELECTOR_IDENT_SET) || is_at_percentage_dimension(p)
+    p.at_ts(KEYFRAMES_ITEM_SELECTOR_IDENT_SET)
+        || is_at_percentage_dimension(p)
+        || is_at_timeline_range_name(p)
 }
 
 /// Parses a keyframes item selector in CSS.
 ///
-/// This function parses a keyframes item selector, which can be either `from`, `to`, or a percentage dimension.
+/// This function parses a keyframes item selector, which can be `from`, `to`,
+/// a percentage dimension, or a `<timeline-range-name> <percentage>` selector
+/// for scroll-driven animations.
 #[inline]
 fn parse_keyframes_item_selector(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_keyframes_item_selector(p) {
@@ -341,7 +364,12 @@ fn parse_keyframes_item_selector(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    let kind = if is_at_percentage_dimension(p) {
+    let kind = if is_at_timeline_range_name(p) {
+        p.bump_ts(TIMELINE_RANGE_NAME_SET);
+        parse_percentage_dimension(p)
+            .or_add_diagnostic(p, expected_percentage_after_timeline_range_name);
+        CSS_KEYFRAMES_RANGE_SELECTOR
+    } else if is_at_percentage_dimension(p) {
         parse_percentage_dimension(p).ok();
         CSS_KEYFRAMES_PERCENTAGE_SELECTOR
     } else {

@@ -1,0 +1,44 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/parens/issue-16594.scss
+---
+
+# Input
+
+```scss
+      @if true {
+        $newKey: ($key: ( $theme-name: $value ))
+      }
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,7 @@
+ @if true {
+   $newKey: (
+     $key: (
+-        $theme-name: $value,
+-      ),
+-  );
++      $theme-name: $value,
++    ),
++  )
+ }
+```
+
+# Output
+
+```scss
+@if true {
+  $newKey: (
+    $key: (
+      $theme-name: $value,
+    ),
+  )
+}
+```
