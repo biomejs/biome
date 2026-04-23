@@ -8,6 +8,7 @@ pub mod no_adjacent_spaces_in_regex;
 pub mod no_alert;
 pub mod no_ambiguous_anchor_text;
 pub mod no_approximative_numeric_constant;
+pub mod no_arbitrary_value;
 pub mod no_arguments;
 pub mod no_aria_hidden_on_focusable;
 pub mod no_aria_unsupported_elements;
