@@ -8,11 +8,17 @@ expression: valid-svelte-const-block.svelte
 <!-- https://github.com/biomejs/biome/issues/10082 -->
 <script>
   const foo = [1, 2, 3, 4];
+  const enabled = true;
 </script>
 
 {#each foo as f}
-  {@const bar = f ** 2}
-  <div>{bar}</div>
+  {@const doubled = f ** 2}
+  <div>{doubled}</div>
 {/each}
+
+{#if enabled}
+  {@const message = "hello"}
+  <p>{message}</p>
+{/if}
 
 ```
