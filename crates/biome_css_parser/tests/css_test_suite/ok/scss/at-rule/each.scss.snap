@@ -40,7 +40,7 @@ CssRoot {
             rule: ScssEachAtRule {
                 each_token: EACH_KW@1..6 "each" [] [Whitespace(" ")],
                 bindings: ScssEachBindingList [
-                    ScssIdentifier {
+                    ScssVariable {
                         dollar_token: DOLLAR@6..7 "$" [] [],
                         name: CssIdentifier {
                             value_token: IDENT@7..12 "item" [] [Whitespace(" ")],
@@ -50,7 +50,7 @@ CssRoot {
                 in_token: IN_KW@12..15 "in" [] [Whitespace(" ")],
                 iterable: ScssExpression {
                     items: ScssExpressionItemList [
-                        ScssIdentifier {
+                        ScssVariable {
                             dollar_token: DOLLAR@15..16 "$" [] [],
                             name: CssIdentifier {
                                 value_token: IDENT@16..21 "list" [] [Whitespace(" ")],
@@ -70,7 +70,7 @@ CssRoot {
                                     colon_token: COLON@30..32 ":" [] [Whitespace(" ")],
                                     value: ScssExpression {
                                         items: ScssExpressionItemList [
-                                            ScssIdentifier {
+                                            ScssVariable {
                                                 dollar_token: DOLLAR@32..33 "$" [] [],
                                                 name: CssIdentifier {
                                                     value_token: IDENT@33..37 "item" [] [],
@@ -93,14 +93,14 @@ CssRoot {
             rule: ScssEachAtRule {
                 each_token: EACH_KW@43..48 "each" [] [Whitespace(" ")],
                 bindings: ScssEachBindingList [
-                    ScssIdentifier {
+                    ScssVariable {
                         dollar_token: DOLLAR@48..49 "$" [] [],
                         name: CssIdentifier {
                             value_token: IDENT@49..52 "key" [] [],
                         },
                     },
                     COMMA@52..54 "," [] [Whitespace(" ")],
-                    ScssIdentifier {
+                    ScssVariable {
                         dollar_token: DOLLAR@54..55 "$" [] [],
                         name: CssIdentifier {
                             value_token: IDENT@55..61 "value" [] [Whitespace(" ")],
@@ -110,7 +110,7 @@ CssRoot {
                 in_token: IN_KW@61..64 "in" [] [Whitespace(" ")],
                 iterable: ScssExpression {
                     items: ScssExpressionItemList [
-                        ScssIdentifier {
+                        ScssVariable {
                             dollar_token: DOLLAR@64..65 "$" [] [],
                             name: CssIdentifier {
                                 value_token: IDENT@65..69 "map" [] [Whitespace(" ")],
@@ -130,7 +130,7 @@ CssRoot {
                                     colon_token: COLON@78..80 ":" [] [Whitespace(" ")],
                                     value: ScssExpression {
                                         items: ScssExpressionItemList [
-                                            ScssIdentifier {
+                                            ScssVariable {
                                                 dollar_token: DOLLAR@80..81 "$" [] [],
                                                 name: CssIdentifier {
                                                     value_token: IDENT@81..84 "key" [] [],
@@ -152,7 +152,7 @@ CssRoot {
                                     colon_token: COLON@98..100 ":" [] [Whitespace(" ")],
                                     value: ScssExpression {
                                         items: ScssExpressionItemList [
-                                            ScssIdentifier {
+                                            ScssVariable {
                                                 dollar_token: DOLLAR@100..101 "$" [] [],
                                                 name: CssIdentifier {
                                                     value_token: IDENT@101..106 "value" [] [],
@@ -175,7 +175,7 @@ CssRoot {
             rule: ScssEachAtRule {
                 each_token: EACH_KW@112..117 "each" [] [Whitespace(" ")],
                 bindings: ScssEachBindingList [
-                    ScssIdentifier {
+                    ScssVariable {
                         dollar_token: DOLLAR@117..118 "$" [] [],
                         name: CssIdentifier {
                             value_token: IDENT@118..125 "animal" [] [Whitespace(" ")],
@@ -262,14 +262,14 @@ CssRoot {
             rule: ScssEachAtRule {
                 each_token: EACH_KW@182..187 "each" [] [Whitespace(" ")],
                 bindings: ScssEachBindingList [
-                    ScssIdentifier {
+                    ScssVariable {
                         dollar_token: DOLLAR@187..188 "$" [] [],
                         name: CssIdentifier {
                             value_token: IDENT@188..192 "name" [] [],
                         },
                     },
                     COMMA@192..194 "," [] [Whitespace(" ")],
-                    ScssIdentifier {
+                    ScssVariable {
                         dollar_token: DOLLAR@194..195 "$" [] [],
                         name: CssIdentifier {
                             value_token: IDENT@195..200 "size" [] [Whitespace(" ")],
@@ -337,7 +337,7 @@ CssRoot {
                                     colon_token: COLON@244..246 ":" [] [Whitespace(" ")],
                                     value: ScssExpression {
                                         items: ScssExpressionItemList [
-                                            ScssIdentifier {
+                                            ScssVariable {
                                                 dollar_token: DOLLAR@246..247 "$" [] [],
                                                 name: CssIdentifier {
                                                     value_token: IDENT@247..251 "size" [] [],
@@ -371,14 +371,14 @@ CssRoot {
       1: SCSS_EACH_AT_RULE@1..40
         0: EACH_KW@1..6 "each" [] [Whitespace(" ")]
         1: SCSS_EACH_BINDING_LIST@6..12
-          0: SCSS_IDENTIFIER@6..12
+          0: SCSS_VARIABLE@6..12
             0: DOLLAR@6..7 "$" [] []
             1: CSS_IDENTIFIER@7..12
               0: IDENT@7..12 "item" [] [Whitespace(" ")]
         2: IN_KW@12..15 "in" [] [Whitespace(" ")]
         3: SCSS_EXPRESSION@15..21
           0: SCSS_EXPRESSION_ITEM_LIST@15..21
-            0: SCSS_IDENTIFIER@15..21
+            0: SCSS_VARIABLE@15..21
               0: DOLLAR@15..16 "$" [] []
               1: CSS_IDENTIFIER@16..21
                 0: IDENT@16..21 "list" [] [Whitespace(" ")]
@@ -393,7 +393,7 @@ CssRoot {
                   1: COLON@30..32 ":" [] [Whitespace(" ")]
                   2: SCSS_EXPRESSION@32..37
                     0: SCSS_EXPRESSION_ITEM_LIST@32..37
-                      0: SCSS_IDENTIFIER@32..37
+                      0: SCSS_VARIABLE@32..37
                         0: DOLLAR@32..33 "$" [] []
                         1: CSS_IDENTIFIER@33..37
                           0: IDENT@33..37 "item" [] []
@@ -405,19 +405,19 @@ CssRoot {
       1: SCSS_EACH_AT_RULE@43..109
         0: EACH_KW@43..48 "each" [] [Whitespace(" ")]
         1: SCSS_EACH_BINDING_LIST@48..61
-          0: SCSS_IDENTIFIER@48..52
+          0: SCSS_VARIABLE@48..52
             0: DOLLAR@48..49 "$" [] []
             1: CSS_IDENTIFIER@49..52
               0: IDENT@49..52 "key" [] []
           1: COMMA@52..54 "," [] [Whitespace(" ")]
-          2: SCSS_IDENTIFIER@54..61
+          2: SCSS_VARIABLE@54..61
             0: DOLLAR@54..55 "$" [] []
             1: CSS_IDENTIFIER@55..61
               0: IDENT@55..61 "value" [] [Whitespace(" ")]
         2: IN_KW@61..64 "in" [] [Whitespace(" ")]
         3: SCSS_EXPRESSION@64..69
           0: SCSS_EXPRESSION_ITEM_LIST@64..69
-            0: SCSS_IDENTIFIER@64..69
+            0: SCSS_VARIABLE@64..69
               0: DOLLAR@64..65 "$" [] []
               1: CSS_IDENTIFIER@65..69
                 0: IDENT@65..69 "map" [] [Whitespace(" ")]
@@ -432,7 +432,7 @@ CssRoot {
                   1: COLON@78..80 ":" [] [Whitespace(" ")]
                   2: SCSS_EXPRESSION@80..84
                     0: SCSS_EXPRESSION_ITEM_LIST@80..84
-                      0: SCSS_IDENTIFIER@80..84
+                      0: SCSS_VARIABLE@80..84
                         0: DOLLAR@80..81 "$" [] []
                         1: CSS_IDENTIFIER@81..84
                           0: IDENT@81..84 "key" [] []
@@ -446,7 +446,7 @@ CssRoot {
                   1: COLON@98..100 ":" [] [Whitespace(" ")]
                   2: SCSS_EXPRESSION@100..106
                     0: SCSS_EXPRESSION_ITEM_LIST@100..106
-                      0: SCSS_IDENTIFIER@100..106
+                      0: SCSS_VARIABLE@100..106
                         0: DOLLAR@100..101 "$" [] []
                         1: CSS_IDENTIFIER@101..106
                           0: IDENT@101..106 "value" [] []
@@ -458,7 +458,7 @@ CssRoot {
       1: SCSS_EACH_AT_RULE@112..179
         0: EACH_KW@112..117 "each" [] [Whitespace(" ")]
         1: SCSS_EACH_BINDING_LIST@117..125
-          0: SCSS_IDENTIFIER@117..125
+          0: SCSS_VARIABLE@117..125
             0: DOLLAR@117..118 "$" [] []
             1: CSS_IDENTIFIER@118..125
               0: IDENT@118..125 "animal" [] [Whitespace(" ")]
@@ -511,12 +511,12 @@ CssRoot {
       1: SCSS_EACH_AT_RULE@182..254
         0: EACH_KW@182..187 "each" [] [Whitespace(" ")]
         1: SCSS_EACH_BINDING_LIST@187..200
-          0: SCSS_IDENTIFIER@187..192
+          0: SCSS_VARIABLE@187..192
             0: DOLLAR@187..188 "$" [] []
             1: CSS_IDENTIFIER@188..192
               0: IDENT@188..192 "name" [] []
           1: COMMA@192..194 "," [] [Whitespace(" ")]
-          2: SCSS_IDENTIFIER@194..200
+          2: SCSS_VARIABLE@194..200
             0: DOLLAR@194..195 "$" [] []
             1: CSS_IDENTIFIER@195..200
               0: IDENT@195..200 "size" [] [Whitespace(" ")]
@@ -562,7 +562,7 @@ CssRoot {
                   1: COLON@244..246 ":" [] [Whitespace(" ")]
                   2: SCSS_EXPRESSION@246..251
                     0: SCSS_EXPRESSION_ITEM_LIST@246..251
-                      0: SCSS_IDENTIFIER@246..251
+                      0: SCSS_VARIABLE@246..251
                         0: DOLLAR@246..247 "$" [] []
                         1: CSS_IDENTIFIER@247..251
                           0: IDENT@247..251 "size" [] []

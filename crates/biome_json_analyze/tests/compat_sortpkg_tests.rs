@@ -1,4 +1,6 @@
-use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleFilter};
+use biome_analyze::{
+    ActionFilter, AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleFilter,
+};
 use biome_json_analyze::JsonAnalyzeServices;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::{AnyJsonValue, JsonFileSource, JsonObjectValue, JsonStringValue};
@@ -109,7 +111,7 @@ fn apply_organize_action(input_code: &str) -> Result<String, String> {
     let mut result_code = None;
 
     let (_, _) = biome_json_analyze::analyze(&root, filter, &options, services, &[], |event| {
-        for action in event.actions() {
+        for action in event.actions(ActionFilter::all()) {
             if !action.is_suppression() {
                 let (_, text_edit) = action
                     .mutation

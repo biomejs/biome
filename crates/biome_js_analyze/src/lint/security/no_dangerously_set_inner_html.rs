@@ -31,7 +31,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noDangerouslySetInnerHtml",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("no-danger").same()],
+        sources: &[RuleSource::EslintReact("no-danger").same(), RuleSource::EslintReactDom("no-dangerously-set-innerhtml").same(), RuleSource::EslintReactXyz("dom-no-dangerously-set-innerhtml").same()],
         domains: &[RuleDomain::React],
         recommended: true,
         severity: Severity::Error,

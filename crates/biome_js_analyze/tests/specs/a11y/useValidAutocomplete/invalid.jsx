@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 <>
 	<input type="text" autocomplete="foo" />
 	<input type="text" autocomplete="name invalid" />

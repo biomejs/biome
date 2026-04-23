@@ -73,7 +73,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoRootType {
-    type Query = Ast<NoRootTypeQuery>;
+    type Query = Ast<AnyNoRootTypeQuery>;
     type State = (TokenText, TextRange);
     type Signals = Option<Self::State>;
     type Options = NoRootTypeOptions;
@@ -87,12 +87,12 @@ impl Rule for NoRootType {
         }
 
         match node {
-            NoRootTypeQuery::GraphqlObjectTypeDefinition(type_def) => {
+            AnyNoRootTypeQuery::GraphqlObjectTypeDefinition(type_def) => {
                 let name = type_def.name().ok()?;
                 let value_token = name.value_token().ok()?;
                 check_name(root_types, value_token)
             }
-            NoRootTypeQuery::GraphqlObjectTypeExtension(type_ext) => {
+            AnyNoRootTypeQuery::GraphqlObjectTypeExtension(type_ext) => {
                 let name = type_ext.name().ok()?;
                 let value_token = name.value_token().ok()?;
                 check_name(root_types, value_token)
@@ -106,18 +106,21 @@ impl Rule for NoRootType {
                 rule_category!(),
                 range,
                 markup! {
-                    "The root type "{{name.to_string()}}" is forbidden."
+                    "This schema defines the disallowed root type "<Emphasis>{name.text()}</Emphasis>"."
                 },
             )
             .note(markup! {
-                "It's forbidden to use this root type within this project. Rework to use a different root type."
+                "This project forbids that root type to enforce a specific schema design."
+            })
+            .note(markup! {
+                "Use a different root type, or update the rule configuration if this root type should be allowed."
             }),
         )
     }
 }
 
 declare_node_union! {
-    pub NoRootTypeQuery = GraphqlObjectTypeDefinition | GraphqlObjectTypeExtension
+    pub AnyNoRootTypeQuery = GraphqlObjectTypeDefinition | GraphqlObjectTypeExtension
 }
 
 fn check_name(

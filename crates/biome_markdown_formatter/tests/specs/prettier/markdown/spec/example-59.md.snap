@@ -22,28 +22,22 @@ of dashes"/>
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,7 +1,7 @@
--## `Foo
+@@ -1,7 +1,5 @@
+ ## `Foo
 -
-+`Foo
-+----
  `
  
--## <a title="a lot
+ ## <a title="a lot
 -
-+<a title="a lot
-+---
  of dashes"/>
 ```
 
 # Output
 
 ```md
-`Foo
-----
+## `Foo
 `
 
-<a title="a lot
----
+## <a title="a lot
 of dashes"/>
 ```

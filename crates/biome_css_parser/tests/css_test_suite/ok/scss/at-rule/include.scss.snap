@@ -67,7 +67,7 @@ CssRoot {
                     items: CssParameterList [
                         ScssExpression {
                             items: ScssExpressionItemList [
-                                ScssIdentifier {
+                                ScssVariable {
                                     dollar_token: DOLLAR@54..55 "$" [] [],
                                     name: CssIdentifier {
                                         value_token: IDENT@55..60 "width" [] [],
@@ -79,7 +79,7 @@ CssRoot {
                         ScssExpression {
                             items: ScssExpressionItemList [
                                 ScssKeywordArgument {
-                                    name: ScssIdentifier {
+                                    name: ScssVariable {
                                         dollar_token: DOLLAR@62..63 "$" [] [],
                                         name: CssIdentifier {
                                             value_token: IDENT@63..69 "height" [] [],
@@ -88,7 +88,7 @@ CssRoot {
                                     colon_token: COLON@69..71 ":" [] [Whitespace(" ")],
                                     value: ScssExpression {
                                         items: ScssExpressionItemList [
-                                            ScssIdentifier {
+                                            ScssVariable {
                                                 dollar_token: DOLLAR@71..72 "$" [] [],
                                                 name: CssIdentifier {
                                                     value_token: IDENT@72..77 "width" [] [],
@@ -103,7 +103,7 @@ CssRoot {
                         ScssExpression {
                             items: ScssExpressionItemList [
                                 ScssArbitraryArgument {
-                                    value: ScssIdentifier {
+                                    value: ScssVariable {
                                         dollar_token: DOLLAR@79..80 "$" [] [],
                                         name: CssIdentifier {
                                             value_token: IDENT@80..84 "args" [] [],
@@ -124,7 +124,7 @@ CssRoot {
             at_token: AT@89..92 "@" [Newline("\n"), Newline("\n")] [],
             rule: ScssIncludeAtRule {
                 include_token: INCLUDE_KW@92..100 "include" [] [Whitespace(" ")],
-                name: ScssQualifiedName {
+                name: ScssModuleMemberAccess {
                     module: CssIdentifier {
                         value_token: IDENT@100..107 "library" [] [],
                     },
@@ -139,7 +139,7 @@ CssRoot {
                         ScssExpression {
                             items: ScssExpressionItemList [
                                 ScssKeywordArgument {
-                                    name: ScssIdentifier {
+                                    name: ScssVariable {
                                         dollar_token: DOLLAR@115..116 "$" [] [],
                                         name: CssIdentifier {
                                             value_token: IDENT@116..122 "radius" [] [],
@@ -243,7 +243,7 @@ CssRoot {
           1: CSS_PARAMETER_LIST@54..87
             0: SCSS_EXPRESSION@54..60
               0: SCSS_EXPRESSION_ITEM_LIST@54..60
-                0: SCSS_IDENTIFIER@54..60
+                0: SCSS_VARIABLE@54..60
                   0: DOLLAR@54..55 "$" [] []
                   1: CSS_IDENTIFIER@55..60
                     0: IDENT@55..60 "width" [] []
@@ -251,14 +251,14 @@ CssRoot {
             2: SCSS_EXPRESSION@62..77
               0: SCSS_EXPRESSION_ITEM_LIST@62..77
                 0: SCSS_KEYWORD_ARGUMENT@62..77
-                  0: SCSS_IDENTIFIER@62..69
+                  0: SCSS_VARIABLE@62..69
                     0: DOLLAR@62..63 "$" [] []
                     1: CSS_IDENTIFIER@63..69
                       0: IDENT@63..69 "height" [] []
                   1: COLON@69..71 ":" [] [Whitespace(" ")]
                   2: SCSS_EXPRESSION@71..77
                     0: SCSS_EXPRESSION_ITEM_LIST@71..77
-                      0: SCSS_IDENTIFIER@71..77
+                      0: SCSS_VARIABLE@71..77
                         0: DOLLAR@71..72 "$" [] []
                         1: CSS_IDENTIFIER@72..77
                           0: IDENT@72..77 "width" [] []
@@ -266,7 +266,7 @@ CssRoot {
             4: SCSS_EXPRESSION@79..87
               0: SCSS_EXPRESSION_ITEM_LIST@79..87
                 0: SCSS_ARBITRARY_ARGUMENT@79..87
-                  0: SCSS_IDENTIFIER@79..84
+                  0: SCSS_VARIABLE@79..84
                     0: DOLLAR@79..80 "$" [] []
                     1: CSS_IDENTIFIER@80..84
                       0: IDENT@80..84 "args" [] []
@@ -278,7 +278,7 @@ CssRoot {
       0: AT@89..92 "@" [Newline("\n"), Newline("\n")] []
       1: SCSS_INCLUDE_AT_RULE@92..129
         0: INCLUDE_KW@92..100 "include" [] [Whitespace(" ")]
-        1: SCSS_QUALIFIED_NAME@100..114
+        1: SCSS_MODULE_MEMBER_ACCESS@100..114
           0: CSS_IDENTIFIER@100..107
             0: IDENT@100..107 "library" [] []
           1: DOT@107..108 "." [] []
@@ -290,7 +290,7 @@ CssRoot {
             0: SCSS_EXPRESSION@115..127
               0: SCSS_EXPRESSION_ITEM_LIST@115..127
                 0: SCSS_KEYWORD_ARGUMENT@115..127
-                  0: SCSS_IDENTIFIER@115..122
+                  0: SCSS_VARIABLE@115..122
                     0: DOLLAR@115..116 "$" [] []
                     1: CSS_IDENTIFIER@116..122
                       0: IDENT@116..122 "radius" [] []

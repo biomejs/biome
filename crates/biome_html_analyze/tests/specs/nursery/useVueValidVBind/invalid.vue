@@ -1,16 +1,11 @@
 <!-- should generate diagnostics -->
 
 <template>
-  <!-- Missing argument: long-form without an argument -->
-  <div v-bind></div>
-  <div v-bind />
-  <Foo v-bind />
-
   <!-- Missing value -->
   <Foo v-bind:foo />
   <Foo :foo />
 
-  <!-- Missing argument with modifier -->
+  <!-- Missing value with modifier -->
   <div v-bind.prop></div>
 
   <!-- Invalid single modifier on long-form -->

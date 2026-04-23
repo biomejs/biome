@@ -324,7 +324,7 @@ CssRoot {
                                             l_curly_token: L_CURLY@234..235 "{" [] [],
                                             value: ScssExpression {
                                                 items: ScssExpressionItemList [
-                                                    ScssIdentifier {
+                                                    ScssVariable {
                                                         dollar_token: DOLLAR@235..236 "$" [] [],
                                                         name: CssIdentifier {
                                                             value_token: IDENT@236..240 "name" [] [],
@@ -587,7 +587,7 @@ CssRoot {
                       1: L_CURLY@234..235 "{" [] []
                       2: SCSS_EXPRESSION@235..240
                         0: SCSS_EXPRESSION_ITEM_LIST@235..240
-                          0: SCSS_IDENTIFIER@235..240
+                          0: SCSS_VARIABLE@235..240
                             0: DOLLAR@235..236 "$" [] []
                             1: CSS_IDENTIFIER@236..240
                               0: IDENT@236..240 "name" [] []

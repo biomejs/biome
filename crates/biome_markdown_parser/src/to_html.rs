@@ -44,10 +44,10 @@
 
 use biome_markdown_syntax::{
     AnyMdBlock, AnyMdBulletListMember, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock,
-    MarkdownLanguage, MdAutolink, MdBlockList, MdBullet, MdBulletListItem, MdDocument,
-    MdEntityReference, MdFencedCodeBlock, MdHardLine, MdHeader, MdHtmlBlock, MdIndentCodeBlock,
-    MdInlineCode, MdInlineEmphasis, MdInlineHtml, MdInlineImage, MdInlineItalic, MdInlineItemList,
-    MdInlineLink, MdLinkBlock, MdLinkDestination, MdLinkLabel, MdLinkReferenceDefinition,
+    MarkdownLanguage, MdAutolink, MdBlockList, MdBullet, MdBulletListItem, MdContinuationIndent,
+    MdDocument, MdEntityReference, MdFencedCodeBlock, MdHardLine, MdHeader, MdHtmlBlock,
+    MdIndentCodeBlock, MdInlineCode, MdInlineEmphasis, MdInlineHtml, MdInlineImage, MdInlineItalic,
+    MdInlineItemList, MdInlineLink, MdLinkDestination, MdLinkLabel, MdLinkReferenceDefinition,
     MdLinkTitle, MdOrderedListItem, MdParagraph, MdQuote, MdReferenceImage, MdReferenceLink,
     MdReferenceLinkLabel, MdSetextHeader, MdSoftBreak, MdTextual, MdThematicBreakBlock,
 };
@@ -526,6 +526,11 @@ impl<'a> HtmlRenderer<'a> {
     }
 
     fn enter(&mut self, node: SyntaxNode<MarkdownLanguage>) {
+        if MdContinuationIndent::cast(node.clone()).is_some() {
+            self.opaque_depth = Some(self.depth);
+            return;
+        }
+
         if MdInlineItemList::cast(node.clone()).is_some()
             && self
                 .suppressed_inline_nodes
@@ -622,7 +627,16 @@ impl<'a> HtmlRenderer<'a> {
 
         if let Some(bullet) = MdBullet::cast(node.clone()) {
             let list_is_tight = self.list_stack.last().is_some_and(|state| state.is_tight);
-            let blocks: Vec<_> = bullet.content().iter().collect();
+            let blocks: Vec<_> = bullet
+                .content()
+                .iter()
+                .filter(|b| {
+                    !matches!(
+                        b,
+                        AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdContinuationIndent(_),)
+                    )
+                })
+                .collect();
             let item_has_blank_line = blocks
                 .windows(2)
                 .any(|pair| is_newline_block(&pair[0]) && is_newline_block(&pair[1]));
@@ -631,12 +645,12 @@ impl<'a> HtmlRenderer<'a> {
 
             let first_is_paragraph = blocks
                 .iter()
-                .find(|b| !is_newline_block(b))
+                .find(|b| !is_transparent_block(b))
                 .is_some_and(is_paragraph_block);
             let last_is_paragraph = blocks
                 .iter()
                 .rev()
-                .find(|b| !is_newline_block(b))
+                .find(|b| !is_transparent_block(b))
                 .is_some_and(is_paragraph_block);
 
             let leading_newline = !is_tight || !first_is_paragraph;
@@ -761,9 +775,7 @@ impl<'a> HtmlRenderer<'a> {
             return;
         }
 
-        if MdLinkReferenceDefinition::cast(node.clone()).is_some()
-            || MdLinkBlock::cast(node.clone()).is_some()
-        {
+        if MdLinkReferenceDefinition::cast(node.clone()).is_some() {
             self.opaque_depth = Some(self.depth);
             return;
         }
@@ -1134,7 +1146,7 @@ fn header_level(header: &MdHeader) -> usize {
     // Count total hash characters in the before list.
     // The lexer emits all consecutive `#` chars as a single HASH token,
     // so we sum the text lengths of all hash tokens.
-    // Use text_trimmed() to exclude any leading trivia (skipped indentation spaces).
+    // Use text_trimmed() to exclude any leading trivia (indentation whitespace).
     header
         .before()
         .iter()
@@ -1175,12 +1187,12 @@ fn render_fenced_code_block(
 ) {
     out.push_str("<pre><code");
 
-    // Determine the fence indentation from the explicit indent slot
+    // Determine the fence indentation from the explicit indent slot.
+    // The indent list only contains the fence's own 0-3 spaces;
+    // list/quote indent is handled separately via container_indent.
     let fence_leading_indent = indent_list_width(&code.indent());
     let container_indent = list_indent + quote_indent;
-    let fence_indent = fence_leading_indent
-        .saturating_sub(container_indent)
-        .min(MAX_BLOCK_PREFIX_INDENT);
+    let fence_indent = fence_leading_indent.min(MAX_BLOCK_PREFIX_INDENT);
     let content_indent = container_indent + fence_indent;
 
     // Get info string (language) - process escapes
@@ -1305,7 +1317,7 @@ fn render_html_block(
 /// Render textual content.
 fn render_textual(text: &MdTextual, out: &mut String) {
     if let Ok(token) = text.value_token() {
-        // Use text_trimmed() to exclude skipped trivia (e.g., indentation stripped during parsing)
+        // Use text_trimmed() to exclude trivia (e.g., indentation stripped during parsing)
         let raw = token.text_trimmed();
         // Process backslash escapes and escape HTML
         let processed = process_escapes(raw);
@@ -1751,17 +1763,32 @@ fn is_paragraph_block(block: &AnyMdBlock) -> bool {
     )
 }
 
-/// Check if a block is a newline (produces no output).
+/// Check if a block is a newline or continuation indent (produces no output).
 fn is_newline_block(block: &AnyMdBlock) -> bool {
     matches!(
         block,
-        AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(_))
+        AnyMdBlock::AnyMdLeafBlock(
+            AnyMdLeafBlock::MdNewline(_) | AnyMdLeafBlock::MdContinuationIndent(_),
+        )
+    )
+}
+
+/// Check if a block is structural-only and produces no rendered content.
+/// This includes newline blocks, continuation indents, and quote prefix markers
+/// that can appear as children of list item content when lists are nested
+/// inside blockquotes.
+fn is_transparent_block(block: &AnyMdBlock) -> bool {
+    matches!(
+        block,
+        AnyMdBlock::AnyMdLeafBlock(
+            AnyMdLeafBlock::MdNewline(_) | AnyMdLeafBlock::MdContinuationIndent(_),
+        ) | AnyMdBlock::MdQuotePrefix(_)
     )
 }
 
 /// Check if blocks are effectively empty (empty or only newlines).
 fn is_empty_content(blocks: &[AnyMdBlock]) -> bool {
-    blocks.is_empty() || blocks.iter().all(is_newline_block)
+    blocks.is_empty() || blocks.iter().all(is_transparent_block)
 }
 
 fn list_item_required_indent(entry: &ListItemIndent) -> usize {
@@ -1991,5 +2018,172 @@ mod tests {
             parsed.quote_indents(),
         );
         assert_eq!(html, "<p>foo\\</p>\n");
+    }
+
+    #[test]
+    fn test_hard_break_in_blockquote() {
+        let parsed = parse_markdown("> foo  \n> bar  \n>\n> baz");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<blockquote>\n<p>foo<br />\nbar</p>\n<p>baz</p>\n</blockquote>\n"
+        );
+    }
+
+    #[test]
+    fn test_hard_break_nested_quote_in_list() {
+        let parsed = parse_markdown("- > quoted  \n  > line  \n  >\n  > next para\n\n- after\n");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<ul>\n<li>\n<blockquote>\n<p>quoted<br />\nline</p>\n<p>next para</p>\n</blockquote>\n</li>\n<li>\n<p>after</p>\n</li>\n</ul>\n"
+        );
+    }
+
+    #[test]
+    fn test_tight_list_marker_split() {
+        // Two tight lists separated by blank line with different markers
+        let input = "- foo\n- bar\n\n* baz\n";
+        let parsed = parse_markdown(input);
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<ul>\n<li>foo</li>\n<li>bar</li>\n</ul>\n<ul>\n<li>baz</li>\n</ul>\n"
+        );
+    }
+
+    #[test]
+    fn test_tight_list_basic() {
+        let input = "- foo\n- bar\n";
+        let parsed = parse_markdown(input);
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(html, "<ul>\n<li>foo</li>\n<li>bar</li>\n</ul>\n");
+    }
+
+    #[test]
+    fn test_loose_list_same_marker() {
+        let input = "- foo\n\n- bar\n";
+        let parsed = parse_markdown(input);
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<ul>\n<li>\n<p>foo</p>\n</li>\n<li>\n<p>bar</p>\n</li>\n</ul>\n"
+        );
+    }
+
+    #[test]
+    fn test_ordered_delim_split_tight() {
+        // Different ordered delimiters across blank line → separate tight lists
+        let input = "1. First\n2. Second\n\n1) Third\n2) Fourth\n";
+        let parsed = parse_markdown(input);
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<ol>\n<li>First</li>\n<li>Second</li>\n</ol>\n<ol>\n<li>Third</li>\n<li>Fourth</li>\n</ol>\n"
+        );
+    }
+
+    #[test]
+    fn test_cross_type_split_tight() {
+        // Bullet → ordered across blank line → separate tight lists
+        let input = "- bullet\n\n1. ordered\n";
+        let parsed = parse_markdown(input);
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<ul>\n<li>bullet</li>\n</ul>\n<ol>\n<li>ordered</li>\n</ol>\n"
+        );
+    }
+
+    #[test]
+    fn test_tight_bullet_list_in_blockquote() {
+        let parsed = parse_markdown("> - a\n> - b\n");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<blockquote>\n<ul>\n<li>a</li>\n<li>b</li>\n</ul>\n</blockquote>\n"
+        );
+    }
+
+    #[test]
+    fn test_tight_ordered_list_in_blockquote() {
+        let parsed = parse_markdown("> 1. a\n> 2. b\n");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<blockquote>\n<ol>\n<li>a</li>\n<li>b</li>\n</ol>\n</blockquote>\n"
+        );
+    }
+
+    #[test]
+    fn test_tight_three_item_bullet_list_in_blockquote() {
+        let parsed = parse_markdown("> - a\n> - b\n> - c\n");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<blockquote>\n<ul>\n<li>a</li>\n<li>b</li>\n<li>c</li>\n</ul>\n</blockquote>\n"
+        );
+    }
+
+    #[test]
+    fn test_tight_list_not_in_blockquote() {
+        let parsed = parse_markdown("- a\n- b\n");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(html, "<ul>\n<li>a</li>\n<li>b</li>\n</ul>\n");
     }
 }

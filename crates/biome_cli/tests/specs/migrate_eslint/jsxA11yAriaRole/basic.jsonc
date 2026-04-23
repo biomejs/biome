@@ -1,0 +1,11 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": {
+      "jsx-a11y/aria-role": ["error", {
+        "allowedInvalidRoles": ["text"],
+        "ignoreNonDOM": true
+      }]
+    }
+  }
+}

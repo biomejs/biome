@@ -1,0 +1,149 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: css/atrule/page.css
+---
+
+# Input
+
+```css
+@page {
+    margin: 1cm;
+}
+@page {
+margin: 1cm;
+}
+@page{
+margin: 1cm;
+}
+@page  {
+    margin: 1cm;
+}
+@page
+{
+margin
+:
+1cm
+;
+}
+@page
+
+{
+
+margin
+:
+
+1cm
+
+;
+
+}
+@page :first {
+    margin: 2cm;
+}
+@page :first {
+margin: 2cm;
+}
+@page :first{
+    margin: 2cm;
+}
+@page  :first  {
+    margin: 2cm;
+}
+@page
+:first
+{
+margin
+:
+2cm
+;
+}
+@page
+
+:first
+
+{
+
+margin
+
+:
+
+2cm
+
+;
+
+}
+@page vertical {
+    size: A4 portrait;
+}
+
+@page:first
+{
+  counter-reset: page 1;
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -38,6 +38,6 @@
+   size: A4 portrait;
+ }
+ 
+-@page:first {
++@page :first {
+   counter-reset: page 1;
+ }
+```
+
+# Output
+
+```css
+@page {
+  margin: 1cm;
+}
+@page {
+  margin: 1cm;
+}
+@page {
+  margin: 1cm;
+}
+@page {
+  margin: 1cm;
+}
+@page {
+  margin: 1cm;
+}
+@page {
+  margin: 1cm;
+}
+@page :first {
+  margin: 2cm;
+}
+@page :first {
+  margin: 2cm;
+}
+@page :first {
+  margin: 2cm;
+}
+@page :first {
+  margin: 2cm;
+}
+@page :first {
+  margin: 2cm;
+}
+@page :first {
+  margin: 2cm;
+}
+@page vertical {
+  size: A4 portrait;
+}
+
+@page :first {
+  counter-reset: page 1;
+}
+```

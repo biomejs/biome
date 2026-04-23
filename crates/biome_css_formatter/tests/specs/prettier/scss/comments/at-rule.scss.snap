@@ -1,0 +1,56 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: scss/comments/at-rule.scss
+---
+
+# Input
+
+```scss
+@at-root .foo
+// .bar
+{
+
+}
+
+@at-root
+// .bar
+.foo
+{
+
+}
+```
+
+
+# Error
+```text
+reformat: output mismatch
+Differences (-re-formatted|+formatted):
+-@at-root .foo { // .bar
++@at-root .foo // .bar
++{
+ }
+ 
+ @at-root // .bar
+ .foo {
+
+IR differences:
+Differences (-re-formatted IR|+formatted IR):
+ [
+   "@at-root ",
+-  group(expand: propagated, [
+-    group([indent([group([".foo"])])]),
+-    line_suffix([" // .bar"]),
+-    expand_parent
+-  ]),
+-  " {",
++  group([group([indent([group([".foo"])])])]),
++  " // .bar",
++  hard_line_break,
++  "{",
+   hard_line_break,
+   "}",
+   empty_line,
+   "@at-root ",
+
+```

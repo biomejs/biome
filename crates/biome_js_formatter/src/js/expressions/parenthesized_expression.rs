@@ -32,28 +32,24 @@ impl FormatNodeRule<JsParenthesizedExpression> for FormatJsParenthesizedExpressi
                 AnyJsExpression::JsObjectExpression(_) | AnyJsExpression::JsArrayExpression(_)
             ));
 
-        if should_hug {
-            if should_insert_space {
-                write!(
-                    f,
-                    [
-                        l_paren_token.format(),
-                        space(),
-                        expression.format(),
-                        space(),
-                        r_paren_token.format()
-                    ]
-                )
+        let l_paren = format_with(|f: &mut JsFormatter| {
+            if f.options().delimiter_spacing().value() {
+                write!(f, [l_paren_token.format(), space()])
             } else {
-                write!(
-                    f,
-                    [
-                        l_paren_token.format(),
-                        expression.format(),
-                        r_paren_token.format()
-                    ]
-                )
+                write!(f, [l_paren_token.format()])
             }
+        });
+
+        let r_paren = format_with(|f: &mut JsFormatter| {
+            if f.options().delimiter_spacing().value() {
+                write!(f, [space(), r_paren_token.format()])
+            } else {
+                write!(f, [r_paren_token.format()])
+            }
+        });
+
+        if should_hug {
+            write!(f, [l_paren, expression.format(), r_paren])
         } else {
             write!(
                 f,

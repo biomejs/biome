@@ -31,7 +31,7 @@ CssRoot {
                             items: CssParameterList [
                                 ScssExpression {
                                     items: ScssExpressionItemList [
-                                        ScssIdentifier {
+                                        ScssVariable {
                                             dollar_token: DOLLAR@10..11 "$" [] [],
                                             name: CssIdentifier {
                                                 value_token: IDENT@11..15 "cond" [] [],
@@ -81,7 +81,7 @@ CssRoot {
               2: CSS_PARAMETER_LIST@10..23
                 0: SCSS_EXPRESSION@10..15
                   0: SCSS_EXPRESSION_ITEM_LIST@10..15
-                    0: SCSS_IDENTIFIER@10..15
+                    0: SCSS_VARIABLE@10..15
                       0: DOLLAR@10..11 "$" [] []
                       1: CSS_IDENTIFIER@11..15
                         0: IDENT@11..15 "cond" [] []

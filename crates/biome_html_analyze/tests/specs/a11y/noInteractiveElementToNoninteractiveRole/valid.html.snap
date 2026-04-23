@@ -1,0 +1,277 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+<a href="http://x.y.z" role="button"></a>
+<a href="http://x.y.z" tabindex="0" role="button"></a>
+<button class="foo" role="button"></button>
+<Button class="foo" role="button"></Button>
+<BUTTON class="foo" role="button"></BUTTON>
+
+<input role="button" />
+<input type="button" role="button" />
+<input type="checkbox" role="button" />
+<input type="color" role="button" />
+<input type="date" role="button" />
+<input type="datetime" role="button" />
+<input type="datetime-local" role="button" />
+<input type="email" role="button" />
+<input type="file" role="button" />
+<input type="image" role="button" />
+<input type="month" role="button" />
+<input type="number" role="button" />
+<input type="password" role="button" />
+<input type="radio" role="button" />
+<input type="range" role="button" />
+<input type="reset" role="button" />
+<input type="search" role="button" />
+<input type="submit" role="button" />
+<input type="tel" role="button" />
+<input type="text" role="button" />
+<input type="time" role="button" />
+<input type="url" role="button" />
+<input type="week" role="button" />
+<input type="hidden" role="button" />
+
+<menuitem role="button">
+</menuitem>
+<option class="foo" role="button"></option>
+<select class="foo" role="button"></select>
+<textarea class="foo" role="button"></textarea>
+<tr role="button"></tr>
+
+<a role="button"></a>
+<a role="img"></a>
+<a tabIndex="0" role="button"></a>
+<a tabIndex="0" role="img"></a>
+<acronym role="button"></acronym>
+<address role="button"></address>
+<applet role="button"></applet>
+<aside role="button"></aside>
+<audio role="button"></audio>
+<b role="button"></b>
+<base role="button" />
+<bdi role="button"></bdi>
+<bdo role="button"></bdo>
+<big role="button"></big>
+<blink role="button"></blink>
+<blockquote role="button"></blockquote>
+
+<body role="button"></body>
+<br role="button" />
+<canvas role="button"></canvas>
+<canvas role="img"></canvas>
+<caption role="button"></caption>
+<center role="button"></center>
+<cite role="button"></cite>
+<code role="button"></code>
+<col role="button" />
+<colgroup role="button"></colgroup>
+<content role="button"></content>
+<data role="button"></data>
+<datalist role="button"></datalist>
+<del role="button"></del>
+<details role="button"></details>
+<dir role="button"></dir>
+<div role="button"></div>
+<div class="foo" role="button"></div>
+<div aria-hidden role="button"></div>
+<div aria-hidden="true" role="button"></div>
+<div role="button"></div>
+<div onkeyup="()=> void 0" aria-hidden="false" role="button"></div>
+<dl role="button"></dl>
+<em role="button"></em>
+<embed role="button" />
+<figcaption role="button"></figcaption>
+<font role="button"></font>
+<footer role="button"></footer>
+<frameset role="button"></frameset>
+
+<head role="button"></head>
+<header role="button"></header>
+<hgroup role="button"></hgroup>
+<html role="button">
+
+</html>
+<i role="button"></i>
+<iframe role="button"></iframe>
+<ins role="button"></ins>
+<kbd role="button"></kbd>
+<keygen role="button"></keygen>
+<label role="button"></label>
+<legend role="button"></legend>
+<link role="button" />
+<map role="button"></map>
+<mark role="button"></mark>
+<marquee role="button"></marquee>
+<menu role="button"></menu>
+<meta role="button" />
+<meter role="button"></meter>
+<noembed role="button"></noembed>
+<noscript role="button"></noscript>
+<object role="button"></object>
+<optgroup role="button"></optgroup>
+<output role="button"></output>
+<p role="button"></p>
+<param role="button" />
+<picture role="button"></picture>
+<pre role="button"></pre>
+<progress role="button"></progress>
+<q role="button"></q>
+<rp role="button"></rp>
+<rt role="button"></rt>
+<rtc role="button">
+</rtc>
+<ruby role="button"></ruby>
+<s role="button"></s>
+<samp role="button"></samp>
+<script role="button"></script>
+<section role="button"></section>
+<small role="button"></small>
+<source role="button" />
+<spacer role="button"></spacer>
+<span role="button"></span>
+<strike role="button"></strike>
+<strong role="button"></strong>
+<style role="button"></style>
+<sub role="button"></sub>
+<summary role="button"></summary>
+
+<sup role="button"></sup>
+<th role="button"></th>
+<time role="button"></time>
+<title role="button"></title>
+<track role="button" />
+<tt role="button"></tt>
+<u role="button"></u>
+<var role="button"></var>
+<video role="button"></video>
+<wbr role="button" />
+<xmp role="button"></xmp>
+
+<div role="button"></div>
+<div role="checkbox"></div>
+<div role="columnheader"></div>
+<div role="combobox"></div>
+<div role="grid"></div>
+<div role="gridcell"></div>
+<div role="link"></div>
+<div role="listbox"></div>
+<div role="menu"></div>
+<div role="menubar"></div>
+<div role="menuitem"></div>
+<div role="menuitemcheckbox"></div>
+<div role="menuitemradio"></div>
+<div role="option"></div>
+<div role="progressbar"></div>
+<div role="radio"></div>
+<div role="radiogroup"></div>
+<div role="row"></div>
+<div role="rowheader"></div>
+<div role="searchbox"></div>
+<div role="slider"></div>
+<div role="spinbutton"></div>
+<div role="switch"></div>
+<div role="tab"></div>
+<div role="textbox"></div>
+<div role="treeitem"></div>
+
+<div role="presentation"></div>
+<hr role="presentation" />
+<hr role="none" />
+
+<div role="command"></div>
+<div role="composite"></div>
+<div role="input"></div>
+<div role="landmark"></div>
+<div role="range"></div>
+<div role="roletype"></div>
+<div role="section"></div>
+<div role="sectionhead"></div>
+<div role="select"></div>
+<div role="structure"></div>
+<div role="tablist"></div>
+<div role="toolbar"></div>
+<div role="tree"></div>
+<div role="treegrid"></div>
+<div role="widget"></div>
+<div role="window"></div>
+
+<main role="button"></main>
+<area role="button" />
+<article role="button"></article>
+<article role="button"></article>
+<dd role="button"></dd>
+<dfn role="button"></dfn>
+<dt role="button"></dt>
+<fieldset role="button"></fieldset>
+<figure role="button"></figure>
+<form role="button"></form>
+<frame role="button"></frame>
+<h1 role="button"></h1>
+<h2 role="button"></h2>
+<h3 role="button"></h3>
+<h4 role="button"></h4>
+<h5 role="button"></h5>
+<h6 role="button"></h6>
+<hr role="button" />
+<img role="button" />
+<li role="button"></li>
+<li role="presentation"></li>
+<nav role="button"></nav>
+<ol role="button"></ol>
+<svg role="img"></svg>
+<table role="button"></table>
+<tbody role="button"></tbody>
+<td role="button"></td>
+<tfoot role="button"></tfoot>
+<thead role="button"></thead>
+<ul role="button"></ul>
+
+<div role="alert"></div>
+<div role="alertdialog"></div>
+<div role="application"></div>
+<div role="article"></div>
+<div role="banner"></div>
+<div role="cell"></div>
+<div role="complementary"></div>
+<div role="contentinfo"></div>
+<div role="definition"></div>
+<div role="dialog"></div>
+<div role="directory"></div>
+<div role="document"></div>
+<div role="feed"></div>
+<div role="figure"></div>
+<div role="form"></div>
+<div role="group"></div>
+<div role="heading"></div>
+<div role="img"></div>
+<div role="list"></div>
+<div role="listitem"></div>
+<div role="log"></div>
+<div role="main"></div>
+<div role="marquee"></div>
+<div role="math"></div>
+<div role="navigation"></div>
+<div role="note"></div>
+<div role="region"></div>
+<div role="rowgroup"></div>
+<div role="search"></div>
+<div role="separator"></div>
+<div role="scrollbar"></div>
+<div role="status"></div>
+<div role="table"></div>
+<div role="tabpanel"></div>
+<div role="term"></div>
+<div role="timer"></div>
+<div role="tooltip"></div>
+
+<picture>
+	<source srcSet="/assets/head.webp" role='img' type='image/webp' />
+	<img src="/assets/head.png" alt='An ASCII-style headshot' />
+</picture>
+
+```

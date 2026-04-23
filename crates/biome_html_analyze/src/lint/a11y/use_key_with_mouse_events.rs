@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlElement, HtmlFileSource};
+use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
 use biome_rowan::AstNode;
 use biome_rule_options::use_key_with_mouse_events::UseKeyWithMouseEventsOptions;
 
@@ -66,7 +66,7 @@ pub enum UseKeyWithMouseEventsState {
 }
 
 impl Rule for UseKeyWithMouseEvents {
-    type Query = Ast<AnyHtmlElement>;
+    type Query = Ast<AnyHtmlTagElement>;
     type State = UseKeyWithMouseEventsState;
     type Signals = Option<Self::State>;
     type Options = UseKeyWithMouseEventsOptions;
@@ -79,7 +79,7 @@ impl Rule for UseKeyWithMouseEvents {
         // and should be skipped. In HTML, all tag names are native elements
         // regardless of casing (e.g. <DIV> is a valid div).
         if !source_type.is_html() {
-            let element_name = node.name()?;
+            let element_name = node.tag_name()?;
             if element_name.text().starts_with(|c: char| c.is_uppercase()) {
                 return None;
             }

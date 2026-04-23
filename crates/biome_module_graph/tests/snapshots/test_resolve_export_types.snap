@@ -60,12 +60,10 @@ Imports {
 ```
 theAnswer  => BindingTypeData {
   Types Module(0) TypeId(0),
-  Exported Ranges: (26..35)
 }
 
 superComputer  => BindingTypeData {
   Types Module(0) TypeId(5),
-  Exported Ranges: (1077..1090)
 }
 ```
 

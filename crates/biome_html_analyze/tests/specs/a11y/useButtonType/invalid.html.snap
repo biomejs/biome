@@ -24,7 +24,7 @@ invalid.html:2:1 lint/a11y/useButtonType ━━━━━━━━━━━━━
   
     1 │ <!-- should generate diagnostics -->
   > 2 │ <button>Do something</button>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^
     3 │ <button type="incorrectType">Do something</button>
     4 │ <button type>Do something</button>
   
@@ -43,7 +43,7 @@ invalid.html:3:1 lint/a11y/useButtonType ━━━━━━━━━━━━━
     1 │ <!-- should generate diagnostics -->
     2 │ <button>Do something</button>
   > 3 │ <button type="incorrectType">Do something</button>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     4 │ <button type>Do something</button>
     5 │ <button type="">Do something</button>
   
@@ -62,7 +62,7 @@ invalid.html:4:1 lint/a11y/useButtonType ━━━━━━━━━━━━━
     2 │ <button>Do something</button>
     3 │ <button type="incorrectType">Do something</button>
   > 4 │ <button type>Do something</button>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^
     5 │ <button type="">Do something</button>
     6 │ <button />
   
@@ -81,7 +81,7 @@ invalid.html:5:1 lint/a11y/useButtonType ━━━━━━━━━━━━━
     3 │ <button type="incorrectType">Do something</button>
     4 │ <button type>Do something</button>
   > 5 │ <button type="">Do something</button>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^
     6 │ <button />
     7 │ <button type="incorrectType" />
   

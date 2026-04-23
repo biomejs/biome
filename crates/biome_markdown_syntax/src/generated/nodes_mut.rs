@@ -45,6 +45,14 @@ impl MdBulletListItem {
         )
     }
 }
+impl MdContinuationIndent {
+    pub fn with_indent(self, element: MdIndentTokenList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl MdDocument {
     pub fn with_bom_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
@@ -351,26 +359,6 @@ impl MdInlineLink {
             self.syntax
                 .splice_slots(6usize..=6usize, once(Some(element.into()))),
         )
-    }
-}
-impl MdLinkBlock {
-    pub fn with_label(self, element: MdTextual) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-    pub fn with_url(self, element: MdTextual) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-    pub fn with_title(self, element: Option<MdTextual>) -> Self {
-        Self::unwrap_cast(self.syntax.splice_slots(
-            2usize..=2usize,
-            once(element.map(|element| element.into_syntax().into())),
-        ))
     }
 }
 impl MdLinkDestination {

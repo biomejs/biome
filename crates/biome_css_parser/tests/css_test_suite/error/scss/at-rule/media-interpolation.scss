@@ -1,0 +1,11 @@
+@media (#{$feature: #{$value}) {
+  .box {
+    color: red;
+  }
+}
+
+@container (#{$feature: #{$value}) {
+  .box {
+    color: red;
+  }
+}

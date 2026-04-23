@@ -37,7 +37,7 @@ invalid.html:3:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━�
     1 │ <!-- should generate diagnostics -->
     2 │ <html />
   > 3 │ <html></html>
-      │ ^^^^^^^^^^^^^
+      │ ^^^^^^
     4 │ <html lang></html>
     5 │ <html lang=""></html>
   
@@ -54,7 +54,7 @@ invalid.html:4:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━�
     2 │ <html />
     3 │ <html></html>
   > 4 │ <html lang></html>
-      │ ^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^
     5 │ <html lang=""></html>
     6 │ 
   
@@ -71,7 +71,7 @@ invalid.html:5:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━�
     3 │ <html></html>
     4 │ <html lang></html>
   > 5 │ <html lang=""></html>
-      │ ^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^
     6 │ 
   
   i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.

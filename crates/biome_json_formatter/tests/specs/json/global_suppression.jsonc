@@ -6,3 +6,8 @@
 
 	    "a": "b", "c": "d", "e": "f"
 }
+
+// biome-ignore-all format: intentional
+{"code":true}
+
+// Biome format should keep this comment

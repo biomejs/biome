@@ -179,3 +179,20 @@ const importMeta = `${import.meta.url}`;
 const optChain1 = `${foo?.bar}`;
 const optChain2 = `${foo?.bar()}`;
 const optChain3 = `${foo?.[bar]}`;
+
+// =====================
+// Multiline template interpolations
+// =====================
+
+// Interpolation whose source spans multiple lines
+const multilineInterp = `${
+	someVeryLongExpressionThatShouldDefinitelyNotFitOnOneLine +
+	anotherLongExpression
+}`;
+
+// Array literal that breaks across lines
+const arrayInterp = `${[
+	"oneOneOneOneOneOneOneOneOneOneOne",
+	"twoTwoTwoTwoTwoTwoTwoTwoTwoTwoTwo",
+	"threeThreeThreeThreeThreeThreeThreeThree",
+]}`;

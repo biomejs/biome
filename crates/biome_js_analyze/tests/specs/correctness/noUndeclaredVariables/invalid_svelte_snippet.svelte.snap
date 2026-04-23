@@ -1,0 +1,96 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_svelte_snippet.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+let images = [];
+</script>
+
+{#snippet figure(image2)}
+    <figure>
+        <img src={image.src} />
+    </figure>
+{/snippet}
+
+{#snippet destructured({ src2, caption2 })}
+    <img {src} alt={caption} />
+{/snippet}
+
+{#each images as img2}
+    {@render figure(img)}
+{/each}
+
+```
+
+# Diagnostics
+```
+invalid_svelte_snippet.svelte:17:21 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The img variable is undeclared.
+  
+    16 │ {#each images as img2}
+  > 17 │     {@render figure(img)}
+       │                     ^^^
+    18 │ {/each}
+    19 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+invalid_svelte_snippet.svelte:8:19 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The image variable is undeclared.
+  
+     6 │ {#snippet figure(image2)}
+     7 │     <figure>
+   > 8 │         <img src={image.src} />
+       │                   ^^^^^
+     9 │     </figure>
+    10 │ {/snippet}
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+invalid_svelte_snippet.svelte:13:11 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The src variable is undeclared.
+  
+    12 │ {#snippet destructured({ src2, caption2 })}
+  > 13 │     <img {src} alt={caption} />
+       │           ^^^
+    14 │ {/snippet}
+    15 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+invalid_svelte_snippet.svelte:13:21 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The caption variable is undeclared.
+  
+    12 │ {#snippet destructured({ src2, caption2 })}
+  > 13 │     <img {src} alt={caption} />
+       │                     ^^^^^^^
+    14 │ {/snippet}
+    15 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
