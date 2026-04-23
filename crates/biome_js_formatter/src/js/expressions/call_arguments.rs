@@ -133,7 +133,6 @@ impl FormatNodeRule<JsCallArguments> for FormatJsCallArguments {
                     r_paren: &r_paren_token.format(),
                     node,
                     expand: true,
-                    should_insert_space,
                 }]
             );
         }
@@ -162,7 +161,6 @@ impl FormatNodeRule<JsCallArguments> for FormatJsCallArguments {
                     r_paren: &r_paren_token.format(),
                     node,
                     expand: false,
-                    should_insert_space,
                 }]
             )
         }
@@ -385,7 +383,6 @@ fn write_grouped_arguments(
                     r_paren: &r_paren_token.format(),
                     node: call_arguments,
                     expand: true,
-                    should_insert_space,
                 }]
             );
         }
@@ -406,8 +403,6 @@ fn write_grouped_arguments(
 
         grouped_arg.will_break(f)
     };
-
-    let should_insert_space = f.options().delimiter_spacing().value();
 
     // We now cache them the delimiters tokens. This is needed because `[biome_formatter::best_fitting]` will try to
     // print each version first
@@ -430,7 +425,6 @@ fn write_grouped_arguments(
                 r_paren: &r_paren,
                 node: call_arguments,
                 expand: true,
-                should_insert_space,
             }]
         )?;
         buffer.write_element(FormatElement::Tag(Tag::EndBestFittingEntry))?;
@@ -868,7 +862,6 @@ struct FormatAllArgsBrokenOut<'a> {
     r_paren: &'a dyn Format<JsFormatContext>,
     expand: bool,
     node: &'a JsCallArguments,
-    should_insert_space: bool,
 }
 
 impl Format<JsFormatContext> for FormatAllArgsBrokenOut<'_> {
