@@ -23,7 +23,7 @@ CssRoot {
     items: CssRootItemList [
         CssBogus {
             items: [
-                ScssIdentifier {
+                ScssVariable {
                     dollar_token: DOLLAR@0..82 "$" [Comments("// Missing element in ..."), Newline("\n")] [],
                     name: CssIdentifier {
                         value_token: IDENT@82..86 "vals" [] [],
@@ -107,7 +107,7 @@ CssRoot {
         },
         CssBogus {
             items: [
-                ScssIdentifier {
+                ScssVariable {
                     dollar_token: DOLLAR@103..180 "$" [Newline("\n"), Newline("\n"), Comments("// Missing element in ..."), Newline("\n")] [],
                     name: CssIdentifier {
                         value_token: IDENT@180..183 "map" [] [],
@@ -211,7 +211,7 @@ CssRoot {
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..206
     0: CSS_BOGUS@0..103
-      0: SCSS_IDENTIFIER@0..86
+      0: SCSS_VARIABLE@0..86
         0: DOLLAR@0..82 "$" [Comments("// Missing element in ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@82..86
           0: IDENT@82..86 "vals" [] []
@@ -251,7 +251,7 @@ CssRoot {
       3: SCSS_VARIABLE_MODIFIER_LIST@102..102
       4: SEMICOLON@102..103 ";" [] []
     1: CSS_BOGUS@103..206
-      0: SCSS_IDENTIFIER@103..183
+      0: SCSS_VARIABLE@103..183
         0: DOLLAR@103..180 "$" [Newline("\n"), Newline("\n"), Comments("// Missing element in ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@180..183
           0: IDENT@180..183 "map" [] []

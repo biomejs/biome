@@ -218,7 +218,7 @@ declare_lint_rule! {
         name: "useBaseline",
         language: "css",
         recommended: false,
-        sources: &[RuleSource::EslintCss("use-baseline").inspired()],
+        sources: &[RuleSource::EslintCss("use-baseline").inspired(), RuleSource::HtmlEslint("use-baseline").inspired()],
     }
 }
 
@@ -325,7 +325,7 @@ impl FeatureName {
         match self {
             Self::Token(name) => name.text().to_string(),
             Self::PropertyValue(key, value) => format!("{}: {}", key.text(), value.text()),
-            Self::String(name) => name.to_string(),
+            Self::String(name) => (*name).to_string(),
         }
     }
 
@@ -556,7 +556,7 @@ fn check_media_condition(
     options: &UseBaselineOptions,
 ) -> Option<UseBaselineState> {
     let name_node = feature.name().ok()?;
-    let tok = name_node.value_token().ok()?;
+    let tok = name_node.as_css_identifier()?.value_token().ok()?;
     let name = tok.token_text_trimmed();
 
     if in_allow_list(&name, &options.allow_media_conditions) {

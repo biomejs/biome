@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 <>
     <div onClick={() => { }} />
     <main onClick={() => void 0} />

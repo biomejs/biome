@@ -1,0 +1,103 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 155
+expression: ternaryCommentTrivia.ts
+---
+# Input
+```ts
+// Comments around ternary parts should be preserved
+declare const x: string | null;
+const a = x !== null ? /* non-null value */ x : /* fallback */ 'default';
+
+// Comment before test
+declare const y: string | null;
+const b = /* check */ y === null ? 'fallback' : y;
+
+// Negative form with comments on both branches
+declare const z: string | null;
+const c = z === null ? /* fallback */ 'default' : /* value */ z;
+
+```
+
+# Diagnostics
+```
+ternaryCommentTrivia.ts:3:11 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for nullish.
+  
+    1 │ // Comments around ternary parts should be preserved
+    2 │ declare const x: string | null;
+  > 3 │ const a = x !== null ? /* non-null value */ x : /* fallback */ 'default';
+      │           ^^^^^^^^^^
+    4 │ 
+    5 │ // Comment before test
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+     1  1 │   // Comments around ternary parts should be preserved
+     2  2 │   declare const x: string | null;
+     3    │ - const·a·=·x·!==·null·?·/*·non-null·value·*/·x·:·/*·fallback·*/·'default';
+        3 │ + const·a·=·/*·non-null·value·*/·x·??·/*·fallback·*/·'default';
+     4  4 │   
+     5  5 │   // Comment before test
+  
+
+```
+
+```
+ternaryCommentTrivia.ts:7:23 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for nullish.
+  
+    5 │ // Comment before test
+    6 │ declare const y: string | null;
+  > 7 │ const b = /* check */ y === null ? 'fallback' : y;
+      │                       ^^^^^^^^^^
+    8 │ 
+    9 │ // Negative form with comments on both branches
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+     5  5 │   // Comment before test
+     6  6 │   declare const y: string | null;
+     7    │ - const·b·=·/*·check·*/·y·===·null·?·'fallback'·:·y;
+        7 │ + const·b·=·/*·check·*/·y·??·'fallback';
+     8  8 │   
+     9  9 │   // Negative form with comments on both branches
+  
+
+```
+
+```
+ternaryCommentTrivia.ts:11:11 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? over a ternary expression checking for nullish.
+  
+     9 │ // Negative form with comments on both branches
+    10 │ declare const z: string | null;
+  > 11 │ const c = z === null ? /* fallback */ 'default' : /* value */ z;
+       │           ^^^^^^^^^^
+    12 │ 
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+     9  9 │   // Negative form with comments on both branches
+    10 10 │   declare const z: string | null;
+    11    │ - const·c·=·z·===·null·?·/*·fallback·*/·'default'·:·/*·value·*/·z;
+       11 │ + const·c·=·/*·value·*/·z·??·/*·fallback·*/·'default';
+    12 12 │   
+  
+
+```

@@ -1,0 +1,77 @@
+name: Benchmarks Markdown
+on:
+  workflow_dispatch:
+  merge_group:
+  pull_request:
+    types: [ opened, synchronize ]
+    branches:
+      - main
+      - next
+    paths:
+      - '.github/workflows/benchmark_markdown.yml'
+      - 'Cargo.lock'
+      - 'crates/biome_markdown_parser/Cargo.toml'
+      - 'crates/biome_markdown_parser/benches/**/*.md'
+      - 'crates/biome_markdown_parser/**/*.rs'
+      - 'crates/biome_markdown_*/**/*.rs'
+      - 'crates/biome_rowan/**/*.rs'
+      - 'crates/biome_parser/**/*.rs'
+  push:
+    branches:
+      - main
+      - next
+    paths:
+      - '.github/workflows/benchmark_markdown.yml'
+      - 'Cargo.lock'
+      - 'crates/biome_markdown_parser/Cargo.toml'
+      - 'crates/biome_markdown_parser/benches/**/*.md'
+      - 'crates/biome_markdown_parser/**/*.rs'
+      - 'crates/biome_markdown_*/**/*.rs'
+      - 'crates/biome_rowan/**/*.rs'
+      - 'crates/biome_parser/**/*.rs'
+
+env:
+  RUST_LOG: info
+
+jobs:
+  bench:
+    permissions:
+      contents: read
+      pull-requests: write
+    name: Bench
+    runs-on: depot-ubuntu-24.04-arm-16
+    strategy:
+      matrix:
+        package:
+          - biome_markdown_parser
+
+    steps:
+
+      - name: Checkout PR Branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Install toolchain
+        uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
+        with:
+          channel: stable
+          cache-target: release
+          bins: cargo-codspeed
+          cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compile
+        timeout-minutes: 20
+        run: cargo codspeed build -p ${{ matrix.package }}
+        env:
+          CARGO_BUILD_JOBS: 3
+
+      - name: Run the benchmarks
+        uses: CodSpeedHQ/action@d872884a306dd4853acf0f584f4b706cf0cc72a2 # v4.13.0
+        timeout-minutes: 50
+        with:
+          mode: simulation
+          run: cargo codspeed run -p biome_markdown_parser --bench markdown_parser
+          token: ${{ secrets.CODSPEED_TOKEN }}

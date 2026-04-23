@@ -38,14 +38,6 @@ console.log    (    "hello world"    );
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,6 +1,6 @@
- ## plain js block
- 
--```js
-+```js    
- console.log    (    "hello world"    );
- ```
- 
 @@ -18,6 +18,6 @@
  
  ## js block with meta and extra spaces (only the first set of spaces should be changed)
@@ -61,7 +53,7 @@ console.log    (    "hello world"    );
 ```md
 ## plain js block
 
-```js    
+```js
 console.log    (    "hello world"    );
 ```
 

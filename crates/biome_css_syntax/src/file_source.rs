@@ -185,6 +185,7 @@ impl CssFileSource {
     /// Returns the applicability of this embedded CSS block.
     pub fn embedding_applicability(&self) -> EmbeddingStyleApplicability {
         match &self.embedding_kind {
+            EmbeddingKind::Html(EmbeddingHtmlKind::Html) => EmbeddingStyleApplicability::Global,
             EmbeddingKind::Html(
                 EmbeddingHtmlKind::Vue { applicability }
                 | EmbeddingHtmlKind::Astro { applicability }

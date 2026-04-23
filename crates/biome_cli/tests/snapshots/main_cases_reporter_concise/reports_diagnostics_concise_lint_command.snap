@@ -92,11 +92,11 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ```block
-× index.ts:2:10: lint/suspicious/noRedeclare: Shouldn't redeclare 'z'. Consider to delete it or rename it.
+× index.ts:2:10: lint/suspicious/noRedeclare: 'z' is redeclared in the same scope.
 ```
 
 ```block
-× index.ts:9:7: lint/suspicious/noRedeclare: Shouldn't redeclare 'f'. Consider to delete it or rename it.
+× index.ts:9:7: lint/suspicious/noRedeclare: 'f' is redeclared in the same scope.
 ```
 
 ```block
@@ -116,11 +116,11 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ```block
-× main.ts:2:10: lint/suspicious/noRedeclare: Shouldn't redeclare 'z'. Consider to delete it or rename it.
+× main.ts:2:10: lint/suspicious/noRedeclare: 'z' is redeclared in the same scope.
 ```
 
 ```block
-× main.ts:9:7: lint/suspicious/noRedeclare: Shouldn't redeclare 'f'. Consider to delete it or rename it.
+× main.ts:9:7: lint/suspicious/noRedeclare: 'f' is redeclared in the same scope.
 ```
 
 ```block

@@ -1,0 +1,154 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/function/arbitrary-arguments.scss
+---
+
+# Input
+
+```scss
+body {
+  test: foo(return-list($list)...);
+}
+body {
+  test: foo(bar($list)...);
+}
+body {
+  test: foo($list...);
+}
+@mixin syntax-colors($args...) {
+  @debug meta.keywords($args);
+  // (string: #080, comment: #800, variable: $60b)
+
+  @each $name, $color in meta.keywords($args) {
+    pre span.stx-#{$name} {
+      color: $color;
+    }
+  }
+}
+$form-selectors: "input.name", "input.address", "input.zip" !default;
+@include order(150px, $form-selectors...);
+@mixin linear-gradient($direction, $gradients...) {
+  background-color: nth($gradients, 1);
+  background-image: linear-gradient($direction, $gradients...);
+}
+$parameters: (
+  'c': 'kittens',
+  'a': true,
+  'b': 42
+);
+$value: dummy($parameters...);
+
+body {
+  background-color: rgba(50, 50, 50, 50);
+  background-color: rgba(50 50 50 50...);
+  background-color: rgba(50 50 .50 50...);
+  background-color: rgba(50 50 50. .50...);
+  // Input is not technically valid ( output is ), but still nice to know that the `.` gets dropped as it would for `50.`
+  background-color: rgba(50 50 50 50....);
+  width: min(50px 20px 30px...);
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -11,7 +11,8 @@
+   @debug meta.keywords($args);
+   // (string: #080, comment: #800, variable: $60b)
+ 
+-  @each $name, $color in meta.keywords($args) {
++  @each $name,
++  $color in meta.keywords($args) {
+     pre span.stx-#{$name} {
+       color: $color;
+     }
+@@ -36,6 +37,6 @@
+   background-color: rgba(50 50 0.5 50...);
+   background-color: rgba(50 50 50 0.5...);
+   // Input is not technically valid ( output is ), but still nice to know that the `.` gets dropped as it would for `50.`
+-  background-color: rgba(50 50 50 50...);
++  background-color: rgba(50 50 50 50....);
+   width: min(50px 20px 30px...);
+ }
+```
+
+# Output
+
+```scss
+body {
+  test: foo(return-list($list)...);
+}
+body {
+  test: foo(bar($list)...);
+}
+body {
+  test: foo($list...);
+}
+@mixin syntax-colors($args...) {
+  @debug meta.keywords($args);
+  // (string: #080, comment: #800, variable: $60b)
+
+  @each $name,
+  $color in meta.keywords($args) {
+    pre span.stx-#{$name} {
+      color: $color;
+    }
+  }
+}
+$form-selectors: "input.name", "input.address", "input.zip" !default;
+@include order(150px, $form-selectors...);
+@mixin linear-gradient($direction, $gradients...) {
+  background-color: nth($gradients, 1);
+  background-image: linear-gradient($direction, $gradients...);
+}
+$parameters: (
+  "c": "kittens",
+  "a": true,
+  "b": 42,
+);
+$value: dummy($parameters...);
+
+body {
+  background-color: rgba(50, 50, 50, 50);
+  background-color: rgba(50 50 50 50...);
+  background-color: rgba(50 50 0.5 50...);
+  background-color: rgba(50 50 50 0.5...);
+  // Input is not technically valid ( output is ), but still nice to know that the `.` gets dropped as it would for `50.`
+  background-color: rgba(50 50 50 50....);
+  width: min(50px 20px 30px...);
+}
+```
+
+# Errors
+```
+arbitrary-arguments.scss:39:40 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found '.'.
+  
+    37 │   background-color: rgba(50 50 50. .50...);
+    38 │   // Input is not technically valid ( output is ), but still nice to know that the `.` gets dropped as it would for `50.`
+  > 39 │   background-color: rgba(50 50 50 50....);
+       │                                        ^
+    40 │   width: min(50px 20px 30px...);
+    41 │ }
+  
+  i Expected a SCSS expression here.
+  
+    37 │   background-color: rgba(50 50 50. .50...);
+    38 │   // Input is not technically valid ( output is ), but still nice to know that the `.` gets dropped as it would for `50.`
+  > 39 │   background-color: rgba(50 50 50 50....);
+       │                                        ^
+    40 │   width: min(50px 20px 30px...);
+    41 │ }
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   39:   // Input is not technically valid ( output is ), but still nice to know that the `.` gets dropped as it would for `50.`
+```

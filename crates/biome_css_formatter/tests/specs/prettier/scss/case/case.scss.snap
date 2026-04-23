@@ -1,0 +1,902 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/case/case.scss
+---
+
+# Input
+
+```scss
+// Convention in this test file:
+// - The case should be preserved for things prefixed with "Keep".
+// - The case should always be preserved for element names and attribute names
+//   in selectors, as well as function names and property keywords.
+// - Other things should mostly be lowercase.
+
+@IMPORT Keep;
+
+HTML#KeepId.KeepClass,
+a[HREF=KeepAttrValue]:HOVER::FIRST-letter,
+svg[viewBox] linearGradient,
+:Not(:NTH-child(2N+1)) {
+    COLOR: #AAbbCC;
+    BACKGROUND-image: URL("KeepString");
+    Margin: 5PX .2E10Em;
+    --Keep-custom-Prop: red;
+    background: Var(--Keep-custom-Prop);
+    animation-name: KeepAnimationName;
+    important: something !IMPORTANT;
+    font-family: INITIAL;
+    padding: UNSET;
+    border: INHERIT;
+    all: REVERT;
+    -WEBKIT-USER-SELECT: none;
+    -MOZ-USER-SELECT: none;
+    -MS-USER-SELECT: none;
+    USER-SELECT: none;
+}
+
+@keyframes KeepAnimationName {
+  FROM {
+    prop: val;
+  }
+
+  #{$KeepInterpolationVar},
+  #{$Keep + 15PX + Keep15PX + '15PX' + "15PX"},
+  #{$Keep + $Keep15PX} {
+    prop: val;
+  }
+
+  TO {
+    prop: val;
+  }
+}
+
+@custom-media --KeepCustomMedia screen and (width >= 768px);
+@media (--KeepCustomMedia) {}
+
+@function KeepFuncName() {
+    @return 12;
+}
+
+%KeepPlaceholderSelector {
+  prop: val;
+}
+
+$KeepTopLevelVar: val;
+@KeepLessVar: val;
+
+@mixin KeepMixinName($Keep: 15IN, $Keep: $Keep15IN, $Keep: Keep-1E-2Em) {
+    $KeepVar: KeepFuncName();
+    #{$KeepInterpolationVar}: val;
+    #{$Keep + 15PX}: val;
+    #{$Keep + $Keep15PX}: val;
+    @KeepLessVar: val;
+    @extend %KeepPlaceholderSelector;
+
+    #{$Keep}[#{$Keep}][#{Keep}^=#{Keep-1A}]:#{$Keep} {
+      prop: val;
+    }
+
+    &Keep & Element {
+      prop: val;
+    }
+
+    BACKGROUND: {
+      COLOR: RED;
+    }
+
+    BACKGROUND: Keep 15PX Keep15PX {
+      COLOR: RED;
+    }
+
+    #{$Keep + 15PX + Keep15PX + '15PX' + "15PX"}: {
+      COLOR: RED;
+    }
+}
+
+@mixin Keep($Keep: $Keep15IN, $Keep: Keepå1E1) {}
+
+@MEDIA (MIN-WIDTH: 700PX) {
+    @include Keep;
+    @include Keep(.12e+01cH);
+    @include Keep($Keep12E01cH);
+}
+
+@MEDIA (#{$Keep}: #{$Keep}) {}
+
+@KEYFRAMES identifier {
+  FROM {
+    margin-top: 50px;
+  }
+  50%  {
+    margin-top: 150px;
+  }
+  TO {
+    margin-top: 100px;
+  }
+}
+
+@-WEBKIT-KEYFRAMES float-up {
+  FROM {
+    margin-top: 50px;
+  }
+  50%  {
+    margin-top: 150px;
+  }
+  TO {
+    margin-top: 100px;
+  }
+}
+
+.foo {
+  color: hsl(0.75TURN, 60%, 70%);
+}
+
+p:FIRST-CHILD {
+  color: lime;
+  background-color: black;
+  padding: 5px;
+}
+
+a::AFTER {
+  content: "→";
+}
+
+a:AFTER {
+  content: "→";
+}
+
+::-WEBKIT-PROGRESS-BAR {
+  background-color: orange;
+}
+
+TABLE {}
+
+.foo { &-KeepSelector {} &-KeepSelector & .KeepClassSelector {} &-100\.200 {} }
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -4,41 +4,41 @@
+ //   in selectors, as well as function names and property keywords.
+ // - Other things should mostly be lowercase.
+ 
+-@import Keep;
++@IMPORT Keep;
+ 
+ HTML#KeepId.KeepClass,
+-a[HREF="KeepAttrValue"]:hover::first-letter,
++a[HREF="KeepAttrValue"]:HOVER::FIRST-letter,
+ svg[viewBox] linearGradient,
+ :not(:nth-child(2n + 1)) {
+-  color: #aabbcc;
+-  background-image: URL("KeepString");
+-  margin: 5px 0.2e10em;
++  COLOR: #aabbcc;
++  BACKGROUND-image: url("KeepString");
++  Margin: 5px 0.2e10em;
+   --Keep-custom-Prop: red;
+   background: Var(--Keep-custom-Prop);
+   animation-name: KeepAnimationName;
+   important: something !important;
+-  font-family: initial;
+-  padding: unset;
+-  border: inherit;
+-  all: revert;
+-  -webkit-user-select: none;
+-  -moz-user-select: none;
+-  -ms-user-select: none;
+-  user-select: none;
++  font-family: INITIAL;
++  padding: UNSET;
++  border: INHERIT;
++  all: REVERT;
++  -WEBKIT-USER-SELECT: none;
++  -MOZ-USER-SELECT: none;
++  -MS-USER-SELECT: none;
++  USER-SELECT: none;
+ }
+ 
+ @keyframes KeepAnimationName {
+-  from {
++  FROM {
+     prop: val;
+   }
+ 
+   #{$KeepInterpolationVar},
+-  #{$Keep + 15px + Keep15PX + "15PX" + "15PX"},
++  #{$Keep + 15PX + Keep15PX + '15PX' + "15PX"},
+   #{$Keep + $Keep15PX} {
+     prop: val;
+   }
+ 
+-  to {
++  TO {
+     prop: val;
+   }
+ }
+@@ -56,103 +56,94 @@
+ }
+ 
+ $KeepTopLevelVar: val;
+-@KeepLessVar: val;
++@KeepLessVar : val;
+ 
+-@mixin KeepMixinName($Keep: 15in, $Keep: $Keep15IN, $Keep: Keep-1E-2Em) {
+-  $KeepVar: KeepFuncName();
+-  #{$KeepInterpolationVar}: val;
+-  #{$Keep + 15PX}: val;
+-  #{$Keep + $Keep15PX}: val;
+-  @KeepLessVar: val;
+-  @extend %KeepPlaceholderSelector;
++@mixin KeepMixinName($Keep: 15IN, $Keep: $Keep15IN, $Keep: Keep-1E-2Em) {
++    $KeepVar: KeepFuncName();
++    #{$KeepInterpolationVar}: val;
++    #{$Keep + 15PX}: val;
++    #{$Keep + $Keep15PX}: val;
++    @KeepLessVar: val;
++    @extend %KeepPlaceholderSelector;
+ 
+-  #{$Keep}[#{$Keep}][#{Keep}^="#{Keep-1A}"]:#{$Keep} {
+-    prop: val;
+-  }
++    #{$Keep}
++[# {$Keep}][#{Keep}^=#{Keep-1A}]:#{$Keep} {
++      prop: val;
++    }
+ 
+-  &Keep & Element {
+-    prop: val;
+-  }
++    &Keep & Element {
++      prop: val;
++    }
+ 
+-  background: {
+-    color: RED;
+-  }
++    BACKGROUND: {
++      COLOR: RED;
++    }
+ 
+-  background: Keep 15px Keep15PX {
+-    color: RED;
+-  }
++    BACKGROUND: Keep 15PX Keep15PX {
++      COLOR: RED;
++    }
+ 
+-  #{$Keep + 15px + Keep15PX + "15PX" + "15PX"}: {
+-    color: RED;
+-  }
++    #{$Keep + 15PX + Keep15PX + '15PX' + "15PX"}: {
++      COLOR: RED;
++    }
+ }
+ 
+-@mixin Keep($Keep: $Keep15IN, $Keep: Keepå1E1) {
+-}
++@mixin Keep($Keep: $Keep15IN, $Keep: Keepå1E1) {}
+ 
+-@media (min-width: 700px) {
+-  @include Keep;
+-  @include Keep(0.12e1ch);
+-  @include Keep($Keep12E01cH);
++@MEDIA (MIN-WIDTH: 700PX) {
++    @include Keep;
++    @include Keep(.12e+01cH);
++    @include Keep($Keep12E01cH);
+ }
+ 
+-@media (#{$Keep}: #{$Keep}) {
+-}
++@MEDIA (#{$Keep}: #{$Keep}) {}
+ 
+-@keyframes identifier {
+-  from {
++@KEYFRAMES identifier {
++  FROM {
+     margin-top: 50px;
+   }
+-  50% {
++  50%  {
+     margin-top: 150px;
+   }
+-  to {
++  TO {
+     margin-top: 100px;
+   }
+ }
+ 
+-@-webkit-keyframes float-up {
+-  from {
++@-WEBKIT-KEYFRAMES float-up {
++  FROM {
+     margin-top: 50px;
+   }
+-  50% {
++  50%  {
+     margin-top: 150px;
+   }
+-  to {
++  TO {
+     margin-top: 100px;
+   }
+ }
+ 
+ .foo {
+-  color: hsl(0.75turn, 60%, 70%);
++  color: hsl(0.75TURN, 60%, 70%);
+ }
+ 
+-p:first-child {
++p:FIRST-CHILD {
+   color: lime;
+   background-color: black;
+   padding: 5px;
+ }
+ 
+-a::after {
++a::AFTER {
+   content: "→";
+ }
+ 
+-a:after {
++a:AFTER {
+   content: "→";
+ }
+ 
+-::-webkit-progress-bar {
++::-WEBKIT-PROGRESS-BAR {
+   background-color: orange;
+ }
+ 
+-TABLE {
+-}
++TABLE {}
+ 
+-.foo {
+-  &-KeepSelector {
+-  }
+-  &-KeepSelector & .KeepClassSelector {
+-  }
+-  &-100\.200 {
+-  }
+-}
++.foo { &-KeepSelector {} &-KeepSelector & .KeepClassSelector {} &-100\.200 {} }
+```
+
+# Output
+
+```scss
+// Convention in this test file:
+// - The case should be preserved for things prefixed with "Keep".
+// - The case should always be preserved for element names and attribute names
+//   in selectors, as well as function names and property keywords.
+// - Other things should mostly be lowercase.
+
+@IMPORT Keep;
+
+HTML#KeepId.KeepClass,
+a[HREF="KeepAttrValue"]:HOVER::FIRST-letter,
+svg[viewBox] linearGradient,
+:not(:nth-child(2n + 1)) {
+  COLOR: #aabbcc;
+  BACKGROUND-image: url("KeepString");
+  Margin: 5px 0.2e10em;
+  --Keep-custom-Prop: red;
+  background: Var(--Keep-custom-Prop);
+  animation-name: KeepAnimationName;
+  important: something !important;
+  font-family: INITIAL;
+  padding: UNSET;
+  border: INHERIT;
+  all: REVERT;
+  -WEBKIT-USER-SELECT: none;
+  -MOZ-USER-SELECT: none;
+  -MS-USER-SELECT: none;
+  USER-SELECT: none;
+}
+
+@keyframes KeepAnimationName {
+  FROM {
+    prop: val;
+  }
+
+  #{$KeepInterpolationVar},
+  #{$Keep + 15PX + Keep15PX + '15PX' + "15PX"},
+  #{$Keep + $Keep15PX} {
+    prop: val;
+  }
+
+  TO {
+    prop: val;
+  }
+}
+
+@custom-media --KeepCustomMedia screen and (width >= 768px);
+@media (--KeepCustomMedia) {
+}
+
+@function KeepFuncName() {
+  @return 12;
+}
+
+%KeepPlaceholderSelector {
+  prop: val;
+}
+
+$KeepTopLevelVar: val;
+@KeepLessVar : val;
+
+@mixin KeepMixinName($Keep: 15IN, $Keep: $Keep15IN, $Keep: Keep-1E-2Em) {
+    $KeepVar: KeepFuncName();
+    #{$KeepInterpolationVar}: val;
+    #{$Keep + 15PX}: val;
+    #{$Keep + $Keep15PX}: val;
+    @KeepLessVar: val;
+    @extend %KeepPlaceholderSelector;
+
+    #{$Keep}
+[# {$Keep}][#{Keep}^=#{Keep-1A}]:#{$Keep} {
+      prop: val;
+    }
+
+    &Keep & Element {
+      prop: val;
+    }
+
+    BACKGROUND: {
+      COLOR: RED;
+    }
+
+    BACKGROUND: Keep 15PX Keep15PX {
+      COLOR: RED;
+    }
+
+    #{$Keep + 15PX + Keep15PX + '15PX' + "15PX"}: {
+      COLOR: RED;
+    }
+}
+
+@mixin Keep($Keep: $Keep15IN, $Keep: Keepå1E1) {}
+
+@MEDIA (MIN-WIDTH: 700PX) {
+    @include Keep;
+    @include Keep(.12e+01cH);
+    @include Keep($Keep12E01cH);
+}
+
+@MEDIA (#{$Keep}: #{$Keep}) {}
+
+@KEYFRAMES identifier {
+  FROM {
+    margin-top: 50px;
+  }
+  50%  {
+    margin-top: 150px;
+  }
+  TO {
+    margin-top: 100px;
+  }
+}
+
+@-WEBKIT-KEYFRAMES float-up {
+  FROM {
+    margin-top: 50px;
+  }
+  50%  {
+    margin-top: 150px;
+  }
+  TO {
+    margin-top: 100px;
+  }
+}
+
+.foo {
+  color: hsl(0.75TURN, 60%, 70%);
+}
+
+p:FIRST-CHILD {
+  color: lime;
+  background-color: black;
+  padding: 5px;
+}
+
+a::AFTER {
+  content: "→";
+}
+
+a:AFTER {
+  content: "→";
+}
+
+::-WEBKIT-PROGRESS-BAR {
+  background-color: orange;
+}
+
+TABLE {}
+
+.foo { &-KeepSelector {} &-KeepSelector & .KeepClassSelector {} &-100\.200 {} }
+```
+
+# Errors
+```
+case.scss:7:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a string but instead found 'Keep'.
+  
+    5 │ // - Other things should mostly be lowercase.
+    6 │ 
+  > 7 │ @IMPORT Keep;
+      │         ^^^^
+    8 │ 
+    9 │ HTML#KeepId.KeepClass,
+  
+  i Expected a string here.
+  
+    5 │ // - Other things should mostly be lowercase.
+    6 │ 
+  > 7 │ @IMPORT Keep;
+      │         ^^^^
+    8 │ 
+    9 │ HTML#KeepId.KeepClass,
+  
+case.scss:35:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    33 │   }
+    34 │ 
+  > 35 │   #{$KeepInterpolationVar},
+       │   ^
+    36 │   #{$Keep + 15PX + Keep15PX + '15PX' + "15PX"},
+    37 │   #{$Keep + $Keep15PX} {
+  
+  i Expected one of:
+  
+  - from
+  - to
+  - a percentage
+  - a timeline-range-name (cover, contain, entry, exit, entry-crossing, exit-crossing)
+  
+case.scss:35:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `,`
+  
+    33 │   }
+    34 │ 
+  > 35 │   #{$KeepInterpolationVar},
+       │                           ^
+    36 │   #{$Keep + 15PX + Keep15PX + '15PX' + "15PX"},
+    37 │   #{$Keep + $Keep15PX} {
+  
+  i Remove ,
+  
+case.scss:37:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    35 │   #{$KeepInterpolationVar},
+    36 │   #{$Keep + 15PX + Keep15PX + '15PX' + "15PX"},
+  > 37 │   #{$Keep + $Keep15PX} {
+       │   ^
+    38 │     prop: val;
+    39 │   }
+  
+  i Expected one of:
+  
+  - from
+  - to
+  - a percentage
+  - a timeline-range-name (cover, contain, entry, exit, entry-crossing, exit-crossing)
+  
+case.scss:37:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `{`
+  
+    35 │   #{$KeepInterpolationVar},
+    36 │   #{$Keep + 15PX + Keep15PX + '15PX' + "15PX"},
+  > 37 │   #{$Keep + $Keep15PX} {
+       │                        ^
+    38 │     prop: val;
+    39 │   }
+  
+  i Remove {
+  
+case.scss:38:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found ': val'.
+  
+    36 │   #{$Keep + 15PX + Keep15PX + '15PX' + "15PX"},
+    37 │   #{$Keep + $Keep15PX} {
+  > 38 │     prop: val;
+       │         ^^^^^
+    39 │   }
+    40 │ 
+  
+  i Expected a SCSS expression here.
+  
+    36 │   #{$Keep + 15PX + Keep15PX + '15PX' + "15PX"},
+    37 │   #{$Keep + $Keep15PX} {
+  > 38 │     prop: val;
+       │         ^^^^^
+    39 │   }
+    40 │ 
+  
+case.scss:68:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a declaration, or an at rule but instead found '['.
+  
+    66 │     @extend %KeepPlaceholderSelector;
+    67 │ 
+  > 68 │     #{$Keep}[#{$Keep}][#{Keep}^=#{Keep-1A}]:#{$Keep} {
+       │             ^
+    69 │       prop: val;
+    70 │     }
+  
+  i Expected a declaration, or an at rule here.
+  
+    66 │     @extend %KeepPlaceholderSelector;
+    67 │ 
+  > 68 │     #{$Keep}[#{$Keep}][#{Keep}^=#{Keep-1A}]:#{$Keep} {
+       │             ^
+    69 │       prop: val;
+    70 │     }
+  
+case.scss:68:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a declaration, or an at rule but instead found '$'.
+  
+    66 │     @extend %KeepPlaceholderSelector;
+    67 │ 
+  > 68 │     #{$Keep}[#{$Keep}][#{Keep}^=#{Keep-1A}]:#{$Keep} {
+       │                ^
+    69 │       prop: val;
+    70 │     }
+  
+  i Expected a declaration, or an at rule here.
+  
+    66 │     @extend %KeepPlaceholderSelector;
+    67 │ 
+  > 68 │     #{$Keep}[#{$Keep}][#{Keep}^=#{Keep-1A}]:#{$Keep} {
+       │                ^
+    69 │       prop: val;
+    70 │     }
+  
+case.scss:68:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `}`
+  
+    66 │     @extend %KeepPlaceholderSelector;
+    67 │ 
+  > 68 │     #{$Keep}[#{$Keep}][#{Keep}^=#{Keep-1A}]:#{$Keep} {
+       │                     ^
+    69 │       prop: val;
+    70 │     }
+  
+  i Remove }
+  
+case.scss:68:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `[`
+  
+    66 │     @extend %KeepPlaceholderSelector;
+    67 │ 
+  > 68 │     #{$Keep}[#{$Keep}][#{Keep}^=#{Keep-1A}]:#{$Keep} {
+       │                       ^
+    69 │       prop: val;
+    70 │     }
+  
+  i Remove [
+  
+case.scss:68:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `}`
+  
+    66 │     @extend %KeepPlaceholderSelector;
+    67 │ 
+  > 68 │     #{$Keep}[#{$Keep}][#{Keep}^=#{Keep-1A}]:#{$Keep} {
+       │                              ^
+    69 │       prop: val;
+    70 │     }
+  
+  i Remove }
+  
+case.scss:68:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `#`
+  
+    66 │     @extend %KeepPlaceholderSelector;
+    67 │ 
+  > 68 │     #{$Keep}[#{$Keep}][#{Keep}^=#{Keep-1A}]:#{$Keep} {
+       │                                 ^
+    69 │       prop: val;
+    70 │     }
+  
+  i Remove #
+  
+case.scss:68:43 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `]`
+  
+    66 │     @extend %KeepPlaceholderSelector;
+    67 │ 
+  > 68 │     #{$Keep}[#{$Keep}][#{Keep}^=#{Keep-1A}]:#{$Keep} {
+       │                                           ^
+    69 │       prop: val;
+    70 │     }
+  
+  i Remove ]
+  
+case.scss:68:44 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `:`
+  
+    66 │     @extend %KeepPlaceholderSelector;
+    67 │ 
+  > 68 │     #{$Keep}[#{$Keep}][#{Keep}^=#{Keep-1A}]:#{$Keep} {
+       │                                            ^
+    69 │       prop: val;
+    70 │     }
+  
+  i Remove :
+  
+case.scss:68:45 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    66 │     @extend %KeepPlaceholderSelector;
+    67 │ 
+  > 68 │     #{$Keep}[#{$Keep}][#{Keep}^=#{Keep-1A}]:#{$Keep} {
+       │                                             ^
+    69 │       prop: val;
+    70 │     }
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+case.scss:68:46 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '{'.
+  
+    66 │     @extend %KeepPlaceholderSelector;
+    67 │ 
+  > 68 │     #{$Keep}[#{$Keep}][#{Keep}^=#{Keep-1A}]:#{$Keep} {
+       │                                              ^
+    69 │       prop: val;
+    70 │     }
+  
+  i Expected an identifier here.
+  
+    66 │     @extend %KeepPlaceholderSelector;
+    67 │ 
+  > 68 │     #{$Keep}[#{$Keep}][#{Keep}^=#{Keep-1A}]:#{$Keep} {
+       │                                              ^
+    69 │       prop: val;
+    70 │     }
+  
+case.scss:68:47 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a declaration, or an at rule but instead found '$'.
+  
+    66 │     @extend %KeepPlaceholderSelector;
+    67 │ 
+  > 68 │     #{$Keep}[#{$Keep}][#{Keep}^=#{Keep-1A}]:#{$Keep} {
+       │                                               ^
+    69 │       prop: val;
+    70 │     }
+  
+  i Expected a declaration, or an at rule here.
+  
+    66 │     @extend %KeepPlaceholderSelector;
+    67 │ 
+  > 68 │     #{$Keep}[#{$Keep}][#{Keep}^=#{Keep-1A}]:#{$Keep} {
+       │                                               ^
+    69 │       prop: val;
+    70 │     }
+  
+case.scss:68:52 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `}`
+  
+    66 │     @extend %KeepPlaceholderSelector;
+    67 │ 
+  > 68 │     #{$Keep}[#{$Keep}][#{Keep}^=#{Keep-1A}]:#{$Keep} {
+       │                                                    ^
+    69 │       prop: val;
+    70 │     }
+  
+  i Remove }
+  
+case.scss:147:66 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `-100`
+  
+    145 │ TABLE {}
+    146 │ 
+  > 147 │ .foo { &-KeepSelector {} &-KeepSelector & .KeepClassSelector {} &-100\.200 {} }
+        │                                                                  ^^^^
+    148 │ 
+  
+  i Remove -100
+  
+case.scss:147:70 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `\.200`
+  
+    145 │ TABLE {}
+    146 │ 
+  > 147 │ .foo { &-KeepSelector {} &-KeepSelector & .KeepClassSelector {} &-100\.200 {} }
+        │                                                                      ^^^^^
+    148 │ 
+  
+  i Remove \.200
+  
+case.scss:148:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+  
+    147 │ .foo { &-KeepSelector {} &-KeepSelector & .KeepClassSelector {} &-100\.200 {} }
+  > 148 │ 
+        │ 
+  
+  i the file ends here
+  
+    147 │ .foo { &-KeepSelector {} &-KeepSelector & .KeepClassSelector {} &-100\.200 {} }
+  > 148 │ 
+        │ 
+  
+
+```

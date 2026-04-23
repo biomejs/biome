@@ -161,9 +161,8 @@ impl Visitor for JsDocTypeCollectorVisitor {
 }
 
 fn load_jsdoc_types_from_node(model: &mut JsDocTypeModel, node: &SyntaxNode<JsLanguage>) {
-    JsdocComment::for_each(node, |comment| {
-        load_jsdoc_types_from_jsdoc_comment(model, comment)
-    });
+    JsdocComment::get_jsdocs(node)
+        .for_each(|comment| load_jsdoc_types_from_jsdoc_comment(model, comment.as_str()));
 }
 
 static JSDOC_INLINE_TAG_REGEX: LazyLock<Regex> = LazyLock::new(|| {

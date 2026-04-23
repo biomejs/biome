@@ -9,6 +9,7 @@ impl FormatRule<AnyScssImportItem> for FormatAnyScssImportItem {
     fn fmt(&self, node: &AnyScssImportItem, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
             AnyScssImportItem::CssString(node) => node.format().fmt(f),
+            AnyScssImportItem::ScssInterpolatedString(node) => node.format().fmt(f),
             AnyScssImportItem::ScssPlainImport(node) => node.format().fmt(f),
         }
     }

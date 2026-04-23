@@ -4,6 +4,7 @@ use biome_js_syntax::{
     AnyJsDeclaration, JsImport, JsVariableKind, TextRange, TsTypeParameter, TsTypeParameterName,
     binding_ext::AnyJsIdentifierBinding,
 };
+use biome_jsdoc_comment::JsdocComment;
 use std::fmt::{Display, Formatter};
 use std::sync::Arc;
 
@@ -457,9 +458,11 @@ pub(crate) struct SemanticModelBindingData {
     pub(crate) range: TextRange,
     pub(crate) references: Vec<SemanticModelReference>,
     // We use a SmallVec because most of the time a binding is expected once.
-    pub(crate) export_by_start: smallvec::SmallVec<[TextSize; 4]>,
+    pub(crate) export_ranges: smallvec::SmallVec<[TextRange; 4]>,
     /// The kind of declaration that introduced this binding.
     pub(crate) declaration_kind: JsDeclarationKind,
+    /// JSDoc comment associated with the binding.
+    pub(crate) jsdoc: Option<JsdocComment>,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -596,13 +599,38 @@ impl Binding {
     /// itself an `export` statement) or an identifier usage.
     pub fn exports(&self) -> impl Iterator<Item = JsSyntaxNode> + '_ {
         let binding = self.data.binding(self.id);
-        binding.export_by_start.iter().map(|export_start| {
-            self.data.binding_node_by_start[export_start].to_node(self.data.to_root().syntax())
+        binding.export_ranges.iter().filter_map(|export_start| {
+            self.data
+                .binding_node_by_start
+                .get(&export_start.start())
+                .map(|ptr| ptr.to_node(self.data.to_root().syntax()))
         })
     }
 
     pub fn is_imported(&self) -> bool {
         super::is_imported(&self.syntax())
+    }
+
+    pub fn is_exported(&self) -> bool {
+        self.data.is_exported(self.syntax().text_trimmed_range())
+    }
+
+    /// Returns the JSDoc comment associated with this binding, if any.
+    pub fn jsdoc(&self) -> Option<&JsdocComment> {
+        let binding = self.data.binding(self.id);
+        binding.jsdoc.as_ref()
+    }
+
+    /// Returns the formatted JsDoc comment
+    pub fn to_fmt_jsonc(&self) -> Option<String> {
+        let binding = self.data.binding(self.id);
+        binding.jsdoc.clone().map(|jsdoc| jsdoc.to_string())
+    }
+
+    /// Returns the text ranges of all export sites for this binding.
+    pub fn export_ranges(&self) -> &[TextRange] {
+        let binding = self.data.binding(self.id);
+        binding.export_ranges.as_slice()
     }
 }
 

@@ -80,6 +80,7 @@ pub(crate) mod pseudo_class_nth_selector;
 pub(crate) mod pseudo_element;
 pub(crate) mod pseudo_value;
 pub(crate) mod query_feature;
+pub(crate) mod query_feature_name;
 pub(crate) mod query_feature_value;
 pub(crate) mod relative_selector;
 pub(crate) mod root;

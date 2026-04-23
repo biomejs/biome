@@ -493,7 +493,7 @@ fn parse_any_named_import_specifier(p: &mut JsParser) -> ParsedSyntax {
             } else {
                 // test js import_as_as_as_identifier
                 // import { as as as } from "test";
-                parse_literal_export_name(p).or_add_diagnostic(p, expected_literal_export_name);
+                parse_any_literal_export_name(p).or_add_diagnostic(p, expected_literal_export_name);
             }
 
             p.expect(T![as]);
@@ -866,7 +866,7 @@ fn parse_any_export_named_specifier(p: &mut JsParser) -> ParsedSyntax {
         let is_string = matches!(p.cur(), JS_STRING_LITERAL);
 
         if let Some(export_name) =
-            parse_literal_export_name(p).or_add_diagnostic(p, expected_identifier)
+            parse_any_literal_export_name(p).or_add_diagnostic(p, expected_identifier)
         {
             let error = if is_string {
                 p.err_builder(
@@ -893,7 +893,7 @@ fn parse_any_export_named_specifier(p: &mut JsParser) -> ParsedSyntax {
     //
     let specifier = if metadata.has_alias {
         p.expect(T![as]);
-        parse_literal_export_name(p).or_add_diagnostic(p, expected_literal_export_name);
+        parse_any_literal_export_name(p).or_add_diagnostic(p, expected_literal_export_name);
 
         m.complete(p, JS_EXPORT_NAMED_SPECIFIER)
     } else {
@@ -1146,7 +1146,7 @@ fn parse_export_named_from_specifier(p: &mut JsParser) -> ParsedSyntax {
             TextRange::new(p.cur_range().start(), p.cur_range().start()),
         ));
     } else {
-        parse_literal_export_name(p).or_add_diagnostic(p, expected_literal_export_name);
+        parse_any_literal_export_name(p).or_add_diagnostic(p, expected_literal_export_name);
     }
 
     if metadata.has_alias {
@@ -1405,7 +1405,7 @@ fn parse_export_as_clause(p: &mut JsParser) -> ParsedSyntax {
     let m = p.start();
     p.expect(T![as]);
 
-    parse_literal_export_name(p).or_add_diagnostic(p, expected_literal_export_name);
+    parse_any_literal_export_name(p).or_add_diagnostic(p, expected_literal_export_name);
 
     Present(m.complete(p, JS_EXPORT_AS_CLAUSE))
 }
@@ -1496,9 +1496,16 @@ fn parse_literal_export_name(p: &mut JsParser) -> ParsedSyntax {
             p.bump_remap(T![ident]);
             Present(m.complete(p, JS_LITERAL_EXPORT_NAME))
         }
-        t if t.is_metavariable() => parse_metavariable(p),
         _ => Absent,
     }
+}
+
+fn parse_any_literal_export_name(p: &mut JsParser) -> ParsedSyntax {
+    if is_at_metavariable(p) {
+        return parse_metavariable(p);
+    }
+
+    parse_literal_export_name(p)
 }
 
 pub(crate) fn parse_module_source(p: &mut JsParser) -> ParsedSyntax {

@@ -29,8 +29,8 @@ use crate::lexer::MarkdownLexContext;
 use crate::syntax::reference::normalize_reference_label;
 use crate::syntax::{
     LinkDestinationKind, MAX_BLOCK_PREFIX_INDENT, MAX_LINK_DESTINATION_PAREN_DEPTH,
-    ParenDepthResult, ends_with_unescaped_close, try_update_paren_depth,
-    validate_link_destination_text,
+    ParenDepthResult, ends_with_unescaped_close, get_title_close_char, is_space_or_tab_token,
+    try_update_paren_depth, validate_link_destination_text,
 };
 
 /// Maximum label length per CommonMark spec (999 characters).
@@ -207,14 +207,9 @@ fn skip_whitespace_tokens(p: &mut MarkdownParser) {
 /// Skip whitespace tokens (spaces/tabs) in lookahead and return whether any were skipped.
 fn skip_whitespace_tokens_tracked(p: &mut MarkdownParser) -> bool {
     let mut skipped = false;
-    while !p.at(EOF) && !p.at(NEWLINE) {
-        let text = p.cur_text();
-        if text.chars().all(|c| c == ' ' || c == '\t') && !text.is_empty() {
-            p.bump_link_definition();
-            skipped = true;
-        } else {
-            break;
-        }
+    while !p.at(EOF) && !p.at(NEWLINE) && is_space_or_tab_token(p) {
+        p.bump_link_definition();
+        skipped = true;
     }
     skipped
 }
@@ -239,13 +234,8 @@ enum DestinationResult {
 /// Skip destination tokens in lookahead. Returns the destination result.
 fn skip_destination_tokens(p: &mut MarkdownParser) -> DestinationResult {
     // Skip optional leading whitespace before destination
-    while !p.at(EOF) && !p.at(NEWLINE) {
-        let text = p.cur_text();
-        if text.chars().all(|c| c == ' ' || c == '\t') && !text.is_empty() {
-            p.bump_link_definition();
-        } else {
-            break;
-        }
+    while !p.at(EOF) && !p.at(NEWLINE) && is_space_or_tab_token(p) {
+        p.bump_link_definition();
     }
 
     if p.at(L_ANGLE) {
@@ -295,9 +285,8 @@ fn skip_destination_tokens(p: &mut MarkdownParser) -> DestinationResult {
         let mut pending_escape = false;
 
         while !p.at(EOF) && !p.at(NEWLINE) {
-            let text = p.cur_text();
             // Stop at whitespace
-            if text.chars().all(|c| c == ' ' || c == '\t') && !text.is_empty() {
+            if is_space_or_tab_token(p) {
                 if has_content {
                     saw_separator = true;
                 }
@@ -305,11 +294,14 @@ fn skip_destination_tokens(p: &mut MarkdownParser) -> DestinationResult {
                 continue;
             }
 
-            if at_title_start(p) && has_content && saw_separator {
-                // Break here - we've found separator before title
+            if has_content && saw_separator {
+                // After whitespace following destination content, only a title
+                // starter is valid. Any other text means the destination ended
+                // at the whitespace boundary.
                 break;
             }
 
+            let text = p.cur_text();
             if !validate_link_destination_text(text, LinkDestinationKind::Raw, &mut pending_escape)
             {
                 return DestinationResult::Invalid;
@@ -425,7 +417,7 @@ pub(crate) fn parse_link_block(p: &mut MarkdownParser) -> ParsedSyntax {
         // Check for title on next line - need to skip trailing whitespace first
         // Also validate that the title is complete and has no trailing content
         let has_valid_title_after_newline = p.lookahead(|p| {
-            while is_whitespace_token(p) {
+            while is_space_or_tab_token(p) {
                 p.bump_link_definition();
             }
             if p.at(NEWLINE) && !p.at_blank_line() {
@@ -486,14 +478,14 @@ fn parse_link_destination(p: &mut MarkdownParser) {
     let list = p.start();
 
     // Include optional whitespace before destination in the destination node.
-    while is_whitespace_token(p) {
+    while is_space_or_tab_token(p) {
         bump_textual_link_def(p);
     }
 
     // Per CommonMark §4.7, destination can be on the next line
     if p.at(NEWLINE) && !p.at_blank_line() {
         bump_textual_link_def(p);
-        while is_whitespace_token(p) {
+        while is_space_or_tab_token(p) {
             bump_textual_link_def(p);
         }
     }
@@ -512,7 +504,7 @@ fn parse_link_destination(p: &mut MarkdownParser) {
         let mut paren_depth: i32 = 0;
 
         while !p.at(EOF) && !p.at(NEWLINE) {
-            if is_whitespace_token(p) {
+            if is_space_or_tab_token(p) {
                 break; // Bare destination stops at first whitespace
             }
 
@@ -548,7 +540,7 @@ fn bump_textual_link_def(p: &mut MarkdownParser) {
 fn at_link_title(p: &mut MarkdownParser) -> bool {
     p.lookahead(|p| {
         // Skip whitespace before title
-        while is_whitespace_token(p) {
+        while is_space_or_tab_token(p) {
             p.bump_link_definition();
         }
         let text = p.cur_text();
@@ -587,7 +579,7 @@ fn parse_link_title_with_trailing_ws(p: &mut MarkdownParser) {
     let list = p.start();
 
     // Include trailing whitespace after destination
-    while is_whitespace_token(p) {
+    while is_space_or_tab_token(p) {
         bump_textual_link_def(p);
     }
 
@@ -597,7 +589,7 @@ fn parse_link_title_with_trailing_ws(p: &mut MarkdownParser) {
     }
 
     // Include leading whitespace on title line
-    while is_whitespace_token(p) {
+    while is_space_or_tab_token(p) {
         bump_textual_link_def(p);
     }
 
@@ -618,7 +610,7 @@ fn parse_link_title(p: &mut MarkdownParser) {
     let list = p.start();
 
     // Include optional filler whitespace before title
-    while is_whitespace_token(p) {
+    while is_space_or_tab_token(p) {
         bump_textual_link_def(p);
     }
 
@@ -628,21 +620,6 @@ fn parse_link_title(p: &mut MarkdownParser) {
 
     list.complete(p, MD_INLINE_ITEM_LIST);
     m.complete(p, MD_LINK_TITLE);
-}
-
-/// Get the closing character for a title based on current token.
-/// Returns None if not at a title start.
-fn get_title_close_char(p: &MarkdownParser) -> Option<char> {
-    let text = p.cur_text();
-    if text.starts_with('"') {
-        Some('"')
-    } else if text.starts_with('\'') {
-        Some('\'')
-    } else if p.at(L_PAREN) {
-        Some(')')
-    } else {
-        None
-    }
 }
 
 /// Parse title content until closing delimiter, including trailing whitespace.
@@ -666,7 +643,7 @@ fn parse_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
     if is_complete {
         // Consume trailing whitespace after title (before newline)
         p.re_lex_link_definition();
-        while is_whitespace_token(p) {
+        while is_space_or_tab_token(p) {
             bump_textual_link_def(p);
         }
         return;
@@ -690,7 +667,7 @@ fn parse_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
             bump_textual(p);
             // Consume trailing whitespace after title (before newline)
             p.re_lex_link_definition();
-            while is_whitespace_token(p) {
+            while is_space_or_tab_token(p) {
                 bump_textual_link_def(p);
             }
             break;
@@ -704,12 +681,6 @@ fn parse_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
         // Use Regular context for title content so whitespace doesn't split
         bump_textual(p);
     }
-}
-
-/// Check if current token is whitespace (space or tab).
-fn is_whitespace_token(p: &MarkdownParser) -> bool {
-    let text = p.cur_text();
-    !text.is_empty() && text.chars().all(|c| c == ' ' || c == '\t')
 }
 
 /// Consume the current token as an MdTextual node.

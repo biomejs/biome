@@ -35,7 +35,6 @@ Imports {
 ```
 foo  => BindingTypeData {
   Types Import Symbol: foo from "/src/foo.ts",
-  Exported Ranges: (73..76)(73..76)
 }
 ```
 
@@ -76,10 +75,6 @@ Imports {
 ```
 foo => BindingTypeData {
   Types Module(0) TypeId(1),
-  JsDoc(
-    @returns {number}
-  ),
-  Exported Ranges: (94..97)
 }
 ```
 

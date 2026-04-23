@@ -10,6 +10,7 @@ impl FormatRule<AnyJsxAttribute> for FormatAnyJsxAttribute {
         match node {
             AnyJsxAttribute::JsMetavariable(node) => node.format().fmt(f),
             AnyJsxAttribute::JsxAttribute(node) => node.format().fmt(f),
+            AnyJsxAttribute::JsxShorthandAttribute(node) => node.format().fmt(f),
             AnyJsxAttribute::JsxSpreadAttribute(node) => node.format().fmt(f),
         }
     }

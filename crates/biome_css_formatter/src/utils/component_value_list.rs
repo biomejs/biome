@@ -141,6 +141,25 @@ where
     N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
     I: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
 {
+    write_component_value_list_with_separator_rule(node, f, |_, _| false)
+}
+
+/// Formats a component value list while allowing callers to suppress the
+/// normally inserted separator between specific adjacent items.
+///
+/// This is used for syntax families where adjacency itself is semantically
+/// significant and the formatter must preserve the no-space boundary instead of
+/// normalizing it to `soft_line_break_or_space()`.
+pub(crate) fn write_component_value_list_with_separator_rule<N, I, P>(
+    node: &N,
+    f: &mut CssFormatter,
+    omit_separator_between: P,
+) -> FormatResult<()>
+where
+    N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
+    I: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
+    P: Fn(&I, &I) -> bool + Copy,
+{
     let layout = get_value_list_layout(node, f.context().comments(), f);
 
     // Check if any of the elements in the list have a leading newline.
@@ -176,8 +195,13 @@ where
 
             let mut fill = f.fill();
             let mut at_group_boundary = false;
+            let mut previous_element: Option<I> = None;
 
             for (element, formatted) in node.iter().zip(node.iter().formatted()) {
+                let omit_separator = previous_element
+                    .as_ref()
+                    .is_some_and(|previous| omit_separator_between(previous, &element));
+
                 fill.entry(
                     &format_once(|f| {
                         // If the current element is not a comma, insert a soft line break or a space.
@@ -186,7 +210,7 @@ where
                         // A separator should not be added before the comma because the comma acts as a `CssGenericDelimiter`.
                         let is_comma = is_comma_delimiter(&element);
 
-                        if !is_comma {
+                        if !is_comma && !omit_separator {
                             if matches!(
                                 layout,
                                 ValueListLayout::PreserveInline | ValueListLayout::OnePerLine
@@ -227,13 +251,19 @@ where
                         // This is also why `at_group_boundary` is initialized to `false` even when
                         // the layout is OneGroupPerLine: because the line break would be ignored
                         // if `at_group_boundary` were set to `true` initially.
-                        at_group_boundary =
-                            is_comma && matches!(layout, ValueListLayout::OneGroupPerLine);
+                        at_group_boundary = is_comma
+                            && matches!(
+                                layout,
+                                ValueListLayout::OneGroupPerLine
+                                    | ValueListLayout::OneGroupPerLineWithDanglingComments
+                            );
 
                         Ok(())
                     }),
                     &formatted,
                 );
+
+                previous_element = Some(element);
             }
 
             fill.finish()
@@ -271,6 +301,9 @@ where
             });
 
             write!(f, [group(&indent(&content))])
+        }
+        ValueListLayout::OneGroupPerLineWithDanglingComments => {
+            write!(f, [group(&values)])
         }
     }
 }
@@ -354,6 +387,15 @@ pub(crate) enum ValueListLayout {
     /// These conditions are inherited from Prettier,
     /// see https://github.com/biomejs/biome/pull/5334 for a detailed explanation
     OneGroupPerLine,
+
+    /// Similar to OneGroupPerLine, but formats dangling comments on the property inline
+    /// before the line break. Used when comments appear between the colon and values.
+    /// ```css
+    /// font-family: /* comment */
+    ///     Hiragino Sans,
+    ///     sans-serif;
+    /// ```
+    OneGroupPerLineWithDanglingComments,
 }
 
 fn should_preceded_by_softline<N, I>(node: &N) -> bool
@@ -371,7 +413,7 @@ where
 /// printed compactly.
 pub(crate) fn get_value_list_layout<N, I>(
     list: &N,
-    _: &CssComments,
+    comments: &CssComments,
     f: &CssFormatter,
 ) -> ValueListLayout
 where
@@ -402,13 +444,27 @@ where
         .iter()
         .any(|x| CssGenericDelimiter::cast_ref(x.syntax()).is_some());
 
+    // Check if the property name has trailing comments (comments between name and values)
+    // If so, we don't need to change the layout since the comments will be formatted
+    // inline with the property name, outside the value indent block
+
+    // Check if the parent property has trailing comments (comments between colon and values)
+    let parent_property = list.parent::<CssGenericProperty>();
+    let has_trailing_comments = parent_property
+        .as_ref()
+        .is_some_and(|prop| !comments.trailing_comments(prop.syntax()).is_empty());
+
     // TODO: Check for comments, check for the types of elements in the list, etc.
     if is_grid_property {
         ValueListLayout::PreserveInline
     } else if list.len() == 1 {
         ValueListLayout::SingleValue
     } else if use_one_group_per_line(css_property.as_deref(), list) {
-        ValueListLayout::OneGroupPerLine
+        if has_trailing_comments {
+            ValueListLayout::OneGroupPerLineWithDanglingComments
+        } else {
+            ValueListLayout::OneGroupPerLine
+        }
     } else if is_comma_separated
         && value_count > 12
         && text_size >= TextSize::from(f.options().line_width().value() as u32)

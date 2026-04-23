@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
 info: css/character-escaping/character_escaping.css
 ---
 
@@ -90,15 +91,6 @@ info: css/character-escaping/character_escaping.css
  #𝄞♪♩♫♬ {
  }
  #💩 {
-@@ -50,7 +47,7 @@
- }
- #\3A hover {
- }
--#\3A hover\3a focus\3a active {
-+#\3A hover\3A focus\3A active {
- }
- #\[attr\=value\] {
- }
 ```
 
 # Output

@@ -35,7 +35,7 @@ invalid.vue:4:3 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━�
     2 │ <template>
     3 │   <!-- onmouseover without onfocus -->
   > 4 │   <div onmouseover="handleMouseOver()"></div>
-      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     5 │ 
     6 │   <!-- onmouseout without onblur -->
   
@@ -51,7 +51,7 @@ invalid.vue:7:3 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━�
   
     6 │   <!-- onmouseout without onblur -->
   > 7 │   <div onmouseout="handleMouseOut()"></div>
-      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     8 │ 
     9 │   <!-- has wrong keyboard pair -->
   
@@ -67,7 +67,7 @@ invalid.vue:10:3 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━�
   
      9 │   <!-- has wrong keyboard pair -->
   > 10 │   <div onmouseover="handleMouseOver()" onblur="handleBlur()"></div>
-       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     11 │   <div onmouseout="handleMouseOut()" onfocus="handleFocus()"></div>
     12 │ 
   
@@ -84,7 +84,7 @@ invalid.vue:11:3 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━�
      9 │   <!-- has wrong keyboard pair -->
     10 │   <div onmouseover="handleMouseOver()" onblur="handleBlur()"></div>
   > 11 │   <div onmouseout="handleMouseOut()" onfocus="handleFocus()"></div>
-       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     12 │ 
     13 │   <!-- self-closing elements -->
   
@@ -116,7 +116,7 @@ invalid.vue:17:3 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━�
   
     16 │   <!-- different element types -->
   > 17 │   <a onmouseover="handleMouseOver()">link</a>
-       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     18 │   <button onmouseout="handleMouseOut()">button</button>
     19 │ </template>
   
@@ -133,7 +133,7 @@ invalid.vue:18:3 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━�
     16 │   <!-- different element types -->
     17 │   <a onmouseover="handleMouseOver()">link</a>
   > 18 │   <button onmouseout="handleMouseOut()">button</button>
-       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     19 │ </template>
     20 │ 
   

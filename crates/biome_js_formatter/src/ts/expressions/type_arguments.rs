@@ -75,21 +75,39 @@ impl FormatNodeRule<TsTypeArguments> for FormatTsTypeArguments {
         let should_inline = !is_arrow_function_variables
             && (ts_type_argument_list.len() == 0 || first_argument_can_be_hugged_or_is_null_type);
 
+        let delimiter_spacing = f.options().delimiter_spacing().value();
+
         if should_inline {
-            write!(
-                f,
-                [
-                    l_angle_token.format(),
-                    ts_type_argument_list.format(),
-                    r_angle_token.format()
-                ]
-            )
+            if delimiter_spacing {
+                write!(
+                    f,
+                    [
+                        l_angle_token.format(),
+                        space(),
+                        ts_type_argument_list.format(),
+                        space(),
+                        r_angle_token.format()
+                    ]
+                )
+            } else {
+                write!(
+                    f,
+                    [
+                        l_angle_token.format(),
+                        ts_type_argument_list.format(),
+                        r_angle_token.format()
+                    ]
+                )
+            }
         } else {
             write!(
                 f,
                 [group(&format_args![
                     l_angle_token.format(),
-                    soft_block_indent(&ts_type_argument_list.format()),
+                    soft_block_indent_with_maybe_space(
+                        &ts_type_argument_list.format(),
+                        delimiter_spacing
+                    ),
                     r_angle_token.format()
                 ])]
             )

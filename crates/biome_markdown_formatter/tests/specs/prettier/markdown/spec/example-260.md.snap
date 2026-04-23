@@ -23,7 +23,7 @@ info: markdown/spec/example-260.md
  - bar
 -
 -* baz
-++ baz
++- baz
 ```
 
 # Output
@@ -31,5 +31,5 @@ info: markdown/spec/example-260.md
 ```md
 - foo
 - bar
-+ baz
+- baz
 ```

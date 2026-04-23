@@ -957,7 +957,7 @@ pub fn js_export(
 }
 pub fn js_export_as_clause(
     as_token: SyntaxToken,
-    exported_name: JsLiteralExportName,
+    exported_name: AnyJsLiteralExportName,
 ) -> JsExportAsClause {
     JsExportAsClause::unwrap_cast(SyntaxNode::new_detached(
         JsSyntaxKind::JS_EXPORT_AS_CLAUSE,
@@ -1193,7 +1193,7 @@ impl JsExportNamedFromClauseBuilder {
     }
 }
 pub fn js_export_named_from_specifier(
-    source_name: JsLiteralExportName,
+    source_name: AnyJsLiteralExportName,
 ) -> JsExportNamedFromSpecifierBuilder {
     JsExportNamedFromSpecifierBuilder {
         source_name,
@@ -1202,7 +1202,7 @@ pub fn js_export_named_from_specifier(
     }
 }
 pub struct JsExportNamedFromSpecifierBuilder {
-    source_name: JsLiteralExportName,
+    source_name: AnyJsLiteralExportName,
     type_token: Option<SyntaxToken>,
     export_as: Option<JsExportAsClause>,
 }
@@ -1257,7 +1257,7 @@ impl JsExportNamedShorthandSpecifierBuilder {
 pub fn js_export_named_specifier(
     local_name: JsReferenceIdentifier,
     as_token: SyntaxToken,
-    exported_name: JsLiteralExportName,
+    exported_name: AnyJsLiteralExportName,
 ) -> JsExportNamedSpecifierBuilder {
     JsExportNamedSpecifierBuilder {
         local_name,
@@ -1269,7 +1269,7 @@ pub fn js_export_named_specifier(
 pub struct JsExportNamedSpecifierBuilder {
     local_name: JsReferenceIdentifier,
     as_token: SyntaxToken,
-    exported_name: JsLiteralExportName,
+    exported_name: AnyJsLiteralExportName,
     type_token: Option<SyntaxToken>,
 }
 impl JsExportNamedSpecifierBuilder {
@@ -2575,7 +2575,7 @@ pub fn js_name(value_token: SyntaxToken) -> JsName {
     ))
 }
 pub fn js_named_import_specifier(
-    name: JsLiteralExportName,
+    name: AnyJsLiteralExportName,
     as_token: SyntaxToken,
     local_name: AnyJsBinding,
 ) -> JsNamedImportSpecifierBuilder {
@@ -2587,7 +2587,7 @@ pub fn js_named_import_specifier(
     }
 }
 pub struct JsNamedImportSpecifierBuilder {
-    name: JsLiteralExportName,
+    name: AnyJsLiteralExportName,
     as_token: SyntaxToken,
     local_name: AnyJsBinding,
     type_token: Option<SyntaxToken>,
@@ -4064,6 +4064,20 @@ impl JsxSelfClosingElementBuilder {
             ],
         ))
     }
+}
+pub fn jsx_shorthand_attribute(
+    l_curly_token: SyntaxToken,
+    name: JsReferenceIdentifier,
+    r_curly_token: SyntaxToken,
+) -> JsxShorthandAttribute {
+    JsxShorthandAttribute::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JSX_SHORTHAND_ATTRIBUTE,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
 }
 pub fn jsx_spread_attribute(
     l_curly_token: SyntaxToken,

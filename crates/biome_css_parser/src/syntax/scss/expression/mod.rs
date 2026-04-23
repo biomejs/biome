@@ -7,16 +7,17 @@ mod primary;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::{Parser, TokenSet, token_set};
 
-use super::is_at_scss_variable_modifier_start;
+use super::is_at_scss_variable_modifier;
 
 pub(crate) use interpolation::{
-    ScssInterpolationMode, is_at_scss_interpolation, is_nth_at_scss_interpolation,
-    parse_scss_interpolation_with_mode,
+    is_at_scss_interpolation, is_nth_at_scss_interpolation, parse_scss_interpolation_prefix,
+    parse_scss_regular_interpolation, parse_scss_selector_interpolation,
 };
 pub(crate) use list::{
     complete_empty_scss_expression, parse_required_scss_value_until, parse_scss_expression,
     parse_scss_expression_in_args_until, parse_scss_expression_in_variable_value_until,
-    parse_scss_expression_until, parse_scss_optional_value_until,
+    parse_scss_expression_until, parse_scss_inner_expression_in_string_until,
+    parse_scss_optional_value_until,
 };
 pub(crate) use precedence::SCSS_UNARY_OPERATOR_TOKEN_SET;
 
@@ -32,6 +33,7 @@ pub(super) struct ScssExpressionOptions {
     allows_keyword_arguments: bool,
     allows_ellipsis: bool,
     stops_before_variable_modifiers: bool,
+    stops_at_string_quote: bool,
 }
 
 impl ScssExpressionOptions {
@@ -42,6 +44,7 @@ impl ScssExpressionOptions {
             allows_keyword_arguments: false,
             allows_ellipsis: false,
             stops_before_variable_modifiers: false,
+            stops_at_string_quote: false,
         }
     }
 
@@ -52,6 +55,7 @@ impl ScssExpressionOptions {
             allows_keyword_arguments: false,
             allows_ellipsis: false,
             stops_before_variable_modifiers: false,
+            stops_at_string_quote: false,
         }
     }
 
@@ -62,6 +66,7 @@ impl ScssExpressionOptions {
             allows_keyword_arguments: true,
             allows_ellipsis: true,
             stops_before_variable_modifiers: false,
+            stops_at_string_quote: false,
         }
     }
 
@@ -72,6 +77,14 @@ impl ScssExpressionOptions {
             allows_keyword_arguments: false,
             allows_ellipsis: false,
             stops_before_variable_modifiers: true,
+            stops_at_string_quote: false,
+        }
+    }
+
+    pub(super) fn value_in_string(end_ts: TokenSet<CssSyntaxKind>) -> Self {
+        Self {
+            stops_at_string_quote: true,
+            ..Self::value(end_ts)
         }
     }
 
@@ -95,5 +108,5 @@ pub(super) fn is_at_scss_expression_end(
 ) -> bool {
     p.at_ts(options.end_ts)
         || p.at(T![')'])
-        || (options.stops_before_variable_modifiers && is_at_scss_variable_modifier_start(p))
+        || (options.stops_before_variable_modifiers && is_at_scss_variable_modifier(p))
 }

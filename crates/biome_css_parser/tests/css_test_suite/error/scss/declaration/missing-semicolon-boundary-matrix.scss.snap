@@ -98,8 +98,8 @@ CssRoot {
             block: CssDeclarationOrRuleBlock {
                 l_curly_token: L_CURLY@2..3 "{" [] [],
                 items: CssDeclarationOrRuleList [
-                    ScssDeclaration {
-                        name: ScssIdentifier {
+                    ScssVariableDeclaration {
+                        name: ScssVariable {
                             dollar_token: DOLLAR@3..7 "$" [Newline("\n"), Whitespace("  ")] [],
                             name: CssIdentifier {
                                 value_token: IDENT@7..9 "v0" [] [],
@@ -165,8 +165,8 @@ CssRoot {
                             r_curly_token: R_CURLY@45..46 "}" [] [],
                         },
                     },
-                    ScssDeclaration {
-                        name: ScssIdentifier {
+                    ScssVariableDeclaration {
+                        name: ScssVariable {
                             dollar_token: DOLLAR@46..51 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
                             name: CssIdentifier {
                                 value_token: IDENT@51..53 "v1" [] [],
@@ -232,8 +232,8 @@ CssRoot {
                             r_curly_token: R_CURLY@86..87 "}" [] [],
                         },
                     },
-                    ScssDeclaration {
-                        name: ScssIdentifier {
+                    ScssVariableDeclaration {
+                        name: ScssVariable {
                             dollar_token: DOLLAR@87..92 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
                             name: CssIdentifier {
                                 value_token: IDENT@92..94 "v2" [] [],
@@ -301,8 +301,8 @@ CssRoot {
                             r_curly_token: R_CURLY@130..131 "}" [] [],
                         },
                     },
-                    ScssDeclaration {
-                        name: ScssIdentifier {
+                    ScssVariableDeclaration {
+                        name: ScssVariable {
                             dollar_token: DOLLAR@131..136 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
                             name: CssIdentifier {
                                 value_token: IDENT@136..138 "v3" [] [],
@@ -373,8 +373,8 @@ CssRoot {
                             r_curly_token: R_CURLY@176..177 "}" [] [],
                         },
                     },
-                    ScssDeclaration {
-                        name: ScssIdentifier {
+                    ScssVariableDeclaration {
+                        name: ScssVariable {
                             dollar_token: DOLLAR@177..182 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
                             name: CssIdentifier {
                                 value_token: IDENT@182..184 "v4" [] [],
@@ -444,8 +444,8 @@ CssRoot {
                             r_curly_token: R_CURLY@222..223 "}" [] [],
                         },
                     },
-                    ScssDeclaration {
-                        name: ScssIdentifier {
+                    ScssVariableDeclaration {
+                        name: ScssVariable {
                             dollar_token: DOLLAR@223..228 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
                             name: CssIdentifier {
                                 value_token: IDENT@228..230 "v5" [] [],
@@ -511,8 +511,8 @@ CssRoot {
                             r_curly_token: R_CURLY@268..269 "}" [] [],
                         },
                     },
-                    ScssDeclaration {
-                        name: ScssIdentifier {
+                    ScssVariableDeclaration {
+                        name: ScssVariable {
                             dollar_token: DOLLAR@269..274 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
                             name: CssIdentifier {
                                 value_token: IDENT@274..276 "v6" [] [],
@@ -578,8 +578,8 @@ CssRoot {
                             r_curly_token: R_CURLY@316..317 "}" [] [],
                         },
                     },
-                    ScssDeclaration {
-                        name: ScssIdentifier {
+                    ScssVariableDeclaration {
+                        name: ScssVariable {
                             dollar_token: DOLLAR@317..322 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
                             name: CssIdentifier {
                                 value_token: IDENT@322..324 "v7" [] [],
@@ -645,8 +645,8 @@ CssRoot {
                             r_curly_token: R_CURLY@362..363 "}" [] [],
                         },
                     },
-                    ScssDeclaration {
-                        name: ScssIdentifier {
+                    ScssVariableDeclaration {
+                        name: ScssVariable {
                             dollar_token: DOLLAR@363..368 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
                             name: CssIdentifier {
                                 value_token: IDENT@368..370 "v8" [] [],
@@ -712,8 +712,8 @@ CssRoot {
                             r_curly_token: R_CURLY@410..411 "}" [] [],
                         },
                     },
-                    ScssDeclaration {
-                        name: ScssIdentifier {
+                    ScssVariableDeclaration {
+                        name: ScssVariable {
                             dollar_token: DOLLAR@411..416 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
                             name: CssIdentifier {
                                 value_token: IDENT@416..418 "v9" [] [],
@@ -775,8 +775,8 @@ CssRoot {
                             r_curly_token: R_CURLY@449..450 "}" [] [],
                         },
                     },
-                    ScssDeclaration {
-                        name: ScssIdentifier {
+                    ScssVariableDeclaration {
+                        name: ScssVariable {
                             dollar_token: DOLLAR@450..455 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
                             name: CssIdentifier {
                                 value_token: IDENT@455..458 "v10" [] [],
@@ -847,8 +847,8 @@ CssRoot {
                             r_curly_token: R_CURLY@493..494 "}" [] [],
                         },
                     },
-                    ScssDeclaration {
-                        name: ScssIdentifier {
+                    ScssVariableDeclaration {
+                        name: ScssVariable {
                             dollar_token: DOLLAR@494..499 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
                             name: CssIdentifier {
                                 value_token: IDENT@499..502 "v11" [] [],
@@ -919,8 +919,8 @@ CssRoot {
                             r_curly_token: R_CURLY@535..536 "}" [] [],
                         },
                     },
-                    ScssDeclaration {
-                        name: ScssIdentifier {
+                    ScssVariableDeclaration {
+                        name: ScssVariable {
                             dollar_token: DOLLAR@536..541 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
                             name: CssIdentifier {
                                 value_token: IDENT@541..544 "v12" [] [],
@@ -991,8 +991,8 @@ CssRoot {
                             r_curly_token: R_CURLY@578..579 "}" [] [],
                         },
                     },
-                    ScssDeclaration {
-                        name: ScssIdentifier {
+                    ScssVariableDeclaration {
+                        name: ScssVariable {
                             dollar_token: DOLLAR@579..584 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
                             name: CssIdentifier {
                                 value_token: IDENT@584..587 "v13" [] [],
@@ -1068,8 +1068,8 @@ CssRoot {
                             r_curly_token: R_CURLY@624..625 "}" [] [],
                         },
                     },
-                    ScssDeclaration {
-                        name: ScssIdentifier {
+                    ScssVariableDeclaration {
+                        name: ScssVariable {
                             dollar_token: DOLLAR@625..630 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
                             name: CssIdentifier {
                                 value_token: IDENT@630..633 "v14" [] [],
@@ -1142,8 +1142,8 @@ CssRoot {
                             r_curly_token: R_CURLY@672..673 "}" [] [],
                         },
                     },
-                    ScssDeclaration {
-                        name: ScssIdentifier {
+                    ScssVariableDeclaration {
+                        name: ScssVariable {
                             dollar_token: DOLLAR@673..678 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
                             name: CssIdentifier {
                                 value_token: IDENT@678..681 "v15" [] [],
@@ -1222,8 +1222,8 @@ CssRoot {
                             r_curly_token: R_CURLY@720..721 "}" [] [],
                         },
                     },
-                    ScssDeclaration {
-                        name: ScssIdentifier {
+                    ScssVariableDeclaration {
+                        name: ScssVariable {
                             dollar_token: DOLLAR@721..726 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
                             name: CssIdentifier {
                                 value_token: IDENT@726..729 "v16" [] [],
@@ -1302,8 +1302,8 @@ CssRoot {
                             r_curly_token: R_CURLY@767..768 "}" [] [],
                         },
                     },
-                    ScssDeclaration {
-                        name: ScssIdentifier {
+                    ScssVariableDeclaration {
+                        name: ScssVariable {
                             dollar_token: DOLLAR@768..773 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
                             name: CssIdentifier {
                                 value_token: IDENT@773..776 "v17" [] [],
@@ -1382,8 +1382,8 @@ CssRoot {
                             r_curly_token: R_CURLY@814..815 "}" [] [],
                         },
                     },
-                    ScssDeclaration {
-                        name: ScssIdentifier {
+                    ScssVariableDeclaration {
+                        name: ScssVariable {
                             dollar_token: DOLLAR@815..820 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
                             name: CssIdentifier {
                                 value_token: IDENT@820..823 "v18" [] [],
@@ -1462,8 +1462,8 @@ CssRoot {
                             r_curly_token: R_CURLY@862..863 "}" [] [],
                         },
                     },
-                    ScssDeclaration {
-                        name: ScssIdentifier {
+                    ScssVariableDeclaration {
+                        name: ScssVariable {
                             dollar_token: DOLLAR@863..868 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
                             name: CssIdentifier {
                                 value_token: IDENT@868..871 "v19" [] [],
@@ -1553,8 +1553,8 @@ CssRoot {
                             },
                         },
                     },
-                    ScssDeclaration {
-                        name: ScssIdentifier {
+                    ScssVariableDeclaration {
+                        name: ScssVariable {
                             dollar_token: DOLLAR@928..933 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
                             name: CssIdentifier {
                                 value_token: IDENT@933..936 "v20" [] [],
@@ -1622,8 +1622,8 @@ CssRoot {
       1: CSS_DECLARATION_OR_RULE_BLOCK@2..964
         0: L_CURLY@2..3 "{" [] []
         1: CSS_DECLARATION_OR_RULE_LIST@3..962
-          0: SCSS_DECLARATION@3..21
-            0: SCSS_IDENTIFIER@3..9
+          0: SCSS_VARIABLE_DECLARATION@3..21
+            0: SCSS_VARIABLE@3..9
               0: DOLLAR@3..7 "$" [Newline("\n"), Whitespace("  ")] []
               1: CSS_IDENTIFIER@7..9
                 0: IDENT@7..9 "v0" [] []
@@ -1665,8 +1665,8 @@ CssRoot {
                     1: (empty)
                   1: SEMICOLON@43..45 ";" [] [Whitespace(" ")]
               2: R_CURLY@45..46 "}" [] []
-          2: SCSS_DECLARATION@46..65
-            0: SCSS_IDENTIFIER@46..53
+          2: SCSS_VARIABLE_DECLARATION@46..65
+            0: SCSS_VARIABLE@46..53
               0: DOLLAR@46..51 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
               1: CSS_IDENTIFIER@51..53
                 0: IDENT@51..53 "v1" [] []
@@ -1708,8 +1708,8 @@ CssRoot {
                     1: (empty)
                   1: SEMICOLON@84..86 ";" [] [Whitespace(" ")]
               2: R_CURLY@86..87 "}" [] []
-          4: SCSS_DECLARATION@87..106
-            0: SCSS_IDENTIFIER@87..94
+          4: SCSS_VARIABLE_DECLARATION@87..106
+            0: SCSS_VARIABLE@87..94
               0: DOLLAR@87..92 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
               1: CSS_IDENTIFIER@92..94
                 0: IDENT@92..94 "v2" [] []
@@ -1752,8 +1752,8 @@ CssRoot {
                     1: (empty)
                   1: SEMICOLON@128..130 ";" [] [Whitespace(" ")]
               2: R_CURLY@130..131 "}" [] []
-          6: SCSS_DECLARATION@131..150
-            0: SCSS_IDENTIFIER@131..138
+          6: SCSS_VARIABLE_DECLARATION@131..150
+            0: SCSS_VARIABLE@131..138
               0: DOLLAR@131..136 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
               1: CSS_IDENTIFIER@136..138
                 0: IDENT@136..138 "v3" [] []
@@ -1799,8 +1799,8 @@ CssRoot {
                     1: (empty)
                   1: SEMICOLON@174..176 ";" [] [Whitespace(" ")]
               2: R_CURLY@176..177 "}" [] []
-          8: SCSS_DECLARATION@177..196
-            0: SCSS_IDENTIFIER@177..184
+          8: SCSS_VARIABLE_DECLARATION@177..196
+            0: SCSS_VARIABLE@177..184
               0: DOLLAR@177..182 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
               1: CSS_IDENTIFIER@182..184
                 0: IDENT@182..184 "v4" [] []
@@ -1844,8 +1844,8 @@ CssRoot {
                     1: (empty)
                   1: SEMICOLON@220..222 ";" [] [Whitespace(" ")]
               2: R_CURLY@222..223 "}" [] []
-          10: SCSS_DECLARATION@223..242
-            0: SCSS_IDENTIFIER@223..230
+          10: SCSS_VARIABLE_DECLARATION@223..242
+            0: SCSS_VARIABLE@223..230
               0: DOLLAR@223..228 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
               1: CSS_IDENTIFIER@228..230
                 0: IDENT@228..230 "v5" [] []
@@ -1887,8 +1887,8 @@ CssRoot {
                     1: (empty)
                   1: SEMICOLON@266..268 ";" [] [Whitespace(" ")]
               2: R_CURLY@268..269 "}" [] []
-          12: SCSS_DECLARATION@269..288
-            0: SCSS_IDENTIFIER@269..276
+          12: SCSS_VARIABLE_DECLARATION@269..288
+            0: SCSS_VARIABLE@269..276
               0: DOLLAR@269..274 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
               1: CSS_IDENTIFIER@274..276
                 0: IDENT@274..276 "v6" [] []
@@ -1930,8 +1930,8 @@ CssRoot {
                     1: (empty)
                   1: SEMICOLON@314..316 ";" [] [Whitespace(" ")]
               2: R_CURLY@316..317 "}" [] []
-          14: SCSS_DECLARATION@317..336
-            0: SCSS_IDENTIFIER@317..324
+          14: SCSS_VARIABLE_DECLARATION@317..336
+            0: SCSS_VARIABLE@317..324
               0: DOLLAR@317..322 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
               1: CSS_IDENTIFIER@322..324
                 0: IDENT@322..324 "v7" [] []
@@ -1973,8 +1973,8 @@ CssRoot {
                     1: (empty)
                   1: SEMICOLON@360..362 ";" [] [Whitespace(" ")]
               2: R_CURLY@362..363 "}" [] []
-          16: SCSS_DECLARATION@363..382
-            0: SCSS_IDENTIFIER@363..370
+          16: SCSS_VARIABLE_DECLARATION@363..382
+            0: SCSS_VARIABLE@363..370
               0: DOLLAR@363..368 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
               1: CSS_IDENTIFIER@368..370
                 0: IDENT@368..370 "v8" [] []
@@ -2016,8 +2016,8 @@ CssRoot {
                     1: (empty)
                   1: SEMICOLON@408..410 ";" [] [Whitespace(" ")]
               2: R_CURLY@410..411 "}" [] []
-          18: SCSS_DECLARATION@411..430
-            0: SCSS_IDENTIFIER@411..418
+          18: SCSS_VARIABLE_DECLARATION@411..430
+            0: SCSS_VARIABLE@411..418
               0: DOLLAR@411..416 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
               1: CSS_IDENTIFIER@416..418
                 0: IDENT@416..418 "v9" [] []
@@ -2057,8 +2057,8 @@ CssRoot {
                     1: (empty)
                   1: SEMICOLON@447..449 ";" [] [Whitespace(" ")]
               2: R_CURLY@449..450 "}" [] []
-          20: SCSS_DECLARATION@450..470
-            0: SCSS_IDENTIFIER@450..458
+          20: SCSS_VARIABLE_DECLARATION@450..470
+            0: SCSS_VARIABLE@450..458
               0: DOLLAR@450..455 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
               1: CSS_IDENTIFIER@455..458
                 0: IDENT@455..458 "v10" [] []
@@ -2103,8 +2103,8 @@ CssRoot {
                     1: (empty)
                   1: SEMICOLON@491..493 ";" [] [Whitespace(" ")]
               2: R_CURLY@493..494 "}" [] []
-          22: SCSS_DECLARATION@494..514
-            0: SCSS_IDENTIFIER@494..502
+          22: SCSS_VARIABLE_DECLARATION@494..514
+            0: SCSS_VARIABLE@494..502
               0: DOLLAR@494..499 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
               1: CSS_IDENTIFIER@499..502
                 0: IDENT@499..502 "v11" [] []
@@ -2149,8 +2149,8 @@ CssRoot {
                     1: (empty)
                   1: SEMICOLON@533..535 ";" [] [Whitespace(" ")]
               2: R_CURLY@535..536 "}" [] []
-          24: SCSS_DECLARATION@536..556
-            0: SCSS_IDENTIFIER@536..544
+          24: SCSS_VARIABLE_DECLARATION@536..556
+            0: SCSS_VARIABLE@536..544
               0: DOLLAR@536..541 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
               1: CSS_IDENTIFIER@541..544
                 0: IDENT@541..544 "v12" [] []
@@ -2195,8 +2195,8 @@ CssRoot {
                     1: (empty)
                   1: SEMICOLON@576..578 ";" [] [Whitespace(" ")]
               2: R_CURLY@578..579 "}" [] []
-          26: SCSS_DECLARATION@579..599
-            0: SCSS_IDENTIFIER@579..587
+          26: SCSS_VARIABLE_DECLARATION@579..599
+            0: SCSS_VARIABLE@579..587
               0: DOLLAR@579..584 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
               1: CSS_IDENTIFIER@584..587
                 0: IDENT@584..587 "v13" [] []
@@ -2245,8 +2245,8 @@ CssRoot {
                     1: (empty)
                   1: SEMICOLON@622..624 ";" [] [Whitespace(" ")]
               2: R_CURLY@624..625 "}" [] []
-          28: SCSS_DECLARATION@625..645
-            0: SCSS_IDENTIFIER@625..633
+          28: SCSS_VARIABLE_DECLARATION@625..645
+            0: SCSS_VARIABLE@625..633
               0: DOLLAR@625..630 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
               1: CSS_IDENTIFIER@630..633
                 0: IDENT@630..633 "v14" [] []
@@ -2292,8 +2292,8 @@ CssRoot {
                     1: (empty)
                   1: SEMICOLON@670..672 ";" [] [Whitespace(" ")]
               2: R_CURLY@672..673 "}" [] []
-          30: SCSS_DECLARATION@673..693
-            0: SCSS_IDENTIFIER@673..681
+          30: SCSS_VARIABLE_DECLARATION@673..693
+            0: SCSS_VARIABLE@673..681
               0: DOLLAR@673..678 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
               1: CSS_IDENTIFIER@678..681
                 0: IDENT@678..681 "v15" [] []
@@ -2344,8 +2344,8 @@ CssRoot {
                     1: (empty)
                   1: SEMICOLON@718..720 ";" [] [Whitespace(" ")]
               2: R_CURLY@720..721 "}" [] []
-          32: SCSS_DECLARATION@721..741
-            0: SCSS_IDENTIFIER@721..729
+          32: SCSS_VARIABLE_DECLARATION@721..741
+            0: SCSS_VARIABLE@721..729
               0: DOLLAR@721..726 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
               1: CSS_IDENTIFIER@726..729
                 0: IDENT@726..729 "v16" [] []
@@ -2396,8 +2396,8 @@ CssRoot {
                     1: (empty)
                   1: SEMICOLON@765..767 ";" [] [Whitespace(" ")]
               2: R_CURLY@767..768 "}" [] []
-          34: SCSS_DECLARATION@768..788
-            0: SCSS_IDENTIFIER@768..776
+          34: SCSS_VARIABLE_DECLARATION@768..788
+            0: SCSS_VARIABLE@768..776
               0: DOLLAR@768..773 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
               1: CSS_IDENTIFIER@773..776
                 0: IDENT@773..776 "v17" [] []
@@ -2448,8 +2448,8 @@ CssRoot {
                     1: (empty)
                   1: SEMICOLON@812..814 ";" [] [Whitespace(" ")]
               2: R_CURLY@814..815 "}" [] []
-          36: SCSS_DECLARATION@815..835
-            0: SCSS_IDENTIFIER@815..823
+          36: SCSS_VARIABLE_DECLARATION@815..835
+            0: SCSS_VARIABLE@815..823
               0: DOLLAR@815..820 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
               1: CSS_IDENTIFIER@820..823
                 0: IDENT@820..823 "v18" [] []
@@ -2500,8 +2500,8 @@ CssRoot {
                     1: (empty)
                   1: SEMICOLON@860..862 ";" [] [Whitespace(" ")]
               2: R_CURLY@862..863 "}" [] []
-          38: SCSS_DECLARATION@863..883
-            0: SCSS_IDENTIFIER@863..871
+          38: SCSS_VARIABLE_DECLARATION@863..883
+            0: SCSS_VARIABLE@863..871
               0: DOLLAR@863..868 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
               1: CSS_IDENTIFIER@868..871
                 0: IDENT@868..871 "v19" [] []
@@ -2558,8 +2558,8 @@ CssRoot {
                           1: SEMICOLON@921..923 ";" [] [Whitespace(" ")]
                       2: R_CURLY@923..924 "}" [] []
                 2: R_CURLY@924..928 "}" [Newline("\n"), Whitespace("  ")] []
-          40: SCSS_DECLARATION@928..948
-            0: SCSS_IDENTIFIER@928..936
+          40: SCSS_VARIABLE_DECLARATION@928..948
+            0: SCSS_VARIABLE@928..936
               0: DOLLAR@928..933 "$" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
               1: CSS_IDENTIFIER@933..936
                 0: IDENT@933..936 "v20" [] []

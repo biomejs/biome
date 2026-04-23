@@ -3,14 +3,14 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_html_syntax::{
-    AnyHtmlContent, AnyHtmlElement, HtmlElement, HtmlOpeningElement,
+    AnyHtmlContent, AnyHtmlElement, HtmlElement, HtmlFileSource, HtmlOpeningElement,
     element_ext::AnyHtmlTagElement, inner_string_text,
 };
 use biome_rowan::AstNode;
 use biome_rule_options::no_ambiguous_anchor_text::NoAmbiguousAnchorTextOptions;
 use biome_string_case::StrOnlyExtension;
 
-use crate::a11y::is_hidden_from_screen_reader;
+use crate::{a11y::is_hidden_from_screen_reader, utils::is_html_tag};
 
 declare_lint_rule! {
     /// Disallow ambiguous anchor descriptions.
@@ -73,15 +73,14 @@ impl Rule for NoAmbiguousAnchorText {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let binding = ctx.query();
         let words = ctx.options().words();
+        let source_type = ctx.source_type::<HtmlFileSource>();
 
-        let name = binding.name().ok()?;
-        let name_text = name.token_text_trimmed()?;
-        if name_text != "a" {
+        if !is_html_tag(&AnyHtmlTagElement::from(binding.clone()), source_type, "a") {
             return None;
         }
 
         let parent = HtmlElement::cast(binding.syntax().parent()?)?;
-        let text = get_accessible_child_text(&parent);
+        let text = get_accessible_child_text(&parent, source_type);
 
         if words.contains(&text) {
             return Some(());
@@ -118,10 +117,8 @@ fn get_aria_label(node: &AnyHtmlTagElement) -> Option<String> {
     Some(text.to_string())
 }
 
-fn get_img_alt(node: &AnyHtmlTagElement) -> Option<String> {
-    let name = node.name().ok()?;
-    let name_text = name.token_text_trimmed()?;
-    if name_text != "img" {
+fn get_img_alt(node: &AnyHtmlTagElement, source_type: &HtmlFileSource) -> Option<String> {
+    if !is_html_tag(node, source_type, "img") {
         return None;
     }
 
@@ -145,7 +142,7 @@ fn standardize_space_and_case(input: &str) -> String {
         .join(" ")
 }
 
-fn get_accessible_text(node: &AnyHtmlTagElement) -> Option<String> {
+fn get_accessible_text(node: &AnyHtmlTagElement, source_type: &HtmlFileSource) -> Option<String> {
     if is_hidden_from_screen_reader(node) {
         return Some(String::new());
     }
@@ -154,17 +151,17 @@ fn get_accessible_text(node: &AnyHtmlTagElement) -> Option<String> {
         return Some(standardize_space_and_case(&aria_label));
     }
 
-    if let Some(alt) = get_img_alt(node) {
+    if let Some(alt) = get_img_alt(node, source_type) {
         return Some(standardize_space_and_case(&alt));
     }
 
     None
 }
 
-fn get_accessible_child_text(node: &HtmlElement) -> String {
+fn get_accessible_child_text(node: &HtmlElement, source_type: &HtmlFileSource) -> String {
     if let Ok(opening) = node.opening_element() {
         let any_jsx_element: AnyHtmlTagElement = opening.clone().into();
-        if let Some(accessible_text) = get_accessible_text(&any_jsx_element) {
+        if let Some(accessible_text) = get_accessible_text(&any_jsx_element, source_type) {
             return accessible_text;
         }
     };
@@ -180,10 +177,12 @@ fn get_accessible_child_text(node: &HtmlElement) -> String {
                     String::new()
                 }
             }
-            AnyHtmlElement::HtmlElement(element) => get_accessible_child_text(&element),
+            AnyHtmlElement::HtmlElement(element) => {
+                get_accessible_child_text(&element, source_type)
+            }
             AnyHtmlElement::HtmlSelfClosingElement(element) => {
                 let any_jsx_element: AnyHtmlTagElement = element.clone().into();
-                get_accessible_text(&any_jsx_element).unwrap_or_default()
+                get_accessible_text(&any_jsx_element, source_type).unwrap_or_default()
             }
             _ => String::new(),
         })

@@ -88,12 +88,12 @@ MdDocument {
                             ],
                             hard_line: missing (optional),
                         },
-                        MdNewline {
-                            value_token: NEWLINE@35..36 "\n" [] [],
-                        },
                     ],
                 },
             ],
+        },
+        MdNewline {
+            value_token: NEWLINE@35..36 "\n" [] [],
         },
         MdBulletListItem {
             md_bullet_list: MdBulletList [
@@ -137,12 +137,12 @@ MdDocument {
                             ],
                             hard_line: missing (optional),
                         },
-                        MdNewline {
-                            value_token: NEWLINE@72..73 "\n" [] [],
-                        },
                     ],
                 },
             ],
+        },
+        MdNewline {
+            value_token: NEWLINE@72..73 "\n" [] [],
         },
         MdBulletListItem {
             md_bullet_list: MdBulletList [
@@ -201,8 +201,8 @@ MdDocument {
 0: MD_DOCUMENT@0..107
   0: (empty)
   1: MD_BLOCK_LIST@0..107
-    0: MD_BULLET_LIST_ITEM@0..36
-      0: MD_BULLET_LIST@0..36
+    0: MD_BULLET_LIST_ITEM@0..35
+      0: MD_BULLET_LIST@0..35
         0: MD_BULLET@0..11
           0: MD_LIST_MARKER_PREFIX@0..1
             0: MD_INDENT_TOKEN_LIST@0..0
@@ -231,13 +231,13 @@ MdDocument {
                 1: MD_TEXTUAL@21..22
                   0: MD_TEXTUAL_LITERAL@21..22 "\n" [] []
               1: (empty)
-        2: MD_BULLET@22..36
+        2: MD_BULLET@22..35
           0: MD_LIST_MARKER_PREFIX@22..23
             0: MD_INDENT_TOKEN_LIST@22..22
             1: MINUS@22..23 "-" [] []
             2: (empty)
             3: MD_INDENT_TOKEN_LIST@23..23
-          1: MD_BLOCK_LIST@23..36
+          1: MD_BLOCK_LIST@23..35
             0: MD_PARAGRAPH@23..35
               0: MD_INLINE_ITEM_LIST@23..35
                 0: MD_TEXTUAL@23..34
@@ -245,10 +245,10 @@ MdDocument {
                 1: MD_TEXTUAL@34..35
                   0: MD_TEXTUAL_LITERAL@34..35 "\n" [] []
               1: (empty)
-            1: MD_NEWLINE@35..36
-              0: NEWLINE@35..36 "\n" [] []
-    1: MD_BULLET_LIST_ITEM@36..73
-      0: MD_BULLET_LIST@36..73
+    1: MD_NEWLINE@35..36
+      0: NEWLINE@35..36 "\n" [] []
+    2: MD_BULLET_LIST_ITEM@36..72
+      0: MD_BULLET_LIST@36..72
         0: MD_BULLET@36..57
           0: MD_LIST_MARKER_PREFIX@36..37
             0: MD_INDENT_TOKEN_LIST@36..36
@@ -263,13 +263,13 @@ MdDocument {
                 1: MD_TEXTUAL@56..57
                   0: MD_TEXTUAL_LITERAL@56..57 "\n" [] []
               1: (empty)
-        1: MD_BULLET@57..73
+        1: MD_BULLET@57..72
           0: MD_LIST_MARKER_PREFIX@57..58
             0: MD_INDENT_TOKEN_LIST@57..57
             1: STAR@57..58 "*" [] []
             2: (empty)
             3: MD_INDENT_TOKEN_LIST@58..58
-          1: MD_BLOCK_LIST@58..73
+          1: MD_BLOCK_LIST@58..72
             0: MD_PARAGRAPH@58..72
               0: MD_INLINE_ITEM_LIST@58..72
                 0: MD_TEXTUAL@58..71
@@ -277,9 +277,9 @@ MdDocument {
                 1: MD_TEXTUAL@71..72
                   0: MD_TEXTUAL_LITERAL@71..72 "\n" [] []
               1: (empty)
-            1: MD_NEWLINE@72..73
-              0: NEWLINE@72..73 "\n" [] []
-    2: MD_BULLET_LIST_ITEM@73..107
+    3: MD_NEWLINE@72..73
+      0: NEWLINE@72..73 "\n" [] []
+    4: MD_BULLET_LIST_ITEM@73..107
       0: MD_BULLET_LIST@73..107
         0: MD_BULLET@73..87
           0: MD_LIST_MARKER_PREFIX@73..74

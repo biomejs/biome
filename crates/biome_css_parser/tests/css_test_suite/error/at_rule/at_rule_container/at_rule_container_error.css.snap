@@ -931,6 +931,26 @@ at_rule_container_error.css:10:32 parse ━━━━━━━━━━━━━�
   
   i Remove {
   
+at_rule_container_error.css:11:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    10 │ @container not (width <= 500px {  }
+  > 11 │ @container not (width <=) {  }
+       │                         ^
+    12 │ @container not {  }
+    13 │ 
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
 at_rule_container_error.css:12:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.

@@ -1,27 +1,8 @@
-use std::{iter::FusedIterator, sync::Arc};
-
-use biome_js_semantic::{BindingId, ScopeId, TsBindingReference};
+use super::{JsModuleInfoInner, binding::JsBinding};
+use biome_js_semantic::{BindingId, TsBindingReference};
 use biome_js_syntax::TextRange;
 use biome_js_type_info::TypeReferenceQualifier;
-use biome_rowan::TokenText;
-use rustc_hash::FxHashMap;
-
-use super::{JsModuleInfoInner, binding::JsBinding};
-
-#[derive(Debug)]
-pub struct JsScopeData {
-    // The scope range
-    #[expect(dead_code, reason = "May be used in future for scope analysis")]
-    pub range: TextRange,
-    // The parent scope of this scope
-    pub parent: Option<ScopeId>,
-    // All children scope of this scope
-    pub children: Vec<ScopeId>,
-    // All bindings of this scope (points to SemanticModelData::bindings)
-    pub bindings: Vec<BindingId>,
-    // Map pointing to the [bindings] vec of each bindings by its name
-    pub bindings_by_name: FxHashMap<TokenText, TsBindingReference>,
-}
+use std::{iter::FusedIterator, sync::Arc};
 
 /// Extension trait for `TsBindingReference` that adds methods depending on
 /// `biome_js_type_info` types, which are not available in `biome_js_semantic`.

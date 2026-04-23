@@ -1,0 +1,31 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+@media (#{$feature}: 10zzz) {}
+
+```
+
+# Diagnostics
+```
+invalid.scss:1:24 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown unit: zzz
+  
+  > 1 │ @media (#{$feature}: 10zzz) {}
+      │                        ^^^
+    2 │ 
+  
+  i See MDN web docs for more details.
+  
+  i Use a known unit instead, such as:
+  
+  - px
+  - em
+  - rem
+  - etc.
+  
+
+```

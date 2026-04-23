@@ -56,6 +56,7 @@ pub enum MarkdownSyntaxKind {
     TAB,
     BOGUS,
     MD_BOGUS,
+    MD_BOGUS_BLOCK,
     MD_BOGUS_BULLET,
     MD_DOCUMENT,
     MD_BLOCK_LIST,
@@ -66,7 +67,6 @@ pub enum MarkdownSyntaxKind {
     MD_FENCED_CODE_BLOCK,
     MD_CODE_NAME_LIST,
     MD_HTML_BLOCK,
-    MD_LINK_BLOCK,
     MD_LINK_REFERENCE_DEFINITION,
     MD_LINK_LABEL,
     MD_LINK_DESTINATION,
@@ -110,6 +110,7 @@ pub enum MarkdownSyntaxKind {
     MD_LIST_MARKER_PREFIX,
     MD_THEMATIC_BREAK_CHAR,
     MD_THEMATIC_BREAK_PART_LIST,
+    MD_CONTINUATION_INDENT,
     #[doc(hidden)]
     __LAST,
 }

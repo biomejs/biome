@@ -12,6 +12,7 @@ use biome_configuration::vcs::VcsConfiguration;
 use biome_configuration::{Configuration, FilesConfiguration};
 use biome_console::{Console, MarkupBuf};
 use biome_deserialize::Merge;
+use biome_diagnostics::Severity;
 use biome_diagnostics::{Category, DiagnosticExt, category};
 use biome_fs::FileSystem;
 use biome_grit_patterns::{GritTargetLanguage, JsTargetLanguage};
@@ -140,6 +141,8 @@ impl ProcessFile for SearchProcessFile {
         ctx: &Ctx,
         workspace_file: &mut WorkspaceFile,
         _features_supported: &FeaturesSupported,
+        _max_diagnostics: u32,
+        _diagnostic_level: Severity,
     ) -> Result<FileStatus, Message>
     where
         Ctx: CrawlerContext,
@@ -175,6 +178,9 @@ impl ProcessFile for SearchProcessFile {
                 .map(|mat| SearchDiagnostic.with_file_span(mat))
                 .collect(),
             skipped_diagnostics: 0,
+            errors: 0,
+            warnings: 0,
+            infos: 0,
         };
 
         Ok(FileStatus::SearchResult(matches_len, search_results))

@@ -157,7 +157,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUntrustedLicenses {
-        version: "next",
+        version: "2.4.9",
         name: "noUntrustedLicenses",
         language: "json",
         recommended: false,

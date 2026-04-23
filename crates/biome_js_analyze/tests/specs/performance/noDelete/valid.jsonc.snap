@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
 expression: valid.jsonc
 ---
 # Input
@@ -30,4 +31,9 @@ delete f()
 # Input
 ```cjs
 delete el.dataset.something
+```
+
+# Input
+```cjs
+delete process.env.FOO
 ```

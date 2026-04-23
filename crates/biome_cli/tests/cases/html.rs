@@ -333,6 +333,115 @@ fn should_apply_fixes_to_embedded_languages() {
 }
 
 #[test]
+fn check_write_html_with_embedded_style_is_idempotent() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    // Already-formatted HTML with an embedded <style> block. Running
+    // `check --write` must be a no-op; see https://github.com/biomejs/biome/issues/9690.
+    let html_file = Utf8Path::new("file.html");
+    let source = r#"<!doctype html>
+<html lang="en">
+	<head>
+		<style>
+			p {
+				color: red;
+			}
+		</style>
+	</head>
+	<body>
+		<p>Hello</p>
+	</body>
+</html>
+"#;
+    fs.insert(html_file.into(), source.as_bytes());
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "html": {
+        "formatter": {
+            "enabled": true
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    // First run: normalize the file to whatever Biome considers canonical.
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", html_file.as_str()].as_slice()),
+    );
+    assert!(result.is_ok(), "first run_cli returned {result:?}");
+
+    // Second run on the now-canonical file MUST be a no-op.
+    let mut console = BufferConsole::default();
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", html_file.as_str()].as_slice()),
+    );
+    assert!(result.is_ok(), "second run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_write_html_with_embedded_style_is_idempotent",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_write_html_with_embedded_script_is_idempotent() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let html_file = Utf8Path::new("file.html");
+    let source = r#"<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <script type="module">
+    import { init } from "./src"
+
+    init()
+  </script>
+</head>
+<body></body>
+</html>
+"#;
+    fs.insert(html_file.into(), source.as_bytes());
+
+    // First run: apply lint fixes.
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--write", html_file.as_str()].as_slice()),
+    );
+    assert!(result.is_ok(), "first run_cli returned {result:?}");
+
+    // Second run MUST be a no-op.
+    let mut console = BufferConsole::default();
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--write", html_file.as_str()].as_slice()),
+    );
+    assert!(result.is_ok(), "second run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_write_html_with_embedded_script_is_idempotent",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn should_lint_a_html_file() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
