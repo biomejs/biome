@@ -1,5 +1,10 @@
+use std::io;
+
 use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
-use biome_console::markup;
+use biome_console::{
+    fmt::{Display, Formatter},
+    markup,
+};
 use biome_js_syntax::{
     AnyJsBinding, AnyJsClass, AnyJsDeclarationClause, AnyJsExpression, AnyJsFunction,
     AnyJsFunctionBody, AnyJsGetter, AnyTsCastExpression, AnyTsIdentifierBinding, AnyTsType,
@@ -111,6 +116,20 @@ enum DescriptionKind {
     Narrowed,
 }
 
+/// Maximum iterations for type graph traversal to guard against infinite loops on cyclic types.
+const MAX_TYPE_TRAVERSAL_ITERATIONS: usize = 50;
+
+/// Maximum iterations for expression traversal to guard against infinite loops.
+const MAX_EXPRESSION_TRAVERSAL_ITERATIONS: usize = 200;
+
+// #region display methods
+/// Upper bound on a narrowed return-type suggestion; longer unions fall back
+/// to the generic diagnostic note.
+const MAX_DESCRIPTION_LENGTH: usize = 80;
+
+/// Separator rendered between union members in the suggestion note.
+const SEPARATOR: &str = " | ";
+
 impl RuleState {
     /// Returns the suggestion kind to render, or `None` to fall back to the
     /// generic note.
@@ -123,32 +142,181 @@ impl RuleState {
         }
         can_render_inferred(&self.returns).then_some(DescriptionKind::Inferred)
     }
+
+    /// Writes an inferred description like `"loading" | "idle"`.
+    fn write_inferred(&self, formatter: &mut Formatter<'_>) -> io::Result<()> {
+        let mut first = true;
+        for return_type in &self.returns {
+            if let TypeData::Literal(literal) = &**return_type {
+                if !first {
+                    formatter.write_str(SEPARATOR)?;
+                }
+                write_literal(formatter, literal.as_ref())?;
+                first = false;
+            }
+        }
+        Ok(())
+    }
+
+    /// Writes narrowed annotation variants (only those covered by the returns).
+    fn write_narrowed(&self, formatter: &mut Formatter<'_>) -> io::Result<()> {
+        let covers_any = |variant: &Type| {
+            self.returns.iter().any(|return_type| {
+                types_match(variant, return_type) || is_nonunion_wider(variant, return_type)
+            })
+        };
+        let mut first = true;
+        for variant in self.effective_return_ty.flattened_union_variants().filter(covers_any) {
+            if !first {
+                formatter.write_str(SEPARATOR)?;
+            }
+            write_variant(formatter, &variant)?;
+            first = false;
+        }
+        Ok(())
+    }
 }
 
-impl biome_console::fmt::Display for RuleState {
-    fn fmt(&self, formatter: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+impl Display for RuleState {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> io::Result<()> {
         match self.description_kind() {
-            Some(DescriptionKind::Inferred) => write_inferred(formatter, &self.returns),
-            Some(DescriptionKind::Narrowed) => {
-                write_narrowed(formatter, &self.effective_return_ty, &self.returns)
-            }
+            Some(DescriptionKind::Inferred) => self.write_inferred(formatter),
+            Some(DescriptionKind::Narrowed) => self.write_narrowed(formatter),
             None => Ok(()),
         }
     }
 }
 
-/// Maximum iterations for type graph traversal to guard against infinite loops on cyclic types.
-const MAX_TYPE_TRAVERSAL_ITERATIONS: usize = 50;
+/// Rendered byte length of a string/number/boolean literal; `None` otherwise.
+fn literal_display_len(literal: &Literal) -> Option<usize> {
+    match literal {
+        Literal::String(value) => Some(value.as_str().len() + 2),
+        Literal::Number(value) => Some(value.as_str().len()),
+        Literal::Boolean(value) => Some(if value.as_bool() { 4 } else { 5 }),
+        _ => None,
+    }
+}
 
-/// Maximum iterations for expression traversal to guard against infinite loops.
-const MAX_EXPRESSION_TRAVERSAL_ITERATIONS: usize = 200;
+/// Rejects literals whose rendered text contains `...`, `__internal`, or `typeof import(`.
+fn literal_content_ok(literal: &Literal) -> bool {
+    let text = match literal {
+        Literal::String(value) => value.as_str(),
+        Literal::Number(value) => value.as_str(),
+        _ => return true,
+    };
+    !text.contains("...") && !text.contains("__internal") && !text.contains("typeof import(")
+}
 
-/// Upper bound on a narrowed return-type suggestion; longer unions fall back
-/// to the generic diagnostic note.
-const MAX_DESCRIPTION_LENGTH: usize = 80;
+/// Writes a string/number/boolean literal; writes nothing for other kinds.
+fn write_literal(formatter: &mut Formatter<'_>, literal: &Literal) -> io::Result<()> {
+    match literal {
+        Literal::String(value) => write!(formatter, "\"{}\"", value.as_str()),
+        Literal::Number(value) => formatter.write_str(value.as_str()),
+        Literal::Boolean(value) => formatter.write_str(if value.as_bool() { "true" } else { "false" }),
+        _ => Ok(()),
+    }
+}
 
-/// Separator rendered between union members in the suggestion note.
-const SEPARATOR: &str = " | ";
+/// Rendered byte length of a primitive keyword or literal variant; `None` otherwise.
+fn variant_display_len(variant: &Type) -> Option<usize> {
+    match &**variant {
+        TypeData::String | TypeData::Number | TypeData::BigInt => Some(6),
+        TypeData::Boolean => Some(7),
+        TypeData::Literal(literal) => literal_display_len(literal.as_ref()),
+        _ => None,
+    }
+}
+
+/// Writes a primitive keyword or literal variant; writes nothing for other kinds.
+fn write_variant(formatter: &mut Formatter<'_>, variant: &Type) -> io::Result<()> {
+    match &**variant {
+        TypeData::String => formatter.write_str("string"),
+        TypeData::Number => formatter.write_str("number"),
+        TypeData::Boolean => formatter.write_str("boolean"),
+        TypeData::BigInt => formatter.write_str("bigint"),
+        TypeData::Literal(literal) => write_literal(formatter, literal.as_ref()),
+        _ => Ok(()),
+    }
+}
+
+/// `true` when every return is a displayable literal with clean content and
+/// the joined output fits within [`MAX_DESCRIPTION_LENGTH`].
+fn can_render_inferred(returns: &[Type]) -> bool {
+    let mut total_len = 0usize;
+    let mut has_any = false;
+    for return_type in returns {
+        let TypeData::Literal(literal) = &**return_type else {
+            return false;
+        };
+        if !literal_content_ok(literal.as_ref()) {
+            return false;
+        }
+        let Some(literal_len) = literal_display_len(literal.as_ref()) else {
+            return false;
+        };
+        if has_any {
+            total_len += SEPARATOR.len();
+        }
+        total_len += literal_len;
+        has_any = true;
+    }
+    has_any && total_len <= MAX_DESCRIPTION_LENGTH
+}
+
+/// Returns `true` when the annotation's union can be safely narrowed to only
+/// its covered variants within [`MAX_DESCRIPTION_LENGTH`].
+fn can_render_narrowed(annotation: &Type, returns: &[Type]) -> bool {
+    let covers_any = |variant: &Type| {
+        returns.iter().any(|return_type| {
+            types_match(variant, return_type) || is_nonunion_wider(variant, return_type)
+        })
+    };
+
+    let mut total = 0usize;
+    let mut covered = 0usize;
+    let mut all_renderable = true;
+    let mut has_widening = false;
+    let mut render_len = 0usize;
+    let mut first = true;
+
+    for variant in annotation.flattened_union_variants() {
+        total += 1;
+        if !covers_any(&variant) {
+            continue;
+        }
+        covered += 1;
+        if returns.iter().any(|return_type| {
+            !types_match(&variant, return_type) && is_nonunion_wider(&variant, return_type)
+        }) {
+            has_widening = true;
+        }
+        match variant_display_len(&variant) {
+            Some(len) => {
+                if !first {
+                    render_len += SEPARATOR.len();
+                }
+                render_len += len;
+                first = false;
+            }
+            None => all_renderable = false,
+        }
+    }
+
+    if covered == 0 || covered == total || !all_renderable {
+        return false;
+    }
+
+    // A widening variant would keep the narrowed annotation misleading, unless
+    // the single-literal-primitive bailout upstream would hide it.
+    let single_literal_bailout =
+        covered == 1 && is_single_literal_primitive_return(returns);
+    if has_widening && !single_literal_bailout {
+        return false;
+    }
+
+    render_len <= MAX_DESCRIPTION_LENGTH
+}
+// #endregion
 
 impl Rule for NoMisleadingReturnType {
     type Query = Typed<AnyFunctionLikeWithReturnType>;
@@ -711,186 +879,6 @@ fn is_base_type_of_literal(base: &Type, literal: &Type) -> bool {
         (TypeData::BigInt, TypeData::Literal(lit)) => matches!(lit.as_ref(), Literal::BigInt(_)),
         _ => false,
     }
-}
-
-/// Rendered byte length of a string/number/boolean literal; `None` otherwise.
-fn literal_display_len(literal: &Literal) -> Option<usize> {
-    match literal {
-        Literal::String(value) => Some(value.as_str().len() + "\"\"".len()),
-        Literal::Number(value) => Some(value.as_str().len()),
-        Literal::Boolean(value) => {
-            Some(if value.as_bool() { "true".len() } else { "false".len() })
-        }
-        _ => None,
-    }
-}
-
-/// Rejects literals whose rendered text contains `...`, `__internal`, or `typeof import(`.
-fn literal_content_ok(literal: &Literal) -> bool {
-    let text = match literal {
-        Literal::String(value) => value.as_str(),
-        Literal::Number(value) => value.as_str(),
-        _ => return true,
-    };
-    !text.contains("...") && !text.contains("__internal") && !text.contains("typeof import(")
-}
-
-/// Writes a string/number/boolean literal; writes nothing for other kinds.
-fn write_literal(
-    formatter: &mut biome_console::fmt::Formatter<'_>,
-    literal: &Literal,
-) -> std::io::Result<()> {
-    match literal {
-        Literal::String(value) => write!(formatter, "\"{}\"", value.as_str()),
-        Literal::Number(value) => formatter.write_str(value.as_str()),
-        Literal::Boolean(value) => formatter.write_str(if value.as_bool() { "true" } else { "false" }),
-        _ => Ok(()),
-    }
-}
-
-/// Rendered byte length of a primitive keyword or literal variant; `None` otherwise.
-fn variant_display_len(variant: &Type) -> Option<usize> {
-    match &**variant {
-        TypeData::String => Some("string".len()),
-        TypeData::Number => Some("number".len()),
-        TypeData::BigInt => Some("bigint".len()),
-        TypeData::Boolean => Some("boolean".len()),
-        TypeData::Literal(literal) => literal_display_len(literal.as_ref()),
-        _ => None,
-    }
-}
-
-/// Writes a primitive keyword or literal variant; writes nothing for other kinds.
-fn write_variant(
-    formatter: &mut biome_console::fmt::Formatter<'_>,
-    variant: &Type,
-) -> std::io::Result<()> {
-    match &**variant {
-        TypeData::String => formatter.write_str("string"),
-        TypeData::Number => formatter.write_str("number"),
-        TypeData::Boolean => formatter.write_str("boolean"),
-        TypeData::BigInt => formatter.write_str("bigint"),
-        TypeData::Literal(literal) => write_literal(formatter, literal.as_ref()),
-        _ => Ok(()),
-    }
-}
-
-/// `true` when every return is a displayable literal with clean content and
-/// the joined output fits within [`MAX_DESCRIPTION_LENGTH`].
-fn can_render_inferred(returns: &[Type]) -> bool {
-    let mut total_len = 0usize;
-    let mut has_any = false;
-    for return_type in returns {
-        let TypeData::Literal(literal) = &**return_type else {
-            return false;
-        };
-        if !literal_content_ok(literal.as_ref()) {
-            return false;
-        }
-        let Some(literal_len) = literal_display_len(literal.as_ref()) else {
-            return false;
-        };
-        if has_any {
-            total_len += SEPARATOR.len();
-        }
-        total_len += literal_len;
-        has_any = true;
-    }
-    has_any && total_len <= MAX_DESCRIPTION_LENGTH
-}
-
-/// Writes an inferred description like `"loading" | "idle"`.
-fn write_inferred(
-    formatter: &mut biome_console::fmt::Formatter<'_>,
-    returns: &[Type],
-) -> std::io::Result<()> {
-    let mut first = true;
-    for return_type in returns {
-        if let TypeData::Literal(literal) = &**return_type {
-            if !first {
-                formatter.write_str(SEPARATOR)?;
-            }
-            write_literal(formatter, literal.as_ref())?;
-            first = false;
-        }
-    }
-    Ok(())
-}
-
-/// Returns `true` when the annotation's union can be safely narrowed to only
-/// its covered variants within [`MAX_DESCRIPTION_LENGTH`].
-fn can_render_narrowed(annotation: &Type, returns: &[Type]) -> bool {
-    let covers_any = |variant: &Type| {
-        returns.iter().any(|return_type| {
-            types_match(variant, return_type) || is_nonunion_wider(variant, return_type)
-        })
-    };
-
-    let mut total = 0usize;
-    let mut covered = 0usize;
-    let mut all_renderable = true;
-    let mut has_widening = false;
-    let mut render_len = 0usize;
-    let mut first = true;
-
-    for variant in annotation.flattened_union_variants() {
-        total += 1;
-        if !covers_any(&variant) {
-            continue;
-        }
-        covered += 1;
-        if returns.iter().any(|return_type| {
-            !types_match(&variant, return_type) && is_nonunion_wider(&variant, return_type)
-        }) {
-            has_widening = true;
-        }
-        match variant_display_len(&variant) {
-            Some(len) => {
-                if !first {
-                    render_len += SEPARATOR.len();
-                }
-                render_len += len;
-                first = false;
-            }
-            None => all_renderable = false,
-        }
-    }
-
-    if covered == 0 || covered == total || !all_renderable {
-        return false;
-    }
-
-    // A widening variant would keep the narrowed annotation misleading, unless
-    // the single-literal-primitive bailout upstream would hide it.
-    let single_literal_bailout =
-        covered == 1 && is_single_literal_primitive_return(returns);
-    if has_widening && !single_literal_bailout {
-        return false;
-    }
-
-    render_len <= MAX_DESCRIPTION_LENGTH
-}
-
-/// Writes narrowed annotation variants (only those covered by the returns).
-fn write_narrowed(
-    formatter: &mut biome_console::fmt::Formatter<'_>,
-    annotation: &Type,
-    returns: &[Type],
-) -> std::io::Result<()> {
-    let covers_any = |variant: &Type| {
-        returns.iter().any(|return_type| {
-            types_match(variant, return_type) || is_nonunion_wider(variant, return_type)
-        })
-    };
-    let mut first = true;
-    for variant in annotation.flattened_union_variants().filter(covers_any) {
-        if !first {
-            formatter.write_str(SEPARATOR)?;
-        }
-        write_variant(formatter, &variant)?;
-        first = false;
-    }
-    Ok(())
 }
 
 /// Per-body accumulator for the misleading-return check.
