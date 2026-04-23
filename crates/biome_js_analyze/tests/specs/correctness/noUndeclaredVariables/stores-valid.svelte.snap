@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: stores-valid.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script>
+	import { writable } from "svelte/store";
+
+	const count = writable(1);
+	$count;
+</script>
+
+```

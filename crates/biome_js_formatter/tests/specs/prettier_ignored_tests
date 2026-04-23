@@ -1,0 +1,94 @@
+# Prettier test files that Biome should completely ignore.
+# One path prefix per line, relative to the prettier/ directory.
+# Ignored files produce no snapshot and are excluded from compatibility reports.
+
+# v8-specific syntaxes
+js/v8_intrinsic
+
+# Babel plugins (mostly experimental syntaxes)
+js/babel-plugins/
+
+# Bogus nodes
+js/chain-expression/new-expression.js
+js/chain-expression/tagged-template-literals.js
+js/optional-chaining-assignment/valid-parenthesized.js
+typescript/conformance/classes/constructorDeclarations/constructorParameters/readonlyReadonly.ts
+typescript/conformance/parser/ecmascript5/Statements/parserES5ForOfStatement21.ts
+typescript/chain-expression/new-expression.ts
+typescript/chain-expression/tagged-template-literals.ts
+
+# Experimental syntax: do expressions
+js/async-do-expressions/
+js/do/
+jsx/do/
+
+# Experimental syntax: export default from
+js/export-default/export-default-from/
+js/export-default/escaped/default-escaped.js
+
+# Experimental syntax: module blocks
+js/module-blocks
+js/explicit-resource-management/valid-module-block-top-level-await-using-binding.js
+js/explicit-resource-management/valid-module-block-top-level-using-binding.js
+
+# Experimental syntax: records and tuples
+js/tuple
+js/record
+js/arrays/tuple-and-record.js
+js/arrows/tuple-and-record.js
+js/binary-expressions/tuple-and-record.js
+js/class-extends/tuple-and-record.js
+js/comments-closure-typecast/tuple-and-record.js
+js/comments/tuple-and-record.js
+js/function-single-destructuring/tuple-and-record.js
+js/method-chain/tuple-and-record.js
+jsx/tuple/
+
+# Experimental syntax: pipeline operator
+js/comments-pipeline-own-line
+js/partial-application
+js/pipeline-operator
+
+# Experimental syntax: bind operator
+js/arrows-bind/
+js/bind-expressions/
+js/objects/expression.js
+js/no-semi-babylon-extensions/no-semi.js
+
+# Experimental syntax: destructuring private fields
+js/destructuring-private-fields
+
+# Experimental syntax: deferred import evaluation
+js/deferred-import-evaluation/
+
+# Experimental syntax: source phase imports
+js/source-phase-imports/
+js/dynamic-import/import-phase.js
+js/dynamic-import/template-literal.js
+
+# Experimental syntax: import reflection
+js/import-reflection/
+
+# Experimental syntax: throw expressions
+js/throw_expressions/
+
+# Embedded languages in template literals
+js/comments-closure-typecast/styled-components.js
+js/multiparser-comments/
+js/multiparser-css/
+js/multiparser-graphql/
+js/multiparser-html/
+js/multiparser-invalid/
+js/multiparser-markdown/
+js/multiparser-text/
+js/template-literals/css-prop.js
+js/template-literals/styled-components-with-expressions.js
+js/template-literals/styled-jsx-with-expressions.js
+js/template-literals/styled-jsx.js
+js/range/issue-7082.js
+js/last-argument-expansion/embed.js
+jsx/template/styled-components.js
+typescript/as/as-const-embedded.ts
+
+# Syntax recovery
+typescript/error-recovery/

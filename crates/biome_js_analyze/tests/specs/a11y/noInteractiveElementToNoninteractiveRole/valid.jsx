@@ -131,7 +131,6 @@
 <style role="button" />;
 <sub role="button" />;
 <summary role="button" />;
-// <summary role="listitem" />;
 <sup role="button" />;
 <th role="button" />;
 <time role="button" />;

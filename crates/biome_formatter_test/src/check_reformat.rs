@@ -130,21 +130,23 @@ where
                 })?;
             let pretty_reformat_ir = format!("{}", re_formatted.into_document());
             let pretty_input_ir = format!("{}", input_format_element.into_document());
-            let output_diff = similar_asserts::SimpleDiff::from_str(
-                re_printed.as_code(),
-                self.text,
-                "re-formatted",
-                "formatted",
-            )
-            .to_string();
+            let output_diff = {
+                let mut buf = Vec::new();
+                similar::TextDiff::from_lines(re_printed.as_code(), self.text)
+                    .unified_diff()
+                    .header("re-formatted", "formatted")
+                    .to_writer(&mut buf)
+                    .unwrap();
+                String::from_utf8(buf).unwrap()
+            };
             let ir_diff = (pretty_reformat_ir != pretty_input_ir).then(|| {
-                similar_asserts::SimpleDiff::from_str(
-                    &pretty_reformat_ir,
-                    &pretty_input_ir,
-                    "re-formatted IR",
-                    "formatted IR",
-                )
-                .to_string()
+                let mut buf = Vec::new();
+                similar::TextDiff::from_lines(&pretty_reformat_ir, &pretty_input_ir)
+                    .unified_diff()
+                    .header("re-formatted IR", "formatted IR")
+                    .to_writer(&mut buf)
+                    .unwrap();
+                String::from_utf8(buf).unwrap()
             });
 
             return Err(ReformatError::OutputMismatch {

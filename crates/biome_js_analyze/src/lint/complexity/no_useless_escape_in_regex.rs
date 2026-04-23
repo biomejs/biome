@@ -27,10 +27,6 @@ declare_lint_rule! {
     /// /[\-]/;
     /// ```
     ///
-    /// ```js,expect_diagnostic
-    /// /[\&]/v;
-    /// ```
-    ///
     /// ### Valid
     ///
     /// ```js
@@ -39,6 +35,10 @@ declare_lint_rule! {
     ///
     /// ```js
     /// /[\b]/
+    /// ```
+    ///
+    /// ```js
+    /// /[\&]/v
     /// ```
     pub NoUselessEscapeInRegex {
         version: "1.9.0",
@@ -126,10 +126,17 @@ impl Rule for NoUselessEscapeInRegex {
                                     b'p' | b'P' | b'k' | b'q' if is_unicode_aware => {}
                                     // Invalid speccial characters in char class under the `v` flag.
                                     b'(' | b')' | b'[' | b'{' | b'}' | b'/' | b'|' if has_v_flag => {}
-                                    // Perhaps a doubled punctuator
-                                    b'&' | b'!' | b'#' | b'$' | b'%' | b'*' | b'+' | b','
-                                    | b'.' | b':' | b';' | b'<' | b'=' | b'>' | b'?'
-                                    | b'@' | b'`' | b'~' if has_v_flag => {
+                                    // `ClassSetReservedPunctuator`: reserved as individual
+                                    // characters inside a `v`-mode character class, so the
+                                    // escape is always required.
+                                    // https://tc39.es/ecma262/#prod-ClassSetReservedPunctuator
+                                    b'&' | b'!' | b'#' | b'%' | b',' | b':' | b';'
+                                    | b'<' | b'=' | b'>' | b'@' | b'`' | b'~' if has_v_flag => {}
+                                    // Characters that form a `ClassSetReservedDoublePunctuator`
+                                    // only when doubled. Escape is useless unless part of a
+                                    // doubled pair.
+                                    // https://tc39.es/ecma262/#prod-ClassSetReservedDoublePunctuator
+                                    b'$' | b'*' | b'+' | b'.' | b'?' if has_v_flag => {
                                         // SAFETY: there is at least one preceding character (`[`)
                                         if bytes[index-1] != *escaped && byte_it.next().is_none_or(|(_, byte)| byte != escaped) {
                                             return Some(State {
