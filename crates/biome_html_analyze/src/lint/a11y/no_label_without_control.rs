@@ -10,8 +10,6 @@ use biome_html_syntax::{
 use biome_rowan::{AstNode, WalkEvent};
 use biome_rule_options::no_label_without_control::NoLabelWithoutControlOptions;
 
-use crate::utils::is_html_tag;
-
 declare_lint_rule! {
     /// Enforce that a label element or component has a text label and an associated input.
     ///
@@ -98,11 +96,7 @@ impl Rule for NoLabelWithoutControl {
 
         let element_name = node.name()?;
         let element_name = element_name.trim();
-        let tag_element = node.clone().as_any_html_tag_element()?;
-        let is_allowed_element = has_element_name(options, element_name)
-            || DEFAULT_LABEL_COMPONENTS
-                .iter()
-                .any(|label_component| is_html_tag(&tag_element, source_type, label_component));
+        let is_allowed_element = has_element_name(options, element_name, source_type);
 
         if !is_allowed_element {
             return None;
@@ -158,12 +152,10 @@ fn has_label_attribute(options: &NoLabelWithoutControlOptions, attribute: &HtmlA
     let Some(attribute_name) = attribute_name.token_text_trimmed() else {
         return false;
     };
-    if !DEFAULT_LABEL_ATTRIBUTES.contains(&attribute_name.text())
-        && !options
-            .label_attributes
-            .iter()
-            .flatten()
-            .any(|name| name.as_ref() == attribute_name)
+    if !options
+        .label_attributes()
+        .iter()
+        .any(|name| *name == attribute_name)
     {
         return false;
     }
@@ -234,18 +226,13 @@ fn has_nested_control(
                         continue;
                     };
                     let element_name = element_name.text();
-                    if DEFAULT_INPUT_COMPONENTS.iter().any(|input_component| {
+                    if options.input_components().iter().any(|name| {
                         if source_type.is_html() {
-                            element_name.eq_ignore_ascii_case(input_component)
+                            element_name.eq_ignore_ascii_case(name)
                         } else {
-                            &element_name == input_component
+                            &element_name == name
                         }
-                    }) || options
-                        .input_components
-                        .iter()
-                        .flatten()
-                        .any(|name| name.as_ref() == element_name)
-                    {
+                    }) {
                         return true;
                     }
                 }
@@ -256,24 +243,27 @@ fn has_nested_control(
     false
 }
 
-fn has_element_name(options: &NoLabelWithoutControlOptions, element_name: &str) -> bool {
+fn has_element_name(
+    options: &NoLabelWithoutControlOptions,
+    element_name: &str,
+    source_type: &HtmlFileSource,
+) -> bool {
     options
-        .label_components
+        .label_components()
         .iter()
-        .flatten()
-        .any(|label_component_name| label_component_name.as_ref() == element_name)
+        .any(|label_component_name| {
+            if source_type.is_html() {
+                element_name.eq_ignore_ascii_case(label_component_name)
+            } else {
+                &element_name == label_component_name
+            }
+        })
 }
 
 pub struct NoLabelWithoutControlState {
     pub has_text_content: bool,
     pub has_control_association: bool,
 }
-
-const DEFAULT_LABEL_ATTRIBUTES: [&str; 3] = ["aria-label", "aria-labelledby", "alt"];
-const DEFAULT_LABEL_COMPONENTS: [&str; 1] = ["label"];
-const DEFAULT_INPUT_COMPONENTS: [&str; 7] = [
-    "input", "meter", "output", "progress", "select", "textarea", "button",
-];
 
 /// Returns true whether the passed `AnyHtmlElement` has a `for` attribute
 fn has_for_attribute(html_element: &AnyHtmlElement) -> bool {
