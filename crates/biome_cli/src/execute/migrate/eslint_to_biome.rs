@@ -804,9 +804,7 @@ fn migrate_eslint_rule(
                 let severity = conf.severity();
                 let group = rules.nursery.get_or_insert_with(Default::default);
                 if let SeverityOrGroup::Group(group) = group {
-                    dbg!(&conf);
-                    let options =
-                        eslint_typescript::NoShadowOptions::from(conf.option_or_default());
+                    let options = conf.option_or_default();
                     group.no_shadow = Some(biome_config::RuleConfiguration::WithOptions(
                         biome_config::RuleWithOptions {
                             level: severity.into(),
