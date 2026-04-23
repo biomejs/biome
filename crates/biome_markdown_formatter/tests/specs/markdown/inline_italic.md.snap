@@ -86,6 +86,6 @@ _foo [*bar*](/url)_
 
 *foo _bar* baz_
 
-_foo __bar *baz bim__ bam_
+_foo **bar *baz bim** bam_
 
 ```
