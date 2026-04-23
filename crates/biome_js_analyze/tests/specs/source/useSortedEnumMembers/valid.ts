@@ -30,3 +30,9 @@ enum ValidStatus4 {
 	NotStarted = 'Not Started',
 	OnHold = 'On Hold',
 }
+
+enum ValidStatus5 {
+	Status1 = 'First',
+	Status2 = 'Second',
+	Status10 = 'Tenth',
+}

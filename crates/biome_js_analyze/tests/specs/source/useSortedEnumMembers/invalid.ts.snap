@@ -5,7 +5,7 @@ expression: invalid.ts
 # Input
 ```ts
 /* should generate diagnostics */
-enum InvalidStatus {
+enum InvalidStatus1 {
 	InProgress = 'In Progress',
 	Completed = 'Completed',
 	/**
@@ -17,6 +17,12 @@ enum InvalidStatus {
 	NotStarted = 'Not Started',
 }
 
+enum InvalidStatus2 {
+	Status1 = 'First',
+	Status10 = 'Tenth',
+	Status2 = 'Second',
+}
+
 ```
 
 # Diagnostics
@@ -26,21 +32,21 @@ invalid.ts:2:1 assist/source/useSortedEnumMembers  FIXABLE  ━━━━━━�
   i Enum is not sorted.
   
      1 │ /* should generate diagnostics */
-   > 2 │ enum InvalidStatus {
-       │ ^^^^^^^^^^^^^^^^^^^^
+   > 2 │ enum InvalidStatus1 {
+       │ ^^^^^^^^^^^^^^^^^^^^^
    > 3 │ 	InProgress = 'In Progress',
    > 4 │ 	Completed = 'Completed',
         ...
-  > 10 │ 	// Pre comment
   > 11 │ 	NotStarted = 'Not Started',
   > 12 │ }
        │ ^
     13 │ 
+    14 │ enum InvalidStatus2 {
   
   i Safe fix: Sort enum.
   
      1  1 │   /* should generate diagnostics */
-     2  2 │   enum InvalidStatus {
+     2  2 │   enum InvalidStatus1 {
      3    │ - → InProgress·=·'In·Progress',
         3 │ + → Cancelled·=·'Cancelled',·//·Some·inline·comment
      4  4 │     Completed = 'Completed',
@@ -60,6 +66,36 @@ invalid.ts:2:1 assist/source/useSortedEnumMembers  FIXABLE  ━━━━━━�
        11 │ + → OnHold·=·'On·Hold',
     12 12 │   }
     13 13 │   
+  
+
+```
+
+```
+invalid.ts:14:1 assist/source/useSortedEnumMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Enum is not sorted.
+  
+    12 │ }
+    13 │ 
+  > 14 │ enum InvalidStatus2 {
+       │ ^^^^^^^^^^^^^^^^^^^^^
+  > 15 │ 	Status1 = 'First',
+  > 16 │ 	Status10 = 'Tenth',
+  > 17 │ 	Status2 = 'Second',
+  > 18 │ }
+       │ ^
+    19 │ 
+  
+  i Safe fix: Sort enum.
+  
+    14 14 │   enum InvalidStatus2 {
+    15 15 │     Status1 = 'First',
+    16    │ - → Status10·=·'Tenth',
+    17    │ - → Status2·=·'Second',
+       16 │ + → Status2·=·'Second',
+       17 │ + → Status10·=·'Tenth',
+    18 18 │   }
+    19 19 │   
   
 
 ```

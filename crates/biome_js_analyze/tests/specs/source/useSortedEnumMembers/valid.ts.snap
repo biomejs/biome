@@ -37,4 +37,10 @@ enum ValidStatus4 {
 	OnHold = 'On Hold',
 }
 
+enum ValidStatus5 {
+	Status1 = 'First',
+	Status2 = 'Second',
+	Status10 = 'Tenth',
+}
+
 ```

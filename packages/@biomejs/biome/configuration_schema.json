@@ -12603,7 +12603,7 @@
 					]
 				},
 				"useSortedEnumMembers": {
-					"description": "Sort enum members.\nSee https://biomejs.dev/assist/actions/use-sorted-enum-members",
+					"description": "Sort the members of an enum in natural order.\nSee https://biomejs.dev/assist/actions/use-sorted-enum-members",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseSortedEnumMembersConfiguration" },
 						{ "type": "null" }

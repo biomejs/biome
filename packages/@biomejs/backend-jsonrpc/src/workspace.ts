@@ -1062,7 +1062,7 @@ See https://biomejs.dev/assist/actions/use-sorted-attributes
 	 */
 	useSortedAttributes?: UseSortedAttributesConfiguration;
 	/**
-	* Sort enum members.
+	* Sort the members of an enum in natural order.
 See https://biomejs.dev/assist/actions/use-sorted-enum-members 
 	 */
 	useSortedEnumMembers?: UseSortedEnumMembersConfiguration;

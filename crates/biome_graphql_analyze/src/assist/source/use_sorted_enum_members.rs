@@ -19,12 +19,16 @@ use biome_string_case::comparable_token::ComparableToken;
 use crate::GraphqlRuleAction;
 
 declare_source_rule! {
-    /// Sort enum members.
+    /// Sort the members of an enum in natural order.
     ///
     /// Enforce a consistent natural sort order for GraphQL enum values.
     ///
     /// Keeping enum values sorted makes schema definitions easier to review and maintain,
     /// especially as enums grow over time.
+    ///
+    /// Members are sorted in a [Natural order](https://en.wikipedia.org/wiki/Natural_sort_order),
+    /// meaning that uppercase letters come before lowercase letters (e.g. `A` < `a` <`B` < `b`)
+    /// and numbers are compared in a human way (e.g. `9` < `10`).
     ///
     /// ## Examples
     ///
@@ -133,7 +137,7 @@ fn get_value_definition_key(node: &GraphqlEnumValueDefinition) -> Option<TokenTe
 }
 
 fn is_enum_value_list_sorted(list: &GraphqlEnumValueList) -> bool {
-    let mut prev: Option<GraphqlEnumValueDefinition> = None;
+    let mut prev = None;
     for item in list {
         if prev
             .as_ref()

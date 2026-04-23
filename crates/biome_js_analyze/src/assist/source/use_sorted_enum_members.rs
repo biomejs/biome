@@ -18,12 +18,16 @@ use biome_string_case::comparable_token::ComparableToken;
 use crate::JsRuleAction;
 
 declare_source_rule! {
-    /// Sort enum members.
+    /// Sort the members of an enum in natural order.
     ///
     /// Enforce a consistent natural sort order for TypeScript enum members with string initializers.
     ///
     /// This rule sorts members in string enums so declarations stay predictable and easier to scan.
     /// Members that cannot be compared, such as computed names, are left in place and split the enum into sortable groups.
+    ///
+    /// Members are sorted in a [Natural order](https://en.wikipedia.org/wiki/Natural_sort_order),
+    /// meaning that uppercase letters come before lowercase letters (e.g. `A` < `a` <`B` < `b`)
+    /// and numbers are compared in a human way (e.g. `9` < `10`).
     ///
     /// ## Examples
     ///
@@ -131,7 +135,7 @@ fn get_value_definition_key(node: &TsEnumMember) -> Option<TokenText> {
 }
 
 fn is_enum_member_list_sorted(list: &TsEnumMemberList) -> bool {
-    let mut prev: Option<TokenText> = None;
+    let mut prev = None;
     for item in list.into_iter().flatten() {
         match get_value_definition_key(&item) {
             Some(key) => {
