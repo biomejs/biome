@@ -1747,6 +1747,12 @@ impl OverrideSettingPattern {
         {
             options.set_bracket_spacing(bracket_spacing);
         }
+        if let Some(delimiter_spacing) = json_formatter
+            .delimiter_spacing
+            .or(formatter.delimiter_spacing)
+        {
+            options.set_delimiter_spacing(delimiter_spacing);
+        }
         if let Some(trailing_newline) = json_formatter
             .trailing_newline
             .or(formatter.trailing_newline)

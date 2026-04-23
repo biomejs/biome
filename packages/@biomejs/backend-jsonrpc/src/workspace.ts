@@ -911,6 +911,13 @@ export interface JsonFormatterConfiguration {
 	 */
 	bracketSpacing?: BracketSpacing;
 	/**
+	* Whether to insert spaces inside delimiters (after the opening delimiter and before the
+closing delimiter). Only applies when the content fits on a single line, and empty
+brackets are not affected. For JSON, affects square brackets (e.g., `[ 1, 2, 3 ]`).
+Defaults to false. 
+	 */
+	delimiterSpacing?: DelimiterSpacing;
+	/**
 	 * Control the formatter for JSON (and its super languages) files.
 	 */
 	enabled?: Bool;
