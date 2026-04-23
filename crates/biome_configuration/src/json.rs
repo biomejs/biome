@@ -145,7 +145,10 @@ pub struct JsonFormatterConfiguration {
     /// closing delimiter). Only applies when the content fits on a single line, and empty
     /// brackets are not affected. For JSON, affects square brackets (e.g., `[ 1, 2, 3 ]`).
     /// Defaults to false.
-    #[bpaf(long("json-formatter-delimiter-spacing"), argument("true|false"))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("json-formatter-delimiter-spacing"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub delimiter_spacing: Option<DelimiterSpacing>,
 
