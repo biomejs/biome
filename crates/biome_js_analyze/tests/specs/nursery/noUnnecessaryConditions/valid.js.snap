@@ -179,4 +179,5 @@ function testDestructuring({ prop = false } = {}) {
     return "truthy";
   }
 }
+
 ```

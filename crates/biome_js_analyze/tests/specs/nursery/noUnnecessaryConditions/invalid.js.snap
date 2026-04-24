@@ -1053,19 +1053,20 @@ invalid.js:118:7 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
 ```
 
 ```
-invalid.js:124:9 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:128:8 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This condition is always truthy based on the type.
+  ! This case is unreachable.
   
-    123 │ // Switch with constant discriminant
-  > 124 │ switch (true) {
-        │         ^^^^
-    125 │   case true:
     126 │     console.log("always matches");
+    127 │     break;
+  > 128 │   case false:
+        │        ^^^^^
+    129 │     console.log("never matches");
+    130 │     break;
   
-  i The type being checked can never be falsy, making this condition redundant.
+  i The discriminant's type can never equal this value.
   
-  i Remove the condition.
+  i Remove the case, or change the discriminant.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
   
