@@ -8,7 +8,7 @@ impl FormatRule<AnyYamlBlockNode> for FormatAnyYamlBlockNode {
     type Context = YamlFormatContext;
     fn fmt(&self, node: &AnyYamlBlockNode, f: &mut YamlFormatter) -> FormatResult<()> {
         match node {
-            AnyYamlBlockNode::AnyYamlBlockInBlockNode(node) => node.format().fmt(f),
+            AnyYamlBlockNode::YamlBlockInBlockNode(node) => node.format().fmt(f),
             AnyYamlBlockNode::YamlBogusBlockNode(node) => node.format().fmt(f),
             AnyYamlBlockNode::YamlFlowInBlockNode(node) => node.format().fmt(f),
         }

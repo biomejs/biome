@@ -71,6 +71,30 @@ impl ProjectLayout {
             .cloned()
     }
 
+    /// Returns the `package.json` for a dependency by name, walking ancestor
+    /// `node_modules` directories to handle hoisted dependencies (e.g. in
+    /// monorepos).
+    ///
+    /// Given a `project_dir` (the directory containing the consumer's
+    /// `package.json`) and a `dependency_name` (e.g. `"lodash"` or
+    /// `"@scope/pkg"`), this will try:
+    /// - `<project_dir>/node_modules/<dependency_name>`
+    /// - `<parent>/node_modules/<dependency_name>`
+    /// - ... all the way up to the filesystem root
+    pub fn get_dependency_manifest(
+        &self,
+        project_dir: &Utf8Path,
+        dependency_name: &str,
+    ) -> Option<PackageJson> {
+        for ancestor in project_dir.ancestors() {
+            let dep_path = ancestor.join("node_modules").join(dependency_name);
+            if let Some(manifest) = self.get_node_manifest_for_package(&dep_path) {
+                return Some(manifest);
+            }
+        }
+        None
+    }
+
     /// Returns the `tsconfig.json` inside the given `package_path`.
     ///
     /// This function does not look for the closest `tsconfig.json` file in the
@@ -405,6 +429,11 @@ impl ProjectLayout {
                     })
             })
             .unwrap_or_default()
+    }
+
+    /// Returns all package paths currently tracked in the layout.
+    pub fn package_paths(&self) -> Vec<Utf8PathBuf> {
+        self.0.pin().keys().cloned().collect()
     }
 
     /// Searches for the `tsconfig.json` file nearest to `path` and calls

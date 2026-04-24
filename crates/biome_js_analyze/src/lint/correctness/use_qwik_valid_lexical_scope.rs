@@ -95,6 +95,7 @@ impl Rule for UseQwikValidLexicalScope {
 fn is_wrapped_with_dollar(expr: &AnyJsExpression) -> bool {
     expr.syntax()
         .ancestors()
+        .skip(1)
         .find_map(JsCallExpression::cast)
         .and_then(|call| call.callee().ok())
         .and_then(|callee| callee.as_js_reference_identifier())

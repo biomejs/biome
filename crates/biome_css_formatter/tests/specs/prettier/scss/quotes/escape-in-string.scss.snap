@@ -1,0 +1,31 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/quotes/escape-in-string.scss
+---
+
+# Input
+
+```scss
+$description: "Lorem ipsum dolor sit \"amet\", consectetur adipiscing elit, " +
+  "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,2 @@
+ $description: 'Lorem ipsum dolor sit "amet", consectetur adipiscing elit, ' +
+-  "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
++"sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+```
+
+# Output
+
+```scss
+$description: 'Lorem ipsum dolor sit "amet", consectetur adipiscing elit, ' +
+"sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+```

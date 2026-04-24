@@ -80,6 +80,9 @@ impl FormatRule<HtmlAttributeList> for FormatHtmlAttributeList {
                                     AnyHtmlAttribute::HtmlSpreadAttribute(attr) => {
                                         attr.format().fmt(f)
                                     }
+                                    AnyHtmlAttribute::AnyAstroDirective(attr) => {
+                                        attr.format().fmt(f)
+                                    }
                                 })
                             }))
                             .finish()?;

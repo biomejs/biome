@@ -11,7 +11,7 @@ use biome_rowan::AstNode;
 use biome_rule_options::use_semantic_elements::UseSemanticElementsOptions;
 
 declare_lint_rule! {
-    /// It detects the use of `role` attributes in JSX elements and suggests using semantic elements instead.
+    /// Enforces using semantic DOM elements over the ARIA `role` property.
     ///
     /// The `role` attribute is used to define the purpose of an element, but it should be used as a last resort.
     /// Using semantic elements like `<button>`, `<nav>` and others are more accessible and provide better semantics.
@@ -42,6 +42,7 @@ declare_lint_rule! {
     /// <>
     ///   <input type="checkbox">label</input>
     ///   <hr/>
+    ///   <div role="status"></div>
     /// </>;
     /// ```
     ///
@@ -51,6 +52,15 @@ declare_lint_rule! {
     /// <div role="img" aria-label="That cat is so cute">
     ///   <p>&#x1F408; &#x1F602;</p>
     /// </div>
+    /// ```
+    ///
+    /// Semantic elements with a matching role are not flagged (see [noRedundantRoles](https://biomejs.dev/linter/rules/no-redundant-roles/)):
+    ///
+    /// ```jsx
+    /// <>
+    ///   <nav role="navigation"></nav>
+    ///   <footer role="contentinfo"></footer>
+    /// </>;
     /// ```
     pub UseSemanticElements {
         version: "1.8.0",
@@ -88,18 +98,49 @@ impl Rule for UseSemanticElements {
         // For the following roles, the associated elements are impractical:
         // - combobox: <select> is not possible to implement many valid comboboxes (see https://www.w3.org/WAI/ARIA/apg/patterns/combobox/)
         // - option: <option> in browsers have divergent/unexpected behavior, with Safari hiding elements by default.
-        // - listbox: <datalist> isn’t always correct for all listbox uses
+        // - listbox: <datalist> isn't always correct for all listbox uses
         // See https://www.w3.org/WAI/ARIA/apg/patterns/combobox/. In most examples, roles are explicit
-        if role_value == "combobox" || role_value == "listbox" || role_value == "option" {
+        // - status: <output> is only a relatedConcept, not a baseConcept of the status role.
+        //   Using <output> for status is misleading (see #9245, eslint-plugin-jsx-a11y#920)
+        // - alert: <output> is only a relatedConcept, same issue as status
+        if role_value == "combobox"
+            || role_value == "listbox"
+            || role_value == "option"
+            || role_value == "status"
+            || role_value == "alert"
+        {
             return None;
         }
 
         let role = AriaRole::from_roles(role_value)?;
-        if role.base_html_elements().is_empty() && role.related_html_elements().is_empty() {
-            None
-        } else {
-            Some(role_attribute)
+        let semantic_elements = role.base_html_elements();
+        let related_elements = role.related_html_elements();
+        if semantic_elements.is_empty() && related_elements.is_empty() {
+            return None;
         }
+
+        // If the current element is already a semantic element for this role
+        // (matching both the tag name and any required attributes),
+        // don't flag it. That case is handled by `noRedundantRoles`.
+        let element_name = node.name_value_token().ok()?;
+        let element_name = element_name.text_trimmed();
+        let is_already_semantic =
+            semantic_elements
+                .iter()
+                .chain(related_elements.iter())
+                .any(|instance| {
+                    instance.element.as_str() == element_name
+                        && instance.attributes.iter().all(|required_attr| {
+                            node.find_attribute_by_name(required_attr.attribute.as_str())
+                                .and_then(|attr| attr.as_static_value())
+                                .is_some_and(|value| value.text() == required_attr.value)
+                        })
+                });
+        if is_already_semantic {
+            return None;
+        }
+
+        Some(role_attribute)
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -125,6 +166,13 @@ impl Rule for UseSemanticElements {
                     {candidate_list}
                 }
                 .to_owned(),
+            )
+            .footer_list(
+                markup! { "Replace with one of these elements:" },
+                role.base_html_elements()
+                    .iter()
+                    .chain(role.related_html_elements())
+                    .map(|element| element.to_string()),
             )
             .note(markup! {
                 "For examples and more information, see " <Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles">"WAI-ARIA Roles"</Hyperlink>

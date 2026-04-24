@@ -24,7 +24,7 @@ pub struct VueFileHandler;
 
 // https://regex101.com/r/E4n4hh/6
 pub static VUE_FENCE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"(?ixs)(?<opening><script(?:\s.*?)?>)\r?\n(?<script>(?U:.*))</script>"#).unwrap()
+    Regex::new(r#"(?ixs)(?<opening><script(?:\s+(?:[^>"']*|"[^"]*"|'[^']*')*)?>)\r?\n(?<script>(?U:.*))</script>"#).unwrap()
 });
 
 impl VueFileHandler {
@@ -81,6 +81,8 @@ impl VueFileHandler {
                         .with_embedding_kind(EmbeddingKind::Vue {
                             setup,
                             is_source: true,
+                            event_handler: false,
+                            allow_statements: true,
                         }),
                 )
             })
@@ -202,6 +204,50 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     javascript::code_actions(params)
 }
 
-fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
+fn fix_all(mut params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
+    let html_options = params
+        .settings
+        .format_options::<HtmlLanguage>(params.biome_path, &params.document_file_source);
+    if *html_options.indent_script_and_style() {
+        params.embeds_initial_indent = 1;
+    }
     javascript::fix_all(params)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::VueFileHandler;
+
+    #[test]
+    fn vue_file_source_simple_ts() {
+        let src = "<script lang=\"ts\">\nimport type { Foo } from \"bar\";\n</script>";
+        assert!(VueFileHandler::file_source(src).is_typescript());
+    }
+
+    #[test]
+    fn vue_file_source_simple_js() {
+        let src = "<script>\nimport { foo } from \"bar\";\n</script>";
+        assert!(!VueFileHandler::file_source(src).is_typescript());
+    }
+
+    #[test]
+    fn vue_file_source_setup_ts() {
+        let src = "<script setup lang=\"ts\">\nimport type { Foo } from \"bar\";\n</script>";
+        assert!(VueFileHandler::file_source(src).is_typescript());
+    }
+
+    #[test]
+    fn vue_file_source_attr_with_gt_in_quotes() {
+        let src =
+            "<script lang=\"ts\" data-info=\"a>b\">\nimport type { Foo } from \"bar\";\n</script>";
+        assert!(VueFileHandler::file_source(src).is_typescript());
+    }
+
+    #[test]
+    fn vue_input_with_gt_in_attr() {
+        let src =
+            "<script lang=\"ts\" data-info=\"a>b\">\nimport type { Foo } from \"bar\";\n</script>";
+        let input = VueFileHandler::input(src);
+        assert_eq!(input, "import type { Foo } from \"bar\";\n");
+    }
 }

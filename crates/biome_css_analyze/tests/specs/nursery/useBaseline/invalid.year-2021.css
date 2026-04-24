@@ -1,0 +1,4 @@
+/* should generate diagnostics */
+
+/* backdrop-filter became newly available in 2022, fails cutoff of 2021 */
+.box { backdrop-filter: blur(10px); }

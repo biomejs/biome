@@ -42,7 +42,6 @@ expression: invalid_self_closing.jsx
     <div role="paragraph" />
     <div role="complementary" />
     <div role="blockquote" />
-    <div role="status" />
     <div role="contentinfo" />
     <div role="region" />
 </>
@@ -65,6 +64,10 @@ invalid_self_closing.jsx:3:10 lint/a11y/useSemanticElements ━━━━━━�
   
   i For examples and more information, see WAI-ARIA Roles
   
+  i Replace with one of these elements:
+  
+  - <input type="checkbox">
+  
 
 ```
 
@@ -82,6 +85,10 @@ invalid_self_closing.jsx:4:10 lint/a11y/useSemanticElements ━━━━━━�
     6 │     <div role="separator" />
   
   i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <input type="radio">
   
 
 ```
@@ -106,6 +113,15 @@ invalid_self_closing.jsx:5:10 lint/a11y/useSemanticElements ━━━━━━�
   
   i For examples and more information, see WAI-ARIA Roles
   
+  i Replace with one of these elements:
+  
+  - <h1>
+  - <h2>
+  - <h3>
+  - <h4>
+  - <h5>
+  - <h6>
+  
 
 ```
 
@@ -123,6 +139,10 @@ invalid_self_closing.jsx:6:10 lint/a11y/useSemanticElements ━━━━━━�
     8 │     <div role="article" />
   
   i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <hr>
   
 
 ```
@@ -142,6 +162,10 @@ invalid_self_closing.jsx:7:10 lint/a11y/useSemanticElements ━━━━━━�
   
   i For examples and more information, see WAI-ARIA Roles
   
+  i Replace with one of these elements:
+  
+  - <button>
+  
 
 ```
 
@@ -159,6 +183,10 @@ invalid_self_closing.jsx:8:10 lint/a11y/useSemanticElements ━━━━━━�
     10 │     <div role="cell" />
   
   i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <article>
   
 
 ```
@@ -178,6 +206,10 @@ invalid_self_closing.jsx:10:10 lint/a11y/useSemanticElements ━━━━━━�
   
   i For examples and more information, see WAI-ARIA Roles
   
+  i Replace with one of these elements:
+  
+  - <td>
+  
 
 ```
 
@@ -194,6 +226,10 @@ invalid_self_closing.jsx:11:10 lint/a11y/useSemanticElements ━━━━━━�
     13 │     <div role="figure" />
   
   i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <th scope="col">
   
 
 ```
@@ -213,6 +249,10 @@ invalid_self_closing.jsx:13:10 lint/a11y/useSemanticElements ━━━━━━�
   
   i For examples and more information, see WAI-ARIA Roles
   
+  i Replace with one of these elements:
+  
+  - <figure>
+  
 
 ```
 
@@ -229,6 +269,10 @@ invalid_self_closing.jsx:14:10 lint/a11y/useSemanticElements ━━━━━━�
   
   i For examples and more information, see WAI-ARIA Roles
   
+  i Replace with one of these elements:
+  
+  - <form>
+  
 
 ```
 
@@ -244,6 +288,10 @@ invalid_self_closing.jsx:17:10 lint/a11y/useSemanticElements ━━━━━━�
     19 │     <div role="group" />
   
   i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <table>
   
 
 ```
@@ -262,6 +310,10 @@ invalid_self_closing.jsx:18:10 lint/a11y/useSemanticElements ━━━━━━�
   
   i For examples and more information, see WAI-ARIA Roles
   
+  i Replace with one of these elements:
+  
+  - <td>
+  
 
 ```
 
@@ -279,6 +331,10 @@ invalid_self_closing.jsx:19:10 lint/a11y/useSemanticElements ━━━━━━�
     21 │     <div role="list" />
   
   i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <fieldset>
   
 
 ```
@@ -299,6 +355,11 @@ invalid_self_closing.jsx:20:10 lint/a11y/useSemanticElements ━━━━━━�
   
   i For examples and more information, see WAI-ARIA Roles
   
+  i Replace with one of these elements:
+  
+  - <a>
+  - <link>
+  
 
 ```
 
@@ -318,6 +379,11 @@ invalid_self_closing.jsx:21:10 lint/a11y/useSemanticElements ━━━━━━�
   
   i For examples and more information, see WAI-ARIA Roles
   
+  i Replace with one of these elements:
+  
+  - <ol>
+  - <ul>
+  
 
 ```
 
@@ -335,6 +401,10 @@ invalid_self_closing.jsx:22:10 lint/a11y/useSemanticElements ━━━━━━�
     24 │     <div role="row" />
   
   i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <li>
   
 
 ```
@@ -354,6 +424,10 @@ invalid_self_closing.jsx:23:10 lint/a11y/useSemanticElements ━━━━━━�
   
   i For examples and more information, see WAI-ARIA Roles
   
+  i Replace with one of these elements:
+  
+  - <nav>
+  
 
 ```
 
@@ -371,6 +445,10 @@ invalid_self_closing.jsx:24:10 lint/a11y/useSemanticElements ━━━━━━�
     26 │     <div role="rowheader" />
   
   i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <tr>
   
 
 ```
@@ -392,6 +470,12 @@ invalid_self_closing.jsx:25:10 lint/a11y/useSemanticElements ━━━━━━�
   
   i For examples and more information, see WAI-ARIA Roles
   
+  i Replace with one of these elements:
+  
+  - <tbody>
+  - <tfoot>
+  - <thead>
+  
 
 ```
 
@@ -409,6 +493,10 @@ invalid_self_closing.jsx:26:10 lint/a11y/useSemanticElements ━━━━━━�
     28 │     <div role="searchbox" />
   
   i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <th scope="row">
   
 
 ```
@@ -428,6 +516,10 @@ invalid_self_closing.jsx:27:10 lint/a11y/useSemanticElements ━━━━━━�
   
   i For examples and more information, see WAI-ARIA Roles
   
+  i Replace with one of these elements:
+  
+  - <search>
+  
 
 ```
 
@@ -445,6 +537,10 @@ invalid_self_closing.jsx:28:10 lint/a11y/useSemanticElements ━━━━━━�
     30 │     <div role="term" />
   
   i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <input type="search">
   
 
 ```
@@ -464,6 +560,10 @@ invalid_self_closing.jsx:29:10 lint/a11y/useSemanticElements ━━━━━━�
   
   i For examples and more information, see WAI-ARIA Roles
   
+  i Replace with one of these elements:
+  
+  - <table>
+  
 
 ```
 
@@ -481,6 +581,10 @@ invalid_self_closing.jsx:30:10 lint/a11y/useSemanticElements ━━━━━━�
     32 │     <div role="generic" />
   
   i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <dfn>
   
 
 ```
@@ -501,24 +605,10 @@ invalid_self_closing.jsx:31:10 lint/a11y/useSemanticElements ━━━━━━�
   
   i For examples and more information, see WAI-ARIA Roles
   
-
-```
-
-```
-invalid_self_closing.jsx:32:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The elements with this role can be changed to the following elements:
-    <div>
-    <span>
+  i Replace with one of these elements:
   
-    30 │     <div role="term" />
-    31 │     <div role="textbox" />
-  > 32 │     <div role="generic" />
-       │          ^^^^^^^^^^^^^^
-    33 │     <div role="caption" />
-    34 │     <div role="main" />
-  
-  i For examples and more information, see WAI-ARIA Roles
+  - <input type="text">
+  - <textarea>
   
 
 ```
@@ -540,6 +630,12 @@ invalid_self_closing.jsx:33:10 lint/a11y/useSemanticElements ━━━━━━�
   
   i For examples and more information, see WAI-ARIA Roles
   
+  i Replace with one of these elements:
+  
+  - <caption>
+  - <figcaption>
+  - <legend>
+  
 
 ```
 
@@ -557,6 +653,10 @@ invalid_self_closing.jsx:34:10 lint/a11y/useSemanticElements ━━━━━━�
     36 │     <div role="paragraph" />
   
   i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <main>
   
 
 ```
@@ -576,6 +676,10 @@ invalid_self_closing.jsx:35:10 lint/a11y/useSemanticElements ━━━━━━�
   
   i For examples and more information, see WAI-ARIA Roles
   
+  i Replace with one of these elements:
+  
+  - <time>
+  
 
 ```
 
@@ -594,6 +698,10 @@ invalid_self_closing.jsx:36:10 lint/a11y/useSemanticElements ━━━━━━�
   
   i For examples and more information, see WAI-ARIA Roles
   
+  i Replace with one of these elements:
+  
+  - <p>
+  
 
 ```
 
@@ -608,9 +716,13 @@ invalid_self_closing.jsx:37:10 lint/a11y/useSemanticElements ━━━━━━�
   > 37 │     <div role="complementary" />
        │          ^^^^^^^^^^^^^^^^^^^^
     38 │     <div role="blockquote" />
-    39 │     <div role="status" />
+    39 │     <div role="contentinfo" />
   
   i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <aside>
   
 
 ```
@@ -625,10 +737,14 @@ invalid_self_closing.jsx:38:10 lint/a11y/useSemanticElements ━━━━━━�
     37 │     <div role="complementary" />
   > 38 │     <div role="blockquote" />
        │          ^^^^^^^^^^^^^^^^^
-    39 │     <div role="status" />
-    40 │     <div role="contentinfo" />
+    39 │     <div role="contentinfo" />
+    40 │     <div role="region" />
   
   i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <blockquote>
   
 
 ```
@@ -637,16 +753,20 @@ invalid_self_closing.jsx:38:10 lint/a11y/useSemanticElements ━━━━━━�
 invalid_self_closing.jsx:39:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The elements with this role can be changed to the following elements:
-    <output>
+    <footer>
   
     37 │     <div role="complementary" />
     38 │     <div role="blockquote" />
-  > 39 │     <div role="status" />
-       │          ^^^^^^^^^^^^^
-    40 │     <div role="contentinfo" />
-    41 │     <div role="region" />
+  > 39 │     <div role="contentinfo" />
+       │          ^^^^^^^^^^^^^^^^^^
+    40 │     <div role="region" />
+    41 │ </>
   
   i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <footer>
   
 
 ```
@@ -655,34 +775,20 @@ invalid_self_closing.jsx:39:10 lint/a11y/useSemanticElements ━━━━━━�
 invalid_self_closing.jsx:40:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The elements with this role can be changed to the following elements:
-    <footer>
-  
-    38 │     <div role="blockquote" />
-    39 │     <div role="status" />
-  > 40 │     <div role="contentinfo" />
-       │          ^^^^^^^^^^^^^^^^^^
-    41 │     <div role="region" />
-    42 │ </>
-  
-  i For examples and more information, see WAI-ARIA Roles
-  
-
-```
-
-```
-invalid_self_closing.jsx:41:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The elements with this role can be changed to the following elements:
     <section>
   
-    39 │     <div role="status" />
-    40 │     <div role="contentinfo" />
-  > 41 │     <div role="region" />
+    38 │     <div role="blockquote" />
+    39 │     <div role="contentinfo" />
+  > 40 │     <div role="region" />
        │          ^^^^^^^^^^^^^
-    42 │ </>
-    43 │ 
+    41 │ </>
+    42 │ 
   
   i For examples and more information, see WAI-ARIA Roles
+  
+  i Replace with one of these elements:
+  
+  - <section>
   
 
 ```

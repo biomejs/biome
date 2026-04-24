@@ -2,7 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{CssFunction, CssParameter};
+use biome_css_syntax::{AnyCssExpression, CssFunction};
 use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
 use biome_rowan::AstSeparatedList;
@@ -72,7 +72,7 @@ pub static DIRECTION_WITHOUT_TO: LazyLock<Regex> = LazyLock::new(|| {
 
 impl Rule for NoInvalidDirectionInLinearGradient {
     type Query = Ast<CssFunction>;
-    type State = CssParameter;
+    type State = AnyCssExpression;
     type Signals = Option<Self::State>;
     type Options = NoInvalidDirectionInLinearGradientOptions;
 
@@ -89,32 +89,31 @@ impl Rule for NoInvalidDirectionInLinearGradient {
         if !linear_gradient_property.contains(&node_name.to_ascii_lowercase_cow().as_ref()) {
             return None;
         }
-        let css_parameter = node.items();
-
-        let first_css_parameter = css_parameter.first()?.ok()?;
-        let first_css_parameter_text = first_css_parameter.to_trimmed_text();
-        if IN_KEYWORD.is_match(&first_css_parameter_text) {
+        let arguments = node.items();
+        let first_expression = arguments.first()?.ok()?;
+        let first_expression_text = first_expression.to_trimmed_text();
+        if IN_KEYWORD.is_match(&first_expression_text) {
             return None;
         }
-        if let Some(first_byte) = first_css_parameter_text.bytes().next()
+        if let Some(first_byte) = first_expression_text.bytes().next()
             && first_byte.is_ascii_digit()
         {
-            if ANGLE.is_match(&first_css_parameter_text) {
+            if ANGLE.is_match(&first_expression_text) {
                 return None;
             }
-            return Some(first_css_parameter);
+            return Some(first_expression);
         }
         let direction_property = ["top", "left", "bottom", "right"];
         if !direction_property.iter().any(|&keyword| {
-            first_css_parameter_text
+            first_expression_text
                 .to_ascii_lowercase_cow()
                 .contains(keyword)
         }) {
             return None;
         }
         let has_prefix = vendor_prefixed(&node_name);
-        if !is_standdard_direction(&first_css_parameter_text, has_prefix) {
-            return Some(first_css_parameter);
+        if !is_standdard_direction(&first_expression_text, has_prefix) {
+            return Some(first_expression);
         }
         None
     }

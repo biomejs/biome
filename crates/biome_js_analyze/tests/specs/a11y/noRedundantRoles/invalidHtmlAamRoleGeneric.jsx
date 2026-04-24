@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 // https://github.com/web-platform-tests/wpt/blob/master/html-aam/roles-generic.html
 <>
 	<b role="generic">x</b>

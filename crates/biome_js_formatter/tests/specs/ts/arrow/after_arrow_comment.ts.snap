@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: ts/arrow/after_arrow_comment.ts
+---
+
+# Input
+
+```ts
+type First = () => 
+  // Comment
+  string
+
+type Second = () => // Comment
+  string
+```
+
+
+# Options
+
+```json
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "javascript": {
+    "formatter": {
+      "arrowParentheses": "asNeeded"
+    }
+  }
+}
+```
+
+# Formatted
+
+```ts
+type First = () => // Comment
+string;
+
+type Second = () => // Comment
+string;
+
+```

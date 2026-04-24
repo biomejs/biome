@@ -1,0 +1,180 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: ignoreConditionalTestsDisabled.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+declare const a: string;
+declare const b: number;
+declare const c: boolean;
+
+if (null || a) {
+  console.log(a);
+}
+
+while (null || b) {
+  break;
+}
+
+for (; null || c; ) {
+  break;
+}
+
+do {
+  break;
+} while (null || 'fallback');
+
+const result = (null || 42) ? 'yes' : 'no';
+
+```
+
+# Diagnostics
+```
+ignoreConditionalTestsDisabled.ts:7:10 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    5 │ declare const c: boolean;
+    6 │ 
+  > 7 │ if (null || a) {
+      │          ^^
+    8 │   console.log(a);
+    9 │ }
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+     5  5 │   declare const c: boolean;
+     6  6 │   
+     7    │ - if·(null·||·a)·{
+        7 │ + if·(null·??·a)·{
+     8  8 │     console.log(a);
+     9  9 │   }
+  
+
+```
+
+```
+ignoreConditionalTestsDisabled.ts:11:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+     9 │ }
+    10 │ 
+  > 11 │ while (null || b) {
+       │             ^^
+    12 │   break;
+    13 │ }
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+     9  9 │   }
+    10 10 │   
+    11    │ - while·(null·||·b)·{
+       11 │ + while·(null·??·b)·{
+    12 12 │     break;
+    13 13 │   }
+  
+
+```
+
+```
+ignoreConditionalTestsDisabled.ts:15:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    13 │ }
+    14 │ 
+  > 15 │ for (; null || c; ) {
+       │             ^^
+    16 │   break;
+    17 │ }
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+    13 13 │   }
+    14 14 │   
+    15    │ - for·(;·null·||·c;·)·{
+       15 │ + for·(;·null·??·c;·)·{
+    16 16 │     break;
+    17 17 │   }
+  
+
+```
+
+```
+ignoreConditionalTestsDisabled.ts:21:15 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    19 │ do {
+    20 │   break;
+  > 21 │ } while (null || 'fallback');
+       │               ^^
+    22 │ 
+    23 │ const result = (null || 42) ? 'yes' : 'no';
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+    19 19 │   do {
+    20 20 │     break;
+    21    │ - }·while·(null·||·'fallback');
+       21 │ + }·while·(null·??·'fallback');
+    22 22 │   
+    23 23 │   const result = (null || 42) ? 'yes' : 'no';
+  
+
+```
+
+```
+ignoreConditionalTestsDisabled.ts:23:22 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    21 │ } while (null || 'fallback');
+    22 │ 
+  > 23 │ const result = (null || 42) ? 'yes' : 'no';
+       │                      ^^
+    24 │ 
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+    21 21 │   } while (null || 'fallback');
+    22 22 │   
+    23    │ - const·result·=·(null·||·42)·?·'yes'·:·'no';
+       23 │ + const·result·=·(null·??·42)·?·'yes'·:·'no';
+    24 24 │   
+  
+
+```

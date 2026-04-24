@@ -45,7 +45,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoPlaywrightForceOption {
-        version: "next",
+        version: "2.4.2",
         name: "noPlaywrightForceOption",
         language: "js",
         sources: &[RuleSource::EslintPlaywright("no-force-option").same()],

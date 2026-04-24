@@ -1,0 +1,2 @@
+// Stray tokens after ellipsis should recover and keep later args
+$arglist-recovery: foo($a..., ???, $b: 1);

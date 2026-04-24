@@ -1,0 +1,126 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidRegex.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+declare const text: string;
+
+text.match(/^bar/) !== null;
+text.match(/bar$/) === null;
+/^bar/.test(text);
+/bar$/.test(text);
+
+```
+
+# Diagnostics
+```
+invalidRegex.ts:5:1 lint/nursery/useStringStartsEndsWith  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This match() comparison looks like you're checking a string prefix.
+  
+    3 │ declare const text: string;
+    4 │ 
+  > 5 │ text.match(/^bar/) !== null;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ text.match(/bar$/) === null;
+    7 │ /^bar/.test(text);
+  
+  i Using the built-in string method is clearer and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use startsWith() instead.
+  
+    3 3 │   declare const text: string;
+    4 4 │   
+    5   │ - text.match(/^bar/)·!==·null;
+      5 │ + text.startsWith("bar");
+    6 6 │   text.match(/bar$/) === null;
+    7 7 │   /^bar/.test(text);
+  
+
+```
+
+```
+invalidRegex.ts:6:1 lint/nursery/useStringStartsEndsWith  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This match() comparison looks like you're checking a string suffix.
+  
+    5 │ text.match(/^bar/) !== null;
+  > 6 │ text.match(/bar$/) === null;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ /^bar/.test(text);
+    8 │ /bar$/.test(text);
+  
+  i Using the built-in string method is clearer and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use endsWith() instead.
+  
+    4 4 │   
+    5 5 │   text.match(/^bar/) !== null;
+    6   │ - text.match(/bar$/)·===·null;
+      6 │ + !text.endsWith("bar");
+    7 7 │   /^bar/.test(text);
+    8 8 │   /bar$/.test(text);
+  
+
+```
+
+```
+invalidRegex.ts:7:1 lint/nursery/useStringStartsEndsWith  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This anchored RegExp#test() call looks like you're checking a string prefix.
+  
+    5 │ text.match(/^bar/) !== null;
+    6 │ text.match(/bar$/) === null;
+  > 7 │ /^bar/.test(text);
+      │ ^^^^^^^^^^^^^^^^^
+    8 │ /bar$/.test(text);
+    9 │ 
+  
+  i Using the built-in string method is clearer and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use startsWith() instead.
+  
+    5 5 │   text.match(/^bar/) !== null;
+    6 6 │   text.match(/bar$/) === null;
+    7   │ - /^bar/.test(text);
+      7 │ + text.startsWith("bar");
+    8 8 │   /bar$/.test(text);
+    9 9 │   
+  
+
+```
+
+```
+invalidRegex.ts:8:1 lint/nursery/useStringStartsEndsWith  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This anchored RegExp#test() call looks like you're checking a string suffix.
+  
+    6 │ text.match(/bar$/) === null;
+    7 │ /^bar/.test(text);
+  > 8 │ /bar$/.test(text);
+      │ ^^^^^^^^^^^^^^^^^
+    9 │ 
+  
+  i Using the built-in string method is clearer and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use endsWith() instead.
+  
+    6 6 │   text.match(/bar$/) === null;
+    7 7 │   /^bar/.test(text);
+    8   │ - /bar$/.test(text);
+      8 │ + text.endsWith("bar");
+    9 9 │   
+  
+
+```

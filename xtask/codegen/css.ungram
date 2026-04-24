@@ -50,7 +50,6 @@ CssBogusFontFeatureValuesItem = SyntaxElement*
 CssBogusKeyframesItem =  SyntaxElement*
 CssBogusRule =  SyntaxElement*
 CssBogusParameter = SyntaxElement*
-CssBogusDeclarationItem = SyntaxElement*
 CssBogusMediaQuery =  SyntaxElement*
 CssBogusProperty =  SyntaxElement*
 CssBogusUrlModifier =  SyntaxElement*
@@ -67,7 +66,6 @@ CssBogusSyntax = SyntaxElement*
 CssBogusSyntaxSingleComponent = SyntaxElement*
 CssBogusAttrName = SyntaxElement*
 CssBogusFunctionParameter = SyntaxElement*
-CssBogusType = SyntaxElement*
 CssBogusIfTestBooleanExpr = SyntaxElement*
 
 AnyCssRoot =
@@ -87,7 +85,7 @@ CssRootItemList = AnyCssRootItem*
 
 AnyCssRootItem =
 	AnyCssRule
-	| ScssDeclaration
+	| ScssVariableDeclaration
 	| CssBogus
 
 CssRuleList = AnyCssRule*
@@ -153,6 +151,7 @@ CssSubSelectorList = AnyCssSubSelector*
 AnyCssSimpleSelector =
 	CssUniversalSelector
 	| CssTypeSelector
+	| ScssPlaceholderSelector
 
 AnyCssSubSelector =
 	CssIdSelector
@@ -180,7 +179,7 @@ CssUniversalSelector =
 // ^^^
 CssTypeSelector =
 	namespace: CssNamespace?
-	ident: CssIdentifier
+	ident: AnyCssSelectorIdentifier
 
 CssNamespace =
 	prefix: AnyCssNamespacePrefix?
@@ -200,13 +199,21 @@ CssUniversalNamespacePrefix =
 // ^^^^
 CssIdSelector =
 	'#'
-	name: CssCustomIdentifier
+	name: AnyCssSelectorCustomIdentifier
 
 // .app {}
 // ^^^^
 CssClassSelector =
 	'.'
-	name: CssCustomIdentifier
+	name: AnyCssSelectorCustomIdentifier
+
+AnyCssSelectorIdentifier =
+	CssIdentifier
+	| ScssInterpolatedIdentifier
+
+AnyCssSelectorCustomIdentifier =
+	CssCustomIdentifier
+	| ScssInterpolatedIdentifier
 
 // [title = "title" i] {}
 // ^^^^^^^^^^^^^^^^^^^
@@ -230,7 +237,7 @@ CssAttributeMatcher =
 CssAttributeMatcherValue =
  name: AnyCssAttributeMatcherValue
 
-AnyCssAttributeMatcherValue = CssString | CssIdentifier
+AnyCssAttributeMatcherValue = CssString | CssIdentifier | ScssInterpolatedString
 
 // :nth-type(2) {}
 // ^^^^^^^^^^^^
@@ -342,6 +349,7 @@ CssPseudoValueList = (AnyCssPseudoValue (',' AnyCssPseudoValue)*)
 AnyCssPseudoValue =
 	CssIdentifier
 	| CssString
+	| ScssInterpolatedString
 
 // :nth-child(2n+1 of li, .test) {}
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -492,7 +500,8 @@ CssDeclarationOrRuleList = AnyCssDeclarationOrRule*
 AnyCssDeclarationOrRule =
 	AnyCssRule
 	| CssDeclarationWithSemicolon
-	| ScssDeclaration
+	| ScssVariableDeclaration
+	| ScssNestingDeclaration
 	| CssEmptyDeclaration
 	| CssBogus
 	| CssMetavariable
@@ -512,7 +521,8 @@ CssDeclarationOrAtRuleList = AnyCssDeclarationOrAtRule*
 
 AnyCssDeclarationOrAtRule =
 	CssDeclarationWithSemicolon
-	| ScssDeclaration
+	| ScssVariableDeclaration
+	| ScssNestingDeclaration
 	| CssEmptyDeclaration
 	| CssAtRule
 
@@ -546,7 +556,8 @@ CssDeclarationList = AnyCssDeclaration*
 
 AnyCssDeclaration =
 	CssDeclarationWithSemicolon
-	| ScssDeclaration
+	| ScssVariableDeclaration
+	| ScssNestingDeclaration
 	| CssEmptyDeclaration
 
 AnyCssRuleBlock =
@@ -574,7 +585,11 @@ AnyCssProperty =
 CssGenericProperty =
 	name: AnyCssDeclarationName
 	':'
-	value: CssGenericComponentValueList
+	value: AnyCssGenericPropertyValueOrExpression
+
+AnyCssGenericPropertyValueOrExpression =
+	CssGenericComponentValueList
+	| ScssExpression
 
 // This grammar is specific to CSS Modules and defines how composes classes.
 // https://github.com/css-modules/css-modules/blob/master/docs/composition.md
@@ -639,7 +654,7 @@ CssGenericDelimiter =
 
 CssComponentValueList = AnyCssValue*
 
-AnyCssDeclarationName = CssIdentifier | CssDashedIdentifier | TwValueThemeReference
+AnyCssDeclarationName = CssIdentifier | CssDashedIdentifier | ScssInterpolatedIdentifier | TwValueThemeReference
 
 CssDeclarationImportant =
 	'!'
@@ -677,6 +692,24 @@ AnyCssAtRule =
 	| CssPositionTryAtRule
 	| CssViewTransitionAtRule
 	| CssFunctionAtRule
+	// SCSS at rules
+	| ScssEachAtRule
+	| ScssAtRootAtRule
+	| ScssExtendAtRule
+	| ScssForAtRule
+	| ScssFunctionAtRule
+	| ScssIfAtRule
+	| ScssContentAtRule
+	| ScssForwardAtRule
+	| ScssImportAtRule
+	| ScssIncludeAtRule
+	| ScssMixinAtRule
+	| ScssReturnAtRule
+	| ScssUseAtRule
+	| ScssWhileAtRule
+	| ScssDebugAtRule
+	| ScssWarnAtRule
+	| ScssErrorAtRule
 	// Tailwind CSS 4.0 at rules
 	| TwThemeAtRule
 	| TwSourceAtRule
@@ -946,7 +979,9 @@ AnyCssContainerOrCombinableQuery =
 AnyCssContainerQueryInParens =
 	CssContainerQueryInParens
 	| CssContainerSizeFeatureInParens
+	| CssContainerScrollStateQueryInParens
 	| CssContainerStyleQueryInParens
+	| AnyCssValue // general-enclosed
 
 // ( <container-query> )
 // @container name (width <= 500px) and ((width <= 500px) or (width <= 500px)) {  }
@@ -963,6 +998,66 @@ CssContainerSizeFeatureInParens =
 	'('
 	feature: AnyCssQueryFeature
 	')'
+
+// scroll-state( <scroll-state-query> )
+// Spec: https://drafts.csswg.org/css-conditional-5/#container-rule
+// @container scroll-state(scrolled: bottom) {}
+//            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssContainerScrollStateQueryInParens =
+	name: CssIdentifier
+	'('
+	query: AnyCssContainerScrollStateQuery
+	')'
+
+// <scroll-state-query>
+AnyCssContainerScrollStateQuery =
+	CssContainerScrollStateNotQuery
+	| CssContainerScrollStateAndQuery
+	| CssContainerScrollStateOrQuery
+	| CssContainerScrollStateInParens
+	| AnyCssQueryFeature
+
+// @container scroll-state(not (stuck)) {}
+//                          ^^^^^^^^^^^
+CssContainerScrollStateNotQuery =
+	'not'
+	query: CssContainerScrollStateInParens
+
+// @container scroll-state((stuck) and (scrolled: bottom)) {}
+//                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssContainerScrollStateAndQuery =
+	left: CssContainerScrollStateInParens
+	'and'
+	right: AnyCssContainerScrollStateAndCombinableQuery
+
+AnyCssContainerScrollStateAndCombinableQuery =
+	CssContainerScrollStateAndQuery
+	| CssContainerScrollStateInParens
+
+// @container scroll-state((stuck) or (scrolled: bottom)) {}
+//                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssContainerScrollStateOrQuery =
+	left: CssContainerScrollStateInParens
+	'or'
+	right: AnyCssContainerScrollStateOrCombinableQuery
+
+AnyCssContainerScrollStateOrCombinableQuery =
+	CssContainerScrollStateOrQuery
+	| CssContainerScrollStateInParens
+
+// <scroll-state-in-parens>
+// @container scroll-state((stuck)) {}
+//                          ^^^^^^^
+CssContainerScrollStateInParens =
+	'('
+	query: AnyCssContainerScrollStateInParens
+	')'
+
+// ( <scroll-state-query> )
+// ( <scroll-state-feature> )
+AnyCssContainerScrollStateInParens =
+	AnyCssContainerScrollStateQuery
+	| AnyCssValue
 
 // style( <style-query> )
 // @container style(--accent-color: blue) {}
@@ -1105,6 +1200,7 @@ CssKeyframesSelectorList =  (AnyCssKeyframesSelector (',' AnyCssKeyframesSelecto
 AnyCssKeyframesSelector =
 	CssKeyframesIdentSelector
 	| CssKeyframesPercentageSelector
+	| CssKeyframesRangeSelector
 	| CssBogusSelector
 
 // @keyframes "something" { from {} to {} }
@@ -1118,6 +1214,14 @@ CssKeyframesIdentSelector =
 //                          ^^^  ^^^
 CssKeyframesPercentageSelector =
 	selector: CssPercentage
+
+// @keyframes reveal { entry 0% {} exit 100% {} }
+//                     ^^^^^^^^^   ^^^^^^^^^^
+// Scroll-driven animations: <timeline-range-name> <percentage>
+// Valid names: cover, contain, entry, exit, entry-crossing, exit-crossing
+CssKeyframesRangeSelector =
+	name: ('cover' | 'contain' | 'entry' | 'exit' | 'entry-crossing' | 'exit-crossing')
+	percentage: CssPercentage
 
 // https://drafts.csswg.org/mediaqueries-5/#media-query
 // <media-query> = <media-condition>
@@ -1260,22 +1364,26 @@ AnyCssQueryFeature =
 	| CssQueryFeatureReverseRange
 	| CssQueryFeatureRangeInterval
 
+AnyCssQueryFeatureName =
+	CssIdentifier
+	| ScssInterpolatedIdentifier
+
 // @container (--responsive: true) {  }
 //             ^^^^^^^^^^^^^^^^^^
 CssQueryFeaturePlain =
-	name: CssIdentifier
+	name: AnyCssQueryFeatureName
 	':'
 	value: AnyCssQueryFeatureValue
 
 // @container (any-hover) {  }
 //             ^^^^^^^^^
 CssQueryFeatureBoolean =
-	name: CssIdentifier
+	name: AnyCssQueryFeatureName
 
 // @media (width <= 500px) {  }
 //         ^^^^^^^^^^^^^^
 CssQueryFeatureRange =
-	left: CssIdentifier
+	left: AnyCssQueryFeatureName
 	comparison: CssQueryFeatureRangeComparison
 	right: AnyCssQueryFeatureValue
 
@@ -1284,14 +1392,14 @@ CssQueryFeatureRange =
 CssQueryFeatureReverseRange =
 	left: AnyCssQueryFeatureValue
 	comparison: CssQueryFeatureRangeComparison
-	right: CssIdentifier
+	right: AnyCssQueryFeatureName
 
 // @media (500px <= width <= 500px) {  }
 //         ^^^^^^^^^^^^^^^^^^^^^^^
 CssQueryFeatureRangeInterval =
 	left: AnyCssQueryFeatureValue
 	left_comparison: CssQueryFeatureRangeComparison
-	name: CssIdentifier
+	name: AnyCssQueryFeatureName
 	right_comparison: CssQueryFeatureRangeComparison
 	right: AnyCssQueryFeatureValue
 
@@ -1308,6 +1416,8 @@ AnyCssQueryFeatureValue =
 	| CssIdentifier
 	| CssRatio
 	| AnyCssFunction
+	| ScssInterpolatedIdentifier
+	| ScssInterpolation
 
 // https://drafts.csswg.org/css-page/#at-ruledef-page
 // @page = @page <page-selector-list>? { <declaration-rule-list> }
@@ -1366,6 +1476,8 @@ CssPageAtRuleItemList = AnyCssPageAtRuleItem*
 
 AnyCssPageAtRuleItem =
 	CssDeclarationWithSemicolon
+	| ScssVariableDeclaration
+	| ScssNestingDeclaration
 	| CssEmptyDeclaration
 	| CssAtRule
 	| CssMarginAtRule
@@ -1579,7 +1691,7 @@ CssImportAtRule =
 //             ^^^^^^^^^^^^
 // @import "./test.scss";
 //         ^^^^^^^^^^^^^
-AnyCssImportUrl = CssUrlFunction | CssString
+AnyCssImportUrl = CssUrlFunction | CssString | ScssInterpolatedString
 
 AnyCssImportLayer =
 	CssImportAnonymousLayer
@@ -1800,7 +1912,6 @@ AnyCssFunctionParameter =
 AnyCssType =
 	CssTypeFunction
 	| AnyCssSyntaxComponent
-	| CssBogusType
 
 // @function --transparent(--color <color>: red, --alpha <number>: 0.5) { }
 //                         ^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^
@@ -1833,7 +1944,12 @@ AnyCssValue =
 	CssIdentifier
 	| CssCustomIdentifier
 	| CssDashedIdentifier
+	| ScssVariable
+	| ScssInterpolatedIdentifier
+	| ScssModuleMemberAccess
+	| ScssParentSelectorValue
 	| CssString
+	| ScssInterpolatedString
 	| CssNumber
 	| AnyCssDimension
 	| CssRatio
@@ -1843,7 +1959,6 @@ AnyCssValue =
 	| CssUnicodeRange
 	| CssMetavariable
 	| TwValueThemeReference
-	| ScssIdentifier
 
 
 // https://drafts.csswg.org/css-syntax/#typedef-dimension-token
@@ -1896,10 +2011,15 @@ AnyCssFunction =
 // content: counter(section);
 // 					^^^^^^^^^^^^^^^^
 CssFunction =
-	name: CssIdentifier
+	name: AnyCssFunctionName
 	'('
 	items: CssParameterList
 	')'
+
+AnyCssFunctionName =
+	CssIdentifier
+	| ScssInterpolatedIdentifier
+	| ScssModuleMemberAccess
 
 // https://drafts.csswg.org/css-values-4/#url-value
 // <url> = <url()> | <src()>
@@ -1928,14 +2048,9 @@ AnyCssUrlModifier =
 AnyCssUrlValue =
 	CssUrlValueRaw
 	| CssString
+	| ScssInterpolatedString
 
-CssParameterList = CssParameter (',' CssParameter)* ','?
-
-// cubic-bezier(0.1, 0.7, 1.0, 0.1)
-//			    ^^^
-// repeating-radial-gradient(red, yellow 10%, green 15%);
-//                                ^^^^^^^^^^
-CssParameter = AnyCssExpression
+CssParameterList = AnyCssExpression (',' AnyCssExpression)* ','?
 
 // https://drafts.csswg.org/css-values-5/#if-notation
 // <if()> = if( [ <if-branch> ; ]* <if-branch> ;? )
@@ -1944,6 +2059,7 @@ CssParameter = AnyCssExpression
 // <if-test> =
 //  supports( [ <ident> : <declaration-value> ] | <supports-condition> ) |
 //  media( <media-feature> | <media-condition> ) |
+//  sass( <expression> ) |
 //  style( <style-query> )
 //
 // if(style(--color: green)): red);
@@ -2060,6 +2176,12 @@ CssIfMediaTest =
 	test: AnyCssIfMediaTestQuery
 	')'
 
+CssIfSassTest =
+	'sass'
+	'('
+	test: ScssExpression
+	')'
+
 CssIfStyleTest =
 	'style'
 	'('
@@ -2069,17 +2191,21 @@ CssIfStyleTest =
 AnyCssIfTest =
 	CssIfSupportsTest
 	| CssIfMediaTest
+	| CssIfSassTest
 	| CssIfStyleTest
 	| CssBogusIfTest
 
 
 AnyCssExpression =
 	CssBinaryExpression
+	| CssUnaryExpression
 	| CssParenthesizedExpression
 	| CssListOfComponentValuesExpression
+	| ScssExpression
 	| CssCommaSeparatedValue
 
-CssListOfComponentValuesExpression = CssComponentValueList
+CssListOfComponentValuesExpression =
+	CssComponentValueList
 
 CssCommaSeparatedValue =
 	'{'
@@ -2088,10 +2214,14 @@ CssCommaSeparatedValue =
 
 CssBinaryExpression =
 	left: AnyCssExpression
-	operator_token: (
+	operator: (
 		'+' | '-' | '*' | '/'
 	)
 	right: AnyCssExpression
+
+CssUnaryExpression =
+	operator: ('+' | '-' | '*')
+	expression: AnyCssExpression
 
 CssParenthesizedExpression =
 	'(' expression: AnyCssExpression? ')'
@@ -2112,7 +2242,11 @@ CssBracketedValue =
 		items: CssBracketedValueList
 	']'
 
-CssBracketedValueList = AnyCssCustomIdentifier*
+CssBracketedValueList = AnyCssBracketedValueItem*
+
+AnyCssBracketedValueItem =
+	AnyCssCustomIdentifier
+	| CssGenericDelimiter
 
 AnyCssCustomIdentifier =
 	CssCustomIdentifier
@@ -2459,27 +2593,528 @@ TwSlotAtRule =
 // SCSS
 /////////////
 
+// @each $item in $list { color: $item; }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssEachAtRule =
+	'each'
+	bindings: ScssEachBindingList
+	'in'
+	iterable: ScssExpression
+	block: CssDeclarationOrRuleBlock
+
+// @each $key, $value in $map { color: $key; }
+//       ^^^^^^^^^^^^
+ScssEachBindingList = ScssVariable (',' ScssVariable)*
+
+// @for $i from 1 through 3 { width: $i * 1px; }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssForAtRule =
+	'for'
+	variable: ScssVariable
+	'from'
+	lower_bound: ScssExpression
+	operator: ('to' | 'through')
+	upper_bound: ScssExpression
+	block: CssDeclarationOrRuleBlock
+
+// @mixin button($radius: 4px, $args...) { border-radius: $radius; }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssMixinAtRule =
+	'mixin'
+	name: CssIdentifier
+	parameters: ScssParameterList?
+	block: CssDeclarationOrRuleBlock
+
+// @function double($value: 2) { @return $value * 2; }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssFunctionAtRule =
+	'function'
+	name: CssIdentifier
+	parameters: ScssParameterList?
+	block: CssDeclarationOrRuleBlock
+
+// @use "sass:math";
+// ^^^^^^^^^^^^^^^^^
+// @use "theme" as * with ($primary: blue);
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssUseAtRule =
+	'use'
+	url: CssString
+	as_clause: ScssUseAsClause?
+	with_clause: ScssWithClause?
+	';'
+
+// as *
+// ^^^^
+// as theme
+// ^^^^^^^^
+ScssUseAsClause =
+	'as'
+	namespace: AnyScssUseNamespace
+
+AnyScssUseNamespace =
+	CssIdentifier
+	| ScssUseAllNamespace
+
+ScssUseAllNamespace =
+	'*'
+
+// @forward "theme" as theme-* show $color, button with ($spacing: 4px);
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssForwardAtRule =
+	'forward'
+	url: CssString
+	as_clause: ScssForwardAsClause?
+	visibility_clause: AnyScssForwardVisibilityClause?
+	with_clause: ScssWithClause?
+	';'
+
+// as theme-*
+// ^^^^^^^^^^^
+ScssForwardAsClause =
+	'as'
+	prefix: CssIdentifier
+	'*'
+
+AnyScssForwardVisibilityClause =
+	ScssShowClause
+	| ScssHideClause
+
+// show $color, button
+// ^^^^^^^^^^^^^^^^^^^
+ScssShowClause =
+	'show'
+	members: ScssModuleMemberList
+
+// hide $private, internal
+// ^^^^^^^^^^^^^^^^^^^^^^^^
+ScssHideClause =
+	'hide'
+	members: ScssModuleMemberList
+
+// @import "theme";
+// ^^^^^^^^^^^^^^^^
+// @import "rounded-corners", "text-shadow";
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssImportAtRule =
+	'import'
+	imports: ScssImportItemList
+	';'
+
+ScssImportItemList =
+	AnyScssImportItem (',' AnyScssImportItem)*
+
+AnyScssImportItem =
+	CssString
+	| ScssInterpolatedString
+	| ScssPlainImport
+
+// "theme.css" print
+// ^^^^^^^^^^^^^^^^^^
+ScssPlainImport =
+	url: AnyCssImportUrl
+	layer: AnyCssImportLayer?
+	supports: CssImportSupports?
+	media: CssMediaQueryList
+
+// @extend .message;
+// ^^^^^^^^^^^^^^^^^
+// @extend %toolbelt !optional;
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssExtendAtRule =
+	'extend'
+	CssSelectorList
+	optional_modifier: ScssExtendOptionalModifier?
+	';'
+
+// @at-root { .root-only { color: red; } }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// @at-root .root-only { color: red; }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// @at-root (without: media supports) { .root-only { color: red; } }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssAtRootAtRule =
+	'at-root'
+	query: ScssAtRootQuery?
+	selector: ScssAtRootSelector?
+	block: CssDeclarationOrRuleBlock
+
+// (without: media supports)
+// ^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssAtRootQuery =
+	'('
+	modifier: ('with' | 'without')
+	':'
+	queries: ScssAtRootQueryList
+	')'
+
+ScssAtRootQueryList = AnyCssCustomIdentifier*
+
+// .root-only, .another-root
+// ^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssAtRootSelector =
+	selector: CssSelectorList
+
+// !optional
+// ^^^^^^^^^
+ScssExtendOptionalModifier =
+	'!'
+	'optional'
+
+// with ($primary: blue, $spacing: 4px)
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssWithClause =
+	'with'
+	configurations: ScssModuleConfigurationList
+
+ScssModuleConfigurationList =
+	'('
+	items: ScssModuleConfigurationItemList
+	')'
+
+ScssModuleConfigurationItemList =
+	AnyScssModuleConfiguration
+	(',' AnyScssModuleConfiguration)*
+	','?
+
+AnyScssModuleConfiguration =
+	ScssModuleConfiguration
+	| CssBogusParameter
+
+// $primary: blue !default
+// ^^^^^^^^^^^^^^^^^^^^^^^
+ScssModuleConfiguration =
+	name: ScssVariable
+	':'
+	value: ScssExpression
+	modifier: ScssVariableModifier?
+
+// $color, button
+// ^^^^^^^^^^^^^^
+ScssModuleMemberList =
+	AnyScssModuleMember
+	(',' AnyScssModuleMember)*
+	','?
+
+// @include button($radius: 4px);
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// @include button {
+// ^^^^^^^^^^^^^^^^
+ScssIncludeAtRule =
+	'include'
+	name: AnyScssIncludeTarget
+	arguments: ScssIncludeArgumentList?
+	block: CssDeclarationOrRuleBlock?
+	';'?
+
+AnyScssIncludeTarget =
+	CssIdentifier
+	| ScssModuleMemberAccess
+
+// ($radius: 4px)
+// ^^^^^^^^^^^^^^
+ScssIncludeArgumentList =
+	'('
+	items: CssParameterList
+	')'
+
+// ($radius: 4px, $args...)
+// ^^^^^^^^^^^^^^^^^^^^^^^^
+ScssParameterList =
+	'('
+	items: ScssParameterItemList
+	')'
+
+ScssParameterItemList = AnyScssParameter (',' AnyScssParameter)* ','?
+
+AnyScssParameter =
+	ScssParameter
+	| CssBogusParameter
+
+// $radius: 4px
+// ^^^^^^^^^^^^
+// $args...
+// ^^^^^^^^
+ScssParameter =
+	name: ScssVariable
+	default_value: ScssParameterDefaultValue?
+	ellipsis: '...'?
+
+// : 4px
+// ^^^^^
+ScssParameterDefaultValue =
+	':'
+	value: ScssExpression
+
+// %toolbelt
+// ^^^^^^^^^
+ScssPlaceholderSelector =
+	'%'
+	name: AnyCssSelectorCustomIdentifier
+
+ScssInterpolatedIdentifier =
+	items: ScssInterpolatedIdentifierPartList
+
+ScssInterpolatedIdentifierPartList = AnyScssInterpolatedIdentifierPart*
+
+// #{$a}-#{$b}
+//      ^
+ScssInterpolatedIdentifierHyphen =
+	'-'
+
+AnyScssInterpolatedIdentifierPart =
+	CssIdentifier
+	| CssCustomIdentifier
+	| ScssInterpolatedIdentifierHyphen
+	| ScssInterpolation
+
+// @if $theme == dark { color: white; } @else { color: black; }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssIfAtRule =
+	'if'
+	condition: ScssExpression
+	block: CssDeclarationOrRuleBlock
+	else_clause: ScssElseClause?
+
+// @else if $theme == light { color: black; }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// @else { color: black; }
+// ^^^^^^^^^^^^^^^^^^^^^^^
+ScssElseClause =
+	'@'
+	'else'
+	body: AnyScssElseClauseBody
+
+AnyScssElseClauseBody =
+	ScssIfAtRule
+	| CssDeclarationOrRuleBlock
+
+// @while $i > 0 { $i: $i - 1; }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssWhileAtRule =
+	'while'
+	condition: ScssExpression
+	block: CssDeclarationOrRuleBlock
+
+// @content;
+// ^^^^^^^^^
+// @content($value);
+// ^^^^^^^^^^^^^^^^^
+ScssContentAtRule =
+	'content'
+	arguments: ScssIncludeArgumentList?
+	';'
+
+// @return $width * 2;
+// ^^^^^^^^^^^^^^^^^^^
+ScssReturnAtRule =
+	'return'
+	value: ScssExpression
+	';'
+
+// @debug $width * 2;
+// ^^^^^^^^^^^^^^^^^^
+ScssDebugAtRule =
+	'debug'
+	value: ScssExpression
+	';'
+
+// @warn "deprecated";
+// ^^^^^^^^^^^^^^^^^^^
+ScssWarnAtRule =
+	'warn'
+	value: ScssExpression
+	';'
+
+// @error "Invalid state.";
+// ^^^^^^^^^^^^^^^^^^^^^^^^
+ScssErrorAtRule =
+	'error'
+	value: ScssExpression
+	';'
+
 // $variable: value;
 // ^^^^^^^^^^^^^^^^^
-ScssDeclaration =
-	name: AnyScssDeclarationName
+ScssVariableDeclaration =
+	name: AnyScssVariableDeclarationName
 	':'
-	value: CssGenericComponentValueList
+	value: ScssExpression
 	modifiers: ScssVariableModifierList
 	';'?
 
 // $var: 1
 // ^^^^
-AnyScssDeclarationName =
-	ScssIdentifier
-	| ScssNamespacedIdentifier
+AnyScssVariableDeclarationName =
+	ScssVariable
+	| ScssNamespacedVariable
 
 // ns.$var: 1;
 // ^^^^^^^
-ScssNamespacedIdentifier =
+ScssNamespacedVariable =
 	namespace: CssIdentifier
 	'.'
-	name: ScssIdentifier
+	name: ScssVariable
+
+// font: { family: sans-serif; size: 12px; }
+// ^^^^
+ScssNestingDeclaration =
+	name: CssIdentifier
+	':'
+	value: ScssExpression
+	block: AnyCssDeclarationOrRuleBlock
+
+// border: 1px solid $color;
+//         ^^^^^^^^^^^^^^^^
+ScssExpression =
+	items: ScssExpressionItemList
+
+// border: 1px solid $color;
+//         ^^^^^^^^^^^^^^^^
+ScssExpressionItemList = AnyScssExpressionItem*
+
+// border: 1px solid $color;
+//         ^^^^^^^^^^^^^^^^
+AnyScssExpressionItem =
+	AnyCssValue
+	| CssGenericDelimiter
+	| CssDeclarationImportant
+	| ScssKeywordArgument
+	| ScssArbitraryArgument
+	| ScssBinaryExpression
+	| ScssInterpolation
+	| ScssUnaryExpression
+	| ScssParenthesizedExpression
+	| ScssListExpression
+	| ScssMapExpression
+
+// @include fn($name: 1);
+//             ^^^^^^^^
+ScssKeywordArgument =
+	name: ScssVariable
+	':'
+	value: AnyScssExpression
+
+// @include fn($args...);
+//             ^^^^^^^^
+ScssArbitraryArgument =
+	value: AnyScssExpression
+	'...'
+
+// width: $a + $b;
+//        ^^^^^^
+ScssBinaryExpression =
+	left: AnyScssExpression
+	operator: (
+		'*' | '/' | '%'
+		| '+' | '-'
+		| '>' | '>=' | '<' | '<='
+		| '==' | '!='
+		| 'and' | 'or'
+	)
+	right: AnyScssExpression
+
+// width: -$a;
+//        ^^^
+// @if not $condition {}
+//     ^^^^^^^^^^^^^^
+ScssUnaryExpression =
+	operator: ('+' | '-' | 'not')
+	expression: AnyScssExpression
+
+// width: ($a);
+//        ^^^^
+ScssParenthesizedExpression =
+	'('
+	expression: AnyScssExpression
+	')'
+
+// width: #{$a + 1};
+//        ^^^^^^^^^
+ScssInterpolation =
+	'#'
+	'{'
+	value: AnyScssExpression
+	'}'
+
+// "foo #{$bar} baz"
+// ^^^^^^^^^^^^^^^^^
+ScssInterpolatedString =
+	opening_quote: 'scss_string_quote'
+	parts: ScssInterpolatedStringPartList
+	closing_quote: 'scss_string_quote'
+
+// "foo #{$bar} baz"
+//  ^^^^^^^^^^^^^^^
+ScssInterpolatedStringPartList = AnyScssInterpolatedStringPart*
+
+AnyScssInterpolatedStringPart =
+	ScssInterpolation
+	| ScssStringText
+
+// "foo #{$bar} baz"
+//  ^^^^       ^^^^
+ScssStringText =
+	value: 'scss_string_content_literal'
+
+// box-shadow: 1px, 2px, 3px;
+//             ^^^^^^^^^^^^^
+ScssListExpression =
+	elements: ScssListExpressionElementList
+
+// list: 1px, 2px, 3px;
+//       ^^^^^^^^^^^^^
+ScssListExpressionElementList = (ScssListExpressionElement (',' ScssListExpressionElement)* ','?)
+
+// list: 1px, 2px, 3px;
+//       ^^^  ^^^  ^^^
+ScssListExpressionElement =
+	value: AnyScssExpression
+
+// $map: (key1: value1, key2: value2);
+//       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssMapExpression =
+	'('
+	pairs: ScssMapExpressionPairList
+	')'
+
+// $map: (key1: value1, key2: value2);
+//        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssMapExpressionPairList = (ScssMapExpressionPair (',' ScssMapExpressionPair)* ','?)
+
+// $map: (key: value);
+//        ^^^^^^^^^^
+ScssMapExpressionPair =
+	key: AnyScssExpression
+	':'
+	value: AnyScssExpression
+
+// width: $a;
+//        ^^
+AnyScssExpression =
+	ScssExpression
+	| ScssBinaryExpression
+	| ScssInterpolation
+	| ScssUnaryExpression
+	| ScssParenthesizedExpression
+	| ScssListExpression
+	| ScssMapExpression
+	| AnyCssValue
+
+// $a: &;
+//     ^
+ScssParentSelectorValue =
+	'&'
+
+// color: module.$var;
+//        ^^^^^^^^^^^
+ScssModuleMemberAccess =
+	module: CssIdentifier
+	'.'
+	member: AnyScssModuleMember
+
+AnyScssModuleMember =
+	CssIdentifier
+	| ScssVariable
 
 // $var: 1 !default !global;
 //         ^^^^^^^^^^^^^^^^
@@ -2493,4 +3128,4 @@ ScssVariableModifier =
 
 // $var: 1;
 // ^^^^
-ScssIdentifier = dollar: '$' name: CssIdentifier
+ScssVariable = dollar: '$' name: CssIdentifier

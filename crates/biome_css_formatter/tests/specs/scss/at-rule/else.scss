@@ -1,0 +1,7 @@
+@else{
+color:red;
+}
+
+@else if $state==loading{
+color:blue;
+}

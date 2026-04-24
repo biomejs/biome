@@ -54,14 +54,12 @@ CssRoot {
                                                     },
                                                     L_PAREN@22..23 "(" [] [],
                                                     CssParameterList [
-                                                        CssParameter {
-                                                            any_css_expression: CssListOfComponentValuesExpression {
-                                                                css_component_value_list: CssComponentValueList [
-                                                                    CssIdentifier {
-                                                                        value_token: IDENT@23..28 "color" [] [],
-                                                                    },
-                                                                ],
-                                                            },
+                                                        CssListOfComponentValuesExpression {
+                                                            css_component_value_list: CssComponentValueList [
+                                                                CssIdentifier {
+                                                                    value_token: IDENT@23..28 "color" [] [],
+                                                                },
+                                                            ],
                                                         },
                                                     ],
                                                     R_PAREN@28..29 ")" [] [],
@@ -115,11 +113,10 @@ CssRoot {
                       0: IDENT@16..22 "v-bind" [] []
                     1: L_PAREN@22..23 "(" [] []
                     2: CSS_PARAMETER_LIST@23..28
-                      0: CSS_PARAMETER@23..28
-                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@23..28
-                          0: CSS_COMPONENT_VALUE_LIST@23..28
-                            0: CSS_IDENTIFIER@23..28
-                              0: IDENT@23..28 "color" [] []
+                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@23..28
+                        0: CSS_COMPONENT_VALUE_LIST@23..28
+                          0: CSS_IDENTIFIER@23..28
+                            0: IDENT@23..28 "color" [] []
                     3: R_PAREN@28..29 ")" [] []
               1: (empty)
             1: SEMICOLON@29..30 ";" [] []

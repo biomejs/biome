@@ -42,7 +42,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoPlaywrightWaitForNavigation {
-        version: "next",
+        version: "2.4.2",
         name: "noPlaywrightWaitForNavigation",
         language: "js",
         sources: &[RuleSource::EslintPlaywright("no-wait-for-navigation").same()],

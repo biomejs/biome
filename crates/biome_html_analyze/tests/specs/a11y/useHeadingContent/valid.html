@@ -1,0 +1,32 @@
+<!-- should not generate diagnostics -->
+<!-- Heading with text content -->
+<h1>heading</h1>
+
+<!-- All heading levels with content -->
+<h2>Sub heading</h2>
+<h3>Sub sub heading</h3>
+<h4>Sub sub sub heading</h4>
+<h5>Sub sub sub sub heading</h5>
+<h6>Sub sub sub sub sub heading</h6>
+
+<!-- Heading with nested visible content -->
+<h1><span>visible content</span></h1>
+
+<!-- Heading with aria-hidden child AND visible text -->
+<h1><span aria-hidden="true">hidden</span> visible content</h1>
+
+<!-- Heading with accessible name via aria-label -->
+<h1 aria-label="Screen reader content"></h1>
+
+<!-- Heading with accessible name via aria-labelledby -->
+<h1 aria-labelledby="heading-label"></h1>
+
+<!-- Heading with accessible name via title -->
+<h1 title="Heading title"></h1>
+
+<!-- Heading with img alt text -->
+<h1><img alt="Logo" /></h1>
+
+<!-- Case-insensitive img in HTML: IMG and Img are the native element -->
+<h1><IMG alt="Logo" /></h1>
+<h1><Img alt="Logo" /></h1>

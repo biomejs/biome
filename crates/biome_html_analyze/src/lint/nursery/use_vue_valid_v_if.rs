@@ -169,6 +169,7 @@ impl Rule for UseVueValidVIf {
 fn find_conflicting_else_directives(v_if: &VueDirective) -> Option<TextRange> {
     v_if.syntax()
         .ancestors()
+        .skip(1)
         .find_map(HtmlAttributeList::cast)?
         .into_iter()
         .find_map(|attr| {

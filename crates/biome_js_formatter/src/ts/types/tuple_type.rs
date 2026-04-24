@@ -14,6 +14,8 @@ impl FormatNodeRule<TsTupleType> for FormatTsTupleType {
             r_brack_token,
         } = node.as_fields();
 
+        let delimiter_spacing = f.options().delimiter_spacing().value();
+
         write!(f, [l_brack_token.format(),])?;
 
         if elements.is_empty() {
@@ -26,7 +28,11 @@ impl FormatNodeRule<TsTupleType> for FormatTsTupleType {
 
             write!(
                 f,
-                [group(&soft_block_indent(&elements.format())).should_expand(should_expand)]
+                [group(&soft_block_indent_with_maybe_space(
+                    &elements.format(),
+                    delimiter_spacing
+                ))
+                .should_expand(should_expand)]
             )?;
         }
 

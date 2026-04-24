@@ -4,7 +4,7 @@ mod errors;
 mod node_builtins;
 mod resolver_fs_proxy;
 
-use std::{borrow::Cow, ops::Deref, sync::Arc};
+use std::{borrow::Cow, cmp::Ordering, ops::Deref, sync::Arc};
 
 use biome_fs::normalize_path;
 use biome_json_value::{JsonObject, JsonValue};
@@ -335,9 +335,12 @@ fn resolve_export(
 /// `mapping` must be taken from either `imports` or `exports` key in a
 /// `package.json` file.
 ///
-/// Keys in these mappings may contain globs with a single `*` character. If
-/// present, the target value should also have a `*` character and the matching
-/// characters are used as a literal replacement in the target value.
+/// This function implements the `PACKAGE_IMPORTS_EXPORTS_RESOLVE` algorithm
+/// from the Node.js spec:
+///
+/// 1. Exact matches (keys without `*`) are checked first.
+/// 2. Pattern keys (containing a single `*`) are sorted by
+///    [`pattern_key_compare()`] (descending specificity) and tried in order.
 ///
 /// This function only implements the functionality that is common between
 /// `imports` or `exports`. [`resolve_export()`] contains additional logic that
@@ -350,25 +353,69 @@ fn resolve_target_mapping(
     options: &ResolveOptions,
 ) -> Result<Utf8PathBuf, ResolveError> {
     let subpath = normalize_subpath(subpath);
+
+    // Step 1: Try exact matches first (keys without '*').
     for (key, target) in mapping.iter() {
         let key = normalize_subpath(key.as_str());
-        if let Some((start, end)) = key.split_once('*') {
-            if subpath.starts_with(start) && subpath.ends_with(end) {
-                let glob_replacement = &subpath[start.len()..subpath.len() - end.len()];
-                return resolve_target_value(
-                    target,
-                    Some(glob_replacement),
-                    package_path,
-                    fs,
-                    options,
-                );
-            }
-        } else if key == subpath {
+        if !key.contains('*') && key == subpath {
             return resolve_target_value(target, None, package_path, fs, options);
         }
     }
 
+    // Step 2: Collect pattern keys (containing a single '*') and sort them
+    // by PATTERN_KEY_COMPARE (longer prefix first, then longer suffix).
+    let mut pattern_keys: Vec<_> = mapping
+        .iter()
+        .filter(|(key, _)| key.as_str().contains('*'))
+        .collect();
+    pattern_keys.sort_by(|(a, _), (b, _)| {
+        pattern_key_compare(normalize_subpath(a.as_str()), normalize_subpath(b.as_str()))
+    });
+
+    // Step 3: Try pattern matches in sorted order.
+    for (key, target) in pattern_keys {
+        let key = normalize_subpath(key.as_str());
+        if let Some((pattern_base, pattern_trailer)) = key.split_once('*')
+            && subpath.starts_with(pattern_base)
+            && subpath != pattern_base
+            && (pattern_trailer.is_empty()
+                || (subpath.ends_with(pattern_trailer) && subpath.len() >= key.len()))
+        {
+            let glob_replacement =
+                &subpath[pattern_base.len()..subpath.len() - pattern_trailer.len()];
+            return resolve_target_value(target, Some(glob_replacement), package_path, fs, options);
+        }
+    }
+
     Err(ResolveError::NotFound)
+}
+
+/// Compares two pattern keys for sorting in descending order of specificity.
+///
+/// Implements the `PATTERN_KEY_COMPARE` algorithm from the Node.js ESM
+/// resolver specification. Keys with longer prefixes (before `*`) are
+/// considered more specific. If prefixes have equal length, keys with longer
+/// suffixes (after `*`) take priority.
+fn pattern_key_compare(key_a: &str, key_b: &str) -> Ordering {
+    let base_length_a = key_a.find('*').unwrap_or(key_a.len());
+    let base_length_b = key_b.find('*').unwrap_or(key_b.len());
+
+    if base_length_a > base_length_b {
+        return Ordering::Less;
+    }
+    if base_length_b > base_length_a {
+        return Ordering::Greater;
+    }
+
+    // Equal base lengths: longer suffix (trailer) wins.
+    if key_a.len() > key_b.len() {
+        return Ordering::Less;
+    }
+    if key_b.len() > key_a.len() {
+        return Ordering::Greater;
+    }
+
+    Ordering::Equal
 }
 
 /// Resolves the given module `specifier` inside the given `package_path` by
@@ -500,6 +547,8 @@ fn resolve_target_value(
                 resolve_target_value(target, glob_replacement, package_path, fs, options).ok()
             })
             .ok_or(ResolveError::NotFound),
+        // A `null` target explicitly excludes the subpath from resolution.
+        JsonValue::Null => Err(ResolveError::NotFound),
         _ => Err(ResolveError::InvalidMappingTarget),
     }
 }
@@ -1111,5 +1160,9 @@ impl ResolvedPath {
 
     pub fn from_path(path: impl Into<Utf8PathBuf>) -> Self {
         Self::new(Ok(path.into()))
+    }
+
+    pub fn dump(&self) -> Option<String> {
+        self.as_path().map(|p| p.as_str().replace('\\', "/"))
     }
 }

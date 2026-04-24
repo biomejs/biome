@@ -15,7 +15,9 @@ domains.json:4:7 deserialize ━━━━━━━━━━━━━━━━━
   
   i Accepted values:
   
+  - drizzle
   - react
+  - reactNative
   - test
   - solid
   - next

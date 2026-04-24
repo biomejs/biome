@@ -12,6 +12,8 @@ impl FormatRule<AnyCssExpression> for FormatAnyCssExpression {
             AnyCssExpression::CssCommaSeparatedValue(node) => node.format().fmt(f),
             AnyCssExpression::CssListOfComponentValuesExpression(node) => node.format().fmt(f),
             AnyCssExpression::CssParenthesizedExpression(node) => node.format().fmt(f),
+            AnyCssExpression::CssUnaryExpression(node) => node.format().fmt(f),
+            AnyCssExpression::ScssExpression(node) => node.format().fmt(f),
         }
     }
 }

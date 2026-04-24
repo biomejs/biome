@@ -28,7 +28,6 @@ biome_console              = { workspace = true }
 biome_deserialize          = { workspace = true }
 biome_deserialize_macros   = { workspace = true }
 biome_diagnostics          = { workspace = true }
-biome_flags                = { workspace = true }
 biome_formatter            = { workspace = true, features = ["serde"] }
 biome_glob                 = { workspace = true, features = ["schema"] }
 biome_html_formatter       = { workspace = true, features = ["serde"] }
@@ -41,7 +40,7 @@ biome_plugin_loader        = { workspace = true }
 biome_resolver             = { workspace = true }
 biome_rowan                = { workspace = true, features = ["serde"] }
 biome_rule_options         = { workspace = true }
-bpaf                       = { workspace = true }
+bpaf                       = { workspace = true, optional = true }
 camino                     = { workspace = true }
 regex                      = { workspace = true }
 rustc-hash                 = { workspace = true }
@@ -49,7 +48,7 @@ schemars                   = { workspace = true, optional = true }
 serde                      = { workspace = true, features = ["derive"] }
 
 [dev-dependencies]
-criterion    = { package = "codspeed-criterion-compat", version = "*" }
+criterion    = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta        = { workspace = true }
 tests_macros = { workspace = true }
 
@@ -60,7 +59,10 @@ tikv-jemallocator = { workspace = true }
 mimalloc = { workspace = true }
 
 [features]
-schema = [
+default    = []
+cli        = ["dep:bpaf"]
+markdown   = []
+schema     = [
   "biome_analyze/schema",
   "biome_formatter/schema",
   "biome_html_formatter/schema",
@@ -72,6 +74,7 @@ schema = [
   "biome_rule_options/schema",
   "dep:schemars",
 ]
+test-utils = []
 
 [lints]
 workspace = true

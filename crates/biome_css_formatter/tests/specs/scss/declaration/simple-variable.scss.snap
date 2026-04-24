@@ -1,0 +1,26 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/declaration/simple-variable.scss
+---
+
+# Input
+
+```scss
+$primary-color:   #ff0000;
+
+$secondary-color  :
+  #00ff00  ;
+$font-size:16px;
+
+```
+
+
+# Formatted
+
+```scss
+$primary-color: #ff0000;
+
+$secondary-color: #00ff00;
+$font-size: 16px;
+
+```

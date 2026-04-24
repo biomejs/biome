@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tables Test</title>
+</head>
+<body>
+    <table>
+        <thead>
+            <tr>
+                <th>Header 1</th>
+                <th>Header 2</th>
+                <th>Header 3</th>
+                <th>Header 4</th>
+                <th>Header 5</th>
+                <th>Header 6</th>
+                <th>Header 7</th>
+                <th>Header 8</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Row 1 Col 1</td>
+                <td>Row 1 Col 2</td>
+                <td>Row 1 Col 3</td>
+                <td>Row 1 Col 4</td>
+                <td>Row 1 Col 5</td>
+                <td>Row 1 Col 6</td>
+                <td>Row 1 Col 7</td>
+                <td>Row 1 Col 8</td>
+            </tr>
+            <tr>
+                <td>Row 2 Col 1</td>
+                <td>Row 2 Col 2</td>
+                <td>Row 2 Col 3</td>
+                <td>Row 2 Col 4</td>
+                <td>Row 2 Col 5</td>
+                <td>Row 2 Col 6</td>
+                <td>Row 2 Col 7</td>
+                <td>Row 2 Col 8</td>
+            </tr>
+            <tr>
+                <td>Row 3 Col 1</td>
+                <td>Row 3 Col 2</td>
+                <td>Row 3 Col 3</td>
+                <td>Row 3 Col 4</td>
+                <td>Row 3 Col 5</td>
+                <td>Row 3 Col 6</td>
+                <td>Row 3 Col 7</td>
+                <td>Row 3 Col 8</td>
+            </tr>
+            <tr>
+                <td>Row 4 Col 1</td>
+                <td>Row 4 Col 2</td>
+                <td>Row 4 Col 3</td>
+                <td>Row 4 Col 4</td>
+                <td>Row 4 Col 5</td>
+                <td>Row 4 Col 6</td>
+                <td>Row 4 Col 7</td>
+                <td>Row 4 Col 8</td>
+            </tr>
+            <tr>
+                <td>Row 5 Col 1</td>
+                <td>Row 5 Col 2</td>
+                <td>Row 5 Col 3</td>
+                <td>Row 5 Col 4</td>
+                <td>Row 5 Col 5</td>
+                <td>Row 5 Col 6</td>
+                <td>Row 5 Col 7</td>
+                <td>Row 5 Col 8</td>
+            </tr>
+            <tr>
+                <td>Row 6 Col 1</td>
+                <td>Row 6 Col 2</td>
+                <td>Row 6 Col 3</td>
+                <td>Row 6 Col 4</td>
+                <td>Row 6 Col 5</td>
+                <td>Row 6 Col 6</td>
+                <td>Row 6 Col 7</td>
+                <td>Row 6 Col 8</td>
+            </tr>
+            <tr>
+                <td>Row 7 Col 1</td>
+                <td>Row 7 Col 2</td>
+                <td>Row 7 Col 3</td>
+                <td>Row 7 Col 4</td>
+                <td>Row 7 Col 5</td>
+                <td>Row 7 Col 6</td>
+                <td>Row 7 Col 7</td>
+                <td>Row 7 Col 8</td>
+            </tr>
+            <tr>
+                <td>Row 8 Col 1</td>
+                <td>Row 8 Col 2</td>
+                <td>Row 8 Col 3</td>
+                <td>Row 8 Col 4</td>
+                <td>Row 8 Col 5</td>
+                <td>Row 8 Col 6</td>
+                <td>Row 8 Col 7</td>
+                <td>Row 8 Col 8</td>
+            </tr>
+            <tr>
+                <td>Row 9 Col 1</td>
+                <td>Row 9 Col 2</td>
+                <td>Row 9 Col 3</td>
+                <td>Row 9 Col 4</td>
+                <td>Row 9 Col 5</td>
+                <td>Row 9 Col 6</td>
+                <td>Row 9 Col 7</td>
+                <td>Row 9 Col 8</td>
+            </tr>
+            <tr>
+                <td>Row 10 Col 1</td>
+                <td>Row 10 Col 2</td>
+                <td>Row 10 Col 3</td>
+                <td>Row 10 Col 4</td>
+                <td>Row 10 Col 5</td>
+                <td>Row 10 Col 6</td>
+                <td>Row 10 Col 7</td>
+                <td>Row 10 Col 8</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <table>
+        <tr>
+            <td>
+                <table>
+                    <tr>
+                        <td>
+                            <table>
+                                <tr>
+                                    <td>
+                                        <table>
+                                            <tr>
+                                                <td>Deeply nested cell</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+    
+    <table>
+        <thead>
+            <tr>
+                <th rowspan="2">Rowspan Header</th>
+                <th colspan="3">Colspan Header</th>
+                <th rowspan="2">Another Rowspan</th>
+            </tr>
+            <tr>
+                <th>Sub 1</th>
+                <th>Sub 2</th>
+                <th>Sub 3</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td rowspan="2">Data 1</td>
+                <td>A</td>
+                <td>B</td>
+                <td>C</td>
+                <td rowspan="2">Data 2</td>
+            </tr>
+            <tr>
+                <td>D</td>
+                <td>E</td>
+                <td>F</td>
+            </tr>
+            <tr>
+                <td rowspan="2">Data 3</td>
+                <td>G</td>
+                <td>H</td>
+                <td>I</td>
+                <td rowspan="2">Data 4</td>
+            </tr>
+            <tr>
+                <td>J</td>
+                <td>K</td>
+                <td>L</td>
+            </tr>
+            <tr>
+                <td rowspan="2">Data 5</td>
+                <td>M</td>
+                <td>N</td>
+                <td>O</td>
+                <td rowspan="2">Data 6</td>
+            </tr>
+            <tr>
+                <td>P</td>
+                <td>Q</td>
+                <td>R</td>
+            </tr>
+            <tr>
+                <td rowspan="2">Data 7</td>
+                <td>S</td>
+                <td>T</td>
+                <td>U</td>
+                <td rowspan="2">Data 8</td>
+            </tr>
+            <tr>
+                <td>V</td>
+                <td>W</td>
+                <td>X</td>
+            </tr>
+            <tr>
+                <td rowspan="2">Data 9</td>
+                <td>Y</td>
+                <td>Z</td>
+                <td>AA</td>
+                <td rowspan="2">Data 10</td>
+            </tr>
+            <tr>
+                <td>AB</td>
+                <td>AC</td>
+                <td>AD</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <table>
+        <caption>Complex Table Structure</caption>
+        <colgroup>
+            <col span="2" class="group1">
+            <col span="2" class="group2">
+            <col span="2" class="group3">
+        </colgroup>
+        <thead>
+            <tr>
+                <th scope="col">A</th>
+                <th scope="col">B</th>
+                <th scope="col">C</th>
+                <th scope="col">D</th>
+                <th scope="col">E</th>
+                <th scope="col">F</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1A</td>
+                <td>1B</td>
+                <td>1C</td>
+                <td>1D</td>
+                <td>1E</td>
+                <td>1F</td>
+            </tr>
+            <tr>
+                <td>2A</td>
+                <td>2B</td>
+                <td>2C</td>
+                <td>2D</td>
+                <td>2E</td>
+                <td>2F</td>
+            </tr>
+            <tr>
+                <td>3A</td>
+                <td>3B</td>
+                <td>3C</td>
+                <td>3D</td>
+                <td>3E</td>
+                <td>3F</td>
+            </tr>
+            <tr>
+                <td>4A</td>
+                <td>4B</td>
+                <td>4C</td>
+                <td>4D</td>
+                <td>4E</td>
+                <td>4F</td>
+            </tr>
+            <tr>
+                <td>5A</td>
+                <td>5B</td>
+                <td>5C</td>
+                <td>5D</td>
+                <td>5E</td>
+                <td>5F</td>
+            </tr>
+            <tr>
+                <td>6A</td>
+                <td>6B</td>
+                <td>6C</td>
+                <td>6D</td>
+                <td>6E</td>
+                <td>6F</td>
+            </tr>
+            <tr>
+                <td>7A</td>
+                <td>7B</td>
+                <td>7C</td>
+                <td>7D</td>
+                <td>7E</td>
+                <td>7F</td>
+            </tr>
+            <tr>
+                <td>8A</td>
+                <td>8B</td>
+                <td>8C</td>
+                <td>8D</td>
+                <td>8E</td>
+                <td>8F</td>
+            </tr>
+            <tr>
+                <td>9A</td>
+                <td>9B</td>
+                <td>9C</td>
+                <td>9D</td>
+                <td>9E</td>
+                <td>9F</td>
+            </tr>
+            <tr>
+                <td>10A</td>
+                <td>10B</td>
+                <td>10C</td>
+                <td>10D</td>
+                <td>10E</td>
+                <td>10F</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td>Footer A</td>
+                <td>Footer B</td>
+                <td>Footer C</td>
+                <td>Footer D</td>
+                <td>Footer E</td>
+                <td>Footer F</td>
+            </tr>
+        </tfoot>
+    </table>
+    
+    <table>
+        <tr>
+            <td>
+                <table>
+                    <tr>
+                        <td>Nested 1</td>
+                        <td>
+                            <table>
+                                <tr>
+                                    <td>Nested 2</td>
+                                    <td>
+                                        <table>
+                                            <tr>
+                                                <td>Nested 3</td>
+                                                <td>
+                                                    <table>
+                                                        <tr>
+                                                            <td>Nested 4</td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            <td>
+                <table>
+                    <tr>
+                        <td>Parallel 1</td>
+                        <td>
+                            <table>
+                                <tr>
+                                    <td>Parallel 2</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

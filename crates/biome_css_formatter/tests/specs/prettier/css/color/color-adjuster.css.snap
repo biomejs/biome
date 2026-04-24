@@ -136,45 +136,131 @@ info: css/color/color-adjuster.css
 ```diff
 --- Prettier
 +++ Biome
-@@ -14,7 +14,7 @@
-   color: color(red red(- 20%));
-   color: color(red red(- 128));
-   color: color(red alpha(- 50%));
+@@ -1,6 +1,6 @@
+ .foo {
+-  color: color(red l(+ 20%));
+-  color: color(red w(+ 20%) s(+ 20%));
++  color: color(red l(+20%));
++  color: color(red w(+20%) s(+20%));
+   color: color(swopc, 0 206 190 77);
+   color: color(indigo, 24 160 86 42 0 18 31);
+   color: color(prophoto, 233 150 122);
+@@ -8,43 +8,43 @@
+   color: color(#eb8fa9 alpha(75%) blackness(20%));
+   color: color(red blue(20));
+   color: color(red blue(20%));
+-  color: color(red green(+ 20));
+-  color: color(red green(+ 20%));
+-  color: color(red red(- 20));
+-  color: color(red red(- 20%));
+-  color: color(red red(- 128));
+-  color: color(red alpha(- 50%));
 -  color: color(red alpha(- 0.75));
-+  color: color(red alpha(- .75));
-   color: color(red rgb(+ 0 255 0));
-   color: color(red rgb(+ #0f0));
-   color: color(red rgb(- 60% 0 0));
-@@ -44,7 +44,7 @@
+-  color: color(red rgb(+ 0 255 0));
+-  color: color(red rgb(+ #0f0));
+-  color: color(red rgb(- 60% 0 0));
+-  color: color(red rgb(- #900));
+-  color: color(rebeccapurple rgb(* 1%));
++  color: color(red green(+20));
++  color: color(red green(+20%));
++  color: color(red red(-20));
++  color: color(red red(-20%));
++  color: color(red red(-128));
++  color: color(red alpha(-50%));
++  color: color(red alpha(-0.75));
++  color: color(red rgb(+0 255 0));
++  color: color(red rgb(+#0f0));
++  color: color(red rgb(-60% 0 0));
++  color: color(red rgb(-#900));
++  color: color(rebeccapurple rgb(*1%));
+   color: color(red hue(20));
+   color: color(red hue(20deg));
+-  color: color(red hue(+ 20));
+-  color: color(red hue(+ 20deg));
+-  color: color(red hue(- 20));
+-  color: color(red hue(- 20deg));
+-  color: color(red hue(* 20));
+-  color: color(red hue(* 20deg));
++  color: color(red hue(+20));
++  color: color(red hue(+20deg));
++  color: color(red hue(-20));
++  color: color(red hue(-20deg));
++  color: color(red hue(*20));
++  color: color(red hue(*20deg));
+   color: color(red lightness(50%));
+   color: color(red lightness(20%));
+-  color: color(red lightness(+ 20%));
+-  color: color(red lightness(- 20%));
+-  color: color(red lightness(* 1.5%));
++  color: color(red lightness(+20%));
++  color: color(red lightness(-20%));
++  color: color(red lightness(*1.5%));
+   color: color(beige saturation(20%));
+-  color: color(beige saturation(+ 20%));
+-  color: color(beige saturation(- 20%));
+-  color: color(beige saturation(* 1.5%));
++  color: color(beige saturation(+20%));
++  color: color(beige saturation(-20%));
++  color: color(beige saturation(*1.5%));
+   color: color(beige blackness(20%));
+-  color: color(beige blackness(+ 20%));
+-  color: color(beige blackness(- 1%));
+-  color: color(beige blackness(* 20%));
++  color: color(beige blackness(+20%));
++  color: color(beige blackness(-1%));
++  color: color(beige blackness(*20%));
    color: color(beige whiteness(20%));
-   color: color(beige whiteness(+ 1%));
-   color: color(beige whiteness(- 20%));
+-  color: color(beige whiteness(+ 1%));
+-  color: color(beige whiteness(- 20%));
 -  color: color(beige whiteness(* 0.5%));
-+  color: color(beige whiteness(* .5%));
++  color: color(beige whiteness(+1%));
++  color: color(beige whiteness(-20%));
++  color: color(beige whiteness(*.5%));
    color: color(red);
    color: color(red tint(0%));
    color: color(red shade(0%));
-@@ -106,10 +106,7 @@
-   color: color(yellow contrast(50%));
+@@ -83,12 +83,12 @@
+   color: color(0grad);
+   color: color(0rad);
+   color: color(beige);
+-  color: color(beige hue(+ 0deg));
+-  color: color(beige saturation(+ 0%));
+-  color: color(beige lightness(+ 0%));
++  color: color(beige hue(+0deg));
++  color: color(beige saturation(+0%));
++  color: color(beige lightness(+0%));
+   color: color(beige alpha(1));
+-  color: color(beige alpha(+ 0));
+-  color: color(beige alpha(+ 0%));
++  color: color(beige alpha(+0));
++  color: color(beige alpha(+0%));
+   color: color(beige blend(beige 0% hsl));
+   color: color(red);
+   color: color(red tint(0%));
+@@ -107,18 +107,18 @@
    color: color(yellow contrast(75%));
    color: color(yellow contrast(100%));
--  color: color(
+   color: color(
 -    color-mod(0deg blue(10%)) rgb(+ 0 10 0) hue(+ 10deg) tint(10%)
 -      lightness(+ 10%) saturation(+ 10%) blend(rebeccapurple 50%)
--  );
-+  color: color(color-mod(0deg blue(10%)) rgb(+ 0 10 0) hue(+ 10deg) tint(10%) lightness(+ 10%) saturation(+ 10%) blend(rebeccapurple 50%));
++    color-mod(0deg blue(10%)) rgb(+0 10 0) hue(+10deg) tint(10%) lightness(+10%)
++      saturation(+10%) blend(rebeccapurple 50%)
+   );
    color: color(var(--color));
-   color: color(var(--color) l(+ 20%));
+-  color: color(var(--color) l(+ 20%));
++  color: color(var(--color) l(+20%));
    color: color(red l(+20%)); /* interpreted as part of the number */
-@@ -118,7 +115,7 @@
+   color: color(red l(-20%)); /* interpreted as part of the number */
+   color: color(red hue(+20));
    color: color(red hue(+20deg));
    color: color(red hue(-20));
    color: color(red hue(-20deg));
 -  color: color(red hue(* 20));
 -  color: color(red hue(* 20deg));
+-  color: color(var(--highlightColor) blackness(+ 20%));
 +  color: color(red hue(*20));
 +  color: color(red hue(*20deg));
-   color: color(var(--highlightColor) blackness(+ 20%));
++  color: color(var(--highlightColor) blackness(+20%));
  }
 ```
 
@@ -182,8 +268,8 @@ info: css/color/color-adjuster.css
 
 ```css
 .foo {
-  color: color(red l(+ 20%));
-  color: color(red w(+ 20%) s(+ 20%));
+  color: color(red l(+20%));
+  color: color(red w(+20%) s(+20%));
   color: color(swopc, 0 206 190 77);
   color: color(indigo, 24 160 86 42 0 18 31);
   color: color(prophoto, 233 150 122);
@@ -191,43 +277,43 @@ info: css/color/color-adjuster.css
   color: color(#eb8fa9 alpha(75%) blackness(20%));
   color: color(red blue(20));
   color: color(red blue(20%));
-  color: color(red green(+ 20));
-  color: color(red green(+ 20%));
-  color: color(red red(- 20));
-  color: color(red red(- 20%));
-  color: color(red red(- 128));
-  color: color(red alpha(- 50%));
-  color: color(red alpha(- .75));
-  color: color(red rgb(+ 0 255 0));
-  color: color(red rgb(+ #0f0));
-  color: color(red rgb(- 60% 0 0));
-  color: color(red rgb(- #900));
-  color: color(rebeccapurple rgb(* 1%));
+  color: color(red green(+20));
+  color: color(red green(+20%));
+  color: color(red red(-20));
+  color: color(red red(-20%));
+  color: color(red red(-128));
+  color: color(red alpha(-50%));
+  color: color(red alpha(-0.75));
+  color: color(red rgb(+0 255 0));
+  color: color(red rgb(+#0f0));
+  color: color(red rgb(-60% 0 0));
+  color: color(red rgb(-#900));
+  color: color(rebeccapurple rgb(*1%));
   color: color(red hue(20));
   color: color(red hue(20deg));
-  color: color(red hue(+ 20));
-  color: color(red hue(+ 20deg));
-  color: color(red hue(- 20));
-  color: color(red hue(- 20deg));
-  color: color(red hue(* 20));
-  color: color(red hue(* 20deg));
+  color: color(red hue(+20));
+  color: color(red hue(+20deg));
+  color: color(red hue(-20));
+  color: color(red hue(-20deg));
+  color: color(red hue(*20));
+  color: color(red hue(*20deg));
   color: color(red lightness(50%));
   color: color(red lightness(20%));
-  color: color(red lightness(+ 20%));
-  color: color(red lightness(- 20%));
-  color: color(red lightness(* 1.5%));
+  color: color(red lightness(+20%));
+  color: color(red lightness(-20%));
+  color: color(red lightness(*1.5%));
   color: color(beige saturation(20%));
-  color: color(beige saturation(+ 20%));
-  color: color(beige saturation(- 20%));
-  color: color(beige saturation(* 1.5%));
+  color: color(beige saturation(+20%));
+  color: color(beige saturation(-20%));
+  color: color(beige saturation(*1.5%));
   color: color(beige blackness(20%));
-  color: color(beige blackness(+ 20%));
-  color: color(beige blackness(- 1%));
-  color: color(beige blackness(* 20%));
+  color: color(beige blackness(+20%));
+  color: color(beige blackness(-1%));
+  color: color(beige blackness(*20%));
   color: color(beige whiteness(20%));
-  color: color(beige whiteness(+ 1%));
-  color: color(beige whiteness(- 20%));
-  color: color(beige whiteness(* .5%));
+  color: color(beige whiteness(+1%));
+  color: color(beige whiteness(-20%));
+  color: color(beige whiteness(*.5%));
   color: color(red);
   color: color(red tint(0%));
   color: color(red shade(0%));
@@ -266,12 +352,12 @@ info: css/color/color-adjuster.css
   color: color(0grad);
   color: color(0rad);
   color: color(beige);
-  color: color(beige hue(+ 0deg));
-  color: color(beige saturation(+ 0%));
-  color: color(beige lightness(+ 0%));
+  color: color(beige hue(+0deg));
+  color: color(beige saturation(+0%));
+  color: color(beige lightness(+0%));
   color: color(beige alpha(1));
-  color: color(beige alpha(+ 0));
-  color: color(beige alpha(+ 0%));
+  color: color(beige alpha(+0));
+  color: color(beige alpha(+0%));
   color: color(beige blend(beige 0% hsl));
   color: color(red);
   color: color(red tint(0%));
@@ -289,9 +375,12 @@ info: css/color/color-adjuster.css
   color: color(yellow contrast(50%));
   color: color(yellow contrast(75%));
   color: color(yellow contrast(100%));
-  color: color(color-mod(0deg blue(10%)) rgb(+ 0 10 0) hue(+ 10deg) tint(10%) lightness(+ 10%) saturation(+ 10%) blend(rebeccapurple 50%));
+  color: color(
+    color-mod(0deg blue(10%)) rgb(+0 10 0) hue(+10deg) tint(10%) lightness(+10%)
+      saturation(+10%) blend(rebeccapurple 50%)
+  );
   color: color(var(--color));
-  color: color(var(--color) l(+ 20%));
+  color: color(var(--color) l(+20%));
   color: color(red l(+20%)); /* interpreted as part of the number */
   color: color(red l(-20%)); /* interpreted as part of the number */
   color: color(red hue(+20));
@@ -300,1531 +389,6 @@ info: css/color/color-adjuster.css
   color: color(red hue(-20deg));
   color: color(red hue(*20));
   color: color(red hue(*20deg));
-  color: color(var(--highlightColor) blackness(+ 20%));
+  color: color(var(--highlightColor) blackness(+20%));
 }
-```
-
-# Errors
-```
-color-adjuster.css:2:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '+'.
-  
-    1 │ .foo {
-  > 2 │     color: color(red l(+ 20%));
-      │                        ^
-    3 │     color: color(red w(+ 20%) s(+ 20%));
-    4 │     color: color(swopc, 0 206 190 77);
-  
-  i Expected a declaration item here.
-  
-    1 │ .foo {
-  > 2 │     color: color(red l(+ 20%));
-      │                        ^
-    3 │     color: color(red w(+ 20%) s(+ 20%));
-    4 │     color: color(swopc, 0 206 190 77);
-  
-color-adjuster.css:2:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `20`
-  
-    1 │ .foo {
-  > 2 │     color: color(red l(+ 20%));
-      │                          ^^
-    3 │     color: color(red w(+ 20%) s(+ 20%));
-    4 │     color: color(swopc, 0 206 190 77);
-  
-  i Remove 20
-  
-color-adjuster.css:3:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '+'.
-  
-    1 │ .foo {
-    2 │     color: color(red l(+ 20%));
-  > 3 │     color: color(red w(+ 20%) s(+ 20%));
-      │                        ^
-    4 │     color: color(swopc, 0 206 190 77);
-    5 │     color: color(indigo, 24 160 86 42 0 18 31);
-  
-  i Expected a declaration item here.
-  
-    1 │ .foo {
-    2 │     color: color(red l(+ 20%));
-  > 3 │     color: color(red w(+ 20%) s(+ 20%));
-      │                        ^
-    4 │     color: color(swopc, 0 206 190 77);
-    5 │     color: color(indigo, 24 160 86 42 0 18 31);
-  
-color-adjuster.css:3:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `20`
-  
-    1 │ .foo {
-    2 │     color: color(red l(+ 20%));
-  > 3 │     color: color(red w(+ 20%) s(+ 20%));
-      │                          ^^
-    4 │     color: color(swopc, 0 206 190 77);
-    5 │     color: color(indigo, 24 160 86 42 0 18 31);
-  
-  i Remove 20
-  
-color-adjuster.css:3:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '+'.
-  
-    1 │ .foo {
-    2 │     color: color(red l(+ 20%));
-  > 3 │     color: color(red w(+ 20%) s(+ 20%));
-      │                                 ^
-    4 │     color: color(swopc, 0 206 190 77);
-    5 │     color: color(indigo, 24 160 86 42 0 18 31);
-  
-  i Expected a declaration item here.
-  
-    1 │ .foo {
-    2 │     color: color(red l(+ 20%));
-  > 3 │     color: color(red w(+ 20%) s(+ 20%));
-      │                                 ^
-    4 │     color: color(swopc, 0 206 190 77);
-    5 │     color: color(indigo, 24 160 86 42 0 18 31);
-  
-color-adjuster.css:3:35 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `20`
-  
-    1 │ .foo {
-    2 │     color: color(red l(+ 20%));
-  > 3 │     color: color(red w(+ 20%) s(+ 20%));
-      │                                   ^^
-    4 │     color: color(swopc, 0 206 190 77);
-    5 │     color: color(indigo, 24 160 86 42 0 18 31);
-  
-  i Remove 20
-  
-color-adjuster.css:11:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '+'.
-  
-     9 │     color: color(red blue(20));
-    10 │     color: color(red blue(20%));
-  > 11 │     color: color(red green(+ 20));
-       │                            ^
-    12 │     color: color(red green(+ 20%));
-    13 │     color: color(red red(- 20));
-  
-  i Expected a declaration item here.
-  
-     9 │     color: color(red blue(20));
-    10 │     color: color(red blue(20%));
-  > 11 │     color: color(red green(+ 20));
-       │                            ^
-    12 │     color: color(red green(+ 20%));
-    13 │     color: color(red red(- 20));
-  
-color-adjuster.css:11:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `20`
-  
-     9 │     color: color(red blue(20));
-    10 │     color: color(red blue(20%));
-  > 11 │     color: color(red green(+ 20));
-       │                              ^^
-    12 │     color: color(red green(+ 20%));
-    13 │     color: color(red red(- 20));
-  
-  i Remove 20
-  
-color-adjuster.css:12:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '+'.
-  
-    10 │     color: color(red blue(20%));
-    11 │     color: color(red green(+ 20));
-  > 12 │     color: color(red green(+ 20%));
-       │                            ^
-    13 │     color: color(red red(- 20));
-    14 │     color: color(red red(- 20%));
-  
-  i Expected a declaration item here.
-  
-    10 │     color: color(red blue(20%));
-    11 │     color: color(red green(+ 20));
-  > 12 │     color: color(red green(+ 20%));
-       │                            ^
-    13 │     color: color(red red(- 20));
-    14 │     color: color(red red(- 20%));
-  
-color-adjuster.css:12:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `20`
-  
-    10 │     color: color(red blue(20%));
-    11 │     color: color(red green(+ 20));
-  > 12 │     color: color(red green(+ 20%));
-       │                              ^^
-    13 │     color: color(red red(- 20));
-    14 │     color: color(red red(- 20%));
-  
-  i Remove 20
-  
-color-adjuster.css:13:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '-'.
-  
-    11 │     color: color(red green(+ 20));
-    12 │     color: color(red green(+ 20%));
-  > 13 │     color: color(red red(- 20));
-       │                          ^
-    14 │     color: color(red red(- 20%));
-    15 │     color: color(red red(- 128));
-  
-  i Expected a declaration item here.
-  
-    11 │     color: color(red green(+ 20));
-    12 │     color: color(red green(+ 20%));
-  > 13 │     color: color(red red(- 20));
-       │                          ^
-    14 │     color: color(red red(- 20%));
-    15 │     color: color(red red(- 128));
-  
-color-adjuster.css:13:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `20`
-  
-    11 │     color: color(red green(+ 20));
-    12 │     color: color(red green(+ 20%));
-  > 13 │     color: color(red red(- 20));
-       │                            ^^
-    14 │     color: color(red red(- 20%));
-    15 │     color: color(red red(- 128));
-  
-  i Remove 20
-  
-color-adjuster.css:14:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '-'.
-  
-    12 │     color: color(red green(+ 20%));
-    13 │     color: color(red red(- 20));
-  > 14 │     color: color(red red(- 20%));
-       │                          ^
-    15 │     color: color(red red(- 128));
-    16 │     color: color(red alpha(- 50%));
-  
-  i Expected a declaration item here.
-  
-    12 │     color: color(red green(+ 20%));
-    13 │     color: color(red red(- 20));
-  > 14 │     color: color(red red(- 20%));
-       │                          ^
-    15 │     color: color(red red(- 128));
-    16 │     color: color(red alpha(- 50%));
-  
-color-adjuster.css:14:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `20`
-  
-    12 │     color: color(red green(+ 20%));
-    13 │     color: color(red red(- 20));
-  > 14 │     color: color(red red(- 20%));
-       │                            ^^
-    15 │     color: color(red red(- 128));
-    16 │     color: color(red alpha(- 50%));
-  
-  i Remove 20
-  
-color-adjuster.css:15:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '-'.
-  
-    13 │     color: color(red red(- 20));
-    14 │     color: color(red red(- 20%));
-  > 15 │     color: color(red red(- 128));
-       │                          ^
-    16 │     color: color(red alpha(- 50%));
-    17 │     color: color(red alpha(- .75));
-  
-  i Expected a declaration item here.
-  
-    13 │     color: color(red red(- 20));
-    14 │     color: color(red red(- 20%));
-  > 15 │     color: color(red red(- 128));
-       │                          ^
-    16 │     color: color(red alpha(- 50%));
-    17 │     color: color(red alpha(- .75));
-  
-color-adjuster.css:15:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `128`
-  
-    13 │     color: color(red red(- 20));
-    14 │     color: color(red red(- 20%));
-  > 15 │     color: color(red red(- 128));
-       │                            ^^^
-    16 │     color: color(red alpha(- 50%));
-    17 │     color: color(red alpha(- .75));
-  
-  i Remove 128
-  
-color-adjuster.css:16:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '-'.
-  
-    14 │     color: color(red red(- 20%));
-    15 │     color: color(red red(- 128));
-  > 16 │     color: color(red alpha(- 50%));
-       │                            ^
-    17 │     color: color(red alpha(- .75));
-    18 │     color: color(red rgb(+ 0 255 0));
-  
-  i Expected a declaration item here.
-  
-    14 │     color: color(red red(- 20%));
-    15 │     color: color(red red(- 128));
-  > 16 │     color: color(red alpha(- 50%));
-       │                            ^
-    17 │     color: color(red alpha(- .75));
-    18 │     color: color(red rgb(+ 0 255 0));
-  
-color-adjuster.css:16:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `50`
-  
-    14 │     color: color(red red(- 20%));
-    15 │     color: color(red red(- 128));
-  > 16 │     color: color(red alpha(- 50%));
-       │                              ^^
-    17 │     color: color(red alpha(- .75));
-    18 │     color: color(red rgb(+ 0 255 0));
-  
-  i Remove 50
-  
-color-adjuster.css:17:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '-'.
-  
-    15 │     color: color(red red(- 128));
-    16 │     color: color(red alpha(- 50%));
-  > 17 │     color: color(red alpha(- .75));
-       │                            ^
-    18 │     color: color(red rgb(+ 0 255 0));
-    19 │     color: color(red rgb(+ #0f0));
-  
-  i Expected a declaration item here.
-  
-    15 │     color: color(red red(- 128));
-    16 │     color: color(red alpha(- 50%));
-  > 17 │     color: color(red alpha(- .75));
-       │                            ^
-    18 │     color: color(red rgb(+ 0 255 0));
-    19 │     color: color(red rgb(+ #0f0));
-  
-color-adjuster.css:17:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `.75`
-  
-    15 │     color: color(red red(- 128));
-    16 │     color: color(red alpha(- 50%));
-  > 17 │     color: color(red alpha(- .75));
-       │                              ^^^
-    18 │     color: color(red rgb(+ 0 255 0));
-    19 │     color: color(red rgb(+ #0f0));
-  
-  i Remove .75
-  
-color-adjuster.css:18:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '+'.
-  
-    16 │     color: color(red alpha(- 50%));
-    17 │     color: color(red alpha(- .75));
-  > 18 │     color: color(red rgb(+ 0 255 0));
-       │                          ^
-    19 │     color: color(red rgb(+ #0f0));
-    20 │     color: color(red rgb(- 60% 0 0));
-  
-  i Expected a declaration item here.
-  
-    16 │     color: color(red alpha(- 50%));
-    17 │     color: color(red alpha(- .75));
-  > 18 │     color: color(red rgb(+ 0 255 0));
-       │                          ^
-    19 │     color: color(red rgb(+ #0f0));
-    20 │     color: color(red rgb(- 60% 0 0));
-  
-color-adjuster.css:18:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `0`
-  
-    16 │     color: color(red alpha(- 50%));
-    17 │     color: color(red alpha(- .75));
-  > 18 │     color: color(red rgb(+ 0 255 0));
-       │                            ^
-    19 │     color: color(red rgb(+ #0f0));
-    20 │     color: color(red rgb(- 60% 0 0));
-  
-  i Remove 0
-  
-color-adjuster.css:19:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '+'.
-  
-    17 │     color: color(red alpha(- .75));
-    18 │     color: color(red rgb(+ 0 255 0));
-  > 19 │     color: color(red rgb(+ #0f0));
-       │                          ^
-    20 │     color: color(red rgb(- 60% 0 0));
-    21 │     color: color(red rgb(- #900));
-  
-  i Expected a declaration item here.
-  
-    17 │     color: color(red alpha(- .75));
-    18 │     color: color(red rgb(+ 0 255 0));
-  > 19 │     color: color(red rgb(+ #0f0));
-       │                          ^
-    20 │     color: color(red rgb(- 60% 0 0));
-    21 │     color: color(red rgb(- #900));
-  
-color-adjuster.css:19:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `#`
-  
-    17 │     color: color(red alpha(- .75));
-    18 │     color: color(red rgb(+ 0 255 0));
-  > 19 │     color: color(red rgb(+ #0f0));
-       │                            ^
-    20 │     color: color(red rgb(- 60% 0 0));
-    21 │     color: color(red rgb(- #900));
-  
-  i Remove #
-  
-color-adjuster.css:20:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '-'.
-  
-    18 │     color: color(red rgb(+ 0 255 0));
-    19 │     color: color(red rgb(+ #0f0));
-  > 20 │     color: color(red rgb(- 60% 0 0));
-       │                          ^
-    21 │     color: color(red rgb(- #900));
-    22 │     color: color(rebeccapurple rgb(* 1%));
-  
-  i Expected a declaration item here.
-  
-    18 │     color: color(red rgb(+ 0 255 0));
-    19 │     color: color(red rgb(+ #0f0));
-  > 20 │     color: color(red rgb(- 60% 0 0));
-       │                          ^
-    21 │     color: color(red rgb(- #900));
-    22 │     color: color(rebeccapurple rgb(* 1%));
-  
-color-adjuster.css:20:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `60`
-  
-    18 │     color: color(red rgb(+ 0 255 0));
-    19 │     color: color(red rgb(+ #0f0));
-  > 20 │     color: color(red rgb(- 60% 0 0));
-       │                            ^^
-    21 │     color: color(red rgb(- #900));
-    22 │     color: color(rebeccapurple rgb(* 1%));
-  
-  i Remove 60
-  
-color-adjuster.css:21:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '-'.
-  
-    19 │     color: color(red rgb(+ #0f0));
-    20 │     color: color(red rgb(- 60% 0 0));
-  > 21 │     color: color(red rgb(- #900));
-       │                          ^
-    22 │     color: color(rebeccapurple rgb(* 1%));
-    23 │     color: color(red hue(20));
-  
-  i Expected a declaration item here.
-  
-    19 │     color: color(red rgb(+ #0f0));
-    20 │     color: color(red rgb(- 60% 0 0));
-  > 21 │     color: color(red rgb(- #900));
-       │                          ^
-    22 │     color: color(rebeccapurple rgb(* 1%));
-    23 │     color: color(red hue(20));
-  
-color-adjuster.css:21:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `#`
-  
-    19 │     color: color(red rgb(+ #0f0));
-    20 │     color: color(red rgb(- 60% 0 0));
-  > 21 │     color: color(red rgb(- #900));
-       │                            ^
-    22 │     color: color(rebeccapurple rgb(* 1%));
-    23 │     color: color(red hue(20));
-  
-  i Remove #
-  
-color-adjuster.css:22:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '*'.
-  
-    20 │     color: color(red rgb(- 60% 0 0));
-    21 │     color: color(red rgb(- #900));
-  > 22 │     color: color(rebeccapurple rgb(* 1%));
-       │                                    ^
-    23 │     color: color(red hue(20));
-    24 │     color: color(red hue(20deg));
-  
-  i Expected a declaration item here.
-  
-    20 │     color: color(red rgb(- 60% 0 0));
-    21 │     color: color(red rgb(- #900));
-  > 22 │     color: color(rebeccapurple rgb(* 1%));
-       │                                    ^
-    23 │     color: color(red hue(20));
-    24 │     color: color(red hue(20deg));
-  
-color-adjuster.css:22:38 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `1`
-  
-    20 │     color: color(red rgb(- 60% 0 0));
-    21 │     color: color(red rgb(- #900));
-  > 22 │     color: color(rebeccapurple rgb(* 1%));
-       │                                      ^
-    23 │     color: color(red hue(20));
-    24 │     color: color(red hue(20deg));
-  
-  i Remove 1
-  
-color-adjuster.css:25:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '+'.
-  
-    23 │     color: color(red hue(20));
-    24 │     color: color(red hue(20deg));
-  > 25 │     color: color(red hue(+ 20));
-       │                          ^
-    26 │     color: color(red hue(+ 20deg));
-    27 │     color: color(red hue(- 20));
-  
-  i Expected a declaration item here.
-  
-    23 │     color: color(red hue(20));
-    24 │     color: color(red hue(20deg));
-  > 25 │     color: color(red hue(+ 20));
-       │                          ^
-    26 │     color: color(red hue(+ 20deg));
-    27 │     color: color(red hue(- 20));
-  
-color-adjuster.css:25:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `20`
-  
-    23 │     color: color(red hue(20));
-    24 │     color: color(red hue(20deg));
-  > 25 │     color: color(red hue(+ 20));
-       │                            ^^
-    26 │     color: color(red hue(+ 20deg));
-    27 │     color: color(red hue(- 20));
-  
-  i Remove 20
-  
-color-adjuster.css:26:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '+'.
-  
-    24 │     color: color(red hue(20deg));
-    25 │     color: color(red hue(+ 20));
-  > 26 │     color: color(red hue(+ 20deg));
-       │                          ^
-    27 │     color: color(red hue(- 20));
-    28 │     color: color(red hue(- 20deg));
-  
-  i Expected a declaration item here.
-  
-    24 │     color: color(red hue(20deg));
-    25 │     color: color(red hue(+ 20));
-  > 26 │     color: color(red hue(+ 20deg));
-       │                          ^
-    27 │     color: color(red hue(- 20));
-    28 │     color: color(red hue(- 20deg));
-  
-color-adjuster.css:26:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `20`
-  
-    24 │     color: color(red hue(20deg));
-    25 │     color: color(red hue(+ 20));
-  > 26 │     color: color(red hue(+ 20deg));
-       │                            ^^
-    27 │     color: color(red hue(- 20));
-    28 │     color: color(red hue(- 20deg));
-  
-  i Remove 20
-  
-color-adjuster.css:27:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '-'.
-  
-    25 │     color: color(red hue(+ 20));
-    26 │     color: color(red hue(+ 20deg));
-  > 27 │     color: color(red hue(- 20));
-       │                          ^
-    28 │     color: color(red hue(- 20deg));
-    29 │     color: color(red hue(* 20));
-  
-  i Expected a declaration item here.
-  
-    25 │     color: color(red hue(+ 20));
-    26 │     color: color(red hue(+ 20deg));
-  > 27 │     color: color(red hue(- 20));
-       │                          ^
-    28 │     color: color(red hue(- 20deg));
-    29 │     color: color(red hue(* 20));
-  
-color-adjuster.css:27:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `20`
-  
-    25 │     color: color(red hue(+ 20));
-    26 │     color: color(red hue(+ 20deg));
-  > 27 │     color: color(red hue(- 20));
-       │                            ^^
-    28 │     color: color(red hue(- 20deg));
-    29 │     color: color(red hue(* 20));
-  
-  i Remove 20
-  
-color-adjuster.css:28:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '-'.
-  
-    26 │     color: color(red hue(+ 20deg));
-    27 │     color: color(red hue(- 20));
-  > 28 │     color: color(red hue(- 20deg));
-       │                          ^
-    29 │     color: color(red hue(* 20));
-    30 │     color: color(red hue(* 20deg));
-  
-  i Expected a declaration item here.
-  
-    26 │     color: color(red hue(+ 20deg));
-    27 │     color: color(red hue(- 20));
-  > 28 │     color: color(red hue(- 20deg));
-       │                          ^
-    29 │     color: color(red hue(* 20));
-    30 │     color: color(red hue(* 20deg));
-  
-color-adjuster.css:28:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `20`
-  
-    26 │     color: color(red hue(+ 20deg));
-    27 │     color: color(red hue(- 20));
-  > 28 │     color: color(red hue(- 20deg));
-       │                            ^^
-    29 │     color: color(red hue(* 20));
-    30 │     color: color(red hue(* 20deg));
-  
-  i Remove 20
-  
-color-adjuster.css:29:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '*'.
-  
-    27 │     color: color(red hue(- 20));
-    28 │     color: color(red hue(- 20deg));
-  > 29 │     color: color(red hue(* 20));
-       │                          ^
-    30 │     color: color(red hue(* 20deg));
-    31 │     color: color(red lightness(50%));
-  
-  i Expected a declaration item here.
-  
-    27 │     color: color(red hue(- 20));
-    28 │     color: color(red hue(- 20deg));
-  > 29 │     color: color(red hue(* 20));
-       │                          ^
-    30 │     color: color(red hue(* 20deg));
-    31 │     color: color(red lightness(50%));
-  
-color-adjuster.css:29:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `20`
-  
-    27 │     color: color(red hue(- 20));
-    28 │     color: color(red hue(- 20deg));
-  > 29 │     color: color(red hue(* 20));
-       │                            ^^
-    30 │     color: color(red hue(* 20deg));
-    31 │     color: color(red lightness(50%));
-  
-  i Remove 20
-  
-color-adjuster.css:30:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '*'.
-  
-    28 │     color: color(red hue(- 20deg));
-    29 │     color: color(red hue(* 20));
-  > 30 │     color: color(red hue(* 20deg));
-       │                          ^
-    31 │     color: color(red lightness(50%));
-    32 │     color: color(red lightness(20%));
-  
-  i Expected a declaration item here.
-  
-    28 │     color: color(red hue(- 20deg));
-    29 │     color: color(red hue(* 20));
-  > 30 │     color: color(red hue(* 20deg));
-       │                          ^
-    31 │     color: color(red lightness(50%));
-    32 │     color: color(red lightness(20%));
-  
-color-adjuster.css:30:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `20`
-  
-    28 │     color: color(red hue(- 20deg));
-    29 │     color: color(red hue(* 20));
-  > 30 │     color: color(red hue(* 20deg));
-       │                            ^^
-    31 │     color: color(red lightness(50%));
-    32 │     color: color(red lightness(20%));
-  
-  i Remove 20
-  
-color-adjuster.css:33:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '+'.
-  
-    31 │     color: color(red lightness(50%));
-    32 │     color: color(red lightness(20%));
-  > 33 │     color: color(red lightness(+ 20%));
-       │                                ^
-    34 │     color: color(red lightness(- 20%));
-    35 │     color: color(red lightness(* 1.5%));
-  
-  i Expected a declaration item here.
-  
-    31 │     color: color(red lightness(50%));
-    32 │     color: color(red lightness(20%));
-  > 33 │     color: color(red lightness(+ 20%));
-       │                                ^
-    34 │     color: color(red lightness(- 20%));
-    35 │     color: color(red lightness(* 1.5%));
-  
-color-adjuster.css:33:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `20`
-  
-    31 │     color: color(red lightness(50%));
-    32 │     color: color(red lightness(20%));
-  > 33 │     color: color(red lightness(+ 20%));
-       │                                  ^^
-    34 │     color: color(red lightness(- 20%));
-    35 │     color: color(red lightness(* 1.5%));
-  
-  i Remove 20
-  
-color-adjuster.css:34:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '-'.
-  
-    32 │     color: color(red lightness(20%));
-    33 │     color: color(red lightness(+ 20%));
-  > 34 │     color: color(red lightness(- 20%));
-       │                                ^
-    35 │     color: color(red lightness(* 1.5%));
-    36 │     color: color(beige saturation(20%));
-  
-  i Expected a declaration item here.
-  
-    32 │     color: color(red lightness(20%));
-    33 │     color: color(red lightness(+ 20%));
-  > 34 │     color: color(red lightness(- 20%));
-       │                                ^
-    35 │     color: color(red lightness(* 1.5%));
-    36 │     color: color(beige saturation(20%));
-  
-color-adjuster.css:34:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `20`
-  
-    32 │     color: color(red lightness(20%));
-    33 │     color: color(red lightness(+ 20%));
-  > 34 │     color: color(red lightness(- 20%));
-       │                                  ^^
-    35 │     color: color(red lightness(* 1.5%));
-    36 │     color: color(beige saturation(20%));
-  
-  i Remove 20
-  
-color-adjuster.css:35:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '*'.
-  
-    33 │     color: color(red lightness(+ 20%));
-    34 │     color: color(red lightness(- 20%));
-  > 35 │     color: color(red lightness(* 1.5%));
-       │                                ^
-    36 │     color: color(beige saturation(20%));
-    37 │     color: color(beige saturation(+ 20%));
-  
-  i Expected a declaration item here.
-  
-    33 │     color: color(red lightness(+ 20%));
-    34 │     color: color(red lightness(- 20%));
-  > 35 │     color: color(red lightness(* 1.5%));
-       │                                ^
-    36 │     color: color(beige saturation(20%));
-    37 │     color: color(beige saturation(+ 20%));
-  
-color-adjuster.css:35:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `1.5`
-  
-    33 │     color: color(red lightness(+ 20%));
-    34 │     color: color(red lightness(- 20%));
-  > 35 │     color: color(red lightness(* 1.5%));
-       │                                  ^^^
-    36 │     color: color(beige saturation(20%));
-    37 │     color: color(beige saturation(+ 20%));
-  
-  i Remove 1.5
-  
-color-adjuster.css:37:35 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '+'.
-  
-    35 │     color: color(red lightness(* 1.5%));
-    36 │     color: color(beige saturation(20%));
-  > 37 │     color: color(beige saturation(+ 20%));
-       │                                   ^
-    38 │     color: color(beige saturation(- 20%));
-    39 │     color: color(beige saturation(* 1.5%));
-  
-  i Expected a declaration item here.
-  
-    35 │     color: color(red lightness(* 1.5%));
-    36 │     color: color(beige saturation(20%));
-  > 37 │     color: color(beige saturation(+ 20%));
-       │                                   ^
-    38 │     color: color(beige saturation(- 20%));
-    39 │     color: color(beige saturation(* 1.5%));
-  
-color-adjuster.css:37:37 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `20`
-  
-    35 │     color: color(red lightness(* 1.5%));
-    36 │     color: color(beige saturation(20%));
-  > 37 │     color: color(beige saturation(+ 20%));
-       │                                     ^^
-    38 │     color: color(beige saturation(- 20%));
-    39 │     color: color(beige saturation(* 1.5%));
-  
-  i Remove 20
-  
-color-adjuster.css:38:35 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '-'.
-  
-    36 │     color: color(beige saturation(20%));
-    37 │     color: color(beige saturation(+ 20%));
-  > 38 │     color: color(beige saturation(- 20%));
-       │                                   ^
-    39 │     color: color(beige saturation(* 1.5%));
-    40 │     color: color(beige blackness(20%));
-  
-  i Expected a declaration item here.
-  
-    36 │     color: color(beige saturation(20%));
-    37 │     color: color(beige saturation(+ 20%));
-  > 38 │     color: color(beige saturation(- 20%));
-       │                                   ^
-    39 │     color: color(beige saturation(* 1.5%));
-    40 │     color: color(beige blackness(20%));
-  
-color-adjuster.css:38:37 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `20`
-  
-    36 │     color: color(beige saturation(20%));
-    37 │     color: color(beige saturation(+ 20%));
-  > 38 │     color: color(beige saturation(- 20%));
-       │                                     ^^
-    39 │     color: color(beige saturation(* 1.5%));
-    40 │     color: color(beige blackness(20%));
-  
-  i Remove 20
-  
-color-adjuster.css:39:35 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '*'.
-  
-    37 │     color: color(beige saturation(+ 20%));
-    38 │     color: color(beige saturation(- 20%));
-  > 39 │     color: color(beige saturation(* 1.5%));
-       │                                   ^
-    40 │     color: color(beige blackness(20%));
-    41 │     color: color(beige blackness(+ 20%));
-  
-  i Expected a declaration item here.
-  
-    37 │     color: color(beige saturation(+ 20%));
-    38 │     color: color(beige saturation(- 20%));
-  > 39 │     color: color(beige saturation(* 1.5%));
-       │                                   ^
-    40 │     color: color(beige blackness(20%));
-    41 │     color: color(beige blackness(+ 20%));
-  
-color-adjuster.css:39:37 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `1.5`
-  
-    37 │     color: color(beige saturation(+ 20%));
-    38 │     color: color(beige saturation(- 20%));
-  > 39 │     color: color(beige saturation(* 1.5%));
-       │                                     ^^^
-    40 │     color: color(beige blackness(20%));
-    41 │     color: color(beige blackness(+ 20%));
-  
-  i Remove 1.5
-  
-color-adjuster.css:41:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '+'.
-  
-    39 │     color: color(beige saturation(* 1.5%));
-    40 │     color: color(beige blackness(20%));
-  > 41 │     color: color(beige blackness(+ 20%));
-       │                                  ^
-    42 │     color: color(beige blackness(- 1%));
-    43 │     color: color(beige blackness(* 20%));
-  
-  i Expected a declaration item here.
-  
-    39 │     color: color(beige saturation(* 1.5%));
-    40 │     color: color(beige blackness(20%));
-  > 41 │     color: color(beige blackness(+ 20%));
-       │                                  ^
-    42 │     color: color(beige blackness(- 1%));
-    43 │     color: color(beige blackness(* 20%));
-  
-color-adjuster.css:41:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `20`
-  
-    39 │     color: color(beige saturation(* 1.5%));
-    40 │     color: color(beige blackness(20%));
-  > 41 │     color: color(beige blackness(+ 20%));
-       │                                    ^^
-    42 │     color: color(beige blackness(- 1%));
-    43 │     color: color(beige blackness(* 20%));
-  
-  i Remove 20
-  
-color-adjuster.css:42:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '-'.
-  
-    40 │     color: color(beige blackness(20%));
-    41 │     color: color(beige blackness(+ 20%));
-  > 42 │     color: color(beige blackness(- 1%));
-       │                                  ^
-    43 │     color: color(beige blackness(* 20%));
-    44 │     color: color(beige whiteness(20%));
-  
-  i Expected a declaration item here.
-  
-    40 │     color: color(beige blackness(20%));
-    41 │     color: color(beige blackness(+ 20%));
-  > 42 │     color: color(beige blackness(- 1%));
-       │                                  ^
-    43 │     color: color(beige blackness(* 20%));
-    44 │     color: color(beige whiteness(20%));
-  
-color-adjuster.css:42:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `1`
-  
-    40 │     color: color(beige blackness(20%));
-    41 │     color: color(beige blackness(+ 20%));
-  > 42 │     color: color(beige blackness(- 1%));
-       │                                    ^
-    43 │     color: color(beige blackness(* 20%));
-    44 │     color: color(beige whiteness(20%));
-  
-  i Remove 1
-  
-color-adjuster.css:43:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '*'.
-  
-    41 │     color: color(beige blackness(+ 20%));
-    42 │     color: color(beige blackness(- 1%));
-  > 43 │     color: color(beige blackness(* 20%));
-       │                                  ^
-    44 │     color: color(beige whiteness(20%));
-    45 │     color: color(beige whiteness(+ 1%));
-  
-  i Expected a declaration item here.
-  
-    41 │     color: color(beige blackness(+ 20%));
-    42 │     color: color(beige blackness(- 1%));
-  > 43 │     color: color(beige blackness(* 20%));
-       │                                  ^
-    44 │     color: color(beige whiteness(20%));
-    45 │     color: color(beige whiteness(+ 1%));
-  
-color-adjuster.css:43:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `20`
-  
-    41 │     color: color(beige blackness(+ 20%));
-    42 │     color: color(beige blackness(- 1%));
-  > 43 │     color: color(beige blackness(* 20%));
-       │                                    ^^
-    44 │     color: color(beige whiteness(20%));
-    45 │     color: color(beige whiteness(+ 1%));
-  
-  i Remove 20
-  
-color-adjuster.css:45:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '+'.
-  
-    43 │     color: color(beige blackness(* 20%));
-    44 │     color: color(beige whiteness(20%));
-  > 45 │     color: color(beige whiteness(+ 1%));
-       │                                  ^
-    46 │     color: color(beige whiteness(- 20%));
-    47 │     color: color(beige whiteness(* .5%));
-  
-  i Expected a declaration item here.
-  
-    43 │     color: color(beige blackness(* 20%));
-    44 │     color: color(beige whiteness(20%));
-  > 45 │     color: color(beige whiteness(+ 1%));
-       │                                  ^
-    46 │     color: color(beige whiteness(- 20%));
-    47 │     color: color(beige whiteness(* .5%));
-  
-color-adjuster.css:45:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `1`
-  
-    43 │     color: color(beige blackness(* 20%));
-    44 │     color: color(beige whiteness(20%));
-  > 45 │     color: color(beige whiteness(+ 1%));
-       │                                    ^
-    46 │     color: color(beige whiteness(- 20%));
-    47 │     color: color(beige whiteness(* .5%));
-  
-  i Remove 1
-  
-color-adjuster.css:46:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '-'.
-  
-    44 │     color: color(beige whiteness(20%));
-    45 │     color: color(beige whiteness(+ 1%));
-  > 46 │     color: color(beige whiteness(- 20%));
-       │                                  ^
-    47 │     color: color(beige whiteness(* .5%));
-    48 │     color: color(red);
-  
-  i Expected a declaration item here.
-  
-    44 │     color: color(beige whiteness(20%));
-    45 │     color: color(beige whiteness(+ 1%));
-  > 46 │     color: color(beige whiteness(- 20%));
-       │                                  ^
-    47 │     color: color(beige whiteness(* .5%));
-    48 │     color: color(red);
-  
-color-adjuster.css:46:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `20`
-  
-    44 │     color: color(beige whiteness(20%));
-    45 │     color: color(beige whiteness(+ 1%));
-  > 46 │     color: color(beige whiteness(- 20%));
-       │                                    ^^
-    47 │     color: color(beige whiteness(* .5%));
-    48 │     color: color(red);
-  
-  i Remove 20
-  
-color-adjuster.css:47:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '*'.
-  
-    45 │     color: color(beige whiteness(+ 1%));
-    46 │     color: color(beige whiteness(- 20%));
-  > 47 │     color: color(beige whiteness(* .5%));
-       │                                  ^
-    48 │     color: color(red);
-    49 │     color: color(red tint(0%));
-  
-  i Expected a declaration item here.
-  
-    45 │     color: color(beige whiteness(+ 1%));
-    46 │     color: color(beige whiteness(- 20%));
-  > 47 │     color: color(beige whiteness(* .5%));
-       │                                  ^
-    48 │     color: color(red);
-    49 │     color: color(red tint(0%));
-  
-color-adjuster.css:47:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `.5`
-  
-    45 │     color: color(beige whiteness(+ 1%));
-    46 │     color: color(beige whiteness(- 20%));
-  > 47 │     color: color(beige whiteness(* .5%));
-       │                                    ^^
-    48 │     color: color(red);
-    49 │     color: color(red tint(0%));
-  
-  i Remove .5
-  
-color-adjuster.css:86:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '+'.
-  
-    84 │     color: color(0rad);
-    85 │     color: color(beige);
-  > 86 │     color: color(beige hue(+ 0deg));
-       │                            ^
-    87 │     color: color(beige saturation(+ 0%));
-    88 │     color: color(beige lightness(+ 0%));
-  
-  i Expected a declaration item here.
-  
-    84 │     color: color(0rad);
-    85 │     color: color(beige);
-  > 86 │     color: color(beige hue(+ 0deg));
-       │                            ^
-    87 │     color: color(beige saturation(+ 0%));
-    88 │     color: color(beige lightness(+ 0%));
-  
-color-adjuster.css:86:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `0`
-  
-    84 │     color: color(0rad);
-    85 │     color: color(beige);
-  > 86 │     color: color(beige hue(+ 0deg));
-       │                              ^
-    87 │     color: color(beige saturation(+ 0%));
-    88 │     color: color(beige lightness(+ 0%));
-  
-  i Remove 0
-  
-color-adjuster.css:87:35 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '+'.
-  
-    85 │     color: color(beige);
-    86 │     color: color(beige hue(+ 0deg));
-  > 87 │     color: color(beige saturation(+ 0%));
-       │                                   ^
-    88 │     color: color(beige lightness(+ 0%));
-    89 │     color: color(beige alpha(1));
-  
-  i Expected a declaration item here.
-  
-    85 │     color: color(beige);
-    86 │     color: color(beige hue(+ 0deg));
-  > 87 │     color: color(beige saturation(+ 0%));
-       │                                   ^
-    88 │     color: color(beige lightness(+ 0%));
-    89 │     color: color(beige alpha(1));
-  
-color-adjuster.css:87:37 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `0`
-  
-    85 │     color: color(beige);
-    86 │     color: color(beige hue(+ 0deg));
-  > 87 │     color: color(beige saturation(+ 0%));
-       │                                     ^
-    88 │     color: color(beige lightness(+ 0%));
-    89 │     color: color(beige alpha(1));
-  
-  i Remove 0
-  
-color-adjuster.css:88:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '+'.
-  
-    86 │     color: color(beige hue(+ 0deg));
-    87 │     color: color(beige saturation(+ 0%));
-  > 88 │     color: color(beige lightness(+ 0%));
-       │                                  ^
-    89 │     color: color(beige alpha(1));
-    90 │     color: color(beige alpha(+ 0));
-  
-  i Expected a declaration item here.
-  
-    86 │     color: color(beige hue(+ 0deg));
-    87 │     color: color(beige saturation(+ 0%));
-  > 88 │     color: color(beige lightness(+ 0%));
-       │                                  ^
-    89 │     color: color(beige alpha(1));
-    90 │     color: color(beige alpha(+ 0));
-  
-color-adjuster.css:88:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `0`
-  
-    86 │     color: color(beige hue(+ 0deg));
-    87 │     color: color(beige saturation(+ 0%));
-  > 88 │     color: color(beige lightness(+ 0%));
-       │                                    ^
-    89 │     color: color(beige alpha(1));
-    90 │     color: color(beige alpha(+ 0));
-  
-  i Remove 0
-  
-color-adjuster.css:90:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '+'.
-  
-    88 │     color: color(beige lightness(+ 0%));
-    89 │     color: color(beige alpha(1));
-  > 90 │     color: color(beige alpha(+ 0));
-       │                              ^
-    91 │     color: color(beige alpha(+ 0%));
-    92 │     color: color(beige blend(beige 0% hsl));
-  
-  i Expected a declaration item here.
-  
-    88 │     color: color(beige lightness(+ 0%));
-    89 │     color: color(beige alpha(1));
-  > 90 │     color: color(beige alpha(+ 0));
-       │                              ^
-    91 │     color: color(beige alpha(+ 0%));
-    92 │     color: color(beige blend(beige 0% hsl));
-  
-color-adjuster.css:90:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `0`
-  
-    88 │     color: color(beige lightness(+ 0%));
-    89 │     color: color(beige alpha(1));
-  > 90 │     color: color(beige alpha(+ 0));
-       │                                ^
-    91 │     color: color(beige alpha(+ 0%));
-    92 │     color: color(beige blend(beige 0% hsl));
-  
-  i Remove 0
-  
-color-adjuster.css:91:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '+'.
-  
-    89 │     color: color(beige alpha(1));
-    90 │     color: color(beige alpha(+ 0));
-  > 91 │     color: color(beige alpha(+ 0%));
-       │                              ^
-    92 │     color: color(beige blend(beige 0% hsl));
-    93 │     color: color(red);
-  
-  i Expected a declaration item here.
-  
-    89 │     color: color(beige alpha(1));
-    90 │     color: color(beige alpha(+ 0));
-  > 91 │     color: color(beige alpha(+ 0%));
-       │                              ^
-    92 │     color: color(beige blend(beige 0% hsl));
-    93 │     color: color(red);
-  
-color-adjuster.css:91:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `0`
-  
-    89 │     color: color(beige alpha(1));
-    90 │     color: color(beige alpha(+ 0));
-  > 91 │     color: color(beige alpha(+ 0%));
-       │                                ^
-    92 │     color: color(beige blend(beige 0% hsl));
-    93 │     color: color(red);
-  
-  i Remove 0
-  
-color-adjuster.css:109:48 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '+'.
-  
-    107 │     color: color(yellow contrast(75%));
-    108 │     color: color(yellow contrast(100%));
-  > 109 │     color: color(color-mod(0deg blue(10%)) rgb(+ 0 10 0) hue(+ 10deg) tint(10%) lightness(+ 10%) saturation(+ 10%) blend(rebeccapurple 50%));
-        │                                                ^
-    110 │     color: color(var(--color));
-    111 │     color: color(var(--color) l(+ 20%));
-  
-  i Expected a declaration item here.
-  
-    107 │     color: color(yellow contrast(75%));
-    108 │     color: color(yellow contrast(100%));
-  > 109 │     color: color(color-mod(0deg blue(10%)) rgb(+ 0 10 0) hue(+ 10deg) tint(10%) lightness(+ 10%) saturation(+ 10%) blend(rebeccapurple 50%));
-        │                                                ^
-    110 │     color: color(var(--color));
-    111 │     color: color(var(--color) l(+ 20%));
-  
-color-adjuster.css:109:50 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `0`
-  
-    107 │     color: color(yellow contrast(75%));
-    108 │     color: color(yellow contrast(100%));
-  > 109 │     color: color(color-mod(0deg blue(10%)) rgb(+ 0 10 0) hue(+ 10deg) tint(10%) lightness(+ 10%) saturation(+ 10%) blend(rebeccapurple 50%));
-        │                                                  ^
-    110 │     color: color(var(--color));
-    111 │     color: color(var(--color) l(+ 20%));
-  
-  i Remove 0
-  
-color-adjuster.css:109:62 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '+'.
-  
-    107 │     color: color(yellow contrast(75%));
-    108 │     color: color(yellow contrast(100%));
-  > 109 │     color: color(color-mod(0deg blue(10%)) rgb(+ 0 10 0) hue(+ 10deg) tint(10%) lightness(+ 10%) saturation(+ 10%) blend(rebeccapurple 50%));
-        │                                                              ^
-    110 │     color: color(var(--color));
-    111 │     color: color(var(--color) l(+ 20%));
-  
-  i Expected a declaration item here.
-  
-    107 │     color: color(yellow contrast(75%));
-    108 │     color: color(yellow contrast(100%));
-  > 109 │     color: color(color-mod(0deg blue(10%)) rgb(+ 0 10 0) hue(+ 10deg) tint(10%) lightness(+ 10%) saturation(+ 10%) blend(rebeccapurple 50%));
-        │                                                              ^
-    110 │     color: color(var(--color));
-    111 │     color: color(var(--color) l(+ 20%));
-  
-color-adjuster.css:109:64 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `10`
-  
-    107 │     color: color(yellow contrast(75%));
-    108 │     color: color(yellow contrast(100%));
-  > 109 │     color: color(color-mod(0deg blue(10%)) rgb(+ 0 10 0) hue(+ 10deg) tint(10%) lightness(+ 10%) saturation(+ 10%) blend(rebeccapurple 50%));
-        │                                                                ^^
-    110 │     color: color(var(--color));
-    111 │     color: color(var(--color) l(+ 20%));
-  
-  i Remove 10
-  
-color-adjuster.css:109:91 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '+'.
-  
-    107 │     color: color(yellow contrast(75%));
-    108 │     color: color(yellow contrast(100%));
-  > 109 │     color: color(color-mod(0deg blue(10%)) rgb(+ 0 10 0) hue(+ 10deg) tint(10%) lightness(+ 10%) saturation(+ 10%) blend(rebeccapurple 50%));
-        │                                                                                           ^
-    110 │     color: color(var(--color));
-    111 │     color: color(var(--color) l(+ 20%));
-  
-  i Expected a declaration item here.
-  
-    107 │     color: color(yellow contrast(75%));
-    108 │     color: color(yellow contrast(100%));
-  > 109 │     color: color(color-mod(0deg blue(10%)) rgb(+ 0 10 0) hue(+ 10deg) tint(10%) lightness(+ 10%) saturation(+ 10%) blend(rebeccapurple 50%));
-        │                                                                                           ^
-    110 │     color: color(var(--color));
-    111 │     color: color(var(--color) l(+ 20%));
-  
-color-adjuster.css:109:93 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `10`
-  
-    107 │     color: color(yellow contrast(75%));
-    108 │     color: color(yellow contrast(100%));
-  > 109 │     color: color(color-mod(0deg blue(10%)) rgb(+ 0 10 0) hue(+ 10deg) tint(10%) lightness(+ 10%) saturation(+ 10%) blend(rebeccapurple 50%));
-        │                                                                                             ^^
-    110 │     color: color(var(--color));
-    111 │     color: color(var(--color) l(+ 20%));
-  
-  i Remove 10
-  
-color-adjuster.css:109:109 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '+'.
-  
-    107 │     color: color(yellow contrast(75%));
-    108 │     color: color(yellow contrast(100%));
-  > 109 │     color: color(color-mod(0deg blue(10%)) rgb(+ 0 10 0) hue(+ 10deg) tint(10%) lightness(+ 10%) saturation(+ 10%) blend(rebeccapurple 50%));
-        │                                                                                                             ^
-    110 │     color: color(var(--color));
-    111 │     color: color(var(--color) l(+ 20%));
-  
-  i Expected a declaration item here.
-  
-    107 │     color: color(yellow contrast(75%));
-    108 │     color: color(yellow contrast(100%));
-  > 109 │     color: color(color-mod(0deg blue(10%)) rgb(+ 0 10 0) hue(+ 10deg) tint(10%) lightness(+ 10%) saturation(+ 10%) blend(rebeccapurple 50%));
-        │                                                                                                             ^
-    110 │     color: color(var(--color));
-    111 │     color: color(var(--color) l(+ 20%));
-  
-color-adjuster.css:109:111 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `10`
-  
-    107 │     color: color(yellow contrast(75%));
-    108 │     color: color(yellow contrast(100%));
-  > 109 │     color: color(color-mod(0deg blue(10%)) rgb(+ 0 10 0) hue(+ 10deg) tint(10%) lightness(+ 10%) saturation(+ 10%) blend(rebeccapurple 50%));
-        │                                                                                                               ^^
-    110 │     color: color(var(--color));
-    111 │     color: color(var(--color) l(+ 20%));
-  
-  i Remove 10
-  
-color-adjuster.css:111:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '+'.
-  
-    109 │     color: color(color-mod(0deg blue(10%)) rgb(+ 0 10 0) hue(+ 10deg) tint(10%) lightness(+ 10%) saturation(+ 10%) blend(rebeccapurple 50%));
-    110 │     color: color(var(--color));
-  > 111 │     color: color(var(--color) l(+ 20%));
-        │                                 ^
-    112 │     color: color(red l(+20%)); /* interpreted as part of the number */
-    113 │     color: color(red l(-20%)); /* interpreted as part of the number */
-  
-  i Expected a declaration item here.
-  
-    109 │     color: color(color-mod(0deg blue(10%)) rgb(+ 0 10 0) hue(+ 10deg) tint(10%) lightness(+ 10%) saturation(+ 10%) blend(rebeccapurple 50%));
-    110 │     color: color(var(--color));
-  > 111 │     color: color(var(--color) l(+ 20%));
-        │                                 ^
-    112 │     color: color(red l(+20%)); /* interpreted as part of the number */
-    113 │     color: color(red l(-20%)); /* interpreted as part of the number */
-  
-color-adjuster.css:111:35 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `20`
-  
-    109 │     color: color(color-mod(0deg blue(10%)) rgb(+ 0 10 0) hue(+ 10deg) tint(10%) lightness(+ 10%) saturation(+ 10%) blend(rebeccapurple 50%));
-    110 │     color: color(var(--color));
-  > 111 │     color: color(var(--color) l(+ 20%));
-        │                                   ^^
-    112 │     color: color(red l(+20%)); /* interpreted as part of the number */
-    113 │     color: color(red l(-20%)); /* interpreted as part of the number */
-  
-  i Remove 20
-  
-color-adjuster.css:118:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '*'.
-  
-    116 │     color: color(red hue(-20));
-    117 │     color: color(red hue(-20deg));
-  > 118 │     color: color(red hue(*20));
-        │                          ^
-    119 │     color: color(red hue(*20deg));
-    120 │     color: color(var(--highlightColor) blackness(+ 20%));
-  
-  i Expected a declaration item here.
-  
-    116 │     color: color(red hue(-20));
-    117 │     color: color(red hue(-20deg));
-  > 118 │     color: color(red hue(*20));
-        │                          ^
-    119 │     color: color(red hue(*20deg));
-    120 │     color: color(var(--highlightColor) blackness(+ 20%));
-  
-color-adjuster.css:118:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `20`
-  
-    116 │     color: color(red hue(-20));
-    117 │     color: color(red hue(-20deg));
-  > 118 │     color: color(red hue(*20));
-        │                           ^^
-    119 │     color: color(red hue(*20deg));
-    120 │     color: color(var(--highlightColor) blackness(+ 20%));
-  
-  i Remove 20
-  
-color-adjuster.css:119:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '*'.
-  
-    117 │     color: color(red hue(-20deg));
-    118 │     color: color(red hue(*20));
-  > 119 │     color: color(red hue(*20deg));
-        │                          ^
-    120 │     color: color(var(--highlightColor) blackness(+ 20%));
-    121 │ }
-  
-  i Expected a declaration item here.
-  
-    117 │     color: color(red hue(-20deg));
-    118 │     color: color(red hue(*20));
-  > 119 │     color: color(red hue(*20deg));
-        │                          ^
-    120 │     color: color(var(--highlightColor) blackness(+ 20%));
-    121 │ }
-  
-color-adjuster.css:119:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `20`
-  
-    117 │     color: color(red hue(-20deg));
-    118 │     color: color(red hue(*20));
-  > 119 │     color: color(red hue(*20deg));
-        │                           ^^
-    120 │     color: color(var(--highlightColor) blackness(+ 20%));
-    121 │ }
-  
-  i Remove 20
-  
-color-adjuster.css:120:50 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration item but instead found '+'.
-  
-    118 │     color: color(red hue(*20));
-    119 │     color: color(red hue(*20deg));
-  > 120 │     color: color(var(--highlightColor) blackness(+ 20%));
-        │                                                  ^
-    121 │ }
-    122 │ 
-  
-  i Expected a declaration item here.
-  
-    118 │     color: color(red hue(*20));
-    119 │     color: color(red hue(*20deg));
-  > 120 │     color: color(var(--highlightColor) blackness(+ 20%));
-        │                                                  ^
-    121 │ }
-    122 │ 
-  
-color-adjuster.css:120:52 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `20`
-  
-    118 │     color: color(red hue(*20));
-    119 │     color: color(red hue(*20deg));
-  > 120 │     color: color(var(--highlightColor) blackness(+ 20%));
-        │                                                    ^^
-    121 │ }
-    122 │ 
-  
-  i Remove 20
-  
-
-```
-
-# Lines exceeding max width of 80 characters
-```
-  109:   color: color(color-mod(0deg blue(10%)) rgb(+ 0 10 0) hue(+ 10deg) tint(10%) lightness(+ 10%) saturation(+ 10%) blend(rebeccapurple 50%));
 ```

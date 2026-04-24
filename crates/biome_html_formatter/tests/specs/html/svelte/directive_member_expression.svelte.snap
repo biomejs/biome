@@ -1,0 +1,27 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/directive_member_expression.svelte
+---
+
+# Input
+
+```svelte
+<button use:obj.action>action</button>
+<button use:obj.action={{leet: 1337}}>with params</button>
+<div in:renderer.in|global out:renderer.out|global></div>
+<div transition:lib.fade|local={{ duration: 200 }}>fading</div>
+<div in:a.b.c|global>deep</div>
+
+```
+
+
+# Formatted
+
+```svelte
+<button use:obj.action>action</button>
+<button use:obj.action={{leet: 1337}}>with params</button>
+<div in:renderer.in|global out:renderer.out|global></div>
+<div transition:lib.fade|local={{ duration: 200 }}>fading</div>
+<div in:a.b.c|global>deep</div>
+
+```

@@ -1,0 +1,27 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/declaration/interpolation.scss
+---
+
+# Input
+
+```scss
+.box{
+#{$name}:1px;
+margin-#{$side}:1px;
+--theme-#{$slot}:red;
+}
+
+```
+
+
+# Formatted
+
+```scss
+.box {
+	#{$name}: 1px;
+	margin-#{$side}: 1px;
+	--theme-#{$slot}: red;
+}
+
+```

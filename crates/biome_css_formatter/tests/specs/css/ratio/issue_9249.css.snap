@@ -1,0 +1,28 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/ratio/issue_9249.css
+---
+
+# Input
+
+```css
+.merch-grid {
+	grid-column: 1 / -1; /* The last column that will be used to position the shop link */
+}
+
+```
+
+
+# Formatted
+
+```css
+.merch-grid {
+	grid-column: 1 / -1; /* The last column that will be used to position the shop link */
+}
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    2: 	grid-column: 1 / -1; /* The last column that will be used to position the shop link */
+```

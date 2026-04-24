@@ -1,0 +1,95 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+
+# `/src/app.css`
+
+## Source
+
+```css
+.app {
+	color: red;
+}
+.btn {
+	padding: 8px;
+}
+```
+
+## Module Info
+
+```
+Classes {
+  app,
+  btn,
+}
+Imports {
+  No imports
+}
+```
+
+
+# `/src/Button.vue`
+
+## Source
+
+```vue
+<template>
+  <button class="btn">Click me</button>
+</template>
+
+<style scoped>
+  .btn { font-weight: bold; }
+</style>
+```
+
+## Module Info
+
+```
+StyleClasses {
+  btn (Local),
+}
+ReferencedClasses {
+  btn,
+}
+LinkedStylesheets {
+  No linked stylesheets
+}
+ScriptImports {
+  No script imports
+}
+```
+
+
+# `/src/App.vue`
+
+## Source
+
+```vue
+<template>
+  <div class="app"><Button /></div>
+</template>
+
+<script>
+import "./app.css";
+import Button from "./Button.vue";
+</script>
+```
+
+## Module Info
+
+```
+StyleClasses {
+  No style classes
+}
+ReferencedClasses {
+  app,
+}
+LinkedStylesheets {
+  No linked stylesheets
+}
+ScriptImports {
+  "./Button.vue" => /src/Button.vue,
+  "./app.css" => /src/app.css,
+}
+```

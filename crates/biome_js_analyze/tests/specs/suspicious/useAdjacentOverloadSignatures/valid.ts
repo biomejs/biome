@@ -70,3 +70,33 @@ class C {
   g(): void {}
   f(): void {}
 }
+
+// Issue https://github.com/biomejs/biome/issues/8345
+// Static and instance methods with the same name should be treated as separate groups
+class D {
+  static kek(): number { return 0 }
+  another(): string { return '' }
+  kek(): number { return 1 }
+}
+
+class E {
+  kek(): number { return 0 }
+  another(): string { return '' }
+  static kek(): number { return 1 }
+}
+
+// Static method overloads should still work
+class F {
+  static foo(s: string): void;
+  static foo(n: number): void;
+  static foo(sn: string | number): void {}
+  bar(): void {}
+}
+
+// Instance method overloads with static methods in between should be separate
+class G {
+  foo(s: string): void;
+  foo(n: number): void;
+  foo(sn: string | number): void {}
+  static foo(): void {}
+}

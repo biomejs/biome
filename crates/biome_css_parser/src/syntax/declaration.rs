@@ -1,15 +1,21 @@
 use crate::parser::CssParser;
 use crate::syntax::CssSyntaxFeatures;
 use crate::syntax::parse_error::{expected_declaration_item, scss_only_syntax_error};
-use crate::syntax::property::{is_at_any_property, parse_any_property};
-use crate::syntax::scss::{is_at_scss_declaration, parse_scss_declaration};
+use crate::syntax::property::{
+    is_at_any_property, parse_any_property, parse_any_property_with_value_end_set,
+};
+use crate::syntax::scss::{
+    is_at_scss_interpolated_property, is_at_scss_nesting_declaration,
+    is_at_scss_variable_declaration, parse_scss_interpolated_property_declaration,
+    parse_scss_variable_declaration,
+};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{Parser, SyntaxFeature, token_set};
+use biome_parser::{CompletedMarker, Parser, SyntaxFeature, TokenSet, token_set};
 
 pub(crate) struct DeclarationList;
 
@@ -19,7 +25,11 @@ impl ParseNodeList for DeclarationList {
     const LIST_KIND: Self::Kind = CSS_DECLARATION_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_any_declaration_with_semicolon(p)
+        if is_at_scss_nesting_declaration(p) || is_at_scss_interpolated_property(p) {
+            parse_scss_interpolated_property_declaration(p)
+        } else {
+            parse_any_declaration_with_semicolon(p)
+        }
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -45,13 +55,35 @@ pub(crate) fn is_at_declaration(p: &mut CssParser) -> bool {
 
 #[inline]
 pub(crate) fn parse_declaration(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_declaration(p) {
-        return Absent;
-    }
+    parse_declaration_with(p, parse_any_property)
+}
 
+/// Parses an interpolation-bearing SCSS property in declaration-only contexts.
+///
+/// Nested-property parsing gets the first chance so `name: { ... }` stays intact.
+/// If no nested-property form is found, this falls back to a regular declaration.
+#[inline]
+pub(crate) fn parse_declaration_with_value_end_set(
+    p: &mut CssParser,
+    value_end_set: TokenSet<CssSyntaxKind>,
+    recovery_end_set: TokenSet<CssSyntaxKind>,
+) -> ParsedSyntax {
+    parse_declaration_with(p, |p| {
+        parse_any_property_with_value_end_set(p, value_end_set, recovery_end_set)
+    })
+}
+
+#[inline]
+fn parse_declaration_with<F>(p: &mut CssParser, parse_property: F) -> ParsedSyntax
+where
+    F: FnOnce(&mut CssParser) -> ParsedSyntax,
+{
     let m = p.start();
 
-    parse_any_property(p).ok();
+    if parse_property(p).is_absent() {
+        m.abandon(p);
+        return Absent;
+    }
     parse_declaration_important(p).ok();
 
     Present(m.complete(p, CSS_DECLARATION))
@@ -66,10 +98,12 @@ pub(crate) fn is_at_any_declaration_with_semicolon(p: &mut CssParser) -> bool {
 pub(crate) fn parse_any_declaration_with_semicolon(p: &mut CssParser) -> ParsedSyntax {
     if is_at_empty_declaration(p) {
         parse_empty_declaration(p)
-    } else if is_at_scss_declaration(p) {
-        CssSyntaxFeatures::Scss.parse_exclusive_syntax(p, parse_scss_declaration, |p, marker| {
-            scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p))
-        })
+    } else if is_at_scss_variable_declaration(p) {
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_variable_declaration,
+            |p, marker| scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p)),
+        )
     } else if is_at_any_declaration_with_semicolon(p) {
         parse_declaration_with_semicolon(p)
     } else {
@@ -79,7 +113,7 @@ pub(crate) fn parse_any_declaration_with_semicolon(p: &mut CssParser) -> ParsedS
 
 #[inline]
 pub(crate) fn is_at_any_declaration(p: &mut CssParser) -> bool {
-    is_at_declaration(p) || is_at_scss_declaration(p)
+    is_at_declaration(p) || is_at_scss_variable_declaration(p)
 }
 
 /// Parses a CSS declaration that may optionally end with a semicolon.
@@ -92,14 +126,23 @@ pub(crate) fn is_at_any_declaration(p: &mut CssParser) -> bool {
 /// that are not at the end, the parser will raise an error.
 #[inline]
 pub(crate) fn parse_declaration_with_semicolon(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_declaration(p) {
-        return Absent;
-    }
+    parse_declaration(p).map(|declaration| complete_declaration_with_semicolon(p, declaration))
+}
 
-    let m = p.start();
+#[inline]
+pub(crate) fn complete_declaration_with_semicolon(
+    p: &mut CssParser,
+    declaration: CompletedMarker,
+) -> CompletedMarker {
+    let declaration_with_semicolon = declaration.precede(p);
 
-    parse_declaration(p).ok();
+    parse_optional_declaration_semicolon(p);
 
+    declaration_with_semicolon.complete(p, CSS_DECLARATION_WITH_SEMICOLON)
+}
+
+#[inline]
+pub(crate) fn parse_optional_declaration_semicolon(p: &mut CssParser) {
     // If the next token is a closing brace ('}'), the semicolon is optional.
     // Otherwise, a semicolon is expected and the parser will enforce its presence.
     // div { color: red; }
@@ -111,8 +154,6 @@ pub(crate) fn parse_declaration_with_semicolon(p: &mut CssParser) -> ParsedSynta
             p.expect(T![;]);
         }
     }
-
-    Present(m.complete(p, CSS_DECLARATION_WITH_SEMICOLON))
 }
 
 #[inline]
@@ -131,12 +172,12 @@ pub(crate) fn parse_empty_declaration(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn is_at_declaration_important(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_declaration_important(p: &mut CssParser) -> bool {
     p.at(T![!]) && p.nth_at(1, T![important])
 }
 
 #[inline]
-fn parse_declaration_important(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_declaration_important(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_declaration_important(p) {
         return Absent;
     }

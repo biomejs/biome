@@ -7,7 +7,7 @@ mod snap_test;
 #[cfg(test)]
 use snap_test::assert_cli_snapshot;
 
-use biome_cli::{CliDiagnostic, CliSession, biome_command};
+use biome_cli::{CliDiagnostic, CliSession, Watcher, biome_command};
 use biome_console::{BufferConsole, Console, ConsoleExt, markup};
 use biome_fs::{MemoryFileSystem, OsFileSystem};
 use biome_resolver::FsWithResolverProxy;
@@ -26,25 +26,6 @@ function f() {
 return { something }
 }
 "#;
-
-mod help {
-    use super::*;
-    use bpaf::Args;
-
-    #[test]
-    fn unknown_command() {
-        let mut console = BufferConsole::default();
-        let fs = MemoryFileSystem::default();
-
-        let (_, result) = run_cli(
-            fs,
-            &mut console,
-            Args::from(["unknown", "--help"].as_slice()),
-        );
-
-        assert!(result.is_ok(), "run_cli returned {result:?}");
-    }
-}
 
 mod main {
     use super::*;
@@ -378,7 +359,43 @@ pub(crate) fn run_cli_with_dyn_fs(
     let workspace = workspace::client(transport, fs).unwrap();
     let app = App::new(console, WorkspaceRef::Owned(workspace));
 
-    let mut session = CliSession { app };
+    let mut session = CliSession {
+        app,
+        watcher_factory: None,
+    };
+    let command = biome_command().run_inner(args);
+    match command {
+        Ok(command) => session.run(command),
+        Err(failure) => {
+            if let ParseFailure::Stdout(help, _) = &failure {
+                let console = &mut session.app.console;
+                console.log(markup! {{help.to_string()}});
+                Ok(())
+            } else {
+                Err(CliDiagnostic::parse_error_bpaf(failure))
+            }
+        }
+    }
+}
+
+/// Create an [App] instance with an in-process workspace and an injected
+/// watcher factory. Used by watch-mode tests to feed a scripted
+/// [`biome_cli::MockWatcher`] into the runner.
+pub(crate) fn run_cli_with_watcher_factory(
+    fs: Box<dyn FsWithResolverProxy>,
+    console: &mut dyn Console,
+    args: bpaf::Args,
+    watcher_factory: Box<dyn Fn() -> Box<dyn Watcher> + Send + Sync>,
+) -> Result<(), CliDiagnostic> {
+    use biome_service::{WorkspaceRef, workspace};
+
+    let workspace = workspace::server(Arc::from(fs), None);
+    let app = App::new(console, WorkspaceRef::Owned(workspace));
+
+    let mut session = CliSession {
+        app,
+        watcher_factory: Some(watcher_factory),
+    };
     let command = biome_command().run_inner(args);
     match command {
         Ok(command) => session.run(command),
@@ -408,7 +425,10 @@ pub(crate) fn run_cli_with_server_workspace(
     let workspace = workspace::server(Arc::new(fs), None);
     let app = App::new(console, WorkspaceRef::Owned(workspace));
 
-    let mut session = CliSession { app };
+    let mut session = CliSession {
+        app,
+        watcher_factory: None,
+    };
     let command = biome_command().run_inner(args);
     let result = match command {
         Ok(command) => session.run(command),

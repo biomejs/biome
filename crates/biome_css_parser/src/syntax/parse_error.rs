@@ -190,6 +190,7 @@ pub(crate) fn expected_any_at_rule(p: &CssParser, range: TextRange) -> ParseDiag
             "container",
             "counter-style",
             "document",
+            "debug",
             "font-face",
             "font-feature-values",
             "font-palette-values",
@@ -201,8 +202,10 @@ pub(crate) fn expected_any_at_rule(p: &CssParser, range: TextRange) -> ParseDiag
             "page",
             "property",
             "supports",
+            "warn",
             "viewport",
             "scope",
+            "error",
         ],
         range,
     )
@@ -255,5 +258,21 @@ pub(crate) fn scss_only_syntax_error(
         ),
         range,
     )
-        .with_hint(markup! { "SCSS only syntax" })
+}
+
+pub(crate) fn inconsistent_scss_bracketed_list_separators(
+    p: &CssParser,
+    expected: &str,
+    found: &str,
+    range: TextRange,
+) -> ParseDiagnostic {
+    p.err_builder(
+        format!(
+            "Mixed separators in SCSS bracketed lists are not supported. Expected {expected} but found {found}."
+        ),
+        range,
+    )
+    .with_hint(markup! {
+        "Use one separator style per bracketed list."
+    })
 }

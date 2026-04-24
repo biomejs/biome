@@ -4,41 +4,43 @@ expression: invalid.jsx
 ---
 # Input
 ```jsx
+/* should generate diagnostics */
 <>
-<a href="#" aria-checked />
-<area href="#" aria-checked />
-<img alt="foobar" aria-checked />
-<menu type="toolbar" aria-checked />
-<aside aria-checked />
-<ul aria-expanded />
-<details aria-expanded />
-<dialog aria-expanded />
-<aside aria-expanded />
-<article aria-expanded />
-<li aria-expanded />
-<nav aria-expanded />
-<ol aria-expanded />
-<output aria-expanded />
-<tbody aria-expanded />
-<tfoot aria-expanded />
-<thead aria-expanded />
-<input type="radio" aria-selected />
-<menu type="toolbar" aria-expanded />
+	<a href="#" aria-checked />
+	<area href="#" aria-checked />
+	<img alt="foobar" aria-checked />
+	<menu type="toolbar" aria-checked />
+	<aside aria-checked />
+	<ul aria-expanded />
+	<details aria-expanded />
+	<dialog aria-expanded />
+	<aside aria-expanded />
+	<article aria-expanded />
+	<li aria-expanded />
+	<nav aria-expanded />
+	<ol aria-expanded />
+	<output aria-expanded />
+	<tbody aria-expanded />
+	<tfoot aria-expanded />
+	<thead aria-expanded />
+	<input type="radio" aria-selected />
+	<menu type="toolbar" aria-expanded />
 </>
 
 ```
 
 # Diagnostics
 ```
-invalid.jsx:2:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:3:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The ARIA attribute 'aria-checked' is not supported by this element.
   
-    1 │ <>
-  > 2 │ <a href="#" aria-checked />
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ <area href="#" aria-checked />
-    4 │ <img alt="foobar" aria-checked />
+    1 │ /* should generate diagnostics */
+    2 │ <>
+  > 3 │ 	<a href="#" aria-checked />
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 	<area href="#" aria-checked />
+    5 │ 	<img alt="foobar" aria-checked />
   
   i Ensure that ARIA attributes are valid for the role of the element.
   
@@ -46,16 +48,16 @@ invalid.jsx:2:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
 ```
 
 ```
-invalid.jsx:3:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:4:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The ARIA attribute 'aria-checked' is not supported by this element.
   
-    1 │ <>
-    2 │ <a href="#" aria-checked />
-  > 3 │ <area href="#" aria-checked />
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ <img alt="foobar" aria-checked />
-    5 │ <menu type="toolbar" aria-checked />
+    2 │ <>
+    3 │ 	<a href="#" aria-checked />
+  > 4 │ 	<area href="#" aria-checked />
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 	<img alt="foobar" aria-checked />
+    6 │ 	<menu type="toolbar" aria-checked />
   
   i Ensure that ARIA attributes are valid for the role of the element.
   
@@ -63,16 +65,16 @@ invalid.jsx:3:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
 ```
 
 ```
-invalid.jsx:4:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:5:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The ARIA attribute 'aria-checked' is not supported by this element.
   
-    2 │ <a href="#" aria-checked />
-    3 │ <area href="#" aria-checked />
-  > 4 │ <img alt="foobar" aria-checked />
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │ <menu type="toolbar" aria-checked />
-    6 │ <aside aria-checked />
+    3 │ 	<a href="#" aria-checked />
+    4 │ 	<area href="#" aria-checked />
+  > 5 │ 	<img alt="foobar" aria-checked />
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 	<menu type="toolbar" aria-checked />
+    7 │ 	<aside aria-checked />
   
   i Ensure that ARIA attributes are valid for the role of the element.
   
@@ -80,16 +82,16 @@ invalid.jsx:4:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
 ```
 
 ```
-invalid.jsx:5:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:6:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The ARIA attribute 'aria-checked' is not supported by this element.
   
-    3 │ <area href="#" aria-checked />
-    4 │ <img alt="foobar" aria-checked />
-  > 5 │ <menu type="toolbar" aria-checked />
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    6 │ <aside aria-checked />
-    7 │ <ul aria-expanded />
+    4 │ 	<area href="#" aria-checked />
+    5 │ 	<img alt="foobar" aria-checked />
+  > 6 │ 	<menu type="toolbar" aria-checked />
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 	<aside aria-checked />
+    8 │ 	<ul aria-expanded />
   
   i Ensure that ARIA attributes are valid for the role of the element.
   
@@ -97,16 +99,16 @@ invalid.jsx:5:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
 ```
 
 ```
-invalid.jsx:6:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:7:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The ARIA attribute 'aria-checked' is not supported by this element.
   
-    4 │ <img alt="foobar" aria-checked />
-    5 │ <menu type="toolbar" aria-checked />
-  > 6 │ <aside aria-checked />
-      │ ^^^^^^^^^^^^^^^^^^^^^^
-    7 │ <ul aria-expanded />
-    8 │ <details aria-expanded />
+    5 │ 	<img alt="foobar" aria-checked />
+    6 │ 	<menu type="toolbar" aria-checked />
+  > 7 │ 	<aside aria-checked />
+      │ 	^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 	<ul aria-expanded />
+    9 │ 	<details aria-expanded />
   
   i Ensure that ARIA attributes are valid for the role of the element.
   
@@ -114,16 +116,16 @@ invalid.jsx:6:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
 ```
 
 ```
-invalid.jsx:7:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:8:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The ARIA attribute 'aria-expanded' is not supported by this element.
   
-    5 │ <menu type="toolbar" aria-checked />
-    6 │ <aside aria-checked />
-  > 7 │ <ul aria-expanded />
-      │ ^^^^^^^^^^^^^^^^^^^^
-    8 │ <details aria-expanded />
-    9 │ <dialog aria-expanded />
+     6 │ 	<menu type="toolbar" aria-checked />
+     7 │ 	<aside aria-checked />
+   > 8 │ 	<ul aria-expanded />
+       │ 	^^^^^^^^^^^^^^^^^^^^
+     9 │ 	<details aria-expanded />
+    10 │ 	<dialog aria-expanded />
   
   i Ensure that ARIA attributes are valid for the role of the element.
   
@@ -131,16 +133,16 @@ invalid.jsx:7:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
 ```
 
 ```
-invalid.jsx:8:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:9:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The ARIA attribute 'aria-expanded' is not supported by this element.
   
-     6 │ <aside aria-checked />
-     7 │ <ul aria-expanded />
-   > 8 │ <details aria-expanded />
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
-     9 │ <dialog aria-expanded />
-    10 │ <aside aria-expanded />
+     7 │ 	<aside aria-checked />
+     8 │ 	<ul aria-expanded />
+   > 9 │ 	<details aria-expanded />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 	<dialog aria-expanded />
+    11 │ 	<aside aria-expanded />
   
   i Ensure that ARIA attributes are valid for the role of the element.
   
@@ -148,16 +150,16 @@ invalid.jsx:8:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
 ```
 
 ```
-invalid.jsx:9:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:10:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The ARIA attribute 'aria-expanded' is not supported by this element.
   
-     7 │ <ul aria-expanded />
-     8 │ <details aria-expanded />
-   > 9 │ <dialog aria-expanded />
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^
-    10 │ <aside aria-expanded />
-    11 │ <article aria-expanded />
+     8 │ 	<ul aria-expanded />
+     9 │ 	<details aria-expanded />
+  > 10 │ 	<dialog aria-expanded />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 	<aside aria-expanded />
+    12 │ 	<article aria-expanded />
   
   i Ensure that ARIA attributes are valid for the role of the element.
   
@@ -165,16 +167,16 @@ invalid.jsx:9:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
 ```
 
 ```
-invalid.jsx:10:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:11:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The ARIA attribute 'aria-expanded' is not supported by this element.
   
-     8 │ <details aria-expanded />
-     9 │ <dialog aria-expanded />
-  > 10 │ <aside aria-expanded />
-       │ ^^^^^^^^^^^^^^^^^^^^^^^
-    11 │ <article aria-expanded />
-    12 │ <li aria-expanded />
+     9 │ 	<details aria-expanded />
+    10 │ 	<dialog aria-expanded />
+  > 11 │ 	<aside aria-expanded />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 	<article aria-expanded />
+    13 │ 	<li aria-expanded />
   
   i Ensure that ARIA attributes are valid for the role of the element.
   
@@ -182,16 +184,16 @@ invalid.jsx:10:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
 ```
 
 ```
-invalid.jsx:11:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:12:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The ARIA attribute 'aria-expanded' is not supported by this element.
   
-     9 │ <dialog aria-expanded />
-    10 │ <aside aria-expanded />
-  > 11 │ <article aria-expanded />
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
-    12 │ <li aria-expanded />
-    13 │ <nav aria-expanded />
+    10 │ 	<dialog aria-expanded />
+    11 │ 	<aside aria-expanded />
+  > 12 │ 	<article aria-expanded />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 	<li aria-expanded />
+    14 │ 	<nav aria-expanded />
   
   i Ensure that ARIA attributes are valid for the role of the element.
   
@@ -199,16 +201,16 @@ invalid.jsx:11:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
 ```
 
 ```
-invalid.jsx:12:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:13:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The ARIA attribute 'aria-expanded' is not supported by this element.
   
-    10 │ <aside aria-expanded />
-    11 │ <article aria-expanded />
-  > 12 │ <li aria-expanded />
-       │ ^^^^^^^^^^^^^^^^^^^^
-    13 │ <nav aria-expanded />
-    14 │ <ol aria-expanded />
+    11 │ 	<aside aria-expanded />
+    12 │ 	<article aria-expanded />
+  > 13 │ 	<li aria-expanded />
+       │ 	^^^^^^^^^^^^^^^^^^^^
+    14 │ 	<nav aria-expanded />
+    15 │ 	<ol aria-expanded />
   
   i Ensure that ARIA attributes are valid for the role of the element.
   
@@ -216,16 +218,16 @@ invalid.jsx:12:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
 ```
 
 ```
-invalid.jsx:13:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:14:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The ARIA attribute 'aria-expanded' is not supported by this element.
   
-    11 │ <article aria-expanded />
-    12 │ <li aria-expanded />
-  > 13 │ <nav aria-expanded />
-       │ ^^^^^^^^^^^^^^^^^^^^^
-    14 │ <ol aria-expanded />
-    15 │ <output aria-expanded />
+    12 │ 	<article aria-expanded />
+    13 │ 	<li aria-expanded />
+  > 14 │ 	<nav aria-expanded />
+       │ 	^^^^^^^^^^^^^^^^^^^^^
+    15 │ 	<ol aria-expanded />
+    16 │ 	<output aria-expanded />
   
   i Ensure that ARIA attributes are valid for the role of the element.
   
@@ -233,16 +235,16 @@ invalid.jsx:13:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
 ```
 
 ```
-invalid.jsx:14:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:15:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The ARIA attribute 'aria-expanded' is not supported by this element.
   
-    12 │ <li aria-expanded />
-    13 │ <nav aria-expanded />
-  > 14 │ <ol aria-expanded />
-       │ ^^^^^^^^^^^^^^^^^^^^
-    15 │ <output aria-expanded />
-    16 │ <tbody aria-expanded />
+    13 │ 	<li aria-expanded />
+    14 │ 	<nav aria-expanded />
+  > 15 │ 	<ol aria-expanded />
+       │ 	^^^^^^^^^^^^^^^^^^^^
+    16 │ 	<output aria-expanded />
+    17 │ 	<tbody aria-expanded />
   
   i Ensure that ARIA attributes are valid for the role of the element.
   
@@ -250,16 +252,16 @@ invalid.jsx:14:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
 ```
 
 ```
-invalid.jsx:15:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:16:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The ARIA attribute 'aria-expanded' is not supported by this element.
   
-    13 │ <nav aria-expanded />
-    14 │ <ol aria-expanded />
-  > 15 │ <output aria-expanded />
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^
-    16 │ <tbody aria-expanded />
-    17 │ <tfoot aria-expanded />
+    14 │ 	<nav aria-expanded />
+    15 │ 	<ol aria-expanded />
+  > 16 │ 	<output aria-expanded />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 	<tbody aria-expanded />
+    18 │ 	<tfoot aria-expanded />
   
   i Ensure that ARIA attributes are valid for the role of the element.
   
@@ -267,16 +269,16 @@ invalid.jsx:15:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
 ```
 
 ```
-invalid.jsx:16:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:17:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The ARIA attribute 'aria-expanded' is not supported by this element.
   
-    14 │ <ol aria-expanded />
-    15 │ <output aria-expanded />
-  > 16 │ <tbody aria-expanded />
-       │ ^^^^^^^^^^^^^^^^^^^^^^^
-    17 │ <tfoot aria-expanded />
-    18 │ <thead aria-expanded />
+    15 │ 	<ol aria-expanded />
+    16 │ 	<output aria-expanded />
+  > 17 │ 	<tbody aria-expanded />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 	<tfoot aria-expanded />
+    19 │ 	<thead aria-expanded />
   
   i Ensure that ARIA attributes are valid for the role of the element.
   
@@ -284,16 +286,16 @@ invalid.jsx:16:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
 ```
 
 ```
-invalid.jsx:17:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:18:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The ARIA attribute 'aria-expanded' is not supported by this element.
   
-    15 │ <output aria-expanded />
-    16 │ <tbody aria-expanded />
-  > 17 │ <tfoot aria-expanded />
-       │ ^^^^^^^^^^^^^^^^^^^^^^^
-    18 │ <thead aria-expanded />
-    19 │ <input type="radio" aria-selected />
+    16 │ 	<output aria-expanded />
+    17 │ 	<tbody aria-expanded />
+  > 18 │ 	<tfoot aria-expanded />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ 	<thead aria-expanded />
+    20 │ 	<input type="radio" aria-selected />
   
   i Ensure that ARIA attributes are valid for the role of the element.
   
@@ -301,16 +303,16 @@ invalid.jsx:17:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
 ```
 
 ```
-invalid.jsx:18:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:19:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The ARIA attribute 'aria-expanded' is not supported by this element.
   
-    16 │ <tbody aria-expanded />
-    17 │ <tfoot aria-expanded />
-  > 18 │ <thead aria-expanded />
-       │ ^^^^^^^^^^^^^^^^^^^^^^^
-    19 │ <input type="radio" aria-selected />
-    20 │ <menu type="toolbar" aria-expanded />
+    17 │ 	<tbody aria-expanded />
+    18 │ 	<tfoot aria-expanded />
+  > 19 │ 	<thead aria-expanded />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ 	<input type="radio" aria-selected />
+    21 │ 	<menu type="toolbar" aria-expanded />
   
   i Ensure that ARIA attributes are valid for the role of the element.
   
@@ -318,16 +320,16 @@ invalid.jsx:18:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
 ```
 
 ```
-invalid.jsx:19:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:20:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The ARIA attribute 'aria-selected' is not supported by this element.
   
-    17 │ <tfoot aria-expanded />
-    18 │ <thead aria-expanded />
-  > 19 │ <input type="radio" aria-selected />
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    20 │ <menu type="toolbar" aria-expanded />
-    21 │ </>
+    18 │ 	<tfoot aria-expanded />
+    19 │ 	<thead aria-expanded />
+  > 20 │ 	<input type="radio" aria-selected />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 	<menu type="toolbar" aria-expanded />
+    22 │ </>
   
   i Ensure that ARIA attributes are valid for the role of the element.
   
@@ -335,16 +337,16 @@ invalid.jsx:19:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
 ```
 
 ```
-invalid.jsx:20:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:21:2 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The ARIA attribute 'aria-expanded' is not supported by this element.
   
-    18 │ <thead aria-expanded />
-    19 │ <input type="radio" aria-selected />
-  > 20 │ <menu type="toolbar" aria-expanded />
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    21 │ </>
-    22 │ 
+    19 │ 	<thead aria-expanded />
+    20 │ 	<input type="radio" aria-selected />
+  > 21 │ 	<menu type="toolbar" aria-expanded />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ </>
+    23 │ 
   
   i Ensure that ARIA attributes are valid for the role of the element.
   

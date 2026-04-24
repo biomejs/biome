@@ -5,7 +5,7 @@ mod parser;
 mod syntax;
 mod token_source;
 
-pub use parser::HtmlParseOptions;
+pub use parser::HtmlParserOptions;
 
 use crate::parser::{HtmlLosslessTreeSink, HtmlParser};
 use crate::syntax::parse_root;
@@ -18,7 +18,7 @@ use biome_rowan::{AstNode, NodeCache};
 pub fn parse_html_with_cache(
     source: &str,
     cache: &mut NodeCache,
-    options: HtmlParseOptions,
+    options: HtmlParserOptions,
 ) -> HtmlParse {
     let mut parser = HtmlParser::new(source, options);
 
@@ -34,7 +34,7 @@ pub fn parse_html_with_cache(
 }
 
 /// Parses an HTML code with the provided options
-pub fn parse_html(source: &str, options: HtmlParseOptions) -> HtmlParse {
+pub fn parse_html(source: &str, options: HtmlParserOptions) -> HtmlParse {
     let mut cache = NodeCache::default();
     parse_html_with_cache(source, &mut cache, options)
 }

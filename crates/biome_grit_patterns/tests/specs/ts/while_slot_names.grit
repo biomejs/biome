@@ -1,0 +1,4 @@
+or {
+  while_statement(condition = $test, body = $body),
+  JsWhileStatement(test = $test, body = $body),
+}

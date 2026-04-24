@@ -1,0 +1,27 @@
+.test {
+  font:bold {
+    color: red;
+  }
+
+  font: bold {
+    family: serif;
+  }
+
+  font:
+  bold {
+    family: sans-serif;
+  }
+
+  font:/*comment*/bold {
+    color: blue;
+  }
+
+  font:/*comment*/ bold {
+    family: monospace;
+  }
+
+  font:/*comment*/
+  bold {
+    family: fantasy;
+  }
+}

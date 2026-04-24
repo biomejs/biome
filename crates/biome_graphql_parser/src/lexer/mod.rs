@@ -128,6 +128,7 @@ impl<'src> LexerWithCheckpoint<'src> for GraphqlLexer<'src> {
             current_flags: self.current_flags,
             current_kind: self.current_kind,
             after_line_break: self.has_preceding_line_break(),
+            after_whitespace: false,
             unicode_bom_length: self.unicode_bom_length,
             diagnostics_pos: self.diagnostics.len() as u32,
         }

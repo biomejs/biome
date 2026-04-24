@@ -1,0 +1,536 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+- # Foo
+- Bar
+  ---
+  baz
+
+- ## Level 2
+
+* ### Level 3
+
+- ###### Level 6
+
+- # Trailing hash #
+
+1. # Ordered heading
+2. ## Ordered level 2
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@0..1 "-" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@1..2 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdHeader {
+                            indent: MdIndentTokenList [],
+                            before: MdHashList [
+                                MdHash {
+                                    hash_token: HASH@2..3 "#" [] [],
+                                },
+                            ],
+                            content: MdParagraph {
+                                list: MdInlineItemList [
+                                    MdTextual {
+                                        value_token: MD_TEXTUAL_LITERAL@3..7 " Foo" [] [],
+                                    },
+                                ],
+                                hard_line: missing (optional),
+                            },
+                            after: MdHashList [],
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@7..8 "\n" [] [],
+                        },
+                    ],
+                },
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@8..9 "-" [] [],
+                        post_marker_space_token: missing (optional),
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdSetextHeader {
+                            content: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@9..13 " Bar" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@13..14 "\n" [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@14..15 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@15..16 " " [] [],
+                                },
+                            ],
+                            underline_token: MD_SETEXT_UNDERLINE_LITERAL@16..19 "---" [] [],
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@19..20 "\n" [] [],
+                        },
+                        MdContinuationIndent {
+                            indent: MdIndentTokenList [
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@20..21 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@21..22 " " [] [],
+                                },
+                            ],
+                        },
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@22..25 "baz" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@25..26 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@26..27 "\n" [] [],
+                        },
+                    ],
+                },
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@27..28 "-" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@28..29 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdHeader {
+                            indent: MdIndentTokenList [],
+                            before: MdHashList [
+                                MdHash {
+                                    hash_token: HASH@29..31 "##" [] [],
+                                },
+                            ],
+                            content: MdParagraph {
+                                list: MdInlineItemList [
+                                    MdTextual {
+                                        value_token: MD_TEXTUAL_LITERAL@31..39 " Level 2" [] [],
+                                    },
+                                ],
+                                hard_line: missing (optional),
+                            },
+                            after: MdHashList [],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@39..40 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@40..41 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: STAR@41..42 "*" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@42..43 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdHeader {
+                            indent: MdIndentTokenList [],
+                            before: MdHashList [
+                                MdHash {
+                                    hash_token: HASH@43..46 "###" [] [],
+                                },
+                            ],
+                            content: MdParagraph {
+                                list: MdInlineItemList [
+                                    MdTextual {
+                                        value_token: MD_TEXTUAL_LITERAL@46..54 " Level 3" [] [],
+                                    },
+                                ],
+                                hard_line: missing (optional),
+                            },
+                            after: MdHashList [],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@54..55 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@55..56 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@56..57 "-" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@57..58 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdHeader {
+                            indent: MdIndentTokenList [],
+                            before: MdHashList [
+                                MdHash {
+                                    hash_token: HASH@58..64 "######" [] [],
+                                },
+                            ],
+                            content: MdParagraph {
+                                list: MdInlineItemList [
+                                    MdTextual {
+                                        value_token: MD_TEXTUAL_LITERAL@64..72 " Level 6" [] [],
+                                    },
+                                ],
+                                hard_line: missing (optional),
+                            },
+                            after: MdHashList [],
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@72..73 "\n" [] [],
+                        },
+                    ],
+                },
+                MdNewline {
+                    value_token: NEWLINE@73..74 "\n" [] [],
+                },
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@74..75 "-" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@75..76 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdHeader {
+                            indent: MdIndentTokenList [],
+                            before: MdHashList [
+                                MdHash {
+                                    hash_token: HASH@76..77 "#" [] [],
+                                },
+                            ],
+                            content: MdParagraph {
+                                list: MdInlineItemList [
+                                    MdTextual {
+                                        value_token: MD_TEXTUAL_LITERAL@77..91 " Trailing hash" [] [],
+                                    },
+                                ],
+                                hard_line: missing (optional),
+                            },
+                            after: MdHashList [
+                                MdHash {
+                                    hash_token: HASH@91..93 "#" [Whitespace(" ")] [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@93..94 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@94..95 "\n" [] [],
+        },
+        MdOrderedListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MD_ORDERED_LIST_MARKER@95..97 "1." [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@97..98 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdHeader {
+                            indent: MdIndentTokenList [],
+                            before: MdHashList [
+                                MdHash {
+                                    hash_token: HASH@98..99 "#" [] [],
+                                },
+                            ],
+                            content: MdParagraph {
+                                list: MdInlineItemList [
+                                    MdTextual {
+                                        value_token: MD_TEXTUAL_LITERAL@99..115 " Ordered heading" [] [],
+                                    },
+                                ],
+                                hard_line: missing (optional),
+                            },
+                            after: MdHashList [],
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@115..116 "\n" [] [],
+                        },
+                    ],
+                },
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MD_ORDERED_LIST_MARKER@116..118 "2." [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@118..119 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdHeader {
+                            indent: MdIndentTokenList [],
+                            before: MdHashList [
+                                MdHash {
+                                    hash_token: HASH@119..121 "##" [] [],
+                                },
+                            ],
+                            content: MdParagraph {
+                                list: MdInlineItemList [
+                                    MdTextual {
+                                        value_token: MD_TEXTUAL_LITERAL@121..137 " Ordered level 2" [] [],
+                                    },
+                                ],
+                                hard_line: missing (optional),
+                            },
+                            after: MdHashList [],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@137..138 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@138..138 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..138
+  0: (empty)
+  1: MD_BLOCK_LIST@0..138
+    0: MD_BULLET_LIST_ITEM@0..39
+      0: MD_BULLET_LIST@0..39
+        0: MD_BULLET@0..8
+          0: MD_LIST_MARKER_PREFIX@0..2
+            0: MD_INDENT_TOKEN_LIST@0..0
+            1: MINUS@0..1 "-" [] []
+            2: MD_LIST_POST_MARKER_SPACE@1..2 " " [] []
+            3: MD_INDENT_TOKEN_LIST@2..2
+          1: MD_BLOCK_LIST@2..8
+            0: MD_HEADER@2..7
+              0: MD_INDENT_TOKEN_LIST@2..2
+              1: MD_HASH_LIST@2..3
+                0: MD_HASH@2..3
+                  0: HASH@2..3 "#" [] []
+              2: MD_PARAGRAPH@3..7
+                0: MD_INLINE_ITEM_LIST@3..7
+                  0: MD_TEXTUAL@3..7
+                    0: MD_TEXTUAL_LITERAL@3..7 " Foo" [] []
+                1: (empty)
+              3: MD_HASH_LIST@7..7
+            1: MD_NEWLINE@7..8
+              0: NEWLINE@7..8 "\n" [] []
+        1: MD_BULLET@8..27
+          0: MD_LIST_MARKER_PREFIX@8..9
+            0: MD_INDENT_TOKEN_LIST@8..8
+            1: MINUS@8..9 "-" [] []
+            2: (empty)
+            3: MD_INDENT_TOKEN_LIST@9..9
+          1: MD_BLOCK_LIST@9..27
+            0: MD_SETEXT_HEADER@9..19
+              0: MD_INLINE_ITEM_LIST@9..16
+                0: MD_TEXTUAL@9..13
+                  0: MD_TEXTUAL_LITERAL@9..13 " Bar" [] []
+                1: MD_TEXTUAL@13..14
+                  0: MD_TEXTUAL_LITERAL@13..14 "\n" [] []
+                2: MD_INDENT_TOKEN@14..15
+                  0: MD_INDENT_CHAR@14..15 " " [] []
+                3: MD_INDENT_TOKEN@15..16
+                  0: MD_INDENT_CHAR@15..16 " " [] []
+              1: MD_SETEXT_UNDERLINE_LITERAL@16..19 "---" [] []
+            1: MD_NEWLINE@19..20
+              0: NEWLINE@19..20 "\n" [] []
+            2: MD_CONTINUATION_INDENT@20..22
+              0: MD_INDENT_TOKEN_LIST@20..22
+                0: MD_INDENT_TOKEN@20..21
+                  0: MD_INDENT_CHAR@20..21 " " [] []
+                1: MD_INDENT_TOKEN@21..22
+                  0: MD_INDENT_CHAR@21..22 " " [] []
+            3: MD_PARAGRAPH@22..26
+              0: MD_INLINE_ITEM_LIST@22..26
+                0: MD_TEXTUAL@22..25
+                  0: MD_TEXTUAL_LITERAL@22..25 "baz" [] []
+                1: MD_TEXTUAL@25..26
+                  0: MD_TEXTUAL_LITERAL@25..26 "\n" [] []
+              1: (empty)
+            4: MD_NEWLINE@26..27
+              0: NEWLINE@26..27 "\n" [] []
+        2: MD_BULLET@27..39
+          0: MD_LIST_MARKER_PREFIX@27..29
+            0: MD_INDENT_TOKEN_LIST@27..27
+            1: MINUS@27..28 "-" [] []
+            2: MD_LIST_POST_MARKER_SPACE@28..29 " " [] []
+            3: MD_INDENT_TOKEN_LIST@29..29
+          1: MD_BLOCK_LIST@29..39
+            0: MD_HEADER@29..39
+              0: MD_INDENT_TOKEN_LIST@29..29
+              1: MD_HASH_LIST@29..31
+                0: MD_HASH@29..31
+                  0: HASH@29..31 "##" [] []
+              2: MD_PARAGRAPH@31..39
+                0: MD_INLINE_ITEM_LIST@31..39
+                  0: MD_TEXTUAL@31..39
+                    0: MD_TEXTUAL_LITERAL@31..39 " Level 2" [] []
+                1: (empty)
+              3: MD_HASH_LIST@39..39
+    1: MD_NEWLINE@39..40
+      0: NEWLINE@39..40 "\n" [] []
+    2: MD_NEWLINE@40..41
+      0: NEWLINE@40..41 "\n" [] []
+    3: MD_BULLET_LIST_ITEM@41..54
+      0: MD_BULLET_LIST@41..54
+        0: MD_BULLET@41..54
+          0: MD_LIST_MARKER_PREFIX@41..43
+            0: MD_INDENT_TOKEN_LIST@41..41
+            1: STAR@41..42 "*" [] []
+            2: MD_LIST_POST_MARKER_SPACE@42..43 " " [] []
+            3: MD_INDENT_TOKEN_LIST@43..43
+          1: MD_BLOCK_LIST@43..54
+            0: MD_HEADER@43..54
+              0: MD_INDENT_TOKEN_LIST@43..43
+              1: MD_HASH_LIST@43..46
+                0: MD_HASH@43..46
+                  0: HASH@43..46 "###" [] []
+              2: MD_PARAGRAPH@46..54
+                0: MD_INLINE_ITEM_LIST@46..54
+                  0: MD_TEXTUAL@46..54
+                    0: MD_TEXTUAL_LITERAL@46..54 " Level 3" [] []
+                1: (empty)
+              3: MD_HASH_LIST@54..54
+    4: MD_NEWLINE@54..55
+      0: NEWLINE@54..55 "\n" [] []
+    5: MD_NEWLINE@55..56
+      0: NEWLINE@55..56 "\n" [] []
+    6: MD_BULLET_LIST_ITEM@56..93
+      0: MD_BULLET_LIST@56..93
+        0: MD_BULLET@56..73
+          0: MD_LIST_MARKER_PREFIX@56..58
+            0: MD_INDENT_TOKEN_LIST@56..56
+            1: MINUS@56..57 "-" [] []
+            2: MD_LIST_POST_MARKER_SPACE@57..58 " " [] []
+            3: MD_INDENT_TOKEN_LIST@58..58
+          1: MD_BLOCK_LIST@58..73
+            0: MD_HEADER@58..72
+              0: MD_INDENT_TOKEN_LIST@58..58
+              1: MD_HASH_LIST@58..64
+                0: MD_HASH@58..64
+                  0: HASH@58..64 "######" [] []
+              2: MD_PARAGRAPH@64..72
+                0: MD_INLINE_ITEM_LIST@64..72
+                  0: MD_TEXTUAL@64..72
+                    0: MD_TEXTUAL_LITERAL@64..72 " Level 6" [] []
+                1: (empty)
+              3: MD_HASH_LIST@72..72
+            1: MD_NEWLINE@72..73
+              0: NEWLINE@72..73 "\n" [] []
+        1: MD_NEWLINE@73..74
+          0: NEWLINE@73..74 "\n" [] []
+        2: MD_BULLET@74..93
+          0: MD_LIST_MARKER_PREFIX@74..76
+            0: MD_INDENT_TOKEN_LIST@74..74
+            1: MINUS@74..75 "-" [] []
+            2: MD_LIST_POST_MARKER_SPACE@75..76 " " [] []
+            3: MD_INDENT_TOKEN_LIST@76..76
+          1: MD_BLOCK_LIST@76..93
+            0: MD_HEADER@76..93
+              0: MD_INDENT_TOKEN_LIST@76..76
+              1: MD_HASH_LIST@76..77
+                0: MD_HASH@76..77
+                  0: HASH@76..77 "#" [] []
+              2: MD_PARAGRAPH@77..91
+                0: MD_INLINE_ITEM_LIST@77..91
+                  0: MD_TEXTUAL@77..91
+                    0: MD_TEXTUAL_LITERAL@77..91 " Trailing hash" [] []
+                1: (empty)
+              3: MD_HASH_LIST@91..93
+                0: MD_HASH@91..93
+                  0: HASH@91..93 "#" [Whitespace(" ")] []
+    7: MD_NEWLINE@93..94
+      0: NEWLINE@93..94 "\n" [] []
+    8: MD_NEWLINE@94..95
+      0: NEWLINE@94..95 "\n" [] []
+    9: MD_ORDERED_LIST_ITEM@95..137
+      0: MD_BULLET_LIST@95..137
+        0: MD_BULLET@95..116
+          0: MD_LIST_MARKER_PREFIX@95..98
+            0: MD_INDENT_TOKEN_LIST@95..95
+            1: MD_ORDERED_LIST_MARKER@95..97 "1." [] []
+            2: MD_LIST_POST_MARKER_SPACE@97..98 " " [] []
+            3: MD_INDENT_TOKEN_LIST@98..98
+          1: MD_BLOCK_LIST@98..116
+            0: MD_HEADER@98..115
+              0: MD_INDENT_TOKEN_LIST@98..98
+              1: MD_HASH_LIST@98..99
+                0: MD_HASH@98..99
+                  0: HASH@98..99 "#" [] []
+              2: MD_PARAGRAPH@99..115
+                0: MD_INLINE_ITEM_LIST@99..115
+                  0: MD_TEXTUAL@99..115
+                    0: MD_TEXTUAL_LITERAL@99..115 " Ordered heading" [] []
+                1: (empty)
+              3: MD_HASH_LIST@115..115
+            1: MD_NEWLINE@115..116
+              0: NEWLINE@115..116 "\n" [] []
+        1: MD_BULLET@116..137
+          0: MD_LIST_MARKER_PREFIX@116..119
+            0: MD_INDENT_TOKEN_LIST@116..116
+            1: MD_ORDERED_LIST_MARKER@116..118 "2." [] []
+            2: MD_LIST_POST_MARKER_SPACE@118..119 " " [] []
+            3: MD_INDENT_TOKEN_LIST@119..119
+          1: MD_BLOCK_LIST@119..137
+            0: MD_HEADER@119..137
+              0: MD_INDENT_TOKEN_LIST@119..119
+              1: MD_HASH_LIST@119..121
+                0: MD_HASH@119..121
+                  0: HASH@119..121 "##" [] []
+              2: MD_PARAGRAPH@121..137
+                0: MD_INLINE_ITEM_LIST@121..137
+                  0: MD_TEXTUAL@121..137
+                    0: MD_TEXTUAL_LITERAL@121..137 " Ordered level 2" [] []
+                1: (empty)
+              3: MD_HASH_LIST@137..137
+    10: MD_NEWLINE@137..138
+      0: NEWLINE@137..138 "\n" [] []
+  2: EOF@138..138 "" [] []
+
+```

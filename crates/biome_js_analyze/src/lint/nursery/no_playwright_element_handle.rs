@@ -51,7 +51,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoPlaywrightElementHandle {
-        version: "next",
+        version: "2.4.2",
         name: "noPlaywrightElementHandle",
         language: "js",
         sources: &[RuleSource::EslintPlaywright("no-element-handle").same()],

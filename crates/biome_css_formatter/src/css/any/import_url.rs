@@ -10,6 +10,7 @@ impl FormatRule<AnyCssImportUrl> for FormatAnyCssImportUrl {
         match node {
             AnyCssImportUrl::CssString(node) => node.format().fmt(f),
             AnyCssImportUrl::CssUrlFunction(node) => node.format().fmt(f),
+            AnyCssImportUrl::ScssInterpolatedString(node) => node.format().fmt(f),
         }
     }
 }

@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 <label for="js_id" />;
 <label for="js_id"><input /></label>;
 <label for="js_id"><textarea /></label>;

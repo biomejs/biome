@@ -345,7 +345,7 @@ pub(super) fn text_width(text: &str) -> usize {
 /// We need to set a value here since we have no way of knowing what the user's
 /// preferred tab display width is, so this is set to `2` to match how tab
 /// characters are printed by [print_invisibles]
-const TAB_WIDTH: usize = 2;
+pub(super) const TAB_WIDTH: usize = 2;
 
 /// Some esoteric space characters don't return a width using `char.width()`, so
 /// we need to assume a fixed length for them

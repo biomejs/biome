@@ -42,7 +42,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoPlaywrightWaitForTimeout {
-        version: "next",
+        version: "2.4.2",
         name: "noPlaywrightWaitForTimeout",
         language: "js",
         sources: &[RuleSource::EslintPlaywright("no-wait-for-timeout").same()],

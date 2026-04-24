@@ -188,6 +188,7 @@ AnyHtmlAttribute =
 	| HtmlSpreadAttribute
 	| AnySvelteDirective
 	| AnyVueDirective
+	| AnyAstroDirective
 	| HtmlBogusAttribute
 
 // <a href="">
@@ -412,6 +413,7 @@ SvelteBindingAssignmentBindingList = (AnySvelteBindingAssignmentBinding (',' Any
 
 AnySvelteBindingAssignmentBinding =
 	SvelteName
+	| AnySvelteDestructuredName
 	| SvelteRestBinding
 
 /// { ...rest }
@@ -600,6 +602,18 @@ SvelteDirectiveValue =
 AnySvelteBindingProperty =
 	SvelteName
 	| SvelteLiteral
+	| SvelteMemberProperty
+
+AnySvelteMemberObject =
+	SvelteName
+	| SvelteMemberProperty
+
+// <div in:renderer.in|global >
+//       ^^^^^^^^^^^
+SvelteMemberProperty =
+	object: AnySvelteMemberObject
+	'.'
+	member: SvelteName
 
 SvelteDirectiveModifierList = SvelteDirectiveModifier*
 
@@ -701,3 +715,58 @@ VueModifierList = VueModifier*
 VueModifier =
 	'.'
 	modifier: 'html_literal'
+
+// ==================================
+// Astro
+// ==================================
+
+AnyAstroDirective =
+	AstroClientDirective
+	| AstroSetDirective
+	| AstroClassDirective
+	| AstroIsDirective
+	| AstroServerDirective
+	| AstroDefineDirective
+
+// <Component client:load />
+//            ^^^^^^^^^^^^
+AstroClientDirective =
+	'client'
+	value: AstroDirectiveValue
+
+// <Component set:text={value} />
+//            ^^^^^^^^^^^^^^^^^
+AstroSetDirective =
+	'set'
+	value: AstroDirectiveValue
+
+// <Component class:list={classes} />
+//            ^^^^^^^^^^^^^^^^^^^^
+AstroClassDirective =
+	'class'
+	value: AstroDirectiveValue
+
+// <Component is:raw />
+//            ^^^^^^^
+AstroIsDirective =
+	'is'
+	value: AstroDirectiveValue
+
+// <Component server:defer />
+//            ^^^^^^^^^^^^^
+AstroServerDirective =
+	'server'
+	value: AstroDirectiveValue
+
+// <Component define:vars={vars} />
+//            ^^^^^^^^^^^^^^^^^^
+AstroDefineDirective =
+	'define'
+	value: AstroDirectiveValue
+
+// <Component client:load />
+//                   ^^^^^
+AstroDirectiveValue =
+	colon_token: ':'
+	name: HtmlAttributeName
+	initializer: HtmlAttributeInitializerClause?

@@ -1,0 +1,53 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+<CustomLabel>
+	<span>
+		<CustomInput />
+	</span>
+</CustomLabel>
+<CustomLabel aria-label="A label" />
+
+```
+
+# Diagnostics
+```
+invalid.astro:2:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A form label must be associated with an input.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <CustomLabel>
+      │ ^^^^^^^^^^^^^
+  > 3 │ 	<span>
+  > 4 │ 		<CustomInput />
+  > 5 │ 	</span>
+  > 6 │ </CustomLabel>
+      │ ^^^^^^^^^^^^^^
+    7 │ <CustomLabel aria-label="A label" />
+    8 │ 
+  
+  i Consider adding an accessible text content to the label element.
+  
+
+```
+
+```
+invalid.astro:7:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A form label must be associated with an input.
+  
+    5 │ 	</span>
+    6 │ </CustomLabel>
+  > 7 │ <CustomLabel aria-label="A label" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i Consider adding a "for" attribute to the label element or moving the input element to inside the label element.
+  
+
+```

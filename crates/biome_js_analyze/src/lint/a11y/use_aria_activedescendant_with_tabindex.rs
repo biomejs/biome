@@ -106,6 +106,7 @@ impl Rule for UseAriaActivedescendantWithTabindex {
         let old_attribute_list = descendant_attribute
             .syntax()
             .ancestors()
+            .skip(1)
             .find_map(JsxAttributeList::cast)?;
 
         let new_attribute = jsx_attribute(AnyJsxAttributeName::JsxName(jsx_name(

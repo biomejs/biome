@@ -1,3 +1,4 @@
+<!-- should not generate diagnostics -->
 <script setup>
 // Imports and variable definitions of SFC should not be flagged as reserved keys.
 import {$el} from 'module1';

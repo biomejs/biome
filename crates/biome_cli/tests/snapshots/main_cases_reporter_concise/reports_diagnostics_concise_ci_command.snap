@@ -1,0 +1,146 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `index.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+
+debugger
+
+let f;
+		let f;
+```
+
+## `main.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+
+debugger
+
+let f;
+		let f;
+```
+
+# Termination Message
+
+```block
+ci ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+! index.ts:1:8: lint/correctness/noUnusedImports: This import is unused.
+```
+
+```block
+! index.ts:2:10: lint/correctness/noUnusedImports: Several of these imports are unused.
+```
+
+```block
+! index.ts:8:5: lint/correctness/noUnusedVariables: This variable f is unused.
+```
+
+```block
+! index.ts:9:7: lint/correctness/noUnusedVariables: This variable f is unused.
+```
+
+```block
+! main.ts:1:8: lint/correctness/noUnusedImports: This import is unused.
+```
+
+```block
+! main.ts:2:10: lint/correctness/noUnusedImports: Several of these imports are unused.
+```
+
+```block
+! main.ts:8:5: lint/correctness/noUnusedVariables: This variable f is unused.
+```
+
+```block
+! main.ts:9:7: lint/correctness/noUnusedVariables: This variable f is unused.
+```
+
+```block
+× index.ts:1:1: assist/source/organizeImports: The imports and exports are not sorted.
+```
+
+```block
+× index.ts:4:3: lint/suspicious/noDoubleEquals: Using == may be unsafe if you are relying on type coercion.
+```
+
+```block
+× index.ts:6:1: lint/suspicious/noDebugger: This is an unexpected use of the debugger statement.
+```
+
+```block
+× index.ts:8:5: lint/suspicious/noImplicitAnyLet: This variable implicitly has the any type.
+```
+
+```block
+× index.ts:9:7: lint/suspicious/noImplicitAnyLet: This variable implicitly has the any type.
+```
+
+```block
+× index.ts:2:10: lint/suspicious/noRedeclare: 'z' is redeclared in the same scope.
+```
+
+```block
+× index.ts:9:7: lint/suspicious/noRedeclare: 'f' is redeclared in the same scope.
+```
+
+```block
+× index.ts: format: File content differs from formatting output
+```
+
+```block
+× main.ts:1:1: assist/source/organizeImports: The imports and exports are not sorted.
+```
+
+```block
+× main.ts:4:3: lint/suspicious/noDoubleEquals: Using == may be unsafe if you are relying on type coercion.
+```
+
+```block
+× main.ts:6:1: lint/suspicious/noDebugger: This is an unexpected use of the debugger statement.
+```
+
+```block
+× main.ts:8:5: lint/suspicious/noImplicitAnyLet: This variable implicitly has the any type.
+```
+
+```block
+× main.ts:9:7: lint/suspicious/noImplicitAnyLet: This variable implicitly has the any type.
+```
+
+```block
+× main.ts:2:10: lint/suspicious/noRedeclare: 'z' is redeclared in the same scope.
+```
+
+```block
+× main.ts:9:7: lint/suspicious/noRedeclare: 'f' is redeclared in the same scope.
+```
+
+```block
+× main.ts: format: File content differs from formatting output
+```
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+Found 16 errors.
+Found 8 warnings.
+```

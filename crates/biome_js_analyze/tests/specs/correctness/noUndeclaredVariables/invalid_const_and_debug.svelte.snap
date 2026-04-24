@@ -1,0 +1,73 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_const_and_debug.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+let items = [];
+let total = 0;
+</script>
+
+{#each items as item}
+    {@const price = unknownPrice}
+    <span>{price}</span>
+{/each}
+
+{@debug total, missingVar}
+{@debug anotherMissing}
+
+```
+
+# Diagnostics
+```
+invalid_const_and_debug.svelte:8:21 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The unknownPrice variable is undeclared.
+  
+     7 │ {#each items as item}
+   > 8 │     {@const price = unknownPrice}
+       │                     ^^^^^^^^^^^^
+     9 │     <span>{price}</span>
+    10 │ {/each}
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+invalid_const_and_debug.svelte:12:16 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The missingVar variable is undeclared.
+  
+    10 │ {/each}
+    11 │ 
+  > 12 │ {@debug total, missingVar}
+       │                ^^^^^^^^^^
+    13 │ {@debug anotherMissing}
+    14 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+invalid_const_and_debug.svelte:13:9 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The anotherMissing variable is undeclared.
+  
+    12 │ {@debug total, missingVar}
+  > 13 │ {@debug anotherMissing}
+       │         ^^^^^^^^^^^^^^
+    14 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```

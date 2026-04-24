@@ -1,6 +1,7 @@
 ---
 name: parser-development
-description: Guide for implementing parsers with error recovery for new languages in Biome. Use when creating parsers for JavaScript, CSS, JSON, HTML, GraphQL, or adding new language support. Examples:<example>User needs to add parsing support for a new language</example><example>User wants to implement error recovery in parser</example><example>User is writing grammar definitions in .ungram format</example>
+description: Guide for implementing parsers with error recovery for new languages in Biome. Use when adding parsing support for a new language, implementing error recovery in a parser, or writing grammar definitions in .ungram format for JavaScript, CSS, JSON, HTML, GraphQL, or other languages.
+compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
 ## Purpose
@@ -12,6 +13,19 @@ Use this skill when creating or modifying Biome's parsers. Covers grammar author
 1. Install required tools: `just install-tools`
 2. Understand the language syntax you're implementing
 3. Read `crates/biome_parser/CONTRIBUTING.md` for detailed concepts
+
+## Code Standards
+
+**CRITICAL: No Emojis**
+
+Emojis are BANNED in all parser code:
+- NO emojis in code comments
+- NO emojis in rustdoc documentation
+- NO emojis in grammar files (.ungram)
+- NO emojis in test files
+- NO emojis in error messages or diagnostics
+
+Keep all code professional and emoji-free.
 
 ## Common Workflows
 
@@ -98,7 +112,7 @@ pub(crate) struct HtmlLexer<'source> {
 impl<'source> Lexer<'source> for HtmlLexer<'source> {
     const NEWLINE: Self::Kind = HtmlSyntaxKind::NEWLINE;
     const WHITESPACE: Self::Kind = HtmlSyntaxKind::WHITESPACE;
-    
+
     type Kind = HtmlSyntaxKind;
     type LexContext = ();
     type ReLexContext = ();
@@ -122,7 +136,7 @@ impl<'source> Lexer<'source> for HtmlLexer<'source> {
         self.current_kind = kind;
         kind
     }
-    
+
     // Implement other required methods...
 }
 ```
@@ -164,13 +178,13 @@ fn parse_if_statement(p: &mut JsParser) -> ParsedSyntax {
     // Parse required tokens
     p.expect(T![if]);
     p.expect(T!['(']);
-    
+
     // Parse required nodes with error recovery
     parse_any_expression(p).or_add_diagnostic(p, expected_expression);
-    
+
     p.expect(T![')']);
     parse_block_statement(p).or_add_diagnostic(p, expected_block);
-    
+
     // Parse optional else clause
     if p.at(T![else]) {
         parse_else_clause(p).ok();
@@ -213,7 +227,7 @@ impl ParseSeparatedList for ArrayElementsList {
             expected_array_element,
         )
     }
-    
+
     fn separating_element_kind(&mut self) -> JsSyntaxKind {
         T![,]
     }
@@ -259,7 +273,7 @@ fn parse_with_statement(p: &mut Parser) -> ParsedSyntax {
     p.bump(T![with]);
     parenthesized_expression(p).or_add_diagnostic(p, expected_expression);
     parse_statement(p).or_add_diagnostic(p, expected_statement);
-    
+
     let with_stmt = m.complete(p, JS_WITH_STATEMENT);
 
     // Mark as invalid in strict mode

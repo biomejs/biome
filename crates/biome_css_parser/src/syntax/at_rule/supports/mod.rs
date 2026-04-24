@@ -6,15 +6,22 @@ use crate::syntax::at_rule::supports::error::{
     expected_any_supports_condition, expected_any_supports_condition_in_parens,
 };
 use crate::syntax::block::parse_conditional_block;
+use crate::syntax::declaration::parse_declaration_important;
+use crate::syntax::parse_any_css_value;
 use crate::syntax::parse_error::{expected_declaration, expected_selector};
+use crate::syntax::property::{
+    END_OF_PROPERTY_VALUE_TOKEN_SET, is_at_generic_property, is_nth_at_direct_generic_property,
+    parse_generic_property_name, parse_property_value_with_end_set,
+};
+use crate::syntax::scss::is_nth_at_scss_interpolated_property;
 use crate::syntax::selector::parse_selector;
-use crate::syntax::{is_nth_at_identifier, parse_any_value, parse_declaration};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_recovery::ParseRecovery;
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::*;
+use biome_parser::{TokenSet, token_set};
 
 /// Checks if the current token in the parser is an `@supports` at-rule.
 #[inline]
@@ -230,7 +237,7 @@ fn parse_any_supports_condition_in_parens(
         {
             return Absent;
         }
-        parse_any_value(p)
+        parse_any_css_value(p)
     }
 }
 
@@ -285,7 +292,8 @@ fn parse_supports_feature_selector(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn is_at_supports_feature_declaration(p: &mut CssParser) -> bool {
-    p.at(T!['(']) && is_nth_at_identifier(p, 1) && p.nth_at(2, T![:])
+    p.at(T!['('])
+        && (is_nth_at_direct_generic_property(p, 1) || is_nth_at_scss_interpolated_property(p, 1))
 }
 
 #[inline]
@@ -297,10 +305,51 @@ fn parse_supports_feature_declaration(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T!['(']);
-    parse_declaration(p)
+    parse_supports_declaration(p)
         .or_recover(p, &AnyInParensParseRecovery, expected_declaration)
         .ok();
     p.expect(T![')']);
 
     Present(m.complete(p, CSS_SUPPORTS_FEATURE_DECLARATION))
+}
+
+#[inline]
+pub(crate) fn is_at_supports_property(p: &mut CssParser) -> bool {
+    is_at_generic_property(p)
+}
+
+#[inline]
+pub(crate) fn parse_supports_declaration(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_supports_property(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    parse_supports_generic_property(p).ok();
+    parse_declaration_important(p).ok();
+    Present(m.complete(p, CSS_DECLARATION))
+}
+
+#[inline]
+fn parse_supports_generic_property(p: &mut CssParser) -> ParsedSyntax {
+    let m = p.start();
+
+    parse_generic_property_name(p).ok();
+
+    p.expect(T![:]);
+    parse_supports_property_value(p);
+
+    Present(m.complete(p, CSS_GENERIC_PROPERTY))
+}
+
+const END_OF_SUPPORTS_PROPERTY_VALUE_TOKEN_SET: TokenSet<CssSyntaxKind> =
+    token_set!(T!['}'], T![;], T![')'], T![!]);
+
+#[inline]
+fn parse_supports_property_value(p: &mut CssParser) {
+    parse_property_value_with_end_set(
+        p,
+        END_OF_SUPPORTS_PROPERTY_VALUE_TOKEN_SET,
+        END_OF_PROPERTY_VALUE_TOKEN_SET,
+    );
 }

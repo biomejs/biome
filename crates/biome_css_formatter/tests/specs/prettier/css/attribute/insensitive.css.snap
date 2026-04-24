@@ -1,0 +1,72 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: css/attribute/insensitive.css
+---
+
+# Input
+
+```css
+input[type="radio" i] {}
+img[alt~="person" i][src*="lorem" i] {}
+section:has(:not([type="radio" i], [type="checkbox" i])) {}
+
+input[type="radio" I] {}
+img[alt~="person" I][src*="lorem" I] {}
+section:has(:not([type="radio" I], [type="checkbox" I])) {}
+
+[type=a   I] {}
+[type="a"   I] {}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -5,14 +5,14 @@
+ section:has(:not([type="radio" i], [type="checkbox" i])) {
+ }
+ 
+-input[type="radio" I] {
++input[type="radio" i] {
+ }
+-img[alt~="person" I][src*="lorem" I] {
++img[alt~="person" i][src*="lorem" i] {
+ }
+-section:has(:not([type="radio" I], [type="checkbox" I])) {
++section:has(:not([type="radio" i], [type="checkbox" i])) {
+ }
+ 
+-[type="a" I] {
++[type="a" i] {
+ }
+-[type="a" I] {
++[type="a" i] {
+ }
+```
+
+# Output
+
+```css
+input[type="radio" i] {
+}
+img[alt~="person" i][src*="lorem" i] {
+}
+section:has(:not([type="radio" i], [type="checkbox" i])) {
+}
+
+input[type="radio" i] {
+}
+img[alt~="person" i][src*="lorem" i] {
+}
+section:has(:not([type="radio" i], [type="checkbox" i])) {
+}
+
+[type="a" i] {
+}
+[type="a" i] {
+}
+```

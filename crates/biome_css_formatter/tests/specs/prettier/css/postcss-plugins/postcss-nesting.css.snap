@@ -454,7 +454,7 @@ a {
 ```
 postcss-nesting.css:162:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `speech`
+  × Expected a media condition, or a parenthesized media query but instead found 'speech'.
   
     160 │     }
     161 │   }
@@ -463,11 +463,18 @@ postcss-nesting.css:162:28 parse ━━━━━━━━━━━━━━━�
     163 │     @media (max-width: 300px), (min-aspect-ratio: 16/9) {
     164 │       order: 5;
   
-  i Remove speech
+  i Expected a media condition, or a parenthesized media query here.
+  
+    160 │     }
+    161 │   }
+  > 162 │   @media screen, print and speech {
+        │                            ^^^^^^
+    163 │     @media (max-width: 300px), (min-aspect-ratio: 16/9) {
+    164 │       order: 5;
   
 postcss-nesting.css:184:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `speech`
+  × Expected a media condition, or a parenthesized media query but instead found 'speech'.
   
     182 │     }
     183 │   }
@@ -476,7 +483,14 @@ postcss-nesting.css:184:28 parse ━━━━━━━━━━━━━━━�
     185 │     @media (max-width: 300px), (min-aspect-ratio: 16/9) {
     186 │       order: 5;
   
-  i Remove speech
+  i Expected a media condition, or a parenthesized media query here.
+  
+    182 │     }
+    183 │   }
+  > 184 │   @media screen, print and speech {
+        │                            ^^^^^^
+    185 │     @media (max-width: 300px), (min-aspect-ratio: 16/9) {
+    186 │       order: 5;
   
 
 ```

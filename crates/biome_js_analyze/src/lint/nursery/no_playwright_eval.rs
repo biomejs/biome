@@ -37,7 +37,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoPlaywrightEval {
-        version: "next",
+        version: "2.4.2",
         name: "noPlaywrightEval",
         language: "js",
         sources: &[RuleSource::EslintPlaywright("no-eval").same()],

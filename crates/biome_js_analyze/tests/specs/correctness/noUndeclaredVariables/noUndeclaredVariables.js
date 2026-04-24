@@ -11,3 +11,4 @@ document;
 navigator;
 new ArrayBuffer();
 new AggregateError();
+Temporal.Now.instant();

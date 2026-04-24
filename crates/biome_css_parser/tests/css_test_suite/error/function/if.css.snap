@@ -144,6 +144,11 @@ expression: snapshot
 	}
 }
 
+.scss-only-test {
+	color: if(sass(true):black;else: white;);
+}
+
+
 ```
 
 
@@ -322,7 +327,6 @@ CssRoot {
                                                                             items: [
                                                                                 COLON@145..147 ":" [] [Whitespace(" ")],
                                                                                 IDENT@147..152 "black" [] [],
-                                                                                R_PAREN@152..153 ")" [] [],
                                                                             ],
                                                                         },
                                                                     ],
@@ -331,7 +335,7 @@ CssRoot {
                                                         },
                                                         important: missing (optional),
                                                     },
-                                                    r_paren_token: missing (required),
+                                                    r_paren_token: R_PAREN@152..153 ")" [] [],
                                                 },
                                                 colon_token: missing (required),
                                                 value: CssGenericComponentValueList [],
@@ -579,17 +583,13 @@ CssRoot {
                                                                                         items: [
                                                                                             CssBogus {
                                                                                                 items: [
+                                                                                                    CssDashedIdentifier {
+                                                                                                        value_token: IDENT@355..362 "--style" [] [],
+                                                                                                    },
                                                                                                     CssBogus {
                                                                                                         items: [
-                                                                                                            CssDashedIdentifier {
-                                                                                                                value_token: IDENT@355..362 "--style" [] [],
-                                                                                                            },
-                                                                                                            CssBogus {
-                                                                                                                items: [
-                                                                                                                    COLON@362..364 ":" [] [Whitespace(" ")],
-                                                                                                                    IDENT@364..369 "black" [] [],
-                                                                                                                ],
-                                                                                                            },
+                                                                                                            COLON@362..364 ":" [] [Whitespace(" ")],
+                                                                                                            IDENT@364..369 "black" [] [],
                                                                                                         ],
                                                                                                     },
                                                                                                 ],
@@ -1426,17 +1426,13 @@ CssRoot {
                                                                                 items: [
                                                                                     CssBogus {
                                                                                         items: [
+                                                                                            CssDashedIdentifier {
+                                                                                                value_token: IDENT@1099..1102 "--c" [] [],
+                                                                                            },
                                                                                             CssBogus {
                                                                                                 items: [
-                                                                                                    CssDashedIdentifier {
-                                                                                                        value_token: IDENT@1099..1102 "--c" [] [],
-                                                                                                    },
-                                                                                                    CssBogus {
-                                                                                                        items: [
-                                                                                                            COLON@1102..1104 ":" [] [Whitespace(" ")],
-                                                                                                            CSS_NUMBER_LITERAL@1104..1105 "3" [] [],
-                                                                                                        ],
-                                                                                                    },
+                                                                                                    COLON@1102..1104 ":" [] [Whitespace(" ")],
+                                                                                                    CSS_NUMBER_LITERAL@1104..1105 "3" [] [],
                                                                                                 ],
                                                                                             },
                                                                                         ],
@@ -3076,17 +3072,97 @@ CssRoot {
                 r_curly_token: R_CURLY@2564..2566 "}" [Newline("\n")] [],
             },
         },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@2566..2569 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@2569..2584 "scss-only-test" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@2584..2585 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@2585..2592 "color" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@2592..2594 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIfFunction {
+                                        if_token: IF_KW@2594..2596 "if" [] [],
+                                        l_paren_token: L_PAREN@2596..2597 "(" [] [],
+                                        css_if_branch_list: CssIfBranchList [
+                                            CssIfBranch {
+                                                condition: CssBogusIfTest {
+                                                    items: [
+                                                        SASS_KW@2597..2601 "sass" [] [],
+                                                        L_PAREN@2601..2602 "(" [] [],
+                                                        CssBogus {
+                                                            items: [
+                                                                ScssExpressionItemList [
+                                                                    CssIdentifier {
+                                                                        value_token: IDENT@2602..2606 "true" [] [],
+                                                                    },
+                                                                ],
+                                                            ],
+                                                        },
+                                                        R_PAREN@2606..2607 ")" [] [],
+                                                    ],
+                                                },
+                                                colon_token: COLON@2607..2608 ":" [] [],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@2608..2613 "black" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            SEMICOLON@2613..2614 ";" [] [],
+                                            CssIfBranch {
+                                                condition: CssElseKeyword {
+                                                    else_token: ELSE_KW@2614..2618 "else" [] [],
+                                                },
+                                                colon_token: COLON@2618..2620 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@2620..2625 "white" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            SEMICOLON@2625..2626 ";" [] [],
+                                        ],
+                                        r_paren_token: R_PAREN@2626..2627 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@2627..2628 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@2628..2630 "}" [Newline("\n")] [],
+            },
+        },
     ],
-    eof_token: EOF@2566..2567 "" [Newline("\n")] [],
+    eof_token: EOF@2630..2632 "" [Newline("\n"), Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..2567
+0: CSS_ROOT@0..2632
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..2566
+  1: CSS_ROOT_ITEM_LIST@0..2630
     0: CSS_QUALIFIED_RULE@0..55
       0: CSS_SELECTOR_LIST@0..15
         0: CSS_COMPOUND_SELECTOR@0..15
@@ -3192,20 +3268,19 @@ CssRoot {
                         0: CSS_IF_STYLE_TEST@129..153
                           0: STYLE_KW@129..134 "style" [] []
                           1: L_PAREN@134..135 "(" [] []
-                          2: CSS_DECLARATION@135..153
-                            0: CSS_BOGUS_PROPERTY@135..153
+                          2: CSS_DECLARATION@135..152
+                            0: CSS_BOGUS_PROPERTY@135..152
                               0: CSS_DASHED_IDENTIFIER@135..140
                                 0: IDENT@135..140 "--foo" [] []
                               1: COLON@140..142 ":" [] [Whitespace(" ")]
-                              2: CSS_BOGUS@142..153
+                              2: CSS_BOGUS@142..152
                                 0: CSS_IDENTIFIER@142..145
                                   0: IDENT@142..145 "bar" [] []
-                                1: CSS_BOGUS_PROPERTY_VALUE@145..153
+                                1: CSS_BOGUS_PROPERTY_VALUE@145..152
                                   0: COLON@145..147 ":" [] [Whitespace(" ")]
                                   1: IDENT@147..152 "black" [] []
-                                  2: R_PAREN@152..153 ")" [] []
                             1: (empty)
-                          3: (empty)
+                          3: R_PAREN@152..153 ")" [] []
                         1: (empty)
                         2: CSS_GENERIC_COMPONENT_VALUE_LIST@153..153
                       1: SEMICOLON@153..154 ";" [] []
@@ -3356,12 +3431,11 @@ CssRoot {
                             2: CSS_BOGUS@355..369
                               0: CSS_BOGUS@355..369
                                 0: CSS_BOGUS@355..369
-                                  0: CSS_BOGUS@355..369
-                                    0: CSS_DASHED_IDENTIFIER@355..362
-                                      0: IDENT@355..362 "--style" [] []
-                                    1: CSS_BOGUS@362..369
-                                      0: COLON@362..364 ":" [] [Whitespace(" ")]
-                                      1: IDENT@364..369 "black" [] []
+                                  0: CSS_DASHED_IDENTIFIER@355..362
+                                    0: IDENT@355..362 "--style" [] []
+                                  1: CSS_BOGUS@362..369
+                                    0: COLON@362..364 ":" [] [Whitespace(" ")]
+                                    1: IDENT@364..369 "black" [] []
                             3: R_PAREN@369..370 ")" [] []
                     3: R_PAREN@370..371 ")" [] []
                   1: CSS_BOGUS_PROPERTY_VALUE@371..378
@@ -3888,12 +3962,11 @@ CssRoot {
                             2: CSS_BOGUS@1099..1105
                               0: CSS_BOGUS@1099..1105
                                 0: CSS_BOGUS@1099..1105
-                                  0: CSS_BOGUS@1099..1105
-                                    0: CSS_DASHED_IDENTIFIER@1099..1102
-                                      0: IDENT@1099..1102 "--c" [] []
-                                    1: CSS_BOGUS@1102..1105
-                                      0: COLON@1102..1104 ":" [] [Whitespace(" ")]
-                                      1: CSS_NUMBER_LITERAL@1104..1105 "3" [] []
+                                  0: CSS_DASHED_IDENTIFIER@1099..1102
+                                    0: IDENT@1099..1102 "--c" [] []
+                                  1: CSS_BOGUS@1102..1105
+                                    0: COLON@1102..1104 ":" [] [Whitespace(" ")]
+                                    1: CSS_NUMBER_LITERAL@1104..1105 "3" [] []
                             3: R_PAREN@1105..1106 ")" [] []
                           2: CSS_BOGUS_PROPERTY_VALUE@1106..1113
                             0: COLON@1106..1108 ":" [] [Whitespace(" ")]
@@ -4943,7 +5016,57 @@ CssRoot {
                     2: R_CURLY@2557..2561 "}" [Newline("\n"), Whitespace("\t\t")] []
               2: R_CURLY@2561..2564 "}" [Newline("\n"), Whitespace("\t")] []
         2: R_CURLY@2564..2566 "}" [Newline("\n")] []
-  2: EOF@2566..2567 "" [Newline("\n")] []
+    31: CSS_QUALIFIED_RULE@2566..2630
+      0: CSS_SELECTOR_LIST@2566..2584
+        0: CSS_COMPOUND_SELECTOR@2566..2584
+          0: CSS_NESTED_SELECTOR_LIST@2566..2566
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@2566..2584
+            0: CSS_CLASS_SELECTOR@2566..2584
+              0: DOT@2566..2569 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@2569..2584
+                0: IDENT@2569..2584 "scss-only-test" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@2584..2630
+        0: L_CURLY@2584..2585 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@2585..2628
+          0: CSS_DECLARATION_WITH_SEMICOLON@2585..2628
+            0: CSS_DECLARATION@2585..2627
+              0: CSS_GENERIC_PROPERTY@2585..2627
+                0: CSS_IDENTIFIER@2585..2592
+                  0: IDENT@2585..2592 "color" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@2592..2594 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@2594..2627
+                  0: CSS_IF_FUNCTION@2594..2627
+                    0: IF_KW@2594..2596 "if" [] []
+                    1: L_PAREN@2596..2597 "(" [] []
+                    2: CSS_IF_BRANCH_LIST@2597..2626
+                      0: CSS_IF_BRANCH@2597..2613
+                        0: CSS_BOGUS_IF_TEST@2597..2607
+                          0: SASS_KW@2597..2601 "sass" [] []
+                          1: L_PAREN@2601..2602 "(" [] []
+                          2: CSS_BOGUS@2602..2606
+                            0: SCSS_EXPRESSION_ITEM_LIST@2602..2606
+                              0: CSS_IDENTIFIER@2602..2606
+                                0: IDENT@2602..2606 "true" [] []
+                          3: R_PAREN@2606..2607 ")" [] []
+                        1: COLON@2607..2608 ":" [] []
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@2608..2613
+                          0: CSS_IDENTIFIER@2608..2613
+                            0: IDENT@2608..2613 "black" [] []
+                      1: SEMICOLON@2613..2614 ";" [] []
+                      2: CSS_IF_BRANCH@2614..2625
+                        0: CSS_ELSE_KEYWORD@2614..2618
+                          0: ELSE_KW@2614..2618 "else" [] []
+                        1: COLON@2618..2620 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@2620..2625
+                          0: CSS_IDENTIFIER@2620..2625
+                            0: IDENT@2620..2625 "white" [] []
+                      3: SEMICOLON@2625..2626 ";" [] []
+                    3: R_PAREN@2626..2627 ")" [] []
+              1: (empty)
+            1: SEMICOLON@2627..2628 ";" [] []
+        2: R_CURLY@2628..2630 "}" [Newline("\n")] []
+  2: EOF@2630..2632 "" [Newline("\n"), Newline("\n")] []
 
 ```
 
@@ -4986,7 +5109,7 @@ if.css:10:28 parse ━━━━━━━━━━━━━━━━━━━━�
   
      9 │ .unclosed-style {
   > 10 │ 	color: if(style(--foo: bar: black);
-       │ 	                          ^^^^^^^^
+       │ 	                          ^^^^^^^
     11 │ }
     12 │ 
   
@@ -5002,7 +5125,7 @@ if.css:10:28 parse ━━━━━━━━━━━━━━━━━━━━�
   
 if.css:10:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `)` but instead found `;`
+  × expected `:` but instead found `;`
   
      9 │ .unclosed-style {
   > 10 │ 	color: if(style(--foo: bar: black);
@@ -5014,7 +5137,7 @@ if.css:10:36 parse ━━━━━━━━━━━━━━━━━━━━�
   
 if.css:11:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected an if branch, or an if test boolean expression but instead found '}'.
+  × expected `)` but instead found `}`
   
      9 │ .unclosed-style {
     10 │ 	color: if(style(--foo: bar: black);
@@ -5023,14 +5146,7 @@ if.css:11:1 parse ━━━━━━━━━━━━━━━━━━━━�
     12 │ 
     13 │ .invalid-style-query {
   
-  i Expected an if branch, or an if test boolean expression here.
-  
-     9 │ .unclosed-style {
-    10 │ 	color: if(style(--foo: bar: black);
-  > 11 │ }
-       │ ^
-    12 │ 
-    13 │ .invalid-style-query {
+  i Remove }
   
 if.css:14:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -5443,7 +5559,7 @@ if.css:62:22 parse ━━━━━━━━━━━━━━━━━━━━�
   
 if.css:63:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected an if branch, or an if test boolean expression but instead found '}'.
+  × expected `)` but instead found `}`
   
     61 │ .incomplete-parens-expr {
     62 │ 	color: if((: black;);
@@ -5452,14 +5568,7 @@ if.css:63:1 parse ━━━━━━━━━━━━━━━━━━━━�
     64 │ 
     65 │ .mixed-operators {
   
-  i Expected an if branch, or an if test boolean expression here.
-  
-    61 │ .incomplete-parens-expr {
-    62 │ 	color: if((: black;);
-  > 63 │ }
-       │ ^
-    64 │ 
-    65 │ .mixed-operators {
+  i Remove }
   
 if.css:66:44 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -5930,5 +6039,15 @@ if.css:133:36 parse ━━━━━━━━━━━━━━━━━━━━
         │ 			                                ^^^
     134 │ 			b: if(style(--valid: false): green; else: yellow);
     135 │ 		}
+  
+if.css:140:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Sass if() tests are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    139 │ .scss-only-test {
+  > 140 │ 	color: if(sass(true):black;else: white;);
+        │ 	               ^^^^
+    141 │ }
+    142 │ 
   
 ```

@@ -9,9 +9,9 @@ impl FormatRule<AnyMdLeafBlock> for FormatAnyMdLeafBlock {
     fn fmt(&self, node: &AnyMdLeafBlock, f: &mut MarkdownFormatter) -> FormatResult<()> {
         match node {
             AnyMdLeafBlock::AnyMdCodeBlock(node) => node.format().fmt(f),
+            AnyMdLeafBlock::MdContinuationIndent(node) => node.format().fmt(f),
             AnyMdLeafBlock::MdHeader(node) => node.format().fmt(f),
             AnyMdLeafBlock::MdHtmlBlock(node) => node.format().fmt(f),
-            AnyMdLeafBlock::MdLinkBlock(node) => node.format().fmt(f),
             AnyMdLeafBlock::MdLinkReferenceDefinition(node) => node.format().fmt(f),
             AnyMdLeafBlock::MdNewline(node) => node.format().fmt(f),
             AnyMdLeafBlock::MdParagraph(node) => node.format().fmt(f),

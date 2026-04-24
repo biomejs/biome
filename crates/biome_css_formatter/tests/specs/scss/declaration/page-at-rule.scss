@@ -1,0 +1,35 @@
+@page   :left{
+$padding:12px !default;
+$scale:1+2*3;
+padding:$padding*$scale;
+#{$name}:1px;
+margin-#{$side}:1px;
+--theme-#{$slot}:red;
+
+font:{
+size:12px;
+family:$font-stack;
+}
+
+$map:(
+($padding+1):foo,
+(1+2):bar,
+);
+
+@top-left{
+$margin:4px !global;
+margin:($margin+2)/2;
+border:1px solid $color{
+width:1px;
+color:$color;
+}
+}
+
+@top-right{
+theme.$gutter:8px;
+padding:theme.$gutter;
+#{$inner}:2px;
+margin-#{$inner-side}:2px;
+--theme-#{$inner-slot}:blue;
+}
+}

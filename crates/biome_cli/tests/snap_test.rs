@@ -1,6 +1,10 @@
 use biome_cli::CliDiagnostic;
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::{BufferConsole, Markup, markup};
+use biome_css_formatter::context::CssFormatOptions;
+use biome_css_formatter::format_node as format_css_node;
+use biome_css_parser::{CssParserOptions, parse_css};
+use biome_css_syntax::CssFileSource;
 use biome_diagnostics::termcolor::NoColor;
 use biome_diagnostics::{Error, print_diagnostic_to_string};
 use biome_formatter::{IndentStyle, IndentWidth};
@@ -22,6 +26,10 @@ use std::sync::LazyLock;
 static TIME_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new("\\s[0-9]+[mµn]?s\\.").unwrap());
 static TIME_JUNIT_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new("time=\\\"[.0-9]+\\\"").unwrap());
+static DURATION_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new("\"duration\":\\s*[0-9]+").unwrap());
+static SCANNER_DURATION_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new("\"scannerDuration\":\\s*[0-9]+").unwrap());
 
 #[derive(Default)]
 struct InMessages {
@@ -96,12 +104,37 @@ impl CliSnapshot {
                     redact_snapshot(file_content).unwrap_or(String::new().into());
 
                 let _ = write!(content, "## `{redacted_name}`\n\n");
-                let _ = write!(content, "```{extension}");
-                content.push('\n');
-                content.push_str(&redacted_content);
-                content.push('\n');
-                content.push_str("```");
-                content.push_str("\n\n")
+
+                if extension == "css" {
+                    // Format CSS with the same pipeline used for biome.json.
+                    let parsed = parse_css(
+                        &redacted_content,
+                        CssFileSource::css(),
+                        CssParserOptions::default(),
+                    );
+                    let formatted = format_css_node(
+                        CssFormatOptions::default()
+                            .with_indent_style(IndentStyle::Space)
+                            .with_indent_width(IndentWidth::default()),
+                        &parsed.syntax(),
+                    )
+                    .expect("formatted CSS")
+                    .print()
+                    .expect("printed CSS");
+
+                    content.push_str("```css");
+                    content.push('\n');
+                    content.push_str(formatted.as_code());
+                    content.push_str("```");
+                    content.push_str("\n\n");
+                } else {
+                    let _ = write!(content, "```{extension}");
+                    content.push('\n');
+                    content.push_str(&redacted_content);
+                    content.push('\n');
+                    content.push_str("```");
+                    content.push_str("\n\n");
+                }
             }
         }
 
@@ -166,6 +199,41 @@ fn redact_snapshot(input: &str) -> Option<Cow<'_, str>> {
         .map(|f| f.start()..f.end());
     if let Some(found) = the_match {
         output.to_mut().replace_range(found, "time=\"<TIME>\"");
+    }
+
+    // Redact duration fields in JSON output
+    while let Some(matched) = DURATION_REGEX.find(&output) {
+        let found = matched.start()..matched.end();
+        let matched_text = matched.as_str();
+        // Preserve the whitespace after the colon
+        let whitespace = matched_text
+            .split_once(':')
+            .map(|(_, after)| {
+                after
+                    .chars()
+                    .take_while(|c| c.is_whitespace())
+                    .collect::<String>()
+            })
+            .unwrap_or_default();
+        let replacement = format!("\"duration\":{whitespace}\"<TIME>\"");
+        output.to_mut().replace_range(found, &replacement);
+    }
+
+    while let Some(matched) = SCANNER_DURATION_REGEX.find(&output) {
+        let found = matched.start()..matched.end();
+        let matched_text = matched.as_str();
+        // Preserve the whitespace after the colon
+        let whitespace = matched_text
+            .split_once(':')
+            .map(|(_, after)| {
+                after
+                    .chars()
+                    .take_while(|c| c.is_whitespace())
+                    .collect::<String>()
+            })
+            .unwrap_or_default();
+        let replacement = format!("\"scannerDuration\":{whitespace}\"<TIME>\"");
+        output.to_mut().replace_range(found, &replacement);
     }
 
     // Normalize the name of the current executable to "biome"

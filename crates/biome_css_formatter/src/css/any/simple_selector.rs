@@ -10,6 +10,7 @@ impl FormatRule<AnyCssSimpleSelector> for FormatAnyCssSimpleSelector {
         match node {
             AnyCssSimpleSelector::CssTypeSelector(node) => node.format().fmt(f),
             AnyCssSimpleSelector::CssUniversalSelector(node) => node.format().fmt(f),
+            AnyCssSimpleSelector::ScssPlaceholderSelector(node) => node.format().fmt(f),
         }
     }
 }

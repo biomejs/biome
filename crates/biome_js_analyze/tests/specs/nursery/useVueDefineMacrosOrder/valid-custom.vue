@@ -1,3 +1,4 @@
+<!-- should not generate diagnostics -->
 <script lang="ts" setup>
 import { ref } from 'vue'
 

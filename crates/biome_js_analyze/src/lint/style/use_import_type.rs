@@ -835,7 +835,7 @@ fn is_only_used_as_type(
     // Then check semantic model for type-only usage
     let mut result = false;
     for reference in binding.all_references(model) {
-        if let Some(reference) = AnyJsIdentifierUsage::cast_ref(reference.syntax()) {
+        if let Some(reference) = AnyJsIdentifierUsage::cast_ref(&reference.syntax()) {
             result = reference.is_only_type();
             if !result {
                 break;

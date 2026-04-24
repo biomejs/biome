@@ -8,7 +8,7 @@ use biome_css_factory::CssSyntaxFactory;
 use biome_css_syntax::{AnyCssRoot, CssFileSource, CssLanguage, CssSyntaxNode};
 pub use biome_parser::prelude::*;
 use biome_parser::{AnyParse, EmbeddedNodeParse, NodeParse};
-use biome_rowan::{AstNode, NodeCache, SyntaxNodeWithOffset};
+use biome_rowan::{AstNode, NodeCache, SyntaxNodeWithOffset, TextSize};
 pub use parser::{CssModulesKind, CssParserOptions};
 
 mod lexer;
@@ -22,7 +22,7 @@ pub(crate) type CssLosslessTreeSink<'source> =
     LosslessTreeSink<'source, CssLanguage, CssSyntaxFactory>;
 
 pub(crate) type CssOffsetLosslessTreeSink<'source> =
-    biome_parser::tree_sink::OffsetLosslessTreeSink<'source, CssLanguage, CssSyntaxFactory>;
+    OffsetLosslessTreeSink<'source, CssLanguage, CssSyntaxFactory>;
 
 pub fn parse_css(source: &str, source_type: CssFileSource, options: CssParserOptions) -> CssParse {
     let mut cache = NodeCache::default();
@@ -166,7 +166,7 @@ impl CssOffsetParse {
     }
 
     /// Get the base offset applied to this parse result
-    pub fn base_offset(&self) -> biome_rowan::TextSize {
+    pub fn base_offset(&self) -> TextSize {
         self.root.base_offset()
     }
 
@@ -252,7 +252,7 @@ pub fn parse_css_with_offset_and_cache(
 mod tests {
     use crate::{CssParserOptions, parse_css};
     use crate::{parse_css_with_cache, parse_css_with_offset};
-    use biome_css_syntax::CssFileSource;
+    use biome_css_syntax::{CssFileSource, EmbeddingKind};
     use biome_rowan::TextSize;
 
     #[test]
@@ -330,6 +330,48 @@ mod tests {
         assert_eq!(
             offset_parse.syntax().inner().text_with_trivia().to_string(),
             normal_parse.syntax().text_with_trivia().to_string()
+        );
+    }
+
+    #[test]
+    fn styled_embedding_accepts_nested_selectors_without_ampersand() {
+        for css in [
+            "svg:first-of-type {\n  margin-left: 0;\n}\n",
+            "div:not(:last-child) {\n  border-bottom: 1px solid black;\n}\n",
+        ] {
+            let parse = parse_css(
+                css,
+                CssFileSource::css().with_embedding_kind(EmbeddingKind::Styled),
+                CssParserOptions::default(),
+            );
+
+            assert!(
+                !parse.has_errors(),
+                "styled embedded CSS should accept nested selectors without &: {:#?}",
+                parse.diagnostics()
+            );
+        }
+    }
+
+    #[test]
+    fn styled_snippet_allows_nested_rule_before_declaration() {
+        let css_code = r#"
+div:first-of-type {
+    color: black;
+}
+background: black;
+"#;
+
+        let parse = parse_css(
+            css_code,
+            CssFileSource::css().with_embedding_kind(EmbeddingKind::Styled),
+            CssParserOptions::default(),
+        );
+
+        assert!(
+            !parse.has_errors(),
+            "styled embedded CSS should parse without errors: {:?}",
+            parse.diagnostics()
         );
     }
 }

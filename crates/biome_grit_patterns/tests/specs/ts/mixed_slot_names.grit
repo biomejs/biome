@@ -1,0 +1,6 @@
+or {
+  member_expression(property = $member),
+  JsStaticMemberExpression(member = $member),
+  if_statement(condition = $test, consequence = $cons),
+  JsIfStatement(test = $test, consequent = $cons),
+}

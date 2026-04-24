@@ -5,6 +5,7 @@
     "rules": {
       "nursery": {
         "useVueConsistentVBindStyle": {
+          "level": "on",
           "options": {
             "style": "longhand"
           }

@@ -44,6 +44,11 @@ pub trait Lexer<'src> {
     /// Returns `true` if the current kind is preceded by a line break.
     fn has_preceding_line_break(&self) -> bool;
 
+    /// Returns `true` if the current kind is preceded by whitespace trivia.
+    fn has_preceding_whitespace(&self) -> bool {
+        false
+    }
+
     /// Returns if the current kind is an identifier that includes a unicode escape sequence (`\u...`).
     fn has_unicode_escape(&self) -> bool;
 
@@ -503,6 +508,10 @@ impl<'l, Lex: Lexer<'l>> BufferedLexer<Lex::Kind, Lex> {
         &mut self.inner
     }
 
+    pub fn lexer(&self) -> &Lex {
+        &self.inner
+    }
+
     /// Returns the kind of the next token and any associated diagnostic.
     ///
     /// [See `Lexer.next_token`](Lexer::next_token)
@@ -562,6 +571,16 @@ impl<'l, Lex: Lexer<'l>> BufferedLexer<Lex::Kind, Lex> {
             current.has_preceding_line_break()
         } else {
             self.inner.has_preceding_line_break()
+        }
+    }
+
+    /// Tests if there's whitespace before the current token.
+    #[inline(always)]
+    pub fn has_preceding_whitespace(&self) -> bool {
+        if let Some(current) = &self.current {
+            current.has_preceding_whitespace()
+        } else {
+            self.inner.has_preceding_whitespace()
         }
     }
 
@@ -655,6 +674,7 @@ where
             current_kind: Lex::Kind::EOF,
             current_flags: TokenFlags::empty(),
             after_line_break: checkpoint.after_line_break,
+            after_whitespace: checkpoint.after_whitespace,
             unicode_bom_length: checkpoint.unicode_bom_length,
             diagnostics_pos: checkpoint.diagnostics_pos,
         };
@@ -664,6 +684,39 @@ where
         self.lookahead.clear();
 
         // Lex the token fresh in the new context
+        let kind = self.inner.next_token(context);
+        self.current = Some(self.inner.checkpoint());
+
+        kind
+    }
+
+    /// Re-lex the current token in the given context, treating the position
+    /// as a line start. This overrides `after_line_break` to `true` so the
+    /// lexer produces line-start-gated tokens (e.g. thematic breaks).
+    pub fn force_relex_at_line_start(&mut self, context: Lex::LexContext) -> Lex::Kind {
+        let checkpoint = if let Some(current) = self.current.clone() {
+            current
+        } else if let Some(first) = self.lookahead.get_checkpoint(0).cloned() {
+            first
+        } else {
+            self.inner.checkpoint()
+        };
+
+        let rewind_checkpoint = LexerCheckpoint {
+            position: checkpoint.current_start,
+            current_start: checkpoint.current_start,
+            current_kind: Lex::Kind::EOF,
+            current_flags: TokenFlags::empty(),
+            after_line_break: true,
+            after_whitespace: checkpoint.after_whitespace,
+            unicode_bom_length: checkpoint.unicode_bom_length,
+            diagnostics_pos: checkpoint.diagnostics_pos,
+        };
+
+        self.inner.rewind(rewind_checkpoint);
+        self.current = None;
+        self.lookahead.clear();
+
         let kind = self.inner.next_token(context);
         self.current = Some(self.inner.checkpoint());
 
@@ -784,6 +837,10 @@ impl<Kind: SyntaxKind> LookaheadToken<Kind> {
     pub fn has_preceding_line_break(&self) -> bool {
         self.flags.has_preceding_line_break()
     }
+
+    pub fn has_preceding_whitespace(&self) -> bool {
+        self.flags.has_preceding_whitespace()
+    }
 }
 
 impl<Kind: SyntaxKind> From<&LexerCheckpoint<Kind>> for LookaheadToken<Kind> {
@@ -803,6 +860,7 @@ pub struct LexerCheckpoint<Kind> {
     pub current_kind: Kind,
     pub current_flags: TokenFlags,
     pub after_line_break: bool,
+    pub after_whitespace: bool,
     pub unicode_bom_length: usize,
     pub diagnostics_pos: u32,
 }
@@ -817,6 +875,10 @@ impl<Kind: SyntaxKind> LexerCheckpoint<Kind> {
         self.current_flags.has_preceding_line_break()
     }
 
+    pub(crate) fn has_preceding_whitespace(&self) -> bool {
+        self.current_flags.has_preceding_whitespace()
+    }
+
     pub(crate) fn has_unicode_escape(&self) -> bool {
         self.current_flags.has_unicode_escape()
     }
@@ -828,6 +890,7 @@ impl<Kind: SyntaxKind> LexerCheckpoint<Kind> {
 enum TokenFlag {
     PrecedingLineBreak = 1 << 0,
     UnicodeEscape = 1 << 1,
+    PrecedingWhitespace = 1 << 2,
 }
 
 /// Flags for a lexed token.
@@ -840,6 +903,10 @@ impl TokenFlags {
 
     /// Indicates that an identifier contains an unicode escape sequence
     pub const UNICODE_ESCAPE: Self = Self(make_bitflags!(TokenFlag::{UnicodeEscape}));
+
+    /// Indicates that there has been a whitespace token between the last
+    /// non-trivia token and the current token.
+    pub const PRECEDING_WHITESPACE: Self = Self(make_bitflags!(TokenFlag::{PrecedingWhitespace}));
 
     pub const fn empty() -> Self {
         Self(BitFlags::EMPTY)
@@ -859,6 +926,10 @@ impl TokenFlags {
 
     pub fn has_unicode_escape(&self) -> bool {
         self.contains(Self::UNICODE_ESCAPE)
+    }
+
+    pub fn has_preceding_whitespace(&self) -> bool {
+        self.contains(Self::PRECEDING_WHITESPACE)
     }
 }
 

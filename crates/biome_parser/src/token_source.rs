@@ -74,6 +74,11 @@ pub trait TokenSource {
     /// Returns true if the current token is preceded by a line break
     fn has_preceding_line_break(&self) -> bool;
 
+    /// Returns true if the current token is preceded by whitespace trivia.
+    fn has_preceding_whitespace(&self) -> bool {
+        false
+    }
+
     fn bump(&mut self);
 
     fn skip_as_trivia(&mut self);
@@ -89,6 +94,21 @@ pub trait BumpWithContext: TokenSource {
 
     /// Skips the current token as skipped token trivia
     fn skip_as_trivia_with_context(&mut self, context: Self::Context);
+
+    /// Skips the current token as trivia of the given kind.
+    ///
+    /// Use `TriviaPieceKind::Whitespace` for spec-driven structural whitespace
+    /// (indentation, trailing spaces, post-marker spaces) and
+    /// `TriviaPieceKind::Skipped` for error-recovery paths.
+    ///
+    /// Default implementation delegates to `skip_as_trivia_with_context` (Skipped).
+    fn skip_as_trivia_of_kind_with_context(
+        &mut self,
+        _kind: TriviaPieceKind,
+        context: Self::Context,
+    ) {
+        self.skip_as_trivia_with_context(context);
+    }
 }
 
 pub trait TokenSourceWithBufferedLexer<Lex>: TokenSource {
@@ -102,6 +122,9 @@ pub trait NthToken<Lex>: TokenSource {
 
     /// Returns true if the nth non-trivia token is preceded by a line break
     fn has_nth_preceding_line_break(&mut self, n: usize) -> bool;
+
+    /// Returns true if the nth non-trivia token is preceded by whitespace trivia.
+    fn has_nth_preceding_whitespace(&mut self, n: usize) -> bool;
 }
 
 impl<'l, Lex, T> NthToken<Lex> for T
@@ -128,6 +151,17 @@ where
             self.lexer()
                 .nth_non_trivia(n)
                 .is_some_and(|lookahead| lookahead.has_preceding_line_break())
+        }
+    }
+
+    /// Returns true if the nth non-trivia token is preceded by whitespace trivia.
+    fn has_nth_preceding_whitespace(&mut self, n: usize) -> bool {
+        if n == 0 {
+            self.has_preceding_whitespace()
+        } else {
+            self.lexer()
+                .nth_non_trivia(n)
+                .is_some_and(|lookahead| lookahead.has_preceding_whitespace())
         }
     }
 }

@@ -265,6 +265,52 @@ fn should_fail_when_ignore_file_is_absent() {
 }
 
 #[test]
+fn should_resolve_gitignore_using_vcs_root() {
+    let mut fs = TemporaryFs::new("should_resolve_gitignore_using_vcs_root");
+    let mut console = BufferConsole::default();
+
+    // .gitignore is at the repo root (one level up from the workspace)
+    fs.create_file(".gitignore", "**/file2.js\n");
+
+    // biome.json is in a subdirectory (workspace), with vcs.root pointing to parent
+    fs.create_file(
+        "workspace/biome.json",
+        r#"{
+            "vcs": {
+                "enabled": true,
+                "clientKind": "git",
+                "useIgnoreFile": true,
+                "root": ".."
+            }
+        }"#,
+    );
+
+    // This file should be formatted (not ignored)
+    fs.create_file("workspace/file1.js", UNFORMATTED);
+    // This file should be ignored by .gitignore at the root
+    fs.create_file("workspace/file2.js", UNFORMATTED);
+
+    // Run CLI from the workspace subdirectory
+    fs.append_to_working_directory("workspace");
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["format", fs.cli_path()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_resolve_gitignore_using_vcs_root",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn should_ignore_absolute_paths_in_ignore_file_with_glob() {
     let mut fs = TemporaryFs::new("should_ignore_absolute_paths_in_ignore_file_with_glob");
     let mut console = BufferConsole::default();

@@ -29,7 +29,6 @@ pub trait Finalizer {
 
 pub(crate) struct FinalizePayload<'a, I> {
     pub(crate) fs: &'a dyn FileSystem,
-    pub(crate) workspace: &'a dyn Workspace,
     pub(crate) scan_duration: Option<Duration>,
     pub(crate) console: &'a mut dyn Console,
     pub(crate) cli_options: &'a CliOptions,

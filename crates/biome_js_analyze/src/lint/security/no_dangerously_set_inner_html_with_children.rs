@@ -40,7 +40,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noDangerouslySetInnerHtmlWithChildren",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("no-danger-with-children").same()],
+        sources: &[RuleSource::EslintReact("no-danger-with-children").same(), RuleSource::EslintReactDom("no-dangerously-set-innerhtml-with-children").same(), RuleSource::EslintReactXyz("dom-no-dangerously-set-innerhtml-with-children").same()],
         domains: &[RuleDomain::React],
         recommended: true,
         severity: Severity::Error,
