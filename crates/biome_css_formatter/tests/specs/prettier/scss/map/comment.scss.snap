@@ -70,9 +70,9 @@ $map: (
 +    key: value,
 +  ),
  );
-
+ 
  $map: (/* comment */);
-
+ 
 -$map: (// comment);
 +$map: (
 +  // comment
