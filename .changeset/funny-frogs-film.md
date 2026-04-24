@@ -2,4 +2,4 @@
 "@biomejs/biome": minor
 ---
 
-Biome now is able to foramt and lint `.svg` files.
+Biome can now format and lint `.svg` files.
