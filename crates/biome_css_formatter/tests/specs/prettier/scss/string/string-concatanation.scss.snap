@@ -1,0 +1,85 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/string/string-concatanation.scss
+---
+
+# Input
+
+```scss
+a {
+  background-image: url($test-path + $test-path);
+  background-image: url($test-path + 'static/test.jpg');
+  background-image: url('../test/' + $test-path);
+  background-image: url('../test/' + 'static/test.jpg');
+  background-image: url($test-path+$test-path);
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,7 @@
+ a {
+   background-image: url($test-path + $test-path);
+-  background-image: url($test-path + "static/test.jpg");
++  background-image: url($test-path + 'static/test.jpg');
+   background-image: url("../test/" + $test-path);
+-  background-image: url("../test/" + "static/test.jpg");
+-  background-image: url($test-path + $test-path);
++  background-image: url("../test/" + 'static/test.jpg');
++  background-image: url($test-path+$test-path);
+ }
+```
+
+# Output
+
+```scss
+a {
+  background-image: url($test-path + $test-path);
+  background-image: url($test-path + 'static/test.jpg');
+  background-image: url("../test/" + $test-path);
+  background-image: url("../test/" + 'static/test.jpg');
+  background-image: url($test-path+$test-path);
+}
+```
+
+# Errors
+```
+string-concatanation.scss:4:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    2 │   background-image: url($test-path + $test-path);
+    3 │   background-image: url($test-path + 'static/test.jpg');
+  > 4 │   background-image: url('../test/' + $test-path);
+      │                                    ^^^
+    5 │   background-image: url('../test/' + 'static/test.jpg');
+    6 │   background-image: url($test-path+$test-path);
+  
+  i Expected one of:
+  
+  - function
+  - identifier
+  
+string-concatanation.scss:5:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    3 │   background-image: url($test-path + 'static/test.jpg');
+    4 │   background-image: url('../test/' + $test-path);
+  > 5 │   background-image: url('../test/' + 'static/test.jpg');
+      │                                    ^^^^^^^^^^^^^^^^^^^
+    6 │   background-image: url($test-path+$test-path);
+    7 │ }
+  
+  i Expected one of:
+  
+  - function
+  - identifier
+  
+
+```

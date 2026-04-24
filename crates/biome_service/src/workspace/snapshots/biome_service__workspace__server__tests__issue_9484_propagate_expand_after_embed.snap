@@ -1,0 +1,12 @@
+---
+source: crates/biome_service/src/workspace/server.tests.rs
+expression: result.as_code()
+---
+const x = foo(
+	graphql`
+		query {
+			a
+		}
+	`,
+	b,
+);

@@ -1,0 +1,56 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "preset": "recommended"
+    }
+  }
+}
+```
+
+## `test.js`
+
+```js
+for (let i = 0; i < 10; i++) {
+    if (i === 5) {
+        continue;
+    }
+}
+
+```
+
+# Emitted Messages
+
+```block
+test.js:3:9 lint/complexity/noUselessContinue  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary continue statement
+  
+    1 │ for (let i = 0; i < 10; i++) {
+    2 │     if (i === 5) {
+  > 3 │         continue;
+      │         ^^^^^^^^^
+    4 │     }
+    5 │ }
+  
+  i Safe fix: Delete the unnecessary continue statement
+  
+    1 1 │   for (let i = 0; i < 10; i++) {
+    2 2 │       if (i === 5) {
+    3   │ - ········continue;
+    4 3 │       }
+    5 4 │   }
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 info.
+```

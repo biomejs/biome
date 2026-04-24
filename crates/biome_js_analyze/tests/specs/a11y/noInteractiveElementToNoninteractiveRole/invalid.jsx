@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 /* Interactive elements */
 <a href="http://x.y.z" role="img" />;
 <a href="http://x.y.z" tabIndex="0" role="img" />;

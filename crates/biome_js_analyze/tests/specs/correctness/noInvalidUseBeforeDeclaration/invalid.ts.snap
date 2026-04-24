@@ -44,6 +44,10 @@ invalid.ts:2:30 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━�
     3 │ }
     4 │ 
   
+  i Using a parameter before it is declared makes the code depend on declaration order and hoisting behavior.
+  
+  i Move this use after the declaration, or move the declaration earlier.
+  
 
 ```
 
@@ -66,6 +70,10 @@ invalid.ts:5:16 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━�
       │      ^
     7 │     A = B,
     8 │     B,
+  
+  i Using a enum before it is declared makes the code depend on declaration order and hoisting behavior.
+  
+  i Move this use after the declaration, or move the declaration earlier.
   
 
 ```
@@ -91,6 +99,10 @@ invalid.ts:7:9 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━
      9 │ }
     10 │ 
   
+  i Using a enum member before it is declared makes the code depend on declaration order and hoisting behavior.
+  
+  i Move this use after the declaration, or move the declaration earlier.
+  
 
 ```
 
@@ -112,6 +124,10 @@ invalid.ts:16:1 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━�
   > 17 │ import x = require("file");
        │        ^
     18 │ 
+  
+  i Using a variable before it is declared makes the code depend on declaration order and hoisting behavior.
+  
+  i Move this use after the declaration, or move the declaration earlier.
   
 
 ```

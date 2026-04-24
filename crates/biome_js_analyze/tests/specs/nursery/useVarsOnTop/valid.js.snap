@@ -1,0 +1,53 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+"use strict";
+
+import "mod";
+
+var topLevel = 1;
+let topLevelLet = 2;
+const topLevelConst = 3;
+export var exported = 2;
+export let exportedLet = 4;
+export const exportedConst = 5;
+
+function validFunction() {
+    "use strict";
+    var first = 1;
+    var second = 2;
+
+    doSomething(first, second);
+}
+
+function validAfterDeclarations() {
+    let localLet = 1;
+    var localVar = 2;
+    const localConst = 2;
+
+    doSomething(localLet, localConst, localVar);
+}
+
+function validDirectiveThenVar() {
+    "use strict";
+    var afterDirective = 1;
+
+    doSomething(afterDirective);
+}
+
+class ValidExample {
+    static {
+        let staticLet = 1;
+        const staticConst = 2;
+        var staticValue = 3;
+
+        doSomething(staticLet, staticConst, staticValue);
+    }
+}
+
+```

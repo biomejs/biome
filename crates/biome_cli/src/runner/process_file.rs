@@ -4,7 +4,7 @@ use crate::runner::crawler::CrawlerContext;
 use crate::runner::diagnostics::{ResultExt, ResultIoExt, UnhandledDiagnostic};
 use crate::runner::execution::Execution;
 use biome_console::Console;
-use biome_diagnostics::{DiagnosticExt, DiagnosticTags, Error, category};
+use biome_diagnostics::{DiagnosticExt, DiagnosticTags, Error, Severity, category};
 use biome_fs::{BiomePath, File, OpenOptions};
 use biome_service::diagnostics::FileTooLarge;
 use biome_service::file_handlers::DocumentFileSource;
@@ -60,6 +60,13 @@ pub(crate) enum Message {
         content: String,
         diagnostics: Vec<Error>,
         skipped_diagnostics: u32,
+        /// Total number of errors returned by the workspace (may exceed diagnostics.len()
+        /// when max_diagnostics caps the serialized output).
+        errors: usize,
+        /// Total number of warnings returned by the workspace.
+        warnings: usize,
+        /// Total number of infos returned by the workspace.
+        infos: usize,
     },
     // DiagnosticsWithActions {
     //     file_path: String,
@@ -123,13 +130,20 @@ pub(crate) trait ProcessFile: Send + Sync + std::panic::RefUnwindSafe {
         ctx: &Ctx,
         workspace_file: &mut WorkspaceFile,
         features_supported: &FeaturesSupported,
+        max_diagnostics: u32,
+        diagnostic_level: Severity,
     ) -> Result<FileStatus, Message>
     where
         Ctx: CrawlerContext;
 
     fn process_std_in(payload: ProcessStdinFilePayload) -> Result<(), CliDiagnostic>;
 
-    fn execute<Ctx>(ctx: &Ctx, biome_path: &BiomePath) -> FileResult
+    fn execute<Ctx>(
+        ctx: &Ctx,
+        biome_path: &BiomePath,
+        max_diagnostics: u32,
+        diagnostic_level: Severity,
+    ) -> FileResult
     where
         Ctx: CrawlerContext,
     {
@@ -193,7 +207,13 @@ pub(crate) trait ProcessFile: Send + Sync + std::panic::RefUnwindSafe {
             return Ok(FileStatus::Ignored);
         }
 
-        Self::process_file(ctx, &mut workspace_file, &file_features)
+        Self::process_file(
+            ctx,
+            &mut workspace_file,
+            &file_features,
+            max_diagnostics,
+            diagnostic_level,
+        )
     }
 
     fn should_skip_ignore_check(biome_path: &BiomePath, workspace: &dyn Workspace) -> bool {
@@ -206,6 +226,8 @@ impl ProcessFile for () {
         _: &Ctx,
         _: &mut WorkspaceFile,
         _: &FeaturesSupported,
+        _: u32,
+        _: Severity,
     ) -> Result<FileStatus, Message>
     where
         Ctx: CrawlerContext,

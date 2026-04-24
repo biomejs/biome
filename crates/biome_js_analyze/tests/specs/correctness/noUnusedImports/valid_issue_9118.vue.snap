@@ -1,0 +1,21 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_issue_9118.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script lang="ts">
+	import MyElement, {
+		type MyElementShape,
+	} from './my-element.vue';
+
+	let myElement: MyElementShape =  {};
+</script>
+
+<template>
+	<MyElement />
+</template>
+
+
+```

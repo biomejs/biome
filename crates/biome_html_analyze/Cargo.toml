@@ -35,6 +35,7 @@ camino                   = { workspace = true }
 phf                      = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"] }
+smallvec                 = { workspace = true }
 
 [dev-dependencies]
 biome_html_parser = { path = "../biome_html_parser" }

@@ -1,0 +1,718 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/scss/3757.scss
+---
+
+# Input
+
+```scss
+$buttonConfig: "save" 50px, 'cancel' 50px, "help" 100PX;
+
+$locale: "en_us";
+html[lang=#{$locale}] {
+  font-size: 10px;
+}
+$alertClass: "error";
+p.message-#{$alertClass} {
+  color: red;
+}
+$mediumBreakpoint: 768px;
+@media (max-width: #{$mediumBreakpoint}) {
+  a {
+    font-size: 18px;
+  }
+}
+
+p {
+  @media (max-width: 768px) {
+    font-size: 150%;
+
+    @media (orientation: landscape) {
+        line-height: 75%;
+    }
+  }
+}
+
+.popularAnimal {
+    background: gray;
+}
+.GoodBoy {
+    color: green;
+}
+.dog {
+  @extend .popularAnimal;
+  @extend .GoodBoy;
+  color: white;
+}
+
+%animal {
+  background: gray;
+}
+.cat {
+  @extend %animal;
+  color: white;
+}
+.dog {
+  @extend %animal;
+  color: black;
+}
+
+%mfw-standing-out {
+  font-size: 150%;
+  font-style: italic;
+  padding: 25px;
+}
+%mfwSlightlyShadowed {
+  @include box-shadow(black 2px 2px 10px); // from Compass
+}
+%MFWRounded {
+  @include border-radius(25px); // from Compass
+}
+#join-button {
+  @extend %mfw-standing-out;
+  @extend %mfwSlightlyShadowed;
+  @extend %MFWRounded;
+  background: green;
+  color: white;
+}
+
+a {
+  &:hover {
+    color: red;
+  }
+}
+p {
+  body.no-touch & {
+    display: none;
+  }
+}
+.foo.bar .baz.bang, .bip.qux {
+  $selector: &;
+}
+@mixin does-parent-exist {
+  @if & {
+    &:hover {
+      color: red;
+    }
+  } @else {
+    a {
+      color: red;
+    }
+  }
+}
+
+p {
+  @if 1 + 1 == 2 {
+    border: 1px solid;
+  }
+  @if 5 < 3 {
+    border: 2px dotted;
+  }
+  @if null {
+    border: 3px double;
+  }
+}
+
+$mosterType: monster;
+p {
+  @if $mosterType == ocean {
+    color: blue;
+  } @else if $mosterType == matador {
+    color: red;
+  } @else if $mosterType == monster {
+    color: green;
+  } @else if $mosterType == nightKing {
+    color: green;
+  } @else if $mosterType == VeryWickedWolf {
+    color: green;
+  } @else {
+    color: black;
+  }
+}
+
+@for $i from 1 through 3 {
+  .item-#{$i} {
+    width: 2em * $i;
+  }
+}
+
+@each $animal in puma, sea-slug, cheerfulDog, BigSalamander, "string", 'another-string', "camelCaseString", "PascalCaseString" {
+  .#{$animal}-icon {
+    background-image: url('/images/#{$animal}.png');
+  }
+}
+
+$i: 6;
+@while $i > 0 {
+  .item-#{$i} {
+    width: 2em * $i;
+  }
+  $i: $i - 2;
+}
+
+@mixin cool-border($width: 10px, $coolStyle: 'solid', $AwesomeColor: "black") {
+  border: $width $coolStyle $AwesomeColor;
+}
+
+p {
+  @include cool-border(1px, "solid", $fff);
+}
+p {
+  @include cool-border($width: 1px, $coolStyle: 'solid', $AwesomeColor: #fff);
+}
+p {
+  @include coolBorder();
+}
+
+@mixin coolBorder() {
+  border: 10px solid #fff;
+}
+p {
+  @include coolBorder(1px, "solid", $fff);
+}
+
+@mixin CoolBorder() {
+  border: 10px solid #fff;
+}
+p {
+  @include CoolBorder(1px, "solid", $fff);
+}
+
+@mixin box-shadow($shadows...) {
+  -moz-box-shadow: $shadows;
+  -webkit-box-shadow: $shadows;
+  box-shadow: $shadows;
+}
+.shadows {
+  @include box-shadow(0px 4px 5px #666, 2px 6px 10px #999);
+}
+
+@mixin apply-to-ie6-only {
+  * html {
+    @content;
+  }
+}
+@include apply-to-ie6-only {
+  #logo {
+    background-image: url(/logo.gif);
+  }
+}
+
+@mixin applyToIe6Only {
+  * html {
+    @content;
+  }
+}
+@include applyToIe6Only {
+  #logo {
+    background-image: url(/logo.gif);
+  }
+}
+
+@mixin ApplyToIe6Only {
+  * html {
+    @content;
+  }
+}
+@include ApplyToIe6Only {
+  #logo {
+    background-image: url(/logo.gif);
+  }
+}
+
+@mixin config-icon-colors($prefix, $colors...) {
+  @each $i in $colors {
+    .#{$prefix}#{nth($i, 1)} {
+      color: nth($i, 2);
+    }
+  }
+}
+@include config-icon-colors(
+  "icon-",
+  "save" green,
+  "cancel" gray,
+  "delete" red,
+  'wait' blue
+);
+
+@function my-calculation-function($some-number, $anotherNumber, $BigNumber){
+  @return $some-number + $anotherNumber + $BigNumber;
+}
+@function myCalculationFunction($some-number, $anotherNumber, $BigNumber){
+  @return $some-number + $anotherNumber + $BigNumber;
+}
+@function AnotherMyCalculationFunction($some-number, $anotherNumber, $BigNumber: 100px){
+  @return $some-number + $anotherNumber + $BigNumber;
+}
+@function border($borders...) {
+  @return $borders;
+}
+.foo {
+  padding: my-calculation-function(10px, 5px, 100px);
+  margin: myCalculationFunction($some-number: 10px, $anotherNumber: 5px, $BigNumber: 100px);
+  width: AnotherMyCalculationFunction(10px, 5px);
+  border: border(25px, 35px);
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,10 +1,7 @@
+-$buttonConfig:
+-  "save" 50px,
+-  "cancel" 50px,
+-  "help" 100px;
++$buttonConfig: "save" 50px, "cancel" 50px, "help" 100px;
+ 
+ $locale: "en_us";
+-html[lang="#{$locale}"] {
++html[lang=# {$locale}] {
+   font-size: 10px;
+ }
+ $alertClass: "error";
+@@ -23,16 +20,16 @@
+     font-size: 150%;
+ 
+     @media (orientation: landscape) {
+-      line-height: 75%;
++        line-height: 75%;
+     }
+   }
+ }
+ 
+ .popularAnimal {
+-  background: gray;
++    background: gray;
+ }
+ .GoodBoy {
+-  color: green;
++    color: green;
+ }
+ .dog {
+   @extend .popularAnimal;
+@@ -81,8 +78,7 @@
+     display: none;
+   }
+ }
+-.foo.bar .baz.bang,
+-.bip.qux {
++.foo.bar .baz.bang, .bip.qux {
+   $selector: &;
+ }
+ @mixin does-parent-exist {
+@@ -132,11 +128,9 @@
+   }
+ }
+ 
+-@each $animal in puma, sea-slug, cheerfulDog, BigSalamander, "string",
+-  "another-string", "camelCaseString", "PascalCaseString"
+-{
++@each $animal in puma, sea-slug, cheerfulDog, BigSalamander, "string", 'another-string', "camelCaseString", "PascalCaseString" {
+   .#{$animal}-icon {
+-    background-image: url("/images/#{$animal}.png");
++    background-image: url('/images/#{$animal}.png');
+   }
+ }
+ 
+@@ -148,7 +142,7 @@
+   $i: $i - 2;
+ }
+ 
+-@mixin cool-border($width: 10px, $coolStyle: "solid", $AwesomeColor: "black") {
++@mixin cool-border($width: 10px, $coolStyle: 'solid', $AwesomeColor: "black") {
+   border: $width $coolStyle $AwesomeColor;
+ }
+ 
+@@ -156,7 +150,7 @@
+   @include cool-border(1px, "solid", $fff);
+ }
+ p {
+-  @include cool-border($width: 1px, $coolStyle: "solid", $AwesomeColor: #fff);
++  @include cool-border($width: 1px, $coolStyle: 'solid', $AwesomeColor: #fff);
+ }
+ p {
+   @include coolBorder();
+@@ -230,20 +224,16 @@
+   "save" green,
+   "cancel" gray,
+   "delete" red,
+-  "wait" blue
++  'wait' blue
+ );
+ 
+-@function my-calculation-function($some-number, $anotherNumber, $BigNumber) {
++@function my-calculation-function($some-number, $anotherNumber, $BigNumber){
+   @return $some-number + $anotherNumber + $BigNumber;
+ }
+-@function myCalculationFunction($some-number, $anotherNumber, $BigNumber) {
++@function myCalculationFunction($some-number, $anotherNumber, $BigNumber){
+   @return $some-number + $anotherNumber + $BigNumber;
+ }
+-@function AnotherMyCalculationFunction(
+-  $some-number,
+-  $anotherNumber,
+-  $BigNumber: 100px
+-) {
++@function AnotherMyCalculationFunction($some-number, $anotherNumber, $BigNumber: 100px){
+   @return $some-number + $anotherNumber + $BigNumber;
+ }
+ @function border($borders...) {
+@@ -251,11 +241,7 @@
+ }
+ .foo {
+   padding: my-calculation-function(10px, 5px, 100px);
+-  margin: myCalculationFunction(
+-    $some-number: 10px,
+-    $anotherNumber: 5px,
+-    $BigNumber: 100px
+-  );
++  margin: myCalculationFunction($some-number: 10px, $anotherNumber: 5px, $BigNumber: 100px);
+   width: AnotherMyCalculationFunction(10px, 5px);
+   border: border(25px, 35px);
+ }
+```
+
+# Output
+
+```scss
+$buttonConfig: "save" 50px, "cancel" 50px, "help" 100px;
+
+$locale: "en_us";
+html[lang=# {$locale}] {
+  font-size: 10px;
+}
+$alertClass: "error";
+p.message-#{$alertClass} {
+  color: red;
+}
+$mediumBreakpoint: 768px;
+@media (max-width: #{$mediumBreakpoint}) {
+  a {
+    font-size: 18px;
+  }
+}
+
+p {
+  @media (max-width: 768px) {
+    font-size: 150%;
+
+    @media (orientation: landscape) {
+        line-height: 75%;
+    }
+  }
+}
+
+.popularAnimal {
+    background: gray;
+}
+.GoodBoy {
+    color: green;
+}
+.dog {
+  @extend .popularAnimal;
+  @extend .GoodBoy;
+  color: white;
+}
+
+%animal {
+  background: gray;
+}
+.cat {
+  @extend %animal;
+  color: white;
+}
+.dog {
+  @extend %animal;
+  color: black;
+}
+
+%mfw-standing-out {
+  font-size: 150%;
+  font-style: italic;
+  padding: 25px;
+}
+%mfwSlightlyShadowed {
+  @include box-shadow(black 2px 2px 10px); // from Compass
+}
+%MFWRounded {
+  @include border-radius(25px); // from Compass
+}
+#join-button {
+  @extend %mfw-standing-out;
+  @extend %mfwSlightlyShadowed;
+  @extend %MFWRounded;
+  background: green;
+  color: white;
+}
+
+a {
+  &:hover {
+    color: red;
+  }
+}
+p {
+  body.no-touch & {
+    display: none;
+  }
+}
+.foo.bar .baz.bang, .bip.qux {
+  $selector: &;
+}
+@mixin does-parent-exist {
+  @if & {
+    &:hover {
+      color: red;
+    }
+  } @else {
+    a {
+      color: red;
+    }
+  }
+}
+
+p {
+  @if 1 + 1 == 2 {
+    border: 1px solid;
+  }
+  @if 5 < 3 {
+    border: 2px dotted;
+  }
+  @if null {
+    border: 3px double;
+  }
+}
+
+$mosterType: monster;
+p {
+  @if $mosterType == ocean {
+    color: blue;
+  } @else if $mosterType == matador {
+    color: red;
+  } @else if $mosterType == monster {
+    color: green;
+  } @else if $mosterType == nightKing {
+    color: green;
+  } @else if $mosterType == VeryWickedWolf {
+    color: green;
+  } @else {
+    color: black;
+  }
+}
+
+@for $i from 1 through 3 {
+  .item-#{$i} {
+    width: 2em * $i;
+  }
+}
+
+@each $animal in puma, sea-slug, cheerfulDog, BigSalamander, "string", 'another-string', "camelCaseString", "PascalCaseString" {
+  .#{$animal}-icon {
+    background-image: url('/images/#{$animal}.png');
+  }
+}
+
+$i: 6;
+@while $i > 0 {
+  .item-#{$i} {
+    width: 2em * $i;
+  }
+  $i: $i - 2;
+}
+
+@mixin cool-border($width: 10px, $coolStyle: 'solid', $AwesomeColor: "black") {
+  border: $width $coolStyle $AwesomeColor;
+}
+
+p {
+  @include cool-border(1px, "solid", $fff);
+}
+p {
+  @include cool-border($width: 1px, $coolStyle: 'solid', $AwesomeColor: #fff);
+}
+p {
+  @include coolBorder();
+}
+
+@mixin coolBorder() {
+  border: 10px solid #fff;
+}
+p {
+  @include coolBorder(1px, "solid", $fff);
+}
+
+@mixin CoolBorder() {
+  border: 10px solid #fff;
+}
+p {
+  @include CoolBorder(1px, "solid", $fff);
+}
+
+@mixin box-shadow($shadows...) {
+  -moz-box-shadow: $shadows;
+  -webkit-box-shadow: $shadows;
+  box-shadow: $shadows;
+}
+.shadows {
+  @include box-shadow(0px 4px 5px #666, 2px 6px 10px #999);
+}
+
+@mixin apply-to-ie6-only {
+  * html {
+    @content;
+  }
+}
+@include apply-to-ie6-only {
+  #logo {
+    background-image: url(/logo.gif);
+  }
+}
+
+@mixin applyToIe6Only {
+  * html {
+    @content;
+  }
+}
+@include applyToIe6Only {
+  #logo {
+    background-image: url(/logo.gif);
+  }
+}
+
+@mixin ApplyToIe6Only {
+  * html {
+    @content;
+  }
+}
+@include ApplyToIe6Only {
+  #logo {
+    background-image: url(/logo.gif);
+  }
+}
+
+@mixin config-icon-colors($prefix, $colors...) {
+  @each $i in $colors {
+    .#{$prefix}#{nth($i, 1)} {
+      color: nth($i, 2);
+    }
+  }
+}
+@include config-icon-colors(
+  "icon-",
+  "save" green,
+  "cancel" gray,
+  "delete" red,
+  'wait' blue
+);
+
+@function my-calculation-function($some-number, $anotherNumber, $BigNumber){
+  @return $some-number + $anotherNumber + $BigNumber;
+}
+@function myCalculationFunction($some-number, $anotherNumber, $BigNumber){
+  @return $some-number + $anotherNumber + $BigNumber;
+}
+@function AnotherMyCalculationFunction($some-number, $anotherNumber, $BigNumber: 100px){
+  @return $some-number + $anotherNumber + $BigNumber;
+}
+@function border($borders...) {
+  @return $borders;
+}
+.foo {
+  padding: my-calculation-function(10px, 5px, 100px);
+  margin: myCalculationFunction($some-number: 10px, $anotherNumber: 5px, $BigNumber: 100px);
+  width: AnotherMyCalculationFunction(10px, 5px);
+  border: border(25px, 35px);
+}
+```
+
+# Errors
+```
+3757.scss:4:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, or a string literal but instead found '#'.
+  
+    3 │ $locale: "en_us";
+  > 4 │ html[lang=#{$locale}] {
+      │           ^
+    5 │   font-size: 10px;
+    6 │ }
+  
+  i Expected an identifier, or a string literal here.
+  
+    3 │ $locale: "en_us";
+  > 4 │ html[lang=#{$locale}] {
+      │           ^
+    5 │   font-size: 10px;
+    6 │ }
+  
+3757.scss:4:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `]` but instead found `{`
+  
+    3 │ $locale: "en_us";
+  > 4 │ html[lang=#{$locale}] {
+      │            ^
+    5 │   font-size: 10px;
+    6 │ }
+  
+  i Remove {
+  
+3757.scss:4:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a declaration, or an at rule but instead found '$'.
+  
+    3 │ $locale: "en_us";
+  > 4 │ html[lang=#{$locale}] {
+      │             ^
+    5 │   font-size: 10px;
+    6 │ }
+  
+  i Expected a declaration, or an at rule here.
+  
+    3 │ $locale: "en_us";
+  > 4 │ html[lang=#{$locale}] {
+      │             ^
+    5 │   font-size: 10px;
+    6 │ }
+  
+3757.scss:4:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `}`
+  
+    3 │ $locale: "en_us";
+  > 4 │ html[lang=#{$locale}] {
+      │                    ^
+    5 │   font-size: 10px;
+    6 │ }
+  
+  i Remove }
+  
+3757.scss:248:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+  
+    246 │   border: border(25px, 35px);
+    247 │ }
+  > 248 │ 
+        │ 
+  
+  i the file ends here
+  
+    246 │   border: border(25px, 35px);
+    247 │ }
+  > 248 │ 
+        │ 
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+  131: @each $animal in puma, sea-slug, cheerfulDog, BigSalamander, "string", 'another-string', "camelCaseString", "PascalCaseString" {
+  236: @function AnotherMyCalculationFunction($some-number, $anotherNumber, $BigNumber: 100px){
+  244:   margin: myCalculationFunction($some-number: 10px, $anotherNumber: 5px, $BigNumber: 100px);
+```

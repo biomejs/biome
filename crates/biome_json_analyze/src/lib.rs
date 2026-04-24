@@ -169,7 +169,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use biome_analyze::{AnalyzerOptions, Never, RuleFilter};
+    use biome_analyze::{ActionFilter, AnalyzerOptions, Never, RuleFilter};
     use biome_console::fmt::{Formatter, Termcolor};
     use biome_console::{Markup, markup};
     use biome_diagnostics::termcolor::NoColor;
@@ -231,7 +231,7 @@ mod tests {
                     eprintln!("{text}");
                 }
 
-                for action in signal.actions() {
+                for action in signal.actions(ActionFilter::all()) {
                     let new_code = action.mutation.commit();
                     eprintln!("{new_code}");
                 }

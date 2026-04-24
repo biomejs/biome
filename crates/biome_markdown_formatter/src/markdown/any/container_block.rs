@@ -5,7 +5,7 @@ use biome_markdown_syntax::AnyMdContainerBlock;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatAnyMdContainerBlock;
 impl FormatRule<AnyMdContainerBlock> for FormatAnyMdContainerBlock {
-    type Context = MdFormatContext;
+    type Context = MarkdownFormatContext;
     fn fmt(&self, node: &AnyMdContainerBlock, f: &mut MarkdownFormatter) -> FormatResult<()> {
         match node {
             AnyMdContainerBlock::MdBulletListItem(node) => node.format().fmt(f),

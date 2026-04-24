@@ -1,3 +1,4 @@
+use crate::{Binding, BindingId, JsDeclarationKind, Scope, ScopeId, SemanticModel};
 use biome_formatter::prelude::*;
 use biome_formatter::{
     FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
@@ -5,8 +6,6 @@ use biome_formatter::{
 };
 use biome_formatter::{format_args, write};
 use biome_js_syntax::TextSize;
-
-use crate::{Binding, BindingId, Scope, ScopeId, SemanticModel};
 
 pub struct FormatSemanticModelOptions;
 
@@ -141,19 +140,41 @@ impl Format<FormatSemanticModelContext> for Scope {
 
 impl Format<FormatSemanticModelContext> for Binding {
     fn fmt(&self, f: &mut Formatter<FormatSemanticModelContext>) -> FormatResult<()> {
+        let is_imported = format_with(|f| {
+            if self.is_imported() {
+                write!(f, [token("Imported: true"), hard_line_break()])
+            } else {
+                write!(f, [token("Imported: false"), hard_line_break()])
+            }
+        });
+
+        let is_exported = format_with(|f| {
+            if self.is_exported() {
+                write!(f, [token("Exported: true"), hard_line_break()])
+            } else {
+                write!(f, [token("Exported: false"), hard_line_break()])
+            }
+        });
+
         let formatted_binding_info = format_with(|f| {
             let range = std::format!("{:?}", self.syntax().text_trimmed_range());
+
             write!(
                 f,
                 [
-                    token("id: "),
+                    token("Id: "),
                     self.id,
                     token(" @ "),
                     text(range.as_str(), TextSize::default()),
                     hard_line_break()
                 ]
             )?;
-            write!(f, [token("scope: "), self.scope().id, hard_line_break()])?;
+            write!(f, [token("Scope: "), self.scope().id, hard_line_break()])?;
+            write!(f, [is_imported, is_exported])?;
+            write!(
+                f,
+                [token("Kind: "), self.declaration_kind(), hard_line_break()]
+            )?;
             let full_text = self.syntax().text_trimmed().into_text();
             write!(
                 f,
@@ -163,6 +184,17 @@ impl Format<FormatSemanticModelContext> for Binding {
                     hard_line_break()
                 ]
             )?;
+
+            if let Some(jsdoc) = self.to_fmt_jsonc() {
+                write!(
+                    f,
+                    [
+                        token("JsDoc Comments: "),
+                        text(jsdoc.as_str(), TextSize::default())
+                    ]
+                )?;
+            }
+
             Ok(())
         });
         write!(
@@ -190,5 +222,12 @@ impl Format<FormatSemanticModelContext> for BindingId {
     fn fmt(&self, f: &mut Formatter<FormatSemanticModelContext>) -> FormatResult<()> {
         let binding_text = std::format!("BindingId({})", self.0);
         write!(f, [text(binding_text.as_str(), TextSize::default())])
+    }
+}
+
+impl Format<FormatSemanticModelContext> for JsDeclarationKind {
+    fn fmt(&self, f: &mut Formatter<FormatSemanticModelContext>) -> FormatResult<()> {
+        let text_kind = std::format!("{:?}", self);
+        write!(f, [text(text_kind.as_str(), TextSize::default())])
     }
 }

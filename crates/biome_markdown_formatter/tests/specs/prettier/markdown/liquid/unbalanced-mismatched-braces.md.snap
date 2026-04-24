@@ -17,20 +17,18 @@ Braces {%  doesn't    match so   these   words should not   be   considered as *
 ```diff
 --- Prettier
 +++ Biome
-@@ -1 +1,2 @@
+@@ -1 +1 @@
 -Braces {% doesn't match so these words should not be considered as _liquid node_ }}
-+
-+Braces {%  doesn't    match so   these   words should not   be   considered as *liquid node* }}
++Braces {%  doesn't    match so   these   words should not   be   considered as _liquid node_ }}
 ```
 
 # Output
 
 ```md
-
-Braces {%  doesn't    match so   these   words should not   be   considered as *liquid node* }}
+Braces {%  doesn't    match so   these   words should not   be   considered as _liquid node_ }}
 ```
 
 # Lines exceeding max width of 80 characters
 ```
-    2: Braces {%  doesn't    match so   these   words should not   be   considered as *liquid node* }}
+    1: Braces {%  doesn't    match so   these   words should not   be   considered as _liquid node_ }}
 ```

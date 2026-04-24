@@ -14,15 +14,12 @@ impl FormatNodeRule<CssUrlFunction> for FormatCssUrlFunction {
             r_paren_token,
         } = node.as_fields();
 
-        write!(
-            f,
-            [
-                name.format(),
-                l_paren_token.format(),
-                value.format(),
-                modifiers.format(),
-                r_paren_token.format()
-            ]
-        )
+        write!(f, [name.format(), l_paren_token.format(), value.format()])?;
+
+        if value.is_some() && modifiers.iter().next().is_some() {
+            write!(f, [space()])?;
+        }
+
+        write!(f, [modifiers.format(), r_paren_token.format()])
     }
 }

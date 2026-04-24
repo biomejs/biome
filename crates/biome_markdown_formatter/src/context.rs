@@ -10,7 +10,7 @@ use crate::comments::{FormatMarkdownLeadingComment, MarkdownCommentStyle};
 
 pub type MarkdownComments = Comments<MarkdownLanguage>;
 
-pub struct MdFormatContext {
+pub struct MarkdownFormatContext {
     source_map: Option<TransformSourceMap>,
     options: MdFormatOptions,
     comments: Rc<MarkdownComments>,
@@ -25,7 +25,7 @@ pub struct MdFormatOptions {
     trailing_newline: TrailingNewline,
 }
 
-impl CstFormatContext for MdFormatContext {
+impl CstFormatContext for MarkdownFormatContext {
     type Language = MarkdownLanguage;
     type Style = MarkdownCommentStyle;
     type CommentRule = FormatMarkdownLeadingComment;
@@ -98,7 +98,7 @@ impl MdFormatOptions {
     }
 }
 
-impl MdFormatContext {
+impl MarkdownFormatContext {
     pub fn new(options: MdFormatOptions) -> Self {
         Self {
             options,
@@ -117,7 +117,7 @@ impl MdFormatContext {
     }
 }
 
-impl FormatContext for MdFormatContext {
+impl FormatContext for MarkdownFormatContext {
     type Options = MdFormatOptions;
 
     fn options(&self) -> &Self::Options {

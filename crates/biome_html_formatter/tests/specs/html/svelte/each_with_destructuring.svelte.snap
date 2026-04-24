@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 240
 info: svelte/each_with_destructuring.svelte
 ---
 
@@ -22,6 +23,10 @@ info: svelte/each_with_destructuring.svelte
   <div>{id}</div>
 {/each}
 
+{#each Object.entries(foo) as [key, { a, b }]}
+  {a} {b}
+{/each}
+
 ```
 
 
@@ -42,6 +47,10 @@ info: svelte/each_with_destructuring.svelte
 
 {#each items as { id, ...rest }}
 	<div>{id}</div>
+{/each}
+
+{#each Object.entries(foo) as [ key, { a, b } ]}
+	{a} {b}
 {/each}
 
 ```

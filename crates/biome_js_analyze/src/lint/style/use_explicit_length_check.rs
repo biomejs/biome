@@ -190,6 +190,20 @@ impl Rule for UseExplicitLengthCheck {
                 });
         }
 
+        if let Some((boolean_expr, is_negative)) = get_boolean_ancestor(member_expr_syntax) {
+            let check = if is_negative {
+                LengthCheck::Zero
+            } else {
+                LengthCheck::NonZero
+            };
+
+            return Some(UseExplicitLengthCheckState {
+                check,
+                node: boolean_expr,
+                member_name,
+            });
+        }
+
         if is_in_boolean_context(member_expr_syntax).unwrap_or(false) {
             return Some(UseExplicitLengthCheckState {
                 check: LengthCheck::NonZero,
@@ -211,20 +225,6 @@ impl Rule for UseExplicitLengthCheck {
             return Some(UseExplicitLengthCheckState {
                 check: LengthCheck::NonZero,
                 node: AnyJsExpression::cast_ref(member_expr_syntax)?,
-                member_name,
-            });
-        }
-
-        if let Some((boolean_expr, is_negative)) = get_boolean_ancestor(member_expr_syntax) {
-            let check = if is_negative {
-                LengthCheck::Zero
-            } else {
-                LengthCheck::NonZero
-            };
-
-            return Some(UseExplicitLengthCheckState {
-                check,
-                node: boolean_expr,
                 member_name,
             });
         }

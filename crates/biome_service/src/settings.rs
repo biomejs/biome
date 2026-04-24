@@ -7,7 +7,9 @@ use biome_configuration::bool::Bool;
 use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
 use biome_configuration::html::{ExperimentalFullSupportEnabled, HtmlConfiguration};
-use biome_configuration::javascript::{ExperimentalEmbeddedSnippetsEnabled, JsxRuntime};
+use biome_configuration::javascript::{
+    ExperimentalEmbeddedSnippetsEnabled, ExperimentalPnpmCatalogsEnabled, JsxRuntime,
+};
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::{VcsClientKind, VcsConfiguration, VcsEnabled, VcsUseIgnoreFile};
 use biome_configuration::{
@@ -80,6 +82,9 @@ pub struct Settings {
 
     // TODO: remove once embedded snippets support is stable
     pub experimental_js_embedded_snippets_enabled: Option<ExperimentalEmbeddedSnippetsEnabled>,
+
+    // TODO: remove once pnpm workspace catalogs support is stable
+    pub experimental_pnpm_catalogs_enabled: Option<ExperimentalPnpmCatalogsEnabled>,
 }
 
 impl Settings {
@@ -169,6 +174,10 @@ impl Settings {
         if let Some(javascript) = configuration.javascript {
             self.experimental_js_embedded_snippets_enabled =
                 javascript.experimental_embedded_snippets_enabled;
+            self.experimental_pnpm_catalogs_enabled = javascript
+                .resolver
+                .as_ref()
+                .and_then(|resolver| resolver.experimental_pnpm_catalogs);
             self.languages.javascript = javascript.into()
         }
         // json settings
@@ -224,6 +233,15 @@ impl Settings {
     #[inline]
     pub fn ignore_unknown_enabled(&self) -> bool {
         self.files.ignore_unknown.unwrap_or_default().into()
+    }
+
+    /// Whether `pnpm-workspace.yaml` catalogs should be used to resolve
+    /// `catalog:` dependency versions.
+    #[inline]
+    pub fn use_pnpm_workspace_catalogs(&self) -> bool {
+        self.experimental_pnpm_catalogs_enabled
+            .unwrap_or_default()
+            .value()
     }
 
     /// Retrieves the settings of the linter
@@ -345,6 +363,10 @@ impl Settings {
 
     pub fn linter_recommended_enabled(&self) -> bool {
         self.linter.recommended_enabled()
+    }
+
+    pub fn linter_all_enabled(&self) -> bool {
+        self.linter.all_enabled()
     }
 
     pub fn is_assist_enabled(&self) -> bool {
@@ -630,9 +652,23 @@ impl LinterSettings {
     pub fn recommended_enabled(&self) -> bool {
         self.rules
             .as_ref()
-            .and_then(|rules| rules.recommended)
+            .and_then(|rules| {
+                rules.recommended.or(Some(
+                    rules
+                        .preset
+                        .as_ref()
+                        .is_some_and(|preset| preset.is_recommended()),
+                ))
+            })
             // If there isn't a clear value, we default to true
             .unwrap_or(true)
+    }
+
+    pub fn all_enabled(&self) -> bool {
+        self.rules
+            .as_ref()
+            .and_then(|rules| rules.preset.as_ref())
+            .is_some_and(|preset| preset.is_all())
     }
 }
 
@@ -1658,6 +1694,12 @@ impl OverrideSettingPattern {
         if let Some(bracket_spacing) = js_formatter.bracket_spacing.or(formatter.bracket_spacing) {
             options.set_bracket_spacing(bracket_spacing);
         }
+        if let Some(delimiter_spacing) = js_formatter
+            .delimiter_spacing
+            .or(formatter.delimiter_spacing)
+        {
+            options.set_delimiter_spacing(delimiter_spacing);
+        }
         if let Some(bracket_same_line) = js_formatter.bracket_same_line {
             options.set_bracket_same_line(bracket_same_line);
         }
@@ -1704,6 +1746,12 @@ impl OverrideSettingPattern {
         if let Some(bracket_spacing) = json_formatter.bracket_spacing.or(formatter.bracket_spacing)
         {
             options.set_bracket_spacing(bracket_spacing);
+        }
+        if let Some(delimiter_spacing) = json_formatter
+            .delimiter_spacing
+            .or(formatter.delimiter_spacing)
+        {
+            options.set_delimiter_spacing(delimiter_spacing);
         }
         if let Some(trailing_newline) = json_formatter
             .trailing_newline

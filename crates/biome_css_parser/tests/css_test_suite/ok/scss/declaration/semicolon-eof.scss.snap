@@ -18,8 +18,8 @@ $size: 10px
 CssRoot {
     bom_token: missing (optional),
     items: CssRootItemList [
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@0..1 "$" [] [],
                 name: CssIdentifier {
                     value_token: IDENT@1..6 "color" [] [],
@@ -36,8 +36,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@11..12 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@12..14 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@14..18 "size" [] [],
@@ -66,8 +66,8 @@ CssRoot {
 0: CSS_ROOT@0..25
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..24
-    0: SCSS_DECLARATION@0..12
-      0: SCSS_IDENTIFIER@0..6
+    0: SCSS_VARIABLE_DECLARATION@0..12
+      0: SCSS_VARIABLE@0..6
         0: DOLLAR@0..1 "$" [] []
         1: CSS_IDENTIFIER@1..6
           0: IDENT@1..6 "color" [] []
@@ -78,8 +78,8 @@ CssRoot {
             0: IDENT@8..11 "red" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@11..11
       4: SEMICOLON@11..12 ";" [] []
-    1: SCSS_DECLARATION@12..24
-      0: SCSS_IDENTIFIER@12..18
+    1: SCSS_VARIABLE_DECLARATION@12..24
+      0: SCSS_VARIABLE@12..18
         0: DOLLAR@12..14 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@14..18
           0: IDENT@14..18 "size" [] []

@@ -1,7 +1,7 @@
 use crate::parser::CssParser;
 use crate::syntax::block::parse_declaration_or_rule_list_block;
 use crate::syntax::scss::{
-    expected_scss_expression, parse_scss_expression_until, parse_scss_identifier,
+    expected_scss_expression, parse_scss_expression_until, parse_scss_variable,
 };
 use biome_css_syntax::CssSyntaxKind::{self, CSS_BOGUS, SCSS_EACH_AT_RULE, SCSS_EACH_BINDING_LIST};
 use biome_css_syntax::T;
@@ -77,7 +77,7 @@ impl ParseSeparatedList for ScssEachBindingList {
     const LIST_KIND: Self::Kind = SCSS_EACH_BINDING_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_scss_identifier(p)
+        parse_scss_variable(p)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {

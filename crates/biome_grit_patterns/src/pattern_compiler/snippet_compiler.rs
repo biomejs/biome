@@ -972,4 +972,39 @@ mod tests {
         )
         "#);
     }
+
+    #[test]
+    fn test_export_named_from_snippet_node() {
+        let snippet = GritJsParser.parse_snippet("", "export { µfoo } from \"source\"", "");
+        let node = node_from_tree(&snippet).expect("no node found");
+        let formatted = format!("{node:#?}");
+
+        insta::assert_snapshot!(formatted, @r###"
+        GritTargetNode {
+            node: JsLanguage(
+                Node(
+                    0: JS_EXPORT@0..30
+                      0: JS_DECORATOR_LIST@0..0
+                      1: EXPORT_KW@0..7 "export" [] [Whitespace(" ")]
+                      2: JS_EXPORT_NAMED_FROM_CLAUSE@7..30
+                        0: (empty)
+                        1: L_CURLY@7..9 "{" [] [Whitespace(" ")]
+                        2: JS_EXPORT_NAMED_FROM_SPECIFIER_LIST@9..15
+                          0: JS_EXPORT_NAMED_FROM_SPECIFIER@9..15
+                            0: (empty)
+                            1: JS_METAVARIABLE@9..15
+                              0: GRIT_METAVARIABLE@9..15 "µfoo" [] [Whitespace(" ")]
+                            2: (empty)
+                        3: R_CURLY@15..17 "}" [] [Whitespace(" ")]
+                        4: FROM_KW@17..22 "from" [] [Whitespace(" ")]
+                        5: JS_MODULE_SOURCE@22..30
+                          0: JS_STRING_LITERAL@22..30 "\"source\"" [] []
+                        6: (empty)
+                        7: (empty)
+                    ,
+                ),
+            ),
+        }
+        "###);
+    }
 }

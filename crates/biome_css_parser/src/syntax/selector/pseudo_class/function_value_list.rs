@@ -1,7 +1,8 @@
 use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_identifier;
+use crate::syntax::scss::{is_at_scss_interpolated_string, parse_scss_interpolated_string};
 use crate::syntax::selector::eat_or_recover_selector_function_close_token;
-use crate::syntax::{is_at_identifier, parse_regular_identifier, parse_string};
+use crate::syntax::{is_at_identifier, is_at_string, parse_regular_identifier, parse_string};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
@@ -78,7 +79,7 @@ impl ParseSeparatedList for PseudoValueList {
 
 #[inline]
 fn is_at_pseudo_value(p: &mut CssParser) -> bool {
-    is_at_identifier(p) || p.at(CSS_STRING_LITERAL)
+    is_at_identifier(p) || is_at_string(p) || is_at_scss_interpolated_string(p)
 }
 
 #[inline]
@@ -87,7 +88,9 @@ fn parse_pseudo_value(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
-    if p.at(CSS_STRING_LITERAL) {
+    if is_at_scss_interpolated_string(p) {
+        parse_scss_interpolated_string(p)
+    } else if is_at_string(p) {
         parse_string(p)
     } else {
         parse_regular_identifier(p)

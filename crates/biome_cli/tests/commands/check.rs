@@ -3354,6 +3354,49 @@ fn check_json_plugin() {
 }
 
 #[test]
+fn check_js_plugin_with_native_field_names() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["noConditionalAlternate.grit"],
+    "formatter": {
+        "enabled": false
+    }
+}"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("noConditionalAlternate.grit"),
+        br#"language js
+
+JsConditionalExpression(consequent = $cons, alternate = $alt) where {
+    register_diagnostic(span = $alt, message = "Avoid the alternate branch.", severity = "error")
+}
+"#,
+    );
+
+    let file_path = "file.js";
+    fs.insert(file_path.into(), br#"condition ? consequent : alternate;"#);
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", file_path].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_js_plugin_with_native_field_names",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn check_plugin_diagnostic_offset_in_vue_file() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -3805,6 +3848,40 @@ fn check_tab_alignment_in_diff_output() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "check_tab_alignment_in_diff_output",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn file_too_large_error_on_warnings() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(Utf8PathBuf::from("biome.json"), CONFIG_FILE_SIZE_LIMIT);
+    // This file exceeds the limit
+    let large_file = Utf8Path::new("large.js");
+    fs.insert(large_file.into(), "statement1();\nstatement2();");
+    // This file is within the limit
+    let small_file = Utf8Path::new("small.js");
+    fs.insert(small_file.into(), "a;\n");
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "check",
+                "--error-on-warnings",
+                large_file.as_str(),
+                small_file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "file_too_large_error_on_warnings",
         fs,
         console,
         result,

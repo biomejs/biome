@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 var a = <span role="checkbox"></span>;
 var a = <span role="switch"></span>;
 var a = <span role="slider" aria-valuemin="0"></span>;

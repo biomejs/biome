@@ -3,8 +3,9 @@ use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::ParseBlockBody;
 use crate::syntax::parse_error::{expected_any_declaration_or_at_rule, scss_only_syntax_error};
 use crate::syntax::scss::{
-    is_at_scss_declaration, is_at_scss_interpolated_property, is_at_scss_nesting_declaration,
-    parse_scss_declaration, parse_scss_interpolated_property_declaration,
+    is_at_scss_interpolated_property, is_at_scss_nesting_declaration,
+    is_at_scss_variable_declaration, parse_scss_interpolated_property_declaration,
+    parse_scss_variable_declaration,
 };
 use crate::syntax::{
     CssSyntaxFeatures, is_at_any_declaration_with_semicolon, parse_any_declaration_with_semicolon,
@@ -39,7 +40,7 @@ impl ParseBlockBody for DeclarationOrAtRuleListBlock {
 #[inline]
 fn is_at_declaration_or_at_rule_item(p: &mut CssParser) -> bool {
     is_at_at_rule(p)
-        || is_at_scss_declaration(p)
+        || is_at_scss_variable_declaration(p)
         || is_at_scss_nesting_declaration(p)
         || is_at_scss_interpolated_property(p)
         || is_at_any_declaration_with_semicolon(p)
@@ -65,10 +66,10 @@ impl ParseNodeList for DeclarationOrAtRuleList {
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         if is_at_at_rule(p) {
             parse_at_rule(p)
-        } else if is_at_scss_declaration(p) {
+        } else if is_at_scss_variable_declaration(p) {
             CssSyntaxFeatures::Scss.parse_exclusive_syntax(
                 p,
-                parse_scss_declaration,
+                parse_scss_variable_declaration,
                 |p, marker| {
                     scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p))
                 },

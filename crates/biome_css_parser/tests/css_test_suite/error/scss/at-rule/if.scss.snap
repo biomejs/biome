@@ -68,7 +68,7 @@ CssRoot {
                             CssBogus {
                                 items: [
                                     ScssBinaryExpression {
-                                        left: ScssIdentifier {
+                                        left: ScssVariable {
                                             dollar_token: DOLLAR@27..28 "$" [] [],
                                             name: CssIdentifier {
                                                 value_token: IDENT@28..34 "theme" [] [Whitespace(" ")],
@@ -98,7 +98,7 @@ CssRoot {
                                         condition: ScssExpression {
                                             items: ScssExpressionItemList [
                                                 ScssBinaryExpression {
-                                                    left: ScssIdentifier {
+                                                    left: ScssVariable {
                                                         dollar_token: DOLLAR@48..49 "$" [] [],
                                                         name: CssIdentifier {
                                                             value_token: IDENT@49..54 "size" [] [Whitespace(" ")],
@@ -183,7 +183,7 @@ CssRoot {
         1: CSS_BOGUS@27..42
           0: CSS_BOGUS@27..42
             0: SCSS_BINARY_EXPRESSION@27..41
-              0: SCSS_IDENTIFIER@27..34
+              0: SCSS_VARIABLE@27..34
                 0: DOLLAR@27..28 "$" [] []
                 1: CSS_IDENTIFIER@28..34
                   0: IDENT@28..34 "theme" [] [Whitespace(" ")]
@@ -201,7 +201,7 @@ CssRoot {
                 1: SCSS_EXPRESSION@48..56
                   0: SCSS_EXPRESSION_ITEM_LIST@48..56
                     0: SCSS_BINARY_EXPRESSION@48..56
-                      0: SCSS_IDENTIFIER@48..54
+                      0: SCSS_VARIABLE@48..54
                         0: DOLLAR@48..49 "$" [] []
                         1: CSS_IDENTIFIER@49..54
                           0: IDENT@49..54 "size" [] [Whitespace(" ")]

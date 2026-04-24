@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use biome_formatter::FormatContext;
 use biome_formatter::write;
 
 use biome_js_syntax::{
@@ -44,7 +45,17 @@ impl FormatNodeRule<JsTemplateChunkElement> for FormatJsTemplateChunkElement {
             return None;
         }
 
-        Some(node.template_chunk_token().ok()?.text_range())
+        let transformed_range = node.template_chunk_token().ok()?.text_range();
+
+        // Map the range back to the original source positions. The formatter works
+        // with a transformed tree (parentheses removed by JsFormatSyntaxRewriter),
+        // but the embedding service stores ranges from the original tree.
+        let source_range = f
+            .context()
+            .source_map()
+            .map_or(transformed_range, |map| map.source_range(transformed_range));
+
+        Some(source_range)
     }
 }
 
@@ -67,6 +78,13 @@ const KNOWN_EMBED_OBJECTS: &[&str] = &["styled", "graphql"];
 ///
 /// Returns `None` when the AST is malformed.
 fn is_plausible_embed_template(expr: &JsTemplateExpression) -> Option<bool> {
+    // The service currently only extracts embedded snippets from single-chunk
+    // templates. Keep the formatter in sync so it doesn't emit StartEmbedded /
+    // EndEmbedded tags for ranges that won't be resolved later.
+    if expr.elements().len() != 1 {
+        return Some(false);
+    }
+
     if let Some(tag) = expr.tag() {
         return Some(match tag {
             // css``, gql``, graphql``

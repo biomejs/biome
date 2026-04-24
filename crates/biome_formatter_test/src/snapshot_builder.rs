@@ -170,6 +170,15 @@ impl<'a> SnapshotBuilder<'a> {
         self
     }
 
+    pub fn with_error(mut self, error: &str) -> Self {
+        writeln!(self.snapshot, "# Error").unwrap();
+        writeln!(self.snapshot, "```text").unwrap();
+        writeln!(self.snapshot, "{error}").unwrap();
+        writeln!(self.snapshot, "```").unwrap();
+        writeln!(self.snapshot).unwrap();
+        self
+    }
+
     /// Renders a `# Options` section with the raw JSON content of an options file.
     pub fn with_options_json(mut self, json_content: &str) -> Self {
         writeln!(self.snapshot, "# Options").unwrap();

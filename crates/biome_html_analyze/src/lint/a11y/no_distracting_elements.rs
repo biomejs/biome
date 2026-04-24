@@ -2,12 +2,13 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::AnyHtmlElement;
+use biome_html_syntax::{AnyHtmlElement, HtmlFileSource};
 use biome_rowan::BatchMutationExt;
 use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::no_distracting_elements::NoDistractingElementsOptions;
 
 use crate::HtmlRuleAction;
+use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Enforces that no distracting elements are used.
@@ -57,10 +58,16 @@ impl Rule for NoDistractingElements {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
-        let element_name = element.name()?;
-        if is_marquee_or_blink_element(element_name.text()) {
+        let source_type = ctx.source_type::<HtmlFileSource>();
+
+        let tag_element = element.clone().as_any_html_tag_element()?;
+        let element_name = tag_element.tag_name()?;
+        if is_html_tag(&tag_element, source_type, "marquee")
+            || is_html_tag(&tag_element, source_type, "blink")
+        {
             return Some(element_name);
         }
+
         None
     }
 
@@ -90,8 +97,4 @@ impl Rule for NoDistractingElements {
             mutation,
         ))
     }
-}
-
-fn is_marquee_or_blink_element(element_name: &str) -> bool {
-    element_name.eq_ignore_ascii_case("marquee") || element_name.eq_ignore_ascii_case("blink")
 }

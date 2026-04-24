@@ -1,5 +1,6 @@
 ---
 source: crates/biome_html_parser/tests/spec_test.rs
+assertion_line: 145
 expression: snapshot
 ---
 
@@ -20,6 +21,10 @@ expression: snapshot
 
 {#each items as { id, ...rest }}
   <div>{id}</div>
+{/each}
+
+{#each Object.entries(foo) as [key, { a, b }]}
+  {a} {b}
 {/each}
 
 ```
@@ -336,19 +341,79 @@ HtmlRoot {
                 r_curly_token: R_CURLY@270..271 "}" [] [],
             },
         },
+        SvelteEachBlock {
+            opening_block: SvelteEachOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@271..275 "{#" [Newline("\n"), Newline("\n")] [],
+                each_token: EACH_KW@275..279 "each" [] [],
+                list: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@279..300 " Object.entries(foo) " [] [],
+                },
+                item: SvelteEachAsKeyedItem {
+                    as_token: AS_KW@300..303 "as" [] [Whitespace(" ")],
+                    name: SvelteSquareDestructuredName {
+                        l_brack_token: L_BRACKET@303..304 "[" [] [],
+                        names: SvelteBindingAssignmentBindingList [
+                            SvelteName {
+                                ident_token: IDENT@304..307 "key" [] [],
+                            },
+                            COMMA@307..309 "," [] [Whitespace(" ")],
+                            SvelteCurlyDestructuredName {
+                                l_curly_token: L_CURLY@309..311 "{" [] [Whitespace(" ")],
+                                names: SvelteBindingAssignmentBindingList [
+                                    SvelteName {
+                                        ident_token: IDENT@311..312 "a" [] [],
+                                    },
+                                    COMMA@312..314 "," [] [Whitespace(" ")],
+                                    SvelteName {
+                                        ident_token: IDENT@314..316 "b" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@316..317 "}" [] [],
+                            },
+                        ],
+                        r_brack_token: R_BRACKET@317..318 "]" [] [],
+                    },
+                    index: missing (optional),
+                    key: missing (optional),
+                },
+                r_curly_token: R_CURLY@318..319 "}" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@319..323 "{" [Newline("\n"), Whitespace("  ")] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@323..324 "a" [] [],
+                    },
+                    r_curly_token: R_CURLY@324..326 "}" [] [Whitespace(" ")],
+                },
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@326..327 "{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@327..328 "b" [] [],
+                    },
+                    r_curly_token: R_CURLY@328..329 "}" [] [],
+                },
+            ],
+            else_clause: missing (optional),
+            closing_block: SvelteEachClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@329..332 "{/" [Newline("\n")] [],
+                each_token: EACH_KW@332..336 "each" [] [],
+                r_curly_token: R_CURLY@336..337 "}" [] [],
+            },
+        },
     ],
-    eof_token: EOF@271..272 "" [Newline("\n")] [],
+    eof_token: EOF@337..338 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: HTML_ROOT@0..272
+0: HTML_ROOT@0..338
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..271
+  3: HTML_ELEMENT_LIST@0..337
     0: SVELTE_EACH_BLOCK@0..63
       0: SVELTE_EACH_OPENING_BLOCK@0..29
         0: SV_CURLY_HASH@0..2 "{#" [] []
@@ -564,6 +629,49 @@ HtmlRoot {
         0: SV_CURLY_SLASH@263..266 "{/" [Newline("\n")] []
         1: EACH_KW@266..270 "each" [] []
         2: R_CURLY@270..271 "}" [] []
-  4: EOF@271..272 "" [Newline("\n")] []
+    4: SVELTE_EACH_BLOCK@271..337
+      0: SVELTE_EACH_OPENING_BLOCK@271..319
+        0: SV_CURLY_HASH@271..275 "{#" [Newline("\n"), Newline("\n")] []
+        1: EACH_KW@275..279 "each" [] []
+        2: HTML_TEXT_EXPRESSION@279..300
+          0: HTML_LITERAL@279..300 " Object.entries(foo) " [] []
+        3: SVELTE_EACH_AS_KEYED_ITEM@300..318
+          0: AS_KW@300..303 "as" [] [Whitespace(" ")]
+          1: SVELTE_SQUARE_DESTRUCTURED_NAME@303..318
+            0: L_BRACKET@303..304 "[" [] []
+            1: SVELTE_BINDING_ASSIGNMENT_BINDING_LIST@304..317
+              0: SVELTE_NAME@304..307
+                0: IDENT@304..307 "key" [] []
+              1: COMMA@307..309 "," [] [Whitespace(" ")]
+              2: SVELTE_CURLY_DESTRUCTURED_NAME@309..317
+                0: L_CURLY@309..311 "{" [] [Whitespace(" ")]
+                1: SVELTE_BINDING_ASSIGNMENT_BINDING_LIST@311..316
+                  0: SVELTE_NAME@311..312
+                    0: IDENT@311..312 "a" [] []
+                  1: COMMA@312..314 "," [] [Whitespace(" ")]
+                  2: SVELTE_NAME@314..316
+                    0: IDENT@314..316 "b" [] [Whitespace(" ")]
+                2: R_CURLY@316..317 "}" [] []
+            2: R_BRACKET@317..318 "]" [] []
+          2: (empty)
+          3: (empty)
+        4: R_CURLY@318..319 "}" [] []
+      1: HTML_ELEMENT_LIST@319..329
+        0: HTML_SINGLE_TEXT_EXPRESSION@319..326
+          0: L_CURLY@319..323 "{" [Newline("\n"), Whitespace("  ")] []
+          1: HTML_TEXT_EXPRESSION@323..324
+            0: HTML_LITERAL@323..324 "a" [] []
+          2: R_CURLY@324..326 "}" [] [Whitespace(" ")]
+        1: HTML_SINGLE_TEXT_EXPRESSION@326..329
+          0: L_CURLY@326..327 "{" [] []
+          1: HTML_TEXT_EXPRESSION@327..328
+            0: HTML_LITERAL@327..328 "b" [] []
+          2: R_CURLY@328..329 "}" [] []
+      2: (empty)
+      3: SVELTE_EACH_CLOSING_BLOCK@329..337
+        0: SV_CURLY_SLASH@329..332 "{/" [Newline("\n")] []
+        1: EACH_KW@332..336 "each" [] []
+        2: R_CURLY@336..337 "}" [] []
+  4: EOF@337..338 "" [Newline("\n")] []
 
 ```

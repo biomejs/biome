@@ -419,9 +419,16 @@ fn at_container_boundary(p: &mut MarkdownParser) -> bool {
 
     let required_indent = p.state().list_item_required_indent;
     if required_indent > 0 && p.at_line_start() {
-        let indent = p.line_start_leading_indent();
-        if indent < required_indent {
-            return true;
+        // Skip if at virtual line start — the list indent was already
+        // consumed by check_continuation_indent.
+        if p.state()
+            .virtual_line_start
+            .is_none_or(|vls| vls != p.cur_range().start())
+        {
+            let indent = p.line_start_leading_indent();
+            if indent < required_indent {
+                return true;
+            }
         }
     }
 

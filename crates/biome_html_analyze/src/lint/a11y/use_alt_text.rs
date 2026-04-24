@@ -3,12 +3,13 @@ use biome_analyze::{
 };
 use biome_console::{fmt::Display, fmt::Formatter, markup};
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlElement, HtmlFileSource};
+use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_alt_text::UseAltTextOptions;
 
-use crate::a11y::{
-    attribute_value_equals_ignore_case, has_non_empty_attribute, is_aria_hidden_true,
+use crate::{
+    a11y::{attribute_value_equals_ignore_case, has_non_empty_attribute, is_aria_hidden_true},
+    utils::is_html_tag,
 };
 
 declare_lint_rule! {
@@ -109,32 +110,21 @@ impl Display for ValidatedElement {
 }
 
 impl Rule for UseAltText {
-    type Query = Ast<AnyHtmlElement>;
+    type Query = Ast<AnyHtmlTagElement>;
     type State = (ValidatedElement, TextRange);
     type Signals = Option<Self::State>;
     type Options = UseAltTextOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
-        let file_source = ctx.source_type::<HtmlFileSource>();
-
-        let element_name = element.name()?;
-        let is_html_file = file_source.is_html();
+        let source_type = ctx.source_type::<HtmlFileSource>();
 
         let has_alt = has_valid_alt_text(element);
         let has_aria_label = has_non_empty_attribute(element, "aria-label");
         let has_aria_labelledby = has_non_empty_attribute(element, "aria-labelledby");
         let aria_hidden = is_aria_hidden_true(element);
 
-        let name_matches = |name: &str| -> bool {
-            if is_html_file {
-                element_name.eq_ignore_ascii_case(name)
-            } else {
-                element_name.text() == name
-            }
-        };
-
-        if name_matches("object") {
+        if is_html_tag(element, source_type, "object") {
             let has_title = has_non_empty_attribute(element, "title");
 
             if !has_title && !has_aria_label && !has_aria_labelledby && !aria_hidden {
@@ -146,18 +136,18 @@ impl Rule for UseAltText {
                     element.syntax().text_trimmed_range(),
                 ));
             }
-        } else if name_matches("img") {
+        } else if is_html_tag(element, source_type, "img") {
             if !has_alt && !has_aria_label && !has_aria_labelledby && !aria_hidden {
                 return Some((ValidatedElement::Img, element.syntax().text_trimmed_range()));
             }
-        } else if name_matches("area") {
+        } else if is_html_tag(element, source_type, "area") {
             if !has_alt && !has_aria_label && !has_aria_labelledby && !aria_hidden {
                 return Some((
                     ValidatedElement::Area,
                     element.syntax().text_trimmed_range(),
                 ));
             }
-        } else if name_matches("input")
+        } else if is_html_tag(element, source_type, "input")
             && has_type_image_attribute(element)
             && !has_alt
             && !has_aria_label
@@ -192,13 +182,13 @@ impl Rule for UseAltText {
 }
 
 /// Check if the element has a type="image" attribute
-fn has_type_image_attribute(element: &AnyHtmlElement) -> bool {
+fn has_type_image_attribute(element: &AnyHtmlTagElement) -> bool {
     element
         .find_attribute_by_name("type")
         .is_some_and(|attr| attribute_value_equals_ignore_case(&attr, "image"))
 }
 
 /// Check if the element has a valid alt attribute
-fn has_valid_alt_text(element: &AnyHtmlElement) -> bool {
+fn has_valid_alt_text(element: &AnyHtmlTagElement) -> bool {
     element.find_attribute_or_vue_binding("alt").is_some()
 }

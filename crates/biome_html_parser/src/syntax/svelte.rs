@@ -761,7 +761,7 @@ fn parse_square_destructured_name(p: &mut HtmlParser) -> ParsedSyntax {
 
     SvelteBindingAssignmentBindingList.parse_list(p);
 
-    p.expect(T![']']);
+    p.expect_with_context(T![']'], HtmlLexContext::Svelte);
 
     Present(m.complete(p, SVELTE_SQUARE_DESTRUCTURED_NAME))
 }
@@ -956,6 +956,19 @@ fn parse_svelte_name(p: &mut HtmlParser) -> ParsedSyntax {
     Present(m.complete(p, SVELTE_NAME))
 }
 
+/// Parses a directive-binding property, supporting member expressions like `renderer.in`.
+fn parse_svelte_binding_property(p: &mut HtmlParser) -> ParsedSyntax {
+    parse_svelte_name(p).map(|mut name| {
+        while p.at(T![.]) {
+            let m = name.precede(p);
+            p.bump_with_context(T![.], HtmlLexContext::Svelte);
+            parse_svelte_name(p).or_add_diagnostic(p, expected_name);
+            name = m.complete(p, SVELTE_MEMBER_PROPERTY);
+        }
+        name
+    })
+}
+
 fn parse_binding_literal(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump_with_context(HTML_LITERAL, HtmlLexContext::InsideTagSvelte);
@@ -1072,6 +1085,14 @@ impl ParseSeparatedList for SvelteBindingAssignmentBindingList {
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         if p.at(T![...]) {
             parse_rest_name(p)
+        } else if p.at(T!['{']) {
+            let result = parse_curly_destructured_name(p);
+            p.re_lex(HtmlReLexContext::Svelte);
+            result
+        } else if p.at(T!['[']) {
+            let result = parse_square_destructured_name(p);
+            p.re_lex(HtmlReLexContext::Svelte);
+            result
         } else {
             parse_svelte_name(p)
         }
@@ -1158,7 +1179,7 @@ fn parse_directive_value(p: &mut HtmlParser, context_after_colon: HtmlLexContext
     } else if context_after_colon == HtmlLexContext::SvelteBindingLiteral {
         parse_binding_literal(p).or_add_diagnostic(p, expected_svelte_property);
     } else {
-        parse_svelte_name(p).or_add_diagnostic(p, expected_name);
+        parse_svelte_binding_property(p).or_add_diagnostic(p, expected_name);
     }
 
     ModifiersList.parse_list(p);

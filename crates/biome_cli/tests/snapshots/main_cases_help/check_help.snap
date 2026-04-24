@@ -9,7 +9,7 @@ Runs formatter, linter and import sorting to the requested files.
 
 Usage: check [--write] [--unsafe] [--assist-enabled=<true|false>] [--enforce-assist=<true|false>] [
 --format-with-errors=<true|false>] [--profile-rules] [--staged] [--changed] [--since=REF] [--only=
-<GROUP|RULE|DOMAIN|ACTION>]... [--skip=<GROUP|RULE|DOMAIN|ACTION>]... [PATH]...
+<GROUP|RULE|DOMAIN|ACTION>]... [--skip=<GROUP|RULE|DOMAIN|ACTION>]... [--watch] [PATH]...
 
 Options that changes how the JSON parser behaves
         --json-parse-allow-comments=<true|false>  Allow parsing comments in `.json` files
@@ -106,6 +106,17 @@ The configuration that is contained inside the file `biome.json`
                               JSX elements. Defaults to auto.
         --javascript-formatter-bracket-spacing=<true|false>  Whether to insert spaces around
                               brackets in object literals. Defaults to true.
+        --javascript-formatter-delimiter-spacing=<auto|always|never>  Whether to insert spaces
+                              inside delimiters (after the opening delimiter and before the closing
+                              delimiter). Only applies when the content fits on a single line.
+                              Spaces are not added before the opening delimiter (e.g., `function
+                              f()` stays `function f()`, not `function f ()`), and empty delimiters
+                              are not affected (e.g., `fn()` stays `fn()`). For JavaScript and
+                              TypeScript, affects parentheses (e.g., `foo( a, b )`), square brackets
+                              (e.g., `[ a, b ]`), template literal interpolations (e.g., `${ expr
+                              }`), TypeScript angle brackets (e.g., `foo< T >()`), JSX expression
+                              braces (e.g., `{ value }`), and the logical NOT operator (e.g., `! x`,
+                              but in chains only after the last one: `!! x`). Defaults to false.
         --javascript-formatter-expand=<auto|always|never>  Whether to expand arrays and objects on
                               multiple lines. When set to `auto`, object literals are formatted on
                               multiple lines if the first property has a newline, and array literals
@@ -159,6 +170,11 @@ The configuration that is contained inside the file `biome.json`
                               Defaults to "auto".
         --json-formatter-bracket-spacing=<true|false>  Whether to insert spaces around brackets in
                               object literals. Defaults to true.
+        --json-formatter-delimiter-spacing=<true|false>  Whether to insert spaces inside delimiters
+                              (after the opening delimiter and before the closing delimiter). Only
+                              applies when the content fits on a single line, and empty brackets are
+                              not affected. For JSON, affects square brackets (e.g., `[ 1, 2, 3 ]`).
+                              Defaults to false.
         --json-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the end
                               of the file.
                               Setting this option to `false` is **highly discouraged** because it
@@ -386,6 +402,8 @@ Available options:
                               Example:
                               ```shell biome check --skip=correctness/noUnusedVariables
                               --skip=suspicious --skip=project ```
+        --watch               Enables the watch mode to re-run the check automatically when any
+                              non-excluded file in the workspace has changed.
     -h, --help                Prints help information
 
 ```
