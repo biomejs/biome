@@ -236,11 +236,8 @@ fn pos(line: u32, character: u32) -> Position {
 #[tokio::test]
 async fn goto_definition_same_file_local_binding() -> Result<()> {
     // Cursor on `myVar` in `console.log(myVar)` (line 1, character 12)
-    let res = goto_definition_single_file(
-        "const myVar = 42;\nconsole.log(myVar);\n",
-        pos(1, 12),
-    )
-    .await?;
+    let res =
+        goto_definition_single_file("const myVar = 42;\nconsole.log(myVar);\n", pos(1, 12)).await?;
 
     assert_definition(res, uri!("document.js"), range(0, 6, 0, 11));
 
@@ -366,7 +363,10 @@ async fn goto_definition_dynamic_import_reference() -> Result<()> {
         name: "goto_definition_dynamic_import_reference",
         files: vec![
             ("utils.js", "export function greet() { return 'hello'; }\n"),
-            ("main.js", "const utils = await import('./utils.js');\nutils.greet();\n"),
+            (
+                "main.js",
+                "const utils = await import('./utils.js');\nutils.greet();\n",
+            ),
         ],
         open_file: "main.js",
         language_id: "javascript",

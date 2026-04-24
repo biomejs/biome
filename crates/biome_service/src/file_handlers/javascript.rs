@@ -5,8 +5,7 @@ use super::{
     DebugCapabilities, DiagnosticsAndActionsParams, EditorCapabilities, EnabledForPath,
     ExtensionHandler, FormatEmbedNode, FormatterCapabilities, LintParams, LintResults,
     ParseEmbedResult, ParseResult, ParserCapabilities, ProcessDiagnosticsAndActions, ProcessFixAll,
-    ProcessLint, SearchCapabilities,
-    UpdateSnippetsNodes, search,
+    ProcessLint, SearchCapabilities, UpdateSnippetsNodes, search,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
