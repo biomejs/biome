@@ -1,5 +1,6 @@
 use crate::markdown::lists::block_list::FormatMdBlockListOptions;
 use crate::prelude::*;
+use crate::shared::TextPrintMode;
 use biome_formatter::write;
 use biome_markdown_syntax::{MdDocument, MdDocumentFields};
 
@@ -20,9 +21,10 @@ impl FormatNodeRule<MdDocument> for FormatMdDocument {
         write!(
             f,
             [
-                value
-                    .format()
-                    .with_options(FormatMdBlockListOptions { trim: true }),
+                value.format().with_options(FormatMdBlockListOptions {
+                    paragraph_print_mode: TextPrintMode::Pristine,
+                    trim: true
+                }),
                 format_removed(&eof_token?)
             ]
         )?;

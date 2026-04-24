@@ -3,11 +3,11 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::AnyHtmlElement;
-use biome_rowan::{AstNode, TextRange};
+use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
+use biome_rowan::AstNode;
 use biome_rule_options::use_html_lang::UseHtmlLangOptions;
 
-use crate::a11y::has_non_empty_attribute;
+use crate::{a11y::has_non_empty_attribute, utils::is_html_tag};
 
 declare_lint_rule! {
     /// Enforce that `html` element has `lang` attribute.
@@ -45,15 +45,16 @@ declare_lint_rule! {
 }
 
 impl Rule for UseHtmlLang {
-    type Query = Ast<AnyHtmlElement>;
-    type State = TextRange;
+    type Query = Ast<AnyHtmlTagElement>;
+    type State = ();
     type Signals = Option<Self::State>;
     type Options = UseHtmlLangOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
+        let source_type = ctx.source_type::<HtmlFileSource>();
 
-        if !is_html_element(element) {
+        if !is_html_tag(element, source_type, "html") {
             return None;
         }
 
@@ -61,13 +62,13 @@ impl Rule for UseHtmlLang {
             return None;
         }
 
-        Some(element.syntax().text_trimmed_range())
+        Some(())
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
         Some(RuleDiagnostic::new(
             rule_category!(),
-            state,
+            ctx.query().range(),
             markup! {
                 "Provide a "<Emphasis>"lang"</Emphasis>" attribute when using the "<Emphasis>"html"</Emphasis>" element."
             }
@@ -78,10 +79,4 @@ impl Rule for UseHtmlLang {
             }
         ))
     }
-}
-
-fn is_html_element(element: &AnyHtmlElement) -> bool {
-    element
-        .name()
-        .is_some_and(|token_text| token_text.eq_ignore_ascii_case("html"))
 }

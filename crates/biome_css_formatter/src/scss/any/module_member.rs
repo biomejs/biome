@@ -9,7 +9,7 @@ impl FormatRule<AnyScssModuleMember> for FormatAnyScssModuleMember {
     fn fmt(&self, node: &AnyScssModuleMember, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
             AnyScssModuleMember::CssIdentifier(node) => node.format().fmt(f),
-            AnyScssModuleMember::ScssIdentifier(node) => node.format().fmt(f),
+            AnyScssModuleMember::ScssVariable(node) => node.format().fmt(f),
         }
     }
 }

@@ -1,0 +1,12 @@
+$beforeTrailingCommaComment:(a:b /* before */,);
+$trailingBlockComment:(a:b,/* end */);
+$multipleTrailingBlockComments:(a:b,/* end */ /* more */);
+$ownLineTrailingBlockComment:(a:b,
+/* end */
+);
+$trailingLineComment:(a:b,// end
+);
+$commentedNestedMapValue:(key:(other-key:other-other-value),/* end */);
+$emptyBlockCommentMap:(/* comment */);
+$emptyLineCommentMap:(// comment
+);

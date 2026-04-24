@@ -1,0 +1,145 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/comments/4594.scss
+---
+
+# Input
+
+```scss
+.foo,
+// Comment
+.bar {
+  // Comment
+  color: red; // Comment
+}
+
+$my-list:
+  'foo', // Comment
+  'bar'; // Comment
+
+$my-map: (
+  'foo': 1, // Comment
+  'bar': 2, // Comment
+  'buz': calc(1 + 2), // Buz
+  'baz': 4, // Baz
+);
+
+[href]:hover &, // Comment
+[href]:focus &, // Comment
+[href]:active & {
+  .tooltip {
+    opacity: 1;
+  }
+}
+
+@import
+  // Comment
+  'mixins',
+  'variables',
+  // Comment
+  'reset',
+  'scaffolding',
+  'type',
+  // Comment
+  'bar',
+  'tabs';
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,27 +1,25 @@
+ .foo,
+ // Comment
+-.bar {
++  .bar {
+   // Comment
+   color: red; // Comment
+ }
+ 
+ $my-list:
+-  "foo",
+-  // Comment
++  "foo", // Comment
+   "bar"; // Comment
+ 
+ $my-map: (
+-  "foo": 1,
+-  // Comment
+-  "bar": 2,
+-  // Comment
+-  "buz": calc(1 + 2),
+-  // Buz
++  "foo": 1, // Comment
++  "bar": 2, // Comment
++  "buz": calc(1 + 2), // Buz
+   "baz": 4, // Baz
+ );
+ 
+-[href]:hover &, // Comment
+-[href]:focus &, // Comment
++[href]:hover
++  &, // Comment
++[href]:focus
++  &, // Comment
+ [href]:active & {
+   .tooltip {
+     opacity: 1;
+@@ -33,7 +31,8 @@
+   "variables",
+   // Comment
+   "reset",
+-  "scaffolding", "type",
++  "scaffolding",
++  "type",
+   // Comment
+   "bar",
+   "tabs";
+```
+
+# Output
+
+```scss
+.foo,
+// Comment
+  .bar {
+  // Comment
+  color: red; // Comment
+}
+
+$my-list:
+  "foo", // Comment
+  "bar"; // Comment
+
+$my-map: (
+  "foo": 1, // Comment
+  "bar": 2, // Comment
+  "buz": calc(1 + 2), // Buz
+  "baz": 4, // Baz
+);
+
+[href]:hover
+  &, // Comment
+[href]:focus
+  &, // Comment
+[href]:active & {
+  .tooltip {
+    opacity: 1;
+  }
+}
+
+@import // Comment
+  "mixins",
+  "variables",
+  // Comment
+  "reset",
+  "scaffolding",
+  "type",
+  // Comment
+  "bar",
+  "tabs";
+```

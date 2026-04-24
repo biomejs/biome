@@ -18,7 +18,9 @@ info: svelte/html.svelte
 # Formatted
 
 ```svelte
-<article>{@html content}</article>
+<article>
+	{@html content}
+</article>
 
 {@html '<div>'}content{@html '</div>'}
 

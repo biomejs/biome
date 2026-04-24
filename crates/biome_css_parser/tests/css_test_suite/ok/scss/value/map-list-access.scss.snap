@@ -52,8 +52,8 @@ $complex-map: (
 CssRoot {
     bom_token: missing (optional),
     items: CssRootItemList [
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@0..23 "$" [Comments("// Map bracket access"), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@23..26 "map" [] [],
@@ -126,8 +126,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@70..71 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@71..73 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@73..79 "value1" [] [],
@@ -137,7 +137,7 @@ CssRoot {
             value: ScssExpression {
                 items: ScssExpressionItemList [
                     CssFunction {
-                        name: ScssQualifiedName {
+                        name: ScssModuleMemberAccess {
                             module: CssIdentifier {
                                 value_token: IDENT@81..84 "map" [] [],
                             },
@@ -150,7 +150,7 @@ CssRoot {
                         items: CssParameterList [
                             ScssExpression {
                                 items: ScssExpressionItemList [
-                                    ScssIdentifier {
+                                    ScssVariable {
                                         dollar_token: DOLLAR@89..90 "$" [] [],
                                         name: CssIdentifier {
                                             value_token: IDENT@90..93 "map" [] [],
@@ -174,8 +174,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@100..101 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@101..125 "$" [Newline("\n"), Newline("\n"), Comments("// Nested map access"), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@125..130 "theme" [] [],
@@ -310,8 +310,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@239..240 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@240..243 "$" [Newline("\n"), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@243..256 "primary-color" [] [],
@@ -321,7 +321,7 @@ CssRoot {
             value: ScssExpression {
                 items: ScssExpressionItemList [
                     CssFunction {
-                        name: ScssQualifiedName {
+                        name: ScssModuleMemberAccess {
                             module: CssIdentifier {
                                 value_token: IDENT@258..261 "map" [] [],
                             },
@@ -335,7 +335,7 @@ CssRoot {
                             ScssExpression {
                                 items: ScssExpressionItemList [
                                     CssFunction {
-                                        name: ScssQualifiedName {
+                                        name: ScssModuleMemberAccess {
                                             module: CssIdentifier {
                                                 value_token: IDENT@266..269 "map" [] [],
                                             },
@@ -348,7 +348,7 @@ CssRoot {
                                         items: CssParameterList [
                                             ScssExpression {
                                                 items: ScssExpressionItemList [
-                                                    ScssIdentifier {
+                                                    ScssVariable {
                                                         dollar_token: DOLLAR@274..275 "$" [] [],
                                                         name: CssIdentifier {
                                                             value_token: IDENT@275..280 "theme" [] [],
@@ -385,8 +385,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@299..300 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@300..380 "$" [Newline("\n"), Newline("\n"), Comments("// List indexing (usi ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@380..384 "list" [] [],
@@ -447,8 +447,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@398..399 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@399..401 "$" [Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@401..407 "second" [] [],
@@ -458,7 +458,7 @@ CssRoot {
             value: ScssExpression {
                 items: ScssExpressionItemList [
                     CssFunction {
-                        name: ScssQualifiedName {
+                        name: ScssModuleMemberAccess {
                             module: CssIdentifier {
                                 value_token: IDENT@409..413 "list" [] [],
                             },
@@ -471,7 +471,7 @@ CssRoot {
                         items: CssParameterList [
                             ScssExpression {
                                 items: ScssExpressionItemList [
-                                    ScssIdentifier {
+                                    ScssVariable {
                                         dollar_token: DOLLAR@418..419 "$" [] [],
                                         name: CssIdentifier {
                                             value_token: IDENT@419..423 "list" [] [],
@@ -495,8 +495,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@427..428 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@428..456 "$" [Newline("\n"), Newline("\n"), Comments("// Map with complex keys"), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@456..467 "complex-map" [] [],
@@ -603,7 +603,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@539..542 "map" [] [],
                                                 },
@@ -616,7 +616,7 @@ CssRoot {
                                             items: CssParameterList [
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@547..548 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@548..551 "map" [] [],
@@ -652,7 +652,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@568..572 "list" [] [],
                                                 },
@@ -665,7 +665,7 @@ CssRoot {
                                             items: CssParameterList [
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@577..578 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@578..582 "list" [] [],
@@ -706,8 +706,8 @@ CssRoot {
 0: CSS_ROOT@0..594
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..589
-    0: SCSS_DECLARATION@0..71
-      0: SCSS_IDENTIFIER@0..26
+    0: SCSS_VARIABLE_DECLARATION@0..71
+      0: SCSS_VARIABLE@0..26
         0: DOLLAR@0..23 "$" [Comments("// Map bracket access"), Newline("\n")] []
         1: CSS_IDENTIFIER@23..26
           0: IDENT@23..26 "map" [] []
@@ -752,8 +752,8 @@ CssRoot {
             2: R_PAREN@69..70 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@70..70
       4: SEMICOLON@70..71 ";" [] []
-    1: SCSS_DECLARATION@71..101
-      0: SCSS_IDENTIFIER@71..79
+    1: SCSS_VARIABLE_DECLARATION@71..101
+      0: SCSS_VARIABLE@71..79
         0: DOLLAR@71..73 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@73..79
           0: IDENT@73..79 "value1" [] []
@@ -761,7 +761,7 @@ CssRoot {
       2: SCSS_EXPRESSION@81..100
         0: SCSS_EXPRESSION_ITEM_LIST@81..100
           0: CSS_FUNCTION@81..100
-            0: SCSS_QUALIFIED_NAME@81..88
+            0: SCSS_MODULE_MEMBER_ACCESS@81..88
               0: CSS_IDENTIFIER@81..84
                 0: IDENT@81..84 "map" [] []
               1: DOT@84..85 "." [] []
@@ -771,7 +771,7 @@ CssRoot {
             2: CSS_PARAMETER_LIST@89..99
               0: SCSS_EXPRESSION@89..93
                 0: SCSS_EXPRESSION_ITEM_LIST@89..93
-                  0: SCSS_IDENTIFIER@89..93
+                  0: SCSS_VARIABLE@89..93
                     0: DOLLAR@89..90 "$" [] []
                     1: CSS_IDENTIFIER@90..93
                       0: IDENT@90..93 "map" [] []
@@ -783,8 +783,8 @@ CssRoot {
             3: R_PAREN@99..100 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@100..100
       4: SEMICOLON@100..101 ";" [] []
-    2: SCSS_DECLARATION@101..240
-      0: SCSS_IDENTIFIER@101..130
+    2: SCSS_VARIABLE_DECLARATION@101..240
+      0: SCSS_VARIABLE@101..130
         0: DOLLAR@101..125 "$" [Newline("\n"), Newline("\n"), Comments("// Nested map access"), Newline("\n")] []
         1: CSS_IDENTIFIER@125..130
           0: IDENT@125..130 "theme" [] []
@@ -868,8 +868,8 @@ CssRoot {
             2: R_PAREN@237..239 ")" [Newline("\n")] []
       3: SCSS_VARIABLE_MODIFIER_LIST@239..239
       4: SEMICOLON@239..240 ";" [] []
-    3: SCSS_DECLARATION@240..300
-      0: SCSS_IDENTIFIER@240..256
+    3: SCSS_VARIABLE_DECLARATION@240..300
+      0: SCSS_VARIABLE@240..256
         0: DOLLAR@240..243 "$" [Newline("\n"), Newline("\n")] []
         1: CSS_IDENTIFIER@243..256
           0: IDENT@243..256 "primary-color" [] []
@@ -877,7 +877,7 @@ CssRoot {
       2: SCSS_EXPRESSION@258..299
         0: SCSS_EXPRESSION_ITEM_LIST@258..299
           0: CSS_FUNCTION@258..299
-            0: SCSS_QUALIFIED_NAME@258..265
+            0: SCSS_MODULE_MEMBER_ACCESS@258..265
               0: CSS_IDENTIFIER@258..261
                 0: IDENT@258..261 "map" [] []
               1: DOT@261..262 "." [] []
@@ -888,7 +888,7 @@ CssRoot {
               0: SCSS_EXPRESSION@266..289
                 0: SCSS_EXPRESSION_ITEM_LIST@266..289
                   0: CSS_FUNCTION@266..289
-                    0: SCSS_QUALIFIED_NAME@266..273
+                    0: SCSS_MODULE_MEMBER_ACCESS@266..273
                       0: CSS_IDENTIFIER@266..269
                         0: IDENT@266..269 "map" [] []
                       1: DOT@269..270 "." [] []
@@ -898,7 +898,7 @@ CssRoot {
                     2: CSS_PARAMETER_LIST@274..288
                       0: SCSS_EXPRESSION@274..280
                         0: SCSS_EXPRESSION_ITEM_LIST@274..280
-                          0: SCSS_IDENTIFIER@274..280
+                          0: SCSS_VARIABLE@274..280
                             0: DOLLAR@274..275 "$" [] []
                             1: CSS_IDENTIFIER@275..280
                               0: IDENT@275..280 "theme" [] []
@@ -916,8 +916,8 @@ CssRoot {
             3: R_PAREN@298..299 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@299..299
       4: SEMICOLON@299..300 ";" [] []
-    4: SCSS_DECLARATION@300..399
-      0: SCSS_IDENTIFIER@300..384
+    4: SCSS_VARIABLE_DECLARATION@300..399
+      0: SCSS_VARIABLE@300..384
         0: DOLLAR@300..380 "$" [Newline("\n"), Newline("\n"), Comments("// List indexing (usi ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@380..384
           0: IDENT@380..384 "list" [] []
@@ -954,8 +954,8 @@ CssRoot {
             2: R_PAREN@397..398 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@398..398
       4: SEMICOLON@398..399 ";" [] []
-    5: SCSS_DECLARATION@399..428
-      0: SCSS_IDENTIFIER@399..407
+    5: SCSS_VARIABLE_DECLARATION@399..428
+      0: SCSS_VARIABLE@399..407
         0: DOLLAR@399..401 "$" [Newline("\n")] []
         1: CSS_IDENTIFIER@401..407
           0: IDENT@401..407 "second" [] []
@@ -963,7 +963,7 @@ CssRoot {
       2: SCSS_EXPRESSION@409..427
         0: SCSS_EXPRESSION_ITEM_LIST@409..427
           0: CSS_FUNCTION@409..427
-            0: SCSS_QUALIFIED_NAME@409..417
+            0: SCSS_MODULE_MEMBER_ACCESS@409..417
               0: CSS_IDENTIFIER@409..413
                 0: IDENT@409..413 "list" [] []
               1: DOT@413..414 "." [] []
@@ -973,7 +973,7 @@ CssRoot {
             2: CSS_PARAMETER_LIST@418..426
               0: SCSS_EXPRESSION@418..423
                 0: SCSS_EXPRESSION_ITEM_LIST@418..423
-                  0: SCSS_IDENTIFIER@418..423
+                  0: SCSS_VARIABLE@418..423
                     0: DOLLAR@418..419 "$" [] []
                     1: CSS_IDENTIFIER@419..423
                       0: IDENT@419..423 "list" [] []
@@ -985,8 +985,8 @@ CssRoot {
             3: R_PAREN@426..427 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@427..427
       4: SEMICOLON@427..428 ";" [] []
-    6: SCSS_DECLARATION@428..520
-      0: SCSS_IDENTIFIER@428..467
+    6: SCSS_VARIABLE_DECLARATION@428..520
+      0: SCSS_VARIABLE@428..467
         0: DOLLAR@428..456 "$" [Newline("\n"), Newline("\n"), Comments("// Map with complex keys"), Newline("\n")] []
         1: CSS_IDENTIFIER@456..467
           0: IDENT@456..467 "complex-map" [] []
@@ -1056,7 +1056,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@539..558
                   0: SCSS_EXPRESSION_ITEM_LIST@539..558
                     0: CSS_FUNCTION@539..558
-                      0: SCSS_QUALIFIED_NAME@539..546
+                      0: SCSS_MODULE_MEMBER_ACCESS@539..546
                         0: CSS_IDENTIFIER@539..542
                           0: IDENT@539..542 "map" [] []
                         1: DOT@542..543 "." [] []
@@ -1066,7 +1066,7 @@ CssRoot {
                       2: CSS_PARAMETER_LIST@547..557
                         0: SCSS_EXPRESSION@547..551
                           0: SCSS_EXPRESSION_ITEM_LIST@547..551
-                            0: SCSS_IDENTIFIER@547..551
+                            0: SCSS_VARIABLE@547..551
                               0: DOLLAR@547..548 "$" [] []
                               1: CSS_IDENTIFIER@548..551
                                 0: IDENT@548..551 "map" [] []
@@ -1087,7 +1087,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@568..586
                   0: SCSS_EXPRESSION_ITEM_LIST@568..586
                     0: CSS_FUNCTION@568..586
-                      0: SCSS_QUALIFIED_NAME@568..576
+                      0: SCSS_MODULE_MEMBER_ACCESS@568..576
                         0: CSS_IDENTIFIER@568..572
                           0: IDENT@568..572 "list" [] []
                         1: DOT@572..573 "." [] []
@@ -1097,7 +1097,7 @@ CssRoot {
                       2: CSS_PARAMETER_LIST@577..585
                         0: SCSS_EXPRESSION@577..582
                           0: SCSS_EXPRESSION_ITEM_LIST@577..582
-                            0: SCSS_IDENTIFIER@577..582
+                            0: SCSS_VARIABLE@577..582
                               0: DOLLAR@577..578 "$" [] []
                               1: CSS_IDENTIFIER@578..582
                                 0: IDENT@578..582 "list" [] []

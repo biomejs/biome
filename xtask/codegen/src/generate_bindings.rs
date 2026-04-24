@@ -13,6 +13,10 @@ use biome_string_case::Case;
 use xtask_codegen::update;
 use xtask_glue::{Mode, Result, project_root};
 
+fn escape_jsdoc_comment_text(text: &str) -> String {
+    text.replace("*/", "*\\/")
+}
+
 pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
     let bindings_path = project_root().join("packages/@biomejs/backend-jsonrpc/src/workspace.ts");
     let methods = methods();
@@ -195,6 +199,7 @@ pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
     items.extend(declarations.into_iter().map(|(decl, description)| {
         let mut export = make::token(T![export]);
         if let Some(description) = description {
+            let description = escape_jsdoc_comment_text(&description);
             let comment = format!("/**\n\t* {description} \n\t */\n");
             let trivia = vec![
                 (TriviaPieceKind::Newline, "\n"),
@@ -416,4 +421,15 @@ pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
     update(&bindings_path, &code, &mode)?;
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::escape_jsdoc_comment_text;
+
+    #[test]
+    fn escapes_comment_closing_sequences() {
+        assert_eq!(escape_jsdoc_comment_text("**/*.ts"), "**\\/*.ts");
+        assert_eq!(escape_jsdoc_comment_text("ends with */"), "ends with *\\/");
+    }
 }

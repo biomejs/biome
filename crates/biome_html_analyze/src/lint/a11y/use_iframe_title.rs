@@ -3,11 +3,11 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlElement, HtmlFileSource};
+use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_iframe_title::UseIframeTitleOptions;
 
-use crate::a11y::has_non_empty_attribute;
+use crate::{a11y::has_non_empty_attribute, utils::is_html_tag};
 
 declare_lint_rule! {
     /// Enforces the usage of the attribute `title` for the element `iframe`.
@@ -52,15 +52,16 @@ declare_lint_rule! {
 }
 
 impl Rule for UseIframeTitle {
-    type Query = Ast<AnyHtmlElement>;
+    type Query = Ast<AnyHtmlTagElement>;
     type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = UseIframeTitleOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
+        let source_type = ctx.source_type::<HtmlFileSource>();
 
-        if !is_iframe_element(element, ctx) {
+        if !is_html_tag(element, source_type, "iframe") {
             return None;
         }
 
@@ -84,22 +85,5 @@ impl Rule for UseIframeTitle {
                 "Screen readers rely on the title set on an iframe to describe the content being displayed."
             }),
         )
-    }
-}
-
-fn is_iframe_element(element: &AnyHtmlElement, ctx: &RuleContext<UseIframeTitle>) -> bool {
-    let Some(element_name) = element.name() else {
-        return false;
-    };
-
-    let source_type = ctx.source_type::<HtmlFileSource>();
-
-    // In HTML files: case-insensitive (IFRAME, Iframe, iframe all match)
-    // In component frameworks (Vue, Svelte, Astro): case-sensitive (only "iframe" matches)
-    // This means <Iframe> in Vue/Svelte is treated as a component and ignored
-    if source_type.is_html() {
-        element_name.text().eq_ignore_ascii_case("iframe")
-    } else {
-        element_name.text() == "iframe"
     }
 }

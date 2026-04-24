@@ -1,0 +1,106 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/map/function-argument/function-argument-2.scss
+---
+
+# Input
+
+```scss
+$display-breakpoints: map-deep-merge(
+  (
+    "sm-only": "only screen and (min-width: #{$map-get + $grid-breakpoints + "hogehoge"}) and (max-width: #{$a})",
+    "sm-only": "inside a long long long long long long long long long long long long long long string #{call("")}",
+    "sm-only": "inside a long long long long long long long long long long long long long long string #{$foo} and #{call("")}",
+    "sm-only": "inside a long long long long long long long long long long long long long long string #{call($a)}",
+  ),
+  $display-breakpoints
+);
+
+@each $name, $hue in $hues {
+  $map: map.merge(
+    $map,
+    (
+      '#{$prefix}-#{$name}': blend.set($base, $hue: $hue),
+    )
+  );
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,18 +1,22 @@
+ $display-breakpoints: map-deep-merge(
+   (
+-    "sm-only":
+-      "only screen and (min-width: #{$map-get + $grid-breakpoints + "hogehoge"}) and (max-width: #{$a})",
+-    "sm-only":
+-      "inside a long long long long long long long long long long long long long long string #{call("")}",
+-    "sm-only":
+-      "inside a long long long long long long long long long long long long long long string #{$foo} and #{call("")}",
+-    "sm-only":
+-      "inside a long long long long long long long long long long long long long long string #{call($a)}",
++    "sm-only": "only screen and (min-width: #{$map-get + $grid-breakpoints +
++    "hogehoge"}) and (max-width: #{$a})",
++    "sm-only": "inside a long long long long long long long long long long long long long long string #{call(
++      ""
++    )}",
++    "sm-only": "inside a long long long long long long long long long long long long long long string #{$foo} and #{call(
++      ""
++    )}",
++    "sm-only": "inside a long long long long long long long long long long long long long long string #{call(
++      $a
++    )}",
+   ),
+   $display-breakpoints
+ );
+ 
+-@each $name, $hue in $hues {
++@each $name,
++$hue in $hues {
+   $map: map.merge(
+     $map,
+     (
+```
+
+# Output
+
+```scss
+$display-breakpoints: map-deep-merge(
+  (
+    "sm-only": "only screen and (min-width: #{$map-get + $grid-breakpoints +
+    "hogehoge"}) and (max-width: #{$a})",
+    "sm-only": "inside a long long long long long long long long long long long long long long string #{call(
+      ""
+    )}",
+    "sm-only": "inside a long long long long long long long long long long long long long long string #{$foo} and #{call(
+      ""
+    )}",
+    "sm-only": "inside a long long long long long long long long long long long long long long string #{call(
+      $a
+    )}",
+  ),
+  $display-breakpoints
+);
+
+@each $name,
+$hue in $hues {
+  $map: map.merge(
+    $map,
+    (
+      "#{$prefix}-#{$name}": blend.set($base, $hue: $hue),
+    )
+  );
+}
+```
+
+# Lines exceeding max width of 80 characters
+```
+    5:     "sm-only": "inside a long long long long long long long long long long long long long long string #{call(
+    8:     "sm-only": "inside a long long long long long long long long long long long long long long string #{$foo} and #{call(
+   11:     "sm-only": "inside a long long long long long long long long long long long long long long string #{call(
+```

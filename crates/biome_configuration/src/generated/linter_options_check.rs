@@ -692,6 +692,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_irregular_whitespace::NoIrregularWhitespaceOptions>(),
     ));
     result.push((
+        "nursery",
+        "noJsxLeakedDollar",
+        TypeId::of::<biome_rule_options::no_jsx_leaked_dollar::NoJsxLeakedDollarOptions>(),
+    ));
+    result.push((
         "style",
         "noJsxLiterals",
         TypeId::of::<biome_rule_options::no_jsx_literals::NoJsxLiteralsOptions>(),
@@ -720,6 +725,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "nursery",
         "noLeakedRender",
         TypeId::of::<biome_rule_options::no_leaked_render::NoLeakedRenderOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noLoopFunc",
+        TypeId::of::<biome_rule_options::no_loop_func::NoLoopFuncOptions>(),
     ));
     result.push((
         "style",
@@ -937,6 +947,25 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "suspicious",
         "noReactForwardRef",
         TypeId::of::<biome_rule_options::no_react_forward_ref::NoReactForwardRefOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noReactNativeDeepImports",
+        TypeId::of::<
+            biome_rule_options::no_react_native_deep_imports::NoReactNativeDeepImportsOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
+        "noReactNativeLiteralColors",
+        TypeId::of::<
+            biome_rule_options::no_react_native_literal_colors::NoReactNativeLiteralColorsOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
+        "noReactNativeRawText",
+        TypeId::of::<biome_rule_options::no_react_native_raw_text::NoReactNativeRawTextOptions>(),
     ));
     result.push((
         "correctness",
@@ -1217,6 +1246,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_unnecessary_conditions::NoUnnecessaryConditionsOptions>(
         ),
     ));
+    result.push(("nursery", "noUnnecessaryTemplateExpression", TypeId::of::<biome_rule_options::no_unnecessary_template_expression::NoUnnecessaryTemplateExpressionOptions>()));
     result.push((
         "correctness",
         "noUnreachable",
@@ -1661,6 +1691,16 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_disposables::UseDisposablesOptions>(),
     ));
     result.push((
+        "nursery",
+        "useDomNodeTextContent",
+        TypeId::of::<biome_rule_options::use_dom_node_text_content::UseDomNodeTextContentOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "useDomQuerySelector",
+        TypeId::of::<biome_rule_options::use_dom_query_selector::UseDomQuerySelectorOptions>(),
+    ));
+    result.push((
         "style",
         "useEnumInitializers",
         TypeId::of::<biome_rule_options::use_enum_initializers::UseEnumInitializersOptions>(),
@@ -2021,6 +2061,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::use_react_function_components::UseReactFunctionComponentsOptions,
         >(),
     ));
+    result.push(("nursery", "useReactNativePlatformComponents", TypeId::of::<biome_rule_options::use_react_native_platform_components::UseReactNativePlatformComponentsOptions>()));
     result.push((
         "style",
         "useReadonlyClassProperties",
@@ -2043,6 +2084,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "nursery",
         "useRegexpExec",
         TypeId::of::<biome_rule_options::use_regexp_exec::UseRegexpExecOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "useRegexpTest",
+        TypeId::of::<biome_rule_options::use_regexp_test::UseRegexpTestOptions>(),
     ));
     result.push((
         "nursery",

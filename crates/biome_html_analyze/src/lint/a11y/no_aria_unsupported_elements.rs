@@ -6,12 +6,12 @@ use biome_analyze::{
 use biome_aria_metadata::AriaAttribute;
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlElement, HtmlFileSource};
+use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
-use biome_string_case::StrLikeExtension;
 use biome_rule_options::no_aria_unsupported_elements::NoAriaUnsupportedElementsOptions;
+use biome_string_case::StrLikeExtension;
 
-use crate::HtmlRuleAction;
+use crate::{HtmlRuleAction, utils::is_html_tag};
 
 declare_lint_rule! {
     /// Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes.
@@ -72,30 +72,21 @@ pub struct RuleState {
 }
 
 impl Rule for NoAriaUnsupportedElements {
-    type Query = Ast<AnyHtmlElement>;
+    type Query = Ast<AnyHtmlTagElement>;
     type State = RuleState;
     type Signals = Option<Self::State>;
     type Options = NoAriaUnsupportedElementsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-
-        let element_name = node.name()?;
         let source_type = ctx.source_type::<HtmlFileSource>();
 
-        let is_unsupported = if source_type.is_html() {
-            ARIA_UNSUPPORTED_ELEMENTS
-                .iter()
-                .any(|el| element_name.eq_ignore_ascii_case(el))
-        } else {
-            ARIA_UNSUPPORTED_ELEMENTS
-                .iter()
-                .any(|el| element_name.text() == *el)
-        };
+        let is_unsupported = ARIA_UNSUPPORTED_ELEMENTS
+            .iter()
+            .any(|el| is_html_tag(node, source_type, el));
 
         if is_unsupported {
-            let attributes = node.attributes()?;
-            let report = attributes.iter().find_map(|attribute| {
+            let report = node.attributes().iter().find_map(|attribute| {
                 let attribute = attribute.as_html_attribute()?;
                 let attribute_name = attribute.name().ok()?.value_token().ok()?;
                 let attribute_name_text = attribute_name.token_text_trimmed();
@@ -144,8 +135,7 @@ impl Rule for NoAriaUnsupportedElements {
         let element = ctx.query();
         let mut mutation = ctx.root().begin();
 
-        let attributes = element.attributes()?;
-        let attribute = attributes.iter().find_map(|attribute| {
+        let attribute = element.attributes().iter().find_map(|attribute| {
             let html_attribute = attribute.as_html_attribute()?;
             let attribute_name = html_attribute.name().ok()?.value_token().ok()?;
             let attribute_name_text = attribute_name.token_text_trimmed();
@@ -168,4 +158,3 @@ impl Rule for NoAriaUnsupportedElements {
         ))
     }
 }
-

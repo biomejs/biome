@@ -48,7 +48,7 @@ CssRoot {
                                                 l_curly_token: L_CURLY@14..15 "{" [] [],
                                                 value: ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@15..16 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@16..21 "theme" [] [],
@@ -117,7 +117,7 @@ CssRoot {
                                                 l_curly_token: L_CURLY@52..53 "{" [] [],
                                                 value: ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@53..54 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@54..60 "locale" [] [],
@@ -197,7 +197,7 @@ CssRoot {
                         1: L_CURLY@14..15 "{" [] []
                         2: SCSS_EXPRESSION@15..21
                           0: SCSS_EXPRESSION_ITEM_LIST@15..21
-                            0: SCSS_IDENTIFIER@15..21
+                            0: SCSS_VARIABLE@15..21
                               0: DOLLAR@15..16 "$" [] []
                               1: CSS_IDENTIFIER@16..21
                                 0: IDENT@16..21 "theme" [] []
@@ -242,7 +242,7 @@ CssRoot {
                         1: L_CURLY@52..53 "{" [] []
                         2: SCSS_EXPRESSION@53..60
                           0: SCSS_EXPRESSION_ITEM_LIST@53..60
-                            0: SCSS_IDENTIFIER@53..60
+                            0: SCSS_VARIABLE@53..60
                               0: DOLLAR@53..54 "$" [] []
                               1: CSS_IDENTIFIER@54..60
                                 0: IDENT@54..60 "locale" [] []

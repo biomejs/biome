@@ -1,0 +1,68 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/function/arbitrary-arguments-comment.scss
+---
+
+# Input
+
+```scss
+@include bar (
+    rgba(
+    50 
+    50 
+    .50 
+    50            ...
+    // comment
+  )
+)
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,6 @@
+ @include bar(
+   rgba(
+-    50 50 0.5 50... // comment
++    50 50 0.5 50...
++    // comment
+   )
+-);
++)
+```
+
+# Output
+
+```scss
+@include bar(
+  rgba(
+    50 50 0.5 50...
+    // comment
+  )
+)
+```
+
+# Errors
+```
+arbitrary-arguments-comment.scss:10:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `;` but instead the file ends
+  
+     8 │   )
+     9 │ )
+  > 10 │ 
+       │ 
+  
+  i the file ends here
+  
+     8 │   )
+     9 │ )
+  > 10 │ 
+       │ 
+  
+
+```

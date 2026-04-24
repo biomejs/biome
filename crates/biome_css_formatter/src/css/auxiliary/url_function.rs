@@ -14,15 +14,27 @@ impl FormatNodeRule<CssUrlFunction> for FormatCssUrlFunction {
             r_paren_token,
         } = node.as_fields();
 
+        let maybe_space = format_with(|f: &mut CssFormatter| {
+            if f.options().delimiter_spacing().value() {
+                write!(f, [space()])?;
+            }
+            Ok(())
+        });
+
         write!(
             f,
             [
                 name.format(),
                 l_paren_token.format(),
-                value.format(),
-                modifiers.format(),
-                r_paren_token.format()
+                maybe_space,
+                value.format()
             ]
-        )
+        )?;
+
+        if value.is_some() && modifiers.iter().next().is_some() {
+            write!(f, [space()])?;
+        }
+
+        write!(f, [maybe_space, modifiers.format(), r_paren_token.format()])
     }
 }

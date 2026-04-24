@@ -4,11 +4,12 @@ use crate::test_utils::setup_workspace_and_open_project;
 use biome_configuration::{
     FormatterConfiguration, JsConfiguration,
     analyzer::AnalyzerSelector,
-    javascript::{JsFormatterConfiguration, JsParserConfiguration},
+    javascript::{JsFormatterConfiguration, JsParserConfiguration, JsResolverConfiguration},
 };
 use biome_formatter::{IndentStyle, LineWidth};
 use biome_fs::MemoryFileSystem;
 use biome_rowan::TextSize;
+use camino::Utf8Path;
 use std::str::FromStr;
 
 #[test]
@@ -66,6 +67,103 @@ fn commonjs_file_rejects_import_statement() {
         }
         Err(error) => panic!("File not available: {error}"),
     }
+}
+
+#[test]
+fn pnpm_workspace_update_reapplies_catalogs() {
+    const PACKAGE_JSON: &[u8] = br#"{
+  "name": "app",
+  "dependencies": {
+    "react": "catalog:react19"
+  }
+}"#;
+    const WORKSPACE_V1: &[u8] = br#"catalogs:
+  react19:
+    react: 19.0.0
+"#;
+    const WORKSPACE_V2: &[u8] = br#"catalogs:
+  react19:
+    react: 18.3.1
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/package.json"), PACKAGE_JSON);
+    fs.insert(
+        Utf8PathBuf::from("/project/pnpm-workspace.yaml"),
+        WORKSPACE_V1,
+    );
+
+    let fs_for_updates = MemoryFileSystem::from_files(fs.files.0.clone());
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    resolver: Some(JsResolverConfiguration {
+                        experimental_pnpm_catalogs: Some(Bool(true)),
+                    }),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    let package_manifest = workspace
+        .project_layout
+        .get_node_manifest_for_package(Utf8Path::new("/project"))
+        .expect("package manifest should be indexed");
+    let initial_react = package_manifest
+        .catalog
+        .as_ref()
+        .and_then(|catalogs| catalogs.named.get("react19"))
+        .and_then(|dependencies| dependencies.get("react"));
+    assert_eq!(initial_react, Some("19.0.0"));
+
+    fs_for_updates.insert(
+        Utf8PathBuf::from("/project/pnpm-workspace.yaml"),
+        WORKSPACE_V2,
+    );
+
+    workspace
+        .open_file_internal(
+            OpenFileReason::Index(IndexTrigger::Update),
+            OpenFileParams {
+                project_key,
+                path: BiomePath::new("/project/pnpm-workspace.yaml"),
+                content: FileContent::FromServer,
+                document_file_source: None,
+                persist_node_cache: false,
+                inline_config: None,
+            },
+        )
+        .unwrap();
+
+    let package_manifest = workspace
+        .project_layout
+        .get_node_manifest_for_package(Utf8Path::new("/project"))
+        .expect("package manifest should be indexed");
+    let updated_react = package_manifest
+        .catalog
+        .as_ref()
+        .and_then(|catalogs| catalogs.named.get("react19"))
+        .and_then(|dependencies| dependencies.get("react"));
+    assert_eq!(updated_react, Some("18.3.1"));
 }
 
 #[test]
@@ -696,6 +794,77 @@ const Bar = styled(Component)`
 }
 
 #[test]
+fn issue_9975() {
+    const FILE_PATH: &str = "/project/file.ts";
+    const FILE_CONTENT: &str = r#"styled.div`
+  svg:first-of-type {
+    margin-left: 0;
+  }
+`;
+
+styled.div`
+  div:not(:last-child) {
+    border-bottom: 1px solid black;
+  }
+`;"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            categories: RuleCategories::default(),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+
+    assert_eq!(result.parse_errors, 0);
+    assert!(
+        result.diagnostics.is_empty(),
+        "Expected no diagnostics for styled nested selectors, got: {:#?}",
+        result.diagnostics
+    );
+}
+
+#[test]
 fn issue_9625() {
     const FILE_PATH: &str = "/project/file.js";
     const FILE_CONTENT: &str = r#"const Portfolio = styled.div`
@@ -762,6 +931,89 @@ const PortfolioIcon = styled.div`
       ${({ theme }) => css``};
     `;
     ");
+}
+
+#[test]
+fn issue_9994() {
+    const FILE_PATH: &str = "/project/file.js";
+    const FILE_CONTENT: &str = r#"styled.div`
+  div:first-of-type {
+    color: black;
+  }
+  background: black;
+`;
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let diagnostics = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            categories: Default::default(),
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Error,
+            enforce_assist: false,
+        })
+        .unwrap();
+
+    assert!(
+        diagnostics.diagnostics.is_empty(),
+        "Expected no diagnostics for issue #9994, got: {:#?}",
+        diagnostics.diagnostics
+    );
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code(), @r#"
+    styled.div`
+    	div:first-of-type {
+    		color: black;
+    	}
+    	background: black;
+    `;
+    "#);
 }
 
 #[test]
@@ -1238,6 +1490,56 @@ const Table = () => {
         .unwrap();
 
     insta::assert_snapshot!(result.as_code());
+}
+
+#[test]
+fn lsp_language_hints_keep_svelte_source_module_path_semantics() {
+    const SVELTE_TS_FILE_PATH: &str = "/project/component.svelte.ts";
+    const SVELTE_JS_FILE_PATH: &str = "/project/component.svelte.js";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from(SVELTE_TS_FILE_PATH),
+        b"export const count = 1;",
+    );
+    fs.insert(
+        Utf8PathBuf::from(SVELTE_JS_FILE_PATH),
+        b"export const count = 1;",
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(SVELTE_TS_FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: Some(DocumentFileSource::from_language_id("typescript")),
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(SVELTE_JS_FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: Some(DocumentFileSource::from_language_id("javascript")),
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let ts_file_source = workspace.get_file_source(SVELTE_TS_FILE_PATH.into(), false);
+    let ts = ts_file_source.to_js_file_source().expect("JS file source");
+    assert!(ts.is_svelte_source_module());
+    assert!(ts.is_typescript());
+
+    let js_file_source = workspace.get_file_source(SVELTE_JS_FILE_PATH.into(), false);
+    let js = js_file_source.to_js_file_source().expect("JS file source");
+    assert!(js.is_svelte_source_module());
+    assert!(!js.is_typescript());
 }
 
 // noUndeclaredClasses

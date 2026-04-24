@@ -53,7 +53,7 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
        2 │ + → "linter":·{
        3 │ + → → "enabled":·true,
        4 │ + → → "rules":·{
-       5 │ + → → → "recommended":·false,
+       5 │ + → → → "preset":·"none",
        6 │ + → → → "complexity":·{·"noUselessLabel":·"error",·"useLiteralKeys":·"off"·},
        7 │ + → → → "security":·{·"noGlobalEval":·"warn"·},
        8 │ + → → → "style":·{·"useDefaultParameterLast":·"off"·},

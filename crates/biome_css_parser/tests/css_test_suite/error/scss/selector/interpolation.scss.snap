@@ -56,7 +56,7 @@ CssRoot {
                                                             items: [
                                                                 CssBogus {
                                                                     items: [
-                                                                        ScssIdentifier {
+                                                                        ScssVariable {
                                                                             dollar_token: DOLLAR@7..8 "$" [] [],
                                                                             name: CssIdentifier {
                                                                                 value_token: IDENT@8..13 "name" [] [Whitespace(" ")],
@@ -345,7 +345,7 @@ CssRoot {
                     1: L_CURLY@6..7 "{" [] []
                     2: CSS_BOGUS@7..27
                       0: CSS_BOGUS@7..27
-                        0: SCSS_IDENTIFIER@7..13
+                        0: SCSS_VARIABLE@7..13
                           0: DOLLAR@7..8 "$" [] []
                           1: CSS_IDENTIFIER@8..13
                             0: IDENT@8..13 "name" [] [Whitespace(" ")]

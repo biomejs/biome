@@ -50,7 +50,7 @@ invalid.html:4:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━�
   
     3 │ <!-- onmouseover without onfocus -->
   > 4 │ <div onmouseover="handleMouseOver()"></div>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     5 │ 
     6 │ <!-- onmouseout without onblur -->
   
@@ -66,7 +66,7 @@ invalid.html:7:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━�
   
     6 │ <!-- onmouseout without onblur -->
   > 7 │ <div onmouseout="handleMouseOut()"></div>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     8 │ 
     9 │ <!-- onmouseover without onfocus (has onblur but not onfocus) -->
   
@@ -82,7 +82,7 @@ invalid.html:10:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━
   
      9 │ <!-- onmouseover without onfocus (has onblur but not onfocus) -->
   > 10 │ <div onmouseover="handleMouseOver()" onblur="handleBlur()"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     11 │ 
     12 │ <!-- onmouseout without onblur (has onfocus but not onblur) -->
   
@@ -98,7 +98,7 @@ invalid.html:13:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━
   
     12 │ <!-- onmouseout without onblur (has onfocus but not onblur) -->
   > 13 │ <div onmouseout="handleMouseOut()" onfocus="handleFocus()"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     14 │ 
     15 │ <!-- case insensitive - still invalid -->
   
@@ -114,7 +114,7 @@ invalid.html:16:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━
   
     15 │ <!-- case insensitive - still invalid -->
   > 16 │ <div ONMOUSEOVER="handleMouseOver()"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     17 │ <div OnMouseOut="handleMouseOut()"></div>
     18 │ <div onMouseOver="handleMouseOver()"></div>
   
@@ -131,7 +131,7 @@ invalid.html:17:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━
     15 │ <!-- case insensitive - still invalid -->
     16 │ <div ONMOUSEOVER="handleMouseOver()"></div>
   > 17 │ <div OnMouseOut="handleMouseOut()"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     18 │ <div onMouseOver="handleMouseOver()"></div>
     19 │ 
   
@@ -148,7 +148,7 @@ invalid.html:18:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━
     16 │ <div ONMOUSEOVER="handleMouseOver()"></div>
     17 │ <div OnMouseOut="handleMouseOut()"></div>
   > 18 │ <div onMouseOver="handleMouseOver()"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     19 │ 
     20 │ <!-- self-closing elements without keyboard pair -->
   
@@ -197,7 +197,7 @@ invalid.html:25:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━
   
     24 │ <!-- different element types -->
   > 25 │ <a onmouseover="handleMouseOver()">link</a>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     26 │ <button onmouseout="handleMouseOut()">button</button>
     27 │ <span onmouseover="handleMouseOver()">text</span>
   
@@ -214,7 +214,7 @@ invalid.html:26:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━
     24 │ <!-- different element types -->
     25 │ <a onmouseover="handleMouseOver()">link</a>
   > 26 │ <button onmouseout="handleMouseOut()">button</button>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     27 │ <span onmouseover="handleMouseOver()">text</span>
     28 │ 
   
@@ -231,7 +231,7 @@ invalid.html:27:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━
     25 │ <a onmouseover="handleMouseOver()">link</a>
     26 │ <button onmouseout="handleMouseOut()">button</button>
   > 27 │ <span onmouseover="handleMouseOver()">text</span>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     28 │ 
     29 │ <!-- with non-opening element (opening tag, closing tag) -->
   
@@ -247,7 +247,7 @@ invalid.html:30:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━
   
     29 │ <!-- with non-opening element (opening tag, closing tag) -->
   > 30 │ <div onmouseover="handleMouseOver()">content</div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     31 │ <div onmouseout="handleMouseOut()">content</div>
     32 │ 
   
@@ -264,7 +264,7 @@ invalid.html:31:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━
     29 │ <!-- with non-opening element (opening tag, closing tag) -->
     30 │ <div onmouseover="handleMouseOver()">content</div>
   > 31 │ <div onmouseout="handleMouseOut()">content</div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     32 │ 
     33 │ <!-- empty mouse event value but no keyboard pair -->
   
@@ -280,7 +280,7 @@ invalid.html:34:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━
   
     33 │ <!-- empty mouse event value but no keyboard pair -->
   > 34 │ <div onmouseover=""></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^
     35 │ <div onmouseout=""></div>
     36 │ 
   
@@ -297,7 +297,7 @@ invalid.html:35:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━
     33 │ <!-- empty mouse event value but no keyboard pair -->
     34 │ <div onmouseover=""></div>
   > 35 │ <div onmouseout=""></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^
     36 │ 
   
   i Users who navigate via keyboard cannot interact with elements that only have mouse event handlers. Add an onblur attribute to ensure keyboard accessibility.

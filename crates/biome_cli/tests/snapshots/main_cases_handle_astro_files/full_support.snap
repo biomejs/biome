@@ -167,14 +167,8 @@ file.astro:41:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━
     40 │ 
   > 41 │ <html>
        │ ^^^^^^
-  > 42 │ 	<head>
-  > 43 │ 		<title>Astro</title>
-  > 44 │ 	</head>
-  > 45 │ 	<body></body>
-  > 46 │ </html>
-       │ ^^^^^^^
-    47 │ 
-    48 │ <style>
+    42 │ 	<head>
+    43 │ 		<title>Astro</title>
   
   i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
   

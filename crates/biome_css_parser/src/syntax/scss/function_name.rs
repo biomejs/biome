@@ -7,16 +7,16 @@ use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::Absent;
 
 use super::{
-    is_at_scss_interpolated_identifier, is_at_scss_qualified_name,
-    parse_scss_interpolated_identifier, parse_scss_qualified_name,
+    is_at_scss_interpolated_identifier, is_at_scss_module_member_access,
+    parse_scss_interpolated_identifier, parse_scss_module_member_access,
 };
 
 #[inline]
 pub(crate) fn is_at_scss_function_name(p: &mut CssParser) -> bool {
-    is_at_scss_qualified_name(p) || is_at_scss_interpolated_identifier(p)
+    is_at_scss_module_member_access(p) || is_at_scss_interpolated_identifier(p)
 }
 
-/// Parses an SCSS function name, including module-qualified names and
+/// Parses an SCSS function name, including module-member access names and
 /// interpolation-shaped plain CSS function names.
 ///
 /// Examples:
@@ -34,9 +34,9 @@ pub(crate) fn parse_scss_function_name(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
-    if is_at_scss_qualified_name(p) {
+    if is_at_scss_module_member_access(p) {
         let has_dollar_member = p.nth_at(2, T![$]);
-        parse_scss_qualified_name(p).map(|marker| {
+        parse_scss_module_member_access(p).map(|marker| {
             add_scss_variable_member_function_name_diagnostic(p, has_dollar_member, marker)
         })
     } else if is_at_scss_interpolated_identifier(p) {

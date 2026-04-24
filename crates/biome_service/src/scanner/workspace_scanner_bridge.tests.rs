@@ -179,6 +179,35 @@ fn should_not_index_a_source_file_with_scan_kind_known_files() {
 }
 
 #[test]
+fn should_index_pnpm_workspace_yaml_as_manifest() {
+    let pnpm_workspace_path = Utf8PathBuf::from("/project/pnpm-workspace.yaml");
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/package.json"),
+        r#"{ "name": "app" }"#,
+    );
+    fs.insert(
+        pnpm_workspace_path.clone(),
+        "catalog:\n  react: 19.0.0\n".as_bytes(),
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .expect("can scan the project");
+
+    assert!(workspace.is_indexed(&pnpm_workspace_path));
+}
+
+#[test]
 fn should_not_index_an_ignored_file_inside_vcs_ignore_file() {
     let file_path = Utf8PathBuf::from("/project/a.js");
 

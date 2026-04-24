@@ -8,6 +8,7 @@ use super::{
 };
 use biome_analyze::RuleSource;
 use biome_configuration::analyzer::SeverityOrGroup;
+use biome_configuration::analyzer::presets::PresetConfig;
 use biome_configuration::{self as biome_config};
 use biome_console::fmt::Display;
 use biome_console::markup;
@@ -552,7 +553,7 @@ impl eslint_eslint::FlatConfigData {
             };
             biome_config.javascript = Some(js_config)
         }
-        rules.recommended = Some(false);
+        rules.preset = Some(PresetConfig::None);
         linter.rules = Some(rules);
         let includes =
             to_biome_includes(&global_config_object.files, &global_config_object.ignores);
@@ -579,7 +580,7 @@ impl eslint_eslint::LegacyConfigData {
         }
         let mut linter = biome_config::LinterConfiguration::default();
         let mut rules = self.rules.into_biome_rules(options, &mut results);
-        rules.recommended = Some(false);
+        rules.preset = Some(PresetConfig::None);
         linter.rules = Some(rules);
         let includes = to_biome_includes(&[] as &[&str], self.ignore_patterns.as_slice());
         linter.includes = (!includes.is_empty()).then_some(includes);

@@ -10,7 +10,7 @@ impl FormatRule<AnyCssFunctionName> for FormatAnyCssFunctionName {
         match node {
             AnyCssFunctionName::CssIdentifier(node) => node.format().fmt(f),
             AnyCssFunctionName::ScssInterpolatedIdentifier(node) => node.format().fmt(f),
-            AnyCssFunctionName::ScssQualifiedName(node) => node.format().fmt(f),
+            AnyCssFunctionName::ScssModuleMemberAccess(node) => node.format().fmt(f),
         }
     }
 }

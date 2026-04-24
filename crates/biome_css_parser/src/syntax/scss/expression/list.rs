@@ -3,8 +3,8 @@ use crate::syntax::parse_error::expected_component_value;
 use crate::syntax::property::{is_at_generic_delimiter, parse_generic_component_value};
 use crate::syntax::scss::expression::precedence::parse_scss_binary_expression;
 use crate::syntax::scss::{
-    END_OF_SCSS_EXPRESSION_TOKEN_SET, expected_scss_expression, is_at_scss_identifier,
-    parse_scss_identifier, scss_ellipsis_not_allowed,
+    END_OF_SCSS_EXPRESSION_TOKEN_SET, expected_scss_expression, is_at_scss_variable,
+    parse_scss_variable, scss_ellipsis_not_allowed,
 };
 use biome_css_syntax::CssSyntaxKind::{
     CSS_BOGUS_PROPERTY_VALUE, EOF, SCSS_ARBITRARY_ARGUMENT, SCSS_EXPRESSION,
@@ -270,7 +270,7 @@ fn report_and_bump_scss_ellipsis(p: &mut CssParser) {
 fn is_at_scss_keyword_argument(p: &mut CssParser, options: ScssExpressionOptions) -> bool {
     options.allows_keyword_arguments
         && !options.end_ts.contains(T![:])
-        && is_at_scss_identifier(p)
+        && is_at_scss_variable(p)
         && p.nth_at(2, T![:])
 }
 
@@ -281,7 +281,7 @@ fn parse_scss_keyword_argument(p: &mut CssParser, options: ScssExpressionOptions
     }
 
     let m = p.start();
-    parse_scss_identifier(p).ok();
+    parse_scss_variable(p).ok();
     p.expect(T![:]);
 
     parse_scss_expression_with_options(

@@ -155,7 +155,7 @@
 					]
 				},
 				"noNoninteractiveTabindex": {
-					"description": "Enforce that tabIndex is not assigned to non-interactive HTML elements.\nSee https://biomejs.dev/linter/rules/no-noninteractive-tabindex",
+					"description": "Enforce that tabindex is not assigned to non-interactive HTML elements.\nSee https://biomejs.dev/linter/rules/no-noninteractive-tabindex",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoNoninteractiveTabindexConfiguration" },
 						{ "type": "null" }
@@ -195,6 +195,10 @@
 						{ "$ref": "#/$defs/NoSvgWithoutTitleConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"preset": {
+					"description": "Enables a particular rule preset",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
 				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
@@ -280,7 +284,7 @@
 					]
 				},
 				"useKeyWithClickEvents": {
-					"description": "Enforce onClick is accompanied by at least one of the following: onKeyUp, onKeyDown, onKeyPress.\nSee https://biomejs.dev/linter/rules/use-key-with-click-events",
+					"description": "Enforce elements with a click event handler to also have at least one keyboard event handler.\nSee https://biomejs.dev/linter/rules/use-key-with-click-events",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseKeyWithClickEventsConfiguration" },
 						{ "type": "null" }
@@ -301,7 +305,7 @@
 					]
 				},
 				"useSemanticElements": {
-					"description": "It detects the use of role attributes in JSX elements and suggests using semantic elements instead.\nSee https://biomejs.dev/linter/rules/use-semantic-elements",
+					"description": "Enforces using semantic DOM elements over the ARIA role property.\nSee https://biomejs.dev/linter/rules/use-semantic-elements",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseSemanticElementsConfiguration" },
 						{ "type": "null" }
@@ -359,6 +363,10 @@
 		"Actions": {
 			"type": "object",
 			"properties": {
+				"preset": {
+					"description": "The actions preset to use.",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
+				},
 				"recommended": {
 					"description": "It enables the assist actions recommended by Biome. `true` by default.",
 					"type": ["boolean", "null"]
@@ -687,6 +695,10 @@
 						{ "$ref": "#/$defs/NoVoidConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"preset": {
+					"description": "Enables a particular rule preset",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
 				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
@@ -1251,6 +1263,10 @@
 						{ "type": "null" }
 					]
 				},
+				"preset": {
+					"description": "Enables a particular rule preset",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
+				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
@@ -1437,6 +1453,10 @@
 			"description": "Options that changes how the CSS formatter behaves",
 			"type": "object",
 			"properties": {
+				"delimiterSpacing": {
+					"description": "Whether to insert spaces inside delimiters (after the opening delimiter and before the\nclosing delimiter). Only applies when the content fits on a single line, and empty\ndelimiters are not affected. For CSS, affects parentheses (e.g., `rgb( 0, 0, 0 )`) and\nsquare brackets (e.g., `[ data-attr ]`). Defaults to false.",
+					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
+				},
 				"enabled": {
 					"description": "Control the formatter for CSS (and its super languages) files.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
@@ -2195,6 +2215,13 @@
 						{ "$ref": "#/$defs/JsParserConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"resolver": {
+					"description": "Module/dependency resolver options",
+					"anyOf": [
+						{ "$ref": "#/$defs/JsResolverConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -2218,6 +2245,10 @@
 				"bracketSpacing": {
 					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
+				},
+				"delimiterSpacing": {
+					"description": "Whether to insert spaces inside delimiters (after the opening delimiter and before the\nclosing delimiter). Only applies when the content fits on a single line. Spaces are not\nadded before the opening delimiter (e.g., `function f()` stays `function f()`, not\n`function f ()`), and empty delimiters are not affected (e.g., `fn()` stays `fn()`).\nFor JavaScript and TypeScript, affects parentheses (e.g., `foo( a, b )`), square brackets\n(e.g., `[ a, b ]`), template literal interpolations (e.g., `${ expr }`), TypeScript angle\nbrackets (e.g., `foo< T >()`), JSX expression braces (e.g., `{ value }`), and the logical\nNOT operator (e.g., `! x`, but in chains only after the last one: `!! x`). Defaults to\nfalse.",
+					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
 				},
 				"enabled": {
 					"description": "Control the formatter for JavaScript (and its super languages) files.",
@@ -2304,6 +2335,17 @@
 			},
 			"additionalProperties": false
 		},
+		"JsResolverConfiguration": {
+			"description": "Resolver options specific to JavaScript files",
+			"type": "object",
+			"properties": {
+				"experimentalPnpmCatalogs": {
+					"description": "Enables pnpm workspace catalog resolution for JavaScript package manifests.\n\nOpt-in:\n- Set `javascript.resolver.experimentalPnpmCatalogs` to `true`.\n\nScope:\n- Resolves `catalog:` and `catalog:<name>` dependency versions from\n  `package.json`.\n- Applies to `dependencies`, `devDependencies`, and `peerDependencies`.\n\nFail-safe behavior:\n- If `pnpm-workspace.yaml` is missing, unreadable, or cannot be parsed,\n  Biome silently falls back to the default behavior (as if this option\n  were disabled).\n- Unknown keys and unsupported value shapes in `pnpm-workspace.yaml` are\n  ignored.\n\nLimitations:\n- Only `pnpm-workspace.yaml` is read.\n- Biome only reads top-level `catalog` / `catalogs` mappings and scalar\n  string entries.\n\nDefault: `false`.",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"JsTrailingCommas": {
 			"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures for JavaScript/TypeScript files.",
 			"type": "string",
@@ -2361,6 +2403,10 @@
 				"bracketSpacing": {
 					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
+				},
+				"delimiterSpacing": {
+					"description": "Whether to insert spaces inside delimiters (after the opening delimiter and before the\nclosing delimiter). Only applies when the content fits on a single line, and empty\nbrackets are not affected. For JSON, affects square brackets (e.g., `[ 1, 2, 3 ]`).\nDefaults to false.",
+					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
 				},
 				"enabled": {
 					"description": "Control the formatter for JSON (and its super languages) files.",
@@ -2632,6 +2678,7 @@
 				":PACKAGE:",
 				":PACKAGE_WITH_PROTOCOL:",
 				":PATH:",
+				":STYLE:",
 				":URL:",
 				"!:ALIAS:",
 				"!:BUN:",
@@ -2639,6 +2686,7 @@
 				"!:PACKAGE:",
 				"!:PACKAGE_WITH_PROTOCOL:",
 				"!:PATH:",
+				"!:STYLE:",
 				"!:URL:"
 			]
 		},
@@ -4168,6 +4216,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoJsxLeakedDollarConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoJsxLeakedDollarOptions" }
+			]
+		},
+		"NoJsxLeakedDollarOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoJsxLiteralsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -4254,6 +4312,13 @@
 			]
 		},
 		"NoLeakedRenderOptions": { "type": "object" },
+		"NoLoopFuncConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoLoopFuncOptions" }
+			]
+		},
+		"NoLoopFuncOptions": { "type": "object", "additionalProperties": false },
 		"NoMagicNumbersConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -4748,6 +4813,43 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoReactNativeDeepImportsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoReactNativeDeepImportsOptions" }
+			]
+		},
+		"NoReactNativeDeepImportsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoReactNativeLiteralColorsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoReactNativeLiteralColorsOptions" }
+			]
+		},
+		"NoReactNativeLiteralColorsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoReactNativeRawTextConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoReactNativeRawTextOptions" }
+			]
+		},
+		"NoReactNativeRawTextOptions": {
+			"type": "object",
+			"properties": {
+				"skip": {
+					"description": "Names of additional components that are allowed to contain raw text.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoReactPropAssignmentsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5198,6 +5300,13 @@
 		"NoUndeclaredDependenciesOptions": {
 			"type": "object",
 			"properties": {
+				"bundleDependencies": {
+					"description": "If set to `false`, then the rule will show an error when `bundleDependencies` are imported. Defaults to `true`.",
+					"anyOf": [
+						{ "$ref": "#/$defs/DependencyAvailability" },
+						{ "type": "null" }
+					]
+				},
 				"devDependencies": {
 					"description": "If set to `false`, then the rule will show an error when `devDependencies` are imported. Defaults to `true`.",
 					"anyOf": [
@@ -5397,6 +5506,16 @@
 			]
 		},
 		"NoUnnecessaryConditionsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoUnnecessaryTemplateExpressionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnnecessaryTemplateExpressionOptions" }
+			]
+		},
+		"NoUnnecessaryTemplateExpressionOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -6271,6 +6390,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noJsxLeakedDollar": {
+					"description": "Flags text nodes with a trailing $ before a JSX expression.\nSee https://biomejs.dev/linter/rules/no-jsx-leaked-dollar",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoJsxLeakedDollarConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noJsxNamespace": {
 					"description": "Disallow JSX namespace syntax.\nSee https://biomejs.dev/linter/rules/no-jsx-namespace",
 					"anyOf": [
@@ -6289,6 +6415,13 @@
 					"description": "Prevent problematic leaked values from being rendered.\nSee https://biomejs.dev/linter/rules/no-leaked-render",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoLeakedRenderConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noLoopFunc": {
+					"description": "Disallow functions declared inside loops that capture unsafe outer variables.\nSee https://biomejs.dev/linter/rules/no-loop-func",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoLoopFuncConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6411,6 +6544,27 @@
 						{ "type": "null" }
 					]
 				},
+				"noReactNativeDeepImports": {
+					"description": "Disallow deep imports from the react-native package.\nSee https://biomejs.dev/linter/rules/no-react-native-deep-imports",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReactNativeDeepImportsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noReactNativeLiteralColors": {
+					"description": "Disallow color literals in React Native styles.\nSee https://biomejs.dev/linter/rules/no-react-native-literal-colors",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReactNativeLiteralColorsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noReactNativeRawText": {
+					"description": "Disallow raw text outside \\<Text> components in React Native.\nSee https://biomejs.dev/linter/rules/no-react-native-raw-text",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReactNativeRawTextConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noRedundantDefaultExport": {
 					"description": "Checks if a default export exports the same symbol as a named export.\nSee https://biomejs.dev/linter/rules/no-redundant-default-export",
 					"anyOf": [
@@ -6495,6 +6649,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnnecessaryTemplateExpression": {
+					"description": "Disallow unnecessary template expressions.\nSee https://biomejs.dev/linter/rules/no-unnecessary-template-expression",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnnecessaryTemplateExpressionConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnsafePlusOperands": {
 					"description": "Disallow + operations with operands that are known to be unsafe.\nSee https://biomejs.dev/linter/rules/no-unsafe-plus-operands",
 					"anyOf": [
@@ -6557,6 +6718,10 @@
 						{ "$ref": "#/$defs/NoVueVIfWithVForConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"preset": {
+					"description": "Enables a particular rule preset",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
 				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
@@ -6629,6 +6794,20 @@
 					"description": "Detects a disposable object assigned to a variable without using or await using syntax.\nSee https://biomejs.dev/linter/rules/use-disposables",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseDisposablesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useDomNodeTextContent": {
+					"description": "Prefer .textContent over .innerText for DOM node text.\nSee https://biomejs.dev/linter/rules/use-dom-node-text-content",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseDomNodeTextContentConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useDomQuerySelector": {
+					"description": "Prefer querySelector() and querySelectorAll() over older DOM query APIs.\nSee https://biomejs.dev/linter/rules/use-dom-query-selector",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseDomQuerySelectorConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6760,6 +6939,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useReactNativePlatformComponents": {
+					"description": "Ensure that platform-specific React Native components are only imported in files named for that platform.\nSee https://biomejs.dev/linter/rules/use-react-native-platform-components",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseReactNativePlatformComponentsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useReduceTypeParameter": {
 					"description": "Enforce using a type parameter on Array#reduce instead of casting the initial value.\nSee https://biomejs.dev/linter/rules/use-reduce-type-parameter",
 					"anyOf": [
@@ -6771,6 +6957,13 @@
 					"description": "Enforce RegExp#exec over String#match if no global flag is provided.\nSee https://biomejs.dev/linter/rules/use-regexp-exec",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseRegexpExecConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useRegexpTest": {
+					"description": "Enforce the use of RegExp.prototype.test() over String.prototype.match() and RegExp.prototype.exec() in boolean contexts.\nSee https://biomejs.dev/linter/rules/use-regexp-test",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseRegexpTestConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7305,6 +7498,10 @@
 						{ "type": "null" }
 					]
 				},
+				"preset": {
+					"description": "Enables a particular rule preset",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
+				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
@@ -7360,6 +7557,11 @@
 		"Plugins": {
 			"type": "array",
 			"items": { "$ref": "#/$defs/PluginConfiguration" }
+		},
+		"PresetConfig": {
+			"description": "A preset configuration for enabling a set of rules.",
+			"type": "string",
+			"enum": ["recommended", "all", "none"]
 		},
 		"PropertyAssignmentMode": {
 			"description": "Specifies whether property assignments on function parameters are allowed or denied.",
@@ -7468,6 +7670,11 @@
 					"description": "React library rules",
 					"type": "string",
 					"const": "react"
+				},
+				{
+					"description": "React Native framework rules",
+					"type": "string",
+					"const": "reactNative"
 				},
 				{ "description": "Testing rules", "type": "string", "const": "test" },
 				{
@@ -8902,6 +9109,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoJsxLeakedDollarOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoJsxLeakedDollarOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoJsxLiteralsOptions": {
 			"type": "object",
 			"properties": {
@@ -8952,6 +9169,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoLeakedRenderOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoLoopFuncOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoLoopFuncOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9416,6 +9642,33 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoReactForwardRefOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoReactNativeDeepImportsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoReactNativeDeepImportsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoReactNativeLiteralColorsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoReactNativeLiteralColorsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoReactNativeRawTextOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoReactNativeRawTextOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9932,6 +10185,16 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnnecessaryConditionsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUnnecessaryTemplateExpressionOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnnecessaryTemplateExpressionOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -10876,6 +11139,26 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseDomNodeTextContentOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseDomNodeTextContentOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseDomQuerySelectorOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseDomQuerySelectorOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseEnumInitializersOptions": {
 			"type": "object",
 			"properties": {
@@ -11556,6 +11839,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseReactNativePlatformComponentsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseReactNativePlatformComponentsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseReadonlyClassPropertiesOptions": {
 			"type": "object",
 			"properties": {
@@ -11591,6 +11883,16 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseRegexpExecOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseRegexpTestOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseRegexpTestOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -12150,6 +12452,10 @@
 						{ "type": "null" }
 					]
 				},
+				"preset": {
+					"description": "The rule presets to use.",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
+				},
 				"recommended": {
 					"description": "It enables the lint rules recommended by Biome. `true` by default.",
 					"type": ["boolean", "null"]
@@ -12214,6 +12520,10 @@
 						{ "$ref": "#/$defs/NoSecretsConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"preset": {
+					"description": "Enables a particular rule preset",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
 				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
@@ -12319,6 +12629,10 @@
 						{ "$ref": "#/$defs/OrganizeImportsConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"preset": {
+					"description": "Enables a particular rule preset",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
 				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
@@ -12605,6 +12919,10 @@
 						{ "$ref": "#/$defs/NoYodaExpressionConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"preset": {
+					"description": "Enables a particular rule preset",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
 				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
@@ -13566,6 +13884,10 @@
 						{ "type": "null" }
 					]
 				},
+				"preset": {
+					"description": "Enables a particular rule preset",
+					"anyOf": [{ "$ref": "#/$defs/PresetConfig" }, { "type": "null" }]
+				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
@@ -14233,6 +14555,26 @@
 			]
 		},
 		"UseDisposablesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseDomNodeTextContentConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseDomNodeTextContentOptions" }
+			]
+		},
+		"UseDomNodeTextContentOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseDomQuerySelectorConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseDomQuerySelectorOptions" }
+			]
+		},
+		"UseDomQuerySelectorOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -15069,6 +15411,28 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseReactNativePlatformComponentsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseReactNativePlatformComponentsOptions" }
+			]
+		},
+		"UseReactNativePlatformComponentsOptions": {
+			"type": "object",
+			"properties": {
+				"androidPathPatterns": {
+					"description": "A list of glob patterns to identify Android-specific files.\nDefaults to `[\"**/*.android.{js,jsx,ts,tsx}\"]`.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/$defs/NormalizedGlob" }
+				},
+				"iosPathPatterns": {
+					"description": "A list of glob patterns to identify iOS-specific files.\nDefaults to `[\"**/*.ios.{js,jsx,ts,tsx}\"]`.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/$defs/NormalizedGlob" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseReadonlyClassPropertiesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -15112,6 +15476,13 @@
 			]
 		},
 		"UseRegexpExecOptions": { "type": "object", "additionalProperties": false },
+		"UseRegexpTestConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseRegexpTestOptions" }
+			]
+		},
+		"UseRegexpTestOptions": { "type": "object", "additionalProperties": false },
 		"UseRequiredScriptsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },

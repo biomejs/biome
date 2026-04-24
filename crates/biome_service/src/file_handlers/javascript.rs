@@ -18,7 +18,9 @@ use crate::settings::{
 };
 use crate::workspace::FixFileMode;
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
-use crate::workspace::{DocumentFileSource, EmbeddedSnippet, PullDiagnosticsAndActionsResult};
+use crate::workspace::{
+    DocumentFileSource, DocumentServices, EmbeddedSnippet, PullDiagnosticsAndActionsResult,
+};
 use crate::{
     WorkspaceError,
     settings::{FormatSettings, LanguageListSettings, LanguageSettings, ServiceLanguage},
@@ -39,8 +41,9 @@ use biome_css_parser::parse_css_with_offset_and_cache;
 use biome_css_syntax::{CssFileSource, CssLanguage, EmbeddingKind};
 use biome_formatter::prelude::{Document, Interned, LineMode, Tag};
 use biome_formatter::{
-    AttributePosition, BracketSameLine, BracketSpacing, Expand, FormatElement, FormatError,
-    IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle, TrailingNewline,
+    AttributePosition, BracketSameLine, BracketSpacing, DelimiterSpacing, Expand, FormatElement,
+    FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
+    TrailingNewline,
 };
 use biome_fs::BiomePath;
 use biome_graphql_parser::parse_graphql_with_offset_and_cache;
@@ -56,7 +59,7 @@ use biome_js_formatter::context::{
 };
 use biome_js_formatter::format_node;
 use biome_js_parser::JsParserOptions;
-use biome_js_semantic::{SemanticModelOptions, semantic_model};
+use biome_js_semantic::{SVELTE_RUNES, SemanticModelOptions, semantic_model};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsRoot, AnyJsTemplateElement, JsCallArgumentList, JsCallArguments,
     JsCallExpression, JsClassDeclaration, JsClassExpression, JsFileSource, JsFunctionDeclaration,
@@ -88,6 +91,7 @@ pub struct JsFormatterSettings {
     pub semicolons: Option<Semicolons>,
     pub arrow_parentheses: Option<ArrowParentheses>,
     pub bracket_spacing: Option<BracketSpacing>,
+    pub delimiter_spacing: Option<DelimiterSpacing>,
     pub bracket_same_line: Option<BracketSameLine>,
     pub line_ending: Option<LineEnding>,
     pub line_width: Option<LineWidth>,
@@ -113,6 +117,7 @@ impl From<JsFormatterConfiguration> for JsFormatterSettings {
             enabled: value.enabled,
             line_width: value.line_width,
             bracket_spacing: value.bracket_spacing,
+            delimiter_spacing: value.delimiter_spacing,
             attribute_position: value.attribute_position,
             indent_width: value.indent_width,
             indent_style: value.indent_style,
@@ -274,6 +279,12 @@ impl ServiceLanguage for JsLanguage {
                 .or(global.bracket_spacing)
                 .unwrap_or_default(),
         )
+        .with_delimiter_spacing(
+            language
+                .delimiter_spacing
+                .or(global.delimiter_spacing)
+                .unwrap_or_default(),
+        )
         .with_bracket_same_line(
             language
                 .bracket_same_line
@@ -365,8 +376,8 @@ impl ServiceLanguage for JsLanguage {
 
         globals.extend(overrides.override_js_globals(path, &global.languages.javascript.globals));
 
-        if let Some(filename) = path.file_name() {
-            if filename.ends_with(".vue") {
+        if let Ok(source_type) = JsFileSource::try_from(path.as_path()) {
+            if source_type.as_embedding_kind().is_vue() {
                 globals.extend(
                     [
                         "defineEmits",
@@ -379,29 +390,11 @@ impl ServiceLanguage for JsLanguage {
                     ]
                     .map(Into::into),
                 );
-            } else if filename.ends_with(".astro") {
+            } else if source_type.as_embedding_kind().is_astro() {
                 globals.extend(["Astro"].map(Into::into));
-            } else if filename.ends_with(".svelte")
-                || filename.ends_with(".svelte.js")
-                || filename.ends_with(".svelte.ts")
-                || filename.ends_with(".svelte.test.ts")
-                || filename.ends_with(".svelte.test.js")
-                || filename.ends_with(".svelte.spec.ts")
-                || filename.ends_with(".svelte.spec.js")
-            {
+            } else if source_type.as_embedding_kind().is_svelte() {
                 // Svelte 5 runes
-                globals.extend(
-                    [
-                        "$bindable",
-                        "$derived",
-                        "$effect",
-                        "$host",
-                        "$inspect",
-                        "$props",
-                        "$state",
-                    ]
-                    .map(Into::into),
-                );
+                globals.extend(SVELTE_RUNES.iter().copied().map(Into::into));
             }
         }
 
@@ -931,9 +924,10 @@ fn debug_registered_types(_path: &BiomePath, parse: AnyParse) -> Result<String, 
     Ok(result)
 }
 
-fn debug_semantic_model(_path: &BiomePath, parse: AnyParse) -> Result<String, WorkspaceError> {
+fn debug_semantic_model(path: &BiomePath, parse: AnyParse) -> Result<String, WorkspaceError> {
     let tree: AnyJsRoot = parse.tree();
-    let model = semantic_model(&tree, SemanticModelOptions::default());
+    let source_type = JsFileSource::try_from(path.as_path()).unwrap_or_default();
+    let model = semantic_model(&tree, SemanticModelOptions::from(&source_type));
     Ok(model.to_string())
 }
 
@@ -941,10 +935,10 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
     let _ =
         debug_span!("Linting JavaScript file", path =? params.path, language =? params.language)
             .entered();
-    let Some(file_source) = params
-        .language
-        .to_js_file_source()
-        .or(JsFileSource::try_from(params.path.as_path()).ok())
+    // Use snippet services (for embedded JS) if present, else document services.
+    let effective_services = params.snippet_services.unwrap_or(params.document_services);
+    let Some(file_source) =
+        js_source_type_for_analysis(params.path, &params.language, effective_services)
     else {
         return LintResults {
             errors: 0,
@@ -983,8 +977,6 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
 
     let mut process_lint = ProcessLint::new(&params);
 
-    // Use snippet services (for embedded JS) if present, else document services.
-    let effective_services = params.snippet_services.unwrap_or(params.document_services);
     let semantic_model = effective_services
         .as_js_services()
         .and_then(|s| s.semantic_model.clone());
@@ -1040,6 +1032,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         document_services,
         working_directory,
         compute_actions,
+        snippet_services,
     } = params;
     let _ = debug_span!("Code actions JavaScript", range =? range, path =? path).entered();
     let tree = parse.tree();
@@ -1070,13 +1063,14 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
     };
 
-    let Some(source_type) = language.to_js_file_source() else {
+    let effective_services = snippet_services.unwrap_or(document_services);
+    let Some(source_type) = js_source_type_for_analysis(path, &language, effective_services) else {
         error!("Could not determine the file source of the file");
         return PullActionsResult {
             actions: Vec::new(),
         };
     };
-    let semantic_model = document_services
+    let semantic_model = effective_services
         .as_js_services()
         .and_then(|s| s.semantic_model.clone());
     let services =
@@ -1164,11 +1158,11 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         range: None,
     };
 
-    let Some(file_source) = params
-        .document_file_source
-        .to_js_file_source()
-        .or(JsFileSource::try_from(params.biome_path.as_path()).ok())
-    else {
+    let Some(file_source) = js_source_type_for_analysis(
+        params.biome_path,
+        &params.document_file_source,
+        params.document_services,
+    ) else {
         return Err(extension_error(params.biome_path));
     };
 
@@ -1494,6 +1488,7 @@ pub(crate) fn pull_diagnostics_and_actions(
         diagnostic_offset,
         document_services,
         working_directory,
+        snippet_services,
     } = params;
     let tree = parse.tree();
     let analyzer_options = settings.analyzer_options::<JsLanguage>(
@@ -1521,13 +1516,14 @@ pub(crate) fn pull_diagnostics_and_actions(
         range: None,
     };
 
-    let Some(source_type) = language.to_js_file_source() else {
+    let effective_services = snippet_services.unwrap_or(document_services);
+    let Some(source_type) = js_source_type_for_analysis(path, &language, effective_services) else {
         error!("Could not determine the file source of the file");
         return PullDiagnosticsAndActionsResult {
             diagnostics: Vec::new(),
         };
     };
-    let semantic_model = document_services
+    let semantic_model = effective_services
         .as_js_services()
         .and_then(|s| s.semantic_model.clone());
     let services =
@@ -1547,13 +1543,14 @@ pub(crate) fn pull_diagnostics_and_actions(
 }
 
 fn rename(
-    _rome_path: &BiomePath,
+    path: &BiomePath,
     parse: AnyParse,
     symbol_at: TextSize,
     new_name: String,
 ) -> Result<RenameResult, WorkspaceError> {
     let root = parse.tree();
-    let model = semantic_model(&root, SemanticModelOptions::default());
+    let source_type = JsFileSource::try_from(path.as_path()).unwrap_or_default();
+    let model = semantic_model(&root, SemanticModelOptions::from(&source_type));
 
     if let Some(node) = parse
         .syntax()
@@ -1585,6 +1582,20 @@ fn rename(
             RenameError::CannotFindDeclaration(new_name),
         ))
     }
+}
+
+fn js_source_type_for_analysis(
+    path: &BiomePath,
+    language: &DocumentFileSource,
+    services: &DocumentServices,
+) -> Option<JsFileSource> {
+    // Prefer source type captured while parsing embedded snippets, then fall back to
+    // document-level source type, then infer from path as a last resort.
+    services
+        .as_js_services()
+        .and_then(|services| services.source_type)
+        .or_else(|| language.to_js_file_source())
+        .or_else(|| JsFileSource::try_from(path.as_path()).ok())
 }
 
 #[instrument(level = "debug", skip_all)]

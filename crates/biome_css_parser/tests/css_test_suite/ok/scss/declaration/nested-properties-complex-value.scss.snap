@@ -112,7 +112,7 @@ CssRoot {
                         value: ScssExpression {
                             items: ScssExpressionItemList [
                                 CssFunction {
-                                    name: ScssQualifiedName {
+                                    name: ScssModuleMemberAccess {
                                         module: CssIdentifier {
                                             value_token: IDENT@69..72 "map" [] [],
                                         },
@@ -125,7 +125,7 @@ CssRoot {
                                     items: CssParameterList [
                                         ScssExpression {
                                             items: ScssExpressionItemList [
-                                                ScssIdentifier {
+                                                ScssVariable {
                                                     dollar_token: DOLLAR@77..78 "$" [] [],
                                                     name: CssIdentifier {
                                                         value_token: IDENT@78..84 "colors" [] [],
@@ -247,7 +247,7 @@ CssRoot {
             2: SCSS_EXPRESSION@69..95
               0: SCSS_EXPRESSION_ITEM_LIST@69..95
                 0: CSS_FUNCTION@69..95
-                  0: SCSS_QUALIFIED_NAME@69..76
+                  0: SCSS_MODULE_MEMBER_ACCESS@69..76
                     0: CSS_IDENTIFIER@69..72
                       0: IDENT@69..72 "map" [] []
                     1: DOT@72..73 "." [] []
@@ -257,7 +257,7 @@ CssRoot {
                   2: CSS_PARAMETER_LIST@77..93
                     0: SCSS_EXPRESSION@77..84
                       0: SCSS_EXPRESSION_ITEM_LIST@77..84
-                        0: SCSS_IDENTIFIER@77..84
+                        0: SCSS_VARIABLE@77..84
                           0: DOLLAR@77..78 "$" [] []
                           1: CSS_IDENTIFIER@78..84
                             0: IDENT@78..84 "colors" [] []

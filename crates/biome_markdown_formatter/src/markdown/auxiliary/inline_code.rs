@@ -22,7 +22,8 @@ impl FormatNodeRule<MdInlineCode> for FormatMdInlineCode {
                     .format()
                     .with_options(FormatMdFormatInlineItemListOptions {
                         print_mode: TextPrintMode::Pristine,
-                        keep_fences_in_italics: false
+                        keep_fences_in_italics: false,
+                        inside_list: false,
                     }),
                 r_tick_token.format()
             ]

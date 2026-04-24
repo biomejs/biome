@@ -1,0 +1,279 @@
+<!-- should not generate diagnostics -->
+<TestComponent onclick={doFoo} />
+<Button onclick={doFoo} />
+
+<a href="http://x.y.z" role="button" />
+<a href="http://x.y.z" tabIndex="0" role="button" />
+<button class="foo" role="button" />
+
+<input role="button" />
+<input type="button" role="button" />
+<input type="checkbox" role="button" />
+<input type="color" role="button" />
+<input type="date" role="button" />
+<input type="datetime" role="button" />
+<input type="datetime-local" role="button" />
+<input type="email" role="button" />
+<input type="file" role="button" />
+<input type="image" role="button" />
+<input type="month" role="button" />
+<input type="number" role="button" />
+<input type="password" role="button" />
+<input type="radio" role="button" />
+<input type="range" role="button" />
+<input type="reset" role="button" />
+<input type="search" role="button" />
+<input type="submit" role="button" />
+<input type="tel" role="button" />
+<input type="text" role="button" />
+<input type="time" role="button" />
+<input type="url" role="button" />
+<input type="week" role="button" />
+<input type="hidden" role="button" />
+
+<menuitem role="button" />
+<option class="foo" role="button" />
+<select class="foo" role="button" />
+<textarea class="foo" role="button" />
+<tr role="button" />
+
+<a role="button" />
+<a role="img" />
+<a tabIndex="0" role="button" />
+<a tabIndex="0" role="img" />
+<acronym role="button" />
+<address role="button" />
+<applet role="button" />
+<aside role="button" />
+<audio role="button" />
+<b role="button" />
+<base role="button" />
+<bdi role="button" />
+<bdo role="button" />
+<big role="button" />
+<blink role="button" />
+<blockquote role="button" />
+<body role="button" />
+<br role="button" />
+<canvas role="button" />
+<canvas role="img" />
+<caption role="button" />
+<center role="button" />
+<cite role="button" />
+<code role="button" />
+<col role="button" />
+<colgroup role="button" />
+<content role="button" />
+<data role="button" />
+<datalist role="button" />
+<del role="button" />
+<details role="button" />
+<dir role="button" />
+<div role="button" />
+<div class="foo" role="button" />
+<div class="foo" {...props} role="button" />
+<div aria-hidden role="button" />
+<div aria-hidden={true} role="button" />
+<div role="button" />
+<div role={undefined} role="button" />
+<div {...props} role="button" />
+<div onkeyup={() => void 0} aria-hidden={false} role="button" />
+<dl role="button" />
+<em role="button" />
+<embed role="button" />
+<figcaption role="button" />
+<font role="button" />
+<footer role="button" />
+<frameset role="button" />
+<head role="button" />
+<header role="button" />
+<hgroup role="button" />
+<html role="button" />
+<i role="button" />
+<iframe role="button" />
+<ins role="button" />
+<kbd role="button" />
+<keygen role="button" />
+<label role="button" />
+<legend role="button" />
+<link role="button" />
+<map role="button" />
+<mark role="button" />
+<marquee role="button" />
+<menu role="button" />
+<meta role="button" />
+<meter role="button" />
+<noembed role="button" />
+<noscript role="button" />
+<object role="button" />
+<optgroup role="button" />
+<output role="button" />
+<p role="button" />
+<param role="button" />
+<picture role="button" />
+<pre role="button" />
+<progress role="button" />
+<q role="button" />
+<rp role="button" />
+<rt role="button" />
+<rtc role="button" />
+<ruby role="button" />
+<s role="button" />
+<samp role="button" />
+<script role="button" />
+<section role="button" />
+<small role="button" />
+<source role="button" />
+<spacer role="button" />
+<span role="button" />
+<strike role="button" />
+<strong role="button" />
+<style role="button" />
+<sub role="button" />
+<summary role="button" />
+
+<sup role="button" />
+<th role="button" />
+<time role="button" />
+<title role="button" />
+<track role="button" />
+<tt role="button" />
+<u role="button" />
+<var role="button" />
+<video role="button" />
+<wbr role="button" />
+<xmp role="button" />
+
+<div role="button" />
+<div role="checkbox" />
+<div role="columnheader" />
+<div role="combobox" />
+<div role="grid" />
+<div role="gridcell" />
+<div role="link" />
+<div role="listbox" />
+<div role="menu" />
+<div role="menubar" />
+<div role="menuitem" />
+<div role="menuitemcheckbox" />
+<div role="menuitemradio" />
+<div role="option" />
+<div role="progressbar" />
+<div role="radio" />
+<div role="radiogroup" />
+<div role="row" />
+<div role="rowheader" />
+<div role="searchbox" />
+<div role="slider" />
+<div role="spinbutton" />
+<div role="switch" />
+<div role="tab" />
+<div role="textbox" />
+<div role="treeitem" />
+
+<div role="presentation" />
+<hr role="presentation" />
+<hr role="none" />
+
+<div role="command" />
+<div role="composite" />
+<div role="input" />
+<div role="landmark" />
+<div role="range" />
+<div role="roletype" />
+<div role="section" />
+<div role="sectionhead" />
+<div role="select" />
+<div role="structure" />
+<div role="tablist" />
+<div role="toolbar" />
+<div role="tree" />
+<div role="treegrid" />
+<div role="widget" />
+<div role="window" />
+
+<main role="button" />
+<area role="button" />
+<article role="button" />
+<article role="button" />
+<dd role="button" />
+<dfn role="button" />
+<dt role="button" />
+<fieldset role="button" />
+<figure role="button" />
+<form role="button" />
+<frame role="button" />
+<h1 role="button" />
+<h2 role="button" />
+<h3 role="button" />
+<h4 role="button" />
+<h5 role="button" />
+<h6 role="button" />
+<hr role="button" />
+<img role="button" />
+<li role="button" />
+<li role="presentation" />
+<nav role="button" />
+<ol role="button" />
+<svg role="img" />
+<table role="button" />
+<tbody role="button" />
+<td role="button" />
+<tfoot role="button" />
+<thead role="button" />
+<ul role="button" />
+
+<div role="alert" />
+<div role="alertdialog" />
+<div role="application" />
+<div role="article" />
+<div role="banner" />
+<div role="cell" />
+<div role="complementary" />
+<div role="contentinfo" />
+<div role="definition" />
+<div role="dialog" />
+<div role="directory" />
+<div role="document" />
+<div role="feed" />
+<div role="figure" />
+<div role="form" />
+<div role="group" />
+<div role="heading" />
+<div role="img" />
+<div role="list" />
+<div role="listitem" />
+<div role="log" />
+<div role="main" />
+<div role="marquee" />
+<div role="math" />
+<div role="navigation" />
+<div role="note" />
+<div role="region" />
+<div role="rowgroup" />
+<div role="search" />
+<div role="separator" />
+<div role="scrollbar" />
+<div role="status" />
+<div role="table" />
+<div role="tabpanel" />
+<div role="term" />
+<div role="timer" />
+<div role="tooltip" />
+
+<div mynamespace:role="term" />
+<input mynamespace:role="img" />
+<Link href="http://x.y.z" role="img" />
+<Link href="http://x.y.z" />
+<Button onclick={doFoo} />
+<picture>
+  <source
+    srcSet={'/assets/head.webp'}
+    role='img'
+    type='image/webp'
+  />
+  <img
+    src={'/assets/head.png'}
+    alt='An ASCII-style headshot'
+  />
+</picture>
