@@ -1,7 +1,7 @@
 use super::{
-    AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams, EditorCapabilities, EnabledForPath,
-    ExtensionHandler, FixAllParams, LintParams, LintResults, ParseResult, ProcessFixAll,
-    ProcessLint, ResolveDefinitionParams, SearchCapabilities, search,
+    AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams, EditorCapabilities,
+    EnabledForPath, ExtensionHandler, FixAllParams, LintParams, LintResults, ParseResult,
+    ProcessFixAll, ProcessLint, ResolveDefinitionParams, SearchCapabilities, search,
 };
 use crate::WorkspaceError;
 use crate::configuration::to_analyzer_rules;

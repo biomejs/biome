@@ -1,9 +1,10 @@
 use super::{
     AnalyzerCapabilities, AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams,
-    DebugCapabilities, DiagnosticsAndActionsParams, EditorCapabilities, EnabledForPath, ExtensionHandler,
-    FormatEmbedNode, FormatterCapabilities, LintParams, LintResults, ParseEmbedResult, ParseResult,
-    ParserCapabilities, ProcessDiagnosticsAndActions, ProcessFixAll, ProcessLint,
-    ResolveBindingParams, ResolveDefinitionParams, SearchCapabilities, UpdateSnippetsNodes, search,
+    DebugCapabilities, DiagnosticsAndActionsParams, EditorCapabilities, EnabledForPath,
+    ExtensionHandler, FormatEmbedNode, FormatterCapabilities, LintParams, LintResults,
+    ParseEmbedResult, ParseResult, ParserCapabilities, ProcessDiagnosticsAndActions, ProcessFixAll,
+    ProcessLint, ResolveBindingParams, ResolveDefinitionParams, SearchCapabilities,
+    UpdateSnippetsNodes, search,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
@@ -19,8 +20,8 @@ use crate::settings::{
 use crate::workspace::FixFileMode;
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
 use crate::workspace::{
-    DefinitionReference, DocumentFileSource, DocumentServices, EmbeddedSnippet, GoToDefinitionResult,
-    PullDiagnosticsAndActionsResult,
+    DefinitionReference, DocumentFileSource, DocumentServices, EmbeddedSnippet,
+    GoToDefinitionResult, PullDiagnosticsAndActionsResult,
 };
 use crate::{
     WorkspaceError,

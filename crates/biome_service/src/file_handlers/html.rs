@@ -15,9 +15,7 @@ use crate::settings::{
 use crate::workspace::FixFileMode;
 use crate::workspace::document::AnyEmbeddedSnippet;
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
-use crate::workspace::{
-    CodeAction, DefinitionReference,
-};
+use crate::workspace::{CodeAction, DefinitionReference};
 use crate::workspace::{FixFileResult, PullActionsResult};
 use crate::{
     WorkspaceError,
