@@ -3588,6 +3588,12 @@ pub fn scss_interpolated_string(
         ],
     ))
 }
+pub fn scss_interpolated_value(items: ScssInterpolatedValuePartList) -> ScssInterpolatedValue {
+    ScssInterpolatedValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_INTERPOLATED_VALUE,
+        [Some(SyntaxElement::Node(items.into_syntax()))],
+    ))
+}
 pub fn scss_interpolation(
     hash_token: SyntaxToken,
     l_curly_token: SyntaxToken,
@@ -5104,6 +5110,18 @@ where
 {
     ScssInterpolatedStringPartList::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_INTERPOLATED_STRING_PART_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn scss_interpolated_value_part_list<I>(items: I) -> ScssInterpolatedValuePartList
+where
+    I: IntoIterator<Item = AnyScssInterpolatedValuePart>,
+    I::IntoIter: ExactSizeIterator,
+{
+    ScssInterpolatedValuePartList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_INTERPOLATED_VALUE_PART_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),

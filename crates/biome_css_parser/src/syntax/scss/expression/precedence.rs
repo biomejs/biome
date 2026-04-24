@@ -10,7 +10,7 @@ use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{Parser, TokenSet, token_set};
 
-use super::primary::parse_scss_primary_expression;
+use super::operand::parse_scss_expression_operand;
 
 pub(super) const SCSS_BINARY_OPERATOR_TOKEN_SET: TokenSet<CssSyntaxKind> = token_set![
     T![*],
@@ -57,17 +57,14 @@ pub(super) fn parse_scss_binary_expression(p: &mut CssParser, min_prec: u8) -> P
 
         let m = left.precede(p);
         p.bump_ts(SCSS_BINARY_OPERATOR_TOKEN_SET);
-
         parse_scss_binary_expression(p, prec + 1).or_add_diagnostic(p, expected_component_value);
-
         left = m.complete(p, SCSS_BINARY_EXPRESSION);
     }
 
     Present(left)
 }
 
-/// Parses chained unary operators (`-`, `+`, `not`) before the primary
-/// expression.
+/// Parses chained unary operators (`-`, `+`, `not`) before an operand.
 ///
 /// Example:
 /// ```scss
@@ -84,7 +81,34 @@ fn parse_scss_unary_expression(p: &mut CssParser) -> ParsedSyntax {
         return Present(m.complete(p, SCSS_UNARY_EXPRESSION));
     }
 
-    parse_scss_primary_expression(p)
+    parse_scss_expression_operand(p)
+}
+
+#[inline]
+fn is_at_scss_unary_operator(p: &mut CssParser) -> bool {
+    p.at_ts(SCSS_UNARY_OPERATOR_TOKEN_SET)
+}
+
+/// Returns the precedence level for the current SCSS binary operator token.
+///
+/// Docs: https://sass-lang.com/documentation/operators/#order-of-operations
+#[inline]
+pub(super) fn scss_binary_precedence(p: &mut CssParser) -> Option<u8> {
+    re_lex_signed_numeric_as_scss_operator(p);
+
+    if !p.at_ts(SCSS_BINARY_OPERATOR_TOKEN_SET) {
+        return None;
+    }
+
+    Some(match p.cur() {
+        T![or] => 1,
+        T![and] => 2,
+        T![==] | T![!=] => 3,
+        T![<] | T![<=] | T![>] | T![>=] => 4,
+        T![+] | T![-] => 5,
+        T![*] | T![/] | T![%] => 6,
+        _ => return None,
+    })
 }
 
 /// Re-lexes signed numeric tokens that Sass treats as binary operators.
@@ -108,31 +132,4 @@ fn should_re_lex_signed_numeric(text: &str, p: &CssParser) -> bool {
         Some(b'-') => !p.has_preceding_whitespace() && !p.has_preceding_line_break(),
         _ => false,
     }
-}
-
-/// Returns the precedence level for the current SCSS binary operator token.
-///
-/// Docs: https://sass-lang.com/documentation/operators/#order-of-operations
-#[inline]
-fn scss_binary_precedence(p: &mut CssParser) -> Option<u8> {
-    re_lex_signed_numeric_as_scss_operator(p);
-
-    if !p.at_ts(SCSS_BINARY_OPERATOR_TOKEN_SET) {
-        return None;
-    }
-
-    Some(match p.cur() {
-        T![or] => 1,
-        T![and] => 2,
-        T![==] | T![!=] => 3,
-        T![<] | T![<=] | T![>] | T![>=] => 4,
-        T![+] | T![-] => 5,
-        T![*] | T![/] | T![%] => 6,
-        _ => return None,
-    })
-}
-
-#[inline]
-fn is_at_scss_unary_operator(p: &mut CssParser) -> bool {
-    p.at_ts(SCSS_UNARY_OPERATOR_TOKEN_SET)
 }

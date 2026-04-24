@@ -1,20 +1,19 @@
 use crate::parser::CssParser;
 use crate::syntax::scss::{
-    add_scss_variable_member_function_name_diagnostic, is_at_scss_function,
-    is_at_scss_interpolated_function_or_value, is_at_scss_interpolated_string,
-    is_at_scss_module_member_access, is_at_scss_parent_selector_value, is_at_scss_variable,
-    parse_scss_function, parse_scss_interpolated_function_or_value, parse_scss_interpolated_string,
+    add_scss_variable_member_function_name_diagnostic, is_at_scss_interpolated_function_or_value,
+    is_at_scss_interpolated_string, is_at_scss_module_member_access,
+    is_at_scss_parent_selector_value, is_at_scss_variable, parse_scss_function_call_from_name,
+    parse_scss_interpolated_function_or_value, parse_scss_interpolated_string,
     parse_scss_module_member_access, parse_scss_parent_selector_value, parse_scss_variable,
 };
 use biome_css_syntax::T;
 use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax;
-use biome_parser::prelude::ParsedSyntax::Absent;
+use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 
 #[inline]
 pub(crate) fn is_at_any_scss_value(p: &mut CssParser) -> bool {
-    is_at_scss_function(p)
-        || is_at_scss_variable(p)
+    is_at_scss_variable(p)
         || is_at_scss_module_member_access(p)
         || is_at_scss_interpolated_function_or_value(p)
         || is_at_scss_parent_selector_value(p)
@@ -47,15 +46,26 @@ pub(crate) fn parse_any_scss_value(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
-    if is_at_scss_function(p) {
-        parse_scss_function(p)
-    } else if is_at_scss_variable(p) {
+    if is_at_scss_variable(p) {
         parse_scss_variable(p)
     } else if is_at_scss_module_member_access(p) {
         let has_dollar_member = p.nth_at(2, T![$]);
-        parse_scss_module_member_access(p).map(|marker| {
-            add_scss_variable_member_function_name_diagnostic(p, has_dollar_member, marker)
-        })
+        // Parse the qualified head once, then wrap it as a function only when
+        // the already parsed head is immediately followed by `(`.
+        let name = match parse_scss_module_member_access(p) {
+            Present(name) => name,
+            Absent => return Absent,
+        };
+
+        if p.at(T!['(']) {
+            // `module.$name(` still recovers as a call, but `$name` is not a
+            // valid module function member.
+            let name =
+                add_scss_variable_member_function_name_diagnostic(p, has_dollar_member, name);
+            parse_scss_function_call_from_name(p, name)
+        } else {
+            Present(name)
+        }
     } else if is_at_scss_interpolated_function_or_value(p) {
         parse_scss_interpolated_function_or_value(p)
     } else if is_at_scss_parent_selector_value(p) {

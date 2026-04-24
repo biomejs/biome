@@ -50,8 +50,8 @@ $product: $a * $b;
 $comparison: $a < $b;
 
 // Expressions with interpolation
-// TODO(interpolation support): $expr1: 10 + #{$a};
-// TODO(interpolation support): $expr2: #{$a} * #{$b};
+$expr1: 10 + #{$a};
+$expr2: #{$a} * #{$b};
 
 // String concatenation
 $concat1: "hello" + " " + "world";
@@ -161,4 +161,3 @@ $precedence4: 2 * 3 + 4 * 5; // Should be (2*3) + (4*5) = 26
 $no-space: 1+2;
 $with-space: 1 + 2;
 $mixed-space: 1+ 2;
-

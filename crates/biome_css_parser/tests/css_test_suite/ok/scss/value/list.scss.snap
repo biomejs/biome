@@ -214,23 +214,27 @@ CssRoot {
             colon_token: COLON@168..170 ":" [] [Whitespace(" ")],
             value: ScssExpression {
                 items: ScssExpressionItemList [
-                    ScssVariable {
-                        dollar_token: DOLLAR@170..171 "$" [] [],
-                        name: CssIdentifier {
-                            value_token: IDENT@171..179 "variable" [] [],
-                        },
-                    },
-                    ScssInterpolation {
-                        hash_token: HASH@179..180 "#" [] [],
-                        l_curly_token: L_CURLY@180..181 "{" [] [],
-                        value: ScssExpression {
-                            items: ScssExpressionItemList [
-                                CssIdentifier {
-                                    value_token: IDENT@181..190 "something" [] [],
+                    ScssInterpolatedValue {
+                        items: ScssInterpolatedValuePartList [
+                            ScssVariable {
+                                dollar_token: DOLLAR@170..171 "$" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@171..179 "variable" [] [],
                                 },
-                            ],
-                        },
-                        r_curly_token: R_CURLY@190..191 "}" [] [],
+                            },
+                            ScssInterpolation {
+                                hash_token: HASH@179..180 "#" [] [],
+                                l_curly_token: L_CURLY@180..181 "{" [] [],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@181..190 "something" [] [],
+                                        },
+                                    ],
+                                },
+                                r_curly_token: R_CURLY@190..191 "}" [] [],
+                            },
+                        ],
                     },
                 ],
             },
@@ -371,18 +375,20 @@ CssRoot {
       1: COLON@168..170 ":" [] [Whitespace(" ")]
       2: SCSS_EXPRESSION@170..191
         0: SCSS_EXPRESSION_ITEM_LIST@170..191
-          0: SCSS_VARIABLE@170..179
-            0: DOLLAR@170..171 "$" [] []
-            1: CSS_IDENTIFIER@171..179
-              0: IDENT@171..179 "variable" [] []
-          1: SCSS_INTERPOLATION@179..191
-            0: HASH@179..180 "#" [] []
-            1: L_CURLY@180..181 "{" [] []
-            2: SCSS_EXPRESSION@181..190
-              0: SCSS_EXPRESSION_ITEM_LIST@181..190
-                0: CSS_IDENTIFIER@181..190
-                  0: IDENT@181..190 "something" [] []
-            3: R_CURLY@190..191 "}" [] []
+          0: SCSS_INTERPOLATED_VALUE@170..191
+            0: SCSS_INTERPOLATED_VALUE_PART_LIST@170..191
+              0: SCSS_VARIABLE@170..179
+                0: DOLLAR@170..171 "$" [] []
+                1: CSS_IDENTIFIER@171..179
+                  0: IDENT@171..179 "variable" [] []
+              1: SCSS_INTERPOLATION@179..191
+                0: HASH@179..180 "#" [] []
+                1: L_CURLY@180..181 "{" [] []
+                2: SCSS_EXPRESSION@181..190
+                  0: SCSS_EXPRESSION_ITEM_LIST@181..190
+                    0: CSS_IDENTIFIER@181..190
+                      0: IDENT@181..190 "something" [] []
+                3: R_CURLY@190..191 "}" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@191..191
       4: SEMICOLON@191..192 ";" [] []
   2: EOF@192..195 "" [Newline("\n"), Newline("\n"), Newline("\n")] []

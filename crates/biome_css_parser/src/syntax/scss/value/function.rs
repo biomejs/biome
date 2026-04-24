@@ -1,16 +1,10 @@
 use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_identifier;
-use crate::syntax::scss::{
-    is_at_scss_interpolation, is_nth_at_scss_interpolation, is_nth_at_scss_module_member_access,
-    parse_scss_function_name, parse_scss_identifier_or_interpolation,
-    parse_scss_interpolated_identifier,
-};
-use crate::syntax::{ValueParsingContext, ValueParsingMode, is_nth_at_identifier};
-use biome_css_syntax::CssSyntaxKind::{
-    CSS_FUNCTION, SCSS_INTERPOLATED_IDENTIFIER, SCSS_INTERPOLATED_IDENTIFIER_PART_LIST,
-    SCSS_INTERPOLATION,
-};
+use crate::syntax::scss::{is_nth_at_scss_module_member_access, parse_scss_function_name};
+use crate::syntax::{ValueParsingContext, ValueParsingMode};
+use biome_css_syntax::CssSyntaxKind::CSS_FUNCTION;
 use biome_css_syntax::T;
+use biome_parser::CompletedMarker;
 use biome_parser::Parser;
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::prelude::ParsedSyntax;
@@ -61,78 +55,27 @@ pub(crate) fn parse_scss_function(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, CSS_FUNCTION))
 }
 
-#[inline]
-pub(crate) fn is_at_scss_interpolated_function_or_value(p: &mut CssParser) -> bool {
-    is_at_scss_interpolation(p) || is_at_identifier_with_interpolation_suffix(p)
-}
-
-/// Returns true when the current interpolation-containing identifier shape is
-/// immediately followed by `(`.
+/// Parses a function call from an already parsed SCSS function name.
 ///
-/// This uses lexer-backed interpolation-aware lookahead so the SCSS parser can
-/// distinguish `#{foo}` from `#{foo}(...)` and `foo#{1 + 1}` from
-/// `foo#{1 + 1}(...)` without reimplementing that shape check in parser code.
-#[inline]
-pub(crate) fn is_at_scss_interpolated_function(p: &mut CssParser) -> bool {
-    is_at_scss_interpolated_function_or_value(p) && p.source().is_at_scss_interpolated_function()
-}
-
-/// Parses an SCSS interpolation-led value and upgrades it to a function call
-/// when the interpolation-shaped name is followed by `(`.
+/// The caller must leave the parser at `(`.
 ///
 /// Examples:
-///
 /// ```scss
-/// #{foo}(arg)
-/// foo#{1 + 1}(arg)
-/// #{$value}
+/// math.pow(2, 3)
+/// #{fn}(arg)
 /// ```
 ///
-/// Docs: https://sass-lang.com/documentation/interpolation
+/// Docs: https://sass-lang.com/documentation/at-rules/function/#plain-css-functions
 #[inline]
-pub(crate) fn parse_scss_interpolated_function_or_value(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_scss_interpolated_function_or_value(p) {
-        return Absent;
-    }
-
-    let name = if is_at_scss_interpolation(p) {
-        parse_scss_identifier_or_interpolation(p)
-    } else {
-        parse_scss_interpolated_identifier(p)
-    };
-
-    // Guarded by is_at_scss_interpolated_function_or_value above.
-    let Some(name) = name.ok() else {
-        return Absent;
-    };
-
-    let name = if name.kind(p) == SCSS_INTERPOLATION && p.at(T!['(']) {
-        // A bare interpolation such as `#{foo}(...)` still needs to become an
-        // interpolated identifier node before we wrap it in `CSS_FUNCTION`.
-        let list = name
-            .precede(p)
-            .complete(p, SCSS_INTERPOLATED_IDENTIFIER_PART_LIST);
-        list.precede(p).complete(p, SCSS_INTERPOLATED_IDENTIFIER)
-    } else {
-        name
-    };
-
-    if !p.at(T!['(']) {
-        return Present(name);
-    }
-
+pub(crate) fn parse_scss_function_call_from_name(
+    p: &mut CssParser,
+    name: CompletedMarker,
+) -> ParsedSyntax {
     let m = name.precede(p);
-    p.bump(T!['(']);
+    p.expect(T!['(']);
     let context = ValueParsingContext::new(p, ValueParsingMode::ScssAware);
     ParameterList::new(context).parse_list(p);
     p.expect(T![')']);
 
     Present(m.complete(p, CSS_FUNCTION))
-}
-
-#[inline]
-fn is_at_identifier_with_interpolation_suffix(p: &mut CssParser) -> bool {
-    is_nth_at_identifier(p, 0)
-        && is_nth_at_scss_interpolation(p, 1)
-        && !p.has_nth_preceding_whitespace(1)
 }

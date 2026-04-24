@@ -1946,6 +1946,7 @@ AnyCssValue =
 	| CssDashedIdentifier
 	| ScssVariable
 	| ScssInterpolatedIdentifier
+	| ScssInterpolatedValue
 	| ScssModuleMemberAccess
 	| ScssParentSelectorValue
 	| CssString
@@ -2867,6 +2868,19 @@ AnyScssInterpolatedIdentifierPart =
 	| CssCustomIdentifier
 	| ScssInterpolatedIdentifierHyphen
 	| ScssInterpolation
+
+ScssInterpolatedValue =
+	items: ScssInterpolatedValuePartList
+
+ScssInterpolatedValuePartList = AnyScssInterpolatedValuePart*
+
+AnyScssInterpolatedValuePart =
+	ScssVariable
+	| ScssNamespacedVariable
+	| ScssInterpolation
+	| CssNumber
+	| AnyCssDimension
+	| CssIdentifier
 
 // @if $theme == dark { color: white; } @else { color: black; }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

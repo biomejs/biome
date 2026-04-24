@@ -323,6 +323,7 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
             .iter()
             .next(),
         "ScssInterpolatedString" => lang::ScssInterpolatedString::KIND_SET.iter().next(),
+        "ScssInterpolatedValue" => lang::ScssInterpolatedValue::KIND_SET.iter().next(),
         "ScssInterpolation" => lang::ScssInterpolation::KIND_SET.iter().next(),
         "ScssKeywordArgument" => lang::ScssKeywordArgument::KIND_SET.iter().next(),
         "ScssMapExpression" => lang::ScssMapExpression::KIND_SET.iter().next(),
@@ -591,6 +592,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "ScssIncludeAtRule" => &[("name", 1), ("arguments", 2), ("block", 3)],
         "ScssInterpolatedIdentifier" => &[("items", 0)],
         "ScssInterpolatedString" => &[("parts", 1)],
+        "ScssInterpolatedValue" => &[("items", 0)],
         "ScssInterpolation" => &[("value", 2)],
         "ScssKeywordArgument" => &[("name", 0), ("value", 2)],
         "ScssMapExpression" => &[("pairs", 1)],

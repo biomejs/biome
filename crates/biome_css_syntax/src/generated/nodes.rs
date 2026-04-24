@@ -10188,6 +10188,41 @@ pub struct ScssInterpolatedStringFields {
     pub closing_quote_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssInterpolatedValue {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssInterpolatedValue {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssInterpolatedValueFields {
+        ScssInterpolatedValueFields {
+            items: self.items(),
+        }
+    }
+    pub fn items(&self) -> ScssInterpolatedValuePartList {
+        support::list(&self.syntax, 0usize)
+    }
+}
+impl Serialize for ScssInterpolatedValue {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssInterpolatedValueFields {
+    pub items: ScssInterpolatedValuePartList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssInterpolation {
     pub(crate) syntax: SyntaxNode,
 }
@@ -15471,6 +15506,7 @@ pub enum AnyCssValue {
     CssUnicodeRange(CssUnicodeRange),
     ScssInterpolatedIdentifier(ScssInterpolatedIdentifier),
     ScssInterpolatedString(ScssInterpolatedString),
+    ScssInterpolatedValue(ScssInterpolatedValue),
     ScssModuleMemberAccess(ScssModuleMemberAccess),
     ScssParentSelectorValue(ScssParentSelectorValue),
     ScssVariable(ScssVariable),
@@ -15558,6 +15594,12 @@ impl AnyCssValue {
     pub fn as_scss_interpolated_string(&self) -> Option<&ScssInterpolatedString> {
         match &self {
             Self::ScssInterpolatedString(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolated_value(&self) -> Option<&ScssInterpolatedValue> {
+        match &self {
+            Self::ScssInterpolatedValue(item) => Some(item),
             _ => None,
         }
     }
@@ -15942,6 +15984,53 @@ impl AnyScssInterpolatedStringPart {
     pub fn as_scss_string_text(&self) -> Option<&ScssStringText> {
         match &self {
             Self::ScssStringText(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyScssInterpolatedValuePart {
+    AnyCssDimension(AnyCssDimension),
+    CssIdentifier(CssIdentifier),
+    CssNumber(CssNumber),
+    ScssInterpolation(ScssInterpolation),
+    ScssNamespacedVariable(ScssNamespacedVariable),
+    ScssVariable(ScssVariable),
+}
+impl AnyScssInterpolatedValuePart {
+    pub fn as_any_css_dimension(&self) -> Option<&AnyCssDimension> {
+        match &self {
+            Self::AnyCssDimension(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
+        match &self {
+            Self::CssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_number(&self) -> Option<&CssNumber> {
+        match &self {
+            Self::CssNumber(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolation(&self) -> Option<&ScssInterpolation> {
+        match &self {
+            Self::ScssInterpolation(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_namespaced_variable(&self) -> Option<&ScssNamespacedVariable> {
+        match &self {
+            Self::ScssNamespacedVariable(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_variable(&self) -> Option<&ScssVariable> {
+        match &self {
+            Self::ScssVariable(item) => Some(item),
             _ => None,
         }
     }
@@ -28399,6 +28488,53 @@ impl From<ScssInterpolatedString> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for ScssInterpolatedValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_INTERPOLATED_VALUE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_INTERPOLATED_VALUE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssInterpolatedValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssInterpolatedValue")
+                .field("items", &self.items())
+                .finish()
+        } else {
+            f.debug_struct("ScssInterpolatedValue").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssInterpolatedValue> for SyntaxNode {
+    fn from(n: ScssInterpolatedValue) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssInterpolatedValue> for SyntaxElement {
+    fn from(n: ScssInterpolatedValue) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for ScssInterpolation {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -39762,6 +39898,11 @@ impl From<ScssInterpolatedString> for AnyCssValue {
         Self::ScssInterpolatedString(node)
     }
 }
+impl From<ScssInterpolatedValue> for AnyCssValue {
+    fn from(node: ScssInterpolatedValue) -> Self {
+        Self::ScssInterpolatedValue(node)
+    }
+}
 impl From<ScssModuleMemberAccess> for AnyCssValue {
     fn from(node: ScssModuleMemberAccess) -> Self {
         Self::ScssModuleMemberAccess(node)
@@ -39798,6 +39939,7 @@ impl AstNode for AnyCssValue {
         .union(CssUnicodeRange::KIND_SET)
         .union(ScssInterpolatedIdentifier::KIND_SET)
         .union(ScssInterpolatedString::KIND_SET)
+        .union(ScssInterpolatedValue::KIND_SET)
         .union(ScssModuleMemberAccess::KIND_SET)
         .union(ScssParentSelectorValue::KIND_SET)
         .union(ScssVariable::KIND_SET)
@@ -39816,6 +39958,7 @@ impl AstNode for AnyCssValue {
             | CSS_UNICODE_RANGE
             | SCSS_INTERPOLATED_IDENTIFIER
             | SCSS_INTERPOLATED_STRING
+            | SCSS_INTERPOLATED_VALUE
             | SCSS_MODULE_MEMBER_ACCESS
             | SCSS_PARENT_SELECTOR_VALUE
             | SCSS_VARIABLE
@@ -39842,6 +39985,9 @@ impl AstNode for AnyCssValue {
             }
             SCSS_INTERPOLATED_STRING => {
                 Self::ScssInterpolatedString(ScssInterpolatedString { syntax })
+            }
+            SCSS_INTERPOLATED_VALUE => {
+                Self::ScssInterpolatedValue(ScssInterpolatedValue { syntax })
             }
             SCSS_MODULE_MEMBER_ACCESS => {
                 Self::ScssModuleMemberAccess(ScssModuleMemberAccess { syntax })
@@ -39882,6 +40028,7 @@ impl AstNode for AnyCssValue {
             Self::CssUnicodeRange(it) => it.syntax(),
             Self::ScssInterpolatedIdentifier(it) => it.syntax(),
             Self::ScssInterpolatedString(it) => it.syntax(),
+            Self::ScssInterpolatedValue(it) => it.syntax(),
             Self::ScssModuleMemberAccess(it) => it.syntax(),
             Self::ScssParentSelectorValue(it) => it.syntax(),
             Self::ScssVariable(it) => it.syntax(),
@@ -39904,6 +40051,7 @@ impl AstNode for AnyCssValue {
             Self::CssUnicodeRange(it) => it.into_syntax(),
             Self::ScssInterpolatedIdentifier(it) => it.into_syntax(),
             Self::ScssInterpolatedString(it) => it.into_syntax(),
+            Self::ScssInterpolatedValue(it) => it.into_syntax(),
             Self::ScssModuleMemberAccess(it) => it.into_syntax(),
             Self::ScssParentSelectorValue(it) => it.into_syntax(),
             Self::ScssVariable(it) => it.into_syntax(),
@@ -39930,6 +40078,7 @@ impl std::fmt::Debug for AnyCssValue {
             Self::CssUnicodeRange(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolatedIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolatedString(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolatedValue(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssModuleMemberAccess(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssParentSelectorValue(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssVariable(it) => std::fmt::Debug::fmt(it, f),
@@ -39954,6 +40103,7 @@ impl From<AnyCssValue> for SyntaxNode {
             AnyCssValue::CssUnicodeRange(it) => it.into_syntax(),
             AnyCssValue::ScssInterpolatedIdentifier(it) => it.into_syntax(),
             AnyCssValue::ScssInterpolatedString(it) => it.into_syntax(),
+            AnyCssValue::ScssInterpolatedValue(it) => it.into_syntax(),
             AnyCssValue::ScssModuleMemberAccess(it) => it.into_syntax(),
             AnyCssValue::ScssParentSelectorValue(it) => it.into_syntax(),
             AnyCssValue::ScssVariable(it) => it.into_syntax(),
@@ -40951,6 +41101,119 @@ impl From<AnyScssInterpolatedStringPart> for SyntaxNode {
 }
 impl From<AnyScssInterpolatedStringPart> for SyntaxElement {
     fn from(n: AnyScssInterpolatedStringPart) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssIdentifier> for AnyScssInterpolatedValuePart {
+    fn from(node: CssIdentifier) -> Self {
+        Self::CssIdentifier(node)
+    }
+}
+impl From<CssNumber> for AnyScssInterpolatedValuePart {
+    fn from(node: CssNumber) -> Self {
+        Self::CssNumber(node)
+    }
+}
+impl From<ScssInterpolation> for AnyScssInterpolatedValuePart {
+    fn from(node: ScssInterpolation) -> Self {
+        Self::ScssInterpolation(node)
+    }
+}
+impl From<ScssNamespacedVariable> for AnyScssInterpolatedValuePart {
+    fn from(node: ScssNamespacedVariable) -> Self {
+        Self::ScssNamespacedVariable(node)
+    }
+}
+impl From<ScssVariable> for AnyScssInterpolatedValuePart {
+    fn from(node: ScssVariable) -> Self {
+        Self::ScssVariable(node)
+    }
+}
+impl AstNode for AnyScssInterpolatedValuePart {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssDimension::KIND_SET
+        .union(CssIdentifier::KIND_SET)
+        .union(CssNumber::KIND_SET)
+        .union(ScssInterpolation::KIND_SET)
+        .union(ScssNamespacedVariable::KIND_SET)
+        .union(ScssVariable::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            CSS_IDENTIFIER
+            | CSS_NUMBER
+            | SCSS_INTERPOLATION
+            | SCSS_NAMESPACED_VARIABLE
+            | SCSS_VARIABLE => true,
+            k if AnyCssDimension::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
+            CSS_NUMBER => Self::CssNumber(CssNumber { syntax }),
+            SCSS_INTERPOLATION => Self::ScssInterpolation(ScssInterpolation { syntax }),
+            SCSS_NAMESPACED_VARIABLE => {
+                Self::ScssNamespacedVariable(ScssNamespacedVariable { syntax })
+            }
+            SCSS_VARIABLE => Self::ScssVariable(ScssVariable { syntax }),
+            _ => {
+                if let Some(any_css_dimension) = AnyCssDimension::cast(syntax) {
+                    return Some(Self::AnyCssDimension(any_css_dimension));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssIdentifier(it) => it.syntax(),
+            Self::CssNumber(it) => it.syntax(),
+            Self::ScssInterpolation(it) => it.syntax(),
+            Self::ScssNamespacedVariable(it) => it.syntax(),
+            Self::ScssVariable(it) => it.syntax(),
+            Self::AnyCssDimension(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssIdentifier(it) => it.into_syntax(),
+            Self::CssNumber(it) => it.into_syntax(),
+            Self::ScssInterpolation(it) => it.into_syntax(),
+            Self::ScssNamespacedVariable(it) => it.into_syntax(),
+            Self::ScssVariable(it) => it.into_syntax(),
+            Self::AnyCssDimension(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyScssInterpolatedValuePart {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AnyCssDimension(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssNumber(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolation(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssNamespacedVariable(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssVariable(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyScssInterpolatedValuePart> for SyntaxNode {
+    fn from(n: AnyScssInterpolatedValuePart) -> Self {
+        match n {
+            AnyScssInterpolatedValuePart::AnyCssDimension(it) => it.into_syntax(),
+            AnyScssInterpolatedValuePart::CssIdentifier(it) => it.into_syntax(),
+            AnyScssInterpolatedValuePart::CssNumber(it) => it.into_syntax(),
+            AnyScssInterpolatedValuePart::ScssInterpolation(it) => it.into_syntax(),
+            AnyScssInterpolatedValuePart::ScssNamespacedVariable(it) => it.into_syntax(),
+            AnyScssInterpolatedValuePart::ScssVariable(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyScssInterpolatedValuePart> for SyntaxElement {
+    fn from(n: AnyScssInterpolatedValuePart) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -42090,6 +42353,11 @@ impl std::fmt::Display for AnyScssInterpolatedIdentifierPart {
     }
 }
 impl std::fmt::Display for AnyScssInterpolatedStringPart {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyScssInterpolatedValuePart {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -43325,6 +43593,11 @@ impl std::fmt::Display for ScssInterpolatedIdentifierHyphen {
     }
 }
 impl std::fmt::Display for ScssInterpolatedString {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssInterpolatedValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -48934,6 +49207,88 @@ impl IntoIterator for &ScssInterpolatedStringPartList {
 impl IntoIterator for ScssInterpolatedStringPartList {
     type Item = AnyScssInterpolatedStringPart;
     type IntoIter = AstNodeListIterator<Language, AnyScssInterpolatedStringPart>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct ScssInterpolatedValuePartList {
+    syntax_list: SyntaxList,
+}
+impl ScssInterpolatedValuePartList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for ScssInterpolatedValuePartList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_INTERPOLATED_VALUE_PART_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_INTERPOLATED_VALUE_PART_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for ScssInterpolatedValuePartList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for ScssInterpolatedValuePartList {
+    type Language = Language;
+    type Node = AnyScssInterpolatedValuePart;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for ScssInterpolatedValuePartList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("ScssInterpolatedValuePartList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &ScssInterpolatedValuePartList {
+    type Item = AnyScssInterpolatedValuePart;
+    type IntoIter = AstNodeListIterator<Language, AnyScssInterpolatedValuePart>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for ScssInterpolatedValuePartList {
+    type Item = AnyScssInterpolatedValuePart;
+    type IntoIter = AstNodeListIterator<Language, AnyScssInterpolatedValuePart>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

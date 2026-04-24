@@ -497,7 +497,18 @@ pub(crate) fn parse_any_value_with_context(
 }
 
 #[inline]
+fn parse_any_non_function_css_value(p: &mut CssParser) -> ParsedSyntax {
+    if is_at_ratio(p) {
+        parse_ratio(p)
+    } else {
+        parse_any_non_function_css_value_atom(p)
+    }
+}
+
+#[inline]
 fn parse_any_exclusive_scss_value(p: &mut CssParser) -> ParsedSyntax {
+    // `module.$name(` must fall through to module-member parsing so it can
+    // recover as a call with the `$` member diagnostic.
     if is_at_scss_function(p) && !p.nth_at(2, T![$]) {
         CssSyntaxFeatures::Scss.parse_exclusive_syntax(p, parse_scss_function, |p, m| {
             scss_only_syntax_error(p, "SCSS qualified function names", m.range(p))
@@ -530,8 +541,13 @@ fn parse_any_exclusive_scss_value(p: &mut CssParser) -> ParsedSyntax {
     }
 }
 
+/// Parses one non-function CSS value atom without claiming `number / number`
+/// as a ratio.
+///
+/// This split lets SCSS expression parsing own numeric heads directly while
+/// the regular CSS wrapper still preserves `number / number` as `CSS_RATIO`.
 #[inline]
-fn parse_any_non_function_css_value(p: &mut CssParser) -> ParsedSyntax {
+fn parse_any_non_function_css_value_atom(p: &mut CssParser) -> ParsedSyntax {
     if is_at_dashed_identifier(p) {
         if p.nth_at(1, T![-]) && p.nth_at(2, T![*]) {
             CssSyntaxFeatures::Tailwind.parse_exclusive_syntax(
@@ -550,8 +566,6 @@ fn parse_any_non_function_css_value(p: &mut CssParser) -> ParsedSyntax {
         parse_string(p)
     } else if is_at_any_dimension(p) {
         parse_any_dimension(p)
-    } else if is_at_ratio(p) {
-        parse_ratio(p)
     } else if p.at(CSS_NUMBER_LITERAL) {
         parse_regular_number(p)
     } else if is_at_color(p) {

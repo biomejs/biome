@@ -4127,6 +4127,14 @@ impl ScssInterpolatedString {
         )
     }
 }
+impl ScssInterpolatedValue {
+    pub fn with_items(self, element: ScssInterpolatedValuePartList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl ScssInterpolation {
     pub fn with_hash_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(

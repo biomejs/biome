@@ -3,10 +3,10 @@ foo {
   test-2: 10 /10;
   test-3: 10/ 10;
   test-4: 10 / 10;
-  // TODO(interpolation support): test-5: 10/#{10};
-  // TODO(interpolation support): test-6: 10 /#{10};
-  // TODO(interpolation support): test-7: 10/ #{10};
-  // TODO(interpolation support): test-8: 10 / #{10};
+  test-5: 10/#{10};
+  test-6: 10 /#{10};
+  test-7: 10/ #{10};
+  test-8: 10 / #{10};
   // TODO(interpolation support): test-9: 10/1#{0};
   // TODO(interpolation support): test-10: 10 /1#{0};
   // TODO(interpolation support): test-11: 10/ 1#{0};
@@ -15,10 +15,10 @@ foo {
   // TODO(interpolation support): test-14: 10 /#{1}0;
   // TODO(interpolation support): test-15: 10/ #{1}0;
   // TODO(interpolation support): test-16: 10 / #{1}0;
-  // TODO(interpolation support): test-17: #{10}/#{10};
-  // TODO(interpolation support): test-18: #{10} /#{10};
-  // TODO(interpolation support): test-19: #{10}/ #{10};
-  // TODO(interpolation support): test-20: #{10} / #{10};
+  test-17: #{10}/#{10};
+  test-18: #{10} /#{10};
+  test-19: #{10}/ #{10};
+  test-20: #{10} / #{10};
   // TODO(interpolation support): test-21: #{10}/1#{0};
   // TODO(interpolation support): test-22: #{10} /1#{0};
   // TODO(interpolation support): test-23: #{10}/ 1#{0};
@@ -229,6 +229,5 @@ foo {
   // TODO(interpolation support): test-51: #AAA/ #{itpl};
   // TODO(interpolation support): test-52: #AAA / #{itpl};
 }
-
 
 

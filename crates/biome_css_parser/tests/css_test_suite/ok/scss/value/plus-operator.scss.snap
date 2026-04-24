@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
 expression: snapshot
 ---
 
@@ -11,10 +12,10 @@ foo {
   test-2: 10 +10;
   test-3: 10+ 10;
   test-4: 10 + 10;
-  // TODO(interpolation support): test-5: 10+#{10};
-  // TODO(interpolation support): test-6: 10 +#{10};
-  // TODO(interpolation support): test-7: 10+ #{10};
-  // TODO(interpolation support): test-8: 10 + #{10};
+  test-5: 10+#{10};
+  test-6: 10 +#{10};
+  test-7: 10+ #{10};
+  test-8: 10 + #{10};
   // TODO(interpolation support): test-9: 10+1#{0};
   // TODO(interpolation support): test-10: 10 +1#{0};
   // TODO(interpolation support): test-11: 10+ 1#{0};
@@ -23,10 +24,10 @@ foo {
   // TODO(interpolation support): test-14: 10 +#{1}0;
   // TODO(interpolation support): test-15: 10+ #{1}0;
   // TODO(interpolation support): test-16: 10 + #{1}0;
-  // TODO(interpolation support): test-17: #{10}+#{10};
-  // TODO(interpolation support): test-18: #{10} +#{10};
-  // TODO(interpolation support): test-19: #{10}+ #{10};
-  // TODO(interpolation support): test-20: #{10} + #{10};
+  test-17: #{10}+#{10};
+  test-18: #{10} +#{10};
+  test-19: #{10}+ #{10};
+  test-20: #{10} + #{10};
   // TODO(interpolation support): test-21: #{10}+1#{0};
   // TODO(interpolation support): test-22: #{10} +1#{0};
   // TODO(interpolation support): test-23: #{10}+ 1#{0};
@@ -197,7 +198,6 @@ foo {
 
 
 
-
 ```
 
 
@@ -323,8 +323,316 @@ CssRoot {
                         },
                         semicolon_token: SEMICOLON@76..77 ";" [] [],
                     },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@77..86 "test-5" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@86..88 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssBinaryExpression {
+                                            left: CssNumber {
+                                                value_token: CSS_NUMBER_LITERAL@88..90 "10" [] [],
+                                            },
+                                            operator: PLUS@90..91 "+" [] [],
+                                            right: ScssInterpolation {
+                                                hash_token: HASH@91..92 "#" [] [],
+                                                l_curly_token: L_CURLY@92..93 "{" [] [],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@93..95 "10" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                                r_curly_token: R_CURLY@95..96 "}" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@96..97 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@97..106 "test-6" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@106..108 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssBinaryExpression {
+                                            left: CssNumber {
+                                                value_token: CSS_NUMBER_LITERAL@108..111 "10" [] [Whitespace(" ")],
+                                            },
+                                            operator: PLUS@111..112 "+" [] [],
+                                            right: ScssInterpolation {
+                                                hash_token: HASH@112..113 "#" [] [],
+                                                l_curly_token: L_CURLY@113..114 "{" [] [],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@114..116 "10" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                                r_curly_token: R_CURLY@116..117 "}" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@117..118 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@118..127 "test-7" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@127..129 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssBinaryExpression {
+                                            left: CssNumber {
+                                                value_token: CSS_NUMBER_LITERAL@129..131 "10" [] [],
+                                            },
+                                            operator: PLUS@131..133 "+" [] [Whitespace(" ")],
+                                            right: ScssInterpolation {
+                                                hash_token: HASH@133..134 "#" [] [],
+                                                l_curly_token: L_CURLY@134..135 "{" [] [],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@135..137 "10" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                                r_curly_token: R_CURLY@137..138 "}" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@138..139 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@139..148 "test-8" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@148..150 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssBinaryExpression {
+                                            left: CssNumber {
+                                                value_token: CSS_NUMBER_LITERAL@150..153 "10" [] [Whitespace(" ")],
+                                            },
+                                            operator: PLUS@153..155 "+" [] [Whitespace(" ")],
+                                            right: ScssInterpolation {
+                                                hash_token: HASH@155..156 "#" [] [],
+                                                l_curly_token: L_CURLY@156..157 "{" [] [],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@157..159 "10" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                                r_curly_token: R_CURLY@159..160 "}" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@160..161 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@161..602 "test-17" [Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@602..604 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssBinaryExpression {
+                                            left: ScssInterpolation {
+                                                hash_token: HASH@604..605 "#" [] [],
+                                                l_curly_token: L_CURLY@605..606 "{" [] [],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@606..608 "10" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                                r_curly_token: R_CURLY@608..609 "}" [] [],
+                                            },
+                                            operator: PLUS@609..610 "+" [] [],
+                                            right: ScssInterpolation {
+                                                hash_token: HASH@610..611 "#" [] [],
+                                                l_curly_token: L_CURLY@611..612 "{" [] [],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@612..614 "10" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                                r_curly_token: R_CURLY@614..615 "}" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@615..616 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@616..626 "test-18" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@626..628 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssBinaryExpression {
+                                            left: ScssInterpolation {
+                                                hash_token: HASH@628..629 "#" [] [],
+                                                l_curly_token: L_CURLY@629..630 "{" [] [],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@630..632 "10" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                                r_curly_token: R_CURLY@632..634 "}" [] [Whitespace(" ")],
+                                            },
+                                            operator: PLUS@634..635 "+" [] [],
+                                            right: ScssInterpolation {
+                                                hash_token: HASH@635..636 "#" [] [],
+                                                l_curly_token: L_CURLY@636..637 "{" [] [],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@637..639 "10" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                                r_curly_token: R_CURLY@639..640 "}" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@640..641 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@641..651 "test-19" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@651..653 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssBinaryExpression {
+                                            left: ScssInterpolation {
+                                                hash_token: HASH@653..654 "#" [] [],
+                                                l_curly_token: L_CURLY@654..655 "{" [] [],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@655..657 "10" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                                r_curly_token: R_CURLY@657..658 "}" [] [],
+                                            },
+                                            operator: PLUS@658..660 "+" [] [Whitespace(" ")],
+                                            right: ScssInterpolation {
+                                                hash_token: HASH@660..661 "#" [] [],
+                                                l_curly_token: L_CURLY@661..662 "{" [] [],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@662..664 "10" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                                r_curly_token: R_CURLY@664..665 "}" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@665..666 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@666..676 "test-20" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@676..678 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssBinaryExpression {
+                                            left: ScssInterpolation {
+                                                hash_token: HASH@678..679 "#" [] [],
+                                                l_curly_token: L_CURLY@679..680 "{" [] [],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@680..682 "10" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                                r_curly_token: R_CURLY@682..684 "}" [] [Whitespace(" ")],
+                                            },
+                                            operator: PLUS@684..686 "+" [] [Whitespace(" ")],
+                                            right: ScssInterpolation {
+                                                hash_token: HASH@686..687 "#" [] [],
+                                                l_curly_token: L_CURLY@687..688 "{" [] [],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@688..690 "10" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                                r_curly_token: R_CURLY@690..691 "}" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@691..692 ";" [] [],
+                    },
                 ],
-                r_curly_token: R_CURLY@77..2090 "}" [Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n")] [],
+                r_curly_token: R_CURLY@692..1834 "}" [Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n")] [],
             },
         },
         CssQualifiedRule {
@@ -334,32 +642,32 @@ CssRoot {
                     simple_selector: CssTypeSelector {
                         namespace: missing (optional),
                         ident: CssIdentifier {
-                            value_token: IDENT@2090..2096 "foo" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                            value_token: IDENT@1834..1840 "foo" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
                         },
                     },
                     sub_selectors: CssSubSelectorList [],
                 },
             ],
             block: CssDeclarationOrRuleBlock {
-                l_curly_token: L_CURLY@2096..2097 "{" [] [],
+                l_curly_token: L_CURLY@1840..1841 "{" [] [],
                 items: CssDeclarationOrRuleList [
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@2097..2106 "test-5" [Newline("\n"), Whitespace("  ")] [],
+                                    value_token: IDENT@1841..1850 "test-5" [Newline("\n"), Whitespace("  ")] [],
                                 },
-                                colon_token: COLON@2106..2108 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@1850..1852 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         ScssBinaryExpression {
                                             left: CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@2108..2110 "10" [] [],
+                                                value_token: CSS_NUMBER_LITERAL@1852..1854 "10" [] [],
                                             },
-                                            operator: PLUS@2110..2111 "+" [] [],
+                                            operator: PLUS@1854..1855 "+" [] [],
                                             right: CssRegularDimension {
-                                                value_token: CSS_NUMBER_LITERAL@2111..2113 "10" [] [],
-                                                unit_token: IDENT@2113..2115 "px" [] [],
+                                                value_token: CSS_NUMBER_LITERAL@1855..1857 "10" [] [],
+                                                unit_token: IDENT@1857..1859 "px" [] [],
                                             },
                                         },
                                     ],
@@ -367,25 +675,25 @@ CssRoot {
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@2115..2116 ";" [] [],
+                        semicolon_token: SEMICOLON@1859..1860 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@2116..2125 "test-6" [Newline("\n"), Whitespace("  ")] [],
+                                    value_token: IDENT@1860..1869 "test-6" [Newline("\n"), Whitespace("  ")] [],
                                 },
-                                colon_token: COLON@2125..2127 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@1869..1871 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         ScssBinaryExpression {
                                             left: CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@2127..2130 "10" [] [Whitespace(" ")],
+                                                value_token: CSS_NUMBER_LITERAL@1871..1874 "10" [] [Whitespace(" ")],
                                             },
-                                            operator: PLUS@2130..2131 "+" [] [],
+                                            operator: PLUS@1874..1875 "+" [] [],
                                             right: CssRegularDimension {
-                                                value_token: CSS_NUMBER_LITERAL@2131..2133 "10" [] [],
-                                                unit_token: IDENT@2133..2135 "px" [] [],
+                                                value_token: CSS_NUMBER_LITERAL@1875..1877 "10" [] [],
+                                                unit_token: IDENT@1877..1879 "px" [] [],
                                             },
                                         },
                                     ],
@@ -393,25 +701,25 @@ CssRoot {
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@2135..2136 ";" [] [],
+                        semicolon_token: SEMICOLON@1879..1880 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@2136..2145 "test-7" [Newline("\n"), Whitespace("  ")] [],
+                                    value_token: IDENT@1880..1889 "test-7" [Newline("\n"), Whitespace("  ")] [],
                                 },
-                                colon_token: COLON@2145..2147 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@1889..1891 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         ScssBinaryExpression {
                                             left: CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@2147..2149 "10" [] [],
+                                                value_token: CSS_NUMBER_LITERAL@1891..1893 "10" [] [],
                                             },
-                                            operator: PLUS@2149..2151 "+" [] [Whitespace(" ")],
+                                            operator: PLUS@1893..1895 "+" [] [Whitespace(" ")],
                                             right: CssRegularDimension {
-                                                value_token: CSS_NUMBER_LITERAL@2151..2153 "10" [] [],
-                                                unit_token: IDENT@2153..2155 "px" [] [],
+                                                value_token: CSS_NUMBER_LITERAL@1895..1897 "10" [] [],
+                                                unit_token: IDENT@1897..1899 "px" [] [],
                                             },
                                         },
                                     ],
@@ -419,25 +727,25 @@ CssRoot {
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@2155..2156 ";" [] [],
+                        semicolon_token: SEMICOLON@1899..1900 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@2156..2165 "test-8" [Newline("\n"), Whitespace("  ")] [],
+                                    value_token: IDENT@1900..1909 "test-8" [Newline("\n"), Whitespace("  ")] [],
                                 },
-                                colon_token: COLON@2165..2167 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@1909..1911 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         ScssBinaryExpression {
                                             left: CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@2167..2170 "10" [] [Whitespace(" ")],
+                                                value_token: CSS_NUMBER_LITERAL@1911..1914 "10" [] [Whitespace(" ")],
                                             },
-                                            operator: PLUS@2170..2172 "+" [] [Whitespace(" ")],
+                                            operator: PLUS@1914..1916 "+" [] [Whitespace(" ")],
                                             right: CssRegularDimension {
-                                                value_token: CSS_NUMBER_LITERAL@2172..2174 "10" [] [],
-                                                unit_token: IDENT@2174..2176 "px" [] [],
+                                                value_token: CSS_NUMBER_LITERAL@1916..1918 "10" [] [],
+                                                unit_token: IDENT@1918..1920 "px" [] [],
                                             },
                                         },
                                     ],
@@ -445,26 +753,26 @@ CssRoot {
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@2176..2177 ";" [] [],
+                        semicolon_token: SEMICOLON@1920..1921 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@2177..3082 "test-25" [Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  ")] [],
+                                    value_token: IDENT@1921..2826 "test-25" [Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  ")] [],
                                 },
-                                colon_token: COLON@3082..3084 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@2826..2828 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         ScssBinaryExpression {
                                             left: CssRegularDimension {
-                                                value_token: CSS_NUMBER_LITERAL@3084..3086 "10" [] [],
-                                                unit_token: IDENT@3086..3088 "px" [] [],
+                                                value_token: CSS_NUMBER_LITERAL@2828..2830 "10" [] [],
+                                                unit_token: IDENT@2830..2832 "px" [] [],
                                             },
-                                            operator: PLUS@3088..3089 "+" [] [],
+                                            operator: PLUS@2832..2833 "+" [] [],
                                             right: CssRegularDimension {
-                                                value_token: CSS_NUMBER_LITERAL@3089..3091 "10" [] [],
-                                                unit_token: IDENT@3091..3093 "px" [] [],
+                                                value_token: CSS_NUMBER_LITERAL@2833..2835 "10" [] [],
+                                                unit_token: IDENT@2835..2837 "px" [] [],
                                             },
                                         },
                                     ],
@@ -472,26 +780,26 @@ CssRoot {
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@3093..3094 ";" [] [],
+                        semicolon_token: SEMICOLON@2837..2838 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@3094..3104 "test-26" [Newline("\n"), Whitespace("  ")] [],
+                                    value_token: IDENT@2838..2848 "test-26" [Newline("\n"), Whitespace("  ")] [],
                                 },
-                                colon_token: COLON@3104..3106 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@2848..2850 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         ScssBinaryExpression {
                                             left: CssRegularDimension {
-                                                value_token: CSS_NUMBER_LITERAL@3106..3108 "10" [] [],
-                                                unit_token: IDENT@3108..3111 "px" [] [Whitespace(" ")],
+                                                value_token: CSS_NUMBER_LITERAL@2850..2852 "10" [] [],
+                                                unit_token: IDENT@2852..2855 "px" [] [Whitespace(" ")],
                                             },
-                                            operator: PLUS@3111..3112 "+" [] [],
+                                            operator: PLUS@2855..2856 "+" [] [],
                                             right: CssRegularDimension {
-                                                value_token: CSS_NUMBER_LITERAL@3112..3114 "10" [] [],
-                                                unit_token: IDENT@3114..3116 "px" [] [],
+                                                value_token: CSS_NUMBER_LITERAL@2856..2858 "10" [] [],
+                                                unit_token: IDENT@2858..2860 "px" [] [],
                                             },
                                         },
                                     ],
@@ -499,26 +807,26 @@ CssRoot {
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@3116..3117 ";" [] [],
+                        semicolon_token: SEMICOLON@2860..2861 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@3117..3127 "test-27" [Newline("\n"), Whitespace("  ")] [],
+                                    value_token: IDENT@2861..2871 "test-27" [Newline("\n"), Whitespace("  ")] [],
                                 },
-                                colon_token: COLON@3127..3129 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@2871..2873 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         ScssBinaryExpression {
                                             left: CssRegularDimension {
-                                                value_token: CSS_NUMBER_LITERAL@3129..3131 "10" [] [],
-                                                unit_token: IDENT@3131..3133 "px" [] [],
+                                                value_token: CSS_NUMBER_LITERAL@2873..2875 "10" [] [],
+                                                unit_token: IDENT@2875..2877 "px" [] [],
                                             },
-                                            operator: PLUS@3133..3135 "+" [] [Whitespace(" ")],
+                                            operator: PLUS@2877..2879 "+" [] [Whitespace(" ")],
                                             right: CssRegularDimension {
-                                                value_token: CSS_NUMBER_LITERAL@3135..3137 "10" [] [],
-                                                unit_token: IDENT@3137..3139 "px" [] [],
+                                                value_token: CSS_NUMBER_LITERAL@2879..2881 "10" [] [],
+                                                unit_token: IDENT@2881..2883 "px" [] [],
                                             },
                                         },
                                     ],
@@ -526,26 +834,26 @@ CssRoot {
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@3139..3140 ";" [] [],
+                        semicolon_token: SEMICOLON@2883..2884 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@3140..3150 "test-28" [Newline("\n"), Whitespace("  ")] [],
+                                    value_token: IDENT@2884..2894 "test-28" [Newline("\n"), Whitespace("  ")] [],
                                 },
-                                colon_token: COLON@3150..3152 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@2894..2896 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         ScssBinaryExpression {
                                             left: CssRegularDimension {
-                                                value_token: CSS_NUMBER_LITERAL@3152..3154 "10" [] [],
-                                                unit_token: IDENT@3154..3157 "px" [] [Whitespace(" ")],
+                                                value_token: CSS_NUMBER_LITERAL@2896..2898 "10" [] [],
+                                                unit_token: IDENT@2898..2901 "px" [] [Whitespace(" ")],
                                             },
-                                            operator: PLUS@3157..3159 "+" [] [Whitespace(" ")],
+                                            operator: PLUS@2901..2903 "+" [] [Whitespace(" ")],
                                             right: CssRegularDimension {
-                                                value_token: CSS_NUMBER_LITERAL@3159..3161 "10" [] [],
-                                                unit_token: IDENT@3161..3163 "px" [] [],
+                                                value_token: CSS_NUMBER_LITERAL@2903..2905 "10" [] [],
+                                                unit_token: IDENT@2905..2907 "px" [] [],
                                             },
                                         },
                                     ],
@@ -553,10 +861,10 @@ CssRoot {
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@3163..3164 ";" [] [],
+                        semicolon_token: SEMICOLON@2907..2908 ";" [] [],
                     },
                 ],
-                r_curly_token: R_CURLY@3164..6534 "}" [Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n")] [],
+                r_curly_token: R_CURLY@2908..6278 "}" [Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n")] [],
             },
         },
         CssQualifiedRule {
@@ -566,31 +874,31 @@ CssRoot {
                     simple_selector: CssTypeSelector {
                         namespace: missing (optional),
                         ident: CssIdentifier {
-                            value_token: IDENT@6534..6540 "foo" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                            value_token: IDENT@6278..6284 "foo" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
                         },
                     },
                     sub_selectors: CssSubSelectorList [],
                 },
             ],
             block: CssDeclarationOrRuleBlock {
-                l_curly_token: L_CURLY@6540..6541 "{" [] [],
+                l_curly_token: L_CURLY@6284..6285 "{" [] [],
                 items: CssDeclarationOrRuleList [
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@6541..6550 "test-1" [Newline("\n"), Whitespace("  ")] [],
+                                    value_token: IDENT@6285..6294 "test-1" [Newline("\n"), Whitespace("  ")] [],
                                 },
-                                colon_token: COLON@6550..6552 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@6294..6296 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         ScssBinaryExpression {
                                             left: CssIdentifier {
-                                                value_token: IDENT@6552..6559 "literal" [] [],
+                                                value_token: IDENT@6296..6303 "literal" [] [],
                                             },
-                                            operator: PLUS@6559..6560 "+" [] [],
+                                            operator: PLUS@6303..6304 "+" [] [],
                                             right: CssIdentifier {
-                                                value_token: IDENT@6560..6567 "literal" [] [],
+                                                value_token: IDENT@6304..6311 "literal" [] [],
                                             },
                                         },
                                     ],
@@ -598,24 +906,24 @@ CssRoot {
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@6567..6568 ";" [] [],
+                        semicolon_token: SEMICOLON@6311..6312 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@6568..6577 "test-2" [Newline("\n"), Whitespace("  ")] [],
+                                    value_token: IDENT@6312..6321 "test-2" [Newline("\n"), Whitespace("  ")] [],
                                 },
-                                colon_token: COLON@6577..6579 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@6321..6323 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         ScssBinaryExpression {
                                             left: CssIdentifier {
-                                                value_token: IDENT@6579..6587 "literal" [] [Whitespace(" ")],
+                                                value_token: IDENT@6323..6331 "literal" [] [Whitespace(" ")],
                                             },
-                                            operator: PLUS@6587..6588 "+" [] [],
+                                            operator: PLUS@6331..6332 "+" [] [],
                                             right: CssIdentifier {
-                                                value_token: IDENT@6588..6595 "literal" [] [],
+                                                value_token: IDENT@6332..6339 "literal" [] [],
                                             },
                                         },
                                     ],
@@ -623,24 +931,24 @@ CssRoot {
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@6595..6596 ";" [] [],
+                        semicolon_token: SEMICOLON@6339..6340 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@6596..6605 "test-3" [Newline("\n"), Whitespace("  ")] [],
+                                    value_token: IDENT@6340..6349 "test-3" [Newline("\n"), Whitespace("  ")] [],
                                 },
-                                colon_token: COLON@6605..6607 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@6349..6351 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         ScssBinaryExpression {
                                             left: CssIdentifier {
-                                                value_token: IDENT@6607..6614 "literal" [] [],
+                                                value_token: IDENT@6351..6358 "literal" [] [],
                                             },
-                                            operator: PLUS@6614..6616 "+" [] [Whitespace(" ")],
+                                            operator: PLUS@6358..6360 "+" [] [Whitespace(" ")],
                                             right: CssIdentifier {
-                                                value_token: IDENT@6616..6623 "literal" [] [],
+                                                value_token: IDENT@6360..6367 "literal" [] [],
                                             },
                                         },
                                     ],
@@ -648,24 +956,24 @@ CssRoot {
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@6623..6624 ";" [] [],
+                        semicolon_token: SEMICOLON@6367..6368 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@6624..6633 "test-4" [Newline("\n"), Whitespace("  ")] [],
+                                    value_token: IDENT@6368..6377 "test-4" [Newline("\n"), Whitespace("  ")] [],
                                 },
-                                colon_token: COLON@6633..6635 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@6377..6379 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         ScssBinaryExpression {
                                             left: CssIdentifier {
-                                                value_token: IDENT@6635..6643 "literal" [] [Whitespace(" ")],
+                                                value_token: IDENT@6379..6387 "literal" [] [Whitespace(" ")],
                                             },
-                                            operator: PLUS@6643..6645 "+" [] [Whitespace(" ")],
+                                            operator: PLUS@6387..6389 "+" [] [Whitespace(" ")],
                                             right: CssIdentifier {
-                                                value_token: IDENT@6645..6652 "literal" [] [],
+                                                value_token: IDENT@6389..6396 "literal" [] [],
                                             },
                                         },
                                     ],
@@ -673,24 +981,24 @@ CssRoot {
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@6652..6653 ";" [] [],
+                        semicolon_token: SEMICOLON@6396..6397 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@6653..6662 "test-5" [Newline("\n"), Whitespace("  ")] [],
+                                    value_token: IDENT@6397..6406 "test-5" [Newline("\n"), Whitespace("  ")] [],
                                 },
-                                colon_token: COLON@6662..6664 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@6406..6408 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         ScssBinaryExpression {
                                             left: CssIdentifier {
-                                                value_token: IDENT@6664..6671 "literal" [] [],
+                                                value_token: IDENT@6408..6415 "literal" [] [],
                                             },
-                                            operator: PLUS@6671..6672 "+" [] [],
+                                            operator: PLUS@6415..6416 "+" [] [],
                                             right: CssString {
-                                                value_token: CSS_STRING_LITERAL@6672..6680 "\"quoted\"" [] [],
+                                                value_token: CSS_STRING_LITERAL@6416..6424 "\"quoted\"" [] [],
                                             },
                                         },
                                     ],
@@ -698,24 +1006,24 @@ CssRoot {
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@6680..6681 ";" [] [],
+                        semicolon_token: SEMICOLON@6424..6425 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@6681..6690 "test-6" [Newline("\n"), Whitespace("  ")] [],
+                                    value_token: IDENT@6425..6434 "test-6" [Newline("\n"), Whitespace("  ")] [],
                                 },
-                                colon_token: COLON@6690..6692 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@6434..6436 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         ScssBinaryExpression {
                                             left: CssIdentifier {
-                                                value_token: IDENT@6692..6700 "literal" [] [Whitespace(" ")],
+                                                value_token: IDENT@6436..6444 "literal" [] [Whitespace(" ")],
                                             },
-                                            operator: PLUS@6700..6701 "+" [] [],
+                                            operator: PLUS@6444..6445 "+" [] [],
                                             right: CssString {
-                                                value_token: CSS_STRING_LITERAL@6701..6709 "\"quoted\"" [] [],
+                                                value_token: CSS_STRING_LITERAL@6445..6453 "\"quoted\"" [] [],
                                             },
                                         },
                                     ],
@@ -723,24 +1031,24 @@ CssRoot {
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@6709..6710 ";" [] [],
+                        semicolon_token: SEMICOLON@6453..6454 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@6710..6719 "test-7" [Newline("\n"), Whitespace("  ")] [],
+                                    value_token: IDENT@6454..6463 "test-7" [Newline("\n"), Whitespace("  ")] [],
                                 },
-                                colon_token: COLON@6719..6721 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@6463..6465 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         ScssBinaryExpression {
                                             left: CssIdentifier {
-                                                value_token: IDENT@6721..6728 "literal" [] [],
+                                                value_token: IDENT@6465..6472 "literal" [] [],
                                             },
-                                            operator: PLUS@6728..6730 "+" [] [Whitespace(" ")],
+                                            operator: PLUS@6472..6474 "+" [] [Whitespace(" ")],
                                             right: CssString {
-                                                value_token: CSS_STRING_LITERAL@6730..6738 "\"quoted\"" [] [],
+                                                value_token: CSS_STRING_LITERAL@6474..6482 "\"quoted\"" [] [],
                                             },
                                         },
                                     ],
@@ -748,24 +1056,24 @@ CssRoot {
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@6738..6739 ";" [] [],
+                        semicolon_token: SEMICOLON@6482..6483 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@6739..6748 "test-8" [Newline("\n"), Whitespace("  ")] [],
+                                    value_token: IDENT@6483..6492 "test-8" [Newline("\n"), Whitespace("  ")] [],
                                 },
-                                colon_token: COLON@6748..6750 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@6492..6494 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         ScssBinaryExpression {
                                             left: CssIdentifier {
-                                                value_token: IDENT@6750..6758 "literal" [] [Whitespace(" ")],
+                                                value_token: IDENT@6494..6502 "literal" [] [Whitespace(" ")],
                                             },
-                                            operator: PLUS@6758..6760 "+" [] [Whitespace(" ")],
+                                            operator: PLUS@6502..6504 "+" [] [Whitespace(" ")],
                                             right: CssString {
-                                                value_token: CSS_STRING_LITERAL@6760..6768 "\"quoted\"" [] [],
+                                                value_token: CSS_STRING_LITERAL@6504..6512 "\"quoted\"" [] [],
                                             },
                                         },
                                     ],
@@ -773,24 +1081,24 @@ CssRoot {
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@6768..6769 ";" [] [],
+                        semicolon_token: SEMICOLON@6512..6513 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@6769..7610 "test-21" [Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  ")] [],
+                                    value_token: IDENT@6513..7354 "test-21" [Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  ")] [],
                                 },
-                                colon_token: COLON@7610..7612 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@7354..7356 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         ScssBinaryExpression {
                                             left: CssString {
-                                                value_token: CSS_STRING_LITERAL@7612..7620 "\"quoted\"" [] [],
+                                                value_token: CSS_STRING_LITERAL@7356..7364 "\"quoted\"" [] [],
                                             },
-                                            operator: PLUS@7620..7621 "+" [] [],
+                                            operator: PLUS@7364..7365 "+" [] [],
                                             right: CssString {
-                                                value_token: CSS_STRING_LITERAL@7621..7629 "\"quoted\"" [] [],
+                                                value_token: CSS_STRING_LITERAL@7365..7373 "\"quoted\"" [] [],
                                             },
                                         },
                                     ],
@@ -798,24 +1106,24 @@ CssRoot {
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@7629..7630 ";" [] [],
+                        semicolon_token: SEMICOLON@7373..7374 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@7630..7640 "test-22" [Newline("\n"), Whitespace("  ")] [],
+                                    value_token: IDENT@7374..7384 "test-22" [Newline("\n"), Whitespace("  ")] [],
                                 },
-                                colon_token: COLON@7640..7642 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@7384..7386 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         ScssBinaryExpression {
                                             left: CssString {
-                                                value_token: CSS_STRING_LITERAL@7642..7651 "\"quoted\"" [] [Whitespace(" ")],
+                                                value_token: CSS_STRING_LITERAL@7386..7395 "\"quoted\"" [] [Whitespace(" ")],
                                             },
-                                            operator: PLUS@7651..7652 "+" [] [],
+                                            operator: PLUS@7395..7396 "+" [] [],
                                             right: CssString {
-                                                value_token: CSS_STRING_LITERAL@7652..7660 "\"quoted\"" [] [],
+                                                value_token: CSS_STRING_LITERAL@7396..7404 "\"quoted\"" [] [],
                                             },
                                         },
                                     ],
@@ -823,24 +1131,24 @@ CssRoot {
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@7660..7661 ";" [] [],
+                        semicolon_token: SEMICOLON@7404..7405 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@7661..7671 "test-23" [Newline("\n"), Whitespace("  ")] [],
+                                    value_token: IDENT@7405..7415 "test-23" [Newline("\n"), Whitespace("  ")] [],
                                 },
-                                colon_token: COLON@7671..7673 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@7415..7417 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         ScssBinaryExpression {
                                             left: CssString {
-                                                value_token: CSS_STRING_LITERAL@7673..7681 "\"quoted\"" [] [],
+                                                value_token: CSS_STRING_LITERAL@7417..7425 "\"quoted\"" [] [],
                                             },
-                                            operator: PLUS@7681..7683 "+" [] [Whitespace(" ")],
+                                            operator: PLUS@7425..7427 "+" [] [Whitespace(" ")],
                                             right: CssString {
-                                                value_token: CSS_STRING_LITERAL@7683..7691 "\"quoted\"" [] [],
+                                                value_token: CSS_STRING_LITERAL@7427..7435 "\"quoted\"" [] [],
                                             },
                                         },
                                     ],
@@ -848,24 +1156,24 @@ CssRoot {
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@7691..7692 ";" [] [],
+                        semicolon_token: SEMICOLON@7435..7436 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@7692..7702 "test-24" [Newline("\n"), Whitespace("  ")] [],
+                                    value_token: IDENT@7436..7446 "test-24" [Newline("\n"), Whitespace("  ")] [],
                                 },
-                                colon_token: COLON@7702..7704 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@7446..7448 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         ScssBinaryExpression {
                                             left: CssString {
-                                                value_token: CSS_STRING_LITERAL@7704..7713 "\"quoted\"" [] [Whitespace(" ")],
+                                                value_token: CSS_STRING_LITERAL@7448..7457 "\"quoted\"" [] [Whitespace(" ")],
                                             },
-                                            operator: PLUS@7713..7715 "+" [] [Whitespace(" ")],
+                                            operator: PLUS@7457..7459 "+" [] [Whitespace(" ")],
                                             right: CssString {
-                                                value_token: CSS_STRING_LITERAL@7715..7723 "\"quoted\"" [] [],
+                                                value_token: CSS_STRING_LITERAL@7459..7467 "\"quoted\"" [] [],
                                             },
                                         },
                                     ],
@@ -873,24 +1181,24 @@ CssRoot {
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@7723..7724 ";" [] [],
+                        semicolon_token: SEMICOLON@7467..7468 ";" [] [],
                     },
                 ],
-                r_curly_token: R_CURLY@7724..10434 "}" [Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n")] [],
+                r_curly_token: R_CURLY@7468..10178 "}" [Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n")] [],
             },
         },
     ],
-    eof_token: EOF@10434..10438 "" [Newline("\n"), Newline("\n"), Newline("\n"), Newline("\n")] [],
+    eof_token: EOF@10178..10181 "" [Newline("\n"), Newline("\n"), Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..10438
+0: CSS_ROOT@0..10181
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..10434
-    0: CSS_QUALIFIED_RULE@0..2090
+  1: CSS_ROOT_ITEM_LIST@0..10178
+    0: CSS_QUALIFIED_RULE@0..1834
       0: CSS_SELECTOR_LIST@0..4
         0: CSS_COMPOUND_SELECTOR@0..4
           0: CSS_NESTED_SELECTOR_LIST@0..0
@@ -899,9 +1207,9 @@ CssRoot {
             1: CSS_IDENTIFIER@0..4
               0: IDENT@0..4 "foo" [] [Whitespace(" ")]
           2: CSS_SUB_SELECTOR_LIST@4..4
-      1: CSS_DECLARATION_OR_RULE_BLOCK@4..2090
+      1: CSS_DECLARATION_OR_RULE_BLOCK@4..1834
         0: L_CURLY@4..5 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@5..77
+        1: CSS_DECLARATION_OR_RULE_LIST@5..692
           0: CSS_DECLARATION_WITH_SEMICOLON@5..22
             0: CSS_DECLARATION@5..21
               0: CSS_GENERIC_PROPERTY@5..21
@@ -966,365 +1274,565 @@ CssRoot {
                         0: CSS_NUMBER_LITERAL@74..76 "10" [] []
               1: (empty)
             1: SEMICOLON@76..77 ";" [] []
-        2: R_CURLY@77..2090 "}" [Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n")] []
-    1: CSS_QUALIFIED_RULE@2090..6534
-      0: CSS_SELECTOR_LIST@2090..2096
-        0: CSS_COMPOUND_SELECTOR@2090..2096
-          0: CSS_NESTED_SELECTOR_LIST@2090..2090
-          1: CSS_TYPE_SELECTOR@2090..2096
+          4: CSS_DECLARATION_WITH_SEMICOLON@77..97
+            0: CSS_DECLARATION@77..96
+              0: CSS_GENERIC_PROPERTY@77..96
+                0: CSS_IDENTIFIER@77..86
+                  0: IDENT@77..86 "test-5" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@86..88 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@88..96
+                  0: SCSS_EXPRESSION_ITEM_LIST@88..96
+                    0: SCSS_BINARY_EXPRESSION@88..96
+                      0: CSS_NUMBER@88..90
+                        0: CSS_NUMBER_LITERAL@88..90 "10" [] []
+                      1: PLUS@90..91 "+" [] []
+                      2: SCSS_INTERPOLATION@91..96
+                        0: HASH@91..92 "#" [] []
+                        1: L_CURLY@92..93 "{" [] []
+                        2: SCSS_EXPRESSION@93..95
+                          0: SCSS_EXPRESSION_ITEM_LIST@93..95
+                            0: CSS_NUMBER@93..95
+                              0: CSS_NUMBER_LITERAL@93..95 "10" [] []
+                        3: R_CURLY@95..96 "}" [] []
+              1: (empty)
+            1: SEMICOLON@96..97 ";" [] []
+          5: CSS_DECLARATION_WITH_SEMICOLON@97..118
+            0: CSS_DECLARATION@97..117
+              0: CSS_GENERIC_PROPERTY@97..117
+                0: CSS_IDENTIFIER@97..106
+                  0: IDENT@97..106 "test-6" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@106..108 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@108..117
+                  0: SCSS_EXPRESSION_ITEM_LIST@108..117
+                    0: SCSS_BINARY_EXPRESSION@108..117
+                      0: CSS_NUMBER@108..111
+                        0: CSS_NUMBER_LITERAL@108..111 "10" [] [Whitespace(" ")]
+                      1: PLUS@111..112 "+" [] []
+                      2: SCSS_INTERPOLATION@112..117
+                        0: HASH@112..113 "#" [] []
+                        1: L_CURLY@113..114 "{" [] []
+                        2: SCSS_EXPRESSION@114..116
+                          0: SCSS_EXPRESSION_ITEM_LIST@114..116
+                            0: CSS_NUMBER@114..116
+                              0: CSS_NUMBER_LITERAL@114..116 "10" [] []
+                        3: R_CURLY@116..117 "}" [] []
+              1: (empty)
+            1: SEMICOLON@117..118 ";" [] []
+          6: CSS_DECLARATION_WITH_SEMICOLON@118..139
+            0: CSS_DECLARATION@118..138
+              0: CSS_GENERIC_PROPERTY@118..138
+                0: CSS_IDENTIFIER@118..127
+                  0: IDENT@118..127 "test-7" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@127..129 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@129..138
+                  0: SCSS_EXPRESSION_ITEM_LIST@129..138
+                    0: SCSS_BINARY_EXPRESSION@129..138
+                      0: CSS_NUMBER@129..131
+                        0: CSS_NUMBER_LITERAL@129..131 "10" [] []
+                      1: PLUS@131..133 "+" [] [Whitespace(" ")]
+                      2: SCSS_INTERPOLATION@133..138
+                        0: HASH@133..134 "#" [] []
+                        1: L_CURLY@134..135 "{" [] []
+                        2: SCSS_EXPRESSION@135..137
+                          0: SCSS_EXPRESSION_ITEM_LIST@135..137
+                            0: CSS_NUMBER@135..137
+                              0: CSS_NUMBER_LITERAL@135..137 "10" [] []
+                        3: R_CURLY@137..138 "}" [] []
+              1: (empty)
+            1: SEMICOLON@138..139 ";" [] []
+          7: CSS_DECLARATION_WITH_SEMICOLON@139..161
+            0: CSS_DECLARATION@139..160
+              0: CSS_GENERIC_PROPERTY@139..160
+                0: CSS_IDENTIFIER@139..148
+                  0: IDENT@139..148 "test-8" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@148..150 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@150..160
+                  0: SCSS_EXPRESSION_ITEM_LIST@150..160
+                    0: SCSS_BINARY_EXPRESSION@150..160
+                      0: CSS_NUMBER@150..153
+                        0: CSS_NUMBER_LITERAL@150..153 "10" [] [Whitespace(" ")]
+                      1: PLUS@153..155 "+" [] [Whitespace(" ")]
+                      2: SCSS_INTERPOLATION@155..160
+                        0: HASH@155..156 "#" [] []
+                        1: L_CURLY@156..157 "{" [] []
+                        2: SCSS_EXPRESSION@157..159
+                          0: SCSS_EXPRESSION_ITEM_LIST@157..159
+                            0: CSS_NUMBER@157..159
+                              0: CSS_NUMBER_LITERAL@157..159 "10" [] []
+                        3: R_CURLY@159..160 "}" [] []
+              1: (empty)
+            1: SEMICOLON@160..161 ";" [] []
+          8: CSS_DECLARATION_WITH_SEMICOLON@161..616
+            0: CSS_DECLARATION@161..615
+              0: CSS_GENERIC_PROPERTY@161..615
+                0: CSS_IDENTIFIER@161..602
+                  0: IDENT@161..602 "test-17" [Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  ")] []
+                1: COLON@602..604 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@604..615
+                  0: SCSS_EXPRESSION_ITEM_LIST@604..615
+                    0: SCSS_BINARY_EXPRESSION@604..615
+                      0: SCSS_INTERPOLATION@604..609
+                        0: HASH@604..605 "#" [] []
+                        1: L_CURLY@605..606 "{" [] []
+                        2: SCSS_EXPRESSION@606..608
+                          0: SCSS_EXPRESSION_ITEM_LIST@606..608
+                            0: CSS_NUMBER@606..608
+                              0: CSS_NUMBER_LITERAL@606..608 "10" [] []
+                        3: R_CURLY@608..609 "}" [] []
+                      1: PLUS@609..610 "+" [] []
+                      2: SCSS_INTERPOLATION@610..615
+                        0: HASH@610..611 "#" [] []
+                        1: L_CURLY@611..612 "{" [] []
+                        2: SCSS_EXPRESSION@612..614
+                          0: SCSS_EXPRESSION_ITEM_LIST@612..614
+                            0: CSS_NUMBER@612..614
+                              0: CSS_NUMBER_LITERAL@612..614 "10" [] []
+                        3: R_CURLY@614..615 "}" [] []
+              1: (empty)
+            1: SEMICOLON@615..616 ";" [] []
+          9: CSS_DECLARATION_WITH_SEMICOLON@616..641
+            0: CSS_DECLARATION@616..640
+              0: CSS_GENERIC_PROPERTY@616..640
+                0: CSS_IDENTIFIER@616..626
+                  0: IDENT@616..626 "test-18" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@626..628 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@628..640
+                  0: SCSS_EXPRESSION_ITEM_LIST@628..640
+                    0: SCSS_BINARY_EXPRESSION@628..640
+                      0: SCSS_INTERPOLATION@628..634
+                        0: HASH@628..629 "#" [] []
+                        1: L_CURLY@629..630 "{" [] []
+                        2: SCSS_EXPRESSION@630..632
+                          0: SCSS_EXPRESSION_ITEM_LIST@630..632
+                            0: CSS_NUMBER@630..632
+                              0: CSS_NUMBER_LITERAL@630..632 "10" [] []
+                        3: R_CURLY@632..634 "}" [] [Whitespace(" ")]
+                      1: PLUS@634..635 "+" [] []
+                      2: SCSS_INTERPOLATION@635..640
+                        0: HASH@635..636 "#" [] []
+                        1: L_CURLY@636..637 "{" [] []
+                        2: SCSS_EXPRESSION@637..639
+                          0: SCSS_EXPRESSION_ITEM_LIST@637..639
+                            0: CSS_NUMBER@637..639
+                              0: CSS_NUMBER_LITERAL@637..639 "10" [] []
+                        3: R_CURLY@639..640 "}" [] []
+              1: (empty)
+            1: SEMICOLON@640..641 ";" [] []
+          10: CSS_DECLARATION_WITH_SEMICOLON@641..666
+            0: CSS_DECLARATION@641..665
+              0: CSS_GENERIC_PROPERTY@641..665
+                0: CSS_IDENTIFIER@641..651
+                  0: IDENT@641..651 "test-19" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@651..653 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@653..665
+                  0: SCSS_EXPRESSION_ITEM_LIST@653..665
+                    0: SCSS_BINARY_EXPRESSION@653..665
+                      0: SCSS_INTERPOLATION@653..658
+                        0: HASH@653..654 "#" [] []
+                        1: L_CURLY@654..655 "{" [] []
+                        2: SCSS_EXPRESSION@655..657
+                          0: SCSS_EXPRESSION_ITEM_LIST@655..657
+                            0: CSS_NUMBER@655..657
+                              0: CSS_NUMBER_LITERAL@655..657 "10" [] []
+                        3: R_CURLY@657..658 "}" [] []
+                      1: PLUS@658..660 "+" [] [Whitespace(" ")]
+                      2: SCSS_INTERPOLATION@660..665
+                        0: HASH@660..661 "#" [] []
+                        1: L_CURLY@661..662 "{" [] []
+                        2: SCSS_EXPRESSION@662..664
+                          0: SCSS_EXPRESSION_ITEM_LIST@662..664
+                            0: CSS_NUMBER@662..664
+                              0: CSS_NUMBER_LITERAL@662..664 "10" [] []
+                        3: R_CURLY@664..665 "}" [] []
+              1: (empty)
+            1: SEMICOLON@665..666 ";" [] []
+          11: CSS_DECLARATION_WITH_SEMICOLON@666..692
+            0: CSS_DECLARATION@666..691
+              0: CSS_GENERIC_PROPERTY@666..691
+                0: CSS_IDENTIFIER@666..676
+                  0: IDENT@666..676 "test-20" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@676..678 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@678..691
+                  0: SCSS_EXPRESSION_ITEM_LIST@678..691
+                    0: SCSS_BINARY_EXPRESSION@678..691
+                      0: SCSS_INTERPOLATION@678..684
+                        0: HASH@678..679 "#" [] []
+                        1: L_CURLY@679..680 "{" [] []
+                        2: SCSS_EXPRESSION@680..682
+                          0: SCSS_EXPRESSION_ITEM_LIST@680..682
+                            0: CSS_NUMBER@680..682
+                              0: CSS_NUMBER_LITERAL@680..682 "10" [] []
+                        3: R_CURLY@682..684 "}" [] [Whitespace(" ")]
+                      1: PLUS@684..686 "+" [] [Whitespace(" ")]
+                      2: SCSS_INTERPOLATION@686..691
+                        0: HASH@686..687 "#" [] []
+                        1: L_CURLY@687..688 "{" [] []
+                        2: SCSS_EXPRESSION@688..690
+                          0: SCSS_EXPRESSION_ITEM_LIST@688..690
+                            0: CSS_NUMBER@688..690
+                              0: CSS_NUMBER_LITERAL@688..690 "10" [] []
+                        3: R_CURLY@690..691 "}" [] []
+              1: (empty)
+            1: SEMICOLON@691..692 ";" [] []
+        2: R_CURLY@692..1834 "}" [Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n")] []
+    1: CSS_QUALIFIED_RULE@1834..6278
+      0: CSS_SELECTOR_LIST@1834..1840
+        0: CSS_COMPOUND_SELECTOR@1834..1840
+          0: CSS_NESTED_SELECTOR_LIST@1834..1834
+          1: CSS_TYPE_SELECTOR@1834..1840
             0: (empty)
-            1: CSS_IDENTIFIER@2090..2096
-              0: IDENT@2090..2096 "foo" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
-          2: CSS_SUB_SELECTOR_LIST@2096..2096
-      1: CSS_DECLARATION_OR_RULE_BLOCK@2096..6534
-        0: L_CURLY@2096..2097 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@2097..3164
-          0: CSS_DECLARATION_WITH_SEMICOLON@2097..2116
-            0: CSS_DECLARATION@2097..2115
-              0: CSS_GENERIC_PROPERTY@2097..2115
-                0: CSS_IDENTIFIER@2097..2106
-                  0: IDENT@2097..2106 "test-5" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@2106..2108 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@2108..2115
-                  0: SCSS_EXPRESSION_ITEM_LIST@2108..2115
-                    0: SCSS_BINARY_EXPRESSION@2108..2115
-                      0: CSS_NUMBER@2108..2110
-                        0: CSS_NUMBER_LITERAL@2108..2110 "10" [] []
-                      1: PLUS@2110..2111 "+" [] []
-                      2: CSS_REGULAR_DIMENSION@2111..2115
-                        0: CSS_NUMBER_LITERAL@2111..2113 "10" [] []
-                        1: IDENT@2113..2115 "px" [] []
+            1: CSS_IDENTIFIER@1834..1840
+              0: IDENT@1834..1840 "foo" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@1840..1840
+      1: CSS_DECLARATION_OR_RULE_BLOCK@1840..6278
+        0: L_CURLY@1840..1841 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@1841..2908
+          0: CSS_DECLARATION_WITH_SEMICOLON@1841..1860
+            0: CSS_DECLARATION@1841..1859
+              0: CSS_GENERIC_PROPERTY@1841..1859
+                0: CSS_IDENTIFIER@1841..1850
+                  0: IDENT@1841..1850 "test-5" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@1850..1852 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@1852..1859
+                  0: SCSS_EXPRESSION_ITEM_LIST@1852..1859
+                    0: SCSS_BINARY_EXPRESSION@1852..1859
+                      0: CSS_NUMBER@1852..1854
+                        0: CSS_NUMBER_LITERAL@1852..1854 "10" [] []
+                      1: PLUS@1854..1855 "+" [] []
+                      2: CSS_REGULAR_DIMENSION@1855..1859
+                        0: CSS_NUMBER_LITERAL@1855..1857 "10" [] []
+                        1: IDENT@1857..1859 "px" [] []
               1: (empty)
-            1: SEMICOLON@2115..2116 ";" [] []
-          1: CSS_DECLARATION_WITH_SEMICOLON@2116..2136
-            0: CSS_DECLARATION@2116..2135
-              0: CSS_GENERIC_PROPERTY@2116..2135
-                0: CSS_IDENTIFIER@2116..2125
-                  0: IDENT@2116..2125 "test-6" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@2125..2127 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@2127..2135
-                  0: SCSS_EXPRESSION_ITEM_LIST@2127..2135
-                    0: SCSS_BINARY_EXPRESSION@2127..2135
-                      0: CSS_NUMBER@2127..2130
-                        0: CSS_NUMBER_LITERAL@2127..2130 "10" [] [Whitespace(" ")]
-                      1: PLUS@2130..2131 "+" [] []
-                      2: CSS_REGULAR_DIMENSION@2131..2135
-                        0: CSS_NUMBER_LITERAL@2131..2133 "10" [] []
-                        1: IDENT@2133..2135 "px" [] []
+            1: SEMICOLON@1859..1860 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@1860..1880
+            0: CSS_DECLARATION@1860..1879
+              0: CSS_GENERIC_PROPERTY@1860..1879
+                0: CSS_IDENTIFIER@1860..1869
+                  0: IDENT@1860..1869 "test-6" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@1869..1871 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@1871..1879
+                  0: SCSS_EXPRESSION_ITEM_LIST@1871..1879
+                    0: SCSS_BINARY_EXPRESSION@1871..1879
+                      0: CSS_NUMBER@1871..1874
+                        0: CSS_NUMBER_LITERAL@1871..1874 "10" [] [Whitespace(" ")]
+                      1: PLUS@1874..1875 "+" [] []
+                      2: CSS_REGULAR_DIMENSION@1875..1879
+                        0: CSS_NUMBER_LITERAL@1875..1877 "10" [] []
+                        1: IDENT@1877..1879 "px" [] []
               1: (empty)
-            1: SEMICOLON@2135..2136 ";" [] []
-          2: CSS_DECLARATION_WITH_SEMICOLON@2136..2156
-            0: CSS_DECLARATION@2136..2155
-              0: CSS_GENERIC_PROPERTY@2136..2155
-                0: CSS_IDENTIFIER@2136..2145
-                  0: IDENT@2136..2145 "test-7" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@2145..2147 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@2147..2155
-                  0: SCSS_EXPRESSION_ITEM_LIST@2147..2155
-                    0: SCSS_BINARY_EXPRESSION@2147..2155
-                      0: CSS_NUMBER@2147..2149
-                        0: CSS_NUMBER_LITERAL@2147..2149 "10" [] []
-                      1: PLUS@2149..2151 "+" [] [Whitespace(" ")]
-                      2: CSS_REGULAR_DIMENSION@2151..2155
-                        0: CSS_NUMBER_LITERAL@2151..2153 "10" [] []
-                        1: IDENT@2153..2155 "px" [] []
+            1: SEMICOLON@1879..1880 ";" [] []
+          2: CSS_DECLARATION_WITH_SEMICOLON@1880..1900
+            0: CSS_DECLARATION@1880..1899
+              0: CSS_GENERIC_PROPERTY@1880..1899
+                0: CSS_IDENTIFIER@1880..1889
+                  0: IDENT@1880..1889 "test-7" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@1889..1891 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@1891..1899
+                  0: SCSS_EXPRESSION_ITEM_LIST@1891..1899
+                    0: SCSS_BINARY_EXPRESSION@1891..1899
+                      0: CSS_NUMBER@1891..1893
+                        0: CSS_NUMBER_LITERAL@1891..1893 "10" [] []
+                      1: PLUS@1893..1895 "+" [] [Whitespace(" ")]
+                      2: CSS_REGULAR_DIMENSION@1895..1899
+                        0: CSS_NUMBER_LITERAL@1895..1897 "10" [] []
+                        1: IDENT@1897..1899 "px" [] []
               1: (empty)
-            1: SEMICOLON@2155..2156 ";" [] []
-          3: CSS_DECLARATION_WITH_SEMICOLON@2156..2177
-            0: CSS_DECLARATION@2156..2176
-              0: CSS_GENERIC_PROPERTY@2156..2176
-                0: CSS_IDENTIFIER@2156..2165
-                  0: IDENT@2156..2165 "test-8" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@2165..2167 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@2167..2176
-                  0: SCSS_EXPRESSION_ITEM_LIST@2167..2176
-                    0: SCSS_BINARY_EXPRESSION@2167..2176
-                      0: CSS_NUMBER@2167..2170
-                        0: CSS_NUMBER_LITERAL@2167..2170 "10" [] [Whitespace(" ")]
-                      1: PLUS@2170..2172 "+" [] [Whitespace(" ")]
-                      2: CSS_REGULAR_DIMENSION@2172..2176
-                        0: CSS_NUMBER_LITERAL@2172..2174 "10" [] []
-                        1: IDENT@2174..2176 "px" [] []
+            1: SEMICOLON@1899..1900 ";" [] []
+          3: CSS_DECLARATION_WITH_SEMICOLON@1900..1921
+            0: CSS_DECLARATION@1900..1920
+              0: CSS_GENERIC_PROPERTY@1900..1920
+                0: CSS_IDENTIFIER@1900..1909
+                  0: IDENT@1900..1909 "test-8" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@1909..1911 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@1911..1920
+                  0: SCSS_EXPRESSION_ITEM_LIST@1911..1920
+                    0: SCSS_BINARY_EXPRESSION@1911..1920
+                      0: CSS_NUMBER@1911..1914
+                        0: CSS_NUMBER_LITERAL@1911..1914 "10" [] [Whitespace(" ")]
+                      1: PLUS@1914..1916 "+" [] [Whitespace(" ")]
+                      2: CSS_REGULAR_DIMENSION@1916..1920
+                        0: CSS_NUMBER_LITERAL@1916..1918 "10" [] []
+                        1: IDENT@1918..1920 "px" [] []
               1: (empty)
-            1: SEMICOLON@2176..2177 ";" [] []
-          4: CSS_DECLARATION_WITH_SEMICOLON@2177..3094
-            0: CSS_DECLARATION@2177..3093
-              0: CSS_GENERIC_PROPERTY@2177..3093
-                0: CSS_IDENTIFIER@2177..3082
-                  0: IDENT@2177..3082 "test-25" [Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  ")] []
-                1: COLON@3082..3084 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@3084..3093
-                  0: SCSS_EXPRESSION_ITEM_LIST@3084..3093
-                    0: SCSS_BINARY_EXPRESSION@3084..3093
-                      0: CSS_REGULAR_DIMENSION@3084..3088
-                        0: CSS_NUMBER_LITERAL@3084..3086 "10" [] []
-                        1: IDENT@3086..3088 "px" [] []
-                      1: PLUS@3088..3089 "+" [] []
-                      2: CSS_REGULAR_DIMENSION@3089..3093
-                        0: CSS_NUMBER_LITERAL@3089..3091 "10" [] []
-                        1: IDENT@3091..3093 "px" [] []
+            1: SEMICOLON@1920..1921 ";" [] []
+          4: CSS_DECLARATION_WITH_SEMICOLON@1921..2838
+            0: CSS_DECLARATION@1921..2837
+              0: CSS_GENERIC_PROPERTY@1921..2837
+                0: CSS_IDENTIFIER@1921..2826
+                  0: IDENT@1921..2826 "test-25" [Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  ")] []
+                1: COLON@2826..2828 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@2828..2837
+                  0: SCSS_EXPRESSION_ITEM_LIST@2828..2837
+                    0: SCSS_BINARY_EXPRESSION@2828..2837
+                      0: CSS_REGULAR_DIMENSION@2828..2832
+                        0: CSS_NUMBER_LITERAL@2828..2830 "10" [] []
+                        1: IDENT@2830..2832 "px" [] []
+                      1: PLUS@2832..2833 "+" [] []
+                      2: CSS_REGULAR_DIMENSION@2833..2837
+                        0: CSS_NUMBER_LITERAL@2833..2835 "10" [] []
+                        1: IDENT@2835..2837 "px" [] []
               1: (empty)
-            1: SEMICOLON@3093..3094 ";" [] []
-          5: CSS_DECLARATION_WITH_SEMICOLON@3094..3117
-            0: CSS_DECLARATION@3094..3116
-              0: CSS_GENERIC_PROPERTY@3094..3116
-                0: CSS_IDENTIFIER@3094..3104
-                  0: IDENT@3094..3104 "test-26" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@3104..3106 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@3106..3116
-                  0: SCSS_EXPRESSION_ITEM_LIST@3106..3116
-                    0: SCSS_BINARY_EXPRESSION@3106..3116
-                      0: CSS_REGULAR_DIMENSION@3106..3111
-                        0: CSS_NUMBER_LITERAL@3106..3108 "10" [] []
-                        1: IDENT@3108..3111 "px" [] [Whitespace(" ")]
-                      1: PLUS@3111..3112 "+" [] []
-                      2: CSS_REGULAR_DIMENSION@3112..3116
-                        0: CSS_NUMBER_LITERAL@3112..3114 "10" [] []
-                        1: IDENT@3114..3116 "px" [] []
+            1: SEMICOLON@2837..2838 ";" [] []
+          5: CSS_DECLARATION_WITH_SEMICOLON@2838..2861
+            0: CSS_DECLARATION@2838..2860
+              0: CSS_GENERIC_PROPERTY@2838..2860
+                0: CSS_IDENTIFIER@2838..2848
+                  0: IDENT@2838..2848 "test-26" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@2848..2850 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@2850..2860
+                  0: SCSS_EXPRESSION_ITEM_LIST@2850..2860
+                    0: SCSS_BINARY_EXPRESSION@2850..2860
+                      0: CSS_REGULAR_DIMENSION@2850..2855
+                        0: CSS_NUMBER_LITERAL@2850..2852 "10" [] []
+                        1: IDENT@2852..2855 "px" [] [Whitespace(" ")]
+                      1: PLUS@2855..2856 "+" [] []
+                      2: CSS_REGULAR_DIMENSION@2856..2860
+                        0: CSS_NUMBER_LITERAL@2856..2858 "10" [] []
+                        1: IDENT@2858..2860 "px" [] []
               1: (empty)
-            1: SEMICOLON@3116..3117 ";" [] []
-          6: CSS_DECLARATION_WITH_SEMICOLON@3117..3140
-            0: CSS_DECLARATION@3117..3139
-              0: CSS_GENERIC_PROPERTY@3117..3139
-                0: CSS_IDENTIFIER@3117..3127
-                  0: IDENT@3117..3127 "test-27" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@3127..3129 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@3129..3139
-                  0: SCSS_EXPRESSION_ITEM_LIST@3129..3139
-                    0: SCSS_BINARY_EXPRESSION@3129..3139
-                      0: CSS_REGULAR_DIMENSION@3129..3133
-                        0: CSS_NUMBER_LITERAL@3129..3131 "10" [] []
-                        1: IDENT@3131..3133 "px" [] []
-                      1: PLUS@3133..3135 "+" [] [Whitespace(" ")]
-                      2: CSS_REGULAR_DIMENSION@3135..3139
-                        0: CSS_NUMBER_LITERAL@3135..3137 "10" [] []
-                        1: IDENT@3137..3139 "px" [] []
+            1: SEMICOLON@2860..2861 ";" [] []
+          6: CSS_DECLARATION_WITH_SEMICOLON@2861..2884
+            0: CSS_DECLARATION@2861..2883
+              0: CSS_GENERIC_PROPERTY@2861..2883
+                0: CSS_IDENTIFIER@2861..2871
+                  0: IDENT@2861..2871 "test-27" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@2871..2873 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@2873..2883
+                  0: SCSS_EXPRESSION_ITEM_LIST@2873..2883
+                    0: SCSS_BINARY_EXPRESSION@2873..2883
+                      0: CSS_REGULAR_DIMENSION@2873..2877
+                        0: CSS_NUMBER_LITERAL@2873..2875 "10" [] []
+                        1: IDENT@2875..2877 "px" [] []
+                      1: PLUS@2877..2879 "+" [] [Whitespace(" ")]
+                      2: CSS_REGULAR_DIMENSION@2879..2883
+                        0: CSS_NUMBER_LITERAL@2879..2881 "10" [] []
+                        1: IDENT@2881..2883 "px" [] []
               1: (empty)
-            1: SEMICOLON@3139..3140 ";" [] []
-          7: CSS_DECLARATION_WITH_SEMICOLON@3140..3164
-            0: CSS_DECLARATION@3140..3163
-              0: CSS_GENERIC_PROPERTY@3140..3163
-                0: CSS_IDENTIFIER@3140..3150
-                  0: IDENT@3140..3150 "test-28" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@3150..3152 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@3152..3163
-                  0: SCSS_EXPRESSION_ITEM_LIST@3152..3163
-                    0: SCSS_BINARY_EXPRESSION@3152..3163
-                      0: CSS_REGULAR_DIMENSION@3152..3157
-                        0: CSS_NUMBER_LITERAL@3152..3154 "10" [] []
-                        1: IDENT@3154..3157 "px" [] [Whitespace(" ")]
-                      1: PLUS@3157..3159 "+" [] [Whitespace(" ")]
-                      2: CSS_REGULAR_DIMENSION@3159..3163
-                        0: CSS_NUMBER_LITERAL@3159..3161 "10" [] []
-                        1: IDENT@3161..3163 "px" [] []
+            1: SEMICOLON@2883..2884 ";" [] []
+          7: CSS_DECLARATION_WITH_SEMICOLON@2884..2908
+            0: CSS_DECLARATION@2884..2907
+              0: CSS_GENERIC_PROPERTY@2884..2907
+                0: CSS_IDENTIFIER@2884..2894
+                  0: IDENT@2884..2894 "test-28" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@2894..2896 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@2896..2907
+                  0: SCSS_EXPRESSION_ITEM_LIST@2896..2907
+                    0: SCSS_BINARY_EXPRESSION@2896..2907
+                      0: CSS_REGULAR_DIMENSION@2896..2901
+                        0: CSS_NUMBER_LITERAL@2896..2898 "10" [] []
+                        1: IDENT@2898..2901 "px" [] [Whitespace(" ")]
+                      1: PLUS@2901..2903 "+" [] [Whitespace(" ")]
+                      2: CSS_REGULAR_DIMENSION@2903..2907
+                        0: CSS_NUMBER_LITERAL@2903..2905 "10" [] []
+                        1: IDENT@2905..2907 "px" [] []
               1: (empty)
-            1: SEMICOLON@3163..3164 ";" [] []
-        2: R_CURLY@3164..6534 "}" [Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n")] []
-    2: CSS_QUALIFIED_RULE@6534..10434
-      0: CSS_SELECTOR_LIST@6534..6540
-        0: CSS_COMPOUND_SELECTOR@6534..6540
-          0: CSS_NESTED_SELECTOR_LIST@6534..6534
-          1: CSS_TYPE_SELECTOR@6534..6540
+            1: SEMICOLON@2907..2908 ";" [] []
+        2: R_CURLY@2908..6278 "}" [Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n")] []
+    2: CSS_QUALIFIED_RULE@6278..10178
+      0: CSS_SELECTOR_LIST@6278..6284
+        0: CSS_COMPOUND_SELECTOR@6278..6284
+          0: CSS_NESTED_SELECTOR_LIST@6278..6278
+          1: CSS_TYPE_SELECTOR@6278..6284
             0: (empty)
-            1: CSS_IDENTIFIER@6534..6540
-              0: IDENT@6534..6540 "foo" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
-          2: CSS_SUB_SELECTOR_LIST@6540..6540
-      1: CSS_DECLARATION_OR_RULE_BLOCK@6540..10434
-        0: L_CURLY@6540..6541 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@6541..7724
-          0: CSS_DECLARATION_WITH_SEMICOLON@6541..6568
-            0: CSS_DECLARATION@6541..6567
-              0: CSS_GENERIC_PROPERTY@6541..6567
-                0: CSS_IDENTIFIER@6541..6550
-                  0: IDENT@6541..6550 "test-1" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@6550..6552 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@6552..6567
-                  0: SCSS_EXPRESSION_ITEM_LIST@6552..6567
-                    0: SCSS_BINARY_EXPRESSION@6552..6567
-                      0: CSS_IDENTIFIER@6552..6559
-                        0: IDENT@6552..6559 "literal" [] []
-                      1: PLUS@6559..6560 "+" [] []
-                      2: CSS_IDENTIFIER@6560..6567
-                        0: IDENT@6560..6567 "literal" [] []
+            1: CSS_IDENTIFIER@6278..6284
+              0: IDENT@6278..6284 "foo" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@6284..6284
+      1: CSS_DECLARATION_OR_RULE_BLOCK@6284..10178
+        0: L_CURLY@6284..6285 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@6285..7468
+          0: CSS_DECLARATION_WITH_SEMICOLON@6285..6312
+            0: CSS_DECLARATION@6285..6311
+              0: CSS_GENERIC_PROPERTY@6285..6311
+                0: CSS_IDENTIFIER@6285..6294
+                  0: IDENT@6285..6294 "test-1" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@6294..6296 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@6296..6311
+                  0: SCSS_EXPRESSION_ITEM_LIST@6296..6311
+                    0: SCSS_BINARY_EXPRESSION@6296..6311
+                      0: CSS_IDENTIFIER@6296..6303
+                        0: IDENT@6296..6303 "literal" [] []
+                      1: PLUS@6303..6304 "+" [] []
+                      2: CSS_IDENTIFIER@6304..6311
+                        0: IDENT@6304..6311 "literal" [] []
               1: (empty)
-            1: SEMICOLON@6567..6568 ";" [] []
-          1: CSS_DECLARATION_WITH_SEMICOLON@6568..6596
-            0: CSS_DECLARATION@6568..6595
-              0: CSS_GENERIC_PROPERTY@6568..6595
-                0: CSS_IDENTIFIER@6568..6577
-                  0: IDENT@6568..6577 "test-2" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@6577..6579 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@6579..6595
-                  0: SCSS_EXPRESSION_ITEM_LIST@6579..6595
-                    0: SCSS_BINARY_EXPRESSION@6579..6595
-                      0: CSS_IDENTIFIER@6579..6587
-                        0: IDENT@6579..6587 "literal" [] [Whitespace(" ")]
-                      1: PLUS@6587..6588 "+" [] []
-                      2: CSS_IDENTIFIER@6588..6595
-                        0: IDENT@6588..6595 "literal" [] []
+            1: SEMICOLON@6311..6312 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@6312..6340
+            0: CSS_DECLARATION@6312..6339
+              0: CSS_GENERIC_PROPERTY@6312..6339
+                0: CSS_IDENTIFIER@6312..6321
+                  0: IDENT@6312..6321 "test-2" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@6321..6323 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@6323..6339
+                  0: SCSS_EXPRESSION_ITEM_LIST@6323..6339
+                    0: SCSS_BINARY_EXPRESSION@6323..6339
+                      0: CSS_IDENTIFIER@6323..6331
+                        0: IDENT@6323..6331 "literal" [] [Whitespace(" ")]
+                      1: PLUS@6331..6332 "+" [] []
+                      2: CSS_IDENTIFIER@6332..6339
+                        0: IDENT@6332..6339 "literal" [] []
               1: (empty)
-            1: SEMICOLON@6595..6596 ";" [] []
-          2: CSS_DECLARATION_WITH_SEMICOLON@6596..6624
-            0: CSS_DECLARATION@6596..6623
-              0: CSS_GENERIC_PROPERTY@6596..6623
-                0: CSS_IDENTIFIER@6596..6605
-                  0: IDENT@6596..6605 "test-3" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@6605..6607 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@6607..6623
-                  0: SCSS_EXPRESSION_ITEM_LIST@6607..6623
-                    0: SCSS_BINARY_EXPRESSION@6607..6623
-                      0: CSS_IDENTIFIER@6607..6614
-                        0: IDENT@6607..6614 "literal" [] []
-                      1: PLUS@6614..6616 "+" [] [Whitespace(" ")]
-                      2: CSS_IDENTIFIER@6616..6623
-                        0: IDENT@6616..6623 "literal" [] []
+            1: SEMICOLON@6339..6340 ";" [] []
+          2: CSS_DECLARATION_WITH_SEMICOLON@6340..6368
+            0: CSS_DECLARATION@6340..6367
+              0: CSS_GENERIC_PROPERTY@6340..6367
+                0: CSS_IDENTIFIER@6340..6349
+                  0: IDENT@6340..6349 "test-3" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@6349..6351 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@6351..6367
+                  0: SCSS_EXPRESSION_ITEM_LIST@6351..6367
+                    0: SCSS_BINARY_EXPRESSION@6351..6367
+                      0: CSS_IDENTIFIER@6351..6358
+                        0: IDENT@6351..6358 "literal" [] []
+                      1: PLUS@6358..6360 "+" [] [Whitespace(" ")]
+                      2: CSS_IDENTIFIER@6360..6367
+                        0: IDENT@6360..6367 "literal" [] []
               1: (empty)
-            1: SEMICOLON@6623..6624 ";" [] []
-          3: CSS_DECLARATION_WITH_SEMICOLON@6624..6653
-            0: CSS_DECLARATION@6624..6652
-              0: CSS_GENERIC_PROPERTY@6624..6652
-                0: CSS_IDENTIFIER@6624..6633
-                  0: IDENT@6624..6633 "test-4" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@6633..6635 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@6635..6652
-                  0: SCSS_EXPRESSION_ITEM_LIST@6635..6652
-                    0: SCSS_BINARY_EXPRESSION@6635..6652
-                      0: CSS_IDENTIFIER@6635..6643
-                        0: IDENT@6635..6643 "literal" [] [Whitespace(" ")]
-                      1: PLUS@6643..6645 "+" [] [Whitespace(" ")]
-                      2: CSS_IDENTIFIER@6645..6652
-                        0: IDENT@6645..6652 "literal" [] []
+            1: SEMICOLON@6367..6368 ";" [] []
+          3: CSS_DECLARATION_WITH_SEMICOLON@6368..6397
+            0: CSS_DECLARATION@6368..6396
+              0: CSS_GENERIC_PROPERTY@6368..6396
+                0: CSS_IDENTIFIER@6368..6377
+                  0: IDENT@6368..6377 "test-4" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@6377..6379 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@6379..6396
+                  0: SCSS_EXPRESSION_ITEM_LIST@6379..6396
+                    0: SCSS_BINARY_EXPRESSION@6379..6396
+                      0: CSS_IDENTIFIER@6379..6387
+                        0: IDENT@6379..6387 "literal" [] [Whitespace(" ")]
+                      1: PLUS@6387..6389 "+" [] [Whitespace(" ")]
+                      2: CSS_IDENTIFIER@6389..6396
+                        0: IDENT@6389..6396 "literal" [] []
               1: (empty)
-            1: SEMICOLON@6652..6653 ";" [] []
-          4: CSS_DECLARATION_WITH_SEMICOLON@6653..6681
-            0: CSS_DECLARATION@6653..6680
-              0: CSS_GENERIC_PROPERTY@6653..6680
-                0: CSS_IDENTIFIER@6653..6662
-                  0: IDENT@6653..6662 "test-5" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@6662..6664 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@6664..6680
-                  0: SCSS_EXPRESSION_ITEM_LIST@6664..6680
-                    0: SCSS_BINARY_EXPRESSION@6664..6680
-                      0: CSS_IDENTIFIER@6664..6671
-                        0: IDENT@6664..6671 "literal" [] []
-                      1: PLUS@6671..6672 "+" [] []
-                      2: CSS_STRING@6672..6680
-                        0: CSS_STRING_LITERAL@6672..6680 "\"quoted\"" [] []
+            1: SEMICOLON@6396..6397 ";" [] []
+          4: CSS_DECLARATION_WITH_SEMICOLON@6397..6425
+            0: CSS_DECLARATION@6397..6424
+              0: CSS_GENERIC_PROPERTY@6397..6424
+                0: CSS_IDENTIFIER@6397..6406
+                  0: IDENT@6397..6406 "test-5" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@6406..6408 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@6408..6424
+                  0: SCSS_EXPRESSION_ITEM_LIST@6408..6424
+                    0: SCSS_BINARY_EXPRESSION@6408..6424
+                      0: CSS_IDENTIFIER@6408..6415
+                        0: IDENT@6408..6415 "literal" [] []
+                      1: PLUS@6415..6416 "+" [] []
+                      2: CSS_STRING@6416..6424
+                        0: CSS_STRING_LITERAL@6416..6424 "\"quoted\"" [] []
               1: (empty)
-            1: SEMICOLON@6680..6681 ";" [] []
-          5: CSS_DECLARATION_WITH_SEMICOLON@6681..6710
-            0: CSS_DECLARATION@6681..6709
-              0: CSS_GENERIC_PROPERTY@6681..6709
-                0: CSS_IDENTIFIER@6681..6690
-                  0: IDENT@6681..6690 "test-6" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@6690..6692 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@6692..6709
-                  0: SCSS_EXPRESSION_ITEM_LIST@6692..6709
-                    0: SCSS_BINARY_EXPRESSION@6692..6709
-                      0: CSS_IDENTIFIER@6692..6700
-                        0: IDENT@6692..6700 "literal" [] [Whitespace(" ")]
-                      1: PLUS@6700..6701 "+" [] []
-                      2: CSS_STRING@6701..6709
-                        0: CSS_STRING_LITERAL@6701..6709 "\"quoted\"" [] []
+            1: SEMICOLON@6424..6425 ";" [] []
+          5: CSS_DECLARATION_WITH_SEMICOLON@6425..6454
+            0: CSS_DECLARATION@6425..6453
+              0: CSS_GENERIC_PROPERTY@6425..6453
+                0: CSS_IDENTIFIER@6425..6434
+                  0: IDENT@6425..6434 "test-6" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@6434..6436 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@6436..6453
+                  0: SCSS_EXPRESSION_ITEM_LIST@6436..6453
+                    0: SCSS_BINARY_EXPRESSION@6436..6453
+                      0: CSS_IDENTIFIER@6436..6444
+                        0: IDENT@6436..6444 "literal" [] [Whitespace(" ")]
+                      1: PLUS@6444..6445 "+" [] []
+                      2: CSS_STRING@6445..6453
+                        0: CSS_STRING_LITERAL@6445..6453 "\"quoted\"" [] []
               1: (empty)
-            1: SEMICOLON@6709..6710 ";" [] []
-          6: CSS_DECLARATION_WITH_SEMICOLON@6710..6739
-            0: CSS_DECLARATION@6710..6738
-              0: CSS_GENERIC_PROPERTY@6710..6738
-                0: CSS_IDENTIFIER@6710..6719
-                  0: IDENT@6710..6719 "test-7" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@6719..6721 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@6721..6738
-                  0: SCSS_EXPRESSION_ITEM_LIST@6721..6738
-                    0: SCSS_BINARY_EXPRESSION@6721..6738
-                      0: CSS_IDENTIFIER@6721..6728
-                        0: IDENT@6721..6728 "literal" [] []
-                      1: PLUS@6728..6730 "+" [] [Whitespace(" ")]
-                      2: CSS_STRING@6730..6738
-                        0: CSS_STRING_LITERAL@6730..6738 "\"quoted\"" [] []
+            1: SEMICOLON@6453..6454 ";" [] []
+          6: CSS_DECLARATION_WITH_SEMICOLON@6454..6483
+            0: CSS_DECLARATION@6454..6482
+              0: CSS_GENERIC_PROPERTY@6454..6482
+                0: CSS_IDENTIFIER@6454..6463
+                  0: IDENT@6454..6463 "test-7" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@6463..6465 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@6465..6482
+                  0: SCSS_EXPRESSION_ITEM_LIST@6465..6482
+                    0: SCSS_BINARY_EXPRESSION@6465..6482
+                      0: CSS_IDENTIFIER@6465..6472
+                        0: IDENT@6465..6472 "literal" [] []
+                      1: PLUS@6472..6474 "+" [] [Whitespace(" ")]
+                      2: CSS_STRING@6474..6482
+                        0: CSS_STRING_LITERAL@6474..6482 "\"quoted\"" [] []
               1: (empty)
-            1: SEMICOLON@6738..6739 ";" [] []
-          7: CSS_DECLARATION_WITH_SEMICOLON@6739..6769
-            0: CSS_DECLARATION@6739..6768
-              0: CSS_GENERIC_PROPERTY@6739..6768
-                0: CSS_IDENTIFIER@6739..6748
-                  0: IDENT@6739..6748 "test-8" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@6748..6750 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@6750..6768
-                  0: SCSS_EXPRESSION_ITEM_LIST@6750..6768
-                    0: SCSS_BINARY_EXPRESSION@6750..6768
-                      0: CSS_IDENTIFIER@6750..6758
-                        0: IDENT@6750..6758 "literal" [] [Whitespace(" ")]
-                      1: PLUS@6758..6760 "+" [] [Whitespace(" ")]
-                      2: CSS_STRING@6760..6768
-                        0: CSS_STRING_LITERAL@6760..6768 "\"quoted\"" [] []
+            1: SEMICOLON@6482..6483 ";" [] []
+          7: CSS_DECLARATION_WITH_SEMICOLON@6483..6513
+            0: CSS_DECLARATION@6483..6512
+              0: CSS_GENERIC_PROPERTY@6483..6512
+                0: CSS_IDENTIFIER@6483..6492
+                  0: IDENT@6483..6492 "test-8" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@6492..6494 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@6494..6512
+                  0: SCSS_EXPRESSION_ITEM_LIST@6494..6512
+                    0: SCSS_BINARY_EXPRESSION@6494..6512
+                      0: CSS_IDENTIFIER@6494..6502
+                        0: IDENT@6494..6502 "literal" [] [Whitespace(" ")]
+                      1: PLUS@6502..6504 "+" [] [Whitespace(" ")]
+                      2: CSS_STRING@6504..6512
+                        0: CSS_STRING_LITERAL@6504..6512 "\"quoted\"" [] []
               1: (empty)
-            1: SEMICOLON@6768..6769 ";" [] []
-          8: CSS_DECLARATION_WITH_SEMICOLON@6769..7630
-            0: CSS_DECLARATION@6769..7629
-              0: CSS_GENERIC_PROPERTY@6769..7629
-                0: CSS_IDENTIFIER@6769..7610
-                  0: IDENT@6769..7610 "test-21" [Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  ")] []
-                1: COLON@7610..7612 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@7612..7629
-                  0: SCSS_EXPRESSION_ITEM_LIST@7612..7629
-                    0: SCSS_BINARY_EXPRESSION@7612..7629
-                      0: CSS_STRING@7612..7620
-                        0: CSS_STRING_LITERAL@7612..7620 "\"quoted\"" [] []
-                      1: PLUS@7620..7621 "+" [] []
-                      2: CSS_STRING@7621..7629
-                        0: CSS_STRING_LITERAL@7621..7629 "\"quoted\"" [] []
+            1: SEMICOLON@6512..6513 ";" [] []
+          8: CSS_DECLARATION_WITH_SEMICOLON@6513..7374
+            0: CSS_DECLARATION@6513..7373
+              0: CSS_GENERIC_PROPERTY@6513..7373
+                0: CSS_IDENTIFIER@6513..7354
+                  0: IDENT@6513..7354 "test-21" [Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  ")] []
+                1: COLON@7354..7356 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@7356..7373
+                  0: SCSS_EXPRESSION_ITEM_LIST@7356..7373
+                    0: SCSS_BINARY_EXPRESSION@7356..7373
+                      0: CSS_STRING@7356..7364
+                        0: CSS_STRING_LITERAL@7356..7364 "\"quoted\"" [] []
+                      1: PLUS@7364..7365 "+" [] []
+                      2: CSS_STRING@7365..7373
+                        0: CSS_STRING_LITERAL@7365..7373 "\"quoted\"" [] []
               1: (empty)
-            1: SEMICOLON@7629..7630 ";" [] []
-          9: CSS_DECLARATION_WITH_SEMICOLON@7630..7661
-            0: CSS_DECLARATION@7630..7660
-              0: CSS_GENERIC_PROPERTY@7630..7660
-                0: CSS_IDENTIFIER@7630..7640
-                  0: IDENT@7630..7640 "test-22" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@7640..7642 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@7642..7660
-                  0: SCSS_EXPRESSION_ITEM_LIST@7642..7660
-                    0: SCSS_BINARY_EXPRESSION@7642..7660
-                      0: CSS_STRING@7642..7651
-                        0: CSS_STRING_LITERAL@7642..7651 "\"quoted\"" [] [Whitespace(" ")]
-                      1: PLUS@7651..7652 "+" [] []
-                      2: CSS_STRING@7652..7660
-                        0: CSS_STRING_LITERAL@7652..7660 "\"quoted\"" [] []
+            1: SEMICOLON@7373..7374 ";" [] []
+          9: CSS_DECLARATION_WITH_SEMICOLON@7374..7405
+            0: CSS_DECLARATION@7374..7404
+              0: CSS_GENERIC_PROPERTY@7374..7404
+                0: CSS_IDENTIFIER@7374..7384
+                  0: IDENT@7374..7384 "test-22" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@7384..7386 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@7386..7404
+                  0: SCSS_EXPRESSION_ITEM_LIST@7386..7404
+                    0: SCSS_BINARY_EXPRESSION@7386..7404
+                      0: CSS_STRING@7386..7395
+                        0: CSS_STRING_LITERAL@7386..7395 "\"quoted\"" [] [Whitespace(" ")]
+                      1: PLUS@7395..7396 "+" [] []
+                      2: CSS_STRING@7396..7404
+                        0: CSS_STRING_LITERAL@7396..7404 "\"quoted\"" [] []
               1: (empty)
-            1: SEMICOLON@7660..7661 ";" [] []
-          10: CSS_DECLARATION_WITH_SEMICOLON@7661..7692
-            0: CSS_DECLARATION@7661..7691
-              0: CSS_GENERIC_PROPERTY@7661..7691
-                0: CSS_IDENTIFIER@7661..7671
-                  0: IDENT@7661..7671 "test-23" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@7671..7673 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@7673..7691
-                  0: SCSS_EXPRESSION_ITEM_LIST@7673..7691
-                    0: SCSS_BINARY_EXPRESSION@7673..7691
-                      0: CSS_STRING@7673..7681
-                        0: CSS_STRING_LITERAL@7673..7681 "\"quoted\"" [] []
-                      1: PLUS@7681..7683 "+" [] [Whitespace(" ")]
-                      2: CSS_STRING@7683..7691
-                        0: CSS_STRING_LITERAL@7683..7691 "\"quoted\"" [] []
+            1: SEMICOLON@7404..7405 ";" [] []
+          10: CSS_DECLARATION_WITH_SEMICOLON@7405..7436
+            0: CSS_DECLARATION@7405..7435
+              0: CSS_GENERIC_PROPERTY@7405..7435
+                0: CSS_IDENTIFIER@7405..7415
+                  0: IDENT@7405..7415 "test-23" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@7415..7417 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@7417..7435
+                  0: SCSS_EXPRESSION_ITEM_LIST@7417..7435
+                    0: SCSS_BINARY_EXPRESSION@7417..7435
+                      0: CSS_STRING@7417..7425
+                        0: CSS_STRING_LITERAL@7417..7425 "\"quoted\"" [] []
+                      1: PLUS@7425..7427 "+" [] [Whitespace(" ")]
+                      2: CSS_STRING@7427..7435
+                        0: CSS_STRING_LITERAL@7427..7435 "\"quoted\"" [] []
               1: (empty)
-            1: SEMICOLON@7691..7692 ";" [] []
-          11: CSS_DECLARATION_WITH_SEMICOLON@7692..7724
-            0: CSS_DECLARATION@7692..7723
-              0: CSS_GENERIC_PROPERTY@7692..7723
-                0: CSS_IDENTIFIER@7692..7702
-                  0: IDENT@7692..7702 "test-24" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@7702..7704 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@7704..7723
-                  0: SCSS_EXPRESSION_ITEM_LIST@7704..7723
-                    0: SCSS_BINARY_EXPRESSION@7704..7723
-                      0: CSS_STRING@7704..7713
-                        0: CSS_STRING_LITERAL@7704..7713 "\"quoted\"" [] [Whitespace(" ")]
-                      1: PLUS@7713..7715 "+" [] [Whitespace(" ")]
-                      2: CSS_STRING@7715..7723
-                        0: CSS_STRING_LITERAL@7715..7723 "\"quoted\"" [] []
+            1: SEMICOLON@7435..7436 ";" [] []
+          11: CSS_DECLARATION_WITH_SEMICOLON@7436..7468
+            0: CSS_DECLARATION@7436..7467
+              0: CSS_GENERIC_PROPERTY@7436..7467
+                0: CSS_IDENTIFIER@7436..7446
+                  0: IDENT@7436..7446 "test-24" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@7446..7448 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@7448..7467
+                  0: SCSS_EXPRESSION_ITEM_LIST@7448..7467
+                    0: SCSS_BINARY_EXPRESSION@7448..7467
+                      0: CSS_STRING@7448..7457
+                        0: CSS_STRING_LITERAL@7448..7457 "\"quoted\"" [] [Whitespace(" ")]
+                      1: PLUS@7457..7459 "+" [] [Whitespace(" ")]
+                      2: CSS_STRING@7459..7467
+                        0: CSS_STRING_LITERAL@7459..7467 "\"quoted\"" [] []
               1: (empty)
-            1: SEMICOLON@7723..7724 ";" [] []
-        2: R_CURLY@7724..10434 "}" [Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n")] []
-  2: EOF@10434..10438 "" [Newline("\n"), Newline("\n"), Newline("\n"), Newline("\n")] []
+            1: SEMICOLON@7467..7468 ";" [] []
+        2: R_CURLY@7468..10178 "}" [Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n"), Whitespace("  "), Comments("// TODO(interpolation ..."), Newline("\n")] []
+  2: EOF@10178..10181 "" [Newline("\n"), Newline("\n"), Newline("\n")] []
 
 ```

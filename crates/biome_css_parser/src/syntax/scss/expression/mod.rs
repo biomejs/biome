@@ -1,8 +1,9 @@
 mod interpolation;
 mod list;
 mod map;
+mod operand;
 mod precedence;
-mod primary;
+mod regular_expression_operand;
 
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::{Parser, TokenSet, token_set};
