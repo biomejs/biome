@@ -4,10 +4,10 @@ use biome_analyze::{
 };
 use biome_js_syntax::{
     AnyJsBindingPattern, AnyJsClass, AnyJsClassMember, AnyJsExpression,
-    AnyJsObjectBindingPatternMember, AnyJsRoot, JsArrayAssignmentPattern, JsArrowFunctionExpression,
-    JsAssignmentExpression, JsClassMemberList, JsConstructorClassMember, JsFunctionBody,
-    JsLanguage, JsObjectAssignmentPattern, JsObjectBindingPattern, JsPostUpdateExpression,
-    JsPreUpdateExpression, JsPropertyClassMember, JsStaticMemberAssignment,
+    AnyJsObjectBindingPatternMember, AnyJsRoot, JsArrayAssignmentPattern,
+    JsArrowFunctionExpression, JsAssignmentExpression, JsClassMemberList, JsConstructorClassMember,
+    JsFunctionBody, JsLanguage, JsObjectAssignmentPattern, JsObjectBindingPattern,
+    JsPostUpdateExpression, JsPreUpdateExpression, JsPropertyClassMember, JsStaticMemberAssignment,
     JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, TextRange,
     TsPropertyParameter,
 };
