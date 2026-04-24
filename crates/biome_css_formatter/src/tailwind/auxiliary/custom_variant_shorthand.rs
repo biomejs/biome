@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use biome_css_syntax::{TwCustomVariantShorthand, TwCustomVariantShorthandFields};
-use biome_formatter::write;
+use biome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatTwCustomVariantShorthand;
@@ -19,28 +19,16 @@ impl FormatNodeRule<TwCustomVariantShorthand> for FormatTwCustomVariantShorthand
 
         let should_insert_space = f.options().delimiter_spacing().value();
 
-        if should_insert_space {
-            write!(
-                f,
-                [
+        write!(
+            f,
+            [
+                group(&format_args![
                     l_paren_token.format(),
-                    space(),
-                    selector.format(),
-                    space(),
-                    r_paren_token.format(),
-                    semicolon_token.format()
-                ]
-            )
-        } else {
-            write!(
-                f,
-                [
-                    l_paren_token.format(),
-                    selector.format(),
-                    r_paren_token.format(),
-                    semicolon_token.format()
-                ]
-            )
-        }
+                    soft_block_indent_with_maybe_space(&selector.format(), should_insert_space),
+                    r_paren_token.format()
+                ]),
+                semicolon_token.format()
+            ]
+        )
     }
 }

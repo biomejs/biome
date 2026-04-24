@@ -13,30 +13,23 @@ impl FormatNodeRule<CssAttributeSelector> for FormatCssAttributeSelector {
             r_brack_token,
         } = node.as_fields();
 
-        let should_insert_space = f.options().delimiter_spacing().value();
+        let maybe_space = format_with(|f: &mut CssFormatter| {
+            if f.options().delimiter_spacing().value() {
+                write!(f, [space()])?;
+            }
+            Ok(())
+        });
 
-        if should_insert_space {
-            write!(
-                f,
-                [
-                    l_brack_token.format(),
-                    space(),
-                    name.format(),
-                    matcher.format(),
-                    space(),
-                    r_brack_token.format()
-                ]
-            )
-        } else {
-            write!(
-                f,
-                [
-                    l_brack_token.format(),
-                    name.format(),
-                    matcher.format(),
-                    r_brack_token.format()
-                ]
-            )
-        }
+        write!(
+            f,
+            [
+                l_brack_token.format(),
+                maybe_space,
+                name.format(),
+                matcher.format(),
+                maybe_space,
+                r_brack_token.format()
+            ]
+        )
     }
 }

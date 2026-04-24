@@ -1,6 +1,5 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 249
 info: css/yaml/ignore.css
 ---
 
@@ -20,7 +19,9 @@ hello: world
 # Error
 ```text
 reformat: output mismatch
-Differences (-re-formatted|+formatted):
+--- re-formatted
++++ formatted
+@@ -1,2 +1,6 @@
 ---- hello:world --- /* biome-ignore format: prettier ignore */ .foo {
 +---
 +  hello:world
@@ -30,7 +31,9 @@ Differences (-re-formatted|+formatted):
  }
 
 IR differences:
-Differences (-re-formatted IR|+formatted IR):
+--- re-formatted IR
++++ formatted IR
+@@ -1,6 +1,6 @@
  [
    group(expand: true, [
 -    group([
@@ -38,9 +41,7 @@ Differences (-re-formatted IR|+formatted IR):
        indent([
          group(["---"]),
          soft_line_break_or_space,
-         " ",
-@ ~~~
-         soft_line_break_or_space,
+@@ -13,7 +13,7 @@
          " ",
          verbatim([
            "/* biome-ignore format: prettier ignore */",
@@ -49,6 +50,5 @@ Differences (-re-formatted IR|+formatted IR):
            ".foo"
          ])
        ])
-     ])
 
 ```

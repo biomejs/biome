@@ -127,7 +127,10 @@ pub struct CssFormatterConfiguration {
     /// closing delimiter). Only applies when the content fits on a single line, and empty
     /// delimiters are not affected. For CSS, affects parentheses (e.g., `rgb( 0, 0, 0 )`) and
     /// square brackets (e.g., `[ data-attr ]`). Defaults to false.
-    #[bpaf(long("css-formatter-delimiter-spacing"), argument("true|false"))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("css-formatter-delimiter-spacing"), argument("double|single"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub delimiter_spacing: Option<DelimiterSpacing>,
 
