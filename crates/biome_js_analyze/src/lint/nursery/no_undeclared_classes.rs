@@ -299,7 +299,7 @@ fn run_without_semantic(
         let found_class = css_steps.iter().any(|step| {
             step.css_classes
                 .iter()
-                .any(|c| c.text() == entry.name.as_ref())
+                .any(|(c, _)| c.text() == entry.name.as_ref())
         });
 
         if !found_class {

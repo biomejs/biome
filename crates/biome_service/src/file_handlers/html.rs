@@ -2,23 +2,21 @@ mod parse_embedded_nodes;
 
 use super::{
     AnalyzerCapabilities, AnalyzerVisitorBuilder, AnalyzerVisitorResult, Capabilities,
-    CodeActionsParams, DebugCapabilities, DocumentFileSource, EditorCapabilities, EnabledForPath, ExtensionHandler,
-    FixAllParams, FormatEmbedNode, FormatterCapabilities, LintParams, LintResults,
-     ParseResult, ParserCapabilities, ProcessFixAll, ProcessLint,
-    ResolveBindingParams, SearchCapabilities, UpdateSnippetsNodes,
+    CodeActionsParams, DebugCapabilities, DocumentFileSource, EditorCapabilities, EnabledForPath,
+    ExtensionHandler, FixAllParams, FormatEmbedNode, FormatterCapabilities, LintParams,
+    LintResults, ParseResult, ParserCapabilities, ProcessFixAll, ProcessLint, ResolveBindingParams,
+    SearchCapabilities, UpdateSnippetsNodes,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::html::parse_embedded_nodes::parse_embedded_nodes;
 use crate::settings::{
     OverrideSettings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
 };
-use crate::workspace::CodeAction;
 use crate::workspace::FixFileMode;
 use crate::workspace::document::AnyEmbeddedSnippet;
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
 use crate::workspace::{
-    CodeAction, CssDocumentServices, DefinitionReference, DocumentServices, EmbeddedSnippet,
-    JsDocumentServices,
+    CodeAction, DefinitionReference,
 };
 use crate::workspace::{FixFileResult, PullActionsResult};
 use crate::{
@@ -53,23 +51,13 @@ use biome_html_formatter::{
 use biome_html_parser::{HtmlParserOptions, parse_html_with_cache};
 use biome_html_syntax::element_ext::AnyEmbeddedContent;
 use biome_html_syntax::{
-    AnyAstroDirective, AnyHtmlAttributeInitializer, AnyHtmlTagName, AnySvelteDirective,
-    AstroEmbeddedContent, HtmlAttribute, HtmlAttributeInitializerClause, HtmlDoubleTextExpression,
-    HtmlElement, HtmlFileSource, HtmlLanguage, HtmlOpeningElement, HtmlRoot,
-    HtmlSelfClosingElement, HtmlSingleTextExpression, HtmlSyntaxNode, HtmlTextExpression,
-    HtmlTextExpressions, HtmlVariant, SvelteAwaitBlock, SvelteEachBlock, SvelteIfBlock,
-    SvelteKeyBlock, VueDirective, VueVBindShorthandDirective, VueVOnShorthandDirective,
-    VueVSlotShorthandDirective,
+    AnyHtmlAttributeInitializer, AnyHtmlTagName, HtmlAttribute, HtmlFileSource, HtmlLanguage,
+    HtmlOpeningElement, HtmlRoot, HtmlSelfClosingElement, HtmlSyntaxNode,
 };
-use biome_js_parser::parse_js_with_offset_and_cache;
-use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage};
-use biome_json_parser::parse_json_with_offset_and_cache;
-use biome_json_syntax::{JsonFileSource, JsonLanguage};
+use biome_js_syntax::{JsFileSource, JsLanguage};
+use biome_json_syntax::JsonLanguage;
 use biome_parser::AnyParse;
-use biome_rowan::{
-    AstNode, AstNodeList, BatchMutation, NodeCache, SendNode, SyntaxNodeCast, TextSize,
-    TokenAtOffset,
-};
+use biome_rowan::{AstNode, BatchMutation, NodeCache, SendNode, SyntaxNodeCast, TokenAtOffset};
 use camino::Utf8Path;
 use either::Either;
 use std::borrow::Cow;
@@ -1036,7 +1024,6 @@ fn reindent_embedded_code(code: &str, indent: &str) -> String {
     }
     out
 }
-
 
 /// Checks if the attribute belongs to a component element rather than a
 /// regular HTML tag. Components are identified by uppercase-starting tag

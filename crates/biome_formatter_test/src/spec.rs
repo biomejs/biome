@@ -202,6 +202,7 @@ impl<'a> SpecSnapshot<'a> {
                 document_file_source: self.document_file_source,
                 persist_node_cache: false,
                 inline_config: None,
+                needs_document_services: None,
             })
             .unwrap();
 

@@ -42,6 +42,7 @@ const c = [
             document_file_source: Some(DocumentFileSource::from(source_type)),
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 

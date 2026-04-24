@@ -17,11 +17,12 @@ use tower::{Service, ServiceExt};
 use tower_lsp_server::LspService;
 use tower_lsp_server::jsonrpc::{self, Request, Response};
 use tower_lsp_server::ls_types::{
-    self as lsp, ClientCapabilities, DidChangeConfigurationParams, DidChangeTextDocumentParams,
+    self as lsp, ClientCapabilities, CodeActionCapabilityResolveSupport,
+    CodeActionClientCapabilities, DidChangeConfigurationParams, DidChangeTextDocumentParams,
     DidCloseTextDocumentParams, DidOpenTextDocumentParams, InitializeParams, InitializeResult,
-    InitializedParams, PublishDiagnosticsParams, ShowMessageParams, TextDocumentContentChangeEvent,
-    TextDocumentIdentifier, TextDocumentItem, Uri, VersionedTextDocumentIdentifier,
-    WorkspaceFolder,
+    InitializedParams, PublishDiagnosticsParams, ShowMessageParams, TextDocumentClientCapabilities,
+    TextDocumentContentChangeEvent, TextDocumentIdentifier, TextDocumentItem, Uri,
+    VersionedTextDocumentIdentifier, WorkspaceFolder,
 };
 
 /// Statically build an [Uri] instance that points to the file at `$path`
@@ -203,6 +204,43 @@ impl Server {
                             uri: uri!("test_two"),
                         },
                     ]),
+                    client_info: None,
+                    locale: None,
+                    work_done_progress_params: Default::default(),
+                },
+            )
+            .await?
+            .context("initialize returned None")?;
+
+        Ok(())
+    }
+
+    /// Like [`Self::initialize`] but advertises `codeAction/resolve` support.
+    #[expect(deprecated)]
+    pub async fn initialize_with_resolve_support(&mut self) -> Result<()> {
+        let _res: InitializeResult = self
+            .request(
+                "initialize",
+                "_init",
+                InitializeParams {
+                    process_id: None,
+                    root_path: None,
+                    root_uri: Some(uri!("")),
+                    initialization_options: None,
+                    capabilities: ClientCapabilities {
+                        text_document: Some(TextDocumentClientCapabilities {
+                            code_action: Some(CodeActionClientCapabilities {
+                                resolve_support: Some(CodeActionCapabilityResolveSupport {
+                                    properties: vec!["edit".to_string()],
+                                }),
+                                ..Default::default()
+                            }),
+                            ..Default::default()
+                        }),
+                        ..Default::default()
+                    },
+                    trace: None,
+                    workspace_folders: None,
                     client_info: None,
                     locale: None,
                     work_done_progress_params: Default::default(),

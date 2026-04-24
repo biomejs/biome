@@ -1139,8 +1139,7 @@ pub fn analyze_with_workspace(
         let biome_path = BiomePath::new(path.clone());
         let doc_source = DocumentFileSource::from_well_known(path.as_path(), true);
         (biome_path, doc_source)
-            needs_document_services: None,
-        });
+    });
     workspace.index_files_for_test(project_key, files_with_sources);
 
     // Build rule selector

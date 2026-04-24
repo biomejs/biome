@@ -152,6 +152,7 @@ fn pnpm_workspace_update_reapplies_catalogs() {
                 document_file_source: None,
                 persist_node_cache: false,
                 inline_config: None,
+                needs_document_services: None,
             },
         )
         .unwrap();
@@ -713,6 +714,7 @@ const items = ['a', 'b'];
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -848,6 +850,7 @@ styled.div`
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -921,6 +924,7 @@ const PortfolioIcon = styled.div`
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -984,6 +988,7 @@ fn issue_9994() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -1091,6 +1096,7 @@ const Container = styled.div`
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -1369,6 +1375,7 @@ graphql(`
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -1425,6 +1432,7 @@ fn issue_9484_propagate_expand_after_embed() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -1491,6 +1499,7 @@ const Table = () => {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -1530,6 +1539,7 @@ fn lsp_language_hints_keep_svelte_source_module_path_semantics() {
             document_file_source: Some(DocumentFileSource::from_language_id("typescript", None)),
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -1541,6 +1551,7 @@ fn lsp_language_hints_keep_svelte_source_module_path_semantics() {
             document_file_source: Some(DocumentFileSource::from_language_id("javascript", None)),
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 

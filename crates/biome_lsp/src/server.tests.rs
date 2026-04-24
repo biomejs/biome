@@ -25,12 +25,13 @@ use tokio::time::sleep;
 use tower_lsp_server::ls_types::{
     self as lsp, ClientCapabilities, CodeAction, CodeActionContext, CodeActionKind,
     CodeActionOrCommand, CodeActionParams, CodeActionResponse, CodeDescription, Diagnostic,
-    DiagnosticRelatedInformation, DiagnosticSeverity, DidCloseTextDocumentParams,
-    DidOpenTextDocumentParams, DidSaveTextDocumentParams, DocumentFormattingParams,
-    DocumentRangeFormattingParams, FormattingOptions, InitializeParams, InitializeResult, Location,
-    MessageType, NumberOrString, PartialResultParams, Position, PublishDiagnosticsParams, Range,
-    ShowMessageParams, TextDocumentContentChangeEvent, TextDocumentIdentifier, TextDocumentItem,
-    TextEdit, Uri, WorkDoneProgressParams, WorkspaceEdit, WorkspaceFolder,
+    DiagnosticRelatedInformation, DiagnosticSeverity, DidChangeConfigurationParams,
+    DidCloseTextDocumentParams, DidOpenTextDocumentParams, DidSaveTextDocumentParams,
+    DocumentFormattingParams, DocumentRangeFormattingParams, FormattingOptions, InitializeParams,
+    InitializeResult, Location, MessageType, NumberOrString, PartialResultParams, Position,
+    PublishDiagnosticsParams, Range, ShowMessageParams, TextDocumentContentChangeEvent,
+    TextDocumentIdentifier, TextDocumentItem, TextEdit, Uri, WorkDoneProgressParams, WorkspaceEdit,
+    WorkspaceFolder,
 };
 
 fn fixable_diagnostic(line: u32) -> Result<lsp::Diagnostic> {

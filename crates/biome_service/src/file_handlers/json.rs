@@ -1,7 +1,7 @@
 use super::{
-    AnalyzerVisitorBuilder, CodeActionsParams, DocumentFileSource, EditorCapabilities,
-    EnabledForPath, ExtensionHandler, ParseResult, ProcessFixAll, ProcessLint, SearchCapabilities,
-    search,
+    AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams, DocumentFileSource,
+    EditorCapabilities, EnabledForPath, ExtensionHandler, ParseResult, ProcessFixAll, ProcessLint,
+    SearchCapabilities, search,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
