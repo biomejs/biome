@@ -5300,6 +5300,13 @@
 		"NoUndeclaredDependenciesOptions": {
 			"type": "object",
 			"properties": {
+				"bundleDependencies": {
+					"description": "If set to `false`, then the rule will show an error when `bundleDependencies` are imported. Defaults to `true`.",
+					"anyOf": [
+						{ "$ref": "#/$defs/DependencyAvailability" },
+						{ "type": "null" }
+					]
+				},
 				"devDependencies": {
 					"description": "If set to `false`, then the rule will show an error when `devDependencies` are imported. Defaults to `true`.",
 					"anyOf": [
