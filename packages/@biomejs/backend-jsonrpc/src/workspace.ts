@@ -10092,6 +10092,82 @@ export interface MigrateConfigurationParams {
 export interface MigrateConfigurationResult {
 	content?: string;
 }
+export interface PullConfigurationDiagnosticsParams {
+	path: BiomePath;
+	projectKey: ProjectKey;
+}
+export interface PullConfigurationDiagnosticsResult {
+	diagnostics: Diagnostic[];
+	errors: number;
+}
+export interface PullConfigurationActionsParams {
+	path: BiomePath;
+	projectKey: ProjectKey;
+}
+export interface PullConfigurationActionsResult {
+	actions: CodeAction[];
+}
+export interface CodeAction {
+	applicability?: Applicability;
+	category: ActionCategory;
+	offset?: TextSize;
+	ruleName?: [string, string];
+	/**
+	* The computed code suggestion with text edit. `None` when the action was
+returned without computing edits (deferred for `codeAction/resolve`). 
+	 */
+	suggestion?: CodeSuggestion;
+}
+/**
+ * Indicates how a tool should manage this suggestion.
+ */
+export type Applicability = "always" | "maybeIncorrect";
+/**
+	* The category of a code action, this type maps directly to the
+[CodeActionKind] type in the Language Server Protocol specification
+
+[CodeActionKind]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind 
+	 */
+export type ActionCategory =
+	| { quickFix: string }
+	| { refactor: RefactorKind }
+	| { source: SourceActionKind }
+	| { other: OtherActionCategory };
+/**
+	* A Suggestion that is provided by Biome's linter, and
+can be reported to the user, and can be automatically
+applied if it has the right [`Applicability`]. 
+	 */
+export interface CodeSuggestion {
+	applicability: Applicability;
+	labels: TextRange[];
+	msg: MarkupBuf;
+	span: TextRange;
+	suggestion: TextEdit;
+}
+/**
+	* The sub-category of a refactor code action.
+
+[Check the LSP spec](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind) for more information: 
+	 */
+export type RefactorKind =
+	| "none"
+	| "extract"
+	| "inline"
+	| "rewrite"
+	| { other: string };
+/**
+ * The sub-category of a source code action
+ */
+export type SourceActionKind =
+	| "fixAll"
+	| "none"
+	| "organizeImports"
+	| { other: string };
+export type OtherActionCategory =
+	| "inlineSuppression"
+	| "toplevelSuppression"
+	| { generic: string };
 export interface GetControlFlowGraphParams {
 	cursor: TextSize;
 	path: BiomePath;
@@ -10247,67 +10323,6 @@ computed). Used by `codeAction/resolve` to defer edit computation.
 export interface PullActionsResult {
 	actions: CodeAction[];
 }
-export interface CodeAction {
-	applicability?: Applicability;
-	category: ActionCategory;
-	offset?: TextSize;
-	ruleName?: [string, string];
-	/**
-	* The computed code suggestion with text edit. `None` when the action was
-returned without computing edits (deferred for `codeAction/resolve`). 
-	 */
-	suggestion?: CodeSuggestion;
-}
-/**
- * Indicates how a tool should manage this suggestion.
- */
-export type Applicability = "always" | "maybeIncorrect";
-/**
-	* The category of a code action, this type maps directly to the
-[CodeActionKind] type in the Language Server Protocol specification
-
-[CodeActionKind]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind 
-	 */
-export type ActionCategory =
-	| { quickFix: string }
-	| { refactor: RefactorKind }
-	| { source: SourceActionKind }
-	| { other: OtherActionCategory };
-/**
-	* A Suggestion that is provided by Biome's linter, and
-can be reported to the user, and can be automatically
-applied if it has the right [`Applicability`]. 
-	 */
-export interface CodeSuggestion {
-	applicability: Applicability;
-	labels: TextRange[];
-	msg: MarkupBuf;
-	span: TextRange;
-	suggestion: TextEdit;
-}
-/**
-	* The sub-category of a refactor code action.
-
-[Check the LSP spec](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind) for more information: 
-	 */
-export type RefactorKind =
-	| "none"
-	| "extract"
-	| "inline"
-	| "rewrite"
-	| { other: string };
-/**
- * The sub-category of a source code action
- */
-export type SourceActionKind =
-	| "fixAll"
-	| "none"
-	| "organizeImports"
-	| { other: string };
-export type OtherActionCategory =
-	| "inlineSuppression"
-	| "toplevelSuppression"
-	| { generic: string };
 export interface PullDiagnosticsAndActionsParams {
 	categories?: RuleCategories;
 	enabledRules?: AnalyzerSelector[];
@@ -10460,6 +10475,12 @@ export interface Workspace {
 	migrateConfiguration(
 		params: MigrateConfigurationParams,
 	): Promise<MigrateConfigurationResult>;
+	pullConfigurationDiagnostics(
+		params: PullConfigurationDiagnosticsParams,
+	): Promise<PullConfigurationDiagnosticsResult>;
+	pullConfigurationActions(
+		params: PullConfigurationActionsParams,
+	): Promise<PullConfigurationActionsResult>;
 	getControlFlowGraph(params: GetControlFlowGraphParams): Promise<string>;
 	getFormatterIr(params: GetFormatterIRParams): Promise<string>;
 	getTypeInfo(params: GetTypeInfoParams): Promise<string>;
@@ -10526,6 +10547,12 @@ export function createWorkspace(transport: Transport): Workspace {
 		},
 		migrateConfiguration(params) {
 			return transport.request("biome/migrate_configuration", params);
+		},
+		pullConfigurationDiagnostics(params) {
+			return transport.request("biome/pull_configuration_diagnostics", params);
+		},
+		pullConfigurationActions(params) {
+			return transport.request("biome/pull_configuration_actions", params);
 		},
 		getControlFlowGraph(params) {
 			return transport.request("biome/get_control_flow_graph", params);
