@@ -378,6 +378,27 @@ invalid.ts:23:10 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━
 ```
 
 ```
+invalid.ts:26:12 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Member 'incorrectlyModifiableInline' is never reassigned.
+  
+    24 │ 	public createConfusingChildClass() {
+    25 │ 		return class {
+  > 26 │ 			private incorrectlyModifiableInline = 7;
+       │ 			        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 		};
+    28 │ 	}
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
+  
+  i Unsafe fix: Add readonly decorator.
+  
+    26 │ → → → private·readonly·incorrectlyModifiableInline·=·7;
+       │               +++++++++                                
+
+```
+
+```
 invalid.ts:33:2 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Member '#incorrectlyModifiableInline' is never reassigned.
@@ -395,6 +416,27 @@ invalid.ts:33:2 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━�
   
     33 │ → readonly·#incorrectlyModifiableInline·=·7;
        │   +++++++++                                 
+
+```
+
+```
+invalid.ts:36:4 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Member '#incorrectlyModifiableInline' is never reassigned.
+  
+    34 │ 	public createConfusingChildClass() {
+    35 │ 		return class {
+  > 36 │ 			#incorrectlyModifiableInline = 7;
+       │ 			^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ 		};
+    38 │ 	}
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
+  
+  i Unsafe fix: Add readonly decorator.
+  
+    36 │ → → → readonly·#incorrectlyModifiableInline·=·7;
+       │       +++++++++                                 
 
 ```
 
@@ -689,6 +731,48 @@ invalid.ts:147:10 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━�
   
     147 │ → private·readonly·incorrectlyInlineLambda·=·()·=>·7;
         │           +++++++++                                  
+
+```
+
+```
+invalid.ts:153:11 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Member '_name' is never reassigned.
+  
+    151 │ function ClassWithName<TBase extends new (...args: any[]) => {}>(Base: TBase) {
+    152 │ 	return class extends Base {
+  > 153 │ 		private _name: string;
+        │ 		        ^^^^^
+    154 │ 	};
+    155 │ }
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
+  
+  i Unsafe fix: Add readonly decorator.
+  
+    153 │ → → private·readonly·_name:·string;
+        │             +++++++++              
+
+```
+
+```
+invalid.ts:160:3 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Member '#name' is never reassigned.
+  
+    158 │ function ClassWithNamePrivate<TBase extends new (...args: any[]) => {}>(Base: TBase) {
+    159 │ 	return class extends Base {
+  > 160 │ 		#name: string;
+        │ 		^^^^^
+    161 │ 	};
+    162 │ }
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
+  
+  i Unsafe fix: Add readonly decorator.
+  
+    160 │ → → readonly·#name:·string;
+        │     +++++++++              
 
 ```
 

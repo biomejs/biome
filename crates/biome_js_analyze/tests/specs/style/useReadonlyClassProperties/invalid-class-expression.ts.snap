@@ -1,0 +1,101 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-class-expression.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+// https://github.com/biomejs/biome/issues/10039
+// The rule should also flag unreassigned private members in non-declaration
+// class forms: class expressions, named class expressions, and export default
+// classes (anonymous and named).
+
+// Anonymous class expression
+const AnonClass = class {
+	#anonPrivate = 123;
+	constructor() {
+		console.log(this.#anonPrivate);
+	}
+};
+
+// Named class expression
+const NamedExpr = class Named {
+	private namedProp = 456;
+	constructor() {
+		console.log(this.namedProp);
+	}
+};
+
+// Anonymous export default class
+export default class {
+	#defaultPrivate = 789;
+	constructor() {
+		console.log(this.#defaultPrivate);
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid-class-expression.ts:9:2 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  i Member '#anonPrivate' is never reassigned.
+  
+     7 │ // Anonymous class expression
+     8 │ const AnonClass = class {
+   > 9 │ 	#anonPrivate = 123;
+       │ 	^^^^^^^^^^^^
+    10 │ 	constructor() {
+    11 │ 		console.log(this.#anonPrivate);
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
+  
+  i Unsafe fix: Add readonly decorator.
+  
+    9 │ → readonly·#anonPrivate·=·123;
+      │   +++++++++                   
+
+```
+
+```
+invalid-class-expression.ts:17:10 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  i Member 'namedProp' is never reassigned.
+  
+    15 │ // Named class expression
+    16 │ const NamedExpr = class Named {
+  > 17 │ 	private namedProp = 456;
+       │ 	        ^^^^^^^^^
+    18 │ 	constructor() {
+    19 │ 		console.log(this.namedProp);
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
+  
+  i Unsafe fix: Add readonly decorator.
+  
+    17 │ → private·readonly·namedProp·=·456;
+       │           +++++++++                
+
+```
+
+```
+invalid-class-expression.ts:25:2 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  i Member '#defaultPrivate' is never reassigned.
+  
+    23 │ // Anonymous export default class
+    24 │ export default class {
+  > 25 │ 	#defaultPrivate = 789;
+       │ 	^^^^^^^^^^^^^^^
+    26 │ 	constructor() {
+    27 │ 		console.log(this.#defaultPrivate);
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
+  
+  i Unsafe fix: Add readonly decorator.
+  
+    25 │ → readonly·#defaultPrivate·=·789;
+       │   +++++++++                      
+
+```
