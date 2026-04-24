@@ -1704,6 +1704,7 @@ dependencies = [
  "biome_rowan",
  "biome_string_case",
  "biome_text_edit",
+ "biome_unicode_table",
  "boxcar",
  "bpaf",
  "camino",
