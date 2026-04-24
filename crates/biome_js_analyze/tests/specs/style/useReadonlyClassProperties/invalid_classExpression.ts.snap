@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: invalid-class-expression.ts
+expression: invalid_classExpression.ts
 ---
 # Input
 ```ts
@@ -38,7 +38,7 @@ export default class {
 
 # Diagnostics
 ```
-invalid-class-expression.ts:9:2 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+invalid_classExpression.ts:9:2 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   i Member '#anonPrivate' is never reassigned.
   
@@ -59,7 +59,7 @@ invalid-class-expression.ts:9:2 lint/style/useReadonlyClassProperties  FIXABLE  
 ```
 
 ```
-invalid-class-expression.ts:17:10 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━
+invalid_classExpression.ts:17:10 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━
 
   i Member 'namedProp' is never reassigned.
   
@@ -80,7 +80,7 @@ invalid-class-expression.ts:17:10 lint/style/useReadonlyClassProperties  FIXABLE
 ```
 
 ```
-invalid-class-expression.ts:25:2 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+invalid_classExpression.ts:25:2 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
 
   i Member '#defaultPrivate' is never reassigned.
   
