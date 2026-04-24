@@ -8803,7 +8803,7 @@ export interface NoUnusedVariablesOptionsIgnore {
 	/**
 	 * An array of identifiers to ignore. Use "*" to ignore all identifiers.
 	 */
-	*?: string[];
+	"*"?: string[];
 	/**
 	 * An array of class names to ignore. Use "*" to ignore all identifiers.
 	 */
