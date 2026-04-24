@@ -116,7 +116,7 @@ impl HtmlFileSource {
     pub fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
         // We assume the file extension is normalized to lowercase
         match extension {
-            "html" => Ok(Self::html()),
+            "html" | "svg" => Ok(Self::html()),
             "astro" => Ok(Self::astro()),
             "vue" => Ok(Self::vue()),
             "svelte" => Ok(Self::svelte()),
@@ -135,7 +135,7 @@ impl HtmlFileSource {
     /// [VS Code extension]: https://github.com/withastro/language-tools/blob/0503392b80765c8a1292ddc9c063a1187425c187/packages/vscode/package.json#L140
     pub fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
         match language_id {
-            "html" => Ok(Self::html()),
+            "html" | "svg" => Ok(Self::html()),
             "astro" => Ok(Self::astro()),
             "vuejs" | "vue" => Ok(Self::vue()),
             "svelte" => Ok(Self::svelte()),
