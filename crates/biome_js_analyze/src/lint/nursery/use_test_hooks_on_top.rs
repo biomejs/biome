@@ -5,13 +5,13 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsFunctionBody, AnyJsModuleItem, AnyJsStatement, JsCallExpression,
-    JsExpressionStatement, JsLanguage, JsModule, JsModuleItemList, JsScript, JsStatementList,
+    AnyJsModuleItem, AnyJsStatement, JsCallExpression, JsExpressionStatement, JsLanguage,
+    JsModule, JsModuleItemList, JsScript, JsStatementList,
 };
 use biome_rowan::{AstNode, AstNodeList, TextRange};
 use biome_rule_options::use_test_hooks_on_top::UseTestHooksOnTopOptions;
 
-use crate::frameworks::unit_tests::{LifecycleHook, is_describe_call, is_unit_test};
+use crate::frameworks::unit_tests::{LifecycleHook, describe_body, is_describe_call, is_unit_test};
 
 declare_lint_rule! {
     /// Enforce that lifecycle hooks appear before any test cases in the same block.
@@ -65,8 +65,8 @@ impl Rule for UseTestHooksOnTop {
         let call = ctx.query();
         let mut signals = Vec::new();
 
-        if let Some(block) = describe_body(call) {
-            signals.extend(scan_statements(block.statements()));
+        if let Some(statement_list) = describe_body(call) {
+            signals.extend(scan_statements(statement_list));
         }
 
         if let Some(module_items) = top_level_module_items_for_call(call) {
@@ -150,33 +150,6 @@ fn scan_statements(
     }
 
     signals
-}
-
-/// Returns the block body of a `describe` callback when the call has a
-/// recognisable function or arrow-function callback.
-fn describe_body(call: &JsCallExpression) -> Option<biome_js_syntax::JsFunctionBody> {
-    if !is_describe_call(call) {
-        return None;
-    }
-
-    let args = call.arguments().ok()?;
-    let [_, callback_arg] = args.get_arguments_by_index([0, 1]);
-    let callback_arg = callback_arg?;
-    let expr = callback_arg.as_any_js_expression()?;
-
-    let body = match expr {
-        AnyJsExpression::JsArrowFunctionExpression(arrow) => arrow.body().ok()?,
-        AnyJsExpression::JsFunctionExpression(func) => {
-            AnyJsFunctionBody::JsFunctionBody(func.body().ok()?)
-        }
-        _ => return None,
-    };
-
-    let AnyJsFunctionBody::JsFunctionBody(block) = body else {
-        return None;
-    };
-
-    Some(block)
 }
 
 fn top_level_module_items_for_call(call: &JsCallExpression) -> Option<JsModuleItemList> {

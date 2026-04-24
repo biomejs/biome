@@ -1,5 +1,5 @@
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsFunctionBody, AnyJsName, AnyJsStatement, JsCallExpression,
+    AnyJsExpression, AnyJsFunctionBody, AnyJsName, JsCallExpression, JsStatementList,
 };
 
 /// The lifecycle hooks recognised by Jest/Vitest/similar frameworks.
@@ -168,10 +168,13 @@ pub(crate) fn is_describe_call(call: &JsCallExpression) -> bool {
     }
 }
 
-/// Returns the list of direct-child statements from the callback passed to a
-/// `describe(...)` call, or `None` if the callback is not a recognisable
-/// function literal with a block body.
-pub(crate) fn describe_body_statements(call: &JsCallExpression) -> Option<Vec<AnyJsStatement>> {
+/// Returns the statement list of a `describe` callback when the call has a
+/// recognisable function or arrow-function callback.
+pub(crate) fn describe_body(call: &JsCallExpression) -> Option<JsStatementList> {
+    if !is_describe_call(call) {
+        return None;
+    }
+
     let args = call.arguments().ok()?;
     let [_, callback_arg] = args.get_arguments_by_index([0, 1]);
     let callback_arg = callback_arg?;
@@ -189,16 +192,16 @@ pub(crate) fn describe_body_statements(call: &JsCallExpression) -> Option<Vec<An
         return None;
     };
 
-    Some(block.statements().into_iter().collect())
+    Some(block.statements())
 }
 
 #[cfg(test)]
 mod tests {
     use biome_js_parser::JsParserOptions;
     use biome_js_syntax::{JsCallExpression, JsFileSource};
-    use biome_rowan::AstNode;
+    use biome_rowan::{AstNode, AstNodeList};
 
-    use super::{LifecycleHook, describe_body_statements, is_describe_call, is_unit_test};
+    use super::{LifecycleHook, describe_body, is_describe_call, is_unit_test};
 
     fn first_call(src: &str) -> JsCallExpression {
         let parse =
@@ -469,7 +472,7 @@ mod tests {
     #[test]
     fn describe_body_with_arrow_callback() {
         let call = first_describe_call("describe('suite', () => { it('a', () => {}); })");
-        let stmts = describe_body_statements(&call).expect("should return statements");
+        let stmts = describe_body(&call).expect("should return statements");
         assert_eq!(stmts.len(), 1);
     }
 
@@ -478,14 +481,14 @@ mod tests {
         let call = first_describe_call(
             "describe('suite', function() { it('a', () => {}); it('b', () => {}); })",
         );
-        let stmts = describe_body_statements(&call).expect("should return statements");
+        let stmts = describe_body(&call).expect("should return statements");
         assert_eq!(stmts.len(), 2);
     }
 
     #[test]
     fn describe_body_with_empty_callback() {
         let call = first_describe_call("describe('suite', () => {})");
-        let stmts = describe_body_statements(&call).expect("should return statements");
+        let stmts = describe_body(&call).expect("should return statements");
         assert_eq!(stmts.len(), 0);
     }
 
@@ -493,17 +496,15 @@ mod tests {
     fn describe_body_with_no_callback_returns_none() {
         // Only one argument — no callback, so returns None.
         let call = first_describe_call("describe('suite')");
-        assert!(describe_body_statements(&call).is_none());
+        assert!(describe_body(&call).is_none());
     }
 
     #[test]
     fn describe_body_with_expression_body_arrow_returns_none() {
         // Arrow with expression body, not a block — returns None.
         let call = first_describe_call("describe('suite', () => null)");
-        assert!(describe_body_statements(&call).is_none());
+        assert!(describe_body(&call).is_none());
     }
-
-    // ── as_str ───────────────────────────────────────────────────────────────
 
     #[test]
     fn as_str_before_each() {
