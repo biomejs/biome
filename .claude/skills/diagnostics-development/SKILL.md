@@ -152,14 +152,14 @@ impl Rule for NoVar {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Use "<Emphasis>"let"</Emphasis>" or "<Emphasis>"const"</Emphasis>" instead of "<Emphasis>"var"</Emphasis>"."
+                    "Using "<Emphasis>"var"</Emphasis>" is not recommended."
                 },
             )
             .note(markup! {
-                "Variables declared with "<Emphasis>"var"</Emphasis>" are function-scoped, not block-scoped."
+                "Variables declared with "<Emphasis>"var"</Emphasis>" are function-scoped, not block-scoped, which means they can leak outside of loops and conditionals and cause unexpected behavior."
             })
             .note(markup! {
-                "See the "<Hyperlink href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/var">"MDN documentation"</Hyperlink>" for more details."
+                "Consider using "<Emphasis>"let"</Emphasis>" or "<Emphasis>"const"</Emphasis>" instead."
             })
         )
     }

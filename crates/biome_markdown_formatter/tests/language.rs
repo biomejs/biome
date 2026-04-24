@@ -1,6 +1,6 @@
 use biome_formatter_test::TestFormatLanguage;
 use biome_fs::BiomePath;
-use biome_markdown_formatter::{MdFormatLanguage, context::MdFormatContext};
+use biome_markdown_formatter::{MdFormatLanguage, context::MarkdownFormatContext};
 use biome_markdown_parser::parse_markdown;
 use biome_markdown_syntax::MarkdownLanguage;
 use biome_parser::AnyParse;
@@ -14,7 +14,7 @@ pub struct MarkdownTestFormatLanguage {}
 
 impl TestFormatLanguage for MarkdownTestFormatLanguage {
     type ServiceLanguage = MarkdownLanguage;
-    type Context = MdFormatContext;
+    type Context = MarkdownFormatContext;
     type FormatLanguage = MdFormatLanguage;
 
     fn parse(&self, text: &str) -> AnyParse {

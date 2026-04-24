@@ -7,8 +7,8 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunction, AnyJsMemberExpression, AnyJsTemplateElement,
     JsCallArgumentList, JsCallArguments, JsCallExpression, JsFormalParameter, JsObjectExpression,
-    JsObjectMemberList, JsParameterList, JsParameters, JsPropertyObjectMember, JsReferenceIdentifier,
-    JsxAttribute,
+    JsObjectMemberList, JsParameterList, JsParameters, JsPropertyObjectMember,
+    JsReferenceIdentifier, JsxAttribute,
 };
 use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::no_array_index_key::NoArrayIndexKeyOptions;
@@ -69,7 +69,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noArrayIndexKey",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("no-array-index-key").same()],
+        sources: &[RuleSource::EslintReact("no-array-index-key").same(), RuleSource::EslintReactX("no-array-index-key").same(), RuleSource::EslintReactXyz("no-array-index-key").same()],
         domains: &[RuleDomain::React],
         recommended: true,
         severity: Severity::Error,
@@ -266,7 +266,10 @@ fn is_array_method_index(
     }
 }
 
-fn collect_reference_identifiers(expression: AnyJsExpression, references: &mut Vec<JsReferenceIdentifier>) {
+fn collect_reference_identifiers(
+    expression: AnyJsExpression,
+    references: &mut Vec<JsReferenceIdentifier>,
+) {
     match expression {
         AnyJsExpression::JsIdentifierExpression(identifier_expression) => {
             if let Ok(reference) = identifier_expression.name() {
@@ -276,9 +279,10 @@ fn collect_reference_identifiers(expression: AnyJsExpression, references: &mut V
         AnyJsExpression::JsTemplateExpression(template_expression) => {
             for element in template_expression.elements() {
                 if let AnyJsTemplateElement::JsTemplateElement(template_element) = element
-                    && let Ok(expression) = template_element.expression() {
-                        collect_reference_identifiers(expression, references);
-                    }
+                    && let Ok(expression) = template_element.expression()
+                {
+                    collect_reference_identifiers(expression, references);
+                }
             }
         }
         AnyJsExpression::JsBinaryExpression(binary_expression) => {

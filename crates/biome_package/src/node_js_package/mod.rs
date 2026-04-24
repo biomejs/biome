@@ -3,7 +3,7 @@ mod tsconfig_json;
 mod turbo_json;
 
 use camino::Utf8Path;
-pub use package_json::{Dependencies, PackageJson, PackageType, Version};
+pub use package_json::{Catalogs, Dependencies, PackageJson, PackageType, Version};
 pub use tsconfig_json::{CompilerOptions, TsConfigJson};
 pub use turbo_json::TurboJson;
 

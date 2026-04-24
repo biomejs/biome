@@ -1,0 +1,47 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/at-rule/media-interpolation.scss
+---
+
+# Input
+
+```scss
+@media (#{$feature}) {.box {color:red;}}
+
+@media (#{$feature}: #{$value}) {.box {color:red;}}
+
+@media (#{$min} <= width <= #{$max}) {.box {color:red;}}
+
+@container (#{$feature}: #{$value}) {.box {color:red;}}
+
+```
+
+
+# Formatted
+
+```scss
+@media (#{$feature}) {
+	.box {
+		color: red;
+	}
+}
+
+@media (#{$feature}: #{$value}) {
+	.box {
+		color: red;
+	}
+}
+
+@media (#{$min} <= width <= #{$max}) {
+	.box {
+		color: red;
+	}
+}
+
+@container (#{$feature}: #{$value}) {
+	.box {
+		color: red;
+	}
+}
+
+```

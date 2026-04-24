@@ -4,6 +4,7 @@ expression: invalid.jsx
 ---
 # Input
 ```jsx
+/* should generate diagnostics */
 <>
 	<div scope={scope} />
 	<div scope={scope}></div>
@@ -16,41 +17,16 @@ expression: invalid.jsx
 
 # Diagnostics
 ```
-invalid.jsx:2:7 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Avoid using the scope attribute on elements other than th elements.
-  
-    1 │ <>
-  > 2 │ 	<div scope={scope} />
-      │ 	     ^^^^^^^^^^^^^
-    3 │ 	<div scope={scope}></div>
-    4 │ 	<div scope="col" />
-  
-  i The scope attribute is used to associate a data cell with its corresponding header cell in a data table,
-                so it should be placed on th elements to provide accessibility to screen readers.
-  
-  i Follow the links for more information,
-                WCAG 1.3.1
-                WCAG 4.1.1
-  
-  i Unsafe fix: Remove the scope attribute.
-  
-    2 │ → <div·scope={scope}·/>
-      │        --------------  
-
-```
-
-```
 invalid.jsx:3:7 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Avoid using the scope attribute on elements other than th elements.
   
-    1 │ <>
-    2 │ 	<div scope={scope} />
-  > 3 │ 	<div scope={scope}></div>
+    1 │ /* should generate diagnostics */
+    2 │ <>
+  > 3 │ 	<div scope={scope} />
       │ 	     ^^^^^^^^^^^^^
-    4 │ 	<div scope="col" />
-    5 │ 	<div scope="col"></div>
+    4 │ 	<div scope={scope}></div>
+    5 │ 	<div scope="col" />
   
   i The scope attribute is used to associate a data cell with its corresponding header cell in a data table,
                 so it should be placed on th elements to provide accessibility to screen readers.
@@ -61,8 +37,8 @@ invalid.jsx:3:7 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━
   
   i Unsafe fix: Remove the scope attribute.
   
-    3 │ → <div·scope={scope}></div>
-      │        -------------       
+    3 │ → <div·scope={scope}·/>
+      │        --------------  
 
 ```
 
@@ -71,12 +47,12 @@ invalid.jsx:4:7 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━
 
   × Avoid using the scope attribute on elements other than th elements.
   
-    2 │ 	<div scope={scope} />
-    3 │ 	<div scope={scope}></div>
-  > 4 │ 	<div scope="col" />
-      │ 	     ^^^^^^^^^^^
-    5 │ 	<div scope="col"></div>
-    6 │ 	<div scope />
+    2 │ <>
+    3 │ 	<div scope={scope} />
+  > 4 │ 	<div scope={scope}></div>
+      │ 	     ^^^^^^^^^^^^^
+    5 │ 	<div scope="col" />
+    6 │ 	<div scope="col"></div>
   
   i The scope attribute is used to associate a data cell with its corresponding header cell in a data table,
                 so it should be placed on th elements to provide accessibility to screen readers.
@@ -87,8 +63,8 @@ invalid.jsx:4:7 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━
   
   i Unsafe fix: Remove the scope attribute.
   
-    4 │ → <div·scope="col"·/>
-      │        ------------  
+    4 │ → <div·scope={scope}></div>
+      │        -------------       
 
 ```
 
@@ -97,12 +73,12 @@ invalid.jsx:5:7 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━
 
   × Avoid using the scope attribute on elements other than th elements.
   
-    3 │ 	<div scope={scope}></div>
-    4 │ 	<div scope="col" />
-  > 5 │ 	<div scope="col"></div>
+    3 │ 	<div scope={scope} />
+    4 │ 	<div scope={scope}></div>
+  > 5 │ 	<div scope="col" />
       │ 	     ^^^^^^^^^^^
-    6 │ 	<div scope />
-    7 │ </>
+    6 │ 	<div scope="col"></div>
+    7 │ 	<div scope />
   
   i The scope attribute is used to associate a data cell with its corresponding header cell in a data table,
                 so it should be placed on th elements to provide accessibility to screen readers.
@@ -113,8 +89,8 @@ invalid.jsx:5:7 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━
   
   i Unsafe fix: Remove the scope attribute.
   
-    5 │ → <div·scope="col"></div>
-      │        -----------       
+    5 │ → <div·scope="col"·/>
+      │        ------------  
 
 ```
 
@@ -123,12 +99,12 @@ invalid.jsx:6:7 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━
 
   × Avoid using the scope attribute on elements other than th elements.
   
-    4 │ 	<div scope="col" />
-    5 │ 	<div scope="col"></div>
-  > 6 │ 	<div scope />
-      │ 	     ^^^^^
-    7 │ </>
-    8 │ 
+    4 │ 	<div scope={scope}></div>
+    5 │ 	<div scope="col" />
+  > 6 │ 	<div scope="col"></div>
+      │ 	     ^^^^^^^^^^^
+    7 │ 	<div scope />
+    8 │ </>
   
   i The scope attribute is used to associate a data cell with its corresponding header cell in a data table,
                 so it should be placed on th elements to provide accessibility to screen readers.
@@ -139,7 +115,33 @@ invalid.jsx:6:7 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━
   
   i Unsafe fix: Remove the scope attribute.
   
-    6 │ → <div·scope·/>
+    6 │ → <div·scope="col"></div>
+      │        -----------       
+
+```
+
+```
+invalid.jsx:7:7 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the scope attribute on elements other than th elements.
+  
+    5 │ 	<div scope="col" />
+    6 │ 	<div scope="col"></div>
+  > 7 │ 	<div scope />
+      │ 	     ^^^^^
+    8 │ </>
+    9 │ 
+  
+  i The scope attribute is used to associate a data cell with its corresponding header cell in a data table,
+                so it should be placed on th elements to provide accessibility to screen readers.
+  
+  i Follow the links for more information,
+                WCAG 1.3.1
+                WCAG 4.1.1
+  
+  i Unsafe fix: Remove the scope attribute.
+  
+    7 │ → <div·scope·/>
       │        ------  
 
 ```

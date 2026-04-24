@@ -1,0 +1,133 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: css/stylefmt-repo/at-media/at-media.css
+---
+
+# Input
+
+```css
+@media   (    max-width:600px    )      {}
+@media   (   min-width:700px) and (     orientation:    landscape){}
+@media (min-width: 700px), handheld and (orientation: landscape) {}
+@media    not      all     and (   monochrome    ) {}
+@media (   not     all    )    and     (   monochrome        ) {}
+@media (  not (   screen     and   (  color  )  )   )  ,   print and   (  color ){}
+@media    screen   and (   device-aspect-ratio:     16/9   ),   screen    and (device-aspect-ratio:16/10  ) {}
+
+@media   (  -webkit-min-device-pixel-ratio:2),
+         (min--moz-device-pixel-ratio: 2        ),
+         (min-resolution:           2dppx),
+         (min-resolution: 192dpi     ){}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -6,16 +6,13 @@
+ }
+ @media not all and (monochrome) {
+ }
+-@media (not all) and (monochrome) {
++@media (   not     all    )    and     (   monochrome        ) {
+ }
+-@media (not ( screen and ( color ) )), print and (color) {
+-}
+-@media screen and (device-aspect-ratio: 16/9),
+-  screen and (device-aspect-ratio: 16/10) {
++@media (  not (   screen     and   (  color  )  )   )  ,   print and   (  color ){}
++@media screen and (device-aspect-ratio: 16 / 9),
++  screen and (device-aspect-ratio: 16 / 10) {
+ }
+ 
+-@media (-webkit-min-device-pixel-ratio: 2),
+-  (min--moz-device-pixel-ratio: 2),
+-  (min-resolution: 2dppx),
+-  (min-resolution: 192dpi) {
++@media (-webkit-min-device-pixel-ratio: 2), (min--moz-device-pixel-ratio: 2),
++  (min-resolution: 2dppx), (min-resolution: 192dpi) {
+ }
+```
+
+# Output
+
+```css
+@media (max-width: 600px) {
+}
+@media (min-width: 700px) and (orientation: landscape) {
+}
+@media (min-width: 700px), handheld and (orientation: landscape) {
+}
+@media not all and (monochrome) {
+}
+@media (   not     all    )    and     (   monochrome        ) {
+}
+@media (  not (   screen     and   (  color  )  )   )  ,   print and   (  color ){}
+@media screen and (device-aspect-ratio: 16 / 9),
+  screen and (device-aspect-ratio: 16 / 10) {
+}
+
+@media (-webkit-min-device-pixel-ratio: 2), (min--moz-device-pixel-ratio: 2),
+  (min-resolution: 2dppx), (min-resolution: 192dpi) {
+}
+```
+
+# Errors
+```
+at-media.css:5:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a media condition, or a query feature but instead found 'all'.
+  
+    3 │ @media (min-width: 700px), handheld and (orientation: landscape) {}
+    4 │ @media    not      all     and (   monochrome    ) {}
+  > 5 │ @media (   not     all    )    and     (   monochrome        ) {}
+      │                    ^^^
+    6 │ @media (  not (   screen     and   (  color  )  )   )  ,   print and   (  color ){}
+    7 │ @media    screen   and (   device-aspect-ratio:     16/9   ),   screen    and (device-aspect-ratio:16/10  ) {}
+  
+  i Expected a media condition, or a query feature here.
+  
+    3 │ @media (min-width: 700px), handheld and (orientation: landscape) {}
+    4 │ @media    not      all     and (   monochrome    ) {}
+  > 5 │ @media (   not     all    )    and     (   monochrome        ) {}
+      │                    ^^^
+    6 │ @media (  not (   screen     and   (  color  )  )   )  ,   print and   (  color ){}
+    7 │ @media    screen   and (   device-aspect-ratio:     16/9   ),   screen    and (device-aspect-ratio:16/10  ) {}
+  
+at-media.css:6:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `and`
+  
+    4 │ @media    not      all     and (   monochrome    ) {}
+    5 │ @media (   not     all    )    and     (   monochrome        ) {}
+  > 6 │ @media (  not (   screen     and   (  color  )  )   )  ,   print and   (  color ){}
+      │                              ^^^
+    7 │ @media    screen   and (   device-aspect-ratio:     16/9   ),   screen    and (device-aspect-ratio:16/10  ) {}
+    8 │ 
+  
+  i Remove and
+  
+at-media.css:6:49 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    4 │ @media    not      all     and (   monochrome    ) {}
+    5 │ @media (   not     all    )    and     (   monochrome        ) {}
+  > 6 │ @media (  not (   screen     and   (  color  )  )   )  ,   print and   (  color ){}
+      │                                                 ^
+    7 │ @media    screen   and (   device-aspect-ratio:     16/9   ),   screen    and (device-aspect-ratio:16/10  ) {}
+    8 │ 
+  
+  i Remove )
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   11: @media (  not (   screen     and   (  color  )  )   )  ,   print and   (  color ){}
+```

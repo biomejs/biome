@@ -29,7 +29,6 @@ Imports {
 ```
 Bar  => BindingTypeData {
   Types Module(0) TypeId(1),
-  Exported Ranges: (21..24)
 }
 ```
 
@@ -132,7 +131,6 @@ Imports {
 ```
 foo => BindingTypeData {
   Types Module(0) TypeId(3),
-  Exported Ranges: 
 }
 ```
 

@@ -1,0 +1,804 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/interpolation/3943.scss
+---
+
+# Input
+
+```scss
+.class-#{$var} {
+  #{$var}: #7b3d66;
+  #{$attr}-color: blue;
+  #{$prop}-#{$side}: $value;
+  background-#{$var}: #7b3d66;
+  animation-name: #{var};
+  line-height: #{strip-unit($line-height)}em;
+  height: 1#{$var};
+  width: calc(100% - #{$sidebar-width});
+  max-width: calc(#{$m*100}vw #{$sign} #{$b});
+  font: #{$font-size}/#{$line-height};
+  content: "I have #{8 + 2} books on SASS!";
+  border: #{$var} #{$var} #{$var};
+  filter: #{$var}#{$var}#{$var};
+  prop:  #{  $var  +  $var  }  #{  $var  +  $var  }  #{  $var  +  $var  };
+  prop2:
+      #{
+      $var
+      +
+      $var
+      }
+
+      #{
+      $var
+      +
+      $var
+      }
+
+      #{
+      $var
+      +
+      $var
+      }
+      ;
+  prop3:
+
+      #{
+
+      $var
+
+      +
+
+      $var
+
+      }
+
+      #{
+
+      $var
+
+      +
+
+      $var
+
+      }
+
+      #{
+
+      $var
+
+      +
+
+      $var
+
+      }
+      ;
+  prop4: -#{$loader-icon-duration};
+  prop5: +#{$loader-icon-duration};
+  prop6: calc(-#{$loader-icon-duration} + 10);
+  prop7: calc(10 + -#{$loader-icon-duration});
+}
+
+/* Framework version for the generated CSS is #{$version}. */
+
+.selector {
+  foo: bar;
+  #{$active} {
+    baz: qux;
+  }
+}
+
+.el:nth-of-type(#{$i}) {}
+
+@media #{$value} {}
+
+$foundation-dir: 'foundation';
+@import url('#{$foundation-dir}/components/grid');
+@import url(#{$foundation-dir}/components/grid);
+@import url($foundation-dir/components/grid);
+@import url($foundation-dir+"/components/grid");
+
+@function get-font-family($family) {
+  @return $family;
+}
+@import url("//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap");
+@import url(//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap);
+
+
+@keyframes loader {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  #{50% - $loader-icon-duration} {
+    transform: translate3d(0, $bounce-height, 0);
+  }
+
+  50% {
+    transform: translate3d(0, $bounce-height, 0) scale($loader-bounce-horizontal-expansion, $loader-bounce-vertical-compression);
+  }
+}
+
+$icons: wifi "\600", wifi-hotspot "\601", weather "\602";
+
+@each $icon in $icons {
+  .icon-#{nth($icon, 1)}, %icon-#{nth($icon, 1)} {
+    content: "#{nth($icon, 2)}";
+  }
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -5,10 +5,10 @@
+   background-#{$var}: #7b3d66;
+   animation-name: #{var};
+   line-height: #{strip-unit($line-height)}em;
+-  height: 1#{$var};
++  height: 1 #{$var};
+   width: calc(100% - #{$sidebar-width});
+   max-width: calc(#{$m * 100}vw #{$sign} #{$b});
+-  font: #{$font-size}/#{$line-height};
++  font: #{$font-size} / #{$line-height};
+   content: "I have #{8 + 2} books on SASS!";
+   border: #{$var} #{$var} #{$var};
+   filter: #{$var}#{$var}#{$var};
+@@ -30,17 +30,15 @@
+   }
+ }
+ 
+-.el:nth-of-type(#{$i}) {
+-}
++.el:nth-of-type(# {$i}) {}
+ 
+-@media #{$value} {
+-}
++@media #{$value} {}
+ 
+-$foundation-dir: "foundation";
+-@import url("#{$foundation-dir}/components/grid");
++$foundation-dir: 'foundation';
++@import url('#{$foundation-dir}/components/grid');
+ @import url(#{$foundation-dir}/components/grid);
+ @import url($foundation-dir/components/grid);
+-@import url($foundation-dir + "/components/grid");
++@import url($foundation-dir+"/components/grid");
+ 
+ @function get-font-family($family) {
+   @return $family;
+@@ -48,6 +46,7 @@
+ @import url("//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap");
+ @import url(//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap);
+ 
++
+ @keyframes loader {
+   0% {
+     transform: translate3d(0, 0, 0);
+@@ -58,22 +57,14 @@
+   }
+ 
+   50% {
+-    transform: translate3d(0, $bounce-height, 0)
+-      scale(
+-        $loader-bounce-horizontal-expansion,
+-        $loader-bounce-vertical-compression
+-      );
++    transform: translate3d(0, $bounce-height, 0) scale($loader-bounce-horizontal-expansion, $loader-bounce-vertical-compression);
+   }
+ }
+ 
+-$icons:
+-  wifi "\600",
+-  wifi-hotspot "\601",
+-  weather "\602";
++$icons: wifi "\600", wifi-hotspot "\601", weather "\602";
+ 
+ @each $icon in $icons {
+-  .icon-#{nth($icon, 1)},
+-  %icon-#{nth($icon, 1)} {
++  .icon-#{nth($icon, 1)}, %icon-#{nth($icon, 1)} {
+     content: "#{nth($icon, 2)}";
+   }
+ }
+```
+
+# Output
+
+```scss
+.class-#{$var} {
+  #{$var}: #7b3d66;
+  #{$attr}-color: blue;
+  #{$prop}-#{$side}: $value;
+  background-#{$var}: #7b3d66;
+  animation-name: #{var};
+  line-height: #{strip-unit($line-height)}em;
+  height: 1 #{$var};
+  width: calc(100% - #{$sidebar-width});
+  max-width: calc(#{$m * 100}vw #{$sign} #{$b});
+  font: #{$font-size} / #{$line-height};
+  content: "I have #{8 + 2} books on SASS!";
+  border: #{$var} #{$var} #{$var};
+  filter: #{$var}#{$var}#{$var};
+  prop: #{$var + $var} #{$var + $var} #{$var + $var};
+  prop2: #{$var + $var} #{$var + $var} #{$var + $var};
+  prop3: #{$var + $var} #{$var + $var} #{$var + $var};
+  prop4: -#{$loader-icon-duration};
+  prop5: +#{$loader-icon-duration};
+  prop6: calc(-#{$loader-icon-duration} + 10);
+  prop7: calc(10 + -#{$loader-icon-duration});
+}
+
+/* Framework version for the generated CSS is #{$version}. */
+
+.selector {
+  foo: bar;
+  #{$active} {
+    baz: qux;
+  }
+}
+
+.el:nth-of-type(# {$i}) {}
+
+@media #{$value} {}
+
+$foundation-dir: 'foundation';
+@import url('#{$foundation-dir}/components/grid');
+@import url(#{$foundation-dir}/components/grid);
+@import url($foundation-dir/components/grid);
+@import url($foundation-dir+"/components/grid");
+
+@function get-font-family($family) {
+  @return $family;
+}
+@import url("//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap");
+@import url(//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap);
+
+
+@keyframes loader {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  #{50% - $loader-icon-duration} {
+    transform: translate3d(0, $bounce-height, 0);
+  }
+
+  50% {
+    transform: translate3d(0, $bounce-height, 0) scale($loader-bounce-horizontal-expansion, $loader-bounce-vertical-compression);
+  }
+}
+
+$icons: wifi "\600", wifi-hotspot "\601", weather "\602";
+
+@each $icon in $icons {
+  .icon-#{nth($icon, 1)}, %icon-#{nth($icon, 1)} {
+    content: "#{nth($icon, 2)}";
+  }
+}
+```
+
+# Errors
+```
+3943.scss:82:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an even, an odd, a n, a <An+B>, or a number but instead found '#'.
+  
+    80 │ }
+    81 │ 
+  > 82 │ .el:nth-of-type(#{$i}) {}
+       │                 ^
+    83 │ 
+    84 │ @media #{$value} {}
+  
+  i Expected an even, an odd, a n, a <An+B>, or a number here.
+  
+    80 │ }
+    81 │ 
+  > 82 │ .el:nth-of-type(#{$i}) {}
+       │                 ^
+    83 │ 
+    84 │ @media #{$value} {}
+  
+3943.scss:82:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `{`
+  
+    80 │ }
+    81 │ 
+  > 82 │ .el:nth-of-type(#{$i}) {}
+       │                  ^
+    83 │ 
+    84 │ @media #{$value} {}
+  
+  i Remove {
+  
+3943.scss:82:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a declaration, or an at rule but instead found '$'.
+  
+    80 │ }
+    81 │ 
+  > 82 │ .el:nth-of-type(#{$i}) {}
+       │                   ^
+    83 │ 
+    84 │ @media #{$value} {}
+  
+  i Expected a declaration, or an at rule here.
+  
+    80 │ }
+    81 │ 
+  > 82 │ .el:nth-of-type(#{$i}) {}
+       │                   ^
+    83 │ 
+    84 │ @media #{$value} {}
+  
+3943.scss:82:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `}`
+  
+    80 │ }
+    81 │ 
+  > 82 │ .el:nth-of-type(#{$i}) {}
+       │                     ^
+    83 │ 
+    84 │ @media #{$value} {}
+  
+  i Remove }
+  
+3943.scss:84:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a media query but instead found '#'.
+  
+    82 │ .el:nth-of-type(#{$i}) {}
+    83 │ 
+  > 84 │ @media #{$value} {}
+       │        ^
+    85 │ 
+    86 │ $foundation-dir: 'foundation';
+  
+  i Expected a media query here.
+  
+    82 │ .el:nth-of-type(#{$i}) {}
+    83 │ 
+  > 84 │ @media #{$value} {}
+       │        ^
+    85 │ 
+    86 │ $foundation-dir: 'foundation';
+  
+3943.scss:84:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a declaration, or an at rule but instead found '$'.
+  
+    82 │ .el:nth-of-type(#{$i}) {}
+    83 │ 
+  > 84 │ @media #{$value} {}
+       │          ^
+    85 │ 
+    86 │ $foundation-dir: 'foundation';
+  
+  i Expected a declaration, or an at rule here.
+  
+    82 │ .el:nth-of-type(#{$i}) {}
+    83 │ 
+  > 84 │ @media #{$value} {}
+       │          ^
+    85 │ 
+    86 │ $foundation-dir: 'foundation';
+  
+3943.scss:84:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `}`
+  
+    82 │ .el:nth-of-type(#{$i}) {}
+    83 │ 
+  > 84 │ @media #{$value} {}
+       │                ^
+    85 │ 
+    86 │ $foundation-dir: 'foundation';
+  
+  i Remove }
+  
+3943.scss:99:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+   > 99 │ @keyframes loader {
+        │ ^
+    100 │   0% {
+    101 │     transform: translate3d(0, 0, 0);
+  
+  i Expected one of:
+  
+  - function
+  - identifier
+  
+3943.scss:99:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+   > 99 │ @keyframes loader {
+        │                   ^
+  > 100 │   0% {
+        │   ^^^^
+    101 │     transform: translate3d(0, 0, 0);
+    102 │   }
+  
+  i Expected one of:
+  
+  - function
+  - identifier
+  
+3943.scss:101:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+     99 │ @keyframes loader {
+    100 │   0% {
+  > 101 │     transform: translate3d(0, 0, 0);
+        │              ^
+    102 │   }
+    103 │ 
+  
+  i Expected one of:
+  
+  - function
+  - identifier
+  
+3943.scss:101:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+     99 │ @keyframes loader {
+    100 │   0% {
+  > 101 │     transform: translate3d(0, 0, 0);
+        │                                    ^
+  > 102 │   }
+  > 103 │ 
+  > 104 │   #{50% - $loader-icon-duration} {
+        │   ^^^^^^^^^
+    105 │     transform: translate3d(0, $bounce-height, 0);
+    106 │   }
+  
+  i Expected one of:
+  
+  - function
+  - identifier
+  
+3943.scss:104:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    102 │   }
+    103 │ 
+  > 104 │   #{50% - $loader-icon-duration} {
+        │                                ^^^
+    105 │     transform: translate3d(0, $bounce-height, 0);
+    106 │   }
+  
+  i Expected one of:
+  
+  - function
+  - identifier
+  
+3943.scss:105:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    104 │   #{50% - $loader-icon-duration} {
+  > 105 │     transform: translate3d(0, $bounce-height, 0);
+        │              ^
+    106 │   }
+    107 │ 
+  
+  i Expected one of:
+  
+  - function
+  - identifier
+  
+3943.scss:105:49 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    104 │   #{50% - $loader-icon-duration} {
+  > 105 │     transform: translate3d(0, $bounce-height, 0);
+        │                                                 ^
+  > 106 │   }
+  > 107 │ 
+  > 108 │   50% {
+        │   ^^^^^
+    109 │     transform: translate3d(0, $bounce-height, 0) scale($loader-bounce-horizontal-expansion, $loader-bounce-vertical-compression);
+    110 │   }
+  
+  i Expected one of:
+  
+  - function
+  - identifier
+  
+3943.scss:109:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    108 │   50% {
+  > 109 │     transform: translate3d(0, $bounce-height, 0) scale($loader-bounce-horizontal-expansion, $loader-bounce-vertical-compression);
+        │              ^
+    110 │   }
+    111 │ }
+  
+  i Expected one of:
+  
+  - function
+  - identifier
+  
+3943.scss:109:129 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    108 │   50% {
+  > 109 │     transform: translate3d(0, $bounce-height, 0) scale($loader-bounce-horizontal-expansion, $loader-bounce-vertical-compression);
+        │                                                                                                                                 ^
+  > 110 │   }
+  > 111 │ }
+  > 112 │ 
+  > 113 │ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
+        │ ^
+    114 │ 
+    115 │ @each $icon in $icons {
+  
+  i Expected one of:
+  
+  - function
+  - identifier
+  
+3943.scss:113:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    111 │ }
+    112 │ 
+  > 113 │ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
+        │       ^
+    114 │ 
+    115 │ @each $icon in $icons {
+  
+  i Expected one of:
+  
+  - function
+  - identifier
+  
+3943.scss:113:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    111 │ }
+    112 │ 
+  > 113 │ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
+        │              ^^^^^^^
+    114 │ 
+    115 │ @each $icon in $icons {
+  
+  i Expected one of:
+  
+  - function
+  - identifier
+  
+3943.scss:113:35 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    111 │ }
+    112 │ 
+  > 113 │ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
+        │                                   ^^^^^^^
+    114 │ 
+    115 │ @each $icon in $icons {
+  
+  i Expected one of:
+  
+  - function
+  - identifier
+  
+3943.scss:113:51 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    111 │ }
+    112 │ 
+  > 113 │ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
+        │                                                   ^^^^^^^
+  > 114 │ 
+  > 115 │ @each $icon in $icons {
+        │ ^
+    116 │   .icon-#{nth($icon, 1)}, %icon-#{nth($icon, 1)} {
+    117 │     content: "#{nth($icon, 2)}";
+  
+  i Expected one of:
+  
+  - function
+  - identifier
+  
+3943.scss:115:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    113 │ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
+    114 │ 
+  > 115 │ @each $icon in $icons {
+        │       ^
+    116 │   .icon-#{nth($icon, 1)}, %icon-#{nth($icon, 1)} {
+    117 │     content: "#{nth($icon, 2)}";
+  
+  i Expected one of:
+  
+  - function
+  - identifier
+  
+3943.scss:115:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    113 │ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
+    114 │ 
+  > 115 │ @each $icon in $icons {
+        │                ^
+    116 │   .icon-#{nth($icon, 1)}, %icon-#{nth($icon, 1)} {
+    117 │     content: "#{nth($icon, 2)}";
+  
+  i Expected one of:
+  
+  - function
+  - identifier
+  
+3943.scss:115:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    113 │ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
+    114 │ 
+  > 115 │ @each $icon in $icons {
+        │                       ^
+  > 116 │   .icon-#{nth($icon, 1)}, %icon-#{nth($icon, 1)} {
+        │   ^
+    117 │     content: "#{nth($icon, 2)}";
+    118 │   }
+  
+  i Expected one of:
+  
+  - function
+  - identifier
+  
+3943.scss:116:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    115 │ @each $icon in $icons {
+  > 116 │   .icon-#{nth($icon, 1)}, %icon-#{nth($icon, 1)} {
+        │         ^^
+    117 │     content: "#{nth($icon, 2)}";
+    118 │   }
+  
+  i Expected one of:
+  
+  - function
+  - identifier
+  
+3943.scss:116:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    115 │ @each $icon in $icons {
+  > 116 │   .icon-#{nth($icon, 1)}, %icon-#{nth($icon, 1)} {
+        │                        ^^^^
+    117 │     content: "#{nth($icon, 2)}";
+    118 │   }
+  
+  i Expected one of:
+  
+  - function
+  - identifier
+  
+3943.scss:116:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    115 │ @each $icon in $icons {
+  > 116 │   .icon-#{nth($icon, 1)}, %icon-#{nth($icon, 1)} {
+        │                                 ^^
+    117 │     content: "#{nth($icon, 2)}";
+    118 │   }
+  
+  i Expected one of:
+  
+  - function
+  - identifier
+  
+3943.scss:116:48 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    115 │ @each $icon in $icons {
+  > 116 │   .icon-#{nth($icon, 1)}, %icon-#{nth($icon, 1)} {
+        │                                                ^^^
+    117 │     content: "#{nth($icon, 2)}";
+    118 │   }
+  
+  i Expected one of:
+  
+  - function
+  - identifier
+  
+3943.scss:117:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    115 │ @each $icon in $icons {
+    116 │   .icon-#{nth($icon, 1)}, %icon-#{nth($icon, 1)} {
+  > 117 │     content: "#{nth($icon, 2)}";
+        │            ^^^^^
+    118 │   }
+    119 │ }
+  
+  i Expected one of:
+  
+  - function
+  - identifier
+  
+3943.scss:117:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    115 │ @each $icon in $icons {
+    116 │   .icon-#{nth($icon, 1)}, %icon-#{nth($icon, 1)} {
+  > 117 │     content: "#{nth($icon, 2)}";
+        │                              ^^^
+  > 118 │   }
+  > 119 │ }
+        │ ^
+    120 │ 
+  
+  i Expected one of:
+  
+  - function
+  - identifier
+  
+3943.scss:117:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+    115 │ @each $icon in $icons {
+    116 │   .icon-#{nth($icon, 1)}, %icon-#{nth($icon, 1)} {
+  > 117 │     content: "#{nth($icon, 2)}";
+        │                               ^^
+    118 │   }
+    119 │ }
+  
+  i The closing quote must be on the same line.
+  
+3943.scss:120:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead the file ends
+  
+    118 │   }
+    119 │ }
+  > 120 │ 
+        │ 
+  
+  i the file ends here
+  
+    118 │   }
+    119 │ }
+  > 120 │ 
+        │ 
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   46: @import url("//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap");
+   47: @import url(//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap);
+   60:     transform: translate3d(0, $bounce-height, 0) scale($loader-bounce-horizontal-expansion, $loader-bounce-vertical-compression);
+```

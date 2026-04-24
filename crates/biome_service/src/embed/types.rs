@@ -1,6 +1,7 @@
 use crate::workspace::DocumentFileSource;
 use biome_css_syntax::CssFileSource;
 use biome_graphql_syntax::GraphqlFileSource;
+use biome_html_syntax::AnySvelteBlock;
 use biome_js_syntax::JsFileSource;
 use biome_json_syntax::JsonFileSource;
 use biome_rowan::{TextRange, TextSize, TokenText};
@@ -73,7 +74,13 @@ pub(crate) enum EmbedCandidate {
     /// Covers `{ expr }` (single), `{{ expr }}` (double), and Svelte control
     /// flow blocks (`{#if}`, `{#each}`, `{#await}`, `{#key}`).
     /// Built from `HtmlTextExpression` by the HTML handler.
-    TextExpression { content: EmbedContent },
+    TextExpression {
+        /// The content of the block
+        content: EmbedContent,
+
+        /// Particular block information, required by certain services
+        block_kind: EmbedBlockKind,
+    },
 
     /// A directive attribute value containing JS.
     /// - Vue: `@click="handler()"`, `:prop="value"`, `v-if="cond"`
@@ -91,6 +98,52 @@ pub(crate) enum EmbedCandidate {
         /// Affects `EmbeddingKind::Astro { is_class_attribute }`.
         is_class_attribute: bool,
     },
+}
+
+impl EmbedCandidate {
+    pub(crate) fn as_block_kind(&self) -> Option<&EmbedBlockKind> {
+        if let Self::TextExpression { block_kind, .. } = &self {
+            Some(block_kind)
+        } else {
+            None
+        }
+    }
+}
+
+#[derive(Debug, Default)]
+pub(crate) enum EmbedBlockKind {
+    Svelte(SvelteBlockKind),
+    /// Neutral block that doesn't need any special handling.
+    #[default]
+    Neutral,
+}
+
+#[derive(Debug)]
+pub(crate) enum SvelteBlockKind {
+    /// `@render` block in Svelte.
+    Render,
+    /// `#snippet` block in Svelte.
+    Snippet,
+    /// `{@const name = value}` block in Svelte. The assignment declares a
+    /// new binding scoped to the enclosing `{#each}` / `{#if}` branch.
+    Const,
+}
+
+impl From<&AnySvelteBlock> for EmbedBlockKind {
+    fn from(value: &AnySvelteBlock) -> Self {
+        match value {
+            AnySvelteBlock::SvelteAwaitBlock(_)
+            | AnySvelteBlock::SvelteBogusBlock(_)
+            | AnySvelteBlock::SvelteDebugBlock(_)
+            | AnySvelteBlock::SvelteEachBlock(_)
+            | AnySvelteBlock::SvelteHtmlBlock(_)
+            | AnySvelteBlock::SvelteIfBlock(_)
+            | AnySvelteBlock::SvelteKeyBlock(_) => Self::Neutral,
+            AnySvelteBlock::SvelteConstBlock(_) => Self::Svelte(SvelteBlockKind::Const),
+            AnySvelteBlock::SvelteRenderBlock(_) => Self::Svelte(SvelteBlockKind::Render),
+            AnySvelteBlock::SvelteSnippetBlock(_) => Self::Svelte(SvelteBlockKind::Snippet),
+        }
+    }
 }
 
 /// The text content and position information for an embed site.
@@ -116,7 +169,7 @@ impl EmbedCandidate {
             Self::Element { content, .. }
             | Self::Frontmatter { content }
             | Self::TaggedTemplate { content, .. }
-            | Self::TextExpression { content }
+            | Self::TextExpression { content, .. }
             | Self::Directive { content, .. } => content,
         }
     }

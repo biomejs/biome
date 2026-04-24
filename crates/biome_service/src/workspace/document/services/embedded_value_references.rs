@@ -6,16 +6,15 @@ use biome_js_syntax::{
     JsxReferenceIdentifier,
 };
 use biome_rowan::{AstNode, TextRange, TokenText, WalkEvent};
-use rustc_hash::FxHashMap;
 
 #[derive(Debug, Clone, Default)]
 pub struct EmbeddedValueReferences {
-    pub references: Vec<FxHashMap<TextRange, TokenText>>,
+    pub references: Vec<Vec<(TextRange, TokenText)>>,
 }
 
 #[derive(Debug)]
 pub(crate) struct EmbeddedValueReferencesBuilder {
-    references: FxHashMap<TextRange, TokenText>,
+    references: Vec<(TextRange, TokenText)>,
 }
 
 impl EmbeddedValueReferences {
@@ -31,8 +30,12 @@ impl EmbeddedValueReferences {
 impl EmbeddedValueReferencesBuilder {
     fn new() -> Self {
         Self {
-            references: FxHashMap::default(),
+            references: Vec::default(),
         }
+    }
+
+    pub(crate) fn register_reference(&mut self, range: TextRange, text: TokenText) {
+        self.references.push((range, text));
     }
 
     /// Visit a non-source snippet to track value references
@@ -102,8 +105,7 @@ impl EmbeddedValueReferencesBuilder {
             AnyHtmlTagName::HtmlComponentName(component) => {
                 // Track simple component: <Component>
                 if let Ok(token) = component.value_token() {
-                    self.references
-                        .insert(token.text_trimmed_range(), token.token_text_trimmed());
+                    self.register_reference(token.text_trimmed_range(), token.token_text_trimmed());
                 }
             }
             AnyHtmlTagName::HtmlMemberName(member) => {
@@ -124,15 +126,13 @@ impl EmbeddedValueReferencesBuilder {
             AnyHtmlComponentObjectName::HtmlTagName(tag) => {
                 // For member expressions starting with lowercase (unusual but possible)
                 if let Ok(token) = tag.value_token() {
-                    self.references
-                        .insert(token.text_trimmed_range(), token.token_text_trimmed());
+                    self.register_reference(token.text_trimmed_range(), token.token_text_trimmed());
                 }
             }
             AnyHtmlComponentObjectName::HtmlComponentName(component) => {
                 // Track the component name
                 if let Ok(token) = component.value_token() {
-                    self.references
-                        .insert(token.text_trimmed_range(), token.token_text_trimmed());
+                    self.register_reference(token.text_trimmed_range(), token.token_text_trimmed());
                 }
             }
             AnyHtmlComponentObjectName::HtmlMemberName(member) => {
@@ -147,7 +147,7 @@ impl EmbeddedValueReferencesBuilder {
 
     fn visit_jsx_reference_identifier(&mut self, reference: JsxReferenceIdentifier) -> Option<()> {
         let name_token = reference.value_token().ok()?;
-        self.references.insert(
+        self.register_reference(
             name_token.text_trimmed_range(),
             name_token.token_text_trimmed(),
         );
@@ -160,7 +160,7 @@ impl EmbeddedValueReferencesBuilder {
             return None;
         }
         let name_token = reference.value_token().ok()?;
-        self.references.insert(
+        self.register_reference(
             name_token.text_trimmed_range(),
             name_token.token_text_trimmed(),
         );
@@ -189,7 +189,7 @@ mod tests {
 
     fn contains_reference(service: &EmbeddedValueReferences, reference: &str) -> bool {
         for refs in service.references.iter() {
-            if refs.values().any(|token| {
+            if refs.iter().any(|(_, token)| {
                 let text = token.text();
                 text == reference
             }) {

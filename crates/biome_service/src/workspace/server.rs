@@ -53,7 +53,7 @@ use biome_js_syntax::{AnyJsRoot, LanguageVariant, ModuleKind};
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
 use biome_module_graph::{HtmlEmbeddedContent, ModuleDependencies, ModuleDiagnostic, ModuleGraph};
-use biome_package::PackageType;
+use biome_package::{Catalogs, PackageJson, PackageType};
 use biome_parser::AnyParse;
 use biome_plugin_loader::Plugins;
 use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
@@ -358,6 +358,14 @@ impl WorkspaceServer {
         let path: Utf8PathBuf = biome_path.clone().into();
 
         if document_file_source.is_none() && !DocumentFileSource::can_read(path.as_path()) {
+            if reason.is_index()
+                && path
+                    .file_name()
+                    .is_some_and(|filename| filename == "pnpm-workspace.yaml")
+                && let Some(workspace_root) = path.parent()
+            {
+                self.refresh_pnpm_workspace_catalogs_for_scope(project_key, workspace_root);
+            }
             return Ok(Default::default());
         }
 
@@ -623,27 +631,38 @@ impl WorkspaceServer {
             reason.is_index() || self.is_indexed(&path)
         };
 
-        // Manifest files need to update the module graph
-        if is_indexed
-            && let Some(root) = syntax
+        // Manifest files need to update the module graph.
+        if is_indexed {
+            if let Some(root) = syntax
                 .and_then(Result::ok)
                 .map(|node| node.unwrap_as_send_node())
-        {
-            let (dependencies, diagnostics) = self.update_service_data(
-                &path,
-                UpdateKind::AddedOrChanged(reason, root, services),
-                project_key,
-            )?;
+            {
+                let (dependencies, diagnostics) = self.update_service_data(
+                    &path,
+                    UpdateKind::AddedOrChanged(reason, root, services),
+                    project_key,
+                )?;
 
-            Ok(InternalOpenFileResult {
-                dependencies,
-                diagnostics,
-            })
-        } else {
-            // If the document was never opened by the scanner, we don't care
-            // about updating service data.
-            Ok(InternalOpenFileResult::default())
+                return Ok(InternalOpenFileResult {
+                    dependencies,
+                    diagnostics,
+                });
+            }
+
+            // pnpm-workspace.yaml is not a parsed manifest, but updates still need to
+            // re-apply catalogs to indexed package.json manifests in the same scope.
+            if path
+                .file_name()
+                .is_some_and(|filename| filename == "pnpm-workspace.yaml")
+                && let Some(workspace_root) = path.parent()
+            {
+                self.refresh_pnpm_workspace_catalogs_for_scope(project_key, workspace_root);
+            }
         }
+
+        // If the document was never opened by the scanner, we don't care
+        // about updating service data.
+        Ok(InternalOpenFileResult::default())
     }
 
     /// Retrieves the parser result for a given file.
@@ -972,12 +991,73 @@ impl WorkspaceServer {
         Ok(is_ignored)
     }
 
+    /// Attempts to load pnpm workspace catalogs by searching for a
+    /// `pnpm-workspace.yaml` starting from the given path and walking up its
+    /// ancestors.
+    fn load_pnpm_workspace_catalog(&self, start_dir: &Utf8Path) -> Option<Catalogs> {
+        for dir in start_dir.ancestors() {
+            let workspace_file = dir.join("pnpm-workspace.yaml");
+            if !self.fs.path_is_file(&workspace_file) {
+                continue;
+            }
+
+            if let Ok(content) = self.fs.read_file_from_path(&workspace_file)
+                && let Some(catalog) = PackageJson::parse_pnpm_workspace_catalog(&content)
+            {
+                return Some(catalog);
+            }
+        }
+
+        None
+    }
+
+    /// Applies (or clears) pnpm workspace catalogs for the `package.json`
+    /// manifest stored at `package_path`, based on the current project settings.
+    fn apply_pnpm_workspace_catalog_to_package(
+        &self,
+        project_key: ProjectKey,
+        package_path: &Utf8Path,
+    ) {
+        let use_pnpm_workspace_catalogs = self
+            .projects
+            .get_settings_based_on_path(project_key, package_path)
+            .is_some_and(|settings| settings.use_pnpm_workspace_catalogs());
+
+        if let Some(mut manifest) = self
+            .project_layout
+            .get_node_manifest_for_package(package_path)
+        {
+            if use_pnpm_workspace_catalogs {
+                manifest.catalog = self.load_pnpm_workspace_catalog(package_path);
+            } else {
+                manifest.catalog = None;
+            }
+
+            self.project_layout
+                .insert_node_manifest(package_path.to_path_buf(), manifest);
+        }
+    }
+
+    /// Re-applies pnpm workspace catalogs to all packages under `scope_root`.
+    fn refresh_pnpm_workspace_catalogs_for_scope(
+        &self,
+        project_key: ProjectKey,
+        scope_root: &Utf8Path,
+    ) {
+        for package_path in self.project_layout.package_paths() {
+            if package_path.starts_with(scope_root) {
+                self.apply_pnpm_workspace_catalog_to_package(project_key, &package_path);
+            }
+        }
+    }
+
     /// Updates the [ProjectLayout] for the given `path`.
     #[instrument(level = "debug", skip(self))]
     fn update_project_layout(
         &self,
         path: &Utf8Path,
         update_kind: &UpdateKind,
+        project_key: ProjectKey,
     ) -> Result<(), WorkspaceError> {
         let filename = path.file_name();
         if filename.is_some_and(|filename| filename == "package.json") {
@@ -989,7 +1069,8 @@ impl WorkspaceServer {
             match update_kind {
                 UpdateKind::AddedOrChanged(_, root, _) => {
                     self.project_layout
-                        .insert_serialized_node_manifest(package_path, root);
+                        .insert_serialized_node_manifest(package_path.clone(), root);
+                    self.apply_pnpm_workspace_catalog_to_package(project_key, &package_path);
                 }
                 UpdateKind::Removed => {
                     self.project_layout.remove_package(&package_path);
@@ -1031,6 +1112,19 @@ impl WorkspaceServer {
                     self.project_layout
                         .remove_turbo_json_from_package(&package_path);
                 }
+            }
+        } else if filename.is_some_and(|filename| filename == "pnpm-workspace.yaml") {
+            let workspace_root = path
+                .parent()
+                .map(|parent| parent.to_path_buf())
+                .unwrap_or_default();
+
+            for package_path in self.project_layout.package_paths() {
+                if !package_path.starts_with(&workspace_root) {
+                    continue;
+                }
+
+                self.apply_pnpm_workspace_catalog_to_package(project_key, &package_path);
             }
         }
 
@@ -1138,7 +1232,7 @@ impl WorkspaceServer {
     ) -> Result<(ModuleDependencies, Vec<ModuleDiagnostic>), WorkspaceError> {
         let path = BiomePath::from(path);
         if path.is_manifest() {
-            self.update_project_layout(&path, &update_kind)?;
+            self.update_project_layout(&path, &update_kind, project_key)?;
         }
         let settings = self
             .projects
@@ -1298,10 +1392,15 @@ impl Workspace for WorkspaceServer {
         );
 
         if !is_root {
+            let nested_workspace_directory = workspace_directory.clone().unwrap_or_default();
             self.projects.set_nested_settings(
                 project_key,
-                workspace_directory.unwrap_or_default(),
+                nested_workspace_directory.clone(),
                 settings,
+            );
+            self.refresh_pnpm_workspace_catalogs_for_scope(
+                project_key,
+                nested_workspace_directory.as_path(),
             );
         } else {
             // If the configuration is a root one, we also load the ignore files
@@ -1342,6 +1441,9 @@ impl Workspace for WorkspaceServer {
             }
 
             self.projects.set_root_settings(project_key, settings);
+            if let Some(project_path) = self.projects.get_project_path(project_key) {
+                self.refresh_pnpm_workspace_catalogs_for_scope(project_key, project_path.as_path());
+            }
         }
 
         Ok(UpdateSettingsResult { diagnostics })
@@ -1798,8 +1900,11 @@ impl Workspace for WorkspaceServer {
             only,
             skip,
             enabled_rules,
-            pull_code_actions,
+            include_code_fix: pull_code_actions,
             inline_config,
+            max_diagnostics,
+            diagnostic_level,
+            enforce_assist,
         } = params;
         let (working_directory, settings) = self
             .projects
@@ -1811,7 +1916,13 @@ impl Workspace for WorkspaceServer {
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
         let capabilities = self.features.get_capabilities(language);
 
-        let (diagnostics, errors, skipped_diagnostics) = if (categories.is_lint()
+        let parse_errors = parse
+            .diagnostics()
+            .iter()
+            .filter(|d| d.severity() >= Severity::Error)
+            .count();
+
+        let (diagnostics, errors, warnings, infos, skipped_diagnostics) = if (categories.is_lint()
             || categories.is_assist())
             && let Some(lint) = capabilities.analyzer.lint
         {
@@ -1843,12 +1954,17 @@ impl Workspace for WorkspaceServer {
                 document_services: &services,
                 snippet_services: None,
                 working_directory: Some(working_directory.as_path()),
+                max_diagnostics,
+                diagnostic_level,
+                enforce_assist,
             });
 
             let LintResults {
                 mut diagnostics,
                 mut errors,
                 mut skipped_diagnostics,
+                mut warnings,
+                mut infos,
             } = results;
             for embedded_node in &embedded_snippets {
                 let Some(file_source) = self.get_source(embedded_node.file_source_index()) else {
@@ -1878,31 +1994,44 @@ impl Workspace for WorkspaceServer {
                     document_services: &services,
                     snippet_services: Some(snippet_services),
                     working_directory: Some(working_directory.as_path()),
+                    max_diagnostics,
+                    diagnostic_level,
+                    enforce_assist,
                 });
 
                 diagnostics.extend(results.diagnostics);
                 skipped_diagnostics += results.skipped_diagnostics;
                 errors += results.errors;
+                warnings += results.warnings;
+                infos += results.infos;
             }
 
-            (diagnostics, errors, skipped_diagnostics)
+            (diagnostics, errors, warnings, infos, skipped_diagnostics)
         } else {
-            let mut parse_diagnostics = parse.into_serde_diagnostics(None);
+            let mut parse_diagnostics: Vec<_> = parse
+                .into_serde_diagnostics(None)
+                .into_iter()
+                .filter(|diag| diag.severity() >= diagnostic_level)
+                .collect();
             let mut errors = parse_diagnostics
                 .iter()
-                .filter(|diag| diag.severity() <= Severity::Error)
+                .filter(|diag| diag.severity() >= Severity::Error)
                 .count();
 
             for embedded_node in embedded_snippets {
-                let diagnostics = embedded_node.into_serde_diagnostics();
+                let diagnostics: Vec<_> = embedded_node
+                    .into_serde_diagnostics()
+                    .into_iter()
+                    .filter(|diag| diag.severity() >= diagnostic_level)
+                    .collect();
                 errors += diagnostics
                     .iter()
-                    .filter(|diag| diag.severity() <= Severity::Error)
+                    .filter(|diag| diag.severity() >= Severity::Error)
                     .count();
                 parse_diagnostics.extend(diagnostics);
             }
 
-            (parse_diagnostics, errors, 0)
+            (parse_diagnostics, errors, 0, 0, 0)
         };
 
         info!(
@@ -1920,6 +2049,9 @@ impl Workspace for WorkspaceServer {
                 })
                 .collect(),
             errors,
+            warnings,
+            infos,
+            parse_errors,
             skipped_diagnostics: skipped_diagnostics.into(),
         })
     }
@@ -2043,6 +2175,7 @@ impl Workspace for WorkspaceServer {
             enabled_rules,
             categories,
             inline_config,
+            compute_actions,
         } = params;
         let (working_directory, settings) = self
             .projects
@@ -2078,6 +2211,7 @@ impl Workspace for WorkspaceServer {
             action_offset: None,
             document_services: &services,
             working_directory: Some(working_directory.as_path()),
+            compute_actions,
         });
 
         for embedded_snippet in embedded_snippets {
@@ -2106,6 +2240,7 @@ impl Workspace for WorkspaceServer {
                 action_offset: Some(embedded_snippet.content_offset()),
                 document_services: &services,
                 working_directory: Some(working_directory.as_path()),
+                compute_actions,
             });
 
             result.actions.extend(embedded_actions_result.actions);
@@ -2336,6 +2471,7 @@ impl Workspace for WorkspaceServer {
                 new_snippets.push(UpdateSnippetsNodes {
                     range: embedded_snippet.element_range(),
                     new_code: results.code,
+                    needs_reindent: should_format,
                 });
             }
 
@@ -2562,6 +2698,12 @@ impl WorkspaceScannerBridge for WorkspaceServer {
             Some("package.json" | "tsconfig.json" | "turbo.json" | "turbo.jsonc") => {
                 self.project_layout.is_indexed(path)
             }
+            Some("pnpm-workspace.yaml") => path.parent().is_some_and(|workspace_root| {
+                self.project_layout
+                    .package_paths()
+                    .into_iter()
+                    .any(|package_path| package_path.starts_with(workspace_root))
+            }),
             _ => self.module_graph.contains(path),
         }
     }
@@ -2766,7 +2908,6 @@ pub(super) struct InternalOpenFileResult {
     /// Dependencies we discovered of the opened file.
     pub dependencies: ModuleDependencies,
 
-    ///
     pub diagnostics: Vec<ModuleDiagnostic>,
 }
 

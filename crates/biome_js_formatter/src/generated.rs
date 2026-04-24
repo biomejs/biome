@@ -5841,6 +5841,44 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxSelfClosingElement {
         )
     }
 }
+impl FormatRule<biome_js_syntax::JsxShorthandAttribute>
+    for crate::jsx::attribute::shorthand_attribute::FormatJsxShorthandAttribute
+{
+    type Context = JsFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_js_syntax::JsxShorthandAttribute,
+        f: &mut JsFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_js_syntax::JsxShorthandAttribute>::fmt(self, node, f)
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::JsxShorthandAttribute {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::JsxShorthandAttribute,
+        crate::jsx::attribute::shorthand_attribute::FormatJsxShorthandAttribute,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::jsx::attribute::shorthand_attribute::FormatJsxShorthandAttribute::default(),
+        )
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxShorthandAttribute {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::JsxShorthandAttribute,
+        crate::jsx::attribute::shorthand_attribute::FormatJsxShorthandAttribute,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::jsx::attribute::shorthand_attribute::FormatJsxShorthandAttribute::default(),
+        )
+    }
+}
 impl FormatRule<biome_js_syntax::JsxSpreadAttribute>
     for crate::jsx::attribute::spread_attribute::FormatJsxSpreadAttribute
 {
@@ -11976,6 +12014,31 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsInProperty {
         FormatOwnedWithRule::new(
             self,
             crate::js::any::in_property::FormatAnyJsInProperty::default(),
+        )
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsLiteralExportName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::AnyJsLiteralExportName,
+        crate::js::any::literal_export_name::FormatAnyJsLiteralExportName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::js::any::literal_export_name::FormatAnyJsLiteralExportName::default(),
+        )
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsLiteralExportName {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::AnyJsLiteralExportName,
+        crate::js::any::literal_export_name::FormatAnyJsLiteralExportName,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::js::any::literal_export_name::FormatAnyJsLiteralExportName::default(),
         )
     }
 }

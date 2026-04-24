@@ -1,0 +1,76 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "preset": "all"
+    }
+  }
+}
+```
+
+## `test.js`
+
+```js
+for (let i = 0; i < 10; i++) {
+    if (i >= 5) {
+        continue;
+    }
+    console.log(i);
+}
+
+```
+
+# Emitted Messages
+
+```block
+test.js:2:14 lint/style/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+    1 │ for (let i = 0; i < 10; i++) {
+  > 2 │     if (i >= 5) {
+      │              ^
+    3 │         continue;
+    4 │     }
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+
+```
+
+```block
+test.js:5:5 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+  
+    3 │         continue;
+    4 │     }
+  > 5 │     console.log(i);
+      │     ^^^^^^^^^^^
+    6 │ }
+    7 │ 
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+    3 3 │           continue;
+    4 4 │       }
+    5   │ - ····console.log(i);
+    6 5 │   }
+    7 6 │   
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 warning.
+Found 1 info.
+```

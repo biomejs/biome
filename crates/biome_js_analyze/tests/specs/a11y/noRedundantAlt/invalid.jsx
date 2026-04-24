@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 let a = <img alt="Photo of friend." />;
 let a = <img alt="Picture of friend." />;
 let a = <img alt="Image of friend." />;

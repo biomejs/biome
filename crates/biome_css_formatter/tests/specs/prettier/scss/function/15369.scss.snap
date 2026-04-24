@@ -1,0 +1,51 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/function/15369.scss
+---
+
+# Input
+
+```scss
+div {
+  margin: -double(-double(1em));
+  margin: -double(- double(1em));
+  margin: - double(-double(1em));
+}
+
+@function -double($value) {
+  @return $value * 2;
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,7 @@
+ div {
+   margin: -double(-double(1em));
+-  margin: -double(- double(1em));
+-  margin: - double(-double(1em));
++  margin: -double(-double(1em));
++  margin: -double(-double(1em));
+ }
+ 
+ @function -double($value) {
+```
+
+# Output
+
+```scss
+div {
+  margin: -double(-double(1em));
+  margin: -double(-double(1em));
+  margin: -double(-double(1em));
+}
+
+@function -double($value) {
+  @return $value * 2;
+}
+```

@@ -839,6 +839,42 @@ pub enum Behavior {
 }
 ```
 
+#### Custom eslint migrators for rule options
+
+If you are working on a port of an ESLint rule, and you are adding an option from that source rule, you may want to provide a custom migrator for that rule, to help users migrate their configuration from ESLint to Biome.
+
+This is usually implemented in `crates/biome_cli/src/execute/migrate/eslint_to_biome.rs`, in the `migrate_eslint_rule` function. The conversion of the options comes from a `impl From<eslint_eslint::RuleConf> for biome_rule_options::...` implementation.
+
+Example:
+
+```rust
+eslint_eslint::Rule::JestConsistentTestIt(conf) => {
+  if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+      let severity = conf.severity();
+      let group = rules.nursery.get_or_insert_with(Default::default);
+      if let SeverityOrGroup::Group(group) = group {
+          let rule_options =
+              if let eslint_eslint::RuleConf::Option(_, rule_options) = conf {
+                  rule_options.into()
+              } else {
+                  eslint_jest::ConsistentTestItOptions::default().into()
+              };
+          group.use_consistent_test_it =
+              Some(biome_config::RuleFixConfiguration::WithOptions(
+                  biome_config::RuleWithFixOptions {
+                      level: severity.into(),
+                      fix: None,
+                      options: rule_options,
+                  },
+              ));
+      }
+      results.add(&name, RuleMigrationResult::Migrated);
+  }
+}
+```
+
+These custom migrators can be tested by adding a snapshot test to `crates/biome_cli/tests/specs/migrate_eslint/`.
+
 ##### Testing & Documenting Rule Options
 
 As with every other user-facing aspect of a rule, the effect that options have on a rule's operation should be both documented and tested, as explained in more detail in the section [Documenting the rule](#documenting-the-rule).

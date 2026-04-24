@@ -14,32 +14,21 @@ impl FormatNodeRule<CssUrlFunction> for FormatCssUrlFunction {
             r_paren_token,
         } = node.as_fields();
 
-        let should_insert_space = f.options().delimiter_spacing().value();
 
-        if should_insert_space {
-            write!(
-                f,
-                [
-                    name.format(),
-                    l_paren_token.format(),
-                    space(),
-                    value.format(),
-                    modifiers.format(),
-                    space(),
-                    r_paren_token.format()
-                ]
-            )
-        } else {
-            write!(
-                f,
-                [
-                    name.format(),
-                    l_paren_token.format(),
-                    value.format(),
-                    modifiers.format(),
-                    r_paren_token.format()
-                ]
-            )
+        let maybe_space = format_with(|f| {
+            if f.options().delimiter_spacing().value() {
+                write!(f, [space()])?;
+            }
+            Ok(())
+        });
+
+
+        write!(f, [name.format(), l_paren_token.format(), maybe_space, value.format()])?;
+
+        if value.is_some() && modifiers.iter().next().is_some() {
+            write!(f, [space()])?;
         }
+
+        write!(f, [maybe_space, modifiers.format(), r_paren_token.format()])
     }
 }

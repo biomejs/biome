@@ -1,0 +1,96 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.pseudo.css
+---
+# Input
+```css
+/* should generate diagnostics */
+:is(.foo, .bar.baz) {}
+:not(.foo.bar) {}
+:has(.foo .bar) {}
+:nth-child(2n of .foo.bar) {}
+
+```
+
+# Diagnostics
+```
+invalid.pseudo.css:2:1 lint/nursery/noExcessiveSelectorClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Expected this selector to have no more than 1 class selector, but found 3.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ :is(.foo, .bar.baz) {}
+      │ ^^^^^^^^^^^^^^^^^^^
+    3 │ :not(.foo.bar) {}
+    4 │ :has(.foo .bar) {}
+  
+  i Selectors with too many chained classes are harder to read, override, and reuse.
+  
+  i Reduce the number of class selectors in this selector, or split it into simpler selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.pseudo.css:3:1 lint/nursery/noExcessiveSelectorClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Expected this selector to have no more than 1 class selector, but found 2.
+  
+    1 │ /* should generate diagnostics */
+    2 │ :is(.foo, .bar.baz) {}
+  > 3 │ :not(.foo.bar) {}
+      │ ^^^^^^^^^^^^^^
+    4 │ :has(.foo .bar) {}
+    5 │ :nth-child(2n of .foo.bar) {}
+  
+  i Selectors with too many chained classes are harder to read, override, and reuse.
+  
+  i Reduce the number of class selectors in this selector, or split it into simpler selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.pseudo.css:4:1 lint/nursery/noExcessiveSelectorClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Expected this selector to have no more than 1 class selector, but found 2.
+  
+    2 │ :is(.foo, .bar.baz) {}
+    3 │ :not(.foo.bar) {}
+  > 4 │ :has(.foo .bar) {}
+      │ ^^^^^^^^^^^^^^^
+    5 │ :nth-child(2n of .foo.bar) {}
+    6 │ 
+  
+  i Selectors with too many chained classes are harder to read, override, and reuse.
+  
+  i Reduce the number of class selectors in this selector, or split it into simpler selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.pseudo.css:5:1 lint/nursery/noExcessiveSelectorClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Expected this selector to have no more than 1 class selector, but found 2.
+  
+    3 │ :not(.foo.bar) {}
+    4 │ :has(.foo .bar) {}
+  > 5 │ :nth-child(2n of .foo.bar) {}
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+  i Selectors with too many chained classes are harder to read, override, and reuse.
+  
+  i Reduce the number of class selectors in this selector, or split it into simpler selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

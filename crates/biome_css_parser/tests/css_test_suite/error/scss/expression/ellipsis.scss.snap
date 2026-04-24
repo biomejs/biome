@@ -20,7 +20,7 @@ CssRoot {
     items: CssRootItemList [
         CssBogus {
             items: [
-                ScssIdentifier {
+                ScssVariable {
                     dollar_token: DOLLAR@0..49 "$" [Comments("// Ellipsis outside a ..."), Newline("\n")] [],
                     name: CssIdentifier {
                         value_token: IDENT@49..65 "ellipsis-outside" [] [],
@@ -31,7 +31,7 @@ CssRoot {
                     items: [
                         CssBogus {
                             items: [
-                                ScssIdentifier {
+                                ScssVariable {
                                     dollar_token: DOLLAR@67..68 "$" [] [],
                                     name: CssIdentifier {
                                         value_token: IDENT@68..72 "args" [] [],
@@ -58,14 +58,14 @@ CssRoot {
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..76
     0: CSS_BOGUS@0..76
-      0: SCSS_IDENTIFIER@0..65
+      0: SCSS_VARIABLE@0..65
         0: DOLLAR@0..49 "$" [Comments("// Ellipsis outside a ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@49..65
           0: IDENT@49..65 "ellipsis-outside" [] []
       1: COLON@65..67 ":" [] [Whitespace(" ")]
       2: CSS_BOGUS@67..75
         0: CSS_BOGUS@67..75
-          0: SCSS_IDENTIFIER@67..72
+          0: SCSS_VARIABLE@67..72
             0: DOLLAR@67..68 "$" [] []
             1: CSS_IDENTIFIER@68..72
               0: IDENT@68..72 "args" [] []

@@ -121,7 +121,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@363..367 "math" [] [],
                                                 },
@@ -168,7 +168,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@393..397 "math" [] [],
                                                 },
@@ -207,7 +207,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@423..427 "math" [] [],
                                                 },
@@ -246,7 +246,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@453..457 "math" [] [],
                                                 },
@@ -285,7 +285,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@480..484 "math" [] [],
                                                 },
@@ -342,7 +342,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@515..519 "math" [] [],
                                                 },
@@ -399,7 +399,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@552..556 "math" [] [],
                                                 },
@@ -467,7 +467,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@610..615 "color" [] [],
                                                 },
@@ -490,7 +490,7 @@ CssRoot {
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
                                                         ScssKeywordArgument {
-                                                            name: ScssIdentifier {
+                                                            name: ScssVariable {
                                                                 dollar_token: DOLLAR@629..630 "$" [] [],
                                                                 name: CssIdentifier {
                                                                     value_token: IDENT@630..639 "lightness" [] [],
@@ -528,7 +528,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@661..666 "color" [] [],
                                                 },
@@ -551,7 +551,7 @@ CssRoot {
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
                                                         ScssKeywordArgument {
-                                                            name: ScssIdentifier {
+                                                            name: ScssVariable {
                                                                 dollar_token: DOLLAR@679..680 "$" [] [],
                                                                 name: CssIdentifier {
                                                                     value_token: IDENT@680..689 "lightness" [] [],
@@ -589,7 +589,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@713..718 "color" [] [],
                                                 },
@@ -612,7 +612,7 @@ CssRoot {
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
                                                         ScssKeywordArgument {
-                                                            name: ScssIdentifier {
+                                                            name: ScssVariable {
                                                                 dollar_token: DOLLAR@732..733 "$" [] [],
                                                                 name: CssIdentifier {
                                                                     value_token: IDENT@733..738 "alpha" [] [],
@@ -649,7 +649,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@753..758 "color" [] [],
                                                 },
@@ -706,7 +706,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@791..796 "color" [] [],
                                                 },
@@ -745,7 +745,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@825..830 "color" [] [],
                                                 },
@@ -806,7 +806,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@895..901 "string" [] [],
                                                 },
@@ -844,7 +844,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@929..935 "string" [] [],
                                                 },
@@ -882,7 +882,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@966..972 "string" [] [],
                                                 },
@@ -920,7 +920,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@1000..1006 "string" [] [],
                                                 },
@@ -974,7 +974,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@1041..1047 "string" [] [],
                                                 },
@@ -1020,7 +1020,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@1079..1085 "string" [] [],
                                                 },
@@ -1068,8 +1068,8 @@ CssRoot {
                 r_curly_token: R_CURLY@1107..1109 "}" [Newline("\n")] [],
             },
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@1109..1127 "$" [Newline("\n"), Newline("\n"), Comments("// List module"), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@1127..1134 "my-list" [] [],
@@ -1148,7 +1148,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@1170..1174 "list" [] [],
                                                 },
@@ -1161,7 +1161,7 @@ CssRoot {
                                             items: CssParameterList [
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@1182..1183 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@1183..1190 "my-list" [] [],
@@ -1189,7 +1189,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@1200..1204 "list" [] [],
                                                 },
@@ -1202,7 +1202,7 @@ CssRoot {
                                             items: CssParameterList [
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@1209..1210 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@1210..1217 "my-list" [] [],
@@ -1238,7 +1238,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@1232..1236 "list" [] [],
                                                 },
@@ -1251,7 +1251,7 @@ CssRoot {
                                             items: CssParameterList [
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@1243..1244 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@1244..1251 "my-list" [] [],
@@ -1287,7 +1287,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@1267..1271 "list" [] [],
                                                 },
@@ -1300,7 +1300,7 @@ CssRoot {
                                             items: CssParameterList [
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@1279..1280 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@1280..1287 "my-list" [] [],
@@ -1336,7 +1336,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@1301..1305 "list" [] [],
                                                 },
@@ -1349,7 +1349,7 @@ CssRoot {
                                             items: CssParameterList [
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@1311..1312 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@1312..1319 "my-list" [] [],
@@ -1403,8 +1403,8 @@ CssRoot {
                 r_curly_token: R_CURLY@1329..1331 "}" [Newline("\n")] [],
             },
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@1331..1348 "$" [Newline("\n"), Newline("\n"), Comments("// Map module"), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@1348..1354 "my-map" [] [],
@@ -1487,7 +1487,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@1405..1408 "map" [] [],
                                                 },
@@ -1500,7 +1500,7 @@ CssRoot {
                                             items: CssParameterList [
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@1413..1414 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@1414..1420 "my-map" [] [],
@@ -1536,7 +1536,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@1440..1443 "map" [] [],
                                                 },
@@ -1549,7 +1549,7 @@ CssRoot {
                                             items: CssParameterList [
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@1452..1453 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@1453..1459 "my-map" [] [],
@@ -1585,7 +1585,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@1476..1479 "map" [] [],
                                                 },
@@ -1598,7 +1598,7 @@ CssRoot {
                                             items: CssParameterList [
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@1485..1486 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@1486..1492 "my-map" [] [],
@@ -1626,7 +1626,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@1505..1508 "map" [] [],
                                                 },
@@ -1639,7 +1639,7 @@ CssRoot {
                                             items: CssParameterList [
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@1516..1517 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@1517..1523 "my-map" [] [],
@@ -1667,7 +1667,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@1535..1538 "map" [] [],
                                                 },
@@ -1680,7 +1680,7 @@ CssRoot {
                                             items: CssParameterList [
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
-                                                        ScssIdentifier {
+                                                        ScssVariable {
                                                             dollar_token: DOLLAR@1545..1546 "$" [] [],
                                                             name: CssIdentifier {
                                                                 value_token: IDENT@1546..1552 "my-map" [] [],
@@ -1758,7 +1758,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@1630..1638 "selector" [] [],
                                                 },
@@ -1804,7 +1804,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@1687..1695 "selector" [] [],
                                                 },
@@ -1850,7 +1850,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@1730..1738 "selector" [] [],
                                                 },
@@ -1926,7 +1926,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@1804..1808 "meta" [] [],
                                                 },
@@ -1965,7 +1965,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@1832..1836 "meta" [] [],
                                                 },
@@ -2004,7 +2004,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@1861..1865 "meta" [] [],
                                                 },
@@ -2042,7 +2042,7 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssFunction {
-                                            name: ScssQualifiedName {
+                                            name: ScssModuleMemberAccess {
                                                 module: CssIdentifier {
                                                     value_token: IDENT@1894..1898 "meta" [] [],
                                                 },
@@ -2117,7 +2117,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@363..381
                   0: SCSS_EXPRESSION_ITEM_LIST@363..381
                     0: CSS_FUNCTION@363..381
-                      0: SCSS_QUALIFIED_NAME@363..371
+                      0: SCSS_MODULE_MEMBER_ACCESS@363..371
                         0: CSS_IDENTIFIER@363..367
                           0: IDENT@363..367 "math" [] []
                         1: DOT@367..368 "." [] []
@@ -2147,7 +2147,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@393..410
                   0: SCSS_EXPRESSION_ITEM_LIST@393..410
                     0: CSS_FUNCTION@393..410
-                      0: SCSS_QUALIFIED_NAME@393..402
+                      0: SCSS_MODULE_MEMBER_ACCESS@393..402
                         0: CSS_IDENTIFIER@393..397
                           0: IDENT@393..397 "math" [] []
                         1: DOT@397..398 "." [] []
@@ -2172,7 +2172,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@423..441
                   0: SCSS_EXPRESSION_ITEM_LIST@423..441
                     0: CSS_FUNCTION@423..441
-                      0: SCSS_QUALIFIED_NAME@423..433
+                      0: SCSS_MODULE_MEMBER_ACCESS@423..433
                         0: CSS_IDENTIFIER@423..427
                           0: IDENT@423..427 "math" [] []
                         1: DOT@427..428 "." [] []
@@ -2197,7 +2197,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@453..471
                   0: SCSS_EXPRESSION_ITEM_LIST@453..471
                     0: CSS_FUNCTION@453..471
-                      0: SCSS_QUALIFIED_NAME@453..463
+                      0: SCSS_MODULE_MEMBER_ACCESS@453..463
                         0: CSS_IDENTIFIER@453..457
                           0: IDENT@453..457 "math" [] []
                         1: DOT@457..458 "." [] []
@@ -2222,7 +2222,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@480..506
                   0: SCSS_EXPRESSION_ITEM_LIST@480..506
                     0: CSS_FUNCTION@480..506
-                      0: SCSS_QUALIFIED_NAME@480..488
+                      0: SCSS_MODULE_MEMBER_ACCESS@480..488
                         0: CSS_IDENTIFIER@480..484
                           0: IDENT@480..484 "math" [] []
                         1: DOT@484..485 "." [] []
@@ -2259,7 +2259,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@515..541
                   0: SCSS_EXPRESSION_ITEM_LIST@515..541
                     0: CSS_FUNCTION@515..541
-                      0: SCSS_QUALIFIED_NAME@515..523
+                      0: SCSS_MODULE_MEMBER_ACCESS@515..523
                         0: CSS_IDENTIFIER@515..519
                           0: IDENT@515..519 "math" [] []
                         1: DOT@519..520 "." [] []
@@ -2296,7 +2296,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@552..566
                   0: SCSS_EXPRESSION_ITEM_LIST@552..566
                     0: CSS_FUNCTION@552..566
-                      0: SCSS_QUALIFIED_NAME@552..560
+                      0: SCSS_MODULE_MEMBER_ACCESS@552..560
                         0: CSS_IDENTIFIER@552..556
                           0: IDENT@552..556 "math" [] []
                         1: DOT@556..557 "." [] []
@@ -2339,7 +2339,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@610..645
                   0: SCSS_EXPRESSION_ITEM_LIST@610..645
                     0: CSS_FUNCTION@610..645
-                      0: SCSS_QUALIFIED_NAME@610..622
+                      0: SCSS_MODULE_MEMBER_ACCESS@610..622
                         0: CSS_IDENTIFIER@610..615
                           0: IDENT@610..615 "color" [] []
                         1: DOT@615..616 "." [] []
@@ -2356,7 +2356,7 @@ CssRoot {
                         2: SCSS_EXPRESSION@629..644
                           0: SCSS_EXPRESSION_ITEM_LIST@629..644
                             0: SCSS_KEYWORD_ARGUMENT@629..644
-                              0: SCSS_IDENTIFIER@629..639
+                              0: SCSS_VARIABLE@629..639
                                 0: DOLLAR@629..630 "$" [] []
                                 1: CSS_IDENTIFIER@630..639
                                   0: IDENT@630..639 "lightness" [] []
@@ -2378,7 +2378,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@661..695
                   0: SCSS_EXPRESSION_ITEM_LIST@661..695
                     0: CSS_FUNCTION@661..695
-                      0: SCSS_QUALIFIED_NAME@661..672
+                      0: SCSS_MODULE_MEMBER_ACCESS@661..672
                         0: CSS_IDENTIFIER@661..666
                           0: IDENT@661..666 "color" [] []
                         1: DOT@666..667 "." [] []
@@ -2395,7 +2395,7 @@ CssRoot {
                         2: SCSS_EXPRESSION@679..694
                           0: SCSS_EXPRESSION_ITEM_LIST@679..694
                             0: SCSS_KEYWORD_ARGUMENT@679..694
-                              0: SCSS_IDENTIFIER@679..689
+                              0: SCSS_VARIABLE@679..689
                                 0: DOLLAR@679..680 "$" [] []
                                 1: CSS_IDENTIFIER@680..689
                                   0: IDENT@680..689 "lightness" [] []
@@ -2417,7 +2417,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@713..744
                   0: SCSS_EXPRESSION_ITEM_LIST@713..744
                     0: CSS_FUNCTION@713..744
-                      0: SCSS_QUALIFIED_NAME@713..725
+                      0: SCSS_MODULE_MEMBER_ACCESS@713..725
                         0: CSS_IDENTIFIER@713..718
                           0: IDENT@713..718 "color" [] []
                         1: DOT@718..719 "." [] []
@@ -2434,7 +2434,7 @@ CssRoot {
                         2: SCSS_EXPRESSION@732..743
                           0: SCSS_EXPRESSION_ITEM_LIST@732..743
                             0: SCSS_KEYWORD_ARGUMENT@732..743
-                              0: SCSS_IDENTIFIER@732..738
+                              0: SCSS_VARIABLE@732..738
                                 0: DOLLAR@732..733 "$" [] []
                                 1: CSS_IDENTIFIER@733..738
                                   0: IDENT@733..738 "alpha" [] []
@@ -2455,7 +2455,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@753..779
                   0: SCSS_EXPRESSION_ITEM_LIST@753..779
                     0: CSS_FUNCTION@753..779
-                      0: SCSS_QUALIFIED_NAME@753..762
+                      0: SCSS_MODULE_MEMBER_ACCESS@753..762
                         0: CSS_IDENTIFIER@753..758
                           0: IDENT@753..758 "color" [] []
                         1: DOT@758..759 "." [] []
@@ -2492,7 +2492,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@791..809
                   0: SCSS_EXPRESSION_ITEM_LIST@791..809
                     0: CSS_FUNCTION@791..809
-                      0: SCSS_QUALIFIED_NAME@791..803
+                      0: SCSS_MODULE_MEMBER_ACCESS@791..803
                         0: CSS_IDENTIFIER@791..796
                           0: IDENT@791..796 "color" [] []
                         1: DOT@796..797 "." [] []
@@ -2517,7 +2517,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@825..847
                   0: SCSS_EXPRESSION_ITEM_LIST@825..847
                     0: CSS_FUNCTION@825..847
-                      0: SCSS_QUALIFIED_NAME@825..841
+                      0: SCSS_MODULE_MEMBER_ACCESS@825..841
                         0: CSS_IDENTIFIER@825..830
                           0: IDENT@825..830 "color" [] []
                         1: DOT@830..831 "." [] []
@@ -2556,7 +2556,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@895..916
                   0: SCSS_EXPRESSION_ITEM_LIST@895..916
                     0: CSS_FUNCTION@895..916
-                      0: SCSS_QUALIFIED_NAME@895..907
+                      0: SCSS_MODULE_MEMBER_ACCESS@895..907
                         0: CSS_IDENTIFIER@895..901
                           0: IDENT@895..901 "string" [] []
                         1: DOT@901..902 "." [] []
@@ -2580,7 +2580,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@929..954
                   0: SCSS_EXPRESSION_ITEM_LIST@929..954
                     0: CSS_FUNCTION@929..954
-                      0: SCSS_QUALIFIED_NAME@929..943
+                      0: SCSS_MODULE_MEMBER_ACCESS@929..943
                         0: CSS_IDENTIFIER@929..935
                           0: IDENT@929..935 "string" [] []
                         1: DOT@935..936 "." [] []
@@ -2604,7 +2604,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@966..988
                   0: SCSS_EXPRESSION_ITEM_LIST@966..988
                     0: CSS_FUNCTION@966..988
-                      0: SCSS_QUALIFIED_NAME@966..979
+                      0: SCSS_MODULE_MEMBER_ACCESS@966..979
                         0: CSS_IDENTIFIER@966..972
                           0: IDENT@966..972 "string" [] []
                         1: DOT@972..973 "." [] []
@@ -2628,7 +2628,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@1000..1030
                   0: SCSS_EXPRESSION_ITEM_LIST@1000..1030
                     0: CSS_FUNCTION@1000..1030
-                      0: SCSS_QUALIFIED_NAME@1000..1013
+                      0: SCSS_MODULE_MEMBER_ACCESS@1000..1013
                         0: CSS_IDENTIFIER@1000..1006
                           0: IDENT@1000..1006 "string" [] []
                         1: DOT@1006..1007 "." [] []
@@ -2662,7 +2662,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@1041..1068
                   0: SCSS_EXPRESSION_ITEM_LIST@1041..1068
                     0: CSS_FUNCTION@1041..1068
-                      0: SCSS_QUALIFIED_NAME@1041..1053
+                      0: SCSS_MODULE_MEMBER_ACCESS@1041..1053
                         0: CSS_IDENTIFIER@1041..1047
                           0: IDENT@1041..1047 "string" [] []
                         1: DOT@1047..1048 "." [] []
@@ -2691,7 +2691,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@1079..1106
                   0: SCSS_EXPRESSION_ITEM_LIST@1079..1106
                     0: CSS_FUNCTION@1079..1106
-                      0: SCSS_QUALIFIED_NAME@1079..1091
+                      0: SCSS_MODULE_MEMBER_ACCESS@1079..1091
                         0: CSS_IDENTIFIER@1079..1085
                           0: IDENT@1079..1085 "string" [] []
                         1: DOT@1085..1086 "." [] []
@@ -2717,8 +2717,8 @@ CssRoot {
               1: (empty)
             1: SEMICOLON@1106..1107 ";" [] []
         2: R_CURLY@1107..1109 "}" [Newline("\n")] []
-    3: SCSS_DECLARATION@1109..1146
-      0: SCSS_IDENTIFIER@1109..1134
+    3: SCSS_VARIABLE_DECLARATION@1109..1146
+      0: SCSS_VARIABLE@1109..1134
         0: DOLLAR@1109..1127 "$" [Newline("\n"), Newline("\n"), Comments("// List module"), Newline("\n")] []
         1: CSS_IDENTIFIER@1127..1134
           0: IDENT@1127..1134 "my-list" [] []
@@ -2771,7 +2771,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@1170..1191
                   0: SCSS_EXPRESSION_ITEM_LIST@1170..1191
                     0: CSS_FUNCTION@1170..1191
-                      0: SCSS_QUALIFIED_NAME@1170..1181
+                      0: SCSS_MODULE_MEMBER_ACCESS@1170..1181
                         0: CSS_IDENTIFIER@1170..1174
                           0: IDENT@1170..1174 "list" [] []
                         1: DOT@1174..1175 "." [] []
@@ -2781,7 +2781,7 @@ CssRoot {
                       2: CSS_PARAMETER_LIST@1182..1190
                         0: SCSS_EXPRESSION@1182..1190
                           0: SCSS_EXPRESSION_ITEM_LIST@1182..1190
-                            0: SCSS_IDENTIFIER@1182..1190
+                            0: SCSS_VARIABLE@1182..1190
                               0: DOLLAR@1182..1183 "$" [] []
                               1: CSS_IDENTIFIER@1183..1190
                                 0: IDENT@1183..1190 "my-list" [] []
@@ -2797,7 +2797,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@1200..1221
                   0: SCSS_EXPRESSION_ITEM_LIST@1200..1221
                     0: CSS_FUNCTION@1200..1221
-                      0: SCSS_QUALIFIED_NAME@1200..1208
+                      0: SCSS_MODULE_MEMBER_ACCESS@1200..1208
                         0: CSS_IDENTIFIER@1200..1204
                           0: IDENT@1200..1204 "list" [] []
                         1: DOT@1204..1205 "." [] []
@@ -2807,7 +2807,7 @@ CssRoot {
                       2: CSS_PARAMETER_LIST@1209..1220
                         0: SCSS_EXPRESSION@1209..1217
                           0: SCSS_EXPRESSION_ITEM_LIST@1209..1217
-                            0: SCSS_IDENTIFIER@1209..1217
+                            0: SCSS_VARIABLE@1209..1217
                               0: DOLLAR@1209..1210 "$" [] []
                               1: CSS_IDENTIFIER@1210..1217
                                 0: IDENT@1210..1217 "my-list" [] []
@@ -2828,7 +2828,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@1232..1255
                   0: SCSS_EXPRESSION_ITEM_LIST@1232..1255
                     0: CSS_FUNCTION@1232..1255
-                      0: SCSS_QUALIFIED_NAME@1232..1242
+                      0: SCSS_MODULE_MEMBER_ACCESS@1232..1242
                         0: CSS_IDENTIFIER@1232..1236
                           0: IDENT@1232..1236 "list" [] []
                         1: DOT@1236..1237 "." [] []
@@ -2838,7 +2838,7 @@ CssRoot {
                       2: CSS_PARAMETER_LIST@1243..1254
                         0: SCSS_EXPRESSION@1243..1251
                           0: SCSS_EXPRESSION_ITEM_LIST@1243..1251
-                            0: SCSS_IDENTIFIER@1243..1251
+                            0: SCSS_VARIABLE@1243..1251
                               0: DOLLAR@1243..1244 "$" [] []
                               1: CSS_IDENTIFIER@1244..1251
                                 0: IDENT@1244..1251 "my-list" [] []
@@ -2859,7 +2859,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@1267..1291
                   0: SCSS_EXPRESSION_ITEM_LIST@1267..1291
                     0: CSS_FUNCTION@1267..1291
-                      0: SCSS_QUALIFIED_NAME@1267..1278
+                      0: SCSS_MODULE_MEMBER_ACCESS@1267..1278
                         0: CSS_IDENTIFIER@1267..1271
                           0: IDENT@1267..1271 "list" [] []
                         1: DOT@1271..1272 "." [] []
@@ -2869,7 +2869,7 @@ CssRoot {
                       2: CSS_PARAMETER_LIST@1279..1290
                         0: SCSS_EXPRESSION@1279..1287
                           0: SCSS_EXPRESSION_ITEM_LIST@1279..1287
-                            0: SCSS_IDENTIFIER@1279..1287
+                            0: SCSS_VARIABLE@1279..1287
                               0: DOLLAR@1279..1280 "$" [] []
                               1: CSS_IDENTIFIER@1280..1287
                                 0: IDENT@1280..1287 "my-list" [] []
@@ -2890,7 +2890,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@1301..1328
                   0: SCSS_EXPRESSION_ITEM_LIST@1301..1328
                     0: CSS_FUNCTION@1301..1328
-                      0: SCSS_QUALIFIED_NAME@1301..1310
+                      0: SCSS_MODULE_MEMBER_ACCESS@1301..1310
                         0: CSS_IDENTIFIER@1301..1305
                           0: IDENT@1301..1305 "list" [] []
                         1: DOT@1305..1306 "." [] []
@@ -2900,7 +2900,7 @@ CssRoot {
                       2: CSS_PARAMETER_LIST@1311..1327
                         0: SCSS_EXPRESSION@1311..1319
                           0: SCSS_EXPRESSION_ITEM_LIST@1311..1319
-                            0: SCSS_IDENTIFIER@1311..1319
+                            0: SCSS_VARIABLE@1311..1319
                               0: DOLLAR@1311..1312 "$" [] []
                               1: CSS_IDENTIFIER@1312..1319
                                 0: IDENT@1312..1319 "my-list" [] []
@@ -2927,8 +2927,8 @@ CssRoot {
               1: (empty)
             1: SEMICOLON@1328..1329 ";" [] []
         2: R_CURLY@1329..1331 "}" [Newline("\n")] []
-    5: SCSS_DECLARATION@1331..1385
-      0: SCSS_IDENTIFIER@1331..1354
+    5: SCSS_VARIABLE_DECLARATION@1331..1385
+      0: SCSS_VARIABLE@1331..1354
         0: DOLLAR@1331..1348 "$" [Newline("\n"), Newline("\n"), Comments("// Map module"), Newline("\n")] []
         1: CSS_IDENTIFIER@1348..1354
           0: IDENT@1348..1354 "my-map" [] []
@@ -2984,7 +2984,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@1405..1427
                   0: SCSS_EXPRESSION_ITEM_LIST@1405..1427
                     0: CSS_FUNCTION@1405..1427
-                      0: SCSS_QUALIFIED_NAME@1405..1412
+                      0: SCSS_MODULE_MEMBER_ACCESS@1405..1412
                         0: CSS_IDENTIFIER@1405..1408
                           0: IDENT@1405..1408 "map" [] []
                         1: DOT@1408..1409 "." [] []
@@ -2994,7 +2994,7 @@ CssRoot {
                       2: CSS_PARAMETER_LIST@1413..1426
                         0: SCSS_EXPRESSION@1413..1420
                           0: SCSS_EXPRESSION_ITEM_LIST@1413..1420
-                            0: SCSS_IDENTIFIER@1413..1420
+                            0: SCSS_VARIABLE@1413..1420
                               0: DOLLAR@1413..1414 "$" [] []
                               1: CSS_IDENTIFIER@1414..1420
                                 0: IDENT@1414..1420 "my-map" [] []
@@ -3015,7 +3015,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@1440..1466
                   0: SCSS_EXPRESSION_ITEM_LIST@1440..1466
                     0: CSS_FUNCTION@1440..1466
-                      0: SCSS_QUALIFIED_NAME@1440..1451
+                      0: SCSS_MODULE_MEMBER_ACCESS@1440..1451
                         0: CSS_IDENTIFIER@1440..1443
                           0: IDENT@1440..1443 "map" [] []
                         1: DOT@1443..1444 "." [] []
@@ -3025,7 +3025,7 @@ CssRoot {
                       2: CSS_PARAMETER_LIST@1452..1465
                         0: SCSS_EXPRESSION@1452..1459
                           0: SCSS_EXPRESSION_ITEM_LIST@1452..1459
-                            0: SCSS_IDENTIFIER@1452..1459
+                            0: SCSS_VARIABLE@1452..1459
                               0: DOLLAR@1452..1453 "$" [] []
                               1: CSS_IDENTIFIER@1453..1459
                                 0: IDENT@1453..1459 "my-map" [] []
@@ -3046,7 +3046,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@1476..1493
                   0: SCSS_EXPRESSION_ITEM_LIST@1476..1493
                     0: CSS_FUNCTION@1476..1493
-                      0: SCSS_QUALIFIED_NAME@1476..1484
+                      0: SCSS_MODULE_MEMBER_ACCESS@1476..1484
                         0: CSS_IDENTIFIER@1476..1479
                           0: IDENT@1476..1479 "map" [] []
                         1: DOT@1479..1480 "." [] []
@@ -3056,7 +3056,7 @@ CssRoot {
                       2: CSS_PARAMETER_LIST@1485..1492
                         0: SCSS_EXPRESSION@1485..1492
                           0: SCSS_EXPRESSION_ITEM_LIST@1485..1492
-                            0: SCSS_IDENTIFIER@1485..1492
+                            0: SCSS_VARIABLE@1485..1492
                               0: DOLLAR@1485..1486 "$" [] []
                               1: CSS_IDENTIFIER@1486..1492
                                 0: IDENT@1486..1492 "my-map" [] []
@@ -3072,7 +3072,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@1505..1524
                   0: SCSS_EXPRESSION_ITEM_LIST@1505..1524
                     0: CSS_FUNCTION@1505..1524
-                      0: SCSS_QUALIFIED_NAME@1505..1515
+                      0: SCSS_MODULE_MEMBER_ACCESS@1505..1515
                         0: CSS_IDENTIFIER@1505..1508
                           0: IDENT@1505..1508 "map" [] []
                         1: DOT@1508..1509 "." [] []
@@ -3082,7 +3082,7 @@ CssRoot {
                       2: CSS_PARAMETER_LIST@1516..1523
                         0: SCSS_EXPRESSION@1516..1523
                           0: SCSS_EXPRESSION_ITEM_LIST@1516..1523
-                            0: SCSS_IDENTIFIER@1516..1523
+                            0: SCSS_VARIABLE@1516..1523
                               0: DOLLAR@1516..1517 "$" [] []
                               1: CSS_IDENTIFIER@1517..1523
                                 0: IDENT@1517..1523 "my-map" [] []
@@ -3098,7 +3098,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@1535..1569
                   0: SCSS_EXPRESSION_ITEM_LIST@1535..1569
                     0: CSS_FUNCTION@1535..1569
-                      0: SCSS_QUALIFIED_NAME@1535..1544
+                      0: SCSS_MODULE_MEMBER_ACCESS@1535..1544
                         0: CSS_IDENTIFIER@1535..1538
                           0: IDENT@1535..1538 "map" [] []
                         1: DOT@1538..1539 "." [] []
@@ -3108,7 +3108,7 @@ CssRoot {
                       2: CSS_PARAMETER_LIST@1545..1568
                         0: SCSS_EXPRESSION@1545..1552
                           0: SCSS_EXPRESSION_ITEM_LIST@1545..1552
-                            0: SCSS_IDENTIFIER@1545..1552
+                            0: SCSS_VARIABLE@1545..1552
                               0: DOLLAR@1545..1546 "$" [] []
                               1: CSS_IDENTIFIER@1546..1552
                                 0: IDENT@1546..1552 "my-map" [] []
@@ -3155,7 +3155,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@1630..1675
                   0: SCSS_EXPRESSION_ITEM_LIST@1630..1675
                     0: CSS_FUNCTION@1630..1675
-                      0: SCSS_QUALIFIED_NAME@1630..1655
+                      0: SCSS_MODULE_MEMBER_ACCESS@1630..1655
                         0: CSS_IDENTIFIER@1630..1638
                           0: IDENT@1630..1638 "selector" [] []
                         1: DOT@1638..1639 "." [] []
@@ -3184,7 +3184,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@1687..1718
                   0: SCSS_EXPRESSION_ITEM_LIST@1687..1718
                     0: CSS_FUNCTION@1687..1718
-                      0: SCSS_QUALIFIED_NAME@1687..1702
+                      0: SCSS_MODULE_MEMBER_ACCESS@1687..1702
                         0: CSS_IDENTIFIER@1687..1695
                           0: IDENT@1687..1695 "selector" [] []
                         1: DOT@1695..1696 "." [] []
@@ -3213,7 +3213,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@1730..1763
                   0: SCSS_EXPRESSION_ITEM_LIST@1730..1763
                     0: CSS_FUNCTION@1730..1763
-                      0: SCSS_QUALIFIED_NAME@1730..1745
+                      0: SCSS_MODULE_MEMBER_ACCESS@1730..1745
                         0: CSS_IDENTIFIER@1730..1738
                           0: IDENT@1730..1738 "selector" [] []
                         1: DOT@1738..1739 "." [] []
@@ -3261,7 +3261,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@1804..1822
                   0: SCSS_EXPRESSION_ITEM_LIST@1804..1822
                     0: CSS_FUNCTION@1804..1822
-                      0: SCSS_QUALIFIED_NAME@1804..1816
+                      0: SCSS_MODULE_MEMBER_ACCESS@1804..1816
                         0: CSS_IDENTIFIER@1804..1808
                           0: IDENT@1804..1808 "meta" [] []
                         1: DOT@1808..1809 "." [] []
@@ -3286,7 +3286,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@1832..1847
                   0: SCSS_EXPRESSION_ITEM_LIST@1832..1847
                     0: CSS_FUNCTION@1832..1847
-                      0: SCSS_QUALIFIED_NAME@1832..1841
+                      0: SCSS_MODULE_MEMBER_ACCESS@1832..1841
                         0: CSS_IDENTIFIER@1832..1836
                           0: IDENT@1832..1836 "meta" [] []
                         1: DOT@1836..1837 "." [] []
@@ -3311,7 +3311,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@1861..1878
                   0: SCSS_EXPRESSION_ITEM_LIST@1861..1878
                     0: CSS_FUNCTION@1861..1878
-                      0: SCSS_QUALIFIED_NAME@1861..1874
+                      0: SCSS_MODULE_MEMBER_ACCESS@1861..1874
                         0: CSS_IDENTIFIER@1861..1865
                           0: IDENT@1861..1865 "meta" [] []
                         1: DOT@1865..1866 "." [] []
@@ -3335,7 +3335,7 @@ CssRoot {
                 2: SCSS_EXPRESSION@1894..1921
                   0: SCSS_EXPRESSION_ITEM_LIST@1894..1921
                     0: CSS_FUNCTION@1894..1921
-                      0: SCSS_QUALIFIED_NAME@1894..1909
+                      0: SCSS_MODULE_MEMBER_ACCESS@1894..1909
                         0: CSS_IDENTIFIER@1894..1898
                           0: IDENT@1894..1898 "meta" [] []
                         1: DOT@1898..1899 "." [] []

@@ -15,6 +15,16 @@ const stringArray: string[] = [];
 stringArray.sort();
 stringArray.toSorted();
 
+declare const pickedNums: Pick<{ nums: number[]; label: string }, "nums">;
+pickedNums.nums.sort();
+pickedNums.nums.toSorted();
+
+declare const omittedNums: Omit<{ nums: number[]; label: string }, "label">;
+omittedNums.nums.sort();
+
+function sortReq(x: Required<{arr?: number[]}>) { x.arr.sort(); }
+function sortRo(x: Readonly<{arr: number[]}>) { x.arr.sort(); }
+
 ```
 
 # Diagnostics
@@ -130,6 +140,108 @@ invalid.ts:10:1 lint/nursery/useArraySortCompare ━━━━━━━━━━�
   > 10 │ stringArray.toSorted();
        │ ^^^^^^^^^^^^^^^^^^^^^^
     11 │ 
+    12 │ declare const pickedNums: Pick<{ nums: number[]; label: string }, "nums">;
+  
+  i When called without a compare function, Array#sort() and Array#toSorted() converts all non-undefined array elements into strings and then compares said strings based off their UTF-16 code units.
+  
+  i Add a compare function to prevent unexpected sorting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:13:1 lint/nursery/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Compare function missing.
+  
+    12 │ declare const pickedNums: Pick<{ nums: number[]; label: string }, "nums">;
+  > 13 │ pickedNums.nums.sort();
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    14 │ pickedNums.nums.toSorted();
+    15 │ 
+  
+  i When called without a compare function, Array#sort() and Array#toSorted() converts all non-undefined array elements into strings and then compares said strings based off their UTF-16 code units.
+  
+  i Add a compare function to prevent unexpected sorting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:14:1 lint/nursery/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Compare function missing.
+  
+    12 │ declare const pickedNums: Pick<{ nums: number[]; label: string }, "nums">;
+    13 │ pickedNums.nums.sort();
+  > 14 │ pickedNums.nums.toSorted();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ declare const omittedNums: Omit<{ nums: number[]; label: string }, "label">;
+  
+  i When called without a compare function, Array#sort() and Array#toSorted() converts all non-undefined array elements into strings and then compares said strings based off their UTF-16 code units.
+  
+  i Add a compare function to prevent unexpected sorting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:17:1 lint/nursery/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Compare function missing.
+  
+    16 │ declare const omittedNums: Omit<{ nums: number[]; label: string }, "label">;
+  > 17 │ omittedNums.nums.sort();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 
+    19 │ function sortReq(x: Required<{arr?: number[]}>) { x.arr.sort(); }
+  
+  i When called without a compare function, Array#sort() and Array#toSorted() converts all non-undefined array elements into strings and then compares said strings based off their UTF-16 code units.
+  
+  i Add a compare function to prevent unexpected sorting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:19:51 lint/nursery/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Compare function missing.
+  
+    17 │ omittedNums.nums.sort();
+    18 │ 
+  > 19 │ function sortReq(x: Required<{arr?: number[]}>) { x.arr.sort(); }
+       │                                                   ^^^^^^^^^^^^
+    20 │ function sortRo(x: Readonly<{arr: number[]}>) { x.arr.sort(); }
+    21 │ 
+  
+  i When called without a compare function, Array#sort() and Array#toSorted() converts all non-undefined array elements into strings and then compares said strings based off their UTF-16 code units.
+  
+  i Add a compare function to prevent unexpected sorting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:20:49 lint/nursery/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Compare function missing.
+  
+    19 │ function sortReq(x: Required<{arr?: number[]}>) { x.arr.sort(); }
+  > 20 │ function sortRo(x: Readonly<{arr: number[]}>) { x.arr.sort(); }
+       │                                                 ^^^^^^^^^^^^
+    21 │ 
   
   i When called without a compare function, Array#sort() and Array#toSorted() converts all non-undefined array elements into strings and then compares said strings based off their UTF-16 code units.
   

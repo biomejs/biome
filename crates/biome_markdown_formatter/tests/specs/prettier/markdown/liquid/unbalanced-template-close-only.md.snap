@@ -18,22 +18,18 @@ Following brace doesn't   open  so these words    should not be   considered as 
 ```diff
 --- Prettier
 +++ Biome
-@@ -1 +1,3 @@
+@@ -1 +1 @@
 -Following brace doesn't open so these words should not be considered as _liquid node_ %}
-+
-+
-+Following brace doesn't   open  so these words    should not be   considered as *liquid node* %}
++Following brace doesn't   open  so these words    should not be   considered as _liquid node_ %}
 ```
 
 # Output
 
 ```md
-
-
-Following brace doesn't   open  so these words    should not be   considered as *liquid node* %}
+Following brace doesn't   open  so these words    should not be   considered as _liquid node_ %}
 ```
 
 # Lines exceeding max width of 80 characters
 ```
-    3: Following brace doesn't   open  so these words    should not be   considered as *liquid node* %}
+    1: Following brace doesn't   open  so these words    should not be   considered as _liquid node_ %}
 ```

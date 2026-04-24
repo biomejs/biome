@@ -1,0 +1,45 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/setext_header.md
+---
+
+# Input
+
+```md
+h1
+===
+
+h2
+---
+
+h1 with extra equals
+=====================
+
+h2 with extra dashes
+---------------------
+
+h1 with trailing spaces   
+===
+
+multi word heading
+===
+
+```
+
+
+# Formatted
+
+```md
+# h1
+
+## h2
+
+# h1 with extra equals
+
+## h2 with extra dashes
+
+# h1 with trailing spaces
+
+# multi word heading
+
+```

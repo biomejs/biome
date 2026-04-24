@@ -67,7 +67,7 @@ info: markdown/blockquote/ignore-code.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -38,13 +38,15 @@
+@@ -38,10 +38,12 @@
  > > ```
  > ````
  
@@ -78,13 +78,8 @@ info: markdown/blockquote/ignore-code.md
  >   long long paragraph.
 +> 
  
--> ```js
-+> ````js
+ > ```js
  > // prettier-ignore
- > const x = 1,
- > b = 2
--> ```
-+> ````
 ```
 
 # Output
@@ -137,9 +132,9 @@ info: markdown/blockquote/ignore-code.md
 >   long long paragraph.
 > 
 
-> ````js
+> ```js
 > // prettier-ignore
 > const x = 1,
 > b = 2
-> ````
+> ```
 ```

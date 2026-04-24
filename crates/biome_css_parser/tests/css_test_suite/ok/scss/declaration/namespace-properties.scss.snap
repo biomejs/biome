@@ -18,13 +18,13 @@ ns.$var: value;
 CssRoot {
     bom_token: missing (optional),
     items: CssRootItemList [
-        ScssDeclaration {
-            name: ScssNamespacedIdentifier {
+        ScssVariableDeclaration {
+            name: ScssNamespacedVariable {
                 namespace: CssIdentifier {
                     value_token: IDENT@0..2 "ns" [] [],
                 },
                 dot_token: DOT@2..3 "." [] [],
-                name: ScssIdentifier {
+                name: ScssVariable {
                     dollar_token: DOLLAR@3..4 "$" [] [],
                     name: CssIdentifier {
                         value_token: IDENT@4..7 "var" [] [],
@@ -53,12 +53,12 @@ CssRoot {
 0: CSS_ROOT@0..17
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..15
-    0: SCSS_DECLARATION@0..15
-      0: SCSS_NAMESPACED_IDENTIFIER@0..7
+    0: SCSS_VARIABLE_DECLARATION@0..15
+      0: SCSS_NAMESPACED_VARIABLE@0..7
         0: CSS_IDENTIFIER@0..2
           0: IDENT@0..2 "ns" [] []
         1: DOT@2..3 "." [] []
-        2: SCSS_IDENTIFIER@3..7
+        2: SCSS_VARIABLE@3..7
           0: DOLLAR@3..4 "$" [] []
           1: CSS_IDENTIFIER@4..7
             0: IDENT@4..7 "var" [] []

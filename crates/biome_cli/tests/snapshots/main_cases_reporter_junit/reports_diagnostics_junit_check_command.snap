@@ -113,12 +113,12 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     </testsuite>
     <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
         <testcase name="org.biome.lint.suspicious.noRedeclare" line="2" column="10">
-            <failure message="Shouldn&apos;t redeclare &apos;z&apos;. Consider to delete it or rename it.">line 2, col 10, Shouldn&apos;t redeclare &apos;z&apos;. Consider to delete it or rename it.</failure>
+            <failure message="&apos;z&apos; is redeclared in the same scope.">line 2, col 10, &apos;z&apos; is redeclared in the same scope.</failure>
         </testcase>
     </testsuite>
     <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
         <testcase name="org.biome.lint.suspicious.noRedeclare" line="9" column="7">
-            <failure message="Shouldn&apos;t redeclare &apos;f&apos;. Consider to delete it or rename it.">line 9, col 7, Shouldn&apos;t redeclare &apos;f&apos;. Consider to delete it or rename it.</failure>
+            <failure message="&apos;f&apos; is redeclared in the same scope.">line 9, col 7, &apos;f&apos; is redeclared in the same scope.</failure>
         </testcase>
     </testsuite>
     <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
@@ -148,12 +148,12 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     </testsuite>
     <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
         <testcase name="org.biome.lint.suspicious.noRedeclare" line="2" column="10">
-            <failure message="Shouldn&apos;t redeclare &apos;z&apos;. Consider to delete it or rename it.">line 2, col 10, Shouldn&apos;t redeclare &apos;z&apos;. Consider to delete it or rename it.</failure>
+            <failure message="&apos;z&apos; is redeclared in the same scope.">line 2, col 10, &apos;z&apos; is redeclared in the same scope.</failure>
         </testcase>
     </testsuite>
     <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
         <testcase name="org.biome.lint.suspicious.noRedeclare" line="9" column="7">
-            <failure message="Shouldn&apos;t redeclare &apos;f&apos;. Consider to delete it or rename it.">line 9, col 7, Shouldn&apos;t redeclare &apos;f&apos;. Consider to delete it or rename it.</failure>
+            <failure message="&apos;f&apos; is redeclared in the same scope.">line 9, col 7, &apos;f&apos; is redeclared in the same scope.</failure>
         </testcase>
     </testsuite>
 </testsuites>

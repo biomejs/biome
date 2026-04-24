@@ -33,7 +33,6 @@ Imports {
 ```
 promise  => BindingTypeData {
   Types Module(0) TypeId(2),
-  Exported Ranges: (119..126)
 }
 ```
 

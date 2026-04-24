@@ -24,6 +24,7 @@ Platform:
   OS:                           **PLACEHOLDER**
 
 Environment:
+  BIOME_DISTRIBUTION:                unset
   BIOME_LOG_PATH:                    **PLACEHOLDER**
   BIOME_LOG_PREFIX_NAME:             unset
   BIOME_LOG_LEVEL:                   unset
@@ -39,7 +40,7 @@ Environment:
   NODE_PACKAGE_MANAGER:         unset
 
 Biome Configuration:
-  Status:                       Loaded successfully
+  Status:                       Loaded successfully.
   Path:                         biome.json
   Formatter enabled:            false
   Linter enabled:               true

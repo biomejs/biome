@@ -11,7 +11,7 @@ var a = 3; var a = 10;
 ```
 invalid.jsonc:1:16 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'a'. Consider to delete it or rename it.
+  × 'a' is redeclared in the same scope.
   
   > 1 │ var a = 3; var a = 10;
       │                ^
@@ -20,6 +20,10 @@ invalid.jsonc:1:16 lint/suspicious/noRedeclare ━━━━━━━━━━━
   
   > 1 │ var a = 3; var a = 10;
       │     ^
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
   
 
 ```
@@ -33,7 +37,7 @@ var c; { var a; var a;}
 ```
 invalid.jsonc:1:21 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'a'. Consider to delete it or rename it.
+  × 'a' is redeclared in the same scope.
   
   > 1 │ var c; { var a; var a;}·
       │                     ^
@@ -42,6 +46,10 @@ invalid.jsonc:1:21 lint/suspicious/noRedeclare ━━━━━━━━━━━
   
   > 1 │ var c; { var a; var a;}·
       │              ^
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
   
 
 ```
@@ -55,7 +63,7 @@ var a; { function a(){} }
 ```
 invalid.jsonc:1:19 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'a'. Consider to delete it or rename it.
+  × 'a' is redeclared in the same scope.
   
   > 1 │ var a; { function a(){} }
       │                   ^
@@ -64,6 +72,10 @@ invalid.jsonc:1:19 lint/suspicious/noRedeclare ━━━━━━━━━━━
   
   > 1 │ var a; { function a(){} }
       │     ^
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
   
 
 ```
@@ -78,7 +90,7 @@ case b: var b = 4}
 ```
 invalid.jsonc:2:13 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'b'. Consider to delete it or rename it.
+  × 'b' is redeclared in the same scope.
   
     1 │ switch(foo) { case a: var b = 3;
   > 2 │ case b: var b = 4}
@@ -89,6 +101,10 @@ invalid.jsonc:2:13 lint/suspicious/noRedeclare ━━━━━━━━━━━
   > 1 │ switch(foo) { case a: var b = 3;
       │                           ^
     2 │ case b: var b = 4}
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
   
 
 ```
@@ -102,7 +118,7 @@ var a = 3; var a = 10;
 ```
 invalid.jsonc:1:16 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'a'. Consider to delete it or rename it.
+  × 'a' is redeclared in the same scope.
   
   > 1 │ var a = 3; var a = 10;
       │                ^
@@ -111,6 +127,10 @@ invalid.jsonc:1:16 lint/suspicious/noRedeclare ━━━━━━━━━━━
   
   > 1 │ var a = 3; var a = 10;
       │     ^
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
   
 
 ```
@@ -124,7 +144,7 @@ var a = {}; var a = [];
 ```
 invalid.jsonc:1:17 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'a'. Consider to delete it or rename it.
+  × 'a' is redeclared in the same scope.
   
   > 1 │ var a = {}; var a = [];
       │                 ^
@@ -133,6 +153,10 @@ invalid.jsonc:1:17 lint/suspicious/noRedeclare ━━━━━━━━━━━
   
   > 1 │ var a = {}; var a = [];
       │     ^
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
   
 
 ```
@@ -146,7 +170,7 @@ var a; function a() {}
 ```
 invalid.jsonc:1:17 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'a'. Consider to delete it or rename it.
+  × 'a' is redeclared in the same scope.
   
   > 1 │ var a; function a() {}
       │                 ^
@@ -155,6 +179,10 @@ invalid.jsonc:1:17 lint/suspicious/noRedeclare ━━━━━━━━━━━
   
   > 1 │ var a; function a() {}
       │     ^
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
   
 
 ```
@@ -168,7 +196,7 @@ function a() {} function a() {}
 ```
 invalid.jsonc:1:26 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'a'. Consider to delete it or rename it.
+  × 'a' is redeclared in the same scope.
   
   > 1 │ function a() {} function a() {}
       │                          ^
@@ -177,6 +205,10 @@ invalid.jsonc:1:26 lint/suspicious/noRedeclare ━━━━━━━━━━━
   
   > 1 │ function a() {} function a() {}
       │          ^
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
   
 
 ```
@@ -190,7 +222,7 @@ var a = function() { }; var a = function() { }
 ```
 invalid.jsonc:1:29 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'a'. Consider to delete it or rename it.
+  × 'a' is redeclared in the same scope.
   
   > 1 │ var a = function() { }; var a = function() { }
       │                             ^
@@ -199,6 +231,10 @@ invalid.jsonc:1:29 lint/suspicious/noRedeclare ━━━━━━━━━━━
   
   > 1 │ var a = function() { }; var a = function() { }
       │     ^
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
   
 
 ```
@@ -212,7 +248,7 @@ var a = function() { }; var a = new Date();
 ```
 invalid.jsonc:1:29 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'a'. Consider to delete it or rename it.
+  × 'a' is redeclared in the same scope.
   
   > 1 │ var a = function() { }; var a = new Date();
       │                             ^
@@ -221,6 +257,10 @@ invalid.jsonc:1:29 lint/suspicious/noRedeclare ━━━━━━━━━━━
   
   > 1 │ var a = function() { }; var a = new Date();
       │     ^
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
   
 
 ```
@@ -234,7 +274,7 @@ var a = 3; var a = 10; var a = 15;
 ```
 invalid.jsonc:1:16 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'a'. Consider to delete it or rename it.
+  × 'a' is redeclared in the same scope.
   
   > 1 │ var a = 3; var a = 10; var a = 15;
       │                ^
@@ -244,13 +284,17 @@ invalid.jsonc:1:16 lint/suspicious/noRedeclare ━━━━━━━━━━━
   > 1 │ var a = 3; var a = 10; var a = 15;
       │     ^
   
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
+  
 
 ```
 
 ```
 invalid.jsonc:1:28 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'a'. Consider to delete it or rename it.
+  × 'a' is redeclared in the same scope.
   
   > 1 │ var a = 3; var a = 10; var a = 15;
       │                            ^
@@ -259,6 +303,10 @@ invalid.jsonc:1:28 lint/suspicious/noRedeclare ━━━━━━━━━━━
   
   > 1 │ var a = 3; var a = 10; var a = 15;
       │     ^
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
   
 
 ```
@@ -272,7 +320,7 @@ var a; var a;
 ```
 invalid.jsonc:1:12 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'a'. Consider to delete it or rename it.
+  × 'a' is redeclared in the same scope.
   
   > 1 │ var a; var a;
       │            ^
@@ -281,6 +329,10 @@ invalid.jsonc:1:12 lint/suspicious/noRedeclare ━━━━━━━━━━━
   
   > 1 │ var a; var a;
       │     ^
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
   
 
 ```
@@ -296,7 +348,7 @@ _Note: The parser emitted 1 diagnostics which are not shown here._
 ```
 invalid.jsonc:1:19 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'a'. Consider to delete it or rename it.
+  × 'a' is redeclared in the same scope.
   
   > 1 │ export var a; var a;
       │                   ^
@@ -305,6 +357,10 @@ invalid.jsonc:1:19 lint/suspicious/noRedeclare ━━━━━━━━━━━
   
   > 1 │ export var a; var a;
       │            ^
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
   
 
 ```
@@ -318,7 +374,7 @@ class C { static { var a; var a; } }
 ```
 invalid.jsonc:1:31 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'a'. Consider to delete it or rename it.
+  × 'a' is redeclared in the same scope.
   
   > 1 │ class C { static { var a; var a; } }
       │                               ^
@@ -327,6 +383,10 @@ invalid.jsonc:1:31 lint/suspicious/noRedeclare ━━━━━━━━━━━
   
   > 1 │ class C { static { var a; var a; } }
       │                        ^
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
   
 
 ```
@@ -340,7 +400,7 @@ class C { static { var a; { var a; } } }
 ```
 invalid.jsonc:1:33 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'a'. Consider to delete it or rename it.
+  × 'a' is redeclared in the same scope.
   
   > 1 │ class C { static { var a; { var a; } } }
       │                                 ^
@@ -349,6 +409,10 @@ invalid.jsonc:1:33 lint/suspicious/noRedeclare ━━━━━━━━━━━
   
   > 1 │ class C { static { var a; { var a; } } }
       │                        ^
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
   
 
 ```
@@ -362,7 +426,7 @@ class C { static { { var a; } var a; } }
 ```
 invalid.jsonc:1:35 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'a'. Consider to delete it or rename it.
+  × 'a' is redeclared in the same scope.
   
   > 1 │ class C { static { { var a; } var a; } }
       │                                   ^
@@ -371,6 +435,10 @@ invalid.jsonc:1:35 lint/suspicious/noRedeclare ━━━━━━━━━━━
   
   > 1 │ class C { static { { var a; } var a; } }
       │                          ^
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
   
 
 ```
@@ -384,7 +452,7 @@ class C { static { { var a; } { var a; } } }
 ```
 invalid.jsonc:1:37 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'a'. Consider to delete it or rename it.
+  × 'a' is redeclared in the same scope.
   
   > 1 │ class C { static { { var a; } { var a; } } }
       │                                     ^
@@ -393,6 +461,10 @@ invalid.jsonc:1:37 lint/suspicious/noRedeclare ━━━━━━━━━━━
   
   > 1 │ class C { static { { var a; } { var a; } } }
       │                          ^
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
   
 
 ```
@@ -406,7 +478,7 @@ var a; var {a = 0, b: Object = 0} = {};
 ```
 invalid.jsonc:1:13 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'a'. Consider to delete it or rename it.
+  × 'a' is redeclared in the same scope.
   
   > 1 │ var a; var {a = 0, b: Object = 0} = {};
       │             ^
@@ -415,6 +487,10 @@ invalid.jsonc:1:13 lint/suspicious/noRedeclare ━━━━━━━━━━━
   
   > 1 │ var a; var {a = 0, b: Object = 0} = {};
       │     ^
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
   
 
 ```
@@ -428,7 +504,7 @@ var a; var {a = 0, b: globalThis = 0} = {};
 ```
 invalid.jsonc:1:13 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'a'. Consider to delete it or rename it.
+  × 'a' is redeclared in the same scope.
   
   > 1 │ var a; var {a = 0, b: globalThis = 0} = {};
       │             ^
@@ -437,6 +513,10 @@ invalid.jsonc:1:13 lint/suspicious/noRedeclare ━━━━━━━━━━━
   
   > 1 │ var a; var {a = 0, b: globalThis = 0} = {};
       │     ^
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
   
 
 ```
@@ -450,7 +530,7 @@ function f() { var a; var a; }
 ```
 invalid.jsonc:1:27 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'a'. Consider to delete it or rename it.
+  × 'a' is redeclared in the same scope.
   
   > 1 │ function f() { var a; var a; }
       │                           ^
@@ -459,6 +539,10 @@ invalid.jsonc:1:27 lint/suspicious/noRedeclare ━━━━━━━━━━━
   
   > 1 │ function f() { var a; var a; }
       │                    ^
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
   
 
 ```
@@ -472,7 +556,7 @@ function f() { var a; if (test) { var a; } }
 ```
 invalid.jsonc:1:39 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'a'. Consider to delete it or rename it.
+  × 'a' is redeclared in the same scope.
   
   > 1 │ function f() { var a; if (test) { var a; } }
       │                                       ^
@@ -481,6 +565,10 @@ invalid.jsonc:1:39 lint/suspicious/noRedeclare ━━━━━━━━━━━
   
   > 1 │ function f() { var a; if (test) { var a; } }
       │                    ^
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
   
 
 ```
@@ -494,7 +582,7 @@ for (var a, a;;);
 ```
 invalid.jsonc:1:13 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'a'. Consider to delete it or rename it.
+  × 'a' is redeclared in the same scope.
   
   > 1 │ for (var a, a;;);
       │             ^
@@ -503,6 +591,10 @@ invalid.jsonc:1:13 lint/suspicious/noRedeclare ━━━━━━━━━━━
   
   > 1 │ for (var a, a;;);
       │          ^
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
   
 
 ```
@@ -518,7 +610,7 @@ _Note: The parser emitted 1 diagnostics which are not shown here._
 ```
 invalid.jsonc:1:18 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'a'. Consider to delete it or rename it.
+  × 'a' is redeclared in the same scope.
   
   > 1 │ for (;;){ var a, a,;}
       │                  ^
@@ -527,6 +619,10 @@ invalid.jsonc:1:18 lint/suspicious/noRedeclare ━━━━━━━━━━━
   
   > 1 │ for (;;){ var a, a,;}
       │               ^
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
   
 
 ```
@@ -540,7 +636,7 @@ function f(x) { var x = 5; }
 ```
 invalid.jsonc:1:21 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'x'. Consider to delete it or rename it.
+  × 'x' is redeclared in the same scope.
   
   > 1 │ function f(x) { var x = 5; }
       │                     ^
@@ -549,6 +645,10 @@ invalid.jsonc:1:21 lint/suspicious/noRedeclare ━━━━━━━━━━━
   
   > 1 │ function f(x) { var x = 5; }
       │            ^
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
   
 
 ```
