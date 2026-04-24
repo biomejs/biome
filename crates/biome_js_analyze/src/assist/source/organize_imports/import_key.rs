@@ -258,13 +258,10 @@ impl ImportInfo {
 }
 impl<'a> From<&'a ImportInfo> for ImportCandidate<'a> {
     fn from(value: &'a ImportInfo) -> Self {
-        let is_bare = value.kind == ImportStatementKind::Bare;
         Self {
             has_type_token: value.kind.has_type_token(),
-            source: value
-                .source
-                .as_ref()
-                .map(|source| ImportSourceCandidate::new(source, is_bare)),
+            is_bare: value.kind == ImportStatementKind::Bare,
+            source: value.source.as_ref().map(ImportSourceCandidate::new),
         }
     }
 }

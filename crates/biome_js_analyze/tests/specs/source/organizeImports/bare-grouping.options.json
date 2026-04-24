@@ -7,9 +7,9 @@
           "level": "on",
           "options": {
             "groups": [
-              ["**", "!:BARE:"],
+              { "kind": "!bare" },
               ":BLANK_LINE:",
-              [":BARE:"]
+              { "kind": "bare" }
             ],
             "sortBareImports": true
           }

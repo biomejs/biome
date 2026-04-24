@@ -8902,6 +8902,7 @@ export interface Selector {
 	scope?: Scope;
 }
 export interface ImportMatcher {
+	kind?: NegatableImportKindMatcher;
 	source?: SourcesMatcher;
 	type?: boolean;
 }
@@ -8956,9 +8957,9 @@ export type Kind =
 	| "typeMethod";
 export type Modifiers = RestrictedModifier[];
 export type Scope = "any" | "global";
+export type NegatableImportKindMatcher = "bare" | "!bare";
 export type NegatablePredefinedSourceMatcher =
 	| ":ALIAS:"
-	| ":BARE:"
 	| ":BUN:"
 	| ":NODE:"
 	| ":PACKAGE:"
@@ -8967,7 +8968,6 @@ export type NegatablePredefinedSourceMatcher =
 	| ":STYLE:"
 	| ":URL:"
 	| "!:ALIAS:"
-	| "!:BARE:"
 	| "!:BUN:"
 	| "!:NODE:"
 	| "!:PACKAGE:"

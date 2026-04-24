@@ -170,9 +170,45 @@ declare_source_rule! {
     /// - `:PATH:`: absolute and relative paths
     /// - `:STYLE:`: paths ending with the following style extensions:
     ///   `.css`, `.less`, `.pcss`, `.sass`, `.scss`, `.sss` and `.styl`
-    /// - `:BARE:`: bare (side-effect) imports, e.g. `import "polyfill"`;
-    ///   Requires [`sortBareImports`](#sortbareimports) to be `true` for bare imports
-    ///   to participate in group matching.
+    ///
+    /// #### Kind matcher
+    ///
+    /// Use a kind matcher to filter imports by their syntactic kind.
+    /// Currently, the only supported kind is `bare`, which matches
+    /// bare (side-effect) imports such as `import "polyfill"`.
+    /// Prefix the kind with `!` to match everything except that kind.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "sortBareImports": true,
+    ///         "groups": [
+    ///             { "kind": "!bare" },
+    ///             ":BLANK_LINE:",
+    ///             { "kind": "bare" }
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// The kind matcher composes with the `source` field,
+    /// allowing patterns such as "only bare imports that import a CSS file":
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "sortBareImports": true,
+    ///         "groups": [
+    ///             { "kind": "bare", "source": "**/*.css" }
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// :::note
+    /// The `bare` kind requires [`sortBareImports`](#sortbareimports) to be `true`
+    /// for bare imports to participate in group matching.
+    /// :::
     ///
     /// #### Type-only matcher
     ///
@@ -334,7 +370,7 @@ declare_source_rule! {
     ///
     /// ### Place side-effect imports last
     ///
-    /// Combine [`sortBareImports`](#sortbareimports) with the `:BARE:` predefined matcher to
+    /// Combine [`sortBareImports`](#sortbareimports) with the `{ "kind": "bare" }` matcher to
     /// gather all bare (side-effect) imports at the bottom of the import list. This is useful,
     /// for example, to enforce that web-component or polyfill registrations run after all
     /// binding imports:
@@ -344,9 +380,9 @@ declare_source_rule! {
     ///     "options": {
     ///         "sortBareImports": true,
     ///         "groups": [
-    ///             ["**", "!:BARE:"],
+    ///             { "kind": "!bare" },
     ///             ":BLANK_LINE:",
-    ///             [":BARE:"]
+    ///             { "kind": "bare" }
     ///         ]
     ///     }
     /// }
@@ -560,9 +596,9 @@ declare_source_rule! {
     /// - Bare imports also called side-effect imports (`import "polyfill"`);
     ///   Each forms its own chunk.
     ///   Set [`sortBareImports`](#sortbareimports) to `true` to disable this rule and sort
-    ///   bare imports together with their neighbors. Combined with the `:BARE:` group
-    ///   matcher, this lets you express conventions such as "place all side-effect imports
-    ///   at the end of the import list".
+    ///   bare imports together with their neighbors. Combined with the `{ "kind": "bare" }`
+    ///   group matcher, this lets you express conventions such as "place all side-effect
+    ///   imports at the end of the import list".
     /// - A comment followed by a blank line that we call a **detached comment**;
     ///   See the [comment handling section](#comment-handling) for more details.
     ///

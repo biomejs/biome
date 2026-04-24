@@ -2,7 +2,7 @@
 "@biomejs/biome": minor
 ---
 
-Added a `:BARE:` predefined group matcher to the [`organizeImports`](https://biomejs.dev/assist/actions/organize-imports/) assist action. The new matcher selects bare (side-effect) imports such as `import "polyfill"` and can be combined with `sortBareImports: true` and the `groups` option to express orderings such as "place all side-effect imports at the end of the import list".
+Added a `kind` field to the `ImportMatcher` used by the [`organizeImports`](https://biomejs.dev/assist/actions/organize-imports/) assist action. The new field selects imports by their syntactic kind and currently supports `bare` (matching side-effect imports such as `import "polyfill"`) with optional `!` negation (`!bare`). The matcher composes with the existing `type` and `source` fields, so users can express patterns such as "only bare imports that import a CSS file" (`{ "kind": "bare", "source": "**/*.css" }`).
 
 For example, with the following configuration:
 
@@ -16,9 +16,9 @@ For example, with the following configuration:
                     "options": {
                         "sortBareImports": true,
                         "groups": [
-                            ["**", "!:BARE:"],
+                            { "kind": "!bare" },
                             ":BLANK_LINE:",
-                            [":BARE:"]
+                            { "kind": "bare" }
                         ]
                     }
                 }

@@ -7,7 +7,7 @@
           "level": "on",
           "options": {
             "groups": [
-              [":NODE:"],
+              { "kind": "bare", "source": "**/*.css" },
               ":BLANK_LINE:",
               { "kind": "!bare" },
               ":BLANK_LINE:",

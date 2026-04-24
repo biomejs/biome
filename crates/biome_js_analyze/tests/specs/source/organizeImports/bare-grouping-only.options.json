@@ -7,7 +7,7 @@
           "level": "on",
           "options": {
             "groups": [
-              [":BARE:"]
+              { "kind": "bare" }
             ],
             "sortBareImports": true
           }
