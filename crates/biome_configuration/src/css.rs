@@ -129,7 +129,7 @@ pub struct CssFormatterConfiguration {
     /// square brackets (e.g., `[ data-attr ]`). Defaults to false.
     #[cfg_attr(
         feature = "cli",
-        bpaf(long("css-formatter-delimiter-spacing"), argument("double|single"))
+        bpaf(long("css-formatter-delimiter-spacing"), argument("true|false"))
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub delimiter_spacing: Option<DelimiterSpacing>,

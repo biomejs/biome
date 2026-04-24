@@ -162,10 +162,7 @@ pub struct JsFormatterConfiguration {
     /// false.
     #[cfg_attr(
         feature = "cli",
-        bpaf(
-            long("javascript-formatter-delimiter-spacing"),
-            argument("auto|always|never")
-        )
+        bpaf(long("javascript-formatter-delimiter-spacing"), argument("true|false"))
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub delimiter_spacing: Option<DelimiterSpacing>,
