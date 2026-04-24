@@ -630,6 +630,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         document_services,
         working_directory,
         compute_actions,
+        snippet_services: _,
     } = params;
     let tree = parse.tree();
     let Some(file_source) = language.to_css_file_source() else {

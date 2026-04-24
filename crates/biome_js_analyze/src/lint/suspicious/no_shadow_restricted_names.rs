@@ -1,11 +1,10 @@
-use crate::globals::javascript::language::ES_BUILTIN;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::JsIdentifierBinding;
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::no_shadow_restricted_names::NoShadowRestrictedNamesOptions;
 
 declare_lint_rule! {
@@ -47,7 +46,7 @@ declare_lint_rule! {
 }
 
 pub struct State {
-    shadowed_name: Box<str>,
+    shadowed_name: TokenText,
 }
 
 impl Rule for NoShadowRestrictedNames {
@@ -61,9 +60,10 @@ impl Rule for NoShadowRestrictedNames {
         let name = binding.name_token().ok()?;
         let name = name.text_trimmed();
 
-        if ES_BUILTIN.contains(&name) {
+        // should this also cover web/node js globals?
+        if crate::globals::is_js_language_global(name) {
             Some(State {
-                shadowed_name: name.into(),
+                shadowed_name: binding.name_token().ok()?.token_text_trimmed(),
             })
         } else {
             None
@@ -76,7 +76,7 @@ impl Rule for NoShadowRestrictedNames {
         let diag = RuleDiagnostic::new(rule_category!(),
             binding.syntax().text_trimmed_range(),
             markup! {
-                "Do not shadow the global \"" {state.shadowed_name} "\" property."
+                "Do not shadow the global \"" {state.shadowed_name.text()} "\" property."
             },
         )
         .note(

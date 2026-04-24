@@ -74,6 +74,7 @@ impl ScopeId {
 #[derive(Debug)]
 pub(crate) struct SemanticModelData {
     pub(crate) root: SendNode,
+    pub(crate) flavor: SemanticFlavor,
     // All scopes of this model
     pub(crate) scopes: Vec<SemanticModelScopeData>,
     pub(crate) scope_by_range: rust_lapper::Lapper<u32, ScopeId>,
@@ -194,6 +195,11 @@ impl SemanticModel {
 
     pub fn root(&self) -> AnyJsRoot {
         self.data.root.to_language_root::<AnyJsRoot>()
+    }
+
+    /// Returns the framework-specific semantic flavor used to build this model.
+    pub fn flavor(&self) -> SemanticFlavor {
+        self.data.flavor
     }
 
     /// Iterate all scopes

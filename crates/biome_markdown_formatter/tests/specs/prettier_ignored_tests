@@ -1,0 +1,44 @@
+# Prettier test files that Biome should completely ignore.
+# One path prefix per line, relative to the prettier/ directory.
+# Ignored files produce no snapshot and are excluded from compatibility reports.
+
+# Tables (GFM extension, not supported by Biome's parser)
+markdown/table/
+markdown/long-table/
+
+# Wiki-links (extension, not supported)
+markdown/wiki-link/
+
+# Footnotes (extension, not supported)
+markdown/footnote/
+markdown/footnoteDefinition/
+markdown/footnoteReference/
+
+# Math (extension, not supported)
+markdown/math/
+
+# Front matter (YAML/TOML, not supported)
+markdown/front-matter/
+markdown/yaml/
+markdown/toml/
+
+# Strikethrough / delete (GFM extension, not supported)
+markdown/delete/
+
+# Liquid templates (not supported)
+markdown/liquid/
+
+# Embedded language formatting in code blocks
+markdown/multiparser-css/
+markdown/multiparser-js/
+markdown/multiparser-json/
+markdown/jsx-semi/
+
+# CJK text splitting (Prettier-specific feature)
+markdown/splitCjkText/
+
+# Cursor placeholder tests (Prettier editor integration)
+markdown/cursor/
+
+# Broken plugin tests
+markdown/broken-plugins/

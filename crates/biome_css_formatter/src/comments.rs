@@ -1,7 +1,8 @@
 use crate::prelude::*;
 use biome_css_syntax::{
     AnyCssDeclarationName, AnyCssRoot, CssComplexSelector, CssFunction, CssGenericProperty,
-    CssIdentifier, CssLanguage, CssSyntaxKind, TextLen, TextSize,
+    CssIdentifier, CssLanguage, CssSyntaxKind, ScssMapExpression, ScssMapExpressionPair, TextLen,
+    TextSize,
 };
 use biome_diagnostics::category;
 use biome_formatter::comments::{
@@ -98,23 +99,69 @@ impl CommentStyle for CssCommentStyle {
         comment: DecoratedComment<Self::Language>,
     ) -> CommentPlacement<Self::Language> {
         match comment.text_position() {
-            CommentTextPosition::EndOfLine => handle_function_comment(comment)
+            CommentTextPosition::EndOfLine => handle_scss_map_trailing_separator_comment(comment)
+                .or_else(handle_function_comment)
                 .or_else(handle_generic_property_comment)
                 .or_else(handle_declaration_name_comment)
                 .or_else(handle_complex_selector_comment)
                 .or_else(handle_global_suppression),
-            CommentTextPosition::OwnLine => handle_function_comment(comment)
+            CommentTextPosition::OwnLine => handle_scss_map_trailing_separator_comment(comment)
+                .or_else(handle_function_comment)
                 .or_else(handle_generic_property_comment)
                 .or_else(handle_declaration_name_comment)
                 .or_else(handle_complex_selector_comment)
                 .or_else(handle_global_suppression),
-            CommentTextPosition::SameLine => handle_function_comment(comment)
+            CommentTextPosition::SameLine => handle_scss_map_trailing_separator_comment(comment)
+                .or_else(handle_function_comment)
                 .or_else(handle_generic_property_comment)
                 .or_else(handle_declaration_name_comment)
                 .or_else(handle_complex_selector_comment)
                 .or_else(handle_global_suppression),
         }
     }
+}
+
+fn handle_scss_map_trailing_separator_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(map_expression) = ScssMapExpression::cast_ref(comment.enclosing_node()) else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let Some(preceding_pair) = comment
+        .preceding_node()
+        .and_then(ScssMapExpressionPair::cast_ref)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    if !comment.kind().is_inline() || comment.text_position().is_own_line() {
+        return CommentPlacement::Default(comment);
+    }
+
+    let Some(following_token) = comment.following_token() else {
+        return CommentPlacement::Default(comment);
+    };
+
+    if following_token.kind() != CssSyntaxKind::R_PAREN {
+        return CommentPlacement::Default(comment);
+    }
+
+    // Keep `a: b /* comment */,` attached to the pair. Only move comments that
+    // live on the trailing separator path, e.g. `a: b, /* comment */)`.
+    let comment_range = comment.piece().text_range();
+    let is_pair_trailing_comment = preceding_pair.syntax().last_token().is_some_and(|token| {
+        token
+            .trailing_trivia()
+            .pieces()
+            .any(|piece| piece.is_comments() && piece.text_range() == comment_range)
+    });
+
+    if is_pair_trailing_comment {
+        return CommentPlacement::Default(comment);
+    }
+
+    CommentPlacement::dangling(map_expression.into_syntax(), comment)
 }
 
 fn handle_generic_property_comment(

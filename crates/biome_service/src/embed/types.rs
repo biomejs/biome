@@ -2,7 +2,7 @@ use crate::workspace::DocumentFileSource;
 use biome_css_syntax::CssFileSource;
 use biome_graphql_syntax::GraphqlFileSource;
 use biome_html_syntax::AnySvelteBlock;
-use biome_js_syntax::JsFileSource;
+use biome_js_syntax::{JsFileSource, Language};
 use biome_json_syntax::JsonFileSource;
 use biome_rowan::{TextRange, TextSize, TokenText};
 
@@ -39,6 +39,29 @@ impl From<GuestLanguage> for DocumentFileSource {
             GuestLanguage::Css => CssFileSource::css().into(),
             GuestLanguage::GraphQL => GraphqlFileSource::graphql().into(),
             GuestLanguage::Json => JsonFileSource::json().into(),
+        }
+    }
+}
+
+impl GuestLanguage {
+    pub(crate) fn from_js_source(source: &JsFileSource) -> Self {
+        match source.language() {
+            Language::JavaScript => {
+                if source.is_script() {
+                    Self::JsScript
+                } else if source.is_jsx() {
+                    Self::Jsx
+                } else {
+                    Self::JsModule
+                }
+            }
+            Language::TypeScript { .. } => {
+                if source.is_jsx() {
+                    Self::Tsx
+                } else {
+                    Self::Ts
+                }
+            }
         }
     }
 }

@@ -1,0 +1,67 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: whitespace/preserve-newline-nontext-children.html
+---
+
+# Input
+
+```html
+<!-- Newlines around inline element should be preserved -->
+<div>
+	<span>text</span>
+</div>
+
+<!-- No newlines = stays inline -->
+<div><span>text</span></div>
+
+<!-- Newlines around multiple inline elements should be preserved -->
+<div>
+	<span>Foo</span>
+	<span>Bar</span>
+</div>
+
+<!-- Mixed content (element + text) should NOT force multiline -->
+<div>
+	<span>Foo</span> Bar
+</div>
+
+<!-- Comment-only child with newlines should be preserved -->
+<div>
+	<!-- comment -->
+</div>
+
+<!-- Comment-only child inline stays inline -->
+<div><!-- comment --></div>
+
+```
+
+
+# Formatted
+
+```html
+<!-- Newlines around inline element should be preserved -->
+<div>
+	<span>text</span>
+</div>
+
+<!-- No newlines = stays inline -->
+<div><span>text</span></div>
+
+<!-- Newlines around multiple inline elements should be preserved -->
+<div>
+	<span>Foo</span>
+	<span>Bar</span>
+</div>
+
+<!-- Mixed content (element + text) should NOT force multiline -->
+<div><span>Foo</span> Bar</div>
+
+<!-- Comment-only child with newlines should be preserved -->
+<div>
+	<!-- comment -->
+</div>
+
+<!-- Comment-only child inline stays inline -->
+<div><!-- comment --></div>
+
+```

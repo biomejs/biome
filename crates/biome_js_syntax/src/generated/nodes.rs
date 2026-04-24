@@ -6474,6 +6474,51 @@ pub struct JsSuperExpressionFields {
     pub super_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct JsSvelteSnippetRoot {
+    pub(crate) syntax: SyntaxNode,
+}
+impl JsSvelteSnippetRoot {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> JsSvelteSnippetRootFields {
+        JsSvelteSnippetRootFields {
+            name: self.name(),
+            parameters: self.parameters(),
+            eof_token: self.eof_token(),
+        }
+    }
+    pub fn name(&self) -> SyntaxResult<AnyJsBinding> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn parameters(&self) -> SyntaxResult<JsParameters> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for JsSvelteSnippetRoot {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct JsSvelteSnippetRootFields {
+    pub name: SyntaxResult<AnyJsBinding>,
+    pub parameters: SyntaxResult<JsParameters>,
+    pub eof_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsSwitchStatement {
     pub(crate) syntax: SyntaxNode,
 }
@@ -15251,6 +15296,7 @@ pub enum AnyJsRoot {
     JsExpressionTemplateRoot(JsExpressionTemplateRoot),
     JsModule(JsModule),
     JsScript(JsScript),
+    JsSvelteSnippetRoot(JsSvelteSnippetRoot),
     TsDeclarationModule(TsDeclarationModule),
 }
 impl AnyJsRoot {
@@ -15275,6 +15321,12 @@ impl AnyJsRoot {
     pub fn as_js_script(&self) -> Option<&JsScript> {
         match &self {
             Self::JsScript(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_svelte_snippet_root(&self) -> Option<&JsSvelteSnippetRoot> {
+        match &self {
+            Self::JsSvelteSnippetRoot(item) => Some(item),
             _ => None,
         }
     }
@@ -24081,6 +24133,55 @@ impl From<JsSuperExpression> for SyntaxNode {
 }
 impl From<JsSuperExpression> for SyntaxElement {
     fn from(n: JsSuperExpression) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for JsSvelteSnippetRoot {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(JS_SVELTE_SNIPPET_ROOT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == JS_SVELTE_SNIPPET_ROOT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for JsSvelteSnippetRoot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsSvelteSnippetRoot")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("parameters", &support::DebugSyntaxResult(self.parameters()))
+                .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
+                .finish()
+        } else {
+            f.debug_struct("JsSvelteSnippetRoot").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<JsSvelteSnippetRoot> for SyntaxNode {
+    fn from(n: JsSvelteSnippetRoot) -> Self {
+        n.syntax
+    }
+}
+impl From<JsSvelteSnippetRoot> for SyntaxElement {
+    fn from(n: JsSvelteSnippetRoot) -> Self {
         n.syntax.into()
     }
 }
@@ -37046,6 +37147,11 @@ impl From<JsScript> for AnyJsRoot {
         Self::JsScript(node)
     }
 }
+impl From<JsSvelteSnippetRoot> for AnyJsRoot {
+    fn from(node: JsSvelteSnippetRoot) -> Self {
+        Self::JsSvelteSnippetRoot(node)
+    }
+}
 impl From<TsDeclarationModule> for AnyJsRoot {
     fn from(node: TsDeclarationModule) -> Self {
         Self::TsDeclarationModule(node)
@@ -37057,6 +37163,7 @@ impl AstNode for AnyJsRoot {
         .union(JsExpressionTemplateRoot::KIND_SET)
         .union(JsModule::KIND_SET)
         .union(JsScript::KIND_SET)
+        .union(JsSvelteSnippetRoot::KIND_SET)
         .union(TsDeclarationModule::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
@@ -37065,6 +37172,7 @@ impl AstNode for AnyJsRoot {
                 | JS_EXPRESSION_TEMPLATE_ROOT
                 | JS_MODULE
                 | JS_SCRIPT
+                | JS_SVELTE_SNIPPET_ROOT
                 | TS_DECLARATION_MODULE
         )
     }
@@ -37076,6 +37184,7 @@ impl AstNode for AnyJsRoot {
             }
             JS_MODULE => Self::JsModule(JsModule { syntax }),
             JS_SCRIPT => Self::JsScript(JsScript { syntax }),
+            JS_SVELTE_SNIPPET_ROOT => Self::JsSvelteSnippetRoot(JsSvelteSnippetRoot { syntax }),
             TS_DECLARATION_MODULE => Self::TsDeclarationModule(TsDeclarationModule { syntax }),
             _ => return None,
         };
@@ -37087,6 +37196,7 @@ impl AstNode for AnyJsRoot {
             Self::JsExpressionTemplateRoot(it) => it.syntax(),
             Self::JsModule(it) => it.syntax(),
             Self::JsScript(it) => it.syntax(),
+            Self::JsSvelteSnippetRoot(it) => it.syntax(),
             Self::TsDeclarationModule(it) => it.syntax(),
         }
     }
@@ -37096,6 +37206,7 @@ impl AstNode for AnyJsRoot {
             Self::JsExpressionTemplateRoot(it) => it.into_syntax(),
             Self::JsModule(it) => it.into_syntax(),
             Self::JsScript(it) => it.into_syntax(),
+            Self::JsSvelteSnippetRoot(it) => it.into_syntax(),
             Self::TsDeclarationModule(it) => it.into_syntax(),
         }
     }
@@ -37107,6 +37218,7 @@ impl std::fmt::Debug for AnyJsRoot {
             Self::JsExpressionTemplateRoot(it) => std::fmt::Debug::fmt(it, f),
             Self::JsModule(it) => std::fmt::Debug::fmt(it, f),
             Self::JsScript(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsSvelteSnippetRoot(it) => std::fmt::Debug::fmt(it, f),
             Self::TsDeclarationModule(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -37118,6 +37230,7 @@ impl From<AnyJsRoot> for SyntaxNode {
             AnyJsRoot::JsExpressionTemplateRoot(it) => it.into_syntax(),
             AnyJsRoot::JsModule(it) => it.into_syntax(),
             AnyJsRoot::JsScript(it) => it.into_syntax(),
+            AnyJsRoot::JsSvelteSnippetRoot(it) => it.into_syntax(),
             AnyJsRoot::TsDeclarationModule(it) => it.into_syntax(),
         }
     }
@@ -41360,6 +41473,11 @@ impl std::fmt::Display for JsStringLiteralExpression {
     }
 }
 impl std::fmt::Display for JsSuperExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for JsSvelteSnippetRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
