@@ -822,9 +822,9 @@ impl WorkspaceServer {
                 match def_ref {
                     None => default_caps,
                     Some(def_ref) => match def_ref {
-                        DefinitionReference::Local { .. } | DefinitionReference::Import { .. } => {
-                            default_caps
-                        }
+                        DefinitionReference::Local { .. }
+                        | DefinitionReference::Import { .. }
+                        | DefinitionReference::DynamicImport { .. } => default_caps,
                         DefinitionReference::CssClass { .. } => self
                             .features
                             .get_capabilities(DocumentFileSource::Css(CssFileSource::css())),

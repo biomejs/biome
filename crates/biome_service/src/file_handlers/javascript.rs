@@ -1,9 +1,11 @@
+mod go_to;
+
 use super::{
     AnalyzerCapabilities, AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams,
     DebugCapabilities, DiagnosticsAndActionsParams, EditorCapabilities, EnabledForPath,
     ExtensionHandler, FormatEmbedNode, FormatterCapabilities, LintParams, LintResults,
     ParseEmbedResult, ParseResult, ParserCapabilities, ProcessDiagnosticsAndActions, ProcessFixAll,
-    ProcessLint, ResolveBindingParams, ResolveDefinitionParams, SearchCapabilities,
+    ProcessLint, SearchCapabilities,
     UpdateSnippetsNodes, search,
 };
 use crate::configuration::to_analyzer_rules;
@@ -13,6 +15,7 @@ use crate::embed::types::{
     EmbedCandidate, EmbedContent, GuestLanguage, HostLanguage, TemplateTagKind,
 };
 use crate::file_handlers::FixAllParams;
+use crate::file_handlers::javascript::go_to::{resolve_binding, resolve_definition};
 use crate::settings::{
     OverrideSettings, Settings, SettingsWithEditor, check_feature_activity,
     check_override_feature_activity,
@@ -20,8 +23,7 @@ use crate::settings::{
 use crate::workspace::FixFileMode;
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
 use crate::workspace::{
-    DefinitionReference, DocumentFileSource, DocumentServices, EmbeddedSnippet,
-    GoToDefinitionResult, PullDiagnosticsAndActionsResult,
+    DocumentFileSource, DocumentServices, EmbeddedSnippet, PullDiagnosticsAndActionsResult,
 };
 use crate::{
     WorkspaceError,
@@ -62,20 +64,18 @@ use biome_js_formatter::context::{
 use biome_js_formatter::format_node;
 use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{SVELTE_RUNES, SemanticModelOptions, semantic_model};
-use biome_js_syntax::binding_ext::AnyJsIdentifierBinding;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsRoot, AnyJsTemplateElement, AnyJsxAttributeValue, JsCallArgumentList,
     JsCallArguments, JsCallExpression, JsClassDeclaration, JsClassExpression, JsFileSource,
-    JsFunctionDeclaration, JsLanguage, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode,
-    JsTemplateChunkElement, JsTemplateExpression, JsVariableDeclarator, JsxAttribute, JsxString,
-    TextRange, TextSize, TokenAtOffset,
+    JsFunctionDeclaration, JsLanguage, JsSyntaxNode, JsTemplateChunkElement, JsTemplateExpression,
+    JsVariableDeclarator, JsxAttribute, JsxString, TextRange, TextSize, TokenAtOffset,
 };
 use biome_js_type_info::{GlobalsResolver, ScopeId, TypeData, TypeResolver};
-use biome_module_graph::{JsOwnExport, ModuleGraph};
+use biome_module_graph::ModuleGraph;
 use biome_parser::AnyParse;
 use biome_rowan::{
     AstNode, AstNodeList, BatchMutation, BatchMutationExt, Direction, NodeCache, SendNode,
-    SyntaxNodeCast, WalkEvent,
+    WalkEvent,
 };
 use camino::Utf8Path;
 use either::Either;
@@ -1638,135 +1638,6 @@ fn update_snippets(
     let root = mutation.commit();
 
     Ok(root.as_send().unwrap())
-}
-
-/// Source-side capability: given a cursor position, identify what binding the user clicked on.
-pub(crate) fn resolve_binding(params: ResolveBindingParams) -> Option<DefinitionReference> {
-    let root: AnyJsRoot = params.parse.tree();
-
-    let token = match root.syntax().token_at_offset(params.cursor_offset) {
-        TokenAtOffset::Single(token) => token,
-        TokenAtOffset::Between(_, right) => right,
-        TokenAtOffset::None => return None,
-    };
-
-    // Check if cursor is inside a JSX className/class attribute string.
-    // This doesn't need the semantic model, so try it before the model check.
-    if let Some(class_name) = extract_css_class_at_offset(&token, params.cursor_offset) {
-        return Some(DefinitionReference::CssClass { class_name });
-    }
-
-    let semantic_model = params.services.as_js_services()?.semantic_model.as_ref()?;
-
-    // Try to resolve as a reference (e.g., `foo` in `console.log(foo)`)
-    if let Some(reference) = token
-        .ancestors()
-        .find_map(|p| p.cast::<JsReferenceIdentifier>())
-        && let Some(binding) = semantic_model.binding(&reference)
-    {
-        let binding_syntax = binding.syntax();
-        if is_under_import_clause(&binding_syntax) {
-            let name = binding_syntax.text_trimmed().to_string();
-            return Some(DefinitionReference::Import { local_name: name });
-        }
-        return Some(DefinitionReference::Local {
-            range: binding_syntax.text_trimmed_range(),
-        });
-    }
-
-    // Try to resolve when cursor is directly on an import binding name.
-    // E.g., cursor on `foo` in `import { foo } from './utils'`
-    if let Some(binding_node) = token
-        .ancestors()
-        .find_map(|p| p.cast::<AnyJsIdentifierBinding>())
-    {
-        let binding_range = binding_node.name_token().ok()?.text_trimmed_range();
-        let binding_text = binding_node.name_token().ok()?.text_trimmed().to_string();
-
-        if is_under_import_clause(binding_node.syntax()) {
-            return Some(DefinitionReference::Import {
-                local_name: binding_text,
-            });
-        }
-
-        return Some(DefinitionReference::Local {
-            range: binding_range,
-        });
-    }
-
-    None
-}
-
-/// Destination-side capability: given a binding reference, resolve the definition location.
-pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoToDefinitionResult> {
-    match params.definition_ref {
-        DefinitionReference::Local { range } => Some(GoToDefinitionResult {
-            path: BiomePath::new(params.path.as_path().to_string()),
-            range: *range,
-        }),
-        DefinitionReference::Import { local_name } => {
-            resolve_import_definition(local_name, params.path.as_path(), params.module_graph)
-        }
-        // CssClass is routed to the CSS handler by the orchestrator
-        _ => None,
-    }
-}
-
-/// Resolves an imported symbol to its definition in the target module.
-fn resolve_import_definition(
-    local_name: &str,
-    current_path: &Utf8Path,
-    module_graph: &ModuleGraph,
-) -> Option<GoToDefinitionResult> {
-    use biome_js_type_info::ImportSymbol;
-
-    let module_info = module_graph.js_module_info_for_path(current_path)?;
-    let js_import = module_info.static_imports.get(local_name)?;
-
-    let target_path = js_import.resolved_path.as_path()?;
-
-    // Skip files not in the module graph
-    if !module_graph.contains(target_path) {
-        return None;
-    }
-
-    let target_module = module_graph.js_module_info_for_path(target_path)?;
-
-    let export_name = match &js_import.symbol {
-        ImportSymbol::Named(name) => name.text(),
-        ImportSymbol::Default => "default",
-        ImportSymbol::All => {
-            // Namespace import: navigate to the target module file
-            return Some(GoToDefinitionResult {
-                path: BiomePath::new(target_path.to_string()),
-                range: TextRange::new(TextSize::from(0), TextSize::from(0)),
-            });
-        }
-    };
-
-    let own_export = target_module.find_js_exported_symbol(module_graph, export_name)?;
-
-    match own_export {
-        JsOwnExport::Binding(range) => Some(GoToDefinitionResult {
-            path: BiomePath::new(target_path.to_string()),
-            range,
-        }),
-        // Type-only exports and namespace exports don't have a binding location
-        JsOwnExport::Type(_) | JsOwnExport::Namespace(_) => None,
-    }
-}
-
-/// Checks if a syntax node is under an import clause.
-fn is_under_import_clause(node: &biome_rowan::SyntaxNode<JsLanguage>) -> bool {
-    node.ancestors().skip(1).any(|ancestor| {
-        matches!(
-            ancestor.kind(),
-            JsSyntaxKind::JS_IMPORT_NAMED_CLAUSE
-                | JsSyntaxKind::JS_IMPORT_DEFAULT_CLAUSE
-                | JsSyntaxKind::JS_IMPORT_NAMESPACE_CLAUSE
-                | JsSyntaxKind::JS_IMPORT_COMBINED_CLAUSE
-        )
-    })
 }
 
 /// Extracts the CSS class name at the given cursor offset from a JSX

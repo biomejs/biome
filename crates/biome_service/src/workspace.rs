@@ -87,6 +87,7 @@ use std::{
 use tokio::sync::watch;
 use tracing::debug;
 
+use crate::settings::{ModuleGraphResolutionKind, SettingsWithEditor};
 pub use crate::{
     WorkspaceError,
     file_handlers::{Capabilities, DocumentFileSource},
@@ -94,11 +95,9 @@ pub use crate::{
     scanner::ScanKind,
     settings::Settings,
 };
+pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 #[cfg(feature = "schema")]
 use schemars::{Schema, SchemaGenerator};
-
-use crate::settings::{ModuleGraphResolutionKind, SettingsWithEditor};
-pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 pub use server::OpenFileReason;
 
 /// Notification regarding a workspace's service data.
@@ -1287,6 +1286,10 @@ pub enum DefinitionReference {
     Import { local_name: String },
     /// A CSS class name from a JSX className/class attribute or a CSS-in-JS snippet (not yet supported)
     CssClass { class_name: String },
+    DynamicImport {
+        local_name: String,
+        specifier: String,
+    },
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
