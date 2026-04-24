@@ -2170,6 +2170,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_template::UseTemplateOptions>(),
     ));
     result.push((
+        "nursery",
+        "useTestHooksOnTop",
+        TypeId::of::<biome_rule_options::use_test_hooks_on_top::UseTestHooksOnTopOptions>(),
+    ));
+    result.push((
         "style",
         "useThrowNewError",
         TypeId::of::<biome_rule_options::use_throw_new_error::UseThrowNewErrorOptions>(),
