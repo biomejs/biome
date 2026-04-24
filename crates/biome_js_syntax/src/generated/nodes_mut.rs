@@ -3096,6 +3096,26 @@ impl JsSuperExpression {
         )
     }
 }
+impl JsSvelteSnippetRoot {
+    pub fn with_name(self, element: AnyJsBinding) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_parameters(self, element: JsParameters) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_eof_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+        )
+    }
+}
 impl JsSwitchStatement {
     pub fn with_switch_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(

@@ -153,3 +153,8 @@ const arrowLetReassign = (): number => { let n = 0; if (Math.random() > 0.5) n =
 // Nested object widening without as const — tsc widens `true` to `boolean` at any depth
 function nestedObj(): { inner: { flag: boolean } } { return { inner: { flag: true } }; }
 function nestedTuple(): [{ ok: boolean }] { return [{ ok: true }]; }
+
+// Getter with a same-namespace setter — tsc widens the getter to the setter's type
+class StoreClass { get status(): string { if (Math.random() > 0.5) return "loading"; return "idle"; } set status(v: string) {} }
+const storeObj = { get status(): string { if (Math.random() > 0.5) return "loading"; return "idle"; }, set status(v: string) {} };
+class StaticStore { static get status(): string { if (Math.random() > 0.5) return "loading"; return "idle"; } static set status(v: string) {} }

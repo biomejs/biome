@@ -1,0 +1,55 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/expression/map-comments.scss
+---
+
+# Input
+
+```scss
+$beforeTrailingCommaComment:(a:b /* before */,);
+$trailingBlockComment:(a:b,/* end */);
+$multipleTrailingBlockComments:(a:b,/* end */ /* more */);
+$ownLineTrailingBlockComment:(a:b,
+/* end */
+);
+$trailingLineComment:(a:b,// end
+);
+$commentedNestedMapValue:(key:(other-key:other-other-value),/* end */);
+$emptyBlockCommentMap:(/* comment */);
+$emptyLineCommentMap:(// comment
+);
+
+```
+
+
+# Formatted
+
+```scss
+$beforeTrailingCommaComment: (
+	a: b /* before */,
+);
+$trailingBlockComment: (
+	a: b, /* end */
+);
+$multipleTrailingBlockComments: (
+	a: b, /* end */
+	/* more */
+);
+$ownLineTrailingBlockComment: (
+	a: b,
+	/* end */
+);
+$trailingLineComment: (
+	a: b, // end
+);
+$commentedNestedMapValue: (
+	key: (
+		other-key: other-other-value,
+	), /* end */
+);
+$emptyBlockCommentMap: (/* comment */);
+$emptyLineCommentMap: (
+	// comment
+);
+
+```

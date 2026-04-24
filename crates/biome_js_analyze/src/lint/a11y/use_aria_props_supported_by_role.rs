@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use crate::services::aria::Aria;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
-use biome_aria_metadata::{AriaAttribute, AriaRole};
+use biome_aria_metadata::AriaAttribute;
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsxAttribute, jsx_ext::AnyJsxElement};
@@ -56,15 +56,11 @@ impl Rule for UseAriaPropsSupportedByRole {
         let node = ctx.query();
 
         // Ignore custom components and namespaced elements
-        if !node.name().is_ok_and(|name| name.as_jsx_name().is_some()) {
+        if !node.is_element() {
             return None;
         }
 
-        let role = node
-            .find_attribute_by_name("role")
-            .and_then(|attribute| attribute.as_static_value())
-            .and_then(|value| AriaRole::from_roles(value.text()))
-            .or_else(|| ctx.aria_roles().get_implicit_role(node));
+        let role = ctx.aria_roles().get_role_by_element_name(node);
 
         let role_attributes = role.map_or(Default::default(), |role| role.attributes());
         let role_prohibited_attributes =
@@ -83,7 +79,7 @@ impl Rule for UseAriaPropsSupportedByRole {
             // Allow null/undefined values regardless of the role
             if attribute
                 .as_static_value()
-                .is_some_and(|value| matches!(value.text(), "null" | "undefined"))
+                .is_some_and(|static_value| static_value.is_null_or_undefined())
             {
                 continue;
             }

@@ -190,6 +190,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "TS_DECLARATION_MODULE",
         "JS_EXPRESSION_SNIPPET",
         "JS_EXPRESSION_TEMPLATE_ROOT",
+        "JS_SVELTE_SNIPPET_ROOT",
         "JS_DIRECTIVE",
         "JS_DIRECTIVE_LIST",
         "JS_STATEMENT_LIST",

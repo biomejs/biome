@@ -105,7 +105,7 @@ biome_yaml_parser            = { path = "./crates/biome_yaml_parser", version = 
 biome_yaml_syntax            = { path = "./crates/biome_yaml_syntax", version = "0.0.1" }
 boa_engine                   = "0.21.1"
 boxcar                       = "0.2.14"
-bpaf                         = { version = "0.9.24", features = ["derive"] }
+bpaf                         = { version = "0.9.25", features = ["derive"] }
 camino                       = "1.2.2"
 cfg-if                       = "1.0.4"
 countme                      = "3.0.1"
@@ -124,7 +124,7 @@ ignore                       = "0.4.25"
 indexmap                     = { version = "2.13.1" }
 insta                        = "1.46.3"
 jiff                         = "0.2.23"
-libc                         = "0.2.184"
+libc                         = "0.2.185"
 mimalloc                     = "0.1.48"
 notify                       = "8.2.0"
 papaya                       = "0.2.4"

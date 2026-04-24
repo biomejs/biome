@@ -7,7 +7,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike};
 use biome_resolver::is_builtin_node_module;
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::no_undeclared_dependencies::NoUndeclaredDependenciesOptions;
 use camino::Utf8PathBuf;
 
@@ -129,7 +129,7 @@ declare_lint_rule! {
 }
 
 pub struct RuleState {
-    package_name: Box<str>,
+    import_text: TokenText,
     is_dev_dependency_available: bool,
     is_peer_dependency_available: bool,
     is_optional_dependency_available: bool,
@@ -173,8 +173,8 @@ impl Rule for NoUndeclaredDependencies {
                 || (is_optional_dependency_available && ctx.is_optional_dependency(package_name))
         };
 
-        let token_text = node.inner_string_text()?;
-        let package_name = parse_package_name(token_text.text())?;
+        let import_text = node.inner_string_text()?;
+        let package_name = parse_package_name(import_text.text())?;
         if is_available(package_name)
             // Self package imports
             // TODO: we should also check that an `.` exports exists.
@@ -202,7 +202,7 @@ impl Rule for NoUndeclaredDependencies {
         }
 
         Some(RuleState {
-            package_name: package_name.into(),
+            import_text,
             is_dev_dependency_available,
             is_peer_dependency_available,
             is_optional_dependency_available,
@@ -211,11 +211,12 @@ impl Rule for NoUndeclaredDependencies {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let RuleState {
-            package_name,
+            import_text,
             is_dev_dependency_available,
             is_peer_dependency_available,
             is_optional_dependency_available,
         } = state;
+        let package_name = parse_package_name(import_text.text())?;
 
         let Some(package_path) = ctx.package_path.as_ref() else {
             return Some(RuleDiagnostic::new(

@@ -63,7 +63,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUnnecessaryTemplateExpression {
-        version: "next",
+        version: "2.4.13",
         name: "noUnnecessaryTemplateExpression",
         language: "js",
         recommended: false,

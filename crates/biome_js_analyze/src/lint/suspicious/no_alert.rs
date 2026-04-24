@@ -4,7 +4,7 @@ use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsCallExpression, JsComputedMemberExpression,
-    JsStaticMemberExpression, global_identifier,
+    JsStaticMemberExpression, global_identifier, inner_string_text,
 };
 use biome_rowan::AstNode;
 use biome_rule_options::no_alert::NoAlertOptions;
@@ -67,7 +67,7 @@ declare_lint_rule! {
 
 impl Rule for NoAlert {
     type Query = Semantic<JsCallExpression>;
-    type State = String;
+    type State = &'static str;
     type Signals = Option<Self::State>;
     type Options = NoAlertOptions;
 
@@ -97,7 +97,7 @@ impl Rule for NoAlert {
     }
 }
 
-fn check_expression(expr: &AnyJsExpression, model: &SemanticModel) -> Option<String> {
+fn check_expression(expr: &AnyJsExpression, model: &SemanticModel) -> Option<&'static str> {
     match expr {
         AnyJsExpression::JsIdentifierExpression(_) => check_global_identifier(expr, model),
         AnyJsExpression::JsStaticMemberExpression(member_expr) => {
@@ -114,12 +114,14 @@ fn check_expression(expr: &AnyJsExpression, model: &SemanticModel) -> Option<Str
     }
 }
 
-fn check_global_identifier(expr: &AnyJsExpression, model: &SemanticModel) -> Option<String> {
+fn check_global_identifier(expr: &AnyJsExpression, model: &SemanticModel) -> Option<&'static str> {
     let (reference, name) = global_identifier(expr)?;
     let name_text = name.text();
 
-    if is_forbidden_function(name_text) && model.binding(&reference).is_none() {
-        Some(name_text.to_string())
+    if model.binding(&reference).is_none()
+        && let Some(forbidden) = forbidden_function(name_text)
+    {
+        Some(forbidden)
     } else {
         None
     }
@@ -128,7 +130,7 @@ fn check_global_identifier(expr: &AnyJsExpression, model: &SemanticModel) -> Opt
 fn check_static_member_expression(
     member_expr: &JsStaticMemberExpression,
     model: &SemanticModel,
-) -> Option<String> {
+) -> Option<&'static str> {
     let object = member_expr.object().ok()?;
     let (reference, object_name) = global_identifier(&object)?;
     let object_name_text = object_name.text();
@@ -138,11 +140,7 @@ fn check_static_member_expression(
         let member_token = member_name.value_token().ok()?;
         let member_name_text = member_token.text_trimmed();
 
-        if is_forbidden_function(member_name_text) {
-            Some(member_name_text.to_string())
-        } else {
-            None
-        }
+        forbidden_function(member_name_text)
     } else {
         None
     }
@@ -151,7 +149,7 @@ fn check_static_member_expression(
 fn check_computed_member_expression(
     computed_member_expr: &JsComputedMemberExpression,
     model: &SemanticModel,
-) -> Option<String> {
+) -> Option<&'static str> {
     let object = computed_member_expr.object().ok()?;
     let (reference, object_name) = global_identifier(&object)?;
     let object_name_text = object_name.text();
@@ -163,14 +161,9 @@ fn check_computed_member_expression(
         ) = member_expr
         {
             let string_token = string_literal.value_token().ok()?;
-            let string_text = string_token.text_trimmed();
-            let member_name = string_text.trim_matches('"').trim_matches('\'');
+            let member_name = inner_string_text(&string_token);
 
-            if is_forbidden_function(member_name) {
-                Some(member_name.to_string())
-            } else {
-                None
-            }
+            forbidden_function(&member_name)
         } else {
             None
         }
@@ -179,8 +172,12 @@ fn check_computed_member_expression(
     }
 }
 
-fn is_forbidden_function(name: &str) -> bool {
-    FORBIDDEN_FUNCTIONS.contains(&name)
+/// If the function name is in the list of forbidden functions, return it. Otherwise, return None.
+fn forbidden_function(name: &str) -> Option<&'static str> {
+    FORBIDDEN_FUNCTIONS
+        .iter()
+        .copied()
+        .find(|candidate| *candidate == name)
 }
 
 fn is_global_object(name: &str) -> bool {

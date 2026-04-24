@@ -6,6 +6,7 @@
 
 #[macro_use]
 mod generated;
+pub mod accessor_ext;
 pub mod assign_ext;
 pub mod binary_like_expression;
 pub mod binding_ext;
@@ -32,6 +33,7 @@ mod unescape;
 mod union_ext;
 
 pub use self::generated::*;
+pub use accessor_ext::*;
 pub use biome_rowan::{
     SyntaxNodeText, TextLen, TextRange, TextSize, TokenAtOffset, TokenText, TriviaPieceKind,
     WalkEvent,

@@ -1,0 +1,17 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "nursery": {
+        "useReactNativePlatformComponents": {
+          "level": "error",
+          "options": {
+            "androidPathPatterns": ["**/*.droid.jsx"],
+            "iosPathPatterns": ["**/*.apple.jsx"]
+          }
+        }
+      }
+    }
+  }
+}

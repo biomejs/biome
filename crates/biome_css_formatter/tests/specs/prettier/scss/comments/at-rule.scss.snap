@@ -1,6 +1,5 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 249
 info: scss/comments/at-rule.scss
 ---
 
@@ -25,17 +24,20 @@ info: scss/comments/at-rule.scss
 # Error
 ```text
 reformat: output mismatch
-Differences (-re-formatted|+formatted):
+--- re-formatted
++++ formatted
+@@ -1,4 +1,5 @@
 -@at-root .foo { // .bar
 +@at-root .foo // .bar
 +{
  }
  
  @at-root // .bar
- .foo {
 
 IR differences:
-Differences (-re-formatted IR|+formatted IR):
+--- re-formatted IR
++++ formatted IR
+@@ -1,11 +1,9 @@
  [
    "@at-root ",
 -  group(expand: propagated, [
@@ -51,6 +53,5 @@ Differences (-re-formatted IR|+formatted IR):
    hard_line_break,
    "}",
    empty_line,
-   "@at-root ",
 
 ```
