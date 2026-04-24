@@ -9650,6 +9650,10 @@ Source-level embeds (`<script>`) use `true`; directives and text expressions use
 	| {
 			Svelte: {
 				/**
+				 * Whether this is a `{@const name = value}` block.
+				 */
+				is_const_block: boolean;
+				/**
 				 * Whether this is the declaration of a function, usually declared in `#snippet`
 				 */
 				is_function_signature: boolean;
