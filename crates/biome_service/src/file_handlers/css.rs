@@ -33,8 +33,8 @@ use biome_css_parser::{CssModulesKind, CssParserOptions};
 use biome_css_semantic::semantic_model;
 use biome_css_syntax::{AnyCssRoot, CssLanguage, CssRoot, CssSyntaxNode};
 use biome_formatter::{
-    FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
-    TrailingNewline,
+    DelimiterSpacing, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
+    QuoteStyle, TrailingNewline,
 };
 use biome_fs::BiomePath;
 use biome_parser::AnyParse;
@@ -53,6 +53,7 @@ pub struct CssFormatterSettings {
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
     pub quote_style: Option<QuoteStyle>,
+    pub delimiter_spacing: Option<DelimiterSpacing>,
     pub enabled: Option<CssFormatterEnabled>,
     pub trailing_newline: Option<TrailingNewline>,
 }
@@ -65,6 +66,7 @@ impl From<CssFormatterConfiguration> for CssFormatterSettings {
             indent_width: configuration.indent_width,
             indent_style: configuration.indent_style,
             quote_style: configuration.quote_style,
+            delimiter_spacing: configuration.delimiter_spacing,
             line_ending: configuration.line_ending,
             trailing_newline: configuration.trailing_newline,
         }
@@ -236,6 +238,12 @@ impl ServiceLanguage for CssLanguage {
         .with_line_width(line_width)
         .with_line_ending(line_ending)
         .with_quote_style(language.quote_style.unwrap_or_default())
+        .with_delimiter_spacing(
+            language
+                .delimiter_spacing
+                .or(global.delimiter_spacing)
+                .unwrap_or_default(),
+        )
         .with_trailing_newline(trailing_newline);
 
         overrides.apply_override_css_format_options(path, &mut options);
