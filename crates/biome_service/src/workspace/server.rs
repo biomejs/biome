@@ -28,6 +28,8 @@ use crate::workspace::{
     IgnoreKind, MigrateConfigurationParams, MigrateConfigurationResult, OpenFileParams,
     OpenFileResult, OpenProjectParams, OpenProjectResult, ParsePatternParams, ParsePatternResult,
     PathIsIgnoredParams, PatternId, PullActionsParams, PullActionsResult,
+    PullConfigurationActionsParams, PullConfigurationActionsResult,
+    PullConfigurationDiagnosticsParams, PullConfigurationDiagnosticsResult,
     PullDiagnosticsAndActionsParams, PullDiagnosticsAndActionsResult, PullDiagnosticsParams,
     PullDiagnosticsResult, RageEntry, RageParams, RageResult, RenameParams, RenameResult, ScanKind,
     ScanProjectParams, ScanProjectResult, SearchPatternParams, SearchResults, ServerInfo,
@@ -35,15 +37,16 @@ use crate::workspace::{
     UpdateSettingsParams, UpdateSettingsResult,
 };
 use crate::{Workspace, WorkspaceError};
-use biome_analyze::{AnalyzerPluginVec, RuleCategory};
+use biome_analyze::{ActionCategory, AnalyzerPluginVec, RuleCategory};
 use biome_configuration::bool::Bool;
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::VcsClientKind;
 use biome_configuration::{BiomeDiagnostic, Configuration, ConfigurationPathHint};
+use biome_console::markup;
 use biome_css_syntax::{AnyCssRoot, CssVariant};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
-use biome_diagnostics::print_diagnostic_to_string;
+use biome_diagnostics::{Applicability, print_diagnostic_to_string};
 use biome_diagnostics::{
     Diagnostic, DiagnosticExt, Severity, serde::Diagnostic as SerdeDiagnostic,
 };
@@ -69,6 +72,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
 use papaya::HashMap;
 use rustc_hash::{FxBuildHasher, FxHashMap};
+use std::borrow::Cow;
 use std::fmt::Debug;
 use std::panic::RefUnwindSafe;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -1871,6 +1875,84 @@ impl Workspace for WorkspaceServer {
 
         Ok(MigrateConfigurationResult {
             content: (migrated_content != original_content).then_some(migrated_content),
+        })
+    }
+
+    fn pull_configuration_diagnostics(
+        &self,
+        params: PullConfigurationDiagnosticsParams,
+    ) -> Result<PullConfigurationDiagnosticsResult, WorkspaceError> {
+        if !params.path.is_config() {
+            return Ok(PullConfigurationDiagnosticsResult {
+                diagnostics: Vec::new(),
+                errors: 0,
+            });
+        }
+
+        let content = self.get_file_content(GetFileContentParams {
+            project_key: params.project_key,
+            path: params.path.clone(),
+        })?;
+        let file_source = JsonFileSource::try_from(params.path.as_path()).unwrap_or_default();
+        let parser_options = JsonParserOptions::from(&file_source);
+        let deserialized: Deserialized<Configuration> =
+            deserialize_from_json_str(&content, parser_options, "config");
+        let diagnostics: Vec<_> = deserialized
+            .into_diagnostics()
+            .into_iter()
+            .map(|diagnostic| {
+                SerdeDiagnostic::new(diagnostic.with_file_path(params.path.to_string()))
+            })
+            .collect();
+        let errors = diagnostics
+            .iter()
+            .filter(|diagnostic| diagnostic.severity() <= Severity::Error)
+            .count();
+
+        Ok(PullConfigurationDiagnosticsResult {
+            diagnostics,
+            errors,
+        })
+    }
+
+    fn pull_configuration_actions(
+        &self,
+        params: PullConfigurationActionsParams,
+    ) -> Result<PullConfigurationActionsResult, WorkspaceError> {
+        let Some(migrated_content) = self
+            .migrate_configuration(MigrateConfigurationParams {
+                project_key: params.project_key,
+                path: params.path.clone(),
+            })?
+            .content
+        else {
+            return Ok(PullConfigurationActionsResult {
+                actions: Vec::new(),
+            });
+        };
+
+        let original_content = self.get_file_content(GetFileContentParams {
+            project_key: params.project_key,
+            path: params.path,
+        })?;
+        let mut builder = TextEdit::builder();
+        builder.replace(&original_content, &migrated_content);
+        let suggestion = builder.finish();
+
+        Ok(PullConfigurationActionsResult {
+            actions: vec![CodeAction {
+                category: ActionCategory::QuickFix(Cow::Borrowed("migrateConfiguration")),
+                rule_name: None,
+                suggestion: Some(CodeSuggestion {
+                    span: TextRange::default(),
+                    applicability: Applicability::Always,
+                    msg: markup!("Migrate configuration file").to_owned(),
+                    suggestion,
+                    labels: Vec::new(),
+                }),
+                applicability: Some(Applicability::Always),
+                offset: None,
+            }],
         })
     }
 

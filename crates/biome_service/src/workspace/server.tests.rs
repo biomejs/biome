@@ -215,8 +215,11 @@ fn pull_diagnostics_skips_lint_when_linter_disabled() {
             only: vec![],
             skip: vec![],
             enabled_rules: vec![],
-            pull_code_actions: true,
+            include_code_fix: true,
             inline_config: Some(inline_config),
+            max_diagnostics: None,
+            diagnostic_level: Severity::Information,
+            enforce_assist: false,
         })
         .unwrap();
 

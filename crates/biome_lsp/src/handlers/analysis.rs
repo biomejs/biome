@@ -18,8 +18,8 @@ use biome_service::file_handlers::svelte::SvelteFileHandler;
 use biome_service::file_handlers::vue::VueFileHandler;
 use biome_service::workspace::{
     CheckFileSizeParams, FeaturesBuilder, FileFeaturesResult, FixFileMode, FixFileParams,
-    GetFileContentParams, IgnoreKind, MigrateConfigurationParams, PathIsIgnoredParams, ProjectKey,
-    PullActionsParams, SupportsFeatureParams,
+    GetFileContentParams, IgnoreKind, PathIsIgnoredParams, ProjectKey, PullActionsParams,
+    PullConfigurationActionsParams, SupportsFeatureParams,
 };
 use biome_service::{WorkspaceError, extension_error};
 use serde_json::Value;
@@ -39,13 +39,6 @@ const CONFIG_MIGRATE_QUICKFIX_CATEGORY: ActionCategory =
 
 fn fix_all_kind() -> CodeActionKind {
     match FIX_ALL_CATEGORY.to_str() {
-        Cow::Borrowed(kind) => CodeActionKind::from(kind),
-        Cow::Owned(kind) => CodeActionKind::from(kind),
-    }
-}
-
-fn config_migrate_kind() -> CodeActionKind {
-    match CONFIG_MIGRATE_QUICKFIX_CATEGORY.to_str() {
         Cow::Borrowed(kind) => CodeActionKind::from(kind),
         Cow::Owned(kind) => CodeActionKind::from(kind),
     }
@@ -141,6 +134,7 @@ pub(crate) fn code_actions(
         &url,
         &path,
         &doc.line_index,
+        position_encoding,
         &filters,
         doc.project_key,
     )?;
@@ -717,6 +711,7 @@ fn config_migrate_code_action(
     url: &Uri,
     path: &BiomePath,
     line_index: &LineIndex,
+    position_encoding: biome_lsp_converters::PositionEncoding,
     filters: &[&str],
     project_key: biome_service::projects::ProjectKey,
 ) -> Result<Option<CodeActionOrCommand>, Error> {
@@ -732,41 +727,23 @@ fn config_migrate_code_action(
         return Ok(None);
     }
 
-    let Some(migrated_content) = session
+    let Some(action) = session
         .workspace
-        .migrate_configuration(MigrateConfigurationParams {
+        .pull_configuration_actions(PullConfigurationActionsParams {
             project_key,
             path: path.clone(),
         })?
-        .content
+        .actions
+        .into_iter()
+        .next()
     else {
         return Ok(None);
     };
 
-    let mut changes = HashMap::new();
-    changes.insert(
-        url.clone(),
-        vec![lsp::TextEdit {
-            range: lsp::Range {
-                start: lsp::Position::new(0, 0),
-                end: lsp::Position::new(line_index.len(), 0),
-            },
-            new_text: migrated_content,
-        }],
-    );
-
-    Ok(Some(CodeActionOrCommand::CodeAction(lsp::CodeAction {
-        title: String::from("Migrate configuration file"),
-        kind: Some(config_migrate_kind()),
-        diagnostics: None,
-        edit: Some(lsp::WorkspaceEdit {
-            changes: Some(changes),
-            document_changes: None,
-            change_annotations: None,
-        }),
-        command: None,
-        is_preferred: Some(true),
-        disabled: None,
-        data: None,
-    })))
+    Ok(
+        utils::code_fix_to_lsp(url, line_index, position_encoding, &[], action)
+            .ok()
+            .flatten()
+            .map(CodeActionOrCommand::CodeAction),
+    )
 }
