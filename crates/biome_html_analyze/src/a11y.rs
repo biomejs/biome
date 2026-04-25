@@ -215,12 +215,7 @@ pub fn has_event_handler(handler_types: &[&str], element: &AnyHtmlTagElement) ->
                     .ok()
                     .and_then(|arg| arg.as_vue_static_argument().cloned())
                     .and_then(|s| s.name_token().ok())
-                    .is_some_and(|t| {
-                        matches_event_handler(
-                            handler_types,
-                            format!("on{}", t.text_trimmed()).as_str(),
-                        )
-                    }),
+                    .is_some_and(|t| matches_event_handler(handler_types, t.text_trimmed())),
 
                 // v-on:name="..."
                 AnyVueDirective::VueDirective(d) => {
@@ -232,12 +227,7 @@ pub fn has_event_handler(handler_types: &[&str], element: &AnyHtmlTagElement) ->
                             .and_then(|arg| arg.arg().ok())
                             .and_then(|arg| arg.as_vue_static_argument().cloned())
                             .and_then(|s| s.name_token().ok())
-                            .is_some_and(|t| {
-                                matches_event_handler(
-                                    handler_types,
-                                    format!("on{}", t.text_trimmed()).as_str(),
-                                )
-                            })
+                            .is_some_and(|t| matches_event_handler(handler_types, t.text_trimmed()))
                 }
 
                 _ => false,

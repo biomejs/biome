@@ -1,95 +1,96 @@
 use biome_string_case::StrOnlyExtension;
 
 // https://github.com/jsx-eslint/jsx-ast-utils/blob/v3.3.5/src/eventHandlers.js
+// Removed "on" from event-handlers to prevent string allocations when adding leading "on" for vue event bindings that don't start with "on"
 const EVENT_HANDLERS: &[(&str, &[&str])] = &[
     (
         "animation",
-        &["onanimationend", "onanimationiteration", "onanimationstart"],
+        &["animationend", "animationiteration", "animationstart"],
     ),
-    ("clipboard", &["oncopy", "oncut", "onpaste"]),
+    ("clipboard", &["copy", "cut", "paste"]),
     (
         "composition",
-        &[
-            "oncompositionend",
-            "oncompositionstart",
-            "oncompositionupdate",
-        ],
+        &["compositionend", "compositionstart", "compositionupdate"],
     ),
-    ("focus", &["onblur", "onfocus"]),
-    ("form", &["onchange", "oninput", "onsubmit"]),
-    ("image", &["onerror", "onload"]),
-    ("keyboard", &["onkeydown", "onkeypress", "onkeyup"]),
+    ("focus", &["blur", "focus"]),
+    ("form", &["change", "input", "submit"]),
+    ("image", &["error", "load"]),
+    ("keyboard", &["keydown", "keypress", "keyup"]),
     (
         "media",
         &[
-            "onabort",
-            "oncanplay",
-            "oncanplaythrough",
-            "ondurationchange",
-            "onemptied",
-            "onencrypted",
-            "onended",
-            "onerror",
-            "onloadeddata",
-            "onloadedmetadata",
-            "onloadstart",
-            "onpause",
-            "onplay",
-            "onplaying",
-            "onprogress",
-            "onratechange",
-            "onseeked",
-            "onseeking",
-            "onstalled",
-            "onsuspend",
-            "ontimeupdate",
-            "onvolumechange",
-            "onwaiting",
+            "abort",
+            "canplay",
+            "canplaythrough",
+            "durationchange",
+            "emptied",
+            "encrypted",
+            "ended",
+            "error",
+            "loadeddata",
+            "loadedmetadata",
+            "loadstart",
+            "pause",
+            "play",
+            "playing",
+            "progress",
+            "ratechange",
+            "seeked",
+            "seeking",
+            "stalled",
+            "suspend",
+            "timeupdate",
+            "volumechange",
+            "waiting",
         ],
     ),
     (
         "mouse",
         &[
-            "onclick",
-            "oncontextmenu",
-            "ondblclick",
-            "ondoubleclick",
-            "ondrag",
-            "ondragend",
-            "ondragenter",
-            "ondragexit",
-            "ondragleave",
-            "ondragover",
-            "ondragstart",
-            "ondrop",
-            "onmousedown",
-            "onmouseenter",
-            "onmouseleave",
-            "onmousemove",
-            "onmouseout",
-            "onmouseover",
-            "onmouseup",
+            "click",
+            "contextmenu",
+            "dblclick",
+            "doubleclick",
+            "drag",
+            "dragend",
+            "dragenter",
+            "dragexit",
+            "dragleave",
+            "dragover",
+            "dragstart",
+            "drop",
+            "mousedown",
+            "mouseenter",
+            "mouseleave",
+            "mousemove",
+            "mouseout",
+            "mouseover",
+            "mouseup",
         ],
     ),
-    ("selection", &["onselect"]),
+    ("selection", &["select"]),
     (
         "touch",
-        &["ontouchcancel", "ontouchend", "ontouchmove", "ontouchstart"],
+        &["touchcancel", "touchend", "touchmove", "touchstart"],
     ),
-    ("transition", &["ontransitionend"]),
-    ("ui", &["onscroll"]),
-    ("wheel", &["onwheel"]),
+    ("transition", &["transitionend"]),
+    ("ui", &["scroll"]),
+    ("wheel", &["wheel"]),
 ];
 
 pub fn matches_event_handler(handler_types: &[&str], event_handler: &str) -> bool {
-    let event_handler_lower = event_handler.to_lowercase_cow();
+    let binding = event_handler.to_lowercase_cow();
+    let mut event_handler_lower = binding.as_ref();
+    if event_handler_lower.starts_with("on") {
+        event_handler_lower = &event_handler_lower[2..];
+    }
     handler_types.iter().any(|handler_type| {
         EVENT_HANDLERS
             .binary_search_by_key(handler_type, |&(a, _)| a)
             .is_ok_and(|idx| {
                 EVENT_HANDLERS[idx]
                     .1
-                    .binary_search(&event_handler_lower.as_ref())
+                    .binary_search(&event_handler_lower)
                     .is_ok()
             })
     })
