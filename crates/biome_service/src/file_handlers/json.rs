@@ -28,8 +28,8 @@ use biome_configuration::json::{
 };
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_formatter::{
-    BracketSpacing, Expand, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
-    TrailingNewline,
+    BracketSpacing, DelimiterSpacing, Expand, FormatError, IndentStyle, IndentWidth, LineEnding,
+    LineWidth, Printed, TrailingNewline,
 };
 use biome_fs::{BiomePath, ConfigName};
 use biome_json_analyze::{ExtendedConfigurationProvider, JsonAnalyzeServices, analyze};
@@ -55,6 +55,7 @@ pub struct JsonFormatterSettings {
     pub trailing_commas: Option<TrailingCommas>,
     pub expand: Option<Expand>,
     pub bracket_spacing: Option<BracketSpacing>,
+    pub delimiter_spacing: Option<DelimiterSpacing>,
     pub enabled: Option<JsonFormatterEnabled>,
     pub trailing_newline: Option<TrailingNewline>,
 }
@@ -69,6 +70,7 @@ impl From<JsonFormatterConfiguration> for JsonFormatterSettings {
             trailing_commas: configuration.trailing_commas,
             expand: configuration.expand,
             bracket_spacing: configuration.bracket_spacing,
+            delimiter_spacing: configuration.delimiter_spacing,
             enabled: configuration.enabled,
             trailing_newline: configuration.trailing_newline,
         }
@@ -216,6 +218,11 @@ impl ServiceLanguage for JsonLanguage {
             .or(global.bracket_spacing)
             .unwrap_or_default();
 
+        let delimiter_spacing = language
+            .delimiter_spacing
+            .or(global.delimiter_spacing)
+            .unwrap_or_default();
+
         let file_source = document_file_source
             .to_json_file_source()
             .unwrap_or_default();
@@ -228,6 +235,7 @@ impl ServiceLanguage for JsonLanguage {
             .with_trailing_commas(trailing_commas)
             .with_expand(expand_lists)
             .with_bracket_spacing(bracket_spacing)
+            .with_delimiter_spacing(delimiter_spacing)
             .with_trailing_newline(trailing_newline);
 
         overrides.apply_override_json_format_options(path, &mut options);
@@ -602,6 +610,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         document_services: _,
         working_directory,
         compute_actions,
+        snippet_services: _,
     } = params;
 
     let _ = debug_span!("Code actions JSON",  range =? range, path =? path).entered();

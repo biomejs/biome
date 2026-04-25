@@ -65,7 +65,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoJsxLeakedDollar {
-        version: "next",
+        version: "2.4.13",
         name: "noJsxLeakedDollar",
         language: "jsx",
         recommended: false,

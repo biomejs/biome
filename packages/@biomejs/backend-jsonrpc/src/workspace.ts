@@ -436,6 +436,13 @@ export interface CssAssistConfiguration {
  */
 export interface CssFormatterConfiguration {
 	/**
+	* Whether to insert spaces inside delimiters (after the opening delimiter and before the
+closing delimiter). Only applies when the content fits on a single line, and empty
+delimiters are not affected. For CSS, affects parentheses (e.g., `rgb( 0, 0, 0 )`) and
+square brackets (e.g., `[ data-attr ]`). Defaults to false. 
+	 */
+	delimiterSpacing?: DelimiterSpacing;
+	/**
 	 * Control the formatter for CSS (and its super languages) files.
 	 */
 	enabled?: Bool;
@@ -911,6 +918,13 @@ export interface JsonFormatterConfiguration {
 	 */
 	bracketSpacing?: BracketSpacing;
 	/**
+	* Whether to insert spaces inside delimiters (after the opening delimiter and before the
+closing delimiter). Only applies when the content fits on a single line, and empty
+brackets are not affected. For JSON, affects square brackets (e.g., `[ 1, 2, 3 ]`).
+Defaults to false. 
+	 */
+	delimiterSpacing?: DelimiterSpacing;
+	/**
 	 * Control the formatter for JSON (and its super languages) files.
 	 */
 	enabled?: Bool;
@@ -1058,7 +1072,7 @@ Can be either a plain path string or an object with path and options:
 {
   "plugins": [
     "simple-plugin.grit",
-    { "path": "scoped-plugin.grit", "includes": ["src/**/*.ts"] }
+    { "path": "scoped-plugin.grit", "includes": ["src/**\/*.ts"] }
   ]
 }
 ``` 
@@ -1309,7 +1323,7 @@ export interface OverrideLinterConfiguration {
 export interface PluginWithOptions {
 	/**
 	* A list of glob patterns. The plugin will only run on files matching
-these patterns. Use negated globs (e.g., `!**/*.test.ts`) for exclusions. 
+these patterns. Use negated globs (e.g., `!**\/*.test.ts`) for exclusions. 
 	 */
 	includes?: NormalizedGlob[];
 	/**
@@ -1493,7 +1507,7 @@ See https://biomejs.dev/linter/rules/use-iframe-title
 	 */
 	useIframeTitle?: UseIframeTitleConfiguration;
 	/**
-	* Enforce onClick is accompanied by at least one of the following: onKeyUp, onKeyDown, onKeyPress.
+	* Enforce elements with a click event handler to also have at least one keyboard event handler.
 See https://biomejs.dev/linter/rules/use-key-with-click-events 
 	 */
 	useKeyWithClickEvents?: UseKeyWithClickEventsConfiguration;
@@ -1508,7 +1522,7 @@ See https://biomejs.dev/linter/rules/use-media-caption
 	 */
 	useMediaCaption?: UseMediaCaptionConfiguration;
 	/**
-	* It detects the use of role attributes in JSX elements and suggests using semantic elements instead.
+	* Enforces using semantic DOM elements over the ARIA role property.
 See https://biomejs.dev/linter/rules/use-semantic-elements 
 	 */
 	useSemanticElements?: UseSemanticElementsConfiguration;
@@ -2741,6 +2755,11 @@ See https://biomejs.dev/linter/rules/use-qwik-loader-location
 See https://biomejs.dev/linter/rules/use-react-async-server-function 
 	 */
 	useReactAsyncServerFunction?: UseReactAsyncServerFunctionConfiguration;
+	/**
+	* Ensure that platform-specific React Native components are only imported in files named for that platform.
+See https://biomejs.dev/linter/rules/use-react-native-platform-components 
+	 */
+	useReactNativePlatformComponents?: UseReactNativePlatformComponentsConfiguration;
 	/**
 	* Enforce using a type parameter on Array#reduce instead of casting the initial value.
 See https://biomejs.dev/linter/rules/use-reduce-type-parameter 
@@ -4754,6 +4773,9 @@ export type UseQwikLoaderLocationConfiguration =
 export type UseReactAsyncServerFunctionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseReactAsyncServerFunctionOptions;
+export type UseReactNativePlatformComponentsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseReactNativePlatformComponentsOptions;
 export type UseReduceTypeParameterConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseReduceTypeParameterOptions;
@@ -6636,6 +6658,10 @@ export interface RuleWithUseReactAsyncServerFunctionOptions {
 	level: RulePlainConfiguration;
 	options?: UseReactAsyncServerFunctionOptions;
 }
+export interface RuleWithUseReactNativePlatformComponentsOptions {
+	level: RulePlainConfiguration;
+	options?: UseReactNativePlatformComponentsOptions;
+}
 export interface RuleWithUseReduceTypeParameterOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -7822,6 +7848,10 @@ export type NoStringCaseMismatchOptions = {};
 export type NoSwitchDeclarationsOptions = {};
 export interface NoUndeclaredDependenciesOptions {
 	/**
+	 * If set to `false`, then the rule will show an error when `bundleDependencies` are imported. Defaults to `true`.
+	 */
+	bundleDependencies?: DependencyAvailability;
+	/**
 	 * If set to `false`, then the rule will show an error when `devDependencies` are imported. Defaults to `true`.
 	 */
 	devDependencies?: DependencyAvailability;
@@ -8279,6 +8309,18 @@ Default: `false`
 export type UsePlaywrightValidDescribeCallbackOptions = {};
 export type UseQwikLoaderLocationOptions = {};
 export type UseReactAsyncServerFunctionOptions = {};
+export interface UseReactNativePlatformComponentsOptions {
+	/**
+	* A list of glob patterns to identify Android-specific files.
+Defaults to `["**\/*.android.{js,jsx,ts,tsx}"]`. 
+	 */
+	androidPathPatterns?: NormalizedGlob[];
+	/**
+	* A list of glob patterns to identify iOS-specific files.
+Defaults to `["**\/*.ios.{js,jsx,ts,tsx}"]`. 
+	 */
+	iosPathPatterns?: NormalizedGlob[];
+}
 export type UseReduceTypeParameterOptions = {};
 export type UseRegexpExecOptions = {};
 export type UseRegexpTestOptions = {};
@@ -8761,7 +8803,7 @@ export interface NoUnusedVariablesOptionsIgnore {
 	/**
 	 * An array of identifiers to ignore. Use "*" to ignore all identifiers.
 	 */
-	*?: string[];
+	"*"?: string[];
 	/**
 	 * An array of class names to ignore. Use "*" to ignore all identifiers.
 	 */
@@ -9343,6 +9385,7 @@ export type Category =
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useReactAsyncServerFunction"
+	| "lint/nursery/useReactNativePlatformComponents"
 	| "lint/nursery/useReduceTypeParameter"
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useRegexpTest"
@@ -9898,9 +9941,20 @@ Source-level embeds (`<script>`) use `true`; directives and text expressions use
 	| {
 			Svelte: {
 				/**
+				 * Whether this is the declaration of a function, usually declared in `#snippet`
+				 */
+				is_function_signature: boolean;
+				/**
 				 * Where the bindings are defined
 				 */
 				is_source: boolean;
+				/**
+	* `kind` models whether the Svelte file is a component document or a
+source module. That distinction controls whether downstream code
+extracts `<script>` content or treats the file as a standalone JS/TS
+module, while `is_source` still tracks where bindings come from. 
+	 */
+				kind: SvelteFileKind;
 			};
 	  };
 export type Language =
@@ -9948,6 +10002,7 @@ export type HtmlVariant =
 	| "Svelte";
 export type GritVariant = "Standard";
 export type MarkdownVariant = "Standard";
+export type SvelteFileKind = "Component" | "SourceModule";
 export type EmbeddingHtmlKind =
 	| "None"
 	| "Html"

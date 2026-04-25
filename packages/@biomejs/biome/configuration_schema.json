@@ -284,7 +284,7 @@
 					]
 				},
 				"useKeyWithClickEvents": {
-					"description": "Enforce onClick is accompanied by at least one of the following: onKeyUp, onKeyDown, onKeyPress.\nSee https://biomejs.dev/linter/rules/use-key-with-click-events",
+					"description": "Enforce elements with a click event handler to also have at least one keyboard event handler.\nSee https://biomejs.dev/linter/rules/use-key-with-click-events",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseKeyWithClickEventsConfiguration" },
 						{ "type": "null" }
@@ -305,7 +305,7 @@
 					]
 				},
 				"useSemanticElements": {
-					"description": "It detects the use of role attributes in JSX elements and suggests using semantic elements instead.\nSee https://biomejs.dev/linter/rules/use-semantic-elements",
+					"description": "Enforces using semantic DOM elements over the ARIA role property.\nSee https://biomejs.dev/linter/rules/use-semantic-elements",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseSemanticElementsConfiguration" },
 						{ "type": "null" }
@@ -1453,6 +1453,10 @@
 			"description": "Options that changes how the CSS formatter behaves",
 			"type": "object",
 			"properties": {
+				"delimiterSpacing": {
+					"description": "Whether to insert spaces inside delimiters (after the opening delimiter and before the\nclosing delimiter). Only applies when the content fits on a single line, and empty\ndelimiters are not affected. For CSS, affects parentheses (e.g., `rgb( 0, 0, 0 )`) and\nsquare brackets (e.g., `[ data-attr ]`). Defaults to false.",
+					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
+				},
 				"enabled": {
 					"description": "Control the formatter for CSS (and its super languages) files.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
@@ -2399,6 +2403,10 @@
 				"bracketSpacing": {
 					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
+				},
+				"delimiterSpacing": {
+					"description": "Whether to insert spaces inside delimiters (after the opening delimiter and before the\nclosing delimiter). Only applies when the content fits on a single line, and empty\nbrackets are not affected. For JSON, affects square brackets (e.g., `[ 1, 2, 3 ]`).\nDefaults to false.",
+					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
 				},
 				"enabled": {
 					"description": "Control the formatter for JSON (and its super languages) files.",
@@ -5292,6 +5300,13 @@
 		"NoUndeclaredDependenciesOptions": {
 			"type": "object",
 			"properties": {
+				"bundleDependencies": {
+					"description": "If set to `false`, then the rule will show an error when `bundleDependencies` are imported. Defaults to `true`.",
+					"anyOf": [
+						{ "$ref": "#/$defs/DependencyAvailability" },
+						{ "type": "null" }
+					]
+				},
 				"devDependencies": {
 					"description": "If set to `false`, then the rule will show an error when `devDependencies` are imported. Defaults to `true`.",
 					"anyOf": [
@@ -6921,6 +6936,13 @@
 					"description": "Require functions with the \"use server\" directive to be async.\nSee https://biomejs.dev/linter/rules/use-react-async-server-function",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseReactAsyncServerFunctionConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useReactNativePlatformComponents": {
+					"description": "Ensure that platform-specific React Native components are only imported in files named for that platform.\nSee https://biomejs.dev/linter/rules/use-react-native-platform-components",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseReactNativePlatformComponentsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -11817,6 +11839,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseReactNativePlatformComponentsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseReactNativePlatformComponentsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseReadonlyClassPropertiesOptions": {
 			"type": "object",
 			"properties": {
@@ -15374,6 +15405,28 @@
 		},
 		"UseReactFunctionComponentsOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseReactNativePlatformComponentsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseReactNativePlatformComponentsOptions" }
+			]
+		},
+		"UseReactNativePlatformComponentsOptions": {
+			"type": "object",
+			"properties": {
+				"androidPathPatterns": {
+					"description": "A list of glob patterns to identify Android-specific files.\nDefaults to `[\"**/*.android.{js,jsx,ts,tsx}\"]`.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/$defs/NormalizedGlob" }
+				},
+				"iosPathPatterns": {
+					"description": "A list of glob patterns to identify iOS-specific files.\nDefaults to `[\"**/*.ios.{js,jsx,ts,tsx}\"]`.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/$defs/NormalizedGlob" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseReadonlyClassPropertiesConfiguration": {

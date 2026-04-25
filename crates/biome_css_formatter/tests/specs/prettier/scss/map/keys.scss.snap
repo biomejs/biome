@@ -27,28 +27,17 @@ $map: (
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,15 +1,16 @@
- $map: (
-   "string": "hello world",
+@@ -3,8 +3,8 @@
    ("list"): "hello world",
--  ("key": "value"): "hello world",
+   ("key": "value"): "hello world",
    (
 -    "list",
 -    "long long long long long long long long long long long long long list",
-+    "key": "value",
-   ): "hello world",
-   (
 +      "list",
 +      "long long long long long long long long long long long long long list"
-+  ): "hello world",
-+  (
-     "key": "value",
--    "long long long long long long long long long long long long long map":
--      "value",
-+    "long long long long long long long long long long long long long map": "value",
    ): "hello world",
- );
- 
+   (
+     "key": "value",
 ```
 
 # Output
@@ -57,16 +46,15 @@ $map: (
 $map: (
   "string": "hello world",
   ("list"): "hello world",
-  (
-    "key": "value",
-  ): "hello world",
+  ("key": "value"): "hello world",
   (
       "list",
       "long long long long long long long long long long long long long list"
   ): "hello world",
   (
     "key": "value",
-    "long long long long long long long long long long long long long map": "value",
+    "long long long long long long long long long long long long long map":
+      "value",
   ): "hello world",
 );
 
@@ -74,9 +62,4 @@ $map: (
 $map: (
   ("my list"): "hello world",
 );
-```
-
-# Lines exceeding max width of 80 characters
-```
-   13:     "long long long long long long long long long long long long long map": "value",
 ```

@@ -50,9 +50,12 @@ const VOID_ELEMENTS: [&str; 16] = [
     "area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "menuitem",
     "meta", "param", "source", "track", "wbr",
 ];
-/// Returns true if the name of the element belong to a self-closing element
-fn is_void_dom_element(element_name: &str) -> bool {
-    VOID_ELEMENTS.contains(&element_name)
+
+fn void_dom_element_name(element_name: &str) -> Option<&'static str> {
+    VOID_ELEMENTS
+        .iter()
+        .copied()
+        .find(|candidate| *candidate == element_name)
 }
 
 pub enum NoVoidElementsWithChildrenCause {
@@ -89,15 +92,15 @@ pub enum NoVoidElementsWithChildrenCause {
 
 pub struct NoVoidElementsWithChildrenState {
     /// The name of the element that triggered the rule
-    element_name: String,
+    element_name: &'static str,
     /// It tracks the causes that triggers the rule
     cause: NoVoidElementsWithChildrenCause,
 }
 
 impl NoVoidElementsWithChildrenState {
-    fn new(element_name: impl Into<String>, cause: NoVoidElementsWithChildrenCause) -> Self {
+    fn new(element_name: &'static str, cause: NoVoidElementsWithChildrenCause) -> Self {
         Self {
-            element_name: element_name.into(),
+            element_name,
             cause,
         }
     }
@@ -196,7 +199,7 @@ impl Rule for NoVoidElementsWithChildren {
                 let name = opening_element.name().ok()?;
                 let name = name.as_jsx_name()?.value_token().ok()?;
                 let name = name.text_trimmed();
-                if is_void_dom_element(name) {
+                if let Some(element_name) = void_dom_element_name(name) {
                     let dangerous_prop =
                         opening_element.find_attribute_by_name("dangerouslySetInnerHTML");
                     let has_children = !element.children().is_empty();
@@ -208,7 +211,7 @@ impl Rule for NoVoidElementsWithChildren {
                             children_cause: has_children,
                         };
 
-                        return Some(NoVoidElementsWithChildrenState::new(name, cause));
+                        return Some(NoVoidElementsWithChildrenState::new(element_name, cause));
                     }
                 }
             }
@@ -216,7 +219,7 @@ impl Rule for NoVoidElementsWithChildren {
                 let name = element.name().ok()?;
                 let name = name.as_jsx_name()?.value_token().ok()?;
                 let name = name.text_trimmed();
-                if is_void_dom_element(name) {
+                if let Some(element_name) = void_dom_element_name(name) {
                     let dangerous_prop = element.find_attribute_by_name("dangerouslySetInnerHTML");
                     let children_prop = element.find_attribute_by_name("children");
                     if dangerous_prop.is_some() || children_prop.is_some() {
@@ -226,7 +229,7 @@ impl Rule for NoVoidElementsWithChildren {
                             children_cause: false,
                         };
 
-                        return Some(NoVoidElementsWithChildrenState::new(name, cause));
+                        return Some(NoVoidElementsWithChildrenState::new(element_name, cause));
                     }
                 }
             }
@@ -241,7 +244,7 @@ impl Rule for NoVoidElementsWithChildren {
 
                 let element_name = element_type.inner_string_text().ok()?;
                 let element_name = element_name.text();
-                if is_void_dom_element(element_name) {
+                if let Some(element_name) = void_dom_element_name(element_name) {
                     let has_children = react_create_element.children.is_some();
                     let dangerous_prop =
                         react_create_element.find_prop_by_name("dangerouslySetInnerHTML");

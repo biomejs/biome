@@ -106,7 +106,7 @@ pub enum PrettierDiff {
 
 pub fn get_prettier_diff(
     input_file: &Utf8Path,
-    relative_file_name: &'static str,
+    relative_file_name: &str,
     formatted: &str,
 ) -> PrettierDiff {
     let input_extension = input_file.extension();

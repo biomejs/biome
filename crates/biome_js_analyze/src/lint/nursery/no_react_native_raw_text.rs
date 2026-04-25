@@ -67,7 +67,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoReactNativeRawText {
-        version: "next",
+        version: "2.4.13",
         name: "noReactNativeRawText",
         language: "jsx",
         sources: &[RuleSource::EslintReactNative("no-raw-text").same()],

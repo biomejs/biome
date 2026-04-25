@@ -609,6 +609,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         document_services: _,
         working_directory,
         compute_actions,
+        snippet_services: _,
     } = params;
     let _ = debug_span!("Code actions HTML", range =? range, path =? path).entered();
     let tree = parse.tree();
