@@ -163,6 +163,7 @@ name = "biome_aria"
 version = "0.5.7"
 dependencies = [
  "biome_aria_metadata",
+ "biome_string_case",
 ]
 
 [[package]]

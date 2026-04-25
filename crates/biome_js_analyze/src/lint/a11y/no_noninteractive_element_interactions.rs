@@ -1,5 +1,5 @@
 use crate::{
-    a11y::{is_content_editable, is_hidden_from_screen_reader},
+    a11y::{has_event_handler, is_content_editable, is_hidden_from_screen_reader},
     services::aria::Aria,
 };
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
@@ -98,7 +98,7 @@ impl Rule for NoNoninteractiveElementInteractions {
         let role = aria_roles.get_role_by_element_name(element);
         let has_interactive_role = role.is_some_and(|role| role.is_interactive());
 
-        if !has_handler_props(element)
+        if !has_event_handler(EVENT_HANDLER_TYPES, element)
             || is_content_editable(element)
             || aria_roles.is_presentation_role(element)
             || is_hidden_from_screen_reader(element)
@@ -122,48 +122,20 @@ impl Rule for NoNoninteractiveElementInteractions {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Non-interactive element should not have event handler."
+                    "Unexpected event handler on non-interactive element."
                 },
             )
             .note(markup! {
-                "Consider replace semantically interactive element like "<Emphasis>"<button/>"</Emphasis>" or "<Emphasis>"<a href/>"</Emphasis>"."
+                "Non-interactive element should not have event handler. Consider replace semantically interactive element like "<Emphasis>"<button/>"</Emphasis>" or "<Emphasis>"<a href/>"</Emphasis>"."
             })
         )
     }
 }
 
-/// Ref: https://github.com/jsx-eslint/jsx-ast-utils/blob/v3.3.5/src/eventHandlers.js
-const INTERACTIVE_HANDLERS: &[&str] = &[
-    "onClick",
-    "onContextMenu",
-    "onDblClick",
-    "onDoubleClick",
-    "onDrag",
-    "onDragEnd",
-    "onDragEnter",
-    "onDragExit",
-    "onDragLeave",
-    "onDragOver",
-    "onDragStart",
-    "onDrop",
-    "onMouseDown",
-    "onMouseEnter",
-    "onMouseLeave",
-    "onMouseMove",
-    "onMouseOut",
-    "onMouseOver",
-    "onKeyDown",
-    "onKeyPress",
-    "onKeyUp",
-    "onFocus",
-    "onBlur",
-    "onLoad",
-    "onError",
-];
+// Only check the focus, image, keyboard and mouse event handler types.
+const EVENT_HANDLER_TYPES: &[&str] = &["focus", "image", "keyboard", "mouse"];
 
-/// Check if the element contains event handler
-fn has_handler_props(element: &AnyJsxElement) -> bool {
-    INTERACTIVE_HANDLERS
-        .iter()
-        .any(|handler| element.find_attribute_by_name(handler).is_some())
+#[test]
+fn test_order() {
+    assert!(EVENT_HANDLER_TYPES.is_sorted());
 }

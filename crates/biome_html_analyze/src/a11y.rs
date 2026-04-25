@@ -7,8 +7,10 @@
 //! 2. **Element helpers** (public): Higher-level checks on HTML elements
 //! 3. **Type-specific variants** (public): Optimized versions that avoid cloning
 
-use biome_html_syntax::HtmlAttribute;
+use biome_aria::event_handlers::matches_event_handler;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_html_syntax::{AnyHtmlAttribute, AnyVueDirective, HtmlAttribute};
+use biome_rowan::AstNodeList;
 
 // ============================================================================
 // Core attribute value helpers (private)
@@ -192,6 +194,47 @@ pub(crate) fn is_content_editable(element: &AnyHtmlTagElement) -> bool {
     element
         .find_attribute_by_name("contenteditable")
         .is_some_and(|attribute| is_strict_true_value(&attribute))
+}
+
+/// Check if the element contains event handler
+pub fn has_event_handler(handler_types: &[&str], element: &AnyHtmlTagElement) -> bool {
+    element.attributes().iter().any(|attribute| {
+        match attribute {
+            AnyHtmlAttribute::HtmlAttribute(html_attribute) => html_attribute
+                .name()
+                .ok()
+                .and_then(|name| name.value_token().ok())
+                .is_some_and(|value_token| {
+                    matches_event_handler(handler_types, value_token.text_trimmed())
+                }),
+
+            AnyHtmlAttribute::AnyVueDirective(vue) => match vue {
+                // @name="..."
+                AnyVueDirective::VueVOnShorthandDirective(d) => d
+                    .arg()
+                    .ok()
+                    .and_then(|arg| arg.as_vue_static_argument().cloned())
+                    .and_then(|s| s.name_token().ok())
+                    .is_some_and(|t| matches_event_handler(handler_types, t.text_trimmed())),
+
+                // v-on:name="..."
+                AnyVueDirective::VueDirective(d) => {
+                    let is_event_handling = d
+                        .name_token()
+                        .is_ok_and(|t| t.text_trimmed().eq_ignore_ascii_case("v-on"));
+                    is_event_handling
+                        && d.arg()
+                            .and_then(|arg| arg.arg().ok())
+                            .and_then(|arg| arg.as_vue_static_argument().cloned())
+                            .and_then(|s| s.name_token().ok())
+                            .is_some_and(|t| matches_event_handler(handler_types, t.text_trimmed()))
+                }
+
+                _ => false,
+            },
+            _ => false,
+        }
+    })
 }
 
 #[cfg(test)]
