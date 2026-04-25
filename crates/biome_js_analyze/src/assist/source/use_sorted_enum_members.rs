@@ -98,11 +98,15 @@ impl Rule for UseSortedEnumMembers {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+        let node = ctx.query();
+        let ident = node.id().ok()?;
+        let binding = ident.as_js_identifier_binding()?;
+        let name = binding.name_token().ok()?;
         Some(RuleDiagnostic::new(
             rule_category!(),
-            ctx.query().range(),
+            node.range(),
             markup! {
-                "Enum is not sorted."
+                "The members of the enum "<Emphasis>{name.text_trimmed()}</Emphasis>" are not sorted."
             },
         ))
     }
@@ -116,7 +120,7 @@ impl Rule for UseSortedEnumMembers {
         Some(RuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup! { "Sort enum." },
+            markup! { "Sort the enum members." },
             mutation,
         ))
     }

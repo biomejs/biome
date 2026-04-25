@@ -90,11 +90,22 @@ impl Rule for UseSortedEnumMembers {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+        let node = ctx.query();
+        let name = match node {
+            AnyUseSortedEnumMembersQuery::GraphqlEnumTypeDefinition(type_def) => {
+                let name = type_def.name().ok()?;
+                name.value_token().ok()
+            }
+            AnyUseSortedEnumMembersQuery::GraphqlEnumTypeExtension(type_ext) => {
+                let name = type_ext.name().ok()?;
+                name.value_token().ok()
+            }
+        }?;
         Some(RuleDiagnostic::new(
             rule_category!(),
             ctx.query().range(),
             markup! {
-                "Enum is not sorted."
+                "The members of the enum "<Emphasis>{name.text_trimmed()}</Emphasis>" are not sorted."
             },
         ))
     }
@@ -116,7 +127,7 @@ impl Rule for UseSortedEnumMembers {
         Some(RuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup! { "Sort enum." },
+            markup! { "Sort the enum members." },
             mutation,
         ))
     }

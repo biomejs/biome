@@ -29,7 +29,7 @@ enum Test {
 ```
 invalid.graphql:2:1 assist/source/useSortedEnumMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Enum is not sorted.
+  i The members of the enum Role are not sorted.
   
     1 │ # should generate diagnostics
   > 2 │ enum Role {
@@ -43,7 +43,7 @@ invalid.graphql:2:1 assist/source/useSortedEnumMembers  FIXABLE  ━━━━━
     8 │ 
     9 │ enum Test {
   
-  i Safe fix: Sort enum.
+  i Safe fix: Sort the enum members.
   
      1  1 │   # should generate diagnostics
      2  2 │   enum Role {
@@ -64,7 +64,7 @@ invalid.graphql:2:1 assist/source/useSortedEnumMembers  FIXABLE  ━━━━━
 ```
 invalid.graphql:9:1 assist/source/useSortedEnumMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Enum is not sorted.
+  i The members of the enum Test are not sorted.
   
      7 │ }
      8 │ 
@@ -78,7 +78,7 @@ invalid.graphql:9:1 assist/source/useSortedEnumMembers  FIXABLE  ━━━━━
        │ ^
     19 │ 
   
-  i Safe fix: Sort enum.
+  i Safe fix: Sort the enum members.
   
      8  8 │   
      9  9 │   enum Test {

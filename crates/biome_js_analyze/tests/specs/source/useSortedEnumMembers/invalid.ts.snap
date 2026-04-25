@@ -29,7 +29,7 @@ enum InvalidStatus2 {
 ```
 invalid.ts:2:1 assist/source/useSortedEnumMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Enum is not sorted.
+  i The members of the enum InvalidStatus1 are not sorted.
   
      1 │ /* should generate diagnostics */
    > 2 │ enum InvalidStatus1 {
@@ -43,7 +43,7 @@ invalid.ts:2:1 assist/source/useSortedEnumMembers  FIXABLE  ━━━━━━�
     13 │ 
     14 │ enum InvalidStatus2 {
   
-  i Safe fix: Sort enum.
+  i Safe fix: Sort the enum members.
   
      1  1 │   /* should generate diagnostics */
      2  2 │   enum InvalidStatus1 {
@@ -73,7 +73,7 @@ invalid.ts:2:1 assist/source/useSortedEnumMembers  FIXABLE  ━━━━━━�
 ```
 invalid.ts:14:1 assist/source/useSortedEnumMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Enum is not sorted.
+  i The members of the enum InvalidStatus2 are not sorted.
   
     12 │ }
     13 │ 
@@ -86,7 +86,7 @@ invalid.ts:14:1 assist/source/useSortedEnumMembers  FIXABLE  ━━━━━━�
        │ ^
     19 │ 
   
-  i Safe fix: Sort enum.
+  i Safe fix: Sort the enum members.
   
     14 14 │   enum InvalidStatus2 {
     15 15 │     Status1 = 'First',
