@@ -200,8 +200,28 @@ impl Rule for NoUselessEscapeInRegex {
                                     inner_class_count -= 1;
                                 } else if !has_v_flag
                                     && index >= 2 // handle edge case `[]`
-                                    && bytes[index - 2] == b'\\'
                                     && bytes[index - 1] == b'-'
+                                    && bytes[index - 2] == b'\\'
+                                    // The `\` at `index - 2` is only escaping
+                                    // the `-` if it isn't itself the second
+                                    // half of an escape pair. Count how many
+                                    // backslashes precede the `-`: an odd
+                                    // count means the last one is unescaped
+                                    // and is genuinely escaping the dash; an
+                                    // even count means they pair up and the
+                                    // dash is on its own.
+                                    && {
+                                        let mut backslash_count = 0;
+                                        let mut i = index - 1;
+                                        while i > 0 {
+                                            i -= 1;
+                                            if bytes[i] != b'\\' {
+                                                break;
+                                            }
+                                            backslash_count += 1;
+                                        }
+                                        backslash_count % 2 == 1
+                                    }
                                 {
                                     return Some(State {
                                         backslash_index: (index - 2) as u16,
