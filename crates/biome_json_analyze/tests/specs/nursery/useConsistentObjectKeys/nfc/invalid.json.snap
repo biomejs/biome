@@ -13,7 +13,7 @@ expression: invalid.json
 
 # Diagnostics
 ```
-invalid.json:2:3 lint/nursery/useConsistentObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:2:3 lint/nursery/useConsistentObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unnormalized key found.
   
@@ -39,7 +39,7 @@ invalid.json:2:3 lint/nursery/useConsistentObjectKeys  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.json:3:3 lint/nursery/useConsistentObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:3:3 lint/nursery/useConsistentObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unnormalized key found.
   
