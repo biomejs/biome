@@ -455,6 +455,7 @@ pub mod use_single_var_declarator;
 pub mod use_solid_for_component;
 pub mod use_sorted_attributes;
 pub mod use_sorted_classes;
+pub mod use_sorted_enum_members;
 pub mod use_sorted_interface_members;
 pub mod use_sorted_keys;
 pub mod use_sorted_package_json;
