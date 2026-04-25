@@ -5322,21 +5322,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"NoUnnormalizedObjectKeysConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithNoUnnormalizedObjectKeysOptions" }
-			]
-		},
-		"NoUnnormalizedObjectKeysOptions": {
-			"type": "object",
-			"properties": {
-				"form": {
-					"anyOf": [{ "$ref": "#/$defs/NormalizationForm" }, { "type": "null" }]
-				}
-			},
-			"additionalProperties": false
-		},
 		"NoUnreachableConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6336,13 +6321,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noUnnormalizedObjectKeys": {
-					"description": "Disallow JSON keys with inconsistent Unicode representation.\nSee https://biomejs.dev/linter/rules/no-unnormalized-object-keys",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoUnnormalizedObjectKeysConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noUnsafePlusOperands": {
 					"description": "Disallow + operations with operands that are known to be unsafe.\nSee https://biomejs.dev/linter/rules/no-unsafe-plus-operands",
 					"anyOf": [
@@ -6449,6 +6427,13 @@
 					"description": "Enforce consistent use of either method signatures or function properties within interfaces and type aliases.\nSee https://biomejs.dev/linter/rules/use-consistent-method-signatures",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseConsistentMethodSignaturesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentObjectKeys": {
+					"description": "Disallow JSON keys with inconsistent Unicode representation.\nSee https://biomejs.dev/linter/rules/use-consistent-object-keys",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentObjectKeysConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9603,16 +9588,6 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
-		"RuleWithNoUnnormalizedObjectKeysOptions": {
-			"type": "object",
-			"properties": {
-				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/NoUnnormalizedObjectKeysOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
 		"RuleWithNoUnreachableOptions": {
 			"type": "object",
 			"properties": {
@@ -10436,6 +10411,16 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseConsistentObjectDefinitionsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseConsistentObjectKeysOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentObjectKeysOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -13655,6 +13640,21 @@
 						{ "$ref": "#/$defs/ObjectPropertySyntax" },
 						{ "type": "null" }
 					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"UseConsistentObjectKeysConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentObjectKeysOptions" }
+			]
+		},
+		"UseConsistentObjectKeysOptions": {
+			"type": "object",
+			"properties": {
+				"form": {
+					"anyOf": [{ "$ref": "#/$defs/NormalizationForm" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false

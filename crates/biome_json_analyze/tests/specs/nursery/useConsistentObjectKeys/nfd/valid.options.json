@@ -3,10 +3,10 @@
   "linter": {
     "rules": {
       "nursery": {
-        "noUnnormalizedObjectKeys": {
+        "useConsistentObjectKeys": {
           "level": "error",
           "options": {
-            "form": "NFKD"
+            "form": "NFD"
           }
         }
       }

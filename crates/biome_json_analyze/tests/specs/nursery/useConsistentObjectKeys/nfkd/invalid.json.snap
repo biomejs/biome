@@ -5,22 +5,22 @@ expression: invalid.json
 # Input
 ```json
 {
-  "\uFF21": "fullwidth latin capital A",
-  "\u2460": "circled digit one"
+  "\uFB00": "latin ligature ff",
+  "\u00BD": "vulgar fraction one half"
 }
 
 ```
 
 # Diagnostics
 ```
-invalid.json:2:3 lint/nursery/noUnnormalizedObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:2:3 lint/nursery/useConsistentObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unnormalized key found.
   
     1 │ {
-  > 2 │   "\uFF21": "fullwidth latin capital A",
+  > 2 │   "\uFB00": "latin ligature ff",
       │   ^^^^^^^^
-    3 │   "\u2460": "circled digit one"
+    3 │   "\u00BD": "vulgar fraction one half"
     4 │ }
   
   i Unicode keys should be normalized to ensure consistent representation and reliable key comparison. Replace the object key with normalized Unicode.
@@ -30,22 +30,22 @@ invalid.json:2:3 lint/nursery/noUnnormalizedObjectKeys  FIXABLE  ━━━━━
   i Unsafe fix: Replace with normalized value.
   
     1 1 │   {
-    2   │ - ··"\uFF21":·"fullwidth·latin·capital·A",
-      2 │ + ··"A":·"fullwidth·latin·capital·A",
-    3 3 │     "\u2460": "circled digit one"
+    2   │ - ··"\uFB00":·"latin·ligature·ff",
+      2 │ + ··"ff":·"latin·ligature·ff",
+    3 3 │     "\u00BD": "vulgar fraction one half"
     4 4 │   }
   
 
 ```
 
 ```
-invalid.json:3:3 lint/nursery/noUnnormalizedObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:3:3 lint/nursery/useConsistentObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unnormalized key found.
   
     1 │ {
-    2 │   "\uFF21": "fullwidth latin capital A",
-  > 3 │   "\u2460": "circled digit one"
+    2 │   "\uFB00": "latin ligature ff",
+  > 3 │   "\u00BD": "vulgar fraction one half"
       │   ^^^^^^^^
     4 │ }
     5 │ 
@@ -57,9 +57,9 @@ invalid.json:3:3 lint/nursery/noUnnormalizedObjectKeys  FIXABLE  ━━━━━
   i Unsafe fix: Replace with normalized value.
   
     1 1 │   {
-    2 2 │     "\uFF21": "fullwidth latin capital A",
-    3   │ - ··"\u2460":·"circled·digit·one"
-      3 │ + ··"1":·"circled·digit·one"
+    2 2 │     "\uFB00": "latin ligature ff",
+    3   │ - ··"\u00BD":·"vulgar·fraction·one·half"
+      3 │ + ··"1⁄2":·"vulgar·fraction·one·half"
     4 4 │   }
     5 5 │   
   

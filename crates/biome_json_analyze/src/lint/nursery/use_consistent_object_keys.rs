@@ -7,53 +7,58 @@ use biome_diagnostics::Severity;
 use biome_json_factory::make::{json_member_name, json_string_literal};
 use biome_json_syntax::JsonMemberName;
 use biome_rowan::{AstNode, BatchMutationExt};
-use biome_rule_options::no_unnormalized_object_keys::{
-    NoUnnormalizedObjectKeysOptions, NormalizationForm,
+use biome_rule_options::use_consistent_object_keys::{
+    NormalizationForm, UseConsistentObjectKeysOptions,
 };
 use unicode_normalization::{UnicodeNormalization, is_nfc, is_nfd, is_nfkc, is_nfkd};
 
 use crate::JsonRuleAction;
 
 declare_lint_rule! {
-    /// Disallow JSON keys with inconsistent Unicode representation.
+    /// Enforce JSON keys with consistent Unicode representation.
     ///
-    /// Unicode characters can sometimes have multiple representations that look identical but are technically different character sequences.
-    /// For example, the character "é" can be represented as a single code point (U+00E9) or as an "e" followed by a combining accent (U+0065 + U+0301).
-    /// This can lead to confusion, comparison issues, and unexpected behavior when working with JSON data.
-    /// Using normalized Unicode ensures consistent representation of text, which is important for key comparison, sorting, and searching operations.
-    /// When keys are properly normalized, operations like key lookups and equality checks will work as expected across different systems and platforms.
+    /// Unicode characters can have different internal representations that look identical.
+    /// For example, "é" can be stored as one code point (U+00E9) or as "e" plus a combining accent (U+0065 + U+0301).
+    /// Unicode normalization converts text to a standard form (such as NFC) so visually identical keys share the same representation.
+    /// This avoids confusing behavior in JSON objects where equality checks and key lookups should treat matching text consistently.
+    ///
+    /// More on Unicode normalization can be found [here](https://www.unicode.org/reports/tr15/).
     ///
     /// ## Examples
     ///
-    /// ### Invalid
+    /// `NFC`: Canonical Decomposition followed by Canonical Composition
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "form": "NFD"
+    ///     }
+    /// }
+    /// ```
     ///
     /// ```json,expect_diagnostic
     /// {
-    ///   "caf\u0065\u0301": "espresso"
+    ///     "caf\u0065\u0301": "espresso"
     /// }
     /// ```
     ///
-    /// ### Valid
+    /// `NFD`: Canonical Decomposition
     ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///   "café": "espresso"
+    ///     "options": {
+    ///         "form": "NFD"
+    ///     }
     /// }
     /// ```
     ///
-    /// ## Options
+    /// ```json,expect_diagnostic,use_options
+    /// {
+    ///     "\u00C5": "precomposed A-ring"
+    /// }
+    /// ```
     ///
-    /// ### `form`
-    ///
-    /// This option specifies which Unicode normalization form to use when checking keys
-    ///
-    /// Each normalization form has specific characteristics:
-    /// - `NFC`: Canonical Decomposition followed by Canonical Composition (default)
-    /// - `NFD`: Canonical Decomposition
-    /// - `NFKC`: Compatibility Decomposition followed by Canonical Composition
-    /// - `NFKD`: Compatibility Decomposition
-    ///
-    /// Default: `NFC`
+    /// `NFKC`: Compatibility Decomposition followed by Canonical Composition
     ///
     /// ```json,options
     /// {
@@ -63,9 +68,31 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    pub NoUnnormalizedObjectKeys {
+    /// ```json,expect_diagnostic,use_options
+    /// {
+    ///     "\u00BD": "circled digit one"
+    /// }
+    /// ```
+    ///
+    /// `NFKD`: Compatibility Decomposition
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "form": "NFKD"
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```json,expect_diagnostic,use_options
+    /// {
+    ///     "\u00BD": "vulgar fraction one half"
+    /// }
+    /// ```
+    ///
+    pub UseConsistentObjectKeys {
         version: "next",
-        name: "noUnnormalizedObjectKeys",
+        name: "useConsistentObjectKeys",
         language: "json",
         recommended: true,
         severity: Severity::Warning,
@@ -74,11 +101,11 @@ declare_lint_rule! {
     }
 }
 
-impl Rule for NoUnnormalizedObjectKeys {
+impl Rule for UseConsistentObjectKeys {
     type Query = Ast<JsonMemberName>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = NoUnnormalizedObjectKeysOptions;
+    type Options = UseConsistentObjectKeysOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

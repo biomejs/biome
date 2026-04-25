@@ -2327,11 +2327,6 @@ See https://biomejs.dev/linter/rules/no-unnecessary-conditions
 	 */
 	noUnnecessaryConditions?: NoUnnecessaryConditionsConfiguration;
 	/**
-	* Disallow JSON keys with inconsistent Unicode representation.
-See https://biomejs.dev/linter/rules/no-unnormalized-object-keys 
-	 */
-	noUnnormalizedObjectKeys?: NoUnnormalizedObjectKeysConfiguration;
-	/**
 	* Disallow + operations with operands that are known to be unsafe.
 See https://biomejs.dev/linter/rules/no-unsafe-plus-operands 
 	 */
@@ -2410,6 +2405,11 @@ See https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions
 See https://biomejs.dev/linter/rules/use-consistent-method-signatures 
 	 */
 	useConsistentMethodSignatures?: UseConsistentMethodSignaturesConfiguration;
+	/**
+	* Disallow JSON keys with inconsistent Unicode representation.
+See https://biomejs.dev/linter/rules/use-consistent-object-keys 
+	 */
+	useConsistentObjectKeys?: UseConsistentObjectKeysConfiguration;
 	/**
 	* Require destructuring from arrays and/or objects.
 See https://biomejs.dev/linter/rules/use-destructuring 
@@ -4297,9 +4297,6 @@ export type NoUnknownAttributeConfiguration =
 export type NoUnnecessaryConditionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnnecessaryConditionsOptions;
-export type NoUnnormalizedObjectKeysConfiguration =
-	| RulePlainConfiguration
-	| RuleWithNoUnnormalizedObjectKeysOptions;
 export type NoUnsafePlusOperandsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnsafePlusOperandsOptions;
@@ -4345,6 +4342,9 @@ export type UseConsistentGraphqlDescriptionsConfiguration =
 export type UseConsistentMethodSignaturesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentMethodSignaturesOptions;
+export type UseConsistentObjectKeysConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentObjectKeysOptions;
 export type UseDestructuringConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDestructuringOptions;
@@ -6029,11 +6029,6 @@ export interface RuleWithNoUnnecessaryConditionsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnnecessaryConditionsOptions;
 }
-export interface RuleWithNoUnnormalizedObjectKeysOptions {
-	fix?: FixKind;
-	level: RulePlainConfiguration;
-	options?: NoUnnormalizedObjectKeysOptions;
-}
 export interface RuleWithNoUnsafePlusOperandsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnsafePlusOperandsOptions;
@@ -6097,6 +6092,11 @@ export interface RuleWithUseConsistentMethodSignaturesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseConsistentMethodSignaturesOptions;
+}
+export interface RuleWithUseConsistentObjectKeysOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseConsistentObjectKeysOptions;
 }
 export interface RuleWithUseDestructuringOptions {
 	level: RulePlainConfiguration;
@@ -7571,9 +7571,6 @@ export interface NoUnknownAttributeOptions {
 	ignore?: string[];
 }
 export type NoUnnecessaryConditionsOptions = {};
-export interface NoUnnormalizedObjectKeysOptions {
-	form?: NormalizationForm;
-}
 export type NoUnsafePlusOperandsOptions = {};
 export interface NoUntrustedLicensesOptions {
 	/**
@@ -7668,6 +7665,9 @@ export interface UseConsistentMethodSignaturesOptions {
 Default: "property" 
 	 */
 	style?: MethodSignatureStyle;
+}
+export interface UseConsistentObjectKeysOptions {
+	form?: NormalizationForm;
 }
 export type UseDestructuringOptions = {};
 /**
@@ -8212,7 +8212,6 @@ while for `useState()` it would be `[1]`.
 	stableResult?: StableHookResult;
 }
 export type Regex = string;
-export type NormalizationForm = "NFC" | "NFD" | "NFKC" | "NFKD";
 /**
 	* The Baseline availability level to target.
 
@@ -8227,6 +8226,7 @@ export type AvailabilityTarget = AvailabilityNamed | number;
  */
 export type UseConsistentGraphqlDescriptionsStyle = "block" | "inline";
 export type MethodSignatureStyle = "property" | "method";
+export type NormalizationForm = "NFC" | "NFD" | "NFKC" | "NFKD";
 export type CheckInputType = "off" | "loose" | "strict";
 export type DeclarationStyle = "type" | "runtime";
 export type VueDirectiveStyle = "shorthand" | "longhand";
@@ -8672,7 +8672,7 @@ export type Category =
 	| "lint/nursery/noUndeclaredEnvVars"
 	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
-	| "lint/nursery/noUnnormalizedObjectKeys"
+	| "lint/nursery/useConsistentObjectKeys"
 	| "lint/nursery/noUnsafePlusOperands"
 	| "lint/nursery/noUntrustedLicenses"
 	| "lint/nursery/noUnwantedPolyfillio"
