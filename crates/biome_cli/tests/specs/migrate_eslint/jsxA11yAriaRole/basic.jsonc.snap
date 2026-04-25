@@ -1,0 +1,43 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: basic.jsonc
+---
+## ESLint Config
+
+```json
+{
+	"rules": {
+		"jsx-a11y/aria-role": [
+			"error",
+			{ "allowedInvalidRoles": ["text"], "ignoreNonDOM": true }
+		]
+	}
+}
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"recommended": false,
+			"a11y": {
+				"useValidAriaRole": {
+					"level": "error",
+					"options": { "allowInvalidRoles": ["text"], "ignoreNonDom": true }
+				}
+			}
+		}
+	}
+}
+
+```

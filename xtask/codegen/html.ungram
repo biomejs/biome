@@ -602,6 +602,18 @@ SvelteDirectiveValue =
 AnySvelteBindingProperty =
 	SvelteName
 	| SvelteLiteral
+	| SvelteMemberProperty
+
+AnySvelteMemberObject =
+	SvelteName
+	| SvelteMemberProperty
+
+// <div in:renderer.in|global >
+//       ^^^^^^^^^^^
+SvelteMemberProperty =
+	object: AnySvelteMemberObject
+	'.'
+	member: SvelteName
 
 SvelteDirectiveModifierList = SvelteDirectiveModifier*
 

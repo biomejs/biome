@@ -69,7 +69,7 @@ CssRoot {
                     members: ScssModuleMemberList [
                         missing element,
                         COMMA@57..59 "," [] [Whitespace(" ")],
-                        ScssIdentifier {
+                        ScssVariable {
                             dollar_token: DOLLAR@59..60 "$" [] [],
                             name: CssIdentifier {
                                 value_token: IDENT@60..65 "color" [] [],
@@ -156,7 +156,7 @@ CssRoot {
                         l_paren_token: L_PAREN@180..181 "(" [] [],
                         items: ScssModuleConfigurationItemList [
                             ScssModuleConfiguration {
-                                name: ScssIdentifier {
+                                name: ScssVariable {
                                     dollar_token: DOLLAR@181..182 "$" [] [],
                                     name: CssIdentifier {
                                         value_token: IDENT@182..189 "spacing" [] [],
@@ -217,7 +217,7 @@ CssRoot {
           1: SCSS_MODULE_MEMBER_LIST@57..65
             0: (empty)
             1: COMMA@57..59 "," [] [Whitespace(" ")]
-            2: SCSS_IDENTIFIER@59..65
+            2: SCSS_VARIABLE@59..65
               0: DOLLAR@59..60 "$" [] []
               1: CSS_IDENTIFIER@60..65
                 0: IDENT@60..65 "color" [] []
@@ -278,7 +278,7 @@ CssRoot {
             0: L_PAREN@180..181 "(" [] []
             1: SCSS_MODULE_CONFIGURATION_ITEM_LIST@181..190
               0: SCSS_MODULE_CONFIGURATION@181..190
-                0: SCSS_IDENTIFIER@181..189
+                0: SCSS_VARIABLE@181..189
                   0: DOLLAR@181..182 "$" [] []
                   1: CSS_IDENTIFIER@182..189
                     0: IDENT@182..189 "spacing" [] []

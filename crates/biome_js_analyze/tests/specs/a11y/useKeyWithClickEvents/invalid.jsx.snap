@@ -4,6 +4,7 @@ expression: invalid.jsx
 ---
 # Input
 ```jsx
+/* should generate diagnostics */
 <>
     <div onClick={() => {}} />
     <div  {...spread} onClick={() => {}} />
@@ -24,32 +25,16 @@ expression: invalid.jsx
 
 # Diagnostics
 ```
-invalid.jsx:2:5 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
-  
-    1 │ <>
-  > 2 │     <div onClick={() => {}} />
-      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │     <div  {...spread} onClick={() => {}} />
-    4 │     <div  {...spread} onClick={() => {}}>foo</div>
-  
-  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
-  
-
-```
-
-```
 invalid.jsx:3:5 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
   
-    1 │ <>
-    2 │     <div onClick={() => {}} />
-  > 3 │     <div  {...spread} onClick={() => {}} />
-      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │     <div  {...spread} onClick={() => {}}>foo</div>
-    5 │     <div onClick={() => void 0} role={undefined} />
+    1 │ /* should generate diagnostics */
+    2 │ <>
+  > 3 │     <div onClick={() => {}} />
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │     <div  {...spread} onClick={() => {}} />
+    5 │     <div  {...spread} onClick={() => {}}>foo</div>
   
   i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
   
@@ -61,12 +46,12 @@ invalid.jsx:4:5 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━�
 
   × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
   
-    2 │     <div onClick={() => {}} />
-    3 │     <div  {...spread} onClick={() => {}} />
-  > 4 │     <div  {...spread} onClick={() => {}}>foo</div>
-      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │     <div onClick={() => void 0} role={undefined} />
-    6 │     <div onClick={() => void 0} {...props} />
+    2 │ <>
+    3 │     <div onClick={() => {}} />
+  > 4 │     <div  {...spread} onClick={() => {}} />
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │     <div  {...spread} onClick={() => {}}>foo</div>
+    6 │     <div onClick={() => void 0} role={undefined} />
   
   i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
   
@@ -78,12 +63,12 @@ invalid.jsx:5:5 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━�
 
   × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
   
-    3 │     <div  {...spread} onClick={() => {}} />
-    4 │     <div  {...spread} onClick={() => {}}>foo</div>
-  > 5 │     <div onClick={() => void 0} role={undefined} />
-      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    6 │     <div onClick={() => void 0} {...props} />
-    7 │     <section onClick={() => void 0} />
+    3 │     <div onClick={() => {}} />
+    4 │     <div  {...spread} onClick={() => {}} />
+  > 5 │     <div  {...spread} onClick={() => {}}>foo</div>
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │     <div onClick={() => void 0} role={undefined} />
+    7 │     <div onClick={() => void 0} {...props} />
   
   i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
   
@@ -95,12 +80,12 @@ invalid.jsx:6:5 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━�
 
   × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
   
-    4 │     <div  {...spread} onClick={() => {}}>foo</div>
-    5 │     <div onClick={() => void 0} role={undefined} />
-  > 6 │     <div onClick={() => void 0} {...props} />
-      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    7 │     <section onClick={() => void 0} />
-    8 │     <main onClick={() => void 0} />
+    4 │     <div  {...spread} onClick={() => {}} />
+    5 │     <div  {...spread} onClick={() => {}}>foo</div>
+  > 6 │     <div onClick={() => void 0} role={undefined} />
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │     <div onClick={() => void 0} {...props} />
+    8 │     <section onClick={() => void 0} />
   
   i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
   
@@ -112,12 +97,12 @@ invalid.jsx:7:5 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━�
 
   × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
   
-    5 │     <div onClick={() => void 0} role={undefined} />
-    6 │     <div onClick={() => void 0} {...props} />
-  > 7 │     <section onClick={() => void 0} />
-      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    8 │     <main onClick={() => void 0} />
-    9 │     <article onClick={() => void 0} />
+    5 │     <div  {...spread} onClick={() => {}}>foo</div>
+    6 │     <div onClick={() => void 0} role={undefined} />
+  > 7 │     <div onClick={() => void 0} {...props} />
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │     <section onClick={() => void 0} />
+    9 │     <main onClick={() => void 0} />
   
   i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
   
@@ -129,12 +114,12 @@ invalid.jsx:8:5 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━�
 
   × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
   
-     6 │     <div onClick={() => void 0} {...props} />
-     7 │     <section onClick={() => void 0} />
-   > 8 │     <main onClick={() => void 0} />
-       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-     9 │     <article onClick={() => void 0} />
-    10 │     <header onClick={() => void 0} />
+     6 │     <div onClick={() => void 0} role={undefined} />
+     7 │     <div onClick={() => void 0} {...props} />
+   > 8 │     <section onClick={() => void 0} />
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │     <main onClick={() => void 0} />
+    10 │     <article onClick={() => void 0} />
   
   i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
   
@@ -146,12 +131,12 @@ invalid.jsx:9:5 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━�
 
   × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
   
-     7 │     <section onClick={() => void 0} />
-     8 │     <main onClick={() => void 0} />
-   > 9 │     <article onClick={() => void 0} />
-       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    10 │     <header onClick={() => void 0} />
-    11 │     <footer onClick={() => void 0} />
+     7 │     <div onClick={() => void 0} {...props} />
+     8 │     <section onClick={() => void 0} />
+   > 9 │     <main onClick={() => void 0} />
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │     <article onClick={() => void 0} />
+    11 │     <header onClick={() => void 0} />
   
   i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
   
@@ -159,16 +144,16 @@ invalid.jsx:9:5 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:11:5 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:10:5 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
   
-     9 │     <article onClick={() => void 0} />
-    10 │     <header onClick={() => void 0} />
-  > 11 │     <footer onClick={() => void 0} />
-       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    12 │     <div onClick={() => void 0} aria-hidden={false} />
-    13 │     {/* TODO:  */}
+     8 │     <section onClick={() => void 0} />
+     9 │     <main onClick={() => void 0} />
+  > 10 │     <article onClick={() => void 0} />
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │     <header onClick={() => void 0} />
+    12 │     <footer onClick={() => void 0} />
   
   i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
   
@@ -180,12 +165,29 @@ invalid.jsx:12:5 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━�
 
   × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
   
-    10 │     <header onClick={() => void 0} />
-    11 │     <footer onClick={() => void 0} />
-  > 12 │     <div onClick={() => void 0} aria-hidden={false} />
+    10 │     <article onClick={() => void 0} />
+    11 │     <header onClick={() => void 0} />
+  > 12 │     <footer onClick={() => void 0} />
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │     <div onClick={() => void 0} aria-hidden={false} />
+    14 │     {/* TODO:  */}
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+```
+
+```
+invalid.jsx:13:5 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    11 │     <header onClick={() => void 0} />
+    12 │     <footer onClick={() => void 0} />
+  > 13 │     <div onClick={() => void 0} aria-hidden={false} />
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    13 │     {/* TODO:  */}
-    14 │     {/* <a onClick={() => void 0} /> */}
+    14 │     {/* TODO:  */}
+    15 │     {/* <a onClick={() => void 0} /> */}
   
   i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
   

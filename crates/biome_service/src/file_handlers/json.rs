@@ -600,6 +600,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         action_offset,
         document_services: _,
         compute_actions,
+        snippet_services: _,
     } = params;
 
     let _ = debug_span!("Code actions JSON",  range =? range, path =? path).entered();

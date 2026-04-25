@@ -1,13 +1,17 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 
-use crate::syntax::scss::{is_at_scss_interpolated_string, parse_scss_interpolated_string};
+use crate::syntax::parse_error::scss_only_syntax_error;
+use crate::syntax::scss::{
+    is_at_scss_function, is_at_scss_interpolated_function, is_at_scss_interpolated_string,
+    is_nth_at_scss_function, parse_scss_function, parse_scss_interpolated_function_or_value,
+    parse_scss_interpolated_string,
+};
 use crate::syntax::value::function::{
-    is_at_css_function, is_at_function, is_nth_at_css_function, is_nth_at_function,
-    parse_css_function, parse_function,
+    is_nth_at_css_function, is_nth_at_function, parse_css_function, parse_function,
 };
 use crate::syntax::value::parse_error::expected_url_modifier;
-use crate::syntax::{ValueParsingContext, ValueParsingMode};
+use crate::syntax::{CssSyntaxFeatures, ValueParsingContext, ValueParsingMode};
 use crate::syntax::{is_at_identifier, is_at_string, parse_regular_identifier, parse_string};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -15,7 +19,7 @@ use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
-use biome_parser::{Parser, TokenSet, token_set};
+use biome_parser::{Parser, SyntaxFeature, TokenSet, token_set};
 
 const URL_SET: TokenSet<CssSyntaxKind> = token_set![T![url], T![src]];
 
@@ -81,14 +85,27 @@ pub(crate) fn parse_url_function_with_context(
 
     p.bump_ts(URL_SET);
 
-    if is_at_nth_url_function(p, 1, context) {
-        // we need to check if the next token is a function or not
-        // to cover the case of `src(var(--foo));`
+    if is_at_nth_url_modifier_function(p, 1, context) {
+        // Keep plain function heads on regular tokenization so `src(var(--foo))`
+        // and similar cases do not get folded into a raw URL literal.
         p.bump(T!['(']);
+    } else if context.is_full_scss_parsing_allowed() {
+        // Full SCSS mode needs URL-body classification so interpolation-based
+        // function names such as `url(#{name}(bar))` survive lexing.
+        p.bump_with_context(
+            T!['('],
+            CssLexContext::UrlBody {
+                scss_exclusive_syntax_allowed: true,
+            },
+        );
     } else {
+        // Plain CSS keeps the cheaper raw-URL path. CSS-only SCSS diagnostics
+        // for interpolation-shaped bodies are not worth paying this cost on
+        // every `url(...)`.
         p.bump_with_context(T!['('], CssLexContext::UrlRawValue);
-        parse_url_value(p).ok();
     }
+
+    parse_url_value(p).ok();
 
     UrlModifierList::new(context).parse_list(p);
     p.expect(T![')']);
@@ -97,9 +114,13 @@ pub(crate) fn parse_url_function_with_context(
 }
 
 #[inline]
-fn is_at_nth_url_function(p: &mut CssParser, n: usize, context: ValueParsingContext) -> bool {
-    if context.is_scss_syntax_allowed() {
-        is_nth_at_function(p, n)
+fn is_at_nth_url_modifier_function(
+    p: &mut CssParser,
+    n: usize,
+    context: ValueParsingContext,
+) -> bool {
+    if context.is_scss_exclusive_syntax_allowed() {
+        is_nth_at_scss_function(p, n) || is_nth_at_function(p, n)
     } else {
         is_nth_at_css_function(p, n)
     }
@@ -110,11 +131,8 @@ fn is_at_url_modifier_function_with_context(
     p: &mut CssParser,
     context: ValueParsingContext,
 ) -> bool {
-    if context.is_scss_syntax_allowed() {
-        is_at_function(p)
-    } else {
-        is_at_css_function(p)
-    }
+    is_at_nth_url_modifier_function(p, 0, context)
+        || (context.is_scss_exclusive_syntax_allowed() && is_at_scss_interpolated_function(p))
 }
 
 #[inline]
@@ -122,8 +140,22 @@ fn parse_url_modifier_function_with_context(
     p: &mut CssParser,
     context: ValueParsingContext,
 ) -> ParsedSyntax {
-    if context.is_scss_syntax_allowed() {
-        parse_function(p)
+    if context.is_scss_exclusive_syntax_allowed() {
+        if is_at_scss_function(p) {
+            CssSyntaxFeatures::Scss.parse_exclusive_syntax(p, parse_scss_function, |p, marker| {
+                scss_only_syntax_error(p, "SCSS qualified function names", marker.range(p))
+            })
+        } else if is_at_scss_interpolated_function(p) {
+            CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+                p,
+                parse_scss_interpolated_function_or_value,
+                |p, marker| {
+                    scss_only_syntax_error(p, "SCSS interpolated function names", marker.range(p))
+                },
+            )
+        } else {
+            parse_function(p)
+        }
     } else {
         parse_css_function(p)
     }

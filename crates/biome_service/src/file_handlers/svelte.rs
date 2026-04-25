@@ -12,7 +12,9 @@ use biome_fs::BiomePath;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse_js_with_cache};
-use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, TextRange, TextSize};
+use biome_js_syntax::{
+    EmbeddingKind, JsFileSource, JsLanguage, SvelteFileKind, TextRange, TextSize,
+};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
 use regex::{Match, Regex};
@@ -22,9 +24,9 @@ use tracing::{debug, error};
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct SvelteFileHandler;
 
-// https://regex101.com/r/E4n4hh/6
+// https://regex101.com/r/oV6XMO/1
 pub static SVELTE_FENCE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"(?ixs)(?<opening><script(?:\s.*?)?>)\r?\n?(?<script>(?U:.*))</script>"#).unwrap()
+    Regex::new(r#"(?ixs)(?<opening><script(?:\s+(?:[^>"']*|"[^"]*"|'[^']*')*)?>)\r?\n?(?<script>(?U:.*))</script>"#).unwrap()
 });
 
 impl SvelteFileHandler {
@@ -76,7 +78,12 @@ impl SvelteFileHandler {
                 Some(
                     JsFileSource::from(language)
                         .with_variant(variant)
-                        .with_embedding_kind(EmbeddingKind::Svelte { is_source: true }),
+                        .with_embedding_kind(EmbeddingKind::Svelte {
+                            is_source: true,
+                            is_function_signature: false,
+                            kind: SvelteFileKind::Component,
+                            is_const_block: false,
+                        }),
                 )
             })
             .map_or(JsFileSource::js_module(), |fs| fs)
@@ -126,21 +133,33 @@ impl ExtensionHandler for SvelteFileHandler {
 
 fn parse(
     _rome_path: &BiomePath,
-    _file_source: DocumentFileSource,
+    file_source: DocumentFileSource,
     text: &str,
     _settings: &SettingsWithEditor,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let script = SvelteFileHandler::input(text);
-    let file_source = SvelteFileHandler::file_source(text);
+    let source_type = file_source.to_js_file_source().unwrap_or_default();
+    let (script, script_file_source) = if source_type.is_svelte_source_module() {
+        (text, source_type)
+    } else {
+        (
+            SvelteFileHandler::input(text),
+            SvelteFileHandler::file_source(text),
+        )
+    };
 
-    debug!("Parsing file with language {:?}", file_source);
+    debug!("Parsing file with language {:?}", script_file_source);
 
-    let parse = parse_js_with_cache(script, file_source, JsParserOptions::default(), cache);
+    let parse = parse_js_with_cache(
+        script,
+        script_file_source,
+        JsParserOptions::default(),
+        cache,
+    );
 
     ParseResult {
         any_parse: parse.into(),
-        language: Some(file_source.into()),
+        language: Some(file_source),
     }
 }
 
@@ -204,4 +223,70 @@ fn fix_all(mut params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
         params.embeds_initial_indent = 1;
     }
     javascript::fix_all(params)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::SvelteFileHandler;
+
+    #[test]
+    fn svelte_file_source_simple_ts() {
+        let src = r#"<script lang="ts">
+import type { Foo } from "bar";
+</script>"#;
+        assert!(SvelteFileHandler::file_source(src).is_typescript());
+    }
+
+    #[test]
+    fn svelte_file_source_simple_js() {
+        let src = r#"<script>
+import { foo } from "bar";
+</script>"#;
+        assert!(!SvelteFileHandler::file_source(src).is_typescript());
+    }
+
+    #[test]
+    fn svelte_file_source_context_module_ts() {
+        let src = r#"<script context="module" lang="ts">
+import type { Foo } from "bar";
+</script>"#;
+        assert!(SvelteFileHandler::file_source(src).is_typescript());
+    }
+
+    #[test]
+    fn svelte_file_source_generics_ts() {
+        let src = r#"<script lang="ts" generics="T extends Record<string, unknown>, U extends FormPath<T>">
+import type { FormPath } from "sveltekit-superforms";
+</script>"#;
+        assert!(SvelteFileHandler::file_source(src).is_typescript());
+    }
+
+    #[test]
+    fn svelte_file_source_generics_with_single_quotes_ts() {
+        let src = r#"<script lang="ts" generics='T extends Record<string, unknown>'>
+import type { Foo } from "bar";
+</script>"#;
+        assert!(SvelteFileHandler::file_source(src).is_typescript());
+    }
+
+    #[test]
+    fn svelte_file_source_generics_before_lang_ts() {
+        let src = r#"<script generics="T extends Record<string, unknown>" lang="ts">
+import type { Foo } from "bar";
+</script>"#;
+        assert!(SvelteFileHandler::file_source(src).is_typescript());
+    }
+
+    #[test]
+    fn svelte_input_with_generics() {
+        let src = r#"<script lang="ts" generics="T extends Record<string, unknown>">
+import type { Foo } from "bar";
+</script>"#;
+        let input = SvelteFileHandler::input(src);
+        assert_eq!(
+            input,
+            r#"import type { Foo } from "bar";
+"#
+        );
+    }
 }

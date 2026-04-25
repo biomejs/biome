@@ -4,7 +4,7 @@ use biome_analyze::{
     VisitorFinishContext,
 };
 use biome_js_semantic::{SemanticEventExtractor, SemanticModel, SemanticModelBuilder};
-use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange, WalkEvent};
+use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage, JsSyntaxNode, TextRange, WalkEvent};
 use biome_rowan::AstNode;
 
 pub struct SemanticServices {
@@ -88,6 +88,10 @@ where
         N::unwrap_cast(node.clone())
     }
 }
+/// Syntax-phase visitor that extracts semantic events and builds semantic data.
+///
+/// Flavor-specific behavior (for example Svelte semantics) is configured from
+/// the file source service when entering the root node.
 pub struct SemanticModelBuilderVisitor {
     extractor: SemanticEventExtractor,
     builder: SemanticModelBuilder,
@@ -105,7 +109,22 @@ impl SemanticModelBuilderVisitor {
 impl Visitor for SemanticModelBuilderVisitor {
     type Language = JsLanguage;
 
-    fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, _ctx: VisitorContext<JsLanguage>) {
+    fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, ctx: VisitorContext<JsLanguage>) {
+        // Visitor construction has no access to the service bag, so configure
+        // semantic flavor when we enter the root node.
+        if let WalkEvent::Enter(node) = event
+            && node.parent().is_none()
+        {
+            let source_type = ctx
+                .services
+                .get_service::<JsFileSource>()
+                .copied()
+                .unwrap_or_default();
+            let flavor = (&source_type).into();
+            self.extractor.set_flavor(flavor);
+            self.builder.set_flavor(flavor);
+        }
+
         match event {
             WalkEvent::Enter(node) => {
                 self.builder.push_node(node);

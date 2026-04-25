@@ -5,8 +5,9 @@ use crate::syntax::property::{
     is_at_any_property, parse_any_property, parse_any_property_with_value_end_set,
 };
 use crate::syntax::scss::{
-    is_at_scss_declaration, is_at_scss_interpolated_property, is_at_scss_nesting_declaration,
-    parse_scss_declaration, parse_scss_interpolated_property_declaration,
+    is_at_scss_interpolated_property, is_at_scss_nesting_declaration,
+    is_at_scss_variable_declaration, parse_scss_interpolated_property_declaration,
+    parse_scss_variable_declaration,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -97,10 +98,12 @@ pub(crate) fn is_at_any_declaration_with_semicolon(p: &mut CssParser) -> bool {
 pub(crate) fn parse_any_declaration_with_semicolon(p: &mut CssParser) -> ParsedSyntax {
     if is_at_empty_declaration(p) {
         parse_empty_declaration(p)
-    } else if is_at_scss_declaration(p) {
-        CssSyntaxFeatures::Scss.parse_exclusive_syntax(p, parse_scss_declaration, |p, marker| {
-            scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p))
-        })
+    } else if is_at_scss_variable_declaration(p) {
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_variable_declaration,
+            |p, marker| scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p)),
+        )
     } else if is_at_any_declaration_with_semicolon(p) {
         parse_declaration_with_semicolon(p)
     } else {
@@ -110,7 +113,7 @@ pub(crate) fn parse_any_declaration_with_semicolon(p: &mut CssParser) -> ParsedS
 
 #[inline]
 pub(crate) fn is_at_any_declaration(p: &mut CssParser) -> bool {
-    is_at_declaration(p) || is_at_scss_declaration(p)
+    is_at_declaration(p) || is_at_scss_variable_declaration(p)
 }
 
 /// Parses a CSS declaration that may optionally end with a semicolon.

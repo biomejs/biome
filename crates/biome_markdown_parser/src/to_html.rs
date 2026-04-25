@@ -645,12 +645,12 @@ impl<'a> HtmlRenderer<'a> {
 
             let first_is_paragraph = blocks
                 .iter()
-                .find(|b| !is_newline_block(b))
+                .find(|b| !is_transparent_block(b))
                 .is_some_and(is_paragraph_block);
             let last_is_paragraph = blocks
                 .iter()
                 .rev()
-                .find(|b| !is_newline_block(b))
+                .find(|b| !is_transparent_block(b))
                 .is_some_and(is_paragraph_block);
 
             let leading_newline = !is_tight || !first_is_paragraph;
@@ -1773,9 +1773,22 @@ fn is_newline_block(block: &AnyMdBlock) -> bool {
     )
 }
 
+/// Check if a block is structural-only and produces no rendered content.
+/// This includes newline blocks, continuation indents, and quote prefix markers
+/// that can appear as children of list item content when lists are nested
+/// inside blockquotes.
+fn is_transparent_block(block: &AnyMdBlock) -> bool {
+    matches!(
+        block,
+        AnyMdBlock::AnyMdLeafBlock(
+            AnyMdLeafBlock::MdNewline(_) | AnyMdLeafBlock::MdContinuationIndent(_),
+        ) | AnyMdBlock::MdQuotePrefix(_)
+    )
+}
+
 /// Check if blocks are effectively empty (empty or only newlines).
 fn is_empty_content(blocks: &[AnyMdBlock]) -> bool {
-    blocks.is_empty() || blocks.iter().all(is_newline_block)
+    blocks.is_empty() || blocks.iter().all(is_transparent_block)
 }
 
 fn list_item_required_indent(entry: &ListItemIndent) -> usize {
@@ -2005,5 +2018,172 @@ mod tests {
             parsed.quote_indents(),
         );
         assert_eq!(html, "<p>foo\\</p>\n");
+    }
+
+    #[test]
+    fn test_hard_break_in_blockquote() {
+        let parsed = parse_markdown("> foo  \n> bar  \n>\n> baz");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<blockquote>\n<p>foo<br />\nbar</p>\n<p>baz</p>\n</blockquote>\n"
+        );
+    }
+
+    #[test]
+    fn test_hard_break_nested_quote_in_list() {
+        let parsed = parse_markdown("- > quoted  \n  > line  \n  >\n  > next para\n\n- after\n");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<ul>\n<li>\n<blockquote>\n<p>quoted<br />\nline</p>\n<p>next para</p>\n</blockquote>\n</li>\n<li>\n<p>after</p>\n</li>\n</ul>\n"
+        );
+    }
+
+    #[test]
+    fn test_tight_list_marker_split() {
+        // Two tight lists separated by blank line with different markers
+        let input = "- foo\n- bar\n\n* baz\n";
+        let parsed = parse_markdown(input);
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<ul>\n<li>foo</li>\n<li>bar</li>\n</ul>\n<ul>\n<li>baz</li>\n</ul>\n"
+        );
+    }
+
+    #[test]
+    fn test_tight_list_basic() {
+        let input = "- foo\n- bar\n";
+        let parsed = parse_markdown(input);
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(html, "<ul>\n<li>foo</li>\n<li>bar</li>\n</ul>\n");
+    }
+
+    #[test]
+    fn test_loose_list_same_marker() {
+        let input = "- foo\n\n- bar\n";
+        let parsed = parse_markdown(input);
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<ul>\n<li>\n<p>foo</p>\n</li>\n<li>\n<p>bar</p>\n</li>\n</ul>\n"
+        );
+    }
+
+    #[test]
+    fn test_ordered_delim_split_tight() {
+        // Different ordered delimiters across blank line → separate tight lists
+        let input = "1. First\n2. Second\n\n1) Third\n2) Fourth\n";
+        let parsed = parse_markdown(input);
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<ol>\n<li>First</li>\n<li>Second</li>\n</ol>\n<ol>\n<li>Third</li>\n<li>Fourth</li>\n</ol>\n"
+        );
+    }
+
+    #[test]
+    fn test_cross_type_split_tight() {
+        // Bullet → ordered across blank line → separate tight lists
+        let input = "- bullet\n\n1. ordered\n";
+        let parsed = parse_markdown(input);
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<ul>\n<li>bullet</li>\n</ul>\n<ol>\n<li>ordered</li>\n</ol>\n"
+        );
+    }
+
+    #[test]
+    fn test_tight_bullet_list_in_blockquote() {
+        let parsed = parse_markdown("> - a\n> - b\n");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<blockquote>\n<ul>\n<li>a</li>\n<li>b</li>\n</ul>\n</blockquote>\n"
+        );
+    }
+
+    #[test]
+    fn test_tight_ordered_list_in_blockquote() {
+        let parsed = parse_markdown("> 1. a\n> 2. b\n");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<blockquote>\n<ol>\n<li>a</li>\n<li>b</li>\n</ol>\n</blockquote>\n"
+        );
+    }
+
+    #[test]
+    fn test_tight_three_item_bullet_list_in_blockquote() {
+        let parsed = parse_markdown("> - a\n> - b\n> - c\n");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(
+            html,
+            "<blockquote>\n<ul>\n<li>a</li>\n<li>b</li>\n<li>c</li>\n</ul>\n</blockquote>\n"
+        );
+    }
+
+    #[test]
+    fn test_tight_list_not_in_blockquote() {
+        let parsed = parse_markdown("- a\n- b\n");
+        let html = document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        );
+        assert_eq!(html, "<ul>\n<li>a</li>\n<li>b</li>\n</ul>\n");
     }
 }

@@ -24,6 +24,7 @@ obj.setTimeout("alert('Hi!');", 100);
 
 // Different function name
 setTimeout(callback, 100);
+new setTimeout("alert('Hi!');", 100);
 
 // Template with substitution
 const code = "alert('Hi!');";
@@ -64,3 +65,40 @@ globalThis?.setInterval(function() {}, 100);
 // Parenthesized function arguments
 setTimeout((function() {}), 100);
 setTimeout((() => {}), 100);
+
+// Shadowed Function constructor
+{
+		class Function {}
+		new Function();
+}
+
+const nestedClass = () => {
+    class Function {}
+    new Function();
+};
+
+function Function() {}
+Function();
+
+var nestedFunction = function () {
+    function Function() {}
+    Function();
+};
+
+var namedExpression = function Function() {
+    Function();
+};
+
+function useParam(Function) {
+    Function("x");
+    new Function("x");
+    Function.call(null, "x");
+    Function["call"](null, "x");
+}
+
+call(Function);
+new Class(Function);
+foo[Function]();
+foo(Function.bind);
+Function.toString();
+Function[call]();

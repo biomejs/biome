@@ -1,0 +1,27 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.html`
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <script type="module">
+    import { init } from "./src"
+
+    init()
+  </script>
+</head>
+<body></body>
+</html>
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

@@ -7,8 +7,8 @@
 //! 2. **Element helpers** (public): Higher-level checks on HTML elements
 //! 3. **Type-specific variants** (public): Optimized versions that avoid cloning
 
+use biome_html_syntax::HtmlAttribute;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
-use biome_html_syntax::{AnyHtmlElement, HtmlAttribute};
 
 // ============================================================================
 // Core attribute value helpers (private)
@@ -90,7 +90,7 @@ pub(crate) fn is_hidden_from_screen_reader(element: &AnyHtmlTagElement) -> bool 
 /// Unlike [`is_aria_hidden_value_truthy`], this only matches the exact string `"true"`.
 ///
 /// Ref: <https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden>
-pub(crate) fn is_aria_hidden_true(element: &AnyHtmlElement) -> bool {
+pub(crate) fn is_aria_hidden_true(element: &AnyHtmlTagElement) -> bool {
     element
         .find_attribute_by_name("aria-hidden")
         .is_some_and(|attr| is_strict_true_value(&attr))
@@ -102,7 +102,9 @@ pub(crate) fn is_aria_hidden_true(element: &AnyHtmlElement) -> bool {
 /// Useful for code fixes that need to reference the attribute node.
 ///
 /// Ref: <https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden>
-pub(crate) fn get_truthy_aria_hidden_attribute(element: &AnyHtmlElement) -> Option<HtmlAttribute> {
+pub(crate) fn get_truthy_aria_hidden_attribute(
+    element: &AnyHtmlTagElement,
+) -> Option<HtmlAttribute> {
     let attribute = element.find_attribute_by_name("aria-hidden")?;
     if is_aria_hidden_value_truthy(&attribute) {
         Some(attribute)
@@ -114,18 +116,43 @@ pub(crate) fn get_truthy_aria_hidden_attribute(element: &AnyHtmlElement) -> Opti
 /// Returns `true` if the element has the named attribute with a non-empty value.
 ///
 /// Whitespace-only values are considered empty.
-pub(crate) fn has_non_empty_attribute(element: &AnyHtmlElement, name: &str) -> bool {
+pub(crate) fn has_non_empty_attribute(element: &AnyHtmlTagElement, name: &str) -> bool {
     element
         .find_attribute_by_name(name)
         .is_some_and(|attr| has_non_empty_value(&attr))
 }
 
+/// Returns `true` if the element has all of the named attributes with non-empty values.
+///
+/// Whitespace-only values are considered empty. Returns `false` if any attribute is missing or has an empty value.
+#[expect(dead_code)]
+pub(crate) fn has_multiple_non_empty_attribute<const N: usize>(
+    element: &AnyHtmlTagElement,
+    names: &[&str; N],
+) -> bool {
+    element
+        .find_multiple_attributes_by_name(names)
+        .iter()
+        .all(|attr| attr.as_ref().is_some_and(has_non_empty_value))
+}
+
+/// Returns `true` if the element has **any** of the named attributes with non-empty values.
+///
+/// Whitespace-only values are considered empty.
+pub(crate) fn has_any_non_empty_attribute<const N: usize>(
+    element: &AnyHtmlTagElement,
+    names: &[&str; N],
+) -> bool {
+    element
+        .find_multiple_attributes_by_name(names)
+        .iter()
+        .any(|attr| attr.as_ref().is_some_and(has_non_empty_value))
+}
+
 /// Returns `true` if the element has an accessible name via `aria-label`,
 /// `aria-labelledby`, or `title` attributes.
-pub(crate) fn has_accessible_name(element: &AnyHtmlElement) -> bool {
-    has_non_empty_attribute(element, "aria-label")
-        || has_non_empty_attribute(element, "aria-labelledby")
-        || has_non_empty_attribute(element, "title")
+pub(crate) fn has_accessible_name(element: &AnyHtmlTagElement) -> bool {
+    has_any_non_empty_attribute(element, &["aria-label", "aria-labelledby", "title"])
 }
 
 /// Checks if an [`HtmlElement`] has a truthy `aria-hidden` attribute.

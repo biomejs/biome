@@ -1,7 +1,14 @@
 //! An extremely fast, lookup table based, СSS lexer which yields SyntaxKind tokens used by the rome-css parser.
 #[rustfmt::skip]
 mod tests;
+mod scan_cursor;
+mod source_cursor;
 
+use self::scan_cursor::CssScanCursor;
+use self::scan_cursor::{
+    PendingUrlRawValueScan, StringBodyScan, StringBodyScanStop, UrlBodyStartScan,
+};
+use self::source_cursor::SourceCursor;
 use crate::CssParserOptions;
 use biome_css_syntax::{
     CssFileSource, CssSyntaxKind, CssSyntaxKind::*, T, TextLen, TextRange, TextSize,
@@ -13,10 +20,8 @@ use biome_parser::lexer::{
 use biome_rowan::SyntaxKind;
 use biome_unicode_table::{
     Dispatch::{self, *},
-    is_css_non_ascii, lookup_byte,
+    lookup_byte,
 };
-use smallvec::SmallVec;
-use std::char::REPLACEMENT_CHARACTER;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
 pub enum CssLexContext {
@@ -32,7 +37,11 @@ pub enum CssLexContext {
     PseudoNthSelector,
 
     /// Applied when lexing CSS url function.
-    /// Greedily consume tokens in the URL function until encountering ")"
+    /// Chooses whether the first body token should stay on regular tokenization
+    /// or become a raw URL literal.
+    UrlBody { scss_exclusive_syntax_allowed: bool },
+    /// Applied when lexing CSS url function raw bodies after classification.
+    /// Greedily consume tokens in the URL function until encountering `)`.
     UrlRawValue,
 
     /// Applied when lexing CSS color literals.
@@ -111,11 +120,8 @@ pub enum CssReLexContext {
 /// An extremely fast, lookup table based, lossless CSS lexer
 #[derive(Debug)]
 pub(crate) struct CssLexer<'src> {
-    /// Source text
-    source: &'src str,
-
-    /// The start byte position in the source text of the next token.
-    position: usize,
+    /// Source text plus the next-token byte position within it.
+    cursor: SourceCursor<'src>,
 
     /// `true` if there has been a line break between the last non-trivia token and the next non-trivia token.
     after_newline: bool,
@@ -127,7 +133,7 @@ pub(crate) struct CssLexer<'src> {
 
     /// Byte offset of the current token from the start of the source.
     ///
-    /// The range of the current token can be computed by `self.position - self.current_start`
+    /// The range of the current token can be computed by `self.position() - self.current_start`
     current_start: TextSize,
 
     /// The kind of the current token
@@ -141,6 +147,7 @@ pub(crate) struct CssLexer<'src> {
     options: CssParserOptions,
     source_type: CssFileSource,
     pending_scss_string_start: Option<PendingScssInterpolatedStringStart>,
+    pending_url_raw_value_scan: Option<PendingUrlRawValueScan>,
 }
 
 impl<'src> Lexer<'src> for CssLexer<'src> {
@@ -152,7 +159,7 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
     type ReLexContext = CssReLexContext;
 
     fn source(&self) -> &'src str {
-        self.source
+        self.cursor.source()
     }
 
     fn current(&self) -> Self::Kind {
@@ -160,7 +167,7 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
     }
 
     fn position(&self) -> usize {
-        self.position
+        self.cursor.position()
     }
 
     fn current_start(&self) -> TextSize {
@@ -183,6 +190,9 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
                 }
                 CssLexContext::Selector => self.consume_selector_token(current),
                 CssLexContext::PseudoNthSelector => self.consume_pseudo_nth_selector_token(current),
+                CssLexContext::UrlBody {
+                    scss_exclusive_syntax_allowed,
+                } => self.consume_url_body_token(current, scss_exclusive_syntax_allowed),
                 CssLexContext::UrlRawValue => self.consume_url_raw_value_token(current),
                 CssLexContext::Color => self.consume_color_token(current),
                 CssLexContext::UnicodeRange => self.consume_unicode_range_token(current),
@@ -235,9 +245,7 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
             diagnostics_pos,
         } = checkpoint;
 
-        let new_pos = u32::from(position) as usize;
-
-        self.position = new_pos;
+        self.cursor.set_position(usize::from(position));
         self.current_kind = current_kind;
         self.current_start = current_start;
         self.current_flags = current_flags;
@@ -246,6 +254,7 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
         self.unicode_bom_length = unicode_bom_length;
         self.diagnostics.truncate(diagnostics_pos as usize);
         self.pending_scss_string_start = None;
+        self.pending_url_raw_value_scan = None;
     }
 
     fn finish(self) -> Vec<ParseDiagnostic> {
@@ -258,14 +267,41 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
 
     #[inline]
     fn advance_char_unchecked(&mut self) {
-        let c = self.current_char_unchecked();
-        self.position += c.len_utf8();
+        let Some(current) = self.current_byte() else {
+            return;
+        };
+        self.cursor.advance_byte_or_char(current);
     }
 
     /// Advances the current position by `n` bytes.
     #[inline]
     fn advance(&mut self, n: usize) {
-        self.position += n;
+        self.cursor.advance(n);
+    }
+
+    #[inline]
+    fn assert_at_char_boundary(&self, offset: usize) {
+        debug_assert!(self.source().is_char_boundary(self.position() + offset));
+    }
+
+    #[inline]
+    fn assert_current_char_boundary(&self) {
+        debug_assert!(self.source().is_char_boundary(self.position()));
+    }
+
+    #[inline]
+    fn current_byte(&self) -> Option<u8> {
+        self.cursor.current_byte()
+    }
+
+    #[inline]
+    fn peek_byte(&self) -> Option<u8> {
+        self.cursor.peek_byte()
+    }
+
+    #[inline]
+    fn byte_at(&self, offset: usize) -> Option<u8> {
+        self.cursor.byte_at(offset)
     }
 }
 
@@ -273,18 +309,18 @@ impl<'src> CssLexer<'src> {
     /// Make a new lexer from a str, this is safe because strs are valid utf8
     pub fn from_str(source: &'src str) -> Self {
         Self {
-            source,
+            cursor: SourceCursor::new(source, 0),
             after_newline: false,
             after_whitespace: false,
             unicode_bom_length: 0,
             current_kind: TOMBSTONE,
             current_start: TextSize::from(0),
             current_flags: TokenFlags::empty(),
-            position: 0,
             diagnostics: vec![],
             options: CssParserOptions::default(),
             source_type: CssFileSource::default(),
             pending_scss_string_start: None,
+            pending_url_raw_value_scan: None,
         }
     }
 
@@ -333,6 +369,32 @@ impl<'src> CssLexer<'src> {
         self.options.allow_wrong_line_comments || self.is_scss()
     }
 
+    fn scan_cursor(&self) -> CssScanCursor<'src> {
+        self.scan_cursor_at(self.position())
+    }
+
+    fn scan_cursor_at(&self, position: usize) -> CssScanCursor<'src> {
+        // The lexer owns the stable scan environment. Shared scanners vary
+        // only by the byte position they inspect.
+        CssScanCursor::new(
+            SourceCursor::new(self.source(), position),
+            self.is_scss(),
+            self.is_line_comment_enabled(),
+        )
+    }
+
+    fn byte_before(&self, position: usize, offset: usize) -> Option<u8> {
+        position
+            .checked_sub(offset)
+            .and_then(|index| self.source().as_bytes().get(index))
+            .copied()
+    }
+
+    #[inline]
+    fn set_position(&mut self, position: usize) {
+        self.cursor.set_position(position);
+    }
+
     /// Get the UTF8 char which starts at the current byte
     ///
     /// ## Safety
@@ -341,47 +403,14 @@ impl<'src> CssLexer<'src> {
         self.char_unchecked_at(0)
     }
 
-    /// Peek the UTF8 char which starts at the current byte
-    ///
-    /// ## Safety
-    /// Must be called at a valid UT8 char boundary
-    fn peek_char_unchecked(&self) -> char {
-        self.char_unchecked_at(1)
-    }
-
     /// Get the UTF8 char which starts at the current byte
     ///
     /// ## Safety
     /// Must be called at a valid UT8 char boundary
     fn char_unchecked_at(&self, offset: usize) -> char {
-        // Precautionary measure for making sure the unsafe code below does not read over memory boundary
         debug_assert!(!self.is_eof());
         self.assert_at_char_boundary(offset);
-
-        // Safety: We know this is safe because we require the input to the lexer to be valid utf8 and we always call this when we are at a char
-        let string = unsafe {
-            std::str::from_utf8_unchecked(
-                self.source
-                    .as_bytes()
-                    .get_unchecked((self.position + offset)..),
-            )
-        };
-        if let Some(chr) = string.chars().next() {
-            chr
-        } else {
-            // Safety: we always call this when we are at a valid char, so this branch is completely unreachable
-            unsafe {
-                core::hint::unreachable_unchecked();
-            }
-        }
-    }
-
-    /// Check if the lexer is at a valid escape. U+005C REVERSE SOLIDUS (\)
-    fn is_valid_escape_at(&self, offset: usize) -> bool {
-        match self.byte_at(offset) {
-            Some(b'\n' | b'\r') | None => false,
-            Some(_) => true,
-        }
+        self.cursor.char_at(offset)
     }
 
     /// Lexes the next token
@@ -426,7 +455,7 @@ impl<'src> CssLexer<'src> {
             // Check for BOM first at position 0, before checking if UNI is an identifier start.
             // The BOM character (U+FEFF) is in the valid CSS non-ASCII identifier range,
             // so without this check it would be incorrectly consumed as part of an identifier.
-            UNI if self.position == 0 => {
+            UNI if self.position() == 0 => {
                 if let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM) {
                     self.unicode_bom_length = bom_size;
                     return bom;
@@ -563,39 +592,61 @@ impl<'src> CssLexer<'src> {
     }
 
     fn consume_url_raw_value_token(&mut self, current: u8) -> CssSyntaxKind {
-        if let Some(chr) = self.current_byte() {
-            let dispatch = lookup_byte(chr);
-            return match dispatch {
-                // TLD byte covers `url(~package/tilde.css)`;
-                // HAS byte covers `url(#IDofSVGpath);`
-                IDT | DOL | UNI | PRD | SLH | ZER | DIG | TLD | HAS => self.consume_url_raw_value(),
-                _ => self.consume_token(current),
-            };
-        }
-        self.consume_token(current)
+        self.scan_cursor()
+            .scan_url_raw_value()
+            .and_then(|scan| self.consume_pending_url_raw_value(scan))
+            .unwrap_or_else(|| self.consume_token(current))
     }
 
-    fn consume_url_raw_value(&mut self) -> CssSyntaxKind {
-        let start = self.text_position();
-        while let Some(chr) = self.current_byte() {
-            let dispatch = lookup_byte(chr);
-            match dispatch {
-                PNC => {
-                    return CSS_URL_VALUE_RAW_LITERAL;
+    fn consume_url_body_token(
+        &mut self,
+        current: u8,
+        scss_exclusive_syntax_allowed: bool,
+    ) -> CssSyntaxKind {
+        if let Some(scan) = self.take_pending_url_raw_value_scan_at_current_position() {
+            return self
+                .consume_pending_url_raw_value(scan)
+                .unwrap_or_else(|| self.consume_token(current));
+        }
+
+        match self.scan_url_body_start(self.position(), scss_exclusive_syntax_allowed) {
+            UrlBodyStartScan::InterpolatedFunction | UrlBodyStartScan::Other => {
+                self.consume_token(current)
+            }
+            UrlBodyStartScan::RawValue(scan) => {
+                if scan.start == self.position() {
+                    self.consume_pending_url_raw_value(scan)
+                        .unwrap_or_else(|| self.consume_token(current))
+                } else {
+                    // Leading trivia is still emitted as normal trivia tokens.
+                    // Cache the raw-value scan so the next non-trivia token can
+                    // commit the already-classified URL body in one step.
+                    self.pending_url_raw_value_scan = Some(scan);
+                    self.consume_token(current)
                 }
-                BSL if self.is_valid_escape_at(1) => {
-                    // We can escape any character, so we just skip over the escape sequence
-                    // Even a closing parenthesis (PNC token):
-                    // url(https://example.com/ima\)ge.png);
-                    //                            ^^ escaped closing paren
-                    self.advance(2)
-                }
-                _ => self.advance(1),
             }
         }
-        let diagnostic = ParseDiagnostic::new("Invalid url raw value", start..self.text_position());
-        self.diagnostics.push(diagnostic);
-        CSS_URL_VALUE_RAW_LITERAL
+    }
+
+    fn consume_pending_url_raw_value(
+        &mut self,
+        scan: PendingUrlRawValueScan,
+    ) -> Option<CssSyntaxKind> {
+        if scan.start != self.position() {
+            return None;
+        }
+
+        self.set_position(scan.end);
+
+        if !scan.terminated {
+            let diagnostic = ParseDiagnostic::new(
+                "Invalid url raw value",
+                TextSize::from(scan.start as u32)..self.text_position(),
+            );
+            self.diagnostics.push(diagnostic);
+        }
+
+        Some(CSS_URL_VALUE_RAW_LITERAL)
     }
 
     fn consume_pseudo_nth_selector_token(&mut self, current: u8) -> CssSyntaxKind {
@@ -634,7 +685,7 @@ impl<'src> CssLexer<'src> {
         if current == quote.as_byte() {
             return match self.scan_same_quote_in_interpolation(quote) {
                 SameQuoteInInterpolation::NestedString(scan) => {
-                    match self.finish_scss_string_start(self.position, quote, scan) {
+                    match self.finish_scss_string_start(self.position(), quote, scan) {
                         StringLexResult::Token(kind) => kind,
                         StringLexResult::Unterminated => {
                             debug_assert!(
@@ -659,7 +710,9 @@ impl<'src> CssLexer<'src> {
     /// before `}`. This helper performs a non-mutating scan so the valid nested
     /// string path can reuse the scan result for real token commitment.
     fn scan_same_quote_in_interpolation(&self, quote: CssStringQuote) -> SameQuoteInInterpolation {
-        let scan = self.scan_string_body(1, quote, true);
+        let scan = self
+            .scan_cursor_at(self.position() + 1)
+            .scan_interpolated_string_body(quote);
 
         match scan.stop {
             StringBodyScanStop::ClosingQuote { .. } | StringBodyScanStop::Interpolation { .. } => {
@@ -672,16 +725,17 @@ impl<'src> CssLexer<'src> {
     }
 
     fn lex_string_token(&mut self, mode: StringLexMode) -> StringLexResult {
+        let start = self.position();
+
         match mode {
             StringLexMode::Plain { quote } => {
-                let start = self.position;
-                let scan = self.scan_string_body(1, quote, false);
+                let scan = self.scan_cursor_at(start + 1).scan_plain_string_body(quote);
                 self.commit_plain_string_literal(start, scan)
             }
             StringLexMode::ScssStart { quote } => {
-                let start = self.position;
-                // Skip the opening quote we are already on.
-                let scan = self.scan_string_body(1, quote, true);
+                let scan = self
+                    .scan_cursor_at(start + 1)
+                    .scan_interpolated_string_body(quote);
                 self.finish_scss_string_start(start, quote, scan)
             }
         }
@@ -712,7 +766,7 @@ impl<'src> CssLexer<'src> {
             return self.consume_byte(SCSS_STRING_QUOTE);
         }
 
-        if self.is_at_scss_interpolation_start() {
+        if self.is_at_scss_interpolation() {
             self.pending_scss_string_start = None;
             return self.consume_byte(T![#]);
         }
@@ -720,17 +774,17 @@ impl<'src> CssLexer<'src> {
         self.commit_scss_string_content(quote)
     }
 
-    fn is_at_scss_interpolation_start(&self) -> bool {
-        self.current_byte() == Some(b'#') && self.peek_byte() == Some(b'{')
+    fn is_at_scss_interpolation(&self) -> bool {
+        self.scan_cursor().is_at_scss_interpolation()
     }
 
     fn commit_scss_string_content(&mut self, quote: CssStringQuote) -> CssSyntaxKind {
         self.assert_current_char_boundary();
-        let start = self.position;
+        let start = self.position();
 
         let scan = self
             .take_pending_scss_string_start_scan(quote)
-            .unwrap_or_else(|| self.scan_string_body(0, quote, true));
+            .unwrap_or_else(|| self.scan_cursor().scan_interpolated_string_body(quote));
 
         match scan.stop {
             StringBodyScanStop::Interpolation { position }
@@ -740,15 +794,15 @@ impl<'src> CssLexer<'src> {
                     "SCSS string content must never be zero-length"
                 );
 
-                self.position = position;
-                self.push_string_issues(&scan.issues);
+                self.set_position(position);
+                self.push_string_issues(&scan.invalid_escape_ranges);
                 // Invalid escapes still belong to this string chunk; keep the
                 // semantic token kind and surface the problem via diagnostics.
                 SCSS_STRING_CONTENT_LITERAL
             }
             StringBodyScanStop::Newline { position, .. } => {
-                self.position = position;
-                self.push_string_issues(&scan.issues);
+                self.set_position(position);
+                self.push_string_issues(&scan.invalid_escape_ranges);
                 let unterminated = ParseDiagnostic::new(
                     "Missing closing quote",
                     TextSize::from(start as u32)..self.text_position(),
@@ -758,14 +812,14 @@ impl<'src> CssLexer<'src> {
                 ERROR_TOKEN
             }
             StringBodyScanStop::Eof { position } => {
-                self.position = position;
-                self.push_string_issues(&scan.issues);
+                self.set_position(position);
+                self.push_string_issues(&scan.invalid_escape_ranges);
                 let unterminated = ParseDiagnostic::new(
                     "Missing closing quote",
                     TextSize::from(start as u32)..self.text_position(),
                 )
                 .with_detail(
-                    self.source.text_len()..self.source.text_len(),
+                    self.source().text_len()..self.source().text_len(),
                     "file ends here",
                 );
                 self.diagnostics.push(unterminated);
@@ -781,17 +835,17 @@ impl<'src> CssLexer<'src> {
     ) -> StringLexResult {
         match scan.stop {
             StringBodyScanStop::ClosingQuote { position } => {
-                self.position = position + 1;
-                self.push_string_issues(&scan.issues);
-                StringLexResult::Token(if !scan.issues.is_empty() {
+                self.set_position(position + 1);
+                self.push_string_issues(&scan.invalid_escape_ranges);
+                StringLexResult::Token(if !scan.invalid_escape_ranges.is_empty() {
                     ERROR_TOKEN
                 } else {
                     CSS_STRING_LITERAL
                 })
             }
             StringBodyScanStop::Newline { position, .. } => {
-                self.position = position;
-                self.push_string_issues(&scan.issues);
+                self.set_position(position);
+                self.push_string_issues(&scan.invalid_escape_ranges);
                 let unterminated = ParseDiagnostic::new(
                     "Missing closing quote",
                     TextSize::from(start as u32)..self.text_position(),
@@ -801,14 +855,14 @@ impl<'src> CssLexer<'src> {
                 StringLexResult::Unterminated
             }
             StringBodyScanStop::Eof { position } => {
-                self.position = position;
-                self.push_string_issues(&scan.issues);
+                self.set_position(position);
+                self.push_string_issues(&scan.invalid_escape_ranges);
                 let unterminated = ParseDiagnostic::new(
                     "Missing closing quote",
                     TextSize::from(start as u32)..self.text_position(),
                 )
                 .with_detail(
-                    self.source.text_len()..self.source.text_len(),
+                    self.source().text_len()..self.source().text_len(),
                     "file ends here",
                 );
                 self.diagnostics.push(unterminated);
@@ -824,80 +878,10 @@ impl<'src> CssLexer<'src> {
         }
     }
 
-    fn push_string_issues(&mut self, issues: &[StringIssue]) {
-        for issue in issues {
-            match issue {
-                StringIssue::InvalidEscape(range) => {
-                    self.diagnostics
-                        .push(ParseDiagnostic::new("Invalid escape sequence", *range));
-                }
-            }
-        }
-    }
-
-    fn scan_string_body(
-        &self,
-        mut offset: usize,
-        quote: CssStringQuote,
-        allow_interpolation: bool,
-    ) -> StringBodyScan {
-        let mut issues = SmallVec::new();
-        let quote_byte = quote.as_byte();
-
-        while let Some(byte) = self.byte_at(offset) {
-            let position = self.position + offset;
-
-            if byte == quote_byte {
-                return StringBodyScan {
-                    stop: StringBodyScanStop::ClosingQuote { position },
-                    issues,
-                };
-            }
-
-            if allow_interpolation && byte == b'#' && self.byte_at(offset + 1) == Some(b'{') {
-                return StringBodyScan {
-                    stop: StringBodyScanStop::Interpolation { position },
-                    issues,
-                };
-            }
-
-            match lookup_byte(byte) {
-                BSL => {
-                    let (next_offset, invalid_hex_escape) = self.scan_string_escape(offset, quote);
-                    if invalid_hex_escape {
-                        issues.push(StringIssue::InvalidEscape(TextRange::new(
-                            TextSize::from(position as u32),
-                            TextSize::from((self.position + next_offset) as u32),
-                        )));
-                    }
-
-                    offset = next_offset;
-                }
-                WHS if matches!(byte, b'\n' | b'\r') => {
-                    let len = if byte == b'\r' && self.byte_at(offset + 1) == Some(b'\n') {
-                        2
-                    } else {
-                        1
-                    };
-
-                    return StringBodyScan {
-                        stop: StringBodyScanStop::Newline { position, len },
-                        issues,
-                    };
-                }
-                // SAFETY: `offset` starts at a known UTF-8 boundary and only
-                // advances over ASCII bytes, escape scanners, or full Unicode
-                // scalar lengths, so it remains on a char boundary here.
-                UNI => offset += self.char_unchecked_at(offset).len_utf8(),
-                _ => offset += 1,
-            }
-        }
-
-        StringBodyScan {
-            stop: StringBodyScanStop::Eof {
-                position: self.source.len(),
-            },
-            issues,
+    fn push_string_issues(&mut self, invalid_escape_ranges: &[TextRange]) {
+        for range in invalid_escape_ranges {
+            self.diagnostics
+                .push(ParseDiagnostic::new("Invalid escape sequence", *range));
         }
     }
 
@@ -907,74 +891,8 @@ impl<'src> CssLexer<'src> {
     ) -> Option<StringBodyScan> {
         self.pending_scss_string_start
             .take()
-            .filter(|pending| pending.quote == quote && pending.content_start == self.position)
+            .filter(|pending| pending.quote == quote && pending.content_start == self.position())
             .map(|pending| pending.initial_chunk_scan)
-    }
-
-    fn consume_escape_sequence(&mut self) -> char {
-        let (next_offset, escaped) = self.scan_hex_escape(0);
-        self.position += next_offset;
-        escaped
-    }
-
-    fn scan_string_escape(&self, offset: usize, quote: CssStringQuote) -> (usize, bool) {
-        let quote = quote.as_byte();
-        let next = offset + 1;
-        match self.byte_at(next) {
-            Some(b'\n') => (next + 1, false),
-            Some(b'\r') => {
-                let len = if self.byte_at(next + 1) == Some(b'\n') {
-                    2
-                } else {
-                    1
-                };
-                (next + len, false)
-            }
-            Some(byte) if byte == quote => (next + 1, false),
-            Some(byte) if byte.is_ascii_hexdigit() => {
-                let (next_offset, escaped) = self.scan_hex_escape(next);
-                (next_offset, escaped == REPLACEMENT_CHARACTER)
-            }
-            Some(byte) if byte.is_ascii() => (next + 1, false),
-            // SAFETY: `next` is immediately after `\`, which is ASCII, so it
-            // is still a valid UTF-8 boundary for the escaped code point.
-            Some(_) => (next + self.char_unchecked_at(next).len_utf8(), false),
-            None => (next, false),
-        }
-    }
-
-    fn scan_hex_escape(&self, offset: usize) -> (usize, char) {
-        debug_assert!(
-            self.byte_at(offset)
-                .is_some_and(|byte| byte.is_ascii_hexdigit()),
-            "hex escape scanning must start on a hex digit"
-        );
-
-        let max_end = offset + 6;
-        let mut cursor = offset;
-        let mut hex = 0u32;
-
-        while cursor < max_end {
-            let Some(byte) = self.byte_at(cursor) else {
-                break;
-            };
-
-            let Some(digit) = (byte as char).to_digit(16) else {
-                break;
-            };
-
-            hex = hex * 16 + digit;
-            cursor += 1;
-        }
-
-        if self
-            .byte_at(cursor)
-            .is_some_and(|byte| matches!(byte, b'\t' | b' ' | b'\n' | b'\r' | 0x0C))
-        {
-            cursor += 1;
-        }
-
-        (cursor, decode_escaped_code_point(hex))
     }
 
     /// Lexes a CSS number literal
@@ -1333,19 +1251,15 @@ impl<'src> CssLexer<'src> {
         }
     }
 
-    /// Consumes a sequence of identifier characters from a byte stream, appending
-    /// them to the provided buffer in lowercase ASCII form.
-    ///
-    /// This function iteratively processes bytes from the stream, which are part
-    /// of an identifier, and appends their lowercase ASCII representation to the buffer.
-    /// It stops processing either when the buffer is full or when a non-identifier
-    /// character is encountered.
+    /// Consumes one identifier token via a single shared scan cursor and
+    /// returns the keyword-buffer bookkeeping needed by the lexer.
     ///
     /// # Arguments
     ///
-    /// * `buf` - A mutable reference to a byte array where the identifier characters
-    ///   will be appended. This buffer should be pre-allocated and have enough
-    ///   space to hold the expected identifier.
+    /// * `buf` - Lowercased ASCII keyword buffer filled by the shared scanner
+    ///   while the identifier remains ASCII-only.
+    /// * `allow_slash` - Whether `/` should be accepted as an identifier
+    ///   fragment for Tailwind utility lexing.
     ///
     /// # Returns
     ///
@@ -1361,114 +1275,34 @@ impl<'src> CssLexer<'src> {
     fn consume_ident_sequence(&mut self, buf: &mut [u8], allow_slash: bool) -> (usize, bool) {
         debug_assert!(self.is_ident_start());
 
-        let mut idx = 0;
-        let mut only_ascii_used = true;
-        // Repeatedly consume the next input code point from the stream.
-        while let Some(current) = self.current_byte() {
-            if let Some(part) = self.consume_ident_part(current, allow_slash) {
-                if only_ascii_used && !part.is_ascii() {
-                    only_ascii_used = false;
-                }
-
-                if only_ascii_used {
-                    // Ensure that there is space in the buffer.
-                    // Since we're only dealing with ASCII, we need at most 1 byte.
-                    if let Some(buf) = buf.get_mut(idx..idx + 1) {
-                        // Convert the ASCII character to lowercase.
-                        buf[0] = part.to_ascii_lowercase() as u8;
-                        idx += 1;
-                    }
-                }
-            } else {
-                break;
-            }
-        }
-
-        (idx, only_ascii_used)
-    }
-
-    /// Consume a character that forms part of a CSS identifier.
-    ///
-    /// Before calling this function, you should make sure that there is a valid identifier start
-    /// using [Self::is_ident_start].
-    ///
-    /// Also handles CSS escape sequences in identifiers and attach appropriate diagnostics for invalid cases.
-    ///
-    /// Returns the consumed character wrapped in `Some` if it is part of an identifier,
-    /// and `None` if it is not.
-    fn consume_ident_part(&mut self, current: u8, allow_slash: bool) -> Option<char> {
-        let dispatched = lookup_byte(current);
-
-        if allow_slash && dispatched == SLH {
-            self.advance(1);
-            return Some(current as char);
-        }
-        if self.options.is_tailwind_directives_enabled()
-            && dispatched == MIN
-            && self.peek_byte().map(lookup_byte) == Some(MUL)
-        {
-            // HACK: handle `--*`
-            if self.prev_byte().map(lookup_byte) == Some(MIN) {
-                self.advance(1);
-                return Some(current as char);
-            }
-            // otherwise, handle cases like `--color-*`
-            return None;
-        }
-
-        let chr = match dispatched {
-            IDT | MIN | DIG | ZER => {
-                self.advance(1);
-                // SAFETY: We know that the current byte is a hyphen or a number.
-                current as char
-            }
-            // name code point
-            UNI => {
-                // SAFETY: We know that the current byte is a valid unicode code point
-                let chr = self.current_char_unchecked();
-                if is_css_non_ascii(chr) {
-                    self.advance(chr.len_utf8());
-                    chr
-                } else {
-                    return None;
-                }
-            }
-            // U+005C REVERSE SOLIDUS (\)
-            // If the first and second code points are a valid escape, continue consume.
-            // Otherwise, break.
-            // BSL if self.is_valid_escape_at(1) => '\\',
-            BSL if self.is_valid_escape_at(1) => {
-                let escape_start = self.text_position();
-                self.advance(1);
-
-                match self.current_byte() {
-                    // Any valid escape sequence can be used as an identifier,
-                    // even if it becomes the REPLACEMENT CHARACTER (like `\0`).
-                    // This is important to handle for cases like the "media
-                    // min-width hack": http://browserbu.gs/css-hacks/media-min-width-0-backslash-0/.
-                    Some(c) if c.is_ascii_hexdigit() => self.consume_escape_sequence(),
-
-                    Some(_) => {
-                        let chr = self.current_char_unchecked();
-                        self.advance(chr.len_utf8());
-                        chr
-                    }
-
-                    None => {
-                        let diagnostic = ParseDiagnostic::new(
-                            "Invalid escape sequence",
-                            escape_start..self.text_position(),
-                        );
-                        self.diagnostics.push(diagnostic);
-
-                        return None;
-                    }
-                }
-            }
-            _ => return None,
+        let mut scan_cursor = self.scan_cursor();
+        let scan = if allow_slash {
+            scan_cursor.consume_ident_sequence_with_slash(buf)
+        } else {
+            scan_cursor.consume_ident_sequence(buf)
         };
+        let mut position = scan.position;
+        let mut count = scan.count;
+        if self.options.is_tailwind_directives_enabled() && scan.stop_byte == Some(b'*') {
+            // Tailwind keeps `--*` as a unit, but stops before the trailing
+            // `-` in patterns like `--color-*`. Check the raw source bytes at
+            // the scan boundary so escaped hyphens do not trigger this fixup.
+            let prev_is_hyphen = self.byte_before(scan.position, 1) == Some(b'-');
+            let prev_prev_is_hyphen = self.byte_before(scan.position, 2) == Some(b'-');
 
-        Some(chr)
+            if prev_is_hyphen && !prev_prev_is_hyphen {
+                position = position.saturating_sub(1);
+
+                // Only trim the keyword-buffer count if that trailing `-`
+                // actually fit into the ASCII buffer.
+                if scan.only_ascii_used && scan.last_was_buffered {
+                    count = count.saturating_sub(1);
+                }
+            }
+        }
+
+        self.set_position(position);
+        (count, scan.only_ascii_used)
     }
 
     /// Lexes a comment.
@@ -1519,7 +1353,7 @@ impl<'src> CssLexer<'src> {
                 let err =
                     ParseDiagnostic::new("Unterminated block comment", start..self.text_position())
                         .with_detail(
-                            self.position..self.position + 1,
+                            self.position()..self.position() + 1,
                             "... but the file ends here",
                         );
 
@@ -1743,54 +1577,10 @@ impl<'src> CssLexer<'src> {
 
     /// Check if the lexer starts an identifier.
     fn is_ident_start(&self) -> bool {
-        // See https://drafts.csswg.org/css-syntax-3/#typedef-ident-token
-        let Some(current) = self.current_byte() else {
-            return false;
-        };
-        // Look at the first code point:
-        match lookup_byte(current) {
-            // U+002D HYPHEN-MINUS
-            MIN => {
-                let Some(next) = self.peek_byte() else {
-                    return false;
-                };
-                match lookup_byte(next) {
-                    MIN => {
-                        let Some(next) = self.byte_at(2) else {
-                            return false;
-                        };
-                        match lookup_byte(next) {
-                            IDT | MIN | DIG | ZER => true,
-                            // If the third code point is a name-start code point
-                            // return true.
-                            // SAFETY: offset 2 is reached only after two ASCII
-                            // `-` bytes, so it is a valid UTF-8 boundary.
-                            UNI => is_css_non_ascii(self.char_unchecked_at(2)),
-                            // or the third and fourth code points are a valid escape
-                            // return true.
-                            BSL => self.is_valid_escape_at(3),
-                            MUL => true,
-                            _ => false,
-                        }
-                    }
-                    IDT => true,
-                    // If the second code point is a name-start code point
-                    // return true.
-                    UNI => is_css_non_ascii(self.peek_char_unchecked()),
-                    // or the second and third code points are a valid escape
-                    // return true.
-                    BSL => self.is_valid_escape_at(2),
-                    _ => false,
-                }
-            }
-            IDT => true,
-            UNI => is_css_non_ascii(self.current_char_unchecked()),
-            // U+005C REVERSE SOLIDUS (\)
-            // If the first and second code points are a valid escape, return true. Otherwise,
-            // return false.
-            BSL => self.is_valid_escape_at(1),
-            _ => false,
-        }
+        // ASCII identifier bytes are already proven by dispatch, so avoid
+        // building a shared scan cursor for that trivial hot path.
+        matches!(self.current_byte().map(lookup_byte), Some(IDT))
+            || self.scan_cursor().is_ident_start()
     }
 
     fn consume_token_tailwind_utility(&mut self, current: u8) -> CssSyntaxKind {
@@ -1838,8 +1628,8 @@ impl<'src> CssLexer<'src> {
 
 impl<'src> ReLexer<'src> for CssLexer<'src> {
     fn re_lex(&mut self, context: Self::ReLexContext) -> Self::Kind {
-        let old_position = self.position;
-        self.position = u32::from(self.current_start) as usize;
+        let old_position = self.position();
+        self.set_position(usize::from(self.current_start));
 
         let re_lexed_kind = match self.current_byte() {
             Some(current) => match context {
@@ -1852,7 +1642,7 @@ impl<'src> ReLexer<'src> for CssLexer<'src> {
 
         if self.current() == re_lexed_kind {
             // Didn't re-lex anything. Return existing token again
-            self.position = old_position;
+            self.set_position(old_position);
         } else {
             self.current_kind = re_lexed_kind;
         }
@@ -1861,9 +1651,36 @@ impl<'src> ReLexer<'src> for CssLexer<'src> {
     }
 }
 
-impl CssLexer<'_> {
+impl<'src> CssLexer<'src> {
     pub(crate) fn has_pending_scss_string_start(&self) -> bool {
         self.pending_scss_string_start.is_some()
+    }
+
+    /// Returns true when `start` begins an interpolation-containing identifier
+    /// immediately followed by `(`, without consuming lexer state.
+    pub(crate) fn is_at_scss_interpolated_function(&self, start: usize) -> bool {
+        self.scan_cursor_at(start)
+            .is_at_scss_interpolated_function()
+    }
+
+    fn take_pending_url_raw_value_scan_at_current_position(
+        &mut self,
+    ) -> Option<PendingUrlRawValueScan> {
+        let scan = self.pending_url_raw_value_scan?;
+
+        if scan.start == self.position() {
+            self.pending_url_raw_value_scan = None;
+            Some(scan)
+        } else {
+            if self.position() > scan.start {
+                // A fallback tokenization path already moved past the cached
+                // raw-literal start, so the speculative range is no longer
+                // aligned with the real lexer position.
+                self.pending_url_raw_value_scan = None;
+            }
+
+            None
+        }
     }
 
     fn consume_scss_expression_token(&mut self, current: u8) -> CssSyntaxKind {
@@ -1873,12 +1690,21 @@ impl CssLexer<'_> {
             _ => self.consume_token(current),
         }
     }
+
+    fn scan_url_body_start(
+        &self,
+        start: usize,
+        scss_exclusive_syntax_allowed: bool,
+    ) -> UrlBodyStartScan {
+        self.scan_cursor_at(start)
+            .scan_url_body_start(scss_exclusive_syntax_allowed)
+    }
 }
 
 impl<'src> LexerWithCheckpoint<'src> for CssLexer<'src> {
     fn checkpoint(&self) -> LexerCheckpoint<Self::Kind> {
         LexerCheckpoint {
-            position: TextSize::from(self.position as u32),
+            position: TextSize::from(self.cursor.position() as u32),
             current_start: self.current_start,
             current_flags: self.current_flags,
             current_kind: self.current_kind,
@@ -1945,49 +1771,4 @@ enum SameQuoteInInterpolation {
     NestedString(StringBodyScan),
     /// The quote should be treated as the outer string closing early.
     OuterQuote,
-}
-
-/// Result of scanning a string body from the current lexer position.
-#[derive(Debug, Clone, Eq, PartialEq)]
-struct StringBodyScan {
-    /// Where scanning stopped.
-    stop: StringBodyScanStop,
-    /// Ranges of invalid escape sequences encountered before the stop
-    /// boundary. The caller decides when to emit diagnostics for them.
-    issues: SmallVec<[StringIssue; 1]>,
-}
-
-/// Next boundary encountered while scanning a string body.
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-enum StringBodyScanStop {
-    /// An unescaped `#{` starts an interpolation part.
-    Interpolation { position: usize },
-    /// The matching quote closes the outer string.
-    ClosingQuote { position: usize },
-    /// A newline terminates the string as malformed input.
-    Newline { position: usize, len: usize },
-    /// The file ended before a closing quote was found.
-    Eof { position: usize },
-}
-
-/// Non-fatal issues discovered while scanning a quoted string body.
-///
-/// These are returned as data by the shared string-body scanner. The caller
-/// decides when to emit diagnostics after committing the scan result.
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-enum StringIssue {
-    /// Invalid escape sequence such as `\0`.
-    InvalidEscape(TextRange),
-}
-
-/// Decodes a CSS hex escape sequence into a Unicode scalar value or the
-/// replacement character when the escape is invalid.
-#[inline]
-fn decode_escaped_code_point(hex: u32) -> char {
-    match hex {
-        0 => REPLACEMENT_CHARACTER,
-        55_296..=57_343 => REPLACEMENT_CHARACTER,
-        1_114_112.. => REPLACEMENT_CHARACTER,
-        _ => char::from_u32(hex).unwrap_or(REPLACEMENT_CHARACTER),
-    }
 }

@@ -355,6 +355,10 @@ impl Format<FormatTypeContext> for TypeMemberKind {
                 let quoted = std::format!("\"{name}\"");
                 write!(f, [text(&quoted, TextSize::default())])
             }
+            Self::NamedOptional(name) => {
+                let quoted = std::format!("\"{name}\"?");
+                write!(f, [text(&quoted, TextSize::default())])
+            }
             Self::NamedStatic(name) => {
                 let quoted = std::format!("static \"{name}\"");
                 write!(f, [text(&quoted, TextSize::default())])

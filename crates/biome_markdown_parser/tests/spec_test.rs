@@ -193,28 +193,9 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     });
 }
 
-/// Normalize HTML for comparison, preserving whitespace inside `<pre>` blocks.
-/// Matches the normalization in `xtask/coverage/src/markdown/commonmark.rs`.
-fn normalize_html(html: &str) -> String {
-    let mut result = Vec::new();
-    let mut in_pre = false;
-
-    for line in html.lines() {
-        if line.contains("<pre") {
-            in_pre = true;
-        }
-        if in_pre {
-            result.push(line.to_string());
-        } else {
-            result.push(line.trim_end().to_string());
-        }
-        if line.contains("</pre>") {
-            in_pre = false;
-        }
-    }
-
-    result.join("\n").trim().to_string() + "\n"
-}
+#[path = "test_utils.rs"]
+mod test_utils;
+use test_utils::normalize_html;
 
 #[test]
 pub fn quick_test() {
@@ -289,6 +270,22 @@ pub fn quick_test() {
         "<blockquote>\n<pre><code>hello\n</code></pre>\n</blockquote>\n",
     );
     test_example(
+        99922,
+        "> foo  \n> bar\n",
+        "<blockquote>\n<p>foo<br />\nbar</p>\n</blockquote>\n",
+    );
+    // Quoted indented code must terminate before a quoted thematic break.
+    test_example(
+        99921,
+        ">     code\n> ---\n",
+        "<blockquote>\n<pre><code>code\n</code></pre>\n<hr />\n</blockquote>\n",
+    );
+    test_example(
+        99923,
+        ">\t>\tfoo\n",
+        "<blockquote>\n<blockquote>\n<p>foo</p>\n</blockquote>\n</blockquote>\n",
+    );
+    test_example(
         9993,
         "- foo\n  - bar\n",
         "<ul>\n<li>foo\n<ul>\n<li>bar</li>\n</ul>\n</li>\n</ul>\n",
@@ -304,6 +301,8 @@ pub fn quick_test() {
         " - foo\n   - bar\n\t - baz\n",
         "<ul>\n<li>foo\n<ul>\n<li>bar\n<ul>\n<li>baz</li>\n</ul>\n</li>\n</ul>\n</li>\n</ul>\n",
     );
+    test_example(10014, "-\tfoo\n", "<ul>\n<li>foo</li>\n</ul>\n");
+    test_example(10015, "- \t foo\n", "<ul>\n<li>foo</li>\n</ul>\n");
     test_example(
         10002,
         "1.  A paragraph\n    with two lines.\n\n        indented code\n\n    > A block quote.\n",
@@ -319,17 +318,29 @@ pub fn quick_test() {
         "- outer item\n  - inner item\n    inner continuation\n  outer continuation at parent indentation\n\n- next outer item\n",
         "<ul>\n<li>\n<p>outer item</p>\n<ul>\n<li>inner item\ninner continuation\nouter continuation at parent indentation</li>\n</ul>\n</li>\n<li>\n<p>next outer item</p>\n</li>\n</ul>\n",
     );
-    // Mixed ordered delimiters across blank lines produce separate lists
+    // Mixed ordered delimiters across blank lines produce separate tight lists
     test_example(
         10005,
         "1. one\n\n2) two\n",
-        "<ol>\n<li>\n<p>one</p>\n</li>\n</ol>\n<ol start=\"2\">\n<li>\n<p>two</p>\n</li>\n</ol>\n",
+        "<ol>\n<li>one</li>\n</ol>\n<ol start=\"2\">\n<li>two</li>\n</ol>\n",
     );
-    // Mixed bullet markers across blank lines produce separate lists
+    // Mixed bullet markers across blank lines produce separate tight lists
     test_example(
         10006,
         "- one\n\n+ two\n",
-        "<ul>\n<li>\n<p>one</p>\n</li>\n</ul>\n<ul>\n<li>\n<p>two</p>\n</li>\n</ul>\n",
+        "<ul>\n<li>one</li>\n</ul>\n<ul>\n<li>two</li>\n</ul>\n",
+    );
+    // Bullet → ordered across blank lines produce separate lists
+    test_example(
+        10012,
+        "- bullet\n\n1. ordered\n",
+        "<ul>\n<li>bullet</li>\n</ul>\n<ol>\n<li>ordered</li>\n</ol>\n",
+    );
+    // Ordered → bullet across blank lines produce separate lists
+    test_example(
+        10013,
+        "1. ordered\n\n- bullet\n",
+        "<ol>\n<li>ordered</li>\n</ol>\n<ul>\n<li>bullet</li>\n</ul>\n",
     );
     // Nested list items separated by blank lines stay in the same nested list.
     test_example(
@@ -379,5 +390,166 @@ pub fn quick_test() {
         20003,
         "Allowed: <div class=\"a\"\n>ok</div> tag.\n",
         "<p>Allowed: &lt;div class=&quot;a&quot;</p>\n<blockquote>\n<p>ok</div> tag.</p>\n</blockquote>\n",
+    );
+    // Setext heading inside blockquote
+    test_example(
+        20002,
+        "> Foo\n> ---\n",
+        "<blockquote>\n<h2>Foo</h2>\n</blockquote>\n",
+    );
+    test_example(20003, "> ---\n", "<blockquote>\n<hr />\n</blockquote>\n");
+
+    // Single-item lists split by marker change should be tight
+    test_example(
+        20008,
+        "* item one\n\n- item two\n",
+        "<ul>\n<li>item one</li>\n</ul>\n<ul>\n<li>item two</li>\n</ul>\n",
+    );
+
+    // Fuzzer: mixed markers after heading-in-list — 3 markers
+    test_example(
+        30001,
+        "- # Bar\n\n+ item one\n\n* item two\n",
+        "<ul>\n<li>\n<h1>Bar</h1>\n</li>\n</ul>\n<ul>\n<li>item one</li>\n</ul>\n<ul>\n<li>item two</li>\n</ul>\n",
+    );
+    // Reduce: heading in list then different marker
+    test_example(
+        30011,
+        "- # Bar\n\n+ item\n",
+        "<ul>\n<li>\n<h1>Bar</h1>\n</li>\n</ul>\n<ul>\n<li>item</li>\n</ul>\n",
+    );
+    // Reduce: paragraph in list then different marker (should work like 10006)
+    test_example(
+        30012,
+        "- bar\n\n+ item\n",
+        "<ul>\n<li>bar</li>\n</ul>\n<ul>\n<li>item</li>\n</ul>\n",
+    );
+    // Reduce: thematic break precedence over list-item interpretation.
+    // CommonMark §4.1 (Examples 60-61) gives the thematic break precedence for `- ---`.
+    test_example(
+        30013,
+        "- ---\n\n+ item\n",
+        "<hr />\n<ul>\n<li>item</li>\n</ul>\n",
+    );
+    // Reduce: setext heading in list then different marker
+    test_example(
+        30014,
+        "- Foo\n  ---\n\n+ item\n",
+        "<ul>\n<li>\n<h2>Foo</h2>\n</li>\n</ul>\n<ul>\n<li>item</li>\n</ul>\n",
+    );
+
+    // Fuzzer: lazy continuation with trailing paragraph
+    test_example(
+        30002,
+        "- outer\n  * nested\n  lazy line\nhello\n",
+        "<ul>\n<li>outer\n<ul>\n<li>nested\nlazy line\nhello</li>\n</ul>\n</li>\n</ul>\n",
+    );
+
+    // Fuzzer: fenced code after list not absorbed
+    test_example(
+        30003,
+        "* one\n* two\n```\ncode here\n```\n",
+        "<ul>\n<li>one</li>\n<li>two</li>\n</ul>\n<pre><code>code here\n</code></pre>\n",
+    );
+
+    // Fuzzer: mixed markers after fenced code in list item
+    test_example(
+        30004,
+        "- item\n\n  ```\n  code\n  ```\n\n+ other\n",
+        "<ul>\n<li>\n<p>item</p>\n<pre><code>code\n</code></pre>\n</li>\n</ul>\n<ul>\n<li>other</li>\n</ul>\n",
+    );
+
+    // Fuzzer: lazy continuation absorbs following non-indented line
+    test_example(
+        30005,
+        "- outer\n  - nested\n  lazy line\nhello\n",
+        "<ul>\n<li>outer\n<ul>\n<li>nested\nlazy line\nhello</li>\n</ul>\n</li>\n</ul>\n",
+    );
+}
+
+fn fuzz_test_example(num: u32, input: &str, expected: &str) {
+    let root = parse_markdown(input);
+    let doc =
+        MdDocument::cast(root.syntax()).unwrap_or_else(|| panic!("Fuzz {:03}: parse failed", num));
+    let html = document_to_html(
+        &doc,
+        root.list_tightness(),
+        root.list_item_indents(),
+        root.quote_indents(),
+    );
+    similar_asserts::assert_eq!(expected, html, "Fuzz {:03} failed\nInput: {:?}", num, input);
+}
+
+#[test]
+fn fuzz_mixed_markers_heading() {
+    fuzz_test_example(
+        1,
+        "- # Bar\n\n+ item\n",
+        "<ul>\n<li>\n<h1>Bar</h1>\n</li>\n</ul>\n<ul>\n<li>item</li>\n</ul>\n",
+    );
+}
+
+#[test]
+fn fuzz_mixed_markers_paragraph() {
+    fuzz_test_example(
+        2,
+        "- bar\n\n+ item\n",
+        "<ul>\n<li>bar</li>\n</ul>\n<ul>\n<li>item</li>\n</ul>\n",
+    );
+}
+
+/// CommonMark §4.1 (Examples 60-61) gives the thematic break precedence over the
+/// list-item interpretation for `- ---`, so this should stay a top-level `<hr />`.
+#[test]
+fn fuzz_mixed_markers_thematic_break() {
+    fuzz_test_example(
+        3,
+        "- ---\n\n+ item\n",
+        "<hr />\n<ul>\n<li>item</li>\n</ul>\n",
+    );
+}
+
+#[test]
+fn fuzz_mixed_markers_setext() {
+    fuzz_test_example(
+        4,
+        "- Foo\n  ---\n\n+ item\n",
+        "<ul>\n<li>\n<h2>Foo</h2>\n</li>\n</ul>\n<ul>\n<li>item</li>\n</ul>\n",
+    );
+}
+
+#[test]
+fn fuzz_mixed_markers_fenced_code() {
+    fuzz_test_example(
+        5,
+        "- item\n\n  ```\n  code\n  ```\n\n+ other\n",
+        "<ul>\n<li>\n<p>item</p>\n<pre><code>code\n</code></pre>\n</li>\n</ul>\n<ul>\n<li>other</li>\n</ul>\n",
+    );
+}
+
+#[test]
+fn fuzz_lazy_cont_nested_trailing() {
+    fuzz_test_example(
+        6,
+        "- outer\n  * nested\n  lazy line\nhello\n",
+        "<ul>\n<li>outer\n<ul>\n<li>nested\nlazy line\nhello</li>\n</ul>\n</li>\n</ul>\n",
+    );
+}
+
+#[test]
+fn fuzz_lazy_cont_nested_same_marker() {
+    fuzz_test_example(
+        7,
+        "- outer\n  - nested\n  lazy line\nhello\n",
+        "<ul>\n<li>outer\n<ul>\n<li>nested\nlazy line\nhello</li>\n</ul>\n</li>\n</ul>\n",
+    );
+}
+
+#[test]
+fn fuzz_code_after_list_not_absorbed() {
+    fuzz_test_example(
+        8,
+        "* one\n* two\n```\ncode here\n```\n",
+        "<ul>\n<li>one</li>\n<li>two</li>\n</ul>\n<pre><code>code here\n</code></pre>\n",
     );
 }

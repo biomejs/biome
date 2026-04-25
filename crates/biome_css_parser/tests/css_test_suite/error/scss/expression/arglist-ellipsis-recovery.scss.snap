@@ -20,7 +20,7 @@ CssRoot {
     items: CssRootItemList [
         CssBogus {
             items: [
-                ScssIdentifier {
+                ScssVariable {
                     dollar_token: DOLLAR@0..67 "$" [Comments("// Stray tokens after ..."), Newline("\n")] [],
                     name: CssIdentifier {
                         value_token: IDENT@67..83 "arglist-recovery" [] [],
@@ -42,7 +42,7 @@ CssRoot {
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
                                                         ScssArbitraryArgument {
-                                                            value: ScssIdentifier {
+                                                            value: ScssVariable {
                                                                 dollar_token: DOLLAR@89..90 "$" [] [],
                                                                 name: CssIdentifier {
                                                                     value_token: IDENT@90..91 "a" [] [],
@@ -64,7 +64,7 @@ CssRoot {
                                                 ScssExpression {
                                                     items: ScssExpressionItemList [
                                                         ScssKeywordArgument {
-                                                            name: ScssIdentifier {
+                                                            name: ScssVariable {
                                                                 dollar_token: DOLLAR@101..102 "$" [] [],
                                                                 name: CssIdentifier {
                                                                     value_token: IDENT@102..103 "b" [] [],
@@ -106,7 +106,7 @@ CssRoot {
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..108
     0: CSS_BOGUS@0..108
-      0: SCSS_IDENTIFIER@0..83
+      0: SCSS_VARIABLE@0..83
         0: DOLLAR@0..67 "$" [Comments("// Stray tokens after ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@67..83
           0: IDENT@67..83 "arglist-recovery" [] []
@@ -121,7 +121,7 @@ CssRoot {
               0: SCSS_EXPRESSION@89..94
                 0: SCSS_EXPRESSION_ITEM_LIST@89..94
                   0: SCSS_ARBITRARY_ARGUMENT@89..94
-                    0: SCSS_IDENTIFIER@89..91
+                    0: SCSS_VARIABLE@89..91
                       0: DOLLAR@89..90 "$" [] []
                       1: CSS_IDENTIFIER@90..91
                         0: IDENT@90..91 "a" [] []
@@ -135,7 +135,7 @@ CssRoot {
               4: SCSS_EXPRESSION@101..106
                 0: SCSS_EXPRESSION_ITEM_LIST@101..106
                   0: SCSS_KEYWORD_ARGUMENT@101..106
-                    0: SCSS_IDENTIFIER@101..103
+                    0: SCSS_VARIABLE@101..103
                       0: DOLLAR@101..102 "$" [] []
                       1: CSS_IDENTIFIER@102..103
                         0: IDENT@102..103 "b" [] []

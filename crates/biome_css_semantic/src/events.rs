@@ -65,6 +65,7 @@ impl SemanticEventExtractor {
                 || kind == CSS_NESTED_QUALIFIED_RULE
                 || kind == CSS_CONTAINER_AT_RULE
                 || kind == CSS_MEDIA_AT_RULE
+                || kind == CSS_SCOPE_AT_RULE
                 || kind == CSS_STARTING_STYLE_AT_RULE
                 || kind == CSS_SUPPORTS_AT_RULE =>
             {
@@ -278,6 +279,7 @@ impl SemanticEventExtractor {
                 | CSS_NESTED_QUALIFIED_RULE
                 | CSS_CONTAINER_AT_RULE
                 | CSS_MEDIA_AT_RULE
+                | CSS_SCOPE_AT_RULE
                 | CSS_STARTING_STYLE_AT_RULE
                 | CSS_SUPPORTS_AT_RULE
         ) {

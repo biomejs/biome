@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use biome_markdown_syntax::MdContinuationIndent;
-use biome_rowan::AstNode;
+use biome_markdown_syntax::{MdContinuationIndent, MdContinuationIndentFields};
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdContinuationIndent;
 impl FormatNodeRule<MdContinuationIndent> for FormatMdContinuationIndent {
@@ -9,6 +9,8 @@ impl FormatNodeRule<MdContinuationIndent> for FormatMdContinuationIndent {
         node: &MdContinuationIndent,
         f: &mut MarkdownFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let MdContinuationIndentFields { indent } = node.as_fields();
+
+        indent.format().fmt(f)
     }
 }

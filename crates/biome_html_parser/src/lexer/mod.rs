@@ -501,7 +501,7 @@ impl<'src> HtmlLexer<'src> {
                     brackets_stack += 1;
                     self.advance(1)
                 }
-                _ if is_closing_paren(current) && !kind.matches_punct(current) => {
+                _ if is_closing_paren(current) => {
                     if brackets_stack == 0 {
                         // Reached the closing brace
                         break;
@@ -663,6 +663,7 @@ impl<'src> HtmlLexer<'src> {
             WHS => self.consume_newline_or_whitespaces(),
             BEC => self.consume_byte(T!['}']),
             PRD if self.is_at_three_dots() => self.consume_dot3(),
+            PRD => self.consume_byte(T![.]),
             COM => self.consume_byte(T![,]),
             PNO => self.consume_byte(T!['(']),
             PNC => self.consume_byte(T![')']),

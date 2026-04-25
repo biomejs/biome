@@ -24,8 +24,8 @@ $func-args: foo(1 + 2, $a..., 3 * 4);
 CssRoot {
     bom_token: missing (optional),
     items: CssRootItemList [
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@0..36 "$" [Comments("// Parenthesized list ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@36..46 "paren-list" [] [],
@@ -56,8 +56,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@55..56 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@56..101 "$" [Newline("\n"), Newline("\n"), Comments("// Map value that is  ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@101..114 "map-with-list" [] [],
@@ -105,8 +105,8 @@ CssRoot {
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@126..127 ";" [] [],
         },
-        ScssDeclaration {
-            name: ScssIdentifier {
+        ScssVariableDeclaration {
+            name: ScssVariable {
                 dollar_token: DOLLAR@127..176 "$" [Newline("\n"), Newline("\n"), Comments("// Function args with ..."), Newline("\n")] [],
                 name: CssIdentifier {
                     value_token: IDENT@176..185 "func-args" [] [],
@@ -138,7 +138,7 @@ CssRoot {
                             ScssExpression {
                                 items: ScssExpressionItemList [
                                     ScssArbitraryArgument {
-                                        value: ScssIdentifier {
+                                        value: ScssVariable {
                                             dollar_token: DOLLAR@198..199 "$" [] [],
                                             name: CssIdentifier {
                                                 value_token: IDENT@199..200 "a" [] [],
@@ -181,8 +181,8 @@ CssRoot {
 0: CSS_ROOT@0..213
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..212
-    0: SCSS_DECLARATION@0..56
-      0: SCSS_IDENTIFIER@0..46
+    0: SCSS_VARIABLE_DECLARATION@0..56
+      0: SCSS_VARIABLE@0..46
         0: DOLLAR@0..36 "$" [Comments("// Parenthesized list ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@36..46
           0: IDENT@36..46 "paren-list" [] []
@@ -202,8 +202,8 @@ CssRoot {
             2: R_PAREN@54..55 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@55..55
       4: SEMICOLON@55..56 ";" [] []
-    1: SCSS_DECLARATION@56..127
-      0: SCSS_IDENTIFIER@56..114
+    1: SCSS_VARIABLE_DECLARATION@56..127
+      0: SCSS_VARIABLE@56..114
         0: DOLLAR@56..101 "$" [Newline("\n"), Newline("\n"), Comments("// Map value that is  ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@101..114
           0: IDENT@101..114 "map-with-list" [] []
@@ -233,8 +233,8 @@ CssRoot {
             2: R_PAREN@125..126 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@126..126
       4: SEMICOLON@126..127 ";" [] []
-    2: SCSS_DECLARATION@127..212
-      0: SCSS_IDENTIFIER@127..185
+    2: SCSS_VARIABLE_DECLARATION@127..212
+      0: SCSS_VARIABLE@127..185
         0: DOLLAR@127..176 "$" [Newline("\n"), Newline("\n"), Comments("// Function args with ..."), Newline("\n")] []
         1: CSS_IDENTIFIER@176..185
           0: IDENT@176..185 "func-args" [] []
@@ -258,7 +258,7 @@ CssRoot {
               2: SCSS_EXPRESSION@198..203
                 0: SCSS_EXPRESSION_ITEM_LIST@198..203
                   0: SCSS_ARBITRARY_ARGUMENT@198..203
-                    0: SCSS_IDENTIFIER@198..200
+                    0: SCSS_VARIABLE@198..200
                       0: DOLLAR@198..199 "$" [] []
                       1: CSS_IDENTIFIER@199..200
                         0: IDENT@199..200 "a" [] []

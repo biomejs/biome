@@ -1,0 +1,14 @@
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noShadow": {
+          "level": "error",
+          "options": {
+            "ignoreFunctionTypeParameterNameValueShadow": false
+          }
+        }
+      }
+    }
+  }
+}

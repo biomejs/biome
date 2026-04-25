@@ -38,7 +38,7 @@ info: markdown/linkReference/case-and-space/case-and-space.md
  # `linkReference`
  
 -[ See `AsyncGeneratorFunction` ][ See `AsyncGeneratorFunction` ]
-+[   See   `AsyncGeneratorFunction`   ][   See   `AsyncGeneratorFunction`   ]
++[   See   `AsyncGeneratorFunction`][   See   `AsyncGeneratorFunction`   ]
  
  # `imageReference`
  
@@ -54,7 +54,7 @@ info: markdown/linkReference/case-and-space/case-and-space.md
 ```md
 # `linkReference`
 
-[   See   `AsyncGeneratorFunction`   ][   See   `AsyncGeneratorFunction`   ]
+[   See   `AsyncGeneratorFunction`][   See   `AsyncGeneratorFunction`   ]
 
 # `imageReference`
 

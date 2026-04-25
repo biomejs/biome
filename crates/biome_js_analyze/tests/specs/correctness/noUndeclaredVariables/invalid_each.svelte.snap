@@ -1,0 +1,125 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_each.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+let items = [];
+let rows = [];
+let pairs = [];
+</script>
+
+{#each items as item}
+    <span>{other.name}</span>
+{/each}
+
+{#each items as item, index}
+    <span>{i}: {item.name}</span>
+{/each}
+
+{#each rows as { id, label }}
+    <span>{name}: {label}</span>
+{/each}
+
+{#each pairs as [first, second]}
+    <span>{third}</span>
+{/each}
+
+{#each rows as { id, ...rest }}
+    <span>{others}</span>
+{/each}
+
+{#each items as item (key)}
+    <span>{item.name}</span>
+{/each}
+
+```
+
+# Diagnostics
+```
+invalid_each.svelte:9:12 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The other variable is undeclared.
+  
+     8 │ {#each items as item}
+   > 9 │     <span>{other.name}</span>
+       │            ^^^^^
+    10 │ {/each}
+    11 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+invalid_each.svelte:13:12 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The i variable is undeclared.
+  
+    12 │ {#each items as item, index}
+  > 13 │     <span>{i}: {item.name}</span>
+       │            ^
+    14 │ {/each}
+    15 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+invalid_each.svelte:21:12 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The third variable is undeclared.
+  
+    20 │ {#each pairs as [first, second]}
+  > 21 │     <span>{third}</span>
+       │            ^^^^^
+    22 │ {/each}
+    23 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+invalid_each.svelte:25:12 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The others variable is undeclared.
+  
+    24 │ {#each rows as { id, ...rest }}
+  > 25 │     <span>{others}</span>
+       │            ^^^^^^
+    26 │ {/each}
+    27 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+invalid_each.svelte:28:23 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key variable is undeclared.
+  
+    26 │ {/each}
+    27 │ 
+  > 28 │ {#each items as item (key)}
+       │                       ^^^
+    29 │     <span>{item.name}</span>
+    30 │ {/each}
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```

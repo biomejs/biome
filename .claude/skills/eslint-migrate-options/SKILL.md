@@ -13,7 +13,7 @@ This skill is specifically for cases where an ESLint rule has options that need 
 - deserialized from ESLint config
 - translated into Biome rule options
 - wired into the migrate pipeline
-- tested so the CLI produces the expected Biome config
+- tested through migrator spec fixtures without depending on CLI tests
 
 Do not use this skill for severity-only migrations. Those are usually covered by the generated rule mapping in `eslint_any_rule_to_biome.rs`.
 
@@ -60,6 +60,7 @@ Add a custom migrator only when a config like this should keep its options:
 | `crates/biome_cli/src/execute/migrate/eslint_typescript.rs` | `@typescript-eslint` option structs and conversions |
 | `crates/biome_cli/src/execute/migrate/eslint_jsxa11y.rs` | `jsx-a11y` option structs and conversions |
 | `crates/biome_cli/src/execute/migrate/eslint_to_biome.rs` | Main conversion logic, including `migrate_eslint_rule()` |
+| `crates/biome_cli/tests/specs/migrate_eslint/` | Fixture-driven snapshot tests for custom ESLint migrators |
 | `crates/biome_cli/src/execute/migrate/eslint_any_rule_to_biome.rs` | Generated severity mapping for all known ESLint-backed rules |
 | `xtask/codegen/src/generate_migrate_eslint.rs` | Codegen for the generated rule mapping |
 
@@ -290,14 +291,22 @@ At minimum, verify all of these:
 3. Unsupported ESLint knobs do not break deserialization.
 4. Empty or partially specified nested options do not emit incorrect Biome config.
 
+Use the migrator spec fixtures in `crates/biome_cli/tests/specs/migrate_eslint/` as the default test path for custom migrators.
+
+- Add one fixture file per case.
+- Keep the fixture focused on `eslint` input and pre-migration `biome` config input.
+- Let the generated test runner in `eslint_to_biome.rs` discover the file and write the adjacent `.snap.new`.
+- Prefer adding or updating these fixture snapshots instead of writing a new full CLI test when you are verifying custom option migration behavior.
+- After inspecting snapshot differences, use `cargo insta accept` to accept valid new snapshots, or `cargo insta reject` to reject invalid ones and keep iterating.
+
+CLI tests in `crates/biome_cli/tests/commands/migrate_eslint.rs` should be treated as smoke coverage for command wiring and end-to-end behavior, not the primary place to test custom migrators.
+
 Useful commands:
 
 ```shell
 cargo check -p biome_cli
-cargo test -p biome_cli migrate
+cargo test -p biome_cli migrate_eslint
 ```
-
-If you add or update a CLI migration test, also inspect the expected output to confirm the serialized Biome config reflects the intended option mapping.
 
 When the rule itself has analyzer behavior tied to the options, run targeted analyzer tests too:
 
@@ -316,7 +325,7 @@ Before finishing, confirm:
 - the `From` impl maps semantics correctly, not just names mechanically
 - `migrate_eslint_any_rule()` is still called first
 - the chosen Biome rule group and configuration type are correct
-- tests cover both severity-only and option-bearing configs
+- migrator spec fixtures cover both severity-only and option-bearing configs when relevant
 
 ## References
 

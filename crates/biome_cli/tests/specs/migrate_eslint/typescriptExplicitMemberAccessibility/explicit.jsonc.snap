@@ -1,0 +1,46 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: explicit.jsonc
+---
+## ESLint Config
+
+```json
+{
+	"rules": {
+		"@typescript-eslint/explicit-member-accessibility": [
+			"error",
+			{
+				"accessibility": "explicit",
+				"overrides": { "constructors": "no-public" }
+			}
+		]
+	}
+}
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"recommended": false,
+			"style": {
+				"useConsistentMemberAccessibility": {
+					"level": "error",
+					"options": { "accessibility": "explicit" }
+				}
+			}
+		}
+	}
+}
+
+```

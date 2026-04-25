@@ -14,6 +14,9 @@ impl FormatRule<AnyScssInterpolatedIdentifierPart> for FormatAnyScssInterpolated
         match node {
             AnyScssInterpolatedIdentifierPart::CssCustomIdentifier(node) => node.format().fmt(f),
             AnyScssInterpolatedIdentifierPart::CssIdentifier(node) => node.format().fmt(f),
+            AnyScssInterpolatedIdentifierPart::ScssInterpolatedIdentifierHyphen(node) => {
+                node.format().fmt(f)
+            }
             AnyScssInterpolatedIdentifierPart::ScssInterpolation(node) => node.format().fmt(f),
         }
     }
