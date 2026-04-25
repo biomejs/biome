@@ -8,9 +8,8 @@ use biome_deserialize::Deserializable;
 use biome_deserialize_macros::Deserializable;
 use biome_rule_options::restricted_regex::RestrictedRegex;
 use biome_rule_options::{
-    no_base_to_string, no_shadow, use_consistent_array_type, use_consistent_array_type,
-    use_consistent_member_accessibility, use_consistent_member_accessibility, use_import_type,
-    use_import_type, use_naming_convention, use_naming_convention,
+    no_base_to_string, no_shadow, use_consistent_array_type, use_consistent_member_accessibility,
+    use_import_type, use_naming_convention,
 };
 
 #[derive(Debug, Default, Deserializable)]
