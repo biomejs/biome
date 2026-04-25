@@ -1,0 +1,20 @@
+/* Comment after colon in property value */
+[lang]:lang(ja) {
+	font-family: /* system-ui,*/ Hiragino Sans, sans-serif;
+}
+
+/* Another case */
+.selector {
+  color: /* red, */ blue;
+}
+
+/* Another case */
+.selector {
+	color/* red, */: blue;
+}
+
+/* Comment before property name should still work */
+.selector {
+  /* comment */
+  color: red;
+}

@@ -25,26 +25,6 @@ impl Format<FormatTypeContext> for BindingTypeData {
         &self,
         f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
     ) -> FormatResult<()> {
-        let ranges: Vec<TypedRange> = self
-            .export_ranges
-            .iter()
-            .map(|range| range.into())
-            .collect();
-        let export_ranges = format_with(|f| {
-            let mut join = f.join();
-
-            for range in ranges.clone() {
-                join.entry(&range);
-            }
-            join.finish()
-        });
-
-        let jsdoc = format_with(|f| {
-            if self.jsdoc.is_some() {
-                write!(f, [&self.jsdoc, token(","), hard_line_break()])?;
-            };
-            Ok(())
-        });
         write!(
             f,
             [
@@ -54,9 +34,6 @@ impl Format<FormatTypeContext> for BindingTypeData {
                     &self.ty,
                     token(","),
                     hard_line_break(),
-                    jsdoc,
-                    token("Exported Ranges: "),
-                    &export_ranges
                 ])),
                 token("}")
             ]
@@ -266,23 +243,6 @@ impl Format<FormatTypeContext> for JsBindingData {
         &self,
         f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
     ) -> FormatResult<()> {
-        let jsdoc_comment = format_with(|f| {
-            if let Some(jsdoc) = &self.jsdoc {
-                write!(
-                    f,
-                    [&format_args![
-                        token("JSDoc comment:"),
-                        space(),
-                        jsdoc,
-                        token(","),
-                        hard_line_break()
-                    ]]
-                )
-            } else {
-                Ok(())
-            }
-        });
-
         let content = format_with(|f| {
             write!(
                 f,
@@ -297,7 +257,6 @@ impl Format<FormatTypeContext> for JsBindingData {
                     &self.ty,
                     token(","),
                     hard_line_break(),
-                    jsdoc_comment,
                     token("Declaration kind:"),
                     space(),
                     text(
@@ -329,8 +288,12 @@ impl Format<FormatTypeContext> for JsReexport {
         let content = format_with(|f| {
             write!(f, [&format_args![&self.import]])?;
 
-            if let Some(comment) = &self.jsdoc_comment {
-                write!(f, [&format_args![&comment]])?;
+            // TODO: address this later
+            if let Some(export_range) = &self.export_range {
+                write!(
+                    f,
+                    [token("Exported range: "), TypedRange::from(export_range)]
+                )?;
             }
 
             Ok(())
@@ -422,6 +385,7 @@ impl Format<FormatTypeContext> for JsImport {
         Ok(())
     }
 }
+
 #[derive(Clone)]
 struct TypedRange(TextRange);
 

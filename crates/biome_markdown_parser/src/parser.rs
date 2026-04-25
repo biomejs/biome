@@ -63,6 +63,12 @@ pub(crate) struct MarkdownParserState {
     /// Indentation column where the current list marker starts.
     /// Used to detect sibling list items after blank lines.
     pub(crate) list_item_marker_indent: usize,
+    /// The bullet marker kind of the parent list (e.g. `-`, `*`, `+`).
+    /// Used to detect marker changes at blank-line boundaries.
+    pub(crate) list_item_marker_kind: Option<MarkdownSyntaxKind>,
+    /// The ordered list delimiter of the parent list (`.` or `)`).
+    /// Used to detect delimiter changes at blank-line boundaries.
+    pub(crate) list_item_ordered_delim: Option<char>,
     /// Emphasis parsing context for the current inline item list.
     pub(crate) emphasis_context: Option<EmphasisContext>,
     /// Normalized link reference definitions collected in a prepass.
@@ -217,12 +223,27 @@ impl<'source> MarkdownParser<'source> {
             .force_relex_in_context(MarkdownLexContext::Regular);
     }
 
+    /// Re-lex the current token in Regular context, treating the position as
+    /// a line start. After consuming a blockquote prefix, the lexer's
+    /// `after_newline` flag is false, which prevents it from producing
+    /// line-start-gated tokens like `MD_THEMATIC_BREAK_LITERAL`. This method
+    /// overrides that flag so the lexer behaves as if at line start.
+    pub(crate) fn force_relex_at_line_start(&mut self) {
+        self.source.force_relex_at_line_start();
+    }
+
     /// Force re-lex the current token in CodeSpan context.
     /// In this context, backslash is literal (not an escape character).
     /// Used for autolinks where `\>` should be `\` + `>` as separate tokens.
     pub(crate) fn relex_code_span(&mut self) {
         self.source
             .force_relex_in_context(MarkdownLexContext::CodeSpan);
+    }
+
+    /// Re-lexes the current token in the specified context. Returns the kind
+    /// of the re-lexed token (can be the same as before if the context doesn't make a difference for the current token)
+    pub fn re_lex(&mut self, context: MarkdownReLexContext) -> MarkdownSyntaxKind {
+        self.source_mut().re_lex(context)
     }
 
     /// Re-lex the current token as single-char emphasis delimiter.

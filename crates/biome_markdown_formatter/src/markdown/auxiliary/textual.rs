@@ -6,7 +6,6 @@ use biome_markdown_syntax::{MdTextual, MdTextualFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdTextual {
     should_remove: bool,
-    trim_start: bool,
     print_mode: TextPrintMode,
 }
 impl FormatNodeRule<MdTextual> for FormatMdTextual {
@@ -70,13 +69,33 @@ impl FormatNodeRule<MdTextual> for FormatMdTextual {
                     )]
                 )
             }
-        } else if self.trim_start {
+        } else if self.print_mode.is_trim_all() {
+            let trimmed_text = value_token.text().trim_start().trim_end();
+            write!(
+                f,
+                [format_replaced(
+                    &value_token,
+                    &text(trimmed_text, value_token.text_trimmed_range().start())
+                )]
+            )
+        } else if self.print_mode.is_trim_start() {
             let trimmed_text = value_token.text().trim_start();
             write!(
                 f,
                 [format_replaced(
                     &value_token,
                     &text(trimmed_text, value_token.text_trimmed_range().start())
+                )]
+            )
+        } else if self.print_mode.is_keep_leading_spaces() {
+            // Preserve the leading whitespace trivia as literal text so that
+            // continuation-line indentation inside list items is kept.
+            let full_text = value_token.text();
+            write!(
+                f,
+                [format_replaced(
+                    &value_token,
+                    &text(full_text, value_token.text_range().start())
                 )]
             )
         } else {
@@ -88,7 +107,6 @@ impl FormatNodeRule<MdTextual> for FormatMdTextual {
 #[derive(Debug, Clone, Copy, Default)]
 pub(crate) struct FormatMdTextualOptions {
     pub(crate) should_remove: bool,
-    pub(crate) trim_start: bool,
     pub(crate) print_mode: TextPrintMode,
 }
 
@@ -97,7 +115,6 @@ impl FormatRuleWithOptions<MdTextual> for FormatMdTextual {
 
     fn with_options(mut self, options: Self::Options) -> Self {
         self.should_remove = options.should_remove;
-        self.trim_start = options.trim_start;
         self.print_mode = options.print_mode;
         self
     }

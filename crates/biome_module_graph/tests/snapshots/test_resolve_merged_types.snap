@@ -49,12 +49,10 @@ Imports {
 ```
 Union  => BindingTypeData {
   Types Module(0) TypeId(5),
-  Exported Ranges: (54..59)
 }
 
 Union2  => BindingTypeData {
   Types Module(0) TypeId(9),
-  Exported Ranges: (131..137)
 }
 ```
 

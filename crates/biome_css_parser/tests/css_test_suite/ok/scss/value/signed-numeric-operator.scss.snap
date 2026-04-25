@@ -588,7 +588,7 @@ CssRoot {
                                                                 expression: ScssExpression {
                                                                     items: ScssExpressionItemList [
                                                                         ScssBinaryExpression {
-                                                                            left: ScssIdentifier {
+                                                                            left: ScssVariable {
                                                                                 dollar_token: DOLLAR@713..714 "$" [] [],
                                                                                 name: CssIdentifier {
                                                                                     value_token: IDENT@714..718 "gap" [] [Whitespace(" ")],
@@ -995,7 +995,7 @@ CssRoot {
                                 1: SCSS_EXPRESSION@713..720
                                   0: SCSS_EXPRESSION_ITEM_LIST@713..720
                                     0: SCSS_BINARY_EXPRESSION@713..720
-                                      0: SCSS_IDENTIFIER@713..718
+                                      0: SCSS_VARIABLE@713..718
                                         0: DOLLAR@713..714 "$" [] []
                                         1: CSS_IDENTIFIER@714..718
                                           0: IDENT@714..718 "gap" [] [Whitespace(" ")]

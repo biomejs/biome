@@ -11,7 +11,7 @@ use biome_rowan::{TextRange, TriviaPieceKind};
 ///
 /// Given a slice of text, finds the byte offset where the current line begins
 /// (after the last newline, handling CRLF).
-fn find_line_start(before: &str) -> usize {
+pub(crate) fn find_line_start(before: &str) -> usize {
     let last_newline_pos = before.rfind(['\n', '\r']);
     match last_newline_pos {
         Some(pos) => {
@@ -158,6 +158,14 @@ impl<'source> MarkdownTokenSource<'source> {
     /// lookahead in Regular context are discarded and re-lexed correctly.
     pub fn force_relex_in_context(&mut self, context: MarkdownLexContext) -> MarkdownSyntaxKind {
         self.lexer.force_relex_in_context(context)
+    }
+
+    /// Re-lex the current token in Regular context, treating the position as
+    /// a line start. This makes the lexer produce line-start-gated tokens
+    /// like `MD_THEMATIC_BREAK_LITERAL`.
+    pub fn force_relex_at_line_start(&mut self) -> MarkdownSyntaxKind {
+        self.lexer
+            .force_relex_at_line_start(MarkdownLexContext::Regular)
     }
 
     pub fn set_force_ordered_list_marker(&mut self, value: bool) {

@@ -2,7 +2,9 @@ use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_html_syntax::{AnyHtmlElement, HtmlAttribute, HtmlAttributeList, HtmlFileSource};
+use biome_html_syntax::{
+    HtmlAttribute, HtmlAttributeList, HtmlFileSource, element_ext::AnyHtmlTagElement,
+};
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TokenText};
 use biome_rule_options::no_inline_styles::NoInlineStylesOptions;
 use biome_string_case::StrOnlyExtension;
@@ -57,7 +59,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoInlineStyles {
-    type Query = Ast<AnyHtmlElement>;
+    type Query = Ast<AnyHtmlTagElement>;
     type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = NoInlineStylesOptions;
@@ -66,18 +68,16 @@ impl Rule for NoInlineStyles {
         let node = ctx.query();
 
         match node {
-            AnyHtmlElement::HtmlElement(element) => {
-                let opening = element.opening_element().ok()?;
-
-                if let Some(name) = opening.tag_name()
+            AnyHtmlTagElement::HtmlOpeningElement(element) => {
+                if let Some(name) = element.tag_name()
                     && is_custom_component(name, ctx)
                 {
                     return None;
                 }
 
-                find_style_attribute(opening.attributes()).map(|attribute| attribute.range())
+                find_style_attribute(element.attributes()).map(|attribute| attribute.range())
             }
-            AnyHtmlElement::HtmlSelfClosingElement(self_closing_element) => {
+            AnyHtmlTagElement::HtmlSelfClosingElement(self_closing_element) => {
                 if let Some(name) = self_closing_element.tag_name()
                     && is_custom_component(name, ctx)
                 {
@@ -87,7 +87,6 @@ impl Rule for NoInlineStyles {
                 find_style_attribute(self_closing_element.attributes())
                     .map(|attribute| attribute.range())
             }
-            _ => None,
         }
     }
 
@@ -111,13 +110,11 @@ impl Rule for NoInlineStyles {
         let mut mutation = ctx.root().begin();
 
         match node {
-            AnyHtmlElement::HtmlElement(element) => {
-                let opening = element.opening_element().ok()?;
-                mutation.remove_node(find_style_attribute(opening.attributes()).unwrap())
+            AnyHtmlTagElement::HtmlOpeningElement(opening_element) => {
+                mutation.remove_node(find_style_attribute(opening_element.attributes()).unwrap())
             }
-            AnyHtmlElement::HtmlSelfClosingElement(self_closing_element) => mutation
+            AnyHtmlTagElement::HtmlSelfClosingElement(self_closing_element) => mutation
                 .remove_node(find_style_attribute(self_closing_element.attributes()).unwrap()),
-            _ => {}
         }
 
         Some(HtmlRuleAction::new(

@@ -13,7 +13,8 @@ use crate::syntax::parse_error::{unclosed_image, unclosed_link};
 use crate::syntax::reference::normalize_reference_label;
 use crate::syntax::{
     LinkDestinationKind, MAX_LINK_DESTINATION_PAREN_DEPTH, ParenDepthResult,
-    ends_with_unescaped_close, try_update_paren_depth, validate_link_destination_text,
+    ends_with_unescaped_close, get_title_close_char, is_space_or_tab_token, try_update_paren_depth,
+    validate_link_destination_text,
 };
 
 /// Parse link starting with `[` - dispatches to inline link or reference link.
@@ -594,19 +595,14 @@ fn bump_textual_link_def(p: &mut MarkdownParser) {
     item.complete(p, MD_TEXTUAL);
 }
 
-fn is_whitespace_token(p: &MarkdownParser) -> bool {
-    let text = p.cur_text();
-    !text.is_empty() && text.chars().all(|c| c == ' ' || c == '\t')
-}
-
 fn inline_title_starts_after_whitespace_tokens(p: &mut MarkdownParser) -> bool {
     p.lookahead(|p| {
-        let mut saw_whitespace = false;
+        let mut saw_separator = false;
         while is_title_separator_token(p) {
             bump_link_def_separator(p);
-            saw_whitespace = true;
+            saw_separator = true;
         }
-        saw_whitespace && get_title_close_char(p).is_some()
+        saw_separator && get_title_close_char(p).is_some()
     })
 }
 
@@ -731,7 +727,7 @@ fn parse_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationSc
     }
 
     while !p.at(EOF) && !p.at(NEWLINE) {
-        if is_whitespace_token(p) {
+        if is_space_or_tab_token(p) {
             break;
         }
         let text = p.cur_text();
@@ -765,7 +761,7 @@ fn parse_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationSc
 }
 
 fn is_title_separator_token(p: &MarkdownParser) -> bool {
-    is_whitespace_token(p) || (p.at(NEWLINE) && !p.at_blank_line())
+    is_space_or_tab_token(p) || (p.at(NEWLINE) && !p.at_blank_line())
 }
 
 fn bump_link_def_separator(p: &mut MarkdownParser) {
@@ -775,19 +771,6 @@ fn bump_link_def_separator(p: &mut MarkdownParser) {
         item.complete(p, MD_TEXTUAL);
     } else {
         bump_textual_link_def(p);
-    }
-}
-
-fn get_title_close_char(p: &MarkdownParser) -> Option<char> {
-    let text = p.cur_text();
-    if text.starts_with('"') {
-        Some('"')
-    } else if text.starts_with('\'') {
-        Some('\'')
-    } else if p.at(L_PAREN) {
-        Some(')')
-    } else {
-        None
     }
 }
 

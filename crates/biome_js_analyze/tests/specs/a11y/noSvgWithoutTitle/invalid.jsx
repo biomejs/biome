@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 <>
 	<svg>foo</svg>
 	<svg>

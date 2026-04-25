@@ -722,6 +722,12 @@ impl RuleSelector {
             return Some(Self::Rule(group.as_str(), rule));
         }
 
+        if let Ok(group) = assist::RuleGroup::from_str(group)
+            && let Some(rule) = Actions::has_rule(group, rule)
+        {
+            return Some(Self::Rule(group.as_str(), rule));
+        }
+
         None
     }
 
@@ -1194,6 +1200,23 @@ mod test {
     fn from_group_and_rule_invalid_group() {
         assert_eq!(
             RuleSelector::from_group_and_rule("notAGroup", "useConst"),
+            None
+        );
+    }
+
+    #[test]
+    fn from_group_and_rule_assist() {
+        let selector = RuleSelector::from_group_and_rule("source", "organizeImports");
+        assert_eq!(
+            selector,
+            Some(RuleSelector::Rule("source", "organizeImports"))
+        );
+    }
+
+    #[test]
+    fn from_group_and_rule_assist_invalid_rule() {
+        assert_eq!(
+            RuleSelector::from_group_and_rule("source", "notARule"),
             None
         );
     }

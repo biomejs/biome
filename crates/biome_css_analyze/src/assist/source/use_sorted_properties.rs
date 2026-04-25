@@ -242,7 +242,7 @@ impl RecessOrderMember {
         match &self.0 {
             AnyCssDeclarationOrRule::CssBogus(_) => NodeKindOrder::UnknownKind,
             AnyCssDeclarationOrRule::CssMetavariable(_) => NodeKindOrder::UnknownKind,
-            AnyCssDeclarationOrRule::ScssDeclaration(_) => NodeKindOrder::UnknownKind,
+            AnyCssDeclarationOrRule::ScssVariableDeclaration(_) => NodeKindOrder::UnknownKind,
             AnyCssDeclarationOrRule::ScssNestingDeclaration(_) => NodeKindOrder::UnknownKind,
             AnyCssDeclarationOrRule::AnyCssRule(rule) => match rule {
                 AnyCssRule::CssAtRule(_) => NodeKindOrder::NestedRuleOrAtRule,

@@ -11,6 +11,7 @@ It describes various parts of how the project is managed as well as accepted pra
     - [Core contributor nomination](#core-contributor-nomination)
   + [Maintainer](#maintainer)
     - [Maintainer nomination](#maintainer-nomination)
+  + [Contractors](#contractors)
   + [Voting Rules](#voting-rules)
   + [Ownership](#ownership)
   + [Inactivity](#inactivity)
@@ -142,6 +143,31 @@ When the verdict is reached, the thread will be deleted, and a [core contributor
 If vote is successful, the person reaching out will ask the nominee if they want to accept the title.
 
 In the event of a rejection, the nominated person will be privately given the requirements they have not met. Details of the discussion, such as the names of those who objected the nomination, will not be disclosed.
+
+### Contractors
+
+Contractors are people that might work within the Biome project for an arbitrary period of time, depending on the entity of the work. Their collaboration is decided by the [Core contributors](#core-contributor).
+
+- If Contractors require a signed contract, the Open Collective will sign one on behalf of the project. Core contributors can't sign contracts on behalf of the project.
+- The rate of the collaboration is negotiated privately by one or more core contributors.
+- There's no limit on the amount of compensation and rate; however, the funds can only be paid via Open Collective.
+- Monthly compensations are paid at the end of each month, unless a contract states otherwise.
+
+During the period of the collaboration, contractors may have access to one or more of the following rights:
+- Merge rights to one or more repositories of the GitHub org (same rights of [maintainers](#maintainer)).
+  - People should be added as external collaborators using the correct GitHub roles.
+- The ability to merge PRs without approval, as long as post-merge reviews are addressed in another PR. Contractors are considered masters in their craft, so their contributions should be considered in line with Biome values and their work.
+- Access to the `#maintainers` channel on Discord.
+
+During the period of the collaboration, contractors:
+- Don't have voting rights.
+- Must follow Biome's CoC.
+- Emit an invoice at the end of each month. A timesheet is welcome, but not mandatory.
+
+During the period of the collaboration, the core team:
+- Must provide all the information possible so that contractors can do their job.
+- Approve invoices promptly at the end of each month.
+- Provide a pleasant environment for the contractors.
 
 ### Voting Rules
 

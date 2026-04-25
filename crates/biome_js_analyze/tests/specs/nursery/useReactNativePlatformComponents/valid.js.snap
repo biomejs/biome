@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+import { View } from "react-native";
+import { Text, ScrollView } from "react-native";
+
+// require() with platform-agnostic components
+const { View: MyView } = require("react-native");
+
+```

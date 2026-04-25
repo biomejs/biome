@@ -25,3 +25,5 @@
 ![alt with **bold** and *italic*](image.png)
 
 ![alt with `code`](image.png)
+
+![alt with `code`](<url>)

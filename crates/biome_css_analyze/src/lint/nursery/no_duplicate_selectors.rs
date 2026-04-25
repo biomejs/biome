@@ -146,6 +146,7 @@ impl Rule for NoDuplicateSelectors {
                         AnyRuleStart::CssMediaAtRule(_)
                             | AnyRuleStart::CssSupportsAtRule(_)
                             | AnyRuleStart::CssContainerAtRule(_)
+                            | AnyRuleStart::CssScopeAtRule(_)
                             | AnyRuleStart::CssStartingStyleAtRule(_)
                     );
 

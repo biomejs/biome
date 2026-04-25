@@ -1,0 +1,6 @@
+.function-name {
+  start: #{1 + 1}foo(arg;
+  mid: foo#{1 + 1}bar(arg;
+  end: foo#{1 + 1}(arg;
+  full: #{foo}(arg;
+}

@@ -1,0 +1,73 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/selector/interpolation.scss
+---
+
+# Input
+
+```scss
+.#{$name}{
+color:red;
+}
+
+.#{$name}-bar,
+.#{$name}-#{$second},
+.foo-#{$i},
+.foo-#{$name}-bar,
+.foo-#{$name}#{$state},
+.foo-#{$name}:hover,
+.foo-#{$name}::after,
+.foo-#{$name} #{$second},
+#app-#{$slot},
+##{$id},
+#{$type},
+#{$type}-#{$state},
+|#{$type},
+*|#{$type},
+ns|#{$type},
+ns|foo-#{$name},
+#{$type}#{$state},
+#{$type}.class,
+#{$type}:hover,
+#{$type}::after,
+%#{$placeholder},
+%placeholder-#{$name}{
+color:red;
+}
+
+```
+
+
+# Formatted
+
+```scss
+.#{$name} {
+	color: red;
+}
+
+.#{$name}-bar,
+.#{$name}-#{$second},
+.foo-#{$i},
+.foo-#{$name}-bar,
+.foo-#{$name}#{$state},
+.foo-#{$name}:hover,
+.foo-#{$name}::after,
+.foo-#{$name} #{$second},
+#app-#{$slot},
+##{$id},
+#{$type},
+#{$type}-#{$state},
+|#{$type},
+*|#{$type},
+ns|#{$type},
+ns|foo-#{$name},
+#{$type}#{$state},
+#{$type}.class,
+#{$type}:hover,
+#{$type}::after,
+%#{$placeholder},
+%placeholder-#{$name} {
+	color: red;
+}
+
+```

@@ -30,7 +30,7 @@ biome_text_edit      = { workspace = true }
 biome_text_size      = { workspace = true, features = ["serde"] }
 camino               = { workspace = true }
 crossbeam            = { workspace = true }
-futures              = "0.3.31"
+futures              = "0.3.32"
 papaya               = { workspace = true }
 rustc-hash           = { workspace = true }
 serde                = { workspace = true, features = ["derive"] }

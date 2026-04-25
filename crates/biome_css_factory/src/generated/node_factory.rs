@@ -1395,6 +1395,18 @@ pub fn css_keyframes_percentage_selector(
         [Some(SyntaxElement::Node(selector.into_syntax()))],
     ))
 }
+pub fn css_keyframes_range_selector(
+    name_token: SyntaxToken,
+    percentage: CssPercentage,
+) -> CssKeyframesRangeSelector {
+    CssKeyframesRangeSelector::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_KEYFRAMES_RANGE_SELECTOR,
+        [
+            Some(SyntaxElement::Token(name_token)),
+            Some(SyntaxElement::Node(percentage.into_syntax())),
+        ],
+    ))
+}
 pub fn css_keyframes_scope_function(
     scope_token: SyntaxToken,
     l_paren_token: SyntaxToken,
@@ -2268,14 +2280,14 @@ pub fn css_qualified_rule(
         ],
     ))
 }
-pub fn css_query_feature_boolean(name: CssIdentifier) -> CssQueryFeatureBoolean {
+pub fn css_query_feature_boolean(name: AnyCssQueryFeatureName) -> CssQueryFeatureBoolean {
     CssQueryFeatureBoolean::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_QUERY_FEATURE_BOOLEAN,
         [Some(SyntaxElement::Node(name.into_syntax()))],
     ))
 }
 pub fn css_query_feature_plain(
-    name: CssIdentifier,
+    name: AnyCssQueryFeatureName,
     colon_token: SyntaxToken,
     value: AnyCssQueryFeatureValue,
 ) -> CssQueryFeaturePlain {
@@ -2289,7 +2301,7 @@ pub fn css_query_feature_plain(
     ))
 }
 pub fn css_query_feature_range(
-    left: CssIdentifier,
+    left: AnyCssQueryFeatureName,
     comparison: CssQueryFeatureRangeComparison,
     right: AnyCssQueryFeatureValue,
 ) -> CssQueryFeatureRange {
@@ -2313,7 +2325,7 @@ pub fn css_query_feature_range_comparison(
 pub fn css_query_feature_range_interval(
     left: AnyCssQueryFeatureValue,
     left_comparison: CssQueryFeatureRangeComparison,
-    name: CssIdentifier,
+    name: AnyCssQueryFeatureName,
     right_comparison: CssQueryFeatureRangeComparison,
     right: AnyCssQueryFeatureValue,
 ) -> CssQueryFeatureRangeInterval {
@@ -2331,7 +2343,7 @@ pub fn css_query_feature_range_interval(
 pub fn css_query_feature_reverse_range(
     left: AnyCssQueryFeatureValue,
     comparison: CssQueryFeatureRangeComparison,
-    right: CssIdentifier,
+    right: AnyCssQueryFeatureName,
 ) -> CssQueryFeatureReverseRange {
     CssQueryFeatureReverseRange::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_QUERY_FEATURE_REVERSE_RANGE,
@@ -3198,46 +3210,6 @@ pub fn scss_debug_at_rule(
         ],
     ))
 }
-pub fn scss_declaration(
-    name: AnyScssDeclarationName,
-    colon_token: SyntaxToken,
-    value: ScssExpression,
-    modifiers: ScssVariableModifierList,
-) -> ScssDeclarationBuilder {
-    ScssDeclarationBuilder {
-        name,
-        colon_token,
-        value,
-        modifiers,
-        semicolon_token: None,
-    }
-}
-pub struct ScssDeclarationBuilder {
-    name: AnyScssDeclarationName,
-    colon_token: SyntaxToken,
-    value: ScssExpression,
-    modifiers: ScssVariableModifierList,
-    semicolon_token: Option<SyntaxToken>,
-}
-impl ScssDeclarationBuilder {
-    pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
-        self.semicolon_token = Some(semicolon_token);
-        self
-    }
-    pub fn build(self) -> ScssDeclaration {
-        ScssDeclaration::unwrap_cast(SyntaxNode::new_detached(
-            CssSyntaxKind::SCSS_DECLARATION,
-            [
-                Some(SyntaxElement::Node(self.name.into_syntax())),
-                Some(SyntaxElement::Token(self.colon_token)),
-                Some(SyntaxElement::Node(self.value.into_syntax())),
-                Some(SyntaxElement::Node(self.modifiers.into_syntax())),
-                self.semicolon_token
-                    .map(|token| SyntaxElement::Token(token)),
-            ],
-        ))
-    }
-}
 pub fn scss_each_at_rule(
     each_token: SyntaxToken,
     bindings: ScssEachBindingList,
@@ -3340,7 +3312,7 @@ pub fn scss_extend_optional_modifier(
 }
 pub fn scss_for_at_rule(
     for_token: SyntaxToken,
-    variable: ScssIdentifier,
+    variable: ScssVariable,
     from_token: SyntaxToken,
     lower_bound: ScssExpression,
     operator_token: SyntaxToken,
@@ -3474,15 +3446,6 @@ pub fn scss_hide_clause(hide_token: SyntaxToken, members: ScssModuleMemberList) 
         ],
     ))
 }
-pub fn scss_identifier(dollar_token: SyntaxToken, name: CssIdentifier) -> ScssIdentifier {
-    ScssIdentifier::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::SCSS_IDENTIFIER,
-        [
-            Some(SyntaxElement::Token(dollar_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
-        ],
-    ))
-}
 pub fn scss_if_at_rule(
     if_token: SyntaxToken,
     condition: ScssExpression,
@@ -3603,6 +3566,28 @@ pub fn scss_interpolated_identifier(
         [Some(SyntaxElement::Node(items.into_syntax()))],
     ))
 }
+pub fn scss_interpolated_identifier_hyphen(
+    minus_token: SyntaxToken,
+) -> ScssInterpolatedIdentifierHyphen {
+    ScssInterpolatedIdentifierHyphen::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_INTERPOLATED_IDENTIFIER_HYPHEN,
+        [Some(SyntaxElement::Token(minus_token))],
+    ))
+}
+pub fn scss_interpolated_string(
+    opening_quote_token: SyntaxToken,
+    parts: ScssInterpolatedStringPartList,
+    closing_quote_token: SyntaxToken,
+) -> ScssInterpolatedString {
+    ScssInterpolatedString::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_INTERPOLATED_STRING,
+        [
+            Some(SyntaxElement::Token(opening_quote_token)),
+            Some(SyntaxElement::Node(parts.into_syntax())),
+            Some(SyntaxElement::Token(closing_quote_token)),
+        ],
+    ))
+}
 pub fn scss_interpolation(
     hash_token: SyntaxToken,
     l_curly_token: SyntaxToken,
@@ -3620,7 +3605,7 @@ pub fn scss_interpolation(
     ))
 }
 pub fn scss_keyword_argument(
-    name: ScssIdentifier,
+    name: ScssVariable,
     colon_token: SyntaxToken,
     value: AnyScssExpression,
 ) -> ScssKeywordArgument {
@@ -3710,7 +3695,7 @@ impl ScssMixinAtRuleBuilder {
     }
 }
 pub fn scss_module_configuration(
-    name: ScssIdentifier,
+    name: ScssVariable,
     colon_token: SyntaxToken,
     value: ScssExpression,
 ) -> ScssModuleConfigurationBuilder {
@@ -3722,7 +3707,7 @@ pub fn scss_module_configuration(
     }
 }
 pub struct ScssModuleConfigurationBuilder {
-    name: ScssIdentifier,
+    name: ScssVariable,
     colon_token: SyntaxToken,
     value: ScssExpression,
     modifier: Option<ScssVariableModifier>,
@@ -3759,13 +3744,27 @@ pub fn scss_module_configuration_list(
         ],
     ))
 }
-pub fn scss_namespaced_identifier(
+pub fn scss_module_member_access(
+    module: CssIdentifier,
+    dot_token: SyntaxToken,
+    member: AnyScssModuleMember,
+) -> ScssModuleMemberAccess {
+    ScssModuleMemberAccess::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_MODULE_MEMBER_ACCESS,
+        [
+            Some(SyntaxElement::Node(module.into_syntax())),
+            Some(SyntaxElement::Token(dot_token)),
+            Some(SyntaxElement::Node(member.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_namespaced_variable(
     namespace: CssIdentifier,
     dot_token: SyntaxToken,
-    name: ScssIdentifier,
-) -> ScssNamespacedIdentifier {
-    ScssNamespacedIdentifier::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::SCSS_NAMESPACED_IDENTIFIER,
+    name: ScssVariable,
+) -> ScssNamespacedVariable {
+    ScssNamespacedVariable::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_NAMESPACED_VARIABLE,
         [
             Some(SyntaxElement::Node(namespace.into_syntax())),
             Some(SyntaxElement::Token(dot_token)),
@@ -3789,7 +3788,7 @@ pub fn scss_nesting_declaration(
         ],
     ))
 }
-pub fn scss_parameter(name: ScssIdentifier) -> ScssParameterBuilder {
+pub fn scss_parameter(name: ScssVariable) -> ScssParameterBuilder {
     ScssParameterBuilder {
         name,
         default_value: None,
@@ -3797,7 +3796,7 @@ pub fn scss_parameter(name: ScssIdentifier) -> ScssParameterBuilder {
     }
 }
 pub struct ScssParameterBuilder {
-    name: ScssIdentifier,
+    name: ScssVariable,
     default_value: Option<ScssParameterDefaultValue>,
     ellipsis_token: Option<SyntaxToken>,
 }
@@ -3917,20 +3916,6 @@ impl ScssPlainImportBuilder {
         ))
     }
 }
-pub fn scss_qualified_name(
-    module: CssIdentifier,
-    dot_token: SyntaxToken,
-    member: AnyScssModuleMember,
-) -> ScssQualifiedName {
-    ScssQualifiedName::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::SCSS_QUALIFIED_NAME,
-        [
-            Some(SyntaxElement::Node(module.into_syntax())),
-            Some(SyntaxElement::Token(dot_token)),
-            Some(SyntaxElement::Node(member.into_syntax())),
-        ],
-    ))
-}
 pub fn scss_return_at_rule(
     return_token: SyntaxToken,
     value: ScssExpression,
@@ -3952,6 +3937,12 @@ pub fn scss_show_clause(show_token: SyntaxToken, members: ScssModuleMemberList) 
             Some(SyntaxElement::Token(show_token)),
             Some(SyntaxElement::Node(members.into_syntax())),
         ],
+    ))
+}
+pub fn scss_string_text(value_token: SyntaxToken) -> ScssStringText {
+    ScssStringText::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_STRING_TEXT,
+        [Some(SyntaxElement::Token(value_token))],
     ))
 }
 pub fn scss_unary_expression(
@@ -4024,6 +4015,55 @@ impl ScssUseAtRuleBuilder {
                 self.with_clause
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Token(self.semicolon_token)),
+            ],
+        ))
+    }
+}
+pub fn scss_variable(dollar_token: SyntaxToken, name: CssIdentifier) -> ScssVariable {
+    ScssVariable::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_VARIABLE,
+        [
+            Some(SyntaxElement::Token(dollar_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_variable_declaration(
+    name: AnyScssVariableDeclarationName,
+    colon_token: SyntaxToken,
+    value: ScssExpression,
+    modifiers: ScssVariableModifierList,
+) -> ScssVariableDeclarationBuilder {
+    ScssVariableDeclarationBuilder {
+        name,
+        colon_token,
+        value,
+        modifiers,
+        semicolon_token: None,
+    }
+}
+pub struct ScssVariableDeclarationBuilder {
+    name: AnyScssVariableDeclarationName,
+    colon_token: SyntaxToken,
+    value: ScssExpression,
+    modifiers: ScssVariableModifierList,
+    semicolon_token: Option<SyntaxToken>,
+}
+impl ScssVariableDeclarationBuilder {
+    pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
+        self.semicolon_token = Some(semicolon_token);
+        self
+    }
+    pub fn build(self) -> ScssVariableDeclaration {
+        ScssVariableDeclaration::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_VARIABLE_DECLARATION,
+            [
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                Some(SyntaxElement::Token(self.colon_token)),
+                Some(SyntaxElement::Node(self.value.into_syntax())),
+                Some(SyntaxElement::Node(self.modifiers.into_syntax())),
+                self.semicolon_token
+                    .map(|token| SyntaxElement::Token(token)),
             ],
         ))
     }
@@ -4993,7 +5033,7 @@ where
 }
 pub fn scss_each_binding_list<I, S>(items: I, separators: S) -> ScssEachBindingList
 where
-    I: IntoIterator<Item = ScssIdentifier>,
+    I: IntoIterator<Item = ScssVariable>,
     I::IntoIter: ExactSizeIterator,
     S: IntoIterator<Item = CssSyntaxToken>,
     S::IntoIter: ExactSizeIterator,
@@ -5052,6 +5092,18 @@ where
 {
     ScssInterpolatedIdentifierPartList::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_INTERPOLATED_IDENTIFIER_PART_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn scss_interpolated_string_part_list<I>(items: I) -> ScssInterpolatedStringPartList
+where
+    I: IntoIterator<Item = AnyScssInterpolatedStringPart>,
+    I::IntoIter: ExactSizeIterator,
+{
+    ScssInterpolatedStringPartList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_INTERPOLATED_STRING_PART_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),

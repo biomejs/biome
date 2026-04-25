@@ -50,7 +50,7 @@ declare_lint_rule! {
     /// String(new String());
     /// ```
     pub NoUselessTypeConversion {
-        version: "next",
+        version: "2.4.11",
         name: "noUselessTypeConversion",
         language: "js",
         recommended: false,

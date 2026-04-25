@@ -1,7 +1,7 @@
 use super::{
-    AnalyzerCapabilities, AnalyzerVisitorBuilder, CodeActionsParams, DebugCapabilities,
-    DiagnosticsAndActionsParams, EnabledForPath, ExtensionHandler, FormatEmbedNode,
-    FormatterCapabilities, LintParams, LintResults, ParseEmbedResult, ParseResult,
+    AnalyzerCapabilities, AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams,
+    DebugCapabilities, DiagnosticsAndActionsParams, EnabledForPath, ExtensionHandler,
+    FormatEmbedNode, FormatterCapabilities, LintParams, LintResults, ParseEmbedResult, ParseResult,
     ParserCapabilities, ProcessDiagnosticsAndActions, ProcessFixAll, ProcessLint,
     SearchCapabilities, UpdateSnippetsNodes, search,
 };
@@ -16,8 +16,11 @@ use crate::settings::{
     OverrideSettings, Settings, SettingsWithEditor, check_feature_activity,
     check_override_feature_activity,
 };
+use crate::workspace::FixFileMode;
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
-use crate::workspace::{DocumentFileSource, EmbeddedSnippet, PullDiagnosticsAndActionsResult};
+use crate::workspace::{
+    DocumentFileSource, DocumentServices, EmbeddedSnippet, PullDiagnosticsAndActionsResult,
+};
 use crate::{
     WorkspaceError,
     settings::{FormatSettings, LanguageListSettings, LanguageSettings, ServiceLanguage},
@@ -55,7 +58,7 @@ use biome_js_formatter::context::{
 };
 use biome_js_formatter::format_node;
 use biome_js_parser::JsParserOptions;
-use biome_js_semantic::{SemanticModelOptions, semantic_model};
+use biome_js_semantic::{SVELTE_RUNES, SemanticModelOptions, semantic_model};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsRoot, AnyJsTemplateElement, JsCallArgumentList, JsCallArguments,
     JsCallExpression, JsClassDeclaration, JsClassExpression, JsFileSource, JsFunctionDeclaration,
@@ -364,8 +367,8 @@ impl ServiceLanguage for JsLanguage {
 
         globals.extend(overrides.override_js_globals(path, &global.languages.javascript.globals));
 
-        if let Some(filename) = path.file_name() {
-            if filename.ends_with(".vue") {
+        if let Ok(source_type) = JsFileSource::try_from(path.as_path()) {
+            if source_type.as_embedding_kind().is_vue() {
                 globals.extend(
                     [
                         "defineEmits",
@@ -378,29 +381,11 @@ impl ServiceLanguage for JsLanguage {
                     ]
                     .map(Into::into),
                 );
-            } else if filename.ends_with(".astro") {
+            } else if source_type.as_embedding_kind().is_astro() {
                 globals.extend(["Astro"].map(Into::into));
-            } else if filename.ends_with(".svelte")
-                || filename.ends_with(".svelte.js")
-                || filename.ends_with(".svelte.ts")
-                || filename.ends_with(".svelte.test.ts")
-                || filename.ends_with(".svelte.test.js")
-                || filename.ends_with(".svelte.spec.ts")
-                || filename.ends_with(".svelte.spec.js")
-            {
+            } else if source_type.as_embedding_kind().is_svelte() {
                 // Svelte 5 runes
-                globals.extend(
-                    [
-                        "$bindable",
-                        "$derived",
-                        "$effect",
-                        "$host",
-                        "$inspect",
-                        "$props",
-                        "$state",
-                    ]
-                    .map(Into::into),
-                );
+                globals.extend(SVELTE_RUNES.iter().copied().map(Into::into));
             }
         }
 
@@ -930,9 +915,10 @@ fn debug_registered_types(_path: &BiomePath, parse: AnyParse) -> Result<String, 
     Ok(result)
 }
 
-fn debug_semantic_model(_path: &BiomePath, parse: AnyParse) -> Result<String, WorkspaceError> {
+fn debug_semantic_model(path: &BiomePath, parse: AnyParse) -> Result<String, WorkspaceError> {
     let tree: AnyJsRoot = parse.tree();
-    let model = semantic_model(&tree, SemanticModelOptions::default());
+    let source_type = JsFileSource::try_from(path.as_path()).unwrap_or_default();
+    let model = semantic_model(&tree, SemanticModelOptions::from(&source_type));
     Ok(model.to_string())
 }
 
@@ -940,10 +926,10 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
     let _ =
         debug_span!("Linting JavaScript file", path =? params.path, language =? params.language)
             .entered();
-    let Some(file_source) = params
-        .language
-        .to_js_file_source()
-        .or(JsFileSource::try_from(params.path.as_path()).ok())
+    // Use snippet services (for embedded JS) if present, else document services.
+    let effective_services = params.snippet_services.unwrap_or(params.document_services);
+    let Some(file_source) =
+        js_source_type_for_analysis(params.path, &params.language, effective_services)
     else {
         return LintResults {
             errors: 0,
@@ -959,14 +945,18 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
         &params.language,
         params.suppression_reason.as_deref(),
     );
-    let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
-            .with_only(params.only)
-            .with_skip(params.skip)
-            .with_path(params.path.as_path())
-            .with_enabled_selectors(params.enabled_selectors)
-            .with_project_layout(params.project_layout.clone())
-            .finish();
+    let AnalyzerVisitorResult {
+        enabled_rules,
+        disabled_rules,
+        analyzer_options,
+        ..
+    } = AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
+        .with_only(params.only)
+        .with_skip(params.skip)
+        .with_path(params.path.as_path())
+        .with_enabled_selectors(params.enabled_selectors)
+        .with_project_layout(params.project_layout.clone())
+        .finish();
 
     let filter = AnalysisFilter {
         categories: params.categories,
@@ -977,8 +967,6 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
 
     let mut process_lint = ProcessLint::new(&params);
 
-    // Use snippet services (for embedded JS) if present, else document services.
-    let effective_services = params.snippet_services.unwrap_or(params.document_services);
     let semantic_model = effective_services
         .as_js_services()
         .and_then(|s| s.semantic_model.clone());
@@ -1033,6 +1021,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         action_offset,
         document_services,
         compute_actions,
+        snippet_services,
     } = params;
     let _ = debug_span!("Code actions JavaScript", range =? range, path =? path).entered();
     let tree = parse.tree();
@@ -1040,14 +1029,18 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let analyzer_options =
         settings.analyzer_options::<JsLanguage>(path, &language, suppression_reason.as_deref());
     let mut actions = Vec::new();
-    let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
-            .with_only(only)
-            .with_skip(skip)
-            .with_path(path.as_path())
-            .with_enabled_selectors(rules)
-            .with_project_layout(project_layout.clone())
-            .finish();
+    let AnalyzerVisitorResult {
+        enabled_rules,
+        disabled_rules,
+        analyzer_options,
+        ..
+    } = AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
+        .with_only(only)
+        .with_skip(skip)
+        .with_path(path.as_path())
+        .with_enabled_selectors(rules)
+        .with_project_layout(project_layout.clone())
+        .finish();
     let filter = AnalysisFilter {
         categories,
         enabled_rules: Some(enabled_rules.as_slice()),
@@ -1055,13 +1048,14 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
     };
 
-    let Some(source_type) = language.to_js_file_source() else {
+    let effective_services = snippet_services.unwrap_or(document_services);
+    let Some(source_type) = js_source_type_for_analysis(path, &language, effective_services) else {
         error!("Could not determine the file source of the file");
         return PullActionsResult {
             actions: Vec::new(),
         };
     };
-    let semantic_model = document_services
+    let semantic_model = effective_services
         .as_js_services()
         .and_then(|s| s.semantic_model.clone());
     let services =
@@ -1128,14 +1122,18 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         &params.document_file_source,
         params.suppression_reason.as_deref(),
     );
-    let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
-            .with_only(params.only)
-            .with_skip(params.skip)
-            .with_path(params.biome_path.as_path())
-            .with_enabled_selectors(params.enabled_rules)
-            .with_project_layout(params.project_layout.clone())
-            .finish();
+    let AnalyzerVisitorResult {
+        enabled_rules,
+        disabled_rules,
+        analyzer_options,
+        fixable_rules,
+    } = AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
+        .with_only(params.only)
+        .with_skip(params.skip)
+        .with_path(params.biome_path.as_path())
+        .with_enabled_selectors(params.enabled_rules)
+        .with_project_layout(params.project_layout.clone())
+        .finish();
 
     let filter = AnalysisFilter {
         categories: params.rule_categories,
@@ -1144,11 +1142,11 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         range: None,
     };
 
-    let Some(file_source) = params
-        .document_file_source
-        .to_js_file_source()
-        .or(JsFileSource::try_from(params.biome_path.as_path()).ok())
-    else {
+    let Some(file_source) = js_source_type_for_analysis(
+        params.biome_path,
+        &params.document_file_source,
+        params.document_services,
+    ) else {
         return Err(extension_error(params.biome_path));
     };
 
@@ -1157,6 +1155,74 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         rules,
         tree.syntax().text_range_with_trivia().len().into(),
     );
+
+    if matches!(params.fix_file_mode, FixFileMode::ApplySuppressions) {
+        // Suppressions apply to all rules -- keep original single-phase loop
+        loop {
+            let mut services = JsAnalyzerServices::from((
+                params.module_graph.clone(),
+                params.project_layout.clone(),
+                file_source,
+            ));
+
+            if let Some(embedded_bindings) = params.document_services.embedded_bindings() {
+                services.set_embedded_bindings(embedded_bindings.bindings)
+            }
+
+            if let Some(value_refs) = params.document_services.embedded_value_references() {
+                services.set_embedded_value_references(value_refs.references)
+            }
+
+            let mut pending_actions = Vec::new();
+
+            let (_, _) = analyze(
+                &tree,
+                filter,
+                &analyzer_options,
+                &params.plugins,
+                services,
+                |signal| process_fix_all.collect_signal(signal, &mut pending_actions),
+            );
+
+            let result = process_fix_all.process_batch_actions(pending_actions, |root| {
+                tree = match AnyJsRoot::cast(root) {
+                    Some(tree) => tree,
+                    None => return None,
+                };
+                Some(tree.syntax().text_range_with_trivia().len().into())
+            })?;
+
+            if result.is_none() {
+                return process_fix_all.finish(
+                    || {
+                        Ok(if params.should_format {
+                            Either::Left(format_node(
+                                params.settings.format_options::<JsLanguage>(
+                                    params.biome_path,
+                                    &params.document_file_source,
+                                ),
+                                tree.syntax(),
+                                false,
+                            ))
+                        } else {
+                            Either::Right(tree.syntax().to_string())
+                        })
+                    },
+                    params.embeds_initial_indent,
+                );
+            }
+        }
+    }
+
+    // Two-phase fix-all: Phase 1 runs only fixable rules, Phase 2 runs all rules for diagnostics.
+
+    // Phase 1: fix loop with fixable-only rules
+    let fixable_filter = AnalysisFilter {
+        categories: params.rule_categories,
+        enabled_rules: Some(fixable_rules.as_slice()),
+        disabled_rules: &disabled_rules,
+        range: None,
+    };
 
     loop {
         let mut services = JsAnalyzerServices::from((
@@ -1177,11 +1243,11 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
 
         let (_, _) = analyze(
             &tree,
-            filter,
+            fixable_filter,
             &analyzer_options,
             &params.plugins,
             services,
-            |signal| process_fix_all.collect_signal(signal, &mut pending_actions),
+            |signal| process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions),
         );
 
         let result = process_fix_all.process_batch_actions(pending_actions, |root| {
@@ -1193,25 +1259,53 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         })?;
 
         if result.is_none() {
-            return process_fix_all.finish(
-                || {
-                    Ok(if params.should_format {
-                        Either::Left(format_node(
-                            params.settings.format_options::<JsLanguage>(
-                                params.biome_path,
-                                &params.document_file_source,
-                            ),
-                            tree.syntax(),
-                            false,
-                        ))
-                    } else {
-                        Either::Right(tree.syntax().to_string())
-                    })
-                },
-                params.embeds_initial_indent,
-            );
+            break;
         }
     }
+
+    // Phase 2: run all rules on the fixed tree for final diagnostics
+    {
+        let mut services = JsAnalyzerServices::from((
+            params.module_graph.clone(),
+            params.project_layout.clone(),
+            file_source,
+        ));
+
+        if let Some(embedded_bindings) = params.document_services.embedded_bindings() {
+            services.set_embedded_bindings(embedded_bindings.bindings)
+        }
+
+        if let Some(value_refs) = params.document_services.embedded_value_references() {
+            services.set_embedded_value_references(value_refs.references)
+        }
+
+        let (_, _) = analyze(
+            &tree,
+            filter,
+            &analyzer_options,
+            &params.plugins,
+            services,
+            |signal| process_fix_all.collect_diagnostic_only(signal),
+        );
+    }
+
+    process_fix_all.finish(
+        || {
+            Ok(if params.should_format {
+                Either::Left(format_node(
+                    params.settings.format_options::<JsLanguage>(
+                        params.biome_path,
+                        &params.document_file_source,
+                    ),
+                    tree.syntax(),
+                    false,
+                ))
+            } else {
+                Either::Right(tree.syntax().to_string())
+            })
+        },
+        params.embeds_initial_indent,
+    )
 }
 
 pub(crate) fn format(
@@ -1334,6 +1428,10 @@ fn format_embedded(
         }
     });
 
+    // Propagate expand flags again after inserting embedded content,
+    // so that groups inside the embedded documents properly expand.
+    formatted.propagate_expand();
+
     match formatted.print() {
         Ok(printed) => Ok(printed),
         Err(error) => Err(WorkspaceError::FormatError(error.into())),
@@ -1358,18 +1456,23 @@ pub(crate) fn pull_diagnostics_and_actions(
         plugins,
         diagnostic_offset,
         document_services,
+        snippet_services,
     } = params;
     let tree = parse.tree();
     let analyzer_options =
         settings.analyzer_options::<JsLanguage>(path, &language, suppression_reason.as_deref());
-    let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
-            .with_only(only)
-            .with_skip(skip)
-            .with_path(path.as_path())
-            .with_enabled_selectors(enabled_selectors)
-            .with_project_layout(project_layout.clone())
-            .finish();
+    let AnalyzerVisitorResult {
+        enabled_rules,
+        disabled_rules,
+        analyzer_options,
+        ..
+    } = AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
+        .with_only(only)
+        .with_skip(skip)
+        .with_path(path.as_path())
+        .with_enabled_selectors(enabled_selectors)
+        .with_project_layout(project_layout.clone())
+        .finish();
     let filter = AnalysisFilter {
         categories,
         enabled_rules: Some(enabled_rules.as_slice()),
@@ -1377,13 +1480,14 @@ pub(crate) fn pull_diagnostics_and_actions(
         range: None,
     };
 
-    let Some(source_type) = language.to_js_file_source() else {
+    let effective_services = snippet_services.unwrap_or(document_services);
+    let Some(source_type) = js_source_type_for_analysis(path, &language, effective_services) else {
         error!("Could not determine the file source of the file");
         return PullDiagnosticsAndActionsResult {
             diagnostics: Vec::new(),
         };
     };
-    let semantic_model = document_services
+    let semantic_model = effective_services
         .as_js_services()
         .and_then(|s| s.semantic_model.clone());
     let services =
@@ -1403,13 +1507,14 @@ pub(crate) fn pull_diagnostics_and_actions(
 }
 
 fn rename(
-    _rome_path: &BiomePath,
+    path: &BiomePath,
     parse: AnyParse,
     symbol_at: TextSize,
     new_name: String,
 ) -> Result<RenameResult, WorkspaceError> {
     let root = parse.tree();
-    let model = semantic_model(&root, SemanticModelOptions::default());
+    let source_type = JsFileSource::try_from(path.as_path()).unwrap_or_default();
+    let model = semantic_model(&root, SemanticModelOptions::from(&source_type));
 
     if let Some(node) = parse
         .syntax()
@@ -1441,6 +1546,20 @@ fn rename(
             RenameError::CannotFindDeclaration(new_name),
         ))
     }
+}
+
+fn js_source_type_for_analysis(
+    path: &BiomePath,
+    language: &DocumentFileSource,
+    services: &DocumentServices,
+) -> Option<JsFileSource> {
+    // Prefer source type captured while parsing embedded snippets, then fall back to
+    // document-level source type, then infer from path as a last resort.
+    services
+        .as_js_services()
+        .and_then(|services| services.source_type)
+        .or_else(|| language.to_js_file_source())
+        .or_else(|| JsFileSource::try_from(path.as_path()).ok())
 }
 
 #[instrument(level = "debug", skip_all)]

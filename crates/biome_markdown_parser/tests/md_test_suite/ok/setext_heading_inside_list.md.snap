@@ -1,0 +1,148 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+- foo
+  ---
+
+- bar
+  ===
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@0..1 "-" [] [],
+                        post_marker_space_token: missing (optional),
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdSetextHeader {
+                            content: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@1..5 " foo" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@5..6 "\n" [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@6..7 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@7..8 " " [] [],
+                                },
+                            ],
+                            underline_token: MD_SETEXT_UNDERLINE_LITERAL@8..11 "---" [] [],
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@11..12 "\n" [] [],
+                        },
+                    ],
+                },
+                MdNewline {
+                    value_token: NEWLINE@12..13 "\n" [] [],
+                },
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@13..14 "-" [] [],
+                        post_marker_space_token: missing (optional),
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdSetextHeader {
+                            content: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@14..18 " bar" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@18..19 "\n" [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@19..20 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@20..21 " " [] [],
+                                },
+                            ],
+                            underline_token: MD_SETEXT_UNDERLINE_LITERAL@21..24 "===" [] [],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@24..25 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@25..25 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..25
+  0: (empty)
+  1: MD_BLOCK_LIST@0..25
+    0: MD_BULLET_LIST_ITEM@0..24
+      0: MD_BULLET_LIST@0..24
+        0: MD_BULLET@0..12
+          0: MD_LIST_MARKER_PREFIX@0..1
+            0: MD_INDENT_TOKEN_LIST@0..0
+            1: MINUS@0..1 "-" [] []
+            2: (empty)
+            3: MD_INDENT_TOKEN_LIST@1..1
+          1: MD_BLOCK_LIST@1..12
+            0: MD_SETEXT_HEADER@1..11
+              0: MD_INLINE_ITEM_LIST@1..8
+                0: MD_TEXTUAL@1..5
+                  0: MD_TEXTUAL_LITERAL@1..5 " foo" [] []
+                1: MD_TEXTUAL@5..6
+                  0: MD_TEXTUAL_LITERAL@5..6 "\n" [] []
+                2: MD_INDENT_TOKEN@6..7
+                  0: MD_INDENT_CHAR@6..7 " " [] []
+                3: MD_INDENT_TOKEN@7..8
+                  0: MD_INDENT_CHAR@7..8 " " [] []
+              1: MD_SETEXT_UNDERLINE_LITERAL@8..11 "---" [] []
+            1: MD_NEWLINE@11..12
+              0: NEWLINE@11..12 "\n" [] []
+        1: MD_NEWLINE@12..13
+          0: NEWLINE@12..13 "\n" [] []
+        2: MD_BULLET@13..24
+          0: MD_LIST_MARKER_PREFIX@13..14
+            0: MD_INDENT_TOKEN_LIST@13..13
+            1: MINUS@13..14 "-" [] []
+            2: (empty)
+            3: MD_INDENT_TOKEN_LIST@14..14
+          1: MD_BLOCK_LIST@14..24
+            0: MD_SETEXT_HEADER@14..24
+              0: MD_INLINE_ITEM_LIST@14..21
+                0: MD_TEXTUAL@14..18
+                  0: MD_TEXTUAL_LITERAL@14..18 " bar" [] []
+                1: MD_TEXTUAL@18..19
+                  0: MD_TEXTUAL_LITERAL@18..19 "\n" [] []
+                2: MD_INDENT_TOKEN@19..20
+                  0: MD_INDENT_CHAR@19..20 " " [] []
+                3: MD_INDENT_TOKEN@20..21
+                  0: MD_INDENT_CHAR@20..21 " " [] []
+              1: MD_SETEXT_UNDERLINE_LITERAL@21..24 "===" [] []
+    1: MD_NEWLINE@24..25
+      0: NEWLINE@24..25 "\n" [] []
+  2: EOF@25..25 "" [] []
+
+```

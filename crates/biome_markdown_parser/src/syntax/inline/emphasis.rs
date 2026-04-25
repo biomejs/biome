@@ -684,18 +684,16 @@ pub(crate) fn set_inline_emphasis_context_until(
 }
 
 fn inline_list_source_len_until(p: &mut MarkdownParser, stop: MarkdownSyntaxKind) -> usize {
+    let start: usize = p.cur_range().start().into();
     p.lookahead(|p| {
-        let mut len = 0usize;
-
         loop {
             if p.at(T![EOF]) || p.at(stop) || p.at_inline_end() {
                 break;
             }
-
-            len += p.cur_text().len();
             p.bump(p.cur());
         }
 
-        len
+        let end: usize = p.cur_range().start().into();
+        end.saturating_sub(start)
     })
 }

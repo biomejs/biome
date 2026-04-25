@@ -45,7 +45,7 @@ CssRoot {
                     items: CssParameterList [
                         ScssExpression {
                             items: ScssExpressionItemList [
-                                ScssIdentifier {
+                                ScssVariable {
                                     dollar_token: DOLLAR@21..22 "$" [] [],
                                     name: CssIdentifier {
                                         value_token: IDENT@22..28 "radius" [] [],
@@ -73,7 +73,7 @@ CssRoot {
                         ScssExpression {
                             items: ScssExpressionItemList [
                                 ScssKeywordArgument {
-                                    name: ScssIdentifier {
+                                    name: ScssVariable {
                                         dollar_token: DOLLAR@48..49 "$" [] [],
                                         name: CssIdentifier {
                                             value_token: IDENT@49..55 "radius" [] [],
@@ -105,7 +105,7 @@ CssRoot {
                         COMMA@77..79 "," [] [Whitespace(" ")],
                         ScssExpression {
                             items: ScssExpressionItemList [
-                                ScssIdentifier {
+                                ScssVariable {
                                     dollar_token: DOLLAR@79..80 "$" [] [],
                                     name: CssIdentifier {
                                         value_token: IDENT@80..87 "padding" [] [],
@@ -161,7 +161,7 @@ CssRoot {
           1: CSS_PARAMETER_LIST@21..28
             0: SCSS_EXPRESSION@21..28
               0: SCSS_EXPRESSION_ITEM_LIST@21..28
-                0: SCSS_IDENTIFIER@21..28
+                0: SCSS_VARIABLE@21..28
                   0: DOLLAR@21..22 "$" [] []
                   1: CSS_IDENTIFIER@22..28
                     0: IDENT@22..28 "radius" [] []
@@ -180,7 +180,7 @@ CssRoot {
             0: SCSS_EXPRESSION@48..57
               0: SCSS_EXPRESSION_ITEM_LIST@48..57
                 0: SCSS_KEYWORD_ARGUMENT@48..57
-                  0: SCSS_IDENTIFIER@48..55
+                  0: SCSS_VARIABLE@48..55
                     0: DOLLAR@48..49 "$" [] []
                     1: CSS_IDENTIFIER@49..55
                       0: IDENT@49..55 "radius" [] []
@@ -202,7 +202,7 @@ CssRoot {
             1: COMMA@77..79 "," [] [Whitespace(" ")]
             2: SCSS_EXPRESSION@79..87
               0: SCSS_EXPRESSION_ITEM_LIST@79..87
-                0: SCSS_IDENTIFIER@79..87
+                0: SCSS_VARIABLE@79..87
                   0: DOLLAR@79..80 "$" [] []
                   1: CSS_IDENTIFIER@80..87
                     0: IDENT@80..87 "padding" [] []

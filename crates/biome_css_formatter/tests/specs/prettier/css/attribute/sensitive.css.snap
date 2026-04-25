@@ -1,0 +1,111 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: css/attribute/sensitive.css
+---
+
+# Input
+
+```css
+[type=a s],
+[type=as],
+[type="a" s] ,
+[type="a s"],
+[type=a   s],
+[type="a"   s]{}
+
+[type=a   S] {}
+[type="a"   S] {}
+
+[type=a   x] {}
+[type='a'   x] {}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -6,12 +6,12 @@
+ [type="a" s] {
+ }
+ 
+-[type="a" S] {
++[type="a" s] {
+ }
+-[type="a" S] {
++[type="a" s] {
+ }
+ 
+-[type="a" x] {
++[type=a   x] {
+ }
+-[type="a" x] {
++[type='a'   x] {
+ }
+```
+
+# Output
+
+```css
+[type="a" s],
+[type="as"],
+[type="a" s],
+[type="a s"],
+[type="a" s],
+[type="a" s] {
+}
+
+[type="a" s] {
+}
+[type="a" s] {
+}
+
+[type=a   x] {
+}
+[type='a'   x] {
+}
+```
+
+# Errors
+```
+sensitive.css:11:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a s, a S, an i, or a I but instead found 'x'.
+  
+     9 │ [type="a"   S] {}
+    10 │ 
+  > 11 │ [type=a   x] {}
+       │           ^
+    12 │ [type='a'   x] {}
+    13 │ 
+  
+  i Expected a s, a S, an i, or a I here.
+  
+     9 │ [type="a"   S] {}
+    10 │ 
+  > 11 │ [type=a   x] {}
+       │           ^
+    12 │ [type='a'   x] {}
+    13 │ 
+  
+sensitive.css:12:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a s, a S, an i, or a I but instead found 'x'.
+  
+    11 │ [type=a   x] {}
+  > 12 │ [type='a'   x] {}
+       │             ^
+    13 │ 
+  
+  i Expected a s, a S, an i, or a I here.
+  
+    11 │ [type=a   x] {}
+  > 12 │ [type='a'   x] {}
+       │             ^
+    13 │ 
+  
+
+```

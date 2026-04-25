@@ -1,0 +1,40 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: generic.jsonc
+---
+## ESLint Config
+
+```json
+{
+	"rules": {
+		"@typescript-eslint/array-type": ["error", { "default": "generic" }]
+	}
+}
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"recommended": false,
+			"style": {
+				"useConsistentArrayType": {
+					"level": "error",
+					"options": { "syntax": "generic" }
+				}
+			}
+		}
+	}
+}
+
+```

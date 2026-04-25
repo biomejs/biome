@@ -20,17 +20,15 @@ info: markdown/spec/example-219.md
 +++ Biome
 @@ -1,3 +1,3 @@
 -> > 1.  one
--> >
--> >     two
 +   > > 1.  one
-+>>
-+>>     two
+ > >
+ > >     two
 ```
 
 # Output
 
 ```md
    > > 1.  one
->>
->>     two
+> >
+> >     two
 ```
