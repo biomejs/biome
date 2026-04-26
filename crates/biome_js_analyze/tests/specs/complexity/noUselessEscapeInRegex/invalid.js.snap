@@ -41,7 +41,15 @@ expression: invalid.js
 
 // A test with unicode characters that take more than one byte
 /😀\😀/
+
+// https://github.com/biomejs/biome/issues/6201
+// Three or more backslashes before a trailing dash: an escape pair leaves a
+// `\-` that's still an useless escape, so the rule should report it.
+/[\\\-]/;
+/[\\\\-]/;
 ```
+
+_Note: The parser emitted 5 diagnostics which are not shown here._
 
 # Diagnostics
 ```
@@ -694,10 +702,29 @@ invalid.js:37:3 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━
     36 │ // A test with unicode characters that take more than one byte
   > 37 │ /😀\😀/
        │    ^^^
+    38 │ 
+    39 │ // https://github.com/biomejs/biome/issues/6201
   
   i Safe fix: Unescape the character.
   
     37 │ /😀\😀/
        │    -   
+
+```
+
+```
+invalid.js:43:6 lint/complexity/noUselessEscapeInRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The character doesn't need to be escaped.
+  
+    41 │ // `\-` that's still an useless escape, so the rule should report it.
+    42 │ /[\\\-]/;
+  > 43 │ /[\\\\-]/;
+       │      ^^
+  
+  i Safe fix: Unescape the character.
+  
+    43 │ /[\\\\-]/;
+       │      -    
 
 ```

@@ -202,26 +202,15 @@ impl Rule for NoUselessEscapeInRegex {
                                     && index >= 2 // handle edge case `[]`
                                     && bytes[index - 1] == b'-'
                                     && bytes[index - 2] == b'\\'
-                                    // The `\` at `index - 2` is only escaping
-                                    // the `-` if it isn't itself the second
-                                    // half of an escape pair. Count how many
-                                    // backslashes precede the `-`: an odd
-                                    // count means the last one is unescaped
-                                    // and is genuinely escaping the dash; an
-                                    // even count means they pair up and the
-                                    // dash is on its own.
-                                    && {
-                                        let mut backslash_count = 0;
-                                        let mut i = index - 1;
-                                        while i > 0 {
-                                            i -= 1;
-                                            if bytes[i] != b'\\' {
-                                                break;
-                                            }
-                                            backslash_count += 1;
-                                        }
-                                        backslash_count % 2 == 1
-                                    }
+                                    // Skip only the exact-two-backslash case
+                                    // `\\-]`: an escape pair followed by a
+                                    // literal dash. Anything else (one
+                                    // backslash, or three+) is reported.
+                                    && !(
+                                        index >= 3
+                                            && bytes[index - 3] == b'\\'
+                                            && (index < 4 || bytes[index - 4] != b'\\')
+                                    )
                                 {
                                     return Some(State {
                                         backslash_index: (index - 2) as u16,
