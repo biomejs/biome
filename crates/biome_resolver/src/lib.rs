@@ -732,14 +732,7 @@ fn definition_extension_for_js_extension(extension: &str) -> Option<&'static str
 }
 
 fn is_type_resolution_path(path: &Utf8Path) -> bool {
-    let path = path.as_str();
-    path.ends_with(".d.ts")
-        || path.ends_with(".d.cts")
-        || path.ends_with(".d.mts")
-        || matches!(
-            Utf8Path::new(path).extension(),
-            Some("ts" | "tsx" | "cts" | "mts")
-        )
+    matches!(path.extension(), Some("ts" | "tsx" | "cts" | "mts"))
 }
 
 pub fn is_relative_specifier(specifier: &str) -> bool {
