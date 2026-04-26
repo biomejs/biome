@@ -199,18 +199,12 @@ impl Rule for NoUselessEscapeInRegex {
                                 if has_v_flag && inner_class_count != 0 {
                                     inner_class_count -= 1;
                                 } else if !has_v_flag
-                                    && index >= 2 // handle edge case `[]`
+                                    && index >= 3
                                     && bytes[index - 1] == b'-'
                                     && bytes[index - 2] == b'\\'
-                                    // Skip only the exact-two-backslash case
-                                    // `\\-]`: an escape pair followed by a
-                                    // literal dash. Anything else (one
-                                    // backslash, or three+) is reported.
-                                    && !(
-                                        index >= 3
-                                            && bytes[index - 3] == b'\\'
-                                            && (index < 4 || bytes[index - 4] != b'\\')
-                                    )
+                                    // Flag unless `-` is preceded by exactly two backslashes
+                                    // (an escape pair `\\` + literal `-`).
+                                    && (bytes[index - 3] != b'\\' || bytes[index - 4] == b'\\')
                                 {
                                     return Some(State {
                                         backslash_index: (index - 2) as u16,
