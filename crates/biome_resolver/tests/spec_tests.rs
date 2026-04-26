@@ -463,6 +463,32 @@ fn test_resolve_type_definitions() {
     );
 
     assert_eq!(
+        resolve("types-and-main", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/node_modules/types-and-main/types/index.d.ts"
+        )))
+    );
+
+    assert_eq!(
+        resolve("source-main", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/node_modules/source-main/src/index.ts"
+        )))
+    );
+
+    assert_eq!(
+        resolve("runtime-main", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/node_modules/runtime-main/dist/index.d.ts"
+        )))
+    );
+
+    assert_eq!(
+        resolve("untyped-main", &base_dir, &fs, &options),
+        Err(ResolveError::DirectoryWithoutDefault)
+    );
+
+    assert_eq!(
         resolve("react", &base_dir.join("src"), &fs, &options),
         Ok(Utf8PathBuf::from(format!(
             "{base_dir}/node_modules/@types/react/index.d.ts"
