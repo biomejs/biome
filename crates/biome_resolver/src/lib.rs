@@ -668,10 +668,10 @@ fn resolve_package_path(
                     // points at TypeScript source or lets us discover a
                     // declaration file. Avoid returning untyped runtime
                     // JavaScript when no type entrypoint exists.
-                    if let Ok(path) = resolve_relative_path(target, &package_path, fs, &options)
-                        && is_type_resolution_path(&path)
-                    {
-                        return Ok(path);
+                    match resolve_relative_path(target, &package_path, fs, &options) {
+                        Ok(path) if is_type_resolution_path(&path) => return Ok(path),
+                        Ok(_) | Err(ResolveError::NotFound) => { /* fall through */ }
+                        Err(error) => return Err(error),
                     }
                 }
             } else if let Some(target) = &package_json.main {
@@ -732,6 +732,8 @@ fn definition_extension_for_js_extension(extension: &str) -> Option<&'static str
 }
 
 fn is_type_resolution_path(path: &Utf8Path) -> bool {
+    // `Utf8Path::extension()` returns the substring after the last dot, so
+    // declaration files such as `index.d.ts` match through `ts`.
     matches!(path.extension(), Some("ts" | "tsx" | "cts" | "mts"))
 }
 
@@ -882,7 +884,9 @@ pub struct ResolveOptions<'a> {
     /// - If no `"types"` export is found in a package, the `package.json`'s
     ///   `types` field  is used as a fallback.
     /// - If the `package.json`'s `types` field is not configured, the `main`
-    ///   field is used as a fallback if it resolves.
+    ///   field is used as a fallback only when it resolves to TypeScript source
+    ///   or a declaration file. Untyped runtime JavaScript is intentionally
+    ///   rejected.
     /// - Directories configured in [`Self::type_roots`] will be checked before
     ///   looking for dependencies in `node_modules/`.
     /// - For any import to a **JavaScript** file where an explicit extension is
