@@ -1,0 +1,324 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```vue
+<div v-for='item in items'>{{ item }}</div>
+<div v-for='item of items'>{{ item }}</div>
+<div v-for='(item, index) of items'>{{ index }}: {{ item }}</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    VueDirective {
+                        name_token: IDENT@5..10 "v-for" [] [],
+                        arg: missing (optional),
+                        modifiers: VueModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@10..11 "=" [] [],
+                            value: VueVForValue {
+                                l_quote: SINGLE_QUOTE@11..12 "'" [] [],
+                                binding: VueVForIdentifierBinding {
+                                    name_token: IDENT@12..17 "item" [] [Whitespace(" ")],
+                                },
+                                operator: VueVForInOperator {
+                                    in_token: IN_KW@17..19 "in" [] [],
+                                },
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@19..25 " items" [] [],
+                                },
+                                r_quote: SINGLE_QUOTE@25..26 "'" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@26..27 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlDoubleTextExpression {
+                    l_double_curly_token: L_DOUBLE_CURLY@27..29 "{{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@29..35 " item " [] [],
+                    },
+                    r_double_curly_token: R_DOUBLE_CURLY@35..37 "}}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@37..38 "<" [] [],
+                slash_token: SLASH@38..39 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@39..42 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@42..43 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@43..45 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@45..49 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    VueDirective {
+                        name_token: IDENT@49..54 "v-for" [] [],
+                        arg: missing (optional),
+                        modifiers: VueModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@54..55 "=" [] [],
+                            value: VueVForValue {
+                                l_quote: SINGLE_QUOTE@55..56 "'" [] [],
+                                binding: VueVForIdentifierBinding {
+                                    name_token: IDENT@56..61 "item" [] [Whitespace(" ")],
+                                },
+                                operator: VueVForOfOperator {
+                                    of_token: OF_KW@61..63 "of" [] [],
+                                },
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@63..69 " items" [] [],
+                                },
+                                r_quote: SINGLE_QUOTE@69..70 "'" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@70..71 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlDoubleTextExpression {
+                    l_double_curly_token: L_DOUBLE_CURLY@71..73 "{{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@73..79 " item " [] [],
+                    },
+                    r_double_curly_token: R_DOUBLE_CURLY@79..81 "}}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@81..82 "<" [] [],
+                slash_token: SLASH@82..83 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@83..86 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@86..87 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@87..89 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@89..93 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    VueDirective {
+                        name_token: IDENT@93..98 "v-for" [] [],
+                        arg: missing (optional),
+                        modifiers: VueModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@98..99 "=" [] [],
+                            value: VueVForValue {
+                                l_quote: SINGLE_QUOTE@99..100 "'" [] [],
+                                binding: VueVForTupleBinding {
+                                    l_paren_token: L_PAREN@100..101 "(" [] [],
+                                    value: VueVForIdentifierBinding {
+                                        name_token: IDENT@101..105 "item" [] [],
+                                    },
+                                    second: VueVForTupleElement {
+                                        comma_token: COMMA@105..107 "," [] [Whitespace(" ")],
+                                        binding: VueVForIdentifierBinding {
+                                            name_token: IDENT@107..112 "index" [] [],
+                                        },
+                                    },
+                                    third: missing (optional),
+                                    r_paren_token: R_PAREN@112..114 ")" [] [Whitespace(" ")],
+                                },
+                                operator: VueVForOfOperator {
+                                    of_token: OF_KW@114..116 "of" [] [],
+                                },
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@116..122 " items" [] [],
+                                },
+                                r_quote: SINGLE_QUOTE@122..123 "'" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@123..124 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlDoubleTextExpression {
+                    l_double_curly_token: L_DOUBLE_CURLY@124..126 "{{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@126..133 " index " [] [],
+                    },
+                    r_double_curly_token: R_DOUBLE_CURLY@133..135 "}}" [] [],
+                },
+                HtmlContent {
+                    value_token: HTML_LITERAL@135..137 ":" [] [Whitespace(" ")],
+                },
+                HtmlDoubleTextExpression {
+                    l_double_curly_token: L_DOUBLE_CURLY@137..139 "{{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@139..145 " item " [] [],
+                    },
+                    r_double_curly_token: R_DOUBLE_CURLY@145..147 "}}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@147..148 "<" [] [],
+                slash_token: SLASH@148..149 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@149..152 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@152..153 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@153..154 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..154
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..153
+    0: HTML_ELEMENT@0..43
+      0: HTML_OPENING_ELEMENT@0..27
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..26
+          0: VUE_DIRECTIVE@5..26
+            0: IDENT@5..10 "v-for" [] []
+            1: (empty)
+            2: VUE_MODIFIER_LIST@10..10
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@10..26
+              0: EQ@10..11 "=" [] []
+              1: VUE_V_FOR_VALUE@11..26
+                0: SINGLE_QUOTE@11..12 "'" [] []
+                1: VUE_V_FOR_IDENTIFIER_BINDING@12..17
+                  0: IDENT@12..17 "item" [] [Whitespace(" ")]
+                2: VUE_V_FOR_IN_OPERATOR@17..19
+                  0: IN_KW@17..19 "in" [] []
+                3: HTML_TEXT_EXPRESSION@19..25
+                  0: HTML_LITERAL@19..25 " items" [] []
+                4: SINGLE_QUOTE@25..26 "'" [] []
+        3: R_ANGLE@26..27 ">" [] []
+      1: HTML_ELEMENT_LIST@27..37
+        0: HTML_DOUBLE_TEXT_EXPRESSION@27..37
+          0: L_DOUBLE_CURLY@27..29 "{{" [] []
+          1: HTML_TEXT_EXPRESSION@29..35
+            0: HTML_LITERAL@29..35 " item " [] []
+          2: R_DOUBLE_CURLY@35..37 "}}" [] []
+      2: HTML_CLOSING_ELEMENT@37..43
+        0: L_ANGLE@37..38 "<" [] []
+        1: SLASH@38..39 "/" [] []
+        2: HTML_TAG_NAME@39..42
+          0: HTML_LITERAL@39..42 "div" [] []
+        3: R_ANGLE@42..43 ">" [] []
+    1: HTML_ELEMENT@43..87
+      0: HTML_OPENING_ELEMENT@43..71
+        0: L_ANGLE@43..45 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@45..49
+          0: HTML_LITERAL@45..49 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@49..70
+          0: VUE_DIRECTIVE@49..70
+            0: IDENT@49..54 "v-for" [] []
+            1: (empty)
+            2: VUE_MODIFIER_LIST@54..54
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@54..70
+              0: EQ@54..55 "=" [] []
+              1: VUE_V_FOR_VALUE@55..70
+                0: SINGLE_QUOTE@55..56 "'" [] []
+                1: VUE_V_FOR_IDENTIFIER_BINDING@56..61
+                  0: IDENT@56..61 "item" [] [Whitespace(" ")]
+                2: VUE_V_FOR_OF_OPERATOR@61..63
+                  0: OF_KW@61..63 "of" [] []
+                3: HTML_TEXT_EXPRESSION@63..69
+                  0: HTML_LITERAL@63..69 " items" [] []
+                4: SINGLE_QUOTE@69..70 "'" [] []
+        3: R_ANGLE@70..71 ">" [] []
+      1: HTML_ELEMENT_LIST@71..81
+        0: HTML_DOUBLE_TEXT_EXPRESSION@71..81
+          0: L_DOUBLE_CURLY@71..73 "{{" [] []
+          1: HTML_TEXT_EXPRESSION@73..79
+            0: HTML_LITERAL@73..79 " item " [] []
+          2: R_DOUBLE_CURLY@79..81 "}}" [] []
+      2: HTML_CLOSING_ELEMENT@81..87
+        0: L_ANGLE@81..82 "<" [] []
+        1: SLASH@82..83 "/" [] []
+        2: HTML_TAG_NAME@83..86
+          0: HTML_LITERAL@83..86 "div" [] []
+        3: R_ANGLE@86..87 ">" [] []
+    2: HTML_ELEMENT@87..153
+      0: HTML_OPENING_ELEMENT@87..124
+        0: L_ANGLE@87..89 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@89..93
+          0: HTML_LITERAL@89..93 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@93..123
+          0: VUE_DIRECTIVE@93..123
+            0: IDENT@93..98 "v-for" [] []
+            1: (empty)
+            2: VUE_MODIFIER_LIST@98..98
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@98..123
+              0: EQ@98..99 "=" [] []
+              1: VUE_V_FOR_VALUE@99..123
+                0: SINGLE_QUOTE@99..100 "'" [] []
+                1: VUE_V_FOR_TUPLE_BINDING@100..114
+                  0: L_PAREN@100..101 "(" [] []
+                  1: VUE_V_FOR_IDENTIFIER_BINDING@101..105
+                    0: IDENT@101..105 "item" [] []
+                  2: VUE_V_FOR_TUPLE_ELEMENT@105..112
+                    0: COMMA@105..107 "," [] [Whitespace(" ")]
+                    1: VUE_V_FOR_IDENTIFIER_BINDING@107..112
+                      0: IDENT@107..112 "index" [] []
+                  3: (empty)
+                  4: R_PAREN@112..114 ")" [] [Whitespace(" ")]
+                2: VUE_V_FOR_OF_OPERATOR@114..116
+                  0: OF_KW@114..116 "of" [] []
+                3: HTML_TEXT_EXPRESSION@116..122
+                  0: HTML_LITERAL@116..122 " items" [] []
+                4: SINGLE_QUOTE@122..123 "'" [] []
+        3: R_ANGLE@123..124 ">" [] []
+      1: HTML_ELEMENT_LIST@124..147
+        0: HTML_DOUBLE_TEXT_EXPRESSION@124..135
+          0: L_DOUBLE_CURLY@124..126 "{{" [] []
+          1: HTML_TEXT_EXPRESSION@126..133
+            0: HTML_LITERAL@126..133 " index " [] []
+          2: R_DOUBLE_CURLY@133..135 "}}" [] []
+        1: HTML_CONTENT@135..137
+          0: HTML_LITERAL@135..137 ":" [] [Whitespace(" ")]
+        2: HTML_DOUBLE_TEXT_EXPRESSION@137..147
+          0: L_DOUBLE_CURLY@137..139 "{{" [] []
+          1: HTML_TEXT_EXPRESSION@139..145
+            0: HTML_LITERAL@139..145 " item " [] []
+          2: R_DOUBLE_CURLY@145..147 "}}" [] []
+      2: HTML_CLOSING_ELEMENT@147..153
+        0: L_ANGLE@147..148 "<" [] []
+        1: SLASH@148..149 "/" [] []
+        2: HTML_TAG_NAME@149..152
+          0: HTML_LITERAL@149..152 "div" [] []
+        3: R_ANGLE@152..153 ">" [] []
+  4: EOF@153..154 "" [Newline("\n")] []
+
+```

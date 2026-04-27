@@ -168,6 +168,9 @@ pub enum EmbeddingKind {
 
         /// Whether this is the declaration of a function, usually declared in `#snippet`
         is_function_signature: bool,
+
+        /// Whether this is a `{@const name = value}` block.
+        is_const_block: bool,
     },
     #[default]
     None,
@@ -236,6 +239,15 @@ impl EmbeddingKind {
             self,
             Self::Svelte {
                 kind: SvelteFileKind::SourceModule,
+                ..
+            }
+        )
+    }
+    pub const fn is_svelte_const_block(&self) -> bool {
+        matches!(
+            self,
+            Self::Svelte {
+                is_const_block: true,
                 ..
             }
         )
@@ -336,6 +348,7 @@ impl JsFileSource {
             is_source: true,
             is_function_signature: false,
             kind: SvelteFileKind::Component,
+            is_const_block: false,
         })
     }
 
@@ -448,6 +461,11 @@ impl JsFileSource {
         self.embedding_kind.is_vue_event_handler()
     }
 
+    /// Returns true if this is a Svelte `{@const}` block
+    pub const fn is_svelte_const_block(&self) -> bool {
+        self.embedding_kind.is_svelte_const_block()
+    }
+
     pub const fn as_embedding_kind(&self) -> &EmbeddingKind {
         &self.embedding_kind
     }
@@ -537,6 +555,7 @@ impl JsFileSource {
                 is_source: true,
                 is_function_signature: false,
                 kind: SvelteFileKind::SourceModule,
+                is_const_block: false,
             }));
         }
 
