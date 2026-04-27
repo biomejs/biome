@@ -279,8 +279,8 @@ fn run_for_member_with_body(
     }
 
     if matches!(&*effective_return_ty, TypeData::Boolean)
-        && has_boolean_literal(&info.types, true)
-        && has_boolean_literal(&info.types, false)
+        && info.matches_boolean_value(true)
+        && info.matches_boolean_value(false)
     {
         return None;
     }
@@ -649,22 +649,11 @@ impl ReturnInfo {
     fn all_opt_into_object(&self) -> bool {
         !self.has_any_const && self.object_keyword_casts == self.types.len()
     }
-}
 
-/// Returns the bool if `ty` is a boolean literal type.
-fn as_boolean_literal(ty: &Type) -> Option<bool> {
-    let TypeData::Literal(lit) = &**ty else {
-        return None;
-    };
-    let Literal::Boolean(b) = lit.as_ref() else {
-        return None;
-    };
-    Some(b.as_bool())
-}
-
-/// Whether any type in `types` is the boolean literal `value`.
-fn has_boolean_literal(types: &[Type], value: bool) -> bool {
-    types.iter().any(|ty| as_boolean_literal(ty) == Some(value))
+    /// Whether any return type matches the boolean literal `value`.
+    fn matches_boolean_value(&self, value: bool) -> bool {
+        self.types.iter().any(|ty| ty.is_boolean_literal(value))
+    }
 }
 
 /// Walks the function body and populates a [`ReturnInfo`].
