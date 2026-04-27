@@ -54,9 +54,17 @@ declare_lint_rule! {
     ///
     /// Additional JSX attribute names to check (beyond the default `class` and `className`).
     ///
+    /// Default: `[]`.
+    ///
     /// ### functions
     ///
     /// Function or tagged template names whose classes will be checked for arbitrary values.
+    ///
+    /// Default: `[]`.
+    ///
+    /// ```jsx,use_options
+    /// <div className={clsx("w-[400px]")} />;
+    /// ```
     ///
     pub NoArbitraryValue {
         version: "next",
