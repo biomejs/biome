@@ -39,6 +39,11 @@ pub(crate) enum HtmlLexContext {
     InsideTagAstro,
     /// Lexes Vue directive arguments inside `[]`.
     VueDirectiveArgument,
+    /// Lexes the binding and operator portions of a Vue `v-for` value.
+    VueVForValue,
+    /// Lexes the iterable expression after a Vue `v-for` `in` or `of` operator.
+    /// The stored syntax kind is the quote that terminates the attribute value.
+    VueVForExpression(HtmlSyntaxKind),
     /// When the parser encounters a `=` token (the beginning of the attribute initializer clause), it switches to this context.
     ///
     /// This is because attribute values can start and end with a `"` or `'` character, or be unquoted, and the lexer needs to know to start lexing a string literal.

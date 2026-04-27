@@ -1,5 +1,6 @@
 use crate::token_source::{
-    HtmlReLexContext, HtmlTokenSource, HtmlTokenSourceCheckpoint, TextExpressionKind,
+    HtmlLexContext, HtmlReLexContext, HtmlTokenSource, HtmlTokenSourceCheckpoint,
+    TextExpressionKind,
 };
 use biome_html_factory::HtmlSyntaxFactory;
 use biome_html_syntax::{
@@ -79,6 +80,18 @@ impl<'source> HtmlParser<'source> {
     /// HTML text rather than a `FENCE` token.
     pub(crate) fn set_after_frontmatter(&mut self, value: bool) {
         self.source.set_after_frontmatter(value);
+    }
+
+    /// shorthand for: `self.bump_with_context(kind, HtmlLexContext::VueVForValue);`
+    #[inline(always)]
+    pub fn bump_v_for(&mut self, kind: HtmlSyntaxKind) {
+        self.bump_with_context(kind, HtmlLexContext::VueVForValue);
+    }
+
+    /// shorthand for: `self.expect_with_context(kind, HtmlLexContext::VueVForValue);`
+    #[inline(always)]
+    pub fn expect_v_for(&mut self, kind: HtmlSyntaxKind) -> bool {
+        self.expect_with_context(kind, HtmlLexContext::VueVForValue)
     }
 }
 

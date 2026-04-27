@@ -5,8 +5,8 @@ use crate::syntax::parse_error::{
     expected_svelte_property, expected_text_expression, expected_valid_directive,
 };
 use crate::syntax::{
-    TextExpression, parse_attribute_initializer, parse_html_element, parse_single_text_expression,
-    parse_single_text_expression_content,
+    AttrInitializerContext, TextExpression, parse_attribute_initializer, parse_html_element,
+    parse_single_text_expression, parse_single_text_expression_content,
 };
 use crate::token_source::{HtmlLexContext, HtmlReLexContext, RestrictedExpressionStopAt};
 use biome_html_syntax::HtmlSyntaxKind::*;
@@ -1203,7 +1203,7 @@ fn parse_directive_value(p: &mut HtmlParser, context_after_colon: HtmlLexContext
     ModifiersList.parse_list(p);
 
     if p.at(T![=]) {
-        parse_attribute_initializer(p).ok();
+        parse_attribute_initializer(p, AttrInitializerContext::Regular).ok();
     } else {
         p.re_lex(HtmlReLexContext::InsideTag);
     }

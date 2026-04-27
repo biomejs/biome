@@ -21,7 +21,7 @@
   "devDependencies": {
     "@biomejs/plugin-api": "workspace:",
     "@changesets/changelog-github": "0.6.0",
-    "@changesets/cli": "2.30.0",
+    "@changesets/cli": "2.31.0",
     "@types/node": "24.12.2",
     "commonmark": "0.31.2",
     "tombi": "0.9.22"
