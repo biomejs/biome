@@ -414,6 +414,10 @@ fn is_any_contaminated(ty: &Type) -> bool {
         TypeData::Union(_) => ty
             .flattened_union_variants()
             .any(|v| matches!(&*v, TypeData::AnyKeyword)),
+        TypeData::Intersection(intersection) => intersection.types().iter().any(|member_ref| {
+            ty.resolve(member_ref)
+                .is_some_and(|resolved| matches!(&*resolved, TypeData::AnyKeyword))
+        }),
         _ => false,
     }
 }
