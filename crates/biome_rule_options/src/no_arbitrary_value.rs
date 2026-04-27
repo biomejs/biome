@@ -1,34 +1,76 @@
-use biome_deserialize::{
-    Deserializable, DeserializableTypes, DeserializableValue, DeserializationContext,
-    DeserializationDiagnostic, DeserializationVisitor, TextRange,
-};
-use biome_rowan::Text;
+use std::ops::Deref;
+
+use biome_deserialize::{Deserializable, DeserializableValue, DeserializationContext};
 use serde::{Deserialize, Serialize};
 
-#[derive(Default, Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct NoArbitraryValueOptions {
-    /// Additional attributes that will be checked.
-    #[serde(skip_serializing_if = "Option::<_>::is_none")]
-    pub attributes: Option<Box<[Box<str>]>>,
-    /// Names of the functions or tagged templates that will be checked.
-    #[serde(skip_serializing_if = "Option::<_>::is_none")]
-    pub functions: Option<Box<[Box<str>]>>,
+use crate::use_sorted_classes::UseSortedClassesOptions;
+
+/// Options for the `noArbitraryValue` rule.
+///
+/// Controls which JSX attributes and utility functions are checked for arbitrary values.
+#[derive(Default, Clone, Debug, Eq, PartialEq)]
+pub struct NoArbitraryValueOptions(UseSortedClassesOptions);
+
+impl Deref for NoArbitraryValueOptions {
+    type Target = UseSortedClassesOptions;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 impl biome_deserialize::Merge for NoArbitraryValueOptions {
     fn merge_with(&mut self, other: Self) {
-        if let Some(attributes) = other.attributes {
-            self.attributes = Some(attributes);
-        }
-        if let Some(functions) = other.functions {
-            self.functions = Some(functions);
-        }
+        self.0.merge_with(other.0);
     }
 }
 
-const ALLOWED_OPTIONS: &[&str] = &["attributes", "functions"];
+// Custom Serialize to match UseSortedClassesOptions format
+impl Serialize for NoArbitraryValueOptions {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        self.0.serialize(serializer)
+    }
+}
+
+// Custom Deserialize to match UseSortedClassesOptions format
+impl<'de> Deserialize<'de> for NoArbitraryValueOptions {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        <UseSortedClassesOptions as serde::Deserialize>::deserialize(deserializer).map(Self)
+    }
+}
+
+// Custom JsonSchema to generate proper schema with distinct type name
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for NoArbitraryValueOptions {
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("NoArbitraryValueOptions")
+    }
+
+    fn json_schema(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        schemars::json_schema!({
+            "type": "object",
+            "properties": {
+                "attributes": {
+                    "description": "Additional attributes that will be checked.",
+                    "type": ["array", "null"],
+                    "items": { "type": "string" }
+                },
+                "functions": {
+                    "description": "Names of the functions or tagged templates that will be checked.",
+                    "type": ["array", "null"],
+                    "items": { "type": "string" }
+                }
+            },
+            "additionalProperties": false
+        })
+    }
+}
 
 impl Deserializable for NoArbitraryValueOptions {
     fn deserialize(
@@ -36,53 +78,6 @@ impl Deserializable for NoArbitraryValueOptions {
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
-        value.deserialize(ctx, NoArbitraryValueOptionsVisitor, name)
-    }
-}
-
-struct NoArbitraryValueOptionsVisitor;
-impl DeserializationVisitor for NoArbitraryValueOptionsVisitor {
-    type Output = NoArbitraryValueOptions;
-
-    const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
-
-    fn visit_map(
-        self,
-        ctx: &mut impl DeserializationContext,
-        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
-        _range: TextRange,
-        _name: &str,
-    ) -> Option<Self::Output> {
-        let mut result = NoArbitraryValueOptions::default();
-
-        let mut attributes = Vec::new();
-        for (key, value) in members.flatten() {
-            let Some(key_text) = Text::deserialize(ctx, &key, "") else {
-                continue;
-            };
-            match key_text.text() {
-                "attributes" => {
-                    if let Some(attributes_option) =
-                        Deserializable::deserialize(ctx, &value, &key_text)
-                    {
-                        attributes.extend::<Vec<Box<str>>>(attributes_option);
-                    }
-                }
-                "functions" => {
-                    result.functions = Deserializable::deserialize(ctx, &value, &key_text)
-                }
-                unknown_key => ctx.report(DeserializationDiagnostic::new_unknown_key(
-                    unknown_key,
-                    key.range(),
-                    ALLOWED_OPTIONS,
-                )),
-            }
-        }
-        result.attributes = if attributes.is_empty() {
-            None
-        } else {
-            Some(attributes.into_boxed_slice())
-        };
-        Some(result)
+        <UseSortedClassesOptions as Deserializable>::deserialize(ctx, value, name).map(Self)
     }
 }

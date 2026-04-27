@@ -1,10 +1,9 @@
 use crate::shared::any_class_string_like::AnyClassStringLike;
-use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_syntax::JsSyntaxKind;
 use biome_rowan::{AstNode, AstNodeList, TextRange, TextSize, TokenText};
 use biome_rule_options::no_arbitrary_value::NoArbitraryValueOptions;
-use biome_rule_options::use_sorted_classes::UseSortedClassesOptions;
 use biome_tailwind_parser::parse_tailwind;
 use biome_tailwind_syntax::{AnyTwCandidate, AnyTwFullCandidate, AnyTwModifier, AnyTwValue};
 
@@ -64,7 +63,6 @@ declare_lint_rule! {
         name: "noArbitraryValue",
         language: "jsx",
         recommended: false,
-        fix_kind: FixKind::None,
     }
 }
 
@@ -77,12 +75,7 @@ impl Rule for NoArbitraryValue {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let options = ctx.options();
-        let visit_options = UseSortedClassesOptions {
-            attributes: options.attributes.clone(),
-            functions: options.functions.clone(),
-        };
-
-        if node.should_visit(&visit_options).is_none() {
+        if node.should_visit(options).is_none() {
             return vec![];
         }
 
