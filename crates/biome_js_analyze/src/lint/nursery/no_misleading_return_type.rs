@@ -61,6 +61,11 @@ declare_lint_rule! {
     /// ```ts
     /// class Foo { greet(): string { return "hello"; } }
     /// ```
+    ///
+    /// ## Known limitations
+    ///
+    /// Cast targets that the rule cannot narrow with the available type
+    /// information are trusted as explicit `object` widening.
     pub NoMisleadingReturnType {
         version: "2.4.11",
         name: "noMisleadingReturnType",
