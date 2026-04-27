@@ -518,11 +518,7 @@ impl ParseSeparatedList for VueVForBindingList {
     fn expect_separator(&mut self, p: &mut Self::Parser<'_>) -> bool {
         if (self.end == T![']'] && p.at(T!['}'])) || (self.end == T!['}'] && p.at(T![']'])) {
             let end = self.end.to_string().unwrap_or("closing delimiter");
-            p.error(expected_vue_v_for_binding_separator(
-                p,
-                p.cur_range(),
-                end,
-            ));
+            p.error(expected_vue_v_for_binding_separator(p, p.cur_range(), end));
             false
         } else {
             p.expect_v_for(self.separating_element_kind())

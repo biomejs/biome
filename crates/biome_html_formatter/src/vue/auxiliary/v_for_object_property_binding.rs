@@ -16,6 +16,14 @@ impl FormatNodeRule<VueVForObjectPropertyBinding> for FormatVueVForObjectPropert
             binding,
         } = node.as_fields();
 
-        write!(f, [property.format(), colon_token.format(), space(), binding.format()])
+        write!(
+            f,
+            [
+                property.format(),
+                colon_token.format(),
+                space(),
+                binding.format()
+            ]
+        )
     }
 }
