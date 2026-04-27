@@ -1,6 +1,7 @@
 #![deny(clippy::use_self)]
 
 mod lexer;
+pub mod lint_utils;
 mod parser;
 mod syntax;
 mod token_source;
