@@ -81,8 +81,6 @@ function objectFromClass(): object { return new Foo(); }
 
 function variantObject(b: boolean): object { if (b) return { a: 1 }; return { b: 2 }; }
 
-function mixedBareAndCast(b: boolean): object { if (b) return {} as object; return { a: 1 }; }
-
 declare const apiResponse: { a: number };
 function resolvedObject(): object { return apiResponse; }
 
@@ -115,6 +113,7 @@ function fnExprReturn(): object { return (): void => {}; }
 function fnDeclReturn(): object { function bar() {} return bar; }
 
 function satisfiesNarrow(): object { return { a: 1 } satisfies { a: number }; }
+function satisfiesObjectStillNarrow(): object { return { a: 1 } satisfies object; }
 function angleNarrow(): object { return <{ a: number }>{ a: 1 }; }
 function identifierBoundNarrow(): object { const x = { a: 1 }; return x; }
 
@@ -127,6 +126,9 @@ function intersectionNarrowAlias(): object { return {} as ObjectAndNarrowShape; 
 
 interface NarrowInterface { a: number; }
 function narrowInterfaceCast(): object { return {} as NarrowInterface; }
-interface InterfaceExtending extends NarrowInterface {}
-function extendingInterfaceCast(): object { return {} as InterfaceExtending; }
-function conditionalOneBranchNarrow(): object { return {} as (true extends true ? object : { a: 1 }); }
+
+function ternaryObjectBranch(b: boolean): object { return b ? {} : { a: 1 }; }
+
+class InheritedBase { y = 1; }
+class ClassWithInheritedMembers extends InheritedBase {}
+function inheritedClassInstance(): object { return new ClassWithInheritedMembers(); }

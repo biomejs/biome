@@ -222,6 +222,11 @@ function nonNullObjectCast(): object { return ({} as object)!; }
 declare const maybeObj: object | undefined;
 function logicalFallbackObjectCast(): object { return maybeObj ?? ({} as object); }
 
+declare const declaredObjectValue: object;
+declare function getDeclaredObject(): object;
+function mixedBareAndDeclaredObject(b: boolean): object { if (b) return declaredObjectValue; return { a: 1 }; }
+function mixedBareAndObjectCall(b: boolean): object { if (b) return getDeclaredObject(); return { a: 1 }; }
+
 function identifierBoundToObjectCast(): object { const x = {} as object; return x; }
 
 function bareEmptyObject(): object { return {}; }
@@ -232,10 +237,14 @@ const arrowExprBareEmpty = (): object => ({});
 async function asyncBareEmpty(): Promise<object> { return {}; }
 function multipleBareEmptyObjects(b: boolean): object { if (b) return {}; return {}; }
 function mixedBareEmptyAndObjectCast(b: boolean): object { if (b) return {}; return {} as object; }
+function mixedBareAndCast(b: boolean): object { if (b) return {} as object; return { a: 1 }; }
+function mixedTernaryObjectCast(b: boolean): object { return b ? ({} as object) : ({} as { a: number }); }
+function mixedNonNullObjectCast(b: boolean): object { if (b) return ({} as object)!; return { a: 1 }; }
 
 function emptyObjectTypeCast(): object { return {} as {}; }
 function parenEmptyObjectTypeCast(): object { return {} as ({}); }
 function doubleEmptyObjectTypeCast(): object { return {} as {} as {}; }
+function anyIntersectionCast(): object { return {} as (any & { a: number }); }
 
 type ObjectAliasA = object;
 type ObjectAliasB = object;
@@ -247,7 +256,6 @@ function emptyInterfaceCast(): object { return {} as EmptyInterface; }
 class EmptyClass {}
 function emptyClassCast(): object { return {} as EmptyClass; }
 
-type AlwaysObjectCond = true extends true ? object : object;
-function condAliasTrust(): object { return {} as AlwaysObjectCond; }
-function inlineConditionalBothObject(): object { return {} as (true extends true ? object : object); }
-function unionOfConditionals(): object { return {} as ((true extends true ? object : object) | object); }
+interface NarrowInterface { a: number; }
+interface InterfaceWithInheritedMembers extends NarrowInterface {}
+function inheritedInterfaceCast(): object { return {} as InterfaceWithInheritedMembers; }
