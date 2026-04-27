@@ -1,0 +1,128 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+{#each ["1", "2", "3"] as val}
+	{@const }
+{/each}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteEachBlock {
+            opening_block: SvelteEachOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                each_token: EACH_KW@2..6 "each" [] [],
+                list: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@6..23 " [\"1\", \"2\", \"3\"] " [] [],
+                },
+                item: SvelteEachAsKeyedItem {
+                    as_token: AS_KW@23..26 "as" [] [Whitespace(" ")],
+                    name: SvelteName {
+                        ident_token: IDENT@26..29 "val" [] [],
+                    },
+                    index: missing (optional),
+                    key: missing (optional),
+                },
+                r_curly_token: R_CURLY@29..30 "}" [] [],
+            },
+            children: HtmlElementList [
+                SvelteConstBlock {
+                    sv_curly_at_token: SV_CURLY_AT@30..34 "{@" [Newline("\n"), Whitespace("\t")] [],
+                    const_token: CONST_KW@34..39 "const" [] [],
+                    expression: missing (required),
+                    r_curly_token: missing (required),
+                },
+                HtmlContent {
+                    value_token: HTML_LITERAL@39..40 " " [] [],
+                },
+                HtmlContent {
+                    value_token: HTML_LITERAL@40..41 "}" [] [],
+                },
+            ],
+            else_clause: missing (optional),
+            closing_block: SvelteEachClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@41..44 "{/" [Newline("\n")] [],
+                each_token: EACH_KW@44..48 "each" [] [],
+                r_curly_token: R_CURLY@48..49 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@49..50 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..50
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..49
+    0: SVELTE_EACH_BLOCK@0..49
+      0: SVELTE_EACH_OPENING_BLOCK@0..30
+        0: SV_CURLY_HASH@0..2 "{#" [] []
+        1: EACH_KW@2..6 "each" [] []
+        2: HTML_TEXT_EXPRESSION@6..23
+          0: HTML_LITERAL@6..23 " [\"1\", \"2\", \"3\"] " [] []
+        3: SVELTE_EACH_AS_KEYED_ITEM@23..29
+          0: AS_KW@23..26 "as" [] [Whitespace(" ")]
+          1: SVELTE_NAME@26..29
+            0: IDENT@26..29 "val" [] []
+          2: (empty)
+          3: (empty)
+        4: R_CURLY@29..30 "}" [] []
+      1: HTML_ELEMENT_LIST@30..41
+        0: SVELTE_CONST_BLOCK@30..39
+          0: SV_CURLY_AT@30..34 "{@" [Newline("\n"), Whitespace("\t")] []
+          1: CONST_KW@34..39 "const" [] []
+          2: (empty)
+          3: (empty)
+        1: HTML_CONTENT@39..40
+          0: HTML_LITERAL@39..40 " " [] []
+        2: HTML_CONTENT@40..41
+          0: HTML_LITERAL@40..41 "}" [] []
+      2: (empty)
+      3: SVELTE_EACH_CLOSING_BLOCK@41..49
+        0: SV_CURLY_SLASH@41..44 "{/" [Newline("\n")] []
+        1: EACH_KW@44..48 "each" [] []
+        2: R_CURLY@48..49 "}" [] []
+  4: EOF@49..50 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+const_missing_expression.svelte:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found ' '.
+  
+    1 │ {#each ["1", "2", "3"] as val}
+  > 2 │ 	{@const }
+      │ 	       ^
+    3 │ {/each}
+    4 │ 
+  
+  i Expected an expression here.
+  
+    1 │ {#each ["1", "2", "3"] as val}
+  > 2 │ 	{@const }
+      │ 	       ^
+    3 │ {/each}
+    4 │ 
+  
+```
