@@ -3,10 +3,9 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_html_syntax::{AnyHtmlAttributeInitializer, HtmlAttribute, inner_string_text};
-use biome_rowan::{AstNode, AstNodeList, TextRange, TextSize, TokenText};
+use biome_rowan::{TextRange, TextSize};
 use biome_rule_options::no_tailwind_arbitrary_value::NoTailwindArbitraryValueOptions;
-use biome_tailwind_parser::parse_tailwind;
-use biome_tailwind_syntax::{AnyTwCandidate, AnyTwFullCandidate, AnyTwModifier, AnyTwValue};
+use biome_tailwind_parser::lint_utils::scan_tailwind_arbitrary_ranges;
 
 declare_lint_rule! {
     /// Disallow arbitrary values in Tailwind CSS utility classes.
@@ -52,6 +51,10 @@ declare_lint_rule! {
     ///         "attributes": ["classList"]
     ///     }
     /// }
+    /// ```
+    ///
+    /// ```html,use_options,expect_diagnostic
+    /// <div classList="w-[400px]"></div>
     /// ```
     ///
     /// ### attributes
@@ -110,7 +113,7 @@ impl Rule for NoTailwindArbitraryValue {
         };
         let content_start = token.text_trimmed_range().start() + quote_offset;
 
-        arbitrary_ranges(text, content_start)
+        scan_tailwind_arbitrary_ranges(text.text(), content_start)
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
@@ -128,92 +131,11 @@ impl Rule for NoTailwindArbitraryValue {
 }
 
 fn is_html_class_attribute(name: &str, options: &NoTailwindArbitraryValueOptions) -> bool {
-    name == "class"
+    name.eq_ignore_ascii_case("class")
         || options
             .attributes
             .iter()
             .flatten()
-            .any(|attribute| attribute.as_ref() == name)
+            .any(|attribute| attribute.as_ref().eq_ignore_ascii_case(name))
 }
 
-fn class_ranges(text: &str) -> Vec<(usize, &str)> {
-    let mut class_start = None;
-    let mut classes = Vec::new();
-
-    for (index, ch) in text.char_indices() {
-        if ch.is_ascii_whitespace() {
-            if let Some(start) = class_start.take() {
-                classes.push((start, &text[start..index]));
-            }
-        } else if class_start.is_none() {
-            class_start = Some(index);
-        }
-    }
-
-    if let Some(start) = class_start {
-        classes.push((start, &text[start..]));
-    }
-
-    classes
-}
-
-fn text_size(offset: usize) -> TextSize {
-    TextSize::from(u32::try_from(offset).expect("class offset should fit into u32"))
-}
-
-fn push_arbitrary_value_range(
-    results: &mut Vec<TextRange>,
-    class_start: TextSize,
-    value: Option<AnyTwValue>,
-) {
-    if let Some(AnyTwValue::TwArbitraryValue(value)) = value {
-        let range = value.syntax().text_trimmed_range();
-        results.push(TextRange::new(
-            class_start + range.start(),
-            class_start + range.end(),
-        ));
-    }
-}
-
-fn push_modifier_range(
-    results: &mut Vec<TextRange>,
-    class_start: TextSize,
-    modifier: Option<AnyTwModifier>,
-) {
-    if let Some(AnyTwModifier::TwModifier(modifier)) = modifier {
-        push_arbitrary_value_range(results, class_start, modifier.value().ok());
-    }
-}
-
-fn arbitrary_ranges(text: TokenText, content_start: TextSize) -> Vec<TextRange> {
-    let mut results = Vec::new();
-
-    for (class_offset, class_name) in class_ranges(text.text()) {
-        let parse = parse_tailwind(class_name);
-        let class_start = content_start + text_size(class_offset);
-
-        for candidate in parse.tree().candidates().iter() {
-            let AnyTwFullCandidate::TwFullCandidate(candidate) = candidate else {
-                continue;
-            };
-
-            match candidate.candidate() {
-                Ok(AnyTwCandidate::TwArbitraryCandidate(candidate)) => {
-                    let range = candidate.syntax().text_trimmed_range();
-                    results.push(TextRange::new(
-                        class_start + range.start(),
-                        class_start + range.end(),
-                    ));
-                    push_modifier_range(&mut results, class_start, candidate.modifier());
-                }
-                Ok(AnyTwCandidate::TwFunctionalCandidate(candidate)) => {
-                    push_arbitrary_value_range(&mut results, class_start, candidate.value().ok());
-                    push_modifier_range(&mut results, class_start, candidate.modifier());
-                }
-                _ => {}
-            }
-        }
-    }
-
-    results
-}
