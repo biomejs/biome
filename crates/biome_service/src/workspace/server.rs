@@ -144,6 +144,10 @@ fn resolve_git_path(base: &Utf8Path, path: &str) -> Utf8PathBuf {
 fn read_git_info_exclude(fs: &dyn FsWithResolverProxy, directory: &Utf8Path) -> Option<String> {
     let git_dir = resolve_git_dir(fs, directory)?;
     let git_common_dir = resolve_git_common_dir(fs, &git_dir);
+
+    // Git treats `$GIT_DIR/info/exclude` as repository-local ignore rules. In a
+    // linked worktree, Git resolves this path through `commondir`, so the
+    // exclude file is shared from the common Git directory.
     fs.read_file_from_path(git_common_dir.join("info/exclude").as_ref())
         .ok()
 }
@@ -151,6 +155,9 @@ fn read_git_info_exclude(fs: &dyn FsWithResolverProxy, directory: &Utf8Path) -> 
 fn resolve_git_dir(fs: &dyn FsWithResolverProxy, directory: &Utf8Path) -> Option<Utf8PathBuf> {
     let dot_git = directory.join(".git");
 
+    // Linked worktrees and submodules use a `.git` file whose `gitdir:` entry
+    // points at the real Git directory. Regular repositories use `.git` as the
+    // Git directory itself.
     match fs.read_file_from_path(dot_git.as_ref()) {
         Ok(content) => content.lines().find_map(|line| {
             let gitdir = line.strip_prefix("gitdir:")?.trim();
@@ -161,10 +168,10 @@ fn resolve_git_dir(fs: &dyn FsWithResolverProxy, directory: &Utf8Path) -> Option
 }
 
 fn resolve_git_common_dir(fs: &dyn FsWithResolverProxy, git_dir: &Utf8Path) -> Utf8PathBuf {
-    let Some(content) = fs
-        .read_file_from_path(git_dir.join("commondir").as_ref())
-        .ok()
-    else {
+    // A linked worktree's gitdir is worktree-specific, while repository-wide
+    // files such as `info/exclude` live under the common Git directory.
+    // `commondir` stores that path, relative to `git_dir` when not absolute.
+    let Ok(content) = fs.read_file_from_path(git_dir.join("commondir").as_ref()) else {
         return git_dir.to_path_buf();
     };
 

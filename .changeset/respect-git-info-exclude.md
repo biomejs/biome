@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Fixed `vcs.useIgnoreFile` so repository-local Git ignore patterns from `.git/info/exclude` are respected.
+Fixed [#4822](https://github.com/biomejs/biome/issues/4822): `vcs.useIgnoreFile` now respects repository-local Git ignore patterns from `.git/info/exclude`.
