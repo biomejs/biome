@@ -141,7 +141,10 @@ fn resolve_git_path(base: &Utf8Path, path: &str) -> Utf8PathBuf {
     normalize_path(&resolved_path)
 }
 
-fn read_git_info_exclude(fs: &dyn FsWithResolverProxy, directory: &Utf8Path) -> Option<String> {
+fn read_git_info_exclude_patterns(
+    fs: &dyn FsWithResolverProxy,
+    directory: &Utf8Path,
+) -> Option<Vec<String>> {
     let git_dir = resolve_git_dir(fs, directory)?;
     let git_common_dir = resolve_git_common_dir(fs, &git_dir);
 
@@ -149,6 +152,7 @@ fn read_git_info_exclude(fs: &dyn FsWithResolverProxy, directory: &Utf8Path) -> 
     // linked worktree, Git resolves this path through `commondir`, so the
     // exclude file is shared from the common Git directory.
     fs.read_file_from_path(git_common_dir.join("info/exclude").as_ref())
+        .map(|content| content.lines().map(String::from).collect())
         .ok()
 }
 
@@ -163,7 +167,7 @@ fn resolve_git_dir(fs: &dyn FsWithResolverProxy, directory: &Utf8Path) -> Option
             let gitdir = line.strip_prefix("gitdir:")?.trim();
             Some(resolve_git_path(directory, gitdir))
         }),
-        Err(_) => Some(dot_git),
+        Err(_) => fs.path_is_dir(&dot_git).then_some(dot_git),
     }
 }
 
@@ -1519,6 +1523,8 @@ impl Workspace for WorkspaceServer {
                         let gitignore = directory.join(".gitignore");
                         let ignore = directory.join(".ignore");
                         let mut ignore_file_contents = Vec::new();
+                        let git_info_exclude =
+                            read_git_info_exclude_patterns(self.fs.as_ref(), directory.as_ref());
 
                         let result = self
                             .fs
@@ -1528,26 +1534,27 @@ impl Workspace for WorkspaceServer {
                         if let Some(content) = result {
                             ignore_file_contents.push(content);
                         }
-                        if let Some(content) =
-                            read_git_info_exclude(self.fs.as_ref(), directory.as_ref())
-                        {
-                            ignore_file_contents.push(content);
+
+                        let mut ignore_file_patterns = ignore_file_contents
+                            .iter()
+                            .flat_map(|content| content.lines())
+                            .collect::<Vec<_>>();
+                        if let Some(git_info_exclude) = git_info_exclude.as_ref() {
+                            ignore_file_patterns
+                                .extend(git_info_exclude.iter().map(String::as_str));
                         }
 
-                        if ignore_file_contents.is_empty() {
+                        if ignore_file_patterns.is_empty() {
                             diagnostics.push(biome_diagnostics::serde::Diagnostic::new(
                                 VcsDiagnostic::NoIgnoreFileFound(NoIgnoreFileFound {
                                     path: directory.to_string(),
                                 }),
                             ));
                         } else {
-                            let lines: Vec<_> = ignore_file_contents
-                                .iter()
-                                .flat_map(|content| content.lines())
-                                .collect();
-                            settings
-                                .vcs_settings
-                                .store_root_ignore_patterns(directory.as_ref(), lines.as_slice())?;
+                            settings.vcs_settings.store_root_ignore_patterns(
+                                directory.as_ref(),
+                                ignore_file_patterns.as_slice(),
+                            )?;
                         };
                     }
                 }

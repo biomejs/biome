@@ -16258,7 +16258,7 @@
 					"type": ["string", "null"]
 				},
 				"useIgnoreFile": {
-					"description": "Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files\nspecified in the ignore file.",
+					"description": "Whether Biome should use VCS ignore files. When [true], Biome will ignore files\nspecified in `.gitignore`, `.ignore`, and Git's local exclude file.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				}
 			},

@@ -1,7 +1,5 @@
 ---
-"@biomejs/biome": patch
+"@biomejs/biome": minor
 ---
 
-Fixed [#4822](https://github.com/biomejs/biome/issues/4822): `vcs.useIgnoreFile` now respects repository-local Git ignore patterns from `.git/info/exclude`.
-
-Because `store_root_ignore_patterns` now includes patterns read through `read_git_info_exclude`, the `NoIgnoreFileFound` diagnostic is only emitted when `.gitignore`, `.ignore`, and `.git/info/exclude` are all absent or empty.
+Biome now applies Git's local exclude file when VCS ignore files are enabled. Files listed in `.git/info/exclude` are skipped the same way as files listed in `.gitignore`, including in linked worktrees.
