@@ -626,10 +626,16 @@ fn build_inferred_description(returns: &[Type]) -> Option<String> {
 }
 
 /// Per-body accumulator for the misleading-return check.
+#[derive(Default)]
 struct ReturnInfo {
     types: Vec<Type>,
     has_any_const: bool,
+    /// Count of return expressions that explicitly cast or assert to the
+    /// `object` keyword (or an equivalent target such as an alias to `object`).
     object_keyword_casts: usize,
+    /// Whether any return expression reveals structure narrower than the
+    /// TypeScript `object` keyword, such as members, tuples, functions, or
+    /// class instances.
     has_narrower_than_object: bool,
 }
 
@@ -666,12 +672,7 @@ fn collect_return_info(
     ctx: &RuleContext<NoMisleadingReturnType>,
     body: &AnyJsFunctionBody,
 ) -> ReturnInfo {
-    let mut info = ReturnInfo {
-        types: Vec::new(),
-        has_any_const: false,
-        object_keyword_casts: 0,
-        has_narrower_than_object: false,
-    };
+    let mut info = ReturnInfo::default();
 
     match body {
         AnyJsFunctionBody::JsFunctionBody(block) => collect_block_returns(ctx, block, &mut info),
