@@ -93,6 +93,9 @@ pub struct RuleState {
 /// Maximum iterations for type graph traversal to guard against infinite loops on cyclic types.
 const MAX_TYPE_TRAVERSAL_ITERATIONS: usize = 50;
 
+/// Upper bound on a rendered return-type suggestion.
+const MAX_DESCRIPTION_LENGTH: usize = 80;
+
 impl Rule for NoMisleadingReturnType {
     type Query = Typed<AnyFunctionLikeWithReturnType>;
     type State = RuleState;
@@ -587,47 +590,78 @@ fn is_base_type_of_literal(base: &Type, literal: &Type) -> bool {
     }
 }
 
-/// Builds a string like `"loading" | "idle"` for the diagnostic note.
-fn build_inferred_description(returns: &[Type]) -> Option<String> {
-    let mut result = String::new();
+/// Return-set description suitable for embedding in a diagnostic via
+/// [`biome_console::fmt::Display`].
+struct InferredReturnDescription<'a> {
+    returns: &'a [Type],
+}
+
+/// Builds a description like `"loading" | "idle"` for the diagnostic note.
+fn build_inferred_description(returns: &[Type]) -> Option<InferredReturnDescription<'_>> {
+    let mut total = 0usize;
+    let mut has_any = false;
     for ty in returns {
-        match &**ty {
-            TypeData::Literal(lit) => {
-                if !result.is_empty() {
-                    result.push_str(" | ");
+        let TypeData::Literal(lit) = &**ty else {
+            return None;
+        };
+        if has_any {
+            total += 3; // " | "
+        }
+        has_any = true;
+        match lit.as_ref() {
+            Literal::String(s) => {
+                let text = s.as_str();
+                // Skip values that would look confusing in a diagnostic (e.g. "...").
+                if text.contains("...")
+                    || text.contains("__internal")
+                    || text.contains("typeof import(")
+                {
+                    return None;
                 }
-                match lit.as_ref() {
-                    Literal::String(s) => {
-                        result.push('"');
-                        result.push_str(s.as_str());
-                        result.push('"');
-                    }
-                    Literal::Number(n) => result.push_str(n.as_str()),
-                    Literal::Boolean(b) => {
-                        result.push_str(if b.as_bool() { "true" } else { "false" })
-                    }
-                    _ => return None,
-                }
+                total += 2 + text.len(); // surrounding quotes
             }
+            Literal::Number(n) => total += n.as_str().len(),
+            Literal::Boolean(b) => total += if b.as_bool() { 4 } else { 5 },
             _ => return None,
         }
+        // Skip overly long descriptions.
+        if total > MAX_DESCRIPTION_LENGTH {
+            return None;
+        }
     }
-
-    if result.is_empty() {
+    if !has_any {
         return None;
     }
+    Some(InferredReturnDescription { returns })
+}
 
-    // Skip values that would look confusing in a diagnostic (e.g. "...").
-    if result.contains("...") || result.contains("__internal") || result.contains("typeof import(") {
-        return None;
+impl biome_console::fmt::Display for InferredReturnDescription<'_> {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+        let mut first = true;
+        for ty in self.returns {
+            let TypeData::Literal(lit) = &**ty else {
+                continue;
+            };
+            if !first {
+                biome_console::fmt::Display::fmt(&" | ", fmt)?;
+            }
+            first = false;
+            match lit.as_ref() {
+                Literal::String(s) => {
+                    biome_console::fmt::Display::fmt(&"\"", fmt)?;
+                    biome_console::fmt::Display::fmt(&s.as_str(), fmt)?;
+                    biome_console::fmt::Display::fmt(&"\"", fmt)?;
+                }
+                Literal::Number(n) => biome_console::fmt::Display::fmt(&n.as_str(), fmt)?,
+                Literal::Boolean(b) => biome_console::fmt::Display::fmt(
+                    &if b.as_bool() { "true" } else { "false" },
+                    fmt,
+                )?,
+                _ => {}
+            }
+        }
+        Ok(())
     }
-
-    // Skip overly long descriptions.
-    if result.len() > 80 {
-        return None;
-    }
-
-    Some(result)
 }
 
 /// Per-body accumulator for the misleading-return check.
