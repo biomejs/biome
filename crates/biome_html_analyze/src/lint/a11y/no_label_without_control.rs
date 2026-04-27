@@ -288,5 +288,6 @@ fn has_label_attribute_value(html_attribute_value: &AnyHtmlAttributeInitializer)
         AnyHtmlAttributeInitializer::HtmlString(html_string) => !html_string
             .inner_string_text()
             .is_ok_and(|text| text.text().trim().is_empty()),
+        _ => false,
     }
 }
