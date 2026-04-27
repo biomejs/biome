@@ -711,18 +711,11 @@ fn collect_block_returns(
 /// equivalent to `object`, so it returns `false`; spreads count because
 /// type-info drops them today.
 fn object_literal_has_any_member(expression: &AnyJsExpression) -> bool {
-    let mut current = expression.clone();
-    loop {
-        match current {
-            AnyJsExpression::JsParenthesizedExpression(paren) => match paren.expression() {
-                Ok(inner) => current = inner,
-                Err(_) => return false,
-            },
-            AnyJsExpression::JsObjectExpression(object) => {
-                return object.members().into_iter().next().is_some();
-            }
-            _ => return false,
+    match expression.clone().omit_parentheses() {
+        AnyJsExpression::JsObjectExpression(object) => {
+            object.members().into_iter().next().is_some()
         }
+        _ => false,
     }
 }
 
@@ -730,7 +723,7 @@ fn object_literal_has_any_member(expression: &AnyJsExpression) -> bool {
 /// than `object`. Walks parens and ternary branches, mirroring
 /// [`has_object_keyword_assertion`].
 fn has_narrow_cast(expression: &AnyJsExpression) -> bool {
-    let mut stack = vec![expression.clone()];
+    let mut stack = vec![expression.clone().omit_parentheses()];
     while let Some(current) = stack.pop() {
         if let Some(cast) = AnyTsCastExpression::cast(current.syntax().clone()) {
             let Some(cast_type) = cast.cast_type() else {
@@ -741,21 +734,13 @@ fn has_narrow_cast(expression: &AnyJsExpression) -> bool {
             }
             continue;
         }
-        match current {
-            AnyJsExpression::JsParenthesizedExpression(paren) => {
-                if let Ok(inner) = paren.expression() {
-                    stack.push(inner);
-                }
+        if let AnyJsExpression::JsConditionalExpression(conditional) = current {
+            if let Ok(consequent) = conditional.consequent() {
+                stack.push(consequent.omit_parentheses());
             }
-            AnyJsExpression::JsConditionalExpression(conditional) => {
-                if let Ok(consequent) = conditional.consequent() {
-                    stack.push(consequent);
-                }
-                if let Ok(alternate) = conditional.alternate() {
-                    stack.push(alternate);
-                }
+            if let Ok(alternate) = conditional.alternate() {
+                stack.push(alternate.omit_parentheses());
             }
-            _ => {}
         }
     }
     false
@@ -764,7 +749,7 @@ fn has_narrow_cast(expression: &AnyJsExpression) -> bool {
 /// Whether the expression is a type assertion that opts into `object` widening.
 /// Ternary branches must each carry their own trustworthy cast.
 fn has_object_keyword_assertion(expression: &AnyJsExpression) -> bool {
-    let mut stack = vec![expression.clone()];
+    let mut stack = vec![expression.clone().omit_parentheses()];
     while let Some(current_expression) = stack.pop() {
         if let Some(cast) = AnyTsCastExpression::cast(current_expression.syntax().clone()) {
             let Some(cast_type) = cast.cast_type() else {
@@ -776,12 +761,6 @@ fn has_object_keyword_assertion(expression: &AnyJsExpression) -> bool {
             continue;
         }
         match current_expression {
-            AnyJsExpression::JsParenthesizedExpression(parenthesized_expression) => {
-                let Ok(inner_expression) = parenthesized_expression.expression() else {
-                    return false;
-                };
-                stack.push(inner_expression);
-            }
             AnyJsExpression::JsConditionalExpression(conditional_expression) => {
                 let Ok(consequent) = conditional_expression.consequent() else {
                     return false;
@@ -789,8 +768,8 @@ fn has_object_keyword_assertion(expression: &AnyJsExpression) -> bool {
                 let Ok(alternate) = conditional_expression.alternate() else {
                     return false;
                 };
-                stack.push(consequent);
-                stack.push(alternate);
+                stack.push(consequent.omit_parentheses());
+                stack.push(alternate.omit_parentheses());
             }
             _ => return false,
         }
