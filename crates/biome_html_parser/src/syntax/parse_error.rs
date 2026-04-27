@@ -158,3 +158,28 @@ pub(crate) fn expected_vue_v_for_expression(p: &HtmlParser, range: TextRange) ->
 pub(crate) fn expected_vue_v_for_binding(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
     expected_node("v-for binding", range, p).into_diagnostic(p)
 }
+
+pub(crate) fn expected_vue_v_for_binding_separator(
+    p: &HtmlParser,
+    range: TextRange,
+    end: &str,
+) -> ParseDiagnostic {
+    p.err_builder(
+        format!(
+            "Expected `,` or `{end}` in the v-for destructuring pattern, but found `{}`.",
+            p.cur_text()
+        ),
+        range,
+    )
+    .with_alternatives("Expected one of:", &[",", end])
+}
+
+pub(crate) fn expected_vue_v_for_tuple_binding_end(
+    p: &HtmlParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    p.err_builder(
+        "Expected `)` to close the v-for tuple binding before the iterable expression.",
+        range,
+    )
+}

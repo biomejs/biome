@@ -10,6 +10,7 @@ pub(crate) mod v_for_array_binding;
 pub(crate) mod v_for_identifier_binding;
 pub(crate) mod v_for_in_operator;
 pub(crate) mod v_for_object_binding;
+pub(crate) mod v_for_object_property_binding;
 pub(crate) mod v_for_of_operator;
 pub(crate) mod v_for_rest_binding;
 pub(crate) mod v_for_tuple_binding;

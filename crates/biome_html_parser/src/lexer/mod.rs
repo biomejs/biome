@@ -298,6 +298,7 @@ impl<'src> HtmlLexer<'src> {
             PNO => self.consume_byte(T!['(']),
             PNC => self.consume_byte(T![')']),
             COM => self.consume_byte(T![,]),
+            COL => self.consume_byte(T![:]),
             BEO => self.consume_byte(T!['{']),
             BEC => self.consume_byte(T!['}']),
             BTO => self.consume_byte(T!['[']),

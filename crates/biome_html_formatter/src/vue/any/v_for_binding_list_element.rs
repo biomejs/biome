@@ -12,6 +12,9 @@ impl FormatRule<AnyVueVForBindingListElement> for FormatAnyVueVForBindingListEle
                 node.format().fmt(f)
             }
             AnyVueVForBindingListElement::VueVForIdentifierBinding(node) => node.format().fmt(f),
+            AnyVueVForBindingListElement::VueVForObjectPropertyBinding(node) => {
+                node.format().fmt(f)
+            }
             AnyVueVForBindingListElement::VueVForRestBinding(node) => node.format().fmt(f),
         }
     }

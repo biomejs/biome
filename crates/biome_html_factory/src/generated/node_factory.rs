@@ -1454,6 +1454,20 @@ pub fn vue_v_for_object_binding(
         ],
     ))
 }
+pub fn vue_v_for_object_property_binding(
+    property: VueVForIdentifierBinding,
+    colon_token: SyntaxToken,
+    binding: AnyVueVForBinding,
+) -> VueVForObjectPropertyBinding {
+    VueVForObjectPropertyBinding::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::VUE_V_FOR_OBJECT_PROPERTY_BINDING,
+        [
+            Some(SyntaxElement::Node(property.into_syntax())),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(binding.into_syntax())),
+        ],
+    ))
+}
 pub fn vue_v_for_of_operator(of_token: SyntaxToken) -> VueVForOfOperator {
     VueVForOfOperator::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::VUE_V_FOR_OF_OPERATOR,

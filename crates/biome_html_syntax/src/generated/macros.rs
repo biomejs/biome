@@ -373,6 +373,11 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::VueVForObjectBinding::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::VUE_V_FOR_OBJECT_PROPERTY_BINDING => {
+                    let $pattern =
+                        unsafe { $crate::VueVForObjectPropertyBinding::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::VUE_V_FOR_OF_OPERATOR => {
                     let $pattern = unsafe { $crate::VueVForOfOperator::new_unchecked(node) };
                     $body

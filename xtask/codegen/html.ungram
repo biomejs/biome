@@ -802,6 +802,7 @@ VueVForBindingList = (AnyVueVForBindingListElement (',' AnyVueVForBindingListEle
 
 AnyVueVForBindingListElement =
 	VueVForIdentifierBinding
+	| VueVForObjectPropertyBinding
 	| AnyVueVForDestructuredBinding
 	| VueVForRestBinding
 
@@ -809,6 +810,13 @@ AnyVueVForBindingListElement =
 //             ^^^^
 VueVForIdentifierBinding =
 	name: 'ident'
+
+// <div v-for="{ foo: bar } in items" />
+//             ^^^^^^^^
+VueVForObjectPropertyBinding =
+	property: VueVForIdentifierBinding
+	':'
+	binding: AnyVueVForBinding
 
 // <div v-for="{ foo, bar } in items" />
 //             ^^^^^^^^^^^^

@@ -851,14 +851,12 @@ invalid-destructuring.vue:5:27 parse ━━━━━━━━━━━━━━�
   
 invalid-destructuring.vue:6:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `)` but instead found `in`
+  × Expected `)` to close the v-for tuple binding before the iterable expression.
   
     4 │ <div v-for="[first,, second] in pairs">{{ first }}: {{ second }}</div>
     5 │ <div v-for="({ id, name },) in users">{{ id }}: {{ name }}</div>
   > 6 │ <div v-for="({ id, name }, index in users">{{ index }}: {{ id }}: {{ name }}</div>
       │                                  ^^
     7 │ 
-  
-  i Remove in
   
 ```

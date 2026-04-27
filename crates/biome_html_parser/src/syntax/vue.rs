@@ -4,8 +4,10 @@ use crate::syntax::parse_attribute_initializer;
 use crate::syntax::parse_error::expected_attribute;
 use crate::syntax::parse_error::expected_vue_directive_argument;
 use crate::syntax::parse_error::expected_vue_v_for_binding;
+use crate::syntax::parse_error::expected_vue_v_for_binding_separator;
 use crate::syntax::parse_error::expected_vue_v_for_expression;
 use crate::syntax::parse_error::expected_vue_v_for_operator;
+use crate::syntax::parse_error::expected_vue_v_for_tuple_binding_end;
 use crate::token_source::HtmlLexContext;
 use biome_html_syntax::HtmlSyntaxKind;
 use biome_html_syntax::HtmlSyntaxKind::*;
@@ -323,10 +325,29 @@ fn parse_vue_v_for_binding_list_element(p: &mut HtmlParser) -> ParsedSyntax {
         match p.cur() {
             T!['{'] => parse_vue_v_for_object_binding(p),
             T!['['] => parse_vue_v_for_array_binding(p),
-            HTML_LITERAL => parse_vue_v_for_identifier_binding(p),
+            HTML_LITERAL => parse_vue_v_for_object_property_or_identifier_binding(p),
             _ => Absent,
         }
     }
+}
+
+fn parse_vue_v_for_object_property_or_identifier_binding(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(HTML_LITERAL) {
+        return Absent;
+    }
+
+    let Some(property) = parse_vue_v_for_identifier_binding(p).ok() else {
+        return Absent;
+    };
+
+    if !p.at(T![:]) {
+        return Present(property);
+    }
+
+    let m = property.precede(p);
+    p.bump_v_for(T![:]);
+    parse_vue_v_for_binding(p).or_add_diagnostic(p, expected_vue_v_for_binding);
+    Present(m.complete(p, VUE_V_FOR_OBJECT_PROPERTY_BINDING))
 }
 
 fn parse_vue_v_for_identifier_binding(p: &mut HtmlParser) -> ParsedSyntax {
@@ -398,7 +419,9 @@ fn parse_vue_v_for_tuple_binding(p: &mut HtmlParser) -> ParsedSyntax {
         }
     }
 
-    p.expect_v_for(T![')']);
+    if !p.eat(T![')']) {
+        p.error(expected_vue_v_for_tuple_binding_end(p, p.cur_range()));
+    }
 
     Present(m.complete(p, VUE_V_FOR_TUPLE_BINDING))
 }
@@ -493,6 +516,16 @@ impl ParseSeparatedList for VueVForBindingList {
     }
 
     fn expect_separator(&mut self, p: &mut Self::Parser<'_>) -> bool {
-        p.expect_v_for(self.separating_element_kind())
+        if (self.end == T![']'] && p.at(T!['}'])) || (self.end == T!['}'] && p.at(T![']'])) {
+            let end = self.end.to_string().unwrap_or("closing delimiter");
+            p.error(expected_vue_v_for_binding_separator(
+                p,
+                p.cur_range(),
+                end,
+            ));
+            false
+        } else {
+            p.expect_v_for(self.separating_element_kind())
+        }
     }
 }
