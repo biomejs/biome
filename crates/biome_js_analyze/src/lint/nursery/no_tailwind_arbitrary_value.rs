@@ -1,9 +1,11 @@
 use crate::shared::any_class_string_like::AnyClassStringLike;
-use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    Ast, Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
 use biome_js_syntax::JsSyntaxKind;
 use biome_rowan::{AstNode, AstNodeList, TextRange, TextSize, TokenText};
-use biome_rule_options::no_arbitrary_value::NoArbitraryValueOptions;
+use biome_rule_options::no_tailwind_arbitrary_value::NoTailwindArbitraryValueOptions;
 use biome_tailwind_parser::parse_tailwind;
 use biome_tailwind_syntax::{AnyTwCandidate, AnyTwFullCandidate, AnyTwModifier, AnyTwValue};
 
@@ -11,7 +13,8 @@ declare_lint_rule! {
     /// Disallow arbitrary values in Tailwind CSS utility classes.
     ///
     /// Arbitrary values (e.g. `w-[400px]`, `text-[#555]`, `[color:red]`) bypass
-    /// the design system. This rule reports them so teams can enforce a constraint-based approach.
+    /// Tailwind's configured theme scales. This rule reports them so teams can
+    /// keep styling constrained to named utilities from their Tailwind configuration.
     ///
     /// ## Examples
     ///
@@ -41,20 +44,24 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
+    /// By default, this rule checks the `class` and `className` JSX attributes.
+    /// The `attributes` option adds more JSX attributes to check, and `functions`
+    /// enables checking string arguments and tagged templates in matching utilities.
+    ///
     /// ```json,options
     /// {
     ///     "options": {
     ///         "attributes": ["classList"],
-    ///         "functions": ["clsx", "cn", "classnames", "tw", "tw.*"]
+    ///         "functions": ["clsx"]
     ///     }
     /// }
     /// ```
     ///
     /// ### attributes
     ///
-    /// Additional JSX attribute names to check (beyond the default `class` and `className`).
+    /// Additional JSX attribute names to check.
     ///
-    /// Default: `[]`.
+    /// Default: `[]` (the `class` and `className` attributes are always checked).
     ///
     /// ### functions
     ///
@@ -62,23 +69,24 @@ declare_lint_rule! {
     ///
     /// Default: `[]`.
     ///
-    /// ```jsx,use_options
+    /// ```jsx,use_options,expect_diagnostic
     /// <div className={clsx("w-[400px]")} />;
     /// ```
     ///
-    pub NoArbitraryValue {
+    pub NoTailwindArbitraryValue {
         version: "next",
-        name: "noArbitraryValue",
+        name: "noTailwindArbitraryValue",
         language: "jsx",
+        domains: &[RuleDomain::Tailwind],
         recommended: false,
     }
 }
 
-impl Rule for NoArbitraryValue {
+impl Rule for NoTailwindArbitraryValue {
     type Query = Ast<AnyClassStringLike>;
     type State = TextRange;
     type Signals = Vec<TextRange>;
-    type Options = NoArbitraryValueOptions;
+    type Options = NoTailwindArbitraryValueOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
@@ -95,10 +103,10 @@ impl Rule for NoArbitraryValue {
             RuleDiagnostic::new(
                 rule_category!(),
                 range,
-                markup! { "Avoid arbitrary values in Tailwind CSS classes." },
+                markup! { "Found an arbitrary value in a Tailwind CSS class." },
             )
             .note(markup! {
-                "Arbitrary values bypass the design system. Use a design token instead."
+                "Use a named utility from your Tailwind configuration instead."
             }),
         )
     }
@@ -170,7 +178,7 @@ fn class_ranges(text: &str) -> Vec<(usize, &str)> {
 }
 
 fn text_size(offset: usize) -> TextSize {
-    TextSize::from(u32::try_from(offset).unwrap())
+    TextSize::from(u32::try_from(offset).expect("class offset should fit into u32"))
 }
 
 fn push_arbitrary_value_range(
