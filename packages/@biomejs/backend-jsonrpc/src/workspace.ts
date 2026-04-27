@@ -2043,11 +2043,6 @@ See https://biomejs.dev/linter/rules/no-ambiguous-anchor-text
 	 */
 	noAmbiguousAnchorText?: NoAmbiguousAnchorTextConfiguration;
 	/**
-	* Disallow arbitrary values in Tailwind CSS utility classes.
-See https://biomejs.dev/linter/rules/no-arbitrary-value 
-	 */
-	noArbitraryValue?: NoArbitraryValueConfiguration;
-	/**
 	* Prevent usage of next/script's beforeInteractive strategy outside of pages/_document.js in a Next.js project.
 See https://biomejs.dev/linter/rules/no-before-interactive-script-outside-document 
 	 */
@@ -2357,6 +2352,11 @@ See https://biomejs.dev/linter/rules/no-shadow
 See https://biomejs.dev/linter/rules/no-sync-scripts 
 	 */
 	noSyncScripts?: NoSyncScriptsConfiguration;
+	/**
+	* Disallow arbitrary values in Tailwind CSS utility classes.
+See https://biomejs.dev/linter/rules/no-tailwind-arbitrary-value 
+	 */
+	noTailwindArbitraryValue?: NoTailwindArbitraryValueConfiguration;
 	/**
 	* Disallow ternary operators.
 See https://biomejs.dev/linter/rules/no-ternary 
@@ -4252,9 +4252,6 @@ export type UseYieldConfiguration =
 export type NoAmbiguousAnchorTextConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAmbiguousAnchorTextOptions;
-export type NoArbitraryValueConfiguration =
-	| RulePlainConfiguration
-	| RuleWithNoArbitraryValueOptions;
 export type NoBeforeInteractiveScriptOutsideDocumentConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoBeforeInteractiveScriptOutsideDocumentOptions;
@@ -4441,6 +4438,9 @@ export type NoShadowConfiguration =
 export type NoSyncScriptsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSyncScriptsOptions;
+export type NoTailwindArbitraryValueConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTailwindArbitraryValueOptions;
 export type NoTernaryConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTernaryOptions;
@@ -5992,10 +5992,6 @@ export interface RuleWithNoAmbiguousAnchorTextOptions {
 	level: RulePlainConfiguration;
 	options?: NoAmbiguousAnchorTextOptions;
 }
-export interface RuleWithNoArbitraryValueOptions {
-	level: RulePlainConfiguration;
-	options?: NoArbitraryValueOptions;
-}
 export interface RuleWithNoBeforeInteractiveScriptOutsideDocumentOptions {
 	level: RulePlainConfiguration;
 	options?: NoBeforeInteractiveScriptOutsideDocumentOptions;
@@ -6254,6 +6250,10 @@ export interface RuleWithNoShadowOptions {
 export interface RuleWithNoSyncScriptsOptions {
 	level: RulePlainConfiguration;
 	options?: NoSyncScriptsOptions;
+}
+export interface RuleWithNoTailwindArbitraryValueOptions {
+	level: RulePlainConfiguration;
+	options?: NoTailwindArbitraryValueOptions;
 }
 export interface RuleWithNoTernaryOptions {
 	level: RulePlainConfiguration;
@@ -7774,16 +7774,6 @@ export interface NoAmbiguousAnchorTextOptions {
 	 */
 	words?: string[];
 }
-export interface NoArbitraryValueOptions {
-	/**
-	 * Additional attributes that will be checked.
-	 */
-	attributes?: string[];
-	/**
-	 * Names of the functions or tagged templates that will be checked.
-	 */
-	functions?: string[];
-}
 export type NoBeforeInteractiveScriptOutsideDocumentOptions = {};
 export type NoComponentHookFactoriesOptions = {};
 export type NoConditionalExpectOptions = {};
@@ -7918,6 +7908,16 @@ Defaults to `true`.
 	ignoreTypeValueShadow?: boolean;
 }
 export type NoSyncScriptsOptions = {};
+export interface NoTailwindArbitraryValueOptions {
+	/**
+	 * Additional attributes that will be checked.
+	 */
+	attributes?: string[];
+	/**
+	 * Names of the functions or tagged templates that will be checked.
+	 */
+	functions?: string[];
+}
 export type NoTernaryOptions = {};
 export type NoTopLevelLiteralsOptions = {};
 export interface NoUndeclaredEnvVarsOptions {
@@ -9038,7 +9038,7 @@ export type Category =
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noAmbiguousAnchorText"
-	| "lint/nursery/noArbitraryValue"
+	| "lint/nursery/noTailwindArbitraryValue"
 	| "lint/nursery/noBeforeInteractiveScriptOutsideDocument"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noComponentHookFactories"

@@ -826,6 +826,8 @@ dependencies = [
  "biome_rule_options",
  "biome_string_case",
  "biome_suppression",
+ "biome_tailwind_parser",
+ "biome_tailwind_syntax",
  "biome_test_utils",
  "camino",
  "codspeed-criterion-compat",

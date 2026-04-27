@@ -3,7 +3,7 @@
 	"linter": {
 		"rules": {
 			"nursery": {
-				"noArbitraryValue": {
+				"noTailwindArbitraryValue": {
 					"level": "error",
 					"options": {
 						"functions": ["clsx", "cn", "classnames", "tw", "tw.*"]
