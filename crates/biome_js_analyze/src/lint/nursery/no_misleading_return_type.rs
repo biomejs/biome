@@ -719,9 +719,10 @@ fn object_literal_has_any_member(expression: &AnyJsExpression) -> bool {
     }
 }
 
-/// Whether the expression has a cast whose target is strictly narrower
-/// than `object`. Walks parens and ternary branches, mirroring
-/// [`has_object_keyword_assertion`].
+/// Returns `true` when the expression contains a cast whose target is
+/// strictly narrower than the `object` keyword. The walk descends through
+/// parentheses and both branches of a ternary; `false` means no narrow cast
+/// was found in any branch.
 fn has_narrow_cast(expression: &AnyJsExpression) -> bool {
     let mut stack = vec![expression.clone().omit_parentheses()];
     while let Some(current) = stack.pop() {
@@ -729,7 +730,7 @@ fn has_narrow_cast(expression: &AnyJsExpression) -> bool {
             let Some(cast_type) = cast.cast_type() else {
                 continue;
             };
-            if !cast_target_trustworthy(&cast_type, &cast) {
+            if !cast_target_at_least_object_wide(&cast_type, &cast) {
                 return true;
             }
             continue;
@@ -755,7 +756,7 @@ fn has_object_keyword_assertion(expression: &AnyJsExpression) -> bool {
             let Some(cast_type) = cast.cast_type() else {
                 return false;
             };
-            if !cast_target_trustworthy(&cast_type, &cast) {
+            if !cast_target_at_least_object_wide(&cast_type, &cast) {
                 return false;
             }
             continue;
@@ -777,9 +778,10 @@ fn has_object_keyword_assertion(expression: &AnyJsExpression) -> bool {
     true
 }
 
-/// Whether the cast target reduces to the `object` keyword. Atomic targets
-/// decide inline; compound shapes delegate to [`walk_compound_cast_target`].
-fn cast_target_trustworthy(cast_target: &AnyTsType, anchor: &AnyTsCastExpression) -> bool {
+/// `true` if the cast target is treated as an `object` opt-in; `false` if it is
+/// known to be strictly narrower. Atomic targets decide inline; compound shapes
+/// delegate to [`compound_cast_target_at_least_object_wide`].
+fn cast_target_at_least_object_wide(cast_target: &AnyTsType, anchor: &AnyTsCastExpression) -> bool {
     match cast_target.clone().omit_parentheses() {
         AnyTsType::TsNonPrimitiveType(_)
         | AnyTsType::TsUnknownType(_)
@@ -790,16 +792,18 @@ fn cast_target_trustworthy(cast_target: &AnyTsType, anchor: &AnyTsCastExpression
         unwrapped @ (AnyTsType::TsReferenceType(_)
         | AnyTsType::TsIntersectionType(_)
         | AnyTsType::TsUnionType(_)
-        | AnyTsType::TsConditionalType(_)) => walk_compound_cast_target(unwrapped, anchor),
+        | AnyTsType::TsConditionalType(_)) => {
+            compound_cast_target_at_least_object_wide(unwrapped, anchor)
+        }
         _ => false,
     }
 }
 
-/// Iterative walker for compound cast targets. Intersections require every
-/// member trustworthy, unions require one. Bounded by
-/// [`MAX_TYPE_TRAVERSAL_ITERATIONS`]; on timeout we trust — tsc rejects
-/// structurally incompatible casts anyway.
-fn walk_compound_cast_target(root: AnyTsType, anchor: &AnyTsCastExpression) -> bool {
+/// Returns `true` when a compound cast target is at least as wide as `object`.
+/// Intersections require every member object-wide, unions require one. Bounded
+/// by [`MAX_TYPE_TRAVERSAL_ITERATIONS`]; on timeout we return `true` — tsc
+/// rejects structurally incompatible casts anyway.
+fn compound_cast_target_at_least_object_wide(root: AnyTsType, anchor: &AnyTsCastExpression) -> bool {
     enum Task {
         Visit(AnyTsType),
         /// AND the top `N` results (intersection).
