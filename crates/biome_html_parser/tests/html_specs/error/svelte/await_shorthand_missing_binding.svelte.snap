@@ -129,7 +129,7 @@ await_shorthand_missing_binding.svelte:1:21 parse ━━━━━━━━━━
   × Expected an expression, instead none was found.
   
   > 1 │ {#await promise then}
-      │                     
+      │                     ^
     2 │   <p>Done!</p>
     3 │ {/await}
   

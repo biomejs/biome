@@ -184,7 +184,7 @@ await_missing_then_binding.svelte:3:7 parse ━━━━━━━━━━━━
     1 │ {#await promise}
     2 │   <p>Loading...</p>
   > 3 │ {:then}
-      │       
+      │       ^
     4 │   <p>Done!</p>
     5 │ {/await}
   

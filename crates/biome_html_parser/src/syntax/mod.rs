@@ -818,7 +818,14 @@ impl TextExpression {
 }
 
 fn parse_single_text_expression_content(p: &mut HtmlParser) -> ParsedSyntax {
-    if p.at(EOF) || p.at(T![<]) || p.at(T!['}']) || p.cur_text().trim().is_empty() {
+    if p.at(EOF) || p.at(T![<]) || p.at(T!['}']) {
+        return Absent;
+    }
+    if p.cur_text().is_empty() {
+        p.bump_remap(HTML_LITERAL);
+        return Absent;
+    }
+    if p.cur_text().trim().is_empty() {
         return Absent;
     }
     let m = p.start();
