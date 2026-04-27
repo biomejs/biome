@@ -4,7 +4,7 @@ use crate::{
 use biome_rowan::declare_node_union;
 
 declare_node_union! {
-    /// Any TypeScript expression that asserts its operand to a specific type:
+    /// Any TypeScript expression with an operand and a target type:
     /// `expr as T`, `expr satisfies T`, or the legacy `<T>expr`.
     pub AnyTsCastExpression =
         TsAsExpression
@@ -13,7 +13,7 @@ declare_node_union! {
 }
 
 impl AnyTsCastExpression {
-    /// Type expression the assertion casts to.
+    /// Target type expression.
     pub fn cast_type(&self) -> Option<AnyTsType> {
         match self {
             Self::TsAsExpression(expression) => expression.ty().ok(),
@@ -22,7 +22,7 @@ impl AnyTsCastExpression {
         }
     }
 
-    /// Underlying expression whose type is being asserted.
+    /// Underlying expression being checked or asserted.
     pub fn inner_expression(&self) -> Option<AnyJsExpression> {
         match self {
             Self::TsAsExpression(expression) => expression.expression().ok(),
