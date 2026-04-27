@@ -2359,11 +2359,6 @@ See https://biomejs.dev/linter/rules/use-yield
  */
 export interface Nursery {
 	/**
-	* Disallow arbitrary values in Tailwind CSS utility classes.
-See https://biomejs.dev/linter/rules/no-arbitrary-value 
-	 */
-	noArbitraryValue?: NoArbitraryValueConfiguration;
-	/**
 	* Require stringification to avoid values that only use the default object representation.
 See https://biomejs.dev/linter/rules/no-base-to-string 
 	 */
@@ -2533,6 +2528,11 @@ See https://biomejs.dev/linter/rules/no-react-string-refs
 See https://biomejs.dev/linter/rules/no-restricted-dependencies 
 	 */
 	noRestrictedDependencies?: NoRestrictedDependenciesConfiguration;
+	/**
+	* Disallow arbitrary values in Tailwind CSS utility classes.
+See https://biomejs.dev/linter/rules/no-tailwind-arbitrary-value 
+	 */
+	noTailwindArbitraryValue?: NoTailwindArbitraryValueConfiguration;
 	/**
 	* Require the JSON top-level value to be an array or object.
 See https://biomejs.dev/linter/rules/no-top-level-literals 
@@ -4632,9 +4632,6 @@ export type UseVueValidVTextConfiguration =
 export type UseYieldConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseYieldOptions;
-export type NoArbitraryValueConfiguration =
-	| RulePlainConfiguration
-	| RuleWithNoArbitraryValueOptions;
 export type NoBaseToStringConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoBaseToStringOptions;
@@ -4737,6 +4734,9 @@ export type NoReactStringRefsConfiguration =
 export type NoRestrictedDependenciesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoRestrictedDependenciesOptions;
+export type NoTailwindArbitraryValueConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTailwindArbitraryValueOptions;
 export type NoTopLevelLiteralsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTopLevelLiteralsOptions;
@@ -6467,10 +6467,6 @@ export interface RuleWithUseYieldOptions {
 	level: RulePlainConfiguration;
 	options?: UseYieldOptions;
 }
-export interface RuleWithNoArbitraryValueOptions {
-	level: RulePlainConfiguration;
-	options?: NoArbitraryValueOptions;
-}
 export interface RuleWithNoBaseToStringOptions {
 	level: RulePlainConfiguration;
 	options?: NoBaseToStringOptions;
@@ -6614,6 +6610,10 @@ export interface RuleWithNoReactStringRefsOptions {
 export interface RuleWithNoRestrictedDependenciesOptions {
 	level: RulePlainConfiguration;
 	options?: NoRestrictedDependenciesOptions;
+}
+export interface RuleWithNoTailwindArbitraryValueOptions {
+	level: RulePlainConfiguration;
+	options?: NoTailwindArbitraryValueOptions;
 }
 export interface RuleWithNoTopLevelLiteralsOptions {
 	level: RulePlainConfiguration;
@@ -8250,16 +8250,6 @@ export type UseVueValidVOnceOptions = {};
 export type UseVueValidVPreOptions = {};
 export type UseVueValidVTextOptions = {};
 export type UseYieldOptions = {};
-export interface NoArbitraryValueOptions {
-	/**
-	 * Additional attributes that will be checked.
-	 */
-	attributes?: string[];
-	/**
-	 * Names of the functions or tagged templates that will be checked.
-	 */
-	functions?: string[];
-}
 export interface NoBaseToStringOptions {
 	ignoredTypeNames?: string[];
 }
@@ -8324,6 +8314,16 @@ export interface NoReactNativeRawTextOptions {
 }
 export type NoReactStringRefsOptions = {};
 export type NoRestrictedDependenciesOptions = {};
+export interface NoTailwindArbitraryValueOptions {
+	/**
+	 * Additional attributes that will be checked.
+	 */
+	attributes?: string[];
+	/**
+	 * Names of the functions or tagged templates that will be checked.
+	 */
+	functions?: string[];
+}
 export type NoTopLevelLiteralsOptions = {};
 /**
  * Options for the `noUndeclaredClasses` rule.
@@ -9655,7 +9655,6 @@ export type Category =
 	| "lint/correctness/useVueValidVPre"
 	| "lint/correctness/useVueValidVText"
 	| "lint/correctness/useYield"
-	| "lint/nursery/noArbitraryValue"
 	| "lint/nursery/noRestrictedDependencies"
 	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noColorInvalidHex"
@@ -9693,6 +9692,7 @@ export type Category =
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
 	| "lint/nursery/noReactStringRefs"
+	| "lint/nursery/noTailwindArbitraryValue"
 	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUnnecessaryTemplateExpression"

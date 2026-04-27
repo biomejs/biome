@@ -5,13 +5,13 @@ use serde::{Deserialize, Serialize};
 
 use crate::use_sorted_classes::UseSortedClassesOptions;
 
-/// Options for the `noArbitraryValue` rule.
+/// Options for the `noTailwindArbitraryValue` rule.
 ///
-/// Controls which JSX attributes and utility functions are checked for arbitrary values.
+/// Controls which attributes and utility functions are checked for arbitrary values.
 #[derive(Default, Clone, Debug, Eq, PartialEq)]
-pub struct NoArbitraryValueOptions(UseSortedClassesOptions);
+pub struct NoTailwindArbitraryValueOptions(UseSortedClassesOptions);
 
-impl Deref for NoArbitraryValueOptions {
+impl Deref for NoTailwindArbitraryValueOptions {
     type Target = UseSortedClassesOptions;
 
     fn deref(&self) -> &Self::Target {
@@ -19,14 +19,14 @@ impl Deref for NoArbitraryValueOptions {
     }
 }
 
-impl biome_deserialize::Merge for NoArbitraryValueOptions {
+impl biome_deserialize::Merge for NoTailwindArbitraryValueOptions {
     fn merge_with(&mut self, other: Self) {
         self.0.merge_with(other.0);
     }
 }
 
 // Custom Serialize to match UseSortedClassesOptions format
-impl Serialize for NoArbitraryValueOptions {
+impl Serialize for NoTailwindArbitraryValueOptions {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
@@ -36,7 +36,7 @@ impl Serialize for NoArbitraryValueOptions {
 }
 
 // Custom Deserialize to match UseSortedClassesOptions format
-impl<'de> Deserialize<'de> for NoArbitraryValueOptions {
+impl<'de> Deserialize<'de> for NoTailwindArbitraryValueOptions {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
@@ -47,9 +47,9 @@ impl<'de> Deserialize<'de> for NoArbitraryValueOptions {
 
 // Custom JsonSchema to generate proper schema with distinct type name
 #[cfg(feature = "schema")]
-impl schemars::JsonSchema for NoArbitraryValueOptions {
+impl schemars::JsonSchema for NoTailwindArbitraryValueOptions {
     fn schema_name() -> std::borrow::Cow<'static, str> {
-        std::borrow::Cow::Borrowed("NoArbitraryValueOptions")
+        std::borrow::Cow::Borrowed("NoTailwindArbitraryValueOptions")
     }
 
     fn json_schema(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
@@ -72,7 +72,7 @@ impl schemars::JsonSchema for NoArbitraryValueOptions {
     }
 }
 
-impl Deserializable for NoArbitraryValueOptions {
+impl Deserializable for NoTailwindArbitraryValueOptions {
     fn deserialize(
         ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,

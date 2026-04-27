@@ -37,11 +37,6 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push(("suspicious", "noApproximativeNumericConstant", TypeId::of::<biome_rule_options::no_approximative_numeric_constant::NoApproximativeNumericConstantOptions>()));
     result.push((
-        "nursery",
-        "noArbitraryValue",
-        TypeId::of::<biome_rule_options::no_arbitrary_value::NoArbitraryValueOptions>(),
-    ));
-    result.push((
         "complexity",
         "noArguments",
         TypeId::of::<biome_rule_options::no_arguments::NoArgumentsOptions>(),
@@ -1155,6 +1150,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "performance",
         "noSyncScripts",
         TypeId::of::<biome_rule_options::no_sync_scripts::NoSyncScriptsOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noTailwindArbitraryValue",
+        TypeId::of::<
+            biome_rule_options::no_tailwind_arbitrary_value::NoTailwindArbitraryValueOptions,
+        >(),
     ));
     result.push(("suspicious", "noTemplateCurlyInString", TypeId::of::<biome_rule_options::no_template_curly_in_string::NoTemplateCurlyInStringOptions>()));
     result.push((
