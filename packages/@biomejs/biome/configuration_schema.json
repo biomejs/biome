@@ -2129,6 +2129,12 @@
 		"ImportMatcher": {
 			"type": "object",
 			"properties": {
+				"kind": {
+					"anyOf": [
+						{ "$ref": "#/$defs/NegatableImportKindMatcher" },
+						{ "type": "null" }
+					]
+				},
 				"source": {
 					"anyOf": [{ "$ref": "#/$defs/SourcesMatcher" }, { "type": "null" }]
 				},
@@ -2668,6 +2674,10 @@
 			"type": "array",
 			"items": { "$ref": "#/$defs/RestrictedModifier" },
 			"uniqueItems": true
+		},
+		"NegatableImportKindMatcher": {
+			"type": "string",
+			"enum": ["bare", "!bare"]
 		},
 		"NegatablePredefinedSourceMatcher": {
 			"type": "string",

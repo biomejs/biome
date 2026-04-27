@@ -2,7 +2,7 @@ pub mod import_key;
 pub mod specifiers_attributes;
 mod util;
 
-use crate::{JsRuleAction, assist::source::organize_imports::import_key::ImportStatementKind};
+use crate::JsRuleAction;
 use biome_analyze::{
     ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource, SourceActionKind,
     context::RuleContext, declare_source_rule,
@@ -17,7 +17,7 @@ use biome_rowan::{
     AstNode, BatchMutationExt, TextRange, TriviaPieceKind, chain_trivia_pieces, declare_node_union,
 };
 use biome_rule_options::{organize_imports::OrganizeImportsOptions, sort_order::SortOrder};
-use import_key::{ImportInfo, ImportKey};
+use import_key::{ImportInfo, ImportKey, ImportStatementKind};
 use rustc_hash::FxHashMap;
 use specifiers_attributes::{
     are_import_attributes_sorted, merge_export_from_specifiers, merge_export_specifiers,
@@ -170,6 +170,45 @@ declare_source_rule! {
     /// - `:PATH:`: absolute and relative paths
     /// - `:STYLE:`: paths ending with the following style extensions:
     ///   `.css`, `.less`, `.pcss`, `.sass`, `.scss`, `.sss` and `.styl`
+    ///
+    /// #### Kind matcher
+    ///
+    /// Use a kind matcher to filter imports by their syntactic kind.
+    /// Currently, the only supported kind is `bare`, which matches
+    /// bare (side-effect) imports such as `import "polyfill"`.
+    /// Prefix the kind with `!` to match everything except that kind.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "sortBareImports": true,
+    ///         "groups": [
+    ///             { "kind": "!bare" },
+    ///             ":BLANK_LINE:",
+    ///             { "kind": "bare" }
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// The kind matcher composes with the `source` field,
+    /// allowing patterns such as "only bare imports that import a CSS file":
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "sortBareImports": true,
+    ///         "groups": [
+    ///             { "kind": "bare", "source": "**/*.css" }
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// :::note
+    /// The `bare` kind requires [`sortBareImports`](#sortbareimports) to be `true`
+    /// for bare imports to participate in group matching.
+    /// :::
     ///
     /// #### Type-only matcher
     ///
@@ -327,6 +366,33 @@ declare_source_rule! {
     /// import lib from "lib";
     /// import { useState } from "react";
     /// import { render } from "react-dom/client";
+    /// ```
+    ///
+    /// ### Place side-effect imports last
+    ///
+    /// Combine [`sortBareImports`](#sortbareimports) with the `{ "kind": "bare" }` matcher to
+    /// gather all bare (side-effect) imports at the bottom of the import list. This is useful,
+    /// for example, to enforce that web-component or polyfill registrations run after all
+    /// binding imports:
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "sortBareImports": true,
+    ///         "groups": [
+    ///             { "kind": "!bare" },
+    ///             ":BLANK_LINE:",
+    ///             { "kind": "bare" }
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```ts,use_options,expect_diagnostic
+    /// import "./register-my-component";
+    /// import { render } from "react-dom";
+    /// import "./polyfill";
+    /// import { Button } from "@/components/Button";
     /// ```
     ///
     /// ### Place style imports last
@@ -529,6 +595,10 @@ declare_source_rule! {
     /// - Any statement that is not an import or an export
     /// - Bare imports also called side-effect imports (`import "polyfill"`);
     ///   Each forms its own chunk.
+    ///   Set [`sortBareImports`](#sortbareimports) to `true` to disable this rule and sort
+    ///   bare imports together with their neighbors. Combined with the `{ "kind": "bare" }`
+    ///   group matcher, this lets you express conventions such as "place all side-effect
+    ///   imports at the end of the import list".
     /// - A comment followed by a blank line that we call a **detached comment**;
     ///   See the [comment handling section](#comment-handling) for more details.
     ///
@@ -1025,8 +1095,9 @@ impl Rule for OrganizeImports {
                             .filter_map(|item| {
                                 let info = ImportInfo::from_module_item(&item)?.0;
                                 let item = organized_items.remove(&info.slot_index).unwrap_or(item);
+                                let key = ImportKey::new(info, groups);
                                 Some(KeyedItem {
-                                    key: ImportKey::new(info, groups),
+                                    key,
                                     was_merged: false,
                                     item: Some(item),
                                 })

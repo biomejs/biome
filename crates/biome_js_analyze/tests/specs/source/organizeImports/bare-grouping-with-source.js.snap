@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: bare-grouping-with-source.js
+---
+# Input
+```js
+import "polyfill";
+import "./styles.css";
+import { render } from "react-dom";
+import "./reset.css";
+
+```
+
+# Diagnostics
+```
+bare-grouping-with-source.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+  > 1 │ import "polyfill";
+      │ ^^^^^^^^^^^^^^^^^^
+    2 │ import "./styles.css";
+    3 │ import { render } from "react-dom";
+  
+  i Safe fix: Organize Imports (Biome)
+  
+    1   │ - import·"polyfill";
+      1 │ + import·"./reset.css";
+    2 2 │   import "./styles.css";
+      3 │ + 
+    3 4 │   import { render } from "react-dom";
+    4   │ - import·"./reset.css";
+      5 │ + 
+      6 │ + import·"polyfill";
+    5 7 │   
+  
+
+```
