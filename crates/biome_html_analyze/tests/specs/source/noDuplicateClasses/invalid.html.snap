@@ -37,6 +37,9 @@ foo"></div>
 <!-- Invalid: triple duplicate -->
 <div class="flex flex flex"></div>
 
+<!-- Invalid: class attribute name is ASCII case-insensitive in HTML -->
+<div CLASS="gap-2 gap-2"></div>
+
 ```
 
 # Diagnostics
@@ -279,6 +282,7 @@ invalid.html:32:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━�
   > 32 │ <div class="flex flex flex"></div>
        │      ^^^^^^^^^^^^^^^^^^^^^^
     33 │ 
+    34 │ <!-- Invalid: class attribute name is ASCII case-insensitive in HTML -->
   
   i The class flex appears multiple times.
   
@@ -288,5 +292,26 @@ invalid.html:32:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━�
   
     32 │ <div·class="flex·flex·flex"></div>
        │                 ----------        
+
+```
+
+```
+invalid.html:35:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string contains a duplicate class.
+  
+    34 │ <!-- Invalid: class attribute name is ASCII case-insensitive in HTML -->
+  > 35 │ <div CLASS="gap-2 gap-2"></div>
+       │      ^^^^^^^^^^^^^^^^^^^
+    36 │ 
+  
+  i The class gap-2 appears multiple times.
+  
+  i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
+  
+  i Safe fix: Remove the duplicate classes.
+  
+    35 │ <div·CLASS="gap-2·gap-2"></div>
+       │                  ------        
 
 ```

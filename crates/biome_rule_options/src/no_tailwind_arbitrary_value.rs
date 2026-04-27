@@ -45,7 +45,10 @@ impl<'de> Deserialize<'de> for NoTailwindArbitraryValueOptions {
     }
 }
 
-// Custom JsonSchema to generate proper schema with distinct type name
+// Developer note: `NoTailwindArbitraryValueOptions` hand-writes its
+// `impl schemars::JsonSchema` so the schema has a distinct type name, but the
+// fields mirror `UseSortedClassesOptions`. Keep this schema in sync whenever
+// `UseSortedClassesOptions` changes to avoid drift.
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for NoTailwindArbitraryValueOptions {
     fn schema_name() -> std::borrow::Cow<'static, str> {

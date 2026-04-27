@@ -143,7 +143,8 @@ fn attribute_key(attribute: &AnyHtmlAttribute) -> Option<(TokenText, TextRange)>
             let name_token = static_argument.name_token().ok()?;
 
             let key = name_token.token_text_trimmed();
-            if key.text() == "class" || key.text() == "style" {
+            if key.text().eq_ignore_ascii_case("class") || key.text().eq_ignore_ascii_case("style")
+            {
                 return None;
             }
 
@@ -158,7 +159,8 @@ fn attribute_key(attribute: &AnyHtmlAttribute) -> Option<(TokenText, TextRange)>
             let name_token = static_argument.name_token().ok()?;
 
             let key = name_token.token_text_trimmed();
-            if key.text() == "class" || key.text() == "style" {
+            if key.text().eq_ignore_ascii_case("class") || key.text().eq_ignore_ascii_case("style")
+            {
                 return None;
             }
 

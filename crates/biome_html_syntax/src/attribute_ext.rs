@@ -31,7 +31,11 @@ impl HtmlAttributeList {
         self.iter().find_map(|attribute| {
             if let AnyHtmlAttribute::HtmlAttribute(attribute) = attribute
                 && let Ok(name) = attribute.name()
-                && name.value_token().ok()?.text_trimmed() == name_to_lookup
+                && name
+                    .value_token()
+                    .ok()?
+                    .text_trimmed()
+                    .eq_ignore_ascii_case(name_to_lookup)
             {
                 return Some(attribute);
             }
