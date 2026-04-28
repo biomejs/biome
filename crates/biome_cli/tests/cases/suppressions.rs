@@ -352,8 +352,8 @@ fn suppress_only_respects_override_disabling_rule() {
         .read_to_string(&mut regular_content)
         .unwrap();
     assert!(
-        regular_content.contains("biome-ignore"),
-        "regular file should receive a suppression comment"
+        regular_content.contains("biome-ignore lint/suspicious/noDebugger"),
+        "regular file should receive a noDebugger suppression comment"
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
