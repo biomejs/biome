@@ -10,3 +10,7 @@ div:not(
      #id:hover
      
      ) {}
+
+input:not(:where([type='submit'], [type='checkbox'], [type='radio'], [type='button'], [type='reset'])) {
+	inline-size: 100%;
+}

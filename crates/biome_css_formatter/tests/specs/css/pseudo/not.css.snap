@@ -18,6 +18,11 @@ div:not(
      #id:hover
      
      ) {}
+
+input:not(:where([type='submit'], [type='checkbox'], [type='radio'], [type='button'], [type='reset'])) {
+	inline-size: 100%;
+}
+
 ```
 
 
@@ -28,6 +33,18 @@ div:not(:last-child) {
 }
 
 :not(div + #id:hover) {
+}
+
+input:not(
+	:where(
+		[type="submit"],
+		[type="checkbox"],
+		[type="radio"],
+		[type="button"],
+		[type="reset"]
+	)
+) {
+	inline-size: 100%;
 }
 
 ```
