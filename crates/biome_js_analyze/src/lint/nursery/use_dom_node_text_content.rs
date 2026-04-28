@@ -56,7 +56,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseDomNodeTextContent {
-        version: "next",
+        version: "2.4.13",
         name: "useDomNodeTextContent",
         language: "js",
         recommended: true,

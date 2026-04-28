@@ -67,3 +67,9 @@ class GetterClass { get code(): number { if (Math.random() > 0.5) return 200; re
 const getterObj = { get code(): number { if (Math.random() > 0.5) return 200; return 404; } };
 
 class AsyncMethod { async getStatus(b: boolean): Promise<string> { if (b) return "loading"; return "idle"; } }
+
+function dateObject(): object { return new Date(); }
+function mapObject(): object { return new Map(); }
+function setObject(): object { return new Set(); }
+function weakMapObject(): object { return new WeakMap(); }
+function errorObject(): object { return new Error(); }

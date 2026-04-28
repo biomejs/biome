@@ -221,10 +221,45 @@ define_global_type!(
     51,
     "AsyncDisposable[Symbol.asyncDispose]"
 );
+define_global_type!(
+    INSTANCEOF_DATE_ID,
+    INSTANCEOF_DATE_ID_NAME,
+    52,
+    "instanceof Date"
+);
+define_global_type!(DATE_ID, DATE_ID_NAME, 53, "Date");
+define_global_type!(
+    INSTANCEOF_MAP_ID,
+    INSTANCEOF_MAP_ID_NAME,
+    54,
+    "instanceof Map"
+);
+define_global_type!(MAP_ID, MAP_ID_NAME, 55, "Map");
+define_global_type!(
+    INSTANCEOF_SET_ID,
+    INSTANCEOF_SET_ID_NAME,
+    56,
+    "instanceof Set"
+);
+define_global_type!(SET_ID, SET_ID_NAME, 57, "Set");
+define_global_type!(
+    INSTANCEOF_WEAK_MAP_ID,
+    INSTANCEOF_WEAK_MAP_ID_NAME,
+    58,
+    "instanceof WeakMap"
+);
+define_global_type!(WEAK_MAP_ID, WEAK_MAP_ID_NAME, 59, "WeakMap");
+define_global_type!(
+    INSTANCEOF_ERROR_ID,
+    INSTANCEOF_ERROR_ID_NAME,
+    60,
+    "instanceof Error"
+);
+define_global_type!(ERROR_ID, ERROR_ID_NAME, 61, "Error");
 
 /// Total number of predefined types.
 /// Must be one more than the highest TypeId above.
-pub const NUM_PREDEFINED_TYPES: usize = 52;
+pub const NUM_PREDEFINED_TYPES: usize = 62;
 
 // Resolved type ID constants (TypeId wrapped with GlobalLevel)
 pub const GLOBAL_UNKNOWN_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, UNKNOWN_ID);
@@ -273,3 +308,8 @@ pub const GLOBAL_SYMBOL_ASYNC_DISPOSE_ID: ResolvedTypeId =
 pub const GLOBAL_DISPOSABLE_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, DISPOSABLE_ID);
 pub const GLOBAL_ASYNC_DISPOSABLE_ID: ResolvedTypeId =
     ResolvedTypeId::new(GLOBAL_LEVEL, ASYNC_DISPOSABLE_ID);
+pub const GLOBAL_DATE_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, DATE_ID);
+pub const GLOBAL_MAP_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, MAP_ID);
+pub const GLOBAL_SET_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, SET_ID);
+pub const GLOBAL_WEAK_MAP_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, WEAK_MAP_ID);
+pub const GLOBAL_ERROR_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, ERROR_ID);

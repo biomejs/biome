@@ -74,6 +74,12 @@ const getterObj = { get code(): number { if (Math.random() > 0.5) return 200; re
 
 class AsyncMethod { async getStatus(b: boolean): Promise<string> { if (b) return "loading"; return "idle"; } }
 
+function dateObject(): object { return new Date(); }
+function mapObject(): object { return new Map(); }
+function setObject(): object { return new Set(); }
+function weakMapObject(): object { return new WeakMap(); }
+function errorObject(): object { return new Error(); }
+
 ```
 
 # Diagnostics
@@ -796,10 +802,124 @@ invalid.ts:69:48 lint/nursery/noMisleadingReturnType ━━━━━━━━━
   > 69 │ class AsyncMethod { async getStatus(b: boolean): Promise<string> { if (b) return "loading"; return "idle"; } }
        │                                                ^^^^^^^^^^^^^^^^^
     70 │ 
+    71 │ function dateObject(): object { return new Date(); }
   
   i A wider return type hides the precise types that callers could rely on.
   
   i Consider using "loading" | "idle" as the return type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:71:22 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    69 │ class AsyncMethod { async getStatus(b: boolean): Promise<string> { if (b) return "loading"; return "idle"; } }
+    70 │ 
+  > 71 │ function dateObject(): object { return new Date(); }
+       │                      ^^^^^^^^
+    72 │ function mapObject(): object { return new Map(); }
+    73 │ function setObject(): object { return new Set(); }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:72:21 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    71 │ function dateObject(): object { return new Date(); }
+  > 72 │ function mapObject(): object { return new Map(); }
+       │                     ^^^^^^^^
+    73 │ function setObject(): object { return new Set(); }
+    74 │ function weakMapObject(): object { return new WeakMap(); }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:73:21 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    71 │ function dateObject(): object { return new Date(); }
+    72 │ function mapObject(): object { return new Map(); }
+  > 73 │ function setObject(): object { return new Set(); }
+       │                     ^^^^^^^^
+    74 │ function weakMapObject(): object { return new WeakMap(); }
+    75 │ function errorObject(): object { return new Error(); }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:74:25 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    72 │ function mapObject(): object { return new Map(); }
+    73 │ function setObject(): object { return new Set(); }
+  > 74 │ function weakMapObject(): object { return new WeakMap(); }
+       │                         ^^^^^^^^
+    75 │ function errorObject(): object { return new Error(); }
+    76 │ 
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:75:23 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    73 │ function setObject(): object { return new Set(); }
+    74 │ function weakMapObject(): object { return new WeakMap(); }
+  > 75 │ function errorObject(): object { return new Error(); }
+       │                       ^^^^^^^^
+    76 │ 
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
   

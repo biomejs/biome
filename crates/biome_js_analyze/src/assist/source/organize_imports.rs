@@ -12,9 +12,11 @@ use biome_diagnostics::category;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsCombinedSpecifier, AnyJsExportClause, AnyJsImportClause, AnyJsModuleItem, JsModule,
-    JsSyntaxKind, T,
+    JsModuleItemList, JsSyntaxKind, T, TsDeclarationModule, TsModuleBlock,
 };
-use biome_rowan::{AstNode, BatchMutationExt, TextRange, TriviaPieceKind, chain_trivia_pieces};
+use biome_rowan::{
+    AstNode, BatchMutationExt, TextRange, TriviaPieceKind, chain_trivia_pieces, declare_node_union,
+};
 use biome_rule_options::{organize_imports::OrganizeImportsOptions, sort_order::SortOrder};
 use import_key::{ImportInfo, ImportKey};
 use rustc_hash::FxHashMap;
@@ -706,7 +708,7 @@ declare_source_rule! {
 }
 
 impl Rule for OrganizeImports {
-    type Query = Ast<JsModule>;
+    type Query = Ast<AnyJsModule>;
     type State = Box<[Issue]>;
     type Signals = Option<Self::State>;
     type Options = OrganizeImportsOptions;
@@ -1109,6 +1111,19 @@ impl Rule for OrganizeImports {
             "Organize Imports (Biome)",
             mutation,
         ))
+    }
+}
+
+declare_node_union! {
+    pub AnyJsModule = JsModule | TsDeclarationModule | TsModuleBlock
+}
+impl AnyJsModule {
+    pub fn items(&self) -> JsModuleItemList {
+        match self {
+            Self::JsModule(js_module) => js_module.items(),
+            Self::TsDeclarationModule(ts_declaration_module) => ts_declaration_module.items(),
+            Self::TsModuleBlock(ts_module_block) => ts_module_block.items(),
+        }
     }
 }
 

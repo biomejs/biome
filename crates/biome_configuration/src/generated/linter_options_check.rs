@@ -692,6 +692,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_irregular_whitespace::NoIrregularWhitespaceOptions>(),
     ));
     result.push((
+        "nursery",
+        "noJsxLeakedDollar",
+        TypeId::of::<biome_rule_options::no_jsx_leaked_dollar::NoJsxLeakedDollarOptions>(),
+    ));
+    result.push((
         "style",
         "noJsxLiterals",
         TypeId::of::<biome_rule_options::no_jsx_literals::NoJsxLiteralsOptions>(),
@@ -720,6 +725,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "nursery",
         "noLeakedRender",
         TypeId::of::<biome_rule_options::no_leaked_render::NoLeakedRenderOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noLoopFunc",
+        TypeId::of::<biome_rule_options::no_loop_func::NoLoopFuncOptions>(),
     ));
     result.push((
         "style",
@@ -1231,6 +1241,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_unnecessary_conditions::NoUnnecessaryConditionsOptions>(
         ),
     ));
+    result.push(("nursery", "noUnnecessaryTemplateExpression", TypeId::of::<biome_rule_options::no_unnecessary_template_expression::NoUnnecessaryTemplateExpressionOptions>()));
     result.push((
         "correctness",
         "noUnreachable",
@@ -2040,6 +2051,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::use_react_function_components::UseReactFunctionComponentsOptions,
         >(),
     ));
+    result.push(("nursery", "useReactNativePlatformComponents", TypeId::of::<biome_rule_options::use_react_native_platform_components::UseReactNativePlatformComponentsOptions>()));
     result.push((
         "style",
         "useReadonlyClassProperties",
@@ -2156,6 +2168,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "style",
         "useTemplate",
         TypeId::of::<biome_rule_options::use_template::UseTemplateOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "useTestHooksOnTop",
+        TypeId::of::<biome_rule_options::use_test_hooks_on_top::UseTestHooksOnTopOptions>(),
     ));
     result.push((
         "style",

@@ -49,7 +49,12 @@ JsBogusNamedImportSpecifier = SyntaxElement*
 TsBogusType = SyntaxElement*
 
 AnyJsRoot =
-	JsScript | JsModule | JsExpressionSnippet | TsDeclarationModule | JsExpressionTemplateRoot
+	JsScript
+	| JsModule
+	| JsExpressionSnippet
+	| TsDeclarationModule
+	| JsExpressionTemplateRoot
+	| JsSvelteSnippetRoot
 
 JsScript =
 	bom: 'UNICODE_BOM'?
@@ -80,6 +85,11 @@ JsExpressionTemplateRoot =
 	expression: AnyJsExpression
 	eof: 'EOF'
 
+// Special root created for Svelte #snippet block
+JsSvelteSnippetRoot =
+		name: AnyJsBinding
+		parameters: JsParameters
+		eof: 'EOF'
 
 JsDirective =
 	value: 'js_string_literal'

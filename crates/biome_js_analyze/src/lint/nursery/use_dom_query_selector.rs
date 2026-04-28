@@ -53,7 +53,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseDomQuerySelector {
-        version: "next",
+        version: "2.4.13",
         name: "useDomQuerySelector",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-query-selector").inspired()],

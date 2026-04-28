@@ -42,7 +42,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseRegexpTest {
-        version: "next",
+        version: "2.4.13",
         name: "useRegexpTest",
         language: "js",
         recommended: false,

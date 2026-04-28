@@ -100,6 +100,16 @@ pub fn global_type_name(id: TypeId) -> Option<&'static str> {
         DISPOSABLE_DISPOSE_ID => Some(DISPOSABLE_DISPOSE_ID_NAME),
         ASYNC_DISPOSABLE_ID => Some(ASYNC_DISPOSABLE_ID_NAME),
         ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID => Some(ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_NAME),
+        INSTANCEOF_DATE_ID => Some(INSTANCEOF_DATE_ID_NAME),
+        DATE_ID => Some(DATE_ID_NAME),
+        INSTANCEOF_MAP_ID => Some(INSTANCEOF_MAP_ID_NAME),
+        MAP_ID => Some(MAP_ID_NAME),
+        INSTANCEOF_SET_ID => Some(INSTANCEOF_SET_ID_NAME),
+        SET_ID => Some(SET_ID_NAME),
+        INSTANCEOF_WEAK_MAP_ID => Some(INSTANCEOF_WEAK_MAP_ID_NAME),
+        WEAK_MAP_ID => Some(WEAK_MAP_ID_NAME),
+        INSTANCEOF_ERROR_ID => Some(INSTANCEOF_ERROR_ID_NAME),
+        ERROR_ID => Some(ERROR_ID_NAME),
         _ => None,
     }
 }
@@ -123,6 +133,16 @@ impl Default for GlobalsResolver {
         let static_member = |name: &'static str, id: TypeId| TypeMember {
             kind: TypeMemberKind::NamedStatic(Text::new_static(name)),
             ty: ResolvedTypeId::new(TypeResolverLevel::Global, id).into(),
+        };
+
+        let class = |name: &'static str, type_parameters: Box<[TypeReference]>| {
+            TypeData::Class(Box::new(Class {
+                name: Some(Text::new_static(name)),
+                type_parameters,
+                extends: None,
+                implements: [].into(),
+                members: Box::default(),
+            }))
         };
 
         let array_method_definition =
@@ -414,6 +434,52 @@ impl Default for GlobalsResolver {
                 return_type: ReturnType::Type(GLOBAL_INSTANCEOF_REGEXP_ID.into()),
             }),
         );
+        builder.set_type_data(
+            INSTANCEOF_DATE_ID,
+            TypeData::instance_of(TypeReference::from(GLOBAL_DATE_ID)),
+        );
+        builder.set_type_data(DATE_ID, class(DATE_ID_NAME, Box::default()));
+        builder.set_type_data(
+            INSTANCEOF_MAP_ID,
+            TypeData::instance_of(TypeReference::from(GLOBAL_MAP_ID)),
+        );
+        builder.set_type_data(
+            MAP_ID,
+            class(
+                MAP_ID_NAME,
+                Box::new([
+                    TypeReference::from(GLOBAL_T_ID),
+                    TypeReference::from(GLOBAL_U_ID),
+                ]),
+            ),
+        );
+        builder.set_type_data(
+            INSTANCEOF_SET_ID,
+            TypeData::instance_of(TypeReference::from(GLOBAL_SET_ID)),
+        );
+        builder.set_type_data(
+            SET_ID,
+            class(SET_ID_NAME, Box::new([TypeReference::from(GLOBAL_T_ID)])),
+        );
+        builder.set_type_data(
+            INSTANCEOF_WEAK_MAP_ID,
+            TypeData::instance_of(TypeReference::from(GLOBAL_WEAK_MAP_ID)),
+        );
+        builder.set_type_data(
+            WEAK_MAP_ID,
+            class(
+                WEAK_MAP_ID_NAME,
+                Box::new([
+                    TypeReference::from(GLOBAL_T_ID),
+                    TypeReference::from(GLOBAL_U_ID),
+                ]),
+            ),
+        );
+        builder.set_type_data(
+            INSTANCEOF_ERROR_ID,
+            TypeData::instance_of(TypeReference::from(GLOBAL_ERROR_ID)),
+        );
+        builder.set_type_data(ERROR_ID, class(ERROR_ID_NAME, Box::default()));
         // Known symbols
         builder.set_type_data(
             INSTANCEOF_SYMBOL_ID,
@@ -568,6 +634,16 @@ impl TypeResolver for GlobalsResolver {
             Some(GLOBAL_REGEXP_ID)
         } else if qualifier.is_symbol() && !qualifier.has_known_type_parameters() {
             Some(GLOBAL_SYMBOL_ID)
+        } else if qualifier.is_date() && !qualifier.has_known_type_parameters() {
+            Some(GLOBAL_DATE_ID)
+        } else if qualifier.is_map() && !qualifier.has_known_type_parameters() {
+            Some(GLOBAL_MAP_ID)
+        } else if qualifier.is_set() && !qualifier.has_known_type_parameters() {
+            Some(GLOBAL_SET_ID)
+        } else if qualifier.is_weak_map() && !qualifier.has_known_type_parameters() {
+            Some(GLOBAL_WEAK_MAP_ID)
+        } else if qualifier.is_error() && !qualifier.has_known_type_parameters() {
+            Some(GLOBAL_ERROR_ID)
         } else if qualifier.is_disposable() && !qualifier.has_known_type_parameters() {
             Some(GLOBAL_DISPOSABLE_ID)
         } else if qualifier.is_async_disposable() && !qualifier.has_known_type_parameters() {

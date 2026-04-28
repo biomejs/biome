@@ -153,3 +153,6 @@ if (ro) console.log();
 
 declare const partialObj2: Partial<{a: string}>;
 if (partialObj2) console.log();
+
+const date = new Date();
+if (date) console.log(date);

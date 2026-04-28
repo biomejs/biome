@@ -59,7 +59,13 @@ impl Rule for UseIframeSandbox {
 
         if element
             .find_attribute_by_name("sandbox")
-            .is_none_or(|sandbox_attribute| sandbox_attribute.as_static_value().is_none())
+            .is_none_or(|sandbox_attribute| {
+                let Some(init) = sandbox_attribute.initializer() else {
+                    return true;
+                };
+
+                init.value().ok().is_none() || sandbox_attribute.is_value_null_or_undefined()
+            })
             && !element.has_spread_prop()
         {
             return Some(());

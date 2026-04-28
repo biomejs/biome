@@ -1,6 +1,5 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 249
 info: scss/comments/if-eslit-at-rule-decloration.scss
 ---
 
@@ -25,8 +24,9 @@ info: scss/comments/if-eslit-at-rule-decloration.scss
 # Error
 ```text
 reformat: output mismatch
-Differences (-re-formatted|+formatted):
- @function _normalize-include($section) {
+--- re-formatted
++++ formatted
+@@ -2,7 +2,8 @@
    // Check if $section is in the $include list.
    @if index($_normalize-include, $section) {
      @return true;
@@ -36,11 +36,11 @@ Differences (-re-formatted|+formatted):
    index($_normalize-include, all) {
      @return true;
    }
-   @return false;
 
 IR differences:
-Differences (-re-formatted IR|+formatted IR):
-     ]),
+--- re-formatted IR
++++ formatted IR
+@@ -21,12 +21,9 @@
      " {",
      indent([hard_line_break, "@return true;"]),
      hard_line_break,
@@ -56,6 +56,5 @@ Differences (-re-formatted IR|+formatted IR):
      group([
        "not index",
        group([
-         "(",
 
 ```

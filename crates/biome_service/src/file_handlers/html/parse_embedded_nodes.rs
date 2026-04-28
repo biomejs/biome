@@ -1,13 +1,13 @@
 use crate::embed::registry::{EmbedDetectorsRegistry, EmbedMatch};
 use crate::embed::types::{
-    EmbedBlockKind, EmbedCandidate, EmbedContent, GuestLanguage, HostLanguage,
+    EmbedBlockKind, EmbedCandidate, EmbedContent, GuestLanguage, HostLanguage, SvelteBlockKind,
 };
 use crate::file_handlers::html::{EmbedParseContext, ParsedEmbed};
 use crate::file_handlers::{DocumentFileSource, ParseEmbedResult};
 use crate::settings::SettingsWithEditor;
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
 use crate::workspace::{
-    AnyEmbeddedSnippet, CssDocumentServices, DocumentServices, EmbeddedSnippet, JsDocumentServices,
+    AnyEmbeddedSnippet, CssDocumentServices, EmbeddedSnippet, JsDocumentServices,
 };
 use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
 use biome_css_syntax::{CssFileSource, CssLanguage, TextSize};
@@ -18,10 +18,10 @@ use biome_html_syntax::{
     HtmlAttribute, HtmlAttributeInitializerClause, HtmlAttributeSingleTextExpression,
     HtmlDoubleTextExpression, HtmlElement, HtmlRoot, HtmlSingleTextExpression, HtmlTextExpression,
     HtmlTextExpressions, HtmlVariant, SvelteName, VueDirective, VueVBindShorthandDirective,
-    VueVOnShorthandDirective, VueVSlotShorthandDirective,
+    VueVForValue, VueVOnShorthandDirective, VueVSlotShorthandDirective,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
-use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage};
+use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, SvelteFileKind};
 use biome_json_parser::parse_json_with_offset_and_cache;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
@@ -131,9 +131,14 @@ pub(crate) fn parse_embedded_nodes(
             // Two-pass: collect elements + expressions, then process
             let mut elements = vec![];
             let mut snippet_expressions = vec![];
+            let mut v_for_values = vec![];
             for element in html_root.syntax().descendants() {
                 if let Some(text_expression) = HtmlDoubleTextExpression::cast_ref(&element) {
                     snippet_expressions.push(text_expression);
+                }
+
+                if let Some(value) = VueVForValue::cast_ref(&element) {
+                    v_for_values.push(value);
                 }
 
                 if let Some(element) = HtmlElement::cast_ref(&element) {
@@ -157,6 +162,19 @@ pub(crate) fn parse_embedded_nodes(
             // Pass 2: text expressions via registry using merged embedded_file_source
             for snippet in snippet_expressions {
                 if let Ok(expression) = snippet.expression()
+                    && let Some(candidate) = build_text_expression_candidate(&expression)
+                {
+                    ctx.parse_and_push(
+                        &candidate,
+                        &doc_file_source,
+                        Some(embedded_file_source),
+                        &mut nodes,
+                    );
+                }
+            }
+
+            for value in v_for_values {
+                if let Ok(expression) = value.expression()
                     && let Some(candidate) = build_text_expression_candidate(&expression)
                 {
                     ctx.parse_and_push(
@@ -723,8 +741,13 @@ impl EmbedParseContext<'_, '_> {
         doc_file_source: &DocumentFileSource,
         embedded_file_source: Option<JsFileSource>,
     ) -> Option<ParsedEmbed> {
-        let embed_match =
-            EmbedDetectorsRegistry::detect_match(HostLanguage::Html, candidate, doc_file_source)?;
+        let embed_match = if let Some(embedded_file_source) = embedded_file_source.as_ref() {
+            EmbedMatch {
+                guest: GuestLanguage::from_js_source(embedded_file_source),
+            }
+        } else {
+            EmbedDetectorsRegistry::detect_match(HostLanguage::Html, candidate, doc_file_source)?
+        };
         parse_matched_embed(candidate, &embed_match, self, embedded_file_source)
     }
 
@@ -760,16 +783,18 @@ fn parse_matched_embed(
         | GuestLanguage::Jsx
         | GuestLanguage::Ts
         | GuestLanguage::Tsx => {
-            // Determine base JsFileSource from guest language
-            let mut js_source = match embed_match.guest {
-                GuestLanguage::JsModule => JsFileSource::js_module(),
-                GuestLanguage::JsScript => JsFileSource::js_script(),
-                GuestLanguage::Jsx => JsFileSource::jsx(),
-                GuestLanguage::Ts => JsFileSource::ts(),
-                GuestLanguage::Tsx => JsFileSource::tsx(),
-                _ => unreachable!(),
+            let mut js_source = if let Some(efs) = embedded_file_source {
+                efs
+            } else {
+                match embed_match.guest {
+                    GuestLanguage::JsModule => JsFileSource::js_module(),
+                    GuestLanguage::JsScript => JsFileSource::js_script(),
+                    GuestLanguage::Jsx => JsFileSource::jsx(),
+                    GuestLanguage::Ts => JsFileSource::ts(),
+                    GuestLanguage::Tsx => JsFileSource::tsx(),
+                    _ => unreachable!(),
+                }
             };
-
             // Configure EmbeddingKind based on framework + candidate type
             let is_source_level = match candidate {
                 EmbedCandidate::Frontmatter { .. } => {
@@ -779,8 +804,12 @@ fn parse_matched_embed(
                 }
                 EmbedCandidate::Element { .. } => {
                     if ctx.host_file_source.is_svelte() {
-                        js_source = js_source
-                            .with_embedding_kind(EmbeddingKind::Svelte { is_source: true });
+                        js_source = js_source.with_embedding_kind(EmbeddingKind::Svelte {
+                            is_source: true,
+                            is_function_signature: false,
+                            kind: SvelteFileKind::Component,
+                            is_const_block: false,
+                        });
                     } else if ctx.host_file_source.is_vue() {
                         js_source = js_source.with_embedding_kind(EmbeddingKind::Vue {
                             setup: candidate.has_attribute("setup"),
@@ -792,17 +821,22 @@ fn parse_matched_embed(
                     // Astro <script> tags and plain HTML: no EmbeddingKind
                     true
                 }
-                EmbedCandidate::TextExpression { .. } => {
-                    // Use embedded_file_source as base if available (Vue/Svelte pass 2+)
-                    if let Some(efs) = embedded_file_source {
-                        js_source = efs;
-                    }
+                EmbedCandidate::TextExpression { block_kind, .. } => {
                     if ctx.host_file_source.is_astro() {
                         js_source = js_source
                             .with_embedding_kind(EmbeddingKind::Astro { frontmatter: false });
                     } else if ctx.host_file_source.is_svelte() {
-                        js_source = js_source
-                            .with_embedding_kind(EmbeddingKind::Svelte { is_source: false });
+                        let is_function_signature =
+                            matches!(block_kind, EmbedBlockKind::Svelte(SvelteBlockKind::Snippet));
+                        js_source = js_source.with_embedding_kind(EmbeddingKind::Svelte {
+                            is_source: false,
+                            is_function_signature,
+                            kind: SvelteFileKind::Component,
+                            is_const_block: matches!(
+                                block_kind,
+                                EmbedBlockKind::Svelte(SvelteBlockKind::Const)
+                            ),
+                        });
                     } else if ctx.host_file_source.is_vue() {
                         js_source = js_source.with_embedding_kind(EmbeddingKind::Vue {
                             setup: false,
@@ -816,10 +850,6 @@ fn parse_matched_embed(
                 EmbedCandidate::Directive {
                     is_event_handler, ..
                 } => {
-                    // Use embedded_file_source as base if available (Vue/Svelte pass 2+)
-                    if let Some(efs) = embedded_file_source {
-                        js_source = efs;
-                    }
                     match ctx.host_file_source.variant() {
                         HtmlVariant::Standard(_) => {}
                         HtmlVariant::Astro => {
@@ -835,8 +865,12 @@ fn parse_matched_embed(
                             });
                         }
                         HtmlVariant::Svelte => {
-                            js_source = js_source
-                                .with_embedding_kind(EmbeddingKind::Svelte { is_source: false });
+                            js_source = js_source.with_embedding_kind(EmbeddingKind::Svelte {
+                                is_source: false,
+                                is_function_signature: false,
+                                kind: SvelteFileKind::Component,
+                                is_const_block: false,
+                            });
                         }
                     }
 
@@ -875,17 +909,13 @@ fn parse_matched_embed(
                 content.content_offset,
             );
 
-            // Source-level embeds get full services; expression-level don't
-            let js_services = if is_source_level
-                && (ctx.settings.as_ref().is_linter_enabled()
-                    || ctx.settings.as_ref().is_assist_enabled())
-            {
-                JsDocumentServices::default()
-                    .with_js_semantic_model(&snippet.tree())
-                    .into()
-            } else {
-                DocumentServices::none()
-            };
+            // Source-level embeds get full services; expression-level doesn't
+            let js_services = JsDocumentServices::from_js_snippet(
+                &snippet.tree(),
+                &js_source,
+                ctx.settings.as_ref().is_linter_enabled()
+                    || ctx.settings.as_ref().is_assist_enabled(),
+            );
 
             Some(ParsedEmbed {
                 node: ((snippet, js_services).into(), doc_source),
@@ -1029,3 +1059,7 @@ fn register_svelte_destructured_bindings(
 
     Some(())
 }
+
+#[cfg(test)]
+#[path = "parse_embedded_nodes.tests.rs"]
+mod tests;

@@ -2,3 +2,7 @@
 
 pub(crate) mod directive;
 pub(crate) mod directive_argument;
+pub(crate) mod v_for_binding;
+pub(crate) mod v_for_binding_list_element;
+pub(crate) mod v_for_destructured_binding;
+pub(crate) mod v_for_operator;

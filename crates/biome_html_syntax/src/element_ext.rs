@@ -137,15 +137,12 @@ impl AnyHtmlElement {
     }
 }
 
-impl HtmlSelfClosingElement {
-    /// Returns the tag name of the element (trimmed), if it has one.
-    pub fn tag_name(&self) -> Option<TokenText> {
-        let name = self.name().ok()?;
-        get_tag_name_text(&name)
-    }
-
+impl HtmlAttributeList {
+    /// Finds an attribute by name (case-insensitive) within this list of attributes.
+    ///
+    /// This will not detect attributes in Svelte attribute shorthand like `<div {foo}>`, or vue bindings like `<div :foo="...">` or `<div v-bind:foo="...">`.
     pub fn find_attribute_by_name(&self, name_to_lookup: &str) -> Option<HtmlAttribute> {
-        self.attributes().iter().find_map(|attr| {
+        self.iter().find_map(|attr| {
             let attribute = attr.as_html_attribute()?;
             let name = attribute.name().ok()?;
             let name_token = name.value_token().ok()?;
@@ -158,6 +155,67 @@ impl HtmlSelfClosingElement {
                 None
             }
         })
+    }
+
+    /// Finds multiple attributes by name (case-insensitive) within this list of attributes.
+    ///
+    /// Returns an array of `Option<HtmlAttribute>`, where each attribute corresponds to the name at the same index in `names_to_lookup`.
+    pub fn find_multiple_attributes_by_name<const N: usize>(
+        &self,
+        names_to_lookup: &[&str; N],
+    ) -> [Option<HtmlAttribute>; N] {
+        const INIT: Option<HtmlAttribute> = None;
+        let mut result: [Option<HtmlAttribute>; N] = [INIT; N];
+        let mut remaining = N;
+
+        for attr in self.iter() {
+            if remaining == 0 {
+                break;
+            }
+
+            let Some(attribute) = attr.as_html_attribute() else {
+                continue;
+            };
+            let Ok(name) = attribute.name() else {
+                continue;
+            };
+            let Ok(name_token) = name.value_token() else {
+                continue;
+            };
+            let attribute_name = name_token.text_trimmed();
+
+            for (index, name_to_lookup) in names_to_lookup.iter().enumerate() {
+                if result[index].is_none() && attribute_name.eq_ignore_ascii_case(name_to_lookup) {
+                    result[index] = Some(attribute.clone());
+                    remaining -= 1;
+                    if remaining == 0 {
+                        break;
+                    }
+                }
+            }
+        }
+
+        result
+    }
+}
+
+impl HtmlSelfClosingElement {
+    /// Returns the tag name of the element (trimmed), if it has one.
+    pub fn tag_name(&self) -> Option<TokenText> {
+        let name = self.name().ok()?;
+        get_tag_name_text(&name)
+    }
+
+    pub fn find_attribute_by_name(&self, name_to_lookup: &str) -> Option<HtmlAttribute> {
+        self.attributes().find_attribute_by_name(name_to_lookup)
+    }
+
+    pub fn find_multiple_attributes_by_name<const N: usize>(
+        &self,
+        names_to_lookup: &[&str; N],
+    ) -> [Option<HtmlAttribute>; N] {
+        self.attributes()
+            .find_multiple_attributes_by_name(names_to_lookup)
     }
 }
 
@@ -169,19 +227,15 @@ impl HtmlOpeningElement {
     }
 
     pub fn find_attribute_by_name(&self, name_to_lookup: &str) -> Option<HtmlAttribute> {
-        self.attributes().iter().find_map(|attr| {
-            let attribute = attr.as_html_attribute()?;
-            let name = attribute.name().ok()?;
-            let name_token = name.value_token().ok()?;
-            if name_token
-                .text_trimmed()
-                .eq_ignore_ascii_case(name_to_lookup)
-            {
-                Some(attribute.clone())
-            } else {
-                None
-            }
-        })
+        self.attributes().find_attribute_by_name(name_to_lookup)
+    }
+
+    pub fn find_multiple_attributes_by_name<const N: usize>(
+        &self,
+        names_to_lookup: &[&str; N],
+    ) -> [Option<HtmlAttribute>; N] {
+        self.attributes()
+            .find_multiple_attributes_by_name(names_to_lookup)
     }
 }
 
@@ -373,6 +427,20 @@ impl AnyHtmlTagElement {
         }
     }
 
+    pub fn find_multiple_attributes_by_name<const N: usize>(
+        &self,
+        names_to_lookup: &[&str; N],
+    ) -> [Option<HtmlAttribute>; N] {
+        match self {
+            Self::HtmlOpeningElement(element) => {
+                element.find_multiple_attributes_by_name(names_to_lookup)
+            }
+            Self::HtmlSelfClosingElement(element) => {
+                element.find_multiple_attributes_by_name(names_to_lookup)
+            }
+        }
+    }
+
     pub fn has_truthy_attribute(&self, name_to_lookup: &str) -> bool {
         self.find_attribute_by_name(name_to_lookup)
             .is_some_and(|attribute| {
@@ -437,9 +505,75 @@ impl AnyHtmlTagElement {
 
 #[cfg(test)]
 mod tests {
-    use biome_html_factory::syntax::HtmlElement;
+    use biome_html_factory::syntax::{HtmlAttribute, HtmlElement};
     use biome_html_parser::{HtmlParserOptions, parse_html};
     use biome_rowan::AstNode;
+
+    fn first_element(html: &str) -> HtmlElement {
+        parse_html(html, HtmlParserOptions::default())
+            .tree()
+            .syntax()
+            .descendants()
+            .find_map(HtmlElement::cast)
+            .unwrap()
+    }
+
+    fn attribute_name(attribute: &HtmlAttribute) -> String {
+        attribute
+            .name()
+            .unwrap()
+            .value_token()
+            .unwrap()
+            .text_trimmed()
+            .to_string()
+    }
+
+    #[test]
+    fn find_multiple_attributes_by_name_matches_requested_names() {
+        let element = first_element(r#"<div id="main" class="card" data-value="1"></div>"#);
+        let attributes = element.opening_element().unwrap().attributes();
+
+        let [id, class, data_value] =
+            attributes.find_multiple_attributes_by_name(&["id", "class", "data-value"]);
+
+        assert_eq!(id.as_ref().map(attribute_name), Some("id".to_string()));
+        assert_eq!(
+            class.as_ref().map(attribute_name),
+            Some("class".to_string())
+        );
+        assert_eq!(
+            data_value.as_ref().map(attribute_name),
+            Some("data-value".to_string())
+        );
+    }
+
+    #[test]
+    fn find_multiple_attributes_by_name_is_case_insensitive_and_preserves_missing() {
+        let element = first_element(r#"<div ID="main" CLASS="card"></div>"#);
+        let attributes = element.opening_element().unwrap().attributes();
+
+        let [id, class, missing] =
+            attributes.find_multiple_attributes_by_name(&["id", "class", "aria-label"]);
+
+        assert_eq!(id.as_ref().map(attribute_name), Some("ID".to_string()));
+        assert_eq!(
+            class.as_ref().map(attribute_name),
+            Some("CLASS".to_string())
+        );
+        assert!(missing.is_none());
+    }
+
+    #[test]
+    fn find_multiple_attributes_by_name_keeps_first_attribute_for_duplicate_names() {
+        let element = first_element(r#"<div class="first" CLASS="second"></div>"#);
+        let attributes = element.opening_element().unwrap().attributes();
+
+        let [class] = attributes.find_multiple_attributes_by_name(&["class"]);
+
+        let class = class.unwrap();
+        assert_eq!(attribute_name(&class), "class");
+        assert_eq!(class.value().unwrap().to_string(), "first");
+    }
 
     #[test]
     fn test_is_javascript_tag() {

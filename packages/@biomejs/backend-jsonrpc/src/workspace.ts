@@ -2198,6 +2198,11 @@ See https://biomejs.dev/linter/rules/no-inline-styles
 	 */
 	noInlineStyles?: NoInlineStylesConfiguration;
 	/**
+	* Flags text nodes with a trailing $ before a JSX expression.
+See https://biomejs.dev/linter/rules/no-jsx-leaked-dollar 
+	 */
+	noJsxLeakedDollar?: NoJsxLeakedDollarConfiguration;
+	/**
 	* Disallow JSX namespace syntax.
 See https://biomejs.dev/linter/rules/no-jsx-namespace 
 	 */
@@ -2212,6 +2217,11 @@ See https://biomejs.dev/linter/rules/no-jsx-props-bind
 See https://biomejs.dev/linter/rules/no-leaked-render 
 	 */
 	noLeakedRender?: NoLeakedRenderConfiguration;
+	/**
+	* Disallow functions declared inside loops that capture unsafe outer variables.
+See https://biomejs.dev/linter/rules/no-loop-func 
+	 */
+	noLoopFunc?: NoLoopFuncConfiguration;
 	/**
 	* Detect return type annotations that are misleadingly wider than what the implementation actually returns.
 See https://biomejs.dev/linter/rules/no-misleading-return-type 
@@ -2367,6 +2377,11 @@ See https://biomejs.dev/linter/rules/no-unknown-attribute
 See https://biomejs.dev/linter/rules/no-unnecessary-conditions 
 	 */
 	noUnnecessaryConditions?: NoUnnecessaryConditionsConfiguration;
+	/**
+	* Disallow unnecessary template expressions.
+See https://biomejs.dev/linter/rules/no-unnecessary-template-expression 
+	 */
+	noUnnecessaryTemplateExpression?: NoUnnecessaryTemplateExpressionConfiguration;
 	/**
 	* Disallow + operations with operands that are known to be unsafe.
 See https://biomejs.dev/linter/rules/no-unsafe-plus-operands 
@@ -2562,6 +2577,11 @@ See https://biomejs.dev/linter/rules/use-react-async-server-function
 	 */
 	useReactAsyncServerFunction?: UseReactAsyncServerFunctionConfiguration;
 	/**
+	* Ensure that platform-specific React Native components are only imported in files named for that platform.
+See https://biomejs.dev/linter/rules/use-react-native-platform-components 
+	 */
+	useReactNativePlatformComponents?: UseReactNativePlatformComponentsConfiguration;
+	/**
 	* Enforce using a type parameter on Array#reduce instead of casting the initial value.
 See https://biomejs.dev/linter/rules/use-reduce-type-parameter 
 	 */
@@ -2601,6 +2621,11 @@ See https://biomejs.dev/linter/rules/use-spread
 See https://biomejs.dev/linter/rules/use-string-starts-ends-with 
 	 */
 	useStringStartsEndsWith?: UseStringStartsEndsWithConfiguration;
+	/**
+	* Enforce that lifecycle hooks appear before any test cases in the same block.
+See https://biomejs.dev/linter/rules/use-test-hooks-on-top 
+	 */
+	useTestHooksOnTop?: UseTestHooksOnTopConfiguration;
 	/**
 	* Enforce the use of the u or v flag for regular expressions.
 See https://biomejs.dev/linter/rules/use-unicode-regex 
@@ -4315,6 +4340,9 @@ export type NoIncrementDecrementConfiguration =
 export type NoInlineStylesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoInlineStylesOptions;
+export type NoJsxLeakedDollarConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoJsxLeakedDollarOptions;
 export type NoJsxNamespaceConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsxNamespaceOptions;
@@ -4324,6 +4352,9 @@ export type NoJsxPropsBindConfiguration =
 export type NoLeakedRenderConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoLeakedRenderOptions;
+export type NoLoopFuncConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoLoopFuncOptions;
 export type NoMisleadingReturnTypeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisleadingReturnTypeOptions;
@@ -4417,6 +4448,9 @@ export type NoUnknownAttributeConfiguration =
 export type NoUnnecessaryConditionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnnecessaryConditionsOptions;
+export type NoUnnecessaryTemplateExpressionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnnecessaryTemplateExpressionOptions;
 export type NoUnsafePlusOperandsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnsafePlusOperandsOptions;
@@ -4531,6 +4565,9 @@ export type UseQwikLoaderLocationConfiguration =
 export type UseReactAsyncServerFunctionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseReactAsyncServerFunctionOptions;
+export type UseReactNativePlatformComponentsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseReactNativePlatformComponentsOptions;
 export type UseReduceTypeParameterConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseReduceTypeParameterOptions;
@@ -4555,6 +4592,9 @@ export type UseSpreadConfiguration =
 export type UseStringStartsEndsWithConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseStringStartsEndsWithOptions;
+export type UseTestHooksOnTopConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseTestHooksOnTopOptions;
 export type UseUnicodeRegexConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUnicodeRegexOptions;
@@ -6072,6 +6112,11 @@ export interface RuleWithNoInlineStylesOptions {
 	level: RulePlainConfiguration;
 	options?: NoInlineStylesOptions;
 }
+export interface RuleWithNoJsxLeakedDollarOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoJsxLeakedDollarOptions;
+}
 export interface RuleWithNoJsxNamespaceOptions {
 	level: RulePlainConfiguration;
 	options?: NoJsxNamespaceOptions;
@@ -6083,6 +6128,10 @@ export interface RuleWithNoJsxPropsBindOptions {
 export interface RuleWithNoLeakedRenderOptions {
 	level: RulePlainConfiguration;
 	options?: NoLeakedRenderOptions;
+}
+export interface RuleWithNoLoopFuncOptions {
+	level: RulePlainConfiguration;
+	options?: NoLoopFuncOptions;
 }
 export interface RuleWithNoMisleadingReturnTypeOptions {
 	level: RulePlainConfiguration;
@@ -6213,6 +6262,11 @@ export interface RuleWithNoUnknownAttributeOptions {
 export interface RuleWithNoUnnecessaryConditionsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnnecessaryConditionsOptions;
+}
+export interface RuleWithNoUnnecessaryTemplateExpressionOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoUnnecessaryTemplateExpressionOptions;
 }
 export interface RuleWithNoUnsafePlusOperandsOptions {
 	level: RulePlainConfiguration;
@@ -6377,6 +6431,10 @@ export interface RuleWithUseReactAsyncServerFunctionOptions {
 	level: RulePlainConfiguration;
 	options?: UseReactAsyncServerFunctionOptions;
 }
+export interface RuleWithUseReactNativePlatformComponentsOptions {
+	level: RulePlainConfiguration;
+	options?: UseReactNativePlatformComponentsOptions;
+}
 export interface RuleWithUseReduceTypeParameterOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6414,6 +6472,10 @@ export interface RuleWithUseStringStartsEndsWithOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseStringStartsEndsWithOptions;
+}
+export interface RuleWithUseTestHooksOnTopOptions {
+	level: RulePlainConfiguration;
+	options?: UseTestHooksOnTopOptions;
 }
 export interface RuleWithUseUnicodeRegexOptions {
 	fix?: FixKind;
@@ -7773,9 +7835,11 @@ export interface NoIncrementDecrementOptions {
 	allowForLoopAfterthoughts?: boolean;
 }
 export type NoInlineStylesOptions = {};
+export type NoJsxLeakedDollarOptions = {};
 export type NoJsxNamespaceOptions = {};
 export type NoJsxPropsBindOptions = {};
 export type NoLeakedRenderOptions = {};
+export type NoLoopFuncOptions = {};
 export type NoMisleadingReturnTypeOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoMultiAssignOptions = {};
@@ -7811,7 +7875,26 @@ The values of the list are case-insensitive.
 	disallow?: string[];
 }
 export type NoScriptUrlOptions = {};
-export type NoShadowOptions = {};
+export interface NoShadowOptions {
+	/**
+	* Ignore parameter names in function type annotations.
+
+Function type parameters (e.g. `(x: string) => void`) only create
+bindings within the type scope and rarely cause confusion.
+
+Defaults to `true`. 
+	 */
+	ignoreFunctionTypeParameterNameValueShadow?: boolean;
+	/**
+	* Ignore cases where a type and a value share the same name.
+
+Types and values live in separate namespaces in TypeScript, so a
+variable named `Foo` and a `type Foo` cannot collide at runtime.
+
+Defaults to `true`. 
+	 */
+	ignoreTypeValueShadow?: boolean;
+}
 export type NoSyncScriptsOptions = {};
 export type NoTernaryOptions = {};
 export type NoTopLevelLiteralsOptions = {};
@@ -7828,6 +7911,7 @@ export interface NoUnknownAttributeOptions {
 	ignore?: string[];
 }
 export type NoUnnecessaryConditionsOptions = {};
+export type NoUnnecessaryTemplateExpressionOptions = {};
 export type NoUnsafePlusOperandsOptions = {};
 export interface NoUntrustedLicensesOptions {
 	/**
@@ -8008,6 +8092,18 @@ Default: `false`
 export type UsePlaywrightValidDescribeCallbackOptions = {};
 export type UseQwikLoaderLocationOptions = {};
 export type UseReactAsyncServerFunctionOptions = {};
+export interface UseReactNativePlatformComponentsOptions {
+	/**
+	* A list of glob patterns to identify Android-specific files.
+Defaults to `["**\/*.android.{js,jsx,ts,tsx}"]`. 
+	 */
+	androidPathPatterns?: NormalizedGlob[];
+	/**
+	* A list of glob patterns to identify iOS-specific files.
+Defaults to `["**\/*.ios.{js,jsx,ts,tsx}"]`. 
+	 */
+	iosPathPatterns?: NormalizedGlob[];
+}
 export type UseReduceTypeParameterOptions = {};
 export type UseRegexpExecOptions = {};
 export type UseRegexpTestOptions = {};
@@ -8030,6 +8126,7 @@ export interface UseSortedClassesOptions {
 }
 export type UseSpreadOptions = {};
 export type UseStringStartsEndsWithOptions = {};
+export type UseTestHooksOnTopOptions = {};
 export type UseUnicodeRegexOptions = {};
 export type UseVarsOnTopOptions = {};
 export interface UseVueConsistentDefinePropsDeclarationOptions {
@@ -8952,10 +9049,12 @@ export type Category =
 	| "lint/nursery/noImpliedEval"
 	| "lint/nursery/noIncrementDecrement"
 	| "lint/nursery/noInlineStyles"
+	| "lint/nursery/noJsxLeakedDollar"
 	| "lint/nursery/noJsxNamespace"
 	| "lint/nursery/noJsxPropsBind"
 	| "lint/nursery/noLeakedRender"
 	| "lint/nursery/noMisleadingReturnType"
+	| "lint/nursery/noLoopFunc"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noMultiAssign"
@@ -8987,6 +9086,7 @@ export type Category =
 	| "lint/nursery/noUndeclaredEnvVars"
 	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
+	| "lint/nursery/noUnnecessaryTemplateExpression"
 	| "lint/nursery/noUnsafePlusOperands"
 	| "lint/nursery/noUntrustedLicenses"
 	| "lint/nursery/noUnwantedPolyfillio"
@@ -9035,6 +9135,7 @@ export type Category =
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useReactAsyncServerFunction"
+	| "lint/nursery/useReactNativePlatformComponents"
 	| "lint/nursery/useReduceTypeParameter"
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useRegexpTest"
@@ -9043,6 +9144,7 @@ export type Category =
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useStringStartsEndsWith"
+	| "lint/nursery/useTestHooksOnTop"
 	| "lint/nursery/useUnicodeRegex"
 	| "lint/nursery/useUniqueArgumentNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"
@@ -9581,9 +9683,24 @@ Source-level embeds (`<script>`) use `true`; directives and text expressions use
 	| {
 			Svelte: {
 				/**
+				 * Whether this is a `{@const name = value}` block.
+				 */
+				is_const_block: boolean;
+				/**
+				 * Whether this is the declaration of a function, usually declared in `#snippet`
+				 */
+				is_function_signature: boolean;
+				/**
 				 * Where the bindings are defined
 				 */
 				is_source: boolean;
+				/**
+	* `kind` models whether the Svelte file is a component document or a
+source module. That distinction controls whether downstream code
+extracts `<script>` content or treats the file as a standalone JS/TS
+module, while `is_source` still tracks where bindings come from. 
+	 */
+				kind: SvelteFileKind;
 			};
 	  };
 export type Language =
@@ -9631,6 +9748,7 @@ export type HtmlVariant =
 	| "Svelte";
 export type GritVariant = "Standard";
 export type MarkdownVariant = "Standard";
+export type SvelteFileKind = "Component" | "SourceModule";
 export type EmbeddingHtmlKind = "None" | "Html" | "Vue" | "Astro" | "Svelte";
 export type HtmlTextExpressions = "None" | "Single" | "Double";
 export interface OpenFileResult {

@@ -1,7 +1,9 @@
+use biome_configuration::{Configuration, HtmlConfiguration, html::HtmlFormatterConfiguration};
 use biome_fs::{BiomePath, MemoryFileSystem};
+use biome_service::settings::ModuleGraphResolutionKind;
 use biome_service::workspace::{
     ChangeFileParams, FileContent, FormatFileParams, GetFormatterIRParams, OpenFileParams,
-    OpenProjectParams, server,
+    OpenProjectParams, UpdateSettingsParams, server,
 };
 use std::sync::Arc;
 
@@ -9,15 +11,7 @@ use std::sync::Arc;
 #[test]
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
-    let src = r#"
-{#snippet ff.call()}
-    {page.value}
-    {second.value}
-    <div>
-        <span></span>
-    </div>
-{/snippet}
-"#;
+    let src = r#""#;
     let fs = MemoryFileSystem::default();
     let workspace = server(Arc::new(fs), None);
 
@@ -25,6 +19,26 @@ fn quick_test() {
         .open_project(OpenProjectParams {
             path: BiomePath::new(""),
             open_uninitialized: true,
+        })
+        .unwrap();
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key: project.project_key,
+            configuration: Configuration {
+                html: Some(HtmlConfiguration {
+                    experimental_full_support_enabled: Some(true.into()),
+                    formatter: Some(HtmlFormatterConfiguration {
+                        enabled: Some(true.into()),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            workspace_directory: None,
+            extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
         })
         .unwrap();
 
