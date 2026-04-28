@@ -11,6 +11,8 @@ use biome_rowan::AstNode;
 pub(crate) enum ScssIncludeClosingCommentSpacing {
     /// Uses a plain space unless a line comment forces a line break.
     AdaptiveSpace,
+    /// Always uses `soft_line_break_or_space()` before the closing comment.
+    SoftLineBreakOrSpace,
 }
 
 /// Returns `true` when an include argument node owns comments before `)`.
@@ -40,6 +42,14 @@ pub(crate) fn write_include_closing_comments(
     write_closing_comments(node, spacing, f)
 }
 
+/// Formats include-owned closing comments for list helpers.
+pub(crate) fn format_include_closing_comments(
+    node: &CssSyntaxNode,
+    spacing: ScssIncludeClosingCommentSpacing,
+) -> impl Format<CssFormatContext> + '_ {
+    format_with(move |f| write_include_closing_comments(node, spacing, f))
+}
+
 /// Writes comments that stay on the include path before the closing `)`.
 fn write_closing_comments(
     node: &CssSyntaxNode,
@@ -62,6 +72,9 @@ fn write_closing_comments(
                     } else {
                         write!(f, [space()])
                     }
+                }
+                ScssIncludeClosingCommentSpacing::SoftLineBreakOrSpace => {
+                    write!(f, [soft_line_break_or_space()])
                 }
             }),
             format_dangling_comments(node),
