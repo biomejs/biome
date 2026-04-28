@@ -67,8 +67,13 @@ declare_lint_rule! {
     ///
     /// ## Known limitations
     ///
-    /// Cast targets that the rule cannot narrow with the available type
-    /// information are trusted as explicit `object` widening.
+    /// When a return uses a type assertion such as `as T`, the rule does
+    /// not flag the return unless it can prove that `T` is narrower than
+    /// `object`. Trusted cases include `unknown`, `any`, `typeof` queries,
+    /// conditional types, generic type parameters, and types the rule
+    /// cannot resolve. Intersections (`A & B`) are trusted when every
+    /// member is or when any member is `any`; unions (`A | B`) when at
+    /// least one is.
     pub NoMisleadingReturnType {
         version: "2.4.11",
         name: "noMisleadingReturnType",
@@ -1026,8 +1031,8 @@ fn const_initializer_from_child(child: &JsSyntaxNode, name: &str) -> Option<AnyJ
     None
 }
 
-/// `true` if the cast target is treated as an `object` opt-in; `false` if it is
-/// known to be strictly narrower.
+/// Returns `true` if the cast target is at least as wide as `object`;
+/// `false` if it is known to be strictly narrower.
 fn cast_target_at_least_object_wide(cast_target: &AnyTsType, anchor: &AnyTsCastExpression) -> bool {
     match cast_target.clone().omit_parentheses() {
         AnyTsType::TsNonPrimitiveType(_)
@@ -1047,8 +1052,9 @@ fn cast_target_at_least_object_wide(cast_target: &AnyTsType, anchor: &AnyTsCastE
     }
 }
 
-/// Checks compound cast targets. Intersections require every member except
-/// direct `any`; unions require one object-wide member.
+/// Returns `true` when a compound cast target is at least as wide as `object`.
+/// Intersections need every member object-wide (or one to be `any`); unions
+/// need one.
 fn compound_cast_target_at_least_object_wide(
     root: AnyTsType,
     anchor: &AnyTsCastExpression,
