@@ -89,3 +89,28 @@ function switchReq(x: Required<{kind?: "a" | "b" | "c"}>) {
 function switchRo(x: Readonly<{kind: "x" | "y" | "z"}>) {
 	switch (x.kind) { case "x": break; }
 }
+
+type Bool = true | false;
+function switchBool(value: Bool): number {
+	switch (value) {
+		case true:
+			return 1;
+	}
+}
+
+type BooleanStatus = true | false | "skip";
+declare const value6: BooleanStatus;
+switch (value6) {
+	case true:
+		break;
+	case "skip":
+		break;
+}
+
+type AliasedBoolean = boolean;
+function switchAliasedBoolean(value: boolean | AliasedBoolean): number {
+	switch (value) {
+		case true:
+			return 1;
+	}
+}

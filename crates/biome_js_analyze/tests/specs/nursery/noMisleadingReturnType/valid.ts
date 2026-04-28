@@ -157,6 +157,21 @@ function nestedTuple(): [{ ok: boolean }] { return [{ ok: true }]; }
 // Getter with a same-namespace setter — tsc widens the getter to the setter's type
 class StoreClass { get status(): string { if (Math.random() > 0.5) return "loading"; return "idle"; } set status(v: string) {} }
 const storeObj = { get status(): string { if (Math.random() > 0.5) return "loading"; return "idle"; }, set status(v: string) {} };
+
+// Union with a `boolean` variant exhausted by both `true` and `false` returns
+declare const a: boolean;
+declare const b: boolean;
+const useCloudLogin = (authenticated: boolean): boolean | null => {
+    if (!authenticated) {
+        if (a) return true;
+        if (b) return false;
+    }
+    return null;
+};
+function booleanOrUndefined(flag: boolean): boolean | undefined { if (flag) return true; if (!flag) return false; return undefined; }
+function booleanOrLiteral(flag: boolean): boolean | "skip" { if (flag) return true; if (!flag) return false; return "skip"; }
+function nullOrBoolean(flag: boolean): null | boolean { if (flag) return null; if (a) return true; return false; }
+function duplicateBooleanReturns(flag: boolean, other: boolean): boolean | null { if (flag) return true; if (other) return true; if (a) return false; return null; }
 class StaticStore { static get status(): string { if (Math.random() > 0.5) return "loading"; return "idle"; } static set status(v: string) {} }
 
 function asObjectCast(): object { return {} as object; }

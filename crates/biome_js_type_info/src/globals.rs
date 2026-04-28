@@ -110,6 +110,7 @@ pub fn global_type_name(id: TypeId) -> Option<&'static str> {
         WEAK_MAP_ID => Some(WEAK_MAP_ID_NAME),
         INSTANCEOF_ERROR_ID => Some(INSTANCEOF_ERROR_ID_NAME),
         ERROR_ID => Some(ERROR_ID_NAME),
+        BOOLEAN_ID => Some(BOOLEAN_ID_NAME),
         _ => None,
     }
 }
@@ -190,6 +191,7 @@ impl Default for GlobalsResolver {
         builder.set_type_data(CONDITIONAL_ID, TypeData::Conditional);
         builder.set_type_data(NUMBER_ID, TypeData::Number);
         builder.set_type_data(STRING_ID, TypeData::String);
+        builder.set_type_data(BOOLEAN_ID, TypeData::Boolean);
 
         // TODO(tidefield): Use biome parser to parse Typescript .d.ts files
         // and generate the following `TypeData`s as much as possible

@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::utils::scss_include_comments::place_map_trailing_separator_comment;
 use biome_css_syntax::{
     AnyCssDeclarationName, AnyCssRoot, CssComplexSelector, CssFunction, CssGenericProperty,
     CssIdentifier, CssLanguage, CssSyntaxKind, ScssMapExpression, ScssMapExpressionPair, TextLen,
@@ -6,8 +7,8 @@ use biome_css_syntax::{
 };
 use biome_diagnostics::category;
 use biome_formatter::comments::{
-    CommentKind, CommentPlacement, CommentStyle, CommentTextPosition, Comments, DecoratedComment,
-    SourceComment, is_doc_comment,
+    CommentKind, CommentPlacement, CommentStyle, Comments, DecoratedComment, SourceComment,
+    is_doc_comment,
 };
 use biome_formatter::formatter::Formatter;
 use biome_formatter::{FormatResult, FormatRule, write};
@@ -98,26 +99,12 @@ impl CommentStyle for CssCommentStyle {
         &self,
         comment: DecoratedComment<Self::Language>,
     ) -> CommentPlacement<Self::Language> {
-        match comment.text_position() {
-            CommentTextPosition::EndOfLine => handle_scss_map_trailing_separator_comment(comment)
-                .or_else(handle_function_comment)
-                .or_else(handle_generic_property_comment)
-                .or_else(handle_declaration_name_comment)
-                .or_else(handle_complex_selector_comment)
-                .or_else(handle_global_suppression),
-            CommentTextPosition::OwnLine => handle_scss_map_trailing_separator_comment(comment)
-                .or_else(handle_function_comment)
-                .or_else(handle_generic_property_comment)
-                .or_else(handle_declaration_name_comment)
-                .or_else(handle_complex_selector_comment)
-                .or_else(handle_global_suppression),
-            CommentTextPosition::SameLine => handle_scss_map_trailing_separator_comment(comment)
-                .or_else(handle_function_comment)
-                .or_else(handle_generic_property_comment)
-                .or_else(handle_declaration_name_comment)
-                .or_else(handle_complex_selector_comment)
-                .or_else(handle_global_suppression),
-        }
+        handle_scss_map_trailing_separator_comment(comment)
+            .or_else(handle_function_comment)
+            .or_else(handle_generic_property_comment)
+            .or_else(handle_declaration_name_comment)
+            .or_else(handle_complex_selector_comment)
+            .or_else(handle_global_suppression)
     }
 }
 
@@ -135,33 +122,25 @@ fn handle_scss_map_trailing_separator_comment(
         return CommentPlacement::Default(comment);
     };
 
-    if !comment.kind().is_inline() || comment.text_position().is_own_line() {
-        return CommentPlacement::Default(comment);
-    }
+    place_map_trailing_separator_comment(&map_expression, &preceding_pair, comment)
+}
 
-    let Some(following_token) = comment.following_token() else {
+fn handle_function_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let (Some(preceding_node), Some(following_node)) =
+        (comment.preceding_node(), comment.following_node())
+    else {
         return CommentPlacement::Default(comment);
     };
 
-    if following_token.kind() != CssSyntaxKind::R_PAREN {
-        return CommentPlacement::Default(comment);
+    let is_inside_function = CssFunction::can_cast(comment.enclosing_node().kind());
+    let is_after_name = CssIdentifier::can_cast(preceding_node.kind());
+    if is_inside_function && is_after_name {
+        CommentPlacement::leading(following_node.clone(), comment)
+    } else {
+        CommentPlacement::Default(comment)
     }
-
-    // Keep `a: b /* comment */,` attached to the pair. Only move comments that
-    // live on the trailing separator path, e.g. `a: b, /* comment */)`.
-    let comment_range = comment.piece().text_range();
-    let is_pair_trailing_comment = preceding_pair.syntax().last_token().is_some_and(|token| {
-        token
-            .trailing_trivia()
-            .pieces()
-            .any(|piece| piece.is_comments() && piece.text_range() == comment_range)
-    });
-
-    if is_pair_trailing_comment {
-        return CommentPlacement::Default(comment);
-    }
-
-    CommentPlacement::dangling(map_expression.into_syntax(), comment)
 }
 
 fn handle_generic_property_comment(
@@ -225,24 +204,6 @@ fn handle_declaration_name_comment(
             }
         }
         _ => CommentPlacement::Default(comment),
-    }
-}
-
-fn handle_function_comment(
-    comment: DecoratedComment<CssLanguage>,
-) -> CommentPlacement<CssLanguage> {
-    let (Some(preceding_node), Some(following_node)) =
-        (comment.preceding_node(), comment.following_node())
-    else {
-        return CommentPlacement::Default(comment);
-    };
-
-    let is_inside_function = CssFunction::can_cast(comment.enclosing_node().kind());
-    let is_after_name = CssIdentifier::can_cast(preceding_node.kind());
-    if is_inside_function && is_after_name {
-        CommentPlacement::leading(following_node.clone(), comment)
-    } else {
-        CommentPlacement::Default(comment)
     }
 }
 

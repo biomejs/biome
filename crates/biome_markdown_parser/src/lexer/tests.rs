@@ -576,6 +576,41 @@ fn block_quote_simple() {
 }
 
 #[test]
+fn vertical_tab_after_block_quote_marker() {
+    // Vertical tab (U+000B) after `>` must not cause an infinite loop.
+    // VT is classified as WHS by the dispatch table but is not a space or tab,
+    // so it must fall through to consume_textual.
+    assert_lex! {
+        ">\u{b}",
+        R_ANGLE:1,
+        MD_TEXTUAL_LITERAL:1,
+    }
+}
+
+#[test]
+fn form_feed_after_block_quote_marker() {
+    // Form feed (U+000C) after `>` — same category as vertical tab in the
+    // dispatch table. Must be consumed as textual, not treated as indentation.
+    assert_lex! {
+        ">\u{c}",
+        R_ANGLE:1,
+        MD_TEXTUAL_LITERAL:1,
+    }
+}
+
+#[test]
+fn vertical_tab_at_line_start() {
+    // VT at line start after a newline must not be treated as indentation
+    // whitespace (only space and tab are valid indentation in CommonMark).
+    assert_lex! {
+        "text\n\u{b}more",
+        MD_TEXTUAL_LITERAL:4,
+        NEWLINE:1,
+        MD_TEXTUAL_LITERAL:5,
+    }
+}
+
+#[test]
 fn force_relex_at_line_start_produces_thematic_break() {
     // After consuming a blockquote prefix (`> `), `---` is normally lexed as
     // MINUS tokens because after_newline is false. force_relex_at_line_start

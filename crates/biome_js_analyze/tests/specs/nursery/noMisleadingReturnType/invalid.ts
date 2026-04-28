@@ -68,6 +68,10 @@ const getterObj = { get code(): number { if (Math.random() > 0.5) return 200; re
 
 class AsyncMethod { async getStatus(b: boolean): Promise<string> { if (b) return "loading"; return "idle"; } }
 
+function partialBooleanUnion(b: boolean): boolean | null { if (b) return true; return null; }
+
+const ternaryBoolean = (b: boolean): boolean | "skip" => b ? true : false;
+
 function dateObject(): object { return new Date(); }
 function mapObject(): object { return new Map(); }
 function setObject(): object { return new Set(); }

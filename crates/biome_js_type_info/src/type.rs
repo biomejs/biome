@@ -70,6 +70,64 @@ impl Type {
         Self { resolver, id }
     }
 
+    /// Returns a new [`Type`] for `id`, reusing this type's resolver. The
+    /// caller must ensure the resolver can resolve `id`; pass a predefined
+    /// global ID for safety.
+    pub fn with_id(&self, id: ResolvedTypeId) -> Self {
+        debug_assert!(
+            self.resolver.get_by_resolved_id(id).is_some(),
+            "Type::with_id called with id {id:?} unknown to this resolver"
+        );
+        Self {
+            resolver: self.resolver.clone(),
+            id,
+        }
+    }
+
+    /// Returns resolved union variants with boolean entries canonicalized.
+    ///
+    /// This is for callers that have already materialized union-like variants
+    /// as [`Type`] values. It removes `true` and `false` when `boolean` is
+    /// present, replaces the pair `true` and `false` with `boolean`, and
+    /// keeps at most one `boolean` keyword variant when several aliased
+    /// references resolve to the same keyword.
+    pub fn normalized_boolean_union_variants(mut types: Vec<Self>) -> Vec<Self> {
+        let has_boolean = types.iter().any(|ty| matches!(&**ty, TypeData::Boolean));
+        let has_true = types.iter().any(|ty| ty.is_boolean_literal(true));
+        let has_false = types.iter().any(|ty| ty.is_boolean_literal(false));
+
+        if !(has_boolean || has_true && has_false) {
+            return types;
+        }
+
+        let template = (!has_boolean)
+            .then(|| {
+                types
+                    .iter()
+                    .find(|ty| ty.is_boolean_literal(true) || ty.is_boolean_literal(false))
+                    .cloned()
+            })
+            .flatten();
+
+        let mut seen_boolean = false;
+        types.retain(|ty| {
+            if matches!(&**ty, TypeData::Boolean) {
+                if seen_boolean {
+                    return false;
+                }
+                seen_boolean = true;
+                return true;
+            }
+            !ty.is_boolean_literal(true) && !ty.is_boolean_literal(false)
+        });
+
+        if !seen_boolean && let Some(template) = template {
+            types.push(template.with_id(crate::globals_ids::GLOBAL_BOOLEAN_ID));
+        }
+
+        types
+    }
+
     /// Returns this type's [`TypeId`].
     ///
     /// **Warning:** Type IDs can only be safely compared with other IDs from

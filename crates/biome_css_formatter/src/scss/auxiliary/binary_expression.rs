@@ -12,7 +12,6 @@ impl FormatNodeRule<ScssBinaryExpression> for FormatScssBinaryExpression {
             operator,
             right,
         } = node.as_fields();
-
         write!(
             f,
             [group(&format_args![

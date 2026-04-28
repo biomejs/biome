@@ -1,7 +1,7 @@
 mod utils;
 
 use biome_js_type_info::{
-    GlobalsResolver, ScopeId, TypeData, TypeReference, TypeResolver, TypeofExpression,
+    GlobalsResolver, Literal, ScopeId, TypeData, TypeReference, TypeResolver, TypeofExpression,
     TypeofStaticMemberExpression,
 };
 
@@ -391,4 +391,129 @@ function bar({ foo }: Foo) {
         &resolver,
         "infer_flattened_type_of_destructured_interface_field",
     )
+}
+
+#[test]
+fn union_of_collapses_true_and_false_to_boolean() {
+    let mut resolver = GlobalsResolver::default();
+    let true_ref = resolver.reference_to_owned_data(TypeData::from(Literal::Boolean(true.into())));
+    let false_ref =
+        resolver.reference_to_owned_data(TypeData::from(Literal::Boolean(false.into())));
+
+    let union_ty = TypeData::union_of(&resolver, [true_ref, false_ref].into());
+    let resolved = resolve_owned(&resolver, &union_ty);
+
+    assert!(
+        matches!(resolved, TypeData::Boolean),
+        "expected boolean keyword, got: {resolved}"
+    );
+}
+
+#[test]
+fn union_of_collapses_true_false_inside_larger_union() {
+    let mut resolver = GlobalsResolver::default();
+    let true_ref = resolver.reference_to_owned_data(TypeData::from(Literal::Boolean(true.into())));
+    let false_ref =
+        resolver.reference_to_owned_data(TypeData::from(Literal::Boolean(false.into())));
+    let null_ref = resolver.reference_to_owned_data(TypeData::Null);
+
+    let union_ty = TypeData::union_of(&resolver, [true_ref, false_ref, null_ref].into());
+
+    let TypeData::Union(union) = union_ty else {
+        panic!("expected union, got: {union_ty}");
+    };
+    let variants: Vec<_> = union
+        .types()
+        .iter()
+        .map(|ty| {
+            resolver
+                .resolve_and_get(ty)
+                .expect("must resolve")
+                .as_raw_data()
+                .clone()
+        })
+        .collect();
+
+    assert!(
+        variants.iter().any(|v| matches!(v, TypeData::Boolean)),
+        "expected boolean keyword in {variants:?}"
+    );
+    assert!(
+        variants.iter().any(|v| matches!(v, TypeData::Null)),
+        "expected null in {variants:?}"
+    );
+    assert!(
+        !variants.iter().any(
+            |v| matches!(v, TypeData::Literal(lit) if matches!(lit.as_ref(), Literal::Boolean(_)))
+        ),
+        "boolean literals should be collapsed, got {variants:?}"
+    );
+}
+
+#[test]
+fn union_of_keeps_lone_boolean_literal() {
+    let mut resolver = GlobalsResolver::default();
+    let true_ref = resolver.reference_to_owned_data(TypeData::from(Literal::Boolean(true.into())));
+    let null_ref = resolver.reference_to_owned_data(TypeData::Null);
+
+    let union_ty = TypeData::union_of(&resolver, [true_ref, null_ref].into());
+
+    let TypeData::Union(union) = union_ty else {
+        panic!("expected union, got: {union_ty}");
+    };
+    let has_true_literal = union.types().iter().any(|ty| {
+        resolver.resolve_and_get(ty).is_some_and(|resolved| {
+            matches!(
+                resolved.as_raw_data(),
+                TypeData::Literal(lit) if matches!(lit.as_ref(), Literal::Boolean(b) if b.as_bool())
+            )
+        })
+    });
+    assert!(
+        has_true_literal,
+        "expected `true` literal to remain when `false` is absent"
+    );
+}
+
+#[test]
+fn union_of_drops_redundant_literals_when_boolean_present() {
+    let mut resolver = GlobalsResolver::default();
+    let true_ref = resolver.reference_to_owned_data(TypeData::from(Literal::Boolean(true.into())));
+    let false_ref =
+        resolver.reference_to_owned_data(TypeData::from(Literal::Boolean(false.into())));
+    let bool_ref = resolver.reference_to_owned_data(TypeData::Boolean);
+
+    let union_ty = TypeData::union_of(&resolver, [true_ref, false_ref, bool_ref].into());
+    let resolved = resolve_owned(&resolver, &union_ty);
+
+    assert!(
+        matches!(resolved, TypeData::Boolean),
+        "expected boolean keyword (literals collapsed onto existing boolean), got: {resolved}"
+    );
+}
+
+#[test]
+fn union_of_drops_boolean_literal_when_boolean_present() {
+    let mut resolver = GlobalsResolver::default();
+    let true_ref = resolver.reference_to_owned_data(TypeData::from(Literal::Boolean(true.into())));
+    let bool_ref = resolver.reference_to_owned_data(TypeData::Boolean);
+
+    let union_ty = TypeData::union_of(&resolver, [bool_ref, true_ref].into());
+    let resolved = resolve_owned(&resolver, &union_ty);
+
+    assert!(
+        matches!(resolved, TypeData::Boolean),
+        "expected boolean keyword (literal subsumed by boolean), got: {resolved}"
+    );
+}
+
+fn resolve_owned(resolver: &dyn TypeResolver, ty: &TypeData) -> TypeData {
+    match ty {
+        TypeData::Reference(r) => resolver
+            .resolve_and_get(r)
+            .expect("must resolve")
+            .as_raw_data()
+            .clone(),
+        other => other.clone(),
+    }
 }

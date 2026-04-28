@@ -28,3 +28,8 @@
 
 100. Hundred
 101. Hundred-one
+
+1.   Extra spaces after marker
+2.   More extra spaces
+
+1.    Four spaces after marker

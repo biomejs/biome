@@ -166,3 +166,11 @@ switch (value3) {
 	case null:
 		break;
 }
+
+declare const x: number;
+switch (true) {
+	case x % 3 === 0:
+		break;
+	case x % 5 === 0:
+		break;
+}

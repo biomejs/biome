@@ -256,10 +256,11 @@ define_global_type!(
     "instanceof Error"
 );
 define_global_type!(ERROR_ID, ERROR_ID_NAME, 61, "Error");
+define_global_type!(BOOLEAN_ID, BOOLEAN_ID_NAME, 62, "boolean");
 
 /// Total number of predefined types.
 /// Must be one more than the highest TypeId above.
-pub const NUM_PREDEFINED_TYPES: usize = 62;
+pub const NUM_PREDEFINED_TYPES: usize = 63;
 
 // Resolved type ID constants (TypeId wrapped with GlobalLevel)
 pub const GLOBAL_UNKNOWN_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, UNKNOWN_ID);
@@ -313,3 +314,4 @@ pub const GLOBAL_MAP_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, MAP_
 pub const GLOBAL_SET_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, SET_ID);
 pub const GLOBAL_WEAK_MAP_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, WEAK_MAP_ID);
 pub const GLOBAL_ERROR_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, ERROR_ID);
+pub const GLOBAL_BOOLEAN_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, BOOLEAN_ID);

@@ -106,6 +106,7 @@ pub(crate) const MAX_BLOCK_PREFIX_INDENT: usize = 3;
 
 pub(crate) fn parse_document(p: &mut MarkdownParser) {
     let m = p.start();
+    p.eat(UNICODE_BOM);
     let _ = parse_block_list(p);
     // Bump the EOF token - required by the grammar
     p.bump(T![EOF]);

@@ -767,7 +767,7 @@ impl Rule for OrganizeImports {
         let sort_order = options.identifier_order.unwrap_or_default();
         let mut chunk: Option<ChunkBuilder> = None;
         let mut prev_kind: Option<JsSyntaxKind> = None;
-        let mut prev_group = 0;
+        let mut prev_group = None;
         for item in root.items() {
             if let Some((info, specifiers, attributes)) = ImportInfo::from_module_item(&item) {
                 let prev_is_distinct = prev_kind.is_some_and(|kind| kind != item.syntax().kind());
@@ -775,11 +775,14 @@ impl Rule for OrganizeImports {
                 if prev_is_distinct || has_detached_leading_comment(item.syntax()) {
                     // The chunk ends, here
                     report_unsorted_chunk(chunk.take(), &mut result);
-                    prev_group = 0;
+                    prev_group = None;
                 }
                 let key = ImportKey::new(info, groups);
-                let blank_line_separated_groups = groups
-                    .is_some_and(|groups| groups.separated_by_blank_line(prev_group, key.group));
+                let blank_line_separated_groups = groups.is_some_and(|groups| {
+                    prev_group.is_some_and(|prev_group| {
+                        groups.separated_by_blank_line(prev_group, key.group)
+                    })
+                });
                 let starts_chunk = chunk.is_none();
                 let leading_newline_count = leading_newlines(item.syntax()).count();
                 let are_specifiers_unsorted =
@@ -825,12 +828,12 @@ impl Rule for OrganizeImports {
                     if chunk.max_key > key || chunk.max_key.is_mergeable(&key) {
                         chunk.slot_indexes.end = key.slot_index + 1;
                     } else {
-                        prev_group = key.group;
+                        prev_group = Some(key.group);
                         chunk.max_key = key;
                     }
                 } else {
                     // New chunk
-                    prev_group = key.group;
+                    prev_group = Some(key.group);
                     chunk = Some(ChunkBuilder::new(key));
                 }
             } else if chunk.is_some() {
@@ -841,7 +844,7 @@ impl Rule for OrganizeImports {
                 //
                 // In any case, the chunk ends here
                 report_unsorted_chunk(chunk.take(), &mut result);
-                prev_group = 0;
+                prev_group = None;
                 // A statement must be separated of a chunk with a blank line
                 if let AnyJsModuleItem::AnyJsStatement(statement) = &item
                     && leading_newlines(statement.syntax()).count() == 1

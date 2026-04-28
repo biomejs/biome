@@ -30,14 +30,14 @@ MdDocument {
                     prefix: MdListMarkerPrefix {
                         pre_marker_indent: MdIndentTokenList [],
                         marker: MINUS@0..1 "-" [] [],
-                        post_marker_space_token: missing (optional),
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@1..2 " " [] [],
                         content_indent: MdIndentTokenList [],
                     },
                     content: MdBlockList [
                         MdParagraph {
                             list: MdInlineItemList [
                                 MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@1..3 " a" [] [],
+                                    value_token: MD_TEXTUAL_LITERAL@2..3 "a" [] [],
                                 },
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@3..4 "\n" [] [],
@@ -58,14 +58,14 @@ MdDocument {
                                             },
                                         ],
                                         marker: MINUS@6..7 "-" [] [],
-                                        post_marker_space_token: missing (optional),
+                                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@7..8 " " [] [],
                                         content_indent: MdIndentTokenList [],
                                     },
                                     content: MdBlockList [
                                         MdParagraph {
                                             list: MdInlineItemList [
                                                 MdTextual {
-                                                    value_token: MD_TEXTUAL_LITERAL@7..9 " b" [] [],
+                                                    value_token: MD_TEXTUAL_LITERAL@8..9 "b" [] [],
                                                 },
                                                 MdTextual {
                                                     value_token: MD_TEXTUAL_LITERAL@9..10 "\n" [] [],
@@ -107,14 +107,14 @@ MdDocument {
                     prefix: MdListMarkerPrefix {
                         pre_marker_indent: MdIndentTokenList [],
                         marker: MINUS@18..19 "-" [] [],
-                        post_marker_space_token: missing (optional),
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@19..20 " " [] [],
                         content_indent: MdIndentTokenList [],
                     },
                     content: MdBlockList [
                         MdParagraph {
                             list: MdInlineItemList [
                                 MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@19..25 " outer" [] [],
+                                    value_token: MD_TEXTUAL_LITERAL@20..25 "outer" [] [],
                                 },
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@25..26 "\n" [] [],
@@ -135,14 +135,14 @@ MdDocument {
                                             },
                                         ],
                                         marker: MINUS@28..29 "-" [] [],
-                                        post_marker_space_token: missing (optional),
+                                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@29..30 " " [] [],
                                         content_indent: MdIndentTokenList [],
                                     },
                                     content: MdBlockList [
                                         MdParagraph {
                                             list: MdInlineItemList [
                                                 MdTextual {
-                                                    value_token: MD_TEXTUAL_LITERAL@29..35 " inner" [] [],
+                                                    value_token: MD_TEXTUAL_LITERAL@30..35 "inner" [] [],
                                                 },
                                                 MdTextual {
                                                     value_token: MD_TEXTUAL_LITERAL@35..36 "\n" [] [],
@@ -211,36 +211,36 @@ MdDocument {
     0: MD_BULLET_LIST_ITEM@0..74
       0: MD_BULLET_LIST@0..74
         0: MD_BULLET@0..18
-          0: MD_LIST_MARKER_PREFIX@0..1
+          0: MD_LIST_MARKER_PREFIX@0..2
             0: MD_INDENT_TOKEN_LIST@0..0
             1: MINUS@0..1 "-" [] []
-            2: (empty)
-            3: MD_INDENT_TOKEN_LIST@1..1
-          1: MD_BLOCK_LIST@1..18
-            0: MD_PARAGRAPH@1..4
-              0: MD_INLINE_ITEM_LIST@1..4
-                0: MD_TEXTUAL@1..3
-                  0: MD_TEXTUAL_LITERAL@1..3 " a" [] []
+            2: MD_LIST_POST_MARKER_SPACE@1..2 " " [] []
+            3: MD_INDENT_TOKEN_LIST@2..2
+          1: MD_BLOCK_LIST@2..18
+            0: MD_PARAGRAPH@2..4
+              0: MD_INLINE_ITEM_LIST@2..4
+                0: MD_TEXTUAL@2..3
+                  0: MD_TEXTUAL_LITERAL@2..3 "a" [] []
                 1: MD_TEXTUAL@3..4
                   0: MD_TEXTUAL_LITERAL@3..4 "\n" [] []
               1: (empty)
             1: MD_BULLET_LIST_ITEM@4..17
               0: MD_BULLET_LIST@4..17
                 0: MD_BULLET@4..17
-                  0: MD_LIST_MARKER_PREFIX@4..7
+                  0: MD_LIST_MARKER_PREFIX@4..8
                     0: MD_INDENT_TOKEN_LIST@4..6
                       0: MD_INDENT_TOKEN@4..5
                         0: MD_INDENT_CHAR@4..5 " " [] []
                       1: MD_INDENT_TOKEN@5..6
                         0: MD_INDENT_CHAR@5..6 " " [] []
                     1: MINUS@6..7 "-" [] []
-                    2: (empty)
-                    3: MD_INDENT_TOKEN_LIST@7..7
-                  1: MD_BLOCK_LIST@7..17
-                    0: MD_PARAGRAPH@7..10
-                      0: MD_INLINE_ITEM_LIST@7..10
-                        0: MD_TEXTUAL@7..9
-                          0: MD_TEXTUAL_LITERAL@7..9 " b" [] []
+                    2: MD_LIST_POST_MARKER_SPACE@7..8 " " [] []
+                    3: MD_INDENT_TOKEN_LIST@8..8
+                  1: MD_BLOCK_LIST@8..17
+                    0: MD_PARAGRAPH@8..10
+                      0: MD_INLINE_ITEM_LIST@8..10
+                        0: MD_TEXTUAL@8..9
+                          0: MD_TEXTUAL_LITERAL@8..9 "b" [] []
                         1: MD_TEXTUAL@9..10
                           0: MD_TEXTUAL_LITERAL@9..10 "\n" [] []
                       1: (empty)
@@ -260,36 +260,36 @@ MdDocument {
             2: MD_NEWLINE@17..18
               0: NEWLINE@17..18 "\n" [] []
         1: MD_BULLET@18..74
-          0: MD_LIST_MARKER_PREFIX@18..19
+          0: MD_LIST_MARKER_PREFIX@18..20
             0: MD_INDENT_TOKEN_LIST@18..18
             1: MINUS@18..19 "-" [] []
-            2: (empty)
-            3: MD_INDENT_TOKEN_LIST@19..19
-          1: MD_BLOCK_LIST@19..74
-            0: MD_PARAGRAPH@19..26
-              0: MD_INLINE_ITEM_LIST@19..26
-                0: MD_TEXTUAL@19..25
-                  0: MD_TEXTUAL_LITERAL@19..25 " outer" [] []
+            2: MD_LIST_POST_MARKER_SPACE@19..20 " " [] []
+            3: MD_INDENT_TOKEN_LIST@20..20
+          1: MD_BLOCK_LIST@20..74
+            0: MD_PARAGRAPH@20..26
+              0: MD_INLINE_ITEM_LIST@20..26
+                0: MD_TEXTUAL@20..25
+                  0: MD_TEXTUAL_LITERAL@20..25 "outer" [] []
                 1: MD_TEXTUAL@25..26
                   0: MD_TEXTUAL_LITERAL@25..26 "\n" [] []
               1: (empty)
             1: MD_BULLET_LIST_ITEM@26..74
               0: MD_BULLET_LIST@26..74
                 0: MD_BULLET@26..74
-                  0: MD_LIST_MARKER_PREFIX@26..29
+                  0: MD_LIST_MARKER_PREFIX@26..30
                     0: MD_INDENT_TOKEN_LIST@26..28
                       0: MD_INDENT_TOKEN@26..27
                         0: MD_INDENT_CHAR@26..27 " " [] []
                       1: MD_INDENT_TOKEN@27..28
                         0: MD_INDENT_CHAR@27..28 " " [] []
                     1: MINUS@28..29 "-" [] []
-                    2: (empty)
-                    3: MD_INDENT_TOKEN_LIST@29..29
-                  1: MD_BLOCK_LIST@29..74
-                    0: MD_PARAGRAPH@29..56
-                      0: MD_INLINE_ITEM_LIST@29..56
-                        0: MD_TEXTUAL@29..35
-                          0: MD_TEXTUAL_LITERAL@29..35 " inner" [] []
+                    2: MD_LIST_POST_MARKER_SPACE@29..30 " " [] []
+                    3: MD_INDENT_TOKEN_LIST@30..30
+                  1: MD_BLOCK_LIST@30..74
+                    0: MD_PARAGRAPH@30..56
+                      0: MD_INLINE_ITEM_LIST@30..56
+                        0: MD_TEXTUAL@30..35
+                          0: MD_TEXTUAL_LITERAL@30..35 "inner" [] []
                         1: MD_TEXTUAL@35..36
                           0: MD_TEXTUAL_LITERAL@35..36 "\n" [] []
                         2: MD_INDENT_TOKEN@36..37

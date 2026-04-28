@@ -249,7 +249,7 @@ await_missing_catch_binding.svelte:5:8 parse ━━━━━━━━━━━�
     3 │ {:then value}
     4 │   <p>{value}</p>
   > 5 │ {:catch}
-      │        
+      │        ^
     6 │   <p>Error occurred</p>
     7 │ {/await}
   

@@ -1,0 +1,68 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/include-arguments.scss
+---
+
+# Input
+
+```scss
+@include mix(
+$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg:1px,
+$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1:2px,
+$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2:10,
+2px 4px 6px
+);
+
+.card{
+@include mix(
+1px,
+2px,
+$arg2:10,
+2px 4px 6px
+);
+}
+
+@include single-item-list((a,));
+@include single-item-list($arg: (a,));
+@include nested-parenthesized($arg: ((a)));
+
+```
+
+
+# Formatted
+
+```scss
+@include mix(
+	$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg:
+		1px,
+	$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1:
+		2px,
+	$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2:
+		10,
+	2px 4px 6px
+);
+
+.card {
+	@include mix(1px, 2px, $arg2: 10, 2px 4px 6px);
+}
+
+@include single-item-list((a));
+@include single-item-list(
+	$arg: (
+		a,
+	)
+);
+@include nested-parenthesized(
+	$arg: (
+		(a),
+	)
+);
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    2: 	$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg:
+    4: 	$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1:
+    6: 	$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2:
+```

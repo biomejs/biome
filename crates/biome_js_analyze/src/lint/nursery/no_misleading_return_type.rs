@@ -724,6 +724,7 @@ impl ReturnInfo {
 }
 
 /// Walks the function body and populates a [`ReturnInfo`].
+/// Boolean return literals use the same canonical form as [`TypeData::union_of`].
 fn collect_return_info(
     ctx: &RuleContext<NoMisleadingReturnType>,
     body: &AnyJsFunctionBody,
@@ -749,6 +750,7 @@ fn collect_return_info(
         }
     }
 
+    info.types = Type::normalized_boolean_union_variants(info.types);
     info
 }
 

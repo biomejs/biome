@@ -17,7 +17,8 @@ impl FormatNodeRule<ScssIncludeArgumentList> for FormatScssIncludeArgumentList {
             f,
             [group(&format_args![
                 l_paren_token.format(),
-                soft_block_indent(&items.format()),
+                indent(&format_args![soft_line_break(), items.format()]),
+                soft_line_break(),
                 r_paren_token.format()
             ])]
         )
