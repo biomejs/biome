@@ -15,6 +15,14 @@ pub(crate) fn scss_keyword_argument_from_css_expression(
         .and_then(|expression| scss_keyword_argument_from_expression(&expression))
 }
 
+/// Returns `$arg: value` when a syntax node is an SCSS expression wrapper.
+pub(crate) fn scss_keyword_argument_from_syntax(
+    node: &CssSyntaxNode,
+) -> Option<ScssKeywordArgument> {
+    AnyScssExpression::cast(node.clone())
+        .and_then(|expression| scss_keyword_argument_from_expression(&expression))
+}
+
 /// Returns `$arg: value` when an SCSS expression only wraps that item.
 pub(crate) fn scss_keyword_argument_from_expression(
     value: &AnyScssExpression,

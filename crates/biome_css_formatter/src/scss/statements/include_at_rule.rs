@@ -32,7 +32,11 @@ impl FormatNodeRule<ScssIncludeAtRule> for FormatScssIncludeAtRule {
                 write!(f, [format_removed(&semicolon_token)])?;
             }
         } else {
-            write!(f, [semicolon_token.format()])?;
+            if let Some(semicolon_token) = semicolon_token {
+                write!(f, [semicolon_token.format()])?;
+            } else {
+                write!(f, [token(";")])?;
+            }
         }
 
         Ok(())

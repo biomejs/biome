@@ -1,5 +1,7 @@
 use crate::prelude::*;
-use crate::utils::scss_include_comments::place_map_trailing_separator_comment;
+use crate::utils::scss_include_comments::{
+    place_map_trailing_separator_comment, place_separated_list_comment,
+};
 use biome_css_syntax::{
     AnyCssDeclarationName, AnyCssRoot, CssComplexSelector, CssFunction, CssGenericProperty,
     CssIdentifier, CssLanguage, CssSyntaxKind, ScssMapExpression, ScssMapExpressionPair, TextLen,
@@ -100,6 +102,7 @@ impl CommentStyle for CssCommentStyle {
         comment: DecoratedComment<Self::Language>,
     ) -> CommentPlacement<Self::Language> {
         handle_scss_map_trailing_separator_comment(comment)
+            .or_else(place_separated_list_comment)
             .or_else(handle_function_comment)
             .or_else(handle_generic_property_comment)
             .or_else(handle_declaration_name_comment)
