@@ -40,7 +40,7 @@ pub(crate) fn resolve_binding(params: ResolveBindingParams) -> Option<Definition
                 let name = binding.syntax().text_trimmed().to_string();
                 return Some(DefinitionReference::Import { local_name: name });
             }
-            if let Some(result) = retrieve_name_under_dynamic_import(&binding_syntax) {
+            if let Some(result) = retrieve_reference_under_dynamic_import(&binding_syntax) {
                 return Some(result);
             }
             return Some(DefinitionReference::Local {
@@ -56,7 +56,7 @@ pub(crate) fn resolve_binding(params: ResolveBindingParams) -> Option<Definition
                 let name = binding_syntax.text_trimmed().to_string();
                 return Some(DefinitionReference::Import { local_name: name });
             }
-            if let Some(result) = retrieve_name_under_dynamic_import(&binding_syntax) {
+            if let Some(result) = retrieve_reference_under_dynamic_import(&binding_syntax) {
                 return Some(result);
             }
             return Some(DefinitionReference::Local {
@@ -75,7 +75,7 @@ pub(crate) fn resolve_binding(params: ResolveBindingParams) -> Option<Definition
                     local_name: binding_text,
                 });
             }
-            if let Some(result) = retrieve_name_under_dynamic_import(&binding_node.syntax()) {
+            if let Some(result) = retrieve_reference_under_dynamic_import(binding_node.syntax()) {
                 return Some(result);
             }
 
@@ -101,7 +101,7 @@ fn is_under_import_clause(node: &JsSyntaxNode) -> bool {
     })
 }
 
-fn retrieve_name_under_dynamic_import(identifier: &JsSyntaxNode) -> Option<DefinitionReference> {
+fn retrieve_reference_under_dynamic_import(identifier: &JsSyntaxNode) -> Option<DefinitionReference> {
     let declarator = identifier
         .ancestors()
         .skip(1)
