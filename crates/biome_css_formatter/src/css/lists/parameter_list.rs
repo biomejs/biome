@@ -1,5 +1,7 @@
 use crate::prelude::*;
-use crate::utils::scss_context::is_in_scss_include_arguments;
+use crate::utils::scss_closing_comments::{
+    ScssIncludeClosingCommentSpacing, owns_include_closing_comments, write_include_closing_comments,
+};
 use crate::utils::scss_expression::scss_keyword_argument_from_css_expression;
 use crate::utils::scss_separated_list::trailing_separator_for_node;
 use biome_css_syntax::{AnyCssExpression, CssParameterList};
@@ -11,17 +13,6 @@ pub(crate) struct FormatCssParameterList;
 impl FormatRule<CssParameterList> for FormatCssParameterList {
     type Context = CssFormatContext;
     fn fmt(&self, node: &CssParameterList, f: &mut CssFormatter) -> FormatResult<()> {
-        if !is_in_scss_include_arguments(node.syntax()) {
-            let separator = soft_line_break_or_space();
-            let mut joiner = f.join_with(&separator);
-
-            for formatted in node.format_separated(",") {
-                joiner.entry(&formatted);
-            }
-
-            return joiner.finish();
-        }
-
         let separated = node
             .format_separated(",")
             .with_trailing_separator(trailing_separator_for_node(node.syntax()));
@@ -42,7 +33,22 @@ impl FormatRule<CssParameterList> for FormatCssParameterList {
             previous_was_keyword_argument = is_scss_keyword_parameter(element_node);
         }
 
-        Ok(())
+        if should_inline_arbitrary_argument_closing_comment(node, f) {
+            write!(
+                f,
+                [
+                    space(),
+                    format_dangling_comments(node.syntax()),
+                    expand_parent()
+                ]
+            )
+        } else {
+            write_include_closing_comments(
+                node.syntax(),
+                ScssIncludeClosingCommentSpacing::AdaptiveSpace,
+                f,
+            )
+        }
     }
 }
 
@@ -68,4 +74,24 @@ fn should_preserve_blank_line_before_parameter(
 
 fn is_scss_keyword_parameter(parameter: Option<&AnyCssExpression>) -> bool {
     parameter.is_some_and(|node| scss_keyword_argument_from_css_expression(node).is_some())
+}
+
+fn should_inline_arbitrary_argument_closing_comment(
+    node: &CssParameterList,
+    f: &CssFormatter,
+) -> bool {
+    owns_include_closing_comments(node.syntax(), f)
+        && f.comments()
+            .dangling_comments(node.syntax())
+            .iter()
+            .all(|comment| comment.kind().is_line())
+        && node.iter().last().is_some_and(|parameter| {
+            parameter.is_ok_and(|node| expression_ends_with_arbitrary_argument(&node))
+        })
+}
+
+fn expression_ends_with_arbitrary_argument(node: &AnyCssExpression) -> bool {
+    node.as_scss_expression()
+        .and_then(|expression| expression.items().iter().last())
+        .is_some_and(|item| item.as_scss_arbitrary_argument().is_some())
 }

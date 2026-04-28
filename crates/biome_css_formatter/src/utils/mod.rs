@@ -1,10 +1,13 @@
 pub(crate) mod block_like;
 pub(crate) mod component_value_list;
 pub(crate) mod import;
+pub(crate) mod scss_closing_comments;
 pub(crate) mod scss_context;
 pub(crate) mod scss_expression;
+pub(crate) mod scss_include_comments;
 pub(crate) mod scss_keyword_argument_layout;
 pub(crate) mod scss_list_layout;
 pub(crate) mod scss_map;
+pub(crate) mod scss_map_layout;
 pub(crate) mod scss_separated_list;
 pub(crate) mod string_utils;
