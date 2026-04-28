@@ -28,6 +28,22 @@ _foo_
 
 [FOOBAR]: train.jpg "train & tracks"
 
+_*foo bar baz bim bam*_
+
+*(*foo*)*
+
+_foo _bar_ baz_
+
+__foo_ bar_
+
+*foo *bar**
+
+*foo [*bar*](/url)*
+
+*foo _bar* baz_
+
+*foo __bar *baz bim__ bam*
+
 ```
 
 
@@ -55,5 +71,21 @@ _foo_
 ![foo *bar*][foobar]
 
 [FOOBAR]: train.jpg "train & tracks"
+
+_*foo bar baz bim bam*_
+
+_(*foo*)_
+
+_foo *bar* baz_
+
+_*foo* bar_
+
+_foo *bar*_
+
+_foo [*bar*](/url)_
+
+*foo _bar* baz_
+
+_foo **bar *baz bim** bam_
 
 ```

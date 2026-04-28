@@ -21,7 +21,7 @@ use biome_html_syntax::{
     HtmlAttribute, HtmlAttributeInitializerClause, HtmlAttributeSingleTextExpression,
     HtmlDoubleTextExpression, HtmlElement, HtmlFileSource, HtmlRoot, HtmlSingleTextExpression,
     HtmlTextExpression, HtmlTextExpressions, HtmlVariant, SvelteName, VueDirective,
-    VueVBindShorthandDirective, VueVOnShorthandDirective, VueVSlotShorthandDirective,
+    VueVBindShorthandDirective, VueVForValue, VueVOnShorthandDirective, VueVSlotShorthandDirective,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, SvelteFileKind};
@@ -141,9 +141,14 @@ pub(crate) fn parse_embedded_nodes(
             // Two-pass: collect elements + expressions, then process
             let mut elements = vec![];
             let mut snippet_expressions = vec![];
+            let mut v_for_values = vec![];
             for element in html_root.syntax().descendants() {
                 if let Some(text_expression) = HtmlDoubleTextExpression::cast_ref(&element) {
                     snippet_expressions.push(text_expression);
+                }
+
+                if let Some(value) = VueVForValue::cast_ref(&element) {
+                    v_for_values.push(value);
                 }
 
                 if let Some(element) = HtmlElement::cast_ref(&element) {
@@ -167,6 +172,19 @@ pub(crate) fn parse_embedded_nodes(
             // Pass 2: text expressions via registry using merged embedded_file_source
             for snippet in snippet_expressions {
                 if let Ok(expression) = snippet.expression()
+                    && let Some(candidate) = build_text_expression_candidate(&expression)
+                {
+                    ctx.parse_and_push(
+                        &candidate,
+                        &doc_file_source,
+                        Some(embedded_file_source),
+                        &mut nodes,
+                    );
+                }
+            }
+
+            for value in v_for_values {
+                if let Ok(expression) = value.expression()
                     && let Some(candidate) = build_text_expression_candidate(&expression)
                 {
                     ctx.parse_and_push(
@@ -847,6 +865,7 @@ fn parse_matched_embed(
                             is_source: true,
                             is_function_signature: false,
                             kind: SvelteFileKind::Component,
+                            is_const_block: false,
                         });
                     } else if ctx.host_file_source.is_vue() {
                         js_source = js_source.with_embedding_kind(EmbeddingKind::Vue {
@@ -872,6 +891,10 @@ fn parse_matched_embed(
                             is_source: false,
                             is_function_signature,
                             kind: SvelteFileKind::Component,
+                            is_const_block: matches!(
+                                block_kind,
+                                EmbedBlockKind::Svelte(SvelteBlockKind::Const)
+                            ),
                         });
                     } else if ctx.host_file_source.is_vue() {
                         js_source = js_source.with_embedding_kind(EmbeddingKind::Vue {
@@ -909,6 +932,7 @@ fn parse_matched_embed(
                                 is_source: false,
                                 is_function_signature: false,
                                 kind: SvelteFileKind::Component,
+                                is_const_block: false,
                             });
                         }
                     }

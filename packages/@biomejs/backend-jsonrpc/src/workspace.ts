@@ -2809,6 +2809,11 @@ See https://biomejs.dev/linter/rules/use-string-starts-ends-with
 	 */
 	useStringStartsEndsWith?: UseStringStartsEndsWithConfiguration;
 	/**
+	* Enforce that lifecycle hooks appear before any test cases in the same block.
+See https://biomejs.dev/linter/rules/use-test-hooks-on-top 
+	 */
+	useTestHooksOnTop?: UseTestHooksOnTopConfiguration;
+	/**
 	* Enforce the use of the u or v flag for regular expressions.
 See https://biomejs.dev/linter/rules/use-unicode-regex 
 	 */
@@ -4812,6 +4817,9 @@ export type UseSpreadConfiguration =
 export type UseStringStartsEndsWithConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseStringStartsEndsWithOptions;
+export type UseTestHooksOnTopConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseTestHooksOnTopOptions;
 export type UseUnicodeRegexConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUnicodeRegexOptions;
@@ -6713,6 +6721,10 @@ export interface RuleWithUseStringStartsEndsWithOptions {
 	level: RulePlainConfiguration;
 	options?: UseStringStartsEndsWithOptions;
 }
+export interface RuleWithUseTestHooksOnTopOptions {
+	level: RulePlainConfiguration;
+	options?: UseTestHooksOnTopOptions;
+}
 export interface RuleWithUseUnicodeRegexOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -8119,7 +8131,26 @@ The values of the list are case-insensitive.
 	disallow?: string[];
 }
 export type NoScriptUrlOptions = {};
-export type NoShadowOptions = {};
+export interface NoShadowOptions {
+	/**
+	* Ignore parameter names in function type annotations.
+
+Function type parameters (e.g. `(x: string) => void`) only create
+bindings within the type scope and rarely cause confusion.
+
+Defaults to `true`. 
+	 */
+	ignoreFunctionTypeParameterNameValueShadow?: boolean;
+	/**
+	* Ignore cases where a type and a value share the same name.
+
+Types and values live in separate namespaces in TypeScript, so a
+variable named `Foo` and a `type Foo` cannot collide at runtime.
+
+Defaults to `true`. 
+	 */
+	ignoreTypeValueShadow?: boolean;
+}
 export type NoSyncScriptsOptions = {};
 export type NoTernaryOptions = {};
 export type NoTopLevelLiteralsOptions = {};
@@ -8356,6 +8387,7 @@ export interface UseSortedClassesOptions {
 }
 export type UseSpreadOptions = {};
 export type UseStringStartsEndsWithOptions = {};
+export type UseTestHooksOnTopOptions = {};
 export type UseUnicodeRegexOptions = {};
 export type UseVarsOnTopOptions = {};
 export interface UseVueConsistentDefinePropsDeclarationOptions {
@@ -9409,6 +9441,7 @@ export type Category =
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useStringStartsEndsWith"
+	| "lint/nursery/useTestHooksOnTop"
 	| "lint/nursery/useUnicodeRegex"
 	| "lint/nursery/useUniqueArgumentNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"
@@ -9956,6 +9989,10 @@ Source-level embeds (`<script>`) use `true`; directives and text expressions use
 	  }
 	| {
 			Svelte: {
+				/**
+				 * Whether this is a `{@const name = value}` block.
+				 */
+				is_const_block: boolean;
 				/**
 				 * Whether this is the declaration of a function, usually declared in `#snippet`
 				 */

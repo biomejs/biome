@@ -11,6 +11,8 @@ a { min-width: anchor-size(--button width); }
 a { transform: color.adjust(1px); transform: rgb(color.adjust(1px)); }
 a { color: light-dark(#777, #000); }
 a { offset-path: xywh(20px 30% 150% 200%); }
+a { clip-path: squircle(50%); }
+a { clip-path: superellipse(50% 50% / 4); }
 a { animation-timing-function: linear(0, 0.25, 1); }
 a { height: calc-size(0px); }
 a { width: v-bind(color); }

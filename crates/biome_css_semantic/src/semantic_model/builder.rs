@@ -53,7 +53,9 @@ impl SemanticModelBuilder {
                     let typed_node = rule.node.to_node(self.root.syntax());
                     if matches!(
                         typed_node,
-                        AnyRuleStart::CssMediaAtRule(_) | AnyRuleStart::CssSupportsAtRule(_)
+                        AnyRuleStart::CssMediaAtRule(_)
+                            | AnyRuleStart::CssScopeAtRule(_)
+                            | AnyRuleStart::CssSupportsAtRule(_)
                     ) {
                         current_parent_id = iterator
                             .next()
@@ -86,7 +88,9 @@ impl SemanticModelBuilder {
                     let typed_node = rule.node.to_node(self.root.syntax());
                     if matches!(
                         typed_node,
-                        AnyRuleStart::CssMediaAtRule(_) | AnyRuleStart::CssSupportsAtRule(_)
+                        AnyRuleStart::CssMediaAtRule(_)
+                            | AnyRuleStart::CssScopeAtRule(_)
+                            | AnyRuleStart::CssSupportsAtRule(_)
                     ) {
                         current_parent_id = iterator
                             .next()

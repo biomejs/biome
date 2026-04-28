@@ -5094,7 +5094,20 @@
 				{ "$ref": "#/$defs/RuleWithNoShadowOptions" }
 			]
 		},
-		"NoShadowOptions": { "type": "object", "additionalProperties": false },
+		"NoShadowOptions": {
+			"type": "object",
+			"properties": {
+				"ignoreFunctionTypeParameterNameValueShadow": {
+					"description": "Ignore parameter names in function type annotations.\n\nFunction type parameters (e.g. `(x: string) => void`) only create\nbindings within the type scope and rarely cause confusion.\n\nDefaults to `true`.",
+					"type": ["boolean", "null"]
+				},
+				"ignoreTypeValueShadow": {
+					"description": "Ignore cases where a type and a value share the same name.\n\nTypes and values live in separate namespaces in TypeScript, so a\nvariable named `Foo` and a `type Foo` cannot collide at runtime.\n\nDefaults to `true`.",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoShadowRestrictedNamesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7009,6 +7022,13 @@
 					"description": "Prefer String#startsWith() and String#endsWith() over verbose prefix and suffix checks.\nSee https://biomejs.dev/linter/rules/use-string-starts-ends-with",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseStringStartsEndsWithConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useTestHooksOnTop": {
+					"description": "Enforce that lifecycle hooks appear before any test cases in the same block.\nSee https://biomejs.dev/linter/rules/use-test-hooks-on-top",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseTestHooksOnTopConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -12091,6 +12111,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseTestHooksOnTopOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseTestHooksOnTopOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseThrowNewErrorOptions": {
 			"type": "object",
 			"properties": {
@@ -15790,6 +15819,16 @@
 			]
 		},
 		"UseTemplateOptions": { "type": "object", "additionalProperties": false },
+		"UseTestHooksOnTopConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseTestHooksOnTopOptions" }
+			]
+		},
+		"UseTestHooksOnTopOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseThrowNewErrorConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
