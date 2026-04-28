@@ -87,19 +87,26 @@ fn parse_scss_unary_expression(p: &mut CssParser) -> ParsedSyntax {
     parse_scss_primary_expression(p)
 }
 
-/// Re-lexes signed numeric tokens in SCSS expression context.
+/// Re-lexes signed numeric tokens that Sass treats as binary operators.
 ///
-/// If the current token is `CSS_NUMBER_LITERAL` or any dimension starting with `+` or `-`,
-/// this mutates parser state via `CssParser::re_lex(CssReLexContext::ScssExpression)`.
+/// `1 - 2` already has a `-` token. Re-lex `1-2`, but keep `1 -2` as a list.
 #[inline]
 fn re_lex_signed_numeric_as_scss_operator(p: &mut CssParser) {
     if !(p.at(CSS_NUMBER_LITERAL) || is_at_any_dimension(p)) {
         return;
     }
 
-    let text = p.cur_text();
-    if matches!(text.as_bytes().first(), Some(b'+' | b'-')) {
+    if should_re_lex_signed_numeric(p.cur_text(), p) {
         p.re_lex(CssReLexContext::ScssExpression);
+    }
+}
+
+#[inline]
+fn should_re_lex_signed_numeric(text: &str, p: &CssParser) -> bool {
+    match text.as_bytes().first().copied() {
+        Some(b'+') => true,
+        Some(b'-') => !p.has_preceding_whitespace() && !p.has_preceding_line_break(),
+        _ => false,
     }
 }
 

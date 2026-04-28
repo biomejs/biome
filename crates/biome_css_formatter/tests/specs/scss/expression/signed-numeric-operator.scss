@@ -26,3 +26,7 @@ $page-like-map:(
 (1 +2):foo,
 ($gap +1):bar,
 );
+
+$dimension-minus-left-space:10 -10px;
+$percentage-minus-left-space:10 -10%;
+$value-list-negative-dimension:0 auto -1px 0;

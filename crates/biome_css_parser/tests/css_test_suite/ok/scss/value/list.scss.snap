@@ -144,15 +144,12 @@ CssRoot {
                             ScssListExpressionElement {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
-                                        ScssBinaryExpression {
-                                            left: CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@109..111 "0" [] [Whitespace(" ")],
-                                            },
-                                            operator: MINUS@111..112 "-" [] [],
-                                            right: CssRegularDimension {
-                                                value_token: CSS_NUMBER_LITERAL@112..115 "0.5" [] [],
-                                                unit_token: IDENT@115..118 "em" [] [Whitespace(" ")],
-                                            },
+                                        CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@109..111 "0" [] [Whitespace(" ")],
+                                        },
+                                        CssRegularDimension {
+                                            value_token: CSS_NUMBER_LITERAL@111..115 "-0.5" [] [],
+                                            unit_token: IDENT@115..118 "em" [] [Whitespace(" ")],
                                         },
                                         ScssVariable {
                                             dollar_token: DOLLAR@118..119 "$" [] [],
@@ -331,14 +328,12 @@ CssRoot {
               2: SCSS_LIST_EXPRESSION_ELEMENT@109..129
                 0: SCSS_EXPRESSION@109..129
                   0: SCSS_EXPRESSION_ITEM_LIST@109..129
-                    0: SCSS_BINARY_EXPRESSION@109..118
-                      0: CSS_NUMBER@109..111
-                        0: CSS_NUMBER_LITERAL@109..111 "0" [] [Whitespace(" ")]
-                      1: MINUS@111..112 "-" [] []
-                      2: CSS_REGULAR_DIMENSION@112..118
-                        0: CSS_NUMBER_LITERAL@112..115 "0.5" [] []
-                        1: IDENT@115..118 "em" [] [Whitespace(" ")]
-                    1: SCSS_VARIABLE@118..129
+                    0: CSS_NUMBER@109..111
+                      0: CSS_NUMBER_LITERAL@109..111 "0" [] [Whitespace(" ")]
+                    1: CSS_REGULAR_DIMENSION@111..118
+                      0: CSS_NUMBER_LITERAL@111..115 "-0.5" [] []
+                      1: IDENT@115..118 "em" [] [Whitespace(" ")]
+                    2: SCSS_VARIABLE@118..129
                       0: DOLLAR@118..119 "$" [] []
                       1: CSS_IDENTIFIER@119..129
                         0: IDENT@119..129 "background" [] []

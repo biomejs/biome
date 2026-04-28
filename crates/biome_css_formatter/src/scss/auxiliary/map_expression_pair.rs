@@ -1,7 +1,8 @@
 use crate::prelude::*;
-use crate::utils::scss_expression::unwrap_single_expression_item;
+use crate::utils::scss_context::is_in_scss_include_arguments;
+use crate::utils::scss_expression::is_self_breaking_value;
 use crate::utils::scss_map::{is_in_scss_map_key, is_scss_map_value};
-use biome_css_syntax::{AnyScssExpression, ScssMapExpressionPair, ScssMapExpressionPairFields};
+use biome_css_syntax::{ScssMapExpressionPair, ScssMapExpressionPairFields};
 use biome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
@@ -14,16 +15,16 @@ impl FormatNodeRule<ScssMapExpressionPair> for FormatScssMapExpressionPair {
             value,
         } = node.as_fields();
 
-        let child_value_manages_its_own_breaking =
-            value.as_ref().is_ok_and(value_manages_its_own_breaking);
+        let child_value_is_self_breaking = value.as_ref().is_ok_and(is_self_breaking_value);
 
         // Pairs inside a map key may wrap after `:` so long keys do not push a
         // scalar value too far to the right.
-        let allow_scalar_value_wrap = is_in_scss_map_key(node);
+        let allow_scalar_value_wrap =
+            is_in_scss_map_key(node) || is_in_scss_include_arguments(node.syntax());
         let value_is_direct_map_value = value.as_ref().ok().is_some_and(is_scss_map_value);
 
         let formatted_value = format_with(|f| {
-            if child_value_manages_its_own_breaking {
+            if child_value_is_self_breaking {
                 // Keep `key: (` on one line and let the value formatter decide
                 // its own internal breaks.
                 write!(f, [space(), value.format()])
@@ -52,26 +53,4 @@ impl FormatNodeRule<ScssMapExpressionPair> for FormatScssMapExpressionPair {
             ])]
         )
     }
-}
-
-/// Returns `true` when the expression value can break internally without
-/// needing the enclosing `key: value` pair to also break after the colon.
-///
-/// Parenthesized, list, and map values own their internal layout, so the pair
-/// formatter keeps `key: (` on the same line and lets the child decide where to
-/// break.
-fn value_manages_its_own_breaking(value: &AnyScssExpression) -> bool {
-    matches!(
-        value,
-        AnyScssExpression::ScssListExpression(_)
-            | AnyScssExpression::ScssMapExpression(_)
-            | AnyScssExpression::ScssParenthesizedExpression(_)
-    ) || unwrap_single_expression_item(value).is_some_and(|item| {
-        matches!(
-            item,
-            biome_css_syntax::AnyScssExpressionItem::ScssListExpression(_)
-                | biome_css_syntax::AnyScssExpressionItem::ScssMapExpression(_)
-                | biome_css_syntax::AnyScssExpressionItem::ScssParenthesizedExpression(_)
-        )
-    })
 }

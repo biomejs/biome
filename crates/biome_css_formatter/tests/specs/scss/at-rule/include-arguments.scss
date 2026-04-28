@@ -1,0 +1,19 @@
+@include mix(
+$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg:1px,
+$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1:2px,
+$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2:10,
+2px 4px 6px
+);
+
+.card{
+@include mix(
+1px,
+2px,
+$arg2:10,
+2px 4px 6px
+);
+}
+
+@include single-item-list((a,));
+@include single-item-list($arg: (a,));
+@include nested-parenthesized($arg: ((a)));

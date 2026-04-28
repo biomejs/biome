@@ -1,6 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: css/scss/expression/signed-numeric-operator.scss
+info: scss/expression/signed-numeric-operator.scss
 ---
 
 # Input
@@ -35,6 +35,10 @@ $page-like-map:(
 ($gap +1):bar,
 );
 
+$dimension-minus-left-space:10 -10px;
+$percentage-minus-left-space:10 -10%;
+$value-list-negative-dimension:0 auto -1px 0;
+
 ```
 
 
@@ -47,7 +51,7 @@ $number-plus-right-space: 1 + 2;
 $number-plus-spaced: 1 + 2;
 
 $number-minus-tight: 3 - 2;
-$number-minus-left-space: 3 - 2;
+$number-minus-left-space: 3 -2;
 $number-minus-right-space: 3 - 2;
 $number-minus-spaced: 3 - 2;
 
@@ -69,5 +73,9 @@ $page-like-map: (
 	(1 + 2): foo,
 	($gap + 1): bar,
 );
+
+$dimension-minus-left-space: 10 -10px;
+$percentage-minus-left-space: 10 -10%;
+$value-list-negative-dimension: 0 auto -1px 0;
 
 ```
