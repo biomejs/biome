@@ -1391,7 +1391,7 @@ impl<'src> MarkdownLexer<'src> {
 
 #[inline]
 fn is_space_or_tab_byte(byte: u8) -> bool {
-    matches!(lookup_byte(byte), WHS) && !matches!(byte, b'\n' | b'\r')
+    byte == b' ' || byte == b'\t'
 }
 
 #[inline]
