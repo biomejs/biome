@@ -7,7 +7,7 @@
   "author": "Dani Guardiola",
   "type": "module",
   "dependencies": {
-    "tailwindcss": "^4.2.3"
+    "tailwindcss": "^4.2.4"
   },
   "scripts": {
     "build": "tsc",

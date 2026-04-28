@@ -923,6 +923,10 @@ fn is_nonunion_wider(annotated: &Type, inferred: &Type) -> bool {
         }
 
         match (&*ann, &*inf) {
+            (TypeData::ObjectKeyword, TypeData::InstanceOf(_)) => {
+                found_wider = true;
+            }
+
             (TypeData::InstanceOf(ann_inst), TypeData::InstanceOf(inf_inst)) => {
                 let same_base = match (ann.resolve(&ann_inst.ty), inf.resolve(&inf_inst.ty)) {
                     (Some(a), Some(b)) => types_match(&a, &b),

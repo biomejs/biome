@@ -1532,6 +1532,31 @@ impl TypeReferenceQualifier {
         self.path.is_identifier("Symbol")
     }
 
+    /// Checks whether this type qualifier references the `Date` type.
+    pub fn is_date(&self) -> bool {
+        self.path.is_identifier("Date")
+    }
+
+    /// Checks whether this type qualifier references the `Map` type.
+    pub fn is_map(&self) -> bool {
+        self.path.is_identifier("Map")
+    }
+
+    /// Checks whether this type qualifier references the `Set` type.
+    pub fn is_set(&self) -> bool {
+        self.path.is_identifier("Set")
+    }
+
+    /// Checks whether this type qualifier references the `WeakMap` type.
+    pub fn is_weak_map(&self) -> bool {
+        self.path.is_identifier("WeakMap")
+    }
+
+    /// Checks whether this type qualifier references the `Error` type.
+    pub fn is_error(&self) -> bool {
+        self.path.is_identifier("Error")
+    }
+
     /// Checks whether this type qualifier references the `Disposable` type.
     ///
     /// This method simply checks whether the reference is for a literal

@@ -18,8 +18,8 @@ use crate::syntax::svelte::{
     parse_svelte_spread_or_expression,
 };
 use crate::syntax::vue::{
-    parse_vue_directive, parse_vue_v_bind_shorthand_directive, parse_vue_v_on_shorthand_directive,
-    parse_vue_v_slot_shorthand_directive,
+    parse_vue_directive, parse_vue_v_bind_shorthand_directive, parse_vue_v_for_value,
+    parse_vue_v_on_shorthand_directive, parse_vue_v_slot_shorthand_directive,
 };
 use crate::token_source::{
     HtmlEmbeddedLanguage, HtmlLexContext, HtmlReLexContext, TextExpressionKind,
@@ -535,7 +535,7 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
             }
 
             if p.at(T![=]) {
-                parse_attribute_initializer(p).ok();
+                parse_attribute_initializer(p, AttrInitializerContext::Regular).ok();
             }
             Present(m.complete(p, HTML_ATTRIBUTE))
         }
@@ -616,11 +616,23 @@ fn parse_attribute_string_literal(p: &mut HtmlParser) -> ParsedSyntax {
     Present(m.complete(p, HTML_STRING))
 }
 
-fn parse_attribute_initializer(p: &mut HtmlParser) -> ParsedSyntax {
+fn parse_attribute_initializer(
+    p: &mut HtmlParser,
+    context: AttrInitializerContext,
+) -> ParsedSyntax {
     if !p.at(T![=]) {
         return Absent;
     }
     let m = p.start();
+
+    // For v-for, we need to switch to VueVForValue context immediately
+    // and parse the v-for value directly (not as an HtmlString first)
+    if context == AttrInitializerContext::VueVFor {
+        p.bump_with_context(T![=], HtmlLexContext::VueVForValue);
+        parse_vue_v_for_value(p).or_add_diagnostic(p, expected_vue_v_for_value);
+        return Present(m.complete(p, HTML_ATTRIBUTE_INITIALIZER_CLAUSE));
+    }
+
     p.bump_with_context(T![=], HtmlLexContext::AttributeValue);
     if p.at(T!['{']) {
         HtmlSyntaxFeatures::SingleTextExpressions
@@ -665,6 +677,13 @@ fn parse_attribute_initializer(p: &mut HtmlParser) -> ParsedSyntax {
         parse_attribute_string_literal(p).or_add_diagnostic(p, expected_initializer);
     }
     Present(m.complete(p, HTML_ATTRIBUTE_INITIALIZER_CLAUSE))
+}
+
+#[derive(Default, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum AttrInitializerContext {
+    #[default]
+    Regular,
+    VueVFor,
 }
 
 fn parse_cdata_section(p: &mut HtmlParser) -> ParsedSyntax {

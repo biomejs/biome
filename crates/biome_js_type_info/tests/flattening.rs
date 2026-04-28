@@ -300,6 +300,25 @@ fn infer_flattened_type_from_direct_promise_instance() {
 }
 
 #[test]
+fn infer_flattened_type_from_direct_builtin_class_instances() {
+    for (code, expected) in [
+        (r#"new Date()"#, "instanceof Date"),
+        (r#"new Map()"#, "instanceof Map"),
+        (r#"new Set()"#, "instanceof Set"),
+        (r#"new WeakMap()"#, "instanceof WeakMap"),
+        (r#"new Error()"#, "instanceof Error"),
+    ] {
+        let root = parse_ts(code);
+        let expr = get_expression(&root);
+        let mut resolver = GlobalsResolver::default();
+        let expr_ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
+        let expr_ty = expr_ty.inferred(&mut resolver);
+
+        assert_eq!(expr_ty.to_string(), expected);
+    }
+}
+
+#[test]
 fn infer_flattened_type_from_static_promise_function() {
     const CODE: &str = r#"Promise.resolve("value")"#;
 

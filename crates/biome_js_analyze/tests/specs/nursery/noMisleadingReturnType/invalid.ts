@@ -71,3 +71,9 @@ class AsyncMethod { async getStatus(b: boolean): Promise<string> { if (b) return
 function partialBooleanUnion(b: boolean): boolean | null { if (b) return true; return null; }
 
 const ternaryBoolean = (b: boolean): boolean | "skip" => b ? true : false;
+
+function dateObject(): object { return new Date(); }
+function mapObject(): object { return new Map(); }
+function setObject(): object { return new Set(); }
+function weakMapObject(): object { return new WeakMap(); }
+function errorObject(): object { return new Error(); }

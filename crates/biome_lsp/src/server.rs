@@ -147,6 +147,13 @@ impl LSPServer {
                             },
                             FileSystemWatcher {
                                 glob_pattern: GlobPattern::Relative(RelativePattern {
+                                    pattern: "**/.biome.{json,jsonc}".to_string(),
+                                    base_uri: OneOf::Left(folder.clone()),
+                                }),
+                                kind: Some(WatchKind::all()),
+                            },
+                            FileSystemWatcher {
+                                glob_pattern: GlobPattern::Relative(RelativePattern {
                                     pattern: ".editorconfig".to_string(),
                                     base_uri: OneOf::Left(folder.clone()),
                                 }),
@@ -179,6 +186,13 @@ impl LSPServer {
                         FileSystemWatcher {
                             glob_pattern: GlobPattern::Relative(RelativePattern {
                                 pattern: "**/biome.{json,jsonc}".to_string(),
+                                base_uri: OneOf::Right(base_uri.clone()),
+                            }),
+                            kind: Some(WatchKind::all()),
+                        },
+                        FileSystemWatcher {
+                            glob_pattern: GlobPattern::Relative(RelativePattern {
+                                pattern: "**/.biome.{json,jsonc}".to_string(),
                                 base_uri: OneOf::Right(base_uri),
                             }),
                             kind: Some(WatchKind::all()),
@@ -386,6 +400,20 @@ impl LanguageServer for LSPServer {
                         || watched_file.ends_with(".gitignore")
                         || watched_file.ends_with(".ignore"))
                 {
+                    info!(
+                        path = %watched_file.display(),
+                        "Received watched file change notification"
+                    );
+                    self.session
+                        .client
+                        .log_message(
+                            MessageType::INFO,
+                            format!(
+                                "Received watched file change notification: {}",
+                                watched_file.display()
+                            ),
+                        )
+                        .await;
                     self.session.load_extension_settings(None).await;
                     self.session.load_workspace_settings(true).await;
                     self.setup_capabilities().await;

@@ -123,9 +123,9 @@ hashbrown                    = { version = "0.15.5", default-features = false }
 ignore                       = "0.4.25"
 indexmap                     = { version = "2.13.1" }
 insta                        = "1.46.3"
-jiff                         = "0.2.23"
-libc                         = "0.2.185"
-mimalloc                     = "0.1.48"
+jiff                         = "0.2.24"
+libc                         = "0.2.186"
+mimalloc                     = "0.1.50"
 papaya                       = "0.2.4"
 path-absolutize              = { version = "3.1.1", features = ["use_unix_paths_on_wasm"], optional = false }
 phf                          = { version = "0.13.1", features = ["macros"] }
