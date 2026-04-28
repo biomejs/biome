@@ -279,6 +279,93 @@ fn custom_explanation_with_reason() {
 }
 
 #[test]
+fn suppress_only_respects_override_disabling_rule() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    // Config: noDebugger enabled at root, disabled for foo/**
+    let config_path = Utf8Path::new("biome.json");
+    fs.insert(
+        config_path.into(),
+        r#"{
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "noDebugger": "error"
+      }
+    }
+  },
+  "overrides": [{
+    "includes": ["foo/**"],
+    "linter": {
+      "rules": {
+        "suspicious": {
+          "noDebugger": "off"
+        }
+      }
+    }
+  }]
+}"#
+        .as_bytes(),
+    );
+
+    // File in normal path: should get suppression
+    let regular_path = Utf8Path::new("src/regular.js");
+    fs.insert(regular_path.into(), b"debugger;" as &[u8]);
+
+    // File in overridden path: should NOT get suppression (rule is off)
+    let overridden_path = Utf8Path::new("foo/overridden.js");
+    fs.insert(overridden_path.into(), b"debugger;" as &[u8]);
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--suppress",
+                "--only=lint/suspicious/noDebugger",
+                regular_path.as_str(),
+                overridden_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    // The overridden file should be unchanged (no suppression comment added)
+    let mut overridden_content = String::new();
+    fs.open(overridden_path)
+        .unwrap()
+        .read_to_string(&mut overridden_content)
+        .unwrap();
+    assert_eq!(
+        overridden_content, "debugger;",
+        "override-disabled file should not receive a suppression comment"
+    );
+
+    // The regular file should have the suppression comment
+    let mut regular_content = String::new();
+    fs.open(regular_path)
+        .unwrap()
+        .read_to_string(&mut regular_content)
+        .unwrap();
+    assert!(
+        regular_content.contains("biome-ignore"),
+        "regular file should receive a suppression comment"
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "suppress_only_respects_override_disabling_rule",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn unused_suppression_after_top_level() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
