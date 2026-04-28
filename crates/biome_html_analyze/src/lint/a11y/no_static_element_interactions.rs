@@ -1,4 +1,4 @@
-use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
@@ -53,6 +53,7 @@ declare_lint_rule! {
         version: "next",
         name: "noStaticElementInteractions",
         language: "html",
+        sources: &[RuleSource::EslintJsxA11y("no-static-element-interactions").inspired()],
         recommended: true,
         severity: Severity::Error,
     }
