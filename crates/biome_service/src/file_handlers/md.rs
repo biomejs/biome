@@ -237,7 +237,7 @@ impl ExtensionHandler for MarkdownFileHandler {
             debug: DebugCapabilities {
                 debug_syntax_tree: Some(debug_syntax_tree),
                 debug_control_flow: None,
-                debug_formatter_ir: None,
+                debug_formatter_ir: Some(debug_formatter_ir),
                 debug_type_info: None,
                 debug_registered_types: None,
                 debug_semantic_model: None,
@@ -291,6 +291,21 @@ fn debug_syntax_tree(_biome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeR
         cst: format!("{syntax:#?}"),
         ast: format!("{tree:#?}"),
     }
+}
+
+fn debug_formatter_ir(
+    biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
+    parse: AnyParse,
+    settings: &SettingsWithEditor,
+) -> Result<String, WorkspaceError> {
+    let options = settings.format_options::<MarkdownLanguage>(biome_path, document_file_source);
+
+    let tree = parse.syntax();
+    let formatted = format_node(options, &tree)?;
+
+    let root_element = formatted.into_document();
+    Ok(root_element.to_string())
 }
 
 pub(crate) fn format(
