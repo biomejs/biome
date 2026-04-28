@@ -51,7 +51,7 @@ declare_lint_rule! {
         version: "1.4.0",
         name: "noAriaHiddenOnFocusable",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("no-aria-hidden-on-focusable").same()],
+        sources: &[RuleSource::EslintJsxA11y("no-aria-hidden-on-focusable").same(), RuleSource::HtmlEslint("no-aria-hidden-on-focusable").inspired()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,

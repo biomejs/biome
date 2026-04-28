@@ -1,4 +1,6 @@
-use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+};
 use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -50,6 +52,7 @@ declare_lint_rule! {
         version: "next",
         name: "noNoninteractiveElementToInteractiveRole",
         language: "html",
+        sources: &[RuleSource::EslintJsxA11y("no-noninteractive-element-to-interactive-role").inspired()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,

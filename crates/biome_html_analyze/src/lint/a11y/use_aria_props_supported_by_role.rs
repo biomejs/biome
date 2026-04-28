@@ -1,5 +1,5 @@
 use crate::services::aria::Aria;
-use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_aria_metadata::{AriaAttribute, AriaRole};
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -37,6 +37,7 @@ declare_lint_rule! {
         version: "next",
         name: "useAriaPropsSupportedByRole",
         language: "html",
+        sources: &[RuleSource::EslintJsxA11y("role-supports-aria-props").inspired()],
         recommended: true,
         severity: Severity::Error,
     }

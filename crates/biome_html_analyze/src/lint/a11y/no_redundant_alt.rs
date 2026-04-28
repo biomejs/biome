@@ -42,7 +42,7 @@ declare_lint_rule! {
         version: "2.4.0",
         name: "noRedundantAlt",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("img-redundant-alt").same()],
+        sources: &[RuleSource::EslintJsxA11y("img-redundant-alt").inspired()],
         recommended: true,
         severity: Severity::Error,
     }
