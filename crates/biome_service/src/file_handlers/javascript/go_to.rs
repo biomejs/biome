@@ -101,7 +101,9 @@ fn is_under_import_clause(node: &JsSyntaxNode) -> bool {
     })
 }
 
-fn retrieve_reference_under_dynamic_import(identifier: &JsSyntaxNode) -> Option<DefinitionReference> {
+fn retrieve_reference_under_dynamic_import(
+    identifier: &JsSyntaxNode,
+) -> Option<DefinitionReference> {
     let declarator = identifier
         .ancestors()
         .skip(1)
