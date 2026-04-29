@@ -1,0 +1,94 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidUseMemo.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+
+import { useMemo } from "react";
+
+function MissingReturn() {
+    const value = useMemo(() => {}, []);
+
+    return <div>{value}</div>;
+}
+
+function UnusedMemo(props) {
+    useMemo(() => props.value, [props.value]);
+
+    return <div>{props.value}</div>;
+}
+
+function DynamicDependencies(props) {
+    const value = useMemo(
+        () => props.text.toUpperCase(),
+        props.enabled ? [props.text] : null,
+    );
+
+    return <div>{value}</div>;
+}
+
+```
+
+# Diagnostics
+```
+invalidUseMemo.jsx:6:27 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This useMemo callback does not return a value.
+  
+    5 │ function MissingReturn() {
+  > 6 │     const value = useMemo(() => {}, []);
+      │                           ^^^^^^^^
+    7 │ 
+    8 │     return <div>{value}</div>;
+  
+  i useMemo is for computing and caching a value, so its callback must return the value to memoize.
+  
+  i Return the computed value from the callback, or use useEffect if this code only performs a side effect.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUseMemo.jsx:12:5 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This useMemo result is unused.
+  
+    11 │ function UnusedMemo(props) {
+  > 12 │     useMemo(() => props.value, [props.value]);
+       │     ^^^^^^^
+    13 │ 
+    14 │     return <div>{props.value}</div>;
+  
+  i useMemo should compute a value that is used during render. An unused memo usually means the callback is being used for a side effect.
+  
+  i Use the memoized value, remove the useMemo call, or move side effects into useEffect.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUseMemo.jsx:20:9 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This hook dependency list is not an array literal.
+  
+    18 │     const value = useMemo(
+    19 │         () => props.text.toUpperCase(),
+  > 20 │         props.enabled ? [props.text] : null,
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │     );
+    22 │ 
+  
+  i A dynamic dependency list makes it unclear when React should reuse the previous value or compute a new one.
+  
+  i Pass an inline array literal as the dependency list, and move conditional logic outside of the dependency argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

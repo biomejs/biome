@@ -1,0 +1,72 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidHookOrder.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+
+import { useState } from "react";
+
+function Component(props) {
+    if (props.enabled) {
+        useState(0);
+    }
+
+    return <div />;
+}
+
+function EarlyReturn(props) {
+    if (props.disabled) {
+        return null;
+    }
+
+    useState(0);
+
+    return <div />;
+}
+
+```
+
+# Diagnostics
+```
+invalidHookOrder.jsx:7:9 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This hook is called conditionally.
+  
+    5 │ function Component(props) {
+    6 │     if (props.enabled) {
+  > 7 │         useState(0);
+      │         ^^^^^^^^
+    8 │     }
+    9 │ 
+  
+  i Hooks must be called in the same order on every render so React can preserve hook state correctly.
+  
+  i Move the hook call to the top level of the component or custom hook, before any conditional return or branch.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidHookOrder.jsx:18:5 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This hook is called conditionally.
+  
+    16 │     }
+    17 │ 
+  > 18 │     useState(0);
+       │     ^^^^^^^^
+    19 │ 
+    20 │     return <div />;
+  
+  i Hooks must be called in the same order on every render so React can preserve hook state correctly.
+  
+  i Move the hook call to the top level of the component or custom hook, before any conditional return or branch.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
