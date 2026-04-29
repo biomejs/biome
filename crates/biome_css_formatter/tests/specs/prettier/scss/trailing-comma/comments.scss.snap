@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
 info: scss/trailing-comma/comments.scss
 ---
 
@@ -42,16 +43,6 @@ $z-indexes: (
    );
  }
  
-@@ -13,8 +13,7 @@
- $z-indexes: (
-   header: 1035,
-   header: 1035,
--  overlay: 1202,
--  // TODO
-+  overlay: 1202, // TODO
-   header: 1035,
-   header: 1035,
- );
 ```
 
 # Output
@@ -72,7 +63,8 @@ $z-indexes: (
 $z-indexes: (
   header: 1035,
   header: 1035,
-  overlay: 1202, // TODO
+  overlay: 1202,
+  // TODO
   header: 1035,
   header: 1035,
 );

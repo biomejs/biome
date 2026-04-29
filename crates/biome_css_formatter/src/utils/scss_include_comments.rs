@@ -66,6 +66,7 @@ fn classify_map_trailing_separator_comment(
     comment: &DecoratedComment<CssLanguage>,
 ) -> IncludeCommentAttachment {
     let is_include_argument = is_in_scss_include_arguments(map_expression.syntax());
+    let is_separator_comment = is_trailing_separator_comment(preceding_pair.syntax(), comment);
 
     if is_include_argument
         && include_keyword_argument_before_argument_list(map_expression.syntax()).is_some()
@@ -75,7 +76,7 @@ fn classify_map_trailing_separator_comment(
         return IncludeCommentAttachment::Trailing(preceding_pair.syntax().clone());
     }
 
-    if is_trailing_comment_on_node(preceding_pair.syntax(), comment) {
+    if !is_separator_comment && is_trailing_comment_on_node(preceding_pair.syntax(), comment) {
         return IncludeCommentAttachment::Default;
     }
 
@@ -83,11 +84,24 @@ fn classify_map_trailing_separator_comment(
         return attachment_before_next_or_closing(comment, map_expression.syntax().clone());
     }
 
+    if is_separator_comment && comment.following_node().is_none() {
+        return if comment.kind().is_line() {
+            IncludeCommentAttachment::Default
+        } else {
+            attachment_before_closing_or_default(comment, map_expression.syntax().clone())
+        };
+    }
+
+    if comment.kind().is_line() && comment.text_position().is_end_of_line() && is_separator_comment
+    {
+        return attachment_before_next_or_closing(comment, map_expression.syntax().clone());
+    }
+
     if !comment.kind().is_inline() || comment.text_position().is_own_line() {
         return IncludeCommentAttachment::Default;
     }
 
-    attachment_before_closing_or_default(comment, map_expression.syntax().clone())
+    attachment_before_next_or_closing(comment, map_expression.syntax().clone())
 }
 
 /// Classifies comments after include-owned list separators.
@@ -257,4 +271,22 @@ fn is_trailing_comment_on_node(
             .pieces()
             .any(|piece| piece.is_comments() && piece.text_range() == comment_range)
     })
+}
+
+/// Returns true when the comment follows the separated-list comma.
+fn is_trailing_separator_comment(
+    node: &CssSyntaxNode,
+    comment: &DecoratedComment<CssLanguage>,
+) -> bool {
+    let comment_range = comment.piece().text_range();
+
+    node.last_token()
+        .and_then(|token| token.next_token())
+        .is_some_and(|token| {
+            token.kind() == CssSyntaxKind::COMMA
+                && token
+                    .trailing_trivia()
+                    .pieces()
+                    .any(|piece| piece.is_comments() && piece.text_range() == comment_range)
+        })
 }

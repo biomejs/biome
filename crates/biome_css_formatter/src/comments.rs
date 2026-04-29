@@ -114,13 +114,20 @@ impl CommentStyle for CssCommentStyle {
 fn handle_scss_map_trailing_separator_comment(
     comment: DecoratedComment<CssLanguage>,
 ) -> CommentPlacement<CssLanguage> {
-    let Some(map_expression) = ScssMapExpression::cast_ref(comment.enclosing_node()) else {
-        return CommentPlacement::Default(comment);
-    };
-
     let Some(preceding_pair) = comment
         .preceding_node()
         .and_then(ScssMapExpressionPair::cast_ref)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let Some(map_expression) =
+        ScssMapExpression::cast_ref(comment.enclosing_node()).or_else(|| {
+            preceding_pair
+                .syntax()
+                .ancestors()
+                .find_map(ScssMapExpression::cast)
+        })
     else {
         return CommentPlacement::Default(comment);
     };
