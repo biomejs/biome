@@ -4,7 +4,7 @@ use crate::utils::scss_expression::{
     include_keyword_argument_before_argument_list, unwrap_single_expression_item,
 };
 use crate::utils::scss_map::{ScssMapOuterParenthesizedValuePayloadKind, scss_map_context};
-use crate::utils::scss_separator_comments::ScssSeparatorComments;
+use crate::utils::scss_separator_comments::FormatScssSeparatorComments;
 use biome_css_syntax::{ScssParenthesizedExpression, ScssParenthesizedExpressionFields};
 use biome_formatter::{format_args, write};
 
@@ -17,7 +17,7 @@ impl FormatNodeRule<ScssParenthesizedExpression> for FormatScssParenthesizedExpr
         node: &ScssParenthesizedExpression,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        ScssSeparatorComments::around(node.syntax()).fmt_node(f, |f| self.fmt_fields(node, f))
+        self.fmt_node_with_scss_separator_comments(node, f)
     }
 
     fn fmt_fields(
@@ -61,7 +61,7 @@ impl FormatNodeRule<ScssParenthesizedExpression> for FormatScssParenthesizedExpr
         node: &ScssParenthesizedExpression,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        ScssSeparatorComments::around(node.syntax()).fmt_leading_comments(f)
+        self.fmt_leading_scss_separator_comments(node, f)
     }
 }
 

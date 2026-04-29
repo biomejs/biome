@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::utils::scss_separator_comments::ScssSeparatorComments;
+use crate::utils::scss_separator_comments::FormatScssSeparatorComments;
 use biome_css_syntax::{ScssExpression, ScssExpressionFields};
 use biome_formatter::{FormatResult, write};
 
@@ -7,7 +7,7 @@ use biome_formatter::{FormatResult, write};
 pub(crate) struct FormatScssExpression;
 impl FormatNodeRule<ScssExpression> for FormatScssExpression {
     fn fmt_node(&self, node: &ScssExpression, f: &mut CssFormatter) -> FormatResult<()> {
-        ScssSeparatorComments::around(node.syntax()).fmt_node(f, |f| self.fmt_fields(node, f))
+        self.fmt_node_with_scss_separator_comments(node, f)
     }
 
     fn fmt_fields(&self, node: &ScssExpression, f: &mut CssFormatter) -> FormatResult<()> {
@@ -20,6 +20,6 @@ impl FormatNodeRule<ScssExpression> for FormatScssExpression {
         node: &ScssExpression,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        ScssSeparatorComments::around(node.syntax()).fmt_leading_comments(f)
+        self.fmt_leading_scss_separator_comments(node, f)
     }
 }

@@ -1,13 +1,13 @@
 use crate::prelude::*;
 use crate::utils::scss_keyword_argument_layout::ScssKeywordArgumentLayout;
-use crate::utils::scss_separator_comments::ScssSeparatorComments;
+use crate::utils::scss_separator_comments::FormatScssSeparatorComments;
 use biome_css_syntax::ScssKeywordArgument;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatScssKeywordArgument;
 impl FormatNodeRule<ScssKeywordArgument> for FormatScssKeywordArgument {
     fn fmt_node(&self, node: &ScssKeywordArgument, f: &mut CssFormatter) -> FormatResult<()> {
-        ScssSeparatorComments::around(node.syntax()).fmt_node(f, |f| self.fmt_fields(node, f))
+        self.fmt_node_with_scss_separator_comments(node, f)
     }
 
     fn fmt_fields(&self, node: &ScssKeywordArgument, f: &mut CssFormatter) -> FormatResult<()> {
@@ -19,7 +19,7 @@ impl FormatNodeRule<ScssKeywordArgument> for FormatScssKeywordArgument {
         node: &ScssKeywordArgument,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        ScssSeparatorComments::around(node.syntax()).fmt_leading_comments(f)
+        self.fmt_leading_scss_separator_comments(node, f)
     }
 
     fn fmt_dangling_comments(

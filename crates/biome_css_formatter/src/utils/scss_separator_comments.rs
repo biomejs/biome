@@ -3,15 +3,44 @@ use crate::prelude::*;
 use crate::utils::comment_trivia::has_same_group_leading_block_comment;
 use crate::utils::scss_context::is_in_scss_include_arguments;
 use crate::utils::scss_expression::is_self_breaking_value;
-use biome_css_syntax::{AnyScssExpression, CssSyntaxNode, ScssListExpressionElement};
+use biome_css_syntax::{AnyScssExpression, CssLanguage, CssSyntaxNode, ScssListExpressionElement};
 use biome_formatter::comments::CommentKind;
 use biome_formatter::{FormatRefWithRule, format_args, write};
 use biome_rowan::AstNode;
 
 type SeparatorCommentBody<'a> = dyn Fn(&mut CssFormatter) -> FormatResult<()> + 'a;
 
+/// Shared opt-in for nodes that receive include separator comments.
+pub(crate) trait FormatScssSeparatorComments<N>: FormatNodeRule<N>
+where
+    N: AstNode<Language = CssLanguage>,
+{
+    fn fmt_node_with_scss_separator_comments(
+        &self,
+        node: &N,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        ScssSeparatorComments::around(node.syntax()).fmt_node(f, |f| self.fmt_fields(node, f))
+    }
+
+    fn fmt_leading_scss_separator_comments(
+        &self,
+        node: &N,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        ScssSeparatorComments::around(node.syntax()).fmt_leading_comments(f)
+    }
+}
+
+impl<N, T> FormatScssSeparatorComments<N> for T
+where
+    N: AstNode<Language = CssLanguage>,
+    T: FormatNodeRule<N>,
+{
+}
+
 /// Wrapper for nodes that receive SCSS separator-path comments.
-pub(crate) struct ScssSeparatorComments<'a> {
+struct ScssSeparatorComments<'a> {
     node: &'a CssSyntaxNode,
     is_active: bool,
 }

@@ -1,12 +1,12 @@
 use crate::prelude::*;
-use crate::utils::scss_separator_comments::ScssSeparatorComments;
+use crate::utils::scss_separator_comments::FormatScssSeparatorComments;
 use biome_css_syntax::{ScssListExpressionElement, ScssListExpressionElementFields};
 use biome_formatter::write;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatScssListExpressionElement;
 impl FormatNodeRule<ScssListExpressionElement> for FormatScssListExpressionElement {
     fn fmt_node(&self, node: &ScssListExpressionElement, f: &mut CssFormatter) -> FormatResult<()> {
-        ScssSeparatorComments::around(node.syntax()).fmt_node(f, |f| self.fmt_fields(node, f))
+        self.fmt_node_with_scss_separator_comments(node, f)
     }
 
     fn fmt_fields(
@@ -24,6 +24,6 @@ impl FormatNodeRule<ScssListExpressionElement> for FormatScssListExpressionEleme
         node: &ScssListExpressionElement,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        ScssSeparatorComments::around(node.syntax()).fmt_leading_comments(f)
+        self.fmt_leading_scss_separator_comments(node, f)
     }
 }

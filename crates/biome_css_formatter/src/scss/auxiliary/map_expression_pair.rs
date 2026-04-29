@@ -2,7 +2,7 @@ use crate::prelude::*;
 use crate::utils::scss_context::is_in_scss_include_arguments;
 use crate::utils::scss_expression::is_self_breaking_value;
 use crate::utils::scss_map::{is_in_scss_map_key, is_scss_map_value};
-use crate::utils::scss_separator_comments::ScssSeparatorComments;
+use crate::utils::scss_separator_comments::FormatScssSeparatorComments;
 use biome_css_syntax::{ScssMapExpressionPair, ScssMapExpressionPairFields};
 use biome_formatter::{format_args, write};
 
@@ -10,7 +10,7 @@ use biome_formatter::{format_args, write};
 pub(crate) struct FormatScssMapExpressionPair;
 impl FormatNodeRule<ScssMapExpressionPair> for FormatScssMapExpressionPair {
     fn fmt_node(&self, node: &ScssMapExpressionPair, f: &mut CssFormatter) -> FormatResult<()> {
-        ScssSeparatorComments::around(node.syntax()).fmt_node(f, |f| self.fmt_fields(node, f))
+        self.fmt_node_with_scss_separator_comments(node, f)
     }
 
     fn fmt_fields(&self, node: &ScssMapExpressionPair, f: &mut CssFormatter) -> FormatResult<()> {
@@ -64,6 +64,6 @@ impl FormatNodeRule<ScssMapExpressionPair> for FormatScssMapExpressionPair {
         node: &ScssMapExpressionPair,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        ScssSeparatorComments::around(node.syntax()).fmt_leading_comments(f)
+        self.fmt_leading_scss_separator_comments(node, f)
     }
 }

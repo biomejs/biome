@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::utils::scss_list_layout::ScssListLayout;
-use crate::utils::scss_separator_comments::ScssSeparatorComments;
+use crate::utils::scss_separator_comments::FormatScssSeparatorComments;
 use biome_css_syntax::ScssListExpression;
 use biome_formatter::write;
 
@@ -9,7 +9,7 @@ pub(crate) struct FormatScssListExpression;
 
 impl FormatNodeRule<ScssListExpression> for FormatScssListExpression {
     fn fmt_node(&self, node: &ScssListExpression, f: &mut CssFormatter) -> FormatResult<()> {
-        ScssSeparatorComments::around(node.syntax()).fmt_node(f, |f| self.fmt_fields(node, f))
+        self.fmt_node_with_scss_separator_comments(node, f)
     }
 
     fn fmt_fields(&self, node: &ScssListExpression, f: &mut CssFormatter) -> FormatResult<()> {
@@ -21,7 +21,7 @@ impl FormatNodeRule<ScssListExpression> for FormatScssListExpression {
         node: &ScssListExpression,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        ScssSeparatorComments::around(node.syntax()).fmt_leading_comments(f)
+        self.fmt_leading_scss_separator_comments(node, f)
     }
 
     fn fmt_dangling_comments(
