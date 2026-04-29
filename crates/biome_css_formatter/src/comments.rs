@@ -7,8 +7,9 @@ use crate::utils::scss_include_comments::{
 };
 use biome_css_syntax::{
     AnyCssDeclarationName, AnyCssRoot, CssComplexSelector, CssFunction, CssGenericProperty,
-    CssIdentifier, CssLanguage, CssSyntaxKind, ScssExpressionItemList, ScssListExpression,
-    ScssListExpressionElement, ScssMapExpression, ScssMapExpressionPair, TextLen, TextSize,
+    CssIdentifier, CssLanguage, CssSyntaxKind, ScssAtRootAtRule, ScssAtRootSelector,
+    ScssExpressionItemList, ScssListExpression, ScssListExpressionElement, ScssMapExpression,
+    ScssMapExpressionPair, T, TextLen, TextSize,
 };
 use biome_diagnostics::category;
 use biome_formatter::comments::{
@@ -108,6 +109,7 @@ impl CommentStyle for CssCommentStyle {
             .or_else(place_separated_list_comment)
             .or_else(handle_scss_list_trailing_separator_comment)
             .or_else(handle_scss_expression_item_trailing_line_comment)
+            .or_else(handle_scss_at_root_selector_comment)
             .or_else(handle_function_comment)
             .or_else(handle_generic_property_comment)
             .or_else(handle_declaration_name_comment)
@@ -189,6 +191,36 @@ fn handle_scss_expression_item_trailing_line_comment(
         CommentPlacement::trailing(preceding_node.clone(), comment)
     } else {
         CommentPlacement::Default(comment)
+    }
+}
+
+fn handle_scss_at_root_selector_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    // Keep selector comments before `{`, matching Prettier's `@at-root` output.
+    if !comment.kind().is_line()
+        || !comment.text_position().is_own_line()
+        || !comment
+            .following_token()
+            .is_some_and(|token| token.kind() == T!['{'])
+    {
+        return CommentPlacement::Default(comment);
+    }
+
+    let Some(selector) = comment
+        .preceding_node()
+        .and_then(ScssAtRootSelector::cast_ref)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let Some(at_root) = selector.syntax().parent().and_then(ScssAtRootAtRule::cast) else {
+        return CommentPlacement::Default(comment);
+    };
+
+    match at_root.block() {
+        Ok(block) => CommentPlacement::leading(block.into_syntax(), comment),
+        Err(_) => CommentPlacement::Default(comment),
     }
 }
 
