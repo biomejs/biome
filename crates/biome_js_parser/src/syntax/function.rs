@@ -902,11 +902,15 @@ fn is_arrow_function_with_single_parameter(p: &mut JsParser) -> bool {
     }
 }
 
-// Returns true when the paren group starting at the current position is immediately
-// followed by `=>`, meaning it must be nested arrow-function parameters rather than
-// a parenthesised expression.  The check is purely token-level — we count `(`/`)`
-// depth so that parens inside type annotations (e.g. `(a: () => T) =>`) are handled
-// correctly.
+// True if the `(...)` group at the current position is immediately followed by `=>`.
+//
+// Used to tell destructured arrow params apart from a parenthesized expression:
+//   ({ a, b }) =>   // followed by `=>` — these are params
+//   ({ key: val })  // no `=>` after `)` — this is an expression
+//
+// Tracks how many `(` are open at once so the first `)` that closes the outermost
+// paren is the one checked for `=>`. Without this, `(a: () => T) =>` would stop
+// at the inner `)` and return false.
 fn is_paren_group_followed_by_fat_arrow(p: &mut JsParser) -> bool {
     debug_assert!(p.at(T!['(']));
     let mut depth: u32 = 0;
@@ -947,17 +951,19 @@ fn parse_arrow_body(
         parse_function_body(p, flags)
     } else {
         p.with_state(EnterFunction(flags), |p| {
-            // Always clear in_conditional_consequent inside an arrow body: we are no
-            // longer in ternary-consequent position, so deeply nested expressions
-            // should parse normally.
+            // Clear in_conditional_consequent for the body. We are past the top of the
+            // ternary consequent now, so nested expressions don't need this guard.
             //
-            // However, when the body starts with `({` or `([` in a ternary consequent
-            // and there is no `=>` after the closing `)`, speculative arrow parsing
-            // would produce a false positive in TypeScript mode (the ternary `:` is
-            // consumed as a return-type annotation and the alternate's `=>` is taken
-            // as the arrow).  In that situation we suppress arrow parsing.  When `=>`
-            // does follow the `)`, the body really is a nested arrow function and we
-            // allow it through.
+            // Special case: when the body starts with `({` or `([`, it is ambiguous:
+            //
+            //   cond ? x => ({ a, b }) => body : alt  // `({a,b})` is a destructured parameter
+            //   cond ? x => ({ key: val }) : alt      // `({key:val})` is an object expression
+            //
+            // In TypeScript mode, the speculative arrow parser can misread the ternary `:`
+            // as a return-type annotation and treat the alternate's `=>` as the arrow. To
+            // avoid this, we block speculative arrow parsing unless `=>` immediately follows
+            // the `)`. If `=>` is there, the `({` or `([` is a destructured parameter and
+            // we allow it.
             let body_context = context.and_in_conditional_consequent(false);
             if context.is_in_conditional_consequent()
                 && matches!(p.cur(), T!['('])
