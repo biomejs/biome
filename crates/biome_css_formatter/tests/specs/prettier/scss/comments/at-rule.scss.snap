@@ -41,12 +41,12 @@ IR differences:
  [
    "@at-root ",
 -  group(expand: propagated, [
--    group([indent([group([".foo"])])]),
+-    group([group([".foo"])]),
 -    line_suffix([" // .bar"]),
 -    expand_parent
 -  ]),
 -  " {",
-+  group([group([indent([group([".foo"])])])]),
++  group([group([group([".foo"])])]),
 +  " // .bar",
 +  hard_line_break,
 +  "{",

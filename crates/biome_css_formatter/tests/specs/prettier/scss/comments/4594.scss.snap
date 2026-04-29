@@ -52,13 +52,7 @@ $my-map: (
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,27 +1,25 @@
- .foo,
- // Comment
--.bar {
-+  .bar {
-   // Comment
-   color: red; // Comment
+@@ -6,22 +6,20 @@
  }
  
  $my-list:
@@ -106,7 +100,7 @@ $my-map: (
 ```scss
 .foo,
 // Comment
-  .bar {
+.bar {
   // Comment
   color: red; // Comment
 }
