@@ -1,8 +1,7 @@
 use crate::prelude::*;
 use crate::utils::comment_trivia::has_inline_trailing_comment;
 use crate::utils::scss_closing_comments::{
-    ScssIncludeClosingCommentSpacing, format_include_closing_comments,
-    owns_include_closing_comments,
+    ClosingCommentSpacing, format_include_closing_comments, owns_include_closing_comments,
 };
 use crate::utils::scss_context::is_in_scss_include_arguments;
 use crate::utils::scss_expression::{
@@ -62,7 +61,7 @@ impl<'a> ScssListLayout<'a> {
         let trailing_comma = format_with(|f| list_layout.write_trailing_comma(group_id, f));
         let closing_comments = format_include_closing_comments(
             self.node.syntax(),
-            ScssIncludeClosingCommentSpacing::SoftLineBreakOrSpace,
+            ClosingCommentSpacing::SoftLineBreak,
         );
 
         if scss_map_context(self.node)

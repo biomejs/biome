@@ -8,11 +8,11 @@ use biome_rowan::AstNode;
 ///
 /// Example: `@include mix((a, b) /* end */)`
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
-pub(crate) enum ScssIncludeClosingCommentSpacing {
-    /// Uses a plain space unless a line comment forces a line break.
-    AdaptiveSpace,
-    /// Always uses `soft_line_break_or_space()` before the closing comment.
-    SoftLineBreakOrSpace,
+pub(crate) enum ClosingCommentSpacing {
+    /// Space before block comments, line break before line comments.
+    Adaptive,
+    /// Let the group choose a space or line break before the comment.
+    SoftLineBreak,
 }
 
 /// Returns `true` when an include argument node owns comments before `)`.
@@ -32,7 +32,7 @@ pub(crate) fn owns_map_closing_comments(node: &ScssMapExpression, f: &CssFormatt
 /// Writes include-owned comments before the closing `)`.
 pub(crate) fn write_include_closing_comments(
     node: &CssSyntaxNode,
-    spacing: ScssIncludeClosingCommentSpacing,
+    spacing: ClosingCommentSpacing,
     f: &mut CssFormatter,
 ) -> FormatResult<()> {
     if !owns_include_closing_comments(node, f) {
@@ -45,7 +45,7 @@ pub(crate) fn write_include_closing_comments(
 /// Formats include-owned closing comments for list helpers.
 pub(crate) fn format_include_closing_comments(
     node: &CssSyntaxNode,
-    spacing: ScssIncludeClosingCommentSpacing,
+    spacing: ClosingCommentSpacing,
 ) -> impl Format<CssFormatContext> + '_ {
     format_with(move |f| write_include_closing_comments(node, spacing, f))
 }
@@ -53,34 +53,38 @@ pub(crate) fn format_include_closing_comments(
 /// Writes comments that stay on the include path before the closing `)`.
 fn write_closing_comments(
     node: &CssSyntaxNode,
-    spacing: ScssIncludeClosingCommentSpacing,
+    spacing: ClosingCommentSpacing,
     f: &mut CssFormatter,
 ) -> FormatResult<()> {
-    let has_line_closing_comment = f
-        .comments()
-        .dangling_comments(node)
-        .iter()
-        .any(|comment| comment.kind().is_line());
+    let has_line_closing_comment = has_line_closing_comment(node, f);
 
     write!(
         f,
         [
-            format_with(|f| match spacing {
-                ScssIncludeClosingCommentSpacing::AdaptiveSpace => {
-                    if has_line_closing_comment {
-                        write!(f, [soft_line_break_or_space()])
-                    } else {
-                        write!(f, [space()])
-                    }
-                }
-                ScssIncludeClosingCommentSpacing::SoftLineBreakOrSpace => {
-                    write!(f, [soft_line_break_or_space()])
-                }
-            }),
+            format_space_before_closing_comment(spacing, has_line_closing_comment),
             format_dangling_comments(node),
             has_line_closing_comment.then_some(hard_line_break())
         ]
     )
+}
+
+fn format_space_before_closing_comment(
+    spacing: ClosingCommentSpacing,
+    has_line_closing_comment: bool,
+) -> impl Format<CssFormatContext> {
+    format_with(move |f| match spacing {
+        ClosingCommentSpacing::Adaptive if !has_line_closing_comment => write!(f, [space()]),
+        ClosingCommentSpacing::Adaptive | ClosingCommentSpacing::SoftLineBreak => {
+            write!(f, [soft_line_break_or_space()])
+        }
+    })
+}
+
+fn has_line_closing_comment(node: &CssSyntaxNode, f: &CssFormatter) -> bool {
+    f.comments()
+        .dangling_comments(node)
+        .iter()
+        .any(|comment| comment.kind().is_line())
 }
 
 /// Returns `true` for inline comments after the last map pair.

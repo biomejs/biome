@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::utils::scss_closing_comments::{
-    ScssIncludeClosingCommentSpacing, owns_include_closing_comments, write_include_closing_comments,
+    ClosingCommentSpacing, owns_include_closing_comments, write_include_closing_comments,
 };
 use biome_css_syntax::{ScssIncludeArgumentList, ScssIncludeArgumentListFields};
 use biome_formatter::{format_args, write};
@@ -16,11 +16,7 @@ impl FormatNodeRule<ScssIncludeArgumentList> for FormatScssIncludeArgumentList {
             r_paren_token,
         } = node.as_fields();
         let closing_comments = format_with(|f| {
-            write_include_closing_comments(
-                node.syntax(),
-                ScssIncludeClosingCommentSpacing::AdaptiveSpace,
-                f,
-            )
+            write_include_closing_comments(node.syntax(), ClosingCommentSpacing::Adaptive, f)
         });
 
         write!(

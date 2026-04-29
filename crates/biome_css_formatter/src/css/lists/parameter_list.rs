@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::utils::scss_closing_comments::{
-    ScssIncludeClosingCommentSpacing, owns_include_closing_comments, write_include_closing_comments,
+    ClosingCommentSpacing, owns_include_closing_comments, write_include_closing_comments,
 };
 use crate::utils::scss_expression::scss_keyword_argument_from_css_expression;
 use crate::utils::scss_separated_list::trailing_separator_for_node;
@@ -43,11 +43,7 @@ impl FormatRule<CssParameterList> for FormatCssParameterList {
                 ]
             )
         } else {
-            write_include_closing_comments(
-                node.syntax(),
-                ScssIncludeClosingCommentSpacing::AdaptiveSpace,
-                f,
-            )
+            write_include_closing_comments(node.syntax(), ClosingCommentSpacing::Adaptive, f)
         }
     }
 }
