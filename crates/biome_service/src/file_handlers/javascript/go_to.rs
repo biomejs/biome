@@ -159,14 +159,10 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
             resolve_import_definition(source, params.path.as_path(), params.module_graph)
         }
         DefinitionReference::LocalEmbedded { range, .. } => {
-            if let Some(offset) = params.offset {
-                Some(GoToDefinitionResult {
-                    path: BiomePath::new(params.path.as_path().to_string()),
-                    range: range.add(offset),
-                })
-            } else {
-                None
-            }
+            params.offset.map(|offset| GoToDefinitionResult {
+                path: BiomePath::new(params.path.as_path().to_string()),
+                range: range.add(offset),
+            })
         }
         // CssClass is routed to the CSS handler by the orchestrator
         _ => None,

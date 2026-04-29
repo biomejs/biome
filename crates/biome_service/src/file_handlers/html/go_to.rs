@@ -89,7 +89,7 @@ pub(crate) fn resolve_binding_html(params: ResolveBindingParams) -> Option<Defin
                 embedded_bindings.get_binding_by_name(element_value.text_trimmed())
         {
             return Some(DefinitionReference::LocalEmbedded {
-                range: binding.range().clone(),
+                range: *binding.range(),
                 to_language: LocalEmbeddedLanguage::Js,
             });
         }
@@ -116,7 +116,6 @@ fn resolve_import_definition(
     current_path: &Utf8Path,
     module_graph: &ModuleGraph,
 ) -> Option<GoToDefinitionResult> {
-    dbg!("here??");
     let module_info = module_graph.html_module_info_for_path(current_path)?;
     let html_import = module_info
         .static_import_paths

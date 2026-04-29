@@ -1307,7 +1307,7 @@ pub enum DefinitionReference {
 
 impl DefinitionReference {
     pub(crate) fn is_embedded(&self) -> bool {
-        matches!(self, DefinitionReference::LocalEmbedded { .. })
+        matches!(self, Self::LocalEmbedded { .. })
     }
 }
 

@@ -2801,7 +2801,7 @@ impl Workspace for WorkspaceServer {
                 });
 
                 match result {
-                    None => continue,
+                    None => {}
                     Some(result) => return Ok(Some(result)),
                 }
             }
