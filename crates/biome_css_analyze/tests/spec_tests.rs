@@ -12,9 +12,9 @@ use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::AstNode;
 use biome_test_utils::{
     CheckActionType, analyze_with_workspace, assert_diagnostics_expectation_comment,
-    assert_errors_are_absent, code_fix_to_string, create_analyzer_options,
-    create_parser_options, diagnostic_to_string, has_bogus_nodes_or_empty_slots,
-    parse_test_path, register_leak_checker, scripts_from_json, write_analyzer_snapshot,
+    assert_errors_are_absent, code_fix_to_string, create_analyzer_options, create_parser_options,
+    diagnostic_to_string, has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker,
+    scripts_from_json, write_analyzer_snapshot,
 };
 use camino::Utf8Path;
 use std::ops::Deref;
