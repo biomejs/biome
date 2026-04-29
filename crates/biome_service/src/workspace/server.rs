@@ -816,7 +816,7 @@ impl WorkspaceServer {
         let capabilities = self.features.get_capabilities(language);
 
         // Resolve the correct capabilities for the definition side based on
-        // the definition reference kind (e.g., CssClass → CSS handler).
+        // the definition reference kind (e.g., CssClass -> CSS handler, Local -> Same handler).
         let resolve_capabilities =
             |def_ref: &Option<DefinitionReference>, default_caps: Capabilities| -> Capabilities {
                 match def_ref {
@@ -824,7 +824,9 @@ impl WorkspaceServer {
                     Some(def_ref) => match def_ref {
                         DefinitionReference::Local { .. }
                         | DefinitionReference::Import { .. }
+                        | DefinitionReference::HtmlComponent { .. }
                         | DefinitionReference::DynamicImport { .. } => default_caps,
+                        // Html components are defined in JavaScript part of the file, so we need a JS handler.
                         DefinitionReference::CssClass { .. } => self
                             .features
                             .get_capabilities(DocumentFileSource::Css(CssFileSource::css())),
@@ -832,14 +834,14 @@ impl WorkspaceServer {
                 }
             };
 
-        if let Some(resolve) = capabilities.editors.resolve_binding {
-            let result = resolve(ResolveBindingParams {
+        if let Some(resolve_binding) = capabilities.editors.resolve_binding {
+            let result = resolve_binding(ResolveBindingParams {
                 parse: parse.clone(),
                 cursor_offset,
                 services,
             });
-            let caps = resolve_capabilities(&result, capabilities);
-            return Ok((result, path.clone(), caps));
+            let capabilities = resolve_capabilities(&result, capabilities);
+            return Ok((result, path.clone(), capabilities));
         }
 
         // Check if cursor falls within an embedded snippet

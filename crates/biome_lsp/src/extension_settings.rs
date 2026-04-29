@@ -32,7 +32,7 @@ pub struct WorkspaceSettings {
     /// Inline configuration, which gets merged before applying querying instructions via workspace
     pub inline_config: Option<Configuration>,
 
-    /// Enables the "go-to" features, by-passing the use of linting or assist
+    /// Enables the "go-to" features, by-passing the use of linting or assist. Enabled by default.
     pub go_to_definition: Option<bool>,
 }
 
@@ -83,6 +83,6 @@ impl ExtensionSettings {
     }
 
     pub(crate) fn goto_definition_enabled(&self) -> bool {
-        self.settings.go_to_definition.unwrap_or_default()
+        self.settings.go_to_definition.unwrap_or(true)
     }
 }

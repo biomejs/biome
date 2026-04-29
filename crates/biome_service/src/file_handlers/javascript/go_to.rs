@@ -154,6 +154,9 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
             params.path.as_path(),
             params.module_graph,
         ),
+        DefinitionReference::HtmlComponent { source } => {
+            resolve_import_definition(source, params.path.as_path(), params.module_graph)
+        }
         // CssClass is routed to the CSS handler by the orchestrator
         _ => None,
     }

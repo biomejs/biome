@@ -1280,12 +1280,19 @@ pub struct GoToDefinitionResult {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum DefinitionReference {
+    /// A component defined in an HTML
+    HtmlComponent {
+        /// The path where the component is imported from. In `import { MyComponent } from "./my-component.html"`
+        /// the source will be `./my-component.html`
+        source: String,
+    },
     /// The binding is in the same file at this range.
     Local { range: TextRange },
     /// Imported symbol — needs module graph resolution.
     Import { local_name: String },
     /// A CSS class name from a JSX className/class attribute or a CSS-in-JS snippet (not yet supported)
     CssClass { class_name: String },
+    /// Imported via dynamic import
     DynamicImport {
         local_name: String,
         specifier: String,

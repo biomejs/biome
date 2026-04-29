@@ -997,7 +997,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
     ));
 
     if let Some(embedded_bindings) = params.document_services.embedded_bindings() {
-        services.set_embedded_bindings(embedded_bindings.bindings)
+        services.set_embedded_bindings(embedded_bindings.bindings_without_source())
     }
 
     if let Some(value_refs) = params.document_services.embedded_value_references() {
@@ -1192,7 +1192,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             ));
 
             if let Some(embedded_bindings) = params.document_services.embedded_bindings() {
-                services.set_embedded_bindings(embedded_bindings.bindings)
+                services.set_embedded_bindings(embedded_bindings.bindings_without_source())
             }
 
             if let Some(value_refs) = params.document_services.embedded_value_references() {
@@ -1258,7 +1258,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         ));
 
         if let Some(embedded_bindings) = params.document_services.embedded_bindings() {
-            services.set_embedded_bindings(embedded_bindings.bindings)
+            services.set_embedded_bindings(embedded_bindings.bindings_without_source())
         }
 
         if let Some(value_refs) = params.document_services.embedded_value_references() {
@@ -1313,7 +1313,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         ));
 
         if let Some(embedded_bindings) = params.document_services.embedded_bindings() {
-            services.set_embedded_bindings(embedded_bindings.bindings)
+            services.set_embedded_bindings(embedded_bindings.bindings_without_source())
         }
 
         if let Some(value_refs) = params.document_services.embedded_value_references() {

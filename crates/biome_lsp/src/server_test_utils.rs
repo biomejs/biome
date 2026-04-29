@@ -154,9 +154,13 @@ impl Server {
     }
 
     /// Basic implementation of the `initialize` request for tests
-    // The `root_path` field is deprecated, but we still need to specify it
-    #[expect(deprecated)]
     pub(crate) async fn initialize(&mut self) -> Result<()> {
+        self.initialize_with_root(uri!("")).await
+    }
+
+    /// Like [`Self::initialize`] but sets a custom root URI.
+    #[expect(deprecated)]
+    pub(crate) async fn initialize_with_root(&mut self, root_uri: Uri) -> Result<()> {
         let _res: InitializeResult = self
             .request(
                 "initialize",
@@ -164,7 +168,7 @@ impl Server {
                 InitializeParams {
                     process_id: None,
                     root_path: None,
-                    root_uri: Some(uri!("")),
+                    root_uri: Some(root_uri),
                     initialization_options: None,
                     capabilities: ClientCapabilities::default(),
                     trace: None,

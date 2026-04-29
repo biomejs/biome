@@ -4,8 +4,7 @@ use crate::server_test_utils::*;
 use anyhow::{Context, Result};
 use biome_fs::TemporaryFs;
 use biome_service::workspace::{
-    FileContent, OpenFileParams, OpenFileResult, OpenProjectParams, OpenProjectResult, ScanKind,
-    ScanProjectParams, ScanProjectResult,
+    OpenProjectParams, OpenProjectResult, ScanKind, ScanProjectParams, ScanProjectResult,
 };
 use biome_service::{Watcher, WatcherOptions};
 use futures::channel::mpsc::channel;
@@ -67,6 +66,7 @@ async fn goto_definition_single_file(
 
 struct CrossFileTestParams {
     name: &'static str,
+    config: &'static str,
     files: Vec<(&'static str, &'static str)>,
     open_file: &'static str,
     language_id: &'static str,
@@ -82,10 +82,17 @@ async fn goto_definition_cross_file(
     params: CrossFileTestParams,
 ) -> Result<(Option<lsp::GotoDefinitionResponse>, TemporaryFs)> {
     let mut fs = TemporaryFs::new(params.name);
-    fs.create_file("biome.json", r#"{ "linter": { "enabled": true } }"#);
+    fs.create_file("biome.json", params.config);
     for (name, content) in &params.files {
         fs.create_file(name, content);
     }
+
+    let root_uri = lsp::Uri::from_str(
+        url::Url::from_file_path(&fs.working_directory)
+            .unwrap()
+            .as_str(),
+    )
+    .unwrap();
 
     let (watcher, instruction_channel) = Watcher::new(WatcherOptions::default())?;
 
@@ -103,7 +110,9 @@ async fn goto_definition_cross_file(
     let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
     let reader = tokio::spawn(client_handler(stream, sink, sender));
 
-    server.initialize().await?;
+    server.initialize_with_root(root_uri).await?;
+    server.initialized().await?;
+    server.load_configuration().await?;
 
     let OpenProjectResult { project_key } = server
         .request(
@@ -136,23 +145,6 @@ async fn goto_definition_cross_file(
     let file_path = fs.working_directory.join(params.open_file);
     let file_uri =
         lsp::Uri::from_str(url::Url::from_file_path(&file_path).unwrap().as_str()).unwrap();
-
-    let _: OpenFileResult = server
-        .request(
-            "biome/open_file",
-            "open_file",
-            OpenFileParams {
-                project_key,
-                path: file_path.clone().into(),
-                content: FileContent::FromServer,
-                document_file_source: None,
-                persist_node_cache: false,
-                inline_config: None,
-                needs_document_services: None,
-            },
-        )
-        .await?
-        .expect("open_file returned an error");
 
     server
         .notify(
@@ -277,6 +269,7 @@ async fn goto_definition_cross_file_named_import() -> Result<()> {
     // Cursor on `greet` in `greet()` at line 1, character 0
     let (res, fs) = goto_definition_cross_file(CrossFileTestParams {
         name: "goto_definition_cross_file_named_import",
+        config: r#"{ "linter": { "enabled": true } }"#,
         files: vec![
             ("utils.js", "export function greet() { return 'hello'; }\n"),
             ("main.js", "import { greet } from './utils.js';\ngreet();\n"),
@@ -298,6 +291,7 @@ async fn goto_definition_on_import_specifier() -> Result<()> {
     // Cursor on `greet` in the import specifier `import { greet }` at line 0, character 9
     let (res, fs) = goto_definition_cross_file(CrossFileTestParams {
         name: "goto_definition_on_import_specifier",
+        config: r#"{ "linter": { "enabled": true } }"#,
         files: vec![
             ("utils.js", "export function greet() { return 'hello'; }\n"),
             ("main.js", "import { greet } from './utils.js';\ngreet();\n"),
@@ -319,6 +313,7 @@ async fn goto_definition_jsx_component_cross_file() -> Result<()> {
     // Cursor on `Button` in `<Button />` at line 1, character 40
     let (res, fs) = goto_definition_cross_file(CrossFileTestParams {
         name: "goto_definition_jsx_component_cross_file",
+        config: r#"{ "linter": { "enabled": true } }"#,
         files: vec![
             ("Button.jsx", "export default function Button() { return <button />; }\n"),
             ("App.jsx", "import Button from './Button.jsx';\nexport default function App() { return <Button />; }\n"),
@@ -340,6 +335,7 @@ async fn goto_definition_dynamic_import_variable_declarator() -> Result<()> {
     // Cursor on `utils` in `const utils = await import(...)` at line 0, character 6
     let (res, fs) = goto_definition_cross_file(CrossFileTestParams {
         name: "goto_definition_dynamic_import",
+        config: r#"{ "linter": { "enabled": true } }"#,
         files: vec![
             ("utils.js", "export function greet() { return 'hello'; }\n"),
             ("main.js", "const utils = await import('./utils.js');\n"),
@@ -361,6 +357,7 @@ async fn goto_definition_dynamic_import_reference() -> Result<()> {
     // Cursor on `utils` in `utils.greet()` at line 1, character 0
     let (res, fs) = goto_definition_cross_file(CrossFileTestParams {
         name: "goto_definition_dynamic_import_reference",
+        config: r#"{ "linter": { "enabled": true } }"#,
         files: vec![
             ("utils.js", "export function greet() { return 'hello'; }\n"),
             (
@@ -376,6 +373,39 @@ async fn goto_definition_dynamic_import_reference() -> Result<()> {
     .await?;
 
     assert_definition(res, file_uri(&fs, "utils.js"), range(0, 0, 0, 0));
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn goto_definition_html_component() -> Result<()> {
+    // Cursor on `utils` in `const utils = await import(...)` at line 0, character 6
+    let (res, fs) = goto_definition_cross_file(CrossFileTestParams {
+        name: "goto_definition_html_component",
+        config: r#"{ "linter": { "enabled": true }, "html": { "experimentalFullSupportEnabled": true } }"#,
+        files: vec![
+            ("Component.astro", "<h1>Hello, world!</h1>"),
+            (
+                "Page.astro",
+                r#"---
+import Component from "./Component.astro";
+---
+<Component />
+"#,
+            ),
+        ],
+        open_file: "Page.astro",
+        language_id: "astro",
+        source: r#"---
+import Component from "./Component.astro";
+---
+<Component />
+"#,
+        cursor: pos(3, 2),
+    })
+    .await?;
+
+    assert_definition(res, file_uri(&fs, "Component.astro"), range(0, 0, 0, 0));
 
     Ok(())
 }
