@@ -902,6 +902,31 @@ fn is_arrow_function_with_single_parameter(p: &mut JsParser) -> bool {
     }
 }
 
+// Returns true when the paren group starting at the current position is immediately
+// followed by `=>`, meaning it must be nested arrow-function parameters rather than
+// a parenthesised expression.  The check is purely token-level — we count `(`/`)`
+// depth so that parens inside type annotations (e.g. `(a: () => T) =>`) are handled
+// correctly.
+fn is_paren_group_followed_by_fat_arrow(p: &mut JsParser) -> bool {
+    debug_assert!(p.at(T!['(']));
+    let mut depth: u32 = 0;
+    let mut offset: usize = 0;
+    loop {
+        match p.nth(offset) {
+            T!['('] => depth += 1,
+            T![')'] => {
+                depth -= 1;
+                if depth == 0 {
+                    return p.nth_at(offset + 1, T![=>]);
+                }
+            }
+            EOF => return false,
+            _ => {}
+        }
+        offset += 1;
+    }
+}
+
 fn parse_arrow_body(
     p: &mut JsParser,
     mut flags: SignatureFlags,
@@ -922,13 +947,26 @@ fn parse_arrow_body(
         parse_function_body(p, flags)
     } else {
         p.with_state(EnterFunction(flags), |p| {
+            // Always clear in_conditional_consequent inside an arrow body: we are no
+            // longer in ternary-consequent position, so deeply nested expressions
+            // should parse normally.
+            //
+            // However, when the body starts with `({` or `([` in a ternary consequent
+            // and there is no `=>` after the closing `)`, speculative arrow parsing
+            // would produce a false positive in TypeScript mode (the ternary `:` is
+            // consumed as a return-type annotation and the alternate's `=>` is taken
+            // as the arrow).  In that situation we suppress arrow parsing.  When `=>`
+            // does follow the `)`, the body really is a nested arrow function and we
+            // allow it through.
+            let body_context = context.and_in_conditional_consequent(false);
             if context.is_in_conditional_consequent()
                 && matches!(p.cur(), T!['('])
                 && matches!(p.nth(1), T!['{'] | T!['['])
+                && !is_paren_group_followed_by_fat_arrow(p)
             {
-                parse_assignment_expression_or_higher_no_arrow(p, context)
+                parse_assignment_expression_or_higher_no_arrow(p, body_context)
             } else {
-                parse_assignment_expression_or_higher(p, context)
+                parse_assignment_expression_or_higher(p, body_context)
             }
         })
     }
