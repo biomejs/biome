@@ -200,9 +200,9 @@ fn handle_scss_at_root_selector_comment(
     // Keep selector comments before `{`, matching Prettier's `@at-root` output.
     if !comment.kind().is_line()
         || !comment.text_position().is_own_line()
-        || !comment
+        || comment
             .following_token()
-            .is_some_and(|token| token.kind() == T!['{'])
+            .is_none_or(|token| token.kind() != T!['{'])
     {
         return CommentPlacement::Default(comment);
     }
