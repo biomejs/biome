@@ -6,10 +6,10 @@ use crate::utils::scss_include_comments::{
     place_separated_list_comment,
 };
 use biome_css_syntax::{
-    AnyCssDeclarationName, AnyCssRoot, CssComplexSelector, CssFunction, CssGenericProperty,
-    CssIdentifier, CssLanguage, CssSyntaxKind, ScssAtRootAtRule, ScssAtRootSelector,
-    ScssExpressionItemList, ScssListExpression, ScssListExpressionElement, ScssMapExpression,
-    ScssMapExpressionPair, T, TextLen, TextSize,
+    AnyCssDeclarationName, AnyCssRoot, CssComplexSelector, CssDeclarationOrRuleBlock, CssFunction,
+    CssGenericProperty, CssIdentifier, CssLanguage, CssSyntaxKind, ScssAtRootAtRule,
+    ScssAtRootSelector, ScssExpressionItemList, ScssIfAtRule, ScssListExpression,
+    ScssListExpressionElement, ScssMapExpression, ScssMapExpressionPair, T, TextLen, TextSize,
 };
 use biome_diagnostics::category;
 use biome_formatter::comments::{
@@ -110,6 +110,7 @@ impl CommentStyle for CssCommentStyle {
             .or_else(handle_scss_list_trailing_separator_comment)
             .or_else(handle_scss_expression_item_trailing_line_comment)
             .or_else(handle_scss_at_root_selector_comment)
+            .or_else(handle_scss_else_clause_comment)
             .or_else(handle_function_comment)
             .or_else(handle_generic_property_comment)
             .or_else(handle_declaration_name_comment)
@@ -221,6 +222,45 @@ fn handle_scss_at_root_selector_comment(
     match at_root.block() {
         Ok(block) => CommentPlacement::leading(block.into_syntax(), comment),
         Err(_) => CommentPlacement::Default(comment),
+    }
+}
+
+fn handle_scss_else_clause_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(following_token_range) = comment
+        .following_token()
+        .filter(|token| token.kind() == T![@])
+        .map(|token| token.text_range())
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    if !comment.kind().is_line() || !comment.text_position().is_own_line() {
+        return CommentPlacement::Default(comment);
+    }
+
+    let Some(block) = comment
+        .preceding_node()
+        .and_then(CssDeclarationOrRuleBlock::cast_ref)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let Some(else_clause) = block
+        .syntax()
+        .parent()
+        .and_then(ScssIfAtRule::cast)
+        .and_then(|if_rule| if_rule.else_clause())
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    match else_clause.at_token() {
+        Ok(at_token) if at_token.text_range() == following_token_range => {
+            CommentPlacement::leading(else_clause.into_syntax(), comment)
+        }
+        _ => CommentPlacement::Default(comment),
     }
 }
 

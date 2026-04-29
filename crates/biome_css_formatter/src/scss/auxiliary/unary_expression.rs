@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use biome_css_syntax::CssSyntaxKind;
-use biome_css_syntax::{ScssUnaryExpression, ScssUnaryExpressionFields, T};
+use biome_css_syntax::{ScssIfAtRule, ScssUnaryExpression, ScssUnaryExpressionFields, T};
 use biome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
@@ -21,9 +21,35 @@ impl FormatNodeRule<ScssUnaryExpression> for FormatScssUnaryExpression {
         let needs_space = matches!(operator.kind(), T![not]) && !is_parenthesized;
 
         if needs_space {
-            write!(f, [operator.format(), space(), expression.format()])
+            if is_in_scss_if_condition(node) {
+                write!(
+                    f,
+                    [
+                        operator.format(),
+                        soft_line_break_or_space(),
+                        expression.format()
+                    ]
+                )
+            } else {
+                write!(f, [operator.format(), space(), expression.format()])
+            }
         } else {
             write!(f, [operator.format(), expression.format()])
         }
     }
+}
+
+fn is_in_scss_if_condition(node: &ScssUnaryExpression) -> bool {
+    let range = node.syntax().text_trimmed_range();
+
+    node.syntax().ancestors().skip(1).any(|ancestor| {
+        ScssIfAtRule::cast_ref(&ancestor)
+            .and_then(|if_rule| if_rule.condition().ok())
+            .is_some_and(|condition| {
+                condition
+                    .syntax()
+                    .text_trimmed_range()
+                    .contains_range(range)
+            })
+    })
 }
