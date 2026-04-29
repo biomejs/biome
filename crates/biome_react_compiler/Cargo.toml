@@ -1,0 +1,28 @@
+[package]
+name                 = "biome_react_compiler"
+version              = "0.0.0"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Biome adapter for the React compiler"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = false
+
+[dependencies]
+biome_js_semantic = { workspace = true }
+biome_js_syntax   = { workspace = true }
+biome_rowan       = { workspace = true }
+indexmap          = { workspace = true }
+react_compiler = { path = "../../react/compiler/crates/react_compiler" }
+react_compiler_ast = { path = "../../react/compiler/crates/react_compiler_ast" }
+react_compiler_hir = { path = "../../react/compiler/crates/react_compiler_hir" }
+serde_json = { workspace = true }
+
+[dev-dependencies]
+biome_js_parser = { path = "../biome_js_parser" }
+
+[lints]
+workspace = true
