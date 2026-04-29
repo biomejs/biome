@@ -1,8 +1,9 @@
 use std::str::FromStr;
+use std::sync::Arc;
 
 use crate::server_test_utils::*;
 use anyhow::{Context, Result};
-use biome_fs::TemporaryFs;
+use biome_fs::{MemoryFileSystem, TemporaryFs};
 use biome_service::workspace::{
     OpenProjectParams, OpenProjectResult, ScanKind, ScanProjectParams, ScanProjectResult,
 };
@@ -16,13 +17,25 @@ use tower_lsp_server::ls_types::{
 
 /// Sends a `textDocument/definition` request for a single-file test.
 ///
-/// Opens `document.js` with the given content, then requests go-to definition
-/// at the given cursor position.
+/// Opens a document with the given content, then requests go-to definition
+/// at the given cursor position. When `config` is provided, a `biome.json`
+/// is inserted into a `MemoryFileSystem` and `load_configuration` is called
+/// so settings like `experimentalFullSupportEnabled` take effect.
 async fn goto_definition_single_file(
+    file_name: &str,
+    language_id: &str,
     source: &str,
     cursor: Position,
+    config: Option<&str>,
 ) -> Result<Option<lsp::GotoDefinitionResponse>> {
-    let factory = ServerFactory::default();
+    let factory = if let Some(config) = config {
+        let fs = MemoryFileSystem::default();
+        fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
+        ServerFactory::new_with_fs(Arc::new(fs))
+    } else {
+        ServerFactory::default()
+    };
+
     let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
@@ -33,7 +46,17 @@ async fn goto_definition_single_file(
     server.initialize().await?;
     server.initialized().await?;
 
-    server.open_document(source).await?;
+    if let Some(config) = config {
+        server
+            .open_named_document(config, uri!("biome.json"), "json")
+            .await?;
+        server.load_configuration().await?;
+    }
+
+    let document_uri = test_uri(file_name);
+    server
+        .open_named_document(source, document_uri.clone(), language_id)
+        .await?;
 
     let res: Option<lsp::GotoDefinitionResponse> = server
         .request(
@@ -41,9 +64,7 @@ async fn goto_definition_single_file(
             "goto_definition",
             lsp::GotoDefinitionParams {
                 text_document_position_params: lsp::TextDocumentPositionParams {
-                    text_document: TextDocumentIdentifier {
-                        uri: uri!("document.js"),
-                    },
+                    text_document: TextDocumentIdentifier { uri: document_uri },
                     position: cursor,
                 },
                 work_done_progress_params: WorkDoneProgressParams {
@@ -57,7 +78,6 @@ async fn goto_definition_single_file(
         .await?
         .context("goto_definition returned None")?;
 
-    server.close_document().await?;
     server.shutdown().await?;
     reader.abort();
 
@@ -223,15 +243,30 @@ fn pos(line: u32, character: u32) -> Position {
     Position { line, character }
 }
 
+fn test_uri(file_name: &str) -> lsp::Uri {
+    let base = if cfg!(windows) {
+        "file:///z%3A/workspace/"
+    } else {
+        "file:///workspace/"
+    };
+    lsp::Uri::from_str(&format!("{base}{file_name}")).unwrap()
+}
+
 // #region SINGLE-FILE TESTS
 
 #[tokio::test]
 async fn goto_definition_same_file_local_binding() -> Result<()> {
     // Cursor on `myVar` in `console.log(myVar)` (line 1, character 12)
-    let res =
-        goto_definition_single_file("const myVar = 42;\nconsole.log(myVar);\n", pos(1, 12)).await?;
+    let res = goto_definition_single_file(
+        "document.js",
+        "javascript",
+        "const myVar = 42;\nconsole.log(myVar);\n",
+        pos(1, 12),
+        None,
+    )
+    .await?;
 
-    assert_definition(res, uri!("document.js"), range(0, 6, 0, 11));
+    assert_definition(res, test_uri("document.js"), range(0, 6, 0, 11));
 
     Ok(())
 }
@@ -239,7 +274,9 @@ async fn goto_definition_same_file_local_binding() -> Result<()> {
 #[tokio::test]
 async fn goto_definition_returns_none_for_non_identifier() -> Result<()> {
     // Cursor on `=` (line 0, character 8) — not an identifier
-    let res = goto_definition_single_file("const x = 1;\n", pos(0, 8)).await?;
+    let res =
+        goto_definition_single_file("document.js", "javascript", "const x = 1;\n", pos(0, 8), None)
+            .await?;
 
     assert!(res.is_none(), "expected None for non-identifier position");
 
@@ -250,12 +287,36 @@ async fn goto_definition_returns_none_for_non_identifier() -> Result<()> {
 async fn goto_definition_jsx_component_same_file() -> Result<()> {
     // Cursor on `MyComponent` in `<MyComponent />` (line 1, character 40)
     let res = goto_definition_single_file(
+        "document.js",
+        "javascript",
         "function MyComponent() { return <div />; }\nexport default function App() { return <MyComponent />; }\n",
         pos(1, 40),
+        None,
     )
     .await?;
 
-    assert_definition(res, uri!("document.js"), range(0, 9, 0, 20));
+    assert_definition(res, test_uri("document.js"), range(0, 9, 0, 20));
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn goto_definition_html_ish_expression() -> Result<()> {
+    // Cursor on `foo` in `{foo}` (line 3, character 5)
+    let res = goto_definition_single_file(
+        "document.astro",
+        "astro",
+        r#"---
+const foo = "bar";
+---
+<h1>{foo}</h1>
+"#,
+        pos(3, 5),
+        Some(r#"{ "linter": { "enabled": true }, "html": { "experimentalFullSupportEnabled": true } }"#),
+    )
+    .await?;
+
+    assert_definition(res, test_uri("document.astro"), range(1, 6, 1, 9));
 
     Ok(())
 }

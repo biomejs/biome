@@ -1299,6 +1299,7 @@ pub(crate) struct ResolveDefinitionParams<'a> {
     pub(crate) path: &'a BiomePath,
     pub(crate) definition_ref: &'a DefinitionReference,
     pub(crate) module_graph: &'a ModuleGraph,
+    pub(crate) offset: Option<TextSize>,
 }
 
 type ResolveBinding = fn(ResolveBindingParams) -> Option<DefinitionReference>;
@@ -1351,7 +1352,13 @@ impl Features {
         match language_hint {
             // TODO: remove match once we remove vue/astro/svelte handlers
             DocumentFileSource::Js(source) => match source.as_embedding_kind() {
-                EmbeddingKind::Astro { .. } => self.astro.capabilities(),
+                EmbeddingKind::Astro { frontmatter, .. } => {
+                    if *frontmatter {
+                        self.js.capabilities()
+                    } else {
+                        self.astro.capabilities()
+                    }
+                }
                 EmbeddingKind::Vue { .. } => self.vue.capabilities(),
                 // `.svelte.ts` / `.svelte.js` are full JS/TS modules with Svelte
                 // semantics; `.svelte` component documents still use the Svelte handler.

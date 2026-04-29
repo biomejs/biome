@@ -1,11 +1,14 @@
 use crate::file_handlers::html::is_component_element;
 use crate::file_handlers::{ResolveBindingParams, ResolveDefinitionParams};
-use crate::workspace::{DefinitionReference, GoToDefinitionResult};
+use crate::workspace::{DefinitionReference, GoToDefinitionResult, LocalEmbeddedLanguage};
 use biome_fs::BiomePath;
-use biome_html_syntax::{AnyHtmlAttributeInitializer, HtmlAttribute, HtmlComponentName, HtmlRoot};
+use biome_html_syntax::{
+    AnyHtmlAttributeInitializer, HtmlAttribute, HtmlComponentName, HtmlRoot, HtmlTextExpression,
+};
 use biome_module_graph::ModuleGraph;
 use biome_rowan::{AstNode, TextRange, TokenAtOffset};
 use camino::Utf8Path;
+use std::ops::Add;
 
 pub(crate) fn resolve_binding_html(params: ResolveBindingParams) -> Option<DefinitionReference> {
     let root: HtmlRoot = params.parse.tree();
@@ -79,6 +82,18 @@ pub(crate) fn resolve_binding_html(params: ResolveBindingParams) -> Option<Defin
                 source: source.to_string(),
             });
         }
+
+        if let Some(element) = HtmlTextExpression::cast_ref(&ancestor)
+            && let Some(embedded_bindings) = params.services.embedded_bindings()
+            && let Some(element_value) = element.html_literal_token().ok()
+            && let Some(binding) =
+                embedded_bindings.get_binding_by_name(element_value.text_trimmed())
+        {
+            return Some(DefinitionReference::LocalEmbedded {
+                range: binding.range().clone(),
+                to_language: LocalEmbeddedLanguage::Js,
+            });
+        }
     }
 
     None
@@ -87,15 +102,14 @@ pub(crate) fn resolve_binding_html(params: ResolveBindingParams) -> Option<Defin
 pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoToDefinitionResult> {
     match params.definition_ref {
         DefinitionReference::HtmlComponent { source } => {
-            return resolve_import_definition(source, params.path.as_path(), params.module_graph);
+            resolve_import_definition(source, params.path.as_path(), params.module_graph)
         }
-        DefinitionReference::Local { .. } => {}
-        DefinitionReference::Import { .. } => {}
-        DefinitionReference::CssClass { .. } => {}
-        DefinitionReference::DynamicImport { .. } => {}
+        DefinitionReference::Local { .. }
+        | DefinitionReference::Import { .. }
+        | DefinitionReference::CssClass { .. }
+        | DefinitionReference::LocalEmbedded { .. }
+        | DefinitionReference::DynamicImport { .. } => None,
     }
-
-    None
 }
 
 fn resolve_import_definition(
@@ -103,6 +117,7 @@ fn resolve_import_definition(
     current_path: &Utf8Path,
     module_graph: &ModuleGraph,
 ) -> Option<GoToDefinitionResult> {
+    dbg!("here??");
     let module_info = module_graph.html_module_info_for_path(current_path)?;
     let html_import = module_info
         .static_import_paths

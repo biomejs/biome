@@ -808,5 +808,5 @@ impl ServerConnection {
 mod tests;
 
 #[cfg(test)]
-#[path = "server_navigation.tests.rs"]
-mod navigation_tests;
+#[path = "server_goto.tests.rs"]
+mod server_goto;

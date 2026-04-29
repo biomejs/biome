@@ -12,6 +12,7 @@ use biome_js_type_info::ImportSymbol;
 use biome_module_graph::{JsOwnExport, ModuleGraph};
 use biome_rowan::{AstNode, AstSeparatedList, TokenAtOffset};
 use camino::Utf8Path;
+use std::ops::Add;
 
 /// Source-side capability: given a cursor position, identify what binding the user clicked on.
 pub(crate) fn resolve_binding(params: ResolveBindingParams) -> Option<DefinitionReference> {
@@ -156,6 +157,16 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
         ),
         DefinitionReference::HtmlComponent { source } => {
             resolve_import_definition(source, params.path.as_path(), params.module_graph)
+        }
+        DefinitionReference::LocalEmbedded { range, .. } => {
+            if let Some(offset) = params.offset {
+                Some(GoToDefinitionResult {
+                    path: BiomePath::new(params.path.as_path().to_string()),
+                    range: range.add(offset),
+                })
+            } else {
+                None
+            }
         }
         // CssClass is routed to the CSS handler by the orchestrator
         _ => None,

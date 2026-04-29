@@ -1288,6 +1288,12 @@ pub enum DefinitionReference {
     },
     /// The binding is in the same file at this range.
     Local { range: TextRange },
+    LocalEmbedded {
+        /// Where the binding is embedded in the source code, relative to its embedded root.
+        range: TextRange,
+        /// In which language embedding kind the binding needs to be resolved
+        to_language: LocalEmbeddedLanguage,
+    },
     /// Imported symbol — needs module graph resolution.
     Import { local_name: String },
     /// A CSS class name from a JSX className/class attribute or a CSS-in-JS snippet (not yet supported)
@@ -1297,6 +1303,20 @@ pub enum DefinitionReference {
         local_name: String,
         specifier: String,
     },
+}
+
+impl DefinitionReference {
+    pub(crate) fn is_embedded(&self) -> bool {
+        matches!(self, DefinitionReference::LocalEmbedded { .. })
+    }
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub enum LocalEmbeddedLanguage {
+    /// Look in a JS snippet
+    Js,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]

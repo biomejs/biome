@@ -27,6 +27,10 @@ pub struct EmbeddedBinding {
 }
 
 impl EmbeddedBinding {
+    pub(crate) fn range(&self) -> &TextRange {
+        &self.range
+    }
+
     pub(crate) fn token_text(&self) -> &TokenText {
         &self.text
     }
@@ -59,6 +63,17 @@ impl EmbeddedExportedBindings {
                 })
                 .collect::<Vec<_>>(),
         );
+    }
+
+    pub(crate) fn get_binding_by_name(&self, binding_name: &str) -> Option<&EmbeddedBinding> {
+        for bindings in self.bindings.iter() {
+            for binding in bindings {
+                if binding.token_text().text() == binding_name {
+                    return Some(binding);
+                }
+            }
+        }
+        None
     }
 
     pub(crate) fn get_binding_with_source(&self, binding_name: &str) -> Option<&EmbeddedBinding> {

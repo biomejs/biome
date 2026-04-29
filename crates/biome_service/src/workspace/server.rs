@@ -55,7 +55,7 @@ use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName, PathKind, normalize_path};
 use biome_grit_patterns::{CompilePatternOptions, GritQuery, compile_pattern_with_options};
 use biome_html_syntax::HtmlRoot;
-use biome_js_syntax::{AnyJsRoot, EmbeddingKind, LanguageVariant, ModuleKind};
+use biome_js_syntax::{AnyJsRoot, EmbeddingKind, JsFileSource, LanguageVariant, ModuleKind};
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
 use biome_module_graph::{HtmlEmbeddedContent, ModuleDependencies, ModuleDiagnostic, ModuleGraph};
@@ -817,22 +817,28 @@ impl WorkspaceServer {
 
         // Resolve the correct capabilities for the definition side based on
         // the definition reference kind (e.g., CssClass -> CSS handler, Local -> Same handler).
-        let resolve_capabilities =
-            |def_ref: &Option<DefinitionReference>, default_caps: Capabilities| -> Capabilities {
-                match def_ref {
-                    None => default_caps,
-                    Some(def_ref) => match def_ref {
-                        DefinitionReference::Local { .. }
-                        | DefinitionReference::Import { .. }
-                        | DefinitionReference::HtmlComponent { .. }
-                        | DefinitionReference::DynamicImport { .. } => default_caps,
-                        // Html components are defined in JavaScript part of the file, so we need a JS handler.
-                        DefinitionReference::CssClass { .. } => self
+        let resolve_capabilities = |def_ref: &Option<DefinitionReference>,
+                                    default_caps: Capabilities|
+         -> Capabilities {
+            match def_ref {
+                None => default_caps,
+                Some(def_ref) => match def_ref {
+                    DefinitionReference::Local { .. }
+                    | DefinitionReference::Import { .. }
+                    | DefinitionReference::HtmlComponent { .. }
+                    | DefinitionReference::DynamicImport { .. } => default_caps,
+                    DefinitionReference::LocalEmbedded { to_language, .. } => match to_language {
+                        LocalEmbeddedLanguage::Js => self
                             .features
-                            .get_capabilities(DocumentFileSource::Css(CssFileSource::css())),
+                            .get_capabilities(DocumentFileSource::Js(JsFileSource::tsx())),
                     },
-                }
-            };
+                    // Html components are defined in JavaScript part of the file, so we need a JS handler.
+                    DefinitionReference::CssClass { .. } => self
+                        .features
+                        .get_capabilities(DocumentFileSource::Css(CssFileSource::css())),
+                },
+            }
+        };
 
         if let Some(resolve_binding) = capabilities.editors.resolve_binding {
             let result = resolve_binding(ResolveBindingParams {
@@ -2772,17 +2778,44 @@ impl Workspace for WorkspaceServer {
             return Ok(None);
         };
 
-        let resolve_definition = capabilities
-            .editors
-            .resolve_definition
-            // NOTE: here we might want to silent the error because it could be noisy
-            .ok_or_else(self.build_capability_error(path))?;
+        if definition_ref.is_embedded() {
+            for snippet in embedded_snippets {
+                let Some(file_source) = self.get_source(snippet.file_source_index()) else {
+                    continue;
+                };
+                let snippet_caps = self.features.get_capabilities(file_source);
+                let Some(resolve_definition) = snippet_caps.editors.resolve_definition else {
+                    continue;
+                };
 
-        Ok(resolve_definition(ResolveDefinitionParams {
-            path: &effective_path,
-            definition_ref: &definition_ref,
-            module_graph: &self.module_graph,
-        }))
+                let result = resolve_definition(ResolveDefinitionParams {
+                    path: &effective_path,
+                    definition_ref: &definition_ref,
+                    module_graph: &self.module_graph,
+                    offset: Some(snippet.content_offset()),
+                });
+
+                match result {
+                    None => continue,
+                    Some(result) => return Ok(Some(result)),
+                }
+            }
+
+            Ok(None)
+        } else {
+            let resolve_definition = capabilities
+                .editors
+                .resolve_definition
+                // NOTE: here we might want to silent the error because it could be noisy
+                .ok_or_else(self.build_capability_error(path))?;
+
+            Ok(resolve_definition(ResolveDefinitionParams {
+                path: &effective_path,
+                definition_ref: &definition_ref,
+                module_graph: &self.module_graph,
+                offset: None,
+            }))
+        }
     }
 
     /// Closes a file opened in the workspace.
