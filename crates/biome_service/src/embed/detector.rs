@@ -38,6 +38,12 @@ pub(crate) enum EmbedDetector {
     /// Matches `EmbedCandidate::Directive`. Always matches (no pattern).
     /// The guest language depends on the host framework.
     Directive { target: EmbedTarget },
+
+    /// Matches `EmbedCandidate::StyleAttribute`. Always CSS.
+    ///
+    /// Prettier treats style attributes as CSS, and formats it as such.
+    /// https://github.com/prettier/prettier/blob/0fe055c25d7e8b74bab35c188ee9bb3de4c23fa5/src/language-html/embed/style.js
+    StyleAttribute { target: EmbedTarget },
 }
 
 impl EmbedDetector {
@@ -109,6 +115,11 @@ impl EmbedDetector {
 
             // Directive detector + Directive candidate: always matches
             (Self::Directive { target }, EmbedCandidate::Directive { .. }) => {
+                target.resolve(candidate, file_source)
+            }
+
+            // Style attribute detector + StyleAttribute candidate: always matches
+            (Self::StyleAttribute { target }, EmbedCandidate::StyleAttribute { .. }) => {
                 target.resolve(candidate, file_source)
             }
 

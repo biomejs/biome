@@ -10,7 +10,7 @@ use crate::workspace::{
     AnyEmbeddedSnippet, CssDocumentServices, EmbeddedSnippet, JsDocumentServices,
 };
 use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
-use biome_css_syntax::{CssFileSource, CssLanguage, TextSize};
+use biome_css_syntax::{CssFileSource, CssLanguage, EmbeddingKind as CssEmbeddingKind, TextSize};
 use biome_fs::BiomePath;
 use biome_html_syntax::{
     AnyAstroDirective, AnySvelteBindingAssignmentBinding, AnySvelteBlock, AnySvelteBlockItem,
@@ -62,7 +62,7 @@ pub(crate) fn parse_embedded_nodes(
                     ctx.parse_and_push(&candidate, &doc_file_source, None, &mut nodes);
                 }
 
-                // Text expressions via registry
+                // Text expressions and style attributes via registry
                 match text_expression {
                     HtmlTextExpressions::Single => {
                         if let Some(text_expression) = HtmlSingleTextExpression::cast_ref(&element)
@@ -82,6 +82,12 @@ pub(crate) fn parse_embedded_nodes(
                         }
                     }
                     HtmlTextExpressions::None => {}
+                }
+
+                if let Some(attr) = HtmlAttribute::cast_ref(&element)
+                    && let Some(candidate) = build_style_attribute_candidate(&attr)
+                {
+                    ctx.parse_and_push(&candidate, &doc_file_source, None, &mut nodes);
                 }
             }
         }
@@ -122,6 +128,12 @@ pub(crate) fn parse_embedded_nodes(
                 if let Some(attr) = HtmlAttribute::cast_ref(&element)
                     && let Some(initializer) = attr.initializer()
                     && let Some(candidate) = build_attribute_expression_candidate(&initializer)
+                {
+                    ctx.parse_and_push(&candidate, &doc_file_source, None, &mut nodes);
+                }
+
+                if let Some(attr) = HtmlAttribute::cast_ref(&element)
+                    && let Some(candidate) = build_style_attribute_candidate(&attr)
                 {
                     ctx.parse_and_push(&candidate, &doc_file_source, None, &mut nodes);
                 }
@@ -244,6 +256,12 @@ pub(crate) fn parse_embedded_nodes(
                         );
                     }
                 }
+
+                if let Some(attr) = HtmlAttribute::cast_ref(&element)
+                    && let Some(candidate) = build_style_attribute_candidate(&attr)
+                {
+                    ctx.parse_and_push(&candidate, &doc_file_source, None, &mut nodes);
+                }
             }
         }
         HtmlVariant::Svelte => {
@@ -336,6 +354,12 @@ pub(crate) fn parse_embedded_nodes(
                         Some(embedded_file_source),
                         &mut nodes,
                     );
+                }
+
+                if let Some(attr) = HtmlAttribute::cast_ref(&element)
+                    && let Some(candidate) = build_style_attribute_candidate(&attr)
+                {
+                    ctx.parse_and_push(&candidate, &doc_file_source, None, &mut nodes);
                 }
             }
         }
@@ -563,6 +587,36 @@ fn build_attribute_expression_candidate(
             text: content_token.token_text(),
         },
         is_event_handler: false,
+    })
+}
+
+fn build_style_attribute_candidate(attribute: &HtmlAttribute) -> Option<EmbedCandidate> {
+    let name = attribute.name().ok()?;
+    if !name
+        .value_token()
+        .ok()?
+        .text_trimmed()
+        .eq_ignore_ascii_case("style")
+    {
+        return None;
+    }
+
+    let value_node = attribute.initializer()?.value().ok()?;
+    let html_string = value_node.as_html_string()?;
+    let value_token = html_string.value_token().ok()?;
+    let inner_text = html_string.inner_string_text().ok()?;
+    let content_range = value_token
+        .text_trimmed_range()
+        .add_start(TextSize::from(1))
+        .sub_end(TextSize::from(1));
+
+    Some(EmbedCandidate::StyleAttribute {
+        content: EmbedContent {
+            element_range: html_string.range(),
+            content_range,
+            content_offset: content_range.start(),
+            text: inner_text,
+        },
     })
 }
 
@@ -929,7 +983,9 @@ fn parse_matched_embed(
         }
 
         GuestLanguage::Css => {
-            let css_source = if ctx.host_file_source.is_html() {
+            let css_source = if matches!(candidate, EmbedCandidate::StyleAttribute { .. }) {
+                CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Styled)
+            } else if ctx.host_file_source.is_html() {
                 CssFileSource::css()
             } else {
                 CssFileSource::new_css_modules()

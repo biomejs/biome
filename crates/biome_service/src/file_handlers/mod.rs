@@ -1178,6 +1178,7 @@ type FormatEmbedded = fn(
 #[derive(Debug)]
 pub(crate) struct FormatEmbedNode {
     pub(crate) range: TextRange,
+    pub(crate) element_range: TextRange,
     pub(crate) node: AnyParse,
     pub(crate) source: DocumentFileSource,
 }

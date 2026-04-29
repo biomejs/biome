@@ -117,6 +117,9 @@ pub(crate) enum EmbedCandidate {
         /// Affects `EmbeddingKind::Vue { event_handler }`.
         is_event_handler: bool,
     },
+
+    /// An inline CSS declaration list in an HTML `style` attribute.
+    StyleAttribute { content: EmbedContent },
 }
 
 impl EmbedCandidate {
@@ -189,7 +192,8 @@ impl EmbedCandidate {
             | Self::Frontmatter { content }
             | Self::TaggedTemplate { content, .. }
             | Self::TextExpression { content, .. }
-            | Self::Directive { content, .. } => content,
+            | Self::Directive { content, .. }
+            | Self::StyleAttribute { content } => content,
         }
     }
 

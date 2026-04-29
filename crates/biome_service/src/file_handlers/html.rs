@@ -516,10 +516,11 @@ fn format_embedded(
             }
             DocumentFileSource::Css(_) => {
                 let css_options = settings.format_options::<CssLanguage>(biome_path, &node.source);
+                let should_indent = node.range == node.element_range;
                 let node = node.node.clone().embedded_syntax::<CssLanguage>();
                 let formatted =
                     biome_css_formatter::format_node_with_offset(css_options, &node).ok()?;
-                Some(wrap_document(formatted.into_document(), true))
+                Some(wrap_document(formatted.into_document(), should_indent))
             }
             _ => None,
         }

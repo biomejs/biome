@@ -37,7 +37,7 @@ impl EmbedDetectorsRegistry {
     }
 }
 
-static HTML_DETECTORS: [EmbedDetector; 5] = [
+static HTML_DETECTORS: [EmbedDetector; 6] = [
     // <script> → JS/TS/JSON (dynamic: depends on type/lang attributes + framework)
     //
     // A single detector handles all <script> variants via the dynamic resolver:
@@ -100,6 +100,10 @@ static HTML_DETECTORS: [EmbedDetector; 5] = [
             resolver: resolve_directive_language,
             fallback: None,
         },
+    },
+    // style="..." → CSS declaration list
+    EmbedDetector::StyleAttribute {
+        target: EmbedTarget::Static(GuestLanguage::Css),
     },
 ];
 
