@@ -26,7 +26,7 @@ reformat: output mismatch
 @@ -3,4 +3,5 @@
    // Foo
    "bar"; // Bar
-
+ 
 -$my-list2: a b c; // a
 +$my-list2: // a
 +  a b c;
