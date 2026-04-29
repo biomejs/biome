@@ -280,9 +280,14 @@ async fn goto_definition_same_file_local_binding() -> Result<()> {
 #[tokio::test]
 async fn goto_definition_returns_none_for_non_identifier() -> Result<()> {
     // Cursor on `=` (line 0, character 8) — not an identifier
-    let res =
-        goto_definition_single_file("document.js", "javascript", "const x = 1;\n", pos(0, 8), None)
-            .await?;
+    let res = goto_definition_single_file(
+        "document.js",
+        "javascript",
+        "const x = 1;\n",
+        pos(0, 8),
+        None,
+    )
+    .await?;
 
     assert!(res.is_none(), "expected None for non-identifier position");
 
