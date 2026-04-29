@@ -1,12 +1,14 @@
 use crate::prelude::*;
+use crate::utils::comment_trivia::is_trailing_comment_on_node;
+use crate::utils::scss_context::is_in_scss_include_arguments;
 use crate::utils::scss_include_comments::{
     place_list_trailing_separator_comment, place_map_trailing_separator_comment,
     place_separated_list_comment,
 };
 use biome_css_syntax::{
     AnyCssDeclarationName, AnyCssRoot, CssComplexSelector, CssFunction, CssGenericProperty,
-    CssIdentifier, CssLanguage, CssSyntaxKind, ScssListExpression, ScssListExpressionElement,
-    ScssMapExpression, ScssMapExpressionPair, TextLen, TextSize,
+    CssIdentifier, CssLanguage, CssSyntaxKind, ScssExpressionItemList, ScssListExpression,
+    ScssListExpressionElement, ScssMapExpression, ScssMapExpressionPair, TextLen, TextSize,
 };
 use biome_diagnostics::category;
 use biome_formatter::comments::{
@@ -105,6 +107,7 @@ impl CommentStyle for CssCommentStyle {
         handle_scss_map_trailing_separator_comment(comment)
             .or_else(place_separated_list_comment)
             .or_else(handle_scss_list_trailing_separator_comment)
+            .or_else(handle_scss_expression_item_trailing_line_comment)
             .or_else(handle_function_comment)
             .or_else(handle_generic_property_comment)
             .or_else(handle_declaration_name_comment)
@@ -156,6 +159,37 @@ fn handle_scss_list_trailing_separator_comment(
     };
 
     place_list_trailing_separator_comment(&list_expression, &preceding_element, comment)
+}
+
+fn handle_scss_expression_item_trailing_line_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let (Some(preceding_node), Some(following_node)) =
+        (comment.preceding_node(), comment.following_node())
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    if !comment.kind().is_line()
+        || !comment.text_position().is_end_of_line()
+        || !is_trailing_comment_on_node(preceding_node, &comment)
+        || is_in_scss_include_arguments(preceding_node)
+    {
+        return CommentPlacement::Default(comment);
+    }
+
+    let Some(list) = preceding_node
+        .parent()
+        .filter(|parent| ScssExpressionItemList::can_cast(parent.kind()))
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    if following_node.parent().as_ref() == Some(&list) {
+        CommentPlacement::trailing(preceding_node.clone(), comment)
+    } else {
+        CommentPlacement::Default(comment)
+    }
 }
 
 fn handle_function_comment(

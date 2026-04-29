@@ -6,3 +6,8 @@ b:2px
 $list-after-source-comma:
 a, // after comma
 b;
+
+$whitespace-list-line-comment:
+a // after item
+b
+c;

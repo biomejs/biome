@@ -3,6 +3,7 @@
 //! Separator comments are attached before formatting so renderers only need to
 //! print leading, trailing, or dangling comments.
 
+use crate::utils::comment_trivia::is_trailing_comment_on_node;
 use crate::utils::scss_context::is_in_scss_include_arguments;
 use crate::utils::scss_expression::{
     include_keyword_argument_before_argument_list, is_self_breaking_value,
@@ -293,20 +294,6 @@ fn separator_comment_owner(node: &CssSyntaxNode) -> CssSyntaxNode {
 
 fn follows_closing_paren(comment: &DecoratedComment<CssLanguage>) -> bool {
     comment.following_token().map(|token| token.kind()) == Some(CssSyntaxKind::R_PAREN)
-}
-
-fn is_trailing_comment_on_node(
-    node: &CssSyntaxNode,
-    comment: &DecoratedComment<CssLanguage>,
-) -> bool {
-    let comment_range = comment.piece().text_range();
-
-    node.last_token().is_some_and(|token| {
-        token
-            .trailing_trivia()
-            .pieces()
-            .any(|piece| piece.is_comments() && piece.text_range() == comment_range)
-    })
 }
 
 /// Returns true when the comment follows the separated-list comma.
