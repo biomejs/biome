@@ -52,20 +52,10 @@ $my-map: (
 ```diff
 --- Prettier
 +++ Biome
-@@ -6,8 +6,7 @@
- }
- 
- $my-list:
--  "foo",
--  // Comment
-+  "foo", // Comment
-   "bar"; // Comment
- 
- $my-map: (
-@@ -20,8 +19,10 @@
+@@ -20,8 +20,10 @@
    "baz": 4, // Baz
  );
- 
+
 -[href]:hover &, // Comment
 -[href]:focus &, // Comment
 +[href]:hover
@@ -75,7 +65,7 @@ $my-map: (
  [href]:active & {
    .tooltip {
      opacity: 1;
-@@ -33,7 +34,8 @@
+@@ -33,7 +35,8 @@
    "variables",
    // Comment
    "reset",
@@ -98,7 +88,8 @@ $my-map: (
 }
 
 $my-list:
-  "foo", // Comment
+  "foo",
+  // Comment
   "bar"; // Comment
 
 $my-map: (

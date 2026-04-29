@@ -1,11 +1,12 @@
 use crate::prelude::*;
 use crate::utils::scss_include_comments::{
-    place_map_trailing_separator_comment, place_separated_list_comment,
+    place_list_trailing_separator_comment, place_map_trailing_separator_comment,
+    place_separated_list_comment,
 };
 use biome_css_syntax::{
     AnyCssDeclarationName, AnyCssRoot, CssComplexSelector, CssFunction, CssGenericProperty,
-    CssIdentifier, CssLanguage, CssSyntaxKind, ScssMapExpression, ScssMapExpressionPair, TextLen,
-    TextSize,
+    CssIdentifier, CssLanguage, CssSyntaxKind, ScssListExpression, ScssListExpressionElement,
+    ScssMapExpression, ScssMapExpressionPair, TextLen, TextSize,
 };
 use biome_diagnostics::category;
 use biome_formatter::comments::{
@@ -103,6 +104,7 @@ impl CommentStyle for CssCommentStyle {
     ) -> CommentPlacement<Self::Language> {
         handle_scss_map_trailing_separator_comment(comment)
             .or_else(place_separated_list_comment)
+            .or_else(handle_scss_list_trailing_separator_comment)
             .or_else(handle_function_comment)
             .or_else(handle_generic_property_comment)
             .or_else(handle_declaration_name_comment)
@@ -133,6 +135,27 @@ fn handle_scss_map_trailing_separator_comment(
     };
 
     place_map_trailing_separator_comment(&map_expression, &preceding_pair, comment)
+}
+
+fn handle_scss_list_trailing_separator_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(preceding_element) = comment
+        .preceding_node()
+        .and_then(ScssListExpressionElement::cast_ref)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let Some(list_expression) = preceding_element
+        .syntax()
+        .ancestors()
+        .find_map(ScssListExpression::cast)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    place_list_trailing_separator_comment(&list_expression, &preceding_element, comment)
 }
 
 fn handle_function_comment(

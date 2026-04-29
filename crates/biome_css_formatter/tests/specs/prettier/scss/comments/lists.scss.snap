@@ -23,10 +23,10 @@ $my-list2:
 reformat: output mismatch
 --- re-formatted
 +++ formatted
-@@ -2,4 +2,5 @@
-   "foo", // Foo
+@@ -3,4 +3,5 @@
+   // Foo
    "bar"; // Bar
- 
+
 -$my-list2: a b c; // a
 +$my-list2: // a
 +  a b c;
@@ -34,7 +34,7 @@ reformat: output mismatch
 IR differences:
 --- re-formatted IR
 +++ formatted IR
-@@ -15,14 +15,11 @@
+@@ -14,14 +14,11 @@
    line_suffix([" // Bar"]),
    expand_parent,
    empty_line,

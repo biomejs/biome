@@ -12,6 +12,10 @@ a:1px, // after comma
 b:2px
 );
 
+$list-after-source-comma:
+a, // after comma
+b;
+
 ```
 
 
@@ -23,5 +27,10 @@ $map-after-source-comma: (
 	// after comma
 	b: 2px,
 );
+
+$list-after-source-comma:
+	a,
+	// after comma
+	b;
 
 ```

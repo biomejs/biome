@@ -1,7 +1,7 @@
-//! Comment placement rules for SCSS `@include` arguments.
+//! Comment placement rules for SCSS separated forms.
 //!
-//! Separator-path comments are attached before formatting so renderers only
-//! need to print leading, trailing, or dangling comments.
+//! Separator comments are attached before formatting so renderers only need to
+//! print leading, trailing, or dangling comments.
 
 use crate::utils::scss_context::is_in_scss_include_arguments;
 use crate::utils::scss_expression::{
@@ -10,7 +10,8 @@ use crate::utils::scss_expression::{
 };
 use biome_css_syntax::{
     CssLanguage, CssParameterList, CssSyntaxKind, CssSyntaxNode, ScssIncludeArgumentList,
-    ScssKeywordArgument, ScssListExpression, ScssMapExpression, ScssMapExpressionPair,
+    ScssKeywordArgument, ScssListExpression, ScssListExpressionElement, ScssMapExpression,
+    ScssMapExpressionPair,
 };
 use biome_formatter::comments::{CommentPlacement, DecoratedComment};
 use biome_rowan::AstNode;
@@ -24,6 +25,18 @@ pub(crate) fn place_map_trailing_separator_comment(
     comment: DecoratedComment<CssLanguage>,
 ) -> CommentPlacement<CssLanguage> {
     classify_map_trailing_separator_comment(map_expression, preceding_pair, &comment)
+        .into_comment_placement(comment)
+}
+
+/// Places comments that follow a list separator.
+///
+/// Example: `$list: a, // next\nb;`.
+pub(crate) fn place_list_trailing_separator_comment(
+    list_expression: &ScssListExpression,
+    preceding_element: &ScssListExpressionElement,
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    classify_list_trailing_separator_comment(list_expression, preceding_element, &comment)
         .into_comment_placement(comment)
 }
 
@@ -102,6 +115,29 @@ fn classify_map_trailing_separator_comment(
     }
 
     attachment_before_next_or_closing(comment, map_expression.syntax().clone())
+}
+
+/// Classifies comments after list separators before attaching them.
+fn classify_list_trailing_separator_comment(
+    list_expression: &ScssListExpression,
+    preceding_element: &ScssListExpressionElement,
+    comment: &DecoratedComment<CssLanguage>,
+) -> IncludeCommentAttachment {
+    if is_in_scss_include_arguments(list_expression.syntax()) {
+        return IncludeCommentAttachment::Default;
+    }
+
+    let is_separator_comment = is_trailing_separator_comment(preceding_element.syntax(), comment);
+
+    if comment.kind().is_line()
+        && comment.text_position().is_end_of_line()
+        && is_separator_comment
+        && comment.following_node().is_some()
+    {
+        attachment_before_next_or_closing(comment, list_expression.syntax().clone())
+    } else {
+        IncludeCommentAttachment::Default
+    }
 }
 
 /// Classifies comments after include-owned list separators.
