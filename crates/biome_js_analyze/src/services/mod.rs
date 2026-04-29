@@ -4,6 +4,7 @@ pub mod embedded_bindings;
 pub mod embedded_value_references;
 pub mod manifest;
 pub mod module_graph;
+pub mod react_compiler;
 pub mod semantic;
 pub mod semantic_class;
 pub mod turborepo;
