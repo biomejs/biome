@@ -83,6 +83,7 @@ static REACT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noSyncScripts"),
         RuleFilter::Rule("nursery", "noUnknownAttribute"),
         RuleFilter::Rule("nursery", "useReactAsyncServerFunction"),
+        RuleFilter::Rule("nursery", "useReactCompiler"),
         RuleFilter::Rule("security", "noDangerouslySetInnerHtml"),
         RuleFilter::Rule("security", "noDangerouslySetInnerHtmlWithChildren"),
         RuleFilter::Rule("style", "useComponentExportOnlyModules"),

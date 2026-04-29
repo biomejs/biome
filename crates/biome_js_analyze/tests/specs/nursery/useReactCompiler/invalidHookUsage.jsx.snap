@@ -1,0 +1,132 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidHookUsage.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+
+import { useEffect, useState } from "react";
+
+function HookInNestedFunction() {
+    function nested() {
+        useState(0);
+    }
+
+    nested();
+
+    return <div />;
+}
+
+function DynamicHookReference(props) {
+    const hook = props.enabled ? useState : useEffect;
+
+    hook(0);
+
+    return <div />;
+}
+
+```
+
+# Diagnostics
+```
+invalidHookUsage.jsx:7:9 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This hook is called outside the top level of a component or custom hook.
+  
+    5 │ function HookInNestedFunction() {
+    6 │     function nested() {
+  > 7 │         useState(0);
+      │         ^^^^^^^^
+    8 │     }
+    9 │ 
+  
+  i Hooks must run directly in a component or custom hook body so React can associate hook state with the correct render.
+  
+  i Move the hook call out of the nested function and into the top-level component or custom hook body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidHookUsage.jsx:16:18 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This hook is referenced as a normal value instead of being called directly.
+  
+    15 │ function DynamicHookReference(props) {
+  > 16 │     const hook = props.enabled ? useState : useEffect;
+       │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 
+    18 │     hook(0);
+  
+  i Hooks must be called directly so React Compiler can verify hook ordering and dependency behavior.
+  
+  i Call the hook directly at the top level instead of assigning it to a variable, passing it around, or selecting it dynamically.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidHookUsage.jsx:16:34 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This hook is referenced as a normal value instead of being called directly.
+  
+    15 │ function DynamicHookReference(props) {
+  > 16 │     const hook = props.enabled ? useState : useEffect;
+       │                                  ^^^^^^^^
+    17 │ 
+    18 │     hook(0);
+  
+  i Hooks must be called directly so React Compiler can verify hook ordering and dependency behavior.
+  
+  i Call the hook directly at the top level instead of assigning it to a variable, passing it around, or selecting it dynamically.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidHookUsage.jsx:16:45 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This hook is referenced as a normal value instead of being called directly.
+  
+    15 │ function DynamicHookReference(props) {
+  > 16 │     const hook = props.enabled ? useState : useEffect;
+       │                                             ^^^^^^^^^
+    17 │ 
+    18 │     hook(0);
+  
+  i Hooks must be called directly so React Compiler can verify hook ordering and dependency behavior.
+  
+  i Call the hook directly at the top level instead of assigning it to a variable, passing it around, or selecting it dynamically.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidHookUsage.jsx:18:5 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This hook is referenced as a normal value instead of being called directly.
+  
+    16 │     const hook = props.enabled ? useState : useEffect;
+    17 │ 
+  > 18 │     hook(0);
+       │     ^^^^
+    19 │ 
+    20 │     return <div />;
+  
+  i Hooks must be called directly so React Compiler can verify hook ordering and dependency behavior.
+  
+  i Call the hook directly at the top level instead of assigning it to a variable, passing it around, or selecting it dynamically.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

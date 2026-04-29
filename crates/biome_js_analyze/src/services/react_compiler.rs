@@ -1,9 +1,10 @@
 use biome_analyze::{
-    AddVisitor, FromServices, Phase, Phases, QueryKey, Queryable, RuleKey, RuleMetadata,
-    ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor, VisitorContext, VisitorFinishContext,
+    AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleKey,
+    RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor, VisitorContext,
+    VisitorFinishContext,
 };
 use biome_js_semantic::SemanticModel;
-use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, WalkEvent};
+use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange, WalkEvent};
 use biome_react_compiler::{
     CompileInput, CompileOutput, ReactCompilerError, compile_program, default_lint_options,
 };
@@ -45,6 +46,45 @@ impl Phase for ReactCompilerServices {
     }
 }
 
+impl Queryable for ReactCompilerServices {
+    type Input = ReactCompilerEvent;
+    type Output = ReactCompilerMatch;
+
+    type Language = JsLanguage;
+    type Services = Self;
+
+    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, root: &AnyJsRoot) {
+        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
+        analyzer.add_visitor(Phases::Syntax, || ReactCompilerVisitor::new(root.clone()));
+        analyzer.add_visitor(Phases::Semantic, ReactCompilerQueryVisitor::default);
+    }
+
+    fn unwrap_match(services: &ServiceBag, event: &ReactCompilerEvent) -> Self::Output {
+        let result = services
+            .get_service::<ReactCompilerResult>()
+            .expect("ReactCompilerResult service is not registered")
+            .clone();
+        ReactCompilerMatch {
+            result,
+            range: event.text_range(),
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct ReactCompilerMatch {
+    pub result: ReactCompilerResult,
+    pub range: TextRange,
+}
+
+pub struct ReactCompilerEvent(TextRange);
+
+impl QueryMatch for ReactCompilerEvent {
+    fn text_range(&self) -> TextRange {
+        self.0
+    }
+}
+
 #[derive(Clone)]
 pub struct ReactCompiler<N>(pub N);
 
@@ -60,7 +100,7 @@ where
 
     fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, root: &AnyJsRoot) {
         analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
-        analyzer.add_visitor(Phases::Semantic, || ReactCompilerVisitor::new(root.clone()));
+        analyzer.add_visitor(Phases::Syntax, || ReactCompilerVisitor::new(root.clone()));
         analyzer.add_visitor(Phases::Semantic, SyntaxVisitor::default);
     }
 
@@ -89,33 +129,53 @@ impl Visitor for ReactCompilerVisitor {
     fn visit(&mut self, _: &WalkEvent<JsSyntaxNode>, _: VisitorContext<JsLanguage>) {}
 
     fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
-        if ctx.services.get_service::<ReactCompilerResult>().is_some() {
-            return;
+        if ctx.services.get_service::<ReactCompilerResult>().is_none() {
+            let result = match ctx.services.get_service::<SemanticModel>() {
+                Some(model) => {
+                    let source_type = ctx
+                        .services
+                        .get_service::<biome_js_syntax::JsFileSource>()
+                        .copied()
+                        .unwrap_or_default();
+                    let source = self.root.syntax().text_with_trivia().to_string();
+
+                    compile_program(CompileInput {
+                        root: &self.root,
+                        model,
+                        source: &source,
+                        source_type,
+                        options: default_lint_options(&source),
+                    })
+                }
+                None => Err(ReactCompilerError::CompilerOutput(
+                    "SemanticModel service is not registered".to_string(),
+                )),
+            };
+
+            ctx.services
+                .insert_service(Arc::new(result) as ReactCompilerResult);
         }
+    }
+}
 
-        let result = match ctx.services.get_service::<SemanticModel>() {
-            Some(model) => {
-                let source_type = ctx
-                    .services
-                    .get_service::<biome_js_syntax::JsFileSource>()
-                    .copied()
-                    .unwrap_or_default();
-                let source = self.root.syntax().text_with_trivia().to_string();
+#[derive(Default)]
+struct ReactCompilerQueryVisitor;
 
-                compile_program(CompileInput {
-                    root: &self.root,
-                    model,
-                    source: &source,
-                    source_type,
-                    options: default_lint_options(&source),
-                })
+impl Visitor for ReactCompilerQueryVisitor {
+    type Language = JsLanguage;
+
+    fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, mut ctx: VisitorContext<JsLanguage>) {
+        let root = match event {
+            WalkEvent::Enter(node) => {
+                if node.parent().is_some() {
+                    return;
+                }
+
+                node
             }
-            None => Err(ReactCompilerError::CompilerOutput(
-                "SemanticModel service is not registered".to_string(),
-            )),
+            WalkEvent::Leave(_) => return,
         };
 
-        ctx.services
-            .insert_service(Arc::new(result) as ReactCompilerResult);
+        ctx.match_query(ReactCompilerEvent(root.text_range_with_trivia()));
     }
 }
