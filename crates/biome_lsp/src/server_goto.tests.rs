@@ -214,7 +214,13 @@ fn assert_definition(
     let definition = res.expect("goto_definition returned empty response");
     match definition {
         lsp::GotoDefinitionResponse::Scalar(location) => {
-            assert_eq!(location.uri, expected_uri);
+            assert_eq!(
+                location.uri.to_file_path(),
+                expected_uri.to_file_path(),
+                "URI file paths differ: got {:?}, expected {:?}",
+                location.uri,
+                expected_uri,
+            );
             assert_eq!(location.range, expected_range);
         }
         other => panic!("expected Scalar response, got: {other:?}"),
