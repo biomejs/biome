@@ -313,11 +313,19 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
                 ElementList.parse_list(p);
                 if let Some(mut closing) =
                     parse_closing_tag(p).or_add_diagnostic(p, expected_closing_tag)
-                    && !closing.text(p).contains(opening_tag_name.as_str())
                 {
-                    p.error(expected_matching_closing_tag(p, closing.range(p)).into_diagnostic(p));
-                    closing.change_to_bogus(p);
-                    continue;
+                    if is_void_closing_tag(p, &closing) {
+                        closing.change_to_bogus(p);
+                        continue;
+                    }
+
+                    if !closing.text(p).contains(opening_tag_name.as_str()) {
+                        p.error(
+                            expected_matching_closing_tag(p, closing.range(p)).into_diagnostic(p),
+                        );
+                        closing.change_to_bogus(p);
+                        continue;
+                    }
                 }
                 break;
             }
@@ -335,13 +343,10 @@ fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump_with_context(T![<], inside_tag_context(p));
     p.bump_with_context(T![/], inside_tag_context(p));
-    let should_be_self_closing = VOID_ELEMENTS
+    let is_void_element = VOID_ELEMENTS
         .iter()
         .any(|tag| tag.eq_ignore_ascii_case(p.cur_text()))
         && !is_possible_component(p, p.cur_text());
-    if should_be_self_closing {
-        p.error(void_element_should_not_have_closing_tag(p, p.cur_range()).into_diagnostic(p));
-    }
     let _name = parse_any_tag_name(p);
 
     // There shouldn't be any attributes in a closing tag.
@@ -350,7 +355,29 @@ fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
         p.bump_remap_with_context(HTML_BOGUS, HtmlLexContext::InsideTag);
     }
     p.expect(T![>]);
-    Present(m.complete(p, HTML_CLOSING_ELEMENT))
+    let closing = m.complete(p, HTML_CLOSING_ELEMENT);
+
+    if is_void_element {
+        p.error(void_element_should_not_have_closing_tag(p, closing.range(p)).into_diagnostic(p));
+    }
+
+    Present(closing)
+}
+
+fn is_void_closing_tag(p: &HtmlParser, closing: &CompletedMarker) -> bool {
+    let text = closing.text(p);
+    let Some(name) = text
+        .strip_prefix("</")
+        .and_then(|text| text.strip_suffix('>'))
+        .map(|text| text.trim())
+    else {
+        return false;
+    };
+
+    VOID_ELEMENTS
+        .iter()
+        .any(|tag| tag.eq_ignore_ascii_case(name))
+        && !is_possible_component(p, name)
 }
 
 #[inline]
