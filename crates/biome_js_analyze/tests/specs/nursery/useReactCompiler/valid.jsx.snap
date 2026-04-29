@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+
+import { useMemo, useState } from "react";
+
+function Component(props) {
+    const [count] = useState(0);
+    const value = useMemo(() => props.value + count, [props.value, count]);
+
+    return <div>{value}</div>;
+}
+
+```
