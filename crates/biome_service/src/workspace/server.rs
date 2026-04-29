@@ -315,7 +315,7 @@ impl WorkspaceServer {
         experimental_full_html_support: bool,
     ) -> Capabilities {
         let language = self.get_file_source(path, experimental_full_html_support);
-        self.features.get_capabilities(language)
+        self.features.get_deprecated_capabilities(language)
     }
 
     /// Retrieves the supported language of a file.
@@ -813,7 +813,7 @@ impl WorkspaceServer {
         embedded_snippets: &[AnyEmbeddedSnippet],
         language: DocumentFileSource,
     ) -> Result<(Option<DefinitionReference>, BiomePath, Capabilities), WorkspaceError> {
-        let capabilities = self.features.get_capabilities(language);
+        let capabilities = self.features.get_deprecated_capabilities(language);
 
         // Resolve the correct capabilities for the definition side based on
         // the definition reference kind (e.g., CssClass -> CSS handler, Local -> Same handler).
@@ -828,14 +828,17 @@ impl WorkspaceServer {
                     | DefinitionReference::HtmlComponent { .. }
                     | DefinitionReference::DynamicImport { .. } => default_caps,
                     DefinitionReference::LocalEmbedded { to_language, .. } => match to_language {
-                        LocalEmbeddedLanguage::Js => self
-                            .features
-                            .get_capabilities(DocumentFileSource::Js(JsFileSource::tsx())),
+                        LocalEmbeddedLanguage::Js => {
+                            self.features
+                                .get_deprecated_capabilities(DocumentFileSource::Js(
+                                    JsFileSource::tsx(),
+                                ))
+                        }
                     },
                     // Html components are defined in JavaScript part of the file, so we need a JS handler.
                     DefinitionReference::CssClass { .. } => self
                         .features
-                        .get_capabilities(DocumentFileSource::Css(CssFileSource::css())),
+                        .get_deprecated_capabilities(DocumentFileSource::Css(CssFileSource::css())),
                 },
             }
         };
@@ -863,7 +866,7 @@ impl WorkspaceServer {
             let Some(file_source) = self.get_source(snippet.file_source_index()) else {
                 continue;
             };
-            let snippet_caps = self.features.get_capabilities(file_source);
+            let snippet_caps = self.features.get_deprecated_capabilities(file_source);
             let Some(resolve) = snippet_caps.editors.resolve_binding else {
                 continue;
             };
@@ -953,7 +956,7 @@ impl WorkspaceServer {
         let file_source = self
             .get_source(file_source_index)
             .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
-        let capabilities = self.features.get_capabilities(file_source);
+        let capabilities = self.features.get_deprecated_capabilities(file_source);
 
         let parse = capabilities
             .parser
@@ -1691,7 +1694,7 @@ impl Workspace for WorkspaceServer {
             &params.path,
             settings.experimental_full_html_support_enabled(),
         );
-        let capabilities = self.features.get_capabilities(language);
+        let capabilities = self.features.get_deprecated_capabilities(language);
 
         let settings = self.settings_handle(&settings, params.inline_config);
         self.projects.get_file_features(GetFileFeaturesParams {
@@ -2101,7 +2104,7 @@ impl Workspace for WorkspaceServer {
             self.get_parse_with_snippets_and_services(&path)?;
         let language =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
-        let capabilities = self.features.get_capabilities(language);
+        let capabilities = self.features.get_deprecated_capabilities(language);
 
         let parse_errors = parse
             .diagnostics()
@@ -2162,7 +2165,7 @@ impl Workspace for WorkspaceServer {
                 let Some(file_source) = self.get_source(embedded_node.file_source_index()) else {
                     continue;
                 };
-                let capabilities = self.features.get_capabilities(file_source);
+                let capabilities = self.features.get_deprecated_capabilities(file_source);
                 let Some(lint) = capabilities.analyzer.lint else {
                     continue;
                 };
@@ -2271,7 +2274,7 @@ impl Workspace for WorkspaceServer {
             self.get_parse_with_snippets_and_services(&path)?;
         let language =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
-        let capabilities = self.features.get_capabilities(language);
+        let capabilities = self.features.get_deprecated_capabilities(language);
         let result = if (categories.is_lint() || categories.is_assist())
             && let Some(pull_diagnostics_and_actions) =
                 capabilities.analyzer.pull_diagnostics_and_actions
@@ -2309,7 +2312,7 @@ impl Workspace for WorkspaceServer {
                 let Some(file_source) = self.get_source(embedded_node.file_source_index()) else {
                     continue;
                 };
-                let capabilities = self.features.get_capabilities(file_source);
+                let capabilities = self.features.get_deprecated_capabilities(file_source);
                 let Some(pull_diagnostics_and_actions) =
                     capabilities.analyzer.pull_diagnostics_and_actions
                 else {
@@ -2419,7 +2422,7 @@ impl Workspace for WorkspaceServer {
             let Some(file_source) = self.get_source(embedded_snippet.file_source_index()) else {
                 continue;
             };
-            let capabilities = self.features.get_capabilities(file_source);
+            let capabilities = self.features.get_deprecated_capabilities(file_source);
             let Some(code_actions) = capabilities.analyzer.code_actions else {
                 continue;
             };
@@ -2642,7 +2645,9 @@ impl Workspace for WorkspaceServer {
                 else {
                     continue;
                 };
-                let capabilities = self.features.get_capabilities(document_file_source);
+                let capabilities = self
+                    .features
+                    .get_deprecated_capabilities(document_file_source);
                 let Some(fix_all) = capabilities.analyzer.fix_all else {
                     continue;
                 };
@@ -2783,7 +2788,7 @@ impl Workspace for WorkspaceServer {
                 let Some(file_source) = self.get_source(snippet.file_source_index()) else {
                     continue;
                 };
-                let snippet_caps = self.features.get_capabilities(file_source);
+                let snippet_caps = self.features.get_real_capabilities(file_source);
                 let Some(resolve_definition) = snippet_caps.editors.resolve_definition else {
                     continue;
                 };

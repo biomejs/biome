@@ -332,6 +332,36 @@ const foo = "bar";
     Ok(())
 }
 
+#[tokio::test]
+async fn goto_definition_html_ish_expression_cross_file() -> Result<()> {
+    let source = r#"---
+import { foo } from "./utils.js";
+---
+<h1>{foo}</h1>
+"#;
+    // Cursor on `foo` in `{foo}` (line 3, character 5)
+    let (res, fs) = goto_definition_cross_file(CrossFileTestParams {
+        name: "goto_definition_html_ish_expression_cross_file",
+        config: r#"{ "linter": { "enabled": true }, "html": { "experimentalFullSupportEnabled": true } }"#,
+        files: vec![
+            ("utils.js", "export const foo = 'hello';\n"),
+            ("page.astro", source),
+        ],
+        open_file: "page.astro",
+        language_id: "astro",
+        source,
+        cursor: pos(3, 5),
+    })
+    .await?;
+
+    // Currently resolves to the import binding in the frontmatter, not the
+    // export in utils.js. Cross-file resolution for template expressions is
+    // not yet implemented.
+    assert_definition(res, file_uri(&fs, "page.astro"), range(1, 9, 1, 12));
+
+    Ok(())
+}
+
 // #endregion
 
 // #region CROSS-FILE TESTS

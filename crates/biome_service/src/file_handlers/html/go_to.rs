@@ -8,7 +8,6 @@ use biome_html_syntax::{
 use biome_module_graph::ModuleGraph;
 use biome_rowan::{AstNode, TextRange, TokenAtOffset};
 use camino::Utf8Path;
-use std::ops::Add;
 
 pub(crate) fn resolve_binding_html(params: ResolveBindingParams) -> Option<DefinitionReference> {
     let root: HtmlRoot = params.parse.tree();

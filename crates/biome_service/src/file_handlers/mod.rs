@@ -1348,17 +1348,19 @@ impl Features {
     }
 
     /// Returns the [Capabilities] associated with a document source.
-    pub(crate) fn get_capabilities(&self, language_hint: DocumentFileSource) -> Capabilities {
+    ///
+    /// ## Warning
+    ///
+    /// This method is deprecated and shouldn't be used unless you're working on a feature for the deprecated
+    /// partial support of vue/svelte/astro
+    // TODO: remove match once we remove vue/astro/svelte handlers
+    pub(crate) fn get_deprecated_capabilities(
+        &self,
+        language_hint: DocumentFileSource,
+    ) -> Capabilities {
         match language_hint {
-            // TODO: remove match once we remove vue/astro/svelte handlers
             DocumentFileSource::Js(source) => match source.as_embedding_kind() {
-                EmbeddingKind::Astro { frontmatter, .. } => {
-                    if *frontmatter {
-                        self.js.capabilities()
-                    } else {
-                        self.astro.capabilities()
-                    }
-                }
+                EmbeddingKind::Astro { .. } => self.astro.capabilities(),
                 EmbeddingKind::Vue { .. } => self.vue.capabilities(),
                 // `.svelte.ts` / `.svelte.js` are full JS/TS modules with Svelte
                 // semantics; `.svelte` component documents still use the Svelte handler.
@@ -1372,6 +1374,21 @@ impl Features {
                 } => self.svelte.capabilities(),
                 EmbeddingKind::None => self.js.capabilities(),
             },
+            DocumentFileSource::Json(_) => self.json.capabilities(),
+            DocumentFileSource::Css(_) => self.css.capabilities(),
+            DocumentFileSource::Graphql(_) => self.graphql.capabilities(),
+            DocumentFileSource::Html(_) => self.html.capabilities(),
+            DocumentFileSource::Grit(_) => self.grit.capabilities(),
+            DocumentFileSource::Markdown(_) => self.markdown.capabilities(),
+            DocumentFileSource::Ignore => self.ignore.capabilities(),
+            DocumentFileSource::Unknown => self.unknown.capabilities(),
+        }
+    }
+
+    /// Returns the [Capabilities] associated with a document source.
+    pub(crate) fn get_real_capabilities(&self, language_hint: DocumentFileSource) -> Capabilities {
+        match language_hint {
+            DocumentFileSource::Js(_) => self.js.capabilities(),
             DocumentFileSource::Json(_) => self.json.capabilities(),
             DocumentFileSource::Css(_) => self.css.capabilities(),
             DocumentFileSource::Graphql(_) => self.graphql.capabilities(),
@@ -2878,7 +2895,8 @@ mod tests {
     fn markdown_features_provide_formatter_capabilities() {
         let features = Features::new();
         let path = Utf8Path::new("doc.md");
-        let capabilities = features.get_capabilities(DocumentFileSource::from_path(path, false));
+        let capabilities =
+            features.get_deprecated_capabilities(DocumentFileSource::from_path(path, false));
 
         assert!(capabilities.formatter.format.is_some());
         assert!(capabilities.parser.parse.is_some());
@@ -2888,7 +2906,8 @@ mod tests {
     fn svelte_source_modules_use_js_capabilities() {
         let features = Features::new();
         let path = Utf8Path::new("file.svelte.js");
-        let capabilities = features.get_capabilities(DocumentFileSource::from_path(path, false));
+        let capabilities =
+            features.get_deprecated_capabilities(DocumentFileSource::from_path(path, false));
 
         assert!(capabilities.analyzer.rename.is_some());
         assert!(capabilities.analyzer.pull_diagnostics_and_actions.is_some());
@@ -2898,7 +2917,8 @@ mod tests {
     fn svelte_typescript_source_modules_use_js_capabilities() {
         let features = Features::new();
         let path = Utf8Path::new("file.svelte.ts");
-        let capabilities = features.get_capabilities(DocumentFileSource::from_path(path, false));
+        let capabilities =
+            features.get_deprecated_capabilities(DocumentFileSource::from_path(path, false));
 
         assert!(capabilities.analyzer.rename.is_some());
         assert!(capabilities.analyzer.pull_diagnostics_and_actions.is_some());
@@ -2908,7 +2928,8 @@ mod tests {
     fn svelte_component_files_keep_svelte_capabilities() {
         let features = Features::new();
         let path = Utf8Path::new("file.svelte");
-        let capabilities = features.get_capabilities(DocumentFileSource::from_path(path, false));
+        let capabilities =
+            features.get_deprecated_capabilities(DocumentFileSource::from_path(path, false));
 
         assert!(capabilities.analyzer.rename.is_none());
         assert!(capabilities.analyzer.pull_diagnostics_and_actions.is_none());
