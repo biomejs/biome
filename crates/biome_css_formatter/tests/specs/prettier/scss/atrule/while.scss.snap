@@ -151,26 +151,6 @@ $i
  }
  @while (($i) > (0)) {
  }
-@@ -58,16 +58,16 @@
- }
- @while (
-   1 >
--    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
-+  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
- ) {
- }
- @while (
-   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
--    1
-+  1
- ) {
- }
- @while (
-   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
--    $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
-+  $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
- ) {
- }
 ```
 
 # Output
@@ -236,17 +216,17 @@ $i
 }
 @while (
   1 >
-  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
 ) {
 }
 @while (
   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
-  1
+    1
 ) {
 }
 @while (
   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
-  $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+    $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
 ) {
 }
 ```
@@ -257,8 +237,8 @@ $i
    36:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
    39: @while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
    40:   $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
-   61:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+   61:     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
    65:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
    70:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
-   71:   $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+   71:     $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
 ```
