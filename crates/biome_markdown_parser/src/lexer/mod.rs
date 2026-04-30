@@ -23,14 +23,8 @@ pub enum MarkdownLexContext {
     /// Normal markdown parsing with inline element detection.
     #[default]
     Regular,
-    /// Inside fenced code block - no markdown parsing.
-    #[expect(dead_code)]
-    FencedCodeBlock,
     /// Inside code info strings. Newlines end them.
     CodeInfoString,
-    /// Inside HTML block - minimal markdown parsing.
-    #[expect(dead_code)]
-    HtmlBlock,
     /// Inside link definition (after `]:`). Whitespace separates destination from title.
     LinkDefinition,
     /// Inside inline code span. Backslashes are literal per CommonMark §6.1.
@@ -64,19 +58,10 @@ impl LexContext for MarkdownLexContext {
 /// Re-lexing context for when token interpretation changes.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum MarkdownReLexContext {
-    /// Re-lex using regular markdown rules.
-    #[expect(dead_code)]
-    Regular,
     /// Re-lex for link definition (whitespace is significant).
     LinkDefinition,
     /// Re-lex for emphasis (emit single tokens for partial consumption).
     EmphasisInline,
-    /// Re-lex for thematic break parts decomposition.
-    /// Decomposes MD_THEMATIC_BREAK_LITERAL into individual marker/space tokens.
-    /// Currently unused: we use `force_relex_in_context(MarkdownLexContext::ThematicBreakParts)`
-    /// directly, but kept for symmetry with the lex context enum.
-    #[expect(dead_code)]
-    ThematicBreakParts,
     /// Inside the code block list, where strings doesn't have particular meaning
     CodeInfoString,
     /// After an ordered list marker. Splits leading whitespace from content
@@ -548,13 +533,6 @@ impl<'src> MarkdownLexer<'src> {
             .all(|b| *b == b' ' || *b == b'\t')
     }
 
-    /// Bumps the current byte and creates a lexed token of the passed in kind.
-    /// Reserved for single-byte token consumption patterns.
-    #[expect(dead_code)]
-    fn eat_byte(&mut self, tok: MarkdownSyntaxKind) -> MarkdownSyntaxKind {
-        self.advance(1);
-        tok
-    }
     /// Returns the byte at position `self.position + offset` or `None` if it is out of bounds.
     #[inline]
     fn byte_at(&self, offset: usize) -> Option<u8> {
@@ -1440,10 +1418,8 @@ impl<'src> ReLexer<'src> for MarkdownLexer<'src> {
         self.position = u32::from(self.current_start) as usize;
 
         let lex_context = match context {
-            MarkdownReLexContext::Regular => MarkdownLexContext::Regular,
             MarkdownReLexContext::LinkDefinition => MarkdownLexContext::LinkDefinition,
             MarkdownReLexContext::EmphasisInline => MarkdownLexContext::EmphasisInline,
-            MarkdownReLexContext::ThematicBreakParts => MarkdownLexContext::ThematicBreakParts,
             MarkdownReLexContext::CodeInfoString => MarkdownLexContext::CodeInfoString,
             MarkdownReLexContext::ListPostMarker => MarkdownLexContext::ListPostMarker,
         };
