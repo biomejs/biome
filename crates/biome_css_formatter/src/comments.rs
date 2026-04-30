@@ -1,15 +1,17 @@
 use crate::prelude::*;
 use crate::utils::comment_trivia::is_trailing_comment_on_node;
 use crate::utils::scss_context::is_in_scss_include_arguments;
+use crate::utils::scss_expression::single_expression_item;
 use crate::utils::scss_include_comments::{
     place_list_trailing_separator_comment, place_map_trailing_separator_comment,
     place_separated_list_comment,
 };
 use biome_css_syntax::{
-    AnyCssDeclarationName, AnyCssRoot, CssComplexSelector, CssDeclarationOrRuleBlock, CssFunction,
-    CssGenericProperty, CssIdentifier, CssLanguage, CssSyntaxKind, ScssAtRootAtRule,
-    ScssAtRootSelector, ScssExpressionItemList, ScssIfAtRule, ScssListExpression,
-    ScssListExpressionElement, ScssMapExpression, ScssMapExpressionPair, T, TextLen, TextSize,
+    AnyCssDeclarationName, AnyCssRoot, AnyScssExpressionItem, CssComplexSelector,
+    CssDeclarationOrRuleBlock, CssFunction, CssGenericProperty, CssIdentifier, CssLanguage,
+    CssSyntaxKind, ScssAtRootAtRule, ScssAtRootSelector, ScssEachAtRule, ScssExpression,
+    ScssExpressionItemList, ScssIfAtRule, ScssListExpression, ScssListExpressionElement,
+    ScssMapExpression, ScssMapExpressionPair, T, TextLen, TextSize,
 };
 use biome_diagnostics::category;
 use biome_formatter::comments::{
@@ -108,6 +110,7 @@ impl CommentStyle for CssCommentStyle {
         handle_scss_map_trailing_separator_comment(comment)
             .or_else(place_separated_list_comment)
             .or_else(handle_scss_list_trailing_separator_comment)
+            .or_else(handle_scss_each_iterable_comment)
             .or_else(handle_scss_expression_item_trailing_line_comment)
             .or_else(handle_scss_at_root_selector_comment)
             .or_else(handle_scss_else_clause_comment)
@@ -162,6 +165,30 @@ fn handle_scss_list_trailing_separator_comment(
     };
 
     place_list_trailing_separator_comment(&list_expression, &preceding_element, comment)
+}
+
+/// Keeps `@each ... in /* comment */ (a, b)` comments with the list.
+fn handle_scss_each_iterable_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(expression) = comment.following_node().and_then(ScssExpression::cast_ref) else {
+        return CommentPlacement::Default(comment);
+    };
+
+    if !expression
+        .syntax()
+        .parent()
+        .is_some_and(|parent| ScssEachAtRule::can_cast(parent.kind()))
+    {
+        return CommentPlacement::Default(comment);
+    }
+
+    let Some(AnyScssExpressionItem::ScssListExpression(list)) = single_expression_item(&expression)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    CommentPlacement::leading(list.into_syntax(), comment)
 }
 
 fn handle_scss_expression_item_trailing_line_comment(

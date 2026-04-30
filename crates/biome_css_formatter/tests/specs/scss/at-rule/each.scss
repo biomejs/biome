@@ -26,3 +26,17 @@ color:red;
 
 @each $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var in puma,sea-slug,egret,salamander{
 }
+
+@each $animal in /* animals */ puma,sea-slug,egret,salamander{
+}
+
+@each $animal in
+// animals
+puma,sea-slug,egret,salamander{
+}
+
+@each $animal,$color,$cursor in /* animals */ (puma,black,default),(sea-slug,blue,pointer){
+}
+
+@each $animal in /* animals */ $animals{
+}
