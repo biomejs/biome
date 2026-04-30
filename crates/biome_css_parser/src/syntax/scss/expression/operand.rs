@@ -1,9 +1,9 @@
 use crate::parser::CssParser;
 use crate::syntax::scss::{
-    add_scss_variable_member_function_name_diagnostic, is_at_scss_interpolated_value_suffix,
-    is_at_scss_interpolation, is_at_scss_namespaced_variable, is_at_scss_variable,
-    parse_scss_function_call_from_name, parse_scss_interpolated_function_or_value_until,
-    parse_scss_interpolated_value, parse_scss_variable,
+    add_scss_variable_member_function_name_diagnostic, is_at_scss_interpolation,
+    is_at_scss_namespaced_variable, is_at_scss_variable, parse_scss_function_call_from_name,
+    parse_scss_interpolated_function_or_value_until, parse_scss_interpolated_value,
+    parse_scss_variable,
 };
 use crate::syntax::value::dimension::{is_at_any_dimension, parse_any_dimension};
 use crate::syntax::{is_at_ratio, parse_ratio, parse_regular_identifier, parse_regular_number};
@@ -116,8 +116,8 @@ fn parse_scss_interpolatable_value(p: &mut CssParser) -> ParsedSyntax {
         Absent => return Absent,
     };
 
-    // Return only the parsed head for `$value`, `$value #{suffix}`, and
-    // `$value / 2`; only adjacent suffixes like `$value#{suffix}` continue.
+    // Return only the parsed head for `$value`, `$value #{suffix}`, `$value / 2`,
+    // and `3%4`; only interpolation suffixes like `$value#{suffix}` continue.
     if !is_at_scss_expression_interpolated_value_suffix(p) {
         return Present(first_part);
     }
@@ -159,17 +159,21 @@ fn is_at_scss_interpolatable_value(p: &mut CssParser) -> bool {
 
 #[inline]
 fn is_at_scss_expression_interpolated_value_suffix(p: &mut CssParser) -> bool {
-    !is_at_scss_expression_interpolated_value_boundary(p) && is_at_scss_interpolated_value_suffix(p)
+    !is_at_scss_expression_interpolated_value_boundary(p) && is_at_scss_interpolation(p)
 }
 
-/// Stops expression value chains before whitespace or a binary operator.
+/// Stops expression value chains before a space, line break, or operator.
 ///
 /// Examples:
 /// ```scss
 /// $value #{suffix}
+/// $value
+/// #{suffix}
 /// $value / 2
 /// ```
 #[inline]
 fn is_at_scss_expression_interpolated_value_boundary(p: &mut CssParser) -> bool {
-    p.has_preceding_whitespace() || scss_binary_precedence(p).is_some()
+    p.has_preceding_whitespace()
+        || p.has_preceding_line_break()
+        || scss_binary_precedence(p).is_some()
 }

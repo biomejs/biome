@@ -13,9 +13,8 @@ pub(crate) use interpolated_string::{
     is_at_scss_interpolated_string, parse_scss_interpolated_string,
 };
 pub(crate) use interpolated_value::{
-    is_at_scss_interpolated_function_or_value, is_at_scss_interpolated_value_suffix,
-    parse_scss_interpolated_function_or_value, parse_scss_interpolated_function_or_value_until,
-    parse_scss_interpolated_value,
+    is_at_scss_interpolated_function_or_value, parse_scss_interpolated_function_or_value,
+    parse_scss_interpolated_function_or_value_until, parse_scss_interpolated_value,
 };
 pub(crate) use parent_selector::{
     is_at_scss_parent_selector_value, parse_scss_parent_selector_value,
