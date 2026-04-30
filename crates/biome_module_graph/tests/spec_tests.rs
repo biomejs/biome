@@ -969,6 +969,43 @@ fn test_resolve_type_of_property_with_getter() {
     snapshot.assert_snapshot("test_resolve_type_of_property_with_getter");
 }
 
+#[test]
+fn test_writable_annotated_binding_does_not_become_singleton_union() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        declare let sink: string;
+        sink += "";
+        "#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
+
+    let index_module = module_graph
+        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
+
+    let sink_id = resolver
+        .resolve_type_of(&Text::new_static("sink"), ScopeId::GLOBAL)
+        .expect("sink variable not found");
+    let sink_ty = resolver.resolved_type_for_id(sink_id);
+
+    assert!(sink_ty.is_string_or_string_literal());
+    assert!(!matches!(
+        sink_ty.resolved_data().unwrap().as_raw_data(),
+        TypeData::Union(_)
+    ));
+}
+
 macro_rules! class_tests {
     ($($name:ident: $prefix:expr,)*) => {
     $(
