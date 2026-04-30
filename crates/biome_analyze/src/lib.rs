@@ -49,14 +49,15 @@ pub use crate::registry::{
 };
 pub use crate::rule::{
     CategoryLanguage, FixKind, GroupCategory, GroupLanguage, Rule, RuleAction, RuleDiagnostic,
-    RuleDomain, RuleGroup, RuleMeta, RuleMetadata, RuleSource, RuleSourceKind, RuleSourceWithKind,
-    SuppressAction,
+    RuleDomain, RuleGroup, RuleMeta, RuleMetadata, RulePreset, RuleSource, RuleSourceKind,
+    RuleSourceWithKind, SuppressAction,
 };
 pub use crate::services::{
     ExtendedConfigurationProvider, FromServices, ServiceBag, ServicesDiagnostic,
 };
 pub use crate::signals::{
-    AnalyzerAction, AnalyzerSignal, AnalyzerTransformation, DiagnosticSignal, PluginSignal,
+    ActionFilter, ActionMetadata, AnalyzerAction, AnalyzerSignal, AnalyzerTransformation,
+    DiagnosticSignal, PluginSignal,
 };
 use crate::suppressions::Suppressions;
 pub use crate::syntax::{Ast, SyntaxVisitor};

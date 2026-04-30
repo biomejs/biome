@@ -1,0 +1,81 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/math/7419.scss
+---
+
+# Input
+
+```scss
+@include container($foo: 2);
+@include container($foo: 2 * ($bar));
+@include container($foo: 2 * ($bar + $baz));
+
+@include container($foo: 1, $bar: 2);
+
+@include container($foo: (
+  $bar,
+  $baz
+));
+
+@include container($foo: (
+  $bar + $baz,
+  $qux * 2
+));
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,29 +1,9 @@
+ @include container($foo: 2);
+-@include container(
+-  $foo: 2 *
+-    (
+-      $bar,
+-    )
+-);
+-@include container(
+-  $foo: 2 *
+-    (
+-      $bar + $baz,
+-    )
+-);
++@include container($foo: 2 * ($bar));
++@include container($foo: 2 * ($bar + $baz));
+ 
+ @include container($foo: 1, $bar: 2);
+ 
+-@include container(
+-  $foo: (
+-    $bar,
+-    $baz,
+-  )
+-);
++@include container($foo: ($bar, $baz));
+ 
+-@include container(
+-  $foo: (
+-    $bar + $baz,
+-    $qux * 2,
+-  )
+-);
++@include container($foo: ($bar + $baz, $qux * 2));
+```
+
+# Output
+
+```scss
+@include container($foo: 2);
+@include container($foo: 2 * ($bar));
+@include container($foo: 2 * ($bar + $baz));
+
+@include container($foo: 1, $bar: 2);
+
+@include container($foo: ($bar, $baz));
+
+@include container($foo: ($bar + $baz, $qux * 2));
+```

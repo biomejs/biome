@@ -1,0 +1,44 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/hard_line.md
+---
+
+# Input
+
+```md
+foo       
+baz
+
+backslash\
+form
+
+no hard line
+here
+
+foo  
+bar with empty line after  
+
+foo  
+bar without empty line after  
+```
+
+
+# Formatted
+
+```md
+foo  
+baz
+
+backslash\
+form
+
+no hard line
+here
+
+foo  
+bar with empty line after
+
+foo  
+bar without empty line after
+
+```

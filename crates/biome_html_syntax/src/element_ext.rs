@@ -4,7 +4,7 @@ use crate::{
     HtmlElement, HtmlEmbeddedContent, HtmlOpeningElement, HtmlSelfClosingElement, HtmlSyntaxToken,
     HtmlTagName, ScriptType, inner_string_text,
 };
-
+use biome_aria::Attribute;
 use biome_rowan::{AstNodeList, SyntaxResult, TokenText, declare_node_union};
 use biome_string_case::StrOnlyExtension;
 
@@ -26,17 +26,6 @@ fn get_tag_name_text(name: &AnyHtmlTagName) -> Option<TokenText> {
             Some(token.token_text_trimmed())
         }
         AnyHtmlTagName::HtmlMemberName(_) => None,
-    }
-}
-
-impl HtmlSelfClosingElement {
-    /// Whether the current self-closing element is a void element.
-    ///
-    /// <https://html.spec.whatwg.org/#void-elements>
-    pub fn is_void_element(&self) -> Option<bool> {
-        let name = self.name().ok()?;
-        let name_text = get_tag_name_text(&name)?;
-        Some(VOID_ELEMENTS.binary_search(&&*name_text).is_ok())
     }
 }
 
@@ -116,6 +105,17 @@ impl AnyHtmlElement {
         }
     }
 
+    pub fn as_any_html_tag_element(self) -> Option<AnyHtmlTagElement> {
+        match &self {
+            Self::HtmlElement(element) => {
+                let opening = element.opening_element().ok()?;
+                Some(AnyHtmlTagElement::from(opening))
+            }
+            Self::HtmlSelfClosingElement(element) => Some(AnyHtmlTagElement::from(element.clone())),
+            _ => None,
+        }
+    }
+
     /// Returns the list of attributes for this element, if it has any.
     pub fn attributes(&self) -> Option<HtmlAttributeList> {
         match self {
@@ -125,57 +125,77 @@ impl AnyHtmlElement {
             _ => None,
         }
     }
+}
 
-    /// Check if the element has a given HTML attribute or a Vue v-bind binding
-    /// targeting the same attribute name.
+impl biome_aria::Element for AnyHtmlElement {
+    fn name(&self) -> Option<impl AsRef<str>> {
+        self.name()
+    }
+
+    fn attributes(&self) -> impl Iterator<Item = impl Attribute> {
+        self.attributes().into_iter().flat_map(|list| list.iter())
+    }
+}
+
+impl HtmlAttributeList {
+    /// Finds an attribute by name (case-insensitive) within this list of attributes.
     ///
-    /// Handles:
-    /// - `name="..."` — standard HTML attribute
-    /// - `:name="..."` — Vue v-bind shorthand (`VueVBindShorthandDirective`)
-    /// - `v-bind:name="..."` — explicit Vue v-bind (`VueDirective`)
-    pub fn find_attribute_or_vue_binding(&self, name_to_lookup: &str) -> Option<AnyHtmlAttribute> {
-        let attrs = self.attributes()?;
-
-        attrs.iter().find_map(|attr| {
-            let matches = match &attr {
-                AnyHtmlAttribute::HtmlAttribute(a) => a
-                    .name()
-                    .ok()
-                    .and_then(|n| n.value_token().ok())
-                    .is_some_and(|t| t.text_trimmed().eq_ignore_ascii_case(name_to_lookup)),
-
-                AnyHtmlAttribute::AnyVueDirective(vue) => match vue {
-                    // :name="..."
-                    AnyVueDirective::VueVBindShorthandDirective(d) => d
-                        .arg()
-                        .ok()
-                        .and_then(|arg| arg.arg().ok())
-                        .and_then(|arg| arg.as_vue_static_argument().cloned())
-                        .and_then(|s| s.name_token().ok())
-                        .is_some_and(|t| t.text_trimmed().eq_ignore_ascii_case(name_to_lookup)),
-
-                    // v-bind:name="..."
-                    AnyVueDirective::VueDirective(d) => {
-                        let is_bind = d
-                            .name_token()
-                            .is_ok_and(|t| t.text_trimmed().eq_ignore_ascii_case("v-bind"));
-                        is_bind
-                            && d.arg()
-                                .and_then(|arg| arg.arg().ok())
-                                .and_then(|arg| arg.as_vue_static_argument().cloned())
-                                .and_then(|s| s.name_token().ok())
-                                .is_some_and(|t| {
-                                    t.text_trimmed().eq_ignore_ascii_case(name_to_lookup)
-                                })
-                    }
-
-                    _ => false,
-                },
-
-                _ => false,
-            };
-            if matches { Some(attr) } else { None }
+    /// This will not detect attributes in Svelte attribute shorthand like `<div {foo}>`, or vue bindings like `<div :foo="...">` or `<div v-bind:foo="...">`.
+    pub fn find_attribute_by_name(&self, name_to_lookup: &str) -> Option<HtmlAttribute> {
+        self.iter().find_map(|attr| {
+            let attribute = attr.as_html_attribute()?;
+            let name = attribute.name().ok()?;
+            let name_token = name.value_token().ok()?;
+            if name_token
+                .text_trimmed()
+                .eq_ignore_ascii_case(name_to_lookup)
+            {
+                Some(attribute.clone())
+            } else {
+                None
+            }
         })
+    }
+
+    /// Finds multiple attributes by name (case-insensitive) within this list of attributes.
+    ///
+    /// Returns an array of `Option<HtmlAttribute>`, where each attribute corresponds to the name at the same index in `names_to_lookup`.
+    pub fn find_multiple_attributes_by_name<const N: usize>(
+        &self,
+        names_to_lookup: &[&str; N],
+    ) -> [Option<HtmlAttribute>; N] {
+        const INIT: Option<HtmlAttribute> = None;
+        let mut result: [Option<HtmlAttribute>; N] = [INIT; N];
+        let mut remaining = N;
+
+        for attr in self.iter() {
+            if remaining == 0 {
+                break;
+            }
+
+            let Some(attribute) = attr.as_html_attribute() else {
+                continue;
+            };
+            let Ok(name) = attribute.name() else {
+                continue;
+            };
+            let Ok(name_token) = name.value_token() else {
+                continue;
+            };
+            let attribute_name = name_token.text_trimmed();
+
+            for (index, name_to_lookup) in names_to_lookup.iter().enumerate() {
+                if result[index].is_none() && attribute_name.eq_ignore_ascii_case(name_to_lookup) {
+                    result[index] = Some(attribute.clone());
+                    remaining -= 1;
+                    if remaining == 0 {
+                        break;
+                    }
+                }
+            }
+        }
+
+        result
     }
 }
 
@@ -187,19 +207,24 @@ impl HtmlSelfClosingElement {
     }
 
     pub fn find_attribute_by_name(&self, name_to_lookup: &str) -> Option<HtmlAttribute> {
-        self.attributes().iter().find_map(|attr| {
-            let attribute = attr.as_html_attribute()?;
-            let name = attribute.name().ok()?;
-            let name_token = name.value_token().ok()?;
-            if name_token
-                .text_trimmed()
-                .eq_ignore_ascii_case(name_to_lookup)
-            {
-                Some(attribute.clone())
-            } else {
-                None
-            }
-        })
+        self.attributes().find_attribute_by_name(name_to_lookup)
+    }
+
+    pub fn find_multiple_attributes_by_name<const N: usize>(
+        &self,
+        names_to_lookup: &[&str; N],
+    ) -> [Option<HtmlAttribute>; N] {
+        self.attributes()
+            .find_multiple_attributes_by_name(names_to_lookup)
+    }
+
+    /// Whether the current self-closing element is a void element.
+    ///
+    /// <https://html.spec.whatwg.org/#void-elements>
+    pub fn is_void_element(&self) -> Option<bool> {
+        let name = self.name().ok()?;
+        let name_text = get_tag_name_text(&name)?;
+        Some(VOID_ELEMENTS.binary_search(&&*name_text).is_ok())
     }
 }
 
@@ -211,19 +236,15 @@ impl HtmlOpeningElement {
     }
 
     pub fn find_attribute_by_name(&self, name_to_lookup: &str) -> Option<HtmlAttribute> {
-        self.attributes().iter().find_map(|attr| {
-            let attribute = attr.as_html_attribute()?;
-            let name = attribute.name().ok()?;
-            let name_token = name.value_token().ok()?;
-            if name_token
-                .text_trimmed()
-                .eq_ignore_ascii_case(name_to_lookup)
-            {
-                Some(attribute.clone())
-            } else {
-                None
-            }
-        })
+        self.attributes().find_attribute_by_name(name_to_lookup)
+    }
+
+    pub fn find_multiple_attributes_by_name<const N: usize>(
+        &self,
+        names_to_lookup: &[&str; N],
+    ) -> [Option<HtmlAttribute>; N] {
+        self.attributes()
+            .find_multiple_attributes_by_name(names_to_lookup)
     }
 }
 
@@ -384,6 +405,13 @@ declare_node_union! {
 }
 
 impl AnyHtmlTagElement {
+    pub fn tag_name(&self) -> Option<TokenText> {
+        match self {
+            Self::HtmlOpeningElement(element) => element.tag_name(),
+            Self::HtmlSelfClosingElement(element) => element.tag_name(),
+        }
+    }
+
     pub fn name(&self) -> SyntaxResult<AnyHtmlTagName> {
         match self {
             Self::HtmlOpeningElement(element) => element.name(),
@@ -414,6 +442,20 @@ impl AnyHtmlTagElement {
         }
     }
 
+    pub fn find_multiple_attributes_by_name<const N: usize>(
+        &self,
+        names_to_lookup: &[&str; N],
+    ) -> [Option<HtmlAttribute>; N] {
+        match self {
+            Self::HtmlOpeningElement(element) => {
+                element.find_multiple_attributes_by_name(names_to_lookup)
+            }
+            Self::HtmlSelfClosingElement(element) => {
+                element.find_multiple_attributes_by_name(names_to_lookup)
+            }
+        }
+    }
+
     pub fn has_truthy_attribute(&self, name_to_lookup: &str) -> bool {
         self.find_attribute_by_name(name_to_lookup)
             .is_some_and(|attribute| {
@@ -424,18 +466,114 @@ impl AnyHtmlTagElement {
                     .is_none_or(|value| value != "false")
             })
     }
+
+    /// Check if the element has a given HTML attribute or a Vue v-bind binding
+    /// targeting the same attribute name.
+    ///
+    /// Handles:
+    /// - `name="..."` — standard HTML attribute
+    /// - `:name="..."` — Vue v-bind shorthand (`VueVBindShorthandDirective`)
+    /// - `v-bind:name="..."` — explicit Vue v-bind (`VueDirective`)
+    pub fn find_attribute_or_vue_binding(&self, name_to_lookup: &str) -> Option<AnyHtmlAttribute> {
+        self.attributes().iter().find_map(|attr| {
+            let matches = match &attr {
+                AnyHtmlAttribute::HtmlAttribute(a) => a
+                    .name()
+                    .ok()
+                    .and_then(|n| n.value_token().ok())
+                    .is_some_and(|t| t.text_trimmed().eq_ignore_ascii_case(name_to_lookup)),
+
+                AnyHtmlAttribute::AnyVueDirective(vue) => match vue {
+                    // :name="..."
+                    AnyVueDirective::VueVBindShorthandDirective(d) => d
+                        .arg()
+                        .ok()
+                        .and_then(|arg| arg.arg().ok())
+                        .and_then(|arg| arg.as_vue_static_argument().cloned())
+                        .and_then(|s| s.name_token().ok())
+                        .is_some_and(|t| t.text_trimmed().eq_ignore_ascii_case(name_to_lookup)),
+
+                    // v-bind:name="..."
+                    AnyVueDirective::VueDirective(d) => {
+                        let is_bind = d
+                            .name_token()
+                            .is_ok_and(|t| t.text_trimmed().eq_ignore_ascii_case("v-bind"));
+                        is_bind
+                            && d.arg()
+                                .and_then(|arg| arg.arg().ok())
+                                .and_then(|arg| arg.as_vue_static_argument().cloned())
+                                .and_then(|s| s.name_token().ok())
+                                .is_some_and(|t| {
+                                    t.text_trimmed().eq_ignore_ascii_case(name_to_lookup)
+                                })
+                    }
+
+                    _ => false,
+                },
+
+                _ => false,
+            };
+            if matches { Some(attr) } else { None }
+        })
+    }
+
+    pub fn find_vue_event_handling_directive(
+        &self,
+        name_to_lookup: &str,
+    ) -> Option<AnyHtmlAttribute> {
+        self.attributes().iter().find_map(|attr| {
+            let matches = match &attr {
+                AnyHtmlAttribute::AnyVueDirective(vue) => match vue {
+                    // @name="..."
+                    AnyVueDirective::VueVOnShorthandDirective(d) => d
+                        .arg()
+                        .ok()
+                        .and_then(|arg| arg.as_vue_static_argument().cloned())
+                        .and_then(|s| s.name_token().ok())
+                        .is_some_and(|t| t.text_trimmed().eq_ignore_ascii_case(name_to_lookup)),
+
+                    // v-on:name="..."
+                    AnyVueDirective::VueDirective(d) => {
+                        let is_event_handling = d
+                            .name_token()
+                            .is_ok_and(|t| t.text_trimmed().eq_ignore_ascii_case("v-on"));
+                        is_event_handling
+                            && d.arg()
+                                .and_then(|arg| arg.arg().ok())
+                                .and_then(|arg| arg.as_vue_static_argument().cloned())
+                                .and_then(|s| s.name_token().ok())
+                                .is_some_and(|t| {
+                                    t.text_trimmed().eq_ignore_ascii_case(name_to_lookup)
+                                })
+                    }
+
+                    _ => false,
+                },
+
+                _ => false,
+            };
+            if matches { Some(attr) } else { None }
+        })
+    }
+
+    /// Returns `true` if the current element is actually a component.
+    ///
+    /// - `<Span />` is a component and it would return `true`
+    /// - `<span ></span>` is **not** component and it returns `false`
+    pub fn is_custom_component(&self) -> bool {
+        self.name().is_ok_and(|it| it.as_html_tag_name().is_none())
+    }
 }
 
-impl biome_aria::Element for AnyHtmlElement {
+impl biome_aria::Element for AnyHtmlTagElement {
     fn name(&self) -> Option<impl AsRef<str>> {
         // HTML element names are case-insensitive; lowercase for AriaRoles matching
-        Some(Self::name(self)?.text().to_lowercase_cow().into_owned())
+        Some(Self::tag_name(self)?.text().to_lowercase_cow().into_owned())
     }
 
     fn attributes(&self) -> impl Iterator<Item = impl biome_aria::Attribute> {
         Self::attributes(self)
             .into_iter()
-            .flatten()
             .filter_map(|attr| match attr {
                 AnyHtmlAttribute::HtmlAttribute(attr) => Some(attr),
                 _ => None,
@@ -465,9 +603,75 @@ impl biome_aria::Attribute for HtmlAttribute {
 
 #[cfg(test)]
 mod tests {
-    use biome_html_factory::syntax::HtmlElement;
+    use biome_html_factory::syntax::{HtmlAttribute, HtmlElement};
     use biome_html_parser::{HtmlParserOptions, parse_html};
     use biome_rowan::AstNode;
+
+    fn first_element(html: &str) -> HtmlElement {
+        parse_html(html, HtmlParserOptions::default())
+            .tree()
+            .syntax()
+            .descendants()
+            .find_map(HtmlElement::cast)
+            .unwrap()
+    }
+
+    fn attribute_name(attribute: &HtmlAttribute) -> String {
+        attribute
+            .name()
+            .unwrap()
+            .value_token()
+            .unwrap()
+            .text_trimmed()
+            .to_string()
+    }
+
+    #[test]
+    fn find_multiple_attributes_by_name_matches_requested_names() {
+        let element = first_element(r#"<div id="main" class="card" data-value="1"></div>"#);
+        let attributes = element.opening_element().unwrap().attributes();
+
+        let [id, class, data_value] =
+            attributes.find_multiple_attributes_by_name(&["id", "class", "data-value"]);
+
+        assert_eq!(id.as_ref().map(attribute_name), Some("id".to_string()));
+        assert_eq!(
+            class.as_ref().map(attribute_name),
+            Some("class".to_string())
+        );
+        assert_eq!(
+            data_value.as_ref().map(attribute_name),
+            Some("data-value".to_string())
+        );
+    }
+
+    #[test]
+    fn find_multiple_attributes_by_name_is_case_insensitive_and_preserves_missing() {
+        let element = first_element(r#"<div ID="main" CLASS="card"></div>"#);
+        let attributes = element.opening_element().unwrap().attributes();
+
+        let [id, class, missing] =
+            attributes.find_multiple_attributes_by_name(&["id", "class", "aria-label"]);
+
+        assert_eq!(id.as_ref().map(attribute_name), Some("ID".to_string()));
+        assert_eq!(
+            class.as_ref().map(attribute_name),
+            Some("CLASS".to_string())
+        );
+        assert!(missing.is_none());
+    }
+
+    #[test]
+    fn find_multiple_attributes_by_name_keeps_first_attribute_for_duplicate_names() {
+        let element = first_element(r#"<div class="first" CLASS="second"></div>"#);
+        let attributes = element.opening_element().unwrap().attributes();
+
+        let [class] = attributes.find_multiple_attributes_by_name(&["class"]);
+
+        let class = class.unwrap();
+        assert_eq!(attribute_name(&class), "class");
+        assert_eq!(class.value().unwrap().to_string(), "first");
+    }
 
     #[test]
     fn test_is_javascript_tag() {

@@ -139,6 +139,6 @@ reporter/violations ━━━━━━━━━━━━━━━━━━━━
 
 ```block
 Checked 3 files in <TIME>. No fixes applied.
-Found 57 errors.
+Found 56 errors.
 Found 16 warnings.
 ```

@@ -107,7 +107,7 @@ impl Rule for UseSingleJsDocAsterisk {
                         is_end_line: invalid_line.is_end_line,
                         char_start: line_offset + invalid_line.char_start,
                         char_end: line_offset + invalid_line.char_end,
-                        comment_text: text.into(),
+                        comment_range: comment.text_range(),
                     })
                 })
                 .collect();
@@ -144,7 +144,7 @@ impl Rule for UseSingleJsDocAsterisk {
             if let Some(comment) = trivia.as_comments() {
                 let mut comment_text = Cow::Borrowed(comment.text());
 
-                if comment.text() == state.comment_text.as_ref() {
+                if comment.text_range() == state.comment_range {
                     let new_comment_text = format!(
                         "{}{}",
                         &comment_text[..state.char_start],
@@ -182,7 +182,7 @@ pub struct RuleState {
     is_end_line: bool,
     char_start: usize,
     char_end: usize,
-    comment_text: Box<str>,
+    comment_range: TextRange,
 }
 
 pub struct InvalidJsDocLineIndexes {
@@ -196,16 +196,8 @@ fn char_is_whitespace(c: u8) -> bool {
     c == b' ' || c == b'\t'
 }
 
-fn char_is_asterisk(c: u8) -> bool {
-    c == b'*'
-}
-
 fn get_first_asterisk_index(line: &str) -> usize {
-    line.as_bytes()
-        .iter()
-        .take_while(|&&b| !char_is_asterisk(b))
-        .count()
-        + 1
+    line.as_bytes().iter().take_while(|&&b| !b == b'*').count() + 1
 }
 
 fn get_invalid_jsdoc_line_start(text: &str) -> Option<InvalidJsDocLineIndexes> {
@@ -222,7 +214,7 @@ fn get_invalid_jsdoc_line_start(text: &str) -> Option<InvalidJsDocLineIndexes> {
             let bytes = line.as_bytes();
 
             // If first symbol is not an asterisk, we can skip the line
-            if bytes.first().is_some_and(|&b| !char_is_asterisk(b)) {
+            if bytes.first().is_some_and(|&b| !b == b'*') {
                 return None;
             }
 
@@ -230,12 +222,9 @@ fn get_invalid_jsdoc_line_start(text: &str) -> Option<InvalidJsDocLineIndexes> {
 
             let mut byte_it = bytes.iter().skip(1).enumerate().peekable();
             while let Some((char_index, &b)) = byte_it.next() {
-                if char_is_asterisk(b) {
+                if b == b'*' {
                     // double asterisk is valid
-                    if byte_it
-                        .peek()
-                        .is_some_and(|&(_, &next_b)| char_is_asterisk(next_b))
-                    {
+                    if byte_it.peek().is_some_and(|&(_, &next_b)| next_b == b'*') {
                         return invalid_asterisk_index.map(|_| (line_index, char_index));
                     }
 
@@ -275,7 +264,7 @@ fn get_invalid_jsdoc_last_line(text: &str) -> Option<InvalidJsDocLineIndexes> {
         .skip(ending_marker);
 
     for (char_index, &b) in byte_it {
-        if char_is_asterisk(b) {
+        if b == b'*' {
             last_invalid_asterisk_index = Some(char_index);
             continue;
         }

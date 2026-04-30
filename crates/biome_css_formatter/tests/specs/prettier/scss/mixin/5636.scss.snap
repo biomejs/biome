@@ -1,0 +1,47 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/mixin/5636.scss
+---
+
+# Input
+
+```scss
+.foo {
+  @include transition(min-height ($spacer/2) ease-in-out);
+}
+
+.bar {
+  @include transition(min-height, $spacer/2, ease-in-out);
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,7 @@
+ .foo {
+-  @include transition(min-height ($spacer/2) ease-in-out);
++  @include transition(min-height($spacer / 2) ease-in-out);
+ }
+ 
+ .bar {
+-  @include transition(min-height, $spacer/2, ease-in-out);
++  @include transition(min-height, $spacer / 2, ease-in-out);
+ }
+```
+
+# Output
+
+```scss
+.foo {
+  @include transition(min-height($spacer / 2) ease-in-out);
+}
+
+.bar {
+  @include transition(min-height, $spacer / 2, ease-in-out);
+}
+```

@@ -34,7 +34,7 @@ biome_rowan          = { workspace = true }
 camino               = { workspace = true }
 cfg-if               = { workspace = true }
 indexmap             = { workspace = true }
-once_cell            = "1.21.3"  # Use `std::sync::OnceLock::get_or_try_init` when it is stable.
+once_cell            = "1.21.4"  # Use `std::sync::OnceLock::get_or_try_init` when it is stable.
 papaya               = { workspace = true }
 rustc-hash           = { workspace = true }
 schemars             = { workspace = true, optional = true }
@@ -55,7 +55,7 @@ biome_json_parser    = { path = "../biome_json_parser" }
 biome_json_value     = { path = "../biome_json_value" }
 biome_service        = { path = "../biome_service", features = ["testing"] }
 biome_test_utils     = { path = "../biome_test_utils" }
-divan                = { package = "codspeed-divan-compat", version = "=4.2.1" }
+divan                = { package = "codspeed-divan-compat", version = "=4.4.1" }
 insta                = { workspace = true }
 walkdir              = { workspace = true }
 

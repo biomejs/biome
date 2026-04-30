@@ -223,12 +223,15 @@ fn resolved_type(ident: IdentOrZero, ty: &Type) -> TokenStream {
         Some(segment) if segment.ident == "Text" => {
             quote! { None }
         }
+        Some(segment) if segment.ident == "bool" => {
+            quote! { None }
+        }
         Some(segment) if segment.ident == "Box" => match &segment.arguments {
             PathArguments::None => abort!(segment, "Box is missing argument"),
             PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
                 match args.args.iter().next().unwrap() {
                     GenericArgument::Type(Type::Slice(slice)) => match slice.elem.as_ref() {
-                        Type::Path(ty) if ty.path.is_ident("Text") => {
+                        Type::Path(ty) if ty.path.is_ident("Text") || ty.path.is_ident("bool") => {
                             quote! { None }
                         }
                         Type::Path(_) => quote! {{
@@ -254,7 +257,7 @@ fn resolved_type(ident: IdentOrZero, ty: &Type) -> TokenStream {
                         _ => abort!(slice, "Unsupported arguments"),
                     },
                     GenericArgument::Type(Type::Path(ty)) => {
-                        if ty.path.is_ident("Text") {
+                        if ty.path.is_ident("Text") || ty.path.is_ident("bool") {
                             quote! { None }
                         } else {
                             quote! {
@@ -274,7 +277,7 @@ fn resolved_type(ident: IdentOrZero, ty: &Type) -> TokenStream {
             PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
                 match args.args.iter().next().unwrap() {
                     GenericArgument::Type(Type::Path(ty)) => {
-                        if ty.path.is_ident("Text") {
+                        if ty.path.is_ident("Text") || ty.path.is_ident("bool") {
                             quote! { None }
                         } else {
                             quote! { self.#ident.as_ref().map(|field| field.resolved(resolver)) }
@@ -300,16 +303,19 @@ fn resolved_unit_type(ident: &Ident, ty: &Type) -> Option<TokenStream> {
 
     match path.path.segments.last() {
         Some(segment) if segment.ident == "Text" => None,
+        Some(segment) if segment.ident == "bool" => None,
         Some(segment) if segment.ident == "Box" => match &segment.arguments {
             PathArguments::None => abort!(segment, "Box is missing argument"),
             PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
                 match args.args.iter().next().unwrap() {
                     GenericArgument::Type(Type::Slice(slice)) => match slice.elem.as_ref() {
-                        Type::Path(ty) if ty.path.is_ident("Text") => None,
+                        Type::Path(ty) if ty.path.is_ident("Text") || ty.path.is_ident("bool") => {
+                            None
+                        }
                         _ => abort!(args, "Unsupported arguments"),
                     },
                     GenericArgument::Type(Type::Path(ty)) => {
-                        if ty.path.is_ident("Text") {
+                        if ty.path.is_ident("Text") || ty.path.is_ident("bool") {
                             None
                         } else {
                             Some(quote! { ty.resolved(resolver).map(Box::new).map(Self::#ident) })
@@ -327,7 +333,7 @@ fn resolved_unit_type(ident: &Ident, ty: &Type) -> Option<TokenStream> {
             PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
                 match args.args.iter().next().unwrap() {
                     GenericArgument::Type(Type::Path(ty)) => {
-                        if ty.path.is_ident("Text") {
+                        if ty.path.is_ident("Text") || ty.path.is_ident("bool") {
                             None
                         } else {
                             Some(quote! { match ty {
@@ -363,12 +369,15 @@ fn update_all_references_for_type(instance: TokenStream, ty: &Type) -> Option<To
 
     match path.path.segments.last() {
         Some(segment) if segment.ident == "Text" => None,
+        Some(segment) if segment.ident == "bool" => None,
         Some(segment) if segment.ident == "Box" => match &segment.arguments {
             PathArguments::None => abort!(segment, "Box is missing argument"),
             PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
                 match args.args.iter().next().unwrap() {
                     GenericArgument::Type(Type::Slice(slice)) => match slice.elem.as_ref() {
-                        Type::Path(ty) if ty.path.is_ident("Text") => None,
+                        Type::Path(ty) if ty.path.is_ident("Text") || ty.path.is_ident("bool") => {
+                            None
+                        }
                         Type::Path(_) => Some(quote! {
                             for elem in &mut #instance {
                                 elem.update_all_references(updater);
@@ -377,7 +386,7 @@ fn update_all_references_for_type(instance: TokenStream, ty: &Type) -> Option<To
                         _ => abort!(slice, "Unsupported arguments"),
                     },
                     GenericArgument::Type(Type::Path(ty)) => {
-                        if ty.path.is_ident("Text") {
+                        if ty.path.is_ident("Text") || ty.path.is_ident("bool") {
                             None
                         } else {
                             Some(quote! {
@@ -397,7 +406,7 @@ fn update_all_references_for_type(instance: TokenStream, ty: &Type) -> Option<To
             PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
                 match args.args.iter().next().unwrap() {
                     GenericArgument::Type(Type::Path(ty)) => {
-                        if ty.path.is_ident("Text") {
+                        if ty.path.is_ident("Text") || ty.path.is_ident("bool") {
                             None
                         } else {
                             Some(quote! {

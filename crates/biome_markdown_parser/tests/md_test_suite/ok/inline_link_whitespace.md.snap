@@ -72,9 +72,12 @@ MdDocument {
                             MdTextual {
                                 value_token: MD_TEXTUAL_LITERAL@58..65 "\"title\"" [] [],
                             },
+                            MdTextual {
+                                value_token: MD_TEXTUAL_LITERAL@65..67 "  " [] [],
+                            },
                         ],
                     },
-                    r_paren_token: R_PAREN@65..68 "  )" [] [],
+                    r_paren_token: R_PAREN@67..68 ")" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@68..69 "\n" [] [],
@@ -283,11 +286,13 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@56..57 " " [] []
             4: MD_TEXTUAL@57..58
               0: MD_TEXTUAL_LITERAL@57..58 " " [] []
-          5: MD_LINK_TITLE@58..65
-            0: MD_INLINE_ITEM_LIST@58..65
+          5: MD_LINK_TITLE@58..67
+            0: MD_INLINE_ITEM_LIST@58..67
               0: MD_TEXTUAL@58..65
                 0: MD_TEXTUAL_LITERAL@58..65 "\"title\"" [] []
-          6: R_PAREN@65..68 "  )" [] []
+              1: MD_TEXTUAL@65..67
+                0: MD_TEXTUAL_LITERAL@65..67 "  " [] []
+          6: R_PAREN@67..68 ")" [] []
         3: MD_TEXTUAL@68..69
           0: MD_TEXTUAL_LITERAL@68..69 "\n" [] []
       1: (empty)

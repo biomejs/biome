@@ -49,29 +49,31 @@ index.css:7:17 lint/correctness/noUnknownFunction ━━━━━━━━━━
   
   ℹ See MDN web docs for more details.
   
-index.css:3:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ✖ Expected a declaration item but instead found '}'.
-  
-  > 3 │ .brokenStyle { color: f( }
-      │                          ^
-    4 │ 
-    5 │ .style {
-  
-  ℹ Expected a declaration item here.
-  
-  > 3 │ .brokenStyle { color: f( }
-      │                          ^
-    4 │ 
-    5 │ .style {
-  
 index.css format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ✖ Code formatting aborted due to parsing errors. To format code with errors, enable the 'formatter.formatWithErrors' option.
   
+index.ts:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ The imports and exports are not sorted.
+  
+  > 1 │ import { z} from "z"
+      │ ^^^^^^^^^^^^^^^^^^^^
+    2 │ import { z, b , a} from "lodash"
+    3 │ 
+  
+  ℹ Safe fix: Organize Imports (Biome)
+  
+     1    │ - import·{·z}·from·"z"
+     2    │ - import·{·z,·b·,·a}·from·"lodash"
+        1 │ + import·{·a,·b·,·z·}·from·"lodash"
+        2 │ + import·{·z}·from·"z"
+     3  3 │   
+     4  4 │   a ==b
+  
 The number of diagnostics exceeds the limit allowed. Use --max-diagnostics to increase it.
-Diagnostics not shown: 60.Checked 3 files in <TIME>. No fixes applied.
-Found 49 errors.
+Diagnostics not shown: 59.Checked 3 files in <TIME>. No fixes applied.
+Found 48 errors.
 Found 16 warnings.
 ```
 

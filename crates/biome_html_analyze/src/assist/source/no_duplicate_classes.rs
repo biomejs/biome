@@ -6,7 +6,7 @@ use biome_analyze::{
     declare_source_rule,
 };
 use biome_console::markup;
-use biome_diagnostics::{Applicability, category};
+use biome_diagnostics::Applicability;
 use biome_html_factory::make;
 use biome_html_syntax::{
     HtmlAttribute, HtmlString, HtmlSyntaxKind, HtmlSyntaxToken, inner_string_text,
@@ -100,7 +100,7 @@ impl Rule for NoDuplicateClasses {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         Some(duplicate_classes_diagnostic(
-            category!("assist/source/noDuplicateClasses"),
+            rule_category!(),
             ctx.query().range(),
             &state.duplicates,
         ))

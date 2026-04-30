@@ -5,7 +5,7 @@ use biome_aria::AriaRoles;
 use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlElement, HtmlAttribute, HtmlFileSource};
+use biome_html_syntax::{HtmlAttribute, HtmlFileSource, element_ext::AnyHtmlTagElement};
 use biome_rowan::{AstNode, BatchMutationExt, Text};
 use biome_rule_options::no_redundant_roles::NoRedundantRolesOptions;
 
@@ -52,7 +52,7 @@ declare_lint_rule! {
         version: "next",
         name: "noRedundantRoles",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("no-redundant-roles").same(), RuleSource::HtmlEslint("no-redundant-role").same()],
+        sources: &[RuleSource::EslintJsxA11y("no-redundant-roles").inspired(), RuleSource::HtmlEslint("no-redundant-role").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -60,20 +60,19 @@ declare_lint_rule! {
 }
 
 impl Rule for NoRedundantRoles {
-    type Query = Ast<AnyHtmlElement>;
+    type Query = Ast<AnyHtmlTagElement>;
     type State = RuleState;
     type Signals = Option<Self::State>;
     type Options = NoRedundantRolesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-
         let source_type = ctx.source_type::<HtmlFileSource>();
+
         if !source_type.is_html() {
-            let element_name = node.name()?;
+            let element_name = node.tag_name()?;
             let name_text = element_name.text();
-            if name_text.chars().next().is_some_and(|c| c.is_uppercase())
-                || name_text.contains('-')
+            if name_text.chars().next().is_some_and(|c| c.is_uppercase()) || name_text.contains('-')
             {
                 return None;
             }
@@ -96,7 +95,7 @@ impl Rule for NoRedundantRoles {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let element_name = ctx.query().name()?;
+        let element_name = ctx.query().tag_name()?;
         let element_name = element_name.text();
         let role_attribute = state.role_attribute_value.to_string();
         Some(RuleDiagnostic::new(

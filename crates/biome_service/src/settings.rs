@@ -7,7 +7,9 @@ use biome_configuration::bool::Bool;
 use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
 use biome_configuration::html::{ExperimentalFullSupportEnabled, HtmlConfiguration};
-use biome_configuration::javascript::{ExperimentalEmbeddedSnippetsEnabled, JsxRuntime};
+use biome_configuration::javascript::{
+    ExperimentalEmbeddedSnippetsEnabled, ExperimentalPnpmCatalogsEnabled, JsxRuntime,
+};
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::{VcsClientKind, VcsConfiguration, VcsEnabled, VcsUseIgnoreFile};
 use biome_configuration::{
@@ -23,8 +25,8 @@ use biome_css_parser::{CssModulesKind, CssParserOptions};
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::Merge;
 use biome_formatter::{
-    AttributePosition, BracketSameLine, BracketSpacing, Expand, IndentStyle, IndentWidth,
-    LineEnding, LineWidth, TrailingNewline,
+    AttributePosition, BracketSameLine, BracketSpacing, DelimiterSpacing, Expand, IndentStyle,
+    IndentWidth, LineEnding, LineWidth, TrailingNewline,
 };
 use biome_fs::BiomePath;
 use biome_graphql_formatter::context::GraphqlFormatOptions;
@@ -80,6 +82,9 @@ pub struct Settings {
 
     // TODO: remove once embedded snippets support is stable
     pub experimental_js_embedded_snippets_enabled: Option<ExperimentalEmbeddedSnippetsEnabled>,
+
+    // TODO: remove once pnpm workspace catalogs support is stable
+    pub experimental_pnpm_catalogs_enabled: Option<ExperimentalPnpmCatalogsEnabled>,
 }
 
 impl Settings {
@@ -169,6 +174,10 @@ impl Settings {
         if let Some(javascript) = configuration.javascript {
             self.experimental_js_embedded_snippets_enabled =
                 javascript.experimental_embedded_snippets_enabled;
+            self.experimental_pnpm_catalogs_enabled = javascript
+                .resolver
+                .as_ref()
+                .and_then(|resolver| resolver.experimental_pnpm_catalogs);
             self.languages.javascript = javascript.into()
         }
         // json settings
@@ -224,6 +233,15 @@ impl Settings {
     #[inline]
     pub fn ignore_unknown_enabled(&self) -> bool {
         self.files.ignore_unknown.unwrap_or_default().into()
+    }
+
+    /// Whether `pnpm-workspace.yaml` catalogs should be used to resolve
+    /// `catalog:` dependency versions.
+    #[inline]
+    pub fn use_pnpm_workspace_catalogs(&self) -> bool {
+        self.experimental_pnpm_catalogs_enabled
+            .unwrap_or_default()
+            .value()
     }
 
     /// Retrieves the settings of the linter
@@ -345,6 +363,10 @@ impl Settings {
 
     pub fn linter_recommended_enabled(&self) -> bool {
         self.linter.recommended_enabled()
+    }
+
+    pub fn linter_all_enabled(&self) -> bool {
+        self.linter.all_enabled()
     }
 
     pub fn is_assist_enabled(&self) -> bool {
@@ -554,6 +576,7 @@ pub struct FormatSettings {
     pub attribute_position: Option<AttributePosition>,
     pub bracket_same_line: Option<BracketSameLine>,
     pub bracket_spacing: Option<BracketSpacing>,
+    pub delimiter_spacing: Option<DelimiterSpacing>,
     pub trailing_newline: Option<TrailingNewline>,
     pub expand: Option<Expand>,
     /// List of included paths/files
@@ -579,6 +602,7 @@ pub struct OverrideFormatSettings {
     pub line_ending: Option<LineEnding>,
     pub line_width: Option<LineWidth>,
     pub bracket_spacing: Option<BracketSpacing>,
+    pub delimiter_spacing: Option<DelimiterSpacing>,
     pub bracket_same_line: Option<BracketSameLine>,
     pub attribute_position: Option<AttributePosition>,
     pub expand: Option<Expand>,
@@ -595,6 +619,7 @@ impl From<OverrideFormatterConfiguration> for OverrideFormatSettings {
             line_ending: conf.line_ending,
             line_width: conf.line_width,
             bracket_spacing: conf.bracket_spacing,
+            delimiter_spacing: conf.delimiter_spacing,
             bracket_same_line: conf.bracket_same_line,
             attribute_position: conf.attribute_position,
             expand: conf.expand,
@@ -627,9 +652,23 @@ impl LinterSettings {
     pub fn recommended_enabled(&self) -> bool {
         self.rules
             .as_ref()
-            .and_then(|rules| rules.recommended)
+            .and_then(|rules| {
+                rules.recommended.or(Some(
+                    rules
+                        .preset
+                        .as_ref()
+                        .is_some_and(|preset| preset.is_recommended()),
+                ))
+            })
             // If there isn't a clear value, we default to true
             .unwrap_or(true)
+    }
+
+    pub fn all_enabled(&self) -> bool {
+        self.rules
+            .as_ref()
+            .and_then(|rules| rules.preset.as_ref())
+            .is_some_and(|preset| preset.is_all())
     }
 }
 
@@ -1655,6 +1694,12 @@ impl OverrideSettingPattern {
         if let Some(bracket_spacing) = js_formatter.bracket_spacing.or(formatter.bracket_spacing) {
             options.set_bracket_spacing(bracket_spacing);
         }
+        if let Some(delimiter_spacing) = js_formatter
+            .delimiter_spacing
+            .or(formatter.delimiter_spacing)
+        {
+            options.set_delimiter_spacing(delimiter_spacing);
+        }
         if let Some(bracket_same_line) = js_formatter.bracket_same_line {
             options.set_bracket_same_line(bracket_same_line);
         }
@@ -1702,6 +1747,12 @@ impl OverrideSettingPattern {
         {
             options.set_bracket_spacing(bracket_spacing);
         }
+        if let Some(delimiter_spacing) = json_formatter
+            .delimiter_spacing
+            .or(formatter.delimiter_spacing)
+        {
+            options.set_delimiter_spacing(delimiter_spacing);
+        }
         if let Some(trailing_newline) = json_formatter
             .trailing_newline
             .or(formatter.trailing_newline)
@@ -1728,6 +1779,12 @@ impl OverrideSettingPattern {
         }
         if let Some(quote_style) = css_formatter.quote_style {
             options.set_quote_style(quote_style);
+        }
+        if let Some(delimiter_spacing) = css_formatter
+            .delimiter_spacing
+            .or(formatter.delimiter_spacing)
+        {
+            options.set_delimiter_spacing(delimiter_spacing);
         }
         if let Some(trailing_newline) = css_formatter
             .trailing_newline
@@ -1924,6 +1981,7 @@ pub fn to_override_settings(
                 line_ending: formatter.line_ending,
                 line_width: formatter.line_width,
                 bracket_spacing: formatter.bracket_spacing,
+                delimiter_spacing: formatter.delimiter_spacing,
                 bracket_same_line: formatter.bracket_same_line,
                 attribute_position: formatter.attribute_position,
                 expand: formatter.expand,
@@ -2129,6 +2187,7 @@ pub fn to_format_settings(
         attribute_position: conf.attribute_position,
         bracket_same_line: conf.bracket_same_line,
         bracket_spacing: conf.bracket_spacing,
+        delimiter_spacing: conf.delimiter_spacing,
         expand: conf.expand,
         trailing_newline: conf.trailing_newline,
         includes: Includes::new(working_directory, conf.includes),
@@ -2155,6 +2214,7 @@ impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
             attribute_position: Some(AttributePosition::default()),
             bracket_same_line: conf.bracket_same_line,
             bracket_spacing: Some(BracketSpacing::default()),
+            delimiter_spacing: conf.delimiter_spacing,
             expand: conf.expand,
             format_with_errors: conf.format_with_errors,
             trailing_newline: conf.trailing_newline,

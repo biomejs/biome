@@ -2,7 +2,13 @@ mod rules;
 
 use crate::bool::Bool;
 use biome_analyze::RuleDomain;
+use biome_console::markup;
+use biome_deserialize::{
+    DeserializableValidator, DeserializationContext, DeserializationDiagnostic, TextRange,
+};
 use biome_deserialize_macros::{Deserializable, Merge};
+use biome_diagnostics::{DiagnosticTags, Severity};
+#[cfg(feature = "cli")]
 use bpaf::Bpaf;
 pub use rules::*;
 use rustc_hash::FxHashMap;
@@ -11,32 +17,56 @@ use std::ops::Deref;
 
 pub type LinterEnabled = Bool<true>;
 
-#[derive(
-    Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Bpaf, Deserializable, Merge,
-)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
+#[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+#[deserializable(with_validator)]
 pub struct LinterConfiguration {
     /// if `false`, it disables the feature and the linter won't be executed. `true` by default
-    #[bpaf(hide)]
+    #[cfg_attr(feature = "cli", bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<LinterEnabled>,
 
     /// List of rules
-    #[bpaf(pure(Default::default()), optional, hide)]
+    #[cfg_attr(feature = "cli", bpaf(pure(Default::default()), optional, hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rules: Option<Rules>,
 
     /// A list of glob patterns. The analyzer will handle only those files/folders that will
     /// match these patterns.
-    #[bpaf(pure(Default::default()), hide)]
+    #[cfg_attr(feature = "cli", bpaf(pure(Default::default()), hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub includes: Option<Vec<biome_glob::NormalizedGlob>>,
 
     /// An object where the keys are the names of the domains, and the values are `all`, `recommended`, or `none`.
-    #[bpaf(hide, pure(Default::default()))]
+    #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub domains: Option<RuleDomains>,
+}
+
+impl DeserializableValidator for LinterConfiguration {
+    fn validate(
+        &mut self,
+        ctx: &mut impl DeserializationContext,
+        _name: &str,
+        range: TextRange,
+    ) -> bool {
+        if let Some(rules) = self.rules.as_ref()
+            && rules.recommended.is_some()
+        {
+            ctx.report(DeserializationDiagnostic::new("The use of the recommended field has been deprecated, and will removed in the next major version of Biome. Use preset instead.").with_range(range).with_custom_severity(Severity::Information).with_tags(DiagnosticTags::DEPRECATED_CODE).with_command("Migrate the configuration with the proper command", "biome migrate"));
+
+            if rules.preset.is_some() {
+                ctx.report(DeserializationDiagnostic::new(markup! {
+                    "The "<Emphasis>"recommended"</Emphasis>" field and the "<Emphasis>"preset"</Emphasis>" field cannot be used together."
+                }).with_range(range).with_custom_severity(Severity::Warning).with_tags(DiagnosticTags::DEPRECATED_CODE).with_note(markup! {
+                    "Remove the "<Emphasis>"recommended"</Emphasis>" field."
+                }));
+            }
+        }
+        true
+    }
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize, Merge)]

@@ -4,7 +4,8 @@ use biome_analyze::{Ast, Rule, RuleDiagnostic, declare_lint_rule};
 use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlElement, HtmlAttribute};
+use biome_html_syntax::HtmlAttribute;
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_rowan::{AstNode, Text};
 use biome_rule_options::use_aria_props_for_role::UseAriaPropsForRoleOptions;
 
@@ -48,7 +49,7 @@ declare_lint_rule! {
         version: "2.4.0",
         name: "useAriaPropsForRole",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("role-has-required-aria-props").same()],
+        sources: &[RuleSource::EslintJsxA11y("role-has-required-aria-props").inspired()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -61,7 +62,7 @@ pub struct UseAriaPropsForRoleState {
 }
 
 impl Rule for UseAriaPropsForRole {
-    type Query = Ast<AnyHtmlElement>;
+    type Query = Ast<AnyHtmlTagElement>;
     type State = UseAriaPropsForRoleState;
     type Signals = Option<Self::State>;
     type Options = UseAriaPropsForRoleOptions;

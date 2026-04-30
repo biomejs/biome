@@ -66,12 +66,6 @@ async function traverseDir(dir, input_config) {
 
 			if (key in snapshot) {
 				let snapshotContent = String(snapshot[key]);
-
-				// Copy the snapshot input file, ensuring the
-				// parent directory exists
-				const outDir = path.resolve(outPath, '..');
-				await fs.mkdir(outDir, { recursive: true });
-				await fs.copyFile(filePath, outPath);
 				// Extract the expected output from the snapshot text
 				const INPUT =
 					"=====================================input======================================";
@@ -82,9 +76,21 @@ async function traverseDir(dir, input_config) {
 				const FOOTER =
 					'================================================================================';
 
-				// extract options string
 				const optionsStart = snapshotContent.match(new RegExp(OPTIONS + '\\n'));
 				const optionsEnd = snapshotContent.match(new RegExp('\\n' + INPUT));
+				const outputStart = snapshotContent.match(new RegExp(OUTPUT + '\\n'));
+				const outputEnd = snapshotContent.match(new RegExp('\\n' + FOOTER));
+
+				if (!optionsStart || !optionsEnd || !outputStart || !outputEnd) {
+					continue;
+				}
+
+				// Copy the snapshot input file, ensuring the
+				// parent directory exists
+				const outDir = path.resolve(outPath, '..');
+				await fs.mkdir(outDir, { recursive: true });
+				await fs.copyFile(filePath, outPath);
+
 				const optionsStartOffset = optionsStart.index + optionsStart[0].length;
 				const optionsEndOffset = optionsEnd.index;
 				const optionsContent = snapshotContent.substring(optionsStartOffset, optionsEndOffset);
@@ -95,10 +101,6 @@ async function traverseDir(dir, input_config) {
 					rangeStart: Number(optionsContent.match(new RegExp(/rangeStart: (\d+)/))?.[1] ?? 0),
 					rangeEnd: Number(optionsContent.match(new RegExp(/rangeEnd: (\d+)/))?.[1] ?? Infinity)
 				};
-
-				// extract output string
-				const outputStart = snapshotContent.match(new RegExp(OUTPUT + '\\n'));
-				const outputEnd = snapshotContent.match(new RegExp('\\n' + FOOTER));
 
 				const outputStartOffset = outputStart.index + outputStart[0].length;
 				const outputEndOffset = outputEnd.index;

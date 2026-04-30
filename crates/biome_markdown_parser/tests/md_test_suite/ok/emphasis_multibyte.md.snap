@@ -1,0 +1,110 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+>💡 Biomeは、[Prettierのオプションに対する考え方](https://prettier.io/docs/en/option-philosophy)と同様のアプローチを採用しています。
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdQuote {
+            prefix: MdQuotePrefix {
+                pre_marker_indent: MdQuoteIndentList [],
+                marker_token: R_ANGLE@0..1 ">" [] [],
+                post_marker_space_token: missing (optional),
+            },
+            content: MdBlockList [
+                MdParagraph {
+                    list: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@1..17 "💡 Biomeは、" [] [],
+                        },
+                        MdInlineLink {
+                            l_brack_token: L_BRACK@17..18 "[" [] [],
+                            text: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@18..65 "Prettierのオプションに対する考え方" [] [],
+                                },
+                            ],
+                            r_brack_token: R_BRACK@65..66 "]" [] [],
+                            l_paren_token: L_PAREN@66..67 "(" [] [],
+                            destination: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@67..101 "https://prettier.io/docs/en/option" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@101..102 "-" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@102..112 "philosophy" [] [],
+                                },
+                            ],
+                            title: missing (optional),
+                            r_paren_token: R_PAREN@112..113 ")" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@113..167 "と同様のアプローチを採用しています。" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@167..168 "\n" [] [],
+                        },
+                    ],
+                    hard_line: missing (optional),
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@168..168 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..168
+  0: (empty)
+  1: MD_BLOCK_LIST@0..168
+    0: MD_QUOTE@0..168
+      0: MD_QUOTE_PREFIX@0..1
+        0: MD_QUOTE_INDENT_LIST@0..0
+        1: R_ANGLE@0..1 ">" [] []
+        2: (empty)
+      1: MD_BLOCK_LIST@1..168
+        0: MD_PARAGRAPH@1..168
+          0: MD_INLINE_ITEM_LIST@1..168
+            0: MD_TEXTUAL@1..17
+              0: MD_TEXTUAL_LITERAL@1..17 "💡 Biomeは、" [] []
+            1: MD_INLINE_LINK@17..113
+              0: L_BRACK@17..18 "[" [] []
+              1: MD_INLINE_ITEM_LIST@18..65
+                0: MD_TEXTUAL@18..65
+                  0: MD_TEXTUAL_LITERAL@18..65 "Prettierのオプションに対する考え方" [] []
+              2: R_BRACK@65..66 "]" [] []
+              3: L_PAREN@66..67 "(" [] []
+              4: MD_INLINE_ITEM_LIST@67..112
+                0: MD_TEXTUAL@67..101
+                  0: MD_TEXTUAL_LITERAL@67..101 "https://prettier.io/docs/en/option" [] []
+                1: MD_TEXTUAL@101..102
+                  0: MD_TEXTUAL_LITERAL@101..102 "-" [] []
+                2: MD_TEXTUAL@102..112
+                  0: MD_TEXTUAL_LITERAL@102..112 "philosophy" [] []
+              5: (empty)
+              6: R_PAREN@112..113 ")" [] []
+            2: MD_TEXTUAL@113..167
+              0: MD_TEXTUAL_LITERAL@113..167 "と同様のアプローチを採用しています。" [] []
+            3: MD_TEXTUAL@167..168
+              0: MD_TEXTUAL_LITERAL@167..168 "\n" [] []
+          1: (empty)
+  2: EOF@168..168 "" [] []
+
+```

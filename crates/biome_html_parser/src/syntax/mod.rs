@@ -18,8 +18,8 @@ use crate::syntax::svelte::{
     parse_svelte_spread_or_expression,
 };
 use crate::syntax::vue::{
-    parse_vue_directive, parse_vue_v_bind_shorthand_directive, parse_vue_v_on_shorthand_directive,
-    parse_vue_v_slot_shorthand_directive,
+    parse_vue_directive, parse_vue_v_bind_shorthand_directive, parse_vue_v_for_value,
+    parse_vue_v_on_shorthand_directive, parse_vue_v_slot_shorthand_directive,
 };
 use crate::token_source::{
     HtmlEmbeddedLanguage, HtmlLexContext, HtmlReLexContext, TextExpressionKind,
@@ -158,6 +158,7 @@ fn inside_tag_context(p: &HtmlParser) -> HtmlLexContext {
     }
 }
 
+#[inline]
 fn is_possible_component(p: &HtmlParser, tag_name: &str) -> bool {
     tag_name
         .chars()
@@ -352,6 +353,7 @@ fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
     Present(m.complete(p, HTML_CLOSING_ELEMENT))
 }
 
+#[inline]
 pub(crate) fn parse_html_element(p: &mut HtmlParser) -> ParsedSyntax {
     match p.cur() {
         T!["<![CDATA["] => parse_cdata_section(p),
@@ -533,13 +535,14 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
             }
 
             if p.at(T![=]) {
-                parse_attribute_initializer(p).ok();
+                parse_attribute_initializer(p, AttrInitializerContext::Regular).ok();
             }
             Present(m.complete(p, HTML_ATTRIBUTE))
         }
     }
 }
 
+#[inline]
 fn is_at_attribute_start(p: &mut HtmlParser) -> bool {
     p.at_ts(token_set![
         HTML_LITERAL,
@@ -552,6 +555,7 @@ fn is_at_attribute_start(p: &mut HtmlParser) -> bool {
         || (Astro.is_supported(p) && is_at_astro_directive_keyword(p))
 }
 
+#[inline]
 fn parse_literal(p: &mut HtmlParser, kind: HtmlSyntaxKind) -> ParsedSyntax {
     if !is_at_start_literal(p) {
         return Absent;
@@ -596,6 +600,7 @@ fn parse_literal(p: &mut HtmlParser, kind: HtmlSyntaxKind) -> ParsedSyntax {
     Present(m.complete(p, kind))
 }
 
+#[inline]
 fn is_at_start_literal(p: &mut HtmlParser) -> bool {
     p.at(HTML_LITERAL) || p.at(T!["{{"]) || p.at(T!["}}"])
 }
@@ -611,11 +616,23 @@ fn parse_attribute_string_literal(p: &mut HtmlParser) -> ParsedSyntax {
     Present(m.complete(p, HTML_STRING))
 }
 
-fn parse_attribute_initializer(p: &mut HtmlParser) -> ParsedSyntax {
+fn parse_attribute_initializer(
+    p: &mut HtmlParser,
+    context: AttrInitializerContext,
+) -> ParsedSyntax {
     if !p.at(T![=]) {
         return Absent;
     }
     let m = p.start();
+
+    // For v-for, we need to switch to VueVForValue context immediately
+    // and parse the v-for value directly (not as an HtmlString first)
+    if context == AttrInitializerContext::VueVFor {
+        p.bump_with_context(T![=], HtmlLexContext::VueVForValue);
+        parse_vue_v_for_value(p).or_add_diagnostic(p, expected_vue_v_for_value);
+        return Present(m.complete(p, HTML_ATTRIBUTE_INITIALIZER_CLAUSE));
+    }
+
     p.bump_with_context(T![=], HtmlLexContext::AttributeValue);
     if p.at(T!['{']) {
         HtmlSyntaxFeatures::SingleTextExpressions
@@ -660,6 +677,13 @@ fn parse_attribute_initializer(p: &mut HtmlParser) -> ParsedSyntax {
         parse_attribute_string_literal(p).or_add_diagnostic(p, expected_initializer);
     }
     Present(m.complete(p, HTML_ATTRIBUTE_INITIALIZER_CLAUSE))
+}
+
+#[derive(Default, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum AttrInitializerContext {
+    #[default]
+    Regular,
+    VueVFor,
 }
 
 fn parse_cdata_section(p: &mut HtmlParser) -> ParsedSyntax {
@@ -720,6 +744,7 @@ fn parse_double_text_expression(p: &mut HtmlParser, context: HtmlLexContext) -> 
     }
 }
 
+#[inline]
 pub(crate) fn is_at_opening_double_expression(p: &mut HtmlParser) -> bool {
     p.at(T!["{{"])
 }
@@ -840,10 +865,12 @@ impl TextExpression {
     }
 }
 
+#[inline]
 fn is_at_keyword(p: &mut HtmlParser) -> bool {
     is_at_svelte_keyword(p) || is_at_html_keyword(p)
 }
 
+#[inline]
 fn is_at_html_keyword(p: &mut HtmlParser) -> bool {
     matches!(p.cur(), T![html] | T![doctype])
 }

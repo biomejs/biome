@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: bare-grouping-with-predefined.js
+---
+# Input
+```js
+import { render } from "react-dom";
+import "./polyfill";
+import fs from "node:fs";
+import { Button } from "@/components/Button";
+import "whatwg-fetch";
+
+```
+
+# Diagnostics
+```
+bare-grouping-with-predefined.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+  > 1 │ import { render } from "react-dom";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ import "./polyfill";
+    3 │ import fs from "node:fs";
+  
+  i Safe fix: Organize Imports (Biome)
+  
+    1   │ - import·{·render·}·from·"react-dom";
+    2   │ - import·"./polyfill";
+    3   │ - import·fs·from·"node:fs";
+    4   │ - import·{·Button·}·from·"@/components/Button";
+    5   │ - import·"whatwg-fetch";
+      1 │ + import·fs·from·"node:fs";
+      2 │ + 
+      3 │ + import·{·render·}·from·"react-dom";
+      4 │ + import·{·Button·}·from·"@/components/Button";
+      5 │ + 
+      6 │ + import·"whatwg-fetch";
+      7 │ + import·"./polyfill";
+    6 8 │   
+  
+
+```

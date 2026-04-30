@@ -136,6 +136,10 @@ impl ModuleGraph {
                                 .static_import_paths
                                 .values()
                                 .any(|p| p.as_path() == Some(current.as_path()))
+                            || html_info
+                                .dynamic_import_paths
+                                .values()
+                                .any(|p| p.as_path() == Some(current.as_path()))
                     }
                 };
 
@@ -364,11 +368,9 @@ impl ModuleGraph {
                     html_info
                         .imported_stylesheets
                         .iter()
+                        .chain(html_info.static_import_paths.values())
+                        .chain(html_info.dynamic_import_paths.values())
                         .any(|p| p.as_path() == Some(current_path))
-                        || html_info
-                            .static_import_paths
-                            .values()
-                            .any(|p| p.as_path() == Some(current_path))
                 }
                 ModuleInfo::Css(_) => false,
             };
@@ -390,6 +392,7 @@ impl ModuleGraph {
                         .imported_stylesheets
                         .iter()
                         .chain(html_info.static_import_paths.values())
+                        .chain(html_info.dynamic_import_paths.values())
                         .filter_map(|stylesheet_path| {
                             let path = stylesheet_path.as_path()?;
                             self.css_module_info_for_path(path)?;
@@ -463,9 +466,26 @@ impl ModuleGraph {
                     });
                 }
             }
+
+            // 3. CSS files imported via static imports from embedded scripts
+            //    (e.g., Astro frontmatter `import "./styles.css"`).
+            for import_path in html_info
+                .static_import_paths
+                .values()
+                .chain(html_info.dynamic_import_paths.values())
+            {
+                if let Some(path) = import_path.as_path()
+                    && let Some(css_info) = self.css_module_info_for_path(path)
+                {
+                    linked_steps.push(CssClassStep {
+                        css_path: path.to_path_buf(),
+                        css_classes: css_info.classes.clone(),
+                    });
+                }
+            }
         }
 
-        // 3. Upward traversal: CSS imported by parent files that import this HTML file.
+        // 4. Upward traversal: CSS imported by parent files that import this HTML file.
         let stack = vec![html_path.to_path_buf()];
         let mut visited = FxHashSet::default();
         visited.insert(html_path.to_path_buf());
@@ -495,6 +515,7 @@ impl ModuleGraph {
         let css_imports: Vec<_> = html_info
             .imported_stylesheets
             .iter()
+            .chain(html_info.static_import_paths.values())
             .filter_map(|stylesheet_path| {
                 let path = stylesheet_path.as_path()?;
                 self.css_module_info_for_path(path)?;
@@ -576,16 +597,12 @@ impl ModuleGraph {
                         .values()
                         .chain(js_info.dynamic_import_paths.values())
                         .any(|p| p.as_path() == Some(current_path.as_path())),
-                    ModuleInfo::Html(html_info) => {
-                        html_info
-                            .imported_stylesheets
-                            .iter()
-                            .any(|p| p.as_path() == Some(current_path.as_path()))
-                            || html_info
-                                .static_import_paths
-                                .values()
-                                .any(|p| p.as_path() == Some(current_path.as_path()))
-                    }
+                    ModuleInfo::Html(html_info) => html_info
+                        .imported_stylesheets
+                        .iter()
+                        .chain(html_info.static_import_paths.values())
+                        .chain(html_info.dynamic_import_paths.values())
+                        .any(|p| p.as_path() == Some(current_path.as_path())),
                     ModuleInfo::Css(_) => false,
                 };
 
@@ -630,6 +647,7 @@ impl ModuleGraph {
                                 .imported_stylesheets
                                 .iter()
                                 .chain(html_info.static_import_paths.values())
+                                .chain(html_info.dynamic_import_paths.values())
                             {
                                 if let Some(path) = stylesheet_path.as_path()
                                     && let Some(css_info) = self.css_module_info_for_path(path)
@@ -847,7 +865,11 @@ impl ModuleGraph {
                 }
             }
 
-            for resolved_path in module.static_import_paths.values() {
+            for resolved_path in module
+                .static_import_paths
+                .values()
+                .chain(module.dynamic_import_paths.values())
+            {
                 if let Some(p) = resolved_path.as_path() {
                     dependencies.insert(p.to_path_buf());
                 }
@@ -922,11 +944,17 @@ impl ModuleGraph {
 
         find_exported_symbol_with_seen_paths(&data, module, symbol_name, &mut seen_paths).and_then(
             |(module, export)| match export {
-                JsOwnExport::Binding(binding_range) => module
-                    .binding_type_data(*binding_range)
-                    .and_then(|data| data.jsdoc.clone()),
+                JsOwnExport::Binding(binding_range) => {
+                    // Find the binding at this range via the semantic model
+                    module
+                        .semantic_model
+                        .as_binding_by_range(*binding_range)
+                        .and_then(|binding| binding.jsdoc().cloned())
+                }
                 JsOwnExport::Type(_) => None,
-                JsOwnExport::Namespace(reexport) => reexport.jsdoc_comment.clone(),
+                JsOwnExport::Namespace(reexport) => reexport
+                    .export_range
+                    .and_then(|range| module.semantic_model.export_jsdoc(range).cloned()),
             },
         )
     }

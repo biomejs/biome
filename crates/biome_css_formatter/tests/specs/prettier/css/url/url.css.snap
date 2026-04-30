@@ -147,7 +147,7 @@ url.css:3:24 parse ━━━━━━━━━━━━━━━━━━━━�
   
 url.css:3:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × SCSS qualified names are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  × SCSS module member accesses are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     1 │ div {
     2 │   background: url(/images/bg.png);

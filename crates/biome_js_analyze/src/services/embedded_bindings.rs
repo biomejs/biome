@@ -1,14 +1,13 @@
 use biome_analyze::{FromServices, RuleKey, RuleMetadata, ServiceBag, ServicesDiagnostic};
 use biome_rowan::{TextRange, TokenText};
-use rustc_hash::FxHashMap;
 
 #[derive(Debug, Clone)]
-pub struct EmbeddedBindings(pub Vec<FxHashMap<TextRange, TokenText>>);
+pub struct EmbeddedBindings(pub Vec<Vec<(TextRange, TokenText)>>);
 
 impl EmbeddedBindings {
     pub(crate) fn contains_binding(&self, binding: &str) -> bool {
         for bindings in self.0.iter() {
-            if bindings.values().any(|token| token.text() == binding) {
+            if bindings.iter().any(|(_, token)| token.text() == binding) {
                 return true;
             }
         }

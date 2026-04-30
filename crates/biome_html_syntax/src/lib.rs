@@ -1,7 +1,6 @@
 #![deny(clippy::use_self)]
 
 #[macro_use]
-mod attr_ext;
 pub mod attribute_ext;
 mod directive_ext;
 pub mod element_ext;

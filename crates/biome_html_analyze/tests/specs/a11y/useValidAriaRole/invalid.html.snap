@@ -23,7 +23,7 @@ invalid.html:2:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━�
   
     1 │ <!-- should generate diagnostics -->
   > 2 │ <div role="range"></div>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^
     3 │ <div role="datepicker"></div>
     4 │ <div role=""></div>
   
@@ -45,7 +45,7 @@ invalid.html:3:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━�
     1 │ <!-- should generate diagnostics -->
     2 │ <div role="range"></div>
   > 3 │ <div role="datepicker"></div>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
     4 │ <div role=""></div>
     5 │ <div role="datepicker" />
   
@@ -67,7 +67,7 @@ invalid.html:4:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━�
     2 │ <div role="range"></div>
     3 │ <div role="datepicker"></div>
   > 4 │ <div role=""></div>
-      │ ^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^
     5 │ <div role="datepicker" />
     6 │ <div role="unknown-invalid-role" />
   
@@ -133,7 +133,7 @@ invalid.html:7:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━�
     5 │ <div role="datepicker" />
     6 │ <div role="unknown-invalid-role" />
   > 7 │ <div role="tabpanel row foobar"></div>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     8 │ <div role="doc-endnotes range"></div>
     9 │ 
   
@@ -155,7 +155,7 @@ invalid.html:8:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━�
     6 │ <div role="unknown-invalid-role" />
     7 │ <div role="tabpanel row foobar"></div>
   > 8 │ <div role="doc-endnotes range"></div>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     9 │ 
   
   i Check WAI-ARIA for valid roles or provide options accordingly.

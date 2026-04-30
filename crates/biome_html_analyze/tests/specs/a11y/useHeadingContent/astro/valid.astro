@@ -1,0 +1,17 @@
+---
+// should not generate diagnostics
+---
+
+<!-- Heading with content -->
+<h1>heading</h1>
+<h2>Sub heading</h2>
+
+<!-- Heading with accessible name -->
+<h1 aria-label="Screen reader content"></h1>
+
+<!-- Heading with nested visible content -->
+<h1><span>visible</span></h1>
+
+<!-- PascalCase: custom components, should NOT trigger the rule -->
+<H1></H1>
+<MyHeading></MyHeading>

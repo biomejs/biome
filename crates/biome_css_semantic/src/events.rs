@@ -65,6 +65,7 @@ impl SemanticEventExtractor {
                 || kind == CSS_NESTED_QUALIFIED_RULE
                 || kind == CSS_CONTAINER_AT_RULE
                 || kind == CSS_MEDIA_AT_RULE
+                || kind == CSS_SCOPE_AT_RULE
                 || kind == CSS_STARTING_STYLE_AT_RULE
                 || kind == CSS_SUPPORTS_AT_RULE =>
             {
@@ -274,7 +275,13 @@ impl SemanticEventExtractor {
     pub fn leave(&mut self, node: &biome_css_syntax::CssSyntaxNode) {
         if matches!(
             node.kind(),
-            CSS_QUALIFIED_RULE | CSS_NESTED_QUALIFIED_RULE | CSS_MEDIA_AT_RULE
+            CSS_QUALIFIED_RULE
+                | CSS_NESTED_QUALIFIED_RULE
+                | CSS_CONTAINER_AT_RULE
+                | CSS_MEDIA_AT_RULE
+                | CSS_SCOPE_AT_RULE
+                | CSS_STARTING_STYLE_AT_RULE
+                | CSS_SUPPORTS_AT_RULE
         ) {
             self.stash.push_back(SemanticEvent::RuleEnd);
             if self.is_in_root_selector {

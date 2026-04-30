@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/at-rule/debug-warn-error.scss
+---
+
+# Input
+
+```scss
+@debug$width*2;
+@warn
+  ("deprecated",  $name );
+@error color.adjust( $color,$lightness:10% );
+
+.card{
+@debug(1,2,3);
+@warn
+$primary,
+$secondary;
+@error if($fatal,
+red, blue);
+}
+
+```
+
+
+# Formatted
+
+```scss
+@debug $width * 2;
+@warn ("deprecated", $name);
+@error color.adjust($color, $lightness: 10%);
+
+.card {
+	@debug (1, 2, 3);
+	@warn $primary, $secondary;
+	@error if($fatal, red, blue);
+}
+
+```

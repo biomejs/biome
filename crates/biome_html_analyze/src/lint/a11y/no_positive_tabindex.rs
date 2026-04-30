@@ -2,7 +2,8 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlElement, HtmlAttribute};
+use biome_html_syntax::HtmlAttribute;
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 use biome_rule_options::no_positive_tabindex::NoPositiveTabindexOptions;
 
@@ -43,7 +44,7 @@ declare_lint_rule! {
         version: "2.4.0",
         name: "noPositiveTabindex",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("tabindex-no-positive").same(), RuleSource::HtmlEslint("no-positive-tabindex").same()],
+        sources: &[RuleSource::EslintJsxA11y("tabindex-no-positive").inspired(), RuleSource::HtmlEslint("no-positive-tabindex").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -56,7 +57,7 @@ pub struct NoPositiveTabindexState {
 }
 
 impl Rule for NoPositiveTabindex {
-    type Query = Ast<AnyHtmlElement>;
+    type Query = Ast<AnyHtmlTagElement>;
     type State = NoPositiveTabindexState;
     type Signals = Option<Self::State>;
     type Options = NoPositiveTabindexOptions;

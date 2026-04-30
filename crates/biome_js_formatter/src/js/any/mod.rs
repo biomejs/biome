@@ -29,6 +29,7 @@ pub(crate) mod function_body;
 pub(crate) mod import_assertion_entry;
 pub(crate) mod import_clause;
 pub(crate) mod in_property;
+pub(crate) mod literal_export_name;
 pub(crate) mod literal_expression;
 pub(crate) mod method_modifier;
 pub(crate) mod module_item;

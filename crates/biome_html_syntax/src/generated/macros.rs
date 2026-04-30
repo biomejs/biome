@@ -280,6 +280,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::SvelteLiteral::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::SVELTE_MEMBER_PROPERTY => {
+                    let $pattern = unsafe { $crate::SvelteMemberProperty::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::SVELTE_NAME => {
                     let $pattern = unsafe { $crate::SvelteName::new_unchecked(node) };
                     $body
@@ -351,6 +355,47 @@ macro_rules! map_syntax_node {
                 $crate::HtmlSyntaxKind::VUE_V_BIND_SHORTHAND_DIRECTIVE => {
                     let $pattern =
                         unsafe { $crate::VueVBindShorthandDirective::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_V_FOR_ARRAY_BINDING => {
+                    let $pattern = unsafe { $crate::VueVForArrayBinding::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_V_FOR_IDENTIFIER_BINDING => {
+                    let $pattern = unsafe { $crate::VueVForIdentifierBinding::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_V_FOR_IN_OPERATOR => {
+                    let $pattern = unsafe { $crate::VueVForInOperator::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_V_FOR_OBJECT_BINDING => {
+                    let $pattern = unsafe { $crate::VueVForObjectBinding::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_V_FOR_OBJECT_PROPERTY_BINDING => {
+                    let $pattern =
+                        unsafe { $crate::VueVForObjectPropertyBinding::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_V_FOR_OF_OPERATOR => {
+                    let $pattern = unsafe { $crate::VueVForOfOperator::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_V_FOR_REST_BINDING => {
+                    let $pattern = unsafe { $crate::VueVForRestBinding::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_V_FOR_TUPLE_BINDING => {
+                    let $pattern = unsafe { $crate::VueVForTupleBinding::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_V_FOR_TUPLE_ELEMENT => {
+                    let $pattern = unsafe { $crate::VueVForTupleElement::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_V_FOR_VALUE => {
+                    let $pattern = unsafe { $crate::VueVForValue::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::VUE_V_ON_SHORTHAND_DIRECTIVE => {
@@ -427,6 +472,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::HtmlSyntaxKind::VUE_MODIFIER_LIST => {
                     let $pattern = unsafe { $crate::VueModifierList::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::VUE_V_FOR_BINDING_LIST => {
+                    let $pattern = unsafe { $crate::VueVForBindingList::new_unchecked(node) };
                     $body
                 }
                 _ => unreachable!(),

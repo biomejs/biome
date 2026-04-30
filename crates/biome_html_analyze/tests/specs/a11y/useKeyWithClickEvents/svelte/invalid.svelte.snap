@@ -1,0 +1,102 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+
+<!-- div with onclick but no keyboard handler -->
+<div onclick="handleClick()"></div>
+<div onclick={handleClick}></div>
+<div onclick={() => {}}></div>
+
+<!-- span with onclick but no keyboard handler -->
+<span onclick="handleClick()">text</span>
+
+<!-- <a> without href is not interactive -->
+<a onclick="handleClick()">bare link</a>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:4:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Elements with onclick must also include at least one keyboard handler: onkeydown, onkeyup, or onkeypress.
+  
+    3 │ <!-- div with onclick but no keyboard handler -->
+  > 4 │ <div onclick="handleClick()"></div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ <div onclick={handleClick}></div>
+    6 │ <div onclick={() => {}}></div>
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+```
+
+```
+invalid.svelte:5:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Elements with onclick must also include at least one keyboard handler: onkeydown, onkeyup, or onkeypress.
+  
+    3 │ <!-- div with onclick but no keyboard handler -->
+    4 │ <div onclick="handleClick()"></div>
+  > 5 │ <div onclick={handleClick}></div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ <div onclick={() => {}}></div>
+    7 │ 
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+```
+
+```
+invalid.svelte:6:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Elements with onclick must also include at least one keyboard handler: onkeydown, onkeyup, or onkeypress.
+  
+    4 │ <div onclick="handleClick()"></div>
+    5 │ <div onclick={handleClick}></div>
+  > 6 │ <div onclick={() => {}}></div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ <!-- span with onclick but no keyboard handler -->
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+```
+
+```
+invalid.svelte:9:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Elements with onclick must also include at least one keyboard handler: onkeydown, onkeyup, or onkeypress.
+  
+     8 │ <!-- span with onclick but no keyboard handler -->
+   > 9 │ <span onclick="handleClick()">text</span>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ <!-- <a> without href is not interactive -->
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+```
+
+```
+invalid.svelte:12:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Elements with onclick must also include at least one keyboard handler: onkeydown, onkeyup, or onkeypress.
+  
+    11 │ <!-- <a> without href is not interactive -->
+  > 12 │ <a onclick="handleClick()">bare link</a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+```

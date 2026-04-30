@@ -2,7 +2,7 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, decl
 use biome_console::markup;
 use biome_css_syntax::{CssDeclarationOrRuleList, CssKeyframesAtRule};
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::{AstNode, TextRange, TokenText};
 use biome_rule_options::no_duplicate_properties::NoDuplicatePropertiesOptions;
 use rustc_hash::FxHashMap;
 use std::collections::hash_map::Entry;
@@ -46,7 +46,7 @@ declare_lint_rule! {
 
 impl Rule for NoDuplicateProperties {
     type Query = Semantic<CssDeclarationOrRuleList>;
-    type State = (TextRange, (TextRange, Box<str>));
+    type State = (TextRange, (TextRange, TokenText));
     type Signals = Option<Self::State>;
     type Options = NoDuplicatePropertiesOptions;
 
@@ -57,14 +57,14 @@ impl Rule for NoDuplicateProperties {
 
         let rule = model.get_rule_by_range(node.range())?;
 
-        let mut seen: FxHashMap<Box<str>, TextRange> = FxHashMap::default();
+        let mut seen: FxHashMap<TokenText, TextRange> = FxHashMap::default();
 
         for declaration in rule.declarations() {
             let prop = declaration.property(&root);
-            let prop_name = prop.to_trimmed_text();
+            let prop_name = prop.value().ok()?;
             let prop_range = prop.range();
 
-            let is_custom_property = prop_name.starts_with("--");
+            let is_custom_property = prop_name.text().starts_with("--");
 
             if is_custom_property {
                 continue;
@@ -80,9 +80,9 @@ impl Rule for NoDuplicateProperties {
                 continue;
             }
 
-            match seen.entry(prop_name.clone().into()) {
+            match seen.entry(prop_name.clone()) {
                 Entry::Occupied(entry) => {
-                    return Some((*entry.get(), (prop_range, prop_name.into())));
+                    return Some((*entry.get(), (prop_range, prop_name)));
                 }
                 Entry::Vacant(entry) => {
                     entry.insert(prop_range);
@@ -104,7 +104,7 @@ impl Rule for NoDuplicateProperties {
                 },
             )
             .detail(first_occurrence_range, markup! {
-                <Emphasis>{duplicate_property_name}</Emphasis> " is already defined here."
+                <Emphasis>{duplicate_property_name.text()}</Emphasis> " is already defined here."
             })
             .note(markup! {
                 "Remove or rename the duplicate property to ensure consistent styling."
