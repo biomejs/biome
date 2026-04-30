@@ -1,6 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: css/scss/at-rule/while.scss
+info: scss/at-rule/while.scss
 ---
 
 # Input
@@ -16,6 +16,9 @@ $gap  >  0{
 gap:$gap;
 $gap:$gap - 0.25rem;
 }
+}
+
+@while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var > 1{
 }
 
 ```
@@ -35,4 +38,14 @@ $gap:$gap - 0.25rem;
 	}
 }
 
+@while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
+	1
+{
+}
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   12: @while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
 ```

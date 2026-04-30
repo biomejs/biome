@@ -142,23 +142,7 @@ $i
  }
  @while ($i > 0) {
  }
-@@ -29,20 +29,17 @@
- @while ($i > 0) {
- }
- @while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
--  1
--{
-+1 {
- }
- @while 1 >
--  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
--{
-+$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var {
- }
- @while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
--  $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
--{
-+$other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var {
+@@ -42,7 +42,7 @@
  }
  @while (($i) > (0)) {
  }
@@ -167,7 +151,7 @@ $i
  }
  @while (($i) > (0)) {
  }
-@@ -58,16 +55,16 @@
+@@ -58,16 +58,16 @@
  }
  @while (
    1 >
@@ -223,13 +207,16 @@ $i
 @while ($i > 0) {
 }
 @while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
-1 {
+  1
+{
 }
 @while 1 >
-$very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var {
+  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+{
 }
 @while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
-$other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var {
+  $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+{
 }
 @while (($i) > (0)) {
 }
@@ -267,11 +254,11 @@ $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-ver
 # Lines exceeding max width of 80 characters
 ```
    31: @while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
-   35: $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var {
-   37: @while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
-   38: $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var {
-   58:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
-   62:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
-   67:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
-   68:   $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+   36:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+   39: @while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
+   40:   $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+   61:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+   65:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
+   70:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
+   71:   $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
 ```
