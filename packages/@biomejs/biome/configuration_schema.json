@@ -536,7 +536,7 @@
 					]
 				},
 				"noImplicitCoercions": {
-					"description": "Disallow shorthand type conversions.\nSee https://biomejs.dev/linter/rules/no-implicit-coercions",
+					"description": "Encourage use of explicit type conversion functions over their shorthand counterparts.\nSee https://biomejs.dev/linter/rules/no-implicit-coercions",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoImplicitCoercionsConfiguration" },
 						{ "type": "null" }
@@ -4043,6 +4043,12 @@
 		},
 		"NoImplicitCoercionsOptions": {
 			"type": "object",
+			"properties": {
+				"allowDoubleNegation": {
+					"description": "Whether to allow implicitly coercing values to booleans via `!!value`.",
+					"type": ["boolean", "null"]
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoImpliedEvalConfiguration": {
