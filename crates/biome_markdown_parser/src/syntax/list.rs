@@ -2247,6 +2247,10 @@ fn parse_first_line_blockquote(p: &mut MarkdownParser, state: &mut ListItemLoopS
     parsed
 }
 
+fn at_current_line_block_interrupt(p: &mut MarkdownParser) -> bool {
+    with_virtual_line_start(p, p.cur_range().start(), at_block_interrupt)
+}
+
 /// After the first line, verify indent level for continuation.
 ///
 /// Handles nested list detection at sufficient indent, sibling/block interrupt
@@ -2276,7 +2280,7 @@ fn check_continuation_indent(
         let can_lazy = state.last_block_was_paragraph
             && !at_bullet_list_item_with_base_indent(p, 0)
             && !at_order_list_item_with_base_indent(p, 0)
-            && !at_block_interrupt(p);
+            && !at_current_line_block_interrupt(p);
         if !can_lazy {
             return ContinuationResult {
                 action: LoopAction::Break,
@@ -2341,7 +2345,7 @@ fn check_continuation_indent(
             };
         }
 
-        if at_block_interrupt(p) {
+        if at_current_line_block_interrupt(p) {
             return ContinuationResult {
                 action: LoopAction::Break,
                 restore: VirtualLineRestore::None,

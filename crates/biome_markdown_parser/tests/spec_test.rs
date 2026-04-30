@@ -553,3 +553,12 @@ fn fuzz_code_after_list_not_absorbed() {
         "<ul>\n<li>one</li>\n<li>two</li>\n</ul>\n<pre><code>code here\n</code></pre>\n",
     );
 }
+
+#[test]
+fn fuzz_nested_lazy_continuation_before_fence() {
+    fuzz_test_example(
+        9,
+        "* outer\n  * nested\n  lazy line\n```\ncode here\n```\n",
+        "<ul>\n<li>outer\n<ul>\n<li>nested\nlazy line</li>\n</ul>\n</li>\n</ul>\n<pre><code>code here\n</code></pre>\n",
+    );
+}
