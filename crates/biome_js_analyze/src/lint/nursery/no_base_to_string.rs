@@ -244,11 +244,11 @@ fn run_binary_expression(
     let left = node.left().ok()?;
     let right = node.right().ok()?;
 
-    if ctx.type_of_expression(&left).is_string_or_string_literal() {
+    if is_string_like_type(&ctx.type_of_expression(&left)) {
         return check_expression(ctx, &right, DiagnosticKind::BaseToString);
     }
 
-    if ctx.type_of_expression(&right).is_string_or_string_literal() {
+    if is_string_like_type(&ctx.type_of_expression(&right)) {
         return check_expression(ctx, &left, DiagnosticKind::BaseToString);
     }
 
@@ -266,7 +266,7 @@ fn run_assignment_expression(
 
     let left = node.left().ok()?;
     let left_ty = type_of_assignment_target(ctx, node, &left)?;
-    if !left_ty.is_string_or_string_literal() {
+    if !is_string_like_type(&left_ty) {
         return None;
     }
 
@@ -310,7 +310,7 @@ fn type_of_assignment_target(
 
 fn type_of_assignment(
     ctx: &RuleContext<NoBaseToString>,
-    assignment: &JsAssignmentExpression,
+    _assignment: &JsAssignmentExpression,
     target: &AnyJsAssignment,
 ) -> Option<Type> {
     let mut current = target.clone();
@@ -319,7 +319,9 @@ fn type_of_assignment(
         match current {
             AnyJsAssignment::JsIdentifierAssignment(identifier) => {
                 let name = identifier.name_token().ok()?;
-                return Some(ctx.type_of_named_value(assignment.range(), name.text_trimmed()));
+                return Some(
+                    ctx.type_of_named_value(name.text_trimmed_range(), name.text_trimmed()),
+                );
             }
             AnyJsAssignment::JsParenthesizedAssignment(parenthesized) => {
                 current = parenthesized.assignment().ok()?;
@@ -376,6 +378,43 @@ fn is_literal_expression(expression: &AnyJsExpression) -> bool {
         expression.clone().omit_parentheses(),
         AnyJsExpression::AnyJsLiteralExpression(_) | AnyJsExpression::JsArrayExpression(_)
     )
+}
+
+fn is_string_like_type(ty: &Type) -> bool {
+    let mut saw_variant = false;
+    let mut pending = vec![ty.clone()];
+
+    while let Some(current) = pending.pop() {
+        if current.is_union() {
+            let mut variants = current.flattened_union_variants().peekable();
+            if variants.peek().is_none() {
+                return false;
+            }
+
+            saw_variant = true;
+            pending.extend(variants);
+            continue;
+        }
+
+        let Some(raw) = current.resolved_data().map(ResolvedTypeData::as_raw_data) else {
+            return false;
+        };
+
+        match raw {
+            TypeData::Generic(generic) if generic.constraint.is_known() => {
+                let Some(constraint) = current.resolve(&generic.constraint) else {
+                    return false;
+                };
+
+                pending.push(constraint);
+            }
+            TypeData::Generic(_) => return false,
+            _ if current.is_string_or_string_literal() => saw_variant = true,
+            _ => return false,
+        }
+    }
+
+    saw_variant
 }
 
 /// Computes whether stringification is always useful, sometimes useful, or never useful. The core business logic for the rule.
