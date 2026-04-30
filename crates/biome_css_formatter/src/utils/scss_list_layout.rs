@@ -5,12 +5,13 @@ use crate::utils::scss_closing_comments::{
 };
 use crate::utils::scss_context::is_in_scss_include_arguments;
 use crate::utils::scss_expression::{
-    include_keyword_argument_before_argument_list, unwrap_single_expression_item,
+    include_keyword_argument_before_argument_list, single_expression_item,
+    unwrap_single_expression_item,
 };
 use crate::utils::scss_map::scss_map_context;
 use biome_css_syntax::{
     ScssExpression, ScssListExpression, ScssListExpressionElementList, ScssListExpressionFields,
-    ScssParenthesizedExpression,
+    ScssModuleConfiguration, ScssParenthesizedExpression,
 };
 use biome_formatter::{GroupId, format_args, write};
 use biome_rowan::{AstNode, AstSeparatedList};
@@ -29,6 +30,21 @@ impl<'a> ScssListLayout<'a> {
         let ScssListExpressionFields { elements } = self.node.as_fields();
 
         if !is_in_scss_include_arguments(self.node.syntax()) {
+            let is_module_configuration_value_list =
+                is_module_configuration_parenthesized_list_value(self.node);
+
+            if is_module_configuration_value_list {
+                return write!(
+                    f,
+                    [group(&format_args![
+                        soft_line_break(),
+                        elements.format(),
+                        token(",")
+                    ])
+                    .should_expand(true)]
+                );
+            }
+
             if scss_map_context(self.node)
                 .is_some_and(|context| context.is_outer_parenthesized_value_list)
             {
@@ -192,6 +208,41 @@ fn is_direct_include_keyword_parenthesized_list_value(node: &ScssListExpression)
         return false;
     }
 
+    parenthesized_owns_list(&parenthesized, node)
+}
+
+/// Returns `true` for the list in `@use "x" with ($family: (a, b))`.
+fn is_module_configuration_parenthesized_list_value(node: &ScssListExpression) -> bool {
+    let Some(parenthesized) = node
+        .syntax()
+        .parent()
+        .and_then(ScssParenthesizedExpression::cast)
+    else {
+        return false;
+    };
+
+    if !parenthesized_owns_list(&parenthesized, node) {
+        return false;
+    }
+
+    parenthesized
+        .syntax()
+        .ancestors()
+        .skip(1)
+        .find_map(ScssModuleConfiguration::cast)
+        .and_then(|configuration| configuration.value().ok())
+        .is_some_and(|value| {
+            value.syntax() == parenthesized.syntax()
+                || single_expression_item(&value)
+                    .is_some_and(|item| item.syntax() == parenthesized.syntax())
+        })
+}
+
+/// Returns `true` when `node` is the list inside `(a, b)`.
+fn parenthesized_owns_list(
+    parenthesized: &ScssParenthesizedExpression,
+    node: &ScssListExpression,
+) -> bool {
     parenthesized.expression().ok().is_some_and(|expression| {
         expression
             .as_scss_list_expression()

@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
 info: scss/configuration/use.scss
 ---
 
@@ -32,14 +33,6 @@ info: scss/configuration/use.scss
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,6 +1,6 @@
- @use "@fylgja/base" with (
-   $family-main: (
--    Rubik,
-+  Rubik,
-     Roboto,
-     system-ui,
-     sans-serif,
 @@ -11,7 +11,4 @@
    $h3-font-weight: 500
  );
@@ -56,7 +49,7 @@ info: scss/configuration/use.scss
 ```scss
 @use "@fylgja/base" with (
   $family-main: (
-  Rubik,
+    Rubik,
     Roboto,
     system-ui,
     sans-serif,
