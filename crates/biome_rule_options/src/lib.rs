@@ -519,3 +519,8 @@ pub mod use_vue_valid_v_text;
 pub mod use_vue_vapor;
 pub mod use_while;
 pub mod use_yield;
+pub mod no_react_leaked_event_listener;
+pub mod no_react_leaked_interval;
+pub mod no_react_leaked_timeout;
+pub mod no_react_leaked_resize_observer;
+pub mod no_react_leaked_intersection_observer;

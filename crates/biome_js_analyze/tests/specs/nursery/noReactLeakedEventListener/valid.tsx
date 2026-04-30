@@ -1,0 +1,490 @@
+/* should not generate diagnostics */
+import { useEffect, useRef, useCallback, useMemo, useLayoutEffect } from "react";
+import { BackHandler } from "react-native";
+import { useEffect as useEffectAbortable } from "foxact/use-abortable-effect";
+
+function Valid1() {
+  useEffect(() => {
+    const handleResize = () => {};
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+}
+
+function Valid2() {
+  useEffect(() => {
+    const handleResize = () => {};
+    window.addEventListener("resize", handleResize as EventListener);
+    return () => {
+      window.removeEventListener("resize", handleResize as EventListener);
+    };
+  }, []);
+}
+
+function Valid3() {
+  useEffect(() => {
+    const handleResize = () => {};
+    window.addEventListener("resize", handleResize as EventListener);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+}
+
+function Valid4() {
+  useEffect(() => {
+    const handleResize = () => {};
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize as EventListener);
+    };
+  }, []);
+}
+
+function Valid5() {
+  useEffect(() => {
+    const handleResize = () => {};
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+}
+
+function Valid6() {
+  useEffect(() => {
+    const handleResize = () => {};
+    window.addEventListener("resize", handleResize, true);
+    return () => {
+      window.removeEventListener("resize", handleResize, true);
+    };
+  }, []);
+}
+
+function Valid7() {
+  useEffect(() => {
+    const handleResize = () => {};
+    window.addEventListener("resize", handleResize, false);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+}
+
+function Valid8() {
+  useEffect(() => {
+    const handleResize = () => {};
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize, false);
+    };
+  }, []);
+}
+
+function Valid9() {
+  useEffect(() => {
+    const handleResize = () => {};
+    window.addEventListener("resize", handleResize, { capture: true });
+    return () => {
+      window.removeEventListener("resize", handleResize, { capture: true });
+    };
+  }, []);
+}
+
+function Valid10() {
+  useEffect(() => {
+    const handleResize = () => {};
+    window.addEventListener("resize", handleResize, { capture: true });
+    window.addEventListener("resize", handleResize, { capture: true });
+    return () => {
+      window.removeEventListener("resize", handleResize, { capture: true });
+    };
+  }, []);
+}
+
+function Valid11() {
+  useEffect(() => {
+    const options = { capture: true };
+    const handleResize = () => {};
+    window.addEventListener("resize", handleResize, options);
+    return () => {
+      window.removeEventListener("resize", handleResize, options);
+    };
+  }, []);
+}
+
+function Valid12() {
+  useEffect(() => {
+    const options = { capture: true };
+    const handleResize = () => {};
+    window.addEventListener("resize", handleResize, { capture: options.capture });
+    return () => {
+      window.removeEventListener("resize", handleResize, { capture: options.capture });
+    };
+  }, []);
+}
+
+function Valid13() {
+  useEffect(() => {
+    const options = { capture: true };
+    const handleResize = () => {};
+    window.addEventListener("resize", handleResize, { capture: options.capture });
+    return () => {
+      window.removeEventListener("resize", handleResize, { capture: true });
+    };
+  }, []);
+}
+
+function Valid14() {
+  useEffect(() => {
+    const options = { capture: true };
+    const handleResize = () => {};
+    window.addEventListener("resize", handleResize, { capture: true });
+    return () => {
+      window.removeEventListener("resize", handleResize, { capture: options.capture });
+    };
+  }, []);
+}
+
+function Valid15() {
+  const handleResize = useCallback(() => {}, []);
+  useEffect(() => {
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+}
+
+function Valid16() {
+  const handleResize = useMemo(() => () => {}, []);
+  useEffect(() => {
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+}
+
+function Valid17() {
+  const rHandleResize = useRef(() => {});
+  useEffect(() => {
+    window.addEventListener("resize", rHandleResize.current);
+    return () => {
+      window.removeEventListener("resize", rHandleResize.current);
+    };
+  }, []);
+}
+
+function Valid18() {
+  const rHandleResize = useRef(() => {});
+  useEffect(() => {
+    window.addEventListener("resize", rHandleResize.current);
+    return () => {
+      window.removeEventListener("resize", rHandleResize.current);
+    };
+  }, []);
+  useEffect(() => {
+    window.addEventListener("resize", rHandleResize.current);
+    return () => {
+      window.removeEventListener("resize", rHandleResize.current);
+    };
+  }, []);
+}
+
+function Valid19() {
+  const rHandleResize = useRef(() => {});
+  useEffect(() => {
+    window.addEventListener("resize", rHandleResize.current);
+  }, []);
+  useEffect(() => {
+    return () => {
+      window.removeEventListener("resize", rHandleResize.current);
+    };
+  }, []);
+}
+
+function Valid20() {
+  const rHandleResize = useRef(() => {});
+  useEffect(() => {
+    window.addEventListener("resize", rHandleResize.current);
+  }, []);
+  useEffect(() => {
+    window.addEventListener("resize", rHandleResize.current);
+    return () => {
+      window.removeEventListener("resize", rHandleResize.current);
+    };
+  }, []);
+}
+
+function Valid21() {
+  const rHandleResize = useRef(() => {});
+  useEffect(() => {
+    window.addEventListener("resize", rHandleResize.current);
+  }, []);
+  useLayoutEffect(() => {
+    return () => {
+      window.removeEventListener("resize", rHandleResize.current);
+    };
+  }, []);
+}
+
+function Valid22() {
+  const rHandleResize = useRef(() => {});
+  useLayoutEffect(() => {
+    return () => {
+      window.removeEventListener("resize", rHandleResize.current);
+    };
+  }, []);
+  useEffect(() => {
+    window.addEventListener("resize", rHandleResize.current);
+  }, []);
+}
+
+function Valid23() {
+  const rHandleResize = useRef(() => {});
+  useEffect(() => {
+    window.removeEventListener("resize", rHandleResize.current);
+    return () => {
+      window.addEventListener("resize", rHandleResize.current);
+    };
+  }, []);
+}
+
+function Valid24() {
+  const rHandleResize = useRef(() => {});
+  useEffect(() => {
+    window.removeEventListener("resize", rHandleResize.current);
+  }, []);
+  useEffect(() => {
+    return () => {
+      window.addEventListener("resize", rHandleResize.current);
+    };
+  }, []);
+}
+
+function Valid25() {
+  const rHandleResize = useRef(() => {});
+  useLayoutEffect(() => {
+    return () => {
+      window.addEventListener("resize", rHandleResize.current);
+    };
+  }, []);
+  useEffect(() => {
+    window.removeEventListener("resize", rHandleResize.current);
+  }, []);
+}
+
+function Valid26() {
+  useEffect(() => {
+    const handleResize = () => {};
+    (window as Window).addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+}
+
+function Valid27() {
+  useEffect(() => {
+    const handleResize = () => {};
+    window.addEventListener("resize", handleResize);
+    return () => {
+      (window as Window).removeEventListener("resize", handleResize);
+    };
+  }, []);
+}
+
+const abortController1 = new AbortController();
+
+function Valid28() {
+  const rHandleResize = useRef(() => {});
+  useEffect(() => {
+    window.addEventListener("resize", rHandleResize.current, { once: false, passive: true, capture: true, signal: abortController1.signal });
+    return () => {
+      window.removeEventListener("resize", rHandleResize.current, { capture: true });
+    };
+  }, []);
+}
+
+const abortController2 = new AbortController();
+
+function Valid29() {
+  const rHandleResize = useRef(() => {});
+  useEffect(() => {
+    window.addEventListener("focus", rHandleResize.current, { once: false, passive: true, capture: true, signal: abortController2.signal });
+    window.addEventListener("resize", rHandleResize.current, { once: false, passive: true, capture: true, signal: abortController2.signal });
+    return () => {
+      abortController2.abort();
+    };
+  }, []);
+}
+
+function Valid30() {
+  useEffect(() => {
+    const ac = new AbortController();
+    x.addEventListener("resize", () => {}, { signal: ac.signal });
+    return () => ac.abort();
+  }, []);
+}
+
+function Valid31() {
+  useEffect(() => {
+    const ac = new AbortController();
+    const signal = ac.signal;
+    x.addEventListener("resize", () => {}, { signal });
+    return () => ac.abort();
+  }, []);
+}
+
+function Valid32() {
+  useEffect(() => {
+    const ac = new AbortController();
+    const signal = ac.signal;
+    const sig = signal;
+    x.addEventListener("resize", () => {}, { signal: sig });
+    return () => ac.abort();
+  }, []);
+}
+
+function Valid33() {
+  const events = ["mousemove", "mousedown", "keydown", "scroll", "touchstart"];
+
+  const handleActivity = () => {};
+
+  useEffect(() => {
+    events.forEach((event) => {
+      window.addEventListener(event, handleActivity);
+    });
+
+    return () => {
+      events.forEach((event) => {
+        window.removeEventListener(event, handleActivity);
+      });
+    };
+  }, []);
+
+  return null;
+}
+
+function Valid34() {
+  const events = ["mousemove", "mousedown", "keydown", "scroll", "touchstart"];
+
+  const handleActivity = () => {};
+
+  useEffect(() => {
+    events.forEach((event) => {
+      window.addEventListener(event, handleActivity);
+    });
+
+    return () => {
+      events.forEach((evt) => {
+        window.removeEventListener(evt, handleActivity);
+      });
+    };
+  }, []);
+
+  return null;
+}
+
+function Valid35() {
+  const events = ["mousemove", "mousedown", "keydown", "scroll", "touchstart"];
+
+  const handleActivity = () => {};
+
+  useEffect(() => {
+    for (const event of events) {
+      window.addEventListener(event, handleActivity);
+    }
+
+    return () => {
+      for (const event of events) {
+        window.removeEventListener(event, handleActivity);
+      }
+    };
+  }, []);
+
+  return null;
+}
+
+function Valid36() {
+  const events = ["mousemove", "mousedown", "keydown", "scroll", "touchstart"];
+
+  const handleActivity = () => {};
+
+  useEffect(() => {
+    for (const event of events) {
+      window.addEventListener(event, handleActivity);
+    }
+
+    return () => {
+      for (const evt of events) {
+        window.removeEventListener(evt, handleActivity);
+      }
+    };
+  }, []);
+
+  return null;
+}
+
+function Valid37() {
+  const events = ["mousemove", "mousedown", "keydown", "scroll", "touchstart"];
+
+  const handleActivity = () => {};
+
+  useEffect(() => {
+    for (let event of events) {
+      window.addEventListener(event, handleActivity);
+    }
+
+    return () => {
+      for (let evt of events) {
+        window.removeEventListener(evt, handleActivity);
+      }
+    };
+  }, []);
+
+  return null;
+}
+
+function Valid38() {
+  useEffect(() => {
+    const events = [
+      ["mousemove", () => {}],
+      ["mousedown", () => {}],
+      ["keydown", () => {}],
+      ["scroll", () => {}],
+      ["touchstart", () => {}],
+    ];
+
+    for (const [event, handler] of events) {
+      window.addEventListener(event, handler);
+    }
+
+    return () => {
+      for (const [event, handler] of events) {
+        window.removeEventListener(event, handler);
+      }
+    };
+  }, []);
+
+  return null;
+}
+
+function Valid39() {
+  useEffect(() => {
+    const { remove } = BackHandler.addEventListener("hardwareBackPress", onBackPress);
+    return () => {
+      remove();
+    };
+  });
+}
+
+function Valid40() {
+  useEffectAbortable((signal) => {
+    window.addEventListener("resize", () => console.log("whoa!"), { signal });
+  }, []);
+}
