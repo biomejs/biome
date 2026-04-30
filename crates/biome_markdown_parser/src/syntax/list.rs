@@ -28,7 +28,6 @@
 //!
 //! ## Current Limitations
 //!
-//! - **Tight vs loose lists**: Not yet tracked; affects HTML output formatting.
 //! - **List interruption rules**: Some constructs can interrupt lists; not all
 //!   rules from CommonMark are implemented.
 
