@@ -20,3 +20,9 @@ font-size:$value;
 color:red;
 }
 }
+
+@each $animal,$color,$cursor in (puma,black,default),(sea-slug,blue,pointer),(egret,white,move){
+}
+
+@each $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var in puma,sea-slug,egret,salamander{
+}
