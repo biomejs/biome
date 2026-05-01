@@ -3,6 +3,7 @@ pub mod class_lexer;
 mod presets;
 mod sort;
 mod sort_config;
+pub mod sort_via_parser;
 mod tailwind_preset;
 
 use self::{
