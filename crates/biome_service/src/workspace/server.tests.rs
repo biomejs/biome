@@ -2327,10 +2327,7 @@ fn go_to_definition_jsx_classname_to_css() {
     let (path, range) = &definition.matches[0];
     assert_eq!(path, &BiomePath::new("/project/styles.css"));
     // "btn" in `.btn` starts at offset 1 (after the dot)
-    assert_eq!(
-        range,
-        &TextRange::new(TextSize::from(1), TextSize::from(4))
-    );
+    assert_eq!(range, &TextRange::new(TextSize::from(1), TextSize::from(4)));
 }
 
 #[test]
@@ -2435,10 +2432,7 @@ fn go_to_definition_html_class_to_css() {
     let (path, range) = &definition.matches[0];
     assert_eq!(path, &BiomePath::new("/project/styles.css"));
     // "header" in `.header` starts at offset 1
-    assert_eq!(
-        range,
-        &TextRange::new(TextSize::from(1), TextSize::from(7))
-    );
+    assert_eq!(range, &TextRange::new(TextSize::from(1), TextSize::from(7)));
 }
 
 #[test]
@@ -2729,10 +2723,7 @@ fn go_to_definition_vue_class_to_external_css() {
     let (path, range) = &definition.matches[0];
     assert_eq!(path, &BiomePath::new("/styles.css"));
     // "wrapper" in `.wrapper` starts at offset 1
-    assert_eq!(
-        range,
-        &TextRange::new(TextSize::from(1), TextSize::from(8))
-    );
+    assert_eq!(range, &TextRange::new(TextSize::from(1), TextSize::from(8)));
 }
 
 #[test]
@@ -2787,10 +2778,7 @@ import './styles.css';
     let (path, range) = &definition.matches[0];
     assert_eq!(path, &BiomePath::new("/styles.css"));
     // "foo" in `.foo` starts at offset 1
-    assert_eq!(
-        range,
-        &TextRange::new(TextSize::from(1), TextSize::from(4))
-    );
+    assert_eq!(range, &TextRange::new(TextSize::from(1), TextSize::from(4)));
 }
 
 #[test]
