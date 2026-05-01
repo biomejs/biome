@@ -345,59 +345,6 @@ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
   
   i Remove }
   
-3943.scss:84:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a media query but instead found '#'.
-  
-    82 │ .el:nth-of-type(#{$i}) {}
-    83 │ 
-  > 84 │ @media #{$value} {}
-       │        ^
-    85 │ 
-    86 │ $foundation-dir: 'foundation';
-  
-  i Expected a media query here.
-  
-    82 │ .el:nth-of-type(#{$i}) {}
-    83 │ 
-  > 84 │ @media #{$value} {}
-       │        ^
-    85 │ 
-    86 │ $foundation-dir: 'foundation';
-  
-3943.scss:84:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration, or an at rule but instead found '$'.
-  
-    82 │ .el:nth-of-type(#{$i}) {}
-    83 │ 
-  > 84 │ @media #{$value} {}
-       │          ^
-    85 │ 
-    86 │ $foundation-dir: 'foundation';
-  
-  i Expected a declaration, or an at rule here.
-  
-    82 │ .el:nth-of-type(#{$i}) {}
-    83 │ 
-  > 84 │ @media #{$value} {}
-       │          ^
-    85 │ 
-    86 │ $foundation-dir: 'foundation';
-  
-3943.scss:84:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `}`
-  
-    82 │ .el:nth-of-type(#{$i}) {}
-    83 │ 
-  > 84 │ @media #{$value} {}
-       │                ^
-    85 │ 
-    86 │ $foundation-dir: 'foundation';
-  
-  i Remove }
-  
 3943.scss:99:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.

@@ -8286,6 +8286,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssMapExpressionPair {
         )
     }
 }
+impl FormatRule<biome_css_syntax::ScssMediaQuery>
+    for crate::scss::auxiliary::media_query::FormatScssMediaQuery
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssMediaQuery,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssMediaQuery>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssMediaQuery {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssMediaQuery,
+        crate::scss::auxiliary::media_query::FormatScssMediaQuery,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::auxiliary::media_query::FormatScssMediaQuery::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssMediaQuery {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssMediaQuery,
+        crate::scss::auxiliary::media_query::FormatScssMediaQuery,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::auxiliary::media_query::FormatScssMediaQuery::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::ScssMixinAtRule>
     for crate::scss::statements::mixin_at_rule::FormatScssMixinAtRule
 {

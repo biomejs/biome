@@ -3664,6 +3664,12 @@ pub fn scss_map_expression_pair(
         ],
     ))
 }
+pub fn scss_media_query(query: ScssInterpolation) -> ScssMediaQuery {
+    ScssMediaQuery::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_MEDIA_QUERY,
+        [Some(SyntaxElement::Node(query.into_syntax()))],
+    ))
+}
 pub fn scss_mixin_at_rule(
     mixin_token: SyntaxToken,
     name: CssIdentifier,

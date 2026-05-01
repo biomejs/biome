@@ -1266,8 +1266,14 @@ CssMediaQueryList = (AnyCssMediaQuery (',' AnyCssMediaQuery)*)
 AnyCssMediaQuery =
 	CssMediaConditionQuery
 	| AnyCssMediaTypeQuery
+	| ScssMediaQuery
 	| CssBogusMediaQuery
 	| CssMetavariable
+
+// @media #{$query} {}
+//        ^^^^^^^^^
+ScssMediaQuery =
+	query: ScssInterpolation
 
 // @media screen, (width > 500px), print {}
 // 				        ^^^^^^^^^^^^^^^

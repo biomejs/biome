@@ -10478,6 +10478,41 @@ pub struct ScssMapExpressionPairFields {
     pub value: SyntaxResult<AnyScssExpression>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssMediaQuery {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssMediaQuery {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssMediaQueryFields {
+        ScssMediaQueryFields {
+            query: self.query(),
+        }
+    }
+    pub fn query(&self) -> SyntaxResult<ScssInterpolation> {
+        support::required_node(&self.syntax, 0usize)
+    }
+}
+impl Serialize for ScssMediaQuery {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssMediaQueryFields {
+    pub query: SyntaxResult<ScssInterpolation>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssMixinAtRule {
     pub(crate) syntax: SyntaxNode,
 }
@@ -14296,6 +14331,7 @@ pub enum AnyCssMediaQuery {
     CssBogusMediaQuery(CssBogusMediaQuery),
     CssMediaConditionQuery(CssMediaConditionQuery),
     CssMetavariable(CssMetavariable),
+    ScssMediaQuery(ScssMediaQuery),
 }
 impl AnyCssMediaQuery {
     pub fn as_any_css_media_type_query(&self) -> Option<&AnyCssMediaTypeQuery> {
@@ -14319,6 +14355,12 @@ impl AnyCssMediaQuery {
     pub fn as_css_metavariable(&self) -> Option<&CssMetavariable> {
         match &self {
             Self::CssMetavariable(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_media_query(&self) -> Option<&ScssMediaQuery> {
+        match &self {
+            Self::ScssMediaQuery(item) => Some(item),
             _ => None,
         }
     }
@@ -28844,6 +28886,53 @@ impl From<ScssMapExpressionPair> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for ScssMediaQuery {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_MEDIA_QUERY as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_MEDIA_QUERY
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssMediaQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssMediaQuery")
+                .field("query", &support::DebugSyntaxResult(self.query()))
+                .finish()
+        } else {
+            f.debug_struct("ScssMediaQuery").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssMediaQuery> for SyntaxNode {
+    fn from(n: ScssMediaQuery) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssMediaQuery> for SyntaxElement {
+    fn from(n: ScssMediaQuery) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for ScssMixinAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -36503,15 +36592,24 @@ impl From<CssMetavariable> for AnyCssMediaQuery {
         Self::CssMetavariable(node)
     }
 }
+impl From<ScssMediaQuery> for AnyCssMediaQuery {
+    fn from(node: ScssMediaQuery) -> Self {
+        Self::ScssMediaQuery(node)
+    }
+}
 impl AstNode for AnyCssMediaQuery {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssMediaTypeQuery::KIND_SET
         .union(CssBogusMediaQuery::KIND_SET)
         .union(CssMediaConditionQuery::KIND_SET)
-        .union(CssMetavariable::KIND_SET);
+        .union(CssMetavariable::KIND_SET)
+        .union(ScssMediaQuery::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_BOGUS_MEDIA_QUERY | CSS_MEDIA_CONDITION_QUERY | CSS_METAVARIABLE => true,
+            CSS_BOGUS_MEDIA_QUERY
+            | CSS_MEDIA_CONDITION_QUERY
+            | CSS_METAVARIABLE
+            | SCSS_MEDIA_QUERY => true,
             k if AnyCssMediaTypeQuery::can_cast(k) => true,
             _ => false,
         }
@@ -36523,6 +36621,7 @@ impl AstNode for AnyCssMediaQuery {
                 Self::CssMediaConditionQuery(CssMediaConditionQuery { syntax })
             }
             CSS_METAVARIABLE => Self::CssMetavariable(CssMetavariable { syntax }),
+            SCSS_MEDIA_QUERY => Self::ScssMediaQuery(ScssMediaQuery { syntax }),
             _ => {
                 if let Some(any_css_media_type_query) = AnyCssMediaTypeQuery::cast(syntax) {
                     return Some(Self::AnyCssMediaTypeQuery(any_css_media_type_query));
@@ -36537,6 +36636,7 @@ impl AstNode for AnyCssMediaQuery {
             Self::CssBogusMediaQuery(it) => it.syntax(),
             Self::CssMediaConditionQuery(it) => it.syntax(),
             Self::CssMetavariable(it) => it.syntax(),
+            Self::ScssMediaQuery(it) => it.syntax(),
             Self::AnyCssMediaTypeQuery(it) => it.syntax(),
         }
     }
@@ -36545,6 +36645,7 @@ impl AstNode for AnyCssMediaQuery {
             Self::CssBogusMediaQuery(it) => it.into_syntax(),
             Self::CssMediaConditionQuery(it) => it.into_syntax(),
             Self::CssMetavariable(it) => it.into_syntax(),
+            Self::ScssMediaQuery(it) => it.into_syntax(),
             Self::AnyCssMediaTypeQuery(it) => it.into_syntax(),
         }
     }
@@ -36556,6 +36657,7 @@ impl std::fmt::Debug for AnyCssMediaQuery {
             Self::CssBogusMediaQuery(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMediaConditionQuery(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssMediaQuery(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -36566,6 +36668,7 @@ impl From<AnyCssMediaQuery> for SyntaxNode {
             AnyCssMediaQuery::CssBogusMediaQuery(it) => it.into_syntax(),
             AnyCssMediaQuery::CssMediaConditionQuery(it) => it.into_syntax(),
             AnyCssMediaQuery::CssMetavariable(it) => it.into_syntax(),
+            AnyCssMediaQuery::ScssMediaQuery(it) => it.into_syntax(),
         }
     }
 }
@@ -43628,6 +43731,11 @@ impl std::fmt::Display for ScssMapExpression {
     }
 }
 impl std::fmt::Display for ScssMapExpressionPair {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssMediaQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

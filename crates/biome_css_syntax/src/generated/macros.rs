@@ -1076,6 +1076,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::ScssMapExpressionPair::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::SCSS_MEDIA_QUERY => {
+                    let $pattern = unsafe { $crate::ScssMediaQuery::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::SCSS_MIXIN_AT_RULE => {
                     let $pattern = unsafe { $crate::ScssMixinAtRule::new_unchecked(node) };
                     $body

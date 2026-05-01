@@ -4237,6 +4237,14 @@ impl ScssMapExpressionPair {
         )
     }
 }
+impl ScssMediaQuery {
+    pub fn with_query(self, element: ScssInterpolation) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl ScssMixinAtRule {
     pub fn with_mixin_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(

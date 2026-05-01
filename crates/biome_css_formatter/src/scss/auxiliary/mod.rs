@@ -18,6 +18,7 @@ pub(crate) mod list_expression;
 pub(crate) mod list_expression_element;
 pub(crate) mod map_expression;
 pub(crate) mod map_expression_pair;
+pub(crate) mod media_query;
 pub(crate) mod module_configuration;
 pub(crate) mod module_configuration_list;
 pub(crate) mod module_member_access;
