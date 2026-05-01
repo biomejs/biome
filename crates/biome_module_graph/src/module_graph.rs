@@ -287,7 +287,8 @@ impl ModuleGraph {
 
     /// Finds the CSS file and text range where a class is defined, searching
     /// all available paths: JS imports, HTML inline styles, linked stylesheets,
-    /// and CSS imports from embedded `<script>` blocks.
+    /// CSS imports from embedded `<script>` blocks, and transitive CSS `@import`
+    /// chains.
     ///
     /// Returns a list of the CSS file path, the selector range, and an optional content
     /// offset for inline `<style>` blocks (needed to translate snippet-local
@@ -298,6 +299,8 @@ impl ModuleGraph {
         class_name: &str,
     ) -> Vec<(Utf8PathBuf, TextRange, Option<TextSize>)> {
         let mut result = Vec::new();
+        let mut visited_css = FxHashSet::default();
+
         // 1. Check inline style classes in HTML-like files (carry content_offset)
         if let Some(html_info) = self.html_module_info_for_path(path) {
             for class_def in &html_info.style_classes {
@@ -317,33 +320,61 @@ impl ModuleGraph {
                 continue; // Already checked inline styles above
             }
 
-            step.css_classes
-                .iter()
-                .filter_map(|(range, token)| {
-                    if token.text() == class_name {
-                        Some(*range)
-                    } else {
-                        None
-                    }
-                })
-                .for_each(|range| result.push((step.css_path.clone(), range, None)))
+            self.search_css_class_transitive(
+                &step.css_path,
+                class_name,
+                &mut result,
+                &mut visited_css,
+            );
         }
 
         // 3. Check CSS files imported by JS (e.g., `import './styles.css'` in JSX)
         for step in self.traverse_import_tree_for_classes(path) {
-            step.css_classes
-                .iter()
-                .filter_map(|(range, token)| {
-                    if token.text() == class_name {
-                        Some(*range)
-                    } else {
-                        None
-                    }
-                })
-                .for_each(|range| result.push((step.css_path.clone(), range, None)))
+            self.search_css_class_transitive(
+                &step.css_path,
+                class_name,
+                &mut result,
+                &mut visited_css,
+            );
         }
 
         result
+    }
+
+    /// Searches a CSS file and all files it transitively `@import`s for a class
+    /// definition, with cycle protection.
+    fn search_css_class_transitive(
+        &self,
+        css_path: &Utf8Path,
+        class_name: &str,
+        result: &mut Vec<(Utf8PathBuf, TextRange, Option<TextSize>)>,
+        visited: &mut FxHashSet<Utf8PathBuf>,
+    ) {
+        let mut queue = VecDeque::new();
+        queue.push_back(css_path.to_path_buf());
+
+        while let Some(current) = queue.pop_front() {
+            if !visited.insert(current.clone()) {
+                continue;
+            }
+
+            let Some(css_info) = self.css_module_info_for_path(&current) else {
+                continue;
+            };
+
+            for (range, token) in css_info.classes.iter() {
+                if token.text() == class_name {
+                    result.push((current.clone(), *range, None));
+                }
+            }
+
+            // Follow @import edges
+            for import in css_info.imports.values() {
+                if let Some(imported_path) = import.resolved_path.as_path() {
+                    queue.push_back(imported_path.to_path_buf());
+                }
+            }
+        }
     }
 
     /// Builds diagnostic information with full component chains for error reporting.

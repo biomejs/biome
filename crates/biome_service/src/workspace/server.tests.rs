@@ -2940,3 +2940,58 @@ fn go_to_definition_css_class_multiple_matches() {
         assert_eq!(range, &expected_range);
     }
 }
+
+#[test]
+fn go_to_definition_css_class_via_transitive_import() {
+    // App.jsx imports app.css, which @imports components.css.
+    // `.card` is defined only in components.css — go-to-definition should find it.
+    const COMPONENTS_CSS: &str = ".card { border: 1px solid; }\n";
+    const APP_CSS: &str = "@import './components.css';\n.wrapper { display: flex; }\n";
+    const JSX_CONTENT: &str = "import './app.css';\n<div className=\"card\" />\n";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/components.css"),
+        COMPONENTS_CSS.as_bytes(),
+    );
+    fs.insert(Utf8PathBuf::from("/project/app.css"), APP_CSS.as_bytes());
+    fs.insert(
+        Utf8PathBuf::from("/project/App.jsx"),
+        JSX_CONTENT.as_bytes(),
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+
+    // Cursor on "card" inside className="card"
+    let card_start = JSX_CONTENT.find("\"card\"").unwrap() + 1;
+    let cursor_range = TextRange::new(
+        TextSize::from(card_start as u32),
+        TextSize::from(card_start as u32),
+    );
+
+    let result = workspace
+        .go_to_definition(GoToDefinitionParams {
+            project_key,
+            enabled: true,
+            path: BiomePath::new("/project/App.jsx"),
+            cursor_range,
+        })
+        .unwrap();
+
+    let definition = result.expect("should resolve className to CSS class in transitive import");
+    assert_eq!(definition.matches.len(), 1);
+    let (path, range) = &definition.matches[0];
+    assert_eq!(path, &BiomePath::new("/project/components.css"));
+    // "card" in `.card` starts at offset 1 (after the dot)
+    assert_eq!(range, &TextRange::new(TextSize::from(1), TextSize::from(5)));
+}
