@@ -8,6 +8,9 @@ a { m: 10%#{foo}; }
 a { m: 10#{p}x; }
 a { m: $v#{x}; }
 a { m: module.$name#{suffix}; }
+a { m: module.$name (1); }
+a { m: module.$name
+(1); }
 a { m: #{x}$v; }
 a { m: foo#{bar}; }
 a { m: #{bar}foo; }

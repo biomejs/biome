@@ -72,7 +72,7 @@ fn parse_scss_module_variable_operand(p: &mut CssParser) -> ParsedSyntax {
     p.expect(T![.]);
     parse_scss_variable(p).ok();
 
-    if p.at(T!['(']) {
+    if p.at(T!['(']) && !p.has_preceding_whitespace() && !p.has_preceding_line_break() {
         // `module.$name(` is an invalid module function name; recover by
         // parsing the call and reporting the `$` member diagnostic.
         let name = head.complete(p, SCSS_MODULE_MEMBER_ACCESS);
