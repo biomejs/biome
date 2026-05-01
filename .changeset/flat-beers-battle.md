@@ -3,7 +3,7 @@
 ---
 
 Added the `sortBareImports` option to [`organizeImports`](https://biomejs.dev/assist/actions/organize-imports/),
-which allows bare imports to be sorted within other imports when set to `false`.
+which allows bare imports to be sorted within other imports when set to `true`.
 
 ```json
 {

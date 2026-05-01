@@ -38,6 +38,11 @@ impl ImportGroups {
                     .any(|group| matches!(group, ImportGroup::BlankLine,))
             })
     }
+
+    /// Returns the explicit import group at `index` if any.
+    pub fn get(&self, index: u16) -> Option<&ImportGroup> {
+        self.0.get(index as usize)
+    }
 }
 impl biome_deserialize::Merge for ImportGroups {
     fn merge_with(&mut self, other: Self) {
@@ -72,18 +77,29 @@ impl ImportCandidate<'_> {
 #[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(untagged)]
-enum ImportGroup {
+pub enum ImportGroup {
     #[serde(rename = ":BLANK_LINE:")]
     BlankLine,
     Matcher(GroupMatcher),
     MatcherList(Box<[GroupMatcher]>),
 }
 impl ImportGroup {
-    fn contains(&self, candidate: &ImportCandidate<'_>) -> bool {
+    pub fn contains(&self, candidate: &ImportCandidate<'_>) -> bool {
         match self {
             Self::BlankLine => false,
             Self::Matcher(matcher) => matcher.is_match(candidate),
             Self::MatcherList(matchers) => candidate.matches_with_exceptions(matchers.iter()),
+        }
+    }
+
+    /// Returns `true` if it matches bare imports.
+    pub fn matches_bare(&self) -> bool {
+        match self {
+            Self::BlankLine => false,
+            Self::Matcher(group_matcher) => group_matcher.matches_bare(),
+            Self::MatcherList(group_matchers) => group_matchers
+                .iter()
+                .any(|group_matcher| group_matcher.matches_bare()),
         }
     }
 }
@@ -150,6 +166,15 @@ impl GroupMatcher {
                 .is_some_and(|src| matcher.is_raw_match(src)),
         }
     }
+
+    /// Returns `true` if it matches bare imports.
+    pub fn matches_bare(&self) -> bool {
+        if let Self::Import(import_matcher) = self {
+            import_matcher.matches_bare()
+        } else {
+            false
+        }
+    }
 }
 impl Deserializable for GroupMatcher {
     fn deserialize(
@@ -192,20 +217,30 @@ impl ImportMatcher {
                     .is_some_and(|candidate_source| src.is_match(candidate_source))
             })
     }
+
+    /// Returns `true` if it matches bare imports.
+    pub fn matches_bare(&self) -> bool {
+        self.kind.is_some_and(|kind| kind.is_bare())
+    }
 }
 
 /// Kind matcher for [`ImportMatcher::kind`].
 ///
 /// Accepts a plain kind (e.g. `"bare"`) or a negated kind (e.g. `"!bare"`).
-#[derive(Clone, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
+#[derive(Clone, Copy, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 #[serde(try_from = "String", into = "String")]
 pub struct NegatableImportKindMatcher {
     is_negated: bool,
     kind: ImportKindMatcher,
 }
 impl NegatableImportKindMatcher {
-    pub fn is_match(&self, candidate: &ImportCandidate<'_>) -> bool {
+    pub fn is_match(self, candidate: &ImportCandidate<'_>) -> bool {
         self.kind.is_match(candidate) != self.is_negated
+    }
+
+    /// Returns `true` if it matches bare import kind.
+    pub const fn is_bare(self) -> bool {
+        !self.is_negated && self.kind.is_bare()
     }
 }
 impl biome_deserialize::Deserializable for NegatableImportKindMatcher {
@@ -286,17 +321,23 @@ impl schemars::JsonSchema for NegatableImportKindMatcher {
     }
 }
 
-#[derive(Clone, Debug, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
+#[derive(
+    Clone, Copy, Debug, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum ImportKindMatcher {
     #[serde(rename = "bare")]
     Bare,
 }
 impl ImportKindMatcher {
-    fn is_match(&self, candidate: &ImportCandidate<'_>) -> bool {
+    pub fn is_match(self, candidate: &ImportCandidate<'_>) -> bool {
         match self {
             Self::Bare => candidate.is_bare,
         }
+    }
+
+    pub const fn is_bare(self) -> bool {
+        matches!(self, Self::Bare)
     }
 }
 impl std::fmt::Display for ImportKindMatcher {
@@ -413,24 +454,24 @@ impl biome_deserialize::Deserializable for SourceMatcher {
     }
 }
 
-#[derive(Clone, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
+#[derive(Clone, Copy, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 #[serde(try_from = "String", into = "String")]
 pub struct NegatablePredefinedSourceMatcher {
     is_negated: bool,
     matcher: PredefinedSourceMatcher,
 }
 impl NegatablePredefinedSourceMatcher {
-    pub fn is_negated(&self) -> bool {
+    pub fn is_negated(self) -> bool {
         self.is_negated
     }
 
     /// Tests whether the given `candidate` matches this matcher.
-    pub fn is_match(&self, candidate: &ImportSourceCandidate) -> bool {
+    pub fn is_match(self, candidate: &ImportSourceCandidate) -> bool {
         self.is_raw_match(candidate) != self.is_negated
     }
 
     /// Tests whether the given `candidate` matches this matcher, ignoring the negation.
-    pub fn is_raw_match(&self, candidate: &ImportSourceCandidate) -> bool {
+    pub fn is_raw_match(self, candidate: &ImportSourceCandidate) -> bool {
         self.matcher.is_match(candidate)
     }
 }
@@ -498,7 +539,9 @@ impl schemars::JsonSchema for NegatablePredefinedSourceMatcher {
     }
 }
 
-#[derive(Clone, Debug, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
+#[derive(
+    Clone, Copy, Debug, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum PredefinedSourceMatcher {
     #[serde(rename = ":ALIAS:")]
@@ -519,7 +562,7 @@ pub enum PredefinedSourceMatcher {
     Url,
 }
 impl PredefinedSourceMatcher {
-    fn is_match(&self, candidate: &ImportSourceCandidate) -> bool {
+    fn is_match(self, candidate: &ImportSourceCandidate) -> bool {
         let source_kind = candidate.source_kund();
         let source = candidate.as_str();
         match self {

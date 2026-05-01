@@ -1,0 +1,68 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: bare-selective-matching-end.js
+---
+# Input
+```js
+import "./e.css";
+import d from "./d.js";
+import "./c.css";
+import "./x.js";
+import "./b.css";
+import "./a.css";
+
+```
+
+# Diagnostics
+```
+bare-selective-matching-end.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Some imports or exports are not organized.
+  
+  > 1 │ import "./e.css";
+      │ ^^^^^^^^^^^^^^^^^
+  > 2 │ import d from "./d.js";
+  > 3 │ import "./c.css";
+  > 4 │ import "./x.js";
+  > 5 │ import "./b.css";
+  > 6 │ import "./a.css";
+      │ ^^^^^^^^^^^^^^^^^
+    7 │ 
+  
+  i Sort these imports.
+  
+  > 1 │ import "./e.css";
+      │ ^^^^^^^^^^^^^^^^^
+  > 2 │ import d from "./d.js";
+  > 3 │ import "./c.css";
+      │ ^^^^^^^^^^^^^^^^^
+    4 │ import "./x.js";
+    5 │ import "./b.css";
+  
+  i Sort these imports.
+  
+    3 │ import "./c.css";
+    4 │ import "./x.js";
+  > 5 │ import "./b.css";
+      │ ^^^^^^^^^^^^^^^^^
+  > 6 │ import "./a.css";
+      │ ^^^^^^^^^^^^^^^^^
+    7 │ 
+  
+  i Safe fix: Organize imports and exports (Biome)
+  
+    1   │ - import·"./e.css";
+    2   │ - import·d·from·"./d.js";
+    3   │ - import·"./c.css";
+      1 │ + import·d·from·"./d.js";
+      2 │ + import·"./c.css";
+      3 │ + import·"./e.css";
+    4 4 │   import "./x.js";
+    5   │ - import·"./b.css";
+    6   │ - import·"./a.css";
+      5 │ + import·"./a.css";
+      6 │ + import·"./b.css";
+    7 7 │   
+  
+
+```

@@ -999,28 +999,43 @@ impl Rule for OrganizeImports {
         let sort_order = options.identifier_order.unwrap_or_default();
         let sort_bare_imports = options.sort_bare_imports.unwrap_or_default();
         let mut chunk: Option<ChunkBuilder> = None;
-        let mut prev_kind: Option<JsSyntaxKind> = None;
-        let mut prev_is_bare_import = false;
+        let mut prev_stmt_kind: Option<JsSyntaxKind> = None;
+        let mut prev_is_unmatched_bare_import = false;
         let mut prev_group = None;
         for item in root.items() {
-            let current_kind = item.syntax().kind();
+            let current_stmt_kind = item.syntax().kind();
             if let Some((info, specifiers, attributes)) = ImportInfo::from_module_item(&item) {
-                let prev_is_distinct = prev_kind.is_some_and(|kind| kind != current_kind);
+                let key = ImportKey::new(info, groups);
+                let prev_is_distinct_stmt_kind =
+                    prev_stmt_kind.is_some_and(|kind| kind != current_stmt_kind);
+                // Is this a bare import that is explicitly matched by its group?
+                // Explicitly means that it is a bare import matcher such as `{ "kind": "bare" }`.
+                let is_matched_bare_import = if key.kind == ImportStatementKind::Bare
+                    && let Some(groups) = groups
+                    && let Some(import_group) = groups.get(key.group)
+                {
+                    import_group.matches_bare()
+                } else {
+                    false
+                };
                 // switching of kind (import/statement/export) marks the start of a new chunk.
-                if prev_is_distinct
+                if prev_is_distinct_stmt_kind
                     // A detached comment marks the start of a new chunk
                     || has_detached_leading_comment(item.syntax())
                     // bare imports marks the start of a new chunk if they are ignored in the sort.
                     || (!sort_bare_imports && (
-                        prev_is_bare_import || info.kind == ImportStatementKind::Bare
+                        // bare imports that are explicitly matched are ignored.
+                        prev_is_unmatched_bare_import || (
+                            !is_matched_bare_import && key.kind == ImportStatementKind::Bare
+                        )
                     ))
                 {
                     // The chunk ends, here
                     report_unsorted_chunk(chunk.take(), &mut result);
                     prev_group = None;
                 }
-                prev_is_bare_import = info.kind == ImportStatementKind::Bare;
-                let key = ImportKey::new(info, groups);
+                prev_is_unmatched_bare_import =
+                    key.kind == ImportStatementKind::Bare && !is_matched_bare_import;
                 let blank_line_separated_groups = groups.is_some_and(|groups| {
                     prev_group.is_some_and(|prev_group| {
                         groups.separated_by_blank_line(prev_group, key.group)
@@ -1037,7 +1052,7 @@ impl Rule for OrganizeImports {
                 let newline_issue = if leading_newline_count == 1
                     // A chunk must start with a blank line (two newlines)
                     // if a distinct kind (import/statement/export) precedes it.
-                    && ((starts_chunk && prev_is_distinct) ||
+                    && ((starts_chunk && prev_is_distinct_stmt_kind) ||
                     // Some groups must be separated by a blank line
                     blank_line_separated_groups)
                 {
@@ -1096,9 +1111,9 @@ impl Rule for OrganizeImports {
                         slot_index: statement.syntax().index() as u32,
                     });
                 }
-                prev_is_bare_import = false;
+                prev_is_unmatched_bare_import = false;
             }
-            prev_kind = Some(current_kind);
+            prev_stmt_kind = Some(current_stmt_kind);
         }
         // Report the last chunk
         report_unsorted_chunk(chunk.take(), &mut result);
