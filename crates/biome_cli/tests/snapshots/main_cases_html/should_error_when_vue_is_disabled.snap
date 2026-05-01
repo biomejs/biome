@@ -43,7 +43,7 @@ file.html:1:6 parse ━━━━━━━━━━━━━━━━━━━━
       │      ^^^^^^^^^^^
     2 │ 
   
-  i Remove it or enable the parsing using the html.parser.vue option.
+  i Remove it, change the extension to .vue, or enable the parsing using the html.parser.vue option.
   
 
 ```

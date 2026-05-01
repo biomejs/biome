@@ -319,7 +319,7 @@ impl ServiceLanguage for HtmlLanguage {
             options = options.with_double_text_expression();
         }
         if language.vue.unwrap_or_default().into() && html_file_source.is_html() {
-            options = options.with_vue();
+            options = options.with_vue().with_double_text_expression();
         }
 
         overrides.apply_override_html_parser_options(path, &mut options);

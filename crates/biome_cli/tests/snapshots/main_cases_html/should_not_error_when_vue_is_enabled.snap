@@ -8,8 +8,7 @@ expression: redactor(content)
 {
   "html": {
     "parser": {
-      "vue": true,
-      "interpolation": true
+      "vue": true
     },
     "linter": {
       "enabled": true

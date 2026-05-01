@@ -499,8 +499,7 @@ fn should_not_error_when_vue_is_enabled() {
         r#"{
     "html": {
         "parser": {
-            "vue": true,
-            "interpolation": true
+            "vue": true
         },
         "linter": {
             "enabled": true
