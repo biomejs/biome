@@ -378,9 +378,9 @@ pub(crate) fn parse_html_element(p: &mut HtmlParser) -> ParsedSyntax {
             p.bump_remap(HTML_LITERAL);
             Present(m.complete(p, HTML_CONTENT))
         }
-        // At this position, we shouldn't have svelte keyword, so we relex everything
-        // as text
-        _ if is_at_svelte_keyword(p) => {
+        // At this position, keywords are plain text unless a more specific parser
+        // handled them first.
+        _ if is_at_keyword(p) => {
             let m = p.start();
             p.re_lex(HtmlReLexContext::HtmlText);
             p.bump_with_context(HTML_LITERAL, HtmlLexContext::Regular);
