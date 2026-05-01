@@ -125,13 +125,22 @@ pub(crate) fn parse_any_media_query(p: &mut CssParser) -> ParsedSyntax {
     } else if is_at_metavariable(p) {
         parse_metavariable(p)
     } else if is_at_any_media_condition(p) {
-        let m = p.start();
-        // Guarded by `is_at_any_media_condition` above.
-        parse_any_media_condition(p).ok();
-        Present(m.complete(p, CSS_MEDIA_CONDITION_QUERY))
+        parse_any_media_condition_query(p)
     } else {
         Absent
     }
+}
+
+#[inline]
+fn parse_any_media_condition_query(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_any_media_condition(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    // Guarded by `is_at_any_media_condition` above.
+    parse_any_media_condition(p).ok();
+    Present(m.complete(p, CSS_MEDIA_CONDITION_QUERY))
 }
 
 #[inline]
