@@ -5,6 +5,7 @@ pub(crate) mod each_binding_list;
 pub(crate) mod expression_item_list;
 pub(crate) mod import_item_list;
 pub(crate) mod interpolated_identifier_part_list;
+pub(crate) mod interpolated_nth_value_part_list;
 pub(crate) mod interpolated_string_part_list;
 pub(crate) mod interpolated_value_part_list;
 pub(crate) mod list_expression_element_list;

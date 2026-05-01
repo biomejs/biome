@@ -143,22 +143,8 @@ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
    content: "I have #{8 + 2} books on SASS!";
    border: #{$var} #{$var} #{$var};
    filter: #{$var}#{$var}#{$var};
-@@ -30,17 +30,15 @@
-   }
- }
- 
--.el:nth-of-type(#{$i}) {
--}
-+.el:nth-of-type(# {$i}) {}
- 
--@media #{$value} {
--}
-+@media #{$value} {}
- 
--$foundation-dir: "foundation";
--@import url("#{$foundation-dir}/components/grid");
-+$foundation-dir: 'foundation';
-+@import url('#{$foundation-dir}/components/grid');
+@@ -40,14 +40,17 @@
+ @import url("#{$foundation-dir}/components/grid");
  @import url(#{$foundation-dir}/components/grid);
  @import url($foundation-dir/components/grid);
 -@import url($foundation-dir + "/components/grid");
@@ -166,15 +152,18 @@ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
  
  @function get-font-family($family) {
    @return $family;
-@@ -48,6 +46,7 @@
- @import url("//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap");
+ }
+-@import url("//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap");
++@import url("//fonts.googleapis.com/css?family=#{get-font-family(
++    "Roboto"
++  )}:100,300,500,700,900&display=swap");
  @import url(//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap);
  
 +
  @keyframes loader {
    0% {
      transform: translate3d(0, 0, 0);
-@@ -58,22 +57,14 @@
+@@ -58,22 +61,14 @@
    }
  
    50% {
@@ -237,12 +226,14 @@ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
   }
 }
 
-.el:nth-of-type(# {$i}) {}
+.el:nth-of-type(#{$i}) {
+}
 
-@media #{$value} {}
+@media #{$value} {
+}
 
-$foundation-dir: 'foundation';
-@import url('#{$foundation-dir}/components/grid');
+$foundation-dir: "foundation";
+@import url("#{$foundation-dir}/components/grid");
 @import url(#{$foundation-dir}/components/grid);
 @import url($foundation-dir/components/grid);
 @import url($foundation-dir+"/components/grid");
@@ -250,7 +241,9 @@ $foundation-dir: 'foundation';
 @function get-font-family($family) {
   @return $family;
 }
-@import url("//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap");
+@import url("//fonts.googleapis.com/css?family=#{get-font-family(
+    "Roboto"
+  )}:100,300,500,700,900&display=swap");
 @import url(//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap);
 
 
@@ -279,72 +272,6 @@ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
 
 # Errors
 ```
-3943.scss:82:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected an even, an odd, a n, a <An+B>, or a number but instead found '#'.
-  
-    80 │ }
-    81 │ 
-  > 82 │ .el:nth-of-type(#{$i}) {}
-       │                 ^
-    83 │ 
-    84 │ @media #{$value} {}
-  
-  i Expected an even, an odd, a n, a <An+B>, or a number here.
-  
-    80 │ }
-    81 │ 
-  > 82 │ .el:nth-of-type(#{$i}) {}
-       │                 ^
-    83 │ 
-    84 │ @media #{$value} {}
-  
-3943.scss:82:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `)` but instead found `{`
-  
-    80 │ }
-    81 │ 
-  > 82 │ .el:nth-of-type(#{$i}) {}
-       │                  ^
-    83 │ 
-    84 │ @media #{$value} {}
-  
-  i Remove {
-  
-3943.scss:82:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration, or an at rule but instead found '$'.
-  
-    80 │ }
-    81 │ 
-  > 82 │ .el:nth-of-type(#{$i}) {}
-       │                   ^
-    83 │ 
-    84 │ @media #{$value} {}
-  
-  i Expected a declaration, or an at rule here.
-  
-    80 │ }
-    81 │ 
-  > 82 │ .el:nth-of-type(#{$i}) {}
-       │                   ^
-    83 │ 
-    84 │ @media #{$value} {}
-  
-3943.scss:82:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `}`
-  
-    80 │ }
-    81 │ 
-  > 82 │ .el:nth-of-type(#{$i}) {}
-       │                     ^
-    83 │ 
-    84 │ @media #{$value} {}
-  
-  i Remove }
-  
 3943.scss:99:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
@@ -741,7 +668,6 @@ $icons: wifi "\600", wifi-hotspot "\601", weather "\602";
 
 # Lines exceeding max width of 80 characters
 ```
-   46: @import url("//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap");
-   47: @import url(//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap);
-   60:     transform: translate3d(0, $bounce-height, 0) scale($loader-bounce-horizontal-expansion, $loader-bounce-vertical-compression);
+   51: @import url(//fonts.googleapis.com/css?family=#{ get-font-family('Roboto') }:100,300,500,700,900&display=swap);
+   64:     transform: translate3d(0, $bounce-height, 0) scale($loader-bounce-horizontal-expansion, $loader-bounce-vertical-compression);
 ```

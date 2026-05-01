@@ -11,7 +11,8 @@ use biome_parser::{Parser, TokenSet, token_set};
 use super::is_at_scss_variable_modifier;
 
 pub(crate) use interpolation::{
-    is_at_scss_interpolation, is_nth_at_scss_interpolation, parse_scss_interpolation_prefix,
+    is_at_scss_interpolation, is_nth_at_scss_interpolation,
+    parse_scss_interpolation_inner_expression, parse_scss_interpolation_prefix,
     parse_scss_regular_interpolation, parse_scss_selector_interpolation,
 };
 pub(crate) use list::{

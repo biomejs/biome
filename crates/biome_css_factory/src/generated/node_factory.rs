@@ -1739,7 +1739,7 @@ pub fn css_nested_selector(amp_token: SyntaxToken) -> CssNestedSelector {
         [Some(SyntaxElement::Token(amp_token))],
     ))
 }
-pub fn css_nth_offset(sign_token: SyntaxToken, value: CssNumber) -> CssNthOffset {
+pub fn css_nth_offset(sign_token: SyntaxToken, value: AnyCssPseudoClassNthValue) -> CssNthOffset {
     CssNthOffset::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_NTH_OFFSET,
         [
@@ -2089,7 +2089,7 @@ pub fn css_pseudo_class_nth(symbol_token: SyntaxToken) -> CssPseudoClassNthBuild
 pub struct CssPseudoClassNthBuilder {
     symbol_token: SyntaxToken,
     sign_token: Option<SyntaxToken>,
-    value: Option<CssNumber>,
+    value: Option<AnyCssPseudoClassNthValue>,
     offset: Option<CssNthOffset>,
 }
 impl CssPseudoClassNthBuilder {
@@ -2097,7 +2097,7 @@ impl CssPseudoClassNthBuilder {
         self.sign_token = Some(sign_token);
         self
     }
-    pub fn with_value(mut self, value: CssNumber) -> Self {
+    pub fn with_value(mut self, value: AnyCssPseudoClassNthValue) -> Self {
         self.value = Some(value);
         self
     }
@@ -2125,14 +2125,16 @@ pub fn css_pseudo_class_nth_identifier(value_token: SyntaxToken) -> CssPseudoCla
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn css_pseudo_class_nth_number(value: CssNumber) -> CssPseudoClassNthNumberBuilder {
+pub fn css_pseudo_class_nth_number(
+    value: AnyCssPseudoClassNthValue,
+) -> CssPseudoClassNthNumberBuilder {
     CssPseudoClassNthNumberBuilder {
         value,
         sign_token: None,
     }
 }
 pub struct CssPseudoClassNthNumberBuilder {
-    value: CssNumber,
+    value: AnyCssPseudoClassNthValue,
     sign_token: Option<SyntaxToken>,
 }
 impl CssPseudoClassNthNumberBuilder {
@@ -3582,6 +3584,14 @@ pub fn scss_interpolated_identifier_hyphen(
     ScssInterpolatedIdentifierHyphen::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_INTERPOLATED_IDENTIFIER_HYPHEN,
         [Some(SyntaxElement::Token(minus_token))],
+    ))
+}
+pub fn scss_interpolated_nth_value(
+    items: ScssInterpolatedNthValuePartList,
+) -> ScssInterpolatedNthValue {
+    ScssInterpolatedNthValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_INTERPOLATED_NTH_VALUE,
+        [Some(SyntaxElement::Node(items.into_syntax()))],
     ))
 }
 pub fn scss_interpolated_string(
@@ -5114,6 +5124,18 @@ where
 {
     ScssInterpolatedIdentifierPartList::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_INTERPOLATED_IDENTIFIER_PART_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn scss_interpolated_nth_value_part_list<I>(items: I) -> ScssInterpolatedNthValuePartList
+where
+    I: IntoIterator<Item = AnyScssInterpolatedNthValuePart>,
+    I::IntoIter: ExactSizeIterator,
+{
+    ScssInterpolatedNthValuePartList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_INTERPOLATED_NTH_VALUE_PART_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),

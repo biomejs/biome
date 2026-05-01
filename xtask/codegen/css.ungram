@@ -237,7 +237,11 @@ CssAttributeMatcher =
 CssAttributeMatcherValue =
  name: AnyCssAttributeMatcherValue
 
-AnyCssAttributeMatcherValue = CssString | CssIdentifier | ScssInterpolatedString
+AnyCssAttributeMatcherValue =
+	CssString
+	| CssIdentifier
+	| ScssInterpolatedString
+	| ScssInterpolatedIdentifier
 
 // :nth-type(2) {}
 // ^^^^^^^^^^^^
@@ -384,9 +388,11 @@ AnyCssPseudoClassNth =
 //            ^^
 // :nth-child(2) {}
 //            ^
+// :nth-child(#{$i}) {}
+//            ^^^^^
 CssPseudoClassNthNumber =
 	sign: ('+' | '-')?
-	value: CssNumber
+	value: AnyCssPseudoClassNthValue
 
 // :nth-child(odd) {}
 //            ^^^
@@ -399,17 +405,39 @@ CssPseudoClassNthIdentifier =
 //            ^^^^
 // :nth-child(+2n+1) {}
 //            ^^^^^
+// :nth-child(#{$n}n + 1) {}
+//            ^^^^^^^^^
+// :nth-child(2n + #{$offset}) {}
+//            ^^^^^^^^^^^^^^^
 CssPseudoClassNth =
 	sign: ('+' | '-')?
-	value: CssNumber?
+	value: AnyCssPseudoClassNthValue?
 	symbol: 'n'
 	offset: CssNthOffset?
 
 // :nth-child(2n+1) {}
 //              ^^
+// :nth-child(2n + #{$offset}) {}
+//              ^^^^^^^^^^^^
 CssNthOffset =
 	sign: ('+' | '-')
-	value: CssNumber
+	value: AnyCssPseudoClassNthValue
+
+AnyCssPseudoClassNthValue =
+	CssNumber
+	| ScssInterpolation
+	| ScssInterpolatedNthValue
+
+// :nth-child(#{$sign}2n) {}
+//            ^^^^^^^^^
+ScssInterpolatedNthValue =
+	items: ScssInterpolatedNthValuePartList
+
+ScssInterpolatedNthValuePartList = AnyScssInterpolatedNthValuePart*
+
+AnyScssInterpolatedNthValuePart =
+	CssNumber
+	| ScssInterpolation
 
 // :nth-child(2n+1 of li, .test) {}
 //             		 ^^^^^^^^^^^^

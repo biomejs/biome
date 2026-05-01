@@ -4953,7 +4953,7 @@ impl CssNthOffset {
     pub fn sign(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn value(&self) -> SyntaxResult<CssNumber> {
+    pub fn value(&self) -> SyntaxResult<AnyCssPseudoClassNthValue> {
         support::required_node(&self.syntax, 1usize)
     }
 }
@@ -4968,7 +4968,7 @@ impl Serialize for CssNthOffset {
 #[derive(Serialize)]
 pub struct CssNthOffsetFields {
     pub sign: SyntaxResult<SyntaxToken>,
-    pub value: SyntaxResult<CssNumber>,
+    pub value: SyntaxResult<AnyCssPseudoClassNthValue>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssNumber {
@@ -6013,7 +6013,7 @@ impl CssPseudoClassNth {
     pub fn sign(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 0usize)
     }
-    pub fn value(&self) -> Option<CssNumber> {
+    pub fn value(&self) -> Option<AnyCssPseudoClassNthValue> {
         support::node(&self.syntax, 1usize)
     }
     pub fn symbol_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -6034,7 +6034,7 @@ impl Serialize for CssPseudoClassNth {
 #[derive(Serialize)]
 pub struct CssPseudoClassNthFields {
     pub sign: Option<SyntaxToken>,
-    pub value: Option<CssNumber>,
+    pub value: Option<AnyCssPseudoClassNthValue>,
     pub symbol_token: SyntaxResult<SyntaxToken>,
     pub offset: Option<CssNthOffset>,
 }
@@ -6096,7 +6096,7 @@ impl CssPseudoClassNthNumber {
     pub fn sign(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 0usize)
     }
-    pub fn value(&self) -> SyntaxResult<CssNumber> {
+    pub fn value(&self) -> SyntaxResult<AnyCssPseudoClassNthValue> {
         support::required_node(&self.syntax, 1usize)
     }
 }
@@ -6111,7 +6111,7 @@ impl Serialize for CssPseudoClassNthNumber {
 #[derive(Serialize)]
 pub struct CssPseudoClassNthNumberFields {
     pub sign: Option<SyntaxToken>,
-    pub value: SyntaxResult<CssNumber>,
+    pub value: SyntaxResult<AnyCssPseudoClassNthValue>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssPseudoClassNthSelector {
@@ -10178,6 +10178,41 @@ pub struct ScssInterpolatedIdentifierHyphenFields {
     pub minus_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssInterpolatedNthValue {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssInterpolatedNthValue {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssInterpolatedNthValueFields {
+        ScssInterpolatedNthValueFields {
+            items: self.items(),
+        }
+    }
+    pub fn items(&self) -> ScssInterpolatedNthValuePartList {
+        support::list(&self.syntax, 0usize)
+    }
+}
+impl Serialize for ScssInterpolatedNthValue {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssInterpolatedNthValueFields {
+    pub items: ScssInterpolatedNthValuePartList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssInterpolatedString {
     pub(crate) syntax: SyntaxNode,
 }
@@ -12884,6 +12919,7 @@ impl AnyCssAttrUnit {
 pub enum AnyCssAttributeMatcherValue {
     CssIdentifier(CssIdentifier),
     CssString(CssString),
+    ScssInterpolatedIdentifier(ScssInterpolatedIdentifier),
     ScssInterpolatedString(ScssInterpolatedString),
 }
 impl AnyCssAttributeMatcherValue {
@@ -12896,6 +12932,12 @@ impl AnyCssAttributeMatcherValue {
     pub fn as_css_string(&self) -> Option<&CssString> {
         match &self {
             Self::CssString(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolated_identifier(&self) -> Option<&ScssInterpolatedIdentifier> {
+        match &self {
+            Self::ScssInterpolatedIdentifier(item) => Some(item),
             _ => None,
         }
     }
@@ -14771,6 +14813,32 @@ impl AnyCssPseudoClassNthSelector {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssPseudoClassNthValue {
+    CssNumber(CssNumber),
+    ScssInterpolatedNthValue(ScssInterpolatedNthValue),
+    ScssInterpolation(ScssInterpolation),
+}
+impl AnyCssPseudoClassNthValue {
+    pub fn as_css_number(&self) -> Option<&CssNumber> {
+        match &self {
+            Self::CssNumber(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolated_nth_value(&self) -> Option<&ScssInterpolatedNthValue> {
+        match &self {
+            Self::ScssInterpolatedNthValue(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolation(&self) -> Option<&ScssInterpolation> {
+        match &self {
+            Self::ScssInterpolation(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssPseudoElement {
     CssBogusPseudoElement(CssBogusPseudoElement),
     CssPseudoElementFunction(CssPseudoElementFunction),
@@ -16036,6 +16104,25 @@ impl AnyScssInterpolatedIdentifierPart {
     ) -> Option<&ScssInterpolatedIdentifierHyphen> {
         match &self {
             Self::ScssInterpolatedIdentifierHyphen(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolation(&self) -> Option<&ScssInterpolation> {
+        match &self {
+            Self::ScssInterpolation(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyScssInterpolatedNthValuePart {
+    CssNumber(CssNumber),
+    ScssInterpolation(ScssInterpolation),
+}
+impl AnyScssInterpolatedNthValuePart {
+    pub fn as_css_number(&self) -> Option<&CssNumber> {
+        match &self {
+            Self::CssNumber(item) => Some(item),
             _ => None,
         }
     }
@@ -28557,6 +28644,53 @@ impl From<ScssInterpolatedIdentifierHyphen> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for ScssInterpolatedNthValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_INTERPOLATED_NTH_VALUE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_INTERPOLATED_NTH_VALUE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssInterpolatedNthValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssInterpolatedNthValue")
+                .field("items", &self.items())
+                .finish()
+        } else {
+            f.debug_struct("ScssInterpolatedNthValue").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssInterpolatedNthValue> for SyntaxNode {
+    fn from(n: ScssInterpolatedNthValue) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssInterpolatedNthValue> for SyntaxElement {
+    fn from(n: ScssInterpolatedNthValue) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for ScssInterpolatedString {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -32247,6 +32381,11 @@ impl From<CssString> for AnyCssAttributeMatcherValue {
         Self::CssString(node)
     }
 }
+impl From<ScssInterpolatedIdentifier> for AnyCssAttributeMatcherValue {
+    fn from(node: ScssInterpolatedIdentifier) -> Self {
+        Self::ScssInterpolatedIdentifier(node)
+    }
+}
 impl From<ScssInterpolatedString> for AnyCssAttributeMatcherValue {
     fn from(node: ScssInterpolatedString) -> Self {
         Self::ScssInterpolatedString(node)
@@ -32256,14 +32395,21 @@ impl AstNode for AnyCssAttributeMatcherValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssIdentifier::KIND_SET
         .union(CssString::KIND_SET)
+        .union(ScssInterpolatedIdentifier::KIND_SET)
         .union(ScssInterpolatedString::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_IDENTIFIER | CSS_STRING | SCSS_INTERPOLATED_STRING)
+        matches!(
+            kind,
+            CSS_IDENTIFIER | CSS_STRING | SCSS_INTERPOLATED_IDENTIFIER | SCSS_INTERPOLATED_STRING
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
             CSS_STRING => Self::CssString(CssString { syntax }),
+            SCSS_INTERPOLATED_IDENTIFIER => {
+                Self::ScssInterpolatedIdentifier(ScssInterpolatedIdentifier { syntax })
+            }
             SCSS_INTERPOLATED_STRING => {
                 Self::ScssInterpolatedString(ScssInterpolatedString { syntax })
             }
@@ -32275,6 +32421,7 @@ impl AstNode for AnyCssAttributeMatcherValue {
         match self {
             Self::CssIdentifier(it) => it.syntax(),
             Self::CssString(it) => it.syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.syntax(),
             Self::ScssInterpolatedString(it) => it.syntax(),
         }
     }
@@ -32282,6 +32429,7 @@ impl AstNode for AnyCssAttributeMatcherValue {
         match self {
             Self::CssIdentifier(it) => it.into_syntax(),
             Self::CssString(it) => it.into_syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.into_syntax(),
             Self::ScssInterpolatedString(it) => it.into_syntax(),
         }
     }
@@ -32291,6 +32439,7 @@ impl std::fmt::Debug for AnyCssAttributeMatcherValue {
         match self {
             Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::CssString(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolatedIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolatedString(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -32300,6 +32449,7 @@ impl From<AnyCssAttributeMatcherValue> for SyntaxNode {
         match n {
             AnyCssAttributeMatcherValue::CssIdentifier(it) => it.into_syntax(),
             AnyCssAttributeMatcherValue::CssString(it) => it.into_syntax(),
+            AnyCssAttributeMatcherValue::ScssInterpolatedIdentifier(it) => it.into_syntax(),
             AnyCssAttributeMatcherValue::ScssInterpolatedString(it) => it.into_syntax(),
         }
     }
@@ -37769,6 +37919,82 @@ impl From<AnyCssPseudoClassNthSelector> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssNumber> for AnyCssPseudoClassNthValue {
+    fn from(node: CssNumber) -> Self {
+        Self::CssNumber(node)
+    }
+}
+impl From<ScssInterpolatedNthValue> for AnyCssPseudoClassNthValue {
+    fn from(node: ScssInterpolatedNthValue) -> Self {
+        Self::ScssInterpolatedNthValue(node)
+    }
+}
+impl From<ScssInterpolation> for AnyCssPseudoClassNthValue {
+    fn from(node: ScssInterpolation) -> Self {
+        Self::ScssInterpolation(node)
+    }
+}
+impl AstNode for AnyCssPseudoClassNthValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = CssNumber::KIND_SET
+        .union(ScssInterpolatedNthValue::KIND_SET)
+        .union(ScssInterpolation::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            CSS_NUMBER | SCSS_INTERPOLATED_NTH_VALUE | SCSS_INTERPOLATION
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_NUMBER => Self::CssNumber(CssNumber { syntax }),
+            SCSS_INTERPOLATED_NTH_VALUE => {
+                Self::ScssInterpolatedNthValue(ScssInterpolatedNthValue { syntax })
+            }
+            SCSS_INTERPOLATION => Self::ScssInterpolation(ScssInterpolation { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssNumber(it) => it.syntax(),
+            Self::ScssInterpolatedNthValue(it) => it.syntax(),
+            Self::ScssInterpolation(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssNumber(it) => it.into_syntax(),
+            Self::ScssInterpolatedNthValue(it) => it.into_syntax(),
+            Self::ScssInterpolation(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssPseudoClassNthValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssNumber(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolatedNthValue(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolation(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssPseudoClassNthValue> for SyntaxNode {
+    fn from(n: AnyCssPseudoClassNthValue) -> Self {
+        match n {
+            AnyCssPseudoClassNthValue::CssNumber(it) => it.into_syntax(),
+            AnyCssPseudoClassNthValue::ScssInterpolatedNthValue(it) => it.into_syntax(),
+            AnyCssPseudoClassNthValue::ScssInterpolation(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssPseudoClassNthValue> for SyntaxElement {
+    fn from(n: AnyCssPseudoClassNthValue) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssBogusPseudoElement> for AnyCssPseudoElement {
     fn from(node: CssBogusPseudoElement) -> Self {
         Self::CssBogusPseudoElement(node)
@@ -41230,6 +41456,66 @@ impl From<AnyScssInterpolatedIdentifierPart> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssNumber> for AnyScssInterpolatedNthValuePart {
+    fn from(node: CssNumber) -> Self {
+        Self::CssNumber(node)
+    }
+}
+impl From<ScssInterpolation> for AnyScssInterpolatedNthValuePart {
+    fn from(node: ScssInterpolation) -> Self {
+        Self::ScssInterpolation(node)
+    }
+}
+impl AstNode for AnyScssInterpolatedNthValuePart {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssNumber::KIND_SET.union(ScssInterpolation::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_NUMBER | SCSS_INTERPOLATION)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_NUMBER => Self::CssNumber(CssNumber { syntax }),
+            SCSS_INTERPOLATION => Self::ScssInterpolation(ScssInterpolation { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssNumber(it) => it.syntax(),
+            Self::ScssInterpolation(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssNumber(it) => it.into_syntax(),
+            Self::ScssInterpolation(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyScssInterpolatedNthValuePart {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssNumber(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolation(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyScssInterpolatedNthValuePart> for SyntaxNode {
+    fn from(n: AnyScssInterpolatedNthValuePart) -> Self {
+        match n {
+            AnyScssInterpolatedNthValuePart::CssNumber(it) => it.into_syntax(),
+            AnyScssInterpolatedNthValuePart::ScssInterpolation(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyScssInterpolatedNthValuePart> for SyntaxElement {
+    fn from(n: AnyScssInterpolatedNthValuePart) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<ScssInterpolation> for AnyScssInterpolatedStringPart {
     fn from(node: ScssInterpolation) -> Self {
         Self::ScssInterpolation(node)
@@ -42337,6 +42623,11 @@ impl std::fmt::Display for AnyCssPseudoClassNthSelector {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssPseudoClassNthValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssPseudoElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -42533,6 +42824,11 @@ impl std::fmt::Display for AnyScssIncludeTarget {
     }
 }
 impl std::fmt::Display for AnyScssInterpolatedIdentifierPart {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyScssInterpolatedNthValuePart {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -43778,6 +44074,11 @@ impl std::fmt::Display for ScssInterpolatedIdentifier {
     }
 }
 impl std::fmt::Display for ScssInterpolatedIdentifierHyphen {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssInterpolatedNthValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -49320,6 +49621,88 @@ impl IntoIterator for &ScssInterpolatedIdentifierPartList {
 impl IntoIterator for ScssInterpolatedIdentifierPartList {
     type Item = AnyScssInterpolatedIdentifierPart;
     type IntoIter = AstNodeListIterator<Language, AnyScssInterpolatedIdentifierPart>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct ScssInterpolatedNthValuePartList {
+    syntax_list: SyntaxList,
+}
+impl ScssInterpolatedNthValuePartList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for ScssInterpolatedNthValuePartList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_INTERPOLATED_NTH_VALUE_PART_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_INTERPOLATED_NTH_VALUE_PART_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for ScssInterpolatedNthValuePartList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for ScssInterpolatedNthValuePartList {
+    type Language = Language;
+    type Node = AnyScssInterpolatedNthValuePart;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for ScssInterpolatedNthValuePartList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("ScssInterpolatedNthValuePartList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &ScssInterpolatedNthValuePartList {
+    type Item = AnyScssInterpolatedNthValuePart;
+    type IntoIter = AstNodeListIterator<Language, AnyScssInterpolatedNthValuePart>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for ScssInterpolatedNthValuePartList {
+    type Item = AnyScssInterpolatedNthValuePart;
+    type IntoIter = AstNodeListIterator<Language, AnyScssInterpolatedNthValuePart>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

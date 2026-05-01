@@ -26,7 +26,9 @@ pub(crate) use expression::{
     SCSS_UNARY_OPERATOR_TOKEN_SET, complete_empty_scss_expression, is_at_scss_interpolation,
     is_nth_at_scss_interpolation, parse_required_scss_value_until, parse_scss_expression,
     parse_scss_expression_in_args_until, parse_scss_expression_in_variable_value_until,
-    parse_scss_expression_until, parse_scss_optional_value_until, parse_scss_regular_interpolation,
+    parse_scss_expression_until, parse_scss_interpolation_inner_expression,
+    parse_scss_interpolation_prefix, parse_scss_optional_value_until,
+    parse_scss_regular_interpolation,
 };
 pub(crate) use function_name::{
     add_scss_variable_member_function_name_diagnostic, parse_scss_function_name,
@@ -46,7 +48,10 @@ pub(crate) use property::{
     is_at_scss_interpolated_property, is_nth_at_scss_interpolated_property,
     parse_scss_interpolated_property_name,
 };
-pub(crate) use selector::{is_nth_at_scss_placeholder_selector, parse_scss_placeholder_selector};
+pub(crate) use selector::{
+    is_at_scss_pseudo_class_nth, is_nth_at_scss_placeholder_selector,
+    parse_scss_placeholder_selector, parse_scss_pseudo_class_nth,
+};
 pub(crate) use token_sets::{
     END_OF_SCSS_EXPRESSION_TOKEN_SET, SCSS_IDENT_CONTINUATION_SET, SCSS_NESTING_VALUE_END_SET,
     SCSS_STATEMENT_START_SET, SCSS_VARIABLE_MODIFIER_LIST_END_SET,

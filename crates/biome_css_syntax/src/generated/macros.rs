@@ -1047,6 +1047,10 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::ScssInterpolatedIdentifierHyphen::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::SCSS_INTERPOLATED_NTH_VALUE => {
+                    let $pattern = unsafe { $crate::ScssInterpolatedNthValue::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::SCSS_INTERPOLATED_STRING => {
                     let $pattern = unsafe { $crate::ScssInterpolatedString::new_unchecked(node) };
                     $body
@@ -1567,6 +1571,11 @@ macro_rules! map_syntax_node {
                 $crate::CssSyntaxKind::SCSS_INTERPOLATED_IDENTIFIER_PART_LIST => {
                     let $pattern =
                         unsafe { $crate::ScssInterpolatedIdentifierPartList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_INTERPOLATED_NTH_VALUE_PART_LIST => {
+                    let $pattern =
+                        unsafe { $crate::ScssInterpolatedNthValuePartList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::SCSS_INTERPOLATED_STRING_PART_LIST => {

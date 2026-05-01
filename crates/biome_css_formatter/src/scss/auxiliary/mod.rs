@@ -11,6 +11,7 @@ pub(crate) mod forward_as_clause;
 pub(crate) mod hide_clause;
 pub(crate) mod include_argument_list;
 pub(crate) mod interpolated_identifier_hyphen;
+pub(crate) mod interpolated_nth_value;
 pub(crate) mod interpolated_string;
 pub(crate) mod interpolated_value;
 pub(crate) mod interpolation;

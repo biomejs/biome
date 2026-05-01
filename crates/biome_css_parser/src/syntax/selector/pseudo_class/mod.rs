@@ -17,6 +17,9 @@ use self::function_compound_selector_list::{
 use self::function_identifier::{
     is_at_pseudo_class_function_identifier, parse_pseudo_class_function_identifier,
 };
+pub(crate) use self::function_nth::{
+    PSEUDO_CLASS_NTH_SIGN_SET, parse_pseudo_class_nth_dimension_value,
+};
 use self::function_nth::{is_at_pseudo_class_function_nth, parse_pseudo_class_function_nth};
 use self::function_relative_selector_list::{
     is_at_pseudo_class_function_relative_selector_list,

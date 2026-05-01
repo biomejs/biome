@@ -323,6 +323,7 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "ScssInterpolatedIdentifierHyphen" => lang::ScssInterpolatedIdentifierHyphen::KIND_SET
             .iter()
             .next(),
+        "ScssInterpolatedNthValue" => lang::ScssInterpolatedNthValue::KIND_SET.iter().next(),
         "ScssInterpolatedString" => lang::ScssInterpolatedString::KIND_SET.iter().next(),
         "ScssInterpolatedValue" => lang::ScssInterpolatedValue::KIND_SET.iter().next(),
         "ScssInterpolation" => lang::ScssInterpolation::KIND_SET.iter().next(),
@@ -594,6 +595,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "ScssImportAtRule" => &[("imports", 1)],
         "ScssIncludeAtRule" => &[("name", 1), ("arguments", 2), ("block", 3)],
         "ScssInterpolatedIdentifier" => &[("items", 0)],
+        "ScssInterpolatedNthValue" => &[("items", 0)],
         "ScssInterpolatedString" => &[("parts", 1)],
         "ScssInterpolatedValue" => &[("items", 0)],
         "ScssInterpolation" => &[("value", 2)],

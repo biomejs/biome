@@ -1998,7 +1998,7 @@ impl CssNthOffset {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_value(self, element: CssNumber) -> Self {
+    pub fn with_value(self, element: AnyCssPseudoClassNthValue) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -2454,7 +2454,7 @@ impl CssPseudoClassNth {
                 .splice_slots(0usize..=0usize, once(element.map(|element| element.into()))),
         )
     }
-    pub fn with_value(self, element: Option<CssNumber>) -> Self {
+    pub fn with_value(self, element: Option<AnyCssPseudoClassNthValue>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             1usize..=1usize,
             once(element.map(|element| element.into_syntax().into())),
@@ -2488,7 +2488,7 @@ impl CssPseudoClassNthNumber {
                 .splice_slots(0usize..=0usize, once(element.map(|element| element.into()))),
         )
     }
-    pub fn with_value(self, element: CssNumber) -> Self {
+    pub fn with_value(self, element: AnyCssPseudoClassNthValue) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -4112,6 +4112,14 @@ impl ScssInterpolatedIdentifierHyphen {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
+impl ScssInterpolatedNthValue {
+    pub fn with_items(self, element: ScssInterpolatedNthValuePartList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
