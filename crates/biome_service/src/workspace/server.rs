@@ -873,6 +873,11 @@ impl WorkspaceServer {
             let snippet_offset = snippet.content_offset();
             let local_cursor = cursor_offset - snippet_offset;
 
+            let snippet_range = snippet.content_range();
+            if cursor_offset < snippet_range.start() || cursor_offset >= snippet_range.end() {
+                continue;
+            }
+
             let Some(file_source) = self.get_source(snippet.file_source_index()) else {
                 continue;
             };
@@ -896,8 +901,10 @@ impl WorkspaceServer {
                 other => other,
             });
 
-            let capabilities = resolve_capabilities(&adjusted, snippet_caps);
-            return Ok((adjusted, path.clone(), capabilities));
+            if adjusted.is_some() {
+                let capabilities = resolve_capabilities(&adjusted, snippet_caps);
+                return Ok((adjusted, path.clone(), capabilities));
+            }
         }
 
         Ok((None, path.clone(), capabilities))

@@ -1280,7 +1280,9 @@ pub struct GoToDefinitionResult {
 
 impl GoToDefinitionResult {
     pub(crate) fn store(&mut self, path: BiomePath, range: TextRange) {
-        self.matches.push((path, range));
+        if !self.matches.iter().any(|(p, r)| *p == path && *r == range) {
+            self.matches.push((path, range));
+        }
     }
 }
 

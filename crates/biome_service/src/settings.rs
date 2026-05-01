@@ -47,7 +47,6 @@ use biome_plugin_loader::Plugins;
 use camino::{Utf8Path, Utf8PathBuf};
 use enumflags2::BitFlags;
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
-use schemars::{Schema, SchemaGenerator};
 use std::borrow::Cow;
 use std::ops::Deref;
 use std::sync::{Arc, RwLock};
@@ -476,7 +475,7 @@ impl schemars::JsonSchema for EditorFeatures {
         Cow::Borrowed("EditorFeatures")
     }
 
-    fn json_schema(generator: &mut SchemaGenerator) -> Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
         <Vec<EditorFeature>>::json_schema(generator)
     }
 }

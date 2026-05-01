@@ -23,8 +23,6 @@ pub(crate) fn resolve_binding(params: ResolveBindingParams) -> Option<Definition
         TokenAtOffset::None => return None,
     };
 
-    let semantic_model = params.services.as_js_services()?.semantic_model.as_ref()?;
-
     for ancestor in token.ancestors() {
         if let Some(jsx_attribute) = JsxAttribute::cast_ref(&ancestor) {
             // Check if cursor is inside a JSX className/class attribute string.
@@ -37,6 +35,7 @@ pub(crate) fn resolve_binding(params: ResolveBindingParams) -> Option<Definition
         }
 
         if let Some(reference) = JsReferenceIdentifier::cast_ref(&ancestor)
+            && let Some(semantic_model) = params.services.as_js_services()?.semantic_model.as_ref()
             && let Some(binding) = semantic_model.binding(&reference)
         {
             let binding_syntax = binding.syntax();
@@ -53,6 +52,7 @@ pub(crate) fn resolve_binding(params: ResolveBindingParams) -> Option<Definition
         }
 
         if let Some(reference) = JsxReferenceIdentifier::cast_ref(&ancestor)
+            && let Some(semantic_model) = params.services.as_js_services()?.semantic_model.as_ref()
             && let Some(binding) = semantic_model.binding(&reference)
         {
             let binding_syntax = binding.syntax();

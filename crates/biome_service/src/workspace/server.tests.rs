@@ -2240,7 +2240,16 @@ fn go_to_definition_returns_none_for_node_modules() {
         })
         .unwrap();
 
-    assert!(result.is_none(), "should not resolve node_modules imports");
+    match result {
+        None => {}
+        Some(definition) => {
+            assert!(
+                definition.matches.is_empty(),
+                "should not resolve node_modules imports, got: {:?}",
+                definition.matches
+            );
+        }
+    }
 }
 
 #[test]
@@ -2453,8 +2462,20 @@ fn go_to_definition_html_class_inline_style() {
             project_key,
             watch: false,
             force: false,
-            scan_kind: ScanKind::TypeAware,
+            scan_kind: ScanKind::NoScanner,
             verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/index.html"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -2492,6 +2513,58 @@ fn go_to_definition_html_class_inline_style() {
         ),
         "range should be in parent document coordinates"
     );
+}
+
+/// Regression: `.foobar` must NOT match a lookup for `foo`.
+/// Substring matching would incorrectly resolve `foo` to the `.foobar` rule.
+#[test]
+fn go_to_definition_inline_style_no_substring_match() {
+    const HTML_CONTENT: &str =
+        "<style>.foobar { color: red; }</style>\n<div class=\"foo\">Content</div>\n";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/index.html"),
+        HTML_CONTENT.as_bytes(),
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+
+    let class_value_start = HTML_CONTENT.find("\"foo\"").unwrap() + 1;
+    let cursor_range = TextRange::new(
+        TextSize::from(class_value_start as u32),
+        TextSize::from(class_value_start as u32),
+    );
+
+    let result = workspace
+        .go_to_definition(GoToDefinitionParams {
+            project_key,
+            enabled: true,
+            path: BiomePath::new("/project/index.html"),
+            cursor_range,
+        })
+        .unwrap();
+
+    match result {
+        None => {}
+        Some(definition) => {
+            assert!(
+                definition.matches.is_empty(),
+                "`.foobar` should not match a lookup for `foo`, got: {:?}",
+                definition.matches
+            );
+        }
+    }
 }
 
 #[test]
@@ -2534,8 +2607,20 @@ fn go_to_definition_vue_class_to_inline_style() {
             project_key,
             watch: false,
             force: false,
-            scan_kind: ScanKind::TypeAware,
+            scan_kind: ScanKind::NoScanner,
             verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/App.vue"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -2619,8 +2704,20 @@ foo();
             project_key,
             watch: false,
             force: false,
-            scan_kind: ScanKind::TypeAware,
+            scan_kind: ScanKind::NoScanner,
             verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/App.vue"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 

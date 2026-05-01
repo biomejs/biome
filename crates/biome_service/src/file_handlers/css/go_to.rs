@@ -1,6 +1,8 @@
 use crate::file_handlers::ResolveDefinitionParams;
 use crate::workspace::{DefinitionReference, GoToDefinitionResult};
+use biome_css_syntax::CssClassSelector;
 use biome_fs::BiomePath;
+use biome_rowan::AstNode;
 use std::ops::Add;
 
 /// Destination-side capability for CSS: resolves a binding reference to a
@@ -28,12 +30,18 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
         {
             for rule in model.rules() {
                 for selector in rule.selectors() {
-                    if selector.resolved().normalize().contains(class_name) {
-                        let mut range = selector.range(&model.root());
-                        if let Some(offset) = params.offset {
-                            range = range.add(offset);
+                    let node = selector.node(&model.root());
+                    for class_sel in node.syntax().descendants().filter_map(CssClassSelector::cast)
+                    {
+                        if let Ok(name) = class_sel.name()
+                            && name.syntax().text_trimmed().to_string() == *class_name
+                        {
+                            let mut range = name.syntax().text_trimmed_range();
+                            if let Some(offset) = params.offset {
+                                range = range.add(offset);
+                            }
+                            result.store(BiomePath::new(path), range);
                         }
-                        result.store(BiomePath::new(path), range);
                     }
                 }
             }
