@@ -562,3 +562,12 @@ fn fuzz_nested_lazy_continuation_before_fence() {
         "<ul>\n<li>outer\n<ul>\n<li>nested\nlazy line</li>\n</ul>\n</li>\n</ul>\n<pre><code>code here\n</code></pre>\n",
     );
 }
+
+#[test]
+fn fuzz_nested_lazy_continuation_before_link_reference() {
+    fuzz_test_example(
+        10,
+        "- outer\n  - nested\n  lazy line\n[valid]: /url\n",
+        "<ul>\n<li>outer\n<ul>\n<li>nested\nlazy line\n[valid]: /url</li>\n</ul>\n</li>\n</ul>\n",
+    );
+}

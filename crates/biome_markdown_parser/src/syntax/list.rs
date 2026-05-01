@@ -44,7 +44,6 @@ use crate::lexer::MarkdownReLexContext;
 use crate::syntax::fenced_code_block::parse_fenced_code_block;
 use crate::syntax::header::{parse_header_content, parse_trailing_hashes};
 use crate::syntax::html_block::{at_html_block, parse_html_block};
-use crate::syntax::parse_any_block_with_indent_code_policy;
 use crate::syntax::parse_error::list_nesting_too_deep;
 use crate::syntax::quote::{
     at_quote_indented_code_start, consume_quote_prefix, consume_quote_prefix_without_virtual,
@@ -56,6 +55,7 @@ use crate::syntax::{
     INDENT_CODE_BLOCK_SPACES, MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES, at_block_interrupt,
     at_indent_code_block, is_paragraph_like, is_whitespace_only,
 };
+use crate::syntax::{parse_any_block_with_indent_code_policy, parse_paragraph};
 use biome_rowan::{TextRange, TextSize};
 
 /// Tokens that start a new block (used for recovery)
@@ -1463,11 +1463,18 @@ enum VirtualLineRestore {
     Restore(Option<TextSize>),
 }
 
+/// How the current continuation line should be parsed after indentation checks.
+enum ContinuationParseMode {
+    AnyBlock,
+    Paragraph,
+}
+
 /// Result of the continuation-indent check.
 struct ContinuationResult {
     action: LoopAction,
     /// Whether virtual_line_start must be restored after parsing the block.
     restore: VirtualLineRestore,
+    parse_mode: ContinuationParseMode,
 }
 
 /// Mutable loop state for `parse_list_item_block_content`.
@@ -2268,6 +2275,7 @@ fn check_continuation_indent(
         return ContinuationResult {
             action: LoopAction::FallThrough,
             restore: VirtualLineRestore::None,
+            parse_mode: ContinuationParseMode::AnyBlock,
         };
     }
 
@@ -2285,6 +2293,7 @@ fn check_continuation_indent(
             return ContinuationResult {
                 action: LoopAction::Break,
                 restore: VirtualLineRestore::None,
+                parse_mode: ContinuationParseMode::AnyBlock,
             };
         }
         // Fall through: the insufficient-indent branch below handles the
@@ -2307,6 +2316,7 @@ fn check_continuation_indent(
                 return ContinuationResult {
                     action: LoopAction::Continue,
                     restore: VirtualLineRestore::None,
+                    parse_mode: ContinuationParseMode::AnyBlock,
                 };
             }
             if at_order_list_item(p) {
@@ -2317,6 +2327,7 @@ fn check_continuation_indent(
                 return ContinuationResult {
                     action: LoopAction::Continue,
                     restore: VirtualLineRestore::None,
+                    parse_mode: ContinuationParseMode::AnyBlock,
                 };
             }
 
@@ -2332,6 +2343,7 @@ fn check_continuation_indent(
             return ContinuationResult {
                 action: LoopAction::FallThrough,
                 restore: VirtualLineRestore::Restore(prev_virtual),
+                parse_mode: ContinuationParseMode::AnyBlock,
             };
         }
     } else {
@@ -2342,6 +2354,7 @@ fn check_continuation_indent(
             return ContinuationResult {
                 action: LoopAction::Break,
                 restore: VirtualLineRestore::None,
+                parse_mode: ContinuationParseMode::AnyBlock,
             };
         }
 
@@ -2349,6 +2362,7 @@ fn check_continuation_indent(
             return ContinuationResult {
                 action: LoopAction::Break,
                 restore: VirtualLineRestore::None,
+                parse_mode: ContinuationParseMode::AnyBlock,
             };
         }
 
@@ -2357,6 +2371,7 @@ fn check_continuation_indent(
             return ContinuationResult {
                 action: LoopAction::Break,
                 restore: VirtualLineRestore::None,
+                parse_mode: ContinuationParseMode::AnyBlock,
             };
         }
 
@@ -2373,12 +2388,14 @@ fn check_continuation_indent(
         return ContinuationResult {
             action: LoopAction::FallThrough,
             restore: VirtualLineRestore::Restore(prev_virtual),
+            parse_mode: ContinuationParseMode::Paragraph,
         };
     }
 
     ContinuationResult {
         action: LoopAction::FallThrough,
         restore: VirtualLineRestore::None,
+        parse_mode: ContinuationParseMode::AnyBlock,
     }
 }
 
@@ -2388,6 +2405,7 @@ fn parse_continuation_block(
     p: &mut MarkdownParser,
     state: &mut ListItemLoopState,
     prev_was_blank: bool,
+    parse_mode: ContinuationParseMode,
     restore: VirtualLineRestore,
 ) {
     let is_blank_line = p.at_blank_line();
@@ -2443,7 +2461,12 @@ fn parse_continuation_block(
     state.first_line = false;
 
     let allow_indent_code_block = !state.last_block_was_paragraph || prev_was_blank;
-    let parsed = parse_any_block_with_indent_code_policy(p, allow_indent_code_block);
+    let parsed = match parse_mode {
+        ContinuationParseMode::AnyBlock => {
+            parse_any_block_with_indent_code_policy(p, allow_indent_code_block)
+        }
+        ContinuationParseMode::Paragraph => parse_paragraph(p),
+    };
     state.last_block_was_paragraph = if let Present(ref marker) = parsed {
         is_paragraph_like(marker.kind(p))
     } else {
@@ -2531,7 +2554,7 @@ fn parse_list_item_block_content(
         }
 
         // Parse block content
-        parse_continuation_block(p, &mut state, prev_was_blank, cont.restore);
+        parse_continuation_block(p, &mut state, prev_was_blank, cont.parse_mode, cont.restore);
     }
 
     m.complete(p, MD_BLOCK_LIST);
