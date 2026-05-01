@@ -4,7 +4,7 @@
 	<Button onClick={doFoo} />
 	<Button onClick={doFoo} />
 	<div />
-	<custom-element />
+	<custom-element onClick={doFoo} />
 	<div className="foo" />
 	<div className="foo" {...props} />
 	<div onClick={() => void 0} aria-hidden />
