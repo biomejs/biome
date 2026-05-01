@@ -260,11 +260,15 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
     // Handle standalone NEWLINE tokens as MdNewline nodes.
     // This prevents inter-block NEWLINEs from becoming "newline-only paragraphs".
     if p.at(NEWLINE) {
+        if p.at_blank_line() {
+            p.state_mut().link_reference_definition_continuation = false;
+        }
         let m = p.start();
         p.bump(NEWLINE);
         return Present(m.complete(p, MD_NEWLINE));
     }
     if at_blank_line_start(p) {
+        p.state_mut().link_reference_definition_continuation = false;
         // Consume blank-line whitespace as whitespace trivia (structural).
         while p.at(MD_TEXTUAL_LITERAL) {
             let text = p.cur_text();
@@ -282,6 +286,9 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
         // Blank line with no trailing newline (e.g., end of file)
         return Absent;
     }
+
+    let allow_indent_code_block =
+        allow_indent_code_block && !p.state().link_reference_definition_continuation;
 
     let parsed = if allow_indent_code_block && at_indent_code_block(p) {
         parse_indent_code_block(p)
@@ -356,6 +363,7 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
             Ok(link)
         });
         if let Ok(parsed) = link_result {
+            p.state_mut().link_reference_definition_continuation = true;
             parsed
         } else {
             parse_paragraph(p)
@@ -404,6 +412,12 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
             p.bump_any();
         }
         return Absent;
+    }
+
+    if let Present(marker) = &parsed
+        && marker.kind(p) != MD_LINK_REFERENCE_DEFINITION
+    {
+        p.state_mut().link_reference_definition_continuation = false;
     }
 
     parsed
