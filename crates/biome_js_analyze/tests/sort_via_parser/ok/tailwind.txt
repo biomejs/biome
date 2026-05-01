@@ -1,0 +1,104 @@
+# Basic: unknown classes come first in original order, then known classes sorted
+px-2 foo p-4 bar
+
+# Basic: already sorted — should be unchanged
+foo bar p-4 px-2
+
+# Basic: single known class
+p-4
+
+# Basic: single unknown class
+foo
+
+# Basic: only unknown classes — order preserved
+foo bar baz
+
+# Utility sorting: typography before layout (text-center after p-4, both after bg-)
+text-center custom-style1 p-4 bg-blue-500 text-white foo rounded-lg shadow-lg
+
+# Utility sorting: flex layout utilities
+flex custom-layout items-center justify-center h-screen bg-gray-200 bar text-lg font-bold
+
+# Utility sorting: grid with margin and border
+grid custom-grid grid-cols-3 gap-4 p-6 m-6 border border-gray-300 shadow-md rounded-md
+
+# Utility sorting: absolute positioning with margin, padding, text, background
+absolute top-0 right-0 m-4 p-2 text-sm bg-red-600 text-white rounded-full custom-alert
+
+# Utility sorting: inline-block with border, background, text
+inline-block bar bg-green-300 text-green-800 p-2 rounded border border-green-500 custom-button
+
+# Utility sorting: flex-col with space, divide, rounded, background, padding, shadow
+flex-col custom-list space-y-4 p-6 bg-white shadow-md rounded-lg divide-y divide-gray-200
+
+# Utility sorting: relative overflow with background, sizing, margin
+relative overflow-hidden custom-background bg-no-repeat bg-cover h-64 w-full foo m-2
+
+# Utility sorting: typography decorations with margin
+underline custom-text foo text-2xl font-semibold my-2
+
+# Utility sorting: flex-wrap with justify, align, background, padding, text
+flex-wrap custom-container justify-between items-start bar bg-purple-200 p-5 text-purple-700
+
+# Utility sorting: gap, border, background, padding, text
+gap-8 bg-indigo-100 text-indigo-900 p-3 border-l-4 border-indigo-500 custom-border
+
+# Variant sorting: plain classes before single-variant classes
+checked:text-center custom-style1 p-4 hover:bg-blue-500 focus:text-white foo hover:focus:rounded-lg shadow-lg
+
+# Variant sorting: multiple different variants
+flex valid:required:bg-gray-200 custom-layout items-center required:justify-center valid:h-screen bar first-letter:text-lg font-bold
+
+# Variant sorting: focus-within and optional variants
+focus-within:hover:shadow-md grid custom-grid grid-cols-3 gap-4 p-6 m-6 focus-within:border focus-within:border-gray-300 optional:rounded-md
+
+# Variant sorting: responsive screen variants (sm, md, lg, xl)
+lg:absolute sm:top-0 md:right-0 lg:m-4 md:p-2 xl:text-sm sm:bg-red-600 sm:text-white sm:rounded-full lg:custom-alert
+
+# Variant sorting: combined responsive and state variants
+checked:sm:inline-block bar hover:md:bg-green-300 hover:lg:text-green-800 p-2 rounded border sm:checked:border-green-500 custom-button
+
+# Arbitrary variants: go after all known-variant classes
+[&nth-child(2)]:[&nth-child(6)]:text-red-200 [&nth-child(2)]:text-red-300 group-hover:flex-col focus:bg-red-100 py-4 text-red-500 hover:focus:bg-red-200 has-[:visited]:flex print:text-red-50 [&nth-child(3)]:text-red-200 container
+
+# Arbitrary variants: mixed known and arbitrary variants
+text-black [&nth-child(2)]:focus:text-red-100 [&nth-child(1)]:group-first:text-red-100 [&nth-child(2)]:hover:focus:bg-red-900 group-first:text-yellow-400 [&nth-child(2)]:text-black focus:bg-sky-100 py-4 checked:visited:bg-yellow-300 hover:text-red-400
+
+# Arbitrary variants: group variants with custom selectors
+group-aria-disabled:bg-red-50 group-[:visited]:text-red-400 group-target:font-bold
+
+# Arbitrary variants: has, aria, group-has, group-aria with nested brackets
+group-has-[.custom-class]:focus:underline aria-[sort=ascending]:bg-red-300 group-aria-[sort=ascending]:text-yellow-200 has-[:checked]:focus:bg-yellow-300 text-red-400
+
+# Negative values: -mt- and -ml- sorted within margin group, before padding
+-ml-2 p-4 -mt-1
+
+# Negative values: -mr- and -mb- within margin group
+-mr-4 m-2 -mb-3
+
+# Negative values: negative margin-x/y with background and text
+text-center -mx-2 bg-blue-500 -my-4
+
+# Negative values: negative positioning with absolute
+-top-2 absolute -left-4 right-0
+
+# Negative values: negative space utilities with flex
+-space-x-2 flex -space-y-4 items-center
+
+# Negative values: negative variants (hover and focus)
+hover:-ml-2 p-4 focus:-mt-1
+
+# Negative values: negative values with responsive variants
+sm:-mx-4 lg:-my-2 md:p-2
+
+# Arbitrary utility: [property:value] form goes to end
+content-[''] absolute
+
+# Arbitrary utility: top-0 before absolute (positioning layer)
+top-0 absolute
+
+# Nested brackets in arbitrary selector with quotes
+m-2 flex items-center gap-2 p-4 [&_svg:not([class*='size-'])]:w-4
+
+# Nested brackets unsorted
+flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center
