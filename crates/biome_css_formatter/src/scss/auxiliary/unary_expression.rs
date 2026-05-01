@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_css_syntax::CssSyntaxKind;
-use biome_css_syntax::{ScssIfAtRule, ScssUnaryExpression, ScssUnaryExpressionFields, T};
+use biome_css_syntax::{
+    AnyCssFunction, CssSyntaxKind, ScssIfAtRule, ScssUnaryExpression, ScssUnaryExpressionFields, T,
+};
 use biome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
@@ -19,6 +20,9 @@ impl FormatNodeRule<ScssUnaryExpression> for FormatScssUnaryExpression {
             CssSyntaxKind::SCSS_PARENTHESIZED_EXPRESSION
         );
         let needs_space = matches!(operator.kind(), T![not]) && !is_parenthesized;
+        let keeps_minus_function_space = matches!(operator.kind(), T![-])
+            && AnyCssFunction::can_cast(expression.syntax().kind())
+            && operator.has_trailing_whitespace();
 
         if needs_space {
             if is_in_scss_if_condition(node) {
@@ -33,6 +37,9 @@ impl FormatNodeRule<ScssUnaryExpression> for FormatScssUnaryExpression {
             } else {
                 write!(f, [operator.format(), space(), expression.format()])
             }
+        } else if keeps_minus_function_space {
+            // Prettier keeps the source space in `- pow()`.
+            write!(f, [operator.format(), space(), expression.format()])
         } else {
             write!(f, [operator.format(), expression.format()])
         }

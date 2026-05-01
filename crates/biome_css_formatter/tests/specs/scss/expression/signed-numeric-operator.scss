@@ -20,6 +20,10 @@ $binary-plus-unary-plus:1 + +2;
 $binary-plus-unary-minus:1 + -3;
 $binary-plus-unary-plus-literal:1 + +5;
 $binary-minus-unary-minus:1 - -2;
+$unary-minus-function-spaced:- pow(2,2) * 100px;
+$unary-minus-function-tight:-pow(2,2) * 100px;
+$unary-minus-nested-function-spaced:-double(- double(1em));
+$unary-minus-function-name-spaced:- double(-double(1em));
 
 $page-like-scale:1 +2 * 3;
 $page-like-map:(
