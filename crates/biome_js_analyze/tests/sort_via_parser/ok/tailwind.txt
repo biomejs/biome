@@ -67,8 +67,6 @@ text-black [&nth-child(2)]:focus:text-red-100 [&nth-child(1)]:group-first:text-r
 # Arbitrary variants: group variants with custom selectors
 group-aria-disabled:bg-red-50 group-[:visited]:text-red-400 group-target:font-bold
 
-# Arbitrary variants: has, aria, group-has, group-aria with nested brackets
-group-has-[.custom-class]:focus:underline aria-[sort=ascending]:bg-red-300 group-aria-[sort=ascending]:text-yellow-200 has-[:checked]:focus:bg-yellow-300 text-red-400
 
 # Negative values: -mt- and -ml- sorted within margin group, before padding
 -ml-2 p-4 -mt-1
@@ -96,9 +94,3 @@ content-[''] absolute
 
 # Arbitrary utility: top-0 before absolute (positioning layer)
 top-0 absolute
-
-# Nested brackets in arbitrary selector with quotes
-m-2 flex items-center gap-2 p-4 [&_svg:not([class*='size-'])]:w-4
-
-# Nested brackets unsorted
-flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center

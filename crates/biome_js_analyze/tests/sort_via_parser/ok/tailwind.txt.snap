@@ -1,0 +1,131 @@
+---
+source: crates/biome_js_analyze/tests/sort_via_parser_spec_test.rs
+expression: snapshot
+---
+## Basic: unknown classes come first in original order, then known classes sorted
+Input:  px-2 foo p-4 bar
+Sorted: foo bar p-4 px-2
+
+## Basic: already sorted — should be unchanged
+Input:  foo bar p-4 px-2
+Sorted: foo bar p-4 px-2
+
+## Basic: single known class
+Input:  p-4
+Sorted: p-4
+
+## Basic: single unknown class
+Input:  foo
+Sorted: foo
+
+## Basic: only unknown classes — order preserved
+Input:  foo bar baz
+Sorted: foo bar baz
+
+## Utility sorting: typography before layout (text-center after p-4, both after bg-)
+Input:  text-center custom-style1 p-4 bg-blue-500 text-white foo rounded-lg shadow-lg
+Sorted: custom-style1 foo rounded-lg bg-blue-500 p-4 text-center text-white shadow-lg
+
+## Utility sorting: flex layout utilities
+Input:  flex custom-layout items-center justify-center h-screen bg-gray-200 bar text-lg font-bold
+Sorted: custom-layout bar flex h-screen items-center justify-center bg-gray-200 font-bold text-lg
+
+## Utility sorting: grid with margin and border
+Input:  grid custom-grid grid-cols-3 gap-4 p-6 m-6 border border-gray-300 shadow-md rounded-md
+Sorted: custom-grid m-6 grid grid-cols-3 gap-4 rounded-md border border-gray-300 p-6 shadow-md
+
+## Utility sorting: absolute positioning with margin, padding, text, background
+Input:  absolute top-0 right-0 m-4 p-2 text-sm bg-red-600 text-white rounded-full custom-alert
+Sorted: custom-alert absolute top-0 right-0 m-4 rounded-full bg-red-600 p-2 text-sm text-white
+
+## Utility sorting: inline-block with border, background, text
+Input:  inline-block bar bg-green-300 text-green-800 p-2 rounded border border-green-500 custom-button
+Sorted: bar custom-button inline-block rounded border border-green-500 bg-green-300 p-2 text-green-800
+
+## Utility sorting: flex-col with space, divide, rounded, background, padding, shadow
+Input:  flex-col custom-list space-y-4 p-6 bg-white shadow-md rounded-lg divide-y divide-gray-200
+Sorted: custom-list flex-col space-y-4 divide-y divide-gray-200 rounded-lg bg-white p-6 shadow-md
+
+## Utility sorting: relative overflow with background, sizing, margin
+Input:  relative overflow-hidden custom-background bg-no-repeat bg-cover h-64 w-full foo m-2
+Sorted: custom-background foo relative m-2 h-64 w-full overflow-hidden bg-cover bg-no-repeat
+
+## Utility sorting: typography decorations with margin
+Input:  underline custom-text foo text-2xl font-semibold my-2
+Sorted: custom-text foo my-2 font-semibold text-2xl underline
+
+## Utility sorting: flex-wrap with justify, align, background, padding, text
+Input:  flex-wrap custom-container justify-between items-start bar bg-purple-200 p-5 text-purple-700
+Sorted: custom-container bar flex-wrap items-start justify-between bg-purple-200 p-5 text-purple-700
+
+## Utility sorting: gap, border, background, padding, text
+Input:  gap-8 bg-indigo-100 text-indigo-900 p-3 border-l-4 border-indigo-500 custom-border
+Sorted: custom-border gap-8 border-indigo-500 border-l-4 bg-indigo-100 p-3 text-indigo-900
+
+## Variant sorting: plain classes before single-variant classes
+Input:  checked:text-center custom-style1 p-4 hover:bg-blue-500 focus:text-white foo hover:focus:rounded-lg shadow-lg
+Sorted: custom-style1 foo p-4 shadow-lg checked:text-center hover:bg-blue-500 focus:text-white hover:focus:rounded-lg
+
+## Variant sorting: multiple different variants
+Input:  flex valid:required:bg-gray-200 custom-layout items-center required:justify-center valid:h-screen bar first-letter:text-lg font-bold
+Sorted: custom-layout bar flex items-center font-bold first-letter:text-lg required:justify-center valid:h-screen valid:required:bg-gray-200
+
+## Variant sorting: focus-within and optional variants
+Input:  focus-within:hover:shadow-md grid custom-grid grid-cols-3 gap-4 p-6 m-6 focus-within:border focus-within:border-gray-300 optional:rounded-md
+Sorted: custom-grid m-6 grid grid-cols-3 gap-4 p-6 optional:rounded-md focus-within:border focus-within:border-gray-300 focus-within:hover:shadow-md
+
+## Variant sorting: responsive screen variants (sm, md, lg, xl)
+Input:  lg:absolute sm:top-0 md:right-0 lg:m-4 md:p-2 xl:text-sm sm:bg-red-600 sm:text-white sm:rounded-full lg:custom-alert
+Sorted: lg:custom-alert sm:top-0 sm:rounded-full sm:bg-red-600 sm:text-white md:right-0 md:p-2 lg:absolute lg:m-4 xl:text-sm
+
+## Variant sorting: combined responsive and state variants
+Input:  checked:sm:inline-block bar hover:md:bg-green-300 hover:lg:text-green-800 p-2 rounded border sm:checked:border-green-500 custom-button
+Sorted: bar custom-button rounded border p-2 checked:sm:inline-block sm:checked:border-green-500 hover:md:bg-green-300 hover:lg:text-green-800
+
+## Arbitrary variants: go after all known-variant classes
+Input:  [&nth-child(2)]:[&nth-child(6)]:text-red-200 [&nth-child(2)]:text-red-300 group-hover:flex-col focus:bg-red-100 py-4 text-red-500 hover:focus:bg-red-200 has-[:visited]:flex print:text-red-50 [&nth-child(3)]:text-red-200 container
+Sorted: container py-4 text-red-500 focus:bg-red-100 hover:focus:bg-red-200 group-hover:flex-col has-[:visited]:flex print:text-red-50 [&nth-child(2)]:text-red-300 [&nth-child(3)]:text-red-200 [&nth-child(2)]:[&nth-child(6)]:text-red-200
+
+## Arbitrary variants: mixed known and arbitrary variants
+Input:  text-black [&nth-child(2)]:focus:text-red-100 [&nth-child(1)]:group-first:text-red-100 [&nth-child(2)]:hover:focus:bg-red-900 group-first:text-yellow-400 [&nth-child(2)]:text-black focus:bg-sky-100 py-4 checked:visited:bg-yellow-300 hover:text-red-400
+Sorted: py-4 text-black checked:visited:bg-yellow-300 hover:text-red-400 focus:bg-sky-100 group-first:text-yellow-400 [&nth-child(1)]:group-first:text-red-100 [&nth-child(2)]:text-black [&nth-child(2)]:focus:text-red-100 [&nth-child(2)]:hover:focus:bg-red-900
+
+## Arbitrary variants: group variants with custom selectors
+Input:  group-aria-disabled:bg-red-50 group-[:visited]:text-red-400 group-target:font-bold
+Sorted: group-target:font-bold group-[:visited]:text-red-400 group-aria-disabled:bg-red-50
+
+## Negative values: -mt- and -ml- sorted within margin group, before padding
+Input:  -ml-2 p-4 -mt-1
+Sorted: -mt-1 -ml-2 p-4
+
+## Negative values: -mr- and -mb- within margin group
+Input:  -mr-4 m-2 -mb-3
+Sorted: m-2 -mr-4 -mb-3
+
+## Negative values: negative margin-x/y with background and text
+Input:  text-center -mx-2 bg-blue-500 -my-4
+Sorted: -mx-2 -my-4 bg-blue-500 text-center
+
+## Negative values: negative positioning with absolute
+Input:  -top-2 absolute -left-4 right-0
+Sorted: absolute -top-2 right-0 -left-4
+
+## Negative values: negative space utilities with flex
+Input:  -space-x-2 flex -space-y-4 items-center
+Sorted: flex items-center -space-x-2 -space-y-4
+
+## Negative values: negative variants (hover and focus)
+Input:  hover:-ml-2 p-4 focus:-mt-1
+Sorted: p-4 hover:-ml-2 focus:-mt-1
+
+## Negative values: negative values with responsive variants
+Input:  sm:-mx-4 lg:-my-2 md:p-2
+Sorted: sm:-mx-4 md:p-2 lg:-my-2
+
+## Arbitrary utility: [property:value] form goes to end
+Input:  content-[''] absolute
+Sorted: absolute content-['']
+
+## Arbitrary utility: top-0 before absolute (positioning layer)
+Input:  top-0 absolute
+Sorted: absolute top-0
