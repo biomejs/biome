@@ -1,12 +1,11 @@
-use crate::file_handlers::javascript::extract_css_class_at_offset;
 use crate::file_handlers::{ResolveBindingParams, ResolveDefinitionParams};
 use crate::workspace::{DefinitionReference, GoToDefinitionResult};
 use biome_css_syntax::{TextRange, TextSize};
 use biome_fs::BiomePath;
 use biome_js_syntax::binding_ext::AnyJsIdentifierBinding;
 use biome_js_syntax::{
-    AnyJsRoot, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator,
-    JsxReferenceIdentifier,
+    AnyJsRoot, AnyJsxAttributeValue, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode,
+    JsVariableDeclarator, JsxAttribute, JsxReferenceIdentifier, JsxString,
 };
 use biome_js_type_info::ImportSymbol;
 use biome_module_graph::{JsOwnExport, ModuleGraph};
@@ -24,15 +23,19 @@ pub(crate) fn resolve_binding(params: ResolveBindingParams) -> Option<Definition
         TokenAtOffset::None => return None,
     };
 
-    // Check if cursor is inside a JSX className/class attribute string.
-    // This doesn't need the semantic model, so try it before the model check.
-    if let Some(class_name) = extract_css_class_at_offset(&token, params.cursor_offset) {
-        return Some(DefinitionReference::CssClass { class_name });
-    }
-
     let semantic_model = params.services.as_js_services()?.semantic_model.as_ref()?;
 
     for ancestor in token.ancestors() {
+        if let Some(jsx_attribute) = JsxAttribute::cast_ref(&ancestor) {
+            // Check if cursor is inside a JSX className/class attribute string.
+            // This doesn't need the semantic model, so try it before the model check.
+            if let Some(class_name) =
+                extract_css_class_at_offset(jsx_attribute, params.cursor_offset)
+            {
+                return Some(DefinitionReference::CssClass { class_name });
+            }
+        }
+
         if let Some(reference) = JsReferenceIdentifier::cast_ref(&ancestor)
             && let Some(binding) = semantic_model.binding(&reference)
         {
@@ -138,35 +141,49 @@ fn retrieve_reference_under_dynamic_import(
 
 /// Destination-side capability: given a binding reference, resolve the definition location.
 pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoToDefinitionResult> {
+    let mut result = GoToDefinitionResult::default();
     match params.definition_ref {
-        DefinitionReference::Local { range } => Some(GoToDefinitionResult {
-            path: BiomePath::new(params.path.as_path().to_string()),
-            range: *range,
-        }),
+        DefinitionReference::Local { range } => {
+            result.store(params.path.clone(), *range);
+        }
         DefinitionReference::Import { local_name } => {
-            resolve_import_definition(local_name, params.path.as_path(), params.module_graph)
+            resolve_import_definition(
+                local_name,
+                params.path.as_path(),
+                params.module_graph,
+                &mut result,
+            );
         }
         DefinitionReference::DynamicImport {
             local_name,
             specifier,
-        } => resolve_dynamic_import_definition(
-            local_name,
-            specifier,
-            params.path.as_path(),
-            params.module_graph,
-        ),
+        } => {
+            resolve_dynamic_import_definition(
+                local_name,
+                specifier,
+                params.path.as_path(),
+                params.module_graph,
+                &mut result,
+            );
+        }
         DefinitionReference::HtmlComponent { source } => {
-            resolve_import_definition(source, params.path.as_path(), params.module_graph)
+            resolve_import_definition(
+                source,
+                params.path.as_path(),
+                params.module_graph,
+                &mut result,
+            );
         }
         DefinitionReference::LocalEmbedded { range, .. } => {
-            params.offset.map(|offset| GoToDefinitionResult {
-                path: BiomePath::new(params.path.as_path().to_string()),
-                range: range.add(offset),
-            })
+            if let Some(offset) = params.offset {
+                result.store(params.path.clone(), range.add(offset))
+            }
         }
         // CssClass is routed to the CSS handler by the orchestrator
-        _ => None,
-    }
+        _ => return None,
+    };
+
+    Some(result)
 }
 
 /// Resolves an imported symbol to its definition in the target module.
@@ -174,7 +191,8 @@ fn resolve_import_definition(
     local_name: &str,
     current_path: &Utf8Path,
     module_graph: &ModuleGraph,
-) -> Option<GoToDefinitionResult> {
+    result: &mut GoToDefinitionResult,
+) -> Option<()> {
     let module_info = module_graph.js_module_info_for_path(current_path)?;
     let js_import = module_info.static_imports.get(local_name)?;
 
@@ -191,24 +209,26 @@ fn resolve_import_definition(
         ImportSymbol::Named(name) => name.text(),
         ImportSymbol::Default => "default",
         ImportSymbol::All => {
+            result.store(
+                BiomePath::new(target_path),
+                TextRange::new(TextSize::from(0), TextSize::from(0)),
+            );
+            return Some(());
             // Namespace import: navigate to the target module file
-            return Some(GoToDefinitionResult {
-                path: BiomePath::new(target_path.to_string()),
-                range: TextRange::new(TextSize::from(0), TextSize::from(0)),
-            });
         }
     };
 
     let own_export = target_module.find_js_exported_symbol(module_graph, export_name)?;
 
     match own_export {
-        JsOwnExport::Binding(range) => Some(GoToDefinitionResult {
-            path: BiomePath::new(target_path.to_string()),
-            range,
-        }),
+        JsOwnExport::Binding(range) => {
+            result.store(BiomePath::new(target_path), range);
+        }
         // Type-only exports and namespace exports don't have a binding location
-        JsOwnExport::Type(_) | JsOwnExport::Namespace(_) => None,
+        JsOwnExport::Type(_) | JsOwnExport::Namespace(_) => {}
     }
+
+    Some(())
 }
 
 fn resolve_dynamic_import_definition(
@@ -216,7 +236,8 @@ fn resolve_dynamic_import_definition(
     specifier: &str,
     current_path: &Utf8Path,
     module_graph: &ModuleGraph,
-) -> Option<GoToDefinitionResult> {
+    result: &mut GoToDefinitionResult,
+) -> Option<()> {
     let module_info = module_graph.js_module_info_for_path(current_path)?;
     let import_path = module_info.dynamic_import_paths.get(specifier)?;
     let target_path = import_path.resolved_path.as_path()?;
@@ -230,16 +251,70 @@ fn resolve_dynamic_import_definition(
         // In this case we found the file, but we don't know the symbol, which means that module
         // imported like `const foo = await import('./foo')`. In this case, we send the user
         // to the top of the file.
-        None => Some(GoToDefinitionResult {
-            path: BiomePath::new(target_path.to_string()),
-            range: TextRange::new(TextSize::from(0), TextSize::from(0)),
-        }),
+        None => {
+            result.store(
+                BiomePath::new(target_path),
+                TextRange::new(TextSize::from(0), TextSize::from(0)),
+            );
+        }
         Some(own_export) => match own_export {
-            JsOwnExport::Binding(range) => Some(GoToDefinitionResult {
-                path: BiomePath::new(target_path.to_string()),
-                range,
-            }),
-            JsOwnExport::Type(_) | JsOwnExport::Namespace(_) => None,
+            JsOwnExport::Binding(range) => result.store(BiomePath::new(target_path), range),
+            JsOwnExport::Type(_) | JsOwnExport::Namespace(_) => {}
         },
+    };
+
+    Some(())
+}
+
+/// Extracts the CSS class name at the given cursor offset from a JSX
+/// `className` or `class` attribute string value.
+///
+/// Given `<div className="foo bar baz">` with cursor on `bar`, returns
+/// `Some("bar")`.
+fn extract_css_class_at_offset(
+    jsx_attribute: JsxAttribute,
+    cursor_offset: TextSize,
+) -> Option<String> {
+    let name_token = jsx_attribute.name_value_token().ok()?;
+    let name_text = name_token.text_trimmed();
+
+    if name_text != "className" && name_text != "class" {
+        return None;
     }
+
+    let initializer = jsx_attribute.initializer()?;
+    let value = initializer.value().ok()?;
+
+    let string_literal: JsxString = match value {
+        AnyJsxAttributeValue::JsxString(s) => s,
+        _ => return None,
+    };
+
+    let value_token = string_literal.value_token().ok()?;
+    let inner_text = string_literal.inner_string_text().ok()?;
+    let inner_source_range = inner_text.source_range(value_token.text_trimmed_range());
+
+    let relative_offset = cursor_offset.checked_sub(inner_source_range.start())?;
+    let relative_offset: usize = relative_offset.into();
+
+    let text = inner_text.text();
+    if relative_offset > text.len() {
+        return None;
+    }
+
+    // Find which whitespace-separated class name the cursor falls within
+    let mut pos = 0usize;
+    for class_name in text.split_ascii_whitespace() {
+        // Find actual start (skip whitespace)
+        let start = text[pos..].find(class_name).map(|i| i + pos)?;
+        let end = start + class_name.len();
+
+        if relative_offset >= start && relative_offset < end {
+            return Some(class_name.to_string());
+        }
+
+        pos = end;
+    }
+
+    None
 }

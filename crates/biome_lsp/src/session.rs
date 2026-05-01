@@ -21,7 +21,7 @@ use biome_service::file_handlers::astro::AstroFileHandler;
 use biome_service::file_handlers::svelte::SvelteFileHandler;
 use biome_service::file_handlers::vue::VueFileHandler;
 use biome_service::projects::ProjectKey;
-use biome_service::settings::ModuleGraphResolutionKind;
+use biome_service::settings::{EditorFeature, ModuleGraphResolutionKind};
 use biome_service::workspace::{
     FeaturesBuilder, GetFileContentParams, OpenProjectParams, OpenProjectResult,
     PullDiagnosticsParams, SupportsFeatureParams,
@@ -651,11 +651,12 @@ impl Session {
             .and_then(|c| c.definition.as_ref())
             .and_then(|c| c.dynamic_registration)
             == Some(true)
-            || self
+            && self
                 .extension_settings
                 .read()
                 .unwrap()
-                .goto_definition_enabled();
+                .editor_features()
+                .contains(EditorFeature::GotoDefinition);
         info!("Can register gotoDefinition: {result}");
 
         result

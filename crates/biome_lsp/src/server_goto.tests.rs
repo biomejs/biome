@@ -227,6 +227,30 @@ fn assert_definition(
     }
 }
 
+fn assert_multiple_definitions(
+    res: Option<lsp::GotoDefinitionResponse>,
+    expected_uri_range: &[(lsp::Uri, Range)],
+) {
+    let definition = res.expect("goto_definition returned empty response");
+    match definition {
+        lsp::GotoDefinitionResponse::Array(locations) => {
+            assert_eq!(locations.len(), expected_uri_range.len());
+            for i in 0..locations.len() {
+                let (uri, range) = &expected_uri_range[i];
+                assert_eq!(
+                    locations[i].uri.to_file_path(),
+                    uri.to_file_path(),
+                    "URI file paths differ: got {:?}, expected {:?}",
+                    locations[i].uri,
+                    uri,
+                );
+                assert_eq!(locations[i].range, *range);
+            }
+        }
+        other => panic!("expected Array response, got: {other:?}"),
+    }
+}
+
 fn file_uri(fs: &TemporaryFs, name: &str) -> lsp::Uri {
     let path = fs.working_directory.join(name);
     lsp::Uri::from_str(url::Url::from_file_path(&path).unwrap().as_str()).unwrap()
@@ -333,32 +357,41 @@ const foo = "bar";
 }
 
 #[tokio::test]
-async fn goto_definition_html_ish_expression_cross_file() -> Result<()> {
-    let source = r#"---
-import { foo } from "./utils.js";
----
-<h1>{foo}</h1>
-"#;
-    // Cursor on `foo` in `{foo}` (line 3, character 5)
-    let (res, fs) = goto_definition_cross_file(CrossFileTestParams {
-        name: "goto_definition_html_ish_expression_cross_file",
-        config: r#"{ "linter": { "enabled": true }, "html": { "experimentalFullSupportEnabled": true } }"#,
-        files: vec![
-            ("utils.js", "export const foo = 'hello';\n"),
-            ("page.astro", source),
-        ],
-        open_file: "page.astro",
-        language_id: "astro",
-        source,
-        cursor: pos(3, 5),
-    })
+async fn js_goto_definition_cursor_on_class_separator_returns_none() -> Result<()> {
+    let result = goto_definition_single_file(
+        "file.tsx",
+        "typescriptreact",
+        r#"<div className="foo bar" />"#,
+        pos(0, 19), // space between "foo" and "bar"
+        None,
+    )
     .await?;
+    assert!(
+        result.is_none(),
+        "cursor on separator space should not trigger go-to definition"
+    );
 
-    // Currently resolves to the import binding in the frontmatter, not the
-    // export in utils.js. Cross-file resolution for template expressions is
-    // not yet implemented.
-    assert_definition(res, file_uri(&fs, "page.astro"), range(1, 9, 1, 12));
+    Ok(())
+}
 
+#[tokio::test]
+async fn goto_definition_css_inline_style() -> Result<()> {
+    // `<style>.card { ... }</style>\n<div class="card">Content</div>\n`
+    // Line 0: `<style>.card { padding: 1rem; }</style>`
+    //          0123456 7890 → "card" is at char 8 (after `<style>.`)
+    // Line 1: `<div class="card">Content</div>`
+    //          012345678901 2 → "card" starts at char 12 (after `<div class="`)
+    let res = goto_definition_single_file(
+        "index.html",
+        "html",
+        "<style>.card { padding: 1rem; }</style>\n<div class=\"card\">Content</div>\n",
+        pos(1, 12),
+        Some(r#"{ "linter": { "enabled": true }, "html": { "experimentalFullSupportEnabled": true } }"#),
+    )
+        .await?;
+
+    // "card" in `.card` lives on line 0, characters 8–12 (after `<style>.`)
+    assert_definition(res, test_uri("index.html"), range(0, 7, 0, 12));
     Ok(())
 }
 
@@ -509,6 +542,152 @@ import Component from "./Component.astro";
 
     assert_definition(res, file_uri(&fs, "Component.astro"), range(0, 0, 0, 0));
 
+    Ok(())
+}
+
+#[tokio::test]
+async fn goto_definition_html_ish_expression_cross_file() -> Result<()> {
+    let source = r#"---
+import { foo } from "./utils.js";
+---
+<h1>{foo}</h1>
+"#;
+    // Cursor on `foo` in `{foo}` (line 3, character 5)
+    let (res, fs) = goto_definition_cross_file(CrossFileTestParams {
+        name: "goto_definition_html_ish_expression_cross_file",
+        config: r#"{ "linter": { "enabled": true }, "html": { "experimentalFullSupportEnabled": true } }"#,
+        files: vec![
+            ("utils.js", "export const foo = 'hello';\n"),
+            ("page.astro", source),
+        ],
+        open_file: "page.astro",
+        language_id: "astro",
+        source,
+        cursor: pos(3, 5),
+    })
+        .await?;
+
+    // Currently resolves to the import binding in the frontmatter, not the
+    // export in utils.js. Cross-file resolution for template expressions is
+    // not yet implemented.
+    assert_definition(res, file_uri(&fs, "page.astro"), range(1, 9, 1, 12));
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn goto_definition_css_cross_file_jsx_classname() -> Result<()> {
+    // Line 0: `import './styles.css';`  (22 chars)
+    // Line 1: `<div className="btn" />`
+    //          0123456789012345 6 → "btn" starts at char 16 (after `<div className="`)
+    let (res, fs) = goto_definition_cross_file(CrossFileTestParams {
+        name: "goto_definition_css_cross_file_jsx_classname",
+        config: r#"{ "linter": { "enabled": true } }"#,
+        files: vec![
+            ("styles.css", ".btn { color: red; }\n"),
+            (
+                "App.jsx",
+                "import './styles.css';\n<div className=\"btn\" />\n",
+            ),
+        ],
+        open_file: "App.jsx",
+        language_id: "javascriptreact",
+        source: "import './styles.css';\n<div className=\"btn\" />\n",
+        cursor: pos(1, 16),
+    })
+    .await?;
+
+    // "btn" in `.btn { ... }` → line 0, chars 1–4 (after the leading dot)
+    assert_definition(res, file_uri(&fs, "styles.css"), range(0, 1, 0, 4));
+    Ok(())
+}
+
+#[tokio::test]
+async fn goto_definition_css_cross_file_multiple_classes() -> Result<()> {
+    // Line 1: `<div className="foo bar baz" />`
+    //                          0123456789012345 6789 20
+    //          "bar" starts at char 20 (after `<div className="foo `)
+    let (res, fs) = goto_definition_cross_file(CrossFileTestParams {
+        name: "goto_definition_css_cross_file_multiple_classes",
+        config: r#"{ "linter": { "enabled": true } }"#,
+        files: vec![
+            ("styles.css", ".foo { } .bar { } .baz { }\n"),
+            (
+                "App.jsx",
+                "import './styles.css';\n<div className=\"foo bar baz\" />\n",
+            ),
+        ],
+        open_file: "App.jsx",
+        language_id: "javascriptreact",
+        source: "import './styles.css';\n<div className=\"foo bar baz\" />\n",
+        cursor: pos(1, 20),
+    })
+    .await?;
+
+    // `.foo { } .bar` → "bar" starts at char 10 on line 0
+    assert_definition(res, file_uri(&fs, "styles.css"), range(0, 10, 0, 13));
+    Ok(())
+}
+
+#[tokio::test]
+async fn goto_definition_css_cross_file_html_class() -> Result<()> {
+    // Line 0: `<link rel="stylesheet" href="./styles.css" />`
+    // Line 1: `<div class="header">Hello</div>`
+    //          012345678901 2 → "header" starts at char 12 (after `<div class="`)
+    let (res, fs) = goto_definition_cross_file(CrossFileTestParams {
+        name: "goto_definition_css_cross_file_html_class",
+        config: r#"{ "linter": { "enabled": true }, "html": { "experimentalFullSupportEnabled": true } }"#,
+        files: vec![
+            ("styles.css", ".header { margin: 0; }\n"),
+            (
+                "index.html",
+                "<link rel=\"stylesheet\" href=\"./styles.css\" />\n<div class=\"header\">Hello</div>\n",
+            ),
+        ],
+        open_file: "index.html",
+        language_id: "html",
+        source: "<link rel=\"stylesheet\" href=\"./styles.css\" />\n<div class=\"header\">Hello</div>\n",
+        cursor: pos(1, 12),
+    })
+        .await?;
+
+    // "header" in `.header { ... }` → line 0, chars 1–7
+    assert_definition(res, file_uri(&fs, "styles.css"), range(0, 1, 0, 7));
+    Ok(())
+}
+
+#[tokio::test]
+async fn goto_definition_css_cross_file_multiple_definitions() -> Result<()> {
+    // `.btn` is defined in two separate stylesheets, both imported by App.jsx.
+    // Line 2: `<div className="btn" />`
+    //          0123456789012345 6 → "btn" starts at char 16 (after `<div className="`)
+    let (res, fs) = goto_definition_cross_file(CrossFileTestParams {
+        name: "goto_definition_css_cross_file_multiple_definitions",
+        config: r#"{ "linter": { "enabled": true } }"#,
+        files: vec![
+            ("a.css", ".btn { color: red; }\n"),
+            ("b.css", ".btn { font-size: 16px; }\n"),
+            (
+                "App.jsx",
+                "import './a.css';\nimport './b.css';\n<div className=\"btn\" />\n",
+            ),
+        ],
+        open_file: "App.jsx",
+        language_id: "javascriptreact",
+        source: "import './a.css';\nimport './b.css';\n<div className=\"btn\" />\n",
+        cursor: pos(2, 16),
+    })
+    .await?;
+
+    // `.btn` in a.css → line 0, chars 1–4
+    // `.btn` in b.css → line 0, chars 1–4
+    assert_multiple_definitions(
+        res,
+        &[
+            (file_uri(&fs, "a.css"), range(0, 1, 0, 4)),
+            (file_uri(&fs, "b.css"), range(0, 1, 0, 4)),
+        ],
+    );
     Ok(())
 }
 

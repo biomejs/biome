@@ -190,7 +190,7 @@ pub fn create_parser_options<L: ServiceLanguage>(
             input_file,
             settings.experimental_full_html_support_enabled(),
         );
-        let handle = SettingsHandle::new(&settings, None);
+        let handle = SettingsHandle::new(&settings, Default::default());
         Some(handle.parse_options::<L>(&input_file.into(), &document_file_source))
     }
 }
@@ -240,7 +240,7 @@ where
             input_file,
             settings.experimental_full_html_support_enabled(),
         );
-        let handle = SettingsHandle::new(&settings, None);
+        let handle = SettingsHandle::new(&settings, Default::default());
         handle.format_options::<L>(&input_file.into(), &document_file_source)
     }
 }

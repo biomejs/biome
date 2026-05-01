@@ -1,11 +1,14 @@
+mod go_to;
+
 use super::{
     AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams, EditorCapabilities,
     EnabledForPath, ExtensionHandler, FixAllParams, LintParams, LintResults, ParseResult,
-    ProcessFixAll, ProcessLint, ResolveDefinitionParams, SearchCapabilities, search,
+    ProcessFixAll, ProcessLint, SearchCapabilities, search,
 };
 use crate::WorkspaceError;
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
+use crate::file_handlers::css::go_to::resolve_definition;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FormatterCapabilities, ParserCapabilities,
 };
@@ -15,8 +18,7 @@ use crate::settings::{
 };
 use crate::workspace::FixFileMode;
 use crate::workspace::{
-    CodeAction, DefinitionReference, DocumentFileSource, FixFileResult, GetSyntaxTreeResult,
-    GoToDefinitionResult, PullActionsResult,
+    CodeAction, DocumentFileSource, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
 };
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
@@ -911,29 +913,6 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         },
         params.embeds_initial_indent,
     )
-}
-
-/// Destination-side capability for CSS: resolves a binding reference to a
-/// CSS class definition location.
-pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoToDefinitionResult> {
-    match params.definition_ref {
-        DefinitionReference::CssClass { class_name } => {
-            let path = params.path.as_path();
-            let (css_path, mut range, content_offset) = params
-                .module_graph
-                .find_css_class_definition(path, class_name)?;
-            // For inline `<style>` blocks, the range is snippet-local.
-            // Apply the content_offset to get parent document coordinates.
-            if let Some(offset) = content_offset {
-                range += offset;
-            }
-            Some(GoToDefinitionResult {
-                path: BiomePath::new(css_path.to_string()),
-                range,
-            })
-        }
-        _ => None,
-    }
 }
 
 #[cfg(test)]

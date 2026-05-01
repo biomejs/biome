@@ -64,10 +64,10 @@ use biome_js_formatter::format_node;
 use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{SVELTE_RUNES, SemanticModelOptions, semantic_model};
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsRoot, AnyJsTemplateElement, AnyJsxAttributeValue, JsCallArgumentList,
-    JsCallArguments, JsCallExpression, JsClassDeclaration, JsClassExpression, JsFileSource,
-    JsFunctionDeclaration, JsLanguage, JsSyntaxNode, JsTemplateChunkElement, JsTemplateExpression,
-    JsVariableDeclarator, JsxAttribute, JsxString, TextRange, TextSize, TokenAtOffset,
+    AnyJsExpression, AnyJsRoot, AnyJsTemplateElement, JsCallArgumentList, JsCallArguments,
+    JsCallExpression, JsClassDeclaration, JsClassExpression, JsFileSource, JsFunctionDeclaration,
+    JsLanguage, JsSyntaxNode, JsTemplateChunkElement, JsTemplateExpression, JsVariableDeclarator,
+    TextRange, TextSize, TokenAtOffset,
 };
 use biome_js_type_info::{GlobalsResolver, ScopeId, TypeData, TypeResolver};
 use biome_module_graph::ModuleGraph;
@@ -1637,60 +1637,4 @@ fn update_snippets(
     let root = mutation.commit();
 
     Ok(root.as_send().unwrap())
-}
-
-/// Extracts the CSS class name at the given cursor offset from a JSX
-/// `className` or `class` attribute string value.
-///
-/// Given `<div className="foo bar baz">` with cursor on `bar`, returns
-/// `Some("bar")`.
-fn extract_css_class_at_offset(
-    token: &biome_rowan::SyntaxToken<JsLanguage>,
-    cursor_offset: TextSize,
-) -> Option<String> {
-    // Walk up to find a JsxAttribute ancestor
-    let jsx_attribute = token.ancestors().find_map(JsxAttribute::cast)?;
-
-    let name_token = jsx_attribute.name_value_token().ok()?;
-    let name_text = name_token.text_trimmed();
-
-    if name_text != "className" && name_text != "class" {
-        return None;
-    }
-
-    let initializer = jsx_attribute.initializer()?;
-    let value = initializer.value().ok()?;
-
-    let string_literal: JsxString = match value {
-        AnyJsxAttributeValue::JsxString(s) => s,
-        _ => return None,
-    };
-
-    let value_token = string_literal.value_token().ok()?;
-    let inner_text = string_literal.inner_string_text().ok()?;
-    let inner_source_range = inner_text.source_range(value_token.text_trimmed_range());
-
-    let relative_offset = cursor_offset.checked_sub(inner_source_range.start())?;
-    let relative_offset: usize = relative_offset.into();
-
-    let text = inner_text.text();
-    if relative_offset > text.len() {
-        return None;
-    }
-
-    // Find which whitespace-separated class name the cursor falls within
-    let mut pos = 0usize;
-    for class_name in text.split_ascii_whitespace() {
-        // Find actual start (skip whitespace)
-        let start = text[pos..].find(class_name).map(|i| i + pos)?;
-        let end = start + class_name.len();
-
-        if relative_offset >= start && relative_offset <= end {
-            return Some(class_name.to_string());
-        }
-
-        pos = end;
-    }
-
-    None
 }

@@ -289,19 +289,20 @@ impl ModuleGraph {
     /// all available paths: JS imports, HTML inline styles, linked stylesheets,
     /// and CSS imports from embedded `<script>` blocks.
     ///
-    /// Returns the CSS file path, the selector range, and an optional content
+    /// Returns a list of the CSS file path, the selector range, and an optional content
     /// offset for inline `<style>` blocks (needed to translate snippet-local
     /// ranges to parent document coordinates).
     pub fn find_css_class_definition(
         &self,
         path: &Utf8Path,
         class_name: &str,
-    ) -> Option<(Utf8PathBuf, TextRange, Option<TextSize>)> {
+    ) -> Vec<(Utf8PathBuf, TextRange, Option<TextSize>)> {
+        let mut result = Vec::new();
         // 1. Check inline style classes in HTML-like files (carry content_offset)
         if let Some(html_info) = self.html_module_info_for_path(path) {
             for class_def in &html_info.style_classes {
                 if class_def.name.text() == class_name {
-                    return Some((
+                    result.push((
                         path.to_path_buf(),
                         class_def.range,
                         class_def.content_offset,
@@ -315,31 +316,34 @@ impl ModuleGraph {
             if step.css_path == path {
                 continue; // Already checked inline styles above
             }
-            if let Some(range) = step.css_classes.iter().find_map(|(token, range)| {
-                if token.text() == class_name {
-                    Some(*range)
-                } else {
-                    None
-                }
-            }) {
-                return Some((step.css_path, range, None));
-            }
+
+            step.css_classes
+                .iter()
+                .filter_map(|(token, range)| {
+                    if token.text() == class_name {
+                        Some(*range)
+                    } else {
+                        None
+                    }
+                })
+                .for_each(|range| result.push((step.css_path.clone(), range, None)))
         }
 
         // 3. Check CSS files imported by JS (e.g., `import './styles.css'` in JSX)
         for step in self.traverse_import_tree_for_classes(path) {
-            if let Some(range) = step.css_classes.iter().find_map(|(token, range)| {
-                if token.text() == class_name {
-                    Some(*range)
-                } else {
-                    None
-                }
-            }) {
-                return Some((step.css_path, range, None));
-            }
+            step.css_classes
+                .iter()
+                .filter_map(|(token, range)| {
+                    if token.text() == class_name {
+                        Some(*range)
+                    } else {
+                        None
+                    }
+                })
+                .for_each(|range| result.push((step.css_path.clone(), range, None)))
         }
 
-        None
+        result
     }
 
     /// Builds diagnostic information with full component chains for error reporting.

@@ -1300,6 +1300,7 @@ pub(crate) struct ResolveDefinitionParams<'a> {
     pub(crate) definition_ref: &'a DefinitionReference,
     pub(crate) module_graph: &'a ModuleGraph,
     pub(crate) offset: Option<TextSize>,
+    pub(crate) services: &'a DocumentServices,
 }
 
 type ResolveBinding = fn(ResolveBindingParams) -> Option<DefinitionReference>;

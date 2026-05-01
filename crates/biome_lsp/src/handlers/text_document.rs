@@ -65,13 +65,7 @@ pub(crate) async fn did_open(
         document_file_source: Some(language_hint),
         persist_node_cache: true,
         inline_config: session.inline_config(),
-        needs_document_services: Some(
-            session
-                .extension_settings
-                .read()
-                .unwrap()
-                .goto_definition_enabled(),
-        ),
+        editor_features: Some(session.extension_settings.read().unwrap().editor_features()),
     })?;
 
     session.insert_document(url.clone(), doc);
@@ -233,6 +227,7 @@ pub(crate) async fn did_change(
         version,
         content: text,
         inline_config: session.inline_config(),
+        editor_features: None,
     })?;
 
     if let Err(err) = session.update_diagnostics(url).await {
@@ -264,6 +259,7 @@ pub(crate) async fn did_save(
             content: text.clone(),
             version: doc.version,
             inline_config: None,
+            editor_features: None,
         })?;
 
         session.insert_document(

@@ -193,7 +193,7 @@ impl ProcessFile for LintAssistProcessFile {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
-            needs_document_services: None,
+            editor_features: None,
         })?;
 
         // apply fix file of the linter
@@ -273,6 +273,7 @@ impl ProcessFile for LintAssistProcessFile {
                     path: biome_path.clone(),
                     version,
                     inline_config: None,
+                    editor_features: None,
                 })?;
                 new_content = Cow::Owned(output);
             }

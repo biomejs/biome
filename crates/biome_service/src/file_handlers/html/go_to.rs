@@ -59,7 +59,7 @@ pub(crate) fn resolve_binding_html(params: ResolveBindingParams) -> Option<Defin
                 let start = text[pos..].find(class_name).map(|i| i + pos)?;
                 let end = start + class_name.len();
 
-                if relative_offset >= start && relative_offset <= end {
+                if relative_offset >= start && relative_offset < end {
                     return Some(DefinitionReference::CssClass {
                         class_name: class_name.to_string(),
                     });
@@ -99,23 +99,32 @@ pub(crate) fn resolve_binding_html(params: ResolveBindingParams) -> Option<Defin
 }
 
 pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoToDefinitionResult> {
+    let mut result = GoToDefinitionResult::default();
     match params.definition_ref {
         DefinitionReference::HtmlComponent { source } => {
-            resolve_import_definition(source, params.path.as_path(), params.module_graph)
+            resolve_import_definition(
+                source,
+                params.path.as_path(),
+                params.module_graph,
+                &mut result,
+            );
         }
         DefinitionReference::Local { .. }
         | DefinitionReference::Import { .. }
         | DefinitionReference::CssClass { .. }
         | DefinitionReference::LocalEmbedded { .. }
-        | DefinitionReference::DynamicImport { .. } => None,
+        | DefinitionReference::DynamicImport { .. } => {}
     }
+
+    Some(result)
 }
 
 fn resolve_import_definition(
     source: &str,
     current_path: &Utf8Path,
     module_graph: &ModuleGraph,
-) -> Option<GoToDefinitionResult> {
+    result: &mut GoToDefinitionResult,
+) -> Option<()> {
     let module_info = module_graph.html_module_info_for_path(current_path)?;
     let html_import = module_info
         .static_import_paths
@@ -129,8 +138,10 @@ fn resolve_import_definition(
         return None;
     }
 
-    Some(GoToDefinitionResult {
-        path: BiomePath::new(target_path.to_string()),
-        range: TextRange::new(0.into(), 0.into()),
-    })
+    result.store(
+        BiomePath::new(target_path),
+        TextRange::new(0.into(), 0.into()),
+    );
+
+    Some(())
 }

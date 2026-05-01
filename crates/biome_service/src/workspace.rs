@@ -87,7 +87,7 @@ use std::{
 use tokio::sync::watch;
 use tracing::debug;
 
-use crate::settings::{ModuleGraphResolutionKind, SettingsWithEditor};
+use crate::settings::{EditorFeatures, ModuleGraphResolutionKind, SettingsWithEditor};
 pub use crate::{
     WorkspaceError,
     file_handlers::{Capabilities, DocumentFileSource},
@@ -841,7 +841,7 @@ pub struct OpenFileParams {
 
     /// Used to enable further document services e.g. semantic model
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub needs_document_services: Option<bool>,
+    pub editor_features: Option<EditorFeatures>,
 }
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -982,6 +982,10 @@ pub struct ChangeFileParams {
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub inline_config: Option<Configuration>,
+
+    /// Used to enable further document services e.g. semantic model
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub editor_features: Option<EditorFeatures>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1267,12 +1271,17 @@ pub struct GoToDefinitionParams {
     pub enabled: bool,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct GoToDefinitionResult {
-    pub path: BiomePath,
-    pub range: TextRange,
+    pub matches: Vec<(BiomePath, TextRange)>,
+}
+
+impl GoToDefinitionResult {
+    pub(crate) fn store(&mut self, path: BiomePath, range: TextRange) {
+        self.matches.push((path, range));
+    }
 }
 
 /// The definition kind of definition
@@ -1303,12 +1312,6 @@ pub enum DefinitionReference {
         local_name: String,
         specifier: String,
     },
-}
-
-impl DefinitionReference {
-    pub(crate) fn is_embedded(&self) -> bool {
-        matches!(self, Self::LocalEmbedded { .. })
-    }
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1888,6 +1891,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             version,
             content,
             inline_config: None,
+            editor_features: None,
         })
     }
 

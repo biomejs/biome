@@ -42,7 +42,7 @@ E {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
-            needs_document_services: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -72,6 +72,7 @@ E {
             content: printed.as_code().to_string(),
             version: 1,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 

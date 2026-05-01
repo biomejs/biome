@@ -1,6 +1,7 @@
 use std::str::FromStr;
 
 use biome_configuration::Configuration;
+use biome_service::settings::{EditorFeature, EditorFeatures};
 use camino::Utf8PathBuf;
 use serde::{Deserialize, Serialize};
 use serde_json::{Error, Value};
@@ -82,7 +83,13 @@ impl ExtensionSettings {
         self.settings.inline_config.clone()
     }
 
-    pub(crate) fn goto_definition_enabled(&self) -> bool {
-        self.settings.go_to_definition.unwrap_or(true)
+    pub(crate) fn editor_features(&self) -> EditorFeatures {
+        let go_to_definition = self.settings.go_to_definition.unwrap_or(true);
+        let mut features = EditorFeatures::default();
+        if go_to_definition {
+            features.insert(EditorFeature::GotoDefinition);
+        }
+
+        features
     }
 }
