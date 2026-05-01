@@ -7022,6 +7022,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueValidVFor": {
+					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/use-vue-valid-v-for",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueValidVForConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueValidVHtml": {
 					"description": "Enforce valid v-html directives.\nSee https://biomejs.dev/linter/rules/use-vue-valid-v-html",
 					"anyOf": [
@@ -12214,6 +12221,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueValidVForOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueValidVForOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueValidVHtmlOptions": {
 			"type": "object",
 			"properties": {
@@ -15931,6 +15947,16 @@
 			"additionalProperties": false
 		},
 		"UseVueValidVElseOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueValidVForConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueValidVForOptions" }
+			]
+		},
+		"UseVueValidVForOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
