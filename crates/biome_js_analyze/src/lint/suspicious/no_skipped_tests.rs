@@ -5,8 +5,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_js_syntax::{AnyJsExpression, JsCallExpression};
-use biome_rowan::{AstSeparatedList, BatchMutationExt, TextRange};
+use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsSyntaxKind};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TextRange};
 use biome_rule_options::no_skipped_tests::NoSkippedTestsOptions;
 
 use crate::JsRuleAction;
@@ -48,6 +48,37 @@ declare_lint_rule! {
     /// ```js
     /// test.only("test", () => {});
     /// test("test", () => {});
+    /// ```
+    ///
+    /// ## Options
+    ///
+    /// ### `allowConditional`
+    ///
+    /// When enabled, conditional skip patterns are allowed:
+    ///
+    /// - `test.skip()` / `test.fixme()` calls inside an `if` statement.
+    /// - `test.skip(condition)` / `test.skip(condition, "reason")` with a non-string first argument.
+    ///
+    /// Default: `false`.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "allowConditional": true
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,use_options
+    /// test("conditional skip inside if", () => {
+    ///     if (someCondition) {
+    ///         test.skip();
+    ///     }
+    /// });
+    ///
+    /// test("conditional skip with arg", () => {
+    ///     test.skip(someCondition);
+    /// });
     /// ```
     ///
     pub NoSkippedTests {
@@ -99,7 +130,8 @@ impl Rule for NoSkippedTests {
 
         // Path 2: Bare skip/fixme calls (e.g., test.skip() or test.fixme() with 0 args),
         // bracket notation (test["skip"]), and Playwright describe/step patterns
-        if let Some(skip_state) = detect_bare_skip_call(node, &callee) {
+        let allow_conditional = ctx.options().allow_conditional();
+        if let Some(skip_state) = detect_bare_skip_call(node, &callee, allow_conditional) {
             return Some(skip_state);
         }
 
@@ -181,6 +213,7 @@ pub struct SkipState {
 fn detect_bare_skip_call(
     call_expr: &JsCallExpression,
     callee: &AnyJsExpression,
+    allow_conditional: bool,
 ) -> Option<SkipState> {
     // Collect the member names from the callee chain
     let names = collect_callee_names(callee)?;
@@ -242,6 +275,10 @@ fn detect_bare_skip_call(
             }
             // 0-arg bare skip/fixme
             if arg_count == 0 {
+                // When `allowConditional` is enabled, allow bare skip/fixme inside an `if` block.
+                if allow_conditional && is_inside_if_block(call_expr) {
+                    return None;
+                }
                 return Some(SkipState {
                     range: name_range,
                     annotation,
@@ -249,6 +286,10 @@ fn detect_bare_skip_call(
             }
             // 1-2 arg conditional skip
             if (arg_count == 1 || arg_count == 2) && !has_string_first_arg(call_expr) {
+                // When `allowConditional` is enabled, allow conditional skip patterns.
+                if allow_conditional {
+                    return None;
+                }
                 return Some(SkipState {
                     range: name_range,
                     annotation,
@@ -334,6 +375,19 @@ fn collect_callee_names_rec(
         }
         _ => None,
     }
+}
+
+/// Checks if a call expression is inside an `if` statement, before hitting a function boundary.
+fn is_inside_if_block(call_expr: &JsCallExpression) -> bool {
+    for ancestor in call_expr.syntax().ancestors() {
+        if ancestor.kind() == JsSyntaxKind::JS_IF_STATEMENT {
+            return true;
+        }
+        if crate::ast_utils::is_function_boundary(ancestor.kind()) {
+            break;
+        }
+    }
+    false
 }
 
 /// Checks if the first argument of a call expression is a string literal or template literal.

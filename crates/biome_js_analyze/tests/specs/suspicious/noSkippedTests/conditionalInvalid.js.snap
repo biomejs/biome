@@ -1,0 +1,306 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: conditionalInvalid.js
+---
+# Input
+```js
+// Standard skip with string first arg — still reported even with allowConditional: true
+test.skip("standard skip", () => {});
+it.skip("standard skip", () => {});
+describe.skip("standard skip", () => {});
+
+// 0-arg bare skip OUTSIDE an `if` block — still reported
+test('outside-if', () => {
+    test.skip();
+});
+
+// describe.skip with non-string first arg — still reported (option only allows test/it)
+describe('describe-conditional', () => {
+    describe.skip(someCondition);
+});
+
+// x-prefix variants are not conditional patterns — still reported
+xtest('x-prefix', () => {});
+xit('x-prefix', () => {});
+xdescribe('x-prefix', () => {});
+
+// Playwright describe/step skip — still reported
+test.describe.skip("playwright", () => {});
+test.step.skip("playwright", () => {});
+
+```
+
+# Diagnostics
+```
+conditionalInvalid.js:2:6 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    1 │ // Standard skip with string first arg — still reported even with allowConditional: true
+  > 2 │ test.skip("standard skip", () => {});
+      │      ^^^^
+    3 │ it.skip("standard skip", () => {});
+    4 │ describe.skip("standard skip", () => {});
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+     1  1 │   // Standard skip with string first arg — still reported even with allowConditional: true
+     2    │ - test.skip("standard·skip",·()·=>·{});
+        2 │ + test("standard·skip",·()·=>·{});
+     3  3 │   it.skip("standard skip", () => {});
+     4  4 │   describe.skip("standard skip", () => {});
+  
+
+```
+
+```
+conditionalInvalid.js:3:4 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    1 │ // Standard skip with string first arg — still reported even with allowConditional: true
+    2 │ test.skip("standard skip", () => {});
+  > 3 │ it.skip("standard skip", () => {});
+      │    ^^^^
+    4 │ describe.skip("standard skip", () => {});
+    5 │ 
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+     1  1 │   // Standard skip with string first arg — still reported even with allowConditional: true
+     2  2 │   test.skip("standard skip", () => {});
+     3    │ - it.skip("standard·skip",·()·=>·{});
+        3 │ + it("standard·skip",·()·=>·{});
+     4  4 │   describe.skip("standard skip", () => {});
+     5  5 │   
+  
+
+```
+
+```
+conditionalInvalid.js:4:10 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    2 │ test.skip("standard skip", () => {});
+    3 │ it.skip("standard skip", () => {});
+  > 4 │ describe.skip("standard skip", () => {});
+      │          ^^^^
+    5 │ 
+    6 │ // 0-arg bare skip OUTSIDE an `if` block — still reported
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+     2  2 │   test.skip("standard skip", () => {});
+     3  3 │   it.skip("standard skip", () => {});
+     4    │ - describe.skip("standard·skip",·()·=>·{});
+        4 │ + describe("standard·skip",·()·=>·{});
+     5  5 │   
+     6  6 │   // 0-arg bare skip OUTSIDE an `if` block — still reported
+  
+
+```
+
+```
+conditionalInvalid.js:8:10 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+     6 │ // 0-arg bare skip OUTSIDE an `if` block — still reported
+     7 │ test('outside-if', () => {
+   > 8 │     test.skip();
+       │          ^^^^
+     9 │ });
+    10 │ 
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+     6  6 │   // 0-arg bare skip OUTSIDE an `if` block — still reported
+     7  7 │   test('outside-if', () => {
+     8    │ - ····test.skip();
+        8 │ + ····test();
+     9  9 │   });
+    10 10 │   
+  
+
+```
+
+```
+conditionalInvalid.js:13:14 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    11 │ // describe.skip with non-string first arg — still reported (option only allows test/it)
+    12 │ describe('describe-conditional', () => {
+  > 13 │     describe.skip(someCondition);
+       │              ^^^^
+    14 │ });
+    15 │ 
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+    11 11 │   // describe.skip with non-string first arg — still reported (option only allows test/it)
+    12 12 │   describe('describe-conditional', () => {
+    13    │ - ····describe.skip(someCondition);
+       13 │ + ····describe(someCondition);
+    14 14 │   });
+    15 15 │   
+  
+
+```
+
+```
+conditionalInvalid.js:17:1 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    16 │ // x-prefix variants are not conditional patterns — still reported
+  > 17 │ xtest('x-prefix', () => {});
+       │ ^^^^^
+    18 │ xit('x-prefix', () => {});
+    19 │ xdescribe('x-prefix', () => {});
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+    15 15 │   
+    16 16 │   // x-prefix variants are not conditional patterns — still reported
+    17    │ - xtest('x-prefix',·()·=>·{});
+       17 │ + test('x-prefix',·()·=>·{});
+    18 18 │   xit('x-prefix', () => {});
+    19 19 │   xdescribe('x-prefix', () => {});
+  
+
+```
+
+```
+conditionalInvalid.js:18:1 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    16 │ // x-prefix variants are not conditional patterns — still reported
+    17 │ xtest('x-prefix', () => {});
+  > 18 │ xit('x-prefix', () => {});
+       │ ^^^
+    19 │ xdescribe('x-prefix', () => {});
+    20 │ 
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+    16 16 │   // x-prefix variants are not conditional patterns — still reported
+    17 17 │   xtest('x-prefix', () => {});
+    18    │ - xit('x-prefix',·()·=>·{});
+       18 │ + it('x-prefix',·()·=>·{});
+    19 19 │   xdescribe('x-prefix', () => {});
+    20 20 │   
+  
+
+```
+
+```
+conditionalInvalid.js:19:1 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    17 │ xtest('x-prefix', () => {});
+    18 │ xit('x-prefix', () => {});
+  > 19 │ xdescribe('x-prefix', () => {});
+       │ ^^^^^^^^^
+    20 │ 
+    21 │ // Playwright describe/step skip — still reported
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+    17 17 │   xtest('x-prefix', () => {});
+    18 18 │   xit('x-prefix', () => {});
+    19    │ - xdescribe('x-prefix',·()·=>·{});
+       19 │ + describe('x-prefix',·()·=>·{});
+    20 20 │   
+    21 21 │   // Playwright describe/step skip — still reported
+  
+
+```
+
+```
+conditionalInvalid.js:22:15 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    21 │ // Playwright describe/step skip — still reported
+  > 22 │ test.describe.skip("playwright", () => {});
+       │               ^^^^
+    23 │ test.step.skip("playwright", () => {});
+    24 │ 
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+    20 20 │   
+    21 21 │   // Playwright describe/step skip — still reported
+    22    │ - test.describe.skip("playwright",·()·=>·{});
+       22 │ + test.describe("playwright",·()·=>·{});
+    23 23 │   test.step.skip("playwright", () => {});
+    24 24 │   
+  
+
+```
+
+```
+conditionalInvalid.js:23:11 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    21 │ // Playwright describe/step skip — still reported
+    22 │ test.describe.skip("playwright", () => {});
+  > 23 │ test.step.skip("playwright", () => {});
+       │           ^^^^
+    24 │ 
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+    21 21 │   // Playwright describe/step skip — still reported
+    22 22 │   test.describe.skip("playwright", () => {});
+    23    │ - test.step.skip("playwright",·()·=>·{});
+       23 │ + test.step("playwright",·()·=>·{});
+    24 24 │   
+  
+
+```

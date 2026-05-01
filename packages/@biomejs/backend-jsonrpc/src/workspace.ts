@@ -8794,7 +8794,13 @@ export type NoRedundantUseStrictOptions = {};
 export type NoSelfCompareOptions = {};
 export type NoShadowRestrictedNamesOptions = {};
 export type NoShorthandPropertyOverridesOptions = {};
-export type NoSkippedTestsOptions = {};
+export interface NoSkippedTestsOptions {
+	/**
+	* Allows conditional skipping inside test bodies.
+When enabled, `test.skip(condition)` and `test.skip()` inside `if` statements are allowed. 
+	 */
+	allowConditional?: boolean;
+}
 export type NoSparseArrayOptions = {};
 export type NoSuspiciousSemicolonInJsxOptions = {};
 export type NoTemplateCurlyInStringOptions = {};

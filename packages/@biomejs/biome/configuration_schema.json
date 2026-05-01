@@ -5146,6 +5146,12 @@
 		},
 		"NoSkippedTestsOptions": {
 			"type": "object",
+			"properties": {
+				"allowConditional": {
+					"description": "Allows conditional skipping inside test bodies.\nWhen enabled, `test.skip(condition)` and `test.skip()` inside `if` statements are allowed.",
+					"type": ["boolean", "null"]
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoSolidDestructuredPropsConfiguration": {
