@@ -932,6 +932,17 @@ fn at_order_list_item_with_base_indent(p: &mut MarkdownParser, base_indent: usiz
     })
 }
 
+fn at_order_list_item_textual_with_base_indent(p: &mut MarkdownParser, base_indent: usize) -> bool {
+    p.lookahead(|p| {
+        if !list_item_within_indent(p, base_indent) {
+            return false;
+        }
+
+        skip_leading_whitespace_tokens(p);
+        p.at(MD_TEXTUAL_LITERAL) && textual_starts_with_ordered_marker(p.cur_text())
+    })
+}
+
 /// Struct implementing `ParseNodeList` for ordered lists.
 struct OrderedList {
     /// A list is tight if there are no blank lines between items or inside items.
@@ -2288,6 +2299,7 @@ fn check_continuation_indent(
         let can_lazy = state.last_block_was_paragraph
             && !at_bullet_list_item_with_base_indent(p, 0)
             && !at_order_list_item_with_base_indent(p, 0)
+            && !at_order_list_item_textual_with_base_indent(p, 0)
             && !at_current_line_block_interrupt(p);
         if !can_lazy {
             return ContinuationResult {
@@ -2330,6 +2342,20 @@ fn check_continuation_indent(
                     parse_mode: ContinuationParseMode::AnyBlock,
                 };
             }
+            if at_order_list_item_textual_with_base_indent(p, p.state().list_item_required_indent) {
+                p.set_force_ordered_list_marker(true);
+                p.force_relex_regular();
+                let _ = parse_order_list_item(p);
+                p.set_force_ordered_list_marker(false);
+                state.last_block_was_paragraph = false;
+                state.first_line = false;
+                p.state_mut().virtual_line_start = prev_virtual;
+                return ContinuationResult {
+                    action: LoopAction::Continue,
+                    restore: VirtualLineRestore::None,
+                    parse_mode: ContinuationParseMode::AnyBlock,
+                };
+            }
 
             // Emit the indentation for a continuation line inside a list item
             // as an explicit MdContinuationIndent node so it appears in the
@@ -2350,6 +2376,7 @@ fn check_continuation_indent(
         // Insufficient indentation - check for block interrupts
         if at_bullet_list_item_with_base_indent(p, state.marker_indent)
             || at_order_list_item_with_base_indent(p, state.marker_indent)
+            || at_order_list_item_textual_with_base_indent(p, state.marker_indent)
         {
             return ContinuationResult {
                 action: LoopAction::Break,
