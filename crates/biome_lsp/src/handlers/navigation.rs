@@ -108,18 +108,15 @@ fn to_location(
     let target_range = if definition_path == original_path {
         to_proto::range(&doc.line_index, *definition_range, position_encoding)?
     } else {
-        match session
-            .workspace
-            .get_file_content(biome_service::workspace::GetFileContentParams {
-                project_key: doc.project_key,
-                path: definition_path.clone(),
-            }) {
-            Ok(content) => {
-                let target_line_index = LineIndex::new(&content);
-                to_proto::range(&target_line_index, *definition_range, position_encoding)?
-            }
-            Err(_) => Range::default(),
-        }
+        let content =
+            session
+                .workspace
+                .get_file_content(biome_service::workspace::GetFileContentParams {
+                    project_key: doc.project_key,
+                    path: definition_path.clone(),
+                })?;
+        let target_line_index = LineIndex::new(&content);
+        to_proto::range(&target_line_index, *definition_range, position_encoding)?
     };
 
     Ok(Location {
