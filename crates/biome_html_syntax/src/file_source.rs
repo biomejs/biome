@@ -139,7 +139,9 @@ impl HtmlFileSource {
     ) -> Result<Self, FileSourceError> {
         match language_id {
             "html" => Ok(Self::html()),
-            "xml" if extension == Some("svg") => Ok(Self::html()),
+            "xml" if extension.is_some_and(|ext| ext.eq_ignore_ascii_case("svg")) => {
+                Ok(Self::html())
+            }
             "astro" => Ok(Self::astro()),
             "vuejs" | "vue" => Ok(Self::vue()),
             "svelte" => Ok(Self::svelte()),
