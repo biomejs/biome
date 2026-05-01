@@ -41,7 +41,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseTestHooksOnTop {
-        version: "next",
+        version: "2.4.14",
         name: "useTestHooksOnTop",
         language: "js",
         recommended: false,

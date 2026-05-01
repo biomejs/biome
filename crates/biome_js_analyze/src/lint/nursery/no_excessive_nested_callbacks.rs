@@ -79,7 +79,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoExcessiveNestedCallbacks {
-        version: "next",
+        version: "2.4.14",
         name: "noExcessiveNestedCallbacks",
         language: "js",
         sources: &[RuleSource::Eslint("max-nested-callbacks").same()],

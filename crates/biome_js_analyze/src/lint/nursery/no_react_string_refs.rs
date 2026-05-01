@@ -59,7 +59,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoReactStringRefs {
-        version: "next",
+        version: "2.4.14",
         name: "noReactStringRefs",
         language: "js",
         sources: &[RuleSource::EslintReact("no-string-refs").same()],

@@ -49,7 +49,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseMathMinMax {
-        version: "next",
+        version: "2.4.14",
         name: "useMathMinMax",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-math-min-max").same()],
