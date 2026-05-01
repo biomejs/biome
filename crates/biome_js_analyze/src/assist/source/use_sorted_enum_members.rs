@@ -26,8 +26,8 @@ declare_source_rule! {
     /// Members that cannot be compared, such as computed names, are left in place and split the enum into sortable groups.
     ///
     /// Members are sorted in a [Natural order](https://en.wikipedia.org/wiki/Natural_sort_order),
-    /// meaning that uppercase letters come before lowercase letters (e.g. `A` < `a` <`B` < `b`)
-    /// and numbers are compared in a human way (e.g. `9` < `10`).
+    /// meaning that uppercase letters come before lowercase letters (e.g. `A` < `a` < `B` < `b`)
+    /// and numbers are compared to their numerical value (e.g. `9` < `10`).
     ///
     /// ## Examples
     ///
