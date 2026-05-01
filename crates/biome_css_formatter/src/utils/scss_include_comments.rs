@@ -293,7 +293,9 @@ fn separator_comment_owner(node: &CssSyntaxNode) -> CssSyntaxNode {
 }
 
 fn follows_closing_paren(comment: &DecoratedComment<CssLanguage>) -> bool {
-    comment.following_token().map(|token| token.kind()) == Some(CssSyntaxKind::R_PAREN)
+    comment
+        .following_token()
+        .is_some_and(|token| token.kind() == CssSyntaxKind::R_PAREN)
 }
 
 /// Returns true when the comment follows the separated-list comma.
@@ -301,15 +303,16 @@ fn is_trailing_separator_comment(
     node: &CssSyntaxNode,
     comment: &DecoratedComment<CssLanguage>,
 ) -> bool {
-    let comment_range = comment.piece().text_range();
+    let comment_piece = comment.piece().as_piece();
 
     node.last_token()
         .and_then(|token| token.next_token())
         .is_some_and(|token| {
             token.kind() == CssSyntaxKind::COMMA
+                && token == comment_piece.token()
                 && token
                     .trailing_trivia()
-                    .pieces()
-                    .any(|piece| piece.is_comments() && piece.text_range() == comment_range)
+                    .text_range()
+                    .contains_range(comment_piece.text_range())
         })
 }

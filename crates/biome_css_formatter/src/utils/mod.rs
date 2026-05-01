@@ -10,6 +10,7 @@ pub(crate) mod scss_keyword_argument_layout;
 pub(crate) mod scss_list_layout;
 pub(crate) mod scss_map;
 pub(crate) mod scss_map_layout;
+pub(crate) mod scss_module_configuration;
 pub(crate) mod scss_separated_list;
 pub(crate) mod scss_separator_comments;
 pub(crate) mod string_utils;

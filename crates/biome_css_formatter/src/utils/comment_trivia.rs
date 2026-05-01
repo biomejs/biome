@@ -22,8 +22,7 @@ pub(crate) fn has_inline_trailing_comment(node: &CssSyntaxNode) -> bool {
     node.last_token().is_some_and(|token| {
         let trailing = token.trailing_trivia();
 
-        !trailing.pieces().any(|piece| piece.is_newline())
-            && trailing.pieces().any(|piece| piece.is_comments())
+        !trailing.pieces().any(|piece| piece.is_newline()) && token.has_trailing_comments()
     })
 }
 
@@ -32,12 +31,13 @@ pub(crate) fn is_trailing_comment_on_node(
     node: &CssSyntaxNode,
     comment: &DecoratedComment<CssLanguage>,
 ) -> bool {
-    let comment_range = comment.piece().text_range();
+    let comment_piece = comment.piece().as_piece();
 
     node.last_token().is_some_and(|token| {
-        token
-            .trailing_trivia()
-            .pieces()
-            .any(|piece| piece.is_comments() && piece.text_range() == comment_range)
+        token == comment_piece.token()
+            && token
+                .trailing_trivia()
+                .text_range()
+                .contains_range(comment_piece.text_range())
     })
 }
