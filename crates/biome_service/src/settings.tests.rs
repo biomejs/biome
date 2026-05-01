@@ -79,7 +79,7 @@ fn correctly_computes_analyzer_options() {
         &language.linter,
         environment,
         &BiomePath::new(Utf8PathBuf::new()),
-        &DocumentFileSource::from_language_id("javascript"),
+        &DocumentFileSource::from_language_id("javascript", None),
         None,
     );
 

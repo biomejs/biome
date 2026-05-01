@@ -233,7 +233,10 @@ impl DocumentFileSource {
     }
 
     #[instrument(level = "debug", fields(result))]
-    fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
+    fn try_from_language_id(
+        language_id: &str,
+        extension: Option<&str>,
+    ) -> Result<Self, FileSourceError> {
         if let Ok(file_source) = JsonFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
@@ -246,7 +249,7 @@ impl DocumentFileSource {
         if let Ok(file_source) = GraphqlFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
-        if let Ok(file_source) = HtmlFileSource::try_from_language_id(language_id) {
+        if let Ok(file_source) = HtmlFileSource::try_from_language_id(language_id, extension) {
             return Ok(file_source.into());
         }
         if let Ok(file_source) = GritFileSource::try_from_language_id(language_id) {
@@ -258,14 +261,15 @@ impl DocumentFileSource {
         Err(FileSourceError::UnknownLanguageId)
     }
 
-    /// Returns the document file source corresponding to this language ID
+    /// Returns the document file source corresponding to this language ID. It accepts an optional extension
+    /// to be used to narrow down the expected language to enable.
     ///
     /// See the [LSP spec] and [VS Code spec] for a list of language identifiers
     ///
     /// [LSP spec]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem
     /// [VS Code spec]: https://code.visualstudio.com/docs/languages/identifiers
-    pub fn from_language_id(language_id: &str) -> Self {
-        Self::try_from_language_id(language_id).unwrap_or(Self::Unknown)
+    pub fn from_language_id(language_id: &str, extension: Option<&str>) -> Self {
+        Self::try_from_language_id(language_id, extension).unwrap_or(Self::Unknown)
     }
 
     pub(crate) fn try_from_path(
@@ -2305,7 +2309,7 @@ mod tests {
         let source = DocumentFileSource::from_path(Utf8Path::new("docs/readme.md"), false);
         assert!(matches!(source, DocumentFileSource::Markdown(_)));
 
-        let language_source = DocumentFileSource::from_language_id("markdown");
+        let language_source = DocumentFileSource::from_language_id("markdown", None);
         assert!(matches!(language_source, DocumentFileSource::Markdown(_)));
 
         assert!(DocumentFileSource::can_parse(Utf8Path::new(
