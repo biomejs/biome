@@ -391,7 +391,7 @@ async fn goto_definition_css_inline_style() -> Result<()> {
         .await?;
 
     // "card" in `.card` lives on line 0, characters 8–12 (after `<style>.`)
-    assert_definition(res, test_uri("index.html"), range(0, 7, 0, 12));
+    assert_definition(res, test_uri("index.html"), range(0, 8, 0, 12));
     Ok(())
 }
 

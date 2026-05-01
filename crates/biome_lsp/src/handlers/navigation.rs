@@ -72,7 +72,7 @@ pub(crate) fn goto_definition(
                 let locations: Vec<_> = definition
                     .matches
                     .iter()
-                    .flat_map(|(definition_path, range)| {
+                    .map(|(definition_path, range)| {
                         to_location(
                             session,
                             definition_path,
@@ -82,7 +82,7 @@ pub(crate) fn goto_definition(
                             &path,
                         )
                     })
-                    .collect();
+                    .collect::<Result<Vec<_>, _>>()?;
 
                 Some(GotoDefinitionResponse::Array(locations))
             };
