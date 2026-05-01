@@ -28,9 +28,10 @@ pub(crate) async fn did_open(
     let url = params.text_document.uri;
     let version = params.text_document.version;
     let content = params.text_document.text;
-    let language_hint = DocumentFileSource::from_language_id(&params.text_document.language_id);
-
     let path = session.file_path(&url)?;
+    let language_hint =
+        DocumentFileSource::from_language_id(&params.text_document.language_id, path.extension());
+
     let file_path = path.to_path_buf();
     let config_path = session.resolve_configuration_path(Some(&file_path));
 

@@ -133,9 +133,13 @@ impl HtmlFileSource {
     /// [LSP spec]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem
     /// [VS Code spec]: https://code.visualstudio.com/docs/languages/identifiers
     /// [VS Code extension]: https://github.com/withastro/language-tools/blob/0503392b80765c8a1292ddc9c063a1187425c187/packages/vscode/package.json#L140
-    pub fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
+    pub fn try_from_language_id(
+        language_id: &str,
+        extension: Option<&str>,
+    ) -> Result<Self, FileSourceError> {
         match language_id {
-            "html" | "svg" => Ok(Self::html()),
+            "html" => Ok(Self::html()),
+            "xml" if extension == Some("svg") => Ok(Self::html()),
             "astro" => Ok(Self::astro()),
             "vuejs" | "vue" => Ok(Self::vue()),
             "svelte" => Ok(Self::svelte()),

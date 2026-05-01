@@ -1514,7 +1514,7 @@ fn lsp_language_hints_keep_svelte_source_module_path_semantics() {
             project_key,
             path: BiomePath::new(SVELTE_TS_FILE_PATH),
             content: FileContent::FromServer,
-            document_file_source: Some(DocumentFileSource::from_language_id("typescript")),
+            document_file_source: Some(DocumentFileSource::from_language_id("typescript", None)),
             persist_node_cache: false,
             inline_config: None,
         })
@@ -1525,7 +1525,7 @@ fn lsp_language_hints_keep_svelte_source_module_path_semantics() {
             project_key,
             path: BiomePath::new(SVELTE_JS_FILE_PATH),
             content: FileContent::FromServer,
-            document_file_source: Some(DocumentFileSource::from_language_id("javascript")),
+            document_file_source: Some(DocumentFileSource::from_language_id("javascript", None)),
             persist_node_cache: false,
             inline_config: None,
         })
