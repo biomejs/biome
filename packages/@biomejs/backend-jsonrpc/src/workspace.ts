@@ -2153,6 +2153,11 @@ See https://biomejs.dev/linter/rules/no-excessive-lines-per-file
 	 */
 	noExcessiveLinesPerFile?: NoExcessiveLinesPerFileConfiguration;
 	/**
+	* Enforce a maximum depth that callbacks can be nested.
+See https://biomejs.dev/linter/rules/no-excessive-nested-callbacks 
+	 */
+	noExcessiveNestedCallbacks?: NoExcessiveNestedCallbacksConfiguration;
+	/**
 	* Limit the number of classes in a selector.
 See https://biomejs.dev/linter/rules/no-excessive-selector-classes 
 	 */
@@ -4323,6 +4328,9 @@ export type NoExcessiveClassesPerFileConfiguration =
 export type NoExcessiveLinesPerFileConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExcessiveLinesPerFileOptions;
+export type NoExcessiveNestedCallbacksConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoExcessiveNestedCallbacksOptions;
 export type NoExcessiveSelectorClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExcessiveSelectorClassesOptions;
@@ -6090,6 +6098,10 @@ export interface RuleWithNoExcessiveLinesPerFileOptions {
 	level: RulePlainConfiguration;
 	options?: NoExcessiveLinesPerFileOptions;
 }
+export interface RuleWithNoExcessiveNestedCallbacksOptions {
+	level: RulePlainConfiguration;
+	options?: NoExcessiveNestedCallbacksOptions;
+}
 export interface RuleWithNoExcessiveSelectorClassesOptions {
 	level: RulePlainConfiguration;
 	options?: NoExcessiveSelectorClassesOptions;
@@ -7838,6 +7850,12 @@ export interface NoExcessiveLinesPerFileOptions {
 	 */
 	skipBlankLines?: boolean;
 }
+export interface NoExcessiveNestedCallbacksOptions {
+	/**
+	 * Maximum callback nesting depth allowed (default: 5)
+	 */
+	max?: number;
+}
 export interface NoExcessiveSelectorClassesOptions {
 	/**
 	* The maximum number of class selectors allowed in a single selector.
@@ -9066,6 +9084,7 @@ export type Category =
 	| "lint/nursery/noEqualsToNull"
 	| "lint/nursery/noExcessiveClassesPerFile"
 	| "lint/nursery/noExcessiveLinesPerFile"
+	| "lint/nursery/noExcessiveNestedCallbacks"
 	| "lint/nursery/noExcessiveSelectorClasses"
 	| "lint/nursery/noFloatingClasses"
 	| "lint/nursery/noFloatingPromises"
@@ -9080,8 +9099,8 @@ export type Category =
 	| "lint/nursery/noJsxNamespace"
 	| "lint/nursery/noJsxPropsBind"
 	| "lint/nursery/noLeakedRender"
-	| "lint/nursery/noMisleadingReturnType"
 	| "lint/nursery/noLoopFunc"
+	| "lint/nursery/noMisleadingReturnType"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noMultiAssign"
@@ -9099,8 +9118,8 @@ export type Category =
 	| "lint/nursery/noPlaywrightWaitForSelector"
 	| "lint/nursery/noPlaywrightWaitForTimeout"
 	| "lint/nursery/noProto"
-	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeDeepImports"
+	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
 	| "lint/nursery/noReactStringRefs"
 	| "lint/nursery/noRedundantDefaultExport"
@@ -9137,8 +9156,8 @@ export type Category =
 	| "lint/nursery/useConsistentTestIt"
 	| "lint/nursery/useDestructuring"
 	| "lint/nursery/useDisposables"
-	| "lint/nursery/useDomQuerySelector"
 	| "lint/nursery/useDomNodeTextContent"
+	| "lint/nursery/useDomQuerySelector"
 	| "lint/nursery/useErrorCause"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExpect"

@@ -644,6 +644,20 @@ fn migrate_eslint_rule(
         eslint_eslint::Rule::Any(name, severity) => {
             let _ = migrate_eslint_any_rule(rules, &name, severity, opts, results);
         }
+        eslint_eslint::Rule::MaxNestedCallbacks(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                let group = rules.nursery.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    group.no_excessive_nested_callbacks =
+                        Some(biome_config::RuleConfiguration::WithOptions(
+                            biome_config::RuleWithOptions {
+                                level: conf.severity().into(),
+                                options: conf.option_or_default().into(),
+                            },
+                        ));
+                }
+            }
+        }
         eslint_eslint::Rule::NoConsole(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
                 && let eslint_eslint::RuleConf::Option(severity, rule_options) = conf

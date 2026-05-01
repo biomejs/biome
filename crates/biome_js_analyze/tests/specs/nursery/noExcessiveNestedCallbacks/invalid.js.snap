@@ -1,0 +1,345 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+foo1(function () {
+    foo2(function () {
+        foo3(function () {
+            foo4(function () {
+                foo5(function () {
+                    foo6(function () {
+                        // Too deeply nested.
+                    });
+                });
+            });
+        });
+    });
+});
+
+foo1(() => {
+    foo2(() => {
+        foo3(() => {
+            foo4(() => {
+                foo5(() => {
+                    foo6(() => {
+                        // Too deeply nested.
+                    });
+                });
+            });
+        });
+    });
+});
+
+bar1(() => {
+    bar2(() => {
+        bar3(() => {
+            bar4(() => {
+                bar5(() => {
+                    bar6(() => {
+                        bar7(() => {
+                            // Too deeply nested.
+                            // only bar6 should be reported, not bar7.
+                        });
+                    });
+                });
+            });
+        });
+    });
+});
+
+baz1(function () {
+    baz2(() => {
+        baz3(function () {
+            baz4(() => {
+                baz5(function () {
+                    baz6(() => {
+                        // Too deeply nested with mixed callback forms.
+                    });
+                });
+            });
+        });
+    });
+});
+
+qux1(() => {
+    qux2(() => {
+        qux3(() => {
+            qux4(() => {
+                qux5(() => {
+                    qux6(() => {
+                        // First too-deep sibling callback.
+                    });
+
+                    qux7(function () {
+                        // Second too-deep sibling callback at the same level.
+                    });
+                });
+            });
+        });
+    });
+});
+
+declaredWrapper1(function () {
+    function declaredNestedCallbacks() {
+        declaredWrapper2(() => {
+            declaredWrapper3(function () {
+                declaredWrapper4(() => {
+                    declaredWrapper5(function () {
+                        declaredWrapper6(() => {
+                            // Too deeply nested inside a function declaration.
+                        });
+                    });
+                });
+            });
+        });
+    }
+
+    declaredNestedCallbacks();
+});
+
+declaredSibling1(() => {
+    function declaredSiblingCallbacks() {
+        declaredSibling2(() => {
+            declaredSibling3(() => {
+                declaredSibling4(() => {
+                    declaredSibling5(() => {
+                        declaredSibling6(() => {
+                            // First too-deep sibling inside a function declaration.
+                        });
+
+                        declaredSibling7(function () {
+                            // Second too-deep sibling inside a function declaration.
+                        });
+                    });
+                });
+            });
+        });
+    }
+
+    declaredSiblingCallbacks();
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:7:26 lint/nursery/noExcessiveNestedCallbacks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This callback is nested too deeply.
+  
+     5 │             foo4(function () {
+     6 │                 foo5(function () {
+   > 7 │                     foo6(function () {
+       │                          ^^^^^^^^^^^^^
+   > 8 │                         // Too deeply nested.
+   > 9 │                     });
+       │                     ^
+    10 │                 });
+    11 │             });
+  
+  i Callbacks nested 6 levels deep are harder to read and maintain. The configured maximum is 5.
+  
+  i Extract some callbacks into named functions to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:26 lint/nursery/noExcessiveNestedCallbacks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This callback is nested too deeply.
+  
+    19 │             foo4(() => {
+    20 │                 foo5(() => {
+  > 21 │                     foo6(() => {
+       │                          ^^^^^^^
+  > 22 │                         // Too deeply nested.
+  > 23 │                     });
+       │                     ^
+    24 │                 });
+    25 │             });
+  
+  i Callbacks nested 6 levels deep are harder to read and maintain. The configured maximum is 5.
+  
+  i Extract some callbacks into named functions to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:26 lint/nursery/noExcessiveNestedCallbacks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This callback is nested too deeply.
+  
+    33 │             bar4(() => {
+    34 │                 bar5(() => {
+  > 35 │                     bar6(() => {
+       │                          ^^^^^^^
+  > 36 │                         bar7(() => {
+  > 37 │                             // Too deeply nested.
+  > 38 │                             // only bar6 should be reported, not bar7.
+  > 39 │                         });
+  > 40 │                     });
+       │                     ^
+    41 │                 });
+    42 │             });
+  
+  i Callbacks nested 6 levels deep are harder to read and maintain. The configured maximum is 5.
+  
+  i Extract some callbacks into named functions to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:52:26 lint/nursery/noExcessiveNestedCallbacks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This callback is nested too deeply.
+  
+    50 │             baz4(() => {
+    51 │                 baz5(function () {
+  > 52 │                     baz6(() => {
+       │                          ^^^^^^^
+  > 53 │                         // Too deeply nested with mixed callback forms.
+  > 54 │                     });
+       │                     ^
+    55 │                 });
+    56 │             });
+  
+  i Callbacks nested 6 levels deep are harder to read and maintain. The configured maximum is 5.
+  
+  i Extract some callbacks into named functions to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:66:26 lint/nursery/noExcessiveNestedCallbacks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This callback is nested too deeply.
+  
+    64 │             qux4(() => {
+    65 │                 qux5(() => {
+  > 66 │                     qux6(() => {
+       │                          ^^^^^^^
+  > 67 │                         // First too-deep sibling callback.
+  > 68 │                     });
+       │                     ^
+    69 │ 
+    70 │                     qux7(function () {
+  
+  i Callbacks nested 6 levels deep are harder to read and maintain. The configured maximum is 5.
+  
+  i Extract some callbacks into named functions to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:70:26 lint/nursery/noExcessiveNestedCallbacks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This callback is nested too deeply.
+  
+    68 │                     });
+    69 │ 
+  > 70 │                     qux7(function () {
+       │                          ^^^^^^^^^^^^^
+  > 71 │                         // Second too-deep sibling callback at the same level.
+  > 72 │                     });
+       │                     ^
+    73 │                 });
+    74 │             });
+  
+  i Callbacks nested 6 levels deep are harder to read and maintain. The configured maximum is 5.
+  
+  i Extract some callbacks into named functions to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:85:42 lint/nursery/noExcessiveNestedCallbacks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This callback is nested too deeply.
+  
+    83 │                 declaredWrapper4(() => {
+    84 │                     declaredWrapper5(function () {
+  > 85 │                         declaredWrapper6(() => {
+       │                                          ^^^^^^^
+  > 86 │                             // Too deeply nested inside a function declaration.
+  > 87 │                         });
+       │                         ^
+    88 │                     });
+    89 │                 });
+  
+  i Callbacks nested 6 levels deep are harder to read and maintain. The configured maximum is 5.
+  
+  i Extract some callbacks into named functions to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:103:42 lint/nursery/noExcessiveNestedCallbacks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This callback is nested too deeply.
+  
+    101 │                 declaredSibling4(() => {
+    102 │                     declaredSibling5(() => {
+  > 103 │                         declaredSibling6(() => {
+        │                                          ^^^^^^^
+  > 104 │                             // First too-deep sibling inside a function declaration.
+  > 105 │                         });
+        │                         ^
+    106 │ 
+    107 │                         declaredSibling7(function () {
+  
+  i Callbacks nested 6 levels deep are harder to read and maintain. The configured maximum is 5.
+  
+  i Extract some callbacks into named functions to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:107:42 lint/nursery/noExcessiveNestedCallbacks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This callback is nested too deeply.
+  
+    105 │                         });
+    106 │ 
+  > 107 │                         declaredSibling7(function () {
+        │                                          ^^^^^^^^^^^^^
+  > 108 │                             // Second too-deep sibling inside a function declaration.
+  > 109 │                         });
+        │                         ^
+    110 │                     });
+    111 │                 });
+  
+  i Callbacks nested 6 levels deep are harder to read and maintain. The configured maximum is 5.
+  
+  i Extract some callbacks into named functions to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

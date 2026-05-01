@@ -535,6 +535,11 @@ impl Deserializable for Rules {
                     };
                     match rule_name.text() {
                         // Eslint rules with options that we handle
+                        "max-nested-callbacks" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::MaxNestedCallbacks(conf));
+                            }
+                        }
                         "no-console" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::NoConsole(conf));
@@ -617,6 +622,59 @@ impl From<NoConsoleOptions> for biome_rule_options::no_console::NoConsoleOptions
     }
 }
 
+#[derive(Debug, Default)]
+pub(crate) struct MaxNestedCallbacksOptions {
+    max: Option<u8>,
+}
+
+impl MaxNestedCallbacksOptions {
+    const ESLINT_DEFAULT_MAX: u8 = 10;
+}
+
+impl Deserializable for MaxNestedCallbacksOptions {
+    fn deserialize(
+        ctx: &mut impl DeserializationContext,
+        value: &impl DeserializableValue,
+        name: &str,
+    ) -> Option<Self> {
+        if value.visitable_type()? == DeserializableType::Number {
+            return Some(Self {
+                max: Deserializable::deserialize(ctx, value, name),
+            });
+        }
+
+        MaxNestedCallbacksObjectOptions::deserialize(ctx, value, name).map(Into::into)
+    }
+}
+
+#[derive(Debug, Default, Deserializable)]
+pub(crate) struct MaxNestedCallbacksObjectOptions {
+    max: Option<u8>,
+    maximum: Option<u8>,
+}
+
+impl From<MaxNestedCallbacksObjectOptions> for MaxNestedCallbacksOptions {
+    fn from(value: MaxNestedCallbacksObjectOptions) -> Self {
+        Self {
+            max: value.max.or(value.maximum),
+        }
+    }
+}
+
+impl From<MaxNestedCallbacksOptions>
+    for biome_rule_options::no_excessive_nested_callbacks::NoExcessiveNestedCallbacksOptions
+{
+    fn from(value: MaxNestedCallbacksOptions) -> Self {
+        Self {
+            max: Some(
+                value
+                    .max
+                    .unwrap_or(MaxNestedCallbacksOptions::ESLINT_DEFAULT_MAX),
+            ),
+        }
+    }
+}
+
 #[derive(Debug)]
 pub(crate) enum NoRestrictedGlobal {
     Plain(String),
@@ -662,6 +720,7 @@ pub(crate) enum Rule {
     Any(Cow<'static, str>, Severity),
     // Eslint rules with its options
     // We use this to configure equivalent Bione's rules.
+    MaxNestedCallbacks(RuleConf<MaxNestedCallbacksOptions>),
     NoConsole(RuleConf<Box<NoConsoleOptions>>),
     NoRestrictedGlobals(RuleConf<Box<NoRestrictedGlobal>>),
     // Eslint plugins
@@ -681,6 +740,7 @@ impl Rule {
     pub(crate) fn name(&self) -> Cow<'static, str> {
         match self {
             Self::Any(name, _) => name.clone(),
+            Self::MaxNestedCallbacks(_) => Cow::Borrowed("max-nested-callbacks"),
             Self::NoConsole(_) => Cow::Borrowed("no-console"),
             Self::NoRestrictedGlobals(_) => Cow::Borrowed("no-restricted-globals"),
             Self::JestConsistentTestIt(_) => Cow::Borrowed("jest/consistent-test-it"),

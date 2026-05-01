@@ -3687,6 +3687,25 @@
 			},
 			"additionalProperties": false
 		},
+		"NoExcessiveNestedCallbacksConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoExcessiveNestedCallbacksOptions" }
+			]
+		},
+		"NoExcessiveNestedCallbacksOptions": {
+			"type": "object",
+			"properties": {
+				"max": {
+					"description": "Maximum callback nesting depth allowed (default: 5)",
+					"type": ["integer", "null"],
+					"format": "uint8",
+					"maximum": 255,
+					"minimum": 0
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoExcessiveNestedTestSuitesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6218,6 +6237,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noExcessiveNestedCallbacks": {
+					"description": "Enforce a maximum depth that callbacks can be nested.\nSee https://biomejs.dev/linter/rules/no-excessive-nested-callbacks",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoExcessiveNestedCallbacksConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noExcessiveSelectorClasses": {
 					"description": "Limit the number of classes in a selector.\nSee https://biomejs.dev/linter/rules/no-excessive-selector-classes",
 					"anyOf": [
@@ -8490,6 +8516,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoExcessiveLinesPerFunctionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoExcessiveNestedCallbacksOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoExcessiveNestedCallbacksOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
