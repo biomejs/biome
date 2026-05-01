@@ -31,7 +31,10 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
             for rule in model.rules() {
                 for selector in rule.selectors() {
                     let node = selector.node(&model.root());
-                    for class_sel in node.syntax().descendants().filter_map(CssClassSelector::cast)
+                    for class_sel in node
+                        .syntax()
+                        .descendants()
+                        .filter_map(CssClassSelector::cast)
                     {
                         if let Ok(name) = class_sel.name()
                             && name.syntax().text_trimmed().to_string() == *class_name
