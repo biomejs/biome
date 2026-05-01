@@ -319,7 +319,7 @@ impl ModuleGraph {
 
             step.css_classes
                 .iter()
-                .filter_map(|(token, range)| {
+                .filter_map(|(range, token)| {
                     if token.text() == class_name {
                         Some(*range)
                     } else {
@@ -333,7 +333,7 @@ impl ModuleGraph {
         for step in self.traverse_import_tree_for_classes(path) {
             step.css_classes
                 .iter()
-                .filter_map(|(token, range)| {
+                .filter_map(|(range, token)| {
                     if token.text() == class_name {
                         Some(*range)
                     } else {
@@ -508,7 +508,7 @@ impl ModuleGraph {
             let all_inline_classes: IndexMap<_, _> = html_info
                 .style_classes
                 .iter()
-                .map(|c| (c.name.clone(), c.range))
+                .map(|c| (c.range, c.name.clone()))
                 .collect();
             if !all_inline_classes.is_empty() {
                 inline_steps.push(CssClassStep {
@@ -639,7 +639,7 @@ impl ModuleGraph {
                 if let Some(path) = import_path.as_path()
                     && let Some(css_info) = self.css_module_info_for_path(path)
                 {
-                    for (class, _range) in css_info.classes.iter() {
+                    for class in css_info.classes.values() {
                         let class_name = class.text().to_string();
                         available_classes.insert(class_name.clone());
                     }
@@ -698,7 +698,7 @@ impl ModuleGraph {
                                 if let Some(path) = import_path.as_path()
                                     && let Some(css_info) = self.css_module_info_for_path(path)
                                 {
-                                    for (class, _range) in css_info.classes.iter() {
+                                    for class in css_info.classes.values() {
                                         let class_name = class.text().to_string();
                                         available_classes.insert(class_name.clone());
                                     }
@@ -727,7 +727,7 @@ impl ModuleGraph {
                                 if let Some(path) = stylesheet_path.as_path()
                                     && let Some(css_info) = self.css_module_info_for_path(path)
                                 {
-                                    for (class, _range) in css_info.classes.iter() {
+                                    for class in css_info.classes.values() {
                                         let class_name = class.text().to_string();
                                         available_classes.insert(class_name.clone());
                                     }

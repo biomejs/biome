@@ -13,7 +13,7 @@ pub struct CssClassStep {
     /// The path of the CSS file discovered in this step
     pub css_path: Utf8PathBuf,
     /// The CSS class names and their selector ranges found in this CSS file
-    pub css_classes: IndexMap<TokenText, TextRange>,
+    pub css_classes: IndexMap<TextRange, TokenText>,
 }
 
 /// Rich diagnostic information including component chain.

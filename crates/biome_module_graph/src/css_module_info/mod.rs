@@ -113,7 +113,7 @@ impl Deref for CssModuleInfo {
 }
 
 impl CssModuleInfo {
-    pub(crate) fn new(imports: CssImports, classes: IndexMap<TokenText, TextRange>) -> Self {
+    pub(crate) fn new(imports: CssImports, classes: IndexMap<TextRange, TokenText>) -> Self {
         let info = CssModuleInfoInner { imports, classes };
         Self(Arc::new(info))
     }
@@ -129,7 +129,7 @@ impl CssModuleInfo {
             classes: self
                 .0
                 .classes
-                .keys()
+                .values()
                 .map(|token| token.text().to_string())
                 .collect(),
         }
@@ -154,7 +154,7 @@ pub struct CssModuleInfoInner {
     ///
     /// Keys are class names (e.g., "header" from `.header`), values are the
     /// `TextRange` of the class selector in the source file.
-    pub classes: IndexMap<TokenText, TextRange>,
+    pub classes: IndexMap<TextRange, TokenText>,
 }
 
 #[derive(Debug, Default, Clone)]

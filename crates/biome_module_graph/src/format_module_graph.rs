@@ -644,7 +644,11 @@ impl Format<FormatTypeContext> for crate::css_module_info::CssModuleInfoInner {
         f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
     ) -> FormatResult<()> {
         let classes_section = format_with(|f| {
-            let mut sorted: Vec<_> = self.classes.keys().map(|t| t.text().to_string()).collect();
+            let mut sorted: Vec<_> = self
+                .classes
+                .values()
+                .map(|t| t.text().to_string())
+                .collect();
             sorted.sort();
             if sorted.is_empty() {
                 write!(f, [token("No classes")])

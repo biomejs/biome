@@ -31,7 +31,7 @@ impl<'a> CssModuleVisitor<'a> {
 
     pub(crate) fn visit(self) -> CssModuleInfo {
         let mut imports = CssImports::default();
-        let mut classes: IndexMap<TokenText, TextRange> = IndexMap::default();
+        let mut classes: IndexMap<TextRange, TokenText> = IndexMap::default();
         // Tracks nesting depth inside `:global(...)` pseudo-class selectors.
         // Class selectors inside `:global()` are globally scoped and cannot be
         // statically traced to specific `class="..."` references, so we skip them.
@@ -72,15 +72,15 @@ impl<'a> CssModuleVisitor<'a> {
     /// `TokenText` into the set.
     ///
     /// Each token represents a single class name (e.g., "header" from `.header`).
-    fn visit_class_selector(node: CssClassSelector, classes: &mut IndexMap<TokenText, TextRange>) {
+    fn visit_class_selector(node: CssClassSelector, classes: &mut IndexMap<TextRange, TokenText>) {
         if let Ok(name) = node.name()
             && let Some(name) = name.as_css_custom_identifier()
             && let Ok(token) = name.value_token()
         {
             // Store the range of the class name token (without the dot)
             classes
-                .entry(token.token_text_trimmed())
-                .or_insert_with(|| token.text_trimmed_range());
+                .entry(token.text_trimmed_range())
+                .or_insert_with(|| token.token_text_trimmed());
         }
     }
 
