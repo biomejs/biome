@@ -120,11 +120,10 @@ impl Rule for UseVueValidVFor {
             return None;
         }
 
-        let iteration_bindings = collect_iteration_bindings(&v_for_value);
         let element = enclosing_tag_element(directive)?;
 
-        check_key_requirement(&element, &iteration_bindings)
-            .or_else(|| check_template_child_keys(directive, &element, &iteration_bindings))
+        check_key_requirement(&element, &v_for_value)
+            .or_else(|| check_template_child_keys(directive, &element, &v_for_value))
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -244,18 +243,17 @@ fn validate_secondary_binding(
 }
 
 /// "Iteration bindings" are the bindings introduced by the v-for directive.
-fn collect_iteration_bindings(value: &VueVForValue) -> Vec<TokenText> {
-    let Ok(binding) = value.binding() else {
-        return Vec::new();
-    };
-
-    binding
-        .syntax()
-        .descendants()
+fn collect_iteration_bindings(
+    value: &VueVForValue,
+) -> impl Iterator<Item = TokenText> + '_ {
+    value
+        .binding()
+        .ok()
+        .into_iter()
+        .flat_map(|binding| binding.syntax().descendants())
         .filter_map(VueVForIdentifierBinding::cast)
         .filter_map(|binding| binding.name_token().ok())
         .map(|token| token.token_text_trimmed())
-        .collect()
 }
 
 fn enclosing_tag_element(directive: &VueDirective) -> Option<AnyHtmlTagElement> {
@@ -268,10 +266,10 @@ fn enclosing_tag_element(directive: &VueDirective) -> Option<AnyHtmlTagElement> 
 
 fn check_key_requirement(
     element: &AnyHtmlTagElement,
-    iteration_bindings: &[TokenText],
+    iteration_value: &VueVForValue,
 ) -> Option<ViolationKind> {
     if let Some(key_directive) = element.find_vue_binding("key") {
-        if key_directive_uses_iteration_variables(&key_directive, iteration_bindings)? {
+        if key_directive_uses_iteration_variables(&key_directive, iteration_value)? {
             return None;
         }
 
@@ -293,7 +291,7 @@ fn check_key_requirement(
 fn check_template_child_keys(
     directive: &VueDirective,
     element: &AnyHtmlTagElement,
-    iteration_bindings: &[TokenText],
+    iteration_value: &VueVForValue,
 ) -> Option<ViolationKind> {
     let tag_name = element.tag_name()?;
     if tag_name.text() != "template" {
@@ -321,11 +319,11 @@ fn check_template_child_keys(
             _ => continue,
         };
 
-        if child_uses_parent_binding_in_v_for(&child, iteration_bindings)? {
+        if child_uses_parent_binding_in_v_for(&child, iteration_value)? {
             continue;
         }
 
-        if let Some(violation) = check_key_requirement(&child, iteration_bindings) {
+        if let Some(violation) = check_key_requirement(&child, iteration_value) {
             return Some(violation);
         }
     }
@@ -335,7 +333,7 @@ fn check_template_child_keys(
 
 fn child_uses_parent_binding_in_v_for(
     element: &AnyHtmlTagElement,
-    iteration_bindings: &[TokenText],
+    iteration_value: &VueVForValue,
 ) -> Option<bool> {
     let Some(v_for) = find_v_for_directive(element) else {
         return Some(false);
@@ -349,7 +347,7 @@ fn child_uses_parent_binding_in_v_for(
     let expression = value.expression().ok()?;
     let text = expression.string_value()?;
 
-    Some(uses_iteration_variables(text.text(), iteration_bindings))
+    Some(uses_iteration_variables(text.text(), iteration_value))
 }
 
 fn find_v_for_directive(element: &AnyHtmlTagElement) -> Option<VueDirective> {
@@ -369,7 +367,7 @@ fn find_v_for_directive(element: &AnyHtmlTagElement) -> Option<VueDirective> {
 
 fn key_directive_uses_iteration_variables(
     directive: &AnyVueDirective,
-    iteration_bindings: &[TokenText],
+    iteration_value: &VueVForValue,
 ) -> Option<bool> {
     let initializer = match directive {
         AnyVueDirective::VueDirective(directive) => directive.initializer(),
@@ -379,10 +377,7 @@ fn key_directive_uses_iteration_variables(
 
     let expression = initializer.and_then(key_expression)?;
 
-    Some(uses_iteration_variables(
-        expression.text(),
-        iteration_bindings,
-    ))
+    Some(uses_iteration_variables(expression.text(), iteration_value))
 }
 
 fn key_expression(initializer: HtmlAttributeInitializerClause) -> Option<biome_rowan::Text> {
@@ -394,9 +389,8 @@ fn key_expression(initializer: HtmlAttributeInitializerClause) -> Option<biome_r
     }
 }
 
-fn uses_iteration_variables(expression: &str, iteration_bindings: &[TokenText]) -> bool {
-    iteration_bindings
-        .iter()
+fn uses_iteration_variables(expression: &str, iteration_value: &VueVForValue) -> bool {
+    collect_iteration_bindings(iteration_value)
         .any(|binding| contains_identifier(expression, binding.text()))
 }
 
