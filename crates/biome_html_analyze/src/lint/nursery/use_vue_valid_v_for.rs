@@ -352,7 +352,12 @@ fn child_uses_parent_binding_in_v_for(
 
 fn find_v_for_directive(element: &AnyHtmlTagElement) -> Option<VueDirective> {
     for attr in element.attributes() {
-        let directive = attr.as_any_vue_directive()?.as_vue_directive()?;
+        let Some(directive) = attr
+            .as_any_vue_directive()
+            .and_then(|directive| directive.as_vue_directive())
+        else {
+            continue;
+        };
 
         if directive
             .name_token()
