@@ -59,6 +59,9 @@ declare_lint_rule! {
     /// </template>
     /// ```
     ///
+    /// Related rules:
+    /// - [`useVueVForKey`](https://biomejs.dev/linter/rules/use-vue-v-for-key/)
+    ///
     pub UseVueValidVFor {
         version: "next",
         name: "useVueValidVFor",
