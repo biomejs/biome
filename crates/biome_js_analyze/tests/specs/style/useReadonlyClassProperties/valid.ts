@@ -1,5 +1,7 @@
 /* should not generate diagnostics */
 
+import _ from "lodash";
+
 function ignore() {
 }
 
@@ -684,4 +686,12 @@ class TesAssignmentInNestedCallback {
 			},
 		});
 	}
+}
+
+export default class Example {
+	private notReadonlyMember = "";
+
+	private readonly someDebouncedFunc = _.debounce(() => {
+		this.notReadonlyMember = "new value";
+	}, 50);
 }

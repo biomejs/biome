@@ -215,6 +215,8 @@ fn class_member_references(list: &JsClassMemberList) -> ClassMemberReferences {
                         return collect_class_property_reads_from_static_member(
                             static_member_expression,
                         );
+                    } else {
+                        return collect_references_from_property_initializer(&expression);
                     }
                 };
                 None
@@ -587,6 +589,142 @@ fn collect_references_from_body(
     visit_references_in_body(member, &scoped_this_references, &mut writes, &mut reads);
 
     Some(ClassMemberReferences { reads, writes })
+}
+
+/// Collects references to class members from arrow functions nested in a class property initializer.
+///
+/// Arrow functions capture the class initializer's lexical `this`, while normal functions establish
+/// their own `this`, so this intentionally skips non-arrow function bodies.
+fn collect_references_from_property_initializer(
+    expression: &AnyJsExpression,
+) -> Option<ClassMemberReferences> {
+    let mut reads = FxHashSet::default();
+    let mut writes = FxHashSet::default();
+    let mut skipped_ranges = vec![];
+
+    for event in expression.syntax().preorder() {
+        match event {
+            WalkEvent::Enter(node) => {
+                if skipped_ranges
+                    .iter()
+                    .any(|range: &TextRange| range.contains_range(node.text_range()))
+                {
+                    continue;
+                }
+
+                if let Some(arrow_function) = JsArrowFunctionExpression::cast_ref(&node) {
+                    collect_references_from_arrow_function(
+                        &arrow_function,
+                        &[],
+                        &mut writes,
+                        &mut reads,
+                    );
+                    skipped_ranges.push(node.text_range());
+                    continue;
+                }
+
+                if matches!(
+                    node.kind(),
+                    JsSyntaxKind::JS_CLASS_EXPRESSION
+                        | JsSyntaxKind::JS_CLASS_DECLARATION
+                        | JsSyntaxKind::JS_CLASS_EXPORT_DEFAULT_DECLARATION
+                        | JsSyntaxKind::JS_FUNCTION_EXPRESSION
+                        | JsSyntaxKind::JS_FUNCTION_DECLARATION
+                        | JsSyntaxKind::JS_FUNCTION_EXPORT_DEFAULT_DECLARATION
+                        | JsSyntaxKind::JS_FUNCTION_BODY
+                ) {
+                    skipped_ranges.push(node.text_range());
+                }
+            }
+            WalkEvent::Leave(node) => {
+                if let Some(last) = skipped_ranges.last()
+                    && *last == node.text_range()
+                {
+                    skipped_ranges.pop();
+                }
+            }
+        }
+    }
+
+    Some(ClassMemberReferences { reads, writes })
+}
+
+fn collect_references_from_arrow_function(
+    arrow_function: &JsArrowFunctionExpression,
+    inherited_this_references: &[ClassMemberReference],
+    writes: &mut FxHashSet<ClassMemberReference>,
+    reads: &mut FxHashSet<ClassMemberReference>,
+) {
+    let Some(body) = arrow_function
+        .body()
+        .ok()
+        .and_then(|body| body.as_js_function_body().cloned())
+    else {
+        return;
+    };
+
+    let mut this_references = FxHashSet::default();
+    this_references.extend(inherited_this_references.iter().cloned());
+    this_references.extend(ThisScopeReferences::new(&body).local_this_references);
+
+    let current_scope = FunctionThisReferences {
+        scope: body.clone(),
+        this_references,
+    };
+    visit_references_in_body(
+        arrow_function.syntax(),
+        std::slice::from_ref(&current_scope),
+        writes,
+        reads,
+    );
+
+    let inherited_this_references: Vec<_> = current_scope.this_references.iter().cloned().collect();
+    let mut skipped_ranges = vec![];
+
+    for event in body.syntax().preorder() {
+        match event {
+            WalkEvent::Enter(node) => {
+                if skipped_ranges
+                    .iter()
+                    .any(|range: &TextRange| range.contains_range(node.text_range()))
+                {
+                    continue;
+                }
+
+                if let Some(nested_arrow_function) = JsArrowFunctionExpression::cast_ref(&node) {
+                    collect_references_from_arrow_function(
+                        &nested_arrow_function,
+                        &inherited_this_references,
+                        writes,
+                        reads,
+                    );
+                    skipped_ranges.push(node.text_range());
+                    continue;
+                }
+
+                if matches!(
+                    node.kind(),
+                    JsSyntaxKind::JS_CLASS_EXPRESSION
+                        | JsSyntaxKind::JS_CLASS_DECLARATION
+                        | JsSyntaxKind::JS_CLASS_EXPORT_DEFAULT_DECLARATION
+                        | JsSyntaxKind::JS_FUNCTION_EXPRESSION
+                        | JsSyntaxKind::JS_FUNCTION_DECLARATION
+                        | JsSyntaxKind::JS_FUNCTION_EXPORT_DEFAULT_DECLARATION
+                ) || (node.kind() == JsSyntaxKind::JS_FUNCTION_BODY
+                    && node.key() != body.syntax().key())
+                {
+                    skipped_ranges.push(node.text_range());
+                }
+            }
+            WalkEvent::Leave(node) => {
+                if let Some(last) = skipped_ranges.last()
+                    && *last == node.text_range()
+                {
+                    skipped_ranges.pop();
+                }
+            }
+        }
+    }
 }
 
 /// Traverses a JavaScript method or initializer body to collect references
@@ -1001,6 +1139,49 @@ mod tests {
             .expect("No object binding pattern found")
             .syntax()
             .clone()
+    }
+
+    #[test]
+    fn test_class_property_initializer_arrow_callback_writes() {
+        let parse = parse_ts(
+            r#"
+            import _ from "lodash";
+
+            class Example {
+                private notReadonlyMember = "";
+
+                private readonly someDebouncedFunc = _.debounce(() => {
+                    this.notReadonlyMember = "new value";
+                }, 50);
+
+                private functionCallbackMember = "";
+
+                private readonly functionCallback = debounce(function () {
+                    this.functionCallbackMember = "new value";
+                });
+            }
+        "#,
+        );
+        let members = parse
+            .syntax()
+            .descendants()
+            .find_map(JsClassMemberList::cast)
+            .expect("No class member list found");
+
+        let references = class_member_references(&members);
+
+        assert_writes(
+            &references.writes,
+            &[("notReadonlyMember", AccessKind::Write)],
+            "class property initializer arrow callback",
+        );
+        assert!(
+            references
+                .writes
+                .iter()
+                .all(|reference| reference.name.text() != "functionCallbackMember"),
+            "normal function callbacks should not use the class initializer's lexical this"
+        );
     }
 
     #[test]
