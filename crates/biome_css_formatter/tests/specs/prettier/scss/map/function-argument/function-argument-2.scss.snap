@@ -33,7 +33,7 @@ $display-breakpoints: map-deep-merge(
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,18 +1,22 @@
+@@ -1,13 +1,16 @@
  $display-breakpoints: map-deep-merge(
    (
 -    "sm-only":
@@ -58,13 +58,6 @@ $display-breakpoints: map-deep-merge(
    ),
    $display-breakpoints
  );
- 
--@each $name, $hue in $hues {
-+@each $name,
-+$hue in $hues {
-   $map: map.merge(
-     $map,
-     (
 ```
 
 # Output
@@ -87,8 +80,7 @@ $display-breakpoints: map-deep-merge(
   $display-breakpoints
 );
 
-@each $name,
-$hue in $hues {
+@each $name, $hue in $hues {
   $map: map.merge(
     $map,
     (

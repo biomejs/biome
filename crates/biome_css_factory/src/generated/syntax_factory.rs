@@ -6586,7 +6586,7 @@ impl SyntaxFactory for CssSyntaxFactory {
             }
             SCSS_EACH_AT_RULE => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
                     && element.kind() == T![each]
@@ -6595,6 +6595,32 @@ impl SyntaxFactory for CssSyntaxFactory {
                     current_element = elements.next();
                 }
                 slots.next_slot();
+                if let Some(element) = &current_element
+                    && ScssEachHeader::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && CssDeclarationOrRuleBlock::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SCSS_EACH_AT_RULE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SCSS_EACH_AT_RULE, children)
+            }
+            SCSS_EACH_HEADER => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
                 if let Some(element) = &current_element
                     && ScssEachBindingList::can_cast(element.kind())
                 {
@@ -6616,20 +6642,13 @@ impl SyntaxFactory for CssSyntaxFactory {
                     current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element
-                    && CssDeclarationOrRuleBlock::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        SCSS_EACH_AT_RULE.to_bogus(),
+                        SCSS_EACH_HEADER.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(SCSS_EACH_AT_RULE, children)
+                slots.into_node(SCSS_EACH_HEADER, children)
             }
             SCSS_ELSE_CLAUSE => {
                 let mut elements = (&children).into_iter();

@@ -7,11 +7,11 @@ use crate::utils::scss_include_comments::{
     place_separated_list_comment,
 };
 use biome_css_syntax::{
-    AnyCssDeclarationName, AnyCssRoot, AnyScssExpressionItem, CssComplexSelector,
-    CssDeclarationOrRuleBlock, CssFunction, CssGenericProperty, CssIdentifier, CssLanguage,
-    CssSyntaxKind, ScssAtRootAtRule, ScssAtRootSelector, ScssEachAtRule, ScssExpression,
-    ScssExpressionItemList, ScssIfAtRule, ScssListExpression, ScssListExpressionElement,
-    ScssMapExpression, ScssMapExpressionPair, T, TextLen, TextSize,
+    AnyCssDeclarationName, AnyCssRoot, CssComplexSelector, CssDeclarationOrRuleBlock, CssFunction,
+    CssGenericProperty, CssIdentifier, CssLanguage, CssSyntaxKind, ScssAtRootAtRule,
+    ScssAtRootSelector, ScssEachHeader, ScssExpression, ScssExpressionItemList, ScssIfAtRule,
+    ScssListExpression, ScssListExpressionElement, ScssMapExpression, ScssMapExpressionPair, T,
+    TextLen, TextSize,
 };
 use biome_diagnostics::category;
 use biome_formatter::comments::{
@@ -167,7 +167,7 @@ fn handle_scss_list_trailing_separator_comment(
     place_list_trailing_separator_comment(&list_expression, &preceding_element, comment)
 }
 
-/// Keeps `@each ... in /* comment */ (a, b)` comments with the list.
+/// Keeps `@each ... in /* comment */ (a, b)` comments with the iterable.
 fn handle_scss_each_iterable_comment(
     comment: DecoratedComment<CssLanguage>,
 ) -> CommentPlacement<CssLanguage> {
@@ -178,17 +178,18 @@ fn handle_scss_each_iterable_comment(
     if !expression
         .syntax()
         .parent()
-        .is_some_and(|parent| ScssEachAtRule::can_cast(parent.kind()))
+        .is_some_and(|parent| ScssEachHeader::can_cast(parent.kind()))
     {
         return CommentPlacement::Default(comment);
     }
 
-    let Some(AnyScssExpressionItem::ScssListExpression(list)) = single_expression_item(&expression)
-    else {
+    if !single_expression_item(&expression).is_some_and(|item| {
+        item.as_scss_list_expression().is_some() || item.as_scss_map_expression().is_some()
+    }) {
         return CommentPlacement::Default(comment);
-    };
+    }
 
-    CommentPlacement::leading(list.into_syntax(), comment)
+    CommentPlacement::leading(expression.into_syntax(), comment)
 }
 
 fn handle_scss_expression_item_trailing_line_comment(

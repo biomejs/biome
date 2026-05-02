@@ -40,3 +40,27 @@ puma,sea-slug,egret,salamander{
 
 @each $animal in /* animals */ $animals{
 }
+
+@each $animal in((puma),(sea-slug),(egret),(salamander)){}
+
+@each $element,$size in(h1:20px,h2:16px,h3:14px){}
+
+@each
+$element,
+$size
+in
+(
+h1
+:
+20px
+,
+h2
+:
+16px
+,
+h3
+:
+14px
+)
+{
+}

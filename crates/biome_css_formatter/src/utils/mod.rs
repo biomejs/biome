@@ -4,6 +4,7 @@ pub(crate) mod component_value_list;
 pub(crate) mod import;
 pub(crate) mod scss_closing_comments;
 pub(crate) mod scss_context;
+pub(crate) mod scss_each;
 pub(crate) mod scss_expression;
 pub(crate) mod scss_include_comments;
 pub(crate) mod scss_keyword_argument_layout;

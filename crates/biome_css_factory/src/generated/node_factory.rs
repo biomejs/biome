@@ -3212,19 +3212,29 @@ pub fn scss_debug_at_rule(
 }
 pub fn scss_each_at_rule(
     each_token: SyntaxToken,
-    bindings: ScssEachBindingList,
-    in_token: SyntaxToken,
-    iterable: ScssExpression,
+    header: ScssEachHeader,
     block: CssDeclarationOrRuleBlock,
 ) -> ScssEachAtRule {
     ScssEachAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_EACH_AT_RULE,
         [
             Some(SyntaxElement::Token(each_token)),
+            Some(SyntaxElement::Node(header.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_each_header(
+    bindings: ScssEachBindingList,
+    in_token: SyntaxToken,
+    iterable: ScssExpression,
+) -> ScssEachHeader {
+    ScssEachHeader::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_EACH_HEADER,
+        [
             Some(SyntaxElement::Node(bindings.into_syntax())),
             Some(SyntaxElement::Token(in_token)),
             Some(SyntaxElement::Node(iterable.into_syntax())),
-            Some(SyntaxElement::Node(block.into_syntax())),
         ],
     ))
 }

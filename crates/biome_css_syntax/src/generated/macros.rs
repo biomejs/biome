@@ -976,6 +976,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::ScssEachAtRule::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::SCSS_EACH_HEADER => {
+                    let $pattern = unsafe { $crate::ScssEachHeader::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::SCSS_ELSE_CLAUSE => {
                     let $pattern = unsafe { $crate::ScssElseClause::new_unchecked(node) };
                     $body

@@ -49,6 +49,30 @@ puma,sea-slug,egret,salamander{
 @each $animal in /* animals */ $animals{
 }
 
+@each $animal in((puma),(sea-slug),(egret),(salamander)){}
+
+@each $element,$size in(h1:20px,h2:16px,h3:14px){}
+
+@each
+$element,
+$size
+in
+(
+h1
+:
+20px
+,
+h2
+:
+16px
+,
+h3
+:
+14px
+)
+{
+}
+
 ```
 
 
@@ -56,17 +80,13 @@ puma,sea-slug,egret,salamander{
 
 ```scss
 .a {
-	@each $item in $list {
+	@each $item in$list {
 		color: $item;
 	}
 }
 
 .b {
-	@each $key,
-	$value in (
-		primary: 16px,
-		secondary: 24px,
-	) {
+	@each $key, $value in(primary: 16px, secondary: 24px) {
 		font-size: $value;
 	}
 }
@@ -106,9 +126,18 @@ puma,sea-slug,egret,salamander{
 @each $animal in /* animals */ $animals {
 }
 
+@each $animal in((puma), (sea-slug), (egret), (salamander)) {
+}
+
+@each $element, $size in(h1: 20px, h2: 16px, h3: 14px) {
+}
+
+@each $element, $size in (h1: 20px, h2: 16px, h3: 14px) {
+}
+
 ```
 
 # Lines exceeding max width of 80 characters
 ```
-   28: @each $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+   24: @each $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
 ```

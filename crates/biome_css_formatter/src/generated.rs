@@ -7413,6 +7413,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssEachAtRule {
         )
     }
 }
+impl FormatRule<biome_css_syntax::ScssEachHeader>
+    for crate::scss::auxiliary::each_header::FormatScssEachHeader
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssEachHeader,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssEachHeader>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssEachHeader {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssEachHeader,
+        crate::scss::auxiliary::each_header::FormatScssEachHeader,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::auxiliary::each_header::FormatScssEachHeader::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssEachHeader {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssEachHeader,
+        crate::scss::auxiliary::each_header::FormatScssEachHeader,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::auxiliary::each_header::FormatScssEachHeader::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::ScssElseClause>
     for crate::scss::auxiliary::else_clause::FormatScssElseClause
 {

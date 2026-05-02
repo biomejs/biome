@@ -2604,10 +2604,15 @@ TwSlotAtRule =
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ScssEachAtRule =
 	'each'
+	header: ScssEachHeader
+	block: CssDeclarationOrRuleBlock
+
+// @each $item in $list { color: $item; }
+//       ^^^^^^^^^^^^^^
+ScssEachHeader =
 	bindings: ScssEachBindingList
 	'in'
 	iterable: ScssExpression
-	block: CssDeclarationOrRuleBlock
 
 // @each $key, $value in $map { color: $key; }
 //       ^^^^^^^^^^^^

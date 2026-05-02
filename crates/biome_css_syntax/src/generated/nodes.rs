@@ -9364,26 +9364,18 @@ impl ScssEachAtRule {
     pub fn as_fields(&self) -> ScssEachAtRuleFields {
         ScssEachAtRuleFields {
             each_token: self.each_token(),
-            bindings: self.bindings(),
-            in_token: self.in_token(),
-            iterable: self.iterable(),
+            header: self.header(),
             block: self.block(),
         }
     }
     pub fn each_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn bindings(&self) -> ScssEachBindingList {
-        support::list(&self.syntax, 1usize)
-    }
-    pub fn in_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
-    }
-    pub fn iterable(&self) -> SyntaxResult<ScssExpression> {
-        support::required_node(&self.syntax, 3usize)
+    pub fn header(&self) -> SyntaxResult<ScssEachHeader> {
+        support::required_node(&self.syntax, 1usize)
     }
     pub fn block(&self) -> SyntaxResult<CssDeclarationOrRuleBlock> {
-        support::required_node(&self.syntax, 4usize)
+        support::required_node(&self.syntax, 2usize)
     }
 }
 impl Serialize for ScssEachAtRule {
@@ -9397,10 +9389,53 @@ impl Serialize for ScssEachAtRule {
 #[derive(Serialize)]
 pub struct ScssEachAtRuleFields {
     pub each_token: SyntaxResult<SyntaxToken>,
+    pub header: SyntaxResult<ScssEachHeader>,
+    pub block: SyntaxResult<CssDeclarationOrRuleBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssEachHeader {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssEachHeader {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssEachHeaderFields {
+        ScssEachHeaderFields {
+            bindings: self.bindings(),
+            in_token: self.in_token(),
+            iterable: self.iterable(),
+        }
+    }
+    pub fn bindings(&self) -> ScssEachBindingList {
+        support::list(&self.syntax, 0usize)
+    }
+    pub fn in_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn iterable(&self) -> SyntaxResult<ScssExpression> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for ScssEachHeader {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssEachHeaderFields {
     pub bindings: ScssEachBindingList,
     pub in_token: SyntaxResult<SyntaxToken>,
     pub iterable: SyntaxResult<ScssExpression>,
-    pub block: SyntaxResult<CssDeclarationOrRuleBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssElseClause {
@@ -27593,9 +27628,7 @@ impl std::fmt::Debug for ScssEachAtRule {
             DEPTH.set(current_depth + 1);
             f.debug_struct("ScssEachAtRule")
                 .field("each_token", &support::DebugSyntaxResult(self.each_token()))
-                .field("bindings", &self.bindings())
-                .field("in_token", &support::DebugSyntaxResult(self.in_token()))
-                .field("iterable", &support::DebugSyntaxResult(self.iterable()))
+                .field("header", &support::DebugSyntaxResult(self.header()))
                 .field("block", &support::DebugSyntaxResult(self.block()))
                 .finish()
         } else {
@@ -27612,6 +27645,55 @@ impl From<ScssEachAtRule> for SyntaxNode {
 }
 impl From<ScssEachAtRule> for SyntaxElement {
     fn from(n: ScssEachAtRule) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for ScssEachHeader {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_EACH_HEADER as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_EACH_HEADER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssEachHeader {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssEachHeader")
+                .field("bindings", &self.bindings())
+                .field("in_token", &support::DebugSyntaxResult(self.in_token()))
+                .field("iterable", &support::DebugSyntaxResult(self.iterable()))
+                .finish()
+        } else {
+            f.debug_struct("ScssEachHeader").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssEachHeader> for SyntaxNode {
+    fn from(n: ScssEachHeader) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssEachHeader> for SyntaxElement {
+    fn from(n: ScssEachHeader) -> Self {
         n.syntax.into()
     }
 }
@@ -43611,6 +43693,11 @@ impl std::fmt::Display for ScssDebugAtRule {
     }
 }
 impl std::fmt::Display for ScssEachAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssEachHeader {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

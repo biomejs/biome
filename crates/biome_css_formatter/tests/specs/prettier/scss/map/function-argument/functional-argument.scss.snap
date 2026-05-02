@@ -117,26 +117,20 @@ font-weight:
    ),
    $display-breakpoints
  );
-@@ -30,8 +32,9 @@
-   "medium": 500,
+@@ -31,7 +33,7 @@
    "bold": 700,
  );
--@each $name, $boldness in $icons {
+ @each $name, $boldness in $icons {
 -  .text #{ $name } {
-+@each $name,
-+$boldness in $icons {
 +  .text #{$name} {
      color: red;
      font-weight: "#{$boldness}";
    }
-@@ -42,8 +45,9 @@
-   "medium": 500,
+@@ -43,7 +45,7 @@
    "bold": 700,
  );
--@each $name, $boldness in $icons {
+ @each $name, $boldness in $icons {
 -  .text-#{ $name } {
-+@each $name,
-+$boldness in $icons {
 +  .text-#{$name} {
      color: red;
      font-weight: "#{$boldness}";
@@ -180,8 +174,7 @@ $font-weights: (
   "medium": 500,
   "bold": 700,
 );
-@each $name,
-$boldness in $icons {
+@each $name, $boldness in $icons {
   .text #{$name} {
     color: red;
     font-weight: "#{$boldness}";
@@ -193,8 +186,7 @@ $font-weights: (
   "medium": 500,
   "bold": 700,
 );
-@each $name,
-$boldness in $icons {
+@each $name, $boldness in $icons {
   .text-#{$name} {
     color: red;
     font-weight: "#{$boldness}";

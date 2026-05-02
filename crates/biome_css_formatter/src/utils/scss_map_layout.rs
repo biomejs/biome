@@ -1,8 +1,12 @@
 use crate::prelude::*;
 use crate::utils::scss_closing_comments::owns_map_closing_comments;
 use crate::utils::scss_context::is_in_scss_include_arguments;
+use crate::utils::scss_expression::single_expression_item;
 use crate::utils::scss_map::is_scss_map_key;
-use biome_css_syntax::{ScssMapExpression, ScssMapExpressionFields};
+use biome_css_syntax::{
+    AnyScssExpressionItem, ScssEachHeader, ScssExpression, ScssMapExpression,
+    ScssMapExpressionFields,
+};
 use biome_formatter::{CstFormatContext, GroupId, format_args, write};
 
 /// Shared map layout policy for `ScssMapExpression`.
@@ -122,7 +126,7 @@ impl<'a> ScssMapLayout<'a> {
                 r_paren_token.format()
             ])
             .with_group_id(Some(self.group_id))
-            .should_expand(should_expand_map_expression(self.node))]
+            .should_expand(self.should_expand())]
         )
     }
 
@@ -143,6 +147,38 @@ impl<'a> ScssMapLayout<'a> {
             }
         })
     }
+
+    fn should_expand(&self) -> bool {
+        // Prettier keeps direct `@each` maps inline when they fit:
+        // `@each $k, $v in (a: 1, b: 2)`.
+        !is_direct_each_iterable_map(self.node) && should_expand_map_expression(self.node)
+    }
+}
+
+/// Returns `true` for the direct map iterable in `@each $name in (a: b, c: d)`.
+fn is_direct_each_iterable_map(node: &ScssMapExpression) -> bool {
+    // Find the expression that directly wraps the map iterable.
+    let Some(expression) = node
+        .syntax()
+        .ancestors()
+        .skip(1)
+        .find_map(ScssExpression::cast)
+    else {
+        return false;
+    };
+
+    if !expression
+        .syntax()
+        .parent()
+        .is_some_and(|parent| ScssEachHeader::can_cast(parent.kind()))
+    {
+        return false;
+    }
+
+    single_expression_item(&expression).is_some_and(|item| match item {
+        AnyScssExpressionItem::ScssMapExpression(map) => map.syntax() == node.syntax(),
+        _ => false,
+    })
 }
 
 /// Returns `true` when the map expression should force a multiline layout.
