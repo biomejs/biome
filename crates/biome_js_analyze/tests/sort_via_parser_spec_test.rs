@@ -1,4 +1,5 @@
 use biome_js_analyze::lint::nursery::use_sorted_classes::sort_via_parser::sort_class_list;
+use biome_tailwind_parser::parse_tailwind;
 use std::fmt::Write;
 use std::fs;
 
@@ -12,9 +13,10 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, _outcome
         if trimmed.starts_with('#') {
             current_comment = trimmed[1..].trim().to_string();
         } else if trimmed.is_empty() {
-            // blank separator — reset comment if we already emitted it
+            // separator
         } else {
-            let sorted = sort_class_list(trimmed);
+            let parsed = parse_tailwind(trimmed);
+            let sorted = sort_class_list(&parsed.tree());
             if !current_comment.is_empty() {
                 writeln!(snapshot, "## {current_comment}").unwrap();
                 current_comment.clear();
