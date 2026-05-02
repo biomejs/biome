@@ -465,6 +465,12 @@ pub fn quick_test() {
         "- outer\n  - nested\n  lazy line\nhello\n",
         "<ul>\n<li>outer\n<ul>\n<li>nested\nlazy line\nhello</li>\n</ul>\n</li>\n</ul>\n",
     );
+    // Fuzzer: lazy continuation in a loose nested list item
+    test_example(
+        30006,
+        "- outer\n  - nested\n  lazy line\n\n    indented\n",
+        "<ul>\n<li>outer\n<ul>\n<li>\n<p>nested\nlazy line</p>\n<p>indented</p>\n</li>\n</ul>\n</li>\n</ul>\n",
+    );
 }
 
 fn fuzz_test_example(num: u32, input: &str, expected: &str) {

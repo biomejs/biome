@@ -1059,16 +1059,6 @@ fn handle_line_continuation(
         return InlineNewlineAction::Break;
     }
 
-    if required_indent > 0 && p.state().list_nesting_depth >= 2 {
-        let marker_indent = p.state().list_item_marker_indent;
-        if marker_indent > 0 {
-            let indent = p.line_start_leading_indent();
-            if indent < required_indent && indent <= marker_indent {
-                return InlineNewlineAction::Break;
-            }
-        }
-    }
-
     if p.at(MD_TEXTUAL_LITERAL) {
         let text = p.cur_text();
         if text.starts_with("```") || text.starts_with("~~~") {

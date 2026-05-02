@@ -121,21 +121,12 @@ MdDocument {
                                                 MdTextual {
                                                     value_token: MD_TEXTUAL_LITERAL@46..47 "\n" [] [],
                                                 },
-                                            ],
-                                            hard_line: missing (optional),
-                                        },
-                                        MdContinuationIndent {
-                                            indent: MdIndentTokenList [
-                                                MdIndentToken {
-                                                    md_indent_char_token: MD_INDENT_CHAR@47..48 " " [] [],
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@47..48 " " [] [],
                                                 },
-                                                MdIndentToken {
-                                                    md_indent_char_token: MD_INDENT_CHAR@48..49 " " [] [],
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@48..49 " " [] [],
                                                 },
-                                            ],
-                                        },
-                                        MdParagraph {
-                                            list: MdInlineItemList [
                                                 MdTextual {
                                                     value_token: MD_TEXTUAL_LITERAL@49..58 "lazy line" [] [],
                                                 },
@@ -228,24 +219,19 @@ MdDocument {
                     2: MD_LIST_POST_MARKER_SPACE@39..40 " " [] []
                     3: MD_INDENT_TOKEN_LIST@40..40
                   1: MD_BLOCK_LIST@40..59
-                    0: MD_PARAGRAPH@40..47
-                      0: MD_INLINE_ITEM_LIST@40..47
+                    0: MD_PARAGRAPH@40..59
+                      0: MD_INLINE_ITEM_LIST@40..59
                         0: MD_TEXTUAL@40..46
                           0: MD_TEXTUAL_LITERAL@40..46 "nested" [] []
                         1: MD_TEXTUAL@46..47
                           0: MD_TEXTUAL_LITERAL@46..47 "\n" [] []
-                      1: (empty)
-                    1: MD_CONTINUATION_INDENT@47..49
-                      0: MD_INDENT_TOKEN_LIST@47..49
-                        0: MD_INDENT_TOKEN@47..48
-                          0: MD_INDENT_CHAR@47..48 " " [] []
-                        1: MD_INDENT_TOKEN@48..49
-                          0: MD_INDENT_CHAR@48..49 " " [] []
-                    2: MD_PARAGRAPH@49..59
-                      0: MD_INLINE_ITEM_LIST@49..59
-                        0: MD_TEXTUAL@49..58
+                        2: MD_TEXTUAL@47..48
+                          0: MD_TEXTUAL_LITERAL@47..48 " " [] []
+                        3: MD_TEXTUAL@48..49
+                          0: MD_TEXTUAL_LITERAL@48..49 " " [] []
+                        4: MD_TEXTUAL@49..58
                           0: MD_TEXTUAL_LITERAL@49..58 "lazy line" [] []
-                        1: MD_TEXTUAL@58..59
+                        5: MD_TEXTUAL@58..59
                           0: MD_TEXTUAL_LITERAL@58..59 "\n" [] []
                       1: (empty)
   2: EOF@59..59 "" [] []

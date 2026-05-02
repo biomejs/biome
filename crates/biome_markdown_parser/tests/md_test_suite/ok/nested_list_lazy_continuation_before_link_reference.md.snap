@@ -1,6 +1,5 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
-assertion_line: 192
 expression: snapshot
 ---
 
@@ -67,35 +66,18 @@ MdDocument {
                                                 MdTextual {
                                                     value_token: MD_TEXTUAL_LITERAL@18..19 "\n" [] [],
                                                 },
-                                            ],
-                                            hard_line: missing (optional),
-                                        },
-                                        MdContinuationIndent {
-                                            indent: MdIndentTokenList [
-                                                MdIndentToken {
-                                                    md_indent_char_token: MD_INDENT_CHAR@19..20 " " [] [],
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@19..20 " " [] [],
                                                 },
-                                                MdIndentToken {
-                                                    md_indent_char_token: MD_INDENT_CHAR@20..21 " " [] [],
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@20..21 " " [] [],
                                                 },
-                                            ],
-                                        },
-                                        MdParagraph {
-                                            list: MdInlineItemList [
                                                 MdTextual {
                                                     value_token: MD_TEXTUAL_LITERAL@21..30 "lazy line" [] [],
                                                 },
                                                 MdTextual {
                                                     value_token: MD_TEXTUAL_LITERAL@30..31 "\n" [] [],
                                                 },
-                                            ],
-                                            hard_line: missing (optional),
-                                        },
-                                        MdContinuationIndent {
-                                            indent: MdIndentTokenList [],
-                                        },
-                                        MdParagraph {
-                                            list: MdInlineItemList [
                                                 MdTextual {
                                                     value_token: MD_TEXTUAL_LITERAL@31..32 "[" [] [],
                                                 },
@@ -165,41 +147,31 @@ MdDocument {
                     2: MD_LIST_POST_MARKER_SPACE@11..12 " " [] []
                     3: MD_INDENT_TOKEN_LIST@12..12
                   1: MD_BLOCK_LIST@12..45
-                    0: MD_PARAGRAPH@12..19
-                      0: MD_INLINE_ITEM_LIST@12..19
+                    0: MD_PARAGRAPH@12..45
+                      0: MD_INLINE_ITEM_LIST@12..45
                         0: MD_TEXTUAL@12..18
                           0: MD_TEXTUAL_LITERAL@12..18 "nested" [] []
                         1: MD_TEXTUAL@18..19
                           0: MD_TEXTUAL_LITERAL@18..19 "\n" [] []
-                      1: (empty)
-                    1: MD_CONTINUATION_INDENT@19..21
-                      0: MD_INDENT_TOKEN_LIST@19..21
-                        0: MD_INDENT_TOKEN@19..20
-                          0: MD_INDENT_CHAR@19..20 " " [] []
-                        1: MD_INDENT_TOKEN@20..21
-                          0: MD_INDENT_CHAR@20..21 " " [] []
-                    2: MD_PARAGRAPH@21..31
-                      0: MD_INLINE_ITEM_LIST@21..31
-                        0: MD_TEXTUAL@21..30
+                        2: MD_TEXTUAL@19..20
+                          0: MD_TEXTUAL_LITERAL@19..20 " " [] []
+                        3: MD_TEXTUAL@20..21
+                          0: MD_TEXTUAL_LITERAL@20..21 " " [] []
+                        4: MD_TEXTUAL@21..30
                           0: MD_TEXTUAL_LITERAL@21..30 "lazy line" [] []
-                        1: MD_TEXTUAL@30..31
+                        5: MD_TEXTUAL@30..31
                           0: MD_TEXTUAL_LITERAL@30..31 "\n" [] []
-                      1: (empty)
-                    3: MD_CONTINUATION_INDENT@31..31
-                      0: MD_INDENT_TOKEN_LIST@31..31
-                    4: MD_PARAGRAPH@31..45
-                      0: MD_INLINE_ITEM_LIST@31..45
-                        0: MD_TEXTUAL@31..32
+                        6: MD_TEXTUAL@31..32
                           0: MD_TEXTUAL_LITERAL@31..32 "[" [] []
-                        1: MD_TEXTUAL@32..37
+                        7: MD_TEXTUAL@32..37
                           0: MD_TEXTUAL_LITERAL@32..37 "valid" [] []
-                        2: MD_TEXTUAL@37..38
+                        8: MD_TEXTUAL@37..38
                           0: MD_TEXTUAL_LITERAL@37..38 "]" [] []
-                        3: MD_TEXTUAL@38..39
+                        9: MD_TEXTUAL@38..39
                           0: MD_TEXTUAL_LITERAL@38..39 ":" [] []
-                        4: MD_TEXTUAL@39..44
+                        10: MD_TEXTUAL@39..44
                           0: MD_TEXTUAL_LITERAL@39..44 " /url" [] []
-                        5: MD_TEXTUAL@44..45
+                        11: MD_TEXTUAL@44..45
                           0: MD_TEXTUAL_LITERAL@44..45 "\n" [] []
                       1: (empty)
   2: EOF@45..45 "" [] []
