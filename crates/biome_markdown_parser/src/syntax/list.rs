@@ -44,6 +44,7 @@ use crate::lexer::MarkdownReLexContext;
 use crate::syntax::fenced_code_block::parse_fenced_code_block;
 use crate::syntax::header::{parse_header_content, parse_trailing_hashes};
 use crate::syntax::html_block::{at_html_block, parse_html_block};
+use crate::syntax::link_block::{at_link_block, parse_link_block};
 use crate::syntax::parse_error::list_nesting_too_deep;
 use crate::syntax::quote::{
     at_quote_indented_code_start, consume_quote_prefix, consume_quote_prefix_without_virtual,
@@ -53,7 +54,8 @@ use crate::syntax::thematic_break_block::parse_thematic_break_block;
 use crate::syntax::with_virtual_line_start;
 use crate::syntax::{
     INDENT_CODE_BLOCK_SPACES, MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES, at_block_interrupt,
-    at_indent_code_block, is_paragraph_like, is_whitespace_only,
+    at_indent_code_block, is_dash_only_thematic_break_text, is_paragraph_like, is_whitespace_only,
+    parse_empty_paragraph,
 };
 use crate::syntax::{parse_any_block_with_indent_code_policy, parse_paragraph};
 use biome_rowan::{TextRange, TextSize};
@@ -2047,6 +2049,22 @@ fn parse_first_line_blocks(
         return LoopAction::Continue;
     }
 
+    // Link reference definition
+    let link_block_start =
+        p.lookahead(|p| with_virtual_line_start(p, p.cur_range().start(), at_link_block));
+
+    if link_block_start {
+        let parsed = with_virtual_line_start(p, p.cur_range().start(), parse_link_block);
+        if parsed.is_present() {
+            p.state_mut().link_reference_definition_continuation = true;
+            if list_link_reference_before_dash_thematic_break(p) {
+                parse_empty_paragraph(p);
+            }
+            state.record_first_line_block();
+            return LoopAction::Continue;
+        }
+    }
+
     // Thematic break (check BEFORE nested list markers per CommonMark §4.1)
     let is_thematic_break = p.lookahead(|p| {
         while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
@@ -2142,6 +2160,29 @@ fn parse_first_line_blocks(
     }
 
     LoopAction::FallThrough
+}
+
+fn list_link_reference_before_dash_thematic_break(p: &mut MarkdownParser) -> bool {
+    if !p.at(NEWLINE) || p.at_blank_line() {
+        return false;
+    }
+
+    p.lookahead(|p| {
+        p.bump(NEWLINE);
+        let mut indent = 0usize;
+        while p.at(MD_TEXTUAL_LITERAL) {
+            match p.cur_text() {
+                " " => indent += 1,
+                "\t" => indent += TAB_STOP_SPACES,
+                _ => break,
+            }
+            p.bump(MD_TEXTUAL_LITERAL);
+        }
+
+        indent >= p.state().list_item_required_indent
+            && p.at(MD_THEMATIC_BREAK_LITERAL)
+            && is_dash_only_thematic_break_text(p.cur_text())
+    })
 }
 
 /// Parse an ATX heading on the first line of list item content.
@@ -2269,6 +2310,10 @@ fn at_current_line_block_interrupt(p: &mut MarkdownParser) -> bool {
     with_virtual_line_start(p, p.cur_range().start(), at_block_interrupt)
 }
 
+fn at_current_line_link_reference_definition(p: &mut MarkdownParser) -> bool {
+    with_virtual_line_start(p, p.cur_range().start(), at_link_block)
+}
+
 /// After the first line, verify indent level for continuation.
 ///
 /// Handles nested list detection at sufficient indent, sibling/block interrupt
@@ -2361,6 +2406,15 @@ fn check_continuation_indent(
             // as an explicit MdContinuationIndent node so it appears in the
             // CST rather than as skipped trivia. See CommonMark §5.2:
             // https://spec.commonmark.org/0.31.2/#list-items
+            let parse_mode = if state.last_block_was_paragraph
+                && !prev_was_blank
+                && at_current_line_link_reference_definition(p)
+            {
+                ContinuationParseMode::Paragraph
+            } else {
+                ContinuationParseMode::AnyBlock
+            };
+
             let ci_m = p.start();
             p.emit_line_indent(state.required_indent);
             ci_m.complete(p, MD_CONTINUATION_INDENT);
@@ -2369,7 +2423,7 @@ fn check_continuation_indent(
             return ContinuationResult {
                 action: LoopAction::FallThrough,
                 restore: VirtualLineRestore::Restore(prev_virtual),
-                parse_mode: ContinuationParseMode::AnyBlock,
+                parse_mode,
             };
         }
     } else {
