@@ -8,8 +8,8 @@ use crate::utils::scss_expression::is_self_breaking_value;
 use biome_css_syntax::{
     CssLanguage, CssParameterList, CssSyntaxKind, CssSyntaxNode, ScssIncludeArgumentList,
     ScssKeywordArgument, ScssListExpression, ScssListExpressionElement, ScssMapExpression,
-    ScssMapExpressionPair, include_keyword_argument_before_argument_list,
-    is_in_scss_include_arguments, scss_keyword_argument_from_syntax,
+    ScssMapExpressionPair, is_in_scss_include_arguments, scss_include_keyword_argument_owner,
+    scss_keyword_argument_from_syntax,
 };
 use biome_formatter::comments::{CommentPlacement, DecoratedComment};
 use biome_rowan::AstNode;
@@ -80,7 +80,7 @@ fn classify_map_trailing_separator_comment(
     let is_separator_comment = is_trailing_separator_comment(preceding_pair.syntax(), comment);
 
     if is_include_argument
-        && include_keyword_argument_before_argument_list(map_expression.syntax()).is_some()
+        && scss_include_keyword_argument_owner(map_expression.syntax()).is_some()
         && comment.kind().is_line()
         && comment.text_position().is_end_of_line()
     {
@@ -182,12 +182,12 @@ fn keyword_argument_value_comment_owner(
     }
 
     let enclosing_node = comment.enclosing_node();
-    if include_keyword_argument_before_argument_list(enclosing_node).is_some() {
+    if scss_include_keyword_argument_owner(enclosing_node).is_some() {
         return None;
     }
 
     let preceding_node = comment.preceding_node()?;
-    let keyword_argument = include_keyword_argument_before_argument_list(preceding_node)
+    let keyword_argument = scss_include_keyword_argument_owner(preceding_node)
         .or_else(|| scss_keyword_argument_from_syntax(preceding_node))?;
     let value = keyword_argument.value().ok()?;
 

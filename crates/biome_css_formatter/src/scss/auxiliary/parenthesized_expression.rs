@@ -3,8 +3,8 @@ use crate::utils::comment_trivia::has_inline_trailing_comment;
 use crate::utils::scss_separator_comments::FormatScssSeparatorComments;
 use biome_css_syntax::{
     ScssMapOuterParenthesizedValuePayloadKind, ScssParenthesizedExpression,
-    ScssParenthesizedExpressionFields, include_keyword_argument_before_argument_list,
-    scss_map_context, unwrap_single_expression_item,
+    ScssParenthesizedExpressionFields, scss_include_keyword_argument_owner, scss_map_context,
+    unwrap_single_expression_item,
 };
 use biome_formatter::{format_args, write};
 
@@ -67,15 +67,14 @@ impl FormatNodeRule<ScssParenthesizedExpression> for FormatScssParenthesizedExpr
 
 /// Returns `true` for `@include mix($arg: (...) /* end */)` wrappers.
 fn should_expand_include_keyword_list_value(node: &ScssParenthesizedExpression) -> bool {
-    let is_include_keyword_value =
-        include_keyword_argument_before_argument_list(node.syntax()).is_some();
+    let is_include_keyword_value = scss_include_keyword_argument_owner(node.syntax()).is_some();
 
     has_inline_trailing_comment(node.syntax()) && is_include_keyword_value
 }
 
 /// Returns `true` for the outer value in `@include mix($arg: ((a)))`.
 fn has_nested_parenthesized_include_item(node: &ScssParenthesizedExpression) -> bool {
-    if include_keyword_argument_before_argument_list(node.syntax()).is_none() {
+    if scss_include_keyword_argument_owner(node.syntax()).is_none() {
         return false;
     }
 

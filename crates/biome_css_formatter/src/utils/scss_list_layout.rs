@@ -5,9 +5,9 @@ use crate::utils::scss_closing_comments::{
 };
 use biome_css_syntax::{
     ScssExpression, ScssListExpression, ScssListExpressionElementList, ScssListExpressionFields,
-    ScssModuleConfiguration, ScssParenthesizedExpression,
-    include_keyword_argument_before_argument_list, is_in_scss_include_arguments, is_scss_map_key,
-    scss_map_context, single_expression_item, unwrap_single_expression_item,
+    ScssModuleConfiguration, ScssParenthesizedExpression, is_in_scss_include_arguments,
+    is_scss_map_key, scss_include_keyword_argument_owner, scss_map_context, single_expression_item,
+    unwrap_single_expression_item,
 };
 use biome_formatter::{format_args, write};
 use biome_rowan::{AstNode, AstSeparatedList};
@@ -167,8 +167,7 @@ fn should_expand_include_keyword_list_value(node: &ScssListExpression, f: &CssFo
         .skip(1)
         .find_map(ScssParenthesizedExpression::cast)
     else {
-        let Some(keyword_argument) = include_keyword_argument_before_argument_list(node.syntax())
-        else {
+        let Some(keyword_argument) = scss_include_keyword_argument_owner(node.syntax()) else {
             return false;
         };
 
@@ -179,9 +178,7 @@ fn should_expand_include_keyword_list_value(node: &ScssListExpression, f: &CssFo
     };
 
     let has_trailing_comment = has_inline_trailing_comment(parenthesized.syntax());
-    let Some(keyword_argument) =
-        include_keyword_argument_before_argument_list(parenthesized.syntax())
-    else {
+    let Some(keyword_argument) = scss_include_keyword_argument_owner(parenthesized.syntax()) else {
         return false;
     };
     let has_keyword_closing_comments = f
@@ -201,7 +198,7 @@ fn is_direct_include_keyword_parenthesized_list_value(node: &ScssListExpression)
         return false;
     };
 
-    if include_keyword_argument_before_argument_list(parenthesized.syntax()).is_none() {
+    if scss_include_keyword_argument_owner(parenthesized.syntax()).is_none() {
         return false;
     }
 
