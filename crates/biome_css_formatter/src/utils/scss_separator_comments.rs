@@ -1,9 +1,11 @@
 use crate::comments::FormatCssLeadingComment;
 use crate::prelude::*;
 use crate::utils::comment_trivia::has_same_group_leading_block_comment;
-use crate::utils::scss_context::is_in_scss_include_arguments;
 use crate::utils::scss_expression::is_self_breaking_value;
-use biome_css_syntax::{AnyScssExpression, CssLanguage, CssSyntaxNode, ScssListExpressionElement};
+use biome_css_syntax::{
+    AnyScssExpression, CssLanguage, CssSyntaxNode, ScssListExpressionElement,
+    is_in_scss_include_arguments,
+};
 use biome_formatter::comments::CommentKind;
 use biome_formatter::{FormatRefWithRule, format_args, write};
 use biome_rowan::AstNode;

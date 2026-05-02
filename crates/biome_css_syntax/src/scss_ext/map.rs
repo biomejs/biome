@@ -1,7 +1,6 @@
-use crate::utils::scss_expression::unwrap_single_expression_item;
-use biome_css_syntax::{
+use crate::{
     AnyScssExpression, CssLanguage, ScssListExpression, ScssMapExpressionPair,
-    ScssParenthesizedExpression,
+    ScssParenthesizedExpression, unwrap_single_expression_item,
 };
 use biome_rowan::AstNode;
 
@@ -9,7 +8,7 @@ use biome_rowan::AstNode;
 ///
 /// Example: in `(fn((a: b)): value)`, `fn((a: b))` returns `true`, but the
 /// nested `(a: b)` returns `false`.
-pub(crate) fn is_scss_map_key<N>(node: &N) -> bool
+pub fn is_scss_map_key<N>(node: &N) -> bool
 where
     N: AstNode<Language = CssLanguage>,
 {
@@ -25,7 +24,7 @@ where
 ///
 /// Example: in `(fn((a: b)): value)`, both `fn((a: b))` and the nested
 /// `(a: b)` return `true`.
-pub(crate) fn is_in_scss_map_key<N>(node: &N) -> bool
+pub fn is_in_scss_map_key<N>(node: &N) -> bool
 where
     N: AstNode<Language = CssLanguage>,
 {
@@ -40,7 +39,7 @@ where
 ///
 /// Example: in `(key: (a, b))`, the outer `(a, b)` returns `true`, but `a`
 /// does not. A single-item `ScssExpression` wrapper still counts as direct.
-pub(crate) fn is_scss_map_value<N>(node: &N) -> bool
+pub fn is_scss_map_value<N>(node: &N) -> bool
 where
     N: AstNode<Language = CssLanguage>,
 {
@@ -52,75 +51,11 @@ where
     )
 }
 
-/// Whether a node is on the key or value side of the nearest enclosing
-/// `ScssMapExpressionPair`.
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
-pub(crate) enum ScssMapRole {
-    /// The key side.
-    ///
-    /// Example: in `(fn((a: b)): value)`, both `fn((a: b))` and the nested
-    /// `(a: b)` are on the key side.
-    Key,
-    /// The value side.
-    ///
-    /// Example: in `(key: (a, b))`, `(a, b)`, `a`, and `b` are on the value
-    /// side.
-    Value,
-}
-
-/// Whether a node is the pair's outer key/value expression or something nested
-/// inside it.
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
-pub(crate) enum ScssMapPositionKind {
-    /// The outer key or value expression itself.
-    ///
-    /// Examples:
-    /// - in `(key: value)`, `key` and `value` are `Direct`
-    /// - in `(key: (a, b))`, `(a, b)` is `Direct`
-    Direct,
-    /// A descendant inside that expression.
-    ///
-    /// Example: in `(key: (a, b))`, `a` and `b` are `Nested`.
-    Nested,
-}
-
-/// The payload wrapped by an outer parenthesized map value like
-/// `key: (<payload>)`.
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
-pub(crate) enum ScssMapOuterParenthesizedValuePayloadKind {
-    /// The wrapper contains a scalar, like `key: (value)`.
-    Scalar,
-    /// The wrapper contains a list, like `key: (a, b)`.
-    List,
-    /// The wrapper contains a nested map, like
-    /// `key: (other-key: other-value)`.
-    Map,
-}
-
-/// Shared SCSS map context used by expression formatters.
-///
-/// Example: in `(key: (a, b))`, the outer `(a, b)` is `Value + Direct`, while
-/// `a` and `b` are `Value + Nested`.
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
-pub(crate) struct ScssMapContext {
-    pub(crate) role: ScssMapRole,
-    pub(crate) position_kind: ScssMapPositionKind,
-
-    /// The payload kind inside the outer wrapper in `key: (<payload>)`.
-    ///
-    /// When this is `Some(...)`, the current node is that outer wrapper.
-    pub(crate) outer_parenthesized_value_payload_kind:
-        Option<ScssMapOuterParenthesizedValuePayloadKind>,
-
-    /// `true` for the list `a, b` in `key: (a, b)`.
-    pub(crate) is_outer_parenthesized_value_list: bool,
-}
-
 /// Returns the SCSS map context for `node`, if it is inside a map pair.
 ///
 /// Example: in `(key: (a, b))`, the outer `(a, b)` is `Value + Direct`, while
 /// `a` is `Value + Nested`.
-pub(crate) fn scss_map_context<N>(node: &N) -> Option<ScssMapContext>
+pub fn scss_map_context<N>(node: &N) -> Option<ScssMapContext>
 where
     N: AstNode<Language = CssLanguage>,
 {
@@ -165,8 +100,69 @@ where
     }
 }
 
-/// Finds the nearest enclosing map pair and whether `node` is on its key or
-/// value side.
+/// Whether a node is on the key or value side of the nearest enclosing
+/// `ScssMapExpressionPair`.
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+pub enum ScssMapRole {
+    /// The key side.
+    ///
+    /// Example: in `(fn((a: b)): value)`, both `fn((a: b))` and the nested
+    /// `(a: b)` are on the key side.
+    Key,
+    /// The value side.
+    ///
+    /// Example: in `(key: (a, b))`, `(a, b)`, `a`, and `b` are on the value
+    /// side.
+    Value,
+}
+
+/// Whether a node is the pair's outer key/value expression or nested inside it.
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+pub enum ScssMapPositionKind {
+    /// The outer key or value expression itself.
+    ///
+    /// Examples:
+    /// - in `(key: value)`, `key` and `value` are `Direct`
+    /// - in `(key: (a, b))`, `(a, b)` is `Direct`
+    Direct,
+    /// A descendant inside that expression.
+    ///
+    /// Example: in `(key: (a, b))`, `a` and `b` are `Nested`.
+    Nested,
+}
+
+/// The payload wrapped by an outer parenthesized map value like
+/// `key: (<payload>)`.
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+pub enum ScssMapOuterParenthesizedValuePayloadKind {
+    /// The wrapper contains a scalar, like `key: (value)`.
+    Scalar,
+    /// The wrapper contains a list, like `key: (a, b)`.
+    List,
+    /// The wrapper contains a nested map, like
+    /// `key: (other-key: other-value)`.
+    Map,
+}
+
+/// Shared SCSS map context for syntax consumers.
+///
+/// Example: in `(key: (a, b))`, the outer `(a, b)` is `Value + Direct`, while
+/// `a` is `Value + Nested`.
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+pub struct ScssMapContext {
+    /// Whether the node is on the pair key or value side.
+    pub role: ScssMapRole,
+    /// Whether the node is the outer expression or nested inside it.
+    pub position_kind: ScssMapPositionKind,
+    /// The payload kind inside the outer wrapper in `key: (<payload>)`.
+    ///
+    /// When this is `Some(...)`, the current node is that outer wrapper.
+    pub outer_parenthesized_value_payload_kind: Option<ScssMapOuterParenthesizedValuePayloadKind>,
+    /// `true` for the list `a, b` in `key: (a, b)`.
+    pub is_outer_parenthesized_value_list: bool,
+}
+
+/// Finds the nearest enclosing map pair and the side containing `node`.
 ///
 /// Descendants keep the same side. In `(fn((a: b)): value)`, the nested
 /// `(a: b)` is still on the key side.
@@ -200,8 +196,7 @@ where
         })
 }
 
-/// Classifies whether `node` is the outer expression for `expression` or a
-/// descendant nested inside it.
+/// Classifies whether `node` is the outer expression or a nested descendant.
 ///
 /// A single-item `ScssExpression` wrapper still counts as the same outer
 /// expression.

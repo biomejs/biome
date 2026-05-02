@@ -1,9 +1,8 @@
 use crate::prelude::*;
 use crate::utils::scss_each::format_after_each_in;
-use crate::utils::scss_expression::single_expression_item;
 use biome_css_syntax::{
     AnyScssExpressionItem, CssSyntaxNode, CssSyntaxToken, ScssEachBindingList, ScssEachHeader,
-    ScssEachHeaderFields, ScssExpression, ScssListExpression,
+    ScssEachHeaderFields, ScssExpression, ScssListExpression, single_expression_item,
 };
 use biome_formatter::{FormatOwnedWithRule, FormatRule, format_args, write};
 use biome_rowan::AstSeparatedList;

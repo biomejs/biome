@@ -23,8 +23,8 @@ $compact: (
 );
 $longListKey: (
 	(
-			"list",
-			"long long long long long long long long long long long long long list"
+		"list",
+		"long long long long long long long long long long long long long list",
 	): "hello world",
 );
 $longMapKey: (

@@ -27,7 +27,7 @@ $map: (
 ```diff
 --- Prettier
 +++ Biome
-@@ -6,45 +6,41 @@
+@@ -6,17 +6,15 @@
      "key": "value",
      "key": "value",
    ): (
@@ -42,54 +42,26 @@ $map: (
      "key": "value",
      "key": "value",
 -  ): (
-+  ): ("list"),
-+  (
-+      "list",
-+      "list",
-+      "list",
-+      "list",
-+      "list",
-+      "list",
-       "list",
+-      "list",
 -    ),
-+      "list",
-+      "list",
-+      "list"
 +  ): ("list"),
    (
--    "list",
--    "list",
--    "list",
--    "list",
--    "list",
--    "list",
--    "list",
--    "list",
--    "list",
--    "list",
+     "list",
+     "list",
+@@ -28,9 +26,7 @@
+     "list",
+     "list",
+     "list",
 -  ): (
-       "list",
+-      "list",
 -    ),
--  (
--    "list",
--    "list",
--    "list",
--    "list",
--    "list",
--    "list",
--    "list",
--    "list",
--    "list",
--    "list",
-+      "list",
-+      "list",
-+      "list",
-+      "list",
-+      "list",
-+      "list",
-+      "list",
-+      "list",
-+      "list"
++  ): ("list"),
+   (
+     "list",
+     "list",
+@@ -43,8 +39,8 @@
+     "list",
+     "list",
    ): (
 -      "key": "value",
 -    ),
@@ -121,28 +93,28 @@ $map: (
     "key": "value",
   ): ("list"),
   (
-      "list",
-      "list",
-      "list",
-      "list",
-      "list",
-      "list",
-      "list",
-      "list",
-      "list",
-      "list"
+    "list",
+    "list",
+    "list",
+    "list",
+    "list",
+    "list",
+    "list",
+    "list",
+    "list",
+    "list",
   ): ("list"),
   (
-      "list",
-      "list",
-      "list",
-      "list",
-      "list",
-      "list",
-      "list",
-      "list",
-      "list",
-      "list"
+    "list",
+    "list",
+    "list",
+    "list",
+    "list",
+    "list",
+    "list",
+    "list",
+    "list",
+    "list",
   ): (
     "key": "value",
   ),

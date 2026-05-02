@@ -6,7 +6,7 @@ use biome_css_syntax::ScssMapExpression;
 pub(crate) struct FormatScssMapExpression;
 impl FormatNodeRule<ScssMapExpression> for FormatScssMapExpression {
     fn fmt_fields(&self, node: &ScssMapExpression, f: &mut CssFormatter) -> FormatResult<()> {
-        ScssMapLayout::new(node, f.group_id("scss_map_expression")).fmt(f)
+        ScssMapLayout::new(node).fmt(f)
     }
 
     fn fmt_dangling_comments(
@@ -14,7 +14,7 @@ impl FormatNodeRule<ScssMapExpression> for FormatScssMapExpression {
         node: &ScssMapExpression,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        if ScssMapLayout::new(node, f.group_id("scss_map_expression")).owns_dangling_comments(f) {
+        if ScssMapLayout::new(node).owns_dangling_comments(f) {
             Ok(())
         } else {
             format_dangling_comments(node.syntax())

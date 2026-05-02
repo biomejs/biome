@@ -1,6 +1,5 @@
 use crate::prelude::*;
-use crate::utils::scss_context::is_in_scss_include_arguments;
-use biome_css_syntax::{CssSyntaxNode, ScssMapExpression};
+use biome_css_syntax::{CssSyntaxNode, ScssMapExpression, is_in_scss_include_arguments};
 use biome_formatter::write;
 use biome_rowan::AstNode;
 

@@ -1,9 +1,10 @@
 use crate::prelude::*;
-use crate::utils::scss_context::is_in_scss_include_arguments;
 use crate::utils::scss_expression::is_self_breaking_value;
-use crate::utils::scss_map::{is_in_scss_map_key, is_scss_map_value};
 use crate::utils::scss_separator_comments::FormatScssSeparatorComments;
-use biome_css_syntax::{ScssMapExpressionPair, ScssMapExpressionPairFields};
+use biome_css_syntax::{
+    ScssMapExpressionPair, ScssMapExpressionPairFields, is_in_scss_include_arguments,
+    is_in_scss_map_key, is_scss_map_value,
+};
 use biome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]

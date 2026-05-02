@@ -2,9 +2,10 @@ use crate::prelude::*;
 use crate::utils::comment_trivia::{
     has_inline_trailing_comment, has_same_group_leading_block_comment,
 };
-use crate::utils::scss_context::is_in_scss_include_arguments;
 use crate::utils::scss_expression::is_self_breaking_value;
-use biome_css_syntax::{ScssKeywordArgument, ScssKeywordArgumentFields};
+use biome_css_syntax::{
+    ScssKeywordArgument, ScssKeywordArgumentFields, is_in_scss_include_arguments,
+};
 use biome_formatter::{format_args, write};
 
 /// Layout for `$arg: value` keyword arguments.
@@ -19,12 +20,6 @@ impl<'a> ScssKeywordArgumentLayout<'a> {
 
     pub(crate) fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
         let node = self.node;
-
-        if f.comments().is_suppressed(node.syntax())
-            || f.comments().is_global_suppressed(node.syntax())
-        {
-            return write!(f, [format_suppressed_node(node.syntax())]);
-        }
 
         let ScssKeywordArgumentFields {
             name,

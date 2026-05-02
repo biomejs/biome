@@ -1,11 +1,11 @@
 use crate::prelude::*;
 use crate::utils::comment_trivia::has_inline_trailing_comment;
-use crate::utils::scss_expression::{
-    include_keyword_argument_before_argument_list, unwrap_single_expression_item,
-};
-use crate::utils::scss_map::{ScssMapOuterParenthesizedValuePayloadKind, scss_map_context};
 use crate::utils::scss_separator_comments::FormatScssSeparatorComments;
-use biome_css_syntax::{ScssParenthesizedExpression, ScssParenthesizedExpressionFields};
+use biome_css_syntax::{
+    ScssMapOuterParenthesizedValuePayloadKind, ScssParenthesizedExpression,
+    ScssParenthesizedExpressionFields, include_keyword_argument_before_argument_list,
+    scss_map_context, unwrap_single_expression_item,
+};
 use biome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]

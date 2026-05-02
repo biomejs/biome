@@ -1,6 +1,5 @@
 use crate::prelude::*;
-use crate::utils::scss_expression::single_expression_item;
-use biome_css_syntax::{ScssWhileAtRule, ScssWhileAtRuleFields};
+use biome_css_syntax::{ScssWhileAtRule, ScssWhileAtRuleFields, single_expression_item};
 use biome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]

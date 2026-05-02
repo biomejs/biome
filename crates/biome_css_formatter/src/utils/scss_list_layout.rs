@@ -3,17 +3,13 @@ use crate::utils::comment_trivia::has_inline_trailing_comment;
 use crate::utils::scss_closing_comments::{
     ClosingCommentSpacing, format_include_closing_comments, owns_include_closing_comments,
 };
-use crate::utils::scss_context::is_in_scss_include_arguments;
-use crate::utils::scss_expression::{
-    include_keyword_argument_before_argument_list, single_expression_item,
-    unwrap_single_expression_item,
-};
-use crate::utils::scss_map::scss_map_context;
 use biome_css_syntax::{
     ScssExpression, ScssListExpression, ScssListExpressionElementList, ScssListExpressionFields,
     ScssModuleConfiguration, ScssParenthesizedExpression,
+    include_keyword_argument_before_argument_list, is_in_scss_include_arguments, is_scss_map_key,
+    scss_map_context, single_expression_item, unwrap_single_expression_item,
 };
-use biome_formatter::{GroupId, format_args, write};
+use biome_formatter::{format_args, write};
 use biome_rowan::{AstNode, AstSeparatedList};
 
 /// Layout for SCSS list expressions.
@@ -48,18 +44,25 @@ impl<'a> ScssListLayout<'a> {
             if scss_map_context(self.node)
                 .is_some_and(|context| context.is_outer_parenthesized_value_list)
             {
-                let group_id = f.group_id("scss_list_expression");
-                let comma = token(",");
-                let trailing_comma = if_group_breaks(&comma).with_group_id(Some(group_id));
-
                 return write!(
                     f,
                     [group(&indent(&format_args![
                         soft_line_break(),
                         elements.format(),
-                        trailing_comma
-                    ]))
-                    .with_group_id(Some(group_id))]
+                        if_group_breaks(&token(","))
+                    ]))]
+                );
+            }
+
+            if is_parenthesized_map_key_list(self.node) {
+                // `(("a", "b"): value)` already gets indented by the key's
+                // parentheses, so the list only controls its own breaks.
+                return write!(
+                    f,
+                    [group(&format_args![
+                        elements.format(),
+                        if_group_breaks(&token(","))
+                    ])]
                 );
             }
 
@@ -72,9 +75,8 @@ impl<'a> ScssListLayout<'a> {
             );
         }
 
-        let group_id = f.group_id("scss_list_expression");
         let list_layout = IncludeListLayout::new(self.node, &elements, f);
-        let trailing_comma = format_with(|f| list_layout.write_trailing_comma(group_id, f));
+        let trailing_comma = format_with(|f| list_layout.write_trailing_comma(f));
         let closing_comments = format_include_closing_comments(
             self.node.syntax(),
             ClosingCommentSpacing::SoftLineBreak,
@@ -92,7 +94,6 @@ impl<'a> ScssListLayout<'a> {
                     elements.format(),
                     trailing_comma, closing_comments
                 ])
-                .with_group_id(Some(group_id))
                 .should_expand(list_layout.should_expand)]
             )
         } else {
@@ -104,7 +105,6 @@ impl<'a> ScssListLayout<'a> {
                     trailing_comma,
                     closing_comments
                 ]))
-                .with_group_id(Some(group_id))
                 .should_expand(list_layout.should_expand)]
             )
         }
@@ -144,14 +144,11 @@ impl IncludeListLayout {
         }
     }
 
-    fn write_trailing_comma(self, group_id: GroupId, f: &mut CssFormatter) -> FormatResult<()> {
+    fn write_trailing_comma(self, f: &mut CssFormatter) -> FormatResult<()> {
         if self.force_trailing_comma {
             write!(f, [token(",")])
         } else {
-            write!(
-                f,
-                [if_group_breaks(&token(",")).with_group_id(Some(group_id))]
-            )
+            write!(f, [if_group_breaks(&token(","))])
         }
     }
 }
@@ -235,6 +232,16 @@ fn is_module_configuration_parenthesized_list_value(node: &ScssListExpression) -
             value.syntax() == parenthesized.syntax()
                 || single_expression_item(&value)
                     .is_some_and(|item| item.syntax() == parenthesized.syntax())
+        })
+}
+
+/// Returns `true` for the list key in `(("a", "b"): value)`.
+fn is_parenthesized_map_key_list(node: &ScssListExpression) -> bool {
+    node.syntax()
+        .parent()
+        .and_then(ScssParenthesizedExpression::cast)
+        .is_some_and(|parenthesized| {
+            is_scss_map_key(&parenthesized) && parenthesized_owns_list(&parenthesized, node)
         })
 }
 

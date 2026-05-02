@@ -1,13 +1,10 @@
 use crate::prelude::*;
 use crate::utils::scss_closing_comments::owns_map_closing_comments;
-use crate::utils::scss_context::is_in_scss_include_arguments;
-use crate::utils::scss_expression::single_expression_item;
-use crate::utils::scss_map::is_scss_map_key;
 use biome_css_syntax::{
     AnyScssExpressionItem, ScssEachHeader, ScssExpression, ScssMapExpression,
-    ScssMapExpressionFields,
+    ScssMapExpressionFields, is_in_scss_include_arguments, is_scss_map_key, single_expression_item,
 };
-use biome_formatter::{CstFormatContext, GroupId, format_args, write};
+use biome_formatter::{CstFormatContext, format_args, write};
 
 /// Shared map layout policy for `ScssMapExpression`.
 ///
@@ -15,12 +12,11 @@ use biome_formatter::{CstFormatContext, GroupId, format_args, write};
 /// `("key": "value"): "hello"`
 pub(crate) struct ScssMapLayout<'a> {
     node: &'a ScssMapExpression,
-    group_id: GroupId,
 }
 
 impl<'a> ScssMapLayout<'a> {
-    pub(crate) fn new(node: &'a ScssMapExpression, group_id: GroupId) -> Self {
-        Self { node, group_id }
+    pub(crate) fn new(node: &'a ScssMapExpression) -> Self {
+        Self { node }
     }
 
     pub(crate) fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
@@ -77,8 +73,7 @@ impl<'a> ScssMapLayout<'a> {
                     ]),
                     hard_line_break(),
                     r_paren_token.format()
-                ])
-                .with_group_id(Some(self.group_id))]
+                ])]
             );
         }
 
@@ -88,8 +83,7 @@ impl<'a> ScssMapLayout<'a> {
                 l_paren_token.format(),
                 format_dangling_comments(self.node.syntax()),
                 r_paren_token.format()
-            ])
-            .with_group_id(Some(self.group_id))]
+            ])]
         )
     }
 
@@ -125,7 +119,6 @@ impl<'a> ScssMapLayout<'a> {
                 soft_line_break(),
                 r_paren_token.format()
             ])
-            .with_group_id(Some(self.group_id))
             .should_expand(self.should_expand())]
         )
     }
@@ -134,16 +127,11 @@ impl<'a> ScssMapLayout<'a> {
         &self,
         has_inline_closing_comments: bool,
     ) -> impl Format<CssFormatContext> {
-        let group_id = self.group_id;
-
         format_with(move |f| {
             if has_inline_closing_comments {
                 write!(f, [token(",")])
             } else {
-                write!(
-                    f,
-                    [if_group_breaks(&token(",")).with_group_id(Some(group_id))]
-                )
+                write!(f, [if_group_breaks(&token(","))])
             }
         })
     }

@@ -1,5 +1,4 @@
-use crate::utils::scss_context::is_in_scss_include_arguments;
-use biome_css_syntax::CssSyntaxNode;
+use biome_css_syntax::{CssSyntaxNode, is_in_scss_include_arguments};
 use biome_formatter::separated::TrailingSeparator;
 
 /// Chooses the trailing separator policy for SCSS-aware separated lists.

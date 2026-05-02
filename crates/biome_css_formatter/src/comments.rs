@@ -1,7 +1,5 @@
 use crate::prelude::*;
 use crate::utils::comment_trivia::is_trailing_comment_on_node;
-use crate::utils::scss_context::is_in_scss_include_arguments;
-use crate::utils::scss_expression::single_expression_item;
 use crate::utils::scss_include_comments::{
     place_list_trailing_separator_comment, place_map_trailing_separator_comment,
     place_separated_list_comment,
@@ -11,7 +9,7 @@ use biome_css_syntax::{
     CssGenericProperty, CssIdentifier, CssLanguage, CssSyntaxKind, ScssAtRootAtRule,
     ScssAtRootSelector, ScssEachHeader, ScssExpression, ScssExpressionItemList, ScssIfAtRule,
     ScssListExpression, ScssListExpressionElement, ScssMapExpression, ScssMapExpressionPair, T,
-    TextLen, TextSize,
+    TextLen, TextSize, is_in_scss_include_arguments, single_expression_item,
 };
 use biome_diagnostics::category;
 use biome_formatter::comments::{

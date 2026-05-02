@@ -4,15 +4,12 @@
 //! print leading, trailing, or dangling comments.
 
 use crate::utils::comment_trivia::is_trailing_comment_on_node;
-use crate::utils::scss_context::is_in_scss_include_arguments;
-use crate::utils::scss_expression::{
-    include_keyword_argument_before_argument_list, is_self_breaking_value,
-    scss_keyword_argument_from_syntax,
-};
+use crate::utils::scss_expression::is_self_breaking_value;
 use biome_css_syntax::{
     CssLanguage, CssParameterList, CssSyntaxKind, CssSyntaxNode, ScssIncludeArgumentList,
     ScssKeywordArgument, ScssListExpression, ScssListExpressionElement, ScssMapExpression,
-    ScssMapExpressionPair,
+    ScssMapExpressionPair, include_keyword_argument_before_argument_list,
+    is_in_scss_include_arguments, scss_keyword_argument_from_syntax,
 };
 use biome_formatter::comments::{CommentPlacement, DecoratedComment};
 use biome_rowan::AstNode;
