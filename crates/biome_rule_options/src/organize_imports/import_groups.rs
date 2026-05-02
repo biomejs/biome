@@ -1,4 +1,5 @@
-use biome_deserialize::{Deserializable, DeserializationContext, Text};
+use biome_console::markup;
+use biome_deserialize::{Deserializable, DeserializationContext, DeserializationDiagnostic, Text};
 use biome_deserialize_macros::Deserializable;
 use biome_glob::{CandidatePath, Glob};
 use biome_resolver::is_builtin_node_module;
@@ -254,7 +255,31 @@ impl biome_deserialize::Deserializable for SourceMatcher {
     ) -> Option<Self> {
         let text = biome_deserialize::Text::deserialize(ctx, value, name)?;
         if text.ends_with(':') && (text.starts_with(':') || text.starts_with("!:")) {
-            text.parse().ok().map(SourceMatcher::Predefined)
+            match text.parse() {
+                Ok(predefined_group) => Some(SourceMatcher::Predefined(predefined_group)),
+                Err(_error) => {
+                    let diagnostic = if text == ":BLANK_LINE:" {
+                        DeserializationDiagnostic::new(markup! {
+                            <Emphasis>{":BLANK_LINE:"}</Emphasis>
+                            " is not a source matcher and thus it cannot be placed in "
+                            <Emphasis>{"source"}</Emphasis>"."
+                        })
+                        .with_note(markup! {
+                            <Emphasis>{":BLANK_LINE:"}</Emphasis>
+                            " can only be placed as an eleemtn of of the "
+                            <Emphasis>{"groups"}</Emphasis>" array."
+                        })
+                    } else {
+                        DeserializationDiagnostic::new(markup! {
+                            "The predefined group "<Emphasis>{
+                                format_args!("{}", text.strip_prefix("!").unwrap_or(&text))
+                            }</Emphasis>" doesn't exist."
+                        })
+                    };
+                    ctx.report(diagnostic.with_range(value.range()));
+                    None
+                }
+            }
         } else {
             Deserializable::deserialize(ctx, value, name).map(SourceMatcher::Glob)
         }

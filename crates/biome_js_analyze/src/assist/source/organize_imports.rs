@@ -201,6 +201,8 @@ declare_source_rule! {
     /// import type { T } from "@my/lib";
     /// ```
     ///
+    /// The `source` field accepts predefined groups and glob patterns.
+    ///
     /// ### `identifierOrder`
     ///
     /// By default, attributes, imported and exported names are sorted with a `natural` sort order.
