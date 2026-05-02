@@ -591,3 +591,12 @@ fn fuzz_list_link_reference_before_dash_thematic_break_with_tabs() {
         "<ol>\n<li>\n<hr />\n</li>\n</ol>\n",
     );
 }
+
+#[test]
+fn fuzz_quoted_list_link_reference_before_dash_thematic_break_with_tabs() {
+    fuzz_test_example(
+        13,
+        "> - [a]: /url\n> \t---\n",
+        "<blockquote>\n<ul>\n<li>\n<hr />\n</li>\n</ul>\n</blockquote>\n",
+    );
+}

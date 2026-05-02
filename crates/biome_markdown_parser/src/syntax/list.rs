@@ -1494,6 +1494,7 @@ struct ListItemLoopState {
     has_blank_line: bool,
     last_was_blank: bool,
     last_block_was_paragraph: bool,
+    last_link_reference_before_dash_thematic_break: bool,
     first_line: bool,
     required_indent: usize,
     marker_indent: usize,
@@ -1507,6 +1508,7 @@ impl ListItemLoopState {
             has_blank_line: false,
             last_was_blank: false,
             last_block_was_paragraph: false,
+            last_link_reference_before_dash_thematic_break: false,
             first_line: true,
             required_indent: p.state().list_item_required_indent,
             marker_indent: p.state().list_item_marker_indent,
@@ -1518,6 +1520,7 @@ impl ListItemLoopState {
     /// Record that a block-level construct was parsed on the first line.
     fn record_first_line_block(&mut self) {
         self.last_block_was_paragraph = false;
+        self.last_link_reference_before_dash_thematic_break = false;
         self.last_was_blank = false;
         self.first_line = false;
     }
@@ -1560,8 +1563,13 @@ fn handle_blank_lines(p: &mut MarkdownParser, state: &mut ListItemLoopState) -> 
 
     let newline_has_quote_prefix = quote_depth > 0
         && p.at(NEWLINE)
-        && (p.at_line_start() || p.has_preceding_line_break())
-        && has_quote_prefix(p, quote_depth);
+        && (((p.at_line_start() || p.has_preceding_line_break())
+            && has_quote_prefix(p, quote_depth))
+            || (state.last_link_reference_before_dash_thematic_break
+                && p.lookahead(|p| {
+                    p.bump(NEWLINE);
+                    has_quote_prefix(p, quote_depth)
+                })));
 
     // Phase 3: Non-quote blank line classification.
     if let Some(outcome) = blank_line_phase_non_quote_classify(p, state, newline_has_quote_prefix) {
@@ -2061,6 +2069,7 @@ fn parse_first_line_blocks(
                 parse_empty_paragraph(p);
             }
             state.record_first_line_block();
+            state.last_link_reference_before_dash_thematic_break = before_dash_thematic_break;
             return LoopAction::Continue;
         }
     }
@@ -2167,7 +2176,9 @@ fn list_link_reference_before_dash_thematic_break(p: &mut MarkdownParser) -> boo
         return false;
     }
 
-    let line_start: usize = p.cur_range().end().into();
+    let Some(line_start) = next_line_start_after_current_quote_prefixes(p) else {
+        return false;
+    };
     let source = p.source().source_text();
     let Some(line) = source.get(line_start..) else {
         return false;
@@ -2179,15 +2190,99 @@ fn list_link_reference_before_dash_thematic_break(p: &mut MarkdownParser) -> boo
     dash_thematic_break_after_required_indent(line, required_indent).is_some()
 }
 
+fn next_line_start_after_current_quote_prefixes(p: &MarkdownParser) -> Option<usize> {
+    let source = p.source().source_text();
+    let current_line_end: usize = p.cur_range().start().into();
+    let current_line_start = source[..current_line_end]
+        .rfind(['\n', '\r'])
+        .map_or(0, |index| index + 1);
+    let quote_prefix_count = count_quote_prefixes(&source[current_line_start..current_line_end]);
+
+    let next_line_start: usize = p.cur_range().end().into();
+    if quote_prefix_count == 0 {
+        return Some(next_line_start);
+    }
+
+    let next_line = source.get(next_line_start..)?;
+    strip_quote_prefixes(next_line, quote_prefix_count).map(|offset| next_line_start + offset)
+}
+
+fn count_quote_prefixes(mut line: &str) -> usize {
+    let mut count = 0usize;
+    while let Some(offset) = strip_one_quote_prefix(line) {
+        count += 1;
+        line = &line[offset..];
+    }
+    count
+}
+
+fn strip_quote_prefixes(line: &str, count: usize) -> Option<usize> {
+    let mut byte_offset = 0usize;
+    for _ in 0..count {
+        let offset = strip_one_quote_prefix(&line[byte_offset..])?;
+        byte_offset += offset;
+    }
+    Some(byte_offset)
+}
+
+fn strip_one_quote_prefix(line: &str) -> Option<usize> {
+    let mut byte_offset = 0usize;
+    let mut column = 0usize;
+
+    for c in line.chars() {
+        let next_column = match c {
+            ' ' => column + 1,
+            '\t' => column + (TAB_STOP_SPACES - (column % TAB_STOP_SPACES)),
+            _ => break,
+        };
+        if next_column > MAX_BLOCK_PREFIX_INDENT {
+            break;
+        }
+        column = next_column;
+        byte_offset += c.len_utf8();
+    }
+
+    if !line[byte_offset..].starts_with('>') {
+        return None;
+    }
+    byte_offset += 1;
+
+    if let Some(c) = line[byte_offset..].chars().next()
+        && matches!(c, ' ' | '\t')
+    {
+        byte_offset += c.len_utf8();
+    }
+
+    Some(byte_offset)
+}
+
 fn current_line_dash_thematic_break_after_required_indent(
     p: &MarkdownParser,
     required_indent: usize,
 ) -> Option<usize> {
-    let line_start: usize = p.cur_range().start().into();
+    let line_start = current_line_start_after_current_quote_prefixes(p)?;
     let source = p.source().source_text();
     let line = source.get(line_start..)?;
     let line_end = line.find(['\n', '\r']).unwrap_or(line.len());
     dash_thematic_break_after_required_indent(&line[..line_end], required_indent)
+}
+
+fn current_line_start_after_current_quote_prefixes(p: &MarkdownParser) -> Option<usize> {
+    let source = p.source().source_text();
+    let physical_line_start: usize = p.cur_range().start().into();
+    let current_line_start = source[..physical_line_start]
+        .rfind(['\n', '\r'])
+        .map_or(0, |index| index + 1);
+    let quote_prefix_count = count_quote_prefixes(&source[current_line_start..physical_line_start]);
+
+    if quote_prefix_count == 0 {
+        return Some(physical_line_start);
+    }
+
+    let current_line = source.get(physical_line_start..)?;
+    strip_quote_prefixes(current_line, quote_prefix_count)
+        .map(|offset| physical_line_start + offset)
+        .or(Some(physical_line_start))
 }
 
 fn dash_thematic_break_after_required_indent(line: &str, required_indent: usize) -> Option<usize> {
@@ -2525,6 +2620,15 @@ fn check_continuation_indent(
 
         // Lazy continuation per CommonMark §5.2
         if !state.last_block_was_paragraph {
+            if state.last_link_reference_before_dash_thematic_break
+                && list_link_reference_before_dash_thematic_break(p)
+            {
+                return ContinuationResult {
+                    action: LoopAction::FallThrough,
+                    restore: VirtualLineRestore::None,
+                    parse_mode: ContinuationParseMode::AnyBlock,
+                };
+            }
             return ContinuationResult {
                 action: LoopAction::Break,
                 restore: VirtualLineRestore::None,
@@ -2629,6 +2733,7 @@ fn parse_continuation_block(
     } else {
         false
     };
+    state.last_link_reference_before_dash_thematic_break = false;
     let last_list_blank = p.take_last_list_ends_with_blank();
     if last_list_blank {
         state.has_blank_line = true;
