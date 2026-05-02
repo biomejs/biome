@@ -263,77 +263,73 @@ fn validate_secondary_alias(
 
 fn collect_iteration_aliases(value: &VueVForValue) -> Vec<TokenText> {
     let mut aliases = Vec::new();
+    let mut pending = Vec::new();
+
     if let Ok(binding) = value.binding() {
-        collect_aliases_from_binding(&binding, &mut aliases);
+        pending.push(binding);
     }
-    aliases
-}
 
-fn collect_aliases_from_binding(binding: &AnyVueVForBinding, aliases: &mut Vec<TokenText>) {
-    match binding {
-        AnyVueVForBinding::VueVForIdentifierBinding(binding) => {
-            if let Ok(token) = binding.name_token() {
-                aliases.push(token.token_text_trimmed());
-            }
-        }
-        AnyVueVForBinding::VueVForTupleBinding(binding) => {
-            if let Ok(value) = binding.value() {
-                collect_aliases_from_binding(&value, aliases);
-            }
-            if let Some(second) = binding.second()
-                && let Ok(binding) = second.binding()
-            {
-                collect_aliases_from_binding(&binding, aliases);
-            }
-            if let Some(third) = binding.third()
-                && let Ok(binding) = third.binding()
-            {
-                collect_aliases_from_binding(&binding, aliases);
-            }
-        }
-        AnyVueVForBinding::AnyVueVForDestructuredBinding(binding) => {
-            collect_aliases_from_destructured_binding(binding, aliases);
-        }
-    }
-}
-
-fn collect_aliases_from_destructured_binding(
-    binding: &AnyVueVForDestructuredBinding,
-    aliases: &mut Vec<TokenText>,
-) {
-    let bindings = match binding {
-        AnyVueVForDestructuredBinding::VueVForArrayBinding(binding) => binding.bindings(),
-        AnyVueVForDestructuredBinding::VueVForObjectBinding(binding) => binding.bindings(),
-    };
-
-    for binding in bindings.iter().flatten() {
+    while let Some(binding) = pending.pop() {
         match binding {
-            biome_html_syntax::AnyVueVForBindingListElement::VueVForIdentifierBinding(binding) => {
+            AnyVueVForBinding::VueVForIdentifierBinding(binding) => {
                 if let Ok(token) = binding.name_token() {
                     aliases.push(token.token_text_trimmed());
                 }
             }
-            biome_html_syntax::AnyVueVForBindingListElement::VueVForObjectPropertyBinding(
-                binding,
-            ) => {
-                if let Ok(binding) = binding.binding() {
-                    collect_aliases_from_binding(&binding, aliases);
-                }
-            }
-            biome_html_syntax::AnyVueVForBindingListElement::VueVForRestBinding(binding) => {
-                if let Ok(binding) = binding.binding()
-                    && let Ok(token) = binding.name_token()
+            AnyVueVForBinding::VueVForTupleBinding(binding) => {
+                if let Some(third) = binding.third()
+                    && let Ok(binding) = third.binding()
                 {
-                    aliases.push(token.token_text_trimmed());
+                    pending.push(binding);
+                }
+                if let Some(second) = binding.second()
+                    && let Ok(binding) = second.binding()
+                {
+                    pending.push(binding);
+                }
+                if let Ok(binding) = binding.value() {
+                    pending.push(binding);
                 }
             }
-            biome_html_syntax::AnyVueVForBindingListElement::AnyVueVForDestructuredBinding(
-                binding,
-            ) => {
-                collect_aliases_from_destructured_binding(&binding, aliases);
+            AnyVueVForBinding::AnyVueVForDestructuredBinding(binding) => {
+                let bindings = match binding {
+                    AnyVueVForDestructuredBinding::VueVForArrayBinding(binding) => {
+                        binding.bindings()
+                    }
+                    AnyVueVForDestructuredBinding::VueVForObjectBinding(binding) => {
+                        binding.bindings()
+                    }
+                };
+
+                for binding in bindings.iter().flatten() {
+                    match binding {
+                        biome_html_syntax::AnyVueVForBindingListElement::VueVForIdentifierBinding(binding) => {
+                            if let Ok(token) = binding.name_token() {
+                                aliases.push(token.token_text_trimmed());
+                            }
+                        }
+                        biome_html_syntax::AnyVueVForBindingListElement::VueVForObjectPropertyBinding(binding) => {
+                            if let Ok(binding) = binding.binding() {
+                                pending.push(binding);
+                            }
+                        }
+                        biome_html_syntax::AnyVueVForBindingListElement::VueVForRestBinding(binding) => {
+                            if let Ok(binding) = binding.binding()
+                                && let Ok(token) = binding.name_token()
+                            {
+                                aliases.push(token.token_text_trimmed());
+                            }
+                        }
+                        biome_html_syntax::AnyVueVForBindingListElement::AnyVueVForDestructuredBinding(binding) => {
+                            pending.push(AnyVueVForBinding::AnyVueVForDestructuredBinding(binding.clone()));
+                        }
+                    }
+                }
             }
         }
     }
+
+    aliases
 }
 
 fn enclosing_tag_element(directive: &VueDirective) -> Option<AnyHtmlTagElement> {
