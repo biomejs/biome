@@ -13,19 +13,19 @@ static PRESET: LazyLock<ConfigPreset> =
 /// Sort the candidates of a parsed Tailwind class list and return the joined,
 /// space-separated result.
 pub fn sort_class_list(root: &TwRoot) -> String {
-    let mut unknown: Vec<String> = Vec::new();
+    let mut unknown: Vec<SyntaxNodeText> = Vec::new();
     let mut known: Vec<SortKey> = Vec::new();
 
     for candidate in root.candidates() {
         match candidate {
             AnyTwFullCandidate::TwBogusCandidate(node) => {
-                unknown.push(node.syntax().text_trimmed().to_string());
+                unknown.push(node.syntax().text_trimmed());
             }
             AnyTwFullCandidate::TwFullCandidate(node) => {
-                let text = node.syntax().text_trimmed().to_string();
-                match SortKey::from_candidate(text, &node) {
+                let text = node.syntax().text_trimmed();
+                match SortKey::from_candidate(text.clone(), &node) {
                     Some(key) => known.push(key),
-                    None => unknown.push(node.syntax().text_trimmed().to_string()),
+                    None => unknown.push(text),
                 }
             }
         }
@@ -33,20 +33,27 @@ pub fn sort_class_list(root: &TwRoot) -> String {
 
     // Pre-sort lexicographically so that classes with identical sort keys keep
     // a deterministic alphabetical order.
-    known.sort_unstable_by(|a, b| a.text.cmp(&b.text));
+    known.sort_unstable_by(|a, b| a.text.chars().cmp(b.text.chars()));
     // Stable 6-step compare.
     known.sort_by(SortKey::compare);
 
-    let mut result: Vec<&str> = unknown.iter().map(String::as_str).collect();
-    result.extend(known.iter().map(|k| k.text.as_str()));
-    result.join(" ")
+    // Concatenate directly into the output buffer so that each candidate's
+    // source bytes are copied exactly once.
+    let mut result = String::new();
+    for text in unknown.iter().chain(known.iter().map(|k| &k.text)) {
+        if !result.is_empty() {
+            result.push(' ');
+        }
+        text.for_each_chunk(|chunk| result.push_str(chunk));
+    }
+    result
 }
 
 /// Sort information extracted from a parsed `TwFullCandidate`.
 struct SortKey {
-    /// The original class text, used as the output and as a lexicographic
-    /// fallback.
-    text: String,
+    /// Source-backed handle to the original class text. Used as the output
+    /// payload and as the lexicographic fallback for ties.
+    text: SyntaxNodeText,
     /// Source-backed texts of arbitrary `[...]:` variants, in source order.
     arbitrary_variants: Vec<SyntaxNodeText>,
     /// Sorted, deduplicated indices of recognized variants in
@@ -61,7 +68,7 @@ struct SortKey {
 }
 
 impl SortKey {
-    fn from_candidate(text: String, node: &TwFullCandidate) -> Option<Self> {
+    fn from_candidate(text: SyntaxNodeText, node: &TwFullCandidate) -> Option<Self> {
         let mut arbitrary_variants: Vec<SyntaxNodeText> = Vec::new();
         let mut variant_indices: Vec<usize> = Vec::new();
 
