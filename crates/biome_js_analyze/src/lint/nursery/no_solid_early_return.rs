@@ -79,13 +79,10 @@ impl Rule for NoSolidEarlyReturn {
             return None;
         }
 
-        let Some(body) = func
+        let body = func
             .body()
             .ok()
-            .and_then(|b| b.as_js_function_body().cloned())
-        else {
-            return None;
-        };
+            .and_then(|b| b.as_js_function_body().cloned())?;
 
         let mut all_returns = vec![];
         let mut if_returns = vec![];
@@ -108,10 +105,10 @@ impl Rule for NoSolidEarlyReturn {
             }
         }
 
-        if has_multiple_returns {
-            if let Some(ret) = if_returns.into_iter().next() {
-                return Some((ReturnType::EarlyReturn, ret));
-            }
+        if has_multiple_returns
+            && let Some(ret) = if_returns.into_iter().next()
+        {
+            return Some((ReturnType::EarlyReturn, ret));
         }
 
         None
