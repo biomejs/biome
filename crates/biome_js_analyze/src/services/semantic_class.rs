@@ -3,7 +3,7 @@ use biome_analyze::{
     RuleMetadata, ServiceBag, ServicesDiagnostic, Visitor, VisitorContext, VisitorFinishContext,
 };
 use biome_js_syntax::{
-    AnyJsBindingPattern, AnyJsClass, AnyJsClassMember, AnyJsExpression,
+    AnyJsBindingPattern, AnyJsClass, AnyJsClassMember, AnyJsExpression, AnyJsFunctionBody,
     AnyJsObjectBindingPatternMember, AnyJsRoot, JsArrayAssignmentPattern,
     JsArrowFunctionExpression, JsAssignmentExpression, JsClassMemberList, JsConstructorClassMember,
     JsFunctionBody, JsLanguage, JsObjectAssignmentPattern, JsObjectBindingPattern,
@@ -201,15 +201,7 @@ fn class_member_references(list: &JsClassMemberList) -> ClassMemberReferences {
                 .and_then(|body| collect_references_from_body(getter.syntax(), &body)),
             AnyJsClassMember::JsPropertyClassMember(property) => {
                 if let Ok(expression) = property.value()?.expression() {
-                    if let Some(arrow_function) =
-                        JsArrowFunctionExpression::cast(expression.clone().into_syntax())
-                    {
-                        if let Ok(any_js_body) = arrow_function.body()
-                            && let Some(body) = any_js_body.as_js_function_body()
-                        {
-                            return collect_references_from_body(arrow_function.syntax(), body);
-                        }
-                    } else if let Some(static_member_expression) =
+                    if let Some(static_member_expression) =
                         expression.as_js_static_member_expression()
                     {
                         return collect_class_property_reads_from_static_member(
@@ -246,7 +238,7 @@ fn class_member_references(list: &JsClassMemberList) -> ClassMemberReferences {
 /// Represents a function body and all `this` references (including aliases) valid within its lexical scope.
 #[derive(Clone, Debug)]
 struct FunctionThisReferences {
-    scope: JsFunctionBody,
+    scope: JsSyntaxNode,
     this_references: FxHashSet<ClassMemberReference>,
 }
 
@@ -295,7 +287,7 @@ impl ThisScopeVisitor<'_> {
                         scoped_this_references.extend(current_scope);
 
                         self.current_this_scopes.push(FunctionThisReferences {
-                            scope: body.clone(),
+                            scope: body.syntax().clone(),
                             this_references: scoped_this_references,
                         });
                     }
@@ -314,7 +306,7 @@ impl ThisScopeVisitor<'_> {
                     scoped_this_references.extend(current_scope_aliases.clone());
 
                     self.current_this_scopes.push(FunctionThisReferences {
-                        scope: body.clone(),
+                        scope: body.syntax().clone(),
                         this_references: scoped_this_references,
                     });
                 }
@@ -405,7 +397,7 @@ fn is_this_reference(
         return scoped_this_references
             .iter()
             .any(|FunctionThisReferences { scope, .. }| {
-                is_within_scope_without_shadowing(syntax, scope.syntax())
+                is_within_scope_without_shadowing(syntax, scope)
             });
     }
 
@@ -427,8 +419,7 @@ fn is_this_reference(
                         .eq(value_token.token_text_trimmed().text())
                 });
 
-                let is_within_scope =
-                    is_within_scope_without_shadowing(name_syntax, scope.syntax());
+                let is_within_scope = is_within_scope_without_shadowing(name_syntax, scope);
 
                 is_alias && is_within_scope
             },
@@ -655,20 +646,22 @@ fn collect_references_from_arrow_function(
     writes: &mut FxHashSet<ClassMemberReference>,
     reads: &mut FxHashSet<ClassMemberReference>,
 ) {
-    let Some(body) = arrow_function
-        .body()
-        .ok()
-        .and_then(|body| body.as_js_function_body().cloned())
-    else {
+    let Ok(body) = arrow_function.body() else {
         return;
     };
 
     let mut this_references = FxHashSet::default();
     this_references.extend(inherited_this_references.iter().cloned());
-    this_references.extend(ThisScopeReferences::new(&body).local_this_references);
+    if let Some(function_body) = body.as_js_function_body() {
+        this_references.extend(ThisScopeReferences::new(function_body).local_this_references);
+    }
 
+    let scope = match &body {
+        AnyJsFunctionBody::AnyJsExpression(_) => arrow_function.syntax().clone(),
+        AnyJsFunctionBody::JsFunctionBody(body) => body.syntax().clone(),
+    };
     let current_scope = FunctionThisReferences {
-        scope: body.clone(),
+        scope,
         this_references,
     };
     visit_references_in_body(
@@ -680,8 +673,12 @@ fn collect_references_from_arrow_function(
 
     let inherited_this_references: Vec<_> = current_scope.this_references.iter().cloned().collect();
     let mut skipped_ranges = vec![];
+    let body_syntax = match &body {
+        AnyJsFunctionBody::AnyJsExpression(expression) => expression.syntax(),
+        AnyJsFunctionBody::JsFunctionBody(body) => body.syntax(),
+    };
 
-    for event in body.syntax().preorder() {
+    for event in body_syntax.preorder() {
         match event {
             WalkEvent::Enter(node) => {
                 if skipped_ranges
@@ -711,7 +708,7 @@ fn collect_references_from_arrow_function(
                         | JsSyntaxKind::JS_FUNCTION_DECLARATION
                         | JsSyntaxKind::JS_FUNCTION_EXPORT_DEFAULT_DECLARATION
                 ) || (node.kind() == JsSyntaxKind::JS_FUNCTION_BODY
-                    && node.key() != body.syntax().key())
+                    && node.key() != body_syntax.key())
                 {
                     skipped_ranges.push(node.text_range());
                 }
@@ -964,7 +961,7 @@ fn collect_references_from_constructor(constructor_body: &JsFunctionBody) -> Cla
 
     for this_scope in all_descendants_fn_bodies_and_this_scopes.iter() {
         visit_references_in_body(
-            this_scope.scope.syntax(),
+            &this_scope.scope,
             std::slice::from_ref(this_scope),
             &mut writes,
             &mut reads,
@@ -1154,10 +1151,32 @@ mod tests {
                     this.notReadonlyMember = "new value";
                 }, 50);
 
+                private expressionAssignedMember = "";
+
+                private readonly expressionAssignedCallback = _.debounce(
+                    () => this.expressionAssignedMember = "new value",
+                    50,
+                );
+
+                private expressionUpdatedMember = 0;
+
+                private readonly expressionUpdatedCallback = _.debounce(
+                    () => this.expressionUpdatedMember++,
+                    50,
+                );
+
                 private functionCallbackMember = "";
 
                 private readonly functionCallback = debounce(function () {
                     this.functionCallbackMember = "new value";
+                });
+
+                private nestedClassMember = "";
+
+                private readonly nestedClassCallback = debounce(() => class Nested {
+                    method() {
+                        this.nestedClassMember = "new value";
+                    }
                 });
             }
         "#,
@@ -1172,8 +1191,17 @@ mod tests {
 
         assert_writes(
             &references.writes,
-            &[("notReadonlyMember", AccessKind::Write)],
+            &[
+                ("notReadonlyMember", AccessKind::Write),
+                ("expressionAssignedMember", AccessKind::Write),
+                ("expressionUpdatedMember", AccessKind::Write),
+            ],
             "class property initializer arrow callback",
+        );
+        assert_reads(
+            &references.reads,
+            &[("expressionUpdatedMember", AccessKind::MeaningfulRead)],
+            "expression-bodied arrow update callback",
         );
         assert!(
             references
@@ -1181,6 +1209,13 @@ mod tests {
                 .iter()
                 .all(|reference| reference.name.text() != "functionCallbackMember"),
             "normal function callbacks should not use the class initializer's lexical this"
+        );
+        assert!(
+            references
+                .writes
+                .iter()
+                .all(|reference| reference.name.text() != "nestedClassMember"),
+            "nested class expressions should not use the outer class initializer's lexical this"
         );
     }
 
