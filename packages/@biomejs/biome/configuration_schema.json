@@ -7023,7 +7023,7 @@
 					]
 				},
 				"useVueValidVFor": {
-					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/use-vue-valid-v-for",
+					"description": "Enforces valid v-for directives in Vue templates.\nSee https://biomejs.dev/linter/rules/use-vue-valid-v-for",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVueValidVForConfiguration" },
 						{ "type": "null" }

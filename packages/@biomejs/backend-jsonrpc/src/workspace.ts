@@ -2712,7 +2712,7 @@ See https://biomejs.dev/linter/rules/use-vue-valid-v-else-if
 	 */
 	useVueValidVElseIf?: UseVueValidVElseIfConfiguration;
 	/**
-	* Succinct description of the rule.
+	* Enforces valid v-for directives in Vue templates.
 See https://biomejs.dev/linter/rules/use-vue-valid-v-for 
 	 */
 	useVueValidVFor?: UseVueValidVForConfiguration;
