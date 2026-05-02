@@ -122,9 +122,7 @@ impl SortKey {
             _ => {}
         }
 
-        // Step 2: compare arbitrary variants by count, then lexicographically
-        // by source text (no allocation — `SyntaxNodeText::chars` streams from
-        // the underlying tokens).
+        // Step 2: compare arbitrary variants by count, then lexicographically.
         if !a.arbitrary_variants.is_empty() {
             let len_cmp = a
                 .arbitrary_variants
