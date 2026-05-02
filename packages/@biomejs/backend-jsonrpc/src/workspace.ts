@@ -2433,6 +2433,11 @@ See https://biomejs.dev/linter/rules/no-vue-v-if-with-v-for
 	 */
 	noVueVIfWithVFor?: NoVueVIfWithVForConfiguration;
 	/**
+	* Disallow number literals with zero fractions or dangling dots.
+See https://biomejs.dev/linter/rules/no-zero-fractions 
+	 */
+	noZeroFractions?: NoZeroFractionsConfiguration;
+	/**
 	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
@@ -4496,6 +4501,9 @@ export type NoVueRefAsOperandConfiguration =
 export type NoVueVIfWithVForConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueVIfWithVForOptions;
+export type NoZeroFractionsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoZeroFractionsOptions;
 export type UseArraySomeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseArraySomeOptions;
@@ -6334,6 +6342,11 @@ export interface RuleWithNoVueVIfWithVForOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueVIfWithVForOptions;
 }
+export interface RuleWithNoZeroFractionsOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoZeroFractionsOptions;
+}
 export interface RuleWithUseArraySomeOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -7997,6 +8010,7 @@ export type NoVueArrowFuncInWatchOptions = {};
 export type NoVueOptionsApiOptions = {};
 export type NoVueRefAsOperandOptions = {};
 export type NoVueVIfWithVForOptions = {};
+export type NoZeroFractionsOptions = {};
 export type UseArraySomeOptions = {};
 export type UseArraySortCompareOptions = {};
 export type UseAwaitThenableOptions = {};
@@ -9144,6 +9158,7 @@ export type Category =
 	| "lint/nursery/noVueOptionsApi"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueVIfWithVFor"
+	| "lint/nursery/noZeroFractions"
 	| "lint/nursery/useArraySome"
 	| "lint/nursery/useArraySortCompare"
 	| "lint/nursery/useAwaitThenable"
