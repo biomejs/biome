@@ -1,4 +1,4 @@
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, SyntaxNodeText};
 use biome_tailwind_syntax::{
     AnyTwCandidate, AnyTwFullCandidate, AnyTwVariant, TwFullCandidate, TwRoot,
 };
@@ -47,8 +47,8 @@ struct SortKey {
     /// The original class text, used as the output and as a lexicographic
     /// fallback.
     text: String,
-    /// Texts of arbitrary `[...]:` variants, in source order.
-    arbitrary_variants: Vec<String>,
+    /// Source-backed texts of arbitrary `[...]:` variants, in source order.
+    arbitrary_variants: Vec<SyntaxNodeText>,
     /// Sorted, deduplicated indices of recognized variants in
     /// [`PRESET::variants`].
     variant_indices: Vec<usize>,
@@ -62,14 +62,14 @@ struct SortKey {
 
 impl SortKey {
     fn from_candidate(text: String, node: &TwFullCandidate) -> Option<Self> {
-        let mut arbitrary_variants: Vec<String> = Vec::new();
+        let mut arbitrary_variants: Vec<SyntaxNodeText> = Vec::new();
         let mut variant_indices: Vec<usize> = Vec::new();
 
         for variant in node.variants() {
             let Ok(variant) = variant else { continue };
             match variant {
                 AnyTwVariant::TwArbitraryVariant(v) => {
-                    arbitrary_variants.push(v.syntax().text_trimmed().to_string());
+                    arbitrary_variants.push(v.syntax().text_trimmed());
                 }
                 AnyTwVariant::TwStaticVariant(v) => {
                     if let Ok(token) = v.base_token() {
@@ -122,7 +122,9 @@ impl SortKey {
             _ => {}
         }
 
-        // Step 2: compare arbitrary variants by count, then lexicographically.
+        // Step 2: compare arbitrary variants by count, then lexicographically
+        // by source text (no allocation — `SyntaxNodeText::chars` streams from
+        // the underlying tokens).
         if !a.arbitrary_variants.is_empty() {
             let len_cmp = a
                 .arbitrary_variants
@@ -131,9 +133,11 @@ impl SortKey {
             if len_cmp != Ordering::Equal {
                 return len_cmp;
             }
-            let lex_cmp = a.arbitrary_variants.cmp(&b.arbitrary_variants);
-            if lex_cmp != Ordering::Equal {
-                return lex_cmp;
+            for (av, bv) in a.arbitrary_variants.iter().zip(&b.arbitrary_variants) {
+                let lex_cmp = av.chars().cmp(bv.chars());
+                if lex_cmp != Ordering::Equal {
+                    return lex_cmp;
+                }
             }
         }
 
