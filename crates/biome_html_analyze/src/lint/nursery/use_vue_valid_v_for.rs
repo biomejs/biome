@@ -4,12 +4,11 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_html_syntax::{
-    AnyHtmlAttribute, AnyHtmlAttributeInitializer, AnyHtmlElement, AnyHtmlTagName, AnyVueDirective,
-    AnyVueVForBinding, AnyVueVForBindingListElement, AnyVueVForDestructuredBinding,
-    HtmlAttributeInitializerClause, HtmlElement, HtmlOpeningElement, HtmlSelfClosingElement,
-    VueDirective, VueDirectiveArgument, VueVForValue,
+    AnyHtmlAttributeInitializer, AnyHtmlElement, AnyHtmlTagName, AnyVueDirective,
+    AnyVueVForBinding, HtmlAttributeInitializerClause, HtmlElement, VueDirective,
+    VueVForIdentifierBinding, VueVForValue,
 };
-use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TextRange, TokenText};
+use biome_rowan::{AstNode, AstNodeList, TextRange, TokenText};
 use biome_rule_options::use_vue_valid_v_for::UseVueValidVForOptions;
 use biome_unicode_table::{is_js_id_continue, is_js_id_start};
 
@@ -75,7 +74,6 @@ pub enum ViolationKind {
     UnexpectedArgument(TextRange),
     UnexpectedModifier(TextRange),
     MissingValue,
-    InvalidEmptyAlias,
     InvalidSecondaryAlias(TextRange),
     MissingKey(TextRange),
     KeyDoesNotUseIterationVariables(TextRange),
@@ -109,10 +107,6 @@ impl Rule for UseVueValidVFor {
 
         if is_missing_v_for_value(&v_for_value) {
             return Some(ViolationKind::MissingValue);
-        }
-
-        if v_for_value.binding().is_err() {
-            return Some(ViolationKind::InvalidEmptyAlias);
         }
 
         if let Some(violation) = validate_secondary_bindings(&v_for_value) {
@@ -173,20 +167,6 @@ impl Rule for UseVueValidVFor {
             })
             .note(markup! {
                 "Provide a value such as "<Emphasis>"v-for=\"item in items\""</Emphasis>"."
-            }),
-
-            ViolationKind::InvalidEmptyAlias => RuleDiagnostic::new(
-                rule_category!(),
-                directive.range(),
-                markup! {
-                    "This v-for directive contains an empty alias."
-                },
-            )
-            .note(markup! {
-                "Every alias slot in a v-for directive must map to a real iteration variable."
-            })
-            .note(markup! {
-                "Remove the empty slot or replace it with an identifier."
             }),
 
             ViolationKind::InvalidSecondaryAlias(range) => RuleDiagnostic::new(
@@ -251,9 +231,7 @@ fn validate_secondary_binding(
     tuple_element: Option<&biome_html_syntax::VueVForTupleElement>,
 ) -> Option<ViolationKind> {
     let tuple_element = tuple_element?;
-    let Ok(binding) = tuple_element.binding() else {
-        return Some(ViolationKind::InvalidEmptyAlias);
-    };
+    let binding = tuple_element.binding().ok()?;
 
     if matches!(binding, AnyVueVForBinding::VueVForIdentifierBinding(_)) {
         None
@@ -264,94 +242,32 @@ fn validate_secondary_binding(
 
 /// "Iteration bindings" are the bindings introduced by the v-for directive.
 fn collect_iteration_bindings(value: &VueVForValue) -> Vec<TokenText> {
-    let mut iteration_bindings = Vec::new();
-    let mut pending = Vec::new();
+    let Ok(binding) = value.binding() else {
+        return Vec::new();
+    };
 
-    if let Ok(binding) = value.binding() {
-        pending.push(binding);
-    }
-
-    while let Some(binding) = pending.pop() {
-        match binding {
-            AnyVueVForBinding::VueVForIdentifierBinding(binding) => {
-                if let Ok(token) = binding.name_token() {
-                    iteration_bindings.push(token.token_text_trimmed());
-                }
-            }
-            AnyVueVForBinding::VueVForTupleBinding(binding) => {
-                if let Some(third) = binding.third()
-                    && let Ok(binding) = third.binding()
-                {
-                    pending.push(binding);
-                }
-                if let Some(second) = binding.second()
-                    && let Ok(binding) = second.binding()
-                {
-                    pending.push(binding);
-                }
-                if let Ok(binding) = binding.value() {
-                    pending.push(binding);
-                }
-            }
-            AnyVueVForBinding::AnyVueVForDestructuredBinding(binding) => {
-                let bindings = match binding {
-                    AnyVueVForDestructuredBinding::VueVForArrayBinding(binding) => {
-                        binding.bindings()
-                    }
-                    AnyVueVForDestructuredBinding::VueVForObjectBinding(binding) => {
-                        binding.bindings()
-                    }
-                };
-
-                for binding in bindings.iter().flatten() {
-                    match binding {
-                        AnyVueVForBindingListElement::VueVForIdentifierBinding(binding) => {
-                            if let Ok(token) = binding.name_token() {
-                                iteration_bindings.push(token.token_text_trimmed());
-                            }
-                        }
-                        AnyVueVForBindingListElement::VueVForObjectPropertyBinding(binding) => {
-                            if let Ok(binding) = binding.binding() {
-                                pending.push(binding);
-                            }
-                        }
-                        AnyVueVForBindingListElement::VueVForRestBinding(binding) => {
-                            if let Ok(binding) = binding.binding()
-                                && let Ok(token) = binding.name_token()
-                            {
-                                iteration_bindings.push(token.token_text_trimmed());
-                            }
-                        }
-                        AnyVueVForBindingListElement::AnyVueVForDestructuredBinding(binding) => {
-                            pending.push(AnyVueVForBinding::AnyVueVForDestructuredBinding(
-                                binding.clone(),
-                            ));
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    iteration_bindings
+    binding
+        .syntax()
+        .descendants()
+        .filter_map(VueVForIdentifierBinding::cast)
+        .filter_map(|binding| binding.name_token().ok())
+        .map(|token| token.token_text_trimmed())
+        .collect()
 }
 
 fn enclosing_tag_element(directive: &VueDirective) -> Option<AnyHtmlTagElement> {
-    directive.syntax().ancestors().skip(1).find_map(|ancestor| {
-        HtmlOpeningElement::cast(ancestor.clone())
-            .map(AnyHtmlTagElement::HtmlOpeningElement)
-            .or_else(|| {
-                HtmlSelfClosingElement::cast(ancestor)
-                    .map(AnyHtmlTagElement::HtmlSelfClosingElement)
-            })
-    })
+    directive
+        .syntax()
+        .ancestors()
+        .skip(1)
+        .find_map(AnyHtmlTagElement::cast)
 }
 
 fn check_key_requirement(
     element: &AnyHtmlTagElement,
     iteration_bindings: &[TokenText],
 ) -> Option<ViolationKind> {
-    if let Some(key_directive) = find_v_bind_key(element) {
+    if let Some(key_directive) = element.find_vue_binding("key") {
         if key_directive_uses_iteration_variables(&key_directive, iteration_bindings)? {
             return None;
         }
@@ -368,6 +284,9 @@ fn check_key_requirement(
     None
 }
 
+/// Handle special case for `<template v-for>`
+///
+/// Vue does not require keys on elements inside a `<template v-for>` as long as they do not use any variables from the `v-for` directive. This function checks for that case and only reports missing keys if necessary.
 fn check_template_child_keys(
     directive: &VueDirective,
     element: &AnyHtmlTagElement,
@@ -378,7 +297,7 @@ fn check_template_child_keys(
         return None;
     }
 
-    if find_v_bind_key(element).is_some() {
+    if element.find_vue_binding("key").is_some() {
         return None;
     }
 
@@ -418,7 +337,12 @@ fn child_uses_parent_binding_in_v_for(
     let Some(v_for) = find_v_for_directive(element) else {
         return Some(false);
     };
-    let value = v_for_value(&v_for)?;
+    let value = v_for
+        .initializer()?
+        .value()
+        .ok()?
+        .as_vue_v_for_value()
+        .cloned()?;
     let expression = value.expression().ok()?;
     let text = expression.string_value()?;
 
@@ -438,53 +362,6 @@ fn find_v_for_directive(element: &AnyHtmlTagElement) -> Option<VueDirective> {
     }
 
     None
-}
-
-fn v_for_value(directive: &VueDirective) -> Option<VueVForValue> {
-    directive
-        .initializer()?
-        .value()
-        .ok()?
-        .as_vue_v_for_value()
-        .cloned()
-}
-
-fn find_v_bind_key(element: &AnyHtmlTagElement) -> Option<AnyVueDirective> {
-    element
-        .attributes()
-        .iter()
-        .find_map(|attribute| match attribute {
-            AnyHtmlAttribute::AnyVueDirective(directive) => match directive {
-                AnyVueDirective::VueDirective(directive)
-                    if directive
-                        .name_token()
-                        .is_ok_and(|token| token.text_trimmed() == "v-bind")
-                        && directive
-                            .arg()
-                            .is_some_and(|argument| is_key_argument(&argument)) =>
-                {
-                    Some(AnyVueDirective::VueDirective(directive))
-                }
-                AnyVueDirective::VueVBindShorthandDirective(directive)
-                    if directive
-                        .arg()
-                        .is_ok_and(|argument| is_key_argument(&argument)) =>
-                {
-                    Some(AnyVueDirective::VueVBindShorthandDirective(directive))
-                }
-                _ => None,
-            },
-            _ => None,
-        })
-}
-
-fn is_key_argument(argument: &VueDirectiveArgument) -> bool {
-    argument
-        .arg()
-        .ok()
-        .and_then(|argument| argument.as_vue_static_argument().cloned())
-        .and_then(|argument| argument.name_token().ok())
-        .is_some_and(|token| token.text_trimmed() == "key")
 }
 
 fn key_directive_uses_iteration_variables(
@@ -510,10 +387,7 @@ fn key_expression(initializer: HtmlAttributeInitializerClause) -> Option<biome_r
         AnyHtmlAttributeInitializer::HtmlString(value) => {
             value.inner_string_text().ok().map(Into::into)
         }
-        AnyHtmlAttributeInitializer::HtmlAttributeSingleTextExpression(value) => {
-            value.expression().ok()?.string_value()
-        }
-        AnyHtmlAttributeInitializer::VueVForValue(_) => None,
+        _ => None,
     }
 }
 

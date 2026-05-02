@@ -480,9 +480,7 @@ impl AnyHtmlTagElement {
 
                     // v-bind:name="..."
                     AnyVueDirective::VueDirective(d) => {
-                        let is_bind = d
-                            .name_token()
-                            .is_ok_and(|t| t.text_trimmed().eq_ignore_ascii_case("v-bind"));
+                        let is_bind = d.name_token().is_ok_and(|t| t.text_trimmed() == "v-bind");
                         is_bind
                             && d.arg()
                                 .and_then(|arg| arg.arg().ok())
@@ -499,6 +497,45 @@ impl AnyHtmlTagElement {
                 _ => false,
             };
             if matches { Some(attr) } else { None }
+        })
+    }
+
+    /// Find a Vue binding (either `:name` or `v-bind:name`) by the target attribute name. This intentionally excludes standard HTML attributes, so it won't match `name="..."` even if it exists on the same element.
+    ///
+    /// Vue bindings are case sensitive, so this will only match if the case of `name_to_lookup` exactly matches the case used in the binding. For example, `:fooBar="..."` will only be matched by `find_vue_binding("fooBar")`, not `find_vue_binding("foobar")`.
+    ///
+    /// See also: [Self::find_attribute_or_vue_binding] which checks for both HTML attributes and Vue bindings.
+    pub fn find_vue_binding(&self, name_to_lookup: &str) -> Option<AnyVueDirective> {
+        self.attributes().iter().find_map(|attr| {
+            let directive = attr.as_any_vue_directive()?;
+            let is_matching_vue_binding = match directive {
+                // :name="..."
+                AnyVueDirective::VueVBindShorthandDirective(d) => d
+                    .arg()
+                    .ok()
+                    .and_then(|arg| arg.arg().ok())
+                    .and_then(|arg| arg.as_vue_static_argument().cloned())
+                    .and_then(|s| s.name_token().ok())
+                    .is_some_and(|t| t.text_trimmed() == name_to_lookup),
+
+                // v-bind:name="..."
+                AnyVueDirective::VueDirective(d) => {
+                    let is_bind = d.name_token().is_ok_and(|t| t.text_trimmed() == "v-bind");
+                    is_bind
+                        && d.arg()
+                            .and_then(|arg| arg.arg().ok())
+                            .and_then(|arg| arg.as_vue_static_argument().cloned())
+                            .and_then(|s| s.name_token().ok())
+                            .is_some_and(|t| t.text_trimmed() == name_to_lookup)
+                }
+
+                _ => false,
+            };
+            if is_matching_vue_binding {
+                Some(directive.clone())
+            } else {
+                None
+            }
         })
     }
 }
