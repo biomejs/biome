@@ -611,6 +611,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         working_directory,
         compute_actions,
         snippet_services: _,
+        analyzer_cache,
     } = params;
     let _ = debug_span!("Code actions HTML", range =? range, path =? path).entered();
     let tree = parse.tree();
@@ -639,6 +640,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         .with_path(path.as_path())
         .with_enabled_selectors(rules)
         .with_project_layout(project_layout.clone())
+        .with_cache(&analyzer_cache)
         .finish();
 
     let filter = AnalysisFilter {

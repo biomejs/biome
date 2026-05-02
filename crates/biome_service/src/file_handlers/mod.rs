@@ -1174,6 +1174,7 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) compute_actions: bool,
     // Services attached to the current embedded snippet, when actions are run on snippets.
     pub(crate) snippet_services: Option<&'a DocumentServices>,
+    pub(crate) analyzer_cache: AnalyzerVisitorCache,
 }
 
 pub(crate) struct UpdateSnippetsNodes {
@@ -2314,7 +2315,6 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
             };
         }
 
-        let original_options = self.analyzer_options.clone();
         let mut analyzer_options = self.analyzer_options;
         let mut disabled_rules = vec![];
         let mut enabled_rules = vec![];
@@ -2416,7 +2416,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         if let Some(key) = key.as_ref()
             && let Some(cache) = self.cache.as_ref()
         {
-            let cached = CachedRuleSet::extract_from(&result, &original_options);
+            let cached = CachedRuleSet::extract_from(&result);
             cache.insert_entry(key.clone(), cached);
         }
 
@@ -2477,20 +2477,23 @@ pub(crate) struct CachedRuleSet {
 }
 
 impl CachedRuleSet {
-    fn extract_from(result: &AnalyzerVisitorResult, options: &AnalyzerOptions) -> Self {
+    fn extract_from(result: &AnalyzerVisitorResult) -> Self {
         Self {
             enabled_rules: result.enabled_rules.clone(),
             disabled_rules: result.disabled_rules.clone(),
             fixable_rules: result.fixable_rules.clone(),
-            globals: options
+            globals: result
+                .analyzer_options
                 .globals()
                 .iter()
                 .map(|s| s.to_string().into_boxed_str())
                 .collect::<Vec<_>>(),
-            jsx_factory: options
+            jsx_factory: result
+                .analyzer_options
                 .jsx_factory()
                 .map(|s| s.to_string().into_boxed_str()),
-            jsx_fragment_factory: options
+            jsx_fragment_factory: result
+                .analyzer_options
                 .jsx_fragment_factory()
                 .map(|s| s.to_string().into_boxed_str()),
         }

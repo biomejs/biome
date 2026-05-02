@@ -131,7 +131,7 @@ pub struct WorkspaceServer {
     notification_tx: watch::Sender<ServiceNotification>,
 
     /// Re-usable cache for analyzer visitors.
-    analyzer_cache: AnalyzerVisitorCache,
+    analyzer_cache: HashMap<ProjectKey, AnalyzerVisitorCache>,
 }
 
 /// The `Workspace` object is long-lived, so we want it to be able to cross
@@ -165,7 +165,7 @@ impl WorkspaceServer {
             scanner: Scanner::new(watcher_tx),
             fs,
             notification_tx,
-            analyzer_cache: AnalyzerVisitorCache::default(),
+            analyzer_cache: HashMap::default(),
         }
     }
 
@@ -1128,7 +1128,9 @@ impl WorkspaceServer {
                     self.project_layout.remove_package(&package_path);
                 }
             }
-            self.analyzer_cache.evict_cache();
+            if let Some(cache) = self.analyzer_cache.pin().get(&project_key) {
+                cache.evict_cache();
+            }
         } else if filename.is_some_and(|filename| filename == "tsconfig.json") {
             let package_path = path
                 .parent()
@@ -1145,7 +1147,9 @@ impl WorkspaceServer {
                         .remove_tsconfig_from_package(&package_path);
                 }
             }
-            self.analyzer_cache.evict_cache();
+            if let Some(cache) = self.analyzer_cache.pin().get(&project_key) {
+                cache.evict_cache();
+            }
         } else if let Some(turbo_filename) =
             filename.filter(|f| *f == "turbo.json" || *f == "turbo.jsonc")
         {
@@ -1322,6 +1326,9 @@ impl Workspace for WorkspaceServer {
         };
 
         let project_key = self.projects.insert_project(path);
+        self.analyzer_cache
+            .pin()
+            .insert(project_key, Default::default());
 
         Ok(OpenProjectResult { project_key })
     }
@@ -1500,7 +1507,9 @@ impl Workspace for WorkspaceServer {
             }
         }
 
-        self.analyzer_cache.evict_cache();
+        if let Some(cache) = self.analyzer_cache.pin().get(&project_key) {
+            cache.evict_cache();
+        }
 
         Ok(UpdateSettingsResult { diagnostics })
     }
@@ -1985,6 +1994,10 @@ impl Workspace for WorkspaceServer {
             .filter(|d| d.severity() >= Severity::Error)
             .count();
 
+        let analyzer_cache_guard = self.analyzer_cache.pin();
+        let analyzer_cache =
+            analyzer_cache_guard.get_or_insert(project_key, AnalyzerVisitorCache::default());
+
         let (diagnostics, errors, warnings, infos, skipped_diagnostics) = if (categories.is_lint()
             || categories.is_assist())
             && let Some(lint) = capabilities.analyzer.lint
@@ -2020,7 +2033,7 @@ impl Workspace for WorkspaceServer {
                 max_diagnostics,
                 diagnostic_level,
                 enforce_assist,
-                analyzer_cache: &self.analyzer_cache,
+                analyzer_cache,
             });
 
             let LintResults {
@@ -2061,7 +2074,7 @@ impl Workspace for WorkspaceServer {
                     max_diagnostics,
                     diagnostic_level,
                     enforce_assist,
-                    analyzer_cache: &self.analyzer_cache,
+                    analyzer_cache,
                 });
 
                 diagnostics.extend(results.diagnostics);
@@ -2281,6 +2294,7 @@ impl Workspace for WorkspaceServer {
             working_directory: Some(working_directory.as_path()),
             compute_actions,
             snippet_services: None,
+            analyzer_cache: AnalyzerVisitorCache::default(),
         });
 
         for embedded_snippet in &embedded_snippets {
@@ -2311,6 +2325,7 @@ impl Workspace for WorkspaceServer {
                 working_directory: Some(working_directory.as_path()),
                 compute_actions,
                 snippet_services: Some(embedded_snippet.as_snippet_services()),
+                analyzer_cache: AnalyzerVisitorCache::default(),
             });
 
             result.actions.extend(embedded_actions_result.actions);
