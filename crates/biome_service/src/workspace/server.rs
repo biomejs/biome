@@ -4,8 +4,9 @@ use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
 use crate::file_handlers::svelte::SvelteFileHandler;
 use crate::file_handlers::{
-    Capabilities, CodeActionsParams, DiagnosticsAndActionsParams, DocumentFileSource, Features,
-    FixAllParams, FormatEmbedNode, LintParams, LintResults, ParseResult, UpdateSnippetsNodes,
+    AnalyzerVisitorCache, Capabilities, CodeActionsParams, DiagnosticsAndActionsParams,
+    DocumentFileSource, Features, FixAllParams, FormatEmbedNode, LintParams, LintResults,
+    ParseResult, UpdateSnippetsNodes,
 };
 use crate::projects::{GetFileFeaturesParams, ProjectKey, Projects};
 use crate::scanner::{
@@ -128,6 +129,9 @@ pub struct WorkspaceServer {
 
     /// Channel sender for sending notifications of service data updates.
     notification_tx: watch::Sender<ServiceNotification>,
+
+    /// Re-usable cache for analyzer visitors.
+    analyzer_cache: AnalyzerVisitorCache,
 }
 
 /// The `Workspace` object is long-lived, so we want it to be able to cross
@@ -161,6 +165,7 @@ impl WorkspaceServer {
             scanner: Scanner::new(watcher_tx),
             fs,
             notification_tx,
+            analyzer_cache: AnalyzerVisitorCache::default(),
         }
     }
 
@@ -1123,6 +1128,7 @@ impl WorkspaceServer {
                     self.project_layout.remove_package(&package_path);
                 }
             }
+            self.analyzer_cache.evict_cache();
         } else if filename.is_some_and(|filename| filename == "tsconfig.json") {
             let package_path = path
                 .parent()
@@ -1139,6 +1145,7 @@ impl WorkspaceServer {
                         .remove_tsconfig_from_package(&package_path);
                 }
             }
+            self.analyzer_cache.evict_cache();
         } else if let Some(turbo_filename) =
             filename.filter(|f| *f == "turbo.json" || *f == "turbo.jsonc")
         {
@@ -1492,6 +1499,8 @@ impl Workspace for WorkspaceServer {
                 self.refresh_pnpm_workspace_catalogs_for_scope(project_key, project_path.as_path());
             }
         }
+
+        self.analyzer_cache.evict_cache();
 
         Ok(UpdateSettingsResult { diagnostics })
     }
@@ -2011,6 +2020,7 @@ impl Workspace for WorkspaceServer {
                 max_diagnostics,
                 diagnostic_level,
                 enforce_assist,
+                analyzer_cache: &self.analyzer_cache,
             });
 
             let LintResults {
@@ -2051,6 +2061,7 @@ impl Workspace for WorkspaceServer {
                     max_diagnostics,
                     diagnostic_level,
                     enforce_assist,
+                    analyzer_cache: &self.analyzer_cache,
                 });
 
                 diagnostics.extend(results.diagnostics);

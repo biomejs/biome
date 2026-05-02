@@ -557,6 +557,7 @@ fn lint(params: LintParams) -> LintResults {
         .with_path(params.path.as_path())
         .with_enabled_selectors(params.enabled_selectors)
         .with_project_layout(params.project_layout.clone())
+        .with_cache(params.analyzer_cache)
         .finish();
 
     let filter = AnalysisFilter {
