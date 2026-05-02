@@ -238,7 +238,7 @@ fn class_member_references(list: &JsClassMemberList) -> ClassMemberReferences {
 /// Represents a function body and all `this` references (including aliases) valid within its lexical scope.
 #[derive(Clone, Debug)]
 struct FunctionThisReferences {
-    scope: JsSyntaxNode,
+    scope: AnyJsFunctionBody,
     this_references: FxHashSet<ClassMemberReference>,
 }
 
@@ -287,7 +287,7 @@ impl ThisScopeVisitor<'_> {
                         scoped_this_references.extend(current_scope);
 
                         self.current_this_scopes.push(FunctionThisReferences {
-                            scope: body.syntax().clone(),
+                            scope: AnyJsFunctionBody::JsFunctionBody(body.clone()),
                             this_references: scoped_this_references,
                         });
                     }
@@ -306,7 +306,7 @@ impl ThisScopeVisitor<'_> {
                     scoped_this_references.extend(current_scope_aliases.clone());
 
                     self.current_this_scopes.push(FunctionThisReferences {
-                        scope: body.syntax().clone(),
+                        scope: AnyJsFunctionBody::JsFunctionBody(body.clone()),
                         this_references: scoped_this_references,
                     });
                 }
@@ -397,7 +397,7 @@ fn is_this_reference(
         return scoped_this_references
             .iter()
             .any(|FunctionThisReferences { scope, .. }| {
-                is_within_scope_without_shadowing(syntax, scope)
+                is_within_scope_without_shadowing(syntax, function_body_syntax(scope))
             });
     }
 
@@ -419,13 +419,21 @@ fn is_this_reference(
                         .eq(value_token.token_text_trimmed().text())
                 });
 
-                let is_within_scope = is_within_scope_without_shadowing(name_syntax, scope);
+                let is_within_scope =
+                    is_within_scope_without_shadowing(name_syntax, function_body_syntax(scope));
 
                 is_alias && is_within_scope
             },
         )
     } else {
         false
+    }
+}
+
+fn function_body_syntax(body: &AnyJsFunctionBody) -> &JsSyntaxNode {
+    match body {
+        AnyJsFunctionBody::AnyJsExpression(expression) => expression.syntax(),
+        AnyJsFunctionBody::JsFunctionBody(body) => body.syntax(),
     }
 }
 
@@ -656,12 +664,8 @@ fn collect_references_from_arrow_function(
         this_references.extend(ThisScopeReferences::new(function_body).local_this_references);
     }
 
-    let scope = match &body {
-        AnyJsFunctionBody::AnyJsExpression(_) => arrow_function.syntax().clone(),
-        AnyJsFunctionBody::JsFunctionBody(body) => body.syntax().clone(),
-    };
     let current_scope = FunctionThisReferences {
-        scope,
+        scope: body.clone(),
         this_references,
     };
     visit_references_in_body(
@@ -673,10 +677,7 @@ fn collect_references_from_arrow_function(
 
     let inherited_this_references: Vec<_> = current_scope.this_references.iter().cloned().collect();
     let mut skipped_ranges = vec![];
-    let body_syntax = match &body {
-        AnyJsFunctionBody::AnyJsExpression(expression) => expression.syntax(),
-        AnyJsFunctionBody::JsFunctionBody(body) => body.syntax(),
-    };
+    let body_syntax = function_body_syntax(&body);
 
     for event in body_syntax.preorder() {
         match event {
@@ -961,7 +962,7 @@ fn collect_references_from_constructor(constructor_body: &JsFunctionBody) -> Cla
 
     for this_scope in all_descendants_fn_bodies_and_this_scopes.iter() {
         visit_references_in_body(
-            &this_scope.scope,
+            function_body_syntax(&this_scope.scope),
             std::slice::from_ref(this_scope),
             &mut writes,
             &mut reads,
