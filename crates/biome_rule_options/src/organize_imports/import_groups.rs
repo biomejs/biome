@@ -261,19 +261,15 @@ impl biome_deserialize::Deserializable for SourceMatcher {
                     let diagnostic = if text == ":BLANK_LINE:" {
                         DeserializationDiagnostic::new(markup! {
                             <Emphasis>{":BLANK_LINE:"}</Emphasis>
-                            " is not a source matcher and thus it cannot be placed in "
-                            <Emphasis>{"source"}</Emphasis>"."
-                        })
-                        .with_note(markup! {
-                            <Emphasis>{":BLANK_LINE:"}</Emphasis>
-                            " can only be placed as an eleemtn of the "
-                            <Emphasis>{"groups"}</Emphasis>" array."
+                            " isn't valid in this position. Remove it."
                         })
                     } else {
                         DeserializationDiagnostic::new(markup! {
-                            "The predefined group "<Emphasis>{
+                            "The predefined group "
+                            <Emphasis>{
                                 format_args!("{}", text.strip_prefix("!").unwrap_or(&text))
-                            }</Emphasis>" doesn't exist."
+                            }</Emphasis>
+                            " doesn't exist. Use a known predefined group."
                         })
                     };
                     ctx.report(diagnostic.with_range(value.range()));
