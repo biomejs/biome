@@ -5,8 +5,9 @@ use biome_console::markup;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_html_syntax::{
     AnyHtmlAttribute, AnyHtmlAttributeInitializer, AnyHtmlElement, AnyHtmlTagName, AnyVueDirective,
-    AnyVueVForBinding, AnyVueVForDestructuredBinding, HtmlAttributeInitializerClause, HtmlElement,
-    HtmlOpeningElement, HtmlSelfClosingElement, VueDirective, VueDirectiveArgument, VueVForValue,
+    AnyVueVForBinding, AnyVueVForBindingListElement, AnyVueVForDestructuredBinding,
+    HtmlAttributeInitializerClause, HtmlElement, HtmlOpeningElement, HtmlSelfClosingElement,
+    VueDirective, VueDirectiveArgument, VueVForValue,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TextRange, TokenText};
 use biome_rule_options::use_vue_valid_v_for::UseVueValidVForOptions;
@@ -114,7 +115,7 @@ impl Rule for UseVueValidVFor {
             return Some(ViolationKind::InvalidEmptyAlias);
         }
 
-        if let Some(violation) = validate_secondary_aliases(&v_for_value) {
+        if let Some(violation) = validate_secondary_bindings(&v_for_value) {
             return Some(violation);
         }
 
@@ -122,11 +123,11 @@ impl Rule for UseVueValidVFor {
             return None;
         }
 
-        let aliases = collect_iteration_aliases(&v_for_value);
+        let iteration_bindings = collect_iteration_bindings(&v_for_value);
         let element = enclosing_tag_element(directive)?;
 
-        check_key_requirement(&element, &aliases)
-            .or_else(|| check_template_child_keys(directive, &element, &aliases))
+        check_key_requirement(&element, &iteration_bindings)
+            .or_else(|| check_template_child_keys(directive, &element, &iteration_bindings))
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -237,16 +238,16 @@ fn is_missing_v_for_value(value: &VueVForValue) -> bool {
     value.binding().is_err() && value.operator().is_err() && value.expression().is_err()
 }
 
-fn validate_secondary_aliases(value: &VueVForValue) -> Option<ViolationKind> {
+fn validate_secondary_bindings(value: &VueVForValue) -> Option<ViolationKind> {
     let AnyVueVForBinding::VueVForTupleBinding(tuple) = value.binding().ok()? else {
         return None;
     };
 
-    validate_secondary_alias(tuple.second().as_ref())
-        .or_else(|| validate_secondary_alias(tuple.third().as_ref()))
+    validate_secondary_binding(tuple.second().as_ref())
+        .or_else(|| validate_secondary_binding(tuple.third().as_ref()))
 }
 
-fn validate_secondary_alias(
+fn validate_secondary_binding(
     tuple_element: Option<&biome_html_syntax::VueVForTupleElement>,
 ) -> Option<ViolationKind> {
     let tuple_element = tuple_element?;
@@ -261,8 +262,9 @@ fn validate_secondary_alias(
     }
 }
 
-fn collect_iteration_aliases(value: &VueVForValue) -> Vec<TokenText> {
-    let mut aliases = Vec::new();
+/// "Iteration bindings" are the bindings introduced by the v-for directive.
+fn collect_iteration_bindings(value: &VueVForValue) -> Vec<TokenText> {
+    let mut iteration_bindings = Vec::new();
     let mut pending = Vec::new();
 
     if let Ok(binding) = value.binding() {
@@ -273,7 +275,7 @@ fn collect_iteration_aliases(value: &VueVForValue) -> Vec<TokenText> {
         match binding {
             AnyVueVForBinding::VueVForIdentifierBinding(binding) => {
                 if let Ok(token) = binding.name_token() {
-                    aliases.push(token.token_text_trimmed());
+                    iteration_bindings.push(token.token_text_trimmed());
                 }
             }
             AnyVueVForBinding::VueVForTupleBinding(binding) => {
@@ -303,25 +305,27 @@ fn collect_iteration_aliases(value: &VueVForValue) -> Vec<TokenText> {
 
                 for binding in bindings.iter().flatten() {
                     match binding {
-                        biome_html_syntax::AnyVueVForBindingListElement::VueVForIdentifierBinding(binding) => {
+                        AnyVueVForBindingListElement::VueVForIdentifierBinding(binding) => {
                             if let Ok(token) = binding.name_token() {
-                                aliases.push(token.token_text_trimmed());
+                                iteration_bindings.push(token.token_text_trimmed());
                             }
                         }
-                        biome_html_syntax::AnyVueVForBindingListElement::VueVForObjectPropertyBinding(binding) => {
+                        AnyVueVForBindingListElement::VueVForObjectPropertyBinding(binding) => {
                             if let Ok(binding) = binding.binding() {
                                 pending.push(binding);
                             }
                         }
-                        biome_html_syntax::AnyVueVForBindingListElement::VueVForRestBinding(binding) => {
+                        AnyVueVForBindingListElement::VueVForRestBinding(binding) => {
                             if let Ok(binding) = binding.binding()
                                 && let Ok(token) = binding.name_token()
                             {
-                                aliases.push(token.token_text_trimmed());
+                                iteration_bindings.push(token.token_text_trimmed());
                             }
                         }
-                        biome_html_syntax::AnyVueVForBindingListElement::AnyVueVForDestructuredBinding(binding) => {
-                            pending.push(AnyVueVForBinding::AnyVueVForDestructuredBinding(binding.clone()));
+                        AnyVueVForBindingListElement::AnyVueVForDestructuredBinding(binding) => {
+                            pending.push(AnyVueVForBinding::AnyVueVForDestructuredBinding(
+                                binding.clone(),
+                            ));
                         }
                     }
                 }
@@ -329,7 +333,7 @@ fn collect_iteration_aliases(value: &VueVForValue) -> Vec<TokenText> {
         }
     }
 
-    aliases
+    iteration_bindings
 }
 
 fn enclosing_tag_element(directive: &VueDirective) -> Option<AnyHtmlTagElement> {
@@ -345,10 +349,10 @@ fn enclosing_tag_element(directive: &VueDirective) -> Option<AnyHtmlTagElement> 
 
 fn check_key_requirement(
     element: &AnyHtmlTagElement,
-    aliases: &[TokenText],
+    iteration_bindings: &[TokenText],
 ) -> Option<ViolationKind> {
     if let Some(key_directive) = find_v_bind_key(element) {
-        if key_directive_uses_iteration_variables(&key_directive, aliases)? {
+        if key_directive_uses_iteration_variables(&key_directive, iteration_bindings)? {
             return None;
         }
 
@@ -367,7 +371,7 @@ fn check_key_requirement(
 fn check_template_child_keys(
     directive: &VueDirective,
     element: &AnyHtmlTagElement,
-    aliases: &[TokenText],
+    iteration_bindings: &[TokenText],
 ) -> Option<ViolationKind> {
     let tag_name = element.tag_name()?;
     if tag_name.text() != "template" {
@@ -395,11 +399,11 @@ fn check_template_child_keys(
             _ => continue,
         };
 
-        if child_uses_parent_alias_in_v_for(&child, aliases)? {
+        if child_uses_parent_binding_in_v_for(&child, iteration_bindings)? {
             continue;
         }
 
-        if let Some(violation) = check_key_requirement(&child, aliases) {
+        if let Some(violation) = check_key_requirement(&child, iteration_bindings) {
             return Some(violation);
         }
     }
@@ -407,9 +411,9 @@ fn check_template_child_keys(
     None
 }
 
-fn child_uses_parent_alias_in_v_for(
+fn child_uses_parent_binding_in_v_for(
     element: &AnyHtmlTagElement,
-    aliases: &[TokenText],
+    iteration_bindings: &[TokenText],
 ) -> Option<bool> {
     let Some(v_for) = find_v_for_directive(element) else {
         return Some(false);
@@ -418,7 +422,7 @@ fn child_uses_parent_alias_in_v_for(
     let expression = value.expression().ok()?;
     let text = expression.string_value()?;
 
-    Some(uses_iteration_variables(text.text(), aliases))
+    Some(uses_iteration_variables(text.text(), iteration_bindings))
 }
 
 fn find_v_for_directive(element: &AnyHtmlTagElement) -> Option<VueDirective> {
@@ -485,7 +489,7 @@ fn is_key_argument(argument: &VueDirectiveArgument) -> bool {
 
 fn key_directive_uses_iteration_variables(
     directive: &AnyVueDirective,
-    aliases: &[TokenText],
+    iteration_bindings: &[TokenText],
 ) -> Option<bool> {
     let initializer = match directive {
         AnyVueDirective::VueDirective(directive) => directive.initializer(),
@@ -495,7 +499,10 @@ fn key_directive_uses_iteration_variables(
 
     let expression = initializer.and_then(key_expression)?;
 
-    Some(uses_iteration_variables(expression.text(), aliases))
+    Some(uses_iteration_variables(
+        expression.text(),
+        iteration_bindings,
+    ))
 }
 
 fn key_expression(initializer: HtmlAttributeInitializerClause) -> Option<biome_rowan::Text> {
@@ -510,10 +517,10 @@ fn key_expression(initializer: HtmlAttributeInitializerClause) -> Option<biome_r
     }
 }
 
-fn uses_iteration_variables(expression: &str, aliases: &[TokenText]) -> bool {
-    aliases
+fn uses_iteration_variables(expression: &str, iteration_bindings: &[TokenText]) -> bool {
+    iteration_bindings
         .iter()
-        .any(|alias| contains_identifier(expression, alias.text()))
+        .any(|binding| contains_identifier(expression, binding.text()))
 }
 
 fn contains_identifier(expression: &str, expected: &str) -> bool {
