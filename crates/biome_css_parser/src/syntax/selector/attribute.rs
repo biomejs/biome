@@ -81,10 +81,11 @@ fn parse_attribute_matcher(p: &mut CssParser) -> ParsedSyntax {
     p.bump_any();
     parse_attribute_matcher_value(p).or_add_diagnostic(p, expected_any_attribute_matcher_name);
 
+    // `html[lang=prefix-#{$locale ]`: let the missing `]` check report EOF.
     let modifier = p.cur();
     if modifier.is_attribute_modifier_keyword() {
         p.bump(modifier);
-    } else if modifier != T![']'] {
+    } else if modifier != T![']'] && modifier != EOF {
         // if we have an invalid modifier, we should add a diagnostic and bump it
         let diagnostic = expected_any_attribute_modifier(p, p.cur_range());
         p.error(diagnostic);

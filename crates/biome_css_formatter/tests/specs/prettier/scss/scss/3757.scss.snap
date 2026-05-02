@@ -262,7 +262,7 @@ p {
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,10 +1,7 @@
+@@ -1,7 +1,4 @@
 -$buttonConfig:
 -  "save" 50px,
 -  "cancel" 50px,
@@ -270,11 +270,7 @@ p {
 +$buttonConfig: "save" 50px, "cancel" 50px, "help" 100px;
  
  $locale: "en_us";
--html[lang="#{$locale}"] {
-+html[lang=#{$locale}] {
-   font-size: 10px;
- }
- $alertClass: "error";
+ html[lang="#{$locale}"] {
 ```
 
 # Output
@@ -283,7 +279,7 @@ p {
 $buttonConfig: "save" 50px, "cancel" 50px, "help" 100px;
 
 $locale: "en_us";
-html[lang=#{$locale}] {
+html[lang="#{$locale}"] {
   font-size: 10px;
 }
 $alertClass: "error";

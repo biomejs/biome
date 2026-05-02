@@ -57,7 +57,7 @@ pub(crate) fn is_at_scss_pseudo_class_nth(p: &mut CssParser) -> bool {
         0
     };
 
-    is_nth_at_scss_interpolation(p, n)
+    is_nth_at_scss_pseudo_class_nth_value_with_interpolation(p, n)
         || p.nth_at(n, CSS_DIMENSION_VALUE)
             && p.nth_at(n + 1, T![n])
             && is_at_scss_interpolated_nth_offset(p, n + 2)

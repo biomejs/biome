@@ -41,3 +41,11 @@ html[lang=#{$locale} i] {
 .grid:nth-child(n - #{$offset} of .item) {
   width: 8px;
 }
+
+.grid:nth-child(1#{$offset}) {
+  width: 9px;
+}
+
+.grid:nth-child(2#{$coef}n) {
+  width: 10px;
+}
