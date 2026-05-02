@@ -577,3 +577,17 @@ fn fuzz_nested_lazy_continuation_before_link_reference() {
         "<ul>\n<li>outer\n<ul>\n<li>nested\nlazy line\n[valid]: /url</li>\n</ul>\n</li>\n</ul>\n",
     );
 }
+
+#[test]
+fn fuzz_list_link_reference_before_dash_thematic_break_with_tabs() {
+    fuzz_test_example(
+        11,
+        "- [a]: /url\n\t---\n",
+        "<ul>\n<li>\n<hr />\n</li>\n</ul>\n",
+    );
+    fuzz_test_example(
+        12,
+        "1.  [a]: /url\n \t---\n",
+        "<ol>\n<li>\n<hr />\n</li>\n</ol>\n",
+    );
+}

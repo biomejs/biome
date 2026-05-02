@@ -54,8 +54,7 @@ use crate::syntax::thematic_break_block::parse_thematic_break_block;
 use crate::syntax::with_virtual_line_start;
 use crate::syntax::{
     INDENT_CODE_BLOCK_SPACES, MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES, at_block_interrupt,
-    at_indent_code_block, is_dash_only_thematic_break_text, is_paragraph_like, is_whitespace_only,
-    parse_empty_paragraph,
+    at_indent_code_block, is_paragraph_like, is_whitespace_only, parse_empty_paragraph,
 };
 use crate::syntax::{parse_any_block_with_indent_code_policy, parse_paragraph};
 use biome_rowan::{TextRange, TextSize};
@@ -2057,7 +2056,8 @@ fn parse_first_line_blocks(
         let parsed = with_virtual_line_start(p, p.cur_range().start(), parse_link_block);
         if parsed.is_present() {
             p.state_mut().link_reference_definition_continuation = true;
-            if list_link_reference_before_dash_thematic_break(p) {
+            let before_dash_thematic_break = list_link_reference_before_dash_thematic_break(p);
+            if before_dash_thematic_break {
                 parse_empty_paragraph(p);
             }
             state.record_first_line_block();
@@ -2167,22 +2167,92 @@ fn list_link_reference_before_dash_thematic_break(p: &mut MarkdownParser) -> boo
         return false;
     }
 
-    p.lookahead(|p| {
-        p.bump(NEWLINE);
-        let mut indent = 0usize;
-        while p.at(MD_TEXTUAL_LITERAL) {
-            match p.cur_text() {
-                " " => indent += 1,
-                "\t" => indent += TAB_STOP_SPACES,
-                _ => break,
-            }
-            p.bump(MD_TEXTUAL_LITERAL);
+    let line_start: usize = p.cur_range().end().into();
+    let source = p.source().source_text();
+    let Some(line) = source.get(line_start..) else {
+        return false;
+    };
+    let line_end = line.find(['\n', '\r']).unwrap_or(line.len());
+    let line = &line[..line_end];
+    let required_indent = p.state().list_item_required_indent;
+
+    dash_thematic_break_after_required_indent(line, required_indent).is_some()
+}
+
+fn current_line_dash_thematic_break_after_required_indent(
+    p: &MarkdownParser,
+    required_indent: usize,
+) -> Option<usize> {
+    let line_start: usize = p.cur_range().start().into();
+    let source = p.source().source_text();
+    let line = source.get(line_start..)?;
+    let line_end = line.find(['\n', '\r']).unwrap_or(line.len());
+    dash_thematic_break_after_required_indent(&line[..line_end], required_indent)
+}
+
+fn dash_thematic_break_after_required_indent(line: &str, required_indent: usize) -> Option<usize> {
+    let mut byte_offset = 0usize;
+    let mut column = 0usize;
+    let bytes = line.as_bytes();
+
+    while column < required_indent {
+        let byte = bytes.get(byte_offset)?;
+        match byte {
+            b' ' => column += 1,
+            b'\t' => column += TAB_STOP_SPACES - (column % TAB_STOP_SPACES),
+            _ => return None,
+        }
+        byte_offset += 1;
+    }
+
+    let required_byte_offset = byte_offset;
+    while let Some(byte) = bytes.get(byte_offset) {
+        let next_column = match byte {
+            b' ' => column + 1,
+            b'\t' => column + (TAB_STOP_SPACES - (column % TAB_STOP_SPACES)),
+            _ => break,
+        };
+        if next_column.saturating_sub(required_indent) > MAX_BLOCK_PREFIX_INDENT {
+            return None;
+        }
+        column = next_column;
+        byte_offset += 1;
+    }
+
+    is_dash_only_thematic_break_line_text(&line[byte_offset..]).then_some(required_byte_offset)
+}
+
+fn is_dash_only_thematic_break_line_text(text: &str) -> bool {
+    let mut dash_count = 0usize;
+    for c in text.chars() {
+        match c {
+            '-' => dash_count += 1,
+            ' ' | '\t' => {}
+            _ => return false,
+        }
+    }
+
+    dash_count >= 3
+}
+
+fn emit_current_line_indent_list_bytes(p: &mut MarkdownParser, mut byte_count: usize) {
+    let list_m = p.start();
+    while byte_count > 0 && p.at(MD_TEXTUAL_LITERAL) {
+        let text = p.cur_text();
+        if text.len() > byte_count || !text.chars().all(|c| c == ' ' || c == '\t') {
+            debug_assert!(
+                false,
+                "indent byte count should end on whitespace token boundary"
+            );
+            break;
         }
 
-        indent >= p.state().list_item_required_indent
-            && p.at(MD_THEMATIC_BREAK_LITERAL)
-            && is_dash_only_thematic_break_text(p.cur_text())
-    })
+        byte_count -= text.len();
+        let token_m = p.start();
+        p.bump_remap(MD_INDENT_CHAR);
+        token_m.complete(p, MD_INDENT_TOKEN);
+    }
+    list_m.complete(p, MD_INDENT_TOKEN_LIST);
 }
 
 /// Parse an ATX heading on the first line of list item content.
@@ -2416,7 +2486,13 @@ fn check_continuation_indent(
             };
 
             let ci_m = p.start();
-            p.emit_line_indent(state.required_indent);
+            if let Some(indent_bytes) =
+                current_line_dash_thematic_break_after_required_indent(p, state.required_indent)
+            {
+                emit_current_line_indent_list_bytes(p, indent_bytes);
+            } else {
+                p.emit_line_indent(state.required_indent);
+            }
             ci_m.complete(p, MD_CONTINUATION_INDENT);
             p.set_virtual_line_start();
 
