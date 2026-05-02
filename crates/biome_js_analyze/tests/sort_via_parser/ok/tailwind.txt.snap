@@ -122,6 +122,30 @@ Sorted: p-4 hover:-ml-2 focus:-mt-1
 Input:  sm:-mx-4 lg:-my-2 md:p-2
 Sorted: sm:-mx-4 md:p-2 lg:-my-2
 
+## Negative values: negative z-index sorts within z-index group
+Input:  flex -z-10 z-20 absolute
+Sorted: absolute -z-10 z-20 flex
+
+## Negative values: negative transform utilities
+Input:  -rotate-45 scale-100 -translate-x-4 -skew-y-3
+Sorted: -translate-x-4 -rotate-45 -skew-y-3 scale-100
+
+## Negative values: negative inset and inset-x mixed
+Input:  -inset-2 absolute -inset-x-4 top-0
+Sorted: absolute -inset-2 -inset-x-4 top-0
+
+## Negative values: same-family positive and negative coexist
+Input:  m-4 -m-2 p-2
+Sorted: -m-2 m-4 p-2
+
+## Negative values: negative with arbitrary value
+Input:  flex -mt-[1.5rem] p-4
+Sorted: -mt-[1.5rem] flex p-4
+
+## Negative values: negative with multiple variants
+Input:  hover:focus:-ml-4 sm:hover:-mt-2 p-4
+Sorted: p-4 hover:focus:-ml-4 sm:hover:-mt-2
+
 ## Arbitrary utility: [property:value] form goes to end
 Input:  content-[''] absolute
 Sorted: absolute content-['']

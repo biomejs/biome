@@ -89,6 +89,24 @@ hover:-ml-2 p-4 focus:-mt-1
 # Negative values: negative values with responsive variants
 sm:-mx-4 lg:-my-2 md:p-2
 
+# Negative values: negative z-index sorts within z-index group
+flex -z-10 z-20 absolute
+
+# Negative values: negative transform utilities
+-rotate-45 scale-100 -translate-x-4 -skew-y-3
+
+# Negative values: negative inset and inset-x mixed
+-inset-2 absolute -inset-x-4 top-0
+
+# Negative values: same-family positive and negative coexist
+m-4 -m-2 p-2
+
+# Negative values: negative with arbitrary value
+flex -mt-[1.5rem] p-4
+
+# Negative values: negative with multiple variants
+hover:focus:-ml-4 sm:hover:-mt-2 p-4
+
 # Arbitrary utility: [property:value] form goes to end
 content-[''] absolute
 
