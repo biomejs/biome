@@ -10,8 +10,8 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, _outcome
 
     for line in content.lines() {
         let trimmed = line.trim();
-        if trimmed.starts_with('#') {
-            current_comment = trimmed[1..].trim().to_string();
+        if let Some(rest) = trimmed.strip_prefix('#') {
+            current_comment = rest.trim().to_string();
         } else if trimmed.is_empty() {
             // separator
         } else {
