@@ -266,7 +266,7 @@ impl biome_deserialize::Deserializable for SourceMatcher {
                         })
                         .with_note(markup! {
                             <Emphasis>{":BLANK_LINE:"}</Emphasis>
-                            " can only be placed as an eleemtn of of the "
+                            " can only be placed as an eleemtn of the "
                             <Emphasis>{"groups"}</Emphasis>" array."
                         })
                     } else {

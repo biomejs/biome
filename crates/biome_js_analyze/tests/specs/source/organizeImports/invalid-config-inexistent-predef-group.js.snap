@@ -12,14 +12,14 @@ expression: invalid-config-inexistent-predef-group.js
 invalid-config-inexistent-predef-group.options:10:15 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The predefined group :ANYthing: doesn't exist.
-  
+
      8 │           "options": {
      9 │             "groups": [
   > 10 │               ":ANYthing:",
        │               ^^^^^^^^^^^^
     11 │               "!:ANYthing:",
     12 │               {
-  
+
 
 ```
 
@@ -27,14 +27,14 @@ invalid-config-inexistent-predef-group.options:10:15 deserialize ━━━━━
 invalid-config-inexistent-predef-group.options:11:15 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The predefined group :ANYthing: doesn't exist.
-  
+
      9 │             "groups": [
     10 │               ":ANYthing:",
   > 11 │               "!:ANYthing:",
        │               ^^^^^^^^^^^^^
     12 │               {
     13 │                 "source": ":ANYthing:"
-  
+
 
 ```
 
@@ -42,14 +42,14 @@ invalid-config-inexistent-predef-group.options:11:15 deserialize ━━━━━
 invalid-config-inexistent-predef-group.options:13:27 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The predefined group :ANYthing: doesn't exist.
-  
+
     11 │               "!:ANYthing:",
     12 │               {
   > 13 │                 "source": ":ANYthing:"
        │                           ^^^^^^^^^^^^
     14 │               },
     15 │               {
-  
+
 
 ```
 
@@ -57,14 +57,14 @@ invalid-config-inexistent-predef-group.options:13:27 deserialize ━━━━━
 invalid-config-inexistent-predef-group.options:16:27 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The predefined group :ANYthing: doesn't exist.
-  
+
     14 │               },
     15 │               {
   > 16 │                 "source": "!:ANYthing:"
        │                           ^^^^^^^^^^^^^
     17 │               },
     18 │               {
-  
+
 
 ```
 
@@ -72,15 +72,15 @@ invalid-config-inexistent-predef-group.options:16:27 deserialize ━━━━━
 invalid-config-inexistent-predef-group.options:21:19 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × :BLANK_LINE: is not a source matcher and thus it cannot be placed in source.
-  
+
     19 │                 "source": [
     20 │                   ":NODE:",
   > 21 │                   ":BLANK_LINE:"
        │                   ^^^^^^^^^^^^^^
     22 │                 ]
     23 │               }
-  
-  i :BLANK_LINE: can only be placed as an eleemtn of of the groups array.
-  
+
+  i :BLANK_LINE: can only be placed as an eleemtn of the groups array.
+
 
 ```
