@@ -117,23 +117,23 @@ body {
 arbitrary-arguments.scss:39:40 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found '.'.
-
+  
     37 │   background-color: rgba(50 50 50. .50...);
     38 │   // Input is not technically valid ( output is ), but still nice to know that the `.` gets dropped as it would for `50.`
   > 39 │   background-color: rgba(50 50 50 50....);
        │                                        ^
     40 │   width: min(50px 20px 30px...);
     41 │ }
-
+  
   i Expected a SCSS expression here.
-
+  
     37 │   background-color: rgba(50 50 50. .50...);
     38 │   // Input is not technically valid ( output is ), but still nice to know that the `.` gets dropped as it would for `50.`
   > 39 │   background-color: rgba(50 50 50 50....);
        │                                        ^
     40 │   width: min(50px 20px 30px...);
     41 │ }
-
+  
 
 ```
 

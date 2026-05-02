@@ -71,14 +71,14 @@ a {
 @@ -14,14 +14,14 @@
    content: foo "#{my-fn("foo")}" bar;
    content: "foo #{$description} bar";
-
+ 
 -  content: "#{my-fn("foo","bar")}";
 -  content: "#{my-fn( "foo" , "bar" )}";
 -  content: "#{my-fn(  "foo"  ,  "bar"  )}";
 +  content: "#{my-fn("foo", "bar")}";
 +  content: "#{my-fn("foo", "bar")}";
 +  content: "#{my-fn("foo", "bar")}";
-
+ 
 -  content: '#{my-fn("foo")}';
    content: "#{my-fn("foo")}";
 -  content: "#{my-fn('foo')}";
@@ -86,11 +86,11 @@ a {
 +  content: "#{my-fn("foo")}";
 +  content: "#{my-fn("foo")}";
  }
-
+ 
  @mixin theme($css-property, $css-value, $theme-classes: t) {
 @@ -31,7 +31,9 @@
          $value: $css-value;
-
+ 
          @each $theme-name, $theme-value in $theme-properties {
 -          $rgba-value: "rgba(#{red($theme-value)}, #{green($theme-value)}, #{blue($theme-value)}";
 +          $rgba-value: "rgba(#{red($theme-value)}, #{green(
