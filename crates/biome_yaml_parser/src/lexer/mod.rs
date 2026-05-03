@@ -345,15 +345,15 @@ impl<'src> YamlLexer<'src> {
             if is_break(current) {
                 let start = self.current_coordinate;
                 let mut trivia = self.consume_trivia(false);
-                if self.breach_parent_scope() {
+                if self.breach_parent_scope() && current_depth == 0 {
                     // The lexed trivia is actually significant and signals the end of current
                     // block scope
                     self.current_coordinate = start;
                     break;
-                } else {
-                    collection_tokens.append(&mut trivia);
-                    continue;
                 }
+
+                collection_tokens.append(&mut trivia);
+                continue;
             }
             let token = match (current, self.peek_byte()) {
                 (c, _) if is_space(c) => self.consume_whitespace_token(),
@@ -401,7 +401,7 @@ impl<'src> YamlLexer<'src> {
                 _ => self.consume_unexpected_token(),
             };
             collection_tokens.push_back(token);
-            if self.breach_parent_scope() {
+            if self.breach_parent_scope() && current_depth == 0 {
                 break;
             }
             if current_depth == 0 {
