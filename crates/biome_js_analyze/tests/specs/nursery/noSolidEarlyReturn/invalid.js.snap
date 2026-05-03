@@ -1,9 +1,12 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
 expression: invalid.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
+
 function Component() {
   if (condition) {
     return <div />;
@@ -58,25 +61,40 @@ HOC(() => {
   }
   return <div />;
 });
+
+HOC(function () {
+  if (condition) {
+    return <div />;
+  }
+  return <div />;
+})
+
+HOC((((function () {
+  if (condition) {
+    return <div />;
+  }
+  return <div />;
+}))))
+
 ```
 
-_Note: The parser emitted 30 diagnostics which are not shown here._
+_Note: The parser emitted 38 diagnostics which are not shown here._
 
 # Diagnostics
 ```
-invalid.js:2:19 lint/nursery/noSolidEarlyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:19 lint/nursery/noSolidEarlyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This early return breaks reactivity.
   
-    1 │ function Component() {
-  > 2 │   if (condition) {
+    3 │ function Component() {
+  > 4 │   if (condition) {
       │                   
-  > 3 │     return <div />;
+  > 5 │     return <div />;
       │     ^^^^^^^
-    4 │   }
-    5 │   return <span />;
+    6 │   }
+    7 │   return <span />;
   
-  i Solid components run once. Moving the condition inside JSX ensures reactivity is preserved.
+  i Solid components run once. Skipped branches won't have their reactive subscriptions set up, so affected parts of the UI won't update when data changes.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -84,19 +102,19 @@ invalid.js:2:19 lint/nursery/noSolidEarlyReturn ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:9:19 lint/nursery/noSolidEarlyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:19 lint/nursery/noSolidEarlyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This early return breaks reactivity.
   
-     8 │ const Component = () => {
-   > 9 │   if (condition) {
+    10 │ const Component = () => {
+  > 11 │   if (condition) {
        │                   
-  > 10 │     return <div />;
+  > 12 │     return <div />;
        │     ^^^^^^^
-    11 │   }
-    12 │   return <span />;
+    13 │   }
+    14 │   return <span />;
   
-  i Solid components run once. Moving the condition inside JSX ensures reactivity is preserved.
+  i Solid components run once. Skipped branches won't have their reactive subscriptions set up, so affected parts of the UI won't update when data changes.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -104,151 +122,171 @@ invalid.js:9:19 lint/nursery/noSolidEarlyReturn ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:15:23 lint/nursery/noSolidEarlyReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:17:23 lint/nursery/noSolidEarlyReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This conditional return breaks reactivity.
   
-    13 │ };
-    14 │ 
-  > 15 │ function Component() {
+    15 │ };
+    16 │ 
+  > 17 │ function Component() {
        │                       
-  > 16 │   return Math.random() > 0.5 ? <div>Big!</div> : <div>Small!</div>;
+  > 18 │   return Math.random() > 0.5 ? <div>Big!</div> : <div>Small!</div>;
        │   ^^^^^^^
-    17 │ };
-    18 │ 
+    19 │ };
+    20 │ 
   
-  i Solid components run once. Moving the condition inside JSX ensures reactivity is preserved.
+  i Solid components run once. Skipped branches won't have their reactive subscriptions set up, so affected parts of the UI won't update when data changes.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Wrap the ternary expression in a fragment.
   
-    16 │ ··return·<>{Math.random()·>·0.5·?·<div>Big!</div>·:·<div>Small!</div>}</>;
+    18 │ ··return·<>{Math.random()·>·0.5·?·<div>Big!</div>·:·<div>Small!</div>}</>;
        │          +++                                                         ++++ 
 
 ```
 
 ```
-invalid.js:19:23 lint/nursery/noSolidEarlyReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:21:23 lint/nursery/noSolidEarlyReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This conditional return breaks reactivity.
   
-    17 │ };
-    18 │ 
-  > 19 │ function Component() {
+    19 │ };
+    20 │ 
+  > 21 │ function Component() {
        │                       
-  > 20 │   return Math.random() > 0.5 ? <div>Big!</div> : "Small!";
+  > 22 │   return Math.random() > 0.5 ? <div>Big!</div> : "Small!";
        │   ^^^^^^^
-    21 │ };
-    22 │ 
+    23 │ };
+    24 │ 
   
-  i Solid components run once. Moving the condition inside JSX ensures reactivity is preserved.
+  i Solid components run once. Skipped branches won't have their reactive subscriptions set up, so affected parts of the UI won't update when data changes.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Wrap the ternary expression in a fragment.
   
-    20 │ ··return·<>{Math.random()·>·0.5·?·<div>Big!</div>·:·"Small!";}</>
+    22 │ ··return·<>{Math.random()·>·0.5·?·<div>Big!</div>·:·"Small!";}</>
        │          +++                                                 ++++
 
 ```
 
 ```
-invalid.js:31:28 lint/nursery/noSolidEarlyReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:33:28 lint/nursery/noSolidEarlyReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This conditional return breaks reactivity.
   
-    29 │ };
-    30 │ 
-  > 31 │ function Component(props) {
+    31 │ };
+    32 │ 
+  > 33 │ function Component(props) {
        │                            
-  > 32 │   return props.cond1 ? (
+  > 34 │   return props.cond1 ? (
        │   ^^^^^^^
-    33 │     <div>Condition 1</div>
-    34 │   ) : Boolean(props.cond2) ? (
+    35 │     <div>Condition 1</div>
+    36 │   ) : Boolean(props.cond2) ? (
   
-  i Solid components run once. Moving the condition inside JSX ensures reactivity is preserved.
+  i Solid components run once. Skipped branches won't have their reactive subscriptions set up, so affected parts of the UI won't update when data changes.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Wrap the ternary expression in a fragment.
   
-    30 30 │   
-    31 31 │   function Component(props) {
-    32    │ - ··return·props.cond1·?·(
-    33    │ - ····<div>Condition·1</div>
-       32 │ + ··return·<>{props.cond1·?·(
-       33 │ + ····<div>Condition·1</div>}</>
-    34 34 │     ) : Boolean(props.cond2) ? (
-    35 35 │       <div>Not condition 1, but condition 2</div>
+    32 32 │   
+    33 33 │   function Component(props) {
+    34    │ - ··return·props.cond1·?·(
+    35    │ - ····<div>Condition·1</div>
+       34 │ + ··return·<>{props.cond1·?·(
+       35 │ + ····<div>Condition·1</div>}</>
+    36 36 │     ) : Boolean(props.cond2) ? (
+    37 37 │       <div>Not condition 1, but condition 2</div>
   
 
 ```
 
 ```
-invalid.js:41:28 lint/nursery/noSolidEarlyReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:43:28 lint/nursery/noSolidEarlyReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This conditional return breaks reactivity.
   
-    39 │ };
-    40 │ 
-  > 41 │ function Component(props) {
+    41 │ };
+    42 │ 
+  > 43 │ function Component(props) {
        │                            
-  > 42 │   return !!props.cond && <div>Conditional</div>;
+  > 44 │   return !!props.cond && <div>Conditional</div>;
        │   ^^^^^^^
-    43 │ };
-    44 │ 
+    45 │ };
+    46 │ 
   
-  i Solid components run once. Moving the condition inside JSX ensures reactivity is preserved.
+  i Solid components run once. Skipped branches won't have their reactive subscriptions set up, so affected parts of the UI won't update when data changes.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Wrap the logical expression in a fragment.
   
-    42 │ ··return·<>{!!props.cond·&&·<div>Conditional</div>;}</>
+    44 │ ··return·<>{!!props.cond·&&·<div>Conditional</div>;}</>
        │          +++                                       ++++
 
 ```
 
 ```
-invalid.js:45:28 lint/nursery/noSolidEarlyReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:47:28 lint/nursery/noSolidEarlyReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This conditional return breaks reactivity.
   
-    43 │ };
-    44 │ 
-  > 45 │ function Component(props) {
+    45 │ };
+    46 │ 
+  > 47 │ function Component(props) {
        │                            
-  > 46 │   return props.primary || <div>{props.secondaryText}</div>;
+  > 48 │   return props.primary || <div>{props.secondaryText}</div>;
        │   ^^^^^^^
-    47 │ };
-    48 │ 
+    49 │ };
+    50 │ 
   
-  i Solid components run once. Moving the condition inside JSX ensures reactivity is preserved.
+  i Solid components run once. Skipped branches won't have their reactive subscriptions set up, so affected parts of the UI won't update when data changes.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Wrap the logical expression in a fragment.
   
-    46 │ ··return·<>{props.primary·||·<div>{props.secondaryText}</div>;}</>
+    48 │ ··return·<>{props.primary·||·<div>{props.secondaryText}</div>;}</>
        │          +++                                                  ++++
 
 ```
 
 ```
-invalid.js:50:19 lint/nursery/noSolidEarlyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:52:19 lint/nursery/noSolidEarlyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This early return breaks reactivity.
   
-    49 │ HOC(() => {
-  > 50 │   if (condition) {
+    51 │ HOC(() => {
+  > 52 │   if (condition) {
        │                   
-  > 51 │     return <div />;
+  > 53 │     return <div />;
        │     ^^^^^^^
-    52 │   }
-    53 │   return <div />;
+    54 │   }
+    55 │   return <div />;
   
-  i Solid components run once. Moving the condition inside JSX ensures reactivity is preserved.
+  i Solid components run once. Skipped branches won't have their reactive subscriptions set up, so affected parts of the UI won't update when data changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:59:19 lint/nursery/noSolidEarlyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This early return breaks reactivity.
+  
+    58 │ HOC(function () {
+  > 59 │   if (condition) {
+       │                   
+  > 60 │     return <div />;
+       │     ^^^^^^^
+    61 │   }
+    62 │   return <div />;
+  
+  i Solid components run once. Skipped branches won't have their reactive subscriptions set up, so affected parts of the UI won't update when data changes.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

@@ -89,11 +89,13 @@ impl Rule for NoSolidEarlyReturn {
         let mut if_returns = vec![];
 
         for statement in body.statements() {
-            if matches!(&statement, AnyJsStatement::JsIfStatement(_)) {
-                collect_return_statements_shallow(&statement, &mut if_returns);
-            } else {
-                collect_return_statements_shallow(&statement, &mut all_returns);
-            }
+            let from_if = matches!(&statement, AnyJsStatement::JsIfStatement(_));
+            collect_return_statements_shallow(
+                &statement,
+                &mut all_returns,
+                &mut if_returns,
+                from_if,
+            );
         }
 
         let has_multiple_returns = all_returns.len() + if_returns.len() > 1;
@@ -217,26 +219,47 @@ fn get_conditional_type(expr: &AnyJsExpression) -> Option<ConditionalType> {
 /// Collect return statements from a statement WITHOUT recursing into nested functions
 fn collect_return_statements_shallow(
     statement: &AnyJsStatement,
-    returns: &mut Vec<JsReturnStatement>,
+    all_returns: &mut Vec<JsReturnStatement>,
+    if_returns: &mut Vec<JsReturnStatement>,
+    from_if: bool,
 ) {
     match statement {
         AnyJsStatement::JsReturnStatement(ret) => {
-            returns.push(ret.clone());
+            if from_if {
+                if_returns.push(ret.clone());
+            } else {
+                all_returns.push(ret.clone());
+            }
         }
         AnyJsStatement::JsIfStatement(if_stmt) => {
             if let Ok(consequent) = if_stmt.consequent() {
-                collect_return_statements_shallow(&consequent, returns);
+                collect_return_statements_shallow(
+                    &consequent,
+                    all_returns,
+                    if_returns,
+                    true,
+                );
             }
             if let Some(alternate) = if_stmt.else_clause()
                 && let Ok(alternate_stmt) = alternate.alternate()
             {
-                collect_return_statements_shallow(&alternate_stmt, returns);
+                collect_return_statements_shallow(
+                    &alternate_stmt,
+                    all_returns,
+                    if_returns,
+                    true,
+                );
             }
         }
         AnyJsStatement::JsBlockStatement(block) => {
             for stmt in block.statements() {
                 if !matches!(stmt, AnyJsStatement::JsFunctionDeclaration(_)) {
-                    collect_return_statements_shallow(&stmt, returns);
+                    collect_return_statements_shallow(
+                        &stmt,
+                        all_returns,
+                        if_returns,
+                        from_if,
+                    );
                 }
             }
         }

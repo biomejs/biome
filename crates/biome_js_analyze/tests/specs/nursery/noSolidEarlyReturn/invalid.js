@@ -1,3 +1,5 @@
+/* should generate diagnostics */
+
 function Component() {
   if (condition) {
     return <div />;
