@@ -46,15 +46,11 @@ $mapValueListBroken: (
 $mapValueMapBroken: (
 	key: (
 		(
-			very-very-very-very-very-very-very-very-long-map-key: very-very-very-very-very-very-very-very-long-map-value,
+			very-very-very-very-very-very-very-very-long-map-key:
+				very-very-very-very-very-very-very-very-long-map-value,
 			other-key: other-other-value,
 		)
 	),
 );
 
-```
-
-# Lines exceeding max width of 80 characters
-```
-   28: 			very-very-very-very-very-very-very-very-long-map-key: very-very-very-very-very-very-very-very-long-map-value,
 ```
