@@ -274,8 +274,14 @@ fn match_utility(target: &str, utility_text: &str) -> UtilityHit {
 
 /// Resolves the position of a variant name inside the preset's variant list.
 ///
-/// Recognizes both bare names (`hover`, `focus`) and the `name-[...]` form
-/// produced by functional variants such as `group-[:visited]`.
+/// Three matching paths:
+/// - Exact equality (`hover` == `hover`) → return immediately.
+/// - `target` followed by `-[...]` (e.g. `group-[:visited]` matches `group`)
+///   → also exact, return immediately.
+/// - `target` is a prefix of `variant_text` with any other suffix (e.g. `peer`
+///   matches `peer-has-[:checked]`) → tracked as a partial match. The loop
+///   keeps going to prefer the *longest* matching target, so a more specific
+///   entry like `peer-has` wins over the bare `peer` when both are present.
 fn locate_variant(variant_text: &str) -> Option<usize> {
     let mut best: Option<usize> = None;
     let mut best_target_len = 0usize;
