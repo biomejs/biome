@@ -1,4 +1,4 @@
-use biome_rowan::{AstNode, SyntaxNodeText};
+use biome_rowan::{AstNode, SyntaxNodeText, TextSize};
 use biome_tailwind_syntax::{
     AnyTwCandidate, AnyTwFullCandidate, AnyTwVariant, TwFullCandidate, TwRoot,
 };
@@ -79,21 +79,19 @@ impl SortKey {
                     arbitrary_variants.push(v.syntax().text_trimmed());
                 }
                 AnyTwVariant::TwStaticVariant(v) => {
-                    if let Ok(token) = v.base_token() {
-                        let name = token.text_trimmed();
-                        if let Some(idx) = locate_variant(name) {
-                            variant_indices.push(idx);
-                        }
+                    let name = v.syntax().text_trimmed();
+                    if let Some(idx) = locate_variant(&name) {
+                        variant_indices.push(idx);
                     }
                 }
                 AnyTwVariant::TwFunctionalVariant(v) => {
-                    let name = v.syntax().text_trimmed().to_string();
+                    let name = v.syntax().text_trimmed();
                     if let Some(idx) = locate_variant(&name) {
                         variant_indices.push(idx);
                     }
                 }
                 AnyTwVariant::TwDataAttribute(v) => {
-                    let name = v.syntax().text_trimmed().to_string();
+                    let name = v.syntax().text_trimmed();
                     if let Some(idx) = locate_variant(&name) {
                         variant_indices.push(idx);
                     }
@@ -220,15 +218,14 @@ fn locate_utility(candidate: &AnyTwCandidate) -> Option<(usize, usize)> {
         return Some((PRESET.utilities.len(), 0));
     }
 
-    let utility_text_owned = candidate.syntax().text_trimmed().to_string();
-    let utility_text = utility_text_owned.as_str();
+    let utility_text = candidate.syntax().text_trimmed();
 
     let mut best: Option<(usize, usize)> = None;
     let mut best_target_len = 0usize;
 
     for (layer_idx, layer) in PRESET.utilities.iter().enumerate() {
         for (idx, &target) in layer.classes.iter().enumerate() {
-            match match_utility(target, utility_text) {
+            match match_utility(target, &utility_text) {
                 UtilityHit::Exact => return Some((layer_idx, idx)),
                 UtilityHit::Partial(target_len) => {
                     if target_len > best_target_len {
@@ -257,7 +254,7 @@ enum UtilityHit {
 /// The parser splits `negative_token` from the candidate, so `utility_text` is
 /// never prefixed with `-`. The preset itself has no negative entries either,
 /// so both sides are clean.
-fn match_utility(target: &str, utility_text: &str) -> UtilityHit {
+fn match_utility(target: &str, utility_text: &SyntaxNodeText) -> UtilityHit {
     if let Some(exact) = target.strip_suffix('$') {
         if utility_text == exact {
             return UtilityHit::Exact;
@@ -265,7 +262,7 @@ fn match_utility(target: &str, utility_text: &str) -> UtilityHit {
         return UtilityHit::None;
     }
 
-    if utility_text.starts_with(target) && utility_text != target {
+    if utility_text.len() > TextSize::of(target) && utility_text.starts_with(target) {
         return UtilityHit::Partial(target.len());
     }
 
@@ -282,19 +279,20 @@ fn match_utility(target: &str, utility_text: &str) -> UtilityHit {
 ///   matches `peer-has-[:checked]`) → tracked as a partial match. The loop
 ///   keeps going to prefer the *longest* matching target, so a more specific
 ///   entry like `peer-has` wins over the bare `peer` when both are present.
-fn locate_variant(variant_text: &str) -> Option<usize> {
+fn locate_variant(variant_text: &SyntaxNodeText) -> Option<usize> {
     let mut best: Option<usize> = None;
     let mut best_target_len = 0usize;
 
     for (idx, &target) in PRESET.variants.iter().enumerate() {
-        if target == variant_text {
+        if variant_text == target {
             return Some(idx);
         }
-        if let Some(rest) = variant_text.strip_prefix(target) {
-            if rest.starts_with("-[") {
+        let target_len = TextSize::of(target);
+        if variant_text.len() > target_len && variant_text.starts_with(target) {
+            if variant_text.slice(target_len..).starts_with("-[") {
                 return Some(idx);
             }
-            if !rest.is_empty() && target.len() > best_target_len {
+            if target.len() > best_target_len {
                 best = Some(idx);
                 best_target_len = target.len();
             }
