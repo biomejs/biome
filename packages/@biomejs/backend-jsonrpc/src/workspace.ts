@@ -2433,6 +2433,11 @@ See https://biomejs.dev/linter/rules/no-vue-v-if-with-v-for
 	 */
 	noVueVIfWithVFor?: NoVueVIfWithVForConfiguration;
 	/**
+	* Disallow deprecated number modifiers on Vue v-on directives.
+See https://biomejs.dev/linter/rules/no-vue-v-on-number-values 
+	 */
+	noVueVOnNumberValues?: NoVueVOnNumberValuesConfiguration;
+	/**
 	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
@@ -4496,6 +4501,9 @@ export type NoVueRefAsOperandConfiguration =
 export type NoVueVIfWithVForConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueVIfWithVForOptions;
+export type NoVueVOnNumberValuesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueVOnNumberValuesOptions;
 export type UseArraySomeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseArraySomeOptions;
@@ -6334,6 +6342,10 @@ export interface RuleWithNoVueVIfWithVForOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueVIfWithVForOptions;
 }
+export interface RuleWithNoVueVOnNumberValuesOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueVOnNumberValuesOptions;
+}
 export interface RuleWithUseArraySomeOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -7997,6 +8009,7 @@ export type NoVueArrowFuncInWatchOptions = {};
 export type NoVueOptionsApiOptions = {};
 export type NoVueRefAsOperandOptions = {};
 export type NoVueVIfWithVForOptions = {};
+export type NoVueVOnNumberValuesOptions = {};
 export type UseArraySomeOptions = {};
 export type UseArraySortCompareOptions = {};
 export type UseAwaitThenableOptions = {};
@@ -9144,6 +9157,7 @@ export type Category =
 	| "lint/nursery/noVueOptionsApi"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueVIfWithVFor"
+	| "lint/nursery/noVueVOnNumberValues"
 	| "lint/nursery/useArraySome"
 	| "lint/nursery/useArraySortCompare"
 	| "lint/nursery/useAwaitThenable"

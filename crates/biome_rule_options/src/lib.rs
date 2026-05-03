@@ -318,6 +318,7 @@ pub mod no_vue_reserved_keys;
 pub mod no_vue_reserved_props;
 pub mod no_vue_setup_props_reactivity_loss;
 pub mod no_vue_v_if_with_v_for;
+pub mod no_vue_v_on_number_values;
 pub mod no_with;
 pub mod no_yoda_expression;
 pub mod organize_imports;
