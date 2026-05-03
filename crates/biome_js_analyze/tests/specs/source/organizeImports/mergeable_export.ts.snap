@@ -17,9 +17,11 @@ export { B, C } from "mod";
 
 # Diagnostics
 ```
-mergeable_export.ts:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+mergeable_export.ts assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Some imports or exports are not organized.
+  
+  i Sort the exported names.
   
     1 │ // Comment 1
   > 2 │ export type { T4, T2 } from "mod";
@@ -27,7 +29,21 @@ mergeable_export.ts:2:1 assist/source/organizeImports  FIXABLE  ━━━━━�
     3 │ // Comment 2
     4 │ export type { T3, T1 } from "mod";
   
-  i Safe fix: Organize Imports (Biome)
+  i Sort this chunk of exports.
+  
+    1 │ // Comment 1
+  > 2 │ export type { T4, T2 } from "mod";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 3 │ // Comment 2
+  > 4 │ export type { T3, T1 } from "mod";
+  > 5 │ // Comment 3
+  > 6 │ export { A, D } from "mod";
+  > 7 │ // Comment 4
+  > 8 │ export { B, C } from "mod";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    9 │ 
+  
+  i Safe fix: Organize imports and exports (Biome)
   
     1 1 │   // Comment 1
     2   │ - export·type·{·T4,·T2·}·from·"mod";

@@ -11,16 +11,19 @@ import {} from "a"
 
 # Diagnostics
 ```
-unsorted-imports-empty-header.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+unsorted-imports-empty-header.js assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Some imports or exports are not organized.
+  
+  i Sort this chunk of imports.
   
   > 1 │ import {} from "b"
       │ ^^^^^^^^^^^^^^^^^^
-    2 │ import {} from "a"
+  > 2 │ import {} from "a"
+      │ ^^^^^^^^^^^^^^^^^^
     3 │ 
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
     1   │ - import·{}·from·"b"
     2   │ - import·{}·from·"a"

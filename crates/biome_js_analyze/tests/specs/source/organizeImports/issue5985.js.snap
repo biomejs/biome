@@ -10,15 +10,18 @@ import { Moment } from 'moment';
 
 # Diagnostics
 ```
-issue5985.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+issue5985.js assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Some imports or exports are not organized.
+  
+  i Sort this chunk of imports.
   
   > 1 │ import moment from 'moment';
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ import { Moment } from 'moment';
+  > 2 │ import { Moment } from 'moment';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
     1   │ - import·moment·from·'moment';
     2   │ - import·{·Moment·}·from·'moment';

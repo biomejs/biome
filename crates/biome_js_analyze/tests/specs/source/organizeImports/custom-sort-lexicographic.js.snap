@@ -31,16 +31,32 @@ _Note: The parser emitted 2 diagnostics which are not shown here._
 
 # Diagnostics
 ```
-custom-sort-lexicographic.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+custom-sort-lexicographic.js assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Some imports or exports are not organized.
+  
+  i Sort the imported names.
   
   > 1 │ import { Module, module, Module1, Module2, module2, module1, module21, module1, module2, module11  } from "@scopeX/special"
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ import { var1, var2, var21, var11, var12, var22 } from 'custom-package'
     3 │ import {
   
-  i Safe fix: Organize Imports (Biome)
+  i Sort this chunk of imports.
+  
+   > 1 │ import { Module, module, Module1, Module2, module2, module1, module21, module1, module2, module11  } from "@scopeX/special"
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 2 │ import { var1, var2, var21, var11, var12, var22 } from 'custom-package'
+   > 3 │ import {
+   > 4 │   BlindedBeaconBlock,··
+        ...
+  > 18 │   CommitteeIndex,
+  > 19 │   BeaconBlockOrContents,
+  > 20 │ } from "@lodestar/types";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 
+  
+  i Safe fix: Organize imports and exports (Biome)
   
      1    │ - import·{·Module,·module,·Module1,·Module2,·module2,·module1,·module21,·module1,·module2,·module11··}·from·"@scopeX/special"
      2    │ - import·{·var1,·var2,·var21,·var11,·var12,·var22·}·from·'custom-package'

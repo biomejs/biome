@@ -10,15 +10,17 @@ export { b, a }
 
 # Diagnostics
 ```
-unorganized-bare-export-specifiers.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━
+unorganized-bare-export-specifiers.js assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Some imports or exports are not organized.
+  
+  i Sort the exported names.
   
   > 1 │ export { b, a }
       │ ^^^^^^^^^^^^^^^
     2 │ 
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
     1   │ - export·{·b,·a·}
       1 │ + export·{·a,·b·}
