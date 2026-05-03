@@ -397,7 +397,7 @@ fn is_this_reference(
         return scoped_this_references
             .iter()
             .any(|FunctionThisReferences { scope, .. }| {
-                is_within_scope_without_shadowing(syntax, function_body_syntax(scope))
+                is_within_scope_without_shadowing(syntax, scope.syntax())
             });
     }
 
@@ -420,20 +420,13 @@ fn is_this_reference(
                 });
 
                 let is_within_scope =
-                    is_within_scope_without_shadowing(name_syntax, function_body_syntax(scope));
+                    is_within_scope_without_shadowing(name_syntax, scope.syntax());
 
                 is_alias && is_within_scope
             },
         )
     } else {
         false
-    }
-}
-
-fn function_body_syntax(body: &AnyJsFunctionBody) -> &JsSyntaxNode {
-    match body {
-        AnyJsFunctionBody::AnyJsExpression(expression) => expression.syntax(),
-        AnyJsFunctionBody::JsFunctionBody(body) => body.syntax(),
     }
 }
 
@@ -677,7 +670,7 @@ fn collect_references_from_arrow_function(
 
     let inherited_this_references: Vec<_> = current_scope.this_references.iter().cloned().collect();
     let mut skipped_ranges = vec![];
-    let body_syntax = function_body_syntax(&body);
+    let body_syntax = body.syntax();
 
     for event in body_syntax.preorder() {
         match event {
@@ -962,7 +955,7 @@ fn collect_references_from_constructor(constructor_body: &JsFunctionBody) -> Cla
 
     for this_scope in all_descendants_fn_bodies_and_this_scopes.iter() {
         visit_references_in_body(
-            function_body_syntax(&this_scope.scope),
+            this_scope.scope.syntax(),
             std::slice::from_ref(this_scope),
             &mut writes,
             &mut reads,
