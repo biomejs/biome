@@ -48,7 +48,7 @@ declare_lint_rule! {
         version: "2.4.13",
         name: "noReactNativeDeepImports",
         language: "js",
-        sources: &[RuleSource::EslintReactNative("no-deep-imports").same()],
+        sources: &[RuleSource::EslintReactNative("no-deep-imports").inspired()],
         domains: &[RuleDomain::ReactNative],
         recommended: true,
         severity: Severity::Error,
