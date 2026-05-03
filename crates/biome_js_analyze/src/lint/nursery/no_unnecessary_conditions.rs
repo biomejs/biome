@@ -175,6 +175,14 @@ pub enum IssueKind {
     UnreachableCase(TextRange),
 }
 
+/// A literal value extracted from a `case <literal>:` clause.
+enum CaseLiteral {
+    String(TokenText),
+    Number(f64),
+    Boolean(bool),
+    Null,
+}
+
 impl Rule for NoUnnecessaryConditions {
     type Query = Typed<AnyConditionLike>;
     type State = IssueKind;
@@ -750,14 +758,6 @@ fn check_comparison_necessity(
     }
 
     None
-}
-
-/// A literal value extracted from a `case <literal>:` clause.
-enum CaseLiteral {
-    String(TokenText),
-    Number(f64),
-    Boolean(bool),
-    Null,
 }
 
 /// Extracts the literal value from a `case X:` test expression, if the test is
