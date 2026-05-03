@@ -44,13 +44,15 @@ impl<'a> ScssListLayout<'a> {
             if scss_map_context(self.node)
                 .is_some_and(|context| context.is_outer_parenthesized_value_list)
             {
+                // `key: (a, b)` gets its block indent from the parentheses;
+                // the list only forces item breaks and the trailing comma.
                 return write!(
                     f,
-                    [group(&indent(&format_args![
-                        soft_line_break(),
+                    [group(&format_args![
                         elements.format(),
                         if_group_breaks(&token(","))
-                    ]))]
+                    ])
+                    .should_expand(true)]
                 );
             }
 

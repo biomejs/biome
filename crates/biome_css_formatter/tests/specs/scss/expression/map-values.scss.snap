@@ -23,8 +23,14 @@ $mapValueScalar: (
 	key: (value),
 );
 $mapValueList: (
-	key: (#d82d2d, #666),
-	other-key: (#52bf4a, #fff),
+	key: (
+		#d82d2d,
+		#666,
+	),
+	other-key: (
+		#52bf4a,
+		#fff,
+	),
 );
 $mapValueMap: (
 	key: (
@@ -38,9 +44,9 @@ $mapValueScalarBroken: (
 );
 $mapValueListBroken: (
 	key: (
-			very-very-very-very-very-very-long-list-item-1,
-			very-very-very-very-very-very-long-list-item-2,
-			very-very-very-very-very-very-long-list-item-3,
+		very-very-very-very-very-very-long-list-item-1,
+		very-very-very-very-very-very-long-list-item-2,
+		very-very-very-very-very-very-long-list-item-3,
 	),
 );
 $mapValueMapBroken: (
