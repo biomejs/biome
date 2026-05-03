@@ -7903,16 +7903,7 @@ export type NoRedundantRolesOptions = {};
 export type NoStaticElementInteractionsOptions = {};
 export type NoSvgWithoutTitleOptions = {};
 export type UseAltTextOptions = {};
-export interface UseAnchorContentOptions {
-	/**
-	* Additional JSX prop names that indicate the anchor is a render prop
-whose children will be injected by the receiving component.
-
-The prop name `"render"` is always recognised. Use this option to add
-further names (e.g. `"as"`, `"component"`) without replacing the default. 
-	 */
-	additionalRenderProps?: string[];
-}
+export type UseAnchorContentOptions = {};
 export type UseAriaActivedescendantWithTabindexOptions = {};
 export type UseAriaPropsForRoleOptions = {};
 export type UseAriaPropsSupportedByRoleOptions = {};
