@@ -120,7 +120,7 @@ if (true) {
   }
 }
 
-// Switch with constant discriminant
+// Switch on a constant value
 switch (true) {
   case true:
     console.log("always matches");

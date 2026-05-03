@@ -255,3 +255,42 @@ function andOnAlwaysTruthy(cfg: AlwaysItems) {
 function ternaryOnAlwaysTruthy(cfg: AlwaysItems) {
   return cfg.items ? "yes" : "no";  // always "yes"
 }
+
+// Optional chain on a non-nullish call result — flagged
+function callReturningNonNullish(): string {
+  return "x";
+}
+const callChain = callReturningNonNullish()?.length;
+
+// `??` on a guaranteed object — flagged
+interface Settings { theme: string }
+function readSettings(s: Settings) {
+  return s.theme ?? "light";
+}
+
+// `null` on the left-hand side of `===` against a non-nullish value — flagged
+function leftNullCmp(x: number) {
+  return null === x;
+}
+
+// `undefined` on the left-hand side of `!==` against a non-nullish value — flagged
+function leftUndefinedCmp(x: number) {
+  return undefined !== x;
+}
+
+// `!` applied to a non-nullish member access — flagged via type information
+interface NonEmpty { items: string[] }
+function notOnAlwaysTruthyMember(c: NonEmpty) {
+  if (!c.items) {
+    return "never";
+  }
+}
+
+// Switch with mixed reachable and unreachable cases
+function switchMixed(value: 'a' | 'b') {
+  switch (value) {
+    case 'a': return 1;     // reachable
+    case 'b': return 2;     // reachable
+    case 'z': return 3;     // unreachable
+  }
+}

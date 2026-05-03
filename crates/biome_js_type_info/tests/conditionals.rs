@@ -109,4 +109,8 @@ fn optional_string_param_is_not_truthy() {
         !conditional.is_truthy(),
         "optional primitive parameter should not be classified as truthy, got {conditional:?}"
     );
+    assert!(
+        !conditional.is_nullish(),
+        "optional primitive parameter should not be classified as nullish, got {conditional:?}"
+    );
 }

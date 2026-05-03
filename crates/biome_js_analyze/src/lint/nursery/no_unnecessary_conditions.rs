@@ -7,116 +7,130 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression, JsBinaryOperator,
     JsCallExpression, JsCaseClause, JsCatchClause, JsComputedMemberExpression,
-    JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIfStatement,
-    JsLogicalExpression, JsLogicalOperator, JsStaticMemberExpression, JsSwitchStatement,
+    JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIdentifierExpression,
+    JsIfStatement, JsLogicalExpression, JsLogicalOperator, JsStaticMemberExpression, JsSwitchStatement,
     JsUnaryOperator, JsWhileStatement, inner_string_text,
 };
 use biome_js_type_info::Type;
-use biome_rowan::{AstNode, TextRange, declare_node_union};
+use biome_rowan::{AstNode, TextRange, TokenText, declare_node_union};
 use biome_rule_options::no_unnecessary_conditions::NoUnnecessaryConditionsOptions;
 
 declare_lint_rule! {
-    /// Disallow unnecessary type-based conditions that can be statically determined as redundant.
+    /// Disallow conditions that always evaluate to the same value.
     ///
-    /// This rule detects if expressions inside conditions are statically inferrable and yield
-    /// falsy or truthy values that don't change during the life cycle of the program.
+    /// Using type information, this rule reports conditions whose result is
+    /// statically known. It covers `if`/`while`/`for`/ternary tests, the `??`
+    /// and `||`/`&&` operators, optional chaining (`?.`), comparisons against
+    /// `null`/`undefined`, and `case` clauses that can never match the value
+    /// passed to `switch`.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
+    /// A non-nullable value never needs an `if` guard:
+    ///
     /// ```ts
     /// function head<T>(items: T[]) {
-    ///   if (items) {  // This check is unnecessary
-    ///     return items[0].toUpperCase();
-    ///   }
+    ///     if (items) {
+    ///         return items[0];
+    ///     }
     /// }
     /// ```
+    ///
+    /// A literal-union type can never be empty, so the truthiness check is
+    /// redundant:
     ///
     /// ```ts
     /// function foo(arg: 'bar' | 'baz') {
-    ///   if (arg) {  // This check is unnecessary
-    ///   }
+    ///     if (arg) {}
     /// }
     /// ```
+    ///
+    /// `?.` and `??` on operands that are guaranteed to be non-nullish:
     ///
     /// ```ts
     /// function bar(arg: string) {
-    ///   return arg?.length;  // ?. is unnecessary
+    ///     return arg?.length;
     /// }
     /// ```
     ///
     /// ```ts
-    /// interface Foo { items: string[] }
-    /// function f(x: Foo) {
-    ///   return x.items || [];  // x.items is string[], always truthy
+    /// function withDefault(name: string) {
+    ///     return name ?? "anonymous";
     /// }
     /// ```
     ///
+    /// `||` and `&&` on always-truthy operands:
+    ///
     /// ```ts
-    /// const a = [];
-    /// if (!a) {}  // always false — array literals are always truthy
+    /// interface Config { items: string[] }
+    /// function f(c: Config) {
+    ///     return c.items || [];
+    /// }
     /// ```
+    ///
+    /// `!expr` on a value that is always truthy:
+    ///
+    /// ```ts
+    /// const items = [];
+    /// if (!items) {}
+    /// ```
+    ///
+    /// Comparing a non-nullable value against `null` or `undefined`:
     ///
     /// ```ts
     /// function f(x: string) {
-    ///   return x === null;  // always false — x is never null
+    ///     return x === null;
     /// }
     /// ```
+    ///
+    /// A `case` whose value can never equal the value passed to `switch`:
     ///
     /// ```ts
     /// function f(v: 'a' | 'b') {
-    ///   switch (v) { case 'c': return 1; }  // 'c' is unreachable
+    ///     switch (v) {
+    ///         case 'c': return 1;
+    ///     }
     /// }
     /// ```
-    ///
-    /// Contrary to the source rule, this rule doesn't trigger bindings that are assigned to multiple
-    /// values. In the following example, the variable `greeting` is assigned to multiple values; hence
-    /// it can't be inferred to a truthy or falsy value.
-    ///
-    /// ```ts
-    /// let greeting = false;
-    ///
-    /// function changeGreeting() {
-    ///     greeting = "Hello World!"
-    /// }
-    ///
-    /// if (greeting) {} // rule not triggered here
-    ///
-    /// ```
-    ///
     ///
     /// ### Valid
     ///
-    /// ```ts
-    /// function head<T>(items: T[] | null) {
-    ///   if (items) {  // This check is necessary
-    ///     return items[0].toUpperCase();
-    ///   }
-    /// }
-    /// ```
+    /// When the type allows nullish or empty values, the check is meaningful:
     ///
     /// ```ts
-    /// function foo(arg: 'bar' | 'baz' | null) {
-    ///   if (arg) {  // This check is necessary
-    ///   }
+    /// function head<T>(items: T[] | null) {
+    ///     if (items) {
+    ///         return items[0];
+    ///     }
     /// }
     /// ```
     ///
     /// ```ts
     /// function bar(arg: string | undefined) {
-    ///   return arg?.length;  // ?. is necessary
+    ///     return arg?.length;
     /// }
     /// ```
     ///
     /// ```ts
     /// function f(v: 'a' | 'b' | 'c') {
-    ///   switch (v) {
-    ///     case 'a': break;
-    ///     case 'b': break;
-    ///     case 'c': break;  // all cases reachable — no flag
-    ///   }
+    ///     switch (v) {
+    ///         case 'a': break;
+    ///         case 'b': break;
+    ///         case 'c': break;
+    ///     }
     /// }
+    /// ```
+    ///
+    /// Unlike the source rule, this rule doesn't flag bindings that are
+    /// reassigned to values of different truthiness, since their narrowing
+    /// can't be inferred reliably:
+    ///
+    /// ```ts
+    /// let greeting = false;
+    /// function update() { greeting = "Hello"; }
+    /// if (greeting) {}
     /// ```
     ///
     pub NoUnnecessaryConditions {
@@ -157,7 +171,7 @@ pub enum IssueKind {
     UnnecessaryCoalescing(TextRange, TextRange),
     /// A binary comparison that will always have the same result
     UnnecessaryComparison(TextRange),
-    /// A `case` clause whose test value can never equal the switch discriminant.
+    /// A `case` clause whose test value can never equal the value passed to `switch`.
     UnreachableCase(TextRange),
 }
 
@@ -275,14 +289,11 @@ impl Rule for NoUnnecessaryConditions {
                     rule_category!(),
                     range,
                     markup! {
-                        "This condition is always truthy based on the type."
+                        "This condition is always truthy."
                     },
                 )
                 .note(markup! {
-                    "The type being checked can never be falsy, making this condition redundant."
-                })
-                .note(markup!{
-                    "Remove the condition."
+                    "The value's type can never be falsy, so this check is redundant."
                 }),
             ),
             IssueKind::AlwaysFalsyCondition(range) => Some(
@@ -290,13 +301,11 @@ impl Rule for NoUnnecessaryConditions {
                     rule_category!(),
                     range,
                     markup! {
-                        "This condition is always falsy based on the type."
+                        "This condition is always falsy."
                     },
                 )
                 .note(markup! {
-                    "The type being checked can never be truthy, making this condition redundant."
-                }).note(markup!{
-                    "Remove the condition."
+                    "The value's type can never be truthy, so this check is redundant."
                 }),
             ),
             IssueKind::UnnecessaryOptionalChain(node_range, operator_range) => Some(
@@ -304,14 +313,14 @@ impl Rule for NoUnnecessaryConditions {
                     rule_category!(),
                     node_range,
                     markup! {
-                        "Optional chaining is unnecessary for this type."
+                        "Unnecessary optional chaining."
                     },
                 )
                 .note(markup! {
-                    "The type being accessed is guaranteed to be non-nullish, making optional chaining redundant."
-                }).detail(operator_range,markup!{
-
-                    "Remove the optional chaining."
+                    "The receiver is guaranteed to be non-nullish."
+                })
+                .detail(operator_range, markup! {
+                    "Replace "<Emphasis>"?."</Emphasis>" with "<Emphasis>"."</Emphasis>"."
                 }),
             ),
             IssueKind::UnnecessaryComparison(range) => Some(
@@ -319,13 +328,11 @@ impl Rule for NoUnnecessaryConditions {
                     rule_category!(),
                     range,
                     markup! {
-                        "This comparison will always have the same result."
+                        "This comparison always has the same result."
                     },
                 )
                 .note(markup! {
-                    "Based on the types being compared, this condition is redundant."
-                }).note(markup!{
-                    "Remove the comparison."
+                    "The operands' types make the outcome statically known."
                 }),
             ),
             IssueKind::UnnecessaryCoalescing(node_range, operator_range) => Some(
@@ -333,28 +340,26 @@ impl Rule for NoUnnecessaryConditions {
                     rule_category!(),
                     node_range,
                     markup! {
-                        "Coalescing is unnecessary for this type."
+                        "Unnecessary nullish coalescing."
                     },
                 )
                 .note(markup! {
-                    "The type being accessed is guaranteed to be non-nullish, making coalescing redundant."
-                }).detail(operator_range,markup!{
-                    "This is a nullish coalescing operator, which is unnecessary."
+                    "The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable."
                 })
+                .detail(operator_range, markup! {
+                    "Drop "<Emphasis>"??"</Emphasis>" and the fallback expression."
+                }),
             ),
             IssueKind::UnreachableCase(range) => Some(
                 RuleDiagnostic::new(
                     rule_category!(),
                     range,
                     markup! {
-                        "This case is unreachable."
+                        "This "<Emphasis>"case"</Emphasis>" is unreachable."
                     },
                 )
                 .note(markup! {
-                    "The discriminant's type can never equal this value."
-                })
-                .note(markup! {
-                    "Remove the case, or change the discriminant."
+                    "The value passed to "<Emphasis>"switch"</Emphasis>" can never equal this value."
                 }),
             ),
         }
@@ -375,11 +380,16 @@ fn is_optional_chain_expr(expr: &AnyJsExpression) -> bool {
 }
 
 /// Returns `true` if `expr` is the identifier `undefined`.
+///
+/// This is a purely syntactic check and intentionally does not resolve the
+/// binding, so a user-defined `undefined` (for example `const undefined = 1`)
+/// is also matched. Strict mode forbids rebinding `undefined`, so the
+/// distinction does not matter in practice.
 fn is_undefined_identifier(expr: &AnyJsExpression) -> bool {
-    matches!(expr, AnyJsExpression::JsIdentifierExpression(id)
-        if id.name().ok()
-            .and_then(|n| n.value_token().ok())
-            .is_some_and(|t| t.text_trimmed() == "undefined"))
+    JsIdentifierExpression::cast_ref(expr.syntax())
+        .and_then(|id| id.name().ok())
+        .and_then(|n| n.value_token().ok())
+        .is_some_and(|t| t.text_trimmed() == "undefined")
 }
 
 fn check_condition_necessity(
@@ -442,14 +452,11 @@ fn check_condition_necessity(
             // Array literals are always truthy
             return Some(IssueKind::AlwaysTruthyCondition(expr.range()));
         }
-        AnyJsExpression::JsIdentifierExpression(id_expr) => {
-            if let Ok(name) = id_expr.name()
-                && name.value_token().ok()?.text_trimmed() == "undefined"
-            {
+        AnyJsExpression::JsIdentifierExpression(_) => {
+            if is_undefined_identifier(expr) {
                 return Some(IssueKind::AlwaysFalsyCondition(expr.range()));
             }
 
-            // Use type inference to check if this identifier always refers to a truthy/falsy value
             let ty = ctx.type_of_expression(expr);
             let conditional = ty.conditional_semantics();
             if conditional.is_truthy() {
@@ -747,7 +754,7 @@ fn check_comparison_necessity(
 
 /// A literal value extracted from a `case <literal>:` clause.
 enum CaseLiteral {
-    String(String),
+    String(TokenText),
     Number(f64),
     Boolean(bool),
     Null,
@@ -764,7 +771,7 @@ fn extract_case_literal(test: &AnyJsExpression) -> Option<CaseLiteral> {
     match lit_expr {
         AnyJsLiteralExpression::JsStringLiteralExpression(s) => {
             let token = s.value_token().ok()?;
-            Some(CaseLiteral::String(inner_string_text(&token).text().to_string()))
+            Some(CaseLiteral::String(inner_string_text(&token)))
         }
         AnyJsLiteralExpression::JsNumberLiteralExpression(n) => {
             // `as_number` handles hex/binary/octal literals and numeric separators.
@@ -794,6 +801,9 @@ fn type_could_equal_literal(ty: &Type, literal: &CaseLiteral) -> bool {
     single_type_could_equal_literal(ty, literal)
 }
 
+/// Same predicate as [`type_could_equal_literal`], but for a single non-union
+/// type. Callers from union handling pass each variant through here; direct
+/// callers pass the type as-is.
 fn single_type_could_equal_literal(ty: &Type, literal: &CaseLiteral) -> bool {
     use biome_js_type_info::TypeData;
 
@@ -816,7 +826,7 @@ fn single_type_could_equal_literal(ty: &Type, literal: &CaseLiteral) -> bool {
                     return true;
                 }
                 // Otherwise it's a string literal — match on exact value.
-                return ty.is_string_literal(s.as_str());
+                return ty.is_string_literal(s.text());
             }
             false
         }
@@ -848,10 +858,12 @@ fn single_type_could_equal_literal(ty: &Type, literal: &CaseLiteral) -> bool {
     }
 }
 
-/// Checks whether a `case <literal>:` clause is reachable given the type of
-/// the enclosing `switch`'s discriminant. Mirrors the behavior of
-/// `@typescript-eslint/no-unnecessary-condition`, which flags each case that
-/// can never equal the discriminant.
+/// Checks whether a `case <literal>:` clause can ever match.
+///
+/// The clause is reachable only when the type of the value passed to `switch`
+/// could possibly equal the literal in the `case`. When the type rules out
+/// that value (for example a `'a' | 'b'` value tested with `case 'c':`), the
+/// `case` body can never run and the rule reports it.
 fn check_case_clause_reachability(
     case_clause: &JsCaseClause,
     ctx: &RuleContext<NoUnnecessaryConditions>,

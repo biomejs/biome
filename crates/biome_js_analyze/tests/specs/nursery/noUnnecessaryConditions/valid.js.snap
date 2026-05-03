@@ -128,7 +128,7 @@ function getBoolean() {
   return Math.random() > 0.5;
 }
 
-// Switch with dynamic discriminant
+// Switch on a value that varies at runtime
 function testSwitch(value) {
   switch (value) {
     case "a":
