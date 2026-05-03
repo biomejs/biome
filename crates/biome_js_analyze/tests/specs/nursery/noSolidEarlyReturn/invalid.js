@@ -52,3 +52,17 @@ HOC(() => {
   }
   return <div />;
 });
+
+HOC(function () {
+  if (condition) {
+    return <div />;
+  }
+  return <div />;
+})
+
+HOC((((function () {
+  if (condition) {
+    return <div />;
+  }
+  return <div />;
+}))))

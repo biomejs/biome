@@ -5,6 +5,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_rule_options::no_solid_early_return::NoSolidEarlyReturnOptions;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunction, AnyJsStatement, AnyJsxChild, AnyJsxTag, JsCallArgumentList,
@@ -63,7 +64,7 @@ impl Rule for NoSolidEarlyReturn {
     type Query = Ast<AnyJsFunction>;
     type State = (ReturnType, JsReturnStatement);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoSolidEarlyReturnOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let func = ctx.query();
@@ -118,14 +119,12 @@ impl Rule for NoSolidEarlyReturn {
         let (return_type, statement) = state;
         let span = statement.return_token().ok()?.text_range();
 
-        let message = match return_type {
-            ReturnType::Conditional(_) => "This conditional return breaks reactivity.",
-            ReturnType::EarlyReturn => "This early return breaks reactivity.",
-        };
-
         Some(
-            RuleDiagnostic::new(rule_category!(), span, message).note(
-                "Solid components run once. Moving the condition inside JSX ensures reactivity is preserved.",
+            RuleDiagnostic::new(rule_category!(), span, match return_type {
+                ReturnType::Conditional(_) => "This conditional return breaks reactivity.",
+                ReturnType::EarlyReturn => "This early return breaks reactivity.",
+            }).note(
+                "Solid components run once. Skipped branches won't have their reactive subscriptions set up, so affected parts of the UI won't update when data changes.",
             ),
         )
     }
@@ -156,21 +155,19 @@ impl Rule for NoSolidEarlyReturn {
 
         mutation.replace_node(arg, AnyJsExpression::JsxTagExpression(jsx_tag_expr));
 
-        let message = match cond_type {
-            ConditionalType::Ternary(_) => "Wrap the ternary expression in a fragment.",
-            ConditionalType::Logical(_) => "Wrap the logical expression in a fragment.",
-        };
-
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup! { {message} }.to_owned(),
+            markup! { {match cond_type {
+                ConditionalType::Ternary(_) => "Wrap the ternary expression in a fragment.",
+                ConditionalType::Logical(_) => "Wrap the logical expression in a fragment.",
+            }} }.to_owned(),
             mutation,
         ))
     }
 }
 
-/// Returns `true` if the function is (probably) a component (because it is PascalCase)
+/// Given the name of a function, returns `true` if it is (probably) a component name (PascalCase)
 fn is_component_name(name: &str) -> bool {
     name.chars().next().is_some_and(|x| x.is_uppercase())
 }
