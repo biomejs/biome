@@ -68,6 +68,11 @@ impl<'a> ScssListLayout<'a> {
                 );
             }
 
+            if is_parenthesized_list(self.node) {
+                // In `(a, b)`, the parentheses own the line break and indent.
+                return write!(f, [group(&format_args![elements.format()])]);
+            }
+
             return write!(
                 f,
                 [group(&indent(&format_args![
@@ -242,6 +247,14 @@ fn is_parenthesized_map_key_list(node: &ScssListExpression) -> bool {
         .is_some_and(|parenthesized| {
             is_scss_map_key(&parenthesized) && parenthesized_owns_list(&parenthesized, node)
         })
+}
+
+/// Returns `true` for the list in `(a, b)`.
+fn is_parenthesized_list(node: &ScssListExpression) -> bool {
+    node.syntax()
+        .parent()
+        .and_then(ScssParenthesizedExpression::cast)
+        .is_some_and(|parenthesized| parenthesized_owns_list(&parenthesized, node))
 }
 
 /// Returns `true` when `node` is the list inside `(a, b)`.
