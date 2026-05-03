@@ -3,6 +3,8 @@ use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::JsxElement;
+use biome_js_syntax::JsxExpressionAttributeValue;
+use biome_js_syntax::JsSyntaxKind;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_anchor_content::UseAnchorContentOptions;
@@ -60,6 +62,11 @@ declare_lint_rule! {
     /// <a><div aria-hidden="true"></div>content</a>
     /// ```
     ///
+    /// ```jsx
+    /// // Valid: <a> is a render prop value; the wrapping component renders children inside it
+    /// <Button render={<a href="/home" aria-label="Home" />}>Home</Button>
+    /// ```
+    ///
     /// ## Accessibility guidelines
     ///
     /// - [WCAG 2.4.4](https://www.w3.org/WAI/WCAG21/Understanding/link-purpose-in-context)
@@ -92,6 +99,10 @@ impl Rule for UseAnchorContent {
             }
 
             if has_valid_anchor_content(node) {
+                return None;
+            }
+
+            if is_render_prop_anchor(node) {
                 return None;
             }
 
@@ -172,4 +183,36 @@ fn has_valid_anchor_content(node: &AnyJsxElement) -> bool {
                     .is_none_or(|attribute| !attribute.is_falsy())
             })
         || node.has_spread_prop()
+}
+
+/// Returns true when the `<a>` element is the value of a JSX attribute (render prop pattern).
+///
+/// In this pattern the receiving component renders the anchor element as a wrapper and
+/// places its own JSX children inside it, so the final DOM will contain both the anchor's
+/// attributes *and* real text content — making the lint check a false positive.
+///
+/// Handles both self-closing (`<a />`) and open/close (`<a></a>`) forms, and also
+/// parenthesized values (`render={(<a />)}`).
+fn is_render_prop_anchor(node: &AnyJsxElement) -> bool {
+    let mut current = node.syntax().parent();
+    loop {
+        let Some(parent) = current else {
+            return false;
+        };
+        if JsxExpressionAttributeValue::can_cast(parent.kind()) {
+            return true;
+        }
+        match parent.kind() {
+            // Walk up through transparent wrapper nodes:
+            // - JsxElement wraps JsxOpeningElement
+            // - JsxTagExpression wraps JSX elements used as JS expressions
+            // - JsParenthesizedExpression for render={(<a />)}
+            JsSyntaxKind::JSX_ELEMENT
+            | JsSyntaxKind::JSX_TAG_EXPRESSION
+            | JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION => {
+                current = parent.parent();
+            }
+            _ => return false,
+        }
+    }
 }
