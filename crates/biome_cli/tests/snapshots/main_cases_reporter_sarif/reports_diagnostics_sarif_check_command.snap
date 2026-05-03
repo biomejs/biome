@@ -294,19 +294,13 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           "ruleId": "assist/source/organizeImports",
           "level": "error",
           "message": {
-            "text": "The imports and exports are not sorted."
+            "text": "Some imports or exports are not organized."
           },
           "locations": [
             {
               "physicalLocation": {
                 "artifactLocation": {
                   "uri": "index.ts"
-                },
-                "region": {
-                  "startLine": 1,
-                  "startColumn": 1,
-                  "endLine": 1,
-                  "endColumn": 21
                 }
               }
             }
@@ -464,19 +458,13 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           "ruleId": "assist/source/organizeImports",
           "level": "error",
           "message": {
-            "text": "The imports and exports are not sorted."
+            "text": "Some imports or exports are not organized."
           },
           "locations": [
             {
               "physicalLocation": {
                 "artifactLocation": {
                   "uri": "main.ts"
-                },
-                "region": {
-                  "startLine": 1,
-                  "startColumn": 1,
-                  "endLine": 1,
-                  "endColumn": 21
                 }
               }
             }

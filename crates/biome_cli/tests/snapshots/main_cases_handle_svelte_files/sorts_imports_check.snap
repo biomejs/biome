@@ -26,17 +26,21 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-file.svelte:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.svelte assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The imports and exports are not sorted.
+  × Some imports or exports are not organized.
   
-    1 │ <script lang="ts">
+  i Sort this chunk of imports.
+  
+  > 1 │ <script lang="ts">
+      │ ^^^^^^^^^^^^^^^^^^
   > 2 │ import Button from "./components/Button.svelte";
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ import * as svelteUse from "svelte-use";
+  > 3 │ import * as svelteUse from "svelte-use";
+      │ ^^^^^^^^^^^^^^^^^^^^^
     4 │ </script>
+    5 │ <div></div>
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
     1   │ - import·Button·from·"./components/Button.svelte";
     2   │ - import·*·as·svelteUse·from·"svelte-use";

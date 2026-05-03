@@ -153,14 +153,25 @@ The --json option is unstable/experimental and its output might change between p
 		},
 		{
 			"severity": "error",
-			"message": "The imports and exports are not sorted.",
+			"message": "Some imports or exports are not organized.",
 			"category": "assist/source/organizeImports",
 			"location": {
 				"path": "index.ts",
-				"start": { "line": 1, "column": 1 },
-				"end": { "line": 1, "column": 21 }
+				"start": { "line": 0, "column": 0 },
+				"end": { "line": 0, "column": 0 }
 			},
-			"advices": []
+			"advices": [
+				{
+					"start": { "line": 2, "column": 1 },
+					"end": { "line": 2, "column": 33 },
+					"text": "Sort this chunk of imports."
+				},
+				{
+					"start": { "line": 1, "column": 1 },
+					"end": { "line": 2, "column": 33 },
+					"text": "Safe fix: Organize imports and exports (Biome)"
+				}
+			]
 		},
 		{
 			"severity": "error",
@@ -253,14 +264,25 @@ The --json option is unstable/experimental and its output might change between p
 		},
 		{
 			"severity": "error",
-			"message": "The imports and exports are not sorted.",
+			"message": "Some imports or exports are not organized.",
 			"category": "assist/source/organizeImports",
 			"location": {
 				"path": "main.ts",
-				"start": { "line": 1, "column": 1 },
-				"end": { "line": 1, "column": 21 }
+				"start": { "line": 0, "column": 0 },
+				"end": { "line": 0, "column": 0 }
 			},
-			"advices": []
+			"advices": [
+				{
+					"start": { "line": 2, "column": 1 },
+					"end": { "line": 2, "column": 33 },
+					"text": "Sort this chunk of imports."
+				},
+				{
+					"start": { "line": 1, "column": 1 },
+					"end": { "line": 2, "column": 33 },
+					"text": "Safe fix: Organize imports and exports (Biome)"
+				}
+			]
 		},
 		{
 			"severity": "error",

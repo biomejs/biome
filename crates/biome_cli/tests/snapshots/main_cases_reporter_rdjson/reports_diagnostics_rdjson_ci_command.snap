@@ -215,20 +215,35 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
         "url": "https://biomejs.dev/assist/actions/organize-imports",
         "value": "assist/source/organizeImports"
       },
-      "location": {
-        "path": "index.ts",
-        "range": {
-          "end": {
-            "column": 21,
-            "line": 1
+      "message": "Some imports or exports are not organized.",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 33,
+              "line": 2
+            },
+            "start": {
+              "column": 1,
+              "line": 2
+            }
           },
-          "start": {
-            "column": 1,
-            "line": 1
-          }
+          "text": "Sort this chunk of imports."
+        },
+        {
+          "range": {
+            "end": {
+              "column": 33,
+              "line": 2
+            },
+            "start": {
+              "column": 1,
+              "line": 1
+            }
+          },
+          "text": "Safe fix: Organize imports and exports (Biome)"
         }
-      },
-      "message": "The imports and exports are not sorted."
+      ]
     },
     {
       "code": {
@@ -391,20 +406,35 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
         "url": "https://biomejs.dev/assist/actions/organize-imports",
         "value": "assist/source/organizeImports"
       },
-      "location": {
-        "path": "main.ts",
-        "range": {
-          "end": {
-            "column": 21,
-            "line": 1
+      "message": "Some imports or exports are not organized.",
+      "suggestions": [
+        {
+          "range": {
+            "end": {
+              "column": 33,
+              "line": 2
+            },
+            "start": {
+              "column": 1,
+              "line": 2
+            }
           },
-          "start": {
-            "column": 1,
-            "line": 1
-          }
+          "text": "Sort this chunk of imports."
+        },
+        {
+          "range": {
+            "end": {
+              "column": 33,
+              "line": 2
+            },
+            "start": {
+              "column": 1,
+              "line": 1
+            }
+          },
+          "text": "Safe fix: Organize imports and exports (Biome)"
         }
-      },
-      "message": "The imports and exports are not sorted."
+      ]
     },
     {
       "code": {
