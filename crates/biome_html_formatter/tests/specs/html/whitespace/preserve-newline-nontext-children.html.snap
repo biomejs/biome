@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
 info: whitespace/preserve-newline-nontext-children.html
 ---
 
@@ -11,6 +12,21 @@ info: whitespace/preserve-newline-nontext-children.html
 	<span>text</span>
 </div>
 
+<!-- Newlines around nested inline elements should be preserved -->
+<span>
+	<em>label</em>
+</span>
+
+<!-- Newlines around custom elements should be preserved -->
+<my-widget>
+	<inner-widget></inner-widget>
+</my-widget>
+
+<!-- Newlines around anchor children should be preserved -->
+<a>
+	<span>label</span>
+</a>
+
 <!-- No newlines = stays inline -->
 <div><span>text</span></div>
 
@@ -20,10 +36,21 @@ info: whitespace/preserve-newline-nontext-children.html
 	<span>Bar</span>
 </div>
 
+<!-- Text-only child stays inline -->
+<span>
+	label
+</span>
+
 <!-- Mixed content (element + text) should NOT force multiline -->
 <div>
 	<span>Foo</span> Bar
 </div>
+
+<!-- Mixed text and element children on separate lines should be preserved -->
+<p>
+	<span>Foo</span>
+	Bar
+</p>
 
 <!-- Comment-only child with newlines should be preserved -->
 <div>
@@ -44,6 +71,21 @@ info: whitespace/preserve-newline-nontext-children.html
 	<span>text</span>
 </div>
 
+<!-- Newlines around nested inline elements should be preserved -->
+<span>
+	<em>label</em>
+</span>
+
+<!-- Newlines around custom elements should be preserved -->
+<my-widget>
+	<inner-widget></inner-widget>
+</my-widget>
+
+<!-- Newlines around anchor children should be preserved -->
+<a>
+	<span>label</span>
+</a>
+
 <!-- No newlines = stays inline -->
 <div><span>text</span></div>
 
@@ -53,8 +95,17 @@ info: whitespace/preserve-newline-nontext-children.html
 	<span>Bar</span>
 </div>
 
+<!-- Text-only child stays inline -->
+<span> label </span>
+
 <!-- Mixed content (element + text) should NOT force multiline -->
 <div><span>Foo</span> Bar</div>
+
+<!-- Mixed text and element children on separate lines should be preserved -->
+<p>
+	<span>Foo</span>
+	Bar
+</p>
 
 <!-- Comment-only child with newlines should be preserved -->
 <div>
