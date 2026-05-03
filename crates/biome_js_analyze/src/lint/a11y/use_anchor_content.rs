@@ -71,22 +71,6 @@ declare_lint_rule! {
     /// <Button render={<a href="/home" aria-label="Home" />}>Home</Button>
     /// ```
     ///
-    /// ## Options
-    ///
-    /// ### `additionalRenderProps`
-    ///
-    /// By default only the `render` prop is treated as a render prop.
-    /// Use `additionalRenderProps` to extend the list for other component APIs
-    /// (e.g. `"as"`, `"component"`) without replacing the default.
-    ///
-    /// ```json,options
-    /// {
-    ///     "options": {
-    ///         "additionalRenderProps": ["as", "component"]
-    ///     }
-    /// }
-    /// ```
-    ///
     /// ## Accessibility guidelines
     ///
     /// - [WCAG 2.4.4](https://www.w3.org/WAI/WCAG21/Understanding/link-purpose-in-context)
@@ -122,11 +106,7 @@ impl Rule for UseAnchorContent {
                 return None;
             }
 
-            let options = ctx.options();
-            let render_prop_names: Vec<&str> = std::iter::once("render")
-                .chain(options.additional_render_props.iter().map(String::as_str))
-                .collect();
-            if is_render_prop_anchor(node, &render_prop_names) {
+            if is_render_prop_anchor(node) {
                 return None;
             }
 
@@ -209,8 +189,10 @@ fn has_valid_anchor_content(node: &AnyJsxElement) -> bool {
         || node.has_spread_prop()
 }
 
+const RENDER_PROP_NAMES: &[&str] = &["render"];
+
 /// Returns true when the `<a>` element is the value of a JSX attribute whose
-/// name is in `render_prop_names` (render prop pattern).
+/// name is in `RENDER_PROP_NAMES` (render prop pattern).
 ///
 /// In this pattern the receiving component renders the anchor element as a
 /// wrapper and places its own JSX children inside it, so the final DOM will
@@ -219,7 +201,7 @@ fn has_valid_anchor_content(node: &AnyJsxElement) -> bool {
 ///
 /// Handles both self-closing (`<a />`) and open/close (`<a></a>`) forms, and
 /// parenthesized values (`render={(<a />)}`).
-fn is_render_prop_anchor(node: &AnyJsxElement, render_prop_names: &[&str]) -> bool {
+fn is_render_prop_anchor(node: &AnyJsxElement) -> bool {
     let mut current = node.syntax().parent();
     loop {
         let Some(parent) = current else {
@@ -227,7 +209,7 @@ fn is_render_prop_anchor(node: &AnyJsxElement, render_prop_names: &[&str]) -> bo
         };
         if JsxExpressionAttributeValue::can_cast(parent.kind()) {
             let attr_value = JsxExpressionAttributeValue::unwrap_cast(parent);
-            return render_prop_name_matches(&attr_value, render_prop_names);
+            return render_prop_name_matches(&attr_value, RENDER_PROP_NAMES);
         }
         match parent.kind() {
             // Walk up through transparent wrapper nodes:
