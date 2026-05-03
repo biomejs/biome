@@ -253,14 +253,18 @@ enum UtilityHit {
     None,
 }
 
-/// Mirrors the preset format:
-/// - `name$` → exact match against `name`.
-/// - `name`  → partial match: the utility text must start with `name` and be
-///   strictly longer than it.
+/// Tests whether `utility_text` matches a single `target` entry from
+/// `PRESET.utilities[*].classes`.
 ///
-/// The parser splits `negative_token` from the candidate, so `utility_text` is
-/// never prefixed with `-`. The preset itself has no negative entries either,
-/// so both sides are clean.
+/// Each `target` follows one of two shapes:
+/// - `"name$"` (trailing `$`) anchors an exact match. Used for utilities
+///   without a value, e.g. `flex`, `block`.
+/// - `"name"` (no suffix) is a prefix match: `utility_text` must start with
+///   `name` and be strictly longer; the remainder is the value, e.g.
+///   `bg-red-500` matches the `bg-` entry.
+///
+/// `negative_token` is split off by the parser, so `utility_text` is never
+/// prefixed with `-`, and the preset has no negative entries either.
 fn matches_utility(target: &str, utility_text: &SyntaxNodeText) -> UtilityHit {
     if let Some(exact) = target.strip_suffix('$') {
         if utility_text == exact {
