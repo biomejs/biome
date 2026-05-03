@@ -16,7 +16,9 @@ use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 
 use super::precedence::scss_binary_precedence;
-use super::regular_expression_operand::parse_scss_regular_expression_operand;
+use super::{
+    ScssExpressionOptions, regular_expression_operand::parse_scss_regular_expression_operand,
+};
 
 /// Parses an SCSS expression operand such as `#{fn}(arg)`, `10#{unit}`,
 /// `module.$name#{suffix}`, or `(1 + 2)`.
@@ -33,7 +35,10 @@ use super::regular_expression_operand::parse_scss_regular_expression_operand;
 /// - https://sass-lang.com/documentation/operators
 /// - https://sass-lang.com/documentation/interpolation
 #[inline]
-pub(super) fn parse_scss_expression_operand(p: &mut CssParser) -> ParsedSyntax {
+pub(super) fn parse_scss_expression_operand(
+    p: &mut CssParser,
+    options: ScssExpressionOptions,
+) -> ParsedSyntax {
     if is_at_scss_interpolation(p) {
         return parse_scss_interpolated_function_or_value_until(
             p,
@@ -49,7 +54,7 @@ pub(super) fn parse_scss_expression_operand(p: &mut CssParser) -> ParsedSyntax {
         return parse_scss_interpolatable_value(p);
     }
 
-    parse_scss_regular_expression_operand(p)
+    parse_scss_regular_expression_operand(p, options)
 }
 
 /// Parses `module.$name` as either a standalone module-member operand or an

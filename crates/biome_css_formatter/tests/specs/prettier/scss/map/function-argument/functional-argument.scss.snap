@@ -100,24 +100,19 @@ font-weight:
 ```diff
 --- Prettier
 +++ Biome
-@@ -3,10 +3,12 @@
-   (
-     "print-only": "only print",
-     "screen-only": "only screen",
--    "xs-only":
--      "only screen and (max-width: #{map-get($grid-breakpoints, "sm") - 1})",
--    "sm-only":
+@@ -6,7 +6,10 @@
+     "xs-only":
+       "only screen and (max-width: #{map-get($grid-breakpoints, "sm") - 1})",
+     "sm-only":
 -      "only screen and (min-width: #{map-get($grid-breakpoints, "sm")}) and (max-width: #{map-get($grid-breakpoints, "md") - 1})",
-+    "xs-only": "only screen and (max-width: #{map-get($grid-breakpoints, "sm") -
-+    1})",
-+    "sm-only": "only screen and (min-width: #{map-get(
-+      $grid-breakpoints,
-+      "sm"
-+    )}) and (max-width: #{map-get($grid-breakpoints, "md") - 1})",
++      "only screen and (min-width: #{map-get(
++        $grid-breakpoints,
++        "sm"
++      )}) and (max-width: #{map-get($grid-breakpoints, "md") - 1})",
    ),
    $display-breakpoints
  );
-@@ -31,7 +33,7 @@
+@@ -31,7 +34,7 @@
    "bold": 700,
  );
  @each $name, $boldness in $icons {
@@ -126,7 +121,7 @@ font-weight:
      color: red;
      font-weight: "#{$boldness}";
    }
-@@ -43,7 +45,7 @@
+@@ -43,7 +46,7 @@
    "bold": 700,
  );
  @each $name, $boldness in $icons {
@@ -145,12 +140,13 @@ $display-breakpoints: map-deep-merge(
   (
     "print-only": "only print",
     "screen-only": "only screen",
-    "xs-only": "only screen and (max-width: #{map-get($grid-breakpoints, "sm") -
-    1})",
-    "sm-only": "only screen and (min-width: #{map-get(
-      $grid-breakpoints,
-      "sm"
-    )}) and (max-width: #{map-get($grid-breakpoints, "md") - 1})",
+    "xs-only":
+      "only screen and (max-width: #{map-get($grid-breakpoints, "sm") - 1})",
+    "sm-only":
+      "only screen and (min-width: #{map-get(
+        $grid-breakpoints,
+        "sm"
+      )}) and (max-width: #{map-get($grid-breakpoints, "md") - 1})",
   ),
   $display-breakpoints
 );

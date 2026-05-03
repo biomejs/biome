@@ -577,3 +577,40 @@ fn fuzz_nested_lazy_continuation_before_link_reference() {
         "<ul>\n<li>outer\n<ul>\n<li>nested\nlazy line\n[valid]: /url</li>\n</ul>\n</li>\n</ul>\n",
     );
 }
+
+#[test]
+fn fuzz_list_link_reference_before_dash_thematic_break_with_tabs() {
+    fuzz_test_example(
+        11,
+        "- [a]: /url\n\t---\n",
+        "<ul>\n<li>\n<hr />\n</li>\n</ul>\n",
+    );
+    fuzz_test_example(
+        12,
+        "1.  [a]: /url\n \t---\n",
+        "<ol>\n<li>\n<hr />\n</li>\n</ol>\n",
+    );
+}
+
+#[test]
+fn fuzz_list_link_reference_before_dash_thematic_break_with_tabs_non_break() {
+    fuzz_test_example(13, "- [a]: /url\n\t--x\n", "<ul>\n<li>--x</li>\n</ul>\n");
+}
+
+#[test]
+fn fuzz_quoted_list_link_reference_before_dash_thematic_break_with_tabs() {
+    fuzz_test_example(
+        14,
+        "> - [a]: /url\n> \t---\n",
+        "<blockquote>\n<ul>\n<li>\n<hr />\n</li>\n</ul>\n</blockquote>\n",
+    );
+}
+
+#[test]
+fn fuzz_quoted_list_link_reference_before_dash_thematic_break_with_tabs_non_break() {
+    fuzz_test_example(
+        15,
+        "> - [a]: /url\n> \t--x\n",
+        "<blockquote>\n<ul>\n<li>--x</li>\n</ul>\n</blockquote>\n",
+    );
+}

@@ -59,7 +59,7 @@ pub(crate) use token_sets::{
 pub(crate) use value::{
     is_at_any_scss_value, is_at_scss_function, is_at_scss_interpolated_function_or_value,
     is_at_scss_interpolated_string, is_at_scss_parent_selector_value, is_nth_at_scss_function,
-    parse_any_scss_value, parse_scss_function, parse_scss_function_call_from_name,
+    parse_any_scss_value_with_context, parse_scss_function, parse_scss_function_call_from_name,
     parse_scss_interpolated_function_or_value, parse_scss_interpolated_function_or_value_until,
     parse_scss_interpolated_string, parse_scss_interpolated_value,
     parse_scss_parent_selector_value,

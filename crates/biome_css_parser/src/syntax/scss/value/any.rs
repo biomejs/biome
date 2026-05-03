@@ -6,6 +6,7 @@ use crate::syntax::scss::{
     parse_scss_interpolated_function_or_value, parse_scss_interpolated_string,
     parse_scss_module_member_access, parse_scss_parent_selector_value, parse_scss_variable,
 };
+use crate::syntax::{FunctionCallContext, ValueParsingContext};
 use biome_css_syntax::T;
 use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax;
@@ -41,7 +42,10 @@ pub(crate) fn is_at_any_scss_value(p: &mut CssParser) -> bool {
 /// - https://sass-lang.com/documentation/modules
 /// - https://sass-lang.com/documentation/interpolation
 #[inline]
-pub(crate) fn parse_any_scss_value(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_any_scss_value_with_context(
+    p: &mut CssParser,
+    context: ValueParsingContext,
+) -> ParsedSyntax {
     if !is_at_any_scss_value(p) {
         return Absent;
     }
@@ -57,7 +61,7 @@ pub(crate) fn parse_any_scss_value(p: &mut CssParser) -> ParsedSyntax {
             Absent => return Absent,
         };
 
-        if p.at(T!['(']) {
+        if is_at_scss_module_function_call_paren(p, context) {
             // `module.$name(` still recovers as a call, but `$name` is not a
             // valid module function member.
             let name =
@@ -73,4 +77,17 @@ pub(crate) fn parse_any_scss_value(p: &mut CssParser) -> ParsedSyntax {
     } else {
         parse_scss_interpolated_string(p)
     }
+}
+
+#[inline]
+fn is_at_scss_module_function_call_paren(p: &mut CssParser, context: ValueParsingContext) -> bool {
+    // `module.fn(...)` is a Sass call. In loose declaration recovery,
+    // `module.fn (...)` can still recover as a call.
+    p.at(T!['('])
+        && match context.function_call_context() {
+            FunctionCallContext::LooseRecovery => true,
+            FunctionCallContext::SourceTight => {
+                !p.has_preceding_whitespace() && !p.has_preceding_line_break()
+            }
+        }
 }

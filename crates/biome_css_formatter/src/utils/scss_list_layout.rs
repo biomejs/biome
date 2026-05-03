@@ -44,13 +44,15 @@ impl<'a> ScssListLayout<'a> {
             if scss_map_context(self.node)
                 .is_some_and(|context| context.is_outer_parenthesized_value_list)
             {
+                // `key: (a, b)` gets its block indent from the parentheses;
+                // the list only forces item breaks and the trailing comma.
                 return write!(
                     f,
-                    [group(&indent(&format_args![
-                        soft_line_break(),
+                    [group(&format_args![
                         elements.format(),
                         if_group_breaks(&token(","))
-                    ]))]
+                    ])
+                    .should_expand(true)]
                 );
             }
 
@@ -64,6 +66,11 @@ impl<'a> ScssListLayout<'a> {
                         if_group_breaks(&token(","))
                     ])]
                 );
+            }
+
+            if is_parenthesized_list(self.node) {
+                // In `(a, b)`, the parentheses own the line break and indent.
+                return write!(f, [group(&format_args![elements.format()])]);
             }
 
             return write!(
@@ -240,6 +247,14 @@ fn is_parenthesized_map_key_list(node: &ScssListExpression) -> bool {
         .is_some_and(|parenthesized| {
             is_scss_map_key(&parenthesized) && parenthesized_owns_list(&parenthesized, node)
         })
+}
+
+/// Returns `true` for the list in `(a, b)`.
+fn is_parenthesized_list(node: &ScssListExpression) -> bool {
+    node.syntax()
+        .parent()
+        .and_then(ScssParenthesizedExpression::cast)
+        .is_some_and(|parenthesized| parenthesized_owns_list(&parenthesized, node))
 }
 
 /// Returns `true` when `node` is the list inside `(a, b)`.

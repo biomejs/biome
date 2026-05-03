@@ -38,7 +38,7 @@ use biome_markdown_syntax::{T, kind::MarkdownSyntaxKind::*};
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::RecoveryResult;
 use biome_parser::{
-    Parser,
+    CompletedMarker, Parser,
     prelude::ParsedSyntax::{self, *},
 };
 use biome_rowan::TextSize;
@@ -364,7 +364,11 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
         });
         if let Ok(parsed) = link_result {
             p.state_mut().link_reference_definition_continuation = true;
-            parsed
+            if link_reference_definition_before_dash_thematic_break(p) {
+                Present(parse_empty_paragraph(p))
+            } else {
+                parsed
+            }
         } else {
             parse_paragraph(p)
         }
@@ -668,6 +672,34 @@ pub(crate) fn parse_paragraph(p: &mut MarkdownParser) -> ParsedSyntax {
         m.complete(p, MD_PARAGRAPH)
     };
     Present(completed)
+}
+
+pub(crate) fn parse_empty_paragraph(p: &mut MarkdownParser) -> CompletedMarker {
+    let paragraph = p.start();
+    let list = p.start();
+    list.complete(p, MD_INLINE_ITEM_LIST);
+    paragraph.complete(p, MD_PARAGRAPH)
+}
+
+fn link_reference_definition_before_dash_thematic_break(p: &mut MarkdownParser) -> bool {
+    if !p.at(NEWLINE) || p.at_blank_line() {
+        return false;
+    }
+
+    p.lookahead(|p| {
+        p.bump(NEWLINE);
+
+        while p.at(MD_TEXTUAL_LITERAL) {
+            let text = p.cur_text();
+            if text == " " || text == "\t" {
+                p.bump(MD_TEXTUAL_LITERAL);
+            } else {
+                break;
+            }
+        }
+
+        p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break(p)
+    })
 }
 
 fn inline_has_non_whitespace(p: &MarkdownParser, start: usize, end: usize) -> bool {

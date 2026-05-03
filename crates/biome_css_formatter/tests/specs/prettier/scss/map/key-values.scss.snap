@@ -59,7 +59,7 @@ $map: (
    (
      "list",
      "list",
-@@ -43,8 +39,8 @@
+@@ -43,13 +39,14 @@
      "list",
      "list",
    ): (
@@ -70,6 +70,13 @@ $map: (
    (
      "key": "value",
      "key": "value",
+     "key": "value",
+     "key": "value",
+     "key": "value",
+-  ): 1,
++  ):
++    1,
+ );
 ```
 
 # Output
@@ -124,6 +131,7 @@ $map: (
     "key": "value",
     "key": "value",
     "key": "value",
-  ): 1,
+  ):
+    1,
 );
 ```
