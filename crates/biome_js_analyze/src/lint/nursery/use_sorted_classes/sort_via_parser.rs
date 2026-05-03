@@ -207,10 +207,17 @@ fn compare_variant_indices(a: &[usize], b: &[usize]) -> Ordering {
     Ordering::Equal
 }
 
-/// Resolves the layer/utility position of a candidate against the preset.
+/// Locates a candidate in the preset and returns its
+/// `(layer_index, utility_index)` position.
 ///
-/// Returns `None` if the utility is not recognized (the caller treats it as a
-/// custom class and preserves source order).
+/// - `layer_index`: index into `PRESET.utilities`. Arbitrary
+///   `[property:value]` candidates use the synthetic value
+///   `PRESET.utilities.len()` so they sort after every named layer.
+/// - `utility_index`: index inside that layer's `classes` slice. Arbitrary
+///   candidates always use `0`.
+///
+/// Returns `None` when no preset entry matches; the caller treats such
+/// classes as user-defined and preserves their source order.
 fn locate_utility(candidate: &AnyTwCandidate) -> Option<(usize, usize)> {
     if matches!(candidate, AnyTwCandidate::TwArbitraryCandidate(_)) {
         // Arbitrary `[property:value]` utilities live in a synthetic layer that
