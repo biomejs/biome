@@ -25,7 +25,7 @@ info: scss/mixin/5636.scss
 @@ -1,7 +1,7 @@
  .foo {
 -  @include transition(min-height ($spacer/2) ease-in-out);
-+  @include transition(min-height($spacer / 2) ease-in-out);
++  @include transition(min-height ($spacer / 2) ease-in-out);
  }
  
  .bar {
@@ -38,7 +38,7 @@ info: scss/mixin/5636.scss
 
 ```scss
 .foo {
-  @include transition(min-height($spacer / 2) ease-in-out);
+  @include transition(min-height ($spacer / 2) ease-in-out);
 }
 
 .bar {

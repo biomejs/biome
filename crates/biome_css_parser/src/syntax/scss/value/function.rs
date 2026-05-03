@@ -10,7 +10,7 @@ use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 
-use crate::syntax::value::function::ParameterList;
+use crate::syntax::value::function::{ParameterList, is_nth_at_source_tight_l_paren};
 
 #[inline]
 pub(crate) fn is_at_scss_function(p: &mut CssParser) -> bool {
@@ -26,7 +26,7 @@ pub(crate) fn is_nth_at_scss_function(p: &mut CssParser, n: usize) -> bool {
     // `module.name(` has `(` at `n + 3`, while invalid function names such as
     // `module.$name(` include the `$` token and place `(` at `n + 4`.
     let l_paren_offset = if p.nth_at(n + 2, T![$]) { 4 } else { 3 };
-    p.nth_at(n + l_paren_offset, T!['('])
+    is_nth_at_source_tight_l_paren(p, n + l_paren_offset)
 }
 
 /// Parses an SCSS function call whose head uses a module-qualified function

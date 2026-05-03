@@ -10,6 +10,7 @@ use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{Parser, TokenSet, token_set};
 
+use super::ScssExpressionOptions;
 use super::operand::parse_scss_expression_operand;
 
 pub(super) const SCSS_BINARY_OPERATOR_TOKEN_SET: TokenSet<CssSyntaxKind> = token_set![
@@ -40,8 +41,12 @@ pub(crate) const SCSS_UNARY_OPERATOR_TOKEN_SET: TokenSet<CssSyntaxKind> =
 ///
 /// Docs: https://sass-lang.com/documentation/operators
 #[inline]
-pub(super) fn parse_scss_binary_expression(p: &mut CssParser, min_prec: u8) -> ParsedSyntax {
-    let mut left = match parse_scss_unary_expression(p) {
+pub(super) fn parse_scss_binary_expression(
+    p: &mut CssParser,
+    min_prec: u8,
+    options: ScssExpressionOptions,
+) -> ParsedSyntax {
+    let mut left = match parse_scss_unary_expression(p, options) {
         Present(left) => left,
         Absent => return Absent,
     };
@@ -57,7 +62,8 @@ pub(super) fn parse_scss_binary_expression(p: &mut CssParser, min_prec: u8) -> P
 
         let m = left.precede(p);
         p.bump_ts(SCSS_BINARY_OPERATOR_TOKEN_SET);
-        parse_scss_binary_expression(p, prec + 1).or_add_diagnostic(p, expected_component_value);
+        parse_scss_binary_expression(p, prec + 1, options)
+            .or_add_diagnostic(p, expected_component_value);
         left = m.complete(p, SCSS_BINARY_EXPRESSION);
     }
 
@@ -73,15 +79,15 @@ pub(super) fn parse_scss_binary_expression(p: &mut CssParser, min_prec: u8) -> P
 ///
 /// Docs: https://sass-lang.com/documentation/operators
 #[inline]
-fn parse_scss_unary_expression(p: &mut CssParser) -> ParsedSyntax {
+fn parse_scss_unary_expression(p: &mut CssParser, options: ScssExpressionOptions) -> ParsedSyntax {
     if is_at_scss_unary_operator(p) {
         let m = p.start();
         p.bump_ts(SCSS_UNARY_OPERATOR_TOKEN_SET);
-        parse_scss_unary_expression(p).or_add_diagnostic(p, expected_component_value);
+        parse_scss_unary_expression(p, options).or_add_diagnostic(p, expected_component_value);
         return Present(m.complete(p, SCSS_UNARY_EXPRESSION));
     }
 
-    parse_scss_expression_operand(p)
+    parse_scss_expression_operand(p, options)
 }
 
 #[inline]

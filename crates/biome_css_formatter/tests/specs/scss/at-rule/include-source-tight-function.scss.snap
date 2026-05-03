@@ -1,0 +1,25 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/include-source-tight-function.scss
+---
+
+# Input
+
+```scss
+@include transition(min-height ($spacer/2) ease-in-out);
+@include transition(min-height($spacer/2) ease-in-out);
+@include transition(min-height ($spacer / 2) ease-in-out);
+@include transition(min-height($spacer / 2) ease-in-out);
+
+```
+
+
+# Formatted
+
+```scss
+@include transition(min-height ($spacer / 2) ease-in-out);
+@include transition(min-height($spacer / 2) ease-in-out);
+@include transition(min-height ($spacer / 2) ease-in-out);
+@include transition(min-height($spacer / 2) ease-in-out);
+
+```

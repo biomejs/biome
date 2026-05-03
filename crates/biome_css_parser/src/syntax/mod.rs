@@ -32,7 +32,8 @@ use crate::syntax::selector::SelectorList;
 use crate::syntax::selector::is_nth_at_selector;
 use crate::syntax::selector::relative_selector::{RelativeSelectorList, is_at_relative_selector};
 use crate::syntax::value::function::{
-    is_at_any_css_function, parse_any_function_with_context, parse_tailwind_value_theme_reference,
+    is_at_any_function_with_context, parse_any_function_with_context,
+    parse_tailwind_value_theme_reference,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, EmbeddingKind, T};
@@ -349,7 +350,7 @@ pub(crate) fn is_at_any_value_with_context(
     context: ValueParsingContext,
 ) -> bool {
     (context.is_scss_exclusive_syntax_allowed() && is_at_any_scss_value(p))
-        || is_at_any_css_function(p)
+        || is_at_any_function_with_context(p, context)
         || is_at_any_non_function_css_value(p)
 }
 
@@ -409,10 +410,20 @@ pub(crate) enum ScssCapability {
     Full,
 }
 
+/// Controls how `ident (` is interpreted by shared value parsing.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub(crate) enum FunctionCallContext {
+    /// CSS value recovery may parse separated calls like `color: rgba (...)`.
+    LooseRecovery,
+    /// Sass expressions only parse source-tight calls like `@include foo(fn(...))`.
+    SourceTight,
+}
+
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub(crate) struct ValueParsingContext {
     mode: ValueParsingMode,
     scss_feature_supported: bool,
+    function_call_context: FunctionCallContext,
 }
 
 impl ValueParsingContext {
@@ -421,7 +432,18 @@ impl ValueParsingContext {
         Self {
             mode,
             scss_feature_supported: CssSyntaxFeatures::Scss.is_supported(p),
+            function_call_context: FunctionCallContext::LooseRecovery,
         }
+    }
+
+    /// Changes how shared value parsing treats `ident (` function heads.
+    #[inline]
+    pub(crate) const fn with_function_call_context(
+        mut self,
+        function_call_context: FunctionCallContext,
+    ) -> Self {
+        self.function_call_context = function_call_context;
+        self
     }
 
     /// Returns the current SCSS capability level for shared value parsing.
@@ -471,6 +493,12 @@ impl ValueParsingContext {
     pub(crate) const fn is_full_scss_parsing_allowed(self) -> bool {
         matches!(self.scss_capability(), ScssCapability::Full)
     }
+
+    /// Returns how shared value parsing treats `ident (` function heads.
+    #[inline]
+    pub(crate) const fn function_call_context(self) -> FunctionCallContext {
+        self.function_call_context
+    }
 }
 
 /// Parses any value while explicitly controlling whether SCSS-only branches are allowed.
@@ -486,7 +514,7 @@ pub(crate) fn parse_any_value_with_context(
 ) -> ParsedSyntax {
     if context.is_scss_exclusive_syntax_allowed() && is_at_any_scss_value(p) {
         parse_any_exclusive_scss_value(p)
-    } else if is_at_any_css_function(p) {
+    } else if is_at_any_function_with_context(p, context) {
         // CSS functions stay on this branch. SCSS-only function heads
         // (`namespace.fn(...)`, interpolation-led heads, etc.) are claimed above
         // so CSS mode still rejects them while SCSS mode parses them as functions.
