@@ -13874,13 +13874,6 @@
 		},
 		"UseAnchorContentOptions": {
 			"type": "object",
-			"properties": {
-				"additionalRenderProps": {
-					"description": "Additional JSX prop names that indicate the anchor is a render prop\nwhose children will be injected by the receiving component.\n\nThe prop name `\"render\"` is always recognised. Use this option to add\nfurther names (e.g. `\"as\"`, `\"component\"`) without replacing the default.",
-					"type": "array",
-					"items": { "type": "string" }
-				}
-			},
 			"additionalProperties": false
 		},
 		"UseAriaActivedescendantWithTabindexConfiguration": {
