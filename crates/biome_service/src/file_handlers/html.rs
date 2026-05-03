@@ -640,7 +640,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         .with_path(path.as_path())
         .with_enabled_selectors(rules)
         .with_project_layout(project_layout.clone())
-        .with_cache(&analyzer_cache)
+        .with_cache(analyzer_cache)
         .finish();
 
     let filter = AnalysisFilter {

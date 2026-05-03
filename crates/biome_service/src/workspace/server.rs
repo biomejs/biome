@@ -2274,6 +2274,9 @@ impl Workspace for WorkspaceServer {
         let language =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
         let settings = self.settings_handle(&settings, inline_config);
+        let analyzer_cache_guard = self.analyzer_cache.pin();
+        let analyzer_cache =
+            analyzer_cache_guard.get_or_insert(project_key, AnalyzerVisitorCache::default());
 
         let mut result = code_actions(CodeActionsParams {
             parse,
@@ -2294,7 +2297,7 @@ impl Workspace for WorkspaceServer {
             working_directory: Some(working_directory.as_path()),
             compute_actions,
             snippet_services: None,
-            analyzer_cache: AnalyzerVisitorCache::default(),
+            analyzer_cache,
         });
 
         for embedded_snippet in &embedded_snippets {
@@ -2325,7 +2328,7 @@ impl Workspace for WorkspaceServer {
                 working_directory: Some(working_directory.as_path()),
                 compute_actions,
                 snippet_services: Some(embedded_snippet.as_snippet_services()),
-                analyzer_cache: AnalyzerVisitorCache::default(),
+                analyzer_cache,
             });
 
             result.actions.extend(embedded_actions_result.actions);

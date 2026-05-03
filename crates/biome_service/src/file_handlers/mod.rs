@@ -1174,7 +1174,7 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) compute_actions: bool,
     // Services attached to the current embedded snippet, when actions are run on snippets.
     pub(crate) snippet_services: Option<&'a DocumentServices>,
-    pub(crate) analyzer_cache: AnalyzerVisitorCache,
+    pub(crate) analyzer_cache: &'a AnalyzerVisitorCache,
 }
 
 pub(crate) struct UpdateSnippetsNodes {
