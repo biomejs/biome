@@ -49,3 +49,10 @@ const validShorthand = {
 
     ...spread,
 };
+
+// Named function expressions — must NOT be converted to shorthand
+// because obj.a.name === "c" would change to obj.a.name === "a"
+const namedFuncValid = {
+    a: function c() {},
+    b: function () {},
+};
