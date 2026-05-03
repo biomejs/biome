@@ -136,3 +136,32 @@ function ternaryObjectBranch(b: boolean): object { return b ? {} : { a: 1 }; }
 class InheritedBase { y = 1; }
 class ClassWithInheritedMembers extends InheritedBase {}
 function inheritedClassInstance(): object { return new ClassWithInheritedMembers(); }
+
+function objectPropertyAsConst(): { a: string } {
+    return { a: "x" as const };
+}
+
+function parenthesizedObjectPropertyAsConst(): { a: string } {
+    return { a: ("x" as const) };
+}
+
+function objectPropertyNegativeNumberAsConst(): { a: number } {
+    return { a: -1 as const };
+}
+
+function objectPropertyTupleAsConst(): { a: [number, number] } {
+    return { a: [1, 2] as const };
+}
+
+function objectPropertyAsConstWithSibling(): { a: string; b: number } {
+    return { a: "x" as const, b: 1 };
+}
+
+function nestedObjectPropertyAsConst(): { outer: { a: string } } {
+    return { outer: { a: "x" as const } };
+}
+
+function objectWithConstPropertyFromIdentifier(): { a: string } {
+    const result = { a: "x" as const };
+    return result;
+}

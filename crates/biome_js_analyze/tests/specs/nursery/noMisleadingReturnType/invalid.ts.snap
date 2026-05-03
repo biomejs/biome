@@ -143,6 +143,35 @@ class InheritedBase { y = 1; }
 class ClassWithInheritedMembers extends InheritedBase {}
 function inheritedClassInstance(): object { return new ClassWithInheritedMembers(); }
 
+function objectPropertyAsConst(): { a: string } {
+    return { a: "x" as const };
+}
+
+function parenthesizedObjectPropertyAsConst(): { a: string } {
+    return { a: ("x" as const) };
+}
+
+function objectPropertyNegativeNumberAsConst(): { a: number } {
+    return { a: -1 as const };
+}
+
+function objectPropertyTupleAsConst(): { a: [number, number] } {
+    return { a: [1, 2] as const };
+}
+
+function objectPropertyAsConstWithSibling(): { a: string; b: number } {
+    return { a: "x" as const, b: 1 };
+}
+
+function nestedObjectPropertyAsConst(): { outer: { a: string } } {
+    return { outer: { a: "x" as const } };
+}
+
+function objectWithConstPropertyFromIdentifier(): { a: string } {
+    const result = { a: "x" as const };
+    return result;
+}
+
 ```
 
 # Diagnostics
@@ -1707,6 +1736,168 @@ invalid.ts:138:34 lint/nursery/noMisleadingReturnType ━━━━━━━━�
   > 138 │ function inheritedClassInstance(): object { return new ClassWithInheritedMembers(); }
         │                                  ^^^^^^^^
     139 │ 
+    140 │ function objectPropertyAsConst(): { a: string } {
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:140:33 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    138 │ function inheritedClassInstance(): object { return new ClassWithInheritedMembers(); }
+    139 │ 
+  > 140 │ function objectPropertyAsConst(): { a: string } {
+        │                                 ^^^^^^^^^^^^^^^
+    141 │     return { a: "x" as const };
+    142 │ }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:144:46 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    142 │ }
+    143 │ 
+  > 144 │ function parenthesizedObjectPropertyAsConst(): { a: string } {
+        │                                              ^^^^^^^^^^^^^^^
+    145 │     return { a: ("x" as const) };
+    146 │ }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:148:47 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    146 │ }
+    147 │ 
+  > 148 │ function objectPropertyNegativeNumberAsConst(): { a: number } {
+        │                                               ^^^^^^^^^^^^^^^
+    149 │     return { a: -1 as const };
+    150 │ }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:152:38 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    150 │ }
+    151 │ 
+  > 152 │ function objectPropertyTupleAsConst(): { a: [number, number] } {
+        │                                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+    153 │     return { a: [1, 2] as const };
+    154 │ }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:156:44 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    154 │ }
+    155 │ 
+  > 156 │ function objectPropertyAsConstWithSibling(): { a: string; b: number } {
+        │                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    157 │     return { a: "x" as const, b: 1 };
+    158 │ }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:160:39 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    158 │ }
+    159 │ 
+  > 160 │ function nestedObjectPropertyAsConst(): { outer: { a: string } } {
+        │                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    161 │     return { outer: { a: "x" as const } };
+    162 │ }
+  
+  i A wider return type hides the precise types that callers could rely on.
+  
+  i Narrow the return type to match what the function actually returns.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9810 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:164:49 lint/nursery/noMisleadingReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The return type annotation is wider than what the function actually returns.
+  
+    162 │ }
+    163 │ 
+  > 164 │ function objectWithConstPropertyFromIdentifier(): { a: string } {
+        │                                                 ^^^^^^^^^^^^^^^
+    165 │     const result = { a: "x" as const };
+    166 │     return result;
   
   i A wider return type hides the precise types that callers could rely on.
   

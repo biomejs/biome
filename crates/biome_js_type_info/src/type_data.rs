@@ -12,7 +12,7 @@
 pub mod literal;
 
 use std::borrow::Cow;
-use std::fmt::Debug;
+use std::fmt::{self, Debug, Formatter, Result as FormatResult};
 use std::str::FromStr;
 
 use biome_js_type_info_macros::Resolvable;
@@ -646,7 +646,7 @@ pub struct Interface {
 }
 
 impl Debug for Interface {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Interface")
             .field("name", &self.name)
             .field("type_parameters", &self.type_parameters)
@@ -919,10 +919,23 @@ pub struct TupleElementType {
 }
 
 /// Members of a definition, such as an object, namespace or module.
-#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
+#[derive(Clone, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeMember {
     pub kind: TypeMemberKind,
     pub ty: TypeReference,
+}
+
+impl Debug for TypeMember {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> FormatResult {
+        let mut debug_struct = formatter.debug_struct("TypeMember");
+        debug_struct
+            .field("kind", &self.kind.without_const_asserted())
+            .field("ty", &self.ty);
+        if self.is_const_asserted() {
+            debug_struct.field("is_const_asserted", &true);
+        }
+        debug_struct.finish()
+    }
 }
 
 impl TypeMember {
@@ -930,6 +943,12 @@ impl TypeMember {
     #[inline]
     pub fn is_optional(&self) -> bool {
         self.kind.is_optional()
+    }
+
+    /// Returns whether this member carries `as const` provenance.
+    #[inline]
+    pub fn is_const_asserted(&self) -> bool {
+        self.kind.is_const_asserted()
     }
 
     /// Returns a reference to the type of the member if we dereference it.
@@ -964,7 +983,10 @@ impl TypeMember {
 
     pub fn is_index_signature_with_ty(&self, predicate: impl Fn(&TypeReference) -> bool) -> bool {
         match &self.kind {
-            TypeMemberKind::IndexSignature(ty) => predicate(ty),
+            TypeMemberKind::IndexSignature(index_signature_type)
+            | TypeMemberKind::ConstAssertedIndexSignature(index_signature_type) => {
+                predicate(index_signature_type)
+            }
             _ => false,
         }
     }
@@ -989,6 +1011,13 @@ impl TypeMember {
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub enum TypeMemberKind {
     CallSignature,
+    ConstAssertedCallSignature,
+    ConstAssertedConstructor,
+    ConstAssertedGetter(Text),
+    ConstAssertedIndexSignature(TypeReference),
+    ConstAssertedNamed(Text),
+    ConstAssertedNamedOptional(Text),
+    ConstAssertedNamedStatic(Text),
     Constructor,
     Getter(Text),
     IndexSignature(TypeReference),
@@ -1000,49 +1029,144 @@ pub enum TypeMemberKind {
 impl TypeMemberKind {
     pub fn has_name(&self, name: &str) -> bool {
         match self {
-            Self::CallSignature | Self::IndexSignature(_) => false,
-            Self::Constructor => name == "constructor",
+            Self::CallSignature
+            | Self::ConstAssertedCallSignature
+            | Self::IndexSignature(_)
+            | Self::ConstAssertedIndexSignature(_) => false,
+            Self::Constructor | Self::ConstAssertedConstructor => name == "constructor",
             Self::Getter(own_name)
+            | Self::ConstAssertedGetter(own_name)
             | Self::Named(own_name)
+            | Self::ConstAssertedNamed(own_name)
             | Self::NamedOptional(own_name)
-            | Self::NamedStatic(own_name) => *own_name == name,
+            | Self::ConstAssertedNamedOptional(own_name)
+            | Self::NamedStatic(own_name)
+            | Self::ConstAssertedNamedStatic(own_name) => *own_name == name,
         }
     }
 
     /// Returns whether this member kind represents an optional member.
     #[inline]
     pub fn is_optional(&self) -> bool {
-        matches!(self, Self::NamedOptional(_))
+        matches!(
+            self,
+            Self::NamedOptional(_) | Self::ConstAssertedNamedOptional(_)
+        )
     }
 
     #[inline]
     pub fn is_call_signature(&self) -> bool {
-        matches!(self, Self::CallSignature)
+        matches!(self, Self::CallSignature | Self::ConstAssertedCallSignature)
     }
 
     #[inline]
     pub fn is_constructor(&self) -> bool {
-        matches!(self, Self::Constructor)
+        matches!(self, Self::Constructor | Self::ConstAssertedConstructor)
     }
 
     #[inline]
     pub fn is_getter(&self) -> bool {
-        matches!(self, Self::Getter(_))
+        matches!(self, Self::Getter(_) | Self::ConstAssertedGetter(_))
     }
 
     #[inline]
     pub fn is_static(&self) -> bool {
-        matches!(self, Self::Constructor | Self::NamedStatic(_))
+        matches!(
+            self,
+            Self::Constructor
+                | Self::ConstAssertedConstructor
+                | Self::NamedStatic(_)
+                | Self::ConstAssertedNamedStatic(_)
+        )
+    }
+
+    #[inline]
+    pub fn is_const_asserted(&self) -> bool {
+        matches!(
+            self,
+            Self::ConstAssertedCallSignature
+                | Self::ConstAssertedConstructor
+                | Self::ConstAssertedGetter(_)
+                | Self::ConstAssertedIndexSignature(_)
+                | Self::ConstAssertedNamed(_)
+                | Self::ConstAssertedNamedOptional(_)
+                | Self::ConstAssertedNamedStatic(_)
+        )
+    }
+
+    /// Marks the member kind with `as const` provenance without growing `TypeMember`.
+    pub fn with_const_asserted(self) -> Self {
+        match self {
+            Self::CallSignature | Self::ConstAssertedCallSignature => {
+                Self::ConstAssertedCallSignature
+            }
+            Self::Constructor | Self::ConstAssertedConstructor => Self::ConstAssertedConstructor,
+            Self::Getter(name) | Self::ConstAssertedGetter(name) => Self::ConstAssertedGetter(name),
+            Self::IndexSignature(index_signature_type)
+            | Self::ConstAssertedIndexSignature(index_signature_type) => {
+                Self::ConstAssertedIndexSignature(index_signature_type)
+            }
+            Self::Named(name) | Self::ConstAssertedNamed(name) => Self::ConstAssertedNamed(name),
+            Self::NamedOptional(name) | Self::ConstAssertedNamedOptional(name) => {
+                Self::ConstAssertedNamedOptional(name)
+            }
+            Self::NamedStatic(name) | Self::ConstAssertedNamedStatic(name) => {
+                Self::ConstAssertedNamedStatic(name)
+            }
+        }
+    }
+
+    /// Returns the structural member kind without `as const` provenance.
+    pub fn without_const_asserted(&self) -> Self {
+        match self {
+            Self::ConstAssertedCallSignature => Self::CallSignature,
+            Self::ConstAssertedConstructor => Self::Constructor,
+            Self::ConstAssertedGetter(name) => Self::Getter(name.clone()),
+            Self::ConstAssertedIndexSignature(index_signature_type) => {
+                Self::IndexSignature(index_signature_type.clone())
+            }
+            Self::ConstAssertedNamed(name) => Self::Named(name.clone()),
+            Self::ConstAssertedNamedOptional(name) => Self::NamedOptional(name.clone()),
+            Self::ConstAssertedNamedStatic(name) => Self::NamedStatic(name.clone()),
+            other => other.clone(),
+        }
+    }
+
+    /// Makes named properties optional while preserving `as const` provenance.
+    pub fn with_optional(self) -> Self {
+        match self {
+            Self::Named(name) => Self::NamedOptional(name),
+            Self::ConstAssertedNamed(name) => Self::ConstAssertedNamedOptional(name),
+            other => other,
+        }
+    }
+
+    /// Makes optional named properties required while preserving `as const` provenance.
+    pub fn without_optional(self) -> Self {
+        match self {
+            Self::NamedOptional(name) => Self::Named(name),
+            Self::ConstAssertedNamedOptional(name) => Self::ConstAssertedNamed(name),
+            other => other,
+        }
     }
 
     pub fn name(&self) -> Option<Text> {
         match self {
-            Self::CallSignature | Self::IndexSignature(_) => None,
-            Self::Constructor => Some(Text::new_static("constructor")),
+            Self::CallSignature
+            | Self::ConstAssertedCallSignature
+            | Self::IndexSignature(_)
+            | Self::ConstAssertedIndexSignature(_) => None,
+            Self::Constructor | Self::ConstAssertedConstructor => {
+                Some(Text::new_static("constructor"))
+            }
             Self::Getter(name)
+            | Self::ConstAssertedGetter(name)
             | Self::Named(name)
+            | Self::ConstAssertedNamed(name)
             | Self::NamedOptional(name)
-            | Self::NamedStatic(name) => Some(name.clone()),
+            | Self::ConstAssertedNamedOptional(name)
+            | Self::NamedStatic(name)
+            | Self::ConstAssertedNamedStatic(name) => Some(name.clone()),
         }
     }
 }

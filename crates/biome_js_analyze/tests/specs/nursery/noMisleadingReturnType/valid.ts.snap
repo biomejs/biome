@@ -67,6 +67,14 @@ function objectNoConst(): { a: string; b: string } {
     return { a: "x", b: "y" };
 }
 
+function propertyLiteralWithoutAsConst(): { a: string } {
+    return { a: "x" };
+}
+
+function propertyAsConstExact(): { a: "x" } {
+    return { a: "x" as const };
+}
+
 function asConstMatch(): "hello" { return "hello" as const; }
 
 function bareReturn(): void { return; }

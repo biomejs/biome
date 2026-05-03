@@ -2691,3 +2691,38 @@ fn test_optional_and_readonly_members() {
 
     snapshot.assert_snapshot("test_optional_and_readonly_members");
 }
+
+#[test]
+fn test_property_const_assertion_flows_through_module_resolver() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"const object = { value: "x" as const };"#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
+
+    let index_module = module_graph
+        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, module_graph));
+    let object = resolver.resolved_type_of_named_value(TextRange::default(), "object");
+    let TypeData::Object(object) = object.deref() else {
+        panic!("expected object type");
+    };
+    let value = object
+        .members
+        .iter()
+        .find(|member| member.has_name("value"))
+        .expect("value member");
+    assert!(value.is_const_asserted());
+    let value_type = resolver
+        .resolve_and_get(&value.ty)
+        .expect("value type")
+        .to_data();
+    assert_eq!(value_type.to_string(), "string: x");
+}

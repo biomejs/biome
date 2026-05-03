@@ -551,6 +551,9 @@ fn is_only_property_literal_widening(annotation: &Type, returns: &[Type]) -> boo
             {
                 let mut index_signature_has_widening = false;
                 let all_inferred_covered = inferred_members.iter().all(|inferred_member| {
+                    if inferred_member.is_const_asserted() {
+                        return false;
+                    }
                     if let Some(inferred_type) = inferred.resolve(&inferred_member.ty) {
                         if types_match(&index_signature_value_type, &inferred_type) {
                             return true;
@@ -581,6 +584,9 @@ fn is_only_property_literal_widening(annotation: &Type, returns: &[Type]) -> boo
                 else {
                     return false;
                 };
+                if inferred_member.is_const_asserted() {
+                    return false;
+                }
                 match (
                     annotated.resolve(&annotated_member.ty),
                     inferred.resolve(&inferred_member.ty),
@@ -1489,15 +1495,9 @@ fn class_type_has_instance_shape(class: &Class) -> bool {
 
 /// Whether a type-info member contributes instance shape.
 fn type_member_affects_instance_shape(member: &biome_js_type_info::TypeMember) -> bool {
-    match &member.kind {
-        TypeMemberKind::Constructor
-        | TypeMemberKind::Getter(_)
-        | TypeMemberKind::NamedStatic(_)
-        | TypeMemberKind::IndexSignature(_) => false,
-        TypeMemberKind::CallSignature
-        | TypeMemberKind::Named(_)
-        | TypeMemberKind::NamedOptional(_) => true,
-    }
+    !member.is_static()
+        && !member.is_getter()
+        && !member.is_index_signature_with_ty(|_| true)
 }
 
 /// Compares non-union type pairs using a work stack. Compound types

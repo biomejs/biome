@@ -121,6 +121,12 @@ function switchAliasedBoolean(value: boolean | AliasedBoolean): number {
 	}
 }
 
+function exhaustiveSwitchOnAsConstStringDiscriminant(): void {
+	const wrappedSwitch = { kind: "wrapped" as const };
+	switch (wrappedSwitch.kind) {
+	}
+}
+
 ```
 
 # Diagnostics
@@ -688,5 +694,34 @@ invalid.ts:112:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━
     115 116 │     }
     116 117 │   }
   
+
+```
+
+```
+invalid.ts:120:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    118 │ function exhaustiveSwitchOnAsConstStringDiscriminant(): void {
+    119 │ 	const wrappedSwitch = { kind: "wrapped" as const };
+  > 120 │ 	switch (wrappedSwitch.kind) {
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 121 │ 	}
+        │ 	^
+    122 │ }
+    123 │ 
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - "wrapped"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    120 │ → switch·(wrappedSwitch.kind)·{case·"wrapped":·throw·new·Error("TODO:·Not·implemented·yet");
+        │                                +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ```
