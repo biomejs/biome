@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+<>
+    {/* default "render" prop still works */}
+    <Button render={<a href="/home" aria-label="Home" />}>Home</Button>
+    {/* additional prop names from options */}
+    <Button as={<a href="/about" aria-label="About" />}>About</Button>
+    <Button component={<a href="/docs" aria-label="Docs" />}>Docs</Button>
+</>
+
+```
