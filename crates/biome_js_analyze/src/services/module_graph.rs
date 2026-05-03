@@ -38,7 +38,7 @@ impl FromServices for ModuleGraphService {
                 .any(|d| d == &RuleDomain::Project);
             if !has_project_domain {
                 panic!(
-                    "The rule {rule_key} uses ModuleGraphService, but it is not in the project domain."
+                    "The rule {rule_key} uses ModuleGraphService, but it is not in the Project domain."
                 );
             }
         }

@@ -89,6 +89,7 @@ impl Rule for NoUselessThisAlias {
         let this_scope = declarator
             .syntax()
             .ancestors()
+            .skip(1)
             .find_map(AnyJsControlFlowRoot::cast)?;
         for write in id.all_writes(model) {
             let assign = JsAssignmentExpression::cast(write.syntax().parent()?)?;
@@ -106,6 +107,7 @@ impl Rule for NoUselessThisAlias {
             let current_this_scope = reference
                 .syntax()
                 .ancestors()
+                .skip(1)
                 .filter(|x| !JsArrowFunctionExpression::can_cast(x.kind()))
                 .find_map(AnyJsControlFlowRoot::cast)?;
             if this_scope != current_this_scope {
@@ -138,6 +140,7 @@ impl Rule for NoUselessThisAlias {
         let var_decl = declarator
             .syntax()
             .ancestors()
+            .skip(1)
             .find_map(JsVariableDeclaration::cast)?;
         let mut mutation = ctx.root().begin();
         let this_expr = AnyJsExpression::from(make::js_this_expression(make::token(T![this])));

@@ -1,0 +1,180 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div bind:this={node}>content</div>
+<canvas bind:this={canvas}></canvas>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteBindDirective {
+                        bind_token: BIND_KW@5..9 "bind" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@9..10 ":" [] [],
+                            property: SvelteName {
+                                ident_token: IDENT@10..14 "this" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@14..15 "=" [] [],
+                                value: HtmlAttributeSingleTextExpression {
+                                    l_curly_token: L_CURLY@15..16 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@16..20 "node" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@20..21 "}" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@21..22 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@22..29 "content" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@29..30 "<" [] [],
+                slash_token: SLASH@30..31 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@31..34 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@34..35 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@35..37 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@37..44 "canvas" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteBindDirective {
+                        bind_token: BIND_KW@44..48 "bind" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@48..49 ":" [] [],
+                            property: SvelteName {
+                                ident_token: IDENT@49..53 "this" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@53..54 "=" [] [],
+                                value: HtmlAttributeSingleTextExpression {
+                                    l_curly_token: L_CURLY@54..55 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@55..61 "canvas" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@61..62 "}" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@62..63 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@63..64 "<" [] [],
+                slash_token: SLASH@64..65 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@65..71 "canvas" [] [],
+                },
+                r_angle_token: R_ANGLE@71..72 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@72..73 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..73
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..72
+    0: HTML_ELEMENT@0..35
+      0: HTML_OPENING_ELEMENT@0..22
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..21
+          0: SVELTE_BIND_DIRECTIVE@5..21
+            0: BIND_KW@5..9 "bind" [] []
+            1: SVELTE_DIRECTIVE_VALUE@9..21
+              0: COLON@9..10 ":" [] []
+              1: SVELTE_NAME@10..14
+                0: IDENT@10..14 "this" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@14..14
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@14..21
+                0: EQ@14..15 "=" [] []
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@15..21
+                  0: L_CURLY@15..16 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@16..20
+                    0: HTML_LITERAL@16..20 "node" [] []
+                  2: R_CURLY@20..21 "}" [] []
+        3: R_ANGLE@21..22 ">" [] []
+      1: HTML_ELEMENT_LIST@22..29
+        0: HTML_CONTENT@22..29
+          0: HTML_LITERAL@22..29 "content" [] []
+      2: HTML_CLOSING_ELEMENT@29..35
+        0: L_ANGLE@29..30 "<" [] []
+        1: SLASH@30..31 "/" [] []
+        2: HTML_TAG_NAME@31..34
+          0: HTML_LITERAL@31..34 "div" [] []
+        3: R_ANGLE@34..35 ">" [] []
+    1: HTML_ELEMENT@35..72
+      0: HTML_OPENING_ELEMENT@35..63
+        0: L_ANGLE@35..37 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@37..44
+          0: HTML_LITERAL@37..44 "canvas" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@44..62
+          0: SVELTE_BIND_DIRECTIVE@44..62
+            0: BIND_KW@44..48 "bind" [] []
+            1: SVELTE_DIRECTIVE_VALUE@48..62
+              0: COLON@48..49 ":" [] []
+              1: SVELTE_NAME@49..53
+                0: IDENT@49..53 "this" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@53..53
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@53..62
+                0: EQ@53..54 "=" [] []
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@54..62
+                  0: L_CURLY@54..55 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@55..61
+                    0: HTML_LITERAL@55..61 "canvas" [] []
+                  2: R_CURLY@61..62 "}" [] []
+        3: R_ANGLE@62..63 ">" [] []
+      1: HTML_ELEMENT_LIST@63..63
+      2: HTML_CLOSING_ELEMENT@63..72
+        0: L_ANGLE@63..64 "<" [] []
+        1: SLASH@64..65 "/" [] []
+        2: HTML_TAG_NAME@65..71
+          0: HTML_LITERAL@65..71 "canvas" [] []
+        3: R_ANGLE@71..72 ">" [] []
+  4: EOF@72..73 "" [Newline("\n")] []
+
+```

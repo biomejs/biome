@@ -242,6 +242,8 @@ impl RecessOrderMember {
         match &self.0 {
             AnyCssDeclarationOrRule::CssBogus(_) => NodeKindOrder::UnknownKind,
             AnyCssDeclarationOrRule::CssMetavariable(_) => NodeKindOrder::UnknownKind,
+            AnyCssDeclarationOrRule::ScssVariableDeclaration(_) => NodeKindOrder::UnknownKind,
+            AnyCssDeclarationOrRule::ScssNestingDeclaration(_) => NodeKindOrder::UnknownKind,
             AnyCssDeclarationOrRule::AnyCssRule(rule) => match rule {
                 AnyCssRule::CssAtRule(_) => NodeKindOrder::NestedRuleOrAtRule,
                 AnyCssRule::CssBogusRule(_) => NodeKindOrder::UnknownKind,
@@ -268,6 +270,13 @@ impl RecessOrderMember {
                                 NodeKindOrder::CustomProperty
                             }
                             AnyCssDeclarationName::CssIdentifier(_) => NodeKindOrder::Declaration,
+                            AnyCssDeclarationName::ScssInterpolatedIdentifier(name) => {
+                                if name.syntax().text_trimmed().starts_with("--") {
+                                    NodeKindOrder::CustomProperty
+                                } else {
+                                    NodeKindOrder::Declaration
+                                }
+                            }
                             AnyCssDeclarationName::TwValueThemeReference(_) => {
                                 NodeKindOrder::Declaration
                             }

@@ -49,7 +49,12 @@ JsBogusNamedImportSpecifier = SyntaxElement*
 TsBogusType = SyntaxElement*
 
 AnyJsRoot =
-	JsScript | JsModule | JsExpressionSnipped | TsDeclarationModule
+	JsScript
+	| JsModule
+	| JsExpressionSnippet
+	| TsDeclarationModule
+	| JsExpressionTemplateRoot
+	| JsSvelteSnippetRoot
 
 JsScript =
 	bom: 'UNICODE_BOM'?
@@ -72,10 +77,19 @@ TsDeclarationModule =
 	items: JsModuleItemList
 	eof: 'EOF'
 
-JsExpressionSnipped =
+JsExpressionSnippet =
 	expression: AnyJsExpression
 	eof: 'EOF'
 
+JsExpressionTemplateRoot =
+	expression: AnyJsExpression
+	eof: 'EOF'
+
+// Special root created for Svelte #snippet block
+JsSvelteSnippetRoot =
+		name: AnyJsBinding
+		parameters: JsParameters
+		eof: 'EOF'
 
 JsDirective =
 	value: 'js_string_literal'
@@ -1332,7 +1346,7 @@ AnyJsNamedImportSpecifier =
 //          ^^^^^^^^^^^^^^^^^
 JsNamedImportSpecifier =
     'type'?
-    name: JsLiteralExportName
+    name: AnyJsLiteralExportName
     'as'
     local_name: AnyJsBinding
 
@@ -1367,6 +1381,10 @@ JsImportAssertionEntry =
 //          ^
 // export { a as "a-b-c" };
 //               ^^^^^^^
+AnyJsLiteralExportName =
+	JsLiteralExportName
+	| JsMetavariable
+
 JsLiteralExportName = value: ('ident' | 'js_string_literal')
 
 
@@ -1489,7 +1507,7 @@ JsExportNamedSpecifier =
     'type'?
     local_name: JsReferenceIdentifier
     'as'
-    exported_name: JsLiteralExportName
+    exported_name: AnyJsLiteralExportName
 
 JsExportFromClause =
 	'type'?
@@ -1526,7 +1544,7 @@ JsExportNamedFromSpecifierList = (JsExportNamedFromSpecifier (',' JsExportNamedF
 //          ^^^^^^
 JsExportNamedFromSpecifier =
     'type'?
-    source_name: JsLiteralExportName
+    source_name: AnyJsLiteralExportName
     export_as: JsExportAsClause?
 
 
@@ -1534,7 +1552,7 @@ JsExportNamedFromSpecifier =
 //            ^^^^
 JsExportAsClause =
     'as'
-    exported_name: JsLiteralExportName
+    exported_name: AnyJsLiteralExportName
 
 // export as namespace mathLib
 //        ^^^^^^^^^^^^^^^^^^^^
@@ -2383,6 +2401,7 @@ JsxAttributeList = AnyJsxAttribute*
 AnyJsxAttribute =
 	JsxAttribute
 	| JsxSpreadAttribute
+	| JsxShorthandAttribute
 	| JsMetavariable
 
 JsxAttribute =
@@ -2413,6 +2432,15 @@ JsxSpreadAttribute =
 	'{'
 	'...'
 	argument: AnyJsExpression // parse_assignment_expression_or_higher
+	'}'
+
+// <a {b} />
+//    ^^^
+// Astro-only shorthand attribute. `{name}` is equivalent to `name={name}`.
+// Only valid when the parser is in an Astro-embedded context.
+JsxShorthandAttribute =
+	'{'
+	name: JsReferenceIdentifier
 	'}'
 
 // ==================================

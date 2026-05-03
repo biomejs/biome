@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/composes.css
 ---
+
 # Input
 
 ```css
@@ -40,19 +41,7 @@ info: css/composes.css
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
------
+# Formatted
 
 ```css
 .a {
@@ -74,4 +63,5 @@ Quote style: Double Quotes
 .c {
 	composes: classNameA classNameB from "./namespace.css";
 }
+
 ```

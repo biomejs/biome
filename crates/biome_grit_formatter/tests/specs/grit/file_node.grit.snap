@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: grit/file_node.grit
 ---
+
 # Input
 
 ```grit
@@ -9,20 +10,9 @@ file(body = contains `console.$method` => `println`)
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Attribute Position: Auto
------
+# Formatted
 
 ```grit
 file(body=contains `console.$method` => `println`)
+
 ```

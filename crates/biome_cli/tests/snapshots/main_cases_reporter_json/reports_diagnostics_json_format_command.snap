@@ -1,0 +1,92 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `index.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+
+debugger
+
+let f;
+		let f;
+```
+
+## `main.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+
+debugger
+
+let f;
+		let f;
+```
+
+# Termination Message
+
+```block
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+The --json option is unstable/experimental and its output might change between patches/minor releases.
+```
+
+```block
+{
+	"summary": {
+		"changed": 0,
+		"unchanged": 2,
+		"matches": 0,
+		"duration": "<TIME>",
+		"errors": 2,
+		"warnings": 0,
+		"infos": 0,
+		"skipped": 0,
+		"suggestedFixesSkipped": 0,
+		"diagnosticsNotPrinted": 0,
+		"scannerDuration": "<TIME>"
+	},
+	"diagnostics": [
+		{
+			"severity": "error",
+			"message": "Formatter would have printed the following content:",
+			"category": "format",
+			"location": {
+				"path": "index.ts",
+				"start": { "line": 0, "column": 0 },
+				"end": { "line": 0, "column": 0 }
+			},
+			"advices": []
+		},
+		{
+			"severity": "error",
+			"message": "Formatter would have printed the following content:",
+			"category": "format",
+			"location": {
+				"path": "main.ts",
+				"start": { "line": 0, "column": 0 },
+				"end": { "line": 0, "column": 0 }
+			},
+			"advices": []
+		}
+	],
+	"command": "format"
+}
+
+```

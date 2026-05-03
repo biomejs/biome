@@ -1,0 +1,15 @@
+{
+	"$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"linter": {
+		"rules": {
+			"suspicious": {
+				"useIterableCallbackReturn": {
+					"level": "error",
+					"options": {
+						"checkForEach": true
+					}
+				}
+			}
+		}
+	}
+}

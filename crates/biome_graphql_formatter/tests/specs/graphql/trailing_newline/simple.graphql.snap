@@ -1,0 +1,35 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: graphql/trailing_newline/simple.graphql
+---
+
+# Input
+
+```graphql
+type Query {
+  hello: String
+}
+
+```
+
+
+# Options
+
+```json
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "graphql": {
+    "formatter": {
+      "trailingNewline": false
+    }
+  }
+}
+```
+
+# Formatted
+
+```graphql
+type Query {
+	hello: String
+}
+```

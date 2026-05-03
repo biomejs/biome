@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: graphql/definitions/interface.graphql
 ---
+
 # Input
 
 ```graphql
@@ -100,20 +101,7 @@ implements interface {
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Bracket spacing: true
-Quote style: Double Quotes
------
+# Formatted
 
 ```graphql
 interface Person {
@@ -160,4 +148,5 @@ interface Person {
 interface interface implements interface {
 	interface: interface
 }
+
 ```

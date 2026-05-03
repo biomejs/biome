@@ -8,7 +8,7 @@ use biome_deserialize::Deserializable;
 use biome_deserialize_macros::Deserializable;
 use biome_rule_options::restricted_regex::RestrictedRegex;
 use biome_rule_options::{
-    use_consistent_array_type, use_consistent_member_accessibility, use_import_type,
+    no_shadow, use_consistent_array_type, use_consistent_member_accessibility, use_import_type,
     use_naming_convention,
 };
 
@@ -649,6 +649,22 @@ impl Underscore {
             Self::Allow => "_?",
             Self::AllowDouble => "(?:__)?",
             Self::AllowSingleOrDouble => "_?_?",
+        }
+    }
+}
+
+#[derive(Debug, Default, Deserializable)]
+#[deserializable(unknown_fields = "allow")]
+pub(crate) struct NoShadowOptions {
+    ignore_type_value_shadow: Option<bool>,
+    ignore_function_type_parameter_name_value_shadow: Option<bool>,
+}
+impl From<NoShadowOptions> for no_shadow::NoShadowOptions {
+    fn from(val: NoShadowOptions) -> Self {
+        Self {
+            ignore_type_value_shadow: val.ignore_type_value_shadow,
+            ignore_function_type_parameter_name_value_shadow: val
+                .ignore_function_type_parameter_name_value_shadow,
         }
     }
 }

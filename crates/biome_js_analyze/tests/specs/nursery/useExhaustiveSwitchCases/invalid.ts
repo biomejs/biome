@@ -77,3 +77,40 @@ switch (value4) {
 declare const value5: (string & { foo: 'bar' }) | '1' | 1 | null | undefined;
 switch (value5) {
 }
+
+type Status = "loading" | "ready" | "error";
+declare const p: Pick<{s: Status}, "s">;
+switch (p.s) { case "loading": break; case "ready": break; }
+
+function switchReq(x: Required<{kind?: "a" | "b" | "c"}>) {
+	switch (x.kind) { case "a": break; case "b": break; }
+}
+
+function switchRo(x: Readonly<{kind: "x" | "y" | "z"}>) {
+	switch (x.kind) { case "x": break; }
+}
+
+type Bool = true | false;
+function switchBool(value: Bool): number {
+	switch (value) {
+		case true:
+			return 1;
+	}
+}
+
+type BooleanStatus = true | false | "skip";
+declare const value6: BooleanStatus;
+switch (value6) {
+	case true:
+		break;
+	case "skip":
+		break;
+}
+
+type AliasedBoolean = boolean;
+function switchAliasedBoolean(value: boolean | AliasedBoolean): number {
+	switch (value) {
+		case true:
+			return 1;
+	}
+}

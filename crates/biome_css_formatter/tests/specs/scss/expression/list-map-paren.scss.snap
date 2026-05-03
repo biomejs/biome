@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/expression/list-map-paren.scss
+---
+
+# Input
+
+```scss
+.test{
+list:fn((1,2,3));
+spaceList:fn((1 2));
+map:fn((primary:red,secondary:blue));
+colors:fn((primary: red));
+emptyMap:fn(());
+}
+
+```
+
+
+# Formatted
+
+```scss
+.test {
+	list: fn((1, 2, 3));
+	spaceList: fn((1 2));
+	map: fn(
+		(
+			primary: red,
+			secondary: blue,
+		)
+	);
+	colors: fn(
+		(
+			primary: red,
+		)
+	);
+	emptyMap: fn(());
+}
+
+```

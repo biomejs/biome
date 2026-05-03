@@ -41,7 +41,7 @@ biome_plugin_loader        = { workspace = true }
 biome_resolver             = { workspace = true }
 biome_rowan                = { workspace = true, features = ["serde"] }
 biome_rule_options         = { workspace = true }
-bpaf                       = { workspace = true }
+bpaf                       = { workspace = true, optional = true }
 camino                     = { workspace = true }
 regex                      = { workspace = true }
 rustc-hash                 = { workspace = true }
@@ -60,7 +60,10 @@ tikv-jemallocator = { workspace = true }
 mimalloc = { workspace = true }
 
 [features]
-schema = [
+default    = []
+cli        = ["dep:bpaf"]
+markdown   = []
+schema     = [
   "biome_analyze/schema",
   "biome_formatter/schema",
   "biome_html_formatter/schema",
@@ -72,6 +75,7 @@ schema = [
   "biome_rule_options/schema",
   "dep:schemars",
 ]
+test-utils = []
 
 [lints]
 workspace = true

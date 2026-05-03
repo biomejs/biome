@@ -1,0 +1,87 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-script-setup-to-refs-no-assign.vue
+---
+# Input
+```vue
+<!-- should emit diagnostics -->
+
+<script setup>
+import { toRefs, reactive } from 'vue';
+defineProps<{ toast: string; number?: number }>();
+const obj = reactive({ toast: 'toast' });
+const { toast } = toRefs(obj)
+</script>
+
+<template>
+	<!-- Which `toast` this refers to is ambiguous, because defineProps makes the props available in the template area -->
+	{{ toast }}
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-script-setup-to-refs-no-assign.vue:5:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    3 │ <script setup>
+    4 │ import { toRefs, reactive } from 'vue';
+  > 5 │ defineProps<{ toast: string; number?: number }>();
+      │                            ^
+    6 │ const obj = reactive({ toast: 'toast' });
+    7 │ const { toast } = toRefs(obj)
+  
+  i Remove ;
+  
+
+```
+
+```
+invalid-script-setup-to-refs-no-assign.vue:5:37 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression, or an assignment but instead found ':'.
+  
+    3 │ <script setup>
+    4 │ import { toRefs, reactive } from 'vue';
+  > 5 │ defineProps<{ toast: string; number?: number }>();
+      │                                     ^
+    6 │ const obj = reactive({ toast: 'toast' });
+    7 │ const { toast } = toRefs(obj)
+  
+  i Expected an expression, or an assignment here.
+  
+    3 │ <script setup>
+    4 │ import { toRefs, reactive } from 'vue';
+  > 5 │ defineProps<{ toast: string; number?: number }>();
+      │                                     ^
+    6 │ const obj = reactive({ toast: 'toast' });
+    7 │ const { toast } = toRefs(obj)
+  
+
+```
+
+```
+invalid-script-setup-to-refs-no-assign.vue:5:46 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found '}>()'.
+  
+    3 │ <script setup>
+    4 │ import { toRefs, reactive } from 'vue';
+  > 5 │ defineProps<{ toast: string; number?: number }>();
+      │                                              ^^^^
+    6 │ const obj = reactive({ toast: 'toast' });
+    7 │ const { toast } = toRefs(obj)
+  
+  i Expected a statement here.
+  
+    3 │ <script setup>
+    4 │ import { toRefs, reactive } from 'vue';
+  > 5 │ defineProps<{ toast: string; number?: number }>();
+      │                                              ^^^^
+    6 │ const obj = reactive({ toast: 'toast' });
+    7 │ const { toast } = toRefs(obj)
+  
+
+```

@@ -26,5 +26,3 @@ info: json/range/issue2297.json
 ```json
 {"a":1, "b":2}
 ```
-
-

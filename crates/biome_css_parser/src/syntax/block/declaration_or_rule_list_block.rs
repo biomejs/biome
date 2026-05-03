@@ -1,19 +1,27 @@
 use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::ParseBlockBody;
-use crate::syntax::parse_error::expected_any_declaration_or_at_rule;
+use crate::syntax::declaration::parse_declaration_with_semicolon;
+use crate::syntax::parse_error::{expected_any_declaration_or_at_rule, scss_only_syntax_error};
+use crate::syntax::scss::{
+    is_at_scss_interpolated_property, is_at_scss_nesting_declaration,
+    is_at_scss_variable_declaration, parse_scss_nesting_declaration,
+    parse_scss_variable_declaration, try_parse_scss_nesting_declaration,
+};
 use crate::syntax::{
-    is_at_any_declaration_with_semicolon, is_at_metavariable, is_at_nested_qualified_rule,
-    parse_any_declaration_with_semicolon, parse_metavariable, parse_nested_qualified_rule,
-    try_parse,
+    CssSyntaxFeatures, is_at_any_declaration_with_semicolon, is_at_metavariable,
+    is_at_nested_qualified_rule, is_at_qualified_rule, parse_any_declaration_with_semicolon,
+    parse_metavariable, parse_nested_qualified_rule, parse_qualified_rule, try_parse,
+    try_parse_nested_qualified_rule_without_selector_recovery,
 };
 use biome_css_syntax::CssSyntaxKind::*;
+use biome_css_syntax::EmbeddingKind;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::Absent;
-use biome_parser::{CompletedMarker, Parser};
+use biome_parser::{CompletedMarker, Parser, SyntaxFeature};
 
 #[inline]
 pub(crate) fn parse_declaration_or_rule_list_block(p: &mut CssParser) -> CompletedMarker {
@@ -30,30 +38,59 @@ impl ParseBlockBody for DeclarationOrRuleListBlock {
     }
 
     fn parse_list(&mut self, p: &mut CssParser) {
-        DeclarationOrRuleList.parse_list(p);
+        DeclarationOrRuleList::new(T!['}']).parse_list(p);
     }
 }
 
 #[inline]
 fn is_at_declaration_or_rule_item(p: &mut CssParser) -> bool {
     is_at_at_rule(p)
+        || is_at_top_level_qualified_rule(p)
         || is_at_nested_qualified_rule(p)
+        || is_at_scss_nesting_declaration(p)
+        || is_at_scss_variable_declaration(p)
+        || is_at_scss_interpolated_property(p)
         || is_at_any_declaration_with_semicolon(p)
         || is_at_metavariable(p)
 }
 
-struct DeclarationOrRuleListParseRecovery;
+#[inline]
+fn is_at_top_level_qualified_rule(p: &mut CssParser) -> bool {
+    !p.state().is_nesting_block
+        && matches!(p.source_type.as_embedding_kind(), EmbeddingKind::Styled)
+        && is_at_qualified_rule(p)
+}
+
+struct DeclarationOrRuleListParseRecovery {
+    end_kind: CssSyntaxKind,
+}
+
+impl DeclarationOrRuleListParseRecovery {
+    fn new(end_kind: CssSyntaxKind) -> Self {
+        Self { end_kind }
+    }
+}
+
 impl ParseRecovery for DeclarationOrRuleListParseRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T!['}']) || is_at_declaration_or_rule_item(p)
+        p.at(self.end_kind) || is_at_declaration_or_rule_item(p)
     }
 }
 
-struct DeclarationOrRuleList;
+pub(crate) struct DeclarationOrRuleList {
+    end_kind: CssSyntaxKind,
+}
+
+impl DeclarationOrRuleList {
+    pub(crate) fn new(end_kind: CssSyntaxKind) -> Self {
+        Self { end_kind }
+    }
+}
+
 impl ParseNodeList for DeclarationOrRuleList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
@@ -62,6 +99,40 @@ impl ParseNodeList for DeclarationOrRuleList {
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         if is_at_at_rule(p) {
             parse_at_rule(p)
+        } else if is_at_scss_nesting_declaration(p) {
+            // Match Sass's declaration-first strategy for ambiguous `name:ident` and
+            // `name::...` forms, but do the ambiguity check inside the same speculative
+            // declaration parse so we don't pay a separate probe pass first.
+            if let Ok(declaration) = try_parse_scss_nesting_declaration(p, self.end_kind) {
+                return declaration;
+            }
+
+            if let Ok(rule) =
+                try_parse_nested_qualified_rule_without_selector_recovery(p, self.end_kind)
+            {
+                return rule;
+            }
+
+            parse_scss_nesting_declaration(p)
+        } else if is_at_scss_variable_declaration(p) {
+            CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+                p,
+                parse_scss_variable_declaration,
+                |p, marker| {
+                    scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p))
+                },
+            )
+        } else if is_at_scss_interpolated_property(p) {
+            // The remaining interpolation-bearing property names here are the
+            // dashed/custom-property forms that `is_at_scss_nesting_declaration`
+            // intentionally excludes, such as `--theme-#{$slot}: red;`.
+            if let Ok(rule) =
+                try_parse_nested_qualified_rule_without_selector_recovery(p, self.end_kind)
+            {
+                return rule;
+            }
+
+            parse_declaration_with_semicolon(p)
         } else if is_at_any_declaration_with_semicolon(p) {
             // if we are at a declaration,
             // we still can have a nested qualified rule or a declaration
@@ -72,9 +143,23 @@ impl ParseNodeList for DeclarationOrRuleList {
             //         font-weight: 500;
             //     }
             // }
+
+            // Reset the if-function flag before parsing. This flag is used to detect
+            // if we encountered an if() function during speculative parsing.
+            p.state_mut().encountered_if_function = false;
+
             // Attempt to parse the current block as a declaration.
             let declaration = try_parse(p, |p| {
                 let declaration = parse_any_declaration_with_semicolon(p);
+
+                // If we encountered an if() function, always fail speculative parsing.
+                // The if() function uses semicolons as branch separators, which can cause
+                // p.last() to be `;` even when the declaration is incomplete. By failing
+                // here, we force a non-speculative retry where recovery is enabled.
+                if p.state().encountered_if_function {
+                    return Err(());
+                }
+
                 // Check if the *last* token parsed is a semicolon
                 // (;) or if the parser is at a closing brace (}).
                 // ; - Indicates the end of a declaration.
@@ -87,16 +172,24 @@ impl ParseNodeList for DeclarationOrRuleList {
                 // } <---
                 // The closing brace indicates the end of the declaration block.
                 // If either condition is true, the declaration is considered valid.
-                if matches!(p.last(), Some(T![;])) || p.at(T!['}']) {
-                    Ok(declaration)
-                } else {
-                    Err(())
-                }
+                // Reject speculative declaration parses that stop at the end of an inner block
+                // rather than the current declaration-or-rule list.
+                // This avoids misclassifying selectors as declarations in embedded snippets.
+                let valid =
+                    (matches!(p.last(), Some(T![;])) && !p.at(T!['}'])) || p.at(self.end_kind);
+                if valid { Ok(declaration) } else { Err(()) }
             });
 
             // If parsing as a declaration was successful, return the parsed declaration.
             if let Ok(declaration) = declaration {
                 return declaration;
+            }
+
+            // If the speculative parse failed and we encountered an if() function,
+            // we know this is a declaration (not a rule) because if() can only appear
+            // in declaration values. Parse again with recovery enabled.
+            if std::mem::take(&mut p.state_mut().encountered_if_function) {
+                return parse_any_declaration_with_semicolon(p);
             }
 
             // If parsing as a declaration failed,
@@ -107,7 +200,7 @@ impl ParseNodeList for DeclarationOrRuleList {
                 // Check if the *last* token parsed is a closing brace (}).
                 // Indicates the end of a rule block.
                 // If true, the nested qualified rule is considered valid.
-                if matches!(p.last(), Some(T!['}'])) {
+                if p.last().is_some_and(|kind| kind == self.end_kind) || p.at(self.end_kind) {
                     Ok(rule)
                 } else {
                     // If the condition is not met, return an error to indicate parsing failure.
@@ -118,6 +211,26 @@ impl ParseNodeList for DeclarationOrRuleList {
             // If parsing as a nested qualified rule was successful, return the parsed rule.
             if let Ok(rule) = rule {
                 return rule;
+            }
+
+            // Styled snippets allow top-level qualified rules, but plain
+            // declarations like `background: black;` are ambiguous with a
+            // selector prefix. Only treat the construct as a qualified rule
+            // after the speculative declaration parse has already failed.
+            if is_at_top_level_qualified_rule(p) {
+                let rule = try_parse(p, |p| {
+                    let rule = parse_qualified_rule(p);
+
+                    if p.at(self.end_kind) || is_at_declaration_or_rule_item(p) {
+                        Ok(rule)
+                    } else {
+                        Err(())
+                    }
+                });
+
+                if let Ok(rule) = rule {
+                    return rule;
+                }
             }
 
             // If both parsing attempts fail,
@@ -134,7 +247,7 @@ impl ParseNodeList for DeclarationOrRuleList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T!['}'])
+        p.at(self.end_kind)
     }
 
     fn recover(
@@ -144,7 +257,7 @@ impl ParseNodeList for DeclarationOrRuleList {
     ) -> RecoveryResult {
         parsed_element.or_recover(
             p,
-            &DeclarationOrRuleListParseRecovery,
+            &DeclarationOrRuleListParseRecovery::new(self.end_kind),
             expected_any_declaration_or_at_rule,
         )
     }

@@ -1,6 +1,7 @@
 #![deny(clippy::use_self)]
 
 mod assist;
+mod baseline_data;
 mod fonts;
 mod keywords;
 mod lint;
@@ -14,14 +15,14 @@ pub use crate::registry::visit_registry;
 use crate::suppression_action::CssSuppressionAction;
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, AnalyzerPluginSlice, AnalyzerSignal, AnalyzerSuppression,
-    ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, Phases, PluginTargetLanguage,
-    PluginVisitor, RuleAction, RuleRegistry, to_analyzer_suppressions,
+    BatchPluginVisitor, ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, Phases,
+    PluginTargetLanguage, RuleAction, RuleRegistry, to_analyzer_suppressions,
 };
 use biome_css_syntax::{CssFileSource, CssLanguage, TextRange};
 use biome_diagnostics::Error;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
-use std::sync::LazyLock;
+use std::sync::{Arc, LazyLock};
 
 pub(crate) type CssRuleAction = RuleAction<CssLanguage>;
 
@@ -144,22 +145,29 @@ where
 
     services.insert_service(css_services.file_source);
     if let Some(semantic_model) = css_services.semantic_model {
-        services.insert_service(semantic_model.clone());
+        services.insert_service(Arc::new(semantic_model.clone()));
+    } else {
+        let semantic_model = biome_css_semantic::semantic_model(root);
+        services.insert_service(Arc::new(semantic_model));
     }
 
     for ((phase, _), visitor) in visitors {
         analyzer.add_visitor(phase, visitor);
     }
 
-    for plugin in plugins {
-        // SAFETY: The plugin target language is correctly checked here.
+    let css_plugins: Vec<_> = plugins
+        .iter()
+        .filter(|p| p.language() == PluginTargetLanguage::Css)
+        .cloned()
+        .collect();
+
+    if !css_plugins.is_empty() {
+        // SAFETY: All plugins have been verified to target CSS above.
         unsafe {
-            if plugin.language() == PluginTargetLanguage::Css {
-                analyzer.add_visitor(
-                    Phases::Syntax,
-                    Box::new(PluginVisitor::new_unchecked(plugin.clone())),
-                )
-            }
+            analyzer.add_visitor(
+                Phases::Syntax,
+                Box::new(BatchPluginVisitor::new_unchecked(&css_plugins)),
+            );
         }
     }
 
@@ -177,7 +185,7 @@ where
 #[cfg(test)]
 mod tests {
     use crate::{AnalysisFilter, ControlFlow, CssAnalyzerServices, analyze};
-    use biome_analyze::{AnalyzerOptions, Never, RuleCategoriesBuilder, RuleFilter};
+    use biome_analyze::{ActionFilter, AnalyzerOptions, Never, RuleCategoriesBuilder, RuleFilter};
     use biome_console::fmt::{Formatter, Termcolor};
     use biome_console::{Markup, markup};
     use biome_css_parser::{CssParserOptions, parse_css};
@@ -221,7 +229,7 @@ mod tests {
         @page :blank:unknown { }
         "#;
 
-        let parsed = parse_css(SOURCE, CssParserOptions::default());
+        let parsed = parse_css(SOURCE, CssFileSource::css(), CssParserOptions::default());
 
         let mut error_ranges: Vec<TextRange> = Vec::new();
         let rule_filter = RuleFilter::Rule("nursery", "noUnknownPseudoClass");
@@ -252,7 +260,7 @@ mod tests {
                     eprintln!("{text}");
                 }
 
-                for action in signal.actions() {
+                for action in signal.actions(ActionFilter::all()) {
                     let new_code = action.mutation.commit();
                     eprintln!("{new_code}");
                 }
@@ -275,7 +283,7 @@ mod tests {
 #bar {}
         ";
 
-        let parsed = parse_css(SOURCE, CssParserOptions::default());
+        let parsed = parse_css(SOURCE, CssFileSource::css(), CssParserOptions::default());
 
         let filter = AnalysisFilter {
             categories: RuleCategoriesBuilder::default().with_syntax().build(),
@@ -326,7 +334,7 @@ a {
 }
         ";
 
-        let parsed = parse_css(SOURCE, CssParserOptions::default());
+        let parsed = parse_css(SOURCE, CssFileSource::css(), CssParserOptions::default());
 
         let filter = AnalysisFilter {
             categories: RuleCategoriesBuilder::default().with_syntax().build(),
@@ -373,7 +381,7 @@ a {
 }
         ";
 
-        let parsed = parse_css(SOURCE, CssParserOptions::default());
+        let parsed = parse_css(SOURCE, CssFileSource::css(), CssParserOptions::default());
 
         let filter = AnalysisFilter {
             categories: RuleCategoriesBuilder::default().with_syntax().build(),
@@ -417,7 +425,7 @@ a {
 #bar {}
         ";
 
-        let parsed = parse_css(SOURCE, CssParserOptions::default());
+        let parsed = parse_css(SOURCE, CssFileSource::css(), CssParserOptions::default());
 
         let filter = AnalysisFilter {
             categories: RuleCategoriesBuilder::default().with_syntax().build(),

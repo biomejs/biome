@@ -1,6 +1,6 @@
 use crate::parser::CssParser;
 use crate::syntax::block::ParseBlockBody;
-use crate::syntax::{DeclarationList, is_at_declaration};
+use crate::syntax::{DeclarationList, is_at_any_declaration};
 use biome_css_syntax::CssSyntaxKind;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_parser::CompletedMarker;
@@ -16,7 +16,7 @@ impl ParseBlockBody for DeclarationBlock {
     const BLOCK_KIND: CssSyntaxKind = CSS_DECLARATION_BLOCK;
 
     fn is_at_element(&self, p: &mut CssParser) -> bool {
-        is_at_declaration(p)
+        is_at_any_declaration(p)
     }
 
     fn parse_list(&mut self, p: &mut CssParser) {

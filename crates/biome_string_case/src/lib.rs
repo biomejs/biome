@@ -4,6 +4,8 @@
 
 use std::{borrow::Cow, cmp::Ordering, ffi::OsStr};
 
+use caseless::Caseless;
+
 #[cfg(feature = "biome_rowan")]
 pub mod comparable_token;
 
@@ -657,6 +659,14 @@ pub trait StrLikeExtension: ToOwned {
     ///
     ///  This orders Unicode code points based on their positions in the code charts.
     fn lexicographic_cmp(&self, other: &Self) -> Ordering;
+
+    /// Returns `true` when `needle` appears anywhere inside `haystack`, treating
+    /// uppercase and lowercase ASCII letters as equal. For example, searching for
+    /// `"color"` inside `"backgroundColor"` returns `true`.
+    ///
+    /// Only ASCII letters are folded. Any other character (digits, punctuation,
+    /// or non-ASCII letters like `É`) must match byte-for-byte.
+    fn contains_ignore_ascii_case(&self, needle: &Self) -> bool;
 }
 
 pub trait StrOnlyExtension: ToOwned {
@@ -664,6 +674,8 @@ pub trait StrOnlyExtension: ToOwned {
     /// is that this functions returns ```Cow``` and does not allocate
     /// if the string is already in lowercase.
     fn to_lowercase_cow(&self) -> Cow<'_, Self>;
+    /// Returns Unicode case-folded text as a Cow, allocating only when needed.
+    fn to_casefold_cow(&self) -> Cow<'_, Self>;
 }
 
 impl StrLikeExtension for str {
@@ -684,6 +696,20 @@ impl StrLikeExtension for str {
     fn lexicographic_cmp(&self, other: &Self) -> Ordering {
         self.as_bytes().lexicographic_cmp(other.as_bytes())
     }
+
+    fn contains_ignore_ascii_case(&self, needle: &Self) -> bool {
+        let haystack = self.as_bytes();
+        let needle = needle.as_bytes();
+        if needle.is_empty() {
+            return true;
+        }
+        if haystack.len() < needle.len() {
+            return false;
+        }
+        haystack
+            .windows(needle.len())
+            .any(|window| window.eq_ignore_ascii_case(needle))
+    }
 }
 
 impl StrOnlyExtension for str {
@@ -692,6 +718,26 @@ impl StrOnlyExtension for str {
         if has_uppercase {
             #[expect(clippy::disallowed_methods)]
             Cow::Owned(self.to_lowercase())
+        } else {
+            Cow::Borrowed(self)
+        }
+    }
+
+    fn to_casefold_cow(&self) -> Cow<'_, Self> {
+        // Fast path: check if case folding changes anything without allocating
+        let mut original = self.chars();
+        let mut folded = self.chars().default_case_fold();
+
+        let differs = loop {
+            match (original.next(), folded.next()) {
+                (None, None) => break false,
+                (Some(o), Some(f)) if o == f => {}
+                _ => break true,
+            }
+        };
+
+        if differs {
+            Cow::Owned(caseless::default_case_fold_str(self))
         } else {
             Cow::Borrowed(self)
         }
@@ -720,6 +766,11 @@ impl StrLikeExtension for std::ffi::OsStr {
     fn lexicographic_cmp(&self, other: &Self) -> Ordering {
         self.as_encoded_bytes().cmp(other.as_encoded_bytes())
     }
+
+    fn contains_ignore_ascii_case(&self, needle: &Self) -> bool {
+        self.as_encoded_bytes()
+            .contains_ignore_ascii_case(needle.as_encoded_bytes())
+    }
 }
 
 impl StrLikeExtension for [u8] {
@@ -738,6 +789,17 @@ impl StrLikeExtension for [u8] {
 
     fn lexicographic_cmp(&self, other: &Self) -> Ordering {
         self.iter().copied().cmp(other.iter().copied())
+    }
+
+    fn contains_ignore_ascii_case(&self, needle: &Self) -> bool {
+        if needle.is_empty() {
+            return true;
+        }
+        if self.len() < needle.len() {
+            return false;
+        }
+        self.windows(needle.len())
+            .any(|window| window.eq_ignore_ascii_case(needle))
     }
 }
 
@@ -1184,6 +1246,13 @@ mod tests {
     }
 
     #[test]
+    fn to_casefold_cow() {
+        assert_eq!("ss", "ẞ".to_casefold_cow());
+        assert_eq!("ss", "ß".to_casefold_cow());
+        assert!(matches!("test".to_casefold_cow(), Cow::Borrowed(_)));
+    }
+
+    #[test]
     fn collation_weight_unique() {
         for weight in 0..=255 {
             assert!(CldrAsciiCollator::WEIGHTS.contains(&weight));
@@ -1216,5 +1285,148 @@ mod tests {
         assert_eq!("9".ascii_nat_cmp("1a"), Ordering::Greater);
 
         assert_eq!("0".ascii_nat_cmp("a"), Ordering::Less);
+    }
+}
+
+#[cfg(test)]
+mod contains_ignore_ascii_case_str {
+    use super::StrLikeExtension;
+
+    #[test]
+    fn matches_exactly() {
+        assert!("color".contains_ignore_ascii_case("color"));
+    }
+
+    #[test]
+    fn matches_at_start() {
+        assert!("colorScheme".contains_ignore_ascii_case("color"));
+    }
+
+    #[test]
+    fn matches_at_end() {
+        assert!("backgroundcolor".contains_ignore_ascii_case("color"));
+    }
+
+    #[test]
+    fn matches_in_the_middle() {
+        assert!("myColorValue".contains_ignore_ascii_case("color"));
+    }
+
+    #[test]
+    fn ignores_ascii_case() {
+        assert!("backgroundColor".contains_ignore_ascii_case("color"));
+        assert!("BACKGROUNDCOLOR".contains_ignore_ascii_case("color"));
+        assert!("background".contains_ignore_ascii_case("GROUND"));
+    }
+
+    #[test]
+    fn rejects_missing_needle() {
+        assert!(!"padding".contains_ignore_ascii_case("color"));
+    }
+
+    #[test]
+    fn empty_needle_always_matches() {
+        assert!("anything".contains_ignore_ascii_case(""));
+        assert!("".contains_ignore_ascii_case(""));
+    }
+
+    #[test]
+    fn needle_longer_than_haystack() {
+        assert!(!"hi".contains_ignore_ascii_case("hello"));
+        assert!(!"".contains_ignore_ascii_case("color"));
+    }
+
+    #[test]
+    fn non_ascii_is_not_case_folded() {
+        assert!(!"café".contains_ignore_ascii_case("CAFÉ"));
+        assert!("café".contains_ignore_ascii_case("café"));
+    }
+
+    #[test]
+    fn punctuation_and_digits_must_match_exactly() {
+        assert!("color-2".contains_ignore_ascii_case("COLOR-2"));
+        assert!(!"color-2".contains_ignore_ascii_case("color_2"));
+    }
+}
+
+#[cfg(test)]
+mod contains_ignore_ascii_case_bytes {
+    use super::StrLikeExtension;
+
+    #[test]
+    fn matches_exactly() {
+        assert!(b"color".contains_ignore_ascii_case(b"color".as_slice()));
+    }
+
+    #[test]
+    fn ignores_ascii_case() {
+        assert!(b"backgroundColor".contains_ignore_ascii_case(b"color".as_slice()));
+        assert!(b"BACKGROUNDCOLOR".contains_ignore_ascii_case(b"color".as_slice()));
+        assert!(b"background".contains_ignore_ascii_case(b"GROUND".as_slice()));
+    }
+
+    #[test]
+    fn rejects_missing_needle() {
+        assert!(!b"padding".contains_ignore_ascii_case(b"color".as_slice()));
+    }
+
+    #[test]
+    fn empty_needle_always_matches() {
+        assert!(b"anything".contains_ignore_ascii_case(b"".as_slice()));
+        assert!(b"".contains_ignore_ascii_case(b"".as_slice()));
+    }
+
+    #[test]
+    fn needle_longer_than_haystack() {
+        assert!(!b"hi".contains_ignore_ascii_case(b"hello".as_slice()));
+        assert!(!b"".contains_ignore_ascii_case(b"color".as_slice()));
+    }
+
+    #[test]
+    fn punctuation_and_digits_must_match_exactly() {
+        assert!(b"color-2".contains_ignore_ascii_case(b"COLOR-2".as_slice()));
+        assert!(!b"color-2".contains_ignore_ascii_case(b"color_2".as_slice()));
+    }
+}
+
+#[cfg(test)]
+mod contains_ignore_ascii_case_osstr {
+    use std::ffi::OsStr;
+
+    use super::StrLikeExtension;
+
+    #[test]
+    fn matches_exactly() {
+        assert!(OsStr::new("color").contains_ignore_ascii_case(OsStr::new("color")));
+    }
+
+    #[test]
+    fn ignores_ascii_case() {
+        assert!(OsStr::new("backgroundColor").contains_ignore_ascii_case(OsStr::new("color")));
+        assert!(OsStr::new("BACKGROUNDCOLOR").contains_ignore_ascii_case(OsStr::new("color")));
+        assert!(OsStr::new("background").contains_ignore_ascii_case(OsStr::new("GROUND")));
+    }
+
+    #[test]
+    fn rejects_missing_needle() {
+        assert!(!OsStr::new("padding").contains_ignore_ascii_case(OsStr::new("color")));
+    }
+
+    #[test]
+    fn empty_needle_always_matches() {
+        assert!(OsStr::new("anything").contains_ignore_ascii_case(OsStr::new("")));
+        assert!(OsStr::new("").contains_ignore_ascii_case(OsStr::new("")));
+    }
+
+    #[test]
+    fn needle_longer_than_haystack() {
+        assert!(!OsStr::new("hi").contains_ignore_ascii_case(OsStr::new("hello")));
+        assert!(!OsStr::new("").contains_ignore_ascii_case(OsStr::new("color")));
+    }
+
+    #[test]
+    fn punctuation_and_digits_must_match_exactly() {
+        assert!(OsStr::new("color-2").contains_ignore_ascii_case(OsStr::new("COLOR-2")));
+        assert!(!OsStr::new("color-2").contains_ignore_ascii_case(OsStr::new("color_2")));
     }
 }

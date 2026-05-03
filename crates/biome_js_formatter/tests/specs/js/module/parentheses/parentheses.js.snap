@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/parentheses/parentheses.js
 ---
+
 # Input
 
 ```js
@@ -32,29 +33,7 @@ const a = () => ({}?.() && a);
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
------
+# Formatted
 
 ```js
 (foo++)?.();
@@ -81,6 +60,7 @@ async function* f() {
 const a = () => ({})?.() && a;
 
 (list || list2)?.[list || list2];
+
 ```
 
 # Lines exceeding max width of 80 characters

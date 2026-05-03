@@ -6,9 +6,11 @@ use biome_formatter::comments::{
 };
 use biome_formatter::formatter::Formatter;
 use biome_formatter::{FormatResult, FormatRule, write};
-use biome_json_syntax::{JsonArrayValue, JsonLanguage, JsonObjectValue, JsonSyntaxKind, TextLen};
+use biome_json_syntax::{
+    JsonArrayValue, JsonLanguage, JsonObjectValue, JsonRoot, JsonSyntaxKind, TextLen, TextSize,
+};
 use biome_rowan::SyntaxTriviaPieceComments;
-use biome_suppression::parse_suppression_comment;
+use biome_suppression::{SuppressionKind, parse_suppression_comment};
 
 pub type JsonComments = Comments<JsonLanguage>;
 
@@ -65,6 +67,15 @@ impl CommentStyle for JsonCommentStyle {
     fn is_suppression(text: &str) -> bool {
         parse_suppression_comment(text)
             .filter_map(Result::ok)
+            .filter(|suppression| suppression.kind == SuppressionKind::Classic)
+            .flat_map(|suppression| suppression.categories)
+            .any(|(key, ..)| key == category!("format"))
+    }
+
+    fn is_global_suppression(text: &str) -> bool {
+        parse_suppression_comment(text)
+            .filter_map(Result::ok)
+            .filter(|suppression| suppression.kind == SuppressionKind::All)
             .flat_map(|suppression| suppression.categories)
             .any(|(key, ..)| key == category!("format"))
     }
@@ -85,7 +96,7 @@ impl CommentStyle for JsonCommentStyle {
         &self,
         comment: biome_formatter::comments::DecoratedComment<Self::Language>,
     ) -> biome_formatter::comments::CommentPlacement<Self::Language> {
-        handle_empty_list_comment(comment)
+        handle_empty_list_comment(comment).or_else(handle_global_suppression)
     }
 }
 
@@ -108,6 +119,29 @@ fn handle_empty_list_comment(
         && object.json_member_list().is_empty()
     {
         return CommentPlacement::dangling(comment.enclosing_node().clone(), comment);
+    }
+
+    CommentPlacement::Default(comment)
+}
+
+fn handle_global_suppression(
+    comment: DecoratedComment<JsonLanguage>,
+) -> CommentPlacement<JsonLanguage> {
+    let node = comment.enclosing_node();
+
+    if node.text_range_with_trivia().start() == TextSize::from(0) {
+        let has_global_suppression = node.first_leading_trivia().is_some_and(|trivia| {
+            trivia
+                .pieces()
+                .filter(|piece| piece.is_comments())
+                .any(|piece| JsonCommentStyle::is_global_suppression(piece.text()))
+        });
+        let root = node.ancestors().find_map(JsonRoot::cast);
+        if let Some(root) = root
+            && has_global_suppression
+        {
+            return CommentPlacement::leading(root.syntax().clone(), comment);
+        }
     }
 
     CommentPlacement::Default(comment)

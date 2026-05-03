@@ -36,7 +36,6 @@
     <div role="paragraph" />
     <div role="complementary" />
     <div role="blockquote" />
-    <div role="status" />
     <div role="contentinfo" />
     <div role="region" />
 </>

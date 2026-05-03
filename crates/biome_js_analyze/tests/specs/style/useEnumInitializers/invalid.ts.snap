@@ -116,8 +116,8 @@ invalid.ts:1:13 lint/style/useEnumInitializers  FIXABLE  ━━━━━━━�
      1  1 │   export enum Status {
      2    │ - → Close,
         2 │ + → Close·=·0,
-     3  3 │   	MidClose = 1,
-     4  4 │   	MidOpen = 10,
+     3  3 │     MidClose = 1,
+     4  4 │     MidOpen = 10,
      5    │ - → /*·implicit·*/·Open·/*·11·*/,
         5 │ + → /*·implicit·*/·Open·=·11·/*·11·*/,
      6  6 │   }
@@ -502,5 +502,3 @@ invalid.ts:70:13 lint/style/useEnumInitializers  FIXABLE  ━━━━━━━�
   
 
 ```
-
-

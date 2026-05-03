@@ -2,15 +2,9 @@ use biome_analyze::RuleSource;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode};
-use biome_rowan::{AstNode, Direction, SyntaxTriviaPiece, TextRange};
+use biome_js_syntax::{AnyJsRoot, JsSyntaxNode};
+use biome_rowan::{AstNode, Direction, TextRange};
 use biome_rule_options::no_irregular_whitespace::NoIrregularWhitespaceOptions;
-
-const IRREGULAR_WHITESPACES: &[char; 22] = &[
-    '\u{c}', '\u{b}', '\u{85}', '\u{feff}', '\u{a0}', '\u{1680}', '\u{180e}', '\u{2000}',
-    '\u{2001}', '\u{2002}', '\u{2003}', '\u{2004}', '\u{2005}', '\u{2006}', '\u{2007}', '\u{2008}',
-    '\u{2009}', '\u{200a}', '\u{200b}', '\u{202f}', '\u{205f}', '\u{3000}',
-];
 
 declare_lint_rule! {
     /// Disallows the use of irregular whitespace characters.
@@ -78,38 +72,41 @@ impl Rule for NoIrregularWhitespace {
     }
 }
 
+fn is_irregular_whitespace(c: char) -> bool {
+    matches!(
+        c,
+        '\u{000B}'
+            | '\u{000C}'
+            | '\u{0085}'
+            | '\u{00A0}'
+            | '\u{1680}'
+            | '\u{180E}'
+            | '\u{2000}'..='\u{200B}'
+            | '\u{202F}'
+            | '\u{205F}'
+            | '\u{3000}'
+            | '\u{FEFF}'
+    )
+}
+
 fn get_irregular_whitespace(syntax: &JsSyntaxNode) -> Vec<TextRange> {
-    let mut all_whitespaces_trivia: Vec<SyntaxTriviaPiece<JsLanguage>> = vec![];
-    let is_whitespace = |trivia: &SyntaxTriviaPiece<JsLanguage>| {
-        trivia.is_whitespace() && !trivia.text().replace(' ', "").is_empty()
-    };
+    if !syntax.text_with_trivia().chars().any(is_irregular_whitespace) {
+        return vec![];
+    }
 
+    let mut results = vec![];
     for token in syntax.descendants_tokens(Direction::Next) {
-        let leading_trivia_pieces = token.leading_trivia().pieces();
-        let trailing_trivia_pieces = token.trailing_trivia().pieces();
-
-        for trivia in leading_trivia_pieces {
-            if is_whitespace(&trivia) {
-                all_whitespaces_trivia.push(trivia);
-            }
-        }
-
-        for trivia in trailing_trivia_pieces {
-            if is_whitespace(&trivia) {
-                all_whitespaces_trivia.push(trivia);
+        for trivia in token
+            .leading_trivia()
+            .pieces()
+            .chain(token.trailing_trivia().pieces())
+        {
+            if trivia.is_whitespace()
+                && trivia.text().chars().any(is_irregular_whitespace)
+            {
+                results.push(trivia.text_range());
             }
         }
     }
-
-    all_whitespaces_trivia
-        .iter()
-        .filter_map(|trivia| {
-            let has_irregular_whitespace = trivia.text().chars().any(|char| {
-                IRREGULAR_WHITESPACES
-                    .iter()
-                    .any(|irregular_whitespace| &char == irregular_whitespace)
-            });
-            has_irregular_whitespace.then(|| trivia.text_range())
-        })
-        .collect::<Vec<TextRange>>()
+    results
 }

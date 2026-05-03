@@ -21,10 +21,15 @@ impl FormatNodeRule<JsonRoot> for FormatJsonRoot {
                     [
                         bom_token.format(),
                         format_or_verbatim(value.format()),
-                        format_removed(&eof_token?),
-                        hard_line_break()
+                        format_removed(&eof_token?)
                     ]
-                )
+                )?;
+
+                if f.options().trailing_newline().value() {
+                    write!(f, [hard_line_break()])
+                } else {
+                    Ok(())
+                }
             }
             // Don't fail formatting if the root contains no root value
             Err(_) => {

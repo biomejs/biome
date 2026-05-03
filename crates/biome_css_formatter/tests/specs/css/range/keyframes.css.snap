@@ -19,19 +19,7 @@ info: css/range/keyframes.css
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
------
+# Formatted
 
 ```css
 @keyframes animation-name {
@@ -43,6 +31,5 @@ Quote style: Double Quotes
 	100% {
 		opacity: 1;
 	}
-}```
-
-
+}
+```

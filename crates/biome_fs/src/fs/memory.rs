@@ -355,14 +355,13 @@ impl<'scope> TraversalScope<'scope> for MemoryTraversalScope<'scope> {
 
 #[cfg(test)]
 mod tests {
-    use biome_diagnostics::Error;
-    use camino::{Utf8Path, Utf8PathBuf};
-    use parking_lot::Mutex;
-    use std::collections::BTreeSet;
-    use std::{io, mem::swap};
-
     use crate::{BiomePath, FileSystem, MemoryFileSystem, PathInterner, TraversalContext};
     use crate::{OpenOptions, fs::FileSystemExt};
+    use biome_diagnostics::Error;
+    use camino::{Utf8Path, Utf8PathBuf};
+    use papaya::{HashSet, HashSetRef, LocalGuard};
+    use std::hash::RandomState;
+    use std::io;
 
     #[test]
     fn fs_read_only() {
@@ -528,7 +527,7 @@ mod tests {
 
         struct TestContext {
             interner: PathInterner,
-            visited: Mutex<BTreeSet<BiomePath>>,
+            visited: HashSet<BiomePath>,
         }
 
         impl TraversalContext for TestContext {
@@ -545,23 +544,22 @@ mod tests {
             }
 
             fn handle_path(&self, path: BiomePath) {
-                self.visited.lock().insert(path.to_written());
+                self.visited.pin().insert(path.to_written());
             }
 
             fn store_path(&self, path: BiomePath) {
-                self.visited.lock().insert(path);
+                self.visited.pin().insert(path);
             }
 
-            fn evaluated_paths(&self) -> BTreeSet<BiomePath> {
-                let lock = self.visited.lock();
-                lock.clone()
+            fn evaluated_paths(&self) -> HashSetRef<'_, BiomePath, RandomState, LocalGuard<'_>> {
+                self.visited.pin()
             }
         }
 
         let (interner, _) = PathInterner::new();
         let mut ctx = TestContext {
             interner,
-            visited: Mutex::default(),
+            visited: HashSet::default(),
         };
 
         // Traverse a directory
@@ -569,22 +567,20 @@ mod tests {
             scope.evaluate(&ctx, Utf8PathBuf::from("dir1"));
         }));
 
-        let mut visited = BTreeSet::default();
-        swap(&mut visited, ctx.visited.get_mut());
+        let visited = std::mem::take(&mut ctx.visited);
 
         assert_eq!(visited.len(), 2);
-        assert!(visited.contains(&BiomePath::new("dir1/file1")));
-        assert!(visited.contains(&BiomePath::new("dir1/file2")));
+        assert!(visited.pin().contains(&BiomePath::new("dir1/file1")));
+        assert!(visited.pin().contains(&BiomePath::new("dir1/file2")));
 
         // Traverse a single file
         fs.traversal(Box::new(|scope| {
             scope.evaluate(&ctx, Utf8PathBuf::from("dir2/file2"));
         }));
 
-        let mut visited = BTreeSet::default();
-        swap(&mut visited, ctx.visited.get_mut());
+        let visited = std::mem::take(&mut ctx.visited);
 
         assert_eq!(visited.len(), 1);
-        assert!(visited.contains(&BiomePath::new("dir2/file2")));
+        assert!(visited.pin().contains(&BiomePath::new("dir2/file2")));
     }
 }

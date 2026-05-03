@@ -1,7 +1,6 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalid.css
-snapshot_kind: text
 ---
 # Input
 ```css
@@ -49,12 +48,16 @@ a { padding-left: 10px; padding-right: 10px; padding: 20px; }
 ```
 invalid.css:1:25 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected shorthand property padding after padding-left
+  × This shorthand property padding overrides the earlier padding-left declaration.
   
   > 1 │ a { padding-left: 10px; padding: 20px; }
       │                         ^^^^^^^
     2 │ 
     3 │ a { border-width: 20px; border: 1px solid black; }
+  
+  i Shorthand properties reset related longhand properties, which can overwrite earlier values unexpectedly.
+  
+  i Declare the shorthand first, or use longhand properties consistently so later declarations stay explicit.
   
 
 ```
@@ -62,7 +65,7 @@ invalid.css:1:25 lint/suspicious/noShorthandPropertyOverrides ━━━━━━
 ```
 invalid.css:3:25 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected shorthand property border after border-width
+  × This shorthand property border overrides the earlier border-width declaration.
   
     1 │ a { padding-left: 10px; padding: 20px; }
     2 │ 
@@ -71,13 +74,17 @@ invalid.css:3:25 lint/suspicious/noShorthandPropertyOverrides ━━━━━━
     4 │ 
     5 │ a { border-color: red; border: 1px solid black; }
   
+  i Shorthand properties reset related longhand properties, which can overwrite earlier values unexpectedly.
+  
+  i Declare the shorthand first, or use longhand properties consistently so later declarations stay explicit.
+  
 
 ```
 
 ```
 invalid.css:5:24 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected shorthand property border after border-color
+  × This shorthand property border overrides the earlier border-color declaration.
   
     3 │ a { border-width: 20px; border: 1px solid black; }
     4 │ 
@@ -86,13 +93,17 @@ invalid.css:5:24 lint/suspicious/noShorthandPropertyOverrides ━━━━━━
     6 │ 
     7 │ a { border-style: dotted; border: 1px solid black; }
   
+  i Shorthand properties reset related longhand properties, which can overwrite earlier values unexpectedly.
+  
+  i Declare the shorthand first, or use longhand properties consistently so later declarations stay explicit.
+  
 
 ```
 
 ```
 invalid.css:7:27 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected shorthand property border after border-style
+  × This shorthand property border overrides the earlier border-style declaration.
   
     5 │ a { border-color: red; border: 1px solid black; }
     6 │ 
@@ -101,13 +112,17 @@ invalid.css:7:27 lint/suspicious/noShorthandPropertyOverrides ━━━━━━
     8 │ 
     9 │ a { border-image: url("foo.png"); border: 1px solid black; }
   
+  i Shorthand properties reset related longhand properties, which can overwrite earlier values unexpectedly.
+  
+  i Declare the shorthand first, or use longhand properties consistently so later declarations stay explicit.
+  
 
 ```
 
 ```
 invalid.css:9:35 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected shorthand property border after border-image
+  × This shorthand property border overrides the earlier border-image declaration.
   
      7 │ a { border-style: dotted; border: 1px solid black; }
      8 │ 
@@ -116,13 +131,17 @@ invalid.css:9:35 lint/suspicious/noShorthandPropertyOverrides ━━━━━━
     10 │ 
     11 │ a { border-image-source: url("foo.png"); border: 1px solid black; }
   
+  i Shorthand properties reset related longhand properties, which can overwrite earlier values unexpectedly.
+  
+  i Declare the shorthand first, or use longhand properties consistently so later declarations stay explicit.
+  
 
 ```
 
 ```
 invalid.css:11:42 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected shorthand property border after border-image-source
+  × This shorthand property border overrides the earlier border-image-source declaration.
   
      9 │ a { border-image: url("foo.png"); border: 1px solid black; }
     10 │ 
@@ -131,13 +150,17 @@ invalid.css:11:42 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
     12 │ 
     13 │ a { pAdDiNg-lEfT: 10Px; pAdDiNg: 20Px; }
   
+  i Shorthand properties reset related longhand properties, which can overwrite earlier values unexpectedly.
+  
+  i Declare the shorthand first, or use longhand properties consistently so later declarations stay explicit.
+  
 
 ```
 
 ```
 invalid.css:13:25 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected shorthand property pAdDiNg after pAdDiNg-lEfT
+  × This shorthand property pAdDiNg overrides the earlier pAdDiNg-lEfT declaration.
   
     11 │ a { border-image-source: url("foo.png"); border: 1px solid black; }
     12 │ 
@@ -146,13 +169,17 @@ invalid.css:13:25 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
     14 │ 
     15 │ a { PADDING-LEFT: 10PX; PADDING: 20PX; }
   
+  i Shorthand properties reset related longhand properties, which can overwrite earlier values unexpectedly.
+  
+  i Declare the shorthand first, or use longhand properties consistently so later declarations stay explicit.
+  
 
 ```
 
 ```
 invalid.css:15:25 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected shorthand property PADDING after PADDING-LEFT
+  × This shorthand property PADDING overrides the earlier PADDING-LEFT declaration.
   
     13 │ a { pAdDiNg-lEfT: 10Px; pAdDiNg: 20Px; }
     14 │ 
@@ -161,13 +188,17 @@ invalid.css:15:25 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
     16 │ 
     17 │ a { border-top-width: 1px; top: 0; bottom: 3px; border: 2px solid blue; }
   
+  i Shorthand properties reset related longhand properties, which can overwrite earlier values unexpectedly.
+  
+  i Declare the shorthand first, or use longhand properties consistently so later declarations stay explicit.
+  
 
 ```
 
 ```
 invalid.css:17:49 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected shorthand property border after border-top-width
+  × This shorthand property border overrides the earlier border-top-width declaration.
   
     15 │ a { PADDING-LEFT: 10PX; PADDING: 20PX; }
     16 │ 
@@ -176,13 +207,17 @@ invalid.css:17:49 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
     18 │ 
     19 │ a { transition-property: opacity; transition: opacity 1s linear; }
   
+  i Shorthand properties reset related longhand properties, which can overwrite earlier values unexpectedly.
+  
+  i Declare the shorthand first, or use longhand properties consistently so later declarations stay explicit.
+  
 
 ```
 
 ```
 invalid.css:19:35 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected shorthand property transition after transition-property
+  × This shorthand property transition overrides the earlier transition-property declaration.
   
     17 │ a { border-top-width: 1px; top: 0; bottom: 3px; border: 2px solid blue; }
     18 │ 
@@ -191,13 +226,17 @@ invalid.css:19:35 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
     20 │ 
     21 │ a { background-repeat: no-repeat; background: url(lion.png); }
   
+  i Shorthand properties reset related longhand properties, which can overwrite earlier values unexpectedly.
+  
+  i Declare the shorthand first, or use longhand properties consistently so later declarations stay explicit.
+  
 
 ```
 
 ```
 invalid.css:21:35 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected shorthand property background after background-repeat
+  × This shorthand property background overrides the earlier background-repeat declaration.
   
     19 │ a { transition-property: opacity; transition: opacity 1s linear; }
     20 │ 
@@ -206,13 +245,17 @@ invalid.css:21:35 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
     22 │ 
     23 │ @media (color) { a { background-repeat: no-repeat; background: url(lion.png); }}
   
+  i Shorthand properties reset related longhand properties, which can overwrite earlier values unexpectedly.
+  
+  i Declare the shorthand first, or use longhand properties consistently so later declarations stay explicit.
+  
 
 ```
 
 ```
 invalid.css:23:52 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected shorthand property background after background-repeat
+  × This shorthand property background overrides the earlier background-repeat declaration.
   
     21 │ a { background-repeat: no-repeat; background: url(lion.png); }
     22 │ 
@@ -221,13 +264,17 @@ invalid.css:23:52 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
     24 │ 
     25 │ a { -webkit-transition-property: opacity; -webkit-transition: opacity 1s linear; }
   
+  i Shorthand properties reset related longhand properties, which can overwrite earlier values unexpectedly.
+  
+  i Declare the shorthand first, or use longhand properties consistently so later declarations stay explicit.
+  
 
 ```
 
 ```
 invalid.css:25:43 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected shorthand property -webkit-transition after -webkit-transition-property
+  × This shorthand property -webkit-transition overrides the earlier -webkit-transition-property declaration.
   
     23 │ @media (color) { a { background-repeat: no-repeat; background: url(lion.png); }}
     24 │ 
@@ -236,13 +283,17 @@ invalid.css:25:43 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
     26 │ 
     27 │ a { -WEBKIT-transition-property: opacity; -webKIT-transition: opacity 1s linear; }
   
+  i Shorthand properties reset related longhand properties, which can overwrite earlier values unexpectedly.
+  
+  i Declare the shorthand first, or use longhand properties consistently so later declarations stay explicit.
+  
 
 ```
 
 ```
 invalid.css:27:43 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected shorthand property -webKIT-transition after -WEBKIT-transition-property
+  × This shorthand property -webKIT-transition overrides the earlier -WEBKIT-transition-property declaration.
   
     25 │ a { -webkit-transition-property: opacity; -webkit-transition: opacity 1s linear; }
     26 │ 
@@ -251,13 +302,17 @@ invalid.css:27:43 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
     28 │ 
     29 │ a { font-variant: small-caps; font: sans-serif; }
   
+  i Shorthand properties reset related longhand properties, which can overwrite earlier values unexpectedly.
+  
+  i Declare the shorthand first, or use longhand properties consistently so later declarations stay explicit.
+  
 
 ```
 
 ```
 invalid.css:29:31 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected shorthand property font after font-variant
+  × This shorthand property font overrides the earlier font-variant declaration.
   
     27 │ a { -WEBKIT-transition-property: opacity; -webKIT-transition: opacity 1s linear; }
     28 │ 
@@ -266,13 +321,17 @@ invalid.css:29:31 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
     30 │ 
     31 │ a { font-variant: all-small-caps; font: sans-serif; }
   
+  i Shorthand properties reset related longhand properties, which can overwrite earlier values unexpectedly.
+  
+  i Declare the shorthand first, or use longhand properties consistently so later declarations stay explicit.
+  
 
 ```
 
 ```
 invalid.css:31:35 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected shorthand property font after font-variant
+  × This shorthand property font overrides the earlier font-variant declaration.
   
     29 │ a { font-variant: small-caps; font: sans-serif; }
     30 │ 
@@ -281,13 +340,17 @@ invalid.css:31:35 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
     32 │ 
     33 │ a { font-size-adjust: 0.545; font: Verdana; }
   
+  i Shorthand properties reset related longhand properties, which can overwrite earlier values unexpectedly.
+  
+  i Declare the shorthand first, or use longhand properties consistently so later declarations stay explicit.
+  
 
 ```
 
 ```
 invalid.css:33:30 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected shorthand property font after font-size-adjust
+  × This shorthand property font overrides the earlier font-size-adjust declaration.
   
     31 │ a { font-variant: all-small-caps; font: sans-serif; }
     32 │ 
@@ -296,13 +359,17 @@ invalid.css:33:30 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
     34 │ 
     35 │ a { padding-left: 10px; padding: 20px; border-width: 20px; border: 1px solid black; }
   
+  i Shorthand properties reset related longhand properties, which can overwrite earlier values unexpectedly.
+  
+  i Declare the shorthand first, or use longhand properties consistently so later declarations stay explicit.
+  
 
 ```
 
 ```
 invalid.css:35:25 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected shorthand property padding after padding-left
+  × This shorthand property padding overrides the earlier padding-left declaration.
   
     33 │ a { font-size-adjust: 0.545; font: Verdana; }
     34 │ 
@@ -311,13 +378,17 @@ invalid.css:35:25 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
     36 │ 
     37 │ a { padding-left: 10px; padding-right: 10px; padding: 20px; }
   
+  i Shorthand properties reset related longhand properties, which can overwrite earlier values unexpectedly.
+  
+  i Declare the shorthand first, or use longhand properties consistently so later declarations stay explicit.
+  
 
 ```
 
 ```
 invalid.css:35:60 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected shorthand property border after border-width
+  × This shorthand property border overrides the earlier border-width declaration.
   
     33 │ a { font-size-adjust: 0.545; font: Verdana; }
     34 │ 
@@ -326,19 +397,9 @@ invalid.css:35:60 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
     36 │ 
     37 │ a { padding-left: 10px; padding-right: 10px; padding: 20px; }
   
-
-```
-
-```
-invalid.css:37:46 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected shorthand property padding after padding-left
+  i Shorthand properties reset related longhand properties, which can overwrite earlier values unexpectedly.
   
-    35 │ a { padding-left: 10px; padding: 20px; border-width: 20px; border: 1px solid black; }
-    36 │ 
-  > 37 │ a { padding-left: 10px; padding-right: 10px; padding: 20px; }
-       │                                              ^^^^^^^
-    38 │ 
+  i Declare the shorthand first, or use longhand properties consistently so later declarations stay explicit.
   
 
 ```
@@ -346,13 +407,35 @@ invalid.css:37:46 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
 ```
 invalid.css:37:46 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected shorthand property padding after padding-right
+  × This shorthand property padding overrides the earlier padding-left declaration.
   
     35 │ a { padding-left: 10px; padding: 20px; border-width: 20px; border: 1px solid black; }
     36 │ 
   > 37 │ a { padding-left: 10px; padding-right: 10px; padding: 20px; }
        │                                              ^^^^^^^
     38 │ 
+  
+  i Shorthand properties reset related longhand properties, which can overwrite earlier values unexpectedly.
+  
+  i Declare the shorthand first, or use longhand properties consistently so later declarations stay explicit.
+  
+
+```
+
+```
+invalid.css:37:46 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This shorthand property padding overrides the earlier padding-right declaration.
+  
+    35 │ a { padding-left: 10px; padding: 20px; border-width: 20px; border: 1px solid black; }
+    36 │ 
+  > 37 │ a { padding-left: 10px; padding-right: 10px; padding: 20px; }
+       │                                              ^^^^^^^
+    38 │ 
+  
+  i Shorthand properties reset related longhand properties, which can overwrite earlier values unexpectedly.
+  
+  i Declare the shorthand first, or use longhand properties consistently so later declarations stay explicit.
   
 
 ```

@@ -1,0 +1,529 @@
+use crate::markdown::auxiliary::hard_line::FormatMdFormatHardLineOptions;
+use crate::markdown::auxiliary::inline_italic::FormatMdInlineItalicOptions;
+use crate::markdown::auxiliary::textual::FormatMdTextualOptions;
+use crate::prelude::*;
+use crate::shared::{TextPrintMode, TrimMode};
+use biome_formatter::{FormatRuleWithOptions, write};
+use biome_markdown_syntax::{AnyMdInline, MdInlineItemList};
+
+#[derive(Debug, Clone, Default)]
+pub(crate) struct FormatMdInlineItemList {
+    print_mode: TextPrintMode,
+    /// When true, and there's a [MdInlineItalic], it instrustructs the formatter to keep the fences
+    keep_fences_in_italics: bool,
+    inside_list: bool,
+}
+
+impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
+    type Context = MarkdownFormatContext;
+    fn fmt(&self, node: &MdInlineItemList, f: &mut MarkdownFormatter) -> FormatResult<()> {
+        if self.inside_list {
+            return self.fmt_inside_list(node, f);
+        } else if self.print_mode.is_auto_link_like() {
+            return self.fmt_auto_link_like(node, f);
+        } else if self.print_mode.is_normalize_words() {
+            return self.fmt_normalize_words(node, f);
+        } else if self.print_mode.is_trim_all() {
+            return self.fmt_trim_all(node, f);
+        } else if self.print_mode.is_pristine() {
+            return self.fmt_pristine(node, f);
+        } else if self.print_mode.is_clean() {
+            return self.fmt_clean(node, f);
+        }
+
+        let mut joiner = f.join();
+
+        let mut seen_new_line = false;
+        for (index, item) in node.iter().enumerate() {
+            match item {
+                AnyMdInline::MdTextual(text) => {
+                    if text.is_empty_and_not_newline()? && seen_new_line {
+                        if self.print_mode.is_keep_leading_spaces() {
+                            joiner.entry(&text.format());
+                        } else {
+                            let entry = format_with(|f| {
+                                write!(
+                                    f,
+                                    [text.format().with_options(FormatMdTextualOptions {
+                                        should_remove: true,
+                                        ..Default::default()
+                                    })]
+                                )
+                            });
+                            joiner.entry(&entry);
+                        }
+                    } else if text.is_newline()? {
+                        let entry = format_with(|f| {
+                            write!(
+                                f,
+                                [
+                                    text.format().with_options(FormatMdTextualOptions {
+                                        should_remove: true,
+                                        ..Default::default()
+                                    }),
+                                    hard_line_break()
+                                ]
+                            )
+                        });
+                        seen_new_line = true;
+                        joiner.entry(&entry);
+                    } else {
+                        joiner.entry(&text.format().with_options(FormatMdTextualOptions {
+                            should_remove: false,
+                            print_mode: if (self.print_mode.is_trim_start() && index == 0)
+                                || (self.print_mode.is_keep_leading_spaces() && seen_new_line)
+                            {
+                                self.print_mode
+                            } else {
+                                TextPrintMode::default()
+                            },
+                        }));
+                    }
+                }
+
+                AnyMdInline::MdHardLine(hard_line) => {
+                    seen_new_line = true;
+                    joiner.entry(&format_with(|f| {
+                        write!(
+                            f,
+                            [hard_line
+                                .format()
+                                .with_options(FormatMdFormatHardLineOptions {
+                                    print_mode: self.print_mode,
+                                })]
+                        )
+                    }));
+                }
+                AnyMdInline::MdInlineItalic(italic) => {
+                    joiner.entry(&italic.format().with_options(FormatMdInlineItalicOptions {
+                        should_keep_fences: self.keep_fences_in_italics,
+                    }));
+                    seen_new_line = false;
+                }
+                AnyMdInline::MdIndentToken(indent) => {
+                    joiner.entry(&indent.format());
+                    seen_new_line = false;
+                }
+                _ => {
+                    joiner.entry(&item.format());
+                    seen_new_line = false;
+                }
+            }
+        }
+
+        joiner.finish()
+    }
+}
+
+impl FormatMdInlineItemList {
+    /// Formats inline content inside a list item, normalizing the indentation
+    /// of continuation lines.
+    ///
+    /// In Markdown, each continuation line of a list item must be indented to
+    /// align with the first character of the item's content. For example, with
+    /// `1. item`, the content starts at column 3, so continuation lines need
+    /// exactly 3 spaces. The parser represents those required spaces as
+    /// `MdIndentToken` nodes in the CST (or, for blank-line-separated "loose"
+    /// paragraphs, as a preceding `MdContinuationIndent` block). Any extra
+    /// leading spaces beyond the required indent end up as `MdTextual " "`
+    /// tokens at the start of the paragraph's `MdInlineItemList`.
+    ///
+    /// This function normalizes those extras:
+    ///
+    /// - At the very start of the paragraph (loose, blank-line-separated
+    ///   context), ALL leading `" "` textuals are removed — they carry no
+    ///   meaning past the continuation indent.
+    /// - On a soft-wrap continuation within the same paragraph (after a `\n`
+    ///   textual), a single excess space is stripped (typo) but two or more
+    ///   are preserved (intentional alignment).
+    /// - Spaces following a hard-line-break (`  \n`) are always preserved
+    ///   because those reflect an explicit choice by the author.
+    fn fmt_inside_list(
+        &self,
+        node: &MdInlineItemList,
+        f: &mut MarkdownFormatter,
+    ) -> FormatResult<()> {
+        let items: Vec<AnyMdInline> = node.iter().collect();
+        let mut joiner = f.join();
+        // True until we have emitted the first non-space content of the
+        // paragraph. While true, every leading `" "` textual is excess and is
+        // removed unconditionally.
+        let mut at_paragraph_start = true;
+        let mut seen_new_line = false;
+        let mut after_hard_line = false;
+
+        for (i, item) in items.iter().enumerate() {
+            match item {
+                AnyMdInline::MdTextual(text) => {
+                    if text.is_newline()? {
+                        seen_new_line = true;
+                        after_hard_line = false;
+                        // Paragraph content has started — any spaces that come
+                        // after this newline are soft-wrap, not paragraph-start.
+                        at_paragraph_start = false;
+                        joiner.entry(&format_with(|f| {
+                            write!(
+                                f,
+                                [
+                                    text.format().with_options(FormatMdTextualOptions {
+                                        should_remove: true,
+                                        ..Default::default()
+                                    }),
+                                    hard_line_break()
+                                ]
+                            )
+                        }));
+                    } else if at_paragraph_start && text.value_token()?.text() == " " {
+                        // Leading space at the start of a loose paragraph —
+                        // strip unconditionally (these are pure excess past the
+                        // continuation indent).
+                        joiner.entry(&text.format().with_options(FormatMdTextualOptions {
+                            should_remove: true,
+                            ..Default::default()
+                        }));
+                    } else if seen_new_line && !after_hard_line && text.value_token()?.text() == " "
+                    {
+                        // Soft-wrap continuation excess. Single extra space is
+                        // a typo (strip); two or more mean intentional
+                        // alignment (keep).
+                        let next_is_space = matches!(
+                            items.get(i + 1),
+                            Some(AnyMdInline::MdTextual(next))
+                            if next.value_token().is_ok_and(|t| t.text() == " ")
+                        );
+                        if next_is_space {
+                            let was_after_newline = seen_new_line;
+                            seen_new_line = false;
+                            after_hard_line = false;
+                            joiner.entry(&text.format().with_options(FormatMdTextualOptions {
+                                should_remove: false,
+                                print_mode: if was_after_newline
+                                    && self.print_mode.is_keep_leading_spaces()
+                                {
+                                    self.print_mode
+                                } else {
+                                    TextPrintMode::default()
+                                },
+                            }));
+                        } else {
+                            // Single excess space before content — remove it.
+                            seen_new_line = false;
+                            joiner.entry(&text.format().with_options(FormatMdTextualOptions {
+                                should_remove: true,
+                                ..Default::default()
+                            }));
+                        }
+                    } else {
+                        let was_after_newline = seen_new_line;
+                        at_paragraph_start = false;
+                        seen_new_line = false;
+                        after_hard_line = false;
+                        joiner.entry(&text.format().with_options(FormatMdTextualOptions {
+                            should_remove: false,
+                            print_mode: if was_after_newline
+                                && self.print_mode.is_keep_leading_spaces()
+                            {
+                                self.print_mode
+                            } else {
+                                TextPrintMode::default()
+                            },
+                        }));
+                    }
+                }
+                AnyMdInline::MdHardLine(hard_line) => {
+                    seen_new_line = true;
+                    after_hard_line = true;
+                    at_paragraph_start = false;
+                    joiner.entry(&format_with(|f| {
+                        write!(
+                            f,
+                            [hard_line
+                                .format()
+                                .with_options(FormatMdFormatHardLineOptions {
+                                    print_mode: self.print_mode,
+                                })]
+                        )
+                    }));
+                }
+                AnyMdInline::MdInlineItalic(italic) => {
+                    seen_new_line = false;
+                    after_hard_line = false;
+                    at_paragraph_start = false;
+                    joiner.entry(&italic.format().with_options(FormatMdInlineItalicOptions {
+                        should_keep_fences: self.keep_fences_in_italics,
+                    }));
+                }
+                AnyMdInline::MdIndentToken(indent) => {
+                    // Continuation indent tokens are not content; keep seen_new_line
+                    // so the next space-only token is still detected as excess.
+                    joiner.entry(&indent.format());
+                }
+                _ => {
+                    seen_new_line = false;
+                    at_paragraph_start = false;
+                    joiner.entry(&item.format());
+                }
+            }
+        }
+
+        joiner.finish()
+    }
+
+    /// If the first and last [MdTextual] are `<` and `>` respectively,
+    /// they are removed. Otherwise falls back to [TrimMode::All].
+    fn fmt_auto_link_like(
+        &self,
+        node: &MdInlineItemList,
+        f: &mut MarkdownFormatter,
+    ) -> FormatResult<()> {
+        let items: Vec<_> = node.iter().collect();
+
+        let starts_with_lt = matches!(items.first(), Some(AnyMdInline::MdTextual(t)) if t.value_token().is_ok_and(|tok| tok.text() == "<"));
+        let ends_with_gt = matches!(items.last(), Some(AnyMdInline::MdTextual(t)) if t.value_token().is_ok_and(|tok| tok.text() == ">"));
+
+        let is_auto_link = starts_with_lt && ends_with_gt && items.len() > 2;
+
+        if !is_auto_link {
+            return self.fmt_trim_all(node, f);
+        }
+
+        let mut joiner = f.join();
+        for (index, item) in items.iter().enumerate() {
+            if (index == 0 || index == items.len() - 1)
+                && let AnyMdInline::MdTextual(text) = item
+            {
+                joiner.entry(&text.format().with_options(FormatMdTextualOptions {
+                    should_remove: true,
+                    ..Default::default()
+                }));
+                continue;
+            }
+            match item {
+                AnyMdInline::MdInlineItalic(italic) => {
+                    joiner.entry(&italic.format().with_options(FormatMdInlineItalicOptions {
+                        should_keep_fences: self.keep_fences_in_italics,
+                    }));
+                }
+                _ => {
+                    joiner.entry(&item.format());
+                }
+            }
+        }
+        joiner.finish()
+    }
+
+    /// Strips leading and trailing whitespace/hard-lines around the content.
+    /// Items between the first and last non-empty nodes are kept as-is;
+    /// items outside those boundaries are removed.
+    fn fmt_trim_all(&self, node: &MdInlineItemList, f: &mut MarkdownFormatter) -> FormatResult<()> {
+        let items: Vec<_> = node.iter().collect();
+        let mut joiner = f.join();
+
+        let is_content = |item: &AnyMdInline| match item {
+            AnyMdInline::MdTextual(text) => !text.is_empty().unwrap_or_default(),
+            AnyMdInline::MdHardLine(_) | AnyMdInline::MdIndentToken(_) => false,
+            _ => true,
+        };
+
+        // Find the first non-empty item from the left.
+        let first_content = items.iter().position(&is_content);
+
+        // Find the first non-empty item from the right.
+        let last_content = items
+            .iter()
+            .rev()
+            .position(is_content)
+            .map(|pos| items.len() - 1 - pos);
+
+        for (index, item) in items.iter().enumerate() {
+            let is_before_content = first_content.is_none_or(|first| index < first);
+            let is_after_content = last_content.is_none_or(|last| index > last);
+
+            if is_before_content || is_after_content {
+                // Outside content boundaries: remove empty nodes.
+                match item {
+                    AnyMdInline::MdTextual(text) => {
+                        joiner.entry(&text.format().with_options(FormatMdTextualOptions {
+                            should_remove: true,
+                            print_mode: TextPrintMode::trim_start(),
+                        }));
+                    }
+                    AnyMdInline::MdHardLine(hard_line) => {
+                        joiner.entry(&hard_line.format().with_options(
+                            FormatMdFormatHardLineOptions {
+                                print_mode: TextPrintMode::trim_all(),
+                            },
+                        ));
+                    }
+                    AnyMdInline::MdInlineItalic(italic) => {
+                        joiner.entry(&italic.format().with_options(FormatMdInlineItalicOptions {
+                            should_keep_fences: self.keep_fences_in_italics,
+                        }));
+                    }
+                    AnyMdInline::MdIndentToken(indent) => {
+                        let token = indent.md_indent_char_token()?;
+                        joiner.entry(&format_with(|f: &mut MarkdownFormatter| {
+                            f.context()
+                                .comments()
+                                .mark_suppression_checked(indent.syntax());
+                            format_removed(&token).fmt(f)
+                        }));
+                    }
+                    _ => {
+                        joiner.entry(&item.format());
+                    }
+                }
+            } else {
+                // Inside content boundaries: keep as-is.
+                match item {
+                    AnyMdInline::MdInlineItalic(italic) => {
+                        joiner.entry(&italic.format().with_options(FormatMdInlineItalicOptions {
+                            should_keep_fences: self.keep_fences_in_italics,
+                        }));
+                    }
+                    _ => {
+                        joiner.entry(&item.format());
+                    }
+                }
+            }
+        }
+
+        joiner.finish()
+    }
+
+    /// Normalizes all whitespace in textual nodes to `hard_space`.
+    ///
+    /// For example, `[  Foo   Bar  ]` becomes `[ Foo Bar ]`.
+    fn fmt_normalize_words(
+        &self,
+        node: &MdInlineItemList,
+        f: &mut MarkdownFormatter,
+    ) -> FormatResult<()> {
+        let mut joiner = f.join();
+
+        for item in node.iter() {
+            match item {
+                AnyMdInline::MdTextual(text) => {
+                    joiner.entry(&text.format().with_options(FormatMdTextualOptions {
+                        print_mode: TextPrintMode::Trim(TrimMode::NormalizeWords),
+                        ..Default::default()
+                    }));
+                }
+                AnyMdInline::MdInlineItalic(italic) => {
+                    joiner.entry(&italic.format().with_options(FormatMdInlineItalicOptions {
+                        should_keep_fences: self.keep_fences_in_italics,
+                    }));
+                }
+                _ => {
+                    joiner.entry(&item.format());
+                }
+            }
+        }
+
+        joiner.finish()
+    }
+
+    /// Clean mode: formats content verbatim, but removes the first
+    /// whitespace-only textual token.
+    fn fmt_clean(&self, node: &MdInlineItemList, f: &mut MarkdownFormatter) -> FormatResult<()> {
+        let mut joiner = f.join();
+        let mut handled_first = false;
+        for item in node.iter() {
+            match item {
+                AnyMdInline::MdTextual(text) if !handled_first => {
+                    handled_first = true;
+                    if text.is_empty_and_not_newline().unwrap_or(false)
+                        || text.is_newline().unwrap_or(false)
+                    {
+                        // First token is trailing whitespace/newline from the
+                        // info string line — remove it entirely.
+                        joiner.entry(&text.format().with_options(FormatMdTextualOptions {
+                            should_remove: true,
+                            ..Default::default()
+                        }));
+                    } else {
+                        let token = text.value_token()?;
+                        let token_text = token.text();
+                        if token_text.trim().is_empty() {
+                            // Mixed whitespace + newline (e.g. "    \n") — remove.
+                            joiner.entry(&text.format().with_options(FormatMdTextualOptions {
+                                should_remove: true,
+                                ..Default::default()
+                            }));
+                        } else {
+                            // First token has content — keep as-is.
+                            joiner.entry(&text.format());
+                        }
+                    }
+                }
+                AnyMdInline::MdTextual(text) if text.is_newline().unwrap_or(false) => {
+                    // After a newline, reset the skip counter for the next line.
+                    joiner.entry(&text.format());
+                }
+                AnyMdInline::MdHardLine(hd) => {
+                    joiner.entry(&hd.format().with_options(FormatMdFormatHardLineOptions {
+                        print_mode: TextPrintMode::Pristine,
+                    }));
+                }
+                AnyMdInline::MdInlineItalic(italic) => {
+                    joiner.entry(&italic.format().with_options(FormatMdInlineItalicOptions {
+                        should_keep_fences: self.keep_fences_in_italics,
+                    }));
+                }
+                node => {
+                    joiner.entry(&node.format());
+                }
+            }
+        }
+
+        joiner.finish()
+    }
+
+    /// Formats all items verbatim, preserving the original text exactly.
+    /// Hard lines are explicitly set to pristine mode to prevent
+    /// normalization (e.g. collapsing multiple trailing spaces to two).
+    fn fmt_pristine(&self, node: &MdInlineItemList, f: &mut MarkdownFormatter) -> FormatResult<()> {
+        let mut joiner = f.join();
+
+        for item in node.iter() {
+            match item {
+                AnyMdInline::MdHardLine(hd) => {
+                    joiner.entry(&hd.format().with_options(FormatMdFormatHardLineOptions {
+                        print_mode: TextPrintMode::Pristine,
+                    }));
+                }
+                AnyMdInline::MdInlineItalic(italic) => {
+                    joiner.entry(&italic.format().with_options(FormatMdInlineItalicOptions {
+                        should_keep_fences: self.keep_fences_in_italics,
+                    }));
+                }
+                node => {
+                    joiner.entry(&node.format());
+                }
+            }
+        }
+
+        joiner.finish()
+    }
+}
+
+#[derive(Debug, Default)]
+pub(crate) struct FormatMdFormatInlineItemListOptions {
+    /// When `true`, and there's a [MdInlineItalic], it instructions the formatter to keep the fences.
+    /// When `false`, it lets the node figure it out.
+    pub(crate) keep_fences_in_italics: bool,
+    pub(crate) print_mode: TextPrintMode,
+    /// When `true`, excess leading spaces on continuation lines are removed.
+    pub(crate) inside_list: bool,
+}
+
+impl FormatRuleWithOptions<MdInlineItemList> for FormatMdInlineItemList {
+    type Options = FormatMdFormatInlineItemListOptions;
+
+    fn with_options(mut self, options: Self::Options) -> Self {
+        self.print_mode = options.print_mode;
+        self.keep_fences_in_italics = options.keep_fences_in_italics;
+        self.inside_list = options.inside_list;
+        self
+    }
+}

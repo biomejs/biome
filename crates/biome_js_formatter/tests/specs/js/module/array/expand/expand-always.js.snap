@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/array/expand/expand-always.js
 ---
+
 # Input
 
 ```js
@@ -26,61 +27,20 @@ const e = [ "value1", "value2", ];
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
------
-
-```js
-const a = ["value1", "value2"];
-
-const b = ["value1", "value2"];
-
-const c = ["value1", "value2"];
-
-const d = ["value1", "value2"];
-
-const e = ["value1", "value2"];
+```json
+{
+  "$schema": "../../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "javascript": {
+    "formatter": {
+      "expand": "always"
+    }
+  }
+}
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Always
-Operator linebreak: After
------
+# Formatted
 
 ```js
 const a = [
@@ -107,4 +67,5 @@ const e = [
 	"value1",
 	"value2",
 ];
+
 ```

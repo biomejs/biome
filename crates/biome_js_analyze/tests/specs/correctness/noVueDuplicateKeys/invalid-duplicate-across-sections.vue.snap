@@ -1,0 +1,68 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-duplicate-across-sections.vue
+---
+# Input
+```vue
+<script>
+export default {
+    props: ['foo'],
+    computed: {
+        foo () {}
+    },
+    data () {
+        return {
+            foo: null
+        }
+    },
+    methods: {
+        foo () {}
+    }
+}
+</script>
+```
+
+# Diagnostics
+```
+invalid-duplicate-across-sections.vue:3:13 lint/correctness/noVueDuplicateKeys ━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate key foo found in Vue component.
+  
+    1 │ <script>
+    2 │ export default {
+  > 3 │     props: ['foo'],
+      │             ^^^^^
+    4 │     computed: {
+    5 │         foo () {}
+  
+  i Key foo is also defined here.
+  
+    3 │     props: ['foo'],
+    4 │     computed: {
+  > 5 │         foo () {}
+      │         ^^^
+    6 │     },
+    7 │     data () {
+  
+  i Key foo is also defined here.
+  
+     7 │     data () {
+     8 │         return {
+   > 9 │             foo: null
+       │             ^^^
+    10 │         }
+    11 │     },
+  
+  i Key foo is also defined here.
+  
+    11 │     },
+    12 │     methods: {
+  > 13 │         foo () {}
+       │         ^^^
+    14 │     }
+    15 │ }
+  
+  i Keys defined in different Vue component options (props, data, methods, computed) can conflict when accessed in the template. Rename the key to avoid conflicts.
+  
+
+```

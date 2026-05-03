@@ -1,7 +1,8 @@
 use biome_configuration::Configuration;
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
-use biome_css_parser::{CssParserOptions, parse_css};
+use biome_css_parser::{CssModulesKind, CssParserOptions, parse_css};
+use biome_css_syntax::{CssFileSource, EmbeddingKind};
 use biome_deserialize::json::deserialize_from_str;
 use biome_diagnostics::DiagnosticExt;
 use biome_diagnostics::display::PrintDiagnostic;
@@ -37,6 +38,10 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         .expect("Expected test to have a file name")
         .to_str()
         .expect("File name to be valid UTF8");
+    let extension = test_case_path
+        .extension()
+        .and_then(|ext| ext.to_str())
+        .unwrap_or_default();
 
     let content = fs::read_to_string(test_case_path)
         .expect("Expected test path to be a readable file in UTF8 encoding");
@@ -46,6 +51,8 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         // TODO: find a way to make it configurable
         .allow_metavariables();
 
+    let mut css_modules_enabled = false;
+    let mut css_modules_kind = CssModulesKind::Classic;
     let options_path = Utf8Path::new(test_directory).join("options.json");
 
     if options_path.exists() {
@@ -62,10 +69,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
             .unwrap();
 
         let settings = settings.languages.css.parser;
-
-        if settings.css_modules_enabled() {
-            options = options.allow_css_modules();
-        }
+        css_modules_enabled = settings.css_modules_enabled();
 
         if settings.allow_wrong_line_comments() {
             options = options.allow_wrong_line_comments();
@@ -73,6 +77,13 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 
         if settings.tailwind_directives_enabled() {
             options = options.allow_tailwind_directives();
+        }
+
+        if settings.css_modules_enabled()
+            && file_name.contains(".vue.")
+            && file_name.ends_with(".css")
+        {
+            css_modules_kind = CssModulesKind::Vue;
         }
 
         if !diagnostics.is_empty() {
@@ -84,7 +95,25 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         }
     }
 
-    let parsed = parse_css(&content, options);
+    let mut source_type = if extension == "scss" {
+        CssFileSource::scss()
+    } else {
+        CssFileSource::css()
+    };
+
+    if file_name.ends_with(".styled.css") {
+        source_type = source_type.with_embedding_kind(EmbeddingKind::Styled);
+    }
+
+    if css_modules_enabled {
+        if css_modules_kind == CssModulesKind::Vue {
+            options.css_modules = CssModulesKind::Vue;
+        } else {
+            options = options.allow_css_modules();
+        }
+    }
+
+    let parsed = parse_css(&content, source_type, options);
     validate_eof_token(parsed.syntax());
 
     let formatted_ast = format!("{:#?}", parsed.tree());

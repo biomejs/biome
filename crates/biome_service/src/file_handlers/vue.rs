@@ -5,7 +5,7 @@ use crate::file_handlers::{
     ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
     ParserCapabilities, javascript,
 };
-use crate::settings::Settings;
+use crate::settings::SettingsWithEditor;
 use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
 use biome_formatter::{Printed, SourceMapGeneration};
 use biome_fs::BiomePath;
@@ -24,7 +24,7 @@ pub struct VueFileHandler;
 
 // https://regex101.com/r/E4n4hh/6
 pub static VUE_FENCE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"(?ixs)(?<opening><script(?:\s.*?)?>)\r?\n(?<script>(?U:.*))</script>"#).unwrap()
+    Regex::new(r#"(?ixs)(?<opening><script(?:\s+(?:[^>"']*|"[^"]*"|'[^']*')*)?>)\r?\n(?<script>(?U:.*))</script>"#).unwrap()
 });
 
 impl VueFileHandler {
@@ -78,7 +78,12 @@ impl VueFileHandler {
                 Some(
                     JsFileSource::from(language)
                         .with_variant(variant)
-                        .with_embedding_kind(EmbeddingKind::Vue { setup }),
+                        .with_embedding_kind(EmbeddingKind::Vue {
+                            setup,
+                            is_source: true,
+                            event_handler: false,
+                            allow_statements: true,
+                        }),
                 )
             })
             .map_or(JsFileSource::js_module(), |fs| fs)
@@ -130,7 +135,7 @@ fn parse(
     _rome_path: &BiomePath,
     _file_source: DocumentFileSource,
     text: &str,
-    _settings: &Settings,
+    _settings: &SettingsWithEditor,
     cache: &mut NodeCache,
 ) -> ParseResult {
     let script = VueFileHandler::input(text);
@@ -151,7 +156,7 @@ fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
     let html_options = settings.format_options::<HtmlLanguage>(biome_path, document_file_source);
@@ -161,7 +166,7 @@ fn format(
         0
     };
     let tree = parse.syntax();
-    let formatted = format_node(options, &tree)?;
+    let formatted = format_node(options, &tree, false)?;
     match formatted.print_with_indent(indent_amount, SourceMapGeneration::Disabled) {
         Ok(printed) => Ok(printed),
         Err(error) => {
@@ -175,7 +180,7 @@ pub(crate) fn format_range(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
     range: TextRange,
 ) -> Result<Printed, WorkspaceError> {
     javascript::format_range(biome_path, document_file_source, parse, settings, range)
@@ -185,7 +190,7 @@ pub(crate) fn format_on_type(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
     offset: TextSize,
 ) -> Result<Printed, WorkspaceError> {
     javascript::format_on_type(biome_path, document_file_source, parse, settings, offset)
@@ -199,6 +204,50 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     javascript::code_actions(params)
 }
 
-fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
+fn fix_all(mut params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
+    let html_options = params
+        .settings
+        .format_options::<HtmlLanguage>(params.biome_path, &params.document_file_source);
+    if *html_options.indent_script_and_style() {
+        params.embeds_initial_indent = 1;
+    }
     javascript::fix_all(params)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::VueFileHandler;
+
+    #[test]
+    fn vue_file_source_simple_ts() {
+        let src = "<script lang=\"ts\">\nimport type { Foo } from \"bar\";\n</script>";
+        assert!(VueFileHandler::file_source(src).is_typescript());
+    }
+
+    #[test]
+    fn vue_file_source_simple_js() {
+        let src = "<script>\nimport { foo } from \"bar\";\n</script>";
+        assert!(!VueFileHandler::file_source(src).is_typescript());
+    }
+
+    #[test]
+    fn vue_file_source_setup_ts() {
+        let src = "<script setup lang=\"ts\">\nimport type { Foo } from \"bar\";\n</script>";
+        assert!(VueFileHandler::file_source(src).is_typescript());
+    }
+
+    #[test]
+    fn vue_file_source_attr_with_gt_in_quotes() {
+        let src =
+            "<script lang=\"ts\" data-info=\"a>b\">\nimport type { Foo } from \"bar\";\n</script>";
+        assert!(VueFileHandler::file_source(src).is_typescript());
+    }
+
+    #[test]
+    fn vue_input_with_gt_in_attr() {
+        let src =
+            "<script lang=\"ts\" data-info=\"a>b\">\nimport type { Foo } from \"bar\";\n</script>";
+        let input = VueFileHandler::input(src);
+        assert_eq!(input, "import type { Foo } from \"bar\";\n");
+    }
 }

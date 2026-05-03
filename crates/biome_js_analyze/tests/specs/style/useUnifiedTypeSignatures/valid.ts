@@ -147,3 +147,7 @@ interface I4 {
 // Cannot make "this" optional.
 declare function f10(): void;
 declare function f10(this: number): void;
+
+// cannot merge 2 different type parameters
+function fizzbuzz([a]: SomeType<string>, { c }: OtherType<number>): void;
+function fizzbuzz([a]: SomeType<number>, { c }: OtherType<string>): void;

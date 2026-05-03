@@ -1,0 +1,32 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "files": {
+    "includes": ["**/*.graphql"]
+  },
+  "graphql": {
+    "formatter": {
+      "trailingNewline": false
+    }
+  }
+}
+```
+
+## `test.graphql`
+
+```graphql
+type Query {
+	hello: String
+}
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

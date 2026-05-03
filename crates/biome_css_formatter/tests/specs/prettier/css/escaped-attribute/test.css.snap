@@ -1,0 +1,97 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: css/escaped-attribute/test.css
+---
+
+# Input
+
+```css
+div span[foo="bar short\
+short"] {
+  color: red;
+}
+
+/* Should not break before `span`, since it doesn't reach printWidth */
+div span[foo="bar long long long\
+long long long long long long long long long long long long"] {
+  color: red;
+}
+
+div {
+  & span[foo="bar short\
+short"] {
+    color: red;
+  }
+
+  /* Should not break before `span`, since it doesn't reach printWidth */
+  & span[foo="bar long long long\
+long long long long long long long long long long long long"] {
+    color: red;
+  }
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,17 +1,19 @@
+-div span[foo="bar short\
++div
++  span[foo="bar short\
+ short"] {
+   color: red;
+ }
+ 
+ /* Should not break before `span`, since it doesn't reach printWidth */
+ div
+-  span[foo="bar long long long\
++span[foo="bar long long long\
+ long long long long long long long long long long long long"] {
+   color: red;
+ }
+ 
+ div {
+-  & span[foo="bar short\
++  &
++    span[foo="bar short\
+ short"] {
+     color: red;
+   }
+```
+
+# Output
+
+```css
+div
+  span[foo="bar short\
+short"] {
+  color: red;
+}
+
+/* Should not break before `span`, since it doesn't reach printWidth */
+div
+span[foo="bar long long long\
+long long long long long long long long long long long long"] {
+  color: red;
+}
+
+div {
+  &
+    span[foo="bar short\
+short"] {
+    color: red;
+  }
+
+  /* Should not break before `span`, since it doesn't reach printWidth */
+  &
+    span[foo="bar long long long\
+long long long long long long long long long long long long"] {
+    color: red;
+  }
+}
+```

@@ -1,0 +1,71 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "linter": { "enabled": true } }
+```
+
+## `.eslintrc`
+
+```eslintrc
+{
+        "rules": {
+            "eol-last": "error",
+            "indent": ["error", 2],
+        },
+    }
+```
+
+# Emitted Messages
+
+```block
+biome.json migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1   │ - {·"linter":·{·"enabled":·true·}·}
+      1 │ + {·"linter":·{·"enabled":·true,·"rules":·{·"recommended":·false·}·}·}
+      2 │ + 
+  
+
+```
+
+```block
+migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 2 ESLint rules found
+    - 2 are obsolete because of Biome's formatter
+    - 0 can be migrated to Biome's rules (run with --write to migrate)
+    - 100% (2) of your ESLint rules are fully covered by Biome
+      - 0% (0) via direct migration to Biome rules
+  
+  
+  i Unsupported rules (0 incompatible with formatter, 1 made obsolete by the formatter, 1 covered by a formatter option, 0 not yet implemented, 0 unknown source):
+  
+  i These rules enforce behavior completely covered by the formatter (so you don't lose the functionality):
+  
+  - eol-last
+  
+  i These rules are covered by formatter options, but they require manual migration:
+  
+  - indent - Covered by Biome's indentWidth formatter option.
+  
+
+```
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - biome.json: configuration needs migration.
+  
+  i Use --write to apply the changes.
+  
+  $ biome migrate --write
+  
+
+```

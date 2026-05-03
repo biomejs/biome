@@ -1,4 +1,6 @@
-use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleFilter};
+use biome_analyze::{
+    ActionFilter, AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleFilter,
+};
 use biome_css_parser::{CssParserOptions, parse_css};
 use biome_css_syntax::{CssFileSource, TextRange};
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, print_diagnostic_to_string};
@@ -15,7 +17,7 @@ fn quick_test() {
 d { font: 1em SF Mono, Liberation Mono, sans-serif; }
 "#;
 
-    let parsed = parse_css(SOURCE, CssParserOptions::default());
+    let parsed = parse_css(SOURCE, CssFileSource::css(), CssParserOptions::default());
 
     let mut error_ranges: Vec<TextRange> = Vec::new();
     let options = AnalyzerOptions::default();
@@ -45,7 +47,7 @@ d { font: 1em SF Mono, Liberation Mono, sans-serif; }
                 eprintln!("{text}");
             }
 
-            for action in signal.actions() {
+            for action in signal.actions(ActionFilter::all()) {
                 let new_code = action.mutation.commit();
                 eprintln!("{new_code}");
             }

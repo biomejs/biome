@@ -1,0 +1,96 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+Crossing: **a *b** c*
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..10 "Crossing: " [] [],
+                },
+                MdInlineItalic {
+                    l_fence: STAR@10..11 "*" [] [],
+                    content: MdInlineItemList [
+                        MdInlineItalic {
+                            l_fence: STAR@11..12 "*" [] [],
+                            content: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@12..14 "a " [] [],
+                                },
+                                MdInlineItalic {
+                                    l_fence: STAR@14..15 "*" [] [],
+                                    content: MdInlineItemList [
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@15..16 "b" [] [],
+                                        },
+                                    ],
+                                    r_fence: STAR@16..17 "*" [] [],
+                                },
+                            ],
+                            r_fence: STAR@17..18 "*" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@18..20 " c" [] [],
+                        },
+                    ],
+                    r_fence: STAR@20..21 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@21..22 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+    ],
+    eof_token: EOF@22..22 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..22
+  0: (empty)
+  1: MD_BLOCK_LIST@0..22
+    0: MD_PARAGRAPH@0..22
+      0: MD_INLINE_ITEM_LIST@0..22
+        0: MD_TEXTUAL@0..10
+          0: MD_TEXTUAL_LITERAL@0..10 "Crossing: " [] []
+        1: MD_INLINE_ITALIC@10..21
+          0: STAR@10..11 "*" [] []
+          1: MD_INLINE_ITEM_LIST@11..20
+            0: MD_INLINE_ITALIC@11..18
+              0: STAR@11..12 "*" [] []
+              1: MD_INLINE_ITEM_LIST@12..17
+                0: MD_TEXTUAL@12..14
+                  0: MD_TEXTUAL_LITERAL@12..14 "a " [] []
+                1: MD_INLINE_ITALIC@14..17
+                  0: STAR@14..15 "*" [] []
+                  1: MD_INLINE_ITEM_LIST@15..16
+                    0: MD_TEXTUAL@15..16
+                      0: MD_TEXTUAL_LITERAL@15..16 "b" [] []
+                  2: STAR@16..17 "*" [] []
+              2: STAR@17..18 "*" [] []
+            1: MD_TEXTUAL@18..20
+              0: MD_TEXTUAL_LITERAL@18..20 " c" [] []
+          2: STAR@20..21 "*" [] []
+        2: MD_TEXTUAL@21..22
+          0: MD_TEXTUAL_LITERAL@21..22 "\n" [] []
+      1: (empty)
+  2: EOF@22..22 "" [] []
+
+```

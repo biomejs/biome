@@ -37,19 +37,7 @@ some-element:is(::before, ::after) {
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
------
+# Formatted
 
 ```css
 :is(ol, ul, menu:unsupported) :is(ol, ul) {
@@ -80,6 +68,5 @@ h1 {
 some-element:is(::before, ::after) {
 	display: block;
 }
+
 ```
-
-

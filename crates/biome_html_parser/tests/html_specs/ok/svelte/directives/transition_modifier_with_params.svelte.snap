@@ -1,0 +1,208 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div transition:fade|global={{ duration: 200 }}>Global with params</div>
+<p transition:fly|local={{ y: 200 }}>Local with params</p>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteTransitionDirective {
+                        transition_token: TRANSITION_KW@5..15 "transition" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@15..16 ":" [] [],
+                            property: SvelteName {
+                                ident_token: IDENT@16..20 "fade" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [
+                                SvelteDirectiveModifier {
+                                    bitwise_or_token: PIPE@20..21 "|" [] [],
+                                    name: SvelteName {
+                                        ident_token: IDENT@21..27 "global" [] [],
+                                    },
+                                },
+                            ],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@27..28 "=" [] [],
+                                value: HtmlAttributeSingleTextExpression {
+                                    l_curly_token: L_CURLY@28..29 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@29..46 "{ duration: 200 }" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@46..47 "}" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@47..48 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@48..66 "Global with params" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@66..67 "<" [] [],
+                slash_token: SLASH@67..68 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@68..71 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@71..72 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@72..74 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@74..76 "p" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteTransitionDirective {
+                        transition_token: TRANSITION_KW@76..86 "transition" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@86..87 ":" [] [],
+                            property: SvelteName {
+                                ident_token: IDENT@87..90 "fly" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [
+                                SvelteDirectiveModifier {
+                                    bitwise_or_token: PIPE@90..91 "|" [] [],
+                                    name: SvelteName {
+                                        ident_token: IDENT@91..96 "local" [] [],
+                                    },
+                                },
+                            ],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@96..97 "=" [] [],
+                                value: HtmlAttributeSingleTextExpression {
+                                    l_curly_token: L_CURLY@97..98 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@98..108 "{ y: 200 }" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@108..109 "}" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@109..110 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@110..127 "Local with params" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@127..128 "<" [] [],
+                slash_token: SLASH@128..129 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@129..130 "p" [] [],
+                },
+                r_angle_token: R_ANGLE@130..131 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@131..132 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..132
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..131
+    0: HTML_ELEMENT@0..72
+      0: HTML_OPENING_ELEMENT@0..48
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..47
+          0: SVELTE_TRANSITION_DIRECTIVE@5..47
+            0: TRANSITION_KW@5..15 "transition" [] []
+            1: SVELTE_DIRECTIVE_VALUE@15..47
+              0: COLON@15..16 ":" [] []
+              1: SVELTE_NAME@16..20
+                0: IDENT@16..20 "fade" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@20..27
+                0: SVELTE_DIRECTIVE_MODIFIER@20..27
+                  0: PIPE@20..21 "|" [] []
+                  1: SVELTE_NAME@21..27
+                    0: IDENT@21..27 "global" [] []
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@27..47
+                0: EQ@27..28 "=" [] []
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@28..47
+                  0: L_CURLY@28..29 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@29..46
+                    0: HTML_LITERAL@29..46 "{ duration: 200 }" [] []
+                  2: R_CURLY@46..47 "}" [] []
+        3: R_ANGLE@47..48 ">" [] []
+      1: HTML_ELEMENT_LIST@48..66
+        0: HTML_CONTENT@48..66
+          0: HTML_LITERAL@48..66 "Global with params" [] []
+      2: HTML_CLOSING_ELEMENT@66..72
+        0: L_ANGLE@66..67 "<" [] []
+        1: SLASH@67..68 "/" [] []
+        2: HTML_TAG_NAME@68..71
+          0: HTML_LITERAL@68..71 "div" [] []
+        3: R_ANGLE@71..72 ">" [] []
+    1: HTML_ELEMENT@72..131
+      0: HTML_OPENING_ELEMENT@72..110
+        0: L_ANGLE@72..74 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@74..76
+          0: HTML_LITERAL@74..76 "p" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@76..109
+          0: SVELTE_TRANSITION_DIRECTIVE@76..109
+            0: TRANSITION_KW@76..86 "transition" [] []
+            1: SVELTE_DIRECTIVE_VALUE@86..109
+              0: COLON@86..87 ":" [] []
+              1: SVELTE_NAME@87..90
+                0: IDENT@87..90 "fly" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@90..96
+                0: SVELTE_DIRECTIVE_MODIFIER@90..96
+                  0: PIPE@90..91 "|" [] []
+                  1: SVELTE_NAME@91..96
+                    0: IDENT@91..96 "local" [] []
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@96..109
+                0: EQ@96..97 "=" [] []
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@97..109
+                  0: L_CURLY@97..98 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@98..108
+                    0: HTML_LITERAL@98..108 "{ y: 200 }" [] []
+                  2: R_CURLY@108..109 "}" [] []
+        3: R_ANGLE@109..110 ">" [] []
+      1: HTML_ELEMENT_LIST@110..127
+        0: HTML_CONTENT@110..127
+          0: HTML_LITERAL@110..127 "Local with params" [] []
+      2: HTML_CLOSING_ELEMENT@127..131
+        0: L_ANGLE@127..128 "<" [] []
+        1: SLASH@128..129 "/" [] []
+        2: HTML_TAG_NAME@129..130
+          0: HTML_LITERAL@129..130 "p" [] []
+        3: R_ANGLE@130..131 ">" [] []
+  4: EOF@131..132 "" [Newline("\n")] []
+
+```

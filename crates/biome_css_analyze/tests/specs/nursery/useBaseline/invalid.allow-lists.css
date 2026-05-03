@@ -1,0 +1,17 @@
+/* should generate diagnostics */
+
+/* allowProperties: only accent-color is allowed, backdrop-filter is still flagged */
+a { accent-color: red; backdrop-filter: blur(10px); }
+
+/* allowSelectors: only "has" is allowed, fullscreen is still flagged */
+h1:has(+ h2) { margin: 0; }
+h1:fullscreen { color: red; }
+
+/* allowFunctions: only color-mix is allowed, abs is still flagged */
+a { width: abs(20% - 100px); }
+
+/* allowMediaConditions: only scripting is allowed, inverted-colors is still flagged */
+@media (inverted-colors: inverted) { a { color: red; } }
+
+/* allowPropertyValues: only clip-path:fill-box is allowed, stroke-box is still flagged */
+a { clip-path: stroke-box; }

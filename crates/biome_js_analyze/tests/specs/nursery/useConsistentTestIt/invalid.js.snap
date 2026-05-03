@@ -1,0 +1,364 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+// Default options: function="it", withinDescribe="it"
+// test() at top level should be renamed to it()
+
+test("foo", () => {});
+test.skip("foo", () => {});
+test.only("foo", () => {});
+test.concurrent("foo", () => {});
+test.each([])(foo, () => {});
+test.for([])("foo", () => {});
+xtest("foo", () => {});
+fit("foo", () => {});
+
+// Inside describe, should also use it() (default withinDescribe="it")
+describe("suite", () => {
+  test("foo", () => {});
+  test.skip("foo", () => {});
+  test.only("foo", () => {});
+  fit("foo", () => {});
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:5:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function test is inconsistent with the configured preferred function it.
+  
+    3 │ // test() at top level should be renamed to it()
+    4 │ 
+  > 5 │ test("foo", () => {});
+      │ ^^^^
+    6 │ test.skip("foo", () => {});
+    7 │ test.only("foo", () => {});
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use it instead.
+  
+     3  3 │   // test() at top level should be renamed to it()
+     4  4 │   
+     5    │ - test("foo",·()·=>·{});
+        5 │ + it("foo",·()·=>·{});
+     6  6 │   test.skip("foo", () => {});
+     7  7 │   test.only("foo", () => {});
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function test is inconsistent with the configured preferred function it.
+  
+    5 │ test("foo", () => {});
+  > 6 │ test.skip("foo", () => {});
+      │ ^^^^
+    7 │ test.only("foo", () => {});
+    8 │ test.concurrent("foo", () => {});
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use it instead.
+  
+     4  4 │   
+     5  5 │   test("foo", () => {});
+     6    │ - test.skip("foo",·()·=>·{});
+        6 │ + it.skip("foo",·()·=>·{});
+     7  7 │   test.only("foo", () => {});
+     8  8 │   test.concurrent("foo", () => {});
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function test is inconsistent with the configured preferred function it.
+  
+    5 │ test("foo", () => {});
+    6 │ test.skip("foo", () => {});
+  > 7 │ test.only("foo", () => {});
+      │ ^^^^
+    8 │ test.concurrent("foo", () => {});
+    9 │ test.each([])(foo, () => {});
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use it instead.
+  
+     5  5 │   test("foo", () => {});
+     6  6 │   test.skip("foo", () => {});
+     7    │ - test.only("foo",·()·=>·{});
+        7 │ + it.only("foo",·()·=>·{});
+     8  8 │   test.concurrent("foo", () => {});
+     9  9 │   test.each([])(foo, () => {});
+  
+
+```
+
+```
+invalid.js:8:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function test is inconsistent with the configured preferred function it.
+  
+     6 │ test.skip("foo", () => {});
+     7 │ test.only("foo", () => {});
+   > 8 │ test.concurrent("foo", () => {});
+       │ ^^^^
+     9 │ test.each([])(foo, () => {});
+    10 │ test.for([])("foo", () => {});
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use it instead.
+  
+     6  6 │   test.skip("foo", () => {});
+     7  7 │   test.only("foo", () => {});
+     8    │ - test.concurrent("foo",·()·=>·{});
+        8 │ + it.concurrent("foo",·()·=>·{});
+     9  9 │   test.each([])(foo, () => {});
+    10 10 │   test.for([])("foo", () => {});
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function test is inconsistent with the configured preferred function it.
+  
+     7 │ test.only("foo", () => {});
+     8 │ test.concurrent("foo", () => {});
+   > 9 │ test.each([])(foo, () => {});
+       │ ^^^^
+    10 │ test.for([])("foo", () => {});
+    11 │ xtest("foo", () => {});
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use it instead.
+  
+     7  7 │   test.only("foo", () => {});
+     8  8 │   test.concurrent("foo", () => {});
+     9    │ - test.each([])(foo,·()·=>·{});
+        9 │ + it.each([])(foo,·()·=>·{});
+    10 10 │   test.for([])("foo", () => {});
+    11 11 │   xtest("foo", () => {});
+  
+
+```
+
+```
+invalid.js:10:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function test is inconsistent with the configured preferred function it.
+  
+     8 │ test.concurrent("foo", () => {});
+     9 │ test.each([])(foo, () => {});
+  > 10 │ test.for([])("foo", () => {});
+       │ ^^^^
+    11 │ xtest("foo", () => {});
+    12 │ fit("foo", () => {});
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use it instead.
+  
+     8  8 │   test.concurrent("foo", () => {});
+     9  9 │   test.each([])(foo, () => {});
+    10    │ - test.for([])("foo",·()·=>·{});
+       10 │ + it.for([])("foo",·()·=>·{});
+    11 11 │   xtest("foo", () => {});
+    12 12 │   fit("foo", () => {});
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function xtest is inconsistent with the configured preferred function xit.
+  
+     9 │ test.each([])(foo, () => {});
+    10 │ test.for([])("foo", () => {});
+  > 11 │ xtest("foo", () => {});
+       │ ^^^^^
+    12 │ fit("foo", () => {});
+    13 │ 
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use xit instead.
+  
+     9  9 │   test.each([])(foo, () => {});
+    10 10 │   test.for([])("foo", () => {});
+    11    │ - xtest("foo",·()·=>·{});
+       11 │ + xit("foo",·()·=>·{});
+    12 12 │   fit("foo", () => {});
+    13 13 │   
+  
+
+```
+
+```
+invalid.js:12:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function fit is inconsistent with the configured preferred function it.only.
+  
+    10 │ test.for([])("foo", () => {});
+    11 │ xtest("foo", () => {});
+  > 12 │ fit("foo", () => {});
+       │ ^^^
+    13 │ 
+    14 │ // Inside describe, should also use it() (default withinDescribe="it")
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use it.only instead.
+  
+    10 10 │   test.for([])("foo", () => {});
+    11 11 │   xtest("foo", () => {});
+    12    │ - fit("foo",·()·=>·{});
+       12 │ + it.only("foo",·()·=>·{});
+    13 13 │   
+    14 14 │   // Inside describe, should also use it() (default withinDescribe="it")
+  
+
+```
+
+```
+invalid.js:16:3 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function test is inconsistent with the configured preferred function it.
+  
+    14 │ // Inside describe, should also use it() (default withinDescribe="it")
+    15 │ describe("suite", () => {
+  > 16 │   test("foo", () => {});
+       │   ^^^^
+    17 │   test.skip("foo", () => {});
+    18 │   test.only("foo", () => {});
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use it instead.
+  
+    14 14 │   // Inside describe, should also use it() (default withinDescribe="it")
+    15 15 │   describe("suite", () => {
+    16    │ - ··test("foo",·()·=>·{});
+       16 │ + ··it("foo",·()·=>·{});
+    17 17 │     test.skip("foo", () => {});
+    18 18 │     test.only("foo", () => {});
+  
+
+```
+
+```
+invalid.js:17:3 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function test is inconsistent with the configured preferred function it.
+  
+    15 │ describe("suite", () => {
+    16 │   test("foo", () => {});
+  > 17 │   test.skip("foo", () => {});
+       │   ^^^^
+    18 │   test.only("foo", () => {});
+    19 │   fit("foo", () => {});
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use it instead.
+  
+    15 15 │   describe("suite", () => {
+    16 16 │     test("foo", () => {});
+    17    │ - ··test.skip("foo",·()·=>·{});
+       17 │ + ··it.skip("foo",·()·=>·{});
+    18 18 │     test.only("foo", () => {});
+    19 19 │     fit("foo", () => {});
+  
+
+```
+
+```
+invalid.js:18:3 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function test is inconsistent with the configured preferred function it.
+  
+    16 │   test("foo", () => {});
+    17 │   test.skip("foo", () => {});
+  > 18 │   test.only("foo", () => {});
+       │   ^^^^
+    19 │   fit("foo", () => {});
+    20 │ });
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use it instead.
+  
+    16 16 │     test("foo", () => {});
+    17 17 │     test.skip("foo", () => {});
+    18    │ - ··test.only("foo",·()·=>·{});
+       18 │ + ··it.only("foo",·()·=>·{});
+    19 19 │     fit("foo", () => {});
+    20 20 │   });
+  
+
+```
+
+```
+invalid.js:19:3 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function fit is inconsistent with the configured preferred function it.only.
+  
+    17 │   test.skip("foo", () => {});
+    18 │   test.only("foo", () => {});
+  > 19 │   fit("foo", () => {});
+       │   ^^^
+    20 │ });
+    21 │ 
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use it.only instead.
+  
+    17 17 │     test.skip("foo", () => {});
+    18 18 │     test.only("foo", () => {});
+    19    │ - ··fit("foo",·()·=>·{});
+       19 │ + ··it.only("foo",·()·=>·{});
+    20 20 │   });
+    21 21 │   
+  
+
+```

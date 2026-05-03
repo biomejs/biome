@@ -1,0 +1,5 @@
+.bad {
+  color: mod.fn(1, 2);
+  background-image: url("a.png" mod.fn(test));
+  value: module.$fn();
+}

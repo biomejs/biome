@@ -1,0 +1,90 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `workspace/biome.json`
+
+```json
+{
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true,
+    "root": ".."
+  }
+}
+```
+
+## `.gitignore`
+
+```gitignore
+**/file2.js
+
+```
+
+## `workspace/file1.js`
+
+```js
+  statement(  )  
+```
+
+## `workspace/file2.js`
+
+```js
+  statement(  )  
+```
+
+# Termination Message
+
+```block
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+biome.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1 1 │   {
+    2   │ - ············"vcs":·{
+    3   │ - ················"enabled":·true,
+    4   │ - ················"clientKind":·"git",
+    5   │ - ················"useIgnoreFile":·true,
+    6   │ - ················"root":·".."
+    7   │ - ············}
+    8   │ - ········}
+      2 │ + → "vcs":·{
+      3 │ + → → "enabled":·true,
+      4 │ + → → "clientKind":·"git",
+      5 │ + → → "useIgnoreFile":·true,
+      6 │ + → → "root":·".."
+      7 │ + → }
+      8 │ + }
+      9 │ + 
+  
+
+```
+
+```block
+file1.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1   │ - ··statement(··)··
+      1 │ + statement();
+      2 │ + 
+  
+
+```
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+Found 2 errors.
+```

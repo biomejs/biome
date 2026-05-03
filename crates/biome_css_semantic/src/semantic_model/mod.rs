@@ -2,14 +2,14 @@ pub mod builder;
 pub mod model;
 pub mod specificity;
 
-use biome_css_syntax::CssRoot;
+use biome_css_syntax::AnyCssRoot;
 use biome_rowan::AstNode;
 use builder::SemanticModelBuilder;
 use model::SemanticModel;
 
 use crate::events::SemanticEventExtractor;
 
-pub fn semantic_model(root: &CssRoot) -> SemanticModel {
+pub fn semantic_model(root: &AnyCssRoot) -> SemanticModel {
     let mut extractor = SemanticEventExtractor::default();
     let mut builder = SemanticModelBuilder::new(root.clone());
 
@@ -32,8 +32,9 @@ pub fn semantic_model(root: &CssRoot) -> SemanticModel {
 
 #[cfg(test)]
 mod tests {
-    use biome_css_parser::CssParserOptions;
-    use biome_css_parser::parse_css;
+    use biome_css_parser::{CssParserOptions, parse_css};
+    use biome_css_syntax::CssFileSource;
+    use biome_rowan::TextRange;
 
     #[test]
     fn test_simple_ruleset() {
@@ -42,6 +43,7 @@ mod tests {
   font-family: verdana;
   font-size: 20px;
 }"#,
+            CssFileSource::css(),
             CssParserOptions::default(),
         );
 
@@ -64,6 +66,7 @@ mod tests {
     color: red;
   }
 }"#,
+            CssFileSource::css(),
             CssParserOptions::default(),
         );
 
@@ -91,6 +94,7 @@ mod tests {
             color: orange;
         }
 }"#,
+            CssFileSource::css(),
             CssParserOptions::default(),
         );
 
@@ -118,6 +122,7 @@ mod tests {
             color: orange;
         }
 }"#,
+            CssFileSource::css(),
             CssParserOptions::default(),
         );
 
@@ -151,6 +156,7 @@ mod tests {
   --custom-size: 20px;
 }
   "#,
+            CssFileSource::css(),
             CssParserOptions::default(),
         );
 
@@ -171,7 +177,11 @@ mod tests {
 
     #[test]
     fn test_empty_at_property() {
-        let parse = parse_css(r#"@property --item-size {}"#, CssParserOptions::default());
+        let parse = parse_css(
+            r#"@property --item-size {}"#,
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
 
         let root = parse.tree();
         let model = super::semantic_model(&root);
@@ -184,15 +194,70 @@ mod tests {
         assert!(item_size);
     }
 
+    #[test]
+    fn test_get_rule_by_range() {
+        let parse = parse_css(
+            r#"p {color: red; font-size: 12px;}"#,
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
+        let root = parse.tree();
+        let model = super::semantic_model(&root);
+
+        // range of the declaration 'red'
+        let range = TextRange::new(10.into(), 13.into());
+        let rule = model.get_rule_by_range(range).unwrap();
+
+        assert_eq!(rule.selectors.len(), 1);
+        assert_eq!(rule.declarations.len(), 2);
+        assert_eq!(rule.selectors[0].resolved().to_string(), "p");
+
+        let range = TextRange::new(0.into(), 1.into());
+        let rule = model.get_rule_by_range(range).unwrap();
+
+        assert_eq!(rule.selectors.len(), 1);
+        assert_eq!(rule.declarations.len(), 2);
+        assert_eq!(rule.selectors[0].resolved().to_string(), "p");
+    }
+
+    #[test]
+    fn test_nested_get_rule_by_range() {
+        let parse = parse_css(
+            r#"p { --foo: red; font-size: 12px;
+            .child { color: var(--foo)}
+            }"#,
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
+        let root = parse.tree();
+        let model = super::semantic_model(&root);
+
+        // range of the declaration 'blue' in '.child'
+        let range = TextRange::new(60.into(), 64.into());
+        let rule = model.get_rule_by_range(range).unwrap();
+
+        assert_eq!(rule.selectors.len(), 1);
+        assert_eq!(rule.declarations.len(), 1);
+        assert_eq!(rule.selectors[0].resolved().to_string(), "p .child");
+
+        let parent = model.get_rule_by_id(&rule.parent_id.unwrap()).unwrap();
+        assert_eq!(parent.selectors.len(), 1);
+        assert_eq!(parent.declarations.len(), 2);
+        assert_eq!(parent.selectors[0].resolved().to_string(), "p");
+    }
+
     #[ignore]
     #[test]
     fn quick_test() {
         let parse = parse_css(
-            r#"@property --item-size {
-  syntax: "<percentage>";
-  inherits: true;
-  initial-value: 40%;
+            r#".parent {
+  color: blue;
+
+  .child {
+    color: red;
+  }
 }"#,
+            CssFileSource::css(),
             CssParserOptions::default(),
         );
 
@@ -207,9 +272,10 @@ mod tests {
 mod specificity_tests {
     use crate::model::{SemanticModel, Specificity};
     use biome_css_parser::{CssParserOptions, parse_css};
+    use biome_css_syntax::CssFileSource;
 
     fn to_semantic_model(source: &str) -> SemanticModel {
-        let parse = parse_css(source, CssParserOptions::default());
+        let parse = parse_css(source, CssFileSource::css(), CssParserOptions::default());
         let root = parse.tree();
         super::semantic_model(&root)
     }
@@ -371,13 +437,19 @@ mod specificity_tests {
 
         let specificity = model.specificity_of_rules().collect::<Vec<_>>();
 
-        assert_eq!(specificity.len(), 3);
+        // The child selector `& > p` is expanded to 2 selectors (one for each parent)
+        assert_eq!(specificity.len(), 4);
 
         let mut specificity = specificity.into_iter();
 
         assert_eq!(specificity.next().unwrap(), Specificity(0, 0, 1), "div");
         assert_eq!(specificity.next().unwrap(), Specificity(0, 0, 1), "span");
-        assert_eq!(specificity.next().unwrap(), Specificity(0, 0, 2), "& > p");
+        assert_eq!(specificity.next().unwrap(), Specificity(0, 0, 2), "div > p");
+        assert_eq!(
+            specificity.next().unwrap(),
+            Specificity(0, 0, 2),
+            "span > p"
+        );
     }
 
     #[test]

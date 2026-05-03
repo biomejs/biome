@@ -1,5 +1,5 @@
 ---
-source: crates/biome_service/tests/spec_tests.rs
+source: crates/biome_configuration/tests/spec_tests.rs
 expression: incorrect_value_javascript.json
 ---
 incorrect_value_javascript.json:4:18 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -12,6 +12,3 @@ incorrect_value_javascript.json:4:18 deserialize ━━━━━━━━━━�
       │ 			              ^^
     5 │ 		}
     6 │ 	]
-  
-
-

@@ -47,7 +47,11 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
 ```block
 migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i 100% (4/4) of the rules can be migrated.
+  i 4 ESLint rules found
+    - 4 can be migrated to Biome's rules (run with --write to migrate)
+    - 100% (4) of your ESLint rules are fully covered by Biome
+      - 100% (4) via direct migration to Biome rules
+  
   
 
 ```

@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/comma_separated_values.css
 ---
+
 # Input
 
 ```css
@@ -16,19 +17,7 @@ info: css/comma_separated_values.css
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
------
+# Formatted
 
 ```css
 .font-heading {
@@ -39,4 +28,5 @@ Quote style: Double Quotes
 		var(--heading-salt), var(--heading-ss06), var(--heading-ss11),
 		var(--heading-cv09), var(--heading-liga), var(--heading-calt);
 }
+
 ```

@@ -21,6 +21,9 @@ pub struct AnalyzerDiagnostic {
     kind: DiagnosticKind,
     /// Series of code suggestions offered by rule code actions
     code_suggestion_list: Vec<CodeSuggestionAdvice<MarkupBuf>>,
+    /// Offset to apply to the diagnostic location and advice ranges
+    /// This is used for embedded snippets (e.g., Vue files) to adjust positions relative to the parent document
+    offset: Option<TextSize>,
 }
 
 impl From<RuleDiagnostic> for AnalyzerDiagnostic {
@@ -28,6 +31,7 @@ impl From<RuleDiagnostic> for AnalyzerDiagnostic {
         Self {
             kind: DiagnosticKind::Rule(Box::new(rule_diagnostic)),
             code_suggestion_list: vec![],
+            offset: None,
         }
     }
 }
@@ -78,18 +82,59 @@ impl Diagnostic for AnalyzerDiagnostic {
     }
 
     fn location(&self) -> Location<'_> {
-        match &self.kind {
+        let mut location = match &self.kind {
             DiagnosticKind::Rule(rule_diagnostic) => {
                 Location::builder().span(&rule_diagnostic.span).build()
             }
             DiagnosticKind::Raw(error) => error.location(),
+        };
+
+        // Apply the offset to the location span if one is set
+        if let Some(offset) = self.offset
+            && location.span.is_some()
+        {
+            location.span = location.span.map(|span| span.add(offset));
         }
+
+        location
     }
 
     fn advices(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
         match &self.kind {
             DiagnosticKind::Rule(rule_diagnostic) => rule_diagnostic.record(visitor)?,
-            DiagnosticKind::Raw(error) => error.advices(visitor)?,
+            DiagnosticKind::Raw(error) => {
+                // If we have an offset, wrap the visitor to apply it to frame locations
+                if let Some(offset) = self.offset {
+                    struct OffsetVisitor<'a> {
+                        inner: &'a mut dyn Visit,
+                        offset: TextSize,
+                    }
+
+                    impl<'a> Visit for OffsetVisitor<'a> {
+                        fn record_frame(&mut self, location: Location<'_>) -> std::io::Result<()> {
+                            if let Some(span) = location.span {
+                                let new_span = span.add(self.offset);
+                                let offset_location = Location::builder()
+                                    .span(&new_span)
+                                    .resource(&location.resource)
+                                    .source_code(&location.source_code)
+                                    .build();
+                                self.inner.record_frame(offset_location)
+                            } else {
+                                self.inner.record_frame(location)
+                            }
+                        }
+                    }
+
+                    let mut offset_visitor = OffsetVisitor {
+                        inner: visitor,
+                        offset,
+                    };
+                    error.advices(&mut offset_visitor)?;
+                } else {
+                    error.advices(visitor)?;
+                }
+            }
         }
 
         // finally, we print possible code suggestions on how to fix the issue
@@ -107,6 +152,7 @@ impl AnalyzerDiagnostic {
         Self {
             kind: DiagnosticKind::Raw(error),
             code_suggestion_list: vec![],
+            offset: None,
         }
     }
 
@@ -135,15 +181,17 @@ impl AnalyzerDiagnostic {
     }
 
     /// The location of the diagnostic is shifted using this offset.
-    /// This is only applied when the `Self::kind` is [DiagnosticKind::Rule]
+    /// This is applied to both [DiagnosticKind::Rule] and [DiagnosticKind::Raw] diagnostics.
     pub fn add_diagnostic_offset(&mut self, offset: TextSize) {
-        if let DiagnosticKind::Rule(rule_diagnostic) = &mut self.kind {
-            let diagnostic = rule_diagnostic.as_mut();
-            if let Some(span) = &diagnostic.span {
-                diagnostic.span = Some(span.add(offset));
+        match &mut self.kind {
+            DiagnosticKind::Rule(rule_diagnostic) => {
+                let diagnostic = rule_diagnostic.as_mut();
+                diagnostic.set_advice_offset(offset);
             }
-            diagnostic.set_advice_offset(offset);
+            DiagnosticKind::Raw(_) => {}
         }
+        // Store the offset to be applied in location()
+        self.offset = Some(offset);
     }
 
     pub const fn is_raw(&self) -> bool {

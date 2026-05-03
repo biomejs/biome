@@ -412,7 +412,7 @@ noArrayIndexKey.jsx:23:62 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      23     │ - → (collection,·thing,·index)·=>·collection.concat(<Hello·key={index}·/>),
          23 │ + → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          24 │ + → (collection,·thing,·index)·=>·collection.concat(<Hello·key={index}·/>),
-     24  25 │   	[]
+     24  25 │     []
      25  26 │   );
   
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
@@ -627,7 +627,7 @@ noArrayIndexKey.jsx:44:41 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      44     │ - → const·foo·=·cloneElement(child,·{·key:·index·});
          44 │ + → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          45 │ + → const·foo·=·cloneElement(child,·{·key:·index·});
-     45  46 │   	return foo;
+     45  46 │     return foo;
      46  47 │   });
   
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
@@ -666,11 +666,11 @@ noArrayIndexKey.jsx:50:37 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      48  48 │   function Test(props) {
-     49  49 │   	return Children.map(props.children, function (child, index) {
+     49  49 │     return Children.map(props.children, function (child, index) {
      50     │ - → → return·cloneElement(child,·{·key:·index·});
          50 │ + → → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          51 │ + → → return·cloneElement(child,·{·key:·index·});
-     51  52 │   	});
+     51  52 │     });
      52  53 │   }
   
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
@@ -1050,8 +1050,8 @@ noArrayIndexKey.jsx:81:58 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      81     │ - → let·elements·=·things.map((_,·index)·=>·<Component·key={index}·/>);
          81 │ + → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          82 │ + → let·elements·=·things.map((_,·index)·=>·<Component·key={index}·/>);
-     82  83 │   	if (condition) {
-     83  84 │   		elements = others.map((_, index) => <Component key={index} />);
+     82  83 │     if (condition) {
+     83  84 │       elements = others.map((_, index) => <Component key={index} />);
   
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
@@ -1089,13 +1089,13 @@ noArrayIndexKey.jsx:83:55 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
-     81  81 │   	let elements = things.map((_, index) => <Component key={index} />);
-     82  82 │   	if (condition) {
+     81  81 │     let elements = things.map((_, index) => <Component key={index} />);
+     82  82 │     if (condition) {
      83     │ - → → elements·=·others.map((_,·index)·=>·<Component·key={index}·/>);
          83 │ + → → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          84 │ + → → elements·=·others.map((_,·index)·=>·<Component·key={index}·/>);
-     84  85 │   	}
-     85  86 │   	return elements;
+     84  85 │     }
+     85  86 │     return elements;
   
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
@@ -1134,12 +1134,12 @@ noArrayIndexKey.jsx:90:50 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      88  88 │   function Component5({ things }) {
-     89  89 │   	const elements = useMemo(
+     89  89 │     const elements = useMemo(
      90     │ - → → ()·=>·things.map((_,·index)·=>·<Component·key={index}·/>),
          90 │ + → → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          91 │ + → → ()·=>·things.map((_,·index)·=>·<Component·key={index}·/>),
-     91  92 │   		[things]
-     92  93 │   	);
+     91  92 │       [things]
+     92  93 │     );
   
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
@@ -1178,12 +1178,12 @@ noArrayIndexKey.jsx:98:50 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      96  96 │   function Component6({ things }) {
-     97  97 │   	const elements = useMemo(
+     97  97 │     const elements = useMemo(
      98     │ - → → ()·=>·things.map((_,·index)·=>·<Component·key={index}·/>),
          98 │ + → → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
          99 │ + → → ()·=>·things.map((_,·index)·=>·<Component·key={index}·/>),
-     99 100 │   		[things]
-    100 101 │   	);
+     99 100 │       [things]
+    100 101 │     );
   
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
@@ -1221,13 +1221,13 @@ noArrayIndexKey.jsx:107:62 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━�
   
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
-    105 105 │   	return (
-    106 106 │   		<HoC>
+    105 105 │     return (
+    106 106 │       <HoC>
     107     │ - → → → {({·things·})·=>·things.map((_,·index)·=>·<Component·key={index}·/>)}
         107 │ + → → → {/**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/}
         108 │ + {({·things·})·=>·things.map((_,·index)·=>·<Component·key={index}·/>)}
-    108 109 │   		</HoC>
-    109 110 │   	);
+    108 109 │       </HoC>
+    109 110 │     );
   
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   

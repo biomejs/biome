@@ -1,0 +1,29 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/declaration/nested-properties-with-value.scss
+---
+
+# Input
+
+```scss
+.font{
+  color:red;
+  font:12px/1.2{
+    family:sans-serif;
+  }
+}
+
+```
+
+
+# Formatted
+
+```scss
+.font {
+	color: red;
+	font: 12px / 1.2 {
+		family: sans-serif;
+	}
+}
+
+```

@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/function/parameters/line_width_100/function_parameters.ts
 ---
+
 # Input
 
 ```ts
@@ -42,87 +43,18 @@ export const queryAuditLog = async ({
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
------
-
-```ts
-export function formatNumber1(
-	value: string,
-	{
-		a,
-		b,
-		c,
-		formatNumber,
-		...props
-	}: Omit<NumberFormatterProps, "value" | "defaultFractionDigits"> & {
-		useGrouping?: boolean;
-	},
-): string {}
-
-export function formatNumber2(
-	value: string,
-	{
-		a,
-	}: Omit<NumberFormatterProps, "value" | "defaultFractionDigits"> & {
-		useGrouping?: boolean;
-	},
-): string {}
-
-export const findByDatefindByDatefindByDatefindByDate = (
-	_,
-	{ date },
-	{ req },
-) => findByDatefindByDatefindByDatefindByDate;
-
-export const queryAuditLog = async ({
-	startDate,
-	endDate,
-	jobId,
-	src,
-	type,
-}: Filter): Promise<DBAuditLog[]> => {};
+```json
+{
+  "$schema": "../../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "formatter": {
+    "lineWidth": 100
+  }
+}
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 100
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
------
+# Formatted
 
 ```ts
 export function formatNumber1(
@@ -157,4 +89,5 @@ export const queryAuditLog = async ({
 	src,
 	type,
 }: Filter): Promise<DBAuditLog[]> => {};
+
 ```

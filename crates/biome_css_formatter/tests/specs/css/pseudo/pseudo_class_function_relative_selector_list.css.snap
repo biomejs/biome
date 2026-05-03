@@ -22,19 +22,7 @@ div
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
------
+# Formatted
 
 ```css
 :has(> img, + dt) {
@@ -46,6 +34,5 @@ Quote style: Double Quotes
 }
 :has(> img, + dt, > p, ~ div > p) {
 }
+
 ```
-
-

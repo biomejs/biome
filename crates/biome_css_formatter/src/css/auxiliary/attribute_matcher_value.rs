@@ -24,6 +24,18 @@ impl FormatNodeRule<CssAttributeMatcherValue> for FormatCssAttributeMatcherValue
             AnyCssAttributeMatcherValue::CssString(string) => {
                 write!(f, [string.format()])
             }
+            AnyCssAttributeMatcherValue::ScssInterpolatedString(string) => {
+                write!(f, [string.format()])
+            }
+            AnyCssAttributeMatcherValue::ScssInterpolatedIdentifier(identifier) => {
+                let quote = if f.options().quote_style().is_double() {
+                    "\""
+                } else {
+                    "'"
+                };
+
+                write!(f, [token(quote), identifier.format(), token(quote)])
+            }
             AnyCssAttributeMatcherValue::CssIdentifier(ident) => {
                 if f.comments().is_suppressed(ident.syntax()) {
                     return write!(f, [ident.format()]);

@@ -1,0 +1,7 @@
+@mixin hoverable{
+@content;
+@content(
+$value,
+  $fallback: 10px
+);
+}

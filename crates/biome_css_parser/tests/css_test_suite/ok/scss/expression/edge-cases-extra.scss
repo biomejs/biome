@@ -1,0 +1,8 @@
+// Parenthesized list is not a map
+$paren-list: (a b c);
+
+// Map value that is a parenthesized list
+$map-with-list: (a: (b c));
+
+// Function args with ellipsis and binary ops
+$func-args: foo(1 + 2, $a..., 3 * 4);

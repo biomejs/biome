@@ -5,7 +5,7 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsNewExpression, global_identifier};
 use biome_rowan::{SyntaxResult, TextRange, declare_node_union};
 use biome_rule_options::no_global_object_calls::NoGlobalObjectCallsOptions;
-use std::{fmt::Display, str::FromStr};
+use std::str::FromStr;
 
 declare_lint_rule! {
     /// Disallow calling global object properties as functions
@@ -117,13 +117,21 @@ impl Rule for NoGlobalObjectCalls {
         _: &RuleContext<Self>,
         (non_callable, range): &Self::State,
     ) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            range,
-            markup! {
-                <Emphasis>{non_callable.to_string()}</Emphasis>" is not a function."
-            },
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                range,
+                markup! {
+                    <Emphasis>{non_callable}</Emphasis>" cannot be called as a function."
+                },
+            )
+            .note(markup! {
+                <Emphasis>{non_callable}</Emphasis>" is a global object with static members, not a callable constructor or function."
+            })
+            .note(markup! {
+                "Use one of its properties or methods instead of calling the object itself."
+            }),
+        )
     }
 }
 
@@ -164,11 +172,11 @@ impl FromStr for NonCallableGlobals {
     }
 }
 
-impl Display for NonCallableGlobals {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl biome_console::fmt::Display for NonCallableGlobals {
+    fn fmt(&self, f: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
         let repr = match self {
             Self::Atomics => "Atomics",
-            Self::Json => "Json",
+            Self::Json => "JSON",
             Self::Math => "Math",
             Self::Reflect => "Reflect",
             Self::Intl => "Intl",

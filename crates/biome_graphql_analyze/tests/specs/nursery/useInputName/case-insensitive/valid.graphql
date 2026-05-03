@@ -1,0 +1,9 @@
+# should not generate diagnostics
+type Mutation { SetMessage(input: SetMessageInput): String }
+
+type Mutation { SetMessage(input: SetMessageInput!): String }
+
+type Mutation { SetMessage(input: [SetMessageInput]): String }
+
+# Case insensitive
+type Mutation { SetMessage(input: setMessageInput): String }

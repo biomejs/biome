@@ -1,0 +1,19 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: whitespace/no-break-display-none.html
+---
+
+# Input
+
+```html
+<div>123<meta attr />456</div>
+
+```
+
+
+# Formatted
+
+```html
+<div>123<meta attr>456</div>
+
+```

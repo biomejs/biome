@@ -90,7 +90,13 @@ pub fn to_capitalized(s: &str) -> String {
 pub enum TaskCommand {
     /// Generates formatters for each language
     #[bpaf(command)]
-    Formatter,
+    Formatter {
+        #[bpaf(long("allow-dirty"))]
+        allow_dirty: bool,
+
+        #[bpaf(long("allow-staged"))]
+        allow_staged: bool,
+    },
     /// Generate factory functions for the analyzer and the configuration of the analyzers
     #[bpaf(command)]
     Analyzer,
@@ -114,6 +120,9 @@ pub enum TaskCommand {
     /// Generates unicode table inside lexer
     #[bpaf(command)]
     Unicode,
+    /// Generates Baseline data for CSS features from web-features
+    #[bpaf(command, long("css-baseline"))]
+    CssBaseline,
     /// Creates a new lint rule
     #[bpaf(command, long("new-lintrule"))]
     NewRule {

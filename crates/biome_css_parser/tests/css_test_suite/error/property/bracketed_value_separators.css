@@ -1,0 +1,8 @@
+.a {
+  grid-template-columns: [full-start , main-start / main-end , full-end];
+  grid-column: [col-start] /[col-end];
+}
+
+.b {
+  content: [a, b / c];
+}

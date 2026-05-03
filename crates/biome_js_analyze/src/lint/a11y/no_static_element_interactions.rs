@@ -101,8 +101,8 @@ impl Rule for NoStaticElementInteractions {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        // Custom components are not checked because we do not know what DOM will be used.
-        if node.is_custom_component() {
+        // Custom components and elements are not checked because we do not know what DOM will be used.
+        if node.is_custom_component() || node.is_custom_element() {
             return None;
         }
 

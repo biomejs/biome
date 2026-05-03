@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```svelte
@@ -28,9 +29,9 @@ HtmlRoot {
                     html_literal_token: HTML_LITERAL@6..13 " items " [] [],
                 },
                 item: SvelteEachAsKeyedItem {
-                    as_token: AS_KW@13..15 "as" [] [],
-                    name: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@15..23 " item\n  " [] [],
+                    as_token: AS_KW@13..16 "as" [] [Whitespace(" ")],
+                    name: SvelteName {
+                        ident_token: IDENT@16..20 "item" [] [],
                     },
                     index: missing (optional),
                     key: missing (optional),
@@ -39,7 +40,7 @@ HtmlRoot {
             },
             children: HtmlElementList [
                 HtmlContent {
-                    value_token: HTML_LITERAL@23..49 "<div>{item}</div>\n{/each}\n" [] [],
+                    value_token: HTML_LITERAL@20..49 "<div>{item}</div>\n{/each}\n" [Newline("\n"), Whitespace("  ")] [],
                 },
             ],
             else_clause: missing (optional),
@@ -59,21 +60,21 @@ HtmlRoot {
   2: (empty)
   3: HTML_ELEMENT_LIST@0..49
     0: SVELTE_EACH_BLOCK@0..49
-      0: SVELTE_EACH_OPENING_BLOCK@0..23
+      0: SVELTE_EACH_OPENING_BLOCK@0..20
         0: SV_CURLY_HASH@0..2 "{#" [] []
         1: EACH_KW@2..6 "each" [] []
         2: HTML_TEXT_EXPRESSION@6..13
           0: HTML_LITERAL@6..13 " items " [] []
-        3: SVELTE_EACH_AS_KEYED_ITEM@13..23
-          0: AS_KW@13..15 "as" [] []
-          1: HTML_TEXT_EXPRESSION@15..23
-            0: HTML_LITERAL@15..23 " item\n  " [] []
+        3: SVELTE_EACH_AS_KEYED_ITEM@13..20
+          0: AS_KW@13..16 "as" [] [Whitespace(" ")]
+          1: SVELTE_NAME@16..20
+            0: IDENT@16..20 "item" [] []
           2: (empty)
           3: (empty)
         4: (empty)
-      1: HTML_ELEMENT_LIST@23..49
-        0: HTML_CONTENT@23..49
-          0: HTML_LITERAL@23..49 "<div>{item}</div>\n{/each}\n" [] []
+      1: HTML_ELEMENT_LIST@20..49
+        0: HTML_CONTENT@20..49
+          0: HTML_LITERAL@20..49 "<div>{item}</div>\n{/each}\n" [Newline("\n"), Whitespace("  ")] []
       2: (empty)
       3: (empty)
   4: EOF@49..49 "" [] []

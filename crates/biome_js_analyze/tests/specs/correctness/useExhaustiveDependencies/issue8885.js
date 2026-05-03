@@ -1,0 +1,27 @@
+/* should not generate diagnostics */
+import { useEffect } from "react";
+
+let renderCount = 0;
+
+// This should not report `count` as unnecessary dependency.
+// `count` is derived from a global variable and can change between renders.
+export const MyComponent = () => {
+    const count = renderCount++;
+
+    useEffect(() => {
+        console.log(count);
+    }, [count]);
+};
+
+// Reading from a global variable without modification is considered stable.
+let globalConfig = { debug: false };
+
+export const Component2 = () => {
+    const debug = globalConfig.debug;
+
+    useEffect(() => {
+        if (debug) {
+            console.log("Debug mode enabled");
+        }
+    }, []);
+};

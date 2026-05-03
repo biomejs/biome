@@ -1,0 +1,186 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div style:color={myColor}>Dynamic color</div>
+<p style:width={width + 'px'}>Dynamic width</p>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteStyleDirective {
+                        style_token: STYLE_KW@5..10 "style" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@10..11 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@11..16 "color" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@16..17 "=" [] [],
+                                value: HtmlAttributeSingleTextExpression {
+                                    l_curly_token: L_CURLY@17..18 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@18..25 "myColor" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@25..26 "}" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@26..27 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@27..40 "Dynamic color" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@40..41 "<" [] [],
+                slash_token: SLASH@41..42 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@42..45 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@45..46 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@46..48 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@48..50 "p" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteStyleDirective {
+                        style_token: STYLE_KW@50..55 "style" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@55..56 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@56..61 "width" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@61..62 "=" [] [],
+                                value: HtmlAttributeSingleTextExpression {
+                                    l_curly_token: L_CURLY@62..63 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@63..75 "width + 'px'" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@75..76 "}" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@76..77 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@77..90 "Dynamic width" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@90..91 "<" [] [],
+                slash_token: SLASH@91..92 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@92..93 "p" [] [],
+                },
+                r_angle_token: R_ANGLE@93..94 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@94..95 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..95
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..94
+    0: HTML_ELEMENT@0..46
+      0: HTML_OPENING_ELEMENT@0..27
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..26
+          0: SVELTE_STYLE_DIRECTIVE@5..26
+            0: STYLE_KW@5..10 "style" [] []
+            1: SVELTE_DIRECTIVE_VALUE@10..26
+              0: COLON@10..11 ":" [] []
+              1: SVELTE_LITERAL@11..16
+                0: HTML_LITERAL@11..16 "color" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@16..16
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@16..26
+                0: EQ@16..17 "=" [] []
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@17..26
+                  0: L_CURLY@17..18 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@18..25
+                    0: HTML_LITERAL@18..25 "myColor" [] []
+                  2: R_CURLY@25..26 "}" [] []
+        3: R_ANGLE@26..27 ">" [] []
+      1: HTML_ELEMENT_LIST@27..40
+        0: HTML_CONTENT@27..40
+          0: HTML_LITERAL@27..40 "Dynamic color" [] []
+      2: HTML_CLOSING_ELEMENT@40..46
+        0: L_ANGLE@40..41 "<" [] []
+        1: SLASH@41..42 "/" [] []
+        2: HTML_TAG_NAME@42..45
+          0: HTML_LITERAL@42..45 "div" [] []
+        3: R_ANGLE@45..46 ">" [] []
+    1: HTML_ELEMENT@46..94
+      0: HTML_OPENING_ELEMENT@46..77
+        0: L_ANGLE@46..48 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@48..50
+          0: HTML_LITERAL@48..50 "p" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@50..76
+          0: SVELTE_STYLE_DIRECTIVE@50..76
+            0: STYLE_KW@50..55 "style" [] []
+            1: SVELTE_DIRECTIVE_VALUE@55..76
+              0: COLON@55..56 ":" [] []
+              1: SVELTE_LITERAL@56..61
+                0: HTML_LITERAL@56..61 "width" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@61..61
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@61..76
+                0: EQ@61..62 "=" [] []
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@62..76
+                  0: L_CURLY@62..63 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@63..75
+                    0: HTML_LITERAL@63..75 "width + 'px'" [] []
+                  2: R_CURLY@75..76 "}" [] []
+        3: R_ANGLE@76..77 ">" [] []
+      1: HTML_ELEMENT_LIST@77..90
+        0: HTML_CONTENT@77..90
+          0: HTML_LITERAL@77..90 "Dynamic width" [] []
+      2: HTML_CLOSING_ELEMENT@90..94
+        0: L_ANGLE@90..91 "<" [] []
+        1: SLASH@91..92 "/" [] []
+        2: HTML_TAG_NAME@92..93
+          0: HTML_LITERAL@92..93 "p" [] []
+        3: R_ANGLE@93..94 ">" [] []
+  4: EOF@94..95 "" [Newline("\n")] []
+
+```

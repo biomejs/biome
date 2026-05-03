@@ -1,0 +1,431 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
+expression: snapshot
+---
+
+## Input
+
+```css
+div {
+  // Plain `(` branch: regular function heads inside `url(...)` should still
+  // parse as modifier functions even when recovery is needed.
+  plain-branch-missing-close: url(join-url("..", "image.png");
+
+  // UrlBody branch: malformed interpolation inside the function head should
+  // still preserve the interpolated-function shape for recovery.
+  interpolated-start-missing-curly: url(#{name(bar));
+  interpolated-mid-broken-interpolation: url(foo#{1 + }(bar));
+  interpolated-mid-missing-curly: url(foo#{1 + 1(bar));
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@0..4 "div" [] [Whitespace(" ")],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@4..5 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@5..174 "plain-branch-missing-close" [Newline("\n"), Whitespace("  "), Comments("// Plain `(` branch:  ..."), Newline("\n"), Whitespace("  "), Comments("// parse as modifier  ..."), Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@174..176 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssUrlFunction {
+                                            name: URL_KW@176..179 "url" [] [],
+                                            l_paren_token: L_PAREN@179..180 "(" [] [],
+                                            value: missing (optional),
+                                            modifiers: CssUrlModifierList [
+                                                CssFunction {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@180..188 "join-url" [] [],
+                                                    },
+                                                    l_paren_token: L_PAREN@188..189 "(" [] [],
+                                                    items: CssParameterList [
+                                                        ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                CssString {
+                                                                    value_token: CSS_STRING_LITERAL@189..193 "\"..\"" [] [],
+                                                                },
+                                                            ],
+                                                        },
+                                                        COMMA@193..195 "," [] [Whitespace(" ")],
+                                                        ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                CssString {
+                                                                    value_token: CSS_STRING_LITERAL@195..206 "\"image.png\"" [] [],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                    r_paren_token: R_PAREN@206..207 ")" [] [],
+                                                },
+                                            ],
+                                            r_paren_token: missing (required),
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@207..208 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@208..387 "interpolated-start-missing-curly" [Newline("\n"), Newline("\n"), Whitespace("  "), Comments("// UrlBody branch: ma ..."), Newline("\n"), Whitespace("  "), Comments("// still preserve the ..."), Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@387..389 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssUrlFunction {
+                                            name: URL_KW@389..392 "url" [] [],
+                                            l_paren_token: L_PAREN@392..393 "(" [] [],
+                                            value: CssUrlValueRaw {
+                                                value_token: CSS_URL_VALUE_RAW_LITERAL@393..403 "#{name(bar" [] [],
+                                            },
+                                            modifiers: CssUrlModifierList [],
+                                            r_paren_token: R_PAREN@403..404 ")" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: missing (optional),
+                    },
+                    CssBogus {
+                        items: [
+                            R_PAREN@404..405 ")" [] [],
+                        ],
+                    },
+                    CssEmptyDeclaration {
+                        semicolon_token: SEMICOLON@405..406 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@406..446 "interpolated-mid-broken-interpolation" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@446..448 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssUrlFunction {
+                                            name: URL_KW@448..451 "url" [] [],
+                                            l_paren_token: L_PAREN@451..452 "(" [] [],
+                                            value: missing (optional),
+                                            modifiers: CssUrlModifierList [
+                                                CssFunction {
+                                                    name: ScssInterpolatedIdentifier {
+                                                        items: ScssInterpolatedIdentifierPartList [
+                                                            CssIdentifier {
+                                                                value_token: IDENT@452..455 "foo" [] [],
+                                                            },
+                                                            ScssInterpolation {
+                                                                hash_token: HASH@455..456 "#" [] [],
+                                                                l_curly_token: L_CURLY@456..457 "{" [] [],
+                                                                value: ScssExpression {
+                                                                    items: ScssExpressionItemList [
+                                                                        ScssBinaryExpression {
+                                                                            left: CssNumber {
+                                                                                value_token: CSS_NUMBER_LITERAL@457..459 "1" [] [Whitespace(" ")],
+                                                                            },
+                                                                            operator: PLUS@459..461 "+" [] [Whitespace(" ")],
+                                                                            right: missing (required),
+                                                                        },
+                                                                    ],
+                                                                },
+                                                                r_curly_token: R_CURLY@461..462 "}" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                    l_paren_token: L_PAREN@462..463 "(" [] [],
+                                                    items: CssParameterList [
+                                                        ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                CssIdentifier {
+                                                                    value_token: IDENT@463..466 "bar" [] [],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                    r_paren_token: R_PAREN@466..467 ")" [] [],
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@467..468 ")" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@468..469 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@469..502 "interpolated-mid-missing-curly" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@502..504 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssUrlFunction {
+                                            name: URL_KW@504..507 "url" [] [],
+                                            l_paren_token: L_PAREN@507..508 "(" [] [],
+                                            value: CssUrlValueRaw {
+                                                value_token: CSS_URL_VALUE_RAW_LITERAL@508..522 "foo#{1 + 1(bar" [] [],
+                                            },
+                                            modifiers: CssUrlModifierList [],
+                                            r_paren_token: R_PAREN@522..523 ")" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: missing (optional),
+                    },
+                    CssBogus {
+                        items: [
+                            R_PAREN@523..524 ")" [] [],
+                        ],
+                    },
+                    CssEmptyDeclaration {
+                        semicolon_token: SEMICOLON@524..525 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@525..527 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@527..528 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..528
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..527
+    0: CSS_QUALIFIED_RULE@0..527
+      0: CSS_SELECTOR_LIST@0..4
+        0: CSS_COMPOUND_SELECTOR@0..4
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: CSS_TYPE_SELECTOR@0..4
+            0: (empty)
+            1: CSS_IDENTIFIER@0..4
+              0: IDENT@0..4 "div" [] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@4..4
+      1: CSS_DECLARATION_OR_RULE_BLOCK@4..527
+        0: L_CURLY@4..5 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@5..525
+          0: CSS_DECLARATION_WITH_SEMICOLON@5..208
+            0: CSS_DECLARATION@5..207
+              0: CSS_GENERIC_PROPERTY@5..207
+                0: CSS_IDENTIFIER@5..174
+                  0: IDENT@5..174 "plain-branch-missing-close" [Newline("\n"), Whitespace("  "), Comments("// Plain `(` branch:  ..."), Newline("\n"), Whitespace("  "), Comments("// parse as modifier  ..."), Newline("\n"), Whitespace("  ")] []
+                1: COLON@174..176 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@176..207
+                  0: SCSS_EXPRESSION_ITEM_LIST@176..207
+                    0: CSS_URL_FUNCTION@176..207
+                      0: URL_KW@176..179 "url" [] []
+                      1: L_PAREN@179..180 "(" [] []
+                      2: (empty)
+                      3: CSS_URL_MODIFIER_LIST@180..207
+                        0: CSS_FUNCTION@180..207
+                          0: CSS_IDENTIFIER@180..188
+                            0: IDENT@180..188 "join-url" [] []
+                          1: L_PAREN@188..189 "(" [] []
+                          2: CSS_PARAMETER_LIST@189..206
+                            0: SCSS_EXPRESSION@189..193
+                              0: SCSS_EXPRESSION_ITEM_LIST@189..193
+                                0: CSS_STRING@189..193
+                                  0: CSS_STRING_LITERAL@189..193 "\"..\"" [] []
+                            1: COMMA@193..195 "," [] [Whitespace(" ")]
+                            2: SCSS_EXPRESSION@195..206
+                              0: SCSS_EXPRESSION_ITEM_LIST@195..206
+                                0: CSS_STRING@195..206
+                                  0: CSS_STRING_LITERAL@195..206 "\"image.png\"" [] []
+                          3: R_PAREN@206..207 ")" [] []
+                      4: (empty)
+              1: (empty)
+            1: SEMICOLON@207..208 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@208..404
+            0: CSS_DECLARATION@208..404
+              0: CSS_GENERIC_PROPERTY@208..404
+                0: CSS_IDENTIFIER@208..387
+                  0: IDENT@208..387 "interpolated-start-missing-curly" [Newline("\n"), Newline("\n"), Whitespace("  "), Comments("// UrlBody branch: ma ..."), Newline("\n"), Whitespace("  "), Comments("// still preserve the ..."), Newline("\n"), Whitespace("  ")] []
+                1: COLON@387..389 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@389..404
+                  0: SCSS_EXPRESSION_ITEM_LIST@389..404
+                    0: CSS_URL_FUNCTION@389..404
+                      0: URL_KW@389..392 "url" [] []
+                      1: L_PAREN@392..393 "(" [] []
+                      2: CSS_URL_VALUE_RAW@393..403
+                        0: CSS_URL_VALUE_RAW_LITERAL@393..403 "#{name(bar" [] []
+                      3: CSS_URL_MODIFIER_LIST@403..403
+                      4: R_PAREN@403..404 ")" [] []
+              1: (empty)
+            1: (empty)
+          2: CSS_BOGUS@404..405
+            0: R_PAREN@404..405 ")" [] []
+          3: CSS_EMPTY_DECLARATION@405..406
+            0: SEMICOLON@405..406 ";" [] []
+          4: CSS_DECLARATION_WITH_SEMICOLON@406..469
+            0: CSS_DECLARATION@406..468
+              0: CSS_GENERIC_PROPERTY@406..468
+                0: CSS_IDENTIFIER@406..446
+                  0: IDENT@406..446 "interpolated-mid-broken-interpolation" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@446..448 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@448..468
+                  0: SCSS_EXPRESSION_ITEM_LIST@448..468
+                    0: CSS_URL_FUNCTION@448..468
+                      0: URL_KW@448..451 "url" [] []
+                      1: L_PAREN@451..452 "(" [] []
+                      2: (empty)
+                      3: CSS_URL_MODIFIER_LIST@452..467
+                        0: CSS_FUNCTION@452..467
+                          0: SCSS_INTERPOLATED_IDENTIFIER@452..462
+                            0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@452..462
+                              0: CSS_IDENTIFIER@452..455
+                                0: IDENT@452..455 "foo" [] []
+                              1: SCSS_INTERPOLATION@455..462
+                                0: HASH@455..456 "#" [] []
+                                1: L_CURLY@456..457 "{" [] []
+                                2: SCSS_EXPRESSION@457..461
+                                  0: SCSS_EXPRESSION_ITEM_LIST@457..461
+                                    0: SCSS_BINARY_EXPRESSION@457..461
+                                      0: CSS_NUMBER@457..459
+                                        0: CSS_NUMBER_LITERAL@457..459 "1" [] [Whitespace(" ")]
+                                      1: PLUS@459..461 "+" [] [Whitespace(" ")]
+                                      2: (empty)
+                                3: R_CURLY@461..462 "}" [] []
+                          1: L_PAREN@462..463 "(" [] []
+                          2: CSS_PARAMETER_LIST@463..466
+                            0: SCSS_EXPRESSION@463..466
+                              0: SCSS_EXPRESSION_ITEM_LIST@463..466
+                                0: CSS_IDENTIFIER@463..466
+                                  0: IDENT@463..466 "bar" [] []
+                          3: R_PAREN@466..467 ")" [] []
+                      4: R_PAREN@467..468 ")" [] []
+              1: (empty)
+            1: SEMICOLON@468..469 ";" [] []
+          5: CSS_DECLARATION_WITH_SEMICOLON@469..523
+            0: CSS_DECLARATION@469..523
+              0: CSS_GENERIC_PROPERTY@469..523
+                0: CSS_IDENTIFIER@469..502
+                  0: IDENT@469..502 "interpolated-mid-missing-curly" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@502..504 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@504..523
+                  0: SCSS_EXPRESSION_ITEM_LIST@504..523
+                    0: CSS_URL_FUNCTION@504..523
+                      0: URL_KW@504..507 "url" [] []
+                      1: L_PAREN@507..508 "(" [] []
+                      2: CSS_URL_VALUE_RAW@508..522
+                        0: CSS_URL_VALUE_RAW_LITERAL@508..522 "foo#{1 + 1(bar" [] []
+                      3: CSS_URL_MODIFIER_LIST@522..522
+                      4: R_PAREN@522..523 ")" [] []
+              1: (empty)
+            1: (empty)
+          6: CSS_BOGUS@523..524
+            0: R_PAREN@523..524 ")" [] []
+          7: CSS_EMPTY_DECLARATION@524..525
+            0: SEMICOLON@524..525 ";" [] []
+        2: R_CURLY@525..527 "}" [Newline("\n")] []
+  2: EOF@527..528 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+url-interpolated-function-name.scss:4:62 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    2 │   // Plain `(` branch: regular function heads inside `url(...)` should still
+    3 │   // parse as modifier functions even when recovery is needed.
+  > 4 │   plain-branch-missing-close: url(join-url("..", "image.png");
+      │                                                              ^
+    5 │ 
+    6 │   // UrlBody branch: malformed interpolation inside the function head should
+  
+  i Expected one of:
+  
+  - function
+  - identifier
+  
+url-interpolated-function-name.scss:8:52 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `;` but instead found `)`
+  
+     6 │   // UrlBody branch: malformed interpolation inside the function head should
+     7 │   // still preserve the interpolated-function shape for recovery.
+   > 8 │   interpolated-start-missing-curly: url(#{name(bar));
+       │                                                    ^
+     9 │   interpolated-mid-broken-interpolation: url(foo#{1 + }(bar));
+    10 │   interpolated-mid-missing-curly: url(foo#{1 + 1(bar));
+  
+  i Remove )
+  
+url-interpolated-function-name.scss:9:55 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+     7 │   // still preserve the interpolated-function shape for recovery.
+     8 │   interpolated-start-missing-curly: url(#{name(bar));
+   > 9 │   interpolated-mid-broken-interpolation: url(foo#{1 + }(bar));
+       │                                                       ^
+    10 │   interpolated-mid-missing-curly: url(foo#{1 + 1(bar));
+    11 │ }
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+url-interpolated-function-name.scss:10:54 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `;` but instead found `)`
+  
+     8 │   interpolated-start-missing-curly: url(#{name(bar));
+     9 │   interpolated-mid-broken-interpolation: url(foo#{1 + }(bar));
+  > 10 │   interpolated-mid-missing-curly: url(foo#{1 + 1(bar));
+       │                                                      ^
+    11 │ }
+    12 │ 
+  
+  i Remove )
+  
+```

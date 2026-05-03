@@ -305,8 +305,8 @@ invalid.js:45:2 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━�
   
   i Safe fix: Use collapsed if instead.
   
-     42  42 │   		// ...
-     43  43 │   	}
+     42  42 │       // ...
+     43  43 │     }
      44     │ - }·else·if·(c)·{
      45     │ - → if·(d)·{
      46     │ - → → //·...
@@ -347,8 +347,8 @@ invalid.js:53:3 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━�
      54     │ - → → → if·(a·?·b·:·c)
          52 │ + → if·((a·||·b)·&&·(a·??·b))
          53 │ + → → if·(a·?·b·:·c)
-     55  54 │   				if (a = b)
-     56  55 │   					if (a += b)
+     55  54 │           if (a = b)
+     56  55 │             if (a += b)
   
 
 ```
@@ -373,14 +373,14 @@ invalid.js:54:4 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━�
   i Safe fix: Use collapsed if instead.
   
      51  51 │   function* foo() {
-     52  52 │   	if (a || b)
+     52  52 │     if (a || b)
      53     │ - → → if·(a·??·b)
      54     │ - → → → if·(a·?·b·:·c)
      55     │ - → → → → if·(a·=·b)
          53 │ + → → if·((a·??·b)·&&·(a·?·b·:·c))
          54 │ + → → → if·(a·=·b)
-     56  55 │   					if (a += b)
-     57  56 │   						if (a -= b)
+     56  55 │             if (a += b)
+     57  56 │               if (a -= b)
   
 
 ```
@@ -405,15 +405,15 @@ invalid.js:55:5 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━�
   
   i Safe fix: Use collapsed if instead.
   
-     52  52 │   	if (a || b)
-     53  53 │   		if (a ?? b)
+     52  52 │     if (a || b)
+     53  53 │       if (a ?? b)
      54     │ - → → → if·(a·?·b·:·c)
      55     │ - → → → → if·(a·=·b)
      56     │ - → → → → → if·(a·+=·b)
          54 │ + → → → if·((a·?·b·:·c)·&&·(a·=·b))
          55 │ + → → → → if·(a·+=·b)
-     57  56 │   						if (a -= b)
-     58  57 │   							if (a &&= b)
+     57  56 │               if (a -= b)
+     58  57 │                 if (a &&= b)
   
 
 ```
@@ -437,15 +437,15 @@ invalid.js:56:6 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━�
   
   i Safe fix: Use collapsed if instead.
   
-     53  53 │   		if (a ?? b)
-     54  54 │   			if (a ? b : c)
+     53  53 │       if (a ?? b)
+     54  54 │         if (a ? b : c)
      55     │ - → → → → if·(a·=·b)
      56     │ - → → → → → if·(a·+=·b)
      57     │ - → → → → → → if·(a·-=·b)
          55 │ + → → → → if·((a·=·b)·&&·(a·+=·b))
          56 │ + → → → → → if·(a·-=·b)
-     58  57 │   							if (a &&= b)
-     59  58 │   								if (yield a)
+     58  57 │                 if (a &&= b)
+     59  58 │                   if (yield a)
   
 
 ```
@@ -468,15 +468,15 @@ invalid.js:57:7 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━�
   
   i Safe fix: Use collapsed if instead.
   
-     54  54 │   			if (a ? b : c)
-     55  55 │   				if (a = b)
+     54  54 │         if (a ? b : c)
+     55  55 │           if (a = b)
      56     │ - → → → → → if·(a·+=·b)
      57     │ - → → → → → → if·(a·-=·b)
      58     │ - → → → → → → → if·(a·&&=·b)
          56 │ + → → → → → if·((a·+=·b)·&&·(a·-=·b))
          57 │ + → → → → → → if·(a·&&=·b)
-     59  58 │   								if (yield a)
-     60  59 │   									if (a, b);
+     59  58 │                   if (yield a)
+     60  59 │                     if (a, b);
   
 
 ```
@@ -498,14 +498,14 @@ invalid.js:58:8 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━�
   
   i Safe fix: Use collapsed if instead.
   
-     55  55 │   				if (a = b)
-     56  56 │   					if (a += b)
+     55  55 │           if (a = b)
+     56  56 │             if (a += b)
      57     │ - → → → → → → if·(a·-=·b)
      58     │ - → → → → → → → if·(a·&&=·b)
      59     │ - → → → → → → → → if·(yield·a)
          57 │ + → → → → → → if·((a·-=·b)·&&·(a·&&=·b))
          58 │ + → → → → → → → if·(yield·a)
-     60  59 │   									if (a, b);
+     60  59 │                     if (a, b);
      61  60 │   }
   
 
@@ -527,8 +527,8 @@ invalid.js:59:9 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━�
   
   i Safe fix: Use collapsed if instead.
   
-     56  56 │   					if (a += b)
-     57  57 │   						if (a -= b)
+     56  56 │             if (a += b)
+     57  57 │               if (a -= b)
      58     │ - → → → → → → → if·(a·&&=·b)
      59     │ - → → → → → → → → if·(yield·a)
      60     │ - → → → → → → → → → if·(a,·b);
@@ -554,8 +554,8 @@ invalid.js:60:10 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━
   
   i Safe fix: Use collapsed if instead.
   
-     57  57 │   						if (a -= b)
-     58  58 │   							if (a &&= b)
+     57  57 │               if (a -= b)
+     58  58 │                 if (a &&= b)
      59     │ - → → → → → → → → if·(yield·a)
      60     │ - → → → → → → → → → if·(a,·b);
          59 │ + → → → → → → → → if·((yield·a)·&&·(a,·b))
@@ -590,7 +590,7 @@ invalid.js:66:3 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━�
      67     │ - → → → if·(a.b)
          65 │ + → if·(a·&&·(await·a))
          66 │ + → → if·(a.b)
-     68  67 │   				if (a && b);
+     68  67 │           if (a && b);
      69  68 │   }
   
 
@@ -613,7 +613,7 @@ invalid.js:67:4 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━�
   i Safe fix: Use collapsed if instead.
   
      64  64 │   async function foo() {
-     65  65 │   	if (a)
+     65  65 │     if (a)
      66     │ - → → if·(await·a)
      67     │ - → → → if·(a.b)
      68     │ - → → → → if·(a·&&·b);
@@ -639,8 +639,8 @@ invalid.js:68:5 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━�
   
   i Safe fix: Use collapsed if instead.
   
-     65  65 │   	if (a)
-     66  66 │   		if (await a)
+     65  65 │     if (a)
+     66  66 │       if (await a)
      67     │ - → → → if·(a.b)
      68     │ - → → → → if·(a·&&·b);
          67 │ + → → → if·(a.b·&&·a·&&·b)
@@ -696,7 +696,7 @@ invalid.js:76:2 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━�
      76     │ - → if·(b)·foo()
          75 │ + if·(a·&&·b)
          76 │ + → foo()
-     77  77 │   	;[].forEach(bar)
+     77  77 │     ;[].forEach(bar)
      78  78 │   
   
 

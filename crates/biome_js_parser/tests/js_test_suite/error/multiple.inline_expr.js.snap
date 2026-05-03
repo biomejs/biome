@@ -1,0 +1,80 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```js
+foo(); bar()
+
+```
+
+
+## AST
+
+```
+JsExpressionTemplateRoot {
+    expression: JsBogusExpression {
+        items: [
+            JsCallExpression {
+                callee: JsIdentifierExpression {
+                    name: JsReferenceIdentifier {
+                        value_token: IDENT@0..3 "foo" [] [],
+                    },
+                },
+                optional_chain_token: missing (optional),
+                type_arguments: missing (optional),
+                arguments: JsCallArguments {
+                    l_paren_token: L_PAREN@3..4 "(" [] [],
+                    args: JsCallArgumentList [],
+                    r_paren_token: R_PAREN@4..5 ")" [] [],
+                },
+            },
+            SEMICOLON@5..7 ";" [] [Whitespace(" ")],
+            IDENT@7..10 "bar" [] [],
+            L_PAREN@10..11 "(" [] [],
+            R_PAREN@11..12 ")" [] [],
+        ],
+    },
+    eof_token: EOF@12..13 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_EXPRESSION_TEMPLATE_ROOT@0..13
+  0: JS_BOGUS_EXPRESSION@0..12
+    0: JS_CALL_EXPRESSION@0..5
+      0: JS_IDENTIFIER_EXPRESSION@0..3
+        0: JS_REFERENCE_IDENTIFIER@0..3
+          0: IDENT@0..3 "foo" [] []
+      1: (empty)
+      2: (empty)
+      3: JS_CALL_ARGUMENTS@3..5
+        0: L_PAREN@3..4 "(" [] []
+        1: JS_CALL_ARGUMENT_LIST@4..4
+        2: R_PAREN@4..5 ")" [] []
+    1: SEMICOLON@5..7 ";" [] [Whitespace(" ")]
+    2: IDENT@7..10 "bar" [] []
+    3: L_PAREN@10..11 "(" [] []
+    4: R_PAREN@11..12 ")" [] []
+  1: EOF@12..13 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+multiple.inline_expr.js:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Template expressions can only contain a single expression
+  
+  > 1 │ foo(); bar()
+      │      ^
+    2 │ 
+  
+  i Remove the extra code or split into multiple template expressions.
+  
+```

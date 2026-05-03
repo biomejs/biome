@@ -1,8 +1,8 @@
 #[cfg(test)]
 mod test {
     use crate::{
-        BindingExtensions, CanBeImportedExported, SemanticModelOptions, SemanticScopeExtensions,
-        semantic_model,
+        BindingExtensions, CanBeImportedExported, SemanticFlavor, SemanticModelOptions,
+        SemanticScopeExtensions, semantic_model,
     };
     use biome_js_parser::JsParserOptions;
     use biome_js_syntax::{
@@ -10,6 +10,13 @@ mod test {
         JsSyntaxKind, TsIdentifierBinding,
     };
     use biome_rowan::{AstNode, SyntaxNodeCast};
+
+    fn svelte_options() -> SemanticModelOptions {
+        SemanticModelOptions {
+            flavor: SemanticFlavor::Svelte,
+            ..SemanticModelOptions::default()
+        }
+    }
 
     #[test]
     pub fn ok_semantic_model() {
@@ -281,5 +288,187 @@ mod test {
             JsParserOptions::default(),
         );
         let _model = semantic_model(&r.tree(), SemanticModelOptions::default());
+    }
+
+    #[test]
+    pub fn ok_semantic_model_ambient_module_type_alias_and_class() {
+        let r = biome_js_parser::parse(
+            r#"
+declare module "jsoneditor" {
+  export type JSONEditorOptions = {
+    mode?: string;
+    [key: string]: unknown;
+  };
+
+  export class JSONEditor {
+    constructor(container: HTMLElement, options?: JSONEditorOptions);
+    get options(): JSONEditorOptions;
+    set options(options: JSONEditorOptions);
+  }
+}
+"#,
+            JsFileSource::d_ts(),
+            JsParserOptions::default(),
+        );
+        let model = semantic_model(&r.tree(), SemanticModelOptions::default());
+        let mut missing_scopes = Vec::new();
+
+        for scope in model.global_scope().descendents() {
+            let range = scope.range();
+            if !scope.data.scope_node_by_range.contains_key(&range) {
+                let matching_kinds = r
+                    .syntax()
+                    .descendants()
+                    .filter(|node| node.text_trimmed_range() == range)
+                    .map(|node| format!("{:?}", node.kind()))
+                    .collect::<Vec<_>>();
+
+                missing_scopes.push(format!(
+                    "scope #{:?} range {:?} missing node, matching kinds: {:?}",
+                    scope.id(),
+                    range,
+                    matching_kinds
+                ));
+            }
+        }
+
+        assert!(
+            missing_scopes.is_empty(),
+            "missing scope nodes:\n{}",
+            missing_scopes.join("\n")
+        );
+    }
+
+    #[test]
+    pub fn ok_semantic_model_namespace_import_type_unqualified_reference_is_unresolved_and_tracked_for_usage()
+     {
+        let r = biome_js_parser::parse(
+            "import type * as Namespace from \"mod\"; type T = Namespace;",
+            JsFileSource::ts(),
+            JsParserOptions::default(),
+        );
+        let model = semantic_model(&r.tree(), SemanticModelOptions::default());
+
+        let namespace_binding = model
+            .global_scope()
+            .get_binding("Namespace")
+            .expect("expected Namespace binding");
+        // TODO(semantic-invalid-namespace-type-ref): This currently tracks a read to keep
+        // `noUnusedImports` behavior while still emitting unresolved diagnostics.
+        assert_eq!(namespace_binding.all_references().count(), 1);
+
+        let mut unresolved_references = model.all_unresolved_references();
+        let unresolved_reference = unresolved_references
+            .next()
+            .expect("expected one unresolved reference");
+        assert_eq!(
+            unresolved_reference.tree().syntax().text_trimmed(),
+            "Namespace"
+        );
+        assert!(unresolved_references.next().is_none());
+    }
+
+    #[test]
+    pub fn ok_semantic_model_svelte_store_dereference() {
+        let r = biome_js_parser::parse(
+            "const store = 1; $store;",
+            JsFileSource::ts(),
+            JsParserOptions::default(),
+        );
+        let model = semantic_model(&r.tree(), svelte_options());
+
+        assert_eq!(model.all_unresolved_references().count(), 0);
+    }
+
+    #[test]
+    pub fn ok_semantic_model_svelte_rune_is_not_normalized_as_store() {
+        let r = biome_js_parser::parse(
+            "const state = 1; $state;",
+            JsFileSource::ts(),
+            JsParserOptions::default(),
+        );
+        let model = semantic_model(&r.tree(), svelte_options());
+
+        let mut unresolved_references = model.all_unresolved_references();
+        let unresolved_reference = unresolved_references
+            .next()
+            .expect("expected one unresolved reference");
+        assert_eq!(
+            unresolved_reference.tree().syntax().text_trimmed(),
+            "$state"
+        );
+        assert!(unresolved_references.next().is_none());
+    }
+
+    #[test]
+    pub fn ok_semantic_model_svelte_dollar_identifier_binding_uses_exact_name() {
+        let r = biome_js_parser::parse(
+            "const $store = 1; $store;",
+            JsFileSource::ts(),
+            JsParserOptions::default(),
+        );
+        let model = semantic_model(&r.tree(), svelte_options());
+
+        assert_eq!(model.all_unresolved_references().count(), 0);
+    }
+
+    #[test]
+    pub fn ok_semantic_model_svelte_store_dereference_can_resolve_outer_value_binding() {
+        let r = biome_js_parser::parse(
+            "const store = 1; { type store = number; $store; }",
+            JsFileSource::ts(),
+            JsParserOptions::default(),
+        );
+        let model = semantic_model(&r.tree(), svelte_options());
+
+        assert_eq!(model.all_unresolved_references().count(), 0);
+    }
+
+    #[test]
+    pub fn ok_semantic_model_svelte_store_dereference_resolves_configured_global() {
+        let r = biome_js_parser::parse("$store;", JsFileSource::ts(), JsParserOptions::default());
+        let mut options = svelte_options();
+        options.globals.insert("store".into());
+
+        let model = semantic_model(&r.tree(), options);
+
+        assert_eq!(model.all_unresolved_references().count(), 0);
+        assert_eq!(model.all_global_references().count(), 1);
+    }
+
+    #[test]
+    pub fn ok_semantic_model_svelte_double_dollar_reference_is_not_normalized() {
+        let r = biome_js_parser::parse("$$state;", JsFileSource::ts(), JsParserOptions::default());
+        let mut options = svelte_options();
+        options.globals.insert("$state".into());
+
+        let model = semantic_model(&r.tree(), options);
+
+        assert_eq!(model.all_unresolved_references().count(), 1);
+        assert_eq!(model.all_global_references().count(), 0);
+    }
+
+    #[test]
+    pub fn ok_semantic_model_svelte_store_assignment_is_not_tracked_as_binding_write() {
+        let r = biome_js_parser::parse(
+            "const store = 1; $store = 2;",
+            JsFileSource::ts(),
+            JsParserOptions::default(),
+        );
+        let model = semantic_model(&r.tree(), svelte_options());
+
+        let store_binding = model
+            .global_scope()
+            .get_binding("store")
+            .expect("expected store binding");
+        assert_eq!(store_binding.all_writes().count(), 0);
+        assert_eq!(store_binding.all_reads().count(), 1);
+
+        let assignment = r
+            .syntax()
+            .descendants()
+            .find_map(JsIdentifierAssignment::cast)
+            .expect("expected an assignment");
+        assert!(model.binding(&assignment).is_none());
     }
 }

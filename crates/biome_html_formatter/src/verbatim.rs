@@ -1,11 +1,12 @@
 use crate::HtmlFormatter;
+use crate::comments::HtmlCommentStyle;
 use crate::context::HtmlFormatContext;
-use biome_formatter::comments::{CommentKind, SourceComment};
+use biome_formatter::comments::{CommentKind, CommentStyle, SourceComment};
 use biome_formatter::format_element::tag::VerbatimKind;
 use biome_formatter::formatter::Formatter;
 use biome_formatter::prelude::{
     Tag, empty_line, expand_parent, format_with, hard_line_break, line_suffix,
-    should_nestle_adjacent_doc_comments, soft_line_break_or_space, space, text,
+    should_nestle_adjacent_doc_comments, space, text,
 };
 
 use biome_formatter::{
@@ -52,15 +53,20 @@ pub struct FormatHtmlVerbatimNode<'node> {
     format_comments: bool,
 }
 
-impl FormatHtmlVerbatimNode<'_> {
-    pub fn with_format_comments(mut self, format_comments: bool) -> Self {
-        self.format_comments = format_comments;
-        self
-    }
-}
-
 impl Format<HtmlFormatContext> for FormatHtmlVerbatimNode<'_> {
     fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
+        fn source_range<Context>(f: &Formatter<Context>, range: TextRange) -> TextRange
+        where
+            Context: CstFormatContext,
+        {
+            f.context()
+                .source_map()
+                .map_or_else(|| range, |source_map| source_map.source_range(range))
+        }
+
+        let preserve_outer_trivia =
+            matches!(self.kind, VerbatimKind::Suppressed) && self.node.parent().is_none();
+
         for element in self.node.descendants_with_tokens(Direction::Next) {
             match element {
                 SyntaxElement::Token(token) => f.state_mut().track_token(&token),
@@ -78,21 +84,22 @@ impl Format<HtmlFormatContext> for FormatHtmlVerbatimNode<'_> {
         // The trimmed range of a node is its range without any of its leading or trailing trivia.
         // Except for nodes that used to be parenthesized, the range than covers the source from the
         // `(` to the `)` (the trimmed range of the parenthesized expression, not the inner expression)
-        let trimmed_source_range = f.context().source_map().map_or_else(
-            || self.node.text_trimmed_range(),
-            |source_map| source_map.trimmed_source_range(self.node),
-        );
+        let verbatim_source_range = if preserve_outer_trivia {
+            source_range(f, self.node.text_range_with_trivia())
+        } else {
+            f.context().source_map().map_or_else(
+                || self.node.text_trimmed_range(),
+                |source_map| source_map.trimmed_source_range(self.node),
+            )
+        };
+
+        let verbatim_text_start = if preserve_outer_trivia {
+            self.node.text_range_with_trivia().start()
+        } else {
+            self.node.text_trimmed_range().start()
+        };
 
         f.write_element(FormatElement::Tag(Tag::StartVerbatim(self.kind)))?;
-
-        fn source_range<Context>(f: &Formatter<Context>, range: TextRange) -> TextRange
-        where
-            Context: CstFormatContext,
-        {
-            f.context()
-                .source_map()
-                .map_or_else(|| range, |source_map| source_map.source_range(range))
-        }
 
         // Format all leading comments that are outside of the node's source range.
         if self.format_comments {
@@ -100,16 +107,13 @@ impl Format<HtmlFormatContext> for FormatHtmlVerbatimNode<'_> {
             let leading_comments = comments.leading_comments(self.node);
 
             let outside_trimmed_range = leading_comments.partition_point(|comment| {
-                comment.piece().text_range().end() <= trimmed_source_range.start()
+                comment.piece().text_range().end() <= verbatim_source_range.start()
             });
 
             let (outside_trimmed_range, in_trimmed_range) =
                 leading_comments.split_at(outside_trimmed_range);
 
-            biome_formatter::write!(
-                f,
-                [FormatLHtmlLeadingComments::Comments(outside_trimmed_range)]
-            )?;
+            biome_formatter::write!(f, [FormatLeadingCommentsSlice(outside_trimmed_range)])?;
 
             for comment in in_trimmed_range {
                 comment.mark_formatted();
@@ -125,23 +129,29 @@ impl Format<HtmlFormatContext> for FormatHtmlVerbatimNode<'_> {
             .flat_map(|trivia| trivia.pieces())
             .filter(|trivia| trivia.is_skipped())
             .map(|trivia| source_range(f, trivia.text_range()).start())
-            .take_while(|start| *start < trimmed_source_range.start())
+            .take_while(|start| *start < verbatim_source_range.start())
             .next()
-            .unwrap_or_else(|| trimmed_source_range.start());
+            .unwrap_or_else(|| verbatim_source_range.start());
 
         let original_source = f.context().source_map().map_or_else(
-            || self.node.text_trimmed().to_string(),
+            || {
+                if preserve_outer_trivia {
+                    self.node.text_with_trivia().to_string()
+                } else {
+                    self.node.text_trimmed().to_string()
+                }
+            },
             |source_map| {
                 source_map
                     .source()
-                    .text_slice(trimmed_source_range.cover_offset(start_source))
+                    .text_slice(verbatim_source_range.cover_offset(start_source))
                     .to_string()
             },
         );
 
         text(
             &normalize_newlines(&original_source, LINE_TERMINATORS),
-            self.node.text_trimmed_range().start(),
+            verbatim_text_start,
         )
         .fmt(f)?;
 
@@ -156,7 +166,7 @@ impl Format<HtmlFormatContext> for FormatHtmlVerbatimNode<'_> {
             let trailing_comments = comments.trailing_comments(self.node);
 
             let outside_trimmed_range_start = trailing_comments.partition_point(|comment| {
-                source_range(f, comment.piece().text_range()).end() <= trimmed_source_range.end()
+                source_range(f, comment.piece().text_range()).end() <= verbatim_source_range.end()
             });
 
             let (in_trimmed_range, outside_trimmed_range) =
@@ -196,59 +206,110 @@ pub fn format_suppressed_node(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNode<'
 }
 
 /// Formats the leading comments of `node`
-pub const fn format_html_leading_comments(node: &HtmlSyntaxNode) -> FormatLHtmlLeadingComments<'_> {
-    FormatLHtmlLeadingComments::Node(node)
+pub const fn format_html_leading_comments(node: &HtmlSyntaxNode) -> FormatHtmlLeadingComments<'_> {
+    FormatHtmlLeadingComments {
+        node,
+        is_block_element: false,
+    }
+}
+
+/// Formats the leading comments of `node`, treating it as a block element.
+/// For block elements, comments with no line break after them will still get a hard line break.
+pub const fn format_html_leading_comments_for_block(
+    node: &HtmlSyntaxNode,
+) -> FormatHtmlLeadingComments<'_> {
+    FormatHtmlLeadingComments {
+        node,
+        is_block_element: true,
+    }
 }
 
 /// Formats the leading comments of a node.
 #[derive(Debug, Copy, Clone)]
-pub enum FormatLHtmlLeadingComments<'a> {
-    Node(&'a HtmlSyntaxNode),
-    Comments(&'a [SourceComment<HtmlLanguage>]),
+pub struct FormatHtmlLeadingComments<'a> {
+    node: &'a HtmlSyntaxNode,
+    /// Whether the node is a block element. If true, comments with no line break after
+    /// them will still get a hard line break instead of a space.
+    is_block_element: bool,
 }
 
-impl<'a> Format<HtmlFormatContext> for FormatLHtmlLeadingComments<'a> {
+impl<'a> Format<HtmlFormatContext> for FormatHtmlLeadingComments<'a> {
     fn fmt(&self, f: &mut HtmlFormatter) -> FormatResult<()> {
         let comments = f.context().comments().clone();
-        let leading_comments = match self {
-            FormatLHtmlLeadingComments::Node(node) => comments.leading_comments(node),
-            FormatLHtmlLeadingComments::Comments(comments) => comments,
-        };
+        let leading_comments = comments.leading_comments(self.node);
+        format_leading_comments_impl(leading_comments, self.is_block_element, f)
+    }
+}
 
-        let leading_comments_iter = leading_comments.iter().peekable();
-        for comment in leading_comments_iter {
-            let format_comment = FormatRefWithRule::new(
-                comment,
-                <HtmlFormatContext as CstFormatContext>::CommentRule::default(),
-            );
-            biome_formatter::write!(f, [format_comment])?;
+/// Formats a slice of leading comments (used for verbatim node formatting).
+#[derive(Debug, Copy, Clone)]
+pub struct FormatLeadingCommentsSlice<'a>(&'a [SourceComment<HtmlLanguage>]);
 
-            match comment.kind() {
-                CommentKind::Block | CommentKind::InlineBlock => {
-                    unreachable!("Html comments only have line comments")
-                }
+impl<'a> Format<HtmlFormatContext> for FormatLeadingCommentsSlice<'a> {
+    fn fmt(&self, f: &mut HtmlFormatter) -> FormatResult<()> {
+        format_leading_comments_impl(self.0, false, f)
+    }
+}
 
-                CommentKind::Line => {
-                    // TODO: review logic here
-                    match comment.lines_after() {
-                        0 => {}
-                        1 => {
-                            if comment.lines_before() == 0 {
-                                biome_formatter::write!(f, [soft_line_break_or_space()])?;
-                            } else {
-                                biome_formatter::write!(f, [hard_line_break()])?;
-                            }
+/// Shared implementation for formatting leading comments.
+fn format_leading_comments_impl(
+    leading_comments: &[SourceComment<HtmlLanguage>],
+    is_block_element: bool,
+    f: &mut HtmlFormatter,
+) -> FormatResult<()> {
+    let leading_comments_iter = leading_comments.iter().peekable();
+    for comment in leading_comments_iter {
+        let format_comment = FormatRefWithRule::new(
+            comment,
+            <HtmlFormatContext as CstFormatContext>::CommentRule::default(),
+        );
+        biome_formatter::write!(f, [format_comment])?;
+
+        // Check if this is a suppression comment
+        let is_suppression = HtmlCommentStyle::is_suppression(comment.piece().text());
+
+        match comment.kind() {
+            CommentKind::Block | CommentKind::InlineBlock => {
+                // HTML comments are block comments (<!-- ... -->)
+                match comment.lines_after() {
+                    0 => {
+                        // No newline after comment in source
+                        if is_suppression {
+                            // Don't add trailing whitespace after suppression comments -
+                            // the suppressed content should directly follow
+                        } else if is_block_element {
+                            // Block elements always get a line break after leading comments
+                            biome_formatter::write!(f, [hard_line_break()])?;
+                        } else {
+                            // Inline elements get a space
+                            biome_formatter::write!(f, [space()])?;
                         }
-                        _ => biome_formatter::write!(f, [empty_line()])?,
                     }
+                    1 => {
+                        biome_formatter::write!(f, [hard_line_break()])?;
+                    }
+                    _ => biome_formatter::write!(f, [empty_line()])?,
                 }
             }
 
-            comment.mark_formatted()
+            CommentKind::Line => {
+                // `//` line comments always require a hard line break after them because
+                // everything after `//` to end-of-line is part of the comment. Using
+                // `soft_line_break_or_space` would collapse the comment with the next
+                // attribute onto a single line, turning the `>` into part of the comment.
+                match comment.lines_after() {
+                    0 => {}
+                    _ => {
+                        biome_formatter::write!(f, [hard_line_break()])?;
+                    }
+                }
+            }
         }
 
-        Ok(())
+        comment.mark_formatted()
     }
+
+    Ok(())
 }
 
 /// Formats the leading comments of `node`

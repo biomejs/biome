@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -52,8 +51,8 @@ invalid.js:2:2 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━━�
   
      1  1 │   switch (foo) {
      2    │ - → case·0:
-     3  2 │   	default:
-     4  3 │   		break;
+     3  2 │     default:
+     4  3 │       break;
   
 
 ```
@@ -83,8 +82,8 @@ invalid.js:10:14 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━�
      8  8 │   
      9  9 │   switch (foo) {
     10    │ - → /*·before·*/case·0:/*·after·*/
-    11 10 │   	// comment for default
-    12 11 │   	default:
+    11 10 │     // comment for default
+    12 11 │     default:
   
 
 ```
@@ -112,11 +111,11 @@ invalid.js:13:2 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━━
   
   i Unsafe fix: Remove the useless case.
   
-    11 11 │   	// comment for default
-    12 12 │   	default:
+    11 11 │     // comment for default
+    12 12 │     default:
     13    │ - → case·1:
-    14 13 │   	case 2:/* statements */
-    15 14 │   		break;
+    14 13 │     case 2:/* statements */
+    15 14 │       break;
   
 
 ```
@@ -147,14 +146,14 @@ invalid.js:14:2 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━━
   i Unsafe fix: Remove the useless case.
   
      9  9 │   switch (foo) {
-    10 10 │   	/* before */case 0:/* after */
+    10 10 │     /* before */case 0:/* after */
     11    │ - → //·comment·for·default
     12    │ - → default:
-    13 11 │   	case 1:
+    13 11 │     case 1:
     14    │ - → case·2:/*·statements·*/
        12 │ + → default:/*·statements·*/
-    15 13 │   		break;
-    16 14 │   	case 3:
+    15 13 │       break;
+    16 14 │     case 3:
   
 
 ```

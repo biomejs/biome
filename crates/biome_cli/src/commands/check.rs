@@ -1,19 +1,29 @@
-use super::{FixFileModeOptions, LoadEditorConfig, determine_fix_file_mode};
+use super::{FixFileModeOptions, determine_fix_file_mode, get_files_to_process_with_cli_options};
+use crate::CliDiagnostic;
 use crate::cli_options::CliOptions;
-use crate::commands::{CommandRunner, get_files_to_process_with_cli_options};
-use crate::{CliDiagnostic, Execution, TraversalMode};
+use crate::runner::execution::{AnalyzerSelectors, Execution, VcsTargeted};
+use crate::runner::impls::commands::traversal::{LoadEditorConfig, TraversalCommand};
+use crate::runner::impls::executions::summary_verb::SummaryVerbExecution;
+use crate::runner::impls::process_file::check::CheckProcessFile;
+use biome_configuration::analyzer::AnalyzerSelector;
 use biome_configuration::analyzer::LinterEnabled;
 use biome_configuration::analyzer::assist::{AssistConfiguration, AssistEnabled};
 use biome_configuration::css::CssParserConfiguration;
 use biome_configuration::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
 use biome_configuration::json::JsonParserConfiguration;
 use biome_configuration::{Configuration, FormatterConfiguration, LinterConfiguration};
-use biome_console::Console;
+use biome_console::{Console, MarkupBuf};
 use biome_deserialize::Merge;
+use biome_diagnostics::{Category, category};
 use biome_fs::FileSystem;
+use biome_service::workspace::{
+    FeatureKind, FeatureName, FeaturesBuilder, FeaturesSupported, FixFileMode, ScanKind,
+    SupportKind,
+};
 use biome_service::{Workspace, WorkspaceError};
 use camino::Utf8PathBuf;
 use std::ffi::OsString;
+use std::time::Duration;
 
 pub(crate) struct CheckCommandPayload {
     pub(crate) write: bool,
@@ -32,6 +42,108 @@ pub(crate) struct CheckCommandPayload {
     pub(crate) format_with_errors: Option<FormatWithErrorsEnabled>,
     pub(crate) json_parser: Option<JsonParserConfiguration>,
     pub(crate) css_parser: Option<CssParserConfiguration>,
+    pub(crate) only: Vec<AnalyzerSelector>,
+    pub(crate) skip: Vec<AnalyzerSelector>,
+    pub(crate) profile_rules: bool,
+}
+
+struct CheckExecution {
+    /// The type of fixes that should be applied when analyzing a file.
+    ///
+    /// It's [None] if the `check` command is called without `--apply` or `--apply-suggested`
+    /// arguments.
+    fix_file_mode: Option<FixFileMode>,
+    /// An optional tuple.
+    /// 1. The virtual path to the file
+    /// 2. The content of the file
+    stdin_file_path: Option<String>,
+    /// A flag to know vcs integrated options such as `--staged` or `--changed` are enabled
+    vcs_targeted: VcsTargeted,
+
+    /// Whether assist diagnostics should be promoted to error, and fail the CLI
+    enforce_assist: bool,
+
+    /// It skips parse errors
+    skip_parse_errors: bool,
+
+    /// Run only the given lint rule, assist action, group of rules and actions, or domain
+    only: Vec<AnalyzerSelector>,
+    /// Skip the given lint rule, assist action, group of rules and actions, or domain
+    skip: Vec<AnalyzerSelector>,
+}
+
+impl Execution for CheckExecution {
+    fn wanted_features(&self) -> FeatureName {
+        FeaturesBuilder::new().with_all().without_search().build()
+    }
+
+    fn not_requested_features(&self) -> FeatureName {
+        FeaturesBuilder::new().with_search().build()
+    }
+
+    fn can_handle(&self, features: FeaturesSupported) -> bool {
+        features.supports_lint() || features.supports_assist() || features.supports_format()
+    }
+
+    fn is_vcs_targeted(&self) -> bool {
+        self.vcs_targeted.changed || self.vcs_targeted.staged
+    }
+
+    fn supports_kind(&self, file_features: &FeaturesSupported) -> Option<SupportKind> {
+        file_features
+            .support_kind_if_not_enabled(FeatureKind::Lint)
+            .and(file_features.support_kind_if_not_enabled(FeatureKind::Format))
+            .and(file_features.support_kind_if_not_enabled(FeatureKind::Assist))
+    }
+
+    fn get_stdin_file_path(&self) -> Option<&str> {
+        self.stdin_file_path.as_deref()
+    }
+
+    fn is_check(&self) -> bool {
+        true
+    }
+
+    fn as_diagnostic_category(&self) -> &'static Category {
+        category!("check")
+    }
+
+    fn is_safe_fixes_enabled(&self) -> bool {
+        self.fix_file_mode
+            .is_some_and(|fix_mode| fix_mode == FixFileMode::SafeFixes)
+    }
+
+    fn is_safe_and_unsafe_fixes_enabled(&self) -> bool {
+        self.fix_file_mode
+            .is_some_and(|fix_mode| fix_mode == FixFileMode::SafeAndUnsafeFixes)
+    }
+
+    fn as_fix_file_mode(&self) -> Option<FixFileMode> {
+        self.fix_file_mode
+    }
+
+    fn should_skip_parse_errors(&self) -> bool {
+        self.skip_parse_errors
+    }
+
+    fn requires_write_access(&self) -> bool {
+        self.fix_file_mode.is_some()
+    }
+
+    fn analyzer_selectors(&self) -> AnalyzerSelectors {
+        AnalyzerSelectors {
+            only: self.only.clone(),
+            skip: self.skip.clone(),
+        }
+    }
+
+    fn should_enforce_assist(&self) -> bool {
+        self.enforce_assist
+    }
+
+    fn summary_phrase(&self, files: usize, duration: &Duration) -> MarkupBuf {
+        SummaryVerbExecution.summary_verb("Checked", files, duration)
+    }
 }
 
 impl LoadEditorConfig for CheckCommandPayload {
@@ -43,8 +155,45 @@ impl LoadEditorConfig for CheckCommandPayload {
     }
 }
 
-impl CommandRunner for CheckCommandPayload {
-    const COMMAND_NAME: &'static str = "check";
+impl TraversalCommand for CheckCommandPayload {
+    type ProcessFile = CheckProcessFile;
+
+    fn command_name(&self) -> &'static str {
+        "check"
+    }
+
+    fn minimal_scan_kind(&self) -> Option<ScanKind> {
+        None
+    }
+
+    fn get_execution(
+        &self,
+        cli_options: &CliOptions,
+        _console: &mut dyn Console,
+        _workspace: &dyn Workspace,
+    ) -> Result<Box<dyn Execution>, CliDiagnostic> {
+        let fix_file_mode = determine_fix_file_mode(FixFileModeOptions {
+            write: self.write,
+            suppress: false,
+            suppression_reason: None,
+            fix: self.fix,
+            unsafe_: self.unsafe_,
+        })?;
+
+        if self.profile_rules {
+            biome_analyze::profiling::enable();
+        }
+
+        Ok(Box::new(CheckExecution {
+            fix_file_mode,
+            stdin_file_path: self.stdin_file_path.clone(),
+            vcs_targeted: (self.staged, self.changed).into(),
+            enforce_assist: self.enforce_assist,
+            skip_parse_errors: cli_options.skip_parse_errors,
+            only: self.only.clone(),
+            skip: self.skip.clone(),
+        }))
+    }
 
     fn merge_configuration(
         &mut self,
@@ -131,37 +280,5 @@ impl CommandRunner for CheckCommandPayload {
         .unwrap_or(self.paths.clone());
 
         Ok(paths)
-    }
-
-    fn get_stdin_file_path(&self) -> Option<&str> {
-        self.stdin_file_path.as_deref()
-    }
-
-    fn should_write(&self) -> bool {
-        self.write || self.fix
-    }
-
-    fn get_execution(
-        &self,
-        cli_options: &CliOptions,
-        console: &mut dyn Console,
-        _workspace: &dyn Workspace,
-    ) -> Result<Execution, CliDiagnostic> {
-        let fix_file_mode = determine_fix_file_mode(FixFileModeOptions {
-            write: self.write,
-            suppress: false,
-            suppression_reason: None,
-            fix: self.fix,
-            unsafe_: self.unsafe_,
-        })?;
-
-        Ok(Execution::new(TraversalMode::Check {
-            fix_file_mode,
-            stdin: self.get_stdin(console)?,
-            vcs_targeted: (self.staged, self.changed).into(),
-            enforce_assist: self.enforce_assist,
-            skip_parse_errors: cli_options.skip_parse_errors,
-        })
-        .set_report(cli_options))
     }
 }

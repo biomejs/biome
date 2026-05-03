@@ -1,0 +1,34 @@
+<!-- should not generate diagnostics -->
+
+<!-- Simple text content -->
+<a>content</a>
+
+<!-- Nested text content -->
+<a><span>content</span></a>
+
+<!-- Mixed content with some hidden -->
+<a><span aria-hidden="true"></span>content</a>
+
+<!-- Text content with nested elements -->
+<a><div aria-hidden="true"></div>content</a>
+
+<!-- aria-hidden="false" should not hide content -->
+<a aria-hidden="false">content</a>
+
+<!-- Nested content with aria-hidden="false" -->
+<a><span aria-hidden="false">content</span></a>
+
+<!-- Image with alt text (self-closing provides content) -->
+<a><img alt="description" /></a>
+
+<!-- Link with title attribute and content -->
+<a title="Home">Home</a>
+
+<!-- Anchor with aria-label attribute (no visible content needed) -->
+<a aria-label="Navigate to home page"></a>
+
+<!-- Anchor with title attribute only (no visible content needed) -->
+<a title="Go to homepage"></a>
+
+<!-- Anchor with both aria-label and title -->
+<a aria-label="Home" title="Navigate home"></a>

@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```svelte
@@ -187,7 +188,7 @@ await_missing_expression.svelte:1:8 parse ━━━━━━━━━━━━�
   × Expected an expression, instead none was found.
   
   > 1 │ {#await}
-      │        
+      │        ^
     2 │   <p>Loading...</p>
     3 │ {:then value}
   

@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: elements/pre.html
 ---
+
 # Input
 
 ```html
@@ -22,23 +23,7 @@ info: elements/pre.html
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Attribute Position: Auto
-Bracket same line: false
-Whitespace sensitivity: css
-Indent script and style: false
-Self close void elements: never
------
+# Formatted
 
 ```html
 <pre>
@@ -54,6 +39,7 @@ Self close void elements: never
  \::/__/      \/__/        \::/  /        /:/  /       \:\__\
 	~~                        \/__/         \/__/         \/__/
 </pre>
+
 ```
 
 

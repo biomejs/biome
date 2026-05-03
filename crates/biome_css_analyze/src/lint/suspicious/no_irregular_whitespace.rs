@@ -2,16 +2,10 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{AnyCssRule, CssLanguage};
+use biome_css_syntax::{AnyCssRule, CssSyntaxNode};
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, Direction, SyntaxToken, TextRange};
+use biome_rowan::{AstNode, Direction, TextRange};
 use biome_rule_options::no_irregular_whitespace::NoIrregularWhitespaceOptions;
-
-const IRREGULAR_WHITESPACES: &[char; 22] = &[
-    '\u{c}', '\u{b}', '\u{85}', '\u{feff}', '\u{a0}', '\u{1680}', '\u{180e}', '\u{2000}',
-    '\u{2001}', '\u{2002}', '\u{2003}', '\u{2004}', '\u{2005}', '\u{2006}', '\u{2007}', '\u{2008}',
-    '\u{2009}', '\u{200a}', '\u{200b}', '\u{202f}', '\u{205f}', '\u{3000}',
-];
 
 declare_lint_rule! {
     /// Disallows the use of irregular whitespace characters.
@@ -53,8 +47,7 @@ impl Rule for NoIrregularWhitespace {
     type Options = NoIrregularWhitespaceOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let node = ctx.query();
-        get_irregular_whitespace(node).into_boxed_slice()
+        get_irregular_whitespace(ctx.query().syntax()).into_boxed_slice()
     }
 
     fn diagnostic(_: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
@@ -73,24 +66,31 @@ impl Rule for NoIrregularWhitespace {
     }
 }
 
-fn get_irregular_whitespace(node: &AnyCssRule) -> Vec<TextRange> {
-    let syntax = node.syntax();
-    let mut all_whitespaces_token: Vec<TextRange> = vec![];
-    let matches_irregular_whitespace = |token: &SyntaxToken<CssLanguage>| {
-        !token.has_leading_comments()
-            && !token.has_trailing_comments()
-            && token.text().chars().any(|char| {
-                IRREGULAR_WHITESPACES
-                    .iter()
-                    .any(|irregular_whitespace| &char == irregular_whitespace)
-            })
-    };
+fn is_irregular_whitespace(c: char) -> bool {
+    matches!(
+        c,
+        '\u{000B}' | '\u{000C}' | '\u{0085}' | '\u{00A0}' | '\u{1680}' | '\u{180E}' | '\u{2000}'
+            ..='\u{200B}' | '\u{202F}' | '\u{205F}' | '\u{3000}' | '\u{FEFF}'
+    )
+}
 
-    for token in syntax.descendants_tokens(Direction::Next) {
-        if matches_irregular_whitespace(&token) {
-            all_whitespaces_token.push(token.text_range());
-        }
+fn get_irregular_whitespace(syntax: &CssSyntaxNode) -> Vec<TextRange> {
+    if !syntax
+        .text_with_trivia()
+        .chars()
+        .any(is_irregular_whitespace)
+    {
+        return vec![];
     }
 
-    all_whitespaces_token
+    let mut results = vec![];
+    for token in syntax.descendants_tokens(Direction::Next) {
+        if !token.has_leading_comments()
+            && !token.has_trailing_comments()
+            && token.text().chars().any(is_irregular_whitespace)
+        {
+            results.push(token.text_range());
+        }
+    }
+    results
 }

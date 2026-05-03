@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```svelte
@@ -38,7 +39,7 @@ HtmlRoot {
                 children: HtmlElementList [
                     HtmlSelfClosingElement {
                         l_angle_token: L_ANGLE@65..69 "<" [Newline("\n"), Whitespace("  ")] [],
-                        name: HtmlTagName {
+                        name: HtmlComponentName {
                             value_token: HTML_LITERAL@69..79 "Component" [] [Whitespace(" ")],
                         },
                         attributes: HtmlAttributeList [],
@@ -82,7 +83,7 @@ HtmlRoot {
         6: HTML_ELEMENT_LIST@65..81
           0: HTML_SELF_CLOSING_ELEMENT@65..81
             0: L_ANGLE@65..69 "<" [Newline("\n"), Whitespace("  ")] []
-            1: HTML_TAG_NAME@69..79
+            1: HTML_COMPONENT_NAME@69..79
               0: HTML_LITERAL@69..79 "Component" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@79..79
             3: SLASH@79..80 "/" [] []

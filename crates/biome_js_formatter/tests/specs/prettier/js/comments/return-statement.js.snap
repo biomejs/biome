@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/comments/return-statement.js
 ---
+
 # Input
 
 ```js
@@ -182,7 +183,7 @@ function singleLineBlockNextLine() {
 ```diff
 --- Prettier
 +++ Biome
-@@ -80,10 +80,12 @@
+@@ -80,10 +80,10 @@
  }
  
  function memberInAndOutWithCalls() {
@@ -192,9 +193,7 @@ function singleLineBlockNextLine() {
 -    .c.d();
 +  return (
 +    // Reason for a
-+    aFunction
-+      .b()
-+      .c.d()
++    aFunction.b().c.d()
 +  );
  }
  
@@ -288,9 +287,7 @@ function memberOutside() {
 function memberInAndOutWithCalls() {
   return (
     // Reason for a
-    aFunction
-      .b()
-      .c.d()
+    aFunction.b().c.d()
   );
 }
 

@@ -1,0 +1,97 @@
+/* should not generate diagnostics */
+
+// Object destructuring in sibling scopes
+function objDestructuring(condition) {
+  if (condition) {
+    const str = 'this is a message';
+    const { str: destructuredStr } = { str: 'this is a message' };
+    const objStr = { str: 'this is a message' };
+    return { str, destructuredStr, objStr };
+  }
+
+  const str = 'this is a message';
+  const { str: destructuredStr } = { str: 'this is a different message' };
+  const objStr = { str: 'this is a different message' };
+  return { str, destructuredStr, objStr };
+}
+
+// Array destructuring in sibling scopes
+function arrDestructuring(condition) {
+  if (condition) {
+    const [first] = [1];
+    const [, second] = [1, 2];
+    return { first, second };
+  }
+
+  const [first] = [10];
+  const [, second] = [10, 20];
+  return { first, second };
+}
+
+// Shorthand object destructuring in sibling scopes
+function shorthandDestructuring(condition) {
+  if (condition) {
+    const { x } = { x: 1 };
+    return x;
+  }
+
+  const { x } = { x: 2 };
+  return x;
+}
+
+// Nested object destructuring in sibling scopes
+function nestedObjDestructuring(condition) {
+  if (condition) {
+    const { a: { b: nested } } = { a: { b: 1 } };
+    return nested;
+  }
+
+  const { a: { b: nested } } = { a: { b: 2 } };
+  return nested;
+}
+
+// Nested array destructuring in sibling scopes
+function nestedArrDestructuring(condition) {
+  if (condition) {
+    const [[inner]] = [[1]];
+    return inner;
+  }
+
+  const [[inner]] = [[2]];
+  return inner;
+}
+
+// Mixed nested destructuring in sibling scopes
+function mixedDestructuring(condition) {
+  if (condition) {
+    const { items: [first] } = { items: [1] };
+    const [{ name }] = [{ name: 'a' }];
+    return { first, name };
+  }
+
+  const { items: [first] } = { items: [2] };
+  const [{ name }] = [{ name: 'b' }];
+  return { first, name };
+}
+
+// Rest element in array destructuring in sibling scopes
+function restDestructuring(condition) {
+  if (condition) {
+    const [head, ...tail] = [1, 2, 3];
+    return { head, tail };
+  }
+
+  const [head, ...tail] = [4, 5, 6];
+  return { head, tail };
+}
+
+// Rest element in object destructuring in sibling scopes
+function restObjDestructuring(condition) {
+  if (condition) {
+    const { a, ...rest } = { a: 1, b: 2 };
+    return { a, rest };
+  }
+
+  const { a, ...rest } = { a: 3, b: 4 };
+  return { a, rest };
+}

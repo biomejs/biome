@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atrule/unknown.css
 ---
+
 # Input
 
 ```css
@@ -16,19 +17,7 @@ info: css/atrule/unknown.css
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
------
+# Formatted
 
 ```css
 .container {
@@ -38,4 +27,5 @@ Quote style: Double Quotes
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 ```

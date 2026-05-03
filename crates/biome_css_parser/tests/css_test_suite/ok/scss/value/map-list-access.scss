@@ -1,0 +1,36 @@
+// Map bracket access
+$map: (key1: value1, key2: value2, key3: value3);
+$value1: map.get($map, key1);
+
+// Nested map access
+$theme: (
+  colors: (
+    primary: #036,
+    secondary: #069
+  ),
+  sizes: (
+    small: 10px,
+    large: 20px
+  )
+);
+
+$primary-color: map.get(map.get($theme, colors), primary);
+
+// List indexing (using nth function - SCSS doesn't have [] syntax natively)
+$list: (a, b, c, d);
+$second: list.nth($list, 2);
+
+// Map with complex keys
+$complex-map: (
+  (key1, key2): value1,
+  "string-key": value2
+);
+
+.test {
+  color: map.get($map, key1);
+  size: list.nth($list, 1);
+}
+
+
+
+

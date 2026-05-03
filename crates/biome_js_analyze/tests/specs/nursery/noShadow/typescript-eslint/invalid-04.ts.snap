@@ -16,7 +16,7 @@ function foo<T extends (arg: any) => void>(arg: T) {}
 ```
 invalid-04.ts:5:14 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable shadows another variable with the same name in the outer scope.
+  ! This variable shadows another variable with the same name in the outer scope.
   
     3 │ // but the `arg` bindings do NOT shadow each other.
     4 │ type T = string;

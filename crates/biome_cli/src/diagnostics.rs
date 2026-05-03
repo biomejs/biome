@@ -375,6 +375,19 @@ impl CliDiagnostic {
         })
     }
 
+    /// Emitted when errors were emitted while running `format` command
+    pub fn format_error(category: &'static Category) -> Self {
+        Self::CheckError(CheckError {
+            category,
+            message: MessageAndDescription::from(
+                markup! {
+                    "Some "<Emphasis>"errors"</Emphasis>" were emitted while "<Emphasis>"running formatter"</Emphasis>"."
+                }
+                    .to_owned(),
+            ),
+        })
+    }
+
     /// Emitted when warnings were emitted while running `check` command
     pub fn check_warnings(category: &'static Category) -> Self {
         Self::CheckError(CheckError {

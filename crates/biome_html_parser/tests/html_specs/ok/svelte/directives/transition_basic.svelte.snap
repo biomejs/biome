@@ -1,0 +1,96 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div transition:fade>Fades in and out</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteTransitionDirective {
+                        transition_token: TRANSITION_KW@5..15 "transition" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@15..16 ":" [] [],
+                            property: SvelteName {
+                                ident_token: IDENT@16..20 "fade" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: missing (optional),
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@20..21 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@21..37 "Fades in and out" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@37..38 "<" [] [],
+                slash_token: SLASH@38..39 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@39..42 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@42..43 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@43..44 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..44
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..43
+    0: HTML_ELEMENT@0..43
+      0: HTML_OPENING_ELEMENT@0..21
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..20
+          0: SVELTE_TRANSITION_DIRECTIVE@5..20
+            0: TRANSITION_KW@5..15 "transition" [] []
+            1: SVELTE_DIRECTIVE_VALUE@15..20
+              0: COLON@15..16 ":" [] []
+              1: SVELTE_NAME@16..20
+                0: IDENT@16..20 "fade" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@20..20
+              3: (empty)
+        3: R_ANGLE@20..21 ">" [] []
+      1: HTML_ELEMENT_LIST@21..37
+        0: HTML_CONTENT@21..37
+          0: HTML_LITERAL@21..37 "Fades in and out" [] []
+      2: HTML_CLOSING_ELEMENT@37..43
+        0: L_ANGLE@37..38 "<" [] []
+        1: SLASH@38..39 "/" [] []
+        2: HTML_TAG_NAME@39..42
+          0: HTML_LITERAL@39..42 "div" [] []
+        3: R_ANGLE@42..43 ">" [] []
+  4: EOF@43..44 "" [Newline("\n")] []
+
+```

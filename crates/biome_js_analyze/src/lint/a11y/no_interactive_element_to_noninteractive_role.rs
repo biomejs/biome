@@ -64,6 +64,12 @@ impl Rule for NoInteractiveElementToNoninteractiveRole {
             let element_name = node.name().ok()?.as_jsx_name()?.value_token().ok()?;
             let element_name = element_name.text_trimmed();
 
+            // `hr` implicitly maps to `separator`, and `presentation`/`none` is explicitly
+            // allowed on separators.
+            if element_name == "hr" && matches!(role_attribute_value, "presentation" | "none") {
+                return None;
+            }
+
             if !ctx.aria_roles().is_not_interactive_element(node)
                 && AriaRole::from_roles(role_attribute_value)
                     .is_some_and(|role| role.is_non_interactive())

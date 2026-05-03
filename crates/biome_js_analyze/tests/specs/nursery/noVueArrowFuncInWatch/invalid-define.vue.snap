@@ -1,0 +1,136 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-define.vue
+---
+# Input
+```vue
+<script>
+/* should generate diagnostics */
+import { defineComponent } from 'vue';
+
+export default defineComponent({
+  watch: {
+    foo: (val, oldVal) => {
+      console.log('new: %s, old: %s', val, oldVal)
+    },
+    bar: {
+			handler: (val, oldVal) => {
+				console.log('new: %s, old: %s', val, oldVal)
+			}
+    }
+    short: (val, oldVal) => console.log('new: %s, old: %s', val, oldVal)
+  }
+})
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-define.vue:15:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `short`
+  
+    13 │ 			}
+    14 │     }
+  > 15 │     short: (val, oldVal) => console.log('new: %s, old: %s', val, oldVal)
+       │     ^^^^^
+    16 │   }
+    17 │ })
+  
+  i Remove short
+  
+
+```
+
+```
+invalid-define.vue:7:10 lint/nursery/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found arrow function in Vue watcher definition.
+  
+     5 │ export default defineComponent({
+     6 │   watch: {
+   > 7 │     foo: (val, oldVal) => {
+       │          ^^^^^^^^^^^^^^^^^^
+   > 8 │       console.log('new: %s, old: %s', val, oldVal)
+   > 9 │     },
+       │     ^
+    10 │     bar: {
+    11 │ 			handler: (val, oldVal) => {
+  
+  i Using an arrow function here means that the `this` context will not refer to the Vue instance, which is probably not what you want.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rewrite the arrow function into a function expression.
+  
+     5  5 │   export default defineComponent({
+     6  6 │     watch: {
+     7    │ - ····foo:·(val,·oldVal)·=>·{
+        7 │ + ····foo:·function(val,·oldVal)·{
+     8  8 │         console.log('new: %s, old: %s', val, oldVal)
+     9  9 │       },
+  
+
+```
+
+```
+invalid-define.vue:11:13 lint/nursery/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found arrow function in Vue watcher definition.
+  
+     9 │     },
+    10 │     bar: {
+  > 11 │ 			handler: (val, oldVal) => {
+       │ 			         ^^^^^^^^^^^^^^^^^^
+  > 12 │ 				console.log('new: %s, old: %s', val, oldVal)
+  > 13 │ 			}
+       │ 			^
+    14 │     }
+    15 │     short: (val, oldVal) => console.log('new: %s, old: %s', val, oldVal)
+  
+  i Using an arrow function here means that the `this` context will not refer to the Vue instance, which is probably not what you want.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rewrite the arrow function into a function expression.
+  
+     9  9 │       },
+    10 10 │       bar: {
+    11    │ - → → → handler:·(val,·oldVal)·=>·{
+       11 │ + → → → handler:·function(val,·oldVal)·{
+    12 12 │           console.log('new: %s, old: %s', val, oldVal)
+    13 13 │         }
+  
+
+```
+
+```
+invalid-define.vue:15:12 lint/nursery/noVueArrowFuncInWatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found arrow function in Vue watcher definition.
+  
+    13 │ 			}
+    14 │     }
+  > 15 │     short: (val, oldVal) => console.log('new: %s, old: %s', val, oldVal)
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │   }
+    17 │ })
+  
+  i Using an arrow function here means that the `this` context will not refer to the Vue instance, which is probably not what you want.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rewrite the arrow function into a function expression.
+  
+    13 13 │   			}
+    14 14 │       }
+    15    │ - ····short:·(val,·oldVal)·=>·console.log('new:·%s,·old:·%s',·val,·oldVal)
+       15 │ + ····short:·function(val,·oldVal)·{
+       16 │ + return·console.log('new:·%s,·old:·%s',·val,·oldVal)
+       17 │ + }
+    16 18 │     }
+    17 19 │   })
+  
+
+```

@@ -3,11 +3,11 @@ use biome_analyze::{
     RuleMetadata, ServiceBag, ServicesDiagnostic, Visitor, VisitorContext, VisitorFinishContext,
 };
 use biome_js_syntax::{
-    AnyJsBindingPattern, AnyJsClassMember, AnyJsExpression, AnyJsObjectBindingPatternMember,
-    AnyJsRoot, JsArrayAssignmentPattern, JsArrowFunctionExpression, JsAssignmentExpression,
-    JsClassDeclaration, JsClassMemberList, JsConstructorClassMember, JsFunctionBody, JsLanguage,
-    JsObjectAssignmentPattern, JsObjectBindingPattern, JsPostUpdateExpression,
-    JsPreUpdateExpression, JsPropertyClassMember, JsStaticMemberAssignment,
+    AnyJsBindingPattern, AnyJsClass, AnyJsClassMember, AnyJsExpression,
+    AnyJsObjectBindingPatternMember, AnyJsRoot, JsArrayAssignmentPattern,
+    JsArrowFunctionExpression, JsAssignmentExpression, JsClassMemberList, JsConstructorClassMember,
+    JsFunctionBody, JsLanguage, JsObjectAssignmentPattern, JsObjectBindingPattern,
+    JsPostUpdateExpression, JsPreUpdateExpression, JsPropertyClassMember, JsStaticMemberAssignment,
     JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, TextRange,
     TsPropertyParameter,
 };
@@ -86,7 +86,7 @@ impl Visitor for SemanticClassMemberReferencesVisitor {
         mut ctx: VisitorContext<'_, '_, JsLanguage>,
     ) {
         if let WalkEvent::Enter(node) = event
-            && JsClassDeclaration::can_cast(node.kind())
+            && AnyJsClass::can_cast(node.kind())
         {
             ctx.match_query(node.clone());
         }
@@ -96,7 +96,7 @@ impl Visitor for SemanticClassMemberReferencesVisitor {
 #[derive(Clone)]
 pub struct SemanticClass<N>(pub N);
 
-impl QueryMatch for SemanticClass<JsClassDeclaration> {
+impl QueryMatch for SemanticClass<AnyJsClass> {
     fn text_range(&self) -> TextRange {
         self.0.syntax().text_trimmed_range()
     }
@@ -1288,6 +1288,7 @@ mod tests {
 
     mod is_used_in_expression_context_tests {
         use super::*;
+        use biome_js_syntax::JsClassDeclaration;
         use biome_js_syntax::binding_ext::AnyJsIdentifierBinding;
 
         fn extract_all_nodes(code: &str) -> Vec<AnyCandidateForUsedInExpressionNode> {

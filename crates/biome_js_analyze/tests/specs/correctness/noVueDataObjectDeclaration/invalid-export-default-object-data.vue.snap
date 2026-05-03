@@ -1,0 +1,51 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-export-default-object-data.vue
+---
+# Input
+```vue
+<script>
+// export default with object `data`
+export default {
+	data: {
+		foo: 'bar'
+	}
+}
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-export-default-object-data.vue:4:2 lint/correctness/noVueDataObjectDeclaration  FIXABLE  ━━━━━━━━━━
+
+  × Found an object declaration for `data` in this component.
+  
+    2 │ // export default with object `data`
+    3 │ export default {
+  > 4 │ 	data: {
+      │ 	^^^^^^^
+  > 5 │ 		foo: 'bar'
+  > 6 │ 	}
+      │ 	^
+    7 │ }
+    8 │ </script>
+  
+  i Using an object declaration for `data` is deprecated, and can result in different component instances sharing the same data.
+  
+  i Safe fix: Refactor the data object into a function returning the data object
+  
+    2  2 │   // export default with object `data`
+    3  3 │   export default {
+    4    │ - → data:·{
+       4 │ + → data:·function()·{
+       5 │ + return·{
+    5  6 │       foo: 'bar'
+    6    │ - → }
+       7 │ + → }
+       8 │ + }
+    7  9 │   }
+    8 10 │   
+  
+
+```

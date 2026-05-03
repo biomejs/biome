@@ -162,3 +162,14 @@ declare function f9(x: number): void;
 // Merges "this" params.
 declare function f10(this: string): void;
 declare function f10(this: number): void;
+
+function tuple([a, b]: [string, string]): void;
+function tuple([c, d]: [number, string]): void;
+
+function f({ a, b }: Record<string, string>): void;
+function f({ c, d }: Record<string, number>): void;
+function f(foo: Record<string, any>): void {}
+
+// Merges latter 2 type parameters into 1
+function fizzbuzz([a]: SomeType<string>, { c }: Record<"c", void>): void;
+function fizzbuzz([a]: SomeType<string>, { c }: Record<"c", number>): void;

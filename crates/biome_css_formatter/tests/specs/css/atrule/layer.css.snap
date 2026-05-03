@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atrule/layer.css
 ---
+
 # Input
 
 ```css
@@ -86,19 +87,7 @@ reset.type
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
------
+# Formatted
 
 ```css
 @layer framework, override, foo, bar.baz;
@@ -202,4 +191,5 @@ Quote style: Double Quotes
 		display: block;
 	}
 }
+
 ```

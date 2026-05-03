@@ -54,11 +54,11 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseConsistentEnumValueType {
-        version: "next",
+        version: "2.3.13",
         name: "useConsistentEnumValueType",
         language: "ts",
         recommended: false,
-        domains: &[RuleDomain::Project],
+        domains: &[RuleDomain::Types],
         sources: &[RuleSource::EslintTypeScript("no-mixed-enums").same()],
     }
 }

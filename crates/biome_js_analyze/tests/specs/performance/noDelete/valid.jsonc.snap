@@ -32,4 +32,7 @@ delete f()
 delete el.dataset.something
 ```
 
-
+# Input
+```cjs
+delete process.env.FOO
+```

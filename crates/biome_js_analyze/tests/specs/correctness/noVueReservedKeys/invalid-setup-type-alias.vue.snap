@@ -1,0 +1,32 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-setup-type-alias.vue
+---
+# Input
+```vue
+<script setup lang="ts">
+type A = {
+    $el: string
+};
+defineProps<A>();
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-setup-type-alias.vue:3:5 lint/correctness/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Key $el is reserved in Vue.
+  
+    1 │ <script setup lang="ts">
+    2 │ type A = {
+  > 3 │     $el: string
+      │     ^^^
+    4 │ };
+    5 │ defineProps<A>();
+  
+  i Rename the key to avoid conflicts with Vue reserved keys.
+  
+
+```

@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: load.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+await page.waitForLoadState('load');
+await page.goto('https://example.com');
+await page.locator('.content').waitFor();
+
+
+
+```

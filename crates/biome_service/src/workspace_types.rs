@@ -14,6 +14,10 @@ use biome_js_factory::{
 };
 use biome_rowan::{AstSeparatedList, TriviaPieceKind};
 
+fn escape_jsdoc_comment_text(text: &str) -> String {
+    text.replace("*/", "*\\/")
+}
+
 /// Manages a queue of type definitions that need to be generated
 #[derive(Default)]
 pub struct ModuleQueue<'a> {
@@ -120,6 +124,7 @@ fn instance_type<'a>(
 
                                 let mut property_ident = make::ident(property);
                                 if let Some(description) = description {
+                                    let description = escape_jsdoc_comment_text(&description);
                                     let comment = format!("/**\n\t* {description} \n\t */");
                                     let trivia = vec![
                                         (TriviaPieceKind::Newline, "\n"),
@@ -642,6 +647,7 @@ pub fn generate_type<'a>(
 
                     let mut property = make::ident(property_str);
                     if let Some(ref description) = description {
+                        let description = escape_jsdoc_comment_text(description);
                         let comment = format!("/**\n\t* {description} \n\t */");
                         let trivia = vec![
                             (TriviaPieceKind::Newline, "\n"),
@@ -790,4 +796,15 @@ pub fn methods() -> [WorkspaceMethod; 30] {
         workspace_method!(search_pattern),
         workspace_method!(drop_pattern),
     ]
+}
+
+#[cfg(test)]
+mod tests {
+    use super::escape_jsdoc_comment_text;
+
+    #[test]
+    fn escapes_comment_closing_sequences() {
+        assert_eq!(escape_jsdoc_comment_text("**/*.ts"), "**\\/*.ts");
+        assert_eq!(escape_jsdoc_comment_text("ends with */"), "ends with *\\/");
+    }
 }

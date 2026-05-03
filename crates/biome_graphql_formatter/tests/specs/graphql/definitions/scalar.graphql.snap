@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: graphql/definitions/scalar.graphql
 ---
+
 # Input
 
 ```graphql
@@ -19,20 +20,7 @@ scalar)
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Bracket spacing: true
-Quote style: Double Quotes
------
+# Formatted
 
 ```graphql
 scalar UUID @specifiedBy(url: "https://tools.ietf.org/html/rfc4122")
@@ -40,4 +28,5 @@ scalar UUID @specifiedBy(url: "https://tools.ietf.org/html/rfc4122")
 scalar URL @specifiedBy(url: "https://tools.ietf.org/html/rfc3986")
 
 scalar scalar @scalar(scalar: scalar)
+
 ```

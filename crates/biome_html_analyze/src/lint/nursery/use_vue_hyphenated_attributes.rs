@@ -3,10 +3,8 @@ use biome_analyze::{
     declare_lint_rule,
 };
 use biome_console::markup;
-use biome_html_syntax::{
-    AnyHtmlAttribute, HtmlAttributeList, HtmlOpeningElement, HtmlSelfClosingElement, HtmlTagName,
-};
-use biome_rowan::{AstNode, AstNodeList, SyntaxResult, TokenText, declare_node_union};
+use biome_html_syntax::{AnyHtmlAttribute, element_ext::AnyHtmlTagElement};
+use biome_rowan::{AstNode, AstNodeList, TokenText};
 use biome_rule_options::use_vue_hyphenated_attributes::UseVueHyphenatedAttributesOptions;
 use biome_string_case::Case;
 
@@ -99,12 +97,8 @@ declare_lint_rule! {
     }
 }
 
-declare_node_union! {
-    pub AnyTagWithAttributes = HtmlOpeningElement | HtmlSelfClosingElement
-}
-
 impl Rule for UseVueHyphenatedAttributes {
-    type Query = Ast<AnyTagWithAttributes>;
+    type Query = Ast<AnyHtmlTagElement>;
     type State = AnyHtmlAttribute;
     type Signals = Box<[Self::State]>;
     type Options = UseVueHyphenatedAttributesOptions;
@@ -113,8 +107,9 @@ impl Rule for UseVueHyphenatedAttributes {
         let node = ctx.query();
 
         if let Some(ignore_tags) = ctx.options().ignore_tags.as_ref()
-            && let Ok(tag_name) = node.name().and_then(|name| name.value_token())
-            && ignore_tags.contains(tag_name.text_trimmed())
+            && let Ok(tag_name) = node.name()
+            && let Some(tag_name_text) = tag_name.token_text_trimmed()
+            && ignore_tags.contains(tag_name_text.as_ref())
         {
             return Box::new([]);
         }
@@ -223,22 +218,6 @@ impl Rule for UseVueHyphenatedAttributes {
             markup! { "Rename the attribute to "<Emphasis>{suggested}</Emphasis>"." }.to_owned(),
             mutation,
         ))
-    }
-}
-
-impl AnyTagWithAttributes {
-    fn name(&self) -> SyntaxResult<HtmlTagName> {
-        match self {
-            Self::HtmlOpeningElement(node) => node.name(),
-            Self::HtmlSelfClosingElement(node) => node.name(),
-        }
-    }
-
-    fn attributes(&self) -> HtmlAttributeList {
-        match self {
-            Self::HtmlOpeningElement(node) => node.attributes(),
-            Self::HtmlSelfClosingElement(node) => node.attributes(),
-        }
     }
 }
 

@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/casing.css
 ---
+
 # Input
 
 ```css
@@ -37,19 +38,7 @@ DIV {
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
------
+# Formatted
 
 ```css
 /*
@@ -86,4 +75,5 @@ DIV {
  */
 @page ThisIsPreserved:first {
 }
+
 ```

@@ -1,0 +1,403 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidCommentTrivia.js
+---
+# Input
+```js
+/* should generate diagnostics */
+// Tests that comment trivia is preserved in code actions
+
+// Leading comment on a simple rename
+// test -> it
+test("with leading comment", () => {});
+
+// Trailing comment should be preserved
+test("with trailing comment", () => {}); // trailing comment
+
+/* Block comment before call */
+test.skip("block comment before skip", () => {});
+
+// Leading comment on member expression
+test.only("with leading comment on only", () => {}); // trailing
+
+// Comment preserved for xtest -> xit
+xtest("xtest with comment", () => {}); // should become xit
+
+// Comment preserved for fit -> it.only
+fit("fit with comment", () => {}); // should become it.only
+
+// Comment between identifier and call parens (same line — trailing trivia of identifier)
+test /* comment between ident and paren */ ("inline block comment", () => {});
+test/* comment on member */.skip("inline comment on skip", () => {});
+fit /* comment on fit */ ("inline comment on fit", () => {});
+
+// Inside describe: comments preserved too
+describe("suite", () => {
+  // Leading comment inside describe
+  test("inner test with comment", () => {});
+  test.skip("inner skip with comment", () => {}); // trailing in describe
+  // Block comment before only inside describe
+  test.only("inner only with comment", () => {});
+  fit("inner fit with comment", () => {}); // trailing on fit inside describe
+});
+
+```
+
+# Diagnostics
+```
+invalidCommentTrivia.js:6:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function test is inconsistent with the configured preferred function it.
+  
+    4 │ // Leading comment on a simple rename
+    5 │ // test -> it
+  > 6 │ test("with leading comment", () => {});
+      │ ^^^^
+    7 │ 
+    8 │ // Trailing comment should be preserved
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use it instead.
+  
+     4  4 │   // Leading comment on a simple rename
+     5  5 │   // test -> it
+     6    │ - test("with·leading·comment",·()·=>·{});
+        6 │ + it("with·leading·comment",·()·=>·{});
+     7  7 │   
+     8  8 │   // Trailing comment should be preserved
+  
+
+```
+
+```
+invalidCommentTrivia.js:9:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function test is inconsistent with the configured preferred function it.
+  
+     8 │ // Trailing comment should be preserved
+   > 9 │ test("with trailing comment", () => {}); // trailing comment
+       │ ^^^^
+    10 │ 
+    11 │ /* Block comment before call */
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use it instead.
+  
+     7  7 │   
+     8  8 │   // Trailing comment should be preserved
+     9    │ - test("with·trailing·comment",·()·=>·{});·//·trailing·comment
+        9 │ + it("with·trailing·comment",·()·=>·{});·//·trailing·comment
+    10 10 │   
+    11 11 │   /* Block comment before call */
+  
+
+```
+
+```
+invalidCommentTrivia.js:12:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function test is inconsistent with the configured preferred function it.
+  
+    11 │ /* Block comment before call */
+  > 12 │ test.skip("block comment before skip", () => {});
+       │ ^^^^
+    13 │ 
+    14 │ // Leading comment on member expression
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use it instead.
+  
+    10 10 │   
+    11 11 │   /* Block comment before call */
+    12    │ - test.skip("block·comment·before·skip",·()·=>·{});
+       12 │ + it.skip("block·comment·before·skip",·()·=>·{});
+    13 13 │   
+    14 14 │   // Leading comment on member expression
+  
+
+```
+
+```
+invalidCommentTrivia.js:15:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function test is inconsistent with the configured preferred function it.
+  
+    14 │ // Leading comment on member expression
+  > 15 │ test.only("with leading comment on only", () => {}); // trailing
+       │ ^^^^
+    16 │ 
+    17 │ // Comment preserved for xtest -> xit
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use it instead.
+  
+    13 13 │   
+    14 14 │   // Leading comment on member expression
+    15    │ - test.only("with·leading·comment·on·only",·()·=>·{});·//·trailing
+       15 │ + it.only("with·leading·comment·on·only",·()·=>·{});·//·trailing
+    16 16 │   
+    17 17 │   // Comment preserved for xtest -> xit
+  
+
+```
+
+```
+invalidCommentTrivia.js:18:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function xtest is inconsistent with the configured preferred function xit.
+  
+    17 │ // Comment preserved for xtest -> xit
+  > 18 │ xtest("xtest with comment", () => {}); // should become xit
+       │ ^^^^^
+    19 │ 
+    20 │ // Comment preserved for fit -> it.only
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use xit instead.
+  
+    16 16 │   
+    17 17 │   // Comment preserved for xtest -> xit
+    18    │ - xtest("xtest·with·comment",·()·=>·{});·//·should·become·xit
+       18 │ + xit("xtest·with·comment",·()·=>·{});·//·should·become·xit
+    19 19 │   
+    20 20 │   // Comment preserved for fit -> it.only
+  
+
+```
+
+```
+invalidCommentTrivia.js:21:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function fit is inconsistent with the configured preferred function it.only.
+  
+    20 │ // Comment preserved for fit -> it.only
+  > 21 │ fit("fit with comment", () => {}); // should become it.only
+       │ ^^^
+    22 │ 
+    23 │ // Comment between identifier and call parens (same line — trailing trivia of identifier)
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use it.only instead.
+  
+    19 19 │   
+    20 20 │   // Comment preserved for fit -> it.only
+    21    │ - fit("fit·with·comment",·()·=>·{});·//·should·become·it.only
+       21 │ + it.only("fit·with·comment",·()·=>·{});·//·should·become·it.only
+    22 22 │   
+    23 23 │   // Comment between identifier and call parens (same line — trailing trivia of identifier)
+  
+
+```
+
+```
+invalidCommentTrivia.js:24:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function test is inconsistent with the configured preferred function it.
+  
+    23 │ // Comment between identifier and call parens (same line — trailing trivia of identifier)
+  > 24 │ test /* comment between ident and paren */ ("inline block comment", () => {});
+       │ ^^^^
+    25 │ test/* comment on member */.skip("inline comment on skip", () => {});
+    26 │ fit /* comment on fit */ ("inline comment on fit", () => {});
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use it instead.
+  
+    22 22 │   
+    23 23 │   // Comment between identifier and call parens (same line — trailing trivia of identifier)
+    24    │ - test·/*·comment·between·ident·and·paren·*/·("inline·block·comment",·()·=>·{});
+       24 │ + it·/*·comment·between·ident·and·paren·*/·("inline·block·comment",·()·=>·{});
+    25 25 │   test/* comment on member */.skip("inline comment on skip", () => {});
+    26 26 │   fit /* comment on fit */ ("inline comment on fit", () => {});
+  
+
+```
+
+```
+invalidCommentTrivia.js:25:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function test is inconsistent with the configured preferred function it.
+  
+    23 │ // Comment between identifier and call parens (same line — trailing trivia of identifier)
+    24 │ test /* comment between ident and paren */ ("inline block comment", () => {});
+  > 25 │ test/* comment on member */.skip("inline comment on skip", () => {});
+       │ ^^^^
+    26 │ fit /* comment on fit */ ("inline comment on fit", () => {});
+    27 │ 
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use it instead.
+  
+    23 23 │   // Comment between identifier and call parens (same line — trailing trivia of identifier)
+    24 24 │   test /* comment between ident and paren */ ("inline block comment", () => {});
+    25    │ - test/*·comment·on·member·*/.skip("inline·comment·on·skip",·()·=>·{});
+       25 │ + it/*·comment·on·member·*/.skip("inline·comment·on·skip",·()·=>·{});
+    26 26 │   fit /* comment on fit */ ("inline comment on fit", () => {});
+    27 27 │   
+  
+
+```
+
+```
+invalidCommentTrivia.js:26:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function fit is inconsistent with the configured preferred function it.only.
+  
+    24 │ test /* comment between ident and paren */ ("inline block comment", () => {});
+    25 │ test/* comment on member */.skip("inline comment on skip", () => {});
+  > 26 │ fit /* comment on fit */ ("inline comment on fit", () => {});
+       │ ^^^
+    27 │ 
+    28 │ // Inside describe: comments preserved too
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use it.only instead.
+  
+    24 24 │   test /* comment between ident and paren */ ("inline block comment", () => {});
+    25 25 │   test/* comment on member */.skip("inline comment on skip", () => {});
+    26    │ - fit·/*·comment·on·fit·*/·("inline·comment·on·fit",·()·=>·{});
+       26 │ + it.only·/*·comment·on·fit·*/·("inline·comment·on·fit",·()·=>·{});
+    27 27 │   
+    28 28 │   // Inside describe: comments preserved too
+  
+
+```
+
+```
+invalidCommentTrivia.js:31:3 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function test is inconsistent with the configured preferred function it.
+  
+    29 │ describe("suite", () => {
+    30 │   // Leading comment inside describe
+  > 31 │   test("inner test with comment", () => {});
+       │   ^^^^
+    32 │   test.skip("inner skip with comment", () => {}); // trailing in describe
+    33 │   // Block comment before only inside describe
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use it instead.
+  
+    29 29 │   describe("suite", () => {
+    30 30 │     // Leading comment inside describe
+    31    │ - ··test("inner·test·with·comment",·()·=>·{});
+       31 │ + ··it("inner·test·with·comment",·()·=>·{});
+    32 32 │     test.skip("inner skip with comment", () => {}); // trailing in describe
+    33 33 │     // Block comment before only inside describe
+  
+
+```
+
+```
+invalidCommentTrivia.js:32:3 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function test is inconsistent with the configured preferred function it.
+  
+    30 │   // Leading comment inside describe
+    31 │   test("inner test with comment", () => {});
+  > 32 │   test.skip("inner skip with comment", () => {}); // trailing in describe
+       │   ^^^^
+    33 │   // Block comment before only inside describe
+    34 │   test.only("inner only with comment", () => {});
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use it instead.
+  
+    30 30 │     // Leading comment inside describe
+    31 31 │     test("inner test with comment", () => {});
+    32    │ - ··test.skip("inner·skip·with·comment",·()·=>·{});·//·trailing·in·describe
+       32 │ + ··it.skip("inner·skip·with·comment",·()·=>·{});·//·trailing·in·describe
+    33 33 │     // Block comment before only inside describe
+    34 34 │     test.only("inner only with comment", () => {});
+  
+
+```
+
+```
+invalidCommentTrivia.js:34:3 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function test is inconsistent with the configured preferred function it.
+  
+    32 │   test.skip("inner skip with comment", () => {}); // trailing in describe
+    33 │   // Block comment before only inside describe
+  > 34 │   test.only("inner only with comment", () => {});
+       │   ^^^^
+    35 │   fit("inner fit with comment", () => {}); // trailing on fit inside describe
+    36 │ });
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use it instead.
+  
+    32 32 │     test.skip("inner skip with comment", () => {}); // trailing in describe
+    33 33 │     // Block comment before only inside describe
+    34    │ - ··test.only("inner·only·with·comment",·()·=>·{});
+       34 │ + ··it.only("inner·only·with·comment",·()·=>·{});
+    35 35 │     fit("inner fit with comment", () => {}); // trailing on fit inside describe
+    36 36 │   });
+  
+
+```
+
+```
+invalidCommentTrivia.js:35:3 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function fit is inconsistent with the configured preferred function it.only.
+  
+    33 │   // Block comment before only inside describe
+    34 │   test.only("inner only with comment", () => {});
+  > 35 │   fit("inner fit with comment", () => {}); // trailing on fit inside describe
+       │   ^^^
+    36 │ });
+    37 │ 
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use it.only instead.
+  
+    33 33 │     // Block comment before only inside describe
+    34 34 │     test.only("inner only with comment", () => {});
+    35    │ - ··fit("inner·fit·with·comment",·()·=>·{});·//·trailing·on·fit·inside·describe
+       35 │ + ··it.only("inner·fit·with·comment",·()·=>·{});·//·trailing·on·fit·inside·describe
+    36 36 │   });
+    37 37 │   
+  
+
+```

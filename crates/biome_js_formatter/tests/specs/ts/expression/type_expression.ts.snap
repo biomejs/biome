@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/expression/type_expression.ts
 ---
+
 # Input
 
 ```ts
@@ -115,29 +116,7 @@ type A<               > = {}
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
------
+# Formatted
 
 ```ts
 import * as assert from "assert";
@@ -252,4 +231,5 @@ function test2(a: string): asserts a is string {}
 type Type01 = 0 extends (1 extends 2 ? 3 : 4) ? 5 : 6;
 
 type A<> = {};
+
 ```

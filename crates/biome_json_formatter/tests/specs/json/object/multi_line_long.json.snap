@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: json/object/multi_line_long.json
 ---
+
 # Input
 
 ```json
@@ -13,25 +14,12 @@ info: json/object/multi_line_long.json
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Trailing commas: None
-Expand: Auto
-Bracket spacing: true
------
+# Formatted
 
 ```json
 {
 	"number": 1123123213123123123123122311231232131231231231231223,
 	"string": "some-long-long-long-long-long-long-long-string"
 }
+
 ```

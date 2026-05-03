@@ -1,8 +1,15 @@
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
-use super::{eslint_any_rule_to_biome::migrate_eslint_any_rule, eslint_eslint, eslint_typescript};
+use crate::execute::migrate::unsupported_rules::UNSUPPORTED_RULES;
+
+use super::{
+    eslint_any_rule_to_biome::migrate_eslint_any_rule, eslint_eslint, eslint_jest,
+    eslint_typescript,
+};
+use biome_analyze::RuleSource;
 use biome_configuration::analyzer::SeverityOrGroup;
 use biome_configuration::{self as biome_config};
+use biome_console::fmt::Display;
 use biome_console::markup;
 use biome_deserialize::Merge;
 use biome_diagnostics::Location;
@@ -25,85 +32,53 @@ pub(crate) struct MigrationOptions {
     pub(crate) include_nursery: bool,
 }
 
-/// Sorted ESlint stylistic rules.
-/// The array is sorted to allow binary search.
-const ESLINT_STYLISTIC_RULES: &[&str] = &[
-    "array-bracket-newline",
-    "array-bracket-spacing",
-    "array-element-newline",
-    "arrow-body-style",
-    "arrow-parens",
-    "arrow-spacing",
-    "block-spacing",
-    "brace-style",
-    "capitalized-comments",
-    "comma-dangle",
-    "comma-spacing",
-    "comma-style",
-    "computed-property-spacing",
-    "dot-location",
-    "eol-last",
-    "func-call-spacing",
-    "function-call-argument-newline",
-    "function-paren-newline",
-    "generator-star-spacing",
-    "implicit-arrow-linebreak",
-    "indent",
-    "indent-legacy",
-    "jsx-quotes",
-    "key-spacing",
-    "keyword-spacing",
-    "line-comment-position",
-    "linebreak-style",
-    "lines-around-comment",
-    "lines-around-directive",
-    "lines-between-class-members",
-    "max-len",
-    "max-statements-per-line",
-    "multiline-comment-style",
-    "multiline-ternary",
-    "new-parens",
-    "newline-after-var",
-    "newline-before-return",
-    "newline-per-chained-call",
-    "no-confusing-arrow",
-    "no-extra-parens",
-    "no-extra-semi",
-    "no-floating-decimal",
-    "no-mixed-operators",
-    "no-mixed-spaces-and-tabs",
-    "no-multiple-empty-lines",
-    "no-spaced-func",
-    "no-tabs",
-    "no-trailing-spaces",
-    "no-whitespace-before-property",
-    "nonblock-statement-body-position",
-    "object-curly-newline",
-    "object-curly-spacing",
-    "object-property-newline",
-    "one-var-declaration-per-line",
-    "operator-linebreak",
-    "padded-blocks",
-    "padding-line-between-statements",
-    "quote-props",
-    "quotes",
-    "rest-spread-spacing",
-    "semi",
-    "semi-spacing",
-    "semi-style",
-    "space-before-blocks",
-    "space-before-function-paren",
-    "space-in-parens",
-    "space-infix-ops",
-    "space-unary-ops",
-    "spaced-comment",
-    "switch-colon-spacing",
-    "template-curly-spacing",
-    "template-tag-spacing",
-    "wrap-iife",
-    "wrap-regex",
-    "yield-star-spacing",
-];
+#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
+pub(crate) struct UnsupportedRule(pub RuleSource<'static>, pub UnsupportedRuleReason);
+
+#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
+pub(crate) enum UnsupportedRuleReason {
+    /// The rule is stylistic and is fundamentally incompatible with the formatter, and there's no formatter option to adjust its behavior.
+    ///
+    /// This is for rules that enforce formatting that are at odds with Biome's formatting decisions.
+    Stylistic,
+    /// The formatter completely covers the functionality that the rule is meant to enforce (assuming default rule options).
+    ///
+    /// The rule is therefore redundant when using the formatter, and losing the rule does not reduce code quality.
+    FormatterCovers,
+    /// The functionality is covered by a Biome formatter option.
+    FormatterOption(&'static str),
+    /// The rule belongs to a known source, but it is not yet implemented in Biome.
+    KnownSourceNotImplemented,
+    /// The rule belongs to an unknown source, and is therefore not implemented in Biome.
+    UnknownSource,
+    /// The rule is covered by a different rule, and is therefore not implemented as its own rule in Biome.
+    CoveredByRule(&'static str),
+}
+
+impl Display for UnsupportedRuleReason {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+        match self {
+            Self::Stylistic => {
+                fmt.write_markup(markup! { "Stylistic, incompatible with formatter." })
+            }
+            Self::FormatterCovers => {
+                fmt.write_markup(markup! { "Redundant, completely covered by Biome's formatter." })
+            }
+            Self::FormatterOption(option) => fmt.write_markup(
+                markup! { "Covered by Biome's "<Emphasis>{option}</Emphasis>" formatter option." },
+            ),
+            Self::KnownSourceNotImplemented => {
+                fmt.write_markup(markup! { "Known source, not yet implemented." })
+            }
+            Self::UnknownSource => fmt.write_markup(markup! {
+                "These rules originate from an eslint plugin or other tool that Biome doesn't know about."
+            }),
+            Self::CoveredByRule(rule) => fmt.write_markup(markup! {
+                "Covered by the "<Emphasis>{rule}</Emphasis>" rule."
+            }),
+        }
+    }
+}
 
 #[derive(Debug, Default)]
 pub(crate) struct MigrationResults {
@@ -115,9 +90,7 @@ pub(crate) struct MigrationResults {
     pub(crate) inspired: BTreeSet<EslintRuleName>,
     pub(crate) nursery: BTreeSet<EslintRuleName>,
     pub(crate) migrated: BTreeSet<EslintRuleName>,
-    /// Stylistic rules that are not supported on purpose.
-    pub(crate) stylistic: BTreeSet<EslintRuleName>,
-    pub(crate) unsupported: BTreeSet<EslintRuleName>,
+    pub(crate) unsupported: BTreeMap<EslintRuleName, UnsupportedRuleReason>,
 }
 impl MigrationResults {
     pub(crate) fn add(&mut self, sourced_rule: &str, status: RuleMigrationResult) {
@@ -133,26 +106,14 @@ impl MigrationResults {
                 self.nursery.insert(sourced);
             }
             RuleMigrationResult::Unsupported => {
-                if sourced.rule_name.starts_with("@stylistic/")
-                    || (sourced.plugin_name.is_none()
-                        && ESLINT_STYLISTIC_RULES
-                            .binary_search(&sourced.rule_name.as_ref())
-                            .is_ok())
-                {
-                    self.stylistic.insert(sourced);
-                } else {
-                    self.unsupported.insert(sourced);
-                };
+                let reason = unsupported_rule_reason(&sourced);
+                self.unsupported.insert(sourced, reason);
             }
         }
     }
 
     pub(crate) fn rule_count(&self) -> usize {
-        self.migrated.len()
-            + self.inspired.len()
-            + self.nursery.len()
-            + self.stylistic.len()
-            + self.unsupported.len()
+        self.migrated.len() + self.inspired.len() + self.nursery.len() + self.unsupported.len()
     }
 }
 impl biome_diagnostics::Diagnostic for MigrationResults {
@@ -175,15 +136,50 @@ impl biome_diagnostics::Diagnostic for MigrationResults {
     fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
         let count = self.rule_count();
         if count != 0 {
-            let migrated_count = self.migrated.len()
-                + if self.write {
-                    0
-                } else {
-                    self.inspired.len() + self.nursery.len()
-                };
-            let migrated_percent = migrated_count * 100 / count;
-            let verb = if self.write { "have been" } else { "can be" };
-            fmt.write_markup(markup! { {migrated_percent}"% ("{migrated_count}"/"{count}") of the rules "{verb}" migrated." })
+            let formatter_covers_count = self
+                .unsupported
+                .iter()
+                .filter(|(_, reason)| {
+                    matches!(
+                        reason,
+                        UnsupportedRuleReason::FormatterCovers
+                            | UnsupportedRuleReason::FormatterOption(_)
+                    )
+                })
+                .count();
+
+            let directly_covered_count = self.migrated.len();
+            let inspired_count = self.inspired.len();
+            let nursery_count = self.nursery.len();
+
+            let total_migratable_count = directly_covered_count + inspired_count + nursery_count;
+            let total_covered_count = total_migratable_count + formatter_covers_count;
+            let total_covered_percent = total_covered_count * 100 / count;
+            let directly_covered_percent = directly_covered_count * 100 / count;
+
+            fmt.write_markup(markup! { <Emphasis>{count}" ESLint rules found\n"</Emphasis> })?;
+            if formatter_covers_count > 0 {
+                fmt.write_markup(markup! { "- "<Emphasis><Success>{formatter_covers_count}</Success>" are obsolete"</Emphasis>" because of Biome's formatter\n" })?;
+            }
+
+            if self.write {
+                fmt.write_markup(markup! { "- "<Emphasis><Success>{directly_covered_count}</Success>" have been migrated"</Emphasis>" to Biome's rules\n" })?;
+            } else {
+                fmt.write_markup(markup! { "- "<Emphasis><Success>{directly_covered_count}</Success>" can be migrated"</Emphasis>" to Biome's rules (run with --write to migrate)\n" })?;
+                if inspired_count > 0 {
+                    fmt.write_markup(markup! { "  - "<Emphasis><Success>"+"{inspired_count}</Success></Emphasis>" with --include-inspired\n" })?;
+                }
+                if nursery_count > 0 {
+                    fmt.write_markup(markup! { "  - "<Emphasis><Success>"+"{nursery_count}</Success></Emphasis>" with --include-nursery (experimental rules)\n" })?;
+                }
+            }
+
+            fmt.write_markup(markup! {
+                "- "<Emphasis><Success>{total_covered_percent}"% ("{total_covered_count}")"</Success>" of your ESLint rules are fully covered by Biome\n"</Emphasis>
+            })?;
+            fmt.write_markup(markup! {
+                "  - "{directly_covered_percent}"% ("{directly_covered_count}") via direct migration to Biome rules\n"
+            })
         } else {
             fmt.write_markup(markup! { "No rules to migrate." })
         }
@@ -218,7 +214,7 @@ impl biome_diagnostics::Diagnostic for MigrationResults {
                 .collect();
             visitor.record_list(list.as_slice())?;
         }
-        if !self.inspired.is_empty() {
+        if !self.nursery.is_empty() {
             visitor.record_log(
                 biome_diagnostics::LogCategory::Info,
                 &markup! { "Rules that can be migrated to a nursery rule using "<Emphasis>"--include-nursery"</Emphasis>":" },
@@ -230,29 +226,113 @@ impl biome_diagnostics::Diagnostic for MigrationResults {
                 .collect();
             visitor.record_list(list.as_slice())?;
         }
-        if !self.stylistic.is_empty() {
-            visitor.record_log(
-                biome_diagnostics::LogCategory::Info,
-                &markup! { "Stylistic rules that the formatter may support (manual migration required):" },
-            )?;
-            let list: Vec<_> = self
-                .stylistic
-                .iter()
-                .map(|item| item as &dyn biome_console::fmt::Display)
-                .collect();
-            visitor.record_list(list.as_slice())?;
-        }
         if !self.unsupported.is_empty() {
+            let mut stylistic = Vec::new();
+            let mut formatter_covers = Vec::new();
+            let mut formatter_option = Vec::new();
+            let mut known_source_not_implemented = Vec::new();
+            let mut unknown_source = Vec::new();
+            let mut covered_by_rule = Vec::new();
+
+            for (rule, reason) in &self.unsupported {
+                match reason {
+                    UnsupportedRuleReason::Stylistic => stylistic.push(rule),
+                    UnsupportedRuleReason::FormatterCovers => formatter_covers.push(rule),
+                    UnsupportedRuleReason::FormatterOption(_) => {
+                        formatter_option.push((rule, reason))
+                    }
+                    UnsupportedRuleReason::KnownSourceNotImplemented => {
+                        known_source_not_implemented.push(rule);
+                    }
+                    UnsupportedRuleReason::UnknownSource => unknown_source.push(rule),
+                    UnsupportedRuleReason::CoveredByRule(_) => covered_by_rule.push((rule, reason)),
+                }
+            }
+
             visitor.record_log(
                 biome_diagnostics::LogCategory::Info,
-                &markup! { "Unsupported rules:" },
+                &markup! { "Unsupported rules ("{stylistic.len()}" incompatible with formatter, "{formatter_covers.len()}" made obsolete by the formatter, "{formatter_option.len()}" covered by a formatter option, "{known_source_not_implemented.len()}" not yet implemented, "{unknown_source.len()}" unknown source):" },
             )?;
-            let list: Vec<_> = self
-                .unsupported
-                .iter()
-                .map(|item| item as &dyn biome_console::fmt::Display)
-                .collect();
-            visitor.record_list(list.as_slice())?;
+
+            if !stylistic.is_empty() {
+                visitor.record_log(
+                    biome_diagnostics::LogCategory::Info,
+                    &markup! { "These rules enforce code styles that are incompatible with the formatter in some way:" },
+                )?;
+                let list: Vec<_> = stylistic
+                    .iter()
+                    .map(|item| *item as &dyn biome_console::fmt::Display)
+                    .collect();
+                visitor.record_list(list.as_slice())?;
+            }
+
+            if !formatter_covers.is_empty() {
+                visitor.record_log(
+                    biome_diagnostics::LogCategory::Info,
+                    &markup! { "These rules enforce behavior completely covered by the formatter (so you don't lose the functionality):" },
+                )?;
+                let list: Vec<_> = formatter_covers
+                    .iter()
+                    .map(|item| *item as &dyn biome_console::fmt::Display)
+                    .collect();
+                visitor.record_list(list.as_slice())?;
+            }
+
+            if !formatter_option.is_empty() {
+                visitor.record_log(
+                    biome_diagnostics::LogCategory::Info,
+                    &markup! { "These rules are covered by formatter options, but they require manual migration:" },
+                )?;
+                let list: Vec<_> = formatter_option
+                    .iter()
+                    .map(|(rule, reason)| UnsupportedRuleDisplay { rule, reason })
+                    .collect();
+                let list: Vec<_> = list
+                    .iter()
+                    .map(|item| item as &dyn biome_console::fmt::Display)
+                    .collect();
+                visitor.record_list(list.as_slice())?;
+            }
+
+            if !known_source_not_implemented.is_empty() {
+                visitor.record_log(
+                    biome_diagnostics::LogCategory::Info,
+                    &markup! { "These rules have not yet been implemented:" },
+                )?;
+                let list: Vec<_> = known_source_not_implemented
+                    .iter()
+                    .map(|item| *item as &dyn biome_console::fmt::Display)
+                    .collect();
+                visitor.record_list(list.as_slice())?;
+            }
+
+            if !unknown_source.is_empty() {
+                visitor.record_log(
+                    biome_diagnostics::LogCategory::Info,
+                    &markup! { "These rules originate from an eslint plugin or other tool that Biome doesn't know about:" },
+                )?;
+                let list: Vec<_> = unknown_source
+                    .iter()
+                    .map(|item| *item as &dyn biome_console::fmt::Display)
+                    .collect();
+                visitor.record_list(list.as_slice())?;
+            }
+
+            if !covered_by_rule.is_empty() {
+                visitor.record_log(
+                    biome_diagnostics::LogCategory::Info,
+                    &markup! { "These rules are covered by another rule, but they require manual migration:" },
+                )?;
+                let list: Vec<_> = covered_by_rule
+                    .iter()
+                    .map(|(rule, reason)| UnsupportedRuleDisplay { rule, reason })
+                    .collect();
+                let list: Vec<_> = list
+                    .iter()
+                    .map(|item| item as &dyn biome_console::fmt::Display)
+                    .collect();
+                visitor.record_list(list.as_slice())?;
+            }
         }
         Ok(())
     }
@@ -300,9 +380,86 @@ impl std::fmt::Display for EslintRuleName {
         }
     }
 }
+
+impl<'a> TryFrom<&'a EslintRuleName> for RuleSource<'a> {
+    type Error = &'static str;
+
+    fn try_from(value: &'a EslintRuleName) -> Result<Self, Self::Error> {
+        let EslintRuleName {
+            plugin_name,
+            rule_name,
+        } = value;
+        let constructor: fn(&'a str) -> RuleSource<'a> = match plugin_name.as_deref() {
+            None => RuleSource::Eslint,
+            Some("barrel-files") => RuleSource::EslintBarrelFiles,
+            Some("@graphql-eslint") => RuleSource::EslintGraphql,
+            Some("import") => RuleSource::EslintImport,
+            Some("import-access") => RuleSource::EslintImportAccess,
+            Some("jest") => RuleSource::EslintJest,
+            Some("jsdoc") => RuleSource::EslintJsDoc,
+            Some("jsx-a11y") => RuleSource::EslintJsxA11y,
+            Some("@mysticatea") => RuleSource::EslintMysticatea,
+            Some("n") => RuleSource::EslintN,
+            Some("@next/next") => RuleSource::EslintNext,
+            Some("no-secrets") => RuleSource::EslintNoSecrets,
+            Some("package-json") => RuleSource::EslintPackageJson,
+            Some("package-json-dependencies") => RuleSource::EslintPackageJsonDependencies,
+            Some("perfectionist") => RuleSource::EslintPerfectionist,
+            Some("qwik") => RuleSource::EslintQwik,
+            Some("react") => RuleSource::EslintReact,
+            Some("react-hooks") => RuleSource::EslintReactHooks,
+            Some("react-prefer-function-component") => {
+                RuleSource::EslintReactPreferFunctionComponent
+            }
+            Some("react-refresh") => RuleSource::EslintReactRefresh,
+            Some("react-x") => RuleSource::EslintReactX,
+            Some("@eslint-react") => RuleSource::EslintReactXyz,
+            Some("react-jsx") => RuleSource::EslintReactJsx,
+            Some("react-dom") => RuleSource::EslintReactDom,
+            Some("regexp") => RuleSource::EslintRegexp,
+            Some("solid") => RuleSource::EslintSolid,
+            Some("sonarjs") => RuleSource::EslintSonarJs,
+            Some("@stylistic") => RuleSource::EslintStylistic,
+            Some("@typescript-eslint") => RuleSource::EslintTypeScript,
+            Some("unicorn") => RuleSource::EslintUnicorn,
+            Some("unused-imports") => RuleSource::EslintUnusedImports,
+            Some("vitest" | "@vitest") => RuleSource::EslintVitest,
+            Some("vue") => RuleSource::EslintVueJs,
+            Some("turbo") => RuleSource::EslintTurbo,
+            Some("@html-eslint") => RuleSource::HtmlEslint,
+            Some("typescript-sort-keys") => RuleSource::EslintTypescriptSortKeys,
+            Some(_) => return Err("Unknown ESLint rule source"),
+        };
+
+        Ok(constructor(rule_name))
+    }
+}
+
+fn unsupported_rule_reason(rule_name: &EslintRuleName) -> UnsupportedRuleReason {
+    let Ok(sourced_rule) = RuleSource::try_from(rule_name) else {
+        return UnsupportedRuleReason::UnknownSource;
+    };
+
+    if let Ok(index) = UNSUPPORTED_RULES.binary_search_by(|rule| rule.0.cmp_any(&sourced_rule)) {
+        return UNSUPPORTED_RULES[index].1.clone();
+    }
+    UnsupportedRuleReason::KnownSourceNotImplemented
+}
+
 impl biome_console::fmt::Display for EslintRuleName {
     fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
         fmt.write_fmt(format_args!("{self}"))
+    }
+}
+
+struct UnsupportedRuleDisplay<'a> {
+    rule: &'a EslintRuleName,
+    reason: &'a UnsupportedRuleReason,
+}
+
+impl biome_console::fmt::Display for UnsupportedRuleDisplay<'_> {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+        fmt.write_markup(markup! { {self.rule}" - "<Dim>{self.reason}</Dim> })
     }
 }
 
@@ -316,6 +473,16 @@ impl eslint_eslint::AnyConfigData {
             Self::Legacy(config) => config.into_biome_config(options),
         }
     }
+}
+
+pub(crate) fn merge_biome_config_with_eslint(
+    mut biome_config: biome_config::Configuration,
+    eslint_config: eslint_eslint::AnyConfigData,
+    options: &MigrationOptions,
+) -> (biome_config::Configuration, MigrationResults) {
+    let (eslint_biome_config, results) = eslint_config.into_biome_config(options);
+    biome_config.merge_with(eslint_biome_config);
+    (biome_config, results)
 }
 
 impl eslint_eslint::FlatConfigData {
@@ -477,6 +644,20 @@ fn migrate_eslint_rule(
         eslint_eslint::Rule::Any(name, severity) => {
             let _ = migrate_eslint_any_rule(rules, &name, severity, opts, results);
         }
+        eslint_eslint::Rule::MaxNestedCallbacks(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                let group = rules.nursery.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    group.no_excessive_nested_callbacks =
+                        Some(biome_config::RuleConfiguration::WithOptions(
+                            biome_config::RuleWithOptions {
+                                level: conf.severity().into(),
+                                options: conf.option_or_default().into(),
+                            },
+                        ));
+                }
+            }
+        }
         eslint_eslint::Rule::NoConsole(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
                 && let eslint_eslint::RuleConf::Option(severity, rule_options) = conf
@@ -522,6 +703,29 @@ fn migrate_eslint_rule(
                             },
                         ));
                 }
+            }
+        }
+        eslint_eslint::Rule::JestConsistentTestIt(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                let severity = conf.severity();
+                let group = rules.nursery.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    let rule_options =
+                        if let eslint_eslint::RuleConf::Option(_, rule_options) = conf {
+                            rule_options.into()
+                        } else {
+                            eslint_jest::ConsistentTestItOptions::default().into()
+                        };
+                    group.use_consistent_test_it =
+                        Some(biome_config::RuleFixConfiguration::WithOptions(
+                            biome_config::RuleWithFixOptions {
+                                level: severity.into(),
+                                fix: None,
+                                options: rule_options,
+                            },
+                        ));
+                }
+                results.add(&name, RuleMigrationResult::Migrated);
             }
         }
         eslint_eslint::Rule::Jsxa11yArioaRoles(conf) => {
@@ -609,6 +813,22 @@ fn migrate_eslint_rule(
                 }
             }
         }
+        eslint_eslint::Rule::TypeScriptNoShadow(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                let severity = conf.severity();
+                let group = rules.nursery.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    let options = conf.option_or_default();
+                    group.no_shadow = Some(biome_config::RuleConfiguration::WithOptions(
+                        biome_config::RuleWithOptions {
+                            level: severity.into(),
+                            options: options.into(),
+                        },
+                    ));
+                }
+                results.add(&name, RuleMigrationResult::Migrated);
+            }
+        }
         eslint_eslint::Rule::UnicornFilenameCase(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 let group = rules.style.get_or_insert_with(Default::default);
@@ -659,12 +879,154 @@ fn to_biome_includes(
 mod tests {
     use super::*;
     use biome_configuration::OverrideGlobs;
+    use camino::Utf8Path;
     use eslint_eslint::*;
     use std::borrow::Cow;
+    use std::fs::read_to_string;
 
-    #[test]
-    fn test_eslint_stylistic_rules_order() {
-        assert!(ESLINT_STYLISTIC_RULES.is_sorted());
+    mod test_utils {
+        use super::*;
+        use biome_deserialize::json::deserialize_from_json_str;
+        use biome_deserialize_macros::Deserializable;
+        use biome_json_formatter::{context::JsonFormatOptions, format_node};
+        use biome_json_parser::{JsonParserOptions, parse_json};
+
+        #[derive(Debug, Default, Deserializable)]
+        pub(super) struct MigratorSpec {
+            #[deserializable(rename = "eslint")]
+            pub(super) eslint_config: LegacyConfigData,
+            #[deserializable(rename = "biome")]
+            pub(super) biome_config: biome_config::Configuration,
+        }
+
+        fn deserialize_legacy_config(input: &str) -> LegacyConfigData {
+            let (config, diagnostics) = deserialize_from_json_str::<LegacyConfigData>(
+                input,
+                JsonParserOptions::default()
+                    .with_allow_comments()
+                    .with_allow_trailing_commas(),
+                "",
+            )
+            .consume();
+            assert!(
+                diagnostics.is_empty(),
+                "unexpected diagnostics: {diagnostics:#?}"
+            );
+            config.expect("legacy ESLint config should deserialize")
+        }
+
+        fn deserialize_biome_config(input: &str) -> biome_config::Configuration {
+            let (config, diagnostics) = deserialize_from_json_str::<biome_config::Configuration>(
+                input,
+                JsonParserOptions::default()
+                    .with_allow_comments()
+                    .with_allow_trailing_commas(),
+                "",
+            )
+            .consume();
+            assert!(
+                diagnostics.is_empty(),
+                "unexpected diagnostics: {diagnostics:#?}"
+            );
+            config.expect("Biome config should deserialize")
+        }
+
+        pub(super) fn deserialize_migrator_spec(input: &str) -> MigratorSpec {
+            let (spec, diagnostics) = deserialize_from_json_str::<MigratorSpec>(
+                input,
+                JsonParserOptions::default()
+                    .with_allow_comments()
+                    .with_allow_trailing_commas(),
+                "",
+            )
+            .consume();
+            assert!(
+                diagnostics.is_empty(),
+                "unexpected diagnostics: {diagnostics:#?}"
+            );
+            spec.expect("migrator spec should deserialize")
+        }
+
+        fn format_json(input: &str) -> String {
+            let parsed = parse_json(
+                input,
+                JsonParserOptions::default()
+                    .with_allow_comments()
+                    .with_allow_trailing_commas(),
+            );
+            format_node(JsonFormatOptions::default(), &parsed.syntax())
+                .expect("JSON should format")
+                .print()
+                .expect("formatted JSON should print")
+                .as_code()
+                .to_string()
+        }
+
+        pub(super) fn format_serialized_json(value: &impl serde::Serialize) -> String {
+            let serialized = serde_json::to_string(value).expect("value should serialize to JSON");
+            format_json(&serialized)
+        }
+
+        pub(super) fn build_legacy_migration_snapshot(
+            eslint_config: &str,
+            biome_config_before: &str,
+            options: MigrationOptions,
+        ) -> String {
+            let eslint_config_data = deserialize_legacy_config(eslint_config);
+            let biome_config_before_data = deserialize_biome_config(biome_config_before);
+            let biome_config_before_snapshot = format_json(biome_config_before);
+            let eslint_config_snapshot = format_json(eslint_config);
+            let (biome_config_after, _) = merge_biome_config_with_eslint(
+                biome_config_before_data,
+                AnyConfigData::Legacy(eslint_config_data),
+                &options,
+            );
+            let biome_config_after_snapshot = format_serialized_json(&biome_config_after);
+
+            // Ensure the migrated output still deserializes as a valid Biome config.
+            deserialize_biome_config(&biome_config_after_snapshot);
+
+            format!(
+                "## ESLint Config\n\n```json\n{}\n```\n\n## Biome Config Before Migration\n\n```json\n{}\n```\n\n## Biome Config After Migration\n\n```json\n{}\n```\n",
+                eslint_config_snapshot, biome_config_before_snapshot, biome_config_after_snapshot,
+            )
+        }
+    }
+
+    use test_utils::{
+        MigratorSpec, build_legacy_migration_snapshot, deserialize_migrator_spec,
+        format_serialized_json,
+    };
+
+    tests_macros::gen_tests! {"tests/specs/migrate_eslint/**/*.{json,jsonc}", crate::execute::migrate::eslint_to_biome::tests::run_migrator_spec_test, "module"}
+
+    fn run_migrator_spec_test(input: &'static str, _: &str, _: &str, _: &str) {
+        let input_file = Utf8Path::new(input);
+        let file_name = input_file.file_name().unwrap();
+        let input_code = read_to_string(input_file)
+            .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
+        let raw_spec: serde_json::Value =
+            serde_json::from_str(&input_code).expect("migrator spec should be valid JSON");
+        let MigratorSpec {
+            eslint_config: _,
+            biome_config: _,
+        } = deserialize_migrator_spec(&input_code);
+
+        let snapshot = build_legacy_migration_snapshot(
+            &format_serialized_json(&raw_spec["eslint"]),
+            &format_serialized_json(&raw_spec["biome"]),
+            MigrationOptions {
+                include_inspired: true,
+                include_nursery: true,
+            },
+        );
+
+        insta::with_settings!({
+            prepend_module_to_snapshot => false,
+            snapshot_path => input_file.parent().unwrap(),
+        }, {
+            insta::assert_snapshot!(file_name, snapshot, file_name);
+        });
     }
 
     #[test]
@@ -775,6 +1137,14 @@ mod tests {
             Some(biome_config::RuleFixConfiguration::Plain(
                 biome_config::RulePlainConfiguration::Off
             ))
+        );
+    }
+
+    #[test]
+    fn sanity_check_unsupported_rule_lookup() {
+        assert_eq!(
+            unsupported_rule_reason(&EslintRuleName::from_str("eol-last")),
+            UnsupportedRuleReason::FormatterCovers
         );
     }
 }

@@ -7,7 +7,7 @@ use crate::prelude::*;
 use crate::{
     BufferExtensions, Format, FormatContext, FormatElement, FormatOptions, FormatResult, Formatter,
     IndentStyle, IndentWidth, LineEnding, LineWidth, PrinterOptions, SourceMapGeneration,
-    TransformSourceMap,
+    TrailingNewline, TransformSourceMap,
 };
 use crate::{format, write};
 use biome_rowan::TextSize;
@@ -254,6 +254,10 @@ impl FormatOptions for IrFormatOptions {
 
     fn line_ending(&self) -> LineEnding {
         LineEnding::Lf
+    }
+
+    fn trailing_newline(&self) -> TrailingNewline {
+        TrailingNewline::default()
     }
 
     fn as_print_options(&self) -> PrinterOptions {

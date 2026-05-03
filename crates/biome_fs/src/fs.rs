@@ -2,11 +2,13 @@ use crate::{BiomePath, PathInterner};
 use biome_diagnostics::{Advices, Diagnostic, IoError, LogCategory, Visit, console};
 use biome_diagnostics::{Error, Severity};
 use camino::{Utf8Path, Utf8PathBuf};
+use directories::ProjectDirs;
 pub use memory::{ErrorEntry, MemoryFileSystem};
 pub use os::{OsFileSystem, TemporaryFs};
+use papaya::{HashSetRef, LocalGuard};
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeSet;
 use std::fmt::{Debug, Display, Formatter};
+use std::hash::RandomState;
 use std::panic::RefUnwindSafe;
 use std::path::Path;
 use std::sync::Arc;
@@ -19,7 +21,8 @@ mod os;
 pub struct ConfigName;
 
 impl ConfigName {
-    const BIOME_JSON: [&'static str; 2] = ["biome.json", "biome.jsonc"];
+    const BIOME_JSON: [&'static str; 4] =
+        ["biome.json", "biome.jsonc", ".biome.json", ".biome.jsonc"];
 
     pub const fn biome_json() -> &'static str {
         Self::BIOME_JSON[0]
@@ -29,16 +32,22 @@ impl ConfigName {
         Self::BIOME_JSON[1]
     }
 
-    pub const fn file_names() -> [&'static str; 2] {
+    pub const fn file_names() -> [&'static str; 4] {
         Self::BIOME_JSON
     }
 }
 
 /// Represents the kind of filesystem entry a path points at.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PathKind {
     File { is_symlink: bool },
     Directory { is_symlink: bool },
+}
+
+impl Default for PathKind {
+    fn default() -> Self {
+        Self::File { is_symlink: false }
+    }
 }
 
 impl PathKind {
@@ -184,6 +193,57 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
         None
     }
 
+    /// Reads an array of **file** paths from the file system. It returns the contents of the first match.
+    fn read_files_from_paths(&self, paths: &[Utf8PathBuf]) -> Option<AutoSearchResult> {
+        self.read_file_from_paths_with_predicate(paths, &mut |_, _| true)
+    }
+
+    fn read_file_from_paths_with_predicate(
+        &self,
+        paths: &[Utf8PathBuf],
+        predicate: &mut dyn FnMut(&Utf8Path, &str) -> bool,
+    ) -> Option<AutoSearchResult> {
+        for file_path in paths {
+            match self.read_file_from_path(file_path) {
+                Ok(content) => {
+                    if !predicate(file_path, &content) {
+                        continue;
+                    }
+                    return Some(AutoSearchResult {
+                        content,
+                        file_path: file_path.to_path_buf(),
+                        directory_path: file_path
+                            .parent()
+                            .map_or(Utf8PathBuf::new(), |path| path.to_path_buf()),
+                    });
+                }
+                Err(_) => {
+                    info!(
+                        "Couldn't find the configuration file at {}.",
+                        file_path.as_str()
+                    );
+                }
+            }
+        }
+
+        None
+    }
+
+    /// Returns the directory that matches:
+    /// - `$XDG_CONFIG_HOME` or `~$HOME/.config/biome` on linux
+    /// - `/Users/$USER/Library/Application Support/biome` on macOS
+    /// - `C:\Users\$USER\AppData\Roaming\biome\config` on Windows
+    fn user_config_dir(&self) -> Option<Utf8PathBuf> {
+        if let Some(project_dir) = ProjectDirs::from("", "", "biome") {
+            let config_dir =
+                Utf8PathBuf::from_path_buf(project_dir.config_dir().to_path_buf()).ok()?;
+
+            return Some(config_dir);
+        }
+
+        None
+    }
+
     /// Reads the content of a file specified by `file_path`.
     ///
     /// This method attempts to open and read the entire content of a file at the given path.
@@ -214,7 +274,6 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
             }),
         }
     }
-
     /// Returns the resolution of a symbolic link.
     fn read_link(&self, path: &Utf8Path) -> io::Result<Utf8PathBuf>;
 
@@ -372,7 +431,7 @@ pub trait TraversalContext: Sync {
     fn store_path(&self, path: BiomePath);
 
     /// Returns the paths that should be handled
-    fn evaluated_paths(&self) -> BTreeSet<BiomePath>;
+    fn evaluated_paths(&self) -> HashSetRef<'_, BiomePath, RandomState, LocalGuard<'_>>;
 
     /// Returns whether directories are stored and returned by
     /// `Self::evaluated_paths()`.

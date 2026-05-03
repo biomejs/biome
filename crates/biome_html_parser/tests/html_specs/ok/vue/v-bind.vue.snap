@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```vue
@@ -33,7 +34,7 @@ HtmlRoot {
                 HtmlElement {
                     opening_element: HtmlOpeningElement {
                         l_angle_token: L_ANGLE@10..13 "<" [Newline("\n"), Whitespace("\t")] [],
-                        name: HtmlTagName {
+                        name: HtmlComponentName {
                             value_token: HTML_LITERAL@13..17 "Foo" [] [Whitespace(" ")],
                         },
                         attributes: HtmlAttributeList [
@@ -60,7 +61,7 @@ HtmlRoot {
                     closing_element: HtmlClosingElement {
                         l_angle_token: L_ANGLE@33..34 "<" [] [],
                         slash_token: SLASH@34..35 "/" [] [],
-                        name: HtmlTagName {
+                        name: HtmlComponentName {
                             value_token: HTML_LITERAL@35..38 "Foo" [] [],
                         },
                         r_angle_token: R_ANGLE@38..39 ">" [] [],
@@ -100,7 +101,7 @@ HtmlRoot {
         0: HTML_ELEMENT@10..39
           0: HTML_OPENING_ELEMENT@10..33
             0: L_ANGLE@10..13 "<" [Newline("\n"), Whitespace("\t")] []
-            1: HTML_TAG_NAME@13..17
+            1: HTML_COMPONENT_NAME@13..17
               0: HTML_LITERAL@13..17 "Foo" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@17..32
               0: VUE_DIRECTIVE@17..32
@@ -119,7 +120,7 @@ HtmlRoot {
           2: HTML_CLOSING_ELEMENT@33..39
             0: L_ANGLE@33..34 "<" [] []
             1: SLASH@34..35 "/" [] []
-            2: HTML_TAG_NAME@35..38
+            2: HTML_COMPONENT_NAME@35..38
               0: HTML_LITERAL@35..38 "Foo" [] []
             3: R_ANGLE@38..39 ">" [] []
       2: HTML_CLOSING_ELEMENT@39..51

@@ -1,0 +1,103 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<input bind:={name} />
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@0..1 "<" [] [],
+            name: HtmlTagName {
+                value_token: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                SvelteBindDirective {
+                    bind_token: BIND_KW@7..11 "bind" [] [],
+                    value: SvelteDirectiveValue {
+                        colon_token: COLON@11..12 ":" [] [],
+                        property: missing (required),
+                        modifiers: SvelteDirectiveModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@12..13 "=" [] [],
+                            value: HtmlAttributeSingleTextExpression {
+                                l_curly_token: L_CURLY@13..14 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@14..18 "name" [] [],
+                                },
+                                r_curly_token: R_CURLY@18..20 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@20..21 "/" [] [],
+            r_angle_token: R_ANGLE@21..22 ">" [] [],
+        },
+    ],
+    eof_token: EOF@22..23 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..23
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..22
+    0: HTML_SELF_CLOSING_ELEMENT@0..22
+      0: L_ANGLE@0..1 "<" [] []
+      1: HTML_TAG_NAME@1..7
+        0: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@7..20
+        0: SVELTE_BIND_DIRECTIVE@7..20
+          0: BIND_KW@7..11 "bind" [] []
+          1: SVELTE_DIRECTIVE_VALUE@11..20
+            0: COLON@11..12 ":" [] []
+            1: (empty)
+            2: SVELTE_DIRECTIVE_MODIFIER_LIST@12..12
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@12..20
+              0: EQ@12..13 "=" [] []
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@13..20
+                0: L_CURLY@13..14 "{" [] []
+                1: HTML_TEXT_EXPRESSION@14..18
+                  0: HTML_LITERAL@14..18 "name" [] []
+                2: R_CURLY@18..20 "}" [] [Whitespace(" ")]
+      3: SLASH@20..21 "/" [] []
+      4: R_ANGLE@21..22 ">" [] []
+  4: EOF@22..23 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+bind_missing_property.svelte:1:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+  > 1 │ <input bind:={name} />
+      │             ^
+    2 │ 
+  
+  i Expected one of:
+  
+  - name
+  - closing block
+  
+```

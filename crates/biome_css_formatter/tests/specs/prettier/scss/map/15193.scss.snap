@@ -1,0 +1,51 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/map/15193.scss
+---
+
+# Input
+
+```scss
+$foo: (
+    'property1': (),
+    // comment 1
+    // comment 2
+
+    'property2': 1,
+    /** comment 1 */
+    /* comment 2 */
+);
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,6 +2,8 @@
+   "property1": (),
+   // comment 1
+   // comment 2
++
+   "property2": 1,
+-  /** comment 1 */ /* comment 2 */
++  /** comment 1 */
++  /* comment 2 */
+ );
+```
+
+# Output
+
+```scss
+$foo: (
+  "property1": (),
+  // comment 1
+  // comment 2
+
+  "property2": 1,
+  /** comment 1 */
+  /* comment 2 */
+);
+```

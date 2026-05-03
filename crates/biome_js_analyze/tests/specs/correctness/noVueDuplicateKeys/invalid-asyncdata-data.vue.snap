@@ -1,0 +1,48 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-asyncdata-data.vue
+---
+# Input
+```vue
+<script>
+export default {
+  asyncData() {
+    return {
+      foo: 'async'
+    }
+  },
+  data() {
+    return {
+      foo: 'data'
+    }
+  }
+}
+</script>
+```
+
+# Diagnostics
+```
+invalid-asyncdata-data.vue:5:7 lint/correctness/noVueDuplicateKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate key foo found in Vue component.
+  
+    3 │   asyncData() {
+    4 │     return {
+  > 5 │       foo: 'async'
+      │       ^^^
+    6 │     }
+    7 │   },
+  
+  i Key foo is also defined here.
+  
+     8 │   data() {
+     9 │     return {
+  > 10 │       foo: 'data'
+       │       ^^^
+    11 │     }
+    12 │   }
+  
+  i Keys defined in different Vue component options (props, data, methods, computed) can conflict when accessed in the template. Rename the key to avoid conflicts.
+  
+
+```

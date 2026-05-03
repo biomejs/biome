@@ -1,0 +1,27 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: empty-block-statement.js
+---
+# Input
+```js
+{
+}
+
+```
+
+# Diagnostics
+```
+empty-block-statement.js:1:1 lint/suspicious/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty source is not allowed.
+  
+  > 1 │ {
+      │ ^
+  > 2 │ }
+      │ ^
+    3 │ 
+  
+  i Empty sources can clutter the codebase and increase cognitive load; deleting empty sources can help reduce it.
+  
+
+```

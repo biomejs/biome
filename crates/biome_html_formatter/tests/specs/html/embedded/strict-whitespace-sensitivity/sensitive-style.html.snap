@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: embedded/strict-whitespace-sensitivity/sensitive-style.html
 ---
+
 # Input
 
 ```html
@@ -13,61 +14,26 @@ body {
 ```
 
 
-=============================
+# Options
 
-# Outputs
+```json
+{
+  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "html": {
+    "formatter": {
+      "whitespaceSensitivity": "strict"
+    }
+  }
+}
+```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Attribute Position: Auto
-Bracket same line: false
-Whitespace sensitivity: css
-Indent script and style: false
-Self close void elements: never
------
+# Formatted
 
 ```html
 <style>
 body {
-  background-color: seagreen;
+	background-color: seagreen;
 }
 </style>
+
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-"\nbody {\n  background-color: seagreen;\n}\n" => 7..47
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Attribute Position: Auto
-Bracket same line: false
-Whitespace sensitivity: strict
-Indent script and style: false
-Self close void elements: never
------
-
-```html
-<style>
-body {
-  background-color: seagreen;
-}
-</style>
-```
-
-
-
-## Unimplemented nodes/tokens
-
-"\nbody {\n  background-color: seagreen;\n}\n" => 7..47

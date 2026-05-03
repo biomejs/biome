@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/value_fill.css
 ---
+
 # Input
 
 ```css
@@ -11,19 +12,7 @@ div {
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
------
+# Formatted
 
 ```css
 div {
@@ -31,4 +20,5 @@ div {
 		farbeyondthe linewidth and fillingon each line like it just keeps going and
 		going forever onward intothenight;
 }
+
 ```

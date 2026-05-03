@@ -1,5 +1,5 @@
 ---
-source: crates/biome_service/tests/spec_tests.rs
+source: crates/biome_configuration/tests/spec_tests.rs
 expression: vcs_wrong_client.json
 ---
 vcs_wrong_client.json:4:17 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -16,6 +16,3 @@ vcs_wrong_client.json:4:17 deserialize ━━━━━━━━━━━━━�
   i Accepted values:
   
   - git
-  
-
-

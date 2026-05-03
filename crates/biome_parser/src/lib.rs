@@ -194,6 +194,11 @@ pub trait Parser: Sized {
         self.source().has_preceding_line_break()
     }
 
+    /// Tests if there's whitespace trivia before the current token.
+    fn has_preceding_whitespace(&self) -> bool {
+        self.source().has_preceding_whitespace()
+    }
+
     /// Get the source code of the parser's current token.
     fn cur_text(&self) -> &str {
         &self.source().text()[self.cur_range()]
@@ -244,6 +249,16 @@ pub trait Parser: Sized {
         Self::Source: NthToken<Lex> + TokenSourceWithBufferedLexer<Lex>,
     {
         self.source_mut().has_nth_preceding_line_break(n)
+    }
+
+    /// Tests if there's whitespace trivia before the nth token.
+    #[inline]
+    fn has_nth_preceding_whitespace<'l, Lex>(&mut self, n: usize) -> bool
+    where
+        Lex: LexerWithCheckpoint<'l, Kind = Self::Kind>,
+        Self::Source: NthToken<Lex> + TokenSourceWithBufferedLexer<Lex>,
+    {
+        self.source_mut().has_nth_preceding_whitespace(n)
     }
 
     /// Consume the current token if `kind` matches.
@@ -656,6 +671,24 @@ pub trait SyntaxFeature: Sized {
                 }
                 _ => Absent,
             }
+        }
+    }
+
+    /// Parses a syntax only if this feature is supported.
+    ///
+    /// Returns `Absent` if the feature isn't supported.
+    fn parse_supported_syntax<'source, P>(
+        &self,
+        p: &mut Self::Parser<'source>,
+        parse: P,
+    ) -> ParsedSyntax
+    where
+        P: FnOnce(&mut Self::Parser<'source>) -> ParsedSyntax,
+    {
+        if self.is_supported(p) {
+            parse(p)
+        } else {
+            Absent
         }
     }
 

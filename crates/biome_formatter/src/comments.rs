@@ -768,6 +768,10 @@ pub trait CommentStyle: Default {
         false
     }
 
+    fn is_global_suppression(_text: &str) -> bool {
+        false
+    }
+
     /// Returns the (kind)[CommentKind] of the comment
     fn get_comment_kind(comment: &SyntaxTriviaPieceComments<Self::Language>) -> CommentKind;
 
@@ -822,8 +826,8 @@ impl<L: Language> Comments<L> {
         Self {
             data: Rc::new(CommentsData {
                 root: Some(root.clone()),
-                is_suppression: Style::is_suppression,
-
+                is_node_suppression: Style::is_suppression,
+                is_global_suppression: Style::is_global_suppression,
                 comments,
                 with_skipped: skipped,
                 #[cfg(debug_assertions)]
@@ -925,10 +929,25 @@ impl<L: Language> Comments<L> {
     /// call expression is nested inside of the expression statement.
     pub fn is_suppressed(&self, node: &SyntaxNode<L>) -> bool {
         self.mark_suppression_checked(node);
-        let is_suppression = self.data.is_suppression;
+        let is_suppression = self.data.is_node_suppression;
 
         self.leading_dangling_trailing_comments(node)
             .any(|comment| is_suppression(comment.piece().text()))
+    }
+
+    pub fn is_global_suppressed(&self, node: &SyntaxNode<L>) -> bool {
+        self.mark_suppression_checked(node);
+        let start = node.text_range_with_trivia().start();
+        // global suppression comments must start at the beginning of the file
+        if start >= TextSize::from(0) {
+            let is_global_suppression = self.data.is_global_suppression;
+            // only leading comments can be global suppression comments
+            return self
+                .leading_comments(node)
+                .iter()
+                .any(|comment| is_global_suppression(comment.piece().text()));
+        }
+        false
     }
 
     #[cfg(not(debug_assertions))]
@@ -1031,8 +1050,11 @@ Node:
 
 struct CommentsData<L: Language> {
     root: Option<SyntaxNode<L>>,
+    /// Returns true if the comment is node suppression
+    is_node_suppression: fn(&str) -> bool,
 
-    is_suppression: fn(&str) -> bool,
+    /// Returns true if the comment is global suppression
+    is_global_suppression: fn(&str) -> bool,
 
     /// Stores all leading node comments by node
     comments: CommentsMap<SyntaxElementKey, SourceComment<L>>,
@@ -1054,7 +1076,8 @@ impl<L: Language> Default for CommentsData<L> {
     fn default() -> Self {
         Self {
             root: None,
-            is_suppression: |_| false,
+            is_node_suppression: |_| false,
+            is_global_suppression: |_| false,
             comments: Default::default(),
             with_skipped: Default::default(),
             #[cfg(debug_assertions)]

@@ -9,9 +9,7 @@ use biome_configuration::diagnostics::{
     CantLoadExtendFile, CantResolve, EditorConfigDiagnostic, ParseFailedDiagnostic,
 };
 use biome_configuration::editorconfig::EditorConfig;
-use biome_configuration::{
-    BiomeDiagnostic, ConfigurationPathHint, ConfigurationPayload, push_to_analyzer_rules,
-};
+use biome_configuration::{BiomeDiagnostic, ConfigurationPathHint, push_to_analyzer_rules};
 use biome_configuration::{Configuration, VERSION, push_to_analyzer_assist};
 use biome_console::markup;
 use biome_css_analyze::METADATA as css_lint_metadata;
@@ -23,6 +21,7 @@ use biome_fs::{AutoSearchResult, ConfigName, FileSystem, OpenOptions};
 use biome_graphql_analyze::METADATA as graphql_lint_metadata;
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_html_analyze::METADATA as html_lint_metadata;
+use biome_html_syntax::HtmlLanguage;
 use biome_js_analyze::METADATA as js_lint_metadata;
 use biome_js_syntax::JsLanguage;
 use biome_json_analyze::METADATA as json_lint_metadata;
@@ -56,6 +55,25 @@ pub struct LoadedConfiguration {
     pub diagnostics: Vec<Error>,
     /// The list of possible extended configuration files
     pub extended_configurations: Vec<(Utf8PathBuf, Configuration)>,
+    /// Where the configuration was loaded from.
+    pub loaded_location: LoadedLocation,
+}
+
+#[derive(Default, Debug)]
+pub enum LoadedLocation {
+    /// Loaded from inside the project
+    #[default]
+    InProject,
+    /// Loaded from a parent folder
+    ParentFolder,
+    /// Loaded from the user configuration folder
+    UserConfigFolder,
+}
+
+impl LoadedLocation {
+    pub const fn is_in_project(&self) -> bool {
+        matches!(self, Self::InProject)
+    }
 }
 
 impl LoadedConfiguration {
@@ -72,6 +90,7 @@ impl LoadedConfiguration {
             external_resolution_base_path,
             configuration_file_path,
             deserialized,
+            loaded_location,
         } = value;
         let (partial_configuration, mut diagnostics) = deserialized.consume();
 
@@ -117,6 +136,7 @@ impl LoadedConfiguration {
             directory_path: configuration_file_path.parent().map(Utf8PathBuf::from),
             file_path: Some(configuration_file_path),
             extended_configurations,
+            loaded_location,
         })
     }
 
@@ -185,6 +205,18 @@ pub fn load_configuration(
     LoadedConfiguration::try_from_payload(config, fs)
 }
 
+#[derive(Debug)]
+pub struct ConfigurationPayload {
+    /// The result of the deserialization
+    pub deserialized: Deserialized<Configuration>,
+    /// The path of where the `biome.json` or `biome.jsonc` file was found. This contains the file name.
+    pub configuration_file_path: Utf8PathBuf,
+    /// The base path where the external configuration in a package should be resolved from
+    pub external_resolution_base_path: Utf8PathBuf,
+
+    pub loaded_location: LoadedLocation,
+}
+
 /// - [Result]: if an error occurred while loading the configuration file.
 /// - [Option]: sometimes not having a configuration file should not be an error, so we need this type.
 /// - [ConfigurationPayload]: The result of the operation
@@ -227,6 +259,7 @@ pub fn read_config(
         ConfigurationPathHint::FromLsp(path) => path.clone(),
         ConfigurationPathHint::FromWorkspace(path) => path.clone(),
         ConfigurationPathHint::FromUser(path) => path.clone(),
+        ConfigurationPathHint::FromUserExternal(path) => path.clone(),
         ConfigurationPathHint::None => fs.working_directory().unwrap_or_default(),
     };
 
@@ -235,7 +268,8 @@ pub fn read_config(
     let configuration_directory = match path_hint {
         ConfigurationPathHint::FromLsp(path) => path,
         ConfigurationPathHint::FromWorkspace(path) => path,
-        ConfigurationPathHint::FromUser(ref config_file_path) => {
+        ConfigurationPathHint::FromUser(ref config_file_path)
+        | ConfigurationPathHint::FromUserExternal(ref config_file_path) => {
             // If the configuration path hint is from the user, we'll load it
             // directly.
             return load_user_config(fs, config_file_path, external_resolution_base_path);
@@ -265,20 +299,37 @@ pub fn read_config(
         is_found
     };
 
-    let Some(auto_search_result) = fs.auto_search_files_with_predicate(
-        &configuration_directory,
-        &[ConfigName::biome_json(), ConfigName::biome_jsonc()],
-        &mut predicate,
-    ) else {
+    let Some((auto_search_result, loaded_location)) = fs
+        .auto_search_files_with_predicate(
+            &configuration_directory,
+            &ConfigName::file_names(),
+            &mut predicate,
+        )
+        .map(|auto_search_result| {
+            if configuration_directory == auto_search_result.directory_path {
+                (auto_search_result, LoadedLocation::InProject)
+            } else {
+                (auto_search_result, LoadedLocation::ParentFolder)
+            }
+        })
+        .or_else(|| {
+            let user_config_dir = fs.user_config_dir()?;
+
+            let paths = ConfigName::file_names().map(|file_name| user_config_dir.join(file_name));
+            fs.read_file_from_paths_with_predicate(paths.as_slice(), &mut predicate)
+                .map(|auto_search_result| (auto_search_result, LoadedLocation::UserConfigFolder))
+        })
+    else {
         return Ok(None);
     };
 
     Ok(Some(ConfigurationPayload {
-        // Unwrapping is safe because the predicate in the search above would
+        // SAFETY: unwrapping is safe because the predicate in the search above would
         // only return `true` if it assigned `Some` value:
         deserialized: deserialized.unwrap(),
         configuration_file_path: auto_search_result.file_path,
         external_resolution_base_path,
+        loaded_location,
     }))
 }
 
@@ -288,6 +339,7 @@ fn load_user_config(
     external_resolution_base_path: Utf8PathBuf,
 ) -> LoadConfig {
     // If the configuration path hint is a file path, we'll load it directly.
+    let working_directory = fs.working_directory();
     if fs.path_is_file(config_file_path) {
         let content = fs.read_file_from_path(config_file_path)?;
         let parser_options = match config_file_path.extension() {
@@ -298,33 +350,36 @@ fn load_user_config(
             _ => return Err(BiomeDiagnostic::invalid_configuration_file(config_file_path).into()),
         };
         let deserialized = deserialize_from_json_str::<Configuration>(&content, parser_options, "");
+        let loaded_location = working_directory.map_or(LoadedLocation::InProject, |wd| {
+            if config_file_path.starts_with(wd) {
+                LoadedLocation::InProject
+            } else {
+                LoadedLocation::ParentFolder
+            }
+        });
         Ok(Some(ConfigurationPayload {
             deserialized,
             configuration_file_path: config_file_path.to_path_buf(),
             external_resolution_base_path,
+            loaded_location,
         }))
     } else {
-        let biome_json_path = config_file_path.join(ConfigName::biome_json());
-        let biome_jsonc_path = config_file_path.join(ConfigName::biome_jsonc());
-        let biome_json_exists = fs.path_exists(biome_json_path.as_path());
-        let biome_jsonc_exists = fs.path_exists(biome_jsonc_path.as_path());
-
-        if !biome_json_exists && !biome_jsonc_exists {
+        let config_paths =
+            ConfigName::file_names().map(|file_name| config_file_path.join(file_name));
+        let result = fs.read_files_from_paths(config_paths.as_slice());
+        let Some(result) = result else {
             return Err(BiomeDiagnostic::no_configuration_file_found(config_file_path).into());
-        }
-
-        let (config_path, parser_options) = if biome_json_exists {
-            (biome_json_path, JsonParserOptions::default())
-        } else {
-            (
-                biome_jsonc_path,
-                JsonParserOptions::default()
-                    .with_allow_comments()
-                    .with_allow_trailing_commas(),
-            )
         };
 
-        let content = fs.read_file_from_path(config_path.as_path())?;
+        let parser_options = if result.file_path.extension() == Some("json") {
+            JsonParserOptions::default()
+        } else {
+            JsonParserOptions::default()
+                .with_allow_comments()
+                .with_allow_trailing_commas()
+        };
+
+        let content = fs.read_file_from_path(result.file_path.as_path())?;
         let deserialized = deserialize_from_json_str::<Configuration>(&content, parser_options, "");
         if deserialized
             .deserialized
@@ -333,11 +388,18 @@ fn load_user_config(
         {
             return Err(BiomeDiagnostic::non_root_configuration(config_file_path).into());
         }
-
+        let loaded_location = working_directory.map_or(LoadedLocation::InProject, |wd| {
+            if config_file_path.starts_with(wd) {
+                LoadedLocation::InProject
+            } else {
+                LoadedLocation::ParentFolder
+            }
+        });
         Ok(Some(ConfigurationPayload {
             deserialized,
-            configuration_file_path: config_path.to_path_buf(),
+            configuration_file_path: result.file_path.to_path_buf(),
             external_resolution_base_path,
+            loaded_location,
         }))
     }
 }
@@ -729,6 +791,7 @@ mod test {
 /// on the current configuration
 pub struct ProjectScanComputer<'a> {
     requires_project_scan: bool,
+    requires_types: bool,
     enabled_rules: FxHashSet<RuleFilter<'a>>,
     configuration: &'a Configuration,
     skip: &'a [AnalyzerSelector],
@@ -741,6 +804,7 @@ impl<'a> ProjectScanComputer<'a> {
         Self {
             enabled_rules,
             requires_project_scan: false,
+            requires_types: false,
             configuration,
             skip: &[],
             only: &[],
@@ -765,6 +829,11 @@ impl<'a> ProjectScanComputer<'a> {
             for (domain, value) in domains.iter() {
                 if domain == &RuleDomain::Project && value != &RuleDomainValue::None {
                     self.requires_project_scan = true;
+                }
+                if domain == &RuleDomain::Types && value != &RuleDomainValue::None {
+                    self.requires_types = true;
+                    self.requires_project_scan = true;
+                    // requiring types is of higher order of project, so we can bail
                     break;
                 }
             }
@@ -774,8 +843,11 @@ impl<'a> ProjectScanComputer<'a> {
         biome_css_analyze::visit_registry(&mut self);
         biome_json_analyze::visit_registry(&mut self);
         biome_js_analyze::visit_registry(&mut self);
+        biome_html_analyze::visit_registry(&mut self);
 
-        if self.requires_project_scan {
+        if self.requires_types {
+            ScanKind::TypeAware
+        } else if self.requires_project_scan {
             ScanKind::Project
         } else {
             // There's no need to scan further known files if the VCS isn't enabled
@@ -799,6 +871,7 @@ impl<'a> ProjectScanComputer<'a> {
                 if selector.match_rule::<R>() {
                     let domains = R::METADATA.domains;
                     self.requires_project_scan |= domains.contains(&RuleDomain::Project);
+                    self.requires_types |= domains.contains(&RuleDomain::Types);
                     break;
                 }
             }
@@ -807,6 +880,7 @@ impl<'a> ProjectScanComputer<'a> {
         {
             let domains = R::METADATA.domains;
             self.requires_project_scan |= domains.contains(&RuleDomain::Project);
+            self.requires_types |= domains.contains(&RuleDomain::Types);
         }
     }
 }
@@ -850,6 +924,15 @@ impl RegistryVisitor<GraphqlLanguage> for ProjectScanComputer<'_> {
     }
 }
 
+impl RegistryVisitor<HtmlLanguage> for ProjectScanComputer<'_> {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = HtmlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.check_rule::<R, HtmlLanguage>();
+    }
+}
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1000,5 +1083,203 @@ mod tests {
                 .compute(),
             ScanKind::NoScanner
         );
+    }
+
+    #[test]
+    fn should_return_type_aware_if_type_aware_domain_is_enabled() {
+        let mut domains = FxHashMap::default();
+        domains.insert(RuleDomain::Types, RuleDomainValue::Recommended);
+
+        let configuration = Configuration {
+            linter: Some(LinterConfiguration {
+                domains: Some(RuleDomains(domains)),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration).compute(),
+            ScanKind::TypeAware
+        );
+    }
+
+    #[test]
+    fn should_return_type_aware_if_type_aware_domain_selector() {
+        let configuration = Configuration::default();
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration)
+                .with_rule_selectors(&[], &[DomainSelector("types").into()])
+                .compute(),
+            ScanKind::TypeAware
+        );
+    }
+
+    #[test]
+    fn should_return_type_aware_when_both_type_aware_and_project_enabled() {
+        let mut domains = FxHashMap::default();
+        domains.insert(RuleDomain::Project, RuleDomainValue::Recommended);
+        domains.insert(RuleDomain::Types, RuleDomainValue::Recommended);
+
+        let configuration = Configuration {
+            linter: Some(LinterConfiguration {
+                domains: Some(RuleDomains(domains)),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration).compute(),
+            ScanKind::TypeAware
+        );
+    }
+
+    #[test]
+    fn should_not_return_type_aware_if_non_type_aware_domain() {
+        let configuration = Configuration::default();
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration)
+                .with_rule_selectors(&[], &[DomainSelector("react").into()])
+                .compute(),
+            ScanKind::NoScanner
+        );
+    }
+}
+
+#[cfg(test)]
+mod configuration_harness {
+    use biome_analyze::{GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleGroup};
+    use biome_configuration::generated::linter_options_check::config_side_rule_options_types;
+    use biome_css_syntax::CssLanguage;
+    use biome_graphql_syntax::GraphqlLanguage;
+    use biome_html_syntax::HtmlLanguage;
+    use biome_js_syntax::JsLanguage;
+    use biome_json_syntax::JsonLanguage;
+    use std::any::TypeId;
+    use std::collections::HashMap;
+
+    /// Collects `TypeId::of::<R::Options>()` for every rule via the registry visitor.
+    /// This is the "rule side" type — what the rule declares as `type Options`.
+    struct RuleSideOptionsVisitor {
+        types: HashMap<(&'static str, &'static str), TypeId>,
+    }
+
+    impl RuleSideOptionsVisitor {
+        fn collect_rule<R, L>(&mut self)
+        where
+            R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
+        {
+            let category = <R::Group as RuleGroup>::Category::CATEGORY;
+            if !matches!(category, RuleCategory::Lint) {
+                return;
+            }
+            self.types.insert(
+                (<R::Group as RuleGroup>::NAME, R::METADATA.name),
+                TypeId::of::<R::Options>(),
+            );
+        }
+    }
+
+    impl RegistryVisitor<JsLanguage> for RuleSideOptionsVisitor {
+        fn record_rule<R>(&mut self)
+        where
+            R: Rule<Options: Default, Query: Queryable<Language = JsLanguage, Output: Clone>>
+                + 'static,
+        {
+            self.collect_rule::<R, JsLanguage>();
+        }
+    }
+
+    impl RegistryVisitor<JsonLanguage> for RuleSideOptionsVisitor {
+        fn record_rule<R>(&mut self)
+        where
+            R: Rule<Options: Default, Query: Queryable<Language = JsonLanguage, Output: Clone>>
+                + 'static,
+        {
+            self.collect_rule::<R, JsonLanguage>();
+        }
+    }
+
+    impl RegistryVisitor<CssLanguage> for RuleSideOptionsVisitor {
+        fn record_rule<R>(&mut self)
+        where
+            R: Rule<Options: Default, Query: Queryable<Language = CssLanguage, Output: Clone>>
+                + 'static,
+        {
+            self.collect_rule::<R, CssLanguage>();
+        }
+    }
+
+    impl RegistryVisitor<GraphqlLanguage> for RuleSideOptionsVisitor {
+        fn record_rule<R>(&mut self)
+        where
+            R: Rule<Options: Default, Query: Queryable<Language = GraphqlLanguage, Output: Clone>>
+                + 'static,
+        {
+            self.collect_rule::<R, GraphqlLanguage>();
+        }
+    }
+
+    impl RegistryVisitor<HtmlLanguage> for RuleSideOptionsVisitor {
+        fn record_rule<R>(&mut self)
+        where
+            R: Rule<Options: Default, Query: Queryable<Language = HtmlLanguage, Output: Clone>>
+                + 'static,
+        {
+            self.collect_rule::<R, HtmlLanguage>();
+        }
+    }
+
+    /// Verifies that every lint rule's `type Options` matches the canonical options
+    /// type derived from the rule name (`biome_rule_options::{snake_name}::{Name}Options`).
+    ///
+    /// This catches copy-paste bugs where a rule accidentally uses another rule's
+    /// options type (e.g. `type Options = SomeOtherRuleOptions`). The configuration
+    /// layer always constructs `RuleOptions` using the canonical type, so a mismatch
+    /// causes a `TypeId` divergence that triggers a panic at runtime.
+    #[test]
+    fn rule_options_match_config_types() {
+        let config_side = config_side_rule_options_types();
+
+        let mut visitor = RuleSideOptionsVisitor {
+            types: HashMap::new(),
+        };
+        biome_js_analyze::visit_registry(&mut visitor);
+        biome_json_analyze::visit_registry(&mut visitor);
+        biome_css_analyze::visit_registry(&mut visitor);
+        biome_graphql_analyze::visit_registry(&mut visitor);
+        biome_html_analyze::visit_registry(&mut visitor);
+
+        let mut mismatches = Vec::new();
+        for (group, rule, config_type_id) in &config_side {
+            if let Some(rule_type_id) = visitor.types.get(&(*group, *rule))
+                && config_type_id != rule_type_id
+            {
+                mismatches.push(format!(
+                    "  {group}/{rule}: rule declares a different Options type than \
+                         biome_rule_options::{module}::{name}Options",
+                    module = biome_string_case::Case::Snake.convert(rule),
+                    name = {
+                        let mut c = rule.chars();
+                        match c.next() {
+                            None => String::new(),
+                            Some(f) => f.to_uppercase().collect::<String>() + c.as_str(),
+                        }
+                    },
+                ));
+            }
+        }
+
+        if !mismatches.is_empty() {
+            panic!(
+                "Rule options type mismatches detected:\n{}\n\n\
+                 Each rule's `type Options` must match the canonical options type \
+                 generated from its name. Check for copy-paste errors.",
+                mismatches.join("\n")
+            );
+        }
     }
 }

@@ -1,0 +1,93 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalid.graphql
+---
+# Input
+```graphql
+# should generate diagnostics
+
+# Input name not "input"
+type Mutation { SetMessage(record: String): String }
+
+# Input type not ending with Input
+type Mutation { SetMessage(input: String): String }
+
+# Case sensitive
+type Mutation { SetMessage(input: setMessageInput): String }
+
+# Input type not matching mutation name
+type Mutation { SetMessage(input: CreateAMessageInput): String }
+
+```
+
+# Diagnostics
+```
+invalid.graphql:4:28 lint/nursery/useInputName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected input name, expected the input name "record" to be named "input".
+  
+    3 │ # Input name not "input"
+  > 4 │ type Mutation { SetMessage(record: String): String }
+      │                            ^^^^^^^^^^^^^^
+    5 │ 
+    6 │ # Input type not ending with Input
+  
+  i Using the same name for all input parameters will make your schemas easier to consume and more predictable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.graphql:7:28 lint/nursery/useInputName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected input type name, expected the input type name "String" to be named "SetMessageInput".
+  
+    6 │ # Input type not ending with Input
+  > 7 │ type Mutation { SetMessage(input: String): String }
+      │                            ^^^^^^^^^^^^^
+    8 │ 
+    9 │ # Case sensitive
+  
+  i Using the name of the operation in the input type name will make it easier to find the operation that the input type belongs to.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.graphql:10:28 lint/nursery/useInputName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected input type name, expected the input type name "setMessageInput" to be named "SetMessageInput".
+  
+     9 │ # Case sensitive
+  > 10 │ type Mutation { SetMessage(input: setMessageInput): String }
+       │                            ^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ # Input type not matching mutation name
+  
+  i Using the name of the operation in the input type name will make it easier to find the operation that the input type belongs to.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.graphql:13:28 lint/nursery/useInputName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected input type name, expected the input type name "CreateAMessageInput" to be named "SetMessageInput".
+  
+    12 │ # Input type not matching mutation name
+  > 13 │ type Mutation { SetMessage(input: CreateAMessageInput): String }
+       │                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+  
+  i Using the name of the operation in the input type name will make it easier to find the operation that the input type belongs to.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

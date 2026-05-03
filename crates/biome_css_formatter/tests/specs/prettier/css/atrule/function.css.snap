@@ -1,7 +1,9 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
 info: css/atrule/function.css
 ---
+
 # Input
 
 ```css
@@ -102,42 +104,51 @@ $args
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,39 +1,73 @@
+@@ -1,39 +1,88 @@
  @function func($arg, $arg1, $arg2: 10, $args...) {
-   @return "Func";
+-  @return "Func";
++    @return "Func";
  }
 -@function func($arg, $arg1, $arg2: 10, $args...) {
-+@function func($arg,$arg1,$arg2:10,$args...) {
-   @return "Func";
+-  @return "Func";
++@function func($arg,$arg1,$arg2:10,$args...){
++    @return "Func";
  }
 -@function func($arg, $arg1, $arg2: 10, $args...) {
+-  @return "Func";
 +@function func ( $arg , $arg1 , $arg2 : 10 , $args ... ) {
-   @return "Func";
++    @return "Func";
  }
 -@function func($arg, $arg1, $arg2: 10, $args...) {
-+@function func  (  $arg  ,  $arg1  ,  $arg2  :  10  ,  $args  ...  ) {
-   @return "Func";
+-  @return "Func";
++@function  func  (  $arg  ,  $arg1  ,  $arg2  :  10  ,  $args  ...  )  {
++    @return "Func";
  }
 -@function func($arg, $arg1, $arg2: 10, $args...) {
+-  @return "Func";
 +@function func(
 +    $arg,
 +    $arg1,
 +    $arg2: 10,
 +    $args...
-+) {
-   @return "Func";
++)  {
++    @return "Func";
  }
 -@function func($arg, $arg1, $arg2: 10, $args...) {
-+@function func(
+-  @return "Func";
++@function
++    func(
 +        $arg,
 +        $arg1,
 +        $arg2: 10,
 +        $args...
-+    ) {
-   @return "Func";
++    )  {
++    @return "Func";
  }
 -@function func($arg, $arg1, $arg2: 10, $args...) {
-+@function func
+-  @return "Func";
++@function
++func
 +(
 +$arg
 +,
@@ -149,14 +160,19 @@ $args
 +,
 +$args
 +...
-+) {
-   @return "Func";
++)
++{
++@return
++"Func"
++;
  }
 -@function func(
 -  $arg,
 -  $arg1,
 -  $arg2: 10,
-+@function func
++@function
++
++func
 +
 +(
 +
@@ -169,8 +185,7 @@ $args
 +,
 +
 +$arg2
- 
--  $args...
++
 +:
 +
 +10
@@ -181,8 +196,19 @@ $args
 +
 +...
 +
- ) {
-   @return "Func";
++)
++
++{
++
++@return
++
++"Func"
++
++;
+ 
+-  $args...
+-) {
+-  @return "Func";
  }
 -@function func(
 -  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg,
@@ -191,8 +217,9 @@ $args
 -    10,
 -  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...
 -) {
+-  @return "Func";
 +@function func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
-   @return "Func";
++    @return "Func";
  }
 ```
 
@@ -200,34 +227,36 @@ $args
 
 ```css
 @function func($arg, $arg1, $arg2: 10, $args...) {
-  @return "Func";
+    @return "Func";
 }
-@function func($arg,$arg1,$arg2:10,$args...) {
-  @return "Func";
+@function func($arg,$arg1,$arg2:10,$args...){
+    @return "Func";
 }
 @function func ( $arg , $arg1 , $arg2 : 10 , $args ... ) {
-  @return "Func";
+    @return "Func";
 }
-@function func  (  $arg  ,  $arg1  ,  $arg2  :  10  ,  $args  ...  ) {
-  @return "Func";
+@function  func  (  $arg  ,  $arg1  ,  $arg2  :  10  ,  $args  ...  )  {
+    @return "Func";
 }
 @function func(
     $arg,
     $arg1,
     $arg2: 10,
     $args...
-) {
-  @return "Func";
+)  {
+    @return "Func";
 }
-@function func(
+@function
+    func(
         $arg,
         $arg1,
         $arg2: 10,
         $args...
-    ) {
-  @return "Func";
+    )  {
+    @return "Func";
 }
-@function func
+@function
+func
 (
 $arg
 ,
@@ -239,10 +268,15 @@ $arg2
 ,
 $args
 ...
-) {
-  @return "Func";
+)
+{
+@return
+"Func"
+;
 }
-@function func
+@function
+
+func
 
 (
 
@@ -266,397 +300,926 @@ $args
 
 ...
 
-) {
-  @return "Func";
+)
+
+{
+
+@return
+
+"Func"
+
+;
+
 }
 @function func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
-  @return "Func";
+    @return "Func";
 }
 ```
 
 # Errors
 ```
-function.css:1:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function.css:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a dashed identifier but instead found 'func'.
   
   > 1 │ @function func($arg, $arg1, $arg2: 10, $args...) {
-      │                ^
+      │           ^^^^
+    2 │     @return "Func";
+    3 │ }
+  
+  i Expected a dashed identifier here.
+  
+  > 1 │ @function func($arg, $arg1, $arg2: 10, $args...) {
+      │           ^^^^
+    2 │     @return "Func";
+    3 │ }
+  
+function.css:1:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a function parameter but instead found '$arg'.
+  
+  > 1 │ @function func($arg, $arg1, $arg2: 10, $args...) {
+      │                ^^^^
+    2 │     @return "Func";
+    3 │ }
+  
+  i Expected a function parameter here.
+  
+  > 1 │ @function func($arg, $arg1, $arg2: 10, $args...) {
+      │                ^^^^
     2 │     @return "Func";
     3 │ }
   
 function.css:1:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$arg1'.
   
   > 1 │ @function func($arg, $arg1, $arg2: 10, $args...) {
-      │                      ^
+      │                      ^^^^^
+    2 │     @return "Func";
+    3 │ }
+  
+  i Expected a function parameter here.
+  
+  > 1 │ @function func($arg, $arg1, $arg2: 10, $args...) {
+      │                      ^^^^^
     2 │     @return "Func";
     3 │ }
   
 function.css:1:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$arg2: 10'.
   
   > 1 │ @function func($arg, $arg1, $arg2: 10, $args...) {
-      │                             ^
+      │                             ^^^^^^^^^
+    2 │     @return "Func";
+    3 │ }
+  
+  i Expected a function parameter here.
+  
+  > 1 │ @function func($arg, $arg1, $arg2: 10, $args...) {
+      │                             ^^^^^^^^^
     2 │     @return "Func";
     3 │ }
   
 function.css:1:40 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$args...'.
   
   > 1 │ @function func($arg, $arg1, $arg2: 10, $args...) {
-      │                                        ^
+      │                                        ^^^^^^^^
     2 │     @return "Func";
     3 │ }
   
-function.css:4:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  i Expected a function parameter here.
+  
+  > 1 │ @function func($arg, $arg1, $arg2: 10, $args...) {
+      │                                        ^^^^^^^^
+    2 │     @return "Func";
+    3 │ }
+  
+function.css:4:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a dashed identifier but instead found 'func'.
   
     2 │     @return "Func";
     3 │ }
   > 4 │ @function func($arg,$arg1,$arg2:10,$args...){
-      │                ^
+      │           ^^^^
+    5 │     @return "Func";
+    6 │ }
+  
+  i Expected a dashed identifier here.
+  
+    2 │     @return "Func";
+    3 │ }
+  > 4 │ @function func($arg,$arg1,$arg2:10,$args...){
+      │           ^^^^
+    5 │     @return "Func";
+    6 │ }
+  
+function.css:4:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a function parameter but instead found '$arg'.
+  
+    2 │     @return "Func";
+    3 │ }
+  > 4 │ @function func($arg,$arg1,$arg2:10,$args...){
+      │                ^^^^
+    5 │     @return "Func";
+    6 │ }
+  
+  i Expected a function parameter here.
+  
+    2 │     @return "Func";
+    3 │ }
+  > 4 │ @function func($arg,$arg1,$arg2:10,$args...){
+      │                ^^^^
     5 │     @return "Func";
     6 │ }
   
 function.css:4:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$arg1'.
   
     2 │     @return "Func";
     3 │ }
   > 4 │ @function func($arg,$arg1,$arg2:10,$args...){
-      │                     ^
+      │                     ^^^^^
+    5 │     @return "Func";
+    6 │ }
+  
+  i Expected a function parameter here.
+  
+    2 │     @return "Func";
+    3 │ }
+  > 4 │ @function func($arg,$arg1,$arg2:10,$args...){
+      │                     ^^^^^
     5 │     @return "Func";
     6 │ }
   
 function.css:4:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$arg2:10'.
   
     2 │     @return "Func";
     3 │ }
   > 4 │ @function func($arg,$arg1,$arg2:10,$args...){
-      │                           ^
+      │                           ^^^^^^^^
+    5 │     @return "Func";
+    6 │ }
+  
+  i Expected a function parameter here.
+  
+    2 │     @return "Func";
+    3 │ }
+  > 4 │ @function func($arg,$arg1,$arg2:10,$args...){
+      │                           ^^^^^^^^
     5 │     @return "Func";
     6 │ }
   
 function.css:4:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$args...'.
   
     2 │     @return "Func";
     3 │ }
   > 4 │ @function func($arg,$arg1,$arg2:10,$args...){
-      │                                    ^
+      │                                    ^^^^^^^^
     5 │     @return "Func";
     6 │ }
   
-function.css:7:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  i Expected a function parameter here.
+  
+    2 │     @return "Func";
+    3 │ }
+  > 4 │ @function func($arg,$arg1,$arg2:10,$args...){
+      │                                    ^^^^^^^^
+    5 │     @return "Func";
+    6 │ }
+  
+function.css:7:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a dashed identifier but instead found 'func'.
   
     5 │     @return "Func";
     6 │ }
   > 7 │ @function func ( $arg , $arg1 , $arg2 : 10 , $args ... ) {
-      │                  ^
+      │           ^^^^
+    8 │     @return "Func";
+    9 │ }
+  
+  i Expected a dashed identifier here.
+  
+    5 │     @return "Func";
+    6 │ }
+  > 7 │ @function func ( $arg , $arg1 , $arg2 : 10 , $args ... ) {
+      │           ^^^^
+    8 │     @return "Func";
+    9 │ }
+  
+function.css:7:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a function parameter but instead found '$arg'.
+  
+    5 │     @return "Func";
+    6 │ }
+  > 7 │ @function func ( $arg , $arg1 , $arg2 : 10 , $args ... ) {
+      │                  ^^^^
+    8 │     @return "Func";
+    9 │ }
+  
+  i Expected a function parameter here.
+  
+    5 │     @return "Func";
+    6 │ }
+  > 7 │ @function func ( $arg , $arg1 , $arg2 : 10 , $args ... ) {
+      │                  ^^^^
     8 │     @return "Func";
     9 │ }
   
 function.css:7:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$arg1'.
   
     5 │     @return "Func";
     6 │ }
   > 7 │ @function func ( $arg , $arg1 , $arg2 : 10 , $args ... ) {
-      │                         ^
+      │                         ^^^^^
+    8 │     @return "Func";
+    9 │ }
+  
+  i Expected a function parameter here.
+  
+    5 │     @return "Func";
+    6 │ }
+  > 7 │ @function func ( $arg , $arg1 , $arg2 : 10 , $args ... ) {
+      │                         ^^^^^
     8 │     @return "Func";
     9 │ }
   
 function.css:7:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$arg2 : 10'.
   
     5 │     @return "Func";
     6 │ }
   > 7 │ @function func ( $arg , $arg1 , $arg2 : 10 , $args ... ) {
-      │                                 ^
+      │                                 ^^^^^^^^^^
+    8 │     @return "Func";
+    9 │ }
+  
+  i Expected a function parameter here.
+  
+    5 │     @return "Func";
+    6 │ }
+  > 7 │ @function func ( $arg , $arg1 , $arg2 : 10 , $args ... ) {
+      │                                 ^^^^^^^^^^
     8 │     @return "Func";
     9 │ }
   
 function.css:7:46 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$args ...'.
   
     5 │     @return "Func";
     6 │ }
   > 7 │ @function func ( $arg , $arg1 , $arg2 : 10 , $args ... ) {
-      │                                              ^
+      │                                              ^^^^^^^^^
     8 │     @return "Func";
     9 │ }
   
-function.css:10:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  i Expected a function parameter here.
+  
+    5 │     @return "Func";
+    6 │ }
+  > 7 │ @function func ( $arg , $arg1 , $arg2 : 10 , $args ... ) {
+      │                                              ^^^^^^^^^
+    8 │     @return "Func";
+    9 │ }
+  
+function.css:10:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a dashed identifier but instead found 'func'.
   
      8 │     @return "Func";
      9 │ }
   > 10 │ @function  func  (  $arg  ,  $arg1  ,  $arg2  :  10  ,  $args  ...  )  {
-       │                     ^
+       │            ^^^^
+    11 │     @return "Func";
+    12 │ }
+  
+  i Expected a dashed identifier here.
+  
+     8 │     @return "Func";
+     9 │ }
+  > 10 │ @function  func  (  $arg  ,  $arg1  ,  $arg2  :  10  ,  $args  ...  )  {
+       │            ^^^^
+    11 │     @return "Func";
+    12 │ }
+  
+function.css:10:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a function parameter but instead found '$arg'.
+  
+     8 │     @return "Func";
+     9 │ }
+  > 10 │ @function  func  (  $arg  ,  $arg1  ,  $arg2  :  10  ,  $args  ...  )  {
+       │                     ^^^^
+    11 │     @return "Func";
+    12 │ }
+  
+  i Expected a function parameter here.
+  
+     8 │     @return "Func";
+     9 │ }
+  > 10 │ @function  func  (  $arg  ,  $arg1  ,  $arg2  :  10  ,  $args  ...  )  {
+       │                     ^^^^
     11 │     @return "Func";
     12 │ }
   
 function.css:10:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$arg1'.
   
      8 │     @return "Func";
      9 │ }
   > 10 │ @function  func  (  $arg  ,  $arg1  ,  $arg2  :  10  ,  $args  ...  )  {
-       │                              ^
+       │                              ^^^^^
+    11 │     @return "Func";
+    12 │ }
+  
+  i Expected a function parameter here.
+  
+     8 │     @return "Func";
+     9 │ }
+  > 10 │ @function  func  (  $arg  ,  $arg1  ,  $arg2  :  10  ,  $args  ...  )  {
+       │                              ^^^^^
     11 │     @return "Func";
     12 │ }
   
 function.css:10:40 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$arg2  :  10'.
   
      8 │     @return "Func";
      9 │ }
   > 10 │ @function  func  (  $arg  ,  $arg1  ,  $arg2  :  10  ,  $args  ...  )  {
-       │                                        ^
+       │                                        ^^^^^^^^^^^^
+    11 │     @return "Func";
+    12 │ }
+  
+  i Expected a function parameter here.
+  
+     8 │     @return "Func";
+     9 │ }
+  > 10 │ @function  func  (  $arg  ,  $arg1  ,  $arg2  :  10  ,  $args  ...  )  {
+       │                                        ^^^^^^^^^^^^
     11 │     @return "Func";
     12 │ }
   
 function.css:10:57 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$args  ...'.
   
      8 │     @return "Func";
      9 │ }
   > 10 │ @function  func  (  $arg  ,  $arg1  ,  $arg2  :  10  ,  $args  ...  )  {
-       │                                                         ^
+       │                                                         ^^^^^^^^^^
     11 │     @return "Func";
     12 │ }
   
+  i Expected a function parameter here.
+  
+     8 │     @return "Func";
+     9 │ }
+  > 10 │ @function  func  (  $arg  ,  $arg1  ,  $arg2  :  10  ,  $args  ...  )  {
+       │                                                         ^^^^^^^^^^
+    11 │     @return "Func";
+    12 │ }
+  
+function.css:13:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found 'func'.
+  
+    11 │     @return "Func";
+    12 │ }
+  > 13 │ @function func(
+       │           ^^^^
+    14 │     $arg,
+    15 │     $arg1,
+  
+  i Expected a dashed identifier here.
+  
+    11 │     @return "Func";
+    12 │ }
+  > 13 │ @function func(
+       │           ^^^^
+    14 │     $arg,
+    15 │     $arg1,
+  
 function.css:14:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$arg'.
   
     12 │ }
     13 │ @function func(
   > 14 │     $arg,
-       │     ^
+       │     ^^^^
+    15 │     $arg1,
+    16 │     $arg2: 10,
+  
+  i Expected a function parameter here.
+  
+    12 │ }
+    13 │ @function func(
+  > 14 │     $arg,
+       │     ^^^^
     15 │     $arg1,
     16 │     $arg2: 10,
   
 function.css:15:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$arg1'.
   
     13 │ @function func(
     14 │     $arg,
   > 15 │     $arg1,
-       │     ^
+       │     ^^^^^
+    16 │     $arg2: 10,
+    17 │     $args...
+  
+  i Expected a function parameter here.
+  
+    13 │ @function func(
+    14 │     $arg,
+  > 15 │     $arg1,
+       │     ^^^^^
     16 │     $arg2: 10,
     17 │     $args...
   
 function.css:16:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$arg2: 10'.
   
     14 │     $arg,
     15 │     $arg1,
   > 16 │     $arg2: 10,
-       │     ^
+       │     ^^^^^^^^^
+    17 │     $args...
+    18 │ )  {
+  
+  i Expected a function parameter here.
+  
+    14 │     $arg,
+    15 │     $arg1,
+  > 16 │     $arg2: 10,
+       │     ^^^^^^^^^
     17 │     $args...
     18 │ )  {
   
 function.css:17:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$args...'.
   
     15 │     $arg1,
     16 │     $arg2: 10,
   > 17 │     $args...
-       │     ^
+       │     ^^^^^^^^
     18 │ )  {
     19 │     @return "Func";
   
+  i Expected a function parameter here.
+  
+    15 │     $arg1,
+    16 │     $arg2: 10,
+  > 17 │     $args...
+       │     ^^^^^^^^
+    18 │ )  {
+    19 │     @return "Func";
+  
+function.css:22:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found 'func'.
+  
+    20 │ }
+    21 │ @function
+  > 22 │     func(
+       │     ^^^^
+    23 │         $arg,
+    24 │         $arg1,
+  
+  i Expected a dashed identifier here.
+  
+    20 │ }
+    21 │ @function
+  > 22 │     func(
+       │     ^^^^
+    23 │         $arg,
+    24 │         $arg1,
+  
 function.css:23:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$arg'.
   
     21 │ @function
     22 │     func(
   > 23 │         $arg,
-       │         ^
+       │         ^^^^
+    24 │         $arg1,
+    25 │         $arg2: 10,
+  
+  i Expected a function parameter here.
+  
+    21 │ @function
+    22 │     func(
+  > 23 │         $arg,
+       │         ^^^^
     24 │         $arg1,
     25 │         $arg2: 10,
   
 function.css:24:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$arg1'.
   
     22 │     func(
     23 │         $arg,
   > 24 │         $arg1,
-       │         ^
+       │         ^^^^^
+    25 │         $arg2: 10,
+    26 │         $args...
+  
+  i Expected a function parameter here.
+  
+    22 │     func(
+    23 │         $arg,
+  > 24 │         $arg1,
+       │         ^^^^^
     25 │         $arg2: 10,
     26 │         $args...
   
 function.css:25:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$arg2: 10'.
   
     23 │         $arg,
     24 │         $arg1,
   > 25 │         $arg2: 10,
-       │         ^
+       │         ^^^^^^^^^
+    26 │         $args...
+    27 │     )  {
+  
+  i Expected a function parameter here.
+  
+    23 │         $arg,
+    24 │         $arg1,
+  > 25 │         $arg2: 10,
+       │         ^^^^^^^^^
     26 │         $args...
     27 │     )  {
   
 function.css:26:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$args...'.
   
     24 │         $arg1,
     25 │         $arg2: 10,
   > 26 │         $args...
-       │         ^
+       │         ^^^^^^^^
     27 │     )  {
     28 │     @return "Func";
   
+  i Expected a function parameter here.
+  
+    24 │         $arg1,
+    25 │         $arg2: 10,
+  > 26 │         $args...
+       │         ^^^^^^^^
+    27 │     )  {
+    28 │     @return "Func";
+  
+function.css:31:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found 'func'.
+  
+    29 │ }
+    30 │ @function
+  > 31 │ func
+       │ ^^^^
+    32 │ (
+    33 │ $arg
+  
+  i Expected a dashed identifier here.
+  
+    29 │ }
+    30 │ @function
+  > 31 │ func
+       │ ^^^^
+    32 │ (
+    33 │ $arg
+  
 function.css:33:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$arg'.
   
     31 │ func
     32 │ (
   > 33 │ $arg
-       │ ^
+       │ ^^^^
+    34 │ ,
+    35 │ $arg1
+  
+  i Expected a function parameter here.
+  
+    31 │ func
+    32 │ (
+  > 33 │ $arg
+       │ ^^^^
     34 │ ,
     35 │ $arg1
   
 function.css:35:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$arg1'.
   
     33 │ $arg
     34 │ ,
   > 35 │ $arg1
-       │ ^
+       │ ^^^^^
+    36 │ ,
+    37 │ $arg2
+  
+  i Expected a function parameter here.
+  
+    33 │ $arg
+    34 │ ,
+  > 35 │ $arg1
+       │ ^^^^^
     36 │ ,
     37 │ $arg2
   
 function.css:37:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$arg2
+    :
+    10'.
   
     35 │ $arg1
     36 │ ,
   > 37 │ $arg2
-       │ ^
-    38 │ :
-    39 │ 10
+       │ ^^^^^
+  > 38 │ :
+  > 39 │ 10
+       │ ^^
+    40 │ ,
+    41 │ $args
+  
+  i Expected a function parameter here.
+  
+    35 │ $arg1
+    36 │ ,
+  > 37 │ $arg2
+       │ ^^^^^
+  > 38 │ :
+  > 39 │ 10
+       │ ^^
+    40 │ ,
+    41 │ $args
   
 function.css:41:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$args
+    ...'.
   
     39 │ 10
     40 │ ,
   > 41 │ $args
-       │ ^
-    42 │ ...
+       │ ^^^^^
+  > 42 │ ...
+       │ ^^^
     43 │ )
+    44 │ {
+  
+  i Expected a function parameter here.
+  
+    39 │ 10
+    40 │ ,
+  > 41 │ $args
+       │ ^^^^^
+  > 42 │ ...
+       │ ^^^
+    43 │ )
+    44 │ {
+  
+function.css:51:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found 'func'.
+  
+    49 │ @function
+    50 │ 
+  > 51 │ func
+       │ ^^^^
+    52 │ 
+    53 │ (
+  
+  i Expected a dashed identifier here.
+  
+    49 │ @function
+    50 │ 
+  > 51 │ func
+       │ ^^^^
+    52 │ 
+    53 │ (
   
 function.css:55:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$arg'.
   
     53 │ (
     54 │ 
   > 55 │ $arg
-       │ ^
+       │ ^^^^
+    56 │ 
+    57 │ ,
+  
+  i Expected a function parameter here.
+  
+    53 │ (
+    54 │ 
+  > 55 │ $arg
+       │ ^^^^
     56 │ 
     57 │ ,
   
 function.css:59:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$arg1'.
   
     57 │ ,
     58 │ 
   > 59 │ $arg1
-       │ ^
+       │ ^^^^^
+    60 │ 
+    61 │ ,
+  
+  i Expected a function parameter here.
+  
+    57 │ ,
+    58 │ 
+  > 59 │ $arg1
+       │ ^^^^^
     60 │ 
     61 │ ,
   
 function.css:63:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$arg2
+    
+    :
+    
+    10'.
   
     61 │ ,
     62 │ 
   > 63 │ $arg2
-       │ ^
-    64 │ 
-    65 │ :
+       │ ^^^^^
+  > 64 │ 
+  > 65 │ :
+  > 66 │ 
+  > 67 │ 10
+       │ ^^
+    68 │ 
+    69 │ ,
+  
+  i Expected a function parameter here.
+  
+    61 │ ,
+    62 │ 
+  > 63 │ $arg2
+       │ ^^^^^
+  > 64 │ 
+  > 65 │ :
+  > 66 │ 
+  > 67 │ 10
+       │ ^^
+    68 │ 
+    69 │ ,
   
 function.css:71:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$args
+    
+    ...'.
   
     69 │ ,
     70 │ 
   > 71 │ $args
-       │ ^
-    72 │ 
-    73 │ ...
+       │ ^^^^^
+  > 72 │ 
+  > 73 │ ...
+       │ ^^^
+    74 │ 
+    75 │ )
   
-function.css:86:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  i Expected a function parameter here.
+  
+    69 │ ,
+    70 │ 
+  > 71 │ $args
+       │ ^^^^^
+  > 72 │ 
+  > 73 │ ...
+       │ ^^^
+    74 │ 
+    75 │ )
+  
+function.css:86:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a dashed identifier but instead found 'func'.
   
     85 │ }
   > 86 │ @function func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
-       │                ^
+       │           ^^^^
+    87 │     @return "Func";
+    88 │ }
+  
+  i Expected a dashed identifier here.
+  
+    85 │ }
+  > 86 │ @function func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
+       │           ^^^^
+    87 │     @return "Func";
+    88 │ }
+  
+function.css:86:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a function parameter but instead found '$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg'.
+  
+    85 │ }
+  > 86 │ @function func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    87 │     @return "Func";
+    88 │ }
+  
+  i Expected a function parameter here.
+  
+    85 │ }
+  > 86 │ @function func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     87 │     @return "Func";
     88 │ }
   
 function.css:86:97 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1'.
   
     85 │ }
   > 86 │ @function func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
-       │                                                                                                 ^
+       │                                                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    87 │     @return "Func";
+    88 │ }
+  
+  i Expected a function parameter here.
+  
+    85 │ }
+  > 86 │ @function func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
+       │                                                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     87 │     @return "Func";
     88 │ }
   
 function.css:86:179 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10'.
   
     85 │ }
   > 86 │ @function func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
-       │                                                                                                                                                                                   ^
+       │                                                                                                                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    87 │     @return "Func";
+    88 │ }
+  
+  i Expected a function parameter here.
+  
+    85 │ }
+  > 86 │ @function func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
+       │                                                                                                                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     87 │     @return "Func";
     88 │ }
   
 function.css:86:265 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `$`
+  × Expected a function parameter but instead found '$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...'.
   
     85 │ }
   > 86 │ @function func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
-       │                                                                                                                                                                                                                                                                         ^
+       │                                                                                                                                                                                                                                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    87 │     @return "Func";
+    88 │ }
+  
+  i Expected a function parameter here.
+  
+    85 │ }
+  > 86 │ @function func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
+       │                                                                                                                                                                                                                                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     87 │     @return "Func";
     88 │ }
   
@@ -665,5 +1228,5 @@ function.css:86:265 parse ━━━━━━━━━━━━━━━━━━
 
 # Lines exceeding max width of 80 characters
 ```
-   71: @function func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
+   86: @function func($very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2: 10, $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-args...) {
 ```

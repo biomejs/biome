@@ -68,7 +68,21 @@ a {
 	color: yellow;
 }
 
+/* Scroll and modern CSS properties */
+a { scroll-marker-group: after; }
+a { scroll-target-group: auto; }
+a { reading-flow: flex-visual; }
+a { reading-order: 1; }
+a { overlay: auto; }
+a { dynamic-range-limit: standard; }
+
 /* View Transition navigation property (should not be flagged) */
 view-transition {
 	navigation: auto;
 }
+
+/* Corner shape properties */
+a { corner-shape: squircle; }
+a { corner-top-left-shape: superellipse(4); }
+a { corner-bottom-right-shape: round; }
+a { corner-block-start-shape: bevel; }

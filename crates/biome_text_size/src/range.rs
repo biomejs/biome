@@ -27,6 +27,12 @@ impl fmt::Debug for TextRange {
     }
 }
 
+impl fmt::Display for TextRange {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(&self, f)
+    }
+}
+
 impl PartialOrd for TextRange {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))

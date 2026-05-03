@@ -3,7 +3,7 @@ use rustc_hash::{FxHashMap, FxHashSet};
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_css_semantic::model::{Rule as CssSemanticRule, RuleId, SemanticModel, Specificity};
-use biome_css_syntax::{AnyCssSelector, CssRoot};
+use biome_css_syntax::{AnyCssRoot, AnyCssSelector};
 use biome_diagnostics::Severity;
 use biome_rowan::TextRange;
 
@@ -125,7 +125,7 @@ fn find_tail_selector_str(selector: &AnyCssSelector) -> Option<String> {
 /// For each selector, it compares its specificity with the previously encountered specificity of the same tail selector.
 /// If a lower specificity selector is found after a higher specificity selector with the same tail selector, it records this as a descending selector.
 fn find_descending_selector(
-    root: &CssRoot,
+    root: &AnyCssRoot,
     rule: &CssSemanticRule,
     model: &SemanticModel,
     visited_rules: &mut FxHashSet<RuleId>,
@@ -176,7 +176,7 @@ fn find_descending_selector(
 }
 
 impl Rule for NoDescendingSpecificity {
-    type Query = Semantic<CssRoot>;
+    type Query = Semantic<AnyCssRoot>;
     type State = DescendingSelector;
     type Signals = Box<[Self::State]>;
     type Options = NoDescendingSpecificityOptions;

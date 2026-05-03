@@ -9,16 +9,17 @@ use crate::file_handlers::graphql::GraphqlFileHandler;
 use crate::file_handlers::ignore::IgnoreFileHandler;
 pub use crate::file_handlers::svelte::SvelteFileHandler;
 pub use crate::file_handlers::vue::VueFileHandler;
-use crate::settings::Settings;
+use crate::settings::{Settings, SettingsWithEditor};
 use crate::utils::growth_guard::GrowthGuard;
+use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
 use crate::workspace::{
     AnyEmbeddedSnippet, CodeAction, DocumentServices, FixAction, FixFileMode, FixFileResult,
     GetSyntaxTreeResult, PullActionsResult, PullDiagnosticsAndActionsResult, RenameResult,
 };
 use biome_analyze::{
-    AnalyzerAction, AnalyzerDiagnostic, AnalyzerOptions, AnalyzerPluginVec, AnalyzerSignal,
-    ControlFlow, GroupCategory, Never, Queryable, RegistryVisitor, Rule, RuleCategories,
-    RuleCategory, RuleError, RuleFilter, RuleGroup,
+    ActionFilter, AnalyzerAction, AnalyzerDiagnostic, AnalyzerOptions, AnalyzerPluginVec,
+    AnalyzerSignal, ControlFlow, FixKind, GroupCategory, Never, Queryable, RegistryVisitor, Rule,
+    RuleCategories, RuleCategory, RuleError, RuleFilter, RuleGroup,
 };
 use biome_configuration::Rules;
 use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue};
@@ -27,7 +28,7 @@ use biome_console::fmt::Formatter;
 use biome_css_analyze::METADATA as css_metadata;
 use biome_css_syntax::{CssFileSource, CssLanguage};
 use biome_diagnostics::{Applicability, Diagnostic, DiagnosticExt, Error, Severity, category};
-use biome_formatter::{FormatContext, FormatResult, Formatted, Printed};
+use biome_formatter::{FormatContext, FormatResult, Formatted, Printed, SourceMapGeneration};
 use biome_fs::BiomePath;
 use biome_graphql_analyze::METADATA as graphql_metadata;
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
@@ -38,21 +39,23 @@ use biome_js_analyze::METADATA as js_metadata;
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{
     AnyJsModuleItem, EmbeddingKind, JsFileSource, JsLanguage, JsxAttribute, JsxAttributeList,
-    Language, LanguageVariant, TextRange, TextSize,
+    Language, LanguageVariant, SvelteFileKind, TextRange, TextSize,
 };
 use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
+use biome_markdown_syntax::MdFileSource;
 use biome_module_graph::ModuleGraph;
 use biome_package::PackageJson;
 use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
-use biome_rowan::{FileSourceError, NodeCache, SendNode, SyntaxNode, TokenText};
+use biome_rowan::{BatchMutation, FileSourceError, NodeCache, SendNode, SyntaxNode, TokenText};
 use biome_string_case::StrLikeExtension;
 use camino::Utf8Path;
 use either::Either;
 use grit::GritFileHandler;
 use html::HtmlFileHandler;
 pub use javascript::JsFormatterSettings;
+use md::MarkdownFileHandler;
 use rustc_hash::FxHashSet;
 use std::borrow::Cow;
 use std::collections::HashSet;
@@ -67,6 +70,7 @@ pub(crate) mod html;
 mod ignore;
 pub(crate) mod javascript;
 pub(crate) mod json;
+pub(crate) mod md;
 pub mod svelte;
 mod unknown;
 pub mod vue;
@@ -82,6 +86,7 @@ pub enum DocumentFileSource {
     Graphql(GraphqlFileSource),
     Html(HtmlFileSource),
     Grit(GritFileSource),
+    Markdown(MdFileSource),
     // Ignore files
     Ignore,
     #[default]
@@ -124,6 +129,12 @@ impl From<GritFileSource> for DocumentFileSource {
     }
 }
 
+impl From<MdFileSource> for DocumentFileSource {
+    fn from(value: MdFileSource) -> Self {
+        Self::Markdown(value)
+    }
+}
+
 impl From<&Utf8Path> for DocumentFileSource {
     fn from(path: &Utf8Path) -> Self {
         Self::from_path(path, false)
@@ -158,6 +169,11 @@ impl DocumentFileSource {
             return Ok(file_source.into());
         }
         if let Ok(file_source) = GraphqlFileSource::try_from_well_known(path) {
+            return Ok(file_source.into());
+        }
+
+        #[cfg(feature = "markdown")]
+        if let Ok(file_source) = MdFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
 
@@ -204,6 +220,9 @@ impl DocumentFileSource {
         if let Ok(file_source) = GritFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
+        if let Ok(file_source) = MdFileSource::try_from_extension(extension) {
+            return Ok(file_source.into());
+        }
         Err(FileSourceError::UnknownExtension)
     }
 
@@ -230,6 +249,9 @@ impl DocumentFileSource {
             return Ok(file_source.into());
         }
         if let Ok(file_source) = GritFileSource::try_from_language_id(language_id) {
+            return Ok(file_source.into());
+        }
+        if let Ok(file_source) = MdFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
         Err(FileSourceError::UnknownLanguageId)
@@ -370,6 +392,13 @@ impl DocumentFileSource {
         }
     }
 
+    pub fn to_markdown_file_source(&self) -> Option<MdFileSource> {
+        match self {
+            Self::Markdown(markdown) => Some(*markdown),
+            _ => None,
+        }
+    }
+
     /// The file can be parsed
     pub fn can_parse(path: &Utf8Path) -> bool {
         let file_source = Self::from(path);
@@ -379,7 +408,8 @@ impl DocumentFileSource {
             | Self::Graphql(_)
             | Self::Json(_)
             | Self::Html(_)
-            | Self::Grit(_) => true,
+            | Self::Grit(_)
+            | Self::Markdown(_) => true,
             Self::Ignore => false,
             Self::Unknown => false,
         }
@@ -394,7 +424,8 @@ impl DocumentFileSource {
             | Self::Graphql(_)
             | Self::Json(_)
             | Self::Html(_)
-            | Self::Grit(_) => true,
+            | Self::Grit(_)
+            | Self::Markdown(_) => true,
             Self::Ignore => true,
             Self::Unknown => false,
         }
@@ -404,12 +435,12 @@ impl DocumentFileSource {
     pub fn can_contain_embeds(path: &Utf8Path, experimental_full_html_support: bool) -> bool {
         let file_source = Self::from_path(path, experimental_full_html_support);
         match file_source {
-            Self::Html(_) => true,
-            Self::Js(_)
-            | Self::Css(_)
+            Self::Html(_) | Self::Js(_) => true,
+            Self::Css(_)
             | Self::Graphql(_)
             | Self::Json(_)
             | Self::Grit(_)
+            | Self::Markdown(_)
             | Self::Ignore
             | Self::Unknown => false,
         }
@@ -444,6 +475,7 @@ impl std::fmt::Display for DocumentFileSource {
             Self::Graphql(_) => write!(fmt, "GraphQL"),
             Self::Html(_) => write!(fmt, "HTML"),
             Self::Grit(_) => write!(fmt, "Grit"),
+            Self::Markdown(_) => write!(fmt, "Markdown"),
             Self::Ignore => write!(fmt, "Ignore"),
             Self::Unknown => write!(fmt, "Unknown"),
         }
@@ -459,7 +491,7 @@ impl biome_console::fmt::Display for DocumentFileSource {
 pub struct FixAllParams<'a> {
     pub(crate) parse: AnyParse,
     pub(crate) fix_file_mode: FixFileMode,
-    pub(crate) settings: &'a Settings,
+    pub(crate) settings: &'a SettingsWithEditor<'a>,
     /// Whether it should format the code action
     pub(crate) should_format: bool,
     pub(crate) biome_path: &'a BiomePath,
@@ -473,6 +505,10 @@ pub struct FixAllParams<'a> {
     pub(crate) enabled_rules: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) document_services: &'a DocumentServices,
+    /// The initial indentation level to apply when printing formatted code.
+    /// Used by embedded language handlers (Svelte, Vue) to preserve
+    /// `indentScriptAndStyle` indentation during fix-all operations.
+    pub(crate) embeds_initial_indent: u16,
 }
 
 #[derive(Default)]
@@ -492,13 +528,21 @@ pub struct ParseResult {
     pub(crate) language: Option<DocumentFileSource>,
 }
 
+#[derive(Default)]
 pub struct ParseEmbedResult {
     pub(crate) nodes: Vec<(AnyEmbeddedSnippet, DocumentFileSource)>,
 }
 
-type Parse = fn(&BiomePath, DocumentFileSource, &str, &Settings, &mut NodeCache) -> ParseResult;
-type ParseEmbeddedNodes =
-    fn(&AnyParse, &BiomePath, &DocumentFileSource, &Settings, &mut NodeCache) -> ParseEmbedResult;
+type Parse =
+    fn(&BiomePath, DocumentFileSource, &str, &SettingsWithEditor, &mut NodeCache) -> ParseResult;
+type ParseEmbeddedNodes = fn(
+    &AnyParse,
+    &BiomePath,
+    &DocumentFileSource,
+    &SettingsWithEditor,
+    &mut NodeCache,
+    &mut EmbeddedBuilder,
+) -> ParseEmbedResult;
 #[derive(Default)]
 pub struct ParserCapabilities {
     /// Parse a file
@@ -509,8 +553,12 @@ pub struct ParserCapabilities {
 
 type DebugSyntaxTree = fn(&BiomePath, AnyParse) -> GetSyntaxTreeResult;
 type DebugControlFlow = fn(AnyParse, TextSize) -> String;
-type DebugFormatterIR =
-    fn(&BiomePath, &DocumentFileSource, AnyParse, &Settings) -> Result<String, WorkspaceError>;
+type DebugFormatterIR = fn(
+    &BiomePath,
+    &DocumentFileSource,
+    AnyParse,
+    &SettingsWithEditor,
+) -> Result<String, WorkspaceError>;
 type DebugTypeInfo =
     fn(&BiomePath, Option<AnyParse>, Arc<ModuleGraph>) -> Result<String, WorkspaceError>;
 type DebugRegisteredTypes = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
@@ -535,7 +583,7 @@ pub struct DebugCapabilities {
 #[derive(Debug)]
 pub(crate) struct LintParams<'a> {
     pub(crate) parse: AnyParse,
-    pub(crate) settings: &'a Settings,
+    pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) language: DocumentFileSource,
     pub(crate) path: &'a BiomePath,
     pub(crate) only: &'a [AnalyzerSelector],
@@ -549,11 +597,16 @@ pub(crate) struct LintParams<'a> {
     pub(crate) pull_code_actions: bool,
     pub(crate) diagnostic_offset: Option<TextSize>,
     pub(crate) document_services: &'a DocumentServices,
+    pub(crate) snippet_services: Option<&'a DocumentServices>,
+    pub(crate) max_diagnostics: Option<u32>,
+    pub(crate) diagnostic_level: Severity,
+    /// When true, promote assist diagnostics (`assist/*`) to error severity.
+    pub(crate) enforce_assist: bool,
 }
 
 pub(crate) struct DiagnosticsAndActionsParams<'a> {
     pub(crate) parse: AnyParse,
-    pub(crate) settings: &'a Settings,
+    pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) language: DocumentFileSource,
     pub(crate) path: &'a BiomePath,
     pub(crate) only: &'a [AnalyzerSelector],
@@ -565,24 +618,33 @@ pub(crate) struct DiagnosticsAndActionsParams<'a> {
     pub(crate) enabled_selectors: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) diagnostic_offset: Option<TextSize>,
-    #[expect(unused)]
     pub(crate) document_services: &'a DocumentServices,
+    // Services attached to the current embedded snippet, when diagnostics are run on snippets.
+    pub(crate) snippet_services: Option<&'a DocumentServices>,
 }
 
+#[derive(Debug, Default)]
 pub(crate) struct LintResults {
     pub(crate) diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
     pub(crate) errors: usize,
     pub(crate) skipped_diagnostics: u32,
+    pub(crate) infos: usize,
+    pub(crate) warnings: usize,
 }
 
 pub(crate) struct ProcessLint<'a> {
     diagnostic_count: u32,
     errors: usize,
+    warnings: usize,
+    infos: usize,
     diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
     ignores_suppression_comment: bool,
     rules: Option<Cow<'a, Rules>>,
     pull_code_actions: bool,
     diagnostic_offset: Option<TextSize>,
+    max_diagnostics: Option<u32>,
+    diagnostic_level: Severity,
+    enforce_assist: bool,
 }
 
 impl<'a> ProcessLint<'a> {
@@ -590,15 +652,25 @@ impl<'a> ProcessLint<'a> {
         Self {
             diagnostic_count: params.parse.diagnostics().len() as u32,
             errors: Default::default(),
+            warnings: Default::default(),
+            infos: Default::default(),
             diagnostics: Default::default(),
             // Do not report unused suppression comment diagnostics if:
             // - it is a syntax-only analyzer pass, or
-            // - if a single rule is run.
+            // - if a single rule is run, or
+            // - if rules or domains are skipped.
             ignores_suppression_comment: !params.categories.contains(RuleCategory::Lint)
-                || !params.only.is_empty(),
-            rules: params.settings.as_linter_rules(params.path.as_path()),
+                || !params.only.is_empty()
+                || !params.skip.is_empty(),
+            rules: params
+                .settings
+                .as_ref()
+                .as_linter_rules(params.path.as_path()),
             pull_code_actions: params.pull_code_actions,
             diagnostic_offset: params.diagnostic_offset,
+            max_diagnostics: params.max_diagnostics,
+            diagnostic_level: params.diagnostic_level,
+            enforce_assist: params.enforce_assist,
         }
     }
 
@@ -613,40 +685,59 @@ impl<'a> ProcessLint<'a> {
                 return ControlFlow::<Never>::Continue(());
             }
 
-            self.diagnostic_count += 1;
-
-            // We do now check if the severity of the diagnostics should be changed.
-            // The configuration allows to change the severity of the diagnostics emitted by rules.
-            let severity = diagnostic
-                .category()
-                .filter(|category| category.name().starts_with("lint/"))
-                .and_then(|category| {
+            // Resolve the final severity for this diagnostic:
+            // 1. Lint rules may have configured severity overrides.
+            // 2. Assist diagnostics are promoted to Error when enforce_assist is set.
+            let category = diagnostic.category();
+            let mut severity = category
+                .filter(|cat| cat.name().starts_with("lint/"))
+                .and_then(|cat| {
                     self.rules.as_ref().and_then(|rules| {
-                        rules.get_severity_from_category(category, diagnostic.severity())
+                        rules.get_severity_from_category(cat, diagnostic.severity())
                     })
                 })
                 .or_else(|| Some(diagnostic.severity()))
                 .unwrap_or(Severity::Warning);
 
-            if severity >= Severity::Error {
-                self.errors += 1;
+            if self.enforce_assist && category.is_some_and(|cat| cat.name().starts_with("assist/"))
+            {
+                severity = Severity::Error;
             }
 
-            if self.pull_code_actions {
-                for action in signal.actions() {
-                    if !action.is_suppression() {
+            if severity < self.diagnostic_level {
+                return ControlFlow::<Never>::Continue(());
+            }
+
+            match severity {
+                Severity::Error | Severity::Fatal => {
+                    self.errors += 1;
+                }
+                Severity::Information => {
+                    self.infos += 1;
+                }
+                Severity::Warning => self.warnings += 1,
+                Severity::Hint => {}
+            }
+
+            if self
+                .max_diagnostics
+                .is_none_or(|max_diagnostics| self.diagnostic_count <= max_diagnostics)
+            {
+                if self.pull_code_actions {
+                    for action in signal.actions(ActionFilter::rule_fix()) {
                         diagnostic = diagnostic.add_code_suggestion(action.into());
                     }
                 }
-            }
-            if let Some(offset) = &self.diagnostic_offset {
-                diagnostic.add_diagnostic_offset(*offset);
-            }
+                if let Some(offset) = &self.diagnostic_offset {
+                    diagnostic.add_diagnostic_offset(*offset);
+                }
 
-            let error = diagnostic.with_severity(severity);
+                let error = diagnostic.with_severity(severity);
 
-            self.diagnostics
-                .push(biome_diagnostics::serde::Diagnostic::new(error));
+                self.diagnostics
+                    .push(biome_diagnostics::serde::Diagnostic::new(error));
+            }
+            self.diagnostic_count += 1;
         }
 
         ControlFlow::<Never>::Continue(())
@@ -657,18 +748,36 @@ impl<'a> ProcessLint<'a> {
         parse_diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
         analyzer_diagnostics: Vec<biome_diagnostics::Error>,
     ) -> LintResults {
-        let mut diagnostics = parse_diagnostics;
-        let errors = diagnostics
-            .iter()
-            .filter(|diag| diag.severity() <= Severity::Error)
-            .count();
+        let mut parse_errors = 0usize;
+        let mut parse_warnings = 0usize;
+        let mut parse_infos = 0usize;
+        let mut diagnostics: Vec<_> = parse_diagnostics
+            .into_iter()
+            .filter(|diag| diag.severity() >= self.diagnostic_level)
+            .inspect(|diag| match diag.severity() {
+                Severity::Error | Severity::Fatal => parse_errors += 1,
+                Severity::Warning => parse_warnings += 1,
+                Severity::Information => parse_infos += 1,
+                Severity::Hint => {}
+            })
+            .collect();
 
         diagnostics.extend(self.diagnostics);
 
+        let mut analyzer_errors = 0usize;
+        let mut analyzer_warnings = 0usize;
+        let mut analyzer_infos = 0usize;
         diagnostics.extend(
             analyzer_diagnostics
                 .into_iter()
                 .map(biome_diagnostics::serde::Diagnostic::new)
+                .filter(|diag| diag.severity() >= self.diagnostic_level)
+                .inspect(|diag| match diag.severity() {
+                    Severity::Error | Severity::Fatal => analyzer_errors += 1,
+                    Severity::Warning => analyzer_warnings += 1,
+                    Severity::Information => analyzer_infos += 1,
+                    Severity::Hint => {}
+                })
                 .collect::<Vec<_>>(),
         );
         let skipped_diagnostics = self
@@ -676,9 +785,11 @@ impl<'a> ProcessLint<'a> {
             .saturating_sub(diagnostics.len() as u32);
 
         LintResults {
-            errors,
+            errors: parse_errors + self.errors + analyzer_errors,
             skipped_diagnostics,
             diagnostics,
+            infos: parse_infos + self.infos + analyzer_infos,
+            warnings: parse_warnings + self.warnings + analyzer_warnings,
         }
     }
 }
@@ -709,12 +820,13 @@ impl<'a> ProcessFixAll<'a> {
         }
     }
 
-    /// Process the incoming signal from the analyzer. Tracks errors and actions based on the type of
-    /// fix have been provided.
-    pub(crate) fn process_signal<L: biome_rowan::Language>(
+    /// Collects all applicable actions from the signal instead of
+    /// breaking on the first one. The analyzer runs to completion, processing every signal.
+    pub(crate) fn collect_signal<L: biome_rowan::Language>(
         &mut self,
         signal: &dyn AnalyzerSignal<L>,
-    ) -> ControlFlow<AnalyzerAction<L>> {
+        pending: &mut Vec<AnalyzerAction<L>>,
+    ) -> ControlFlow<Never> {
         let current_diagnostic = signal.diagnostic();
 
         if let Some(diagnostic) = current_diagnostic.as_ref()
@@ -723,36 +835,36 @@ impl<'a> ProcessFixAll<'a> {
             self.errors += 1;
         }
 
-        for action in signal.actions() {
+        let action_filter = match self.fix_file_mode {
+            FixFileMode::ApplySuppressions => ActionFilter::inline_suppression(),
+            FixFileMode::SafeFixes | FixFileMode::SafeAndUnsafeFixes => ActionFilter::rule_fix(),
+        };
+        for action in signal.actions(action_filter) {
             match self.fix_file_mode {
                 FixFileMode::ApplySuppressions => {
                     if action.is_suppression() {
-                        return ControlFlow::Break(action);
+                        pending.push(action);
+                        // Take only the first suppression action per signal
+                        // (inline), not the top-level one as well.
+                        break;
                     }
                 }
                 FixFileMode::SafeFixes => {
-                    // suppression actions should not be part of safe fixes
-                    if action.is_suppression() {
-                        continue;
-                    }
                     if action.applicability == Applicability::MaybeIncorrect {
                         self.skipped_suggested_fixes += 1;
                     }
                     if action.applicability == Applicability::Always {
                         self.errors = self.errors.saturating_sub(1);
-                        return ControlFlow::Break(action);
+                        pending.push(action);
                     }
                 }
                 FixFileMode::SafeAndUnsafeFixes => {
-                    if action.is_suppression() {
-                        continue;
-                    }
                     if matches!(
                         action.applicability,
                         Applicability::Always | Applicability::MaybeIncorrect
                     ) {
                         self.errors = self.errors.saturating_sub(1);
-                        return ControlFlow::Break(action);
+                        pending.push(action);
                     }
                 }
             }
@@ -761,77 +873,160 @@ impl<'a> ProcessFixAll<'a> {
         ControlFlow::Continue(())
     }
 
-    /// Applies the mutation of the `action`. The closure returns the new root and must return
-    /// the length of the text that was replaced by the mutation.
-    ///
-    /// If `None` is returned, it means that there aren't any more mutations to apply.
-    pub(crate) fn process_action<T, L>(
+    /// Phase 1 callback: collect applicable fix actions without counting errors.
+    /// Error counting is deferred to Phase 2 where all rules run on the final tree.
+    pub(crate) fn collect_signal_fixes_only<L: biome_rowan::Language>(
         &mut self,
-        action: Option<AnalyzerAction<L>>,
+        signal: &dyn AnalyzerSignal<L>,
+        pending: &mut Vec<AnalyzerAction<L>>,
+    ) -> ControlFlow<Never> {
+        let action_filter = match self.fix_file_mode {
+            FixFileMode::ApplySuppressions => ActionFilter::inline_suppression(),
+            FixFileMode::SafeFixes | FixFileMode::SafeAndUnsafeFixes => ActionFilter::rule_fix(),
+        };
+        for action in signal.actions(action_filter) {
+            match self.fix_file_mode {
+                FixFileMode::ApplySuppressions => {
+                    if action.is_suppression() {
+                        pending.push(action);
+                        break;
+                    }
+                }
+                FixFileMode::SafeFixes => {
+                    if action.applicability == Applicability::MaybeIncorrect {
+                        self.skipped_suggested_fixes += 1;
+                    }
+                    if action.applicability == Applicability::Always {
+                        pending.push(action);
+                    }
+                }
+                FixFileMode::SafeAndUnsafeFixes => {
+                    if matches!(
+                        action.applicability,
+                        Applicability::Always | Applicability::MaybeIncorrect
+                    ) {
+                        pending.push(action);
+                    }
+                }
+            }
+        }
+
+        ControlFlow::Continue(())
+    }
+
+    /// Phase 2 callback: count remaining errors on the fixed tree without collecting actions.
+    pub(crate) fn collect_diagnostic_only<L: biome_rowan::Language>(
+        &mut self,
+        signal: &dyn AnalyzerSignal<L>,
+    ) -> ControlFlow<Never> {
+        if let Some(diagnostic) = signal.diagnostic().as_ref()
+            && is_diagnostic_error(diagnostic, self.rules.as_deref())
+        {
+            self.errors += 1;
+        }
+        ControlFlow::Continue(())
+    }
+
+    /// Merge pending actions from the same rule into one mutation and commit.
+    ///
+    /// Only actions matching the first rule are merged and applied. Remaining
+    /// rules are handled in subsequent iterations of the `fix_all` loop. This
+    /// avoids merging mutations from different rules which may conflict.
+    ///
+    /// Returns `Some(())` if any fixes were applied, `None` if pending was empty.
+    pub(crate) fn process_batch_actions<T, L>(
+        &mut self,
+        pending: Vec<AnalyzerAction<L>>,
         mut update_tree_return_text_len: T,
     ) -> Result<Option<()>, WorkspaceError>
     where
         T: FnMut(SyntaxNode<L>) -> Option<u32>,
         L: biome_rowan::Language,
     {
-        match action {
-            Some(action) => {
-                if let (root, Some((range, _))) =
-                    action.mutation.commit_with_text_range_and_edit(true)
-                {
-                    let Some(curr_len) = update_tree_return_text_len(root) else {
-                        return Err(WorkspaceError::RuleError(
-                            RuleError::ReplacedRootWithNonRootError {
-                                rule_name: action.rule_name.map(|(group, rule)| {
-                                    (Cow::Borrowed(group), Cow::Borrowed(rule))
-                                }),
-                            },
-                        ));
-                    };
-
-                    self.actions.push(FixAction {
-                        rule_name: action
-                            .rule_name
-                            .map(|(group, rule)| (Cow::Borrowed(group), Cow::Borrowed(rule))),
-                        range,
-                    });
-
-                    // Check for runaway edit growth
-                    if !self.growth_guard.check(curr_len) {
-                        // In order to provide a useful diagnostic, we want to flag the rules that caused the conflict.
-                        // We can do this by inspecting the last few fixes that were applied.
-                        // We limit it to the last 10 fixes. If there is a chain of conflicting fixes longer than that, something is **really** fucked up.
-
-                        let mut seen_rules = HashSet::new();
-                        for action in self.actions.iter().rev().take(10) {
-                            if let Some((group, rule)) = action.rule_name.as_ref() {
-                                seen_rules.insert((group.clone(), rule.clone()));
-                            }
-                        }
-
-                        return Err(WorkspaceError::RuleError(
-                            RuleError::ConflictingRuleFixesError {
-                                rules: seen_rules.into_iter().collect(),
-                            },
-                        ));
-                    };
-                };
-
-                Ok(Some(()))
-            }
-            None => Ok(None),
+        if pending.is_empty() {
+            return Ok(None);
         }
+
+        let target_rule = pending[0].rule_name;
+        let mut master: Option<BatchMutation<L>> = None;
+        let mut count = 0usize;
+
+        for action in pending {
+            if action.rule_name != target_rule {
+                continue;
+            }
+            match &mut master {
+                Some(m) => m.merge(action.mutation),
+                None => master = Some(action.mutation),
+            }
+            count += 1;
+        }
+
+        let Some(master) = master else {
+            return Ok(None);
+        };
+
+        let (root, text_range_and_edit) = master.commit_with_text_range_and_edit(true);
+        if let Some((range, _)) = text_range_and_edit {
+            let Some(curr_len) = update_tree_return_text_len(root) else {
+                return Err(WorkspaceError::RuleError(
+                    RuleError::ReplacedRootWithNonRootError {
+                        rule_name: target_rule.map(|(g, r)| (Cow::Borrowed(g), Cow::Borrowed(r))),
+                    },
+                ));
+            };
+
+            for _ in 0..count {
+                self.actions.push(FixAction {
+                    rule_name: target_rule.map(|(g, r)| (Cow::Borrowed(g), Cow::Borrowed(r))),
+                    range,
+                });
+            }
+
+            if !self.growth_guard.check(curr_len) {
+                let seen_rules: HashSet<_> = self
+                    .actions
+                    .iter()
+                    .rev()
+                    .take(10)
+                    .filter_map(|a| a.rule_name.clone())
+                    .collect();
+                return Err(WorkspaceError::RuleError(
+                    RuleError::ConflictingRuleFixesError {
+                        rules: seen_rules.into_iter().collect(),
+                    },
+                ));
+            }
+        }
+
+        Ok(Some(()))
     }
 
     /// Finish processing the fix all actions. Returns the result of the fix-all actions. The `format_tree`
     /// is a closure that must return the new code (formatted, if needed).
-    pub(crate) fn finish<F, C>(self, format_tree: F) -> Result<FixFileResult, WorkspaceError>
+    ///
+    /// `initial_indent` specifies the base indentation level for printing. This is used by
+    /// embedded language handlers (e.g. Svelte, Vue) to preserve `indentScriptAndStyle`
+    /// indentation when formatting during fix-all operations.
+    pub(crate) fn finish<F, C>(
+        self,
+        format_tree: F,
+        initial_indent: u16,
+    ) -> Result<FixFileResult, WorkspaceError>
     where
         F: FnOnce() -> Result<Either<FormatResult<Formatted<C>>, String>, WorkspaceError>,
         C: FormatContext,
     {
         let code = match format_tree()? {
-            Either::Left(printed) => printed?.print()?.into_code(),
+            Either::Left(printed) => {
+                if initial_indent > 0 {
+                    printed?
+                        .print_with_indent(initial_indent, SourceMapGeneration::Disabled)?
+                        .into_code()
+                } else {
+                    printed?.print()?.into_code()
+                }
+            }
             Either::Right(string) => string,
         };
         Ok(FixFileResult {
@@ -864,14 +1059,15 @@ impl ProcessDiagnosticsAndActions {
 
         if let Some(mut diagnostic) = diagnostic {
             let actions: Vec<_> = signal
-                .actions()
+                .actions(ActionFilter::all())
                 .into_code_action_iter()
                 .map(|item| CodeAction {
                     category: item.category.clone(),
                     rule_name: item
                         .rule_name
                         .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
-                    suggestion: item.suggestion,
+                    applicability: Some(item.suggestion.applicability),
+                    suggestion: Some(item.suggestion),
                     offset: None,
                 })
                 .collect();
@@ -899,7 +1095,7 @@ impl ProcessDiagnosticsAndActions {
 pub(crate) struct CodeActionsParams<'a> {
     pub(crate) parse: AnyParse,
     pub(crate) range: Option<TextRange>,
-    pub(crate) settings: &'a Settings,
+    pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) path: &'a BiomePath,
     pub(crate) module_graph: Arc<ModuleGraph>,
     pub(crate) project_layout: Arc<ProjectLayout>,
@@ -912,11 +1108,19 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) categories: RuleCategories,
     pub(crate) action_offset: Option<TextSize>,
     pub(crate) document_services: &'a DocumentServices,
+    /// When `false`, actions are returned with `suggestion: None` (no mutations computed).
+    pub(crate) compute_actions: bool,
+    // Services attached to the current embedded snippet, when actions are run on snippets.
+    pub(crate) snippet_services: Option<&'a DocumentServices>,
 }
 
 pub(crate) struct UpdateSnippetsNodes {
     pub(crate) range: TextRange,
     pub(crate) new_code: String,
+    /// When `true`, `new_code` needs to be re-indented to match the
+    /// host's nesting level. When `false`, `new_code` already has the
+    /// right shape and can be spliced back as-is.
+    pub(crate) needs_reindent: bool,
 }
 
 type Lint = fn(LintParams) -> LintResults;
@@ -942,20 +1146,24 @@ pub struct AnalyzerCapabilities {
     pub(crate) pull_diagnostics_and_actions: Option<PullDiagnosticsAndActions>,
 }
 
-type Format =
-    fn(&BiomePath, &DocumentFileSource, AnyParse, &Settings) -> Result<Printed, WorkspaceError>;
+type Format = fn(
+    &BiomePath,
+    &DocumentFileSource,
+    AnyParse,
+    &SettingsWithEditor,
+) -> Result<Printed, WorkspaceError>;
 type FormatRange = fn(
     &BiomePath,
     &DocumentFileSource,
     AnyParse,
-    &Settings,
+    &SettingsWithEditor,
     TextRange,
 ) -> Result<Printed, WorkspaceError>;
 type FormatOnType = fn(
     &BiomePath,
     &DocumentFileSource,
     AnyParse,
-    &Settings,
+    &SettingsWithEditor,
     TextSize,
 ) -> Result<Printed, WorkspaceError>;
 
@@ -963,7 +1171,7 @@ type FormatEmbedded = fn(
     &BiomePath,
     &DocumentFileSource,
     AnyParse,
-    &Settings,
+    &SettingsWithEditor,
     Vec<FormatEmbedNode>,
 ) -> Result<Printed, WorkspaceError>;
 
@@ -986,14 +1194,14 @@ pub(crate) struct FormatterCapabilities {
     pub(crate) format_embedded: Option<FormatEmbedded>,
 }
 
-type Enabled = fn(&Utf8Path, &Settings) -> bool;
+type Enabled = fn(&Utf8Path, &SettingsWithEditor) -> bool;
 
 type Search = fn(
     &BiomePath,
     &DocumentFileSource,
     AnyParse,
     &GritQuery,
-    &Settings,
+    &SettingsWithEditor,
 ) -> Result<Vec<TextRange>, WorkspaceError>;
 
 #[derive(Default)]
@@ -1030,6 +1238,7 @@ pub(crate) struct Features {
     graphql: GraphqlFileHandler,
     html: HtmlFileHandler,
     grit: GritFileHandler,
+    markdown: MarkdownFileHandler,
     ignore: IgnoreFileHandler,
 }
 
@@ -1045,19 +1254,29 @@ impl Features {
             graphql: GraphqlFileHandler {},
             html: HtmlFileHandler {},
             grit: GritFileHandler {},
+            markdown: MarkdownFileHandler {},
             ignore: IgnoreFileHandler {},
             unknown: UnknownFileHandler::default(),
         }
     }
 
-    /// Returns the [Capabilities] associated with a [BiomePath]
+    /// Returns the [Capabilities] associated with a document source.
     pub(crate) fn get_capabilities(&self, language_hint: DocumentFileSource) -> Capabilities {
         match language_hint {
             // TODO: remove match once we remove vue/astro/svelte handlers
             DocumentFileSource::Js(source) => match source.as_embedding_kind() {
                 EmbeddingKind::Astro { .. } => self.astro.capabilities(),
                 EmbeddingKind::Vue { .. } => self.vue.capabilities(),
-                EmbeddingKind::Svelte => self.svelte.capabilities(),
+                // `.svelte.ts` / `.svelte.js` are full JS/TS modules with Svelte
+                // semantics; `.svelte` component documents still use the Svelte handler.
+                EmbeddingKind::Svelte {
+                    kind: SvelteFileKind::SourceModule,
+                    ..
+                } => self.js.capabilities(),
+                EmbeddingKind::Svelte {
+                    kind: SvelteFileKind::Component,
+                    ..
+                } => self.svelte.capabilities(),
                 EmbeddingKind::None => self.js.capabilities(),
             },
             DocumentFileSource::Json(_) => self.json.capabilities(),
@@ -1065,6 +1284,7 @@ impl Features {
             DocumentFileSource::Graphql(_) => self.graphql.capabilities(),
             DocumentFileSource::Html(_) => self.html.capabilities(),
             DocumentFileSource::Grit(_) => self.grit.capabilities(),
+            DocumentFileSource::Markdown(_) => self.markdown.capabilities(),
             DocumentFileSource::Ignore => self.ignore.capabilities(),
             DocumentFileSource::Unknown => self.unknown.capabilities(),
         }
@@ -1186,7 +1406,7 @@ pub(crate) fn search(
     _file_source: &DocumentFileSource,
     parse: AnyParse,
     query: &GritQuery,
-    _settings: &Settings,
+    _settings: &SettingsWithEditor,
 ) -> Result<Vec<TextRange>, WorkspaceError> {
     let result = query
         .execute(GritTargetFile::new(path.as_path(), parse))
@@ -1316,6 +1536,9 @@ impl RegistryVisitor<HtmlLanguage> for SyntaxVisitor<'_> {
 struct LintVisitor<'a, 'b> {
     pub(crate) enabled_rules: FxHashSet<RuleFilter<'a>>,
     pub(crate) disabled_rules: FxHashSet<RuleFilter<'a>>,
+    /// Set of rules that have a code fix, regardless of whether they are enabled.
+    /// Used after `finish()` to derive the fixable subset of `enabled_rules`.
+    pub(crate) rules_with_fix: FxHashSet<RuleFilter<'a>>,
     // lint_params: &'b LintParams<'a>,
     only: Option<&'b [AnalyzerSelector]>,
     skip: Option<&'b [AnalyzerSelector]>,
@@ -1337,6 +1560,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         Self {
             enabled_rules: Default::default(),
             disabled_rules: Default::default(),
+            rules_with_fix: Default::default(),
             only,
             skip,
             settings,
@@ -1348,8 +1572,6 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
 
     /// It loops over the domains of the current rule, and check each domain specify
     /// a dependency.
-    ///
-    /// Returns `true` if the rule was enabled, `false` otherwise
     fn record_rule_from_manifest<R, L>(&mut self, rule_filter: RuleFilter<'static>)
     where
         L: biome_rowan::Language,
@@ -1370,16 +1592,20 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         }
 
         let no_only = self.only.is_some_and(|only| only.is_empty());
-        let no_domains = self
-            .settings
-            .as_linter_domains(path)
-            .is_none_or(|d| d.is_empty());
-        if !(no_only && no_domains) {
+        if !no_only {
             return;
         }
 
+        let domains = self.settings.as_linter_domains(path);
         if let Some(manifest) = &self.package_json {
             for domain in R::METADATA.domains {
+                if domains
+                    .as_ref()
+                    .is_some_and(|domains| domains.contains_key(domain))
+                {
+                    continue;
+                }
+
                 let matches_a_dependency = domain
                     .manifest_dependencies()
                     .iter()
@@ -1387,7 +1613,6 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
 
                 if matches_a_dependency {
                     self.enabled_rules.insert(rule_filter);
-
                     self.analyzer_options
                         .push_globals(domain.globals().iter().copied().map(Into::into));
                 }
@@ -1441,7 +1666,6 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
                 match configured_domain_value {
                     RuleDomainValue::All => {
                         self.enabled_rules.insert(rule_filter);
-
                         self.analyzer_options.push_globals(
                             configured_domain.globals().iter().copied().map(Into::into),
                         );
@@ -1452,7 +1676,6 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
                     RuleDomainValue::Recommended => {
                         if R::METADATA.recommended {
                             self.enabled_rules.insert(rule_filter);
-
                             self.analyzer_options.push_globals(
                                 configured_domain.globals().iter().copied().map(Into::into),
                             );
@@ -1463,7 +1686,13 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         }
     }
 
-    fn finish(mut self) -> (FxHashSet<RuleFilter<'a>>, FxHashSet<RuleFilter<'a>>) {
+    fn finish(
+        mut self,
+    ) -> (
+        FxHashSet<RuleFilter<'a>>,
+        FxHashSet<RuleFilter<'a>>,
+        Vec<RuleFilter<'a>>,
+    ) {
         let has_only_filter = self.only.is_none_or(|only| !only.is_empty());
         let rules = self
             .settings
@@ -1473,7 +1702,13 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             self.enabled_rules.extend(rules.as_enabled_rules());
             self.disabled_rules.extend(rules.as_disabled_rules());
         }
-        (self.enabled_rules, self.disabled_rules)
+        let fixable_rules = self
+            .enabled_rules
+            .iter()
+            .filter(|rule| self.rules_with_fix.contains(rule))
+            .copied()
+            .collect();
+        (self.enabled_rules, self.disabled_rules, fixable_rules)
     }
 
     fn push_rule<R, L>(&mut self, rule_filter: Option<RuleFilter<'static>>)
@@ -1481,14 +1716,15 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
         L: biome_rowan::Language,
     {
-        if let Some(rule_filter) = rule_filter
-            && rule_filter.match_rule::<R>()
-        {
-            // first we want to register rules via "magic default"
-            self.record_rule_from_manifest::<R, L>(rule_filter);
-            // then we want to register rules
-            self.record_rule_from_domains::<R, L>(rule_filter);
+        let Some(rule_filter) = rule_filter.filter(|rule_filter| rule_filter.match_rule::<R>())
+        else {
+            return;
         };
+
+        // first we want to register rules via "magic default"
+        self.record_rule_from_manifest::<R, L>(rule_filter);
+        // then we want to register rules
+        self.record_rule_from_domains::<R, L>(rule_filter);
 
         // Do not report unused suppression comment diagnostics if:
         // - it is a syntax-only analyzer pass, or
@@ -1526,6 +1762,10 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
                     }
                 }
             }
+        }
+
+        if R::METADATA.fix_kind != FixKind::None {
+            self.rules_with_fix.insert(rule_filter);
         }
     }
 }
@@ -1652,6 +1892,9 @@ struct AssistsVisitor<'a, 'b> {
     settings: &'b Settings,
     enabled_rules: Vec<RuleFilter<'a>>,
     disabled_rules: Vec<RuleFilter<'a>>,
+    /// Set of rules that have a code fix, regardless of whether they are enabled.
+    /// Used after `finish()` to derive the fixable subset of `enabled_rules`.
+    rules_with_fix: FxHashSet<RuleFilter<'a>>,
     only: Option<&'b [AnalyzerSelector]>,
     skip: Option<&'b [AnalyzerSelector]>,
     path: Option<&'b Utf8Path>,
@@ -1667,6 +1910,7 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
         Self {
             enabled_rules: vec![],
             disabled_rules: vec![],
+            rules_with_fix: Default::default(),
             settings,
             path,
             only,
@@ -1721,9 +1965,22 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
                 }
             }
         }
+
+        if R::METADATA.fix_kind != FixKind::None {
+            self.rules_with_fix.insert(RuleFilter::Rule(
+                <R::Group as RuleGroup>::NAME,
+                R::METADATA.name,
+            ));
+        }
     }
 
-    fn finish(mut self) -> (Vec<RuleFilter<'a>>, Vec<RuleFilter<'a>>) {
+    fn finish(
+        mut self,
+    ) -> (
+        Vec<RuleFilter<'a>>,
+        Vec<RuleFilter<'a>>,
+        Vec<RuleFilter<'a>>,
+    ) {
         let has_only_filter = self.only.is_none_or(|only| !only.is_empty());
         let rules = self
             .settings
@@ -1733,7 +1990,13 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
             self.enabled_rules.extend(rules.as_enabled_rules());
             self.disabled_rules.extend(rules.as_disabled_rules());
         }
-        (self.enabled_rules, self.disabled_rules)
+        let fixable_rules = self
+            .enabled_rules
+            .iter()
+            .filter(|rule| self.rules_with_fix.contains(rule))
+            .copied()
+            .collect();
+        (self.enabled_rules, self.disabled_rules, fixable_rules)
     }
 }
 
@@ -1816,6 +2079,15 @@ impl RegistryVisitor<HtmlLanguage> for AssistsVisitor<'_, '_> {
     }
 }
 
+/// Result of building the analyzer visitor: the resolved rule filters and options.
+pub(crate) struct AnalyzerVisitorResult<'a> {
+    pub(crate) enabled_rules: Vec<RuleFilter<'a>>,
+    pub(crate) disabled_rules: Vec<RuleFilter<'a>>,
+    pub(crate) analyzer_options: AnalyzerOptions,
+    /// Subset of `enabled_rules` that have a code fix (`FixKind::Safe` or `FixKind::Unsafe`).
+    pub(crate) fixable_rules: Vec<RuleFilter<'a>>,
+}
+
 pub(crate) struct AnalyzerVisitorBuilder<'a> {
     settings: &'a Settings,
     only: Option<&'a [AnalyzerSelector]>,
@@ -1870,7 +2142,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
     }
 
     #[must_use]
-    pub(crate) fn finish(self) -> (Vec<RuleFilter<'b>>, Vec<RuleFilter<'b>>, AnalyzerOptions) {
+    pub(crate) fn finish(self) -> AnalyzerVisitorResult<'b> {
         let mut analyzer_options = self.analyzer_options;
         let mut disabled_rules = vec![];
         let mut enabled_rules = vec![];
@@ -1901,6 +2173,34 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
             .and_then(|path| self.project_layout.find_node_manifest_for_path(path))
             .map(|(_, manifest)| manifest);
 
+        // Query tsconfig.json for JSX factory settings if jsx_runtime is ReactClassic
+        // and the factory settings are not already set
+        if let Some(path) = self.path
+            && analyzer_options.jsx_runtime()
+                == Some(biome_analyze::options::JsxRuntime::ReactClassic)
+        {
+            if analyzer_options.jsx_factory().is_none() {
+                let factory = self
+                    .project_layout
+                    .query_tsconfig_for_path(path, |tsconfig| {
+                        tsconfig.jsx_factory_identifier().map(|s| s.to_string())
+                    })
+                    .flatten();
+                analyzer_options.set_jsx_factory(factory.map(|s| s.into()));
+            }
+            if analyzer_options.jsx_fragment_factory().is_none() {
+                let fragment_factory = self
+                    .project_layout
+                    .query_tsconfig_for_path(path, |tsconfig| {
+                        tsconfig
+                            .jsx_fragment_factory_identifier()
+                            .map(|s| s.to_string())
+                    })
+                    .flatten();
+                analyzer_options.set_jsx_fragment_factory(fragment_factory.map(|s| s.into()));
+            }
+        }
+
         let mut lint = LintVisitor::new(
             self.only,
             self.skip,
@@ -1915,7 +2215,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         biome_json_analyze::visit_registry(&mut lint);
         biome_graphql_analyze::visit_registry(&mut lint);
         biome_html_analyze::visit_registry(&mut lint);
-        let (linter_enabled_rules, linter_disabled_rules) = lint.finish();
+        let (linter_enabled_rules, linter_disabled_rules, linter_fixable_rules) = lint.finish();
         enabled_rules.extend(linter_enabled_rules);
         disabled_rules.extend(linter_disabled_rules);
 
@@ -1926,10 +2226,84 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         biome_json_analyze::visit_registry(&mut assist);
         biome_graphql_analyze::visit_registry(&mut assist);
         biome_html_analyze::visit_registry(&mut assist);
-        let (assists_enabled_rules, assists_disabled_rules) = assist.finish();
+        let (assists_enabled_rules, assists_disabled_rules, assists_fixable_rules) =
+            assist.finish();
         enabled_rules.extend(assists_enabled_rules);
         disabled_rules.extend(assists_disabled_rules);
 
-        (enabled_rules, disabled_rules, analyzer_options)
+        let mut fixable_rules = linter_fixable_rules;
+        fixable_rules.extend(assists_fixable_rules);
+
+        AnalyzerVisitorResult {
+            enabled_rules,
+            disabled_rules,
+            analyzer_options,
+            fixable_rules,
+        }
+    }
+}
+#[cfg(test)]
+mod tests {
+    use super::{DocumentFileSource, Features};
+    use camino::Utf8Path;
+
+    #[test]
+    fn markdown_file_source_detection_and_capabilities() {
+        let source = DocumentFileSource::from_path(Utf8Path::new("docs/readme.md"), false);
+        assert!(matches!(source, DocumentFileSource::Markdown(_)));
+
+        let language_source = DocumentFileSource::from_language_id("markdown");
+        assert!(matches!(language_source, DocumentFileSource::Markdown(_)));
+
+        assert!(DocumentFileSource::can_parse(Utf8Path::new(
+            "docs/readme.md"
+        )));
+        assert!(DocumentFileSource::can_read(Utf8Path::new(
+            "docs/readme.md"
+        )));
+        assert!(!DocumentFileSource::can_contain_embeds(
+            Utf8Path::new("docs/readme.md"),
+            false
+        ));
+    }
+
+    #[test]
+    fn markdown_features_provide_formatter_capabilities() {
+        let features = Features::new();
+        let path = Utf8Path::new("doc.md");
+        let capabilities = features.get_capabilities(DocumentFileSource::from_path(path, false));
+
+        assert!(capabilities.formatter.format.is_some());
+        assert!(capabilities.parser.parse.is_some());
+    }
+
+    #[test]
+    fn svelte_source_modules_use_js_capabilities() {
+        let features = Features::new();
+        let path = Utf8Path::new("file.svelte.js");
+        let capabilities = features.get_capabilities(DocumentFileSource::from_path(path, false));
+
+        assert!(capabilities.analyzer.rename.is_some());
+        assert!(capabilities.analyzer.pull_diagnostics_and_actions.is_some());
+    }
+
+    #[test]
+    fn svelte_typescript_source_modules_use_js_capabilities() {
+        let features = Features::new();
+        let path = Utf8Path::new("file.svelte.ts");
+        let capabilities = features.get_capabilities(DocumentFileSource::from_path(path, false));
+
+        assert!(capabilities.analyzer.rename.is_some());
+        assert!(capabilities.analyzer.pull_diagnostics_and_actions.is_some());
+    }
+
+    #[test]
+    fn svelte_component_files_keep_svelte_capabilities() {
+        let features = Features::new();
+        let path = Utf8Path::new("file.svelte");
+        let capabilities = features.get_capabilities(DocumentFileSource::from_path(path, false));
+
+        assert!(capabilities.analyzer.rename.is_none());
+        assert!(capabilities.analyzer.pull_diagnostics_and_actions.is_none());
     }
 }

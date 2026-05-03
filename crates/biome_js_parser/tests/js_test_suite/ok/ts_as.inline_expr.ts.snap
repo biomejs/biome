@@ -1,0 +1,46 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```ts
+foo as string
+
+```
+
+
+## AST
+
+```
+JsExpressionTemplateRoot {
+    expression: TsAsExpression {
+        expression: JsIdentifierExpression {
+            name: JsReferenceIdentifier {
+                value_token: IDENT@0..4 "foo" [] [Whitespace(" ")],
+            },
+        },
+        as_token: AS_KW@4..7 "as" [] [Whitespace(" ")],
+        ty: TsStringType {
+            string_token: STRING_KW@7..13 "string" [] [],
+        },
+    },
+    eof_token: EOF@13..14 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_EXPRESSION_TEMPLATE_ROOT@0..14
+  0: TS_AS_EXPRESSION@0..13
+    0: JS_IDENTIFIER_EXPRESSION@0..4
+      0: JS_REFERENCE_IDENTIFIER@0..4
+        0: IDENT@0..4 "foo" [] [Whitespace(" ")]
+    1: AS_KW@4..7 "as" [] [Whitespace(" ")]
+    2: TS_STRING_TYPE@7..13
+      0: STRING_KW@7..13 "string" [] []
+  1: EOF@13..14 "" [Newline("\n")] []
+
+```

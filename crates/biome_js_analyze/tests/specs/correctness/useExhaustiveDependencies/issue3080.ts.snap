@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 152
 expression: issue3080.ts
 ---
 # Input
@@ -53,7 +52,7 @@ issue3080.ts:5:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━�
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency bar to the list.
   
     8 │ ····},·[bar]);
       │         +++   
@@ -87,7 +86,7 @@ issue3080.ts:5:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━�
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency foo to the list.
   
     8 │ ····},·[foo]);
       │         +++   
@@ -120,7 +119,7 @@ issue3080.ts:16:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency bar to the list.
   
     16 │ ····useEffect(myEffect,·[bar]);
        │                          +++   
@@ -152,7 +151,7 @@ issue3080.ts:16:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency foo to the list.
   
     16 │ ····useEffect(myEffect,·[foo]);
        │                          +++   

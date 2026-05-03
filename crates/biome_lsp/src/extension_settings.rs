@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use biome_configuration::Configuration;
 use camino::Utf8PathBuf;
 use serde::{Deserialize, Serialize};
 use serde_json::{Error, Value};
@@ -27,6 +28,9 @@ pub struct WorkspaceSettings {
 
     /// Experimental settings
     pub experimental: Option<ExperimentalSettings>,
+
+    /// Inline configuration, which gets merged before applying querying instructions via workspace
+    pub inline_config: Option<Configuration>,
 }
 
 #[derive(Debug, Default, Clone, Deserialize, Serialize, PartialEq, Eq)]
@@ -69,5 +73,9 @@ impl ExtensionSettings {
             Some(config_path) if !config_path.is_empty() => Utf8PathBuf::from_str(config_path).ok(),
             _ => None,
         }
+    }
+
+    pub(crate) fn inline_config(&self) -> Option<Configuration> {
+        self.settings.inline_config.clone()
     }
 }

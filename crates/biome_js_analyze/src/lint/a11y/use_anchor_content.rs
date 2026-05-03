@@ -160,6 +160,7 @@ impl Rule for UseAnchorContent {
 fn has_valid_anchor_content(node: &AnyJsxElement) -> bool {
     node.find_attribute_by_name("dangerouslySetInnerHTML")
         .is_some()
+        || node.find_attribute_by_name("innerHTML").is_some()
         || node
             .find_attribute_by_name("children")
             .is_some_and(|attribute| {

@@ -1,0 +1,450 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// return at end of function body
+function a() {
+    return;
+}
+
+// return after statements at end
+function b() {
+    doSomething();
+    return;
+}
+
+// return at end of if-block (no code after if)
+function c() {
+    if (condition) {
+        bar();
+        return;
+    }
+}
+
+// return at end of else-block (no code after if/else)
+function d() {
+    if (condition) {
+        foo();
+    } else {
+        bar();
+        return;
+    }
+}
+
+// both branches with return, tail-positioned
+function e() {
+    if (condition) {
+        return;
+    } else {
+        return;
+    }
+}
+
+// return in nested if chains, all tail-positioned
+function f() {
+    if (a) {
+        if (b) {
+            return;
+        }
+    }
+}
+
+// return at end of try block (tail-positioned, no finally)
+function g() {
+    try {
+        doSomething();
+        return;
+    } catch (e) {
+        handleError();
+    }
+}
+
+// return at end of catch block (tail-positioned, no finally)
+function h() {
+    try {
+        doSomething();
+    } catch (e) {
+        handleError();
+        return;
+    }
+}
+
+// arrow function
+const i = () => {
+    return;
+}
+
+// return in labeled statement (tail-positioned)
+function j() {
+    label: {
+        return;
+    }
+}
+
+// return in try body of try-finally (tail-positioned)
+function k() {
+    try {
+        return;
+    } finally {
+        cleanup();
+    }
+}
+
+// single-statement if with return (tail-positioned)
+function l() {
+    if (foo) { return; }
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:5:5 lint/nursery/noUselessReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return statement is unnecessary.
+  
+    3 │ // return at end of function body
+    4 │ function a() {
+  > 5 │     return;
+      │     ^^^^^^^
+    6 │ }
+    7 │ 
+  
+  i Removing this statement does not change the control flow of the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unnecessary return statement.
+  
+     3  3 │   // return at end of function body
+     4  4 │   function a() {
+     5    │ - ····return;
+     6  5 │   }
+     7  6 │   
+  
+
+```
+
+```
+invalid.js:11:5 lint/nursery/noUselessReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return statement is unnecessary.
+  
+     9 │ function b() {
+    10 │     doSomething();
+  > 11 │     return;
+       │     ^^^^^^^
+    12 │ }
+    13 │ 
+  
+  i Removing this statement does not change the control flow of the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unnecessary return statement.
+  
+     9  9 │   function b() {
+    10 10 │       doSomething();
+    11    │ - ····return;
+    12 11 │   }
+    13 12 │   
+  
+
+```
+
+```
+invalid.js:18:9 lint/nursery/noUselessReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return statement is unnecessary.
+  
+    16 │     if (condition) {
+    17 │         bar();
+  > 18 │         return;
+       │         ^^^^^^^
+    19 │     }
+    20 │ }
+  
+  i Removing this statement does not change the control flow of the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unnecessary return statement.
+  
+    16 16 │       if (condition) {
+    17 17 │           bar();
+    18    │ - ········return;
+    19 18 │       }
+    20 19 │   }
+  
+
+```
+
+```
+invalid.js:28:9 lint/nursery/noUselessReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return statement is unnecessary.
+  
+    26 │     } else {
+    27 │         bar();
+  > 28 │         return;
+       │         ^^^^^^^
+    29 │     }
+    30 │ }
+  
+  i Removing this statement does not change the control flow of the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unnecessary return statement.
+  
+    26 26 │       } else {
+    27 27 │           bar();
+    28    │ - ········return;
+    29 28 │       }
+    30 29 │   }
+  
+
+```
+
+```
+invalid.js:35:9 lint/nursery/noUselessReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return statement is unnecessary.
+  
+    33 │ function e() {
+    34 │     if (condition) {
+  > 35 │         return;
+       │         ^^^^^^^
+    36 │     } else {
+    37 │         return;
+  
+  i Removing this statement does not change the control flow of the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unnecessary return statement.
+  
+    33 33 │   function e() {
+    34 34 │       if (condition) {
+    35    │ - ········return;
+    36 35 │       } else {
+    37 36 │           return;
+  
+
+```
+
+```
+invalid.js:37:9 lint/nursery/noUselessReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return statement is unnecessary.
+  
+    35 │         return;
+    36 │     } else {
+  > 37 │         return;
+       │         ^^^^^^^
+    38 │     }
+    39 │ }
+  
+  i Removing this statement does not change the control flow of the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unnecessary return statement.
+  
+    35 35 │           return;
+    36 36 │       } else {
+    37    │ - ········return;
+    38 37 │       }
+    39 38 │   }
+  
+
+```
+
+```
+invalid.js:45:13 lint/nursery/noUselessReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return statement is unnecessary.
+  
+    43 │     if (a) {
+    44 │         if (b) {
+  > 45 │             return;
+       │             ^^^^^^^
+    46 │         }
+    47 │     }
+  
+  i Removing this statement does not change the control flow of the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unnecessary return statement.
+  
+    43 43 │       if (a) {
+    44 44 │           if (b) {
+    45    │ - ············return;
+    46 45 │           }
+    47 46 │       }
+  
+
+```
+
+```
+invalid.js:54:9 lint/nursery/noUselessReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return statement is unnecessary.
+  
+    52 │     try {
+    53 │         doSomething();
+  > 54 │         return;
+       │         ^^^^^^^
+    55 │     } catch (e) {
+    56 │         handleError();
+  
+  i Removing this statement does not change the control flow of the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unnecessary return statement.
+  
+    52 52 │       try {
+    53 53 │           doSomething();
+    54    │ - ········return;
+    55 54 │       } catch (e) {
+    56 55 │           handleError();
+  
+
+```
+
+```
+invalid.js:66:9 lint/nursery/noUselessReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return statement is unnecessary.
+  
+    64 │     } catch (e) {
+    65 │         handleError();
+  > 66 │         return;
+       │         ^^^^^^^
+    67 │     }
+    68 │ }
+  
+  i Removing this statement does not change the control flow of the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unnecessary return statement.
+  
+    64 64 │       } catch (e) {
+    65 65 │           handleError();
+    66    │ - ········return;
+    67 66 │       }
+    68 67 │   }
+  
+
+```
+
+```
+invalid.js:72:5 lint/nursery/noUselessReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return statement is unnecessary.
+  
+    70 │ // arrow function
+    71 │ const i = () => {
+  > 72 │     return;
+       │     ^^^^^^^
+    73 │ }
+    74 │ 
+  
+  i Removing this statement does not change the control flow of the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unnecessary return statement.
+  
+    70 70 │   // arrow function
+    71 71 │   const i = () => {
+    72    │ - ····return;
+    73 72 │   }
+    74 73 │   
+  
+
+```
+
+```
+invalid.js:78:9 lint/nursery/noUselessReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return statement is unnecessary.
+  
+    76 │ function j() {
+    77 │     label: {
+  > 78 │         return;
+       │         ^^^^^^^
+    79 │     }
+    80 │ }
+  
+  i Removing this statement does not change the control flow of the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unnecessary return statement.
+  
+    76 76 │   function j() {
+    77 77 │       label: {
+    78    │ - ········return;
+    79 78 │       }
+    80 79 │   }
+  
+
+```
+
+```
+invalid.js:85:9 lint/nursery/noUselessReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return statement is unnecessary.
+  
+    83 │ function k() {
+    84 │     try {
+  > 85 │         return;
+       │         ^^^^^^^
+    86 │     } finally {
+    87 │         cleanup();
+  
+  i Removing this statement does not change the control flow of the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unnecessary return statement.
+  
+    83 83 │   function k() {
+    84 84 │       try {
+    85    │ - ········return;
+    86 85 │       } finally {
+    87 86 │           cleanup();
+  
+
+```
+
+```
+invalid.js:93:16 lint/nursery/noUselessReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return statement is unnecessary.
+  
+    91 │ // single-statement if with return (tail-positioned)
+    92 │ function l() {
+  > 93 │     if (foo) { return; }
+       │                ^^^^^^^
+    94 │ }
+    95 │ 
+  
+  i Removing this statement does not change the control flow of the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unnecessary return statement.
+  
+    93 │ ····if·(foo)·{·return;·}
+       │                -------- 
+
+```

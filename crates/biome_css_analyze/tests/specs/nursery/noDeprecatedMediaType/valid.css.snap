@@ -1,0 +1,13 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+@media screen {}
+@media print and (min-resolution: 300dpi) {}
+@media (max-width: 600px) {}
+@media (min-width: 900px) {}
+
+```

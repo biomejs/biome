@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
-snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -12,10 +11,14 @@ for (; true;);
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ for (; true;);
       │        ^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -29,10 +32,14 @@ for (; ``;);
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ for (; ``;);
       │        ^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -46,10 +53,14 @@ for (; `foo`;);
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ for (; `foo`;);
       │        ^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -63,10 +74,14 @@ for (; `foo${bar}`;);
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ for (; `foo${bar}`;);
       │        ^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -80,10 +95,14 @@ do { } while (1)
 ```
 invalid.jsonc:1:15 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ do { } while (1)
       │               ^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -97,10 +116,14 @@ do { } while ('1')
 ```
 invalid.jsonc:1:15 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ do { } while ('1')
       │               ^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -114,10 +137,14 @@ do { } while (0)
 ```
 invalid.jsonc:1:15 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ do { } while (0)
       │               ^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -131,10 +158,14 @@ do { } while (t = -2)
 ```
 invalid.jsonc:1:15 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ do { } while (t = -2)
       │               ^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -148,10 +179,14 @@ do { } while (``)
 ```
 invalid.jsonc:1:15 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ do { } while (``)
       │               ^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -165,10 +200,14 @@ do { } while (`foo`)
 ```
 invalid.jsonc:1:15 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ do { } while (`foo`)
       │               ^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -182,10 +221,14 @@ do { } while (`foo${bar}`)
 ```
 invalid.jsonc:1:15 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ do { } while (`foo${bar}`)
       │               ^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -199,10 +242,14 @@ true ? 1 : 2;
 ```
 invalid.jsonc:1:1 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ true ? 1 : 2;
       │ ^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -216,10 +263,14 @@ invalid.jsonc:1:1 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 invalid.jsonc:1:1 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ 1 ? 1 : 2;
       │ ^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -233,10 +284,14 @@ q = 0 ? 1 : 2;
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ q = 0 ? 1 : 2;
       │     ^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -250,10 +305,14 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 invalid.jsonc:1:1 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ (q = 0) ? 1 : 2;
       │ ^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -267,10 +326,14 @@ invalid.jsonc:1:1 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 invalid.jsonc:1:1 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ `` ? 1 : 2;
       │ ^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -284,10 +347,14 @@ invalid.jsonc:1:1 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 invalid.jsonc:1:1 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ `foo` ? 1 : 2;
       │ ^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -301,10 +368,14 @@ invalid.jsonc:1:1 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 invalid.jsonc:1:1 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ `foo${bar}` ? 1 : 2;
       │ ^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -318,10 +389,14 @@ if (-2);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (-2);
       │     ^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -335,10 +410,14 @@ if (true);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (true);
       │     ^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -352,10 +431,14 @@ if (1);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (1);
       │     ^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -369,10 +452,14 @@ if ({});
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if ({});
       │     ^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -386,10 +473,14 @@ if (0 < 1);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (0 < 1);
       │     ^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -403,10 +494,14 @@ if (0 || 1);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (0 || 1);
       │     ^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -420,10 +515,14 @@ if (a, 1);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (a, 1);
       │     ^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -437,10 +536,14 @@ if (`foo`);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (`foo`);
       │     ^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -454,10 +557,14 @@ if (``);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (``);
       │     ^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -472,12 +579,16 @@ if (`\
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (`\
       │     ^^
   > 2 │ `);
       │ ^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -491,10 +602,14 @@ if (`${'bar'}`);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (`${'bar'}`);
       │     ^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -508,10 +623,14 @@ if (`${'bar' + `foo`}`);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (`${'bar' + `foo`}`);
       │     ^^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -525,10 +644,14 @@ if (`foo${false || true}`);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (`foo${false || true}`);
       │     ^^^^^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -542,10 +665,14 @@ if (`foo${0 || 1}`);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (`foo${0 || 1}`);
       │     ^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -559,10 +686,14 @@ if (`foo${bar}`);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (`foo${bar}`);
       │     ^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -576,10 +707,14 @@ if (`${bar}foo`);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (`${bar}foo`);
       │     ^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -593,10 +728,14 @@ if (!(true || a));
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (!(true || a));
       │     ^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -610,10 +749,14 @@ if (!(a && void b && c));
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (!(a && void b && c));
       │     ^^^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -627,10 +770,14 @@ if (0 || !(a && null));
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (0 || !(a && null));
       │     ^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -644,10 +791,14 @@ if (1 + !(a || true));
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (1 + !(a || true));
       │     ^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -661,10 +812,14 @@ if (!(null && a) > 1);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (!(null && a) > 1);
       │     ^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -678,10 +833,14 @@ if (+(!(a && 0)));
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (+(!(a && 0)));
       │     ^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -695,10 +854,14 @@ if (!typeof a === 'string');
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (!typeof a === 'string');
       │     ^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -712,10 +875,14 @@ if (-('foo' || a));
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (-('foo' || a));
       │     ^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -729,10 +896,14 @@ if (+(void a && b) === ~(1 || c));
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (+(void a && b) === ~(1 || c));
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -746,10 +917,14 @@ if (a ||= true);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (a ||= true);
       │     ^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -763,10 +938,14 @@ if (a ||= 5);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (a ||= 5);
       │     ^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -780,10 +959,14 @@ if (a ||= 'foo' || b);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (a ||= 'foo' || b);
       │     ^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -797,10 +980,14 @@ if (a ||= b || /regex/);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (a ||= b || /regex/);
       │     ^^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -814,10 +1001,14 @@ if (a ||= b ||= true);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (a ||= b ||= true);
       │     ^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -831,10 +1022,14 @@ if (a ||= b ||= c || 1);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (a ||= b ||= c || 1);
       │     ^^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -848,10 +1043,14 @@ if (!(a ||= true));
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (!(a ||= true));
       │     ^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -865,10 +1064,14 @@ if (!(a ||= 'foo') === true);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (!(a ||= 'foo') === true);
       │     ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -882,10 +1085,14 @@ if (!(a ||= 'foo') === false);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (!(a ||= 'foo') === false);
       │     ^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -899,10 +1106,14 @@ if (a || (b ||= true));
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (a || (b ||= true));
       │     ^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -916,10 +1127,14 @@ if ((a ||= 1) || b);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if ((a ||= 1) || b);
       │     ^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -933,10 +1148,14 @@ if ((a ||= true) && true);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if ((a ||= true) && true);
       │     ^^^^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -950,10 +1169,14 @@ if (true && (a ||= true));
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (true && (a ||= true));
       │     ^^^^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -967,10 +1190,14 @@ if (a &&= false);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (a &&= false);
       │     ^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -984,10 +1211,14 @@ if (a &&= null);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (a &&= null);
       │     ^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1001,10 +1232,14 @@ if (a &&= void b);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (a &&= void b);
       │     ^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1018,10 +1253,14 @@ if (a &&= 0 && b);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (a &&= 0 && b);
       │     ^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1035,10 +1274,14 @@ if (a &&= b && '');
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (a &&= b && '');
       │     ^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1052,10 +1295,14 @@ if (a &&= b &&= false);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (a &&= b &&= false);
       │     ^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1069,10 +1316,14 @@ if (a &&= b &&= c && false);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (a &&= b &&= c && false);
       │     ^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1086,10 +1337,14 @@ if (!(a &&= false));
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (!(a &&= false));
       │     ^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1103,10 +1358,14 @@ if (!(a &&= 0) + 1);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (!(a &&= 0) + 1);
       │     ^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1120,10 +1379,14 @@ if (a && (b &&= false));
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (a && (b &&= false));
       │     ^^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1137,10 +1400,14 @@ if ((a &&= null) && b);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if ((a &&= null) && b);
       │     ^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1154,10 +1421,14 @@ if (false || (a &&= false));
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (false || (a &&= false));
       │     ^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1171,10 +1442,14 @@ if ((a &&= false) || false);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if ((a &&= false) || false);
       │     ^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1188,10 +1463,14 @@ while ([]);
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ while ([]);
       │        ^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1205,10 +1484,14 @@ while (~!0);
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ while (~!0);
       │        ^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1222,10 +1505,14 @@ while (x = 1);
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ while (x = 1);
       │        ^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1239,10 +1526,14 @@ while (function () { });
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ while (function () { });
       │        ^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1256,10 +1547,14 @@ while (1);
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ while (1);
       │        ^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1273,10 +1568,14 @@ while (() => { });
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ while (() => { });
       │        ^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1290,10 +1589,14 @@ while (`foo`);
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ while (`foo`);
       │        ^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1307,10 +1610,14 @@ while (``);
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ while (``);
       │        ^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1324,10 +1631,14 @@ while (`${'foo'}`);
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ while (`${'foo'}`);
       │        ^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1341,10 +1652,14 @@ while (`${'foo' + 'bar'}`);
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ while (`${'foo' + 'bar'}`);
       │        ^^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1358,10 +1673,14 @@ if (typeof x) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (typeof x) { }
       │     ^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1375,10 +1694,14 @@ if (typeof 'abc' === 'string') { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (typeof 'abc' === 'string') { }
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1392,10 +1715,14 @@ if (a = typeof b) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (a = typeof b) { }
       │     ^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1409,10 +1736,14 @@ if (a, typeof b) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (a, typeof b) { }
       │     ^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1426,10 +1757,14 @@ if (typeof 'a' == 'string' || typeof 'b' == 'string') { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (typeof 'a' == 'string' || typeof 'b' == 'string') { }
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1443,10 +1778,14 @@ while (typeof x) { }
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ while (typeof x) { }
       │        ^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1460,10 +1799,14 @@ if (1 || void x);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (1 || void x);
       │     ^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1477,10 +1820,14 @@ if (void x);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (void x);
       │     ^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1494,10 +1841,14 @@ if (y = void x);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (y = void x);
       │     ^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1511,10 +1862,14 @@ if (x, void x);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (x, void x);
       │     ^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1528,10 +1883,14 @@ if (void x === void y);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (void x === void y);
       │     ^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1545,10 +1904,14 @@ if (void x && a);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (void x && a);
       │     ^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1562,10 +1925,14 @@ if (a && void x);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (a && void x);
       │     ^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1579,10 +1946,14 @@ if (false && abc === 'str') { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (false && abc === 'str') { }
       │     ^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1596,10 +1967,14 @@ if (true || abc === 'str') { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (true || abc === 'str') { }
       │     ^^^^^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1613,10 +1988,14 @@ if (1 || abc === 'str') { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (1 || abc === 'str') { }
       │     ^^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1630,10 +2009,14 @@ if (abc === 'str' || true) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (abc === 'str' || true) { }
       │     ^^^^^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1647,10 +2030,14 @@ if (abc === 'str' || true || def === 'str') { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (abc === 'str' || true || def === 'str') { }
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1664,10 +2051,14 @@ if (false || true) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (false || true) { }
       │     ^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1681,10 +2072,14 @@ if (typeof abc === 'str' || true) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (typeof abc === 'str' || true) { }
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1698,10 +2093,14 @@ if ('str' || a) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if ('str' || a) { }
       │     ^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1715,10 +2114,14 @@ if ('str' || abc === 'str') { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if ('str' || abc === 'str') { }
       │     ^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1732,10 +2135,14 @@ if ('str1' || 'str2') { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if ('str1' || 'str2') { }
       │     ^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1749,10 +2156,14 @@ if ('str1' && 'str2') { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if ('str1' && 'str2') { }
       │     ^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1766,10 +2177,14 @@ if (abc === 'str' || 'str') { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (abc === 'str' || 'str') { }
       │     ^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1783,10 +2198,14 @@ if (a || 'str') { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (a || 'str') { }
       │     ^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1800,10 +2219,14 @@ function* foo() { while (1) { } yield 'foo'; }
 ```
 invalid.jsonc:1:26 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ function* foo() { while (1) { } yield 'foo'; }
       │                          ^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1817,10 +2240,14 @@ function* foo() { while (1) { if (true) { yield 'foo'; } } }
 ```
 invalid.jsonc:1:26 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ function* foo() { while (1) { if (true) { yield 'foo'; } } }
       │                          ^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1828,10 +2255,14 @@ invalid.jsonc:1:26 lint/correctness/noConstantCondition ━━━━━━━━
 ```
 invalid.jsonc:1:35 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ function* foo() { while (1) { if (true) { yield 'foo'; } } }
       │                                   ^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1845,10 +2276,14 @@ function* foo() { while (1) { yield 'foo'; } while (1) { } }
 ```
 invalid.jsonc:1:53 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ function* foo() { while (1) { yield 'foo'; } while (1) { } }
       │                                                     ^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1862,10 +2297,14 @@ var a = function* foo() { while (1) { } yield 'foo'; }
 ```
 invalid.jsonc:1:34 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ var a = function* foo() { while (1) { } yield 'foo'; }
       │                                  ^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1879,10 +2318,14 @@ while (1) { function* foo() { yield; } }
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ while (1) { function* foo() { yield; } }
       │        ^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1896,10 +2339,14 @@ function* foo() { if (true) { yield 'foo'; } }
 ```
 invalid.jsonc:1:23 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ function* foo() { if (true) { yield 'foo'; } }
       │                       ^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1913,10 +2360,14 @@ function* foo() { for (let foo = yield; true;) { } }
 ```
 invalid.jsonc:1:41 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ function* foo() { for (let foo = yield; true;) { } }
       │                                         ^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1930,10 +2381,14 @@ function* foo() { for (foo = yield; true;) { } }
 ```
 invalid.jsonc:1:37 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ function* foo() { for (foo = yield; true;) { } }
       │                                     ^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1947,10 +2402,14 @@ function foo() { while (1) { function* bar() { while (1) { yield; } } } }
 ```
 invalid.jsonc:1:25 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ function foo() { while (1) { function* bar() { while (1) { yield; } } } }
       │                         ^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1964,10 +2423,14 @@ function foo() { while (1) { const bar = function* () { while (1) { yield; } } }
 ```
 invalid.jsonc:1:25 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ function foo() { while (1) { const bar = function* () { while (1) { yield; } } } }
       │                         ^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1981,10 +2444,14 @@ function* foo() { for (let foo = 1 + 2 + 3 + (yield); true; baz) { } }
 ```
 invalid.jsonc:1:55 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ function* foo() { for (let foo = 1 + 2 + 3 + (yield); true; baz) { } }
       │                                                       ^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -1998,10 +2465,14 @@ if ([a]) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if ([a]) { }
       │     ^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -2015,10 +2486,14 @@ if ([]) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if ([]) { }
       │     ^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -2032,10 +2507,14 @@ if ('' + ['a']) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if ('' + ['a']) { }
       │     ^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -2049,10 +2528,14 @@ if ('' + []) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if ('' + []) { }
       │     ^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -2066,10 +2549,14 @@ if (+1) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (+1) { }
       │     ^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -2083,10 +2570,14 @@ if ([,] + '') { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if ([,] + '') { }
       │     ^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -2100,10 +2591,14 @@ if (/foo/ui);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (/foo/ui);
       │     ^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -2117,10 +2612,14 @@ if (0n);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (0n);
       │     ^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -2134,10 +2633,14 @@ if (0b0n);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (0b0n);
       │     ^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -2151,10 +2654,14 @@ if (0o0n);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (0o0n);
       │     ^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -2168,10 +2675,14 @@ if (0x0n);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (0x0n);
       │     ^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -2185,10 +2696,14 @@ if (0b1n);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (0b1n);
       │     ^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -2202,10 +2717,14 @@ if (0o1n);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (0o1n);
       │     ^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -2219,10 +2738,14 @@ if (0x1n);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (0x1n);
       │     ^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -2236,10 +2759,14 @@ if (0x1n || foo);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (0x1n || foo);
       │     ^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -2253,10 +2780,14 @@ if (class { }) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (class { }) { }
       │     ^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -2270,10 +2801,14 @@ if (new Foo()) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (new Foo()) { }
       │     ^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -2287,10 +2822,14 @@ if (new Boolean(foo)) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (new Boolean(foo)) { }
       │     ^^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -2304,10 +2843,14 @@ if (new String(foo)) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (new String(foo)) { }
       │     ^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -2321,10 +2864,14 @@ if (new Number(foo)) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (new Number(foo)) { }
       │     ^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -2338,10 +2885,14 @@ if (`${[...['a']]}`) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (`${[...['a']]}`) { }
       │     ^^^^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -2355,10 +2906,14 @@ if (undefined) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (undefined) { }
       │     ^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -2372,10 +2927,14 @@ if (Boolean(1)) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (Boolean(1)) { }
       │     ^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -2389,10 +2948,14 @@ if (Boolean()) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (Boolean()) { }
       │     ^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -2406,10 +2969,14 @@ if (Boolean([a])) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ if (Boolean([a])) { }
       │     ^^^^^^^^^^^^
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```

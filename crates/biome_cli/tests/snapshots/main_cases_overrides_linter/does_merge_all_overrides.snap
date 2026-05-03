@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -45,19 +44,22 @@ snapshot_kind: text
 ## `test.js`
 
 ```js
-debugger
+debugger;
+
 ```
 
 ## `test2.js`
 
 ```js
-debugger
+debugger;
+
 ```
 
 ## `test3.js`
 
 ```js
-debugger
+debugger;
+
 ```
 
 # Emitted Messages
@@ -67,13 +69,14 @@ test2.js:1:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━
 
   ! This is an unexpected use of the debugger statement.
   
-  > 1 │ debugger
-      │ ^^^^^^^^
+  > 1 │ debugger;
+      │ ^^^^^^^^^
+    2 │ 
   
   i Unsafe fix: Remove debugger statement
   
-    1 │ debugger
-      │ --------
+    1 │ debugger;
+      │ ---------
 
 ```
 
@@ -82,13 +85,14 @@ test3.js:1:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━
 
   ! This is an unexpected use of the debugger statement.
   
-  > 1 │ debugger
-      │ ^^^^^^^^
+  > 1 │ debugger;
+      │ ^^^^^^^^^
+    2 │ 
   
   i Unsafe fix: Remove debugger statement
   
-    1 │ debugger
-      │ --------
+    1 │ debugger;
+      │ ---------
 
 ```
 

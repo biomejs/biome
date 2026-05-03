@@ -31,5 +31,3 @@ delete 1 in [1,2];
 ```cjs
 +1 instanceof [1,2];
 ```
-
-

@@ -1,11 +1,10 @@
 ---
 source: crates/biome_html_analyze/tests/spec_tests.rs
-assertion_line: 83
 expression: valid.html
 ---
 # Input
 ```html
-<!-- Valid cases - should NOT trigger the rule -->
+<!-- should not generate diagnostics -->
 
 <a href="https://example.com">Link</a>
 

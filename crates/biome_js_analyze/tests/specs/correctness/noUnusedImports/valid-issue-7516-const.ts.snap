@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-issue-7516-const.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+// Issue #7516: const variable shadows import type namespace
+import type * as mdast from "mdast"
+const _f = () => {
+    const mdast: mdast.Node = {} as any
+}
+
+```

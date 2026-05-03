@@ -40,11 +40,15 @@ invalid.js parse ━━━━━━━━━━━━━━━━━━━━━
 ```block
 valid.js:1:6 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
   > 1 │ for(;true;);
       │      ^^^^
     2 │ 
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```
@@ -62,4 +66,5 @@ valid.js format ━━━━━━━━━━━━━━━━━━━━━�
 ```block
 Checked 2 files in <TIME>. No fixes applied.
 Found 2 errors.
+Found 1 info.
 ```

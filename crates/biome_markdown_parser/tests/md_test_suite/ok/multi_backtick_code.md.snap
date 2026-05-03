@@ -1,0 +1,236 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+Single backtick: `code`
+
+Double backtick with literal backtick: `` `code` ``
+
+Triple backtick inline: ``` ``code`` ```
+
+Nested backticks: `` foo`bar ``
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..17 "Single backtick: " [] [],
+                },
+                MdInlineCode {
+                    l_tick_token: BACKTICK@17..18 "`" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@18..22 "code" [] [],
+                        },
+                    ],
+                    r_tick_token: BACKTICK@22..23 "`" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@23..24 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@24..25 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@25..64 "Double backtick with literal backtick: " [] [],
+                },
+                MdInlineCode {
+                    l_tick_token: BACKTICK@64..66 "``" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@66..67 " " [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@67..68 "`" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@68..72 "code" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@72..73 "`" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@73..74 " " [] [],
+                        },
+                    ],
+                    r_tick_token: BACKTICK@74..76 "``" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@76..77 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@77..78 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@78..102 "Triple backtick inline: " [] [],
+                },
+                MdInlineCode {
+                    l_tick_token: BACKTICK@102..105 "```" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@105..106 " " [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@106..108 "``" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@108..112 "code" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@112..114 "``" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@114..115 " " [] [],
+                        },
+                    ],
+                    r_tick_token: BACKTICK@115..118 "```" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@118..119 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@119..120 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@120..138 "Nested backticks: " [] [],
+                },
+                MdInlineCode {
+                    l_tick_token: BACKTICK@138..140 "``" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@140..144 " foo" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@144..145 "`" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@145..149 "bar " [] [],
+                        },
+                    ],
+                    r_tick_token: BACKTICK@149..151 "``" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@151..152 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+    ],
+    eof_token: EOF@152..152 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..152
+  0: (empty)
+  1: MD_BLOCK_LIST@0..152
+    0: MD_PARAGRAPH@0..24
+      0: MD_INLINE_ITEM_LIST@0..24
+        0: MD_TEXTUAL@0..17
+          0: MD_TEXTUAL_LITERAL@0..17 "Single backtick: " [] []
+        1: MD_INLINE_CODE@17..23
+          0: BACKTICK@17..18 "`" [] []
+          1: MD_INLINE_ITEM_LIST@18..22
+            0: MD_TEXTUAL@18..22
+              0: MD_TEXTUAL_LITERAL@18..22 "code" [] []
+          2: BACKTICK@22..23 "`" [] []
+        2: MD_TEXTUAL@23..24
+          0: MD_TEXTUAL_LITERAL@23..24 "\n" [] []
+      1: (empty)
+    1: MD_NEWLINE@24..25
+      0: NEWLINE@24..25 "\n" [] []
+    2: MD_PARAGRAPH@25..77
+      0: MD_INLINE_ITEM_LIST@25..77
+        0: MD_TEXTUAL@25..64
+          0: MD_TEXTUAL_LITERAL@25..64 "Double backtick with literal backtick: " [] []
+        1: MD_INLINE_CODE@64..76
+          0: BACKTICK@64..66 "``" [] []
+          1: MD_INLINE_ITEM_LIST@66..74
+            0: MD_TEXTUAL@66..67
+              0: MD_TEXTUAL_LITERAL@66..67 " " [] []
+            1: MD_TEXTUAL@67..68
+              0: MD_TEXTUAL_LITERAL@67..68 "`" [] []
+            2: MD_TEXTUAL@68..72
+              0: MD_TEXTUAL_LITERAL@68..72 "code" [] []
+            3: MD_TEXTUAL@72..73
+              0: MD_TEXTUAL_LITERAL@72..73 "`" [] []
+            4: MD_TEXTUAL@73..74
+              0: MD_TEXTUAL_LITERAL@73..74 " " [] []
+          2: BACKTICK@74..76 "``" [] []
+        2: MD_TEXTUAL@76..77
+          0: MD_TEXTUAL_LITERAL@76..77 "\n" [] []
+      1: (empty)
+    3: MD_NEWLINE@77..78
+      0: NEWLINE@77..78 "\n" [] []
+    4: MD_PARAGRAPH@78..119
+      0: MD_INLINE_ITEM_LIST@78..119
+        0: MD_TEXTUAL@78..102
+          0: MD_TEXTUAL_LITERAL@78..102 "Triple backtick inline: " [] []
+        1: MD_INLINE_CODE@102..118
+          0: BACKTICK@102..105 "```" [] []
+          1: MD_INLINE_ITEM_LIST@105..115
+            0: MD_TEXTUAL@105..106
+              0: MD_TEXTUAL_LITERAL@105..106 " " [] []
+            1: MD_TEXTUAL@106..108
+              0: MD_TEXTUAL_LITERAL@106..108 "``" [] []
+            2: MD_TEXTUAL@108..112
+              0: MD_TEXTUAL_LITERAL@108..112 "code" [] []
+            3: MD_TEXTUAL@112..114
+              0: MD_TEXTUAL_LITERAL@112..114 "``" [] []
+            4: MD_TEXTUAL@114..115
+              0: MD_TEXTUAL_LITERAL@114..115 " " [] []
+          2: BACKTICK@115..118 "```" [] []
+        2: MD_TEXTUAL@118..119
+          0: MD_TEXTUAL_LITERAL@118..119 "\n" [] []
+      1: (empty)
+    5: MD_NEWLINE@119..120
+      0: NEWLINE@119..120 "\n" [] []
+    6: MD_PARAGRAPH@120..152
+      0: MD_INLINE_ITEM_LIST@120..152
+        0: MD_TEXTUAL@120..138
+          0: MD_TEXTUAL_LITERAL@120..138 "Nested backticks: " [] []
+        1: MD_INLINE_CODE@138..151
+          0: BACKTICK@138..140 "``" [] []
+          1: MD_INLINE_ITEM_LIST@140..149
+            0: MD_TEXTUAL@140..144
+              0: MD_TEXTUAL_LITERAL@140..144 " foo" [] []
+            1: MD_TEXTUAL@144..145
+              0: MD_TEXTUAL_LITERAL@144..145 "`" [] []
+            2: MD_TEXTUAL@145..149
+              0: MD_TEXTUAL_LITERAL@145..149 "bar " [] []
+          2: BACKTICK@149..151 "``" [] []
+        2: MD_TEXTUAL@151..152
+          0: MD_TEXTUAL_LITERAL@151..152 "\n" [] []
+      1: (empty)
+  2: EOF@152..152 "" [] []
+
+```

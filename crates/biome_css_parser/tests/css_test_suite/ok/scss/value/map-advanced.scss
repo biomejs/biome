@@ -1,0 +1,161 @@
+// Advanced map syntax tests
+
+// Empty map
+$empty-map: ();
+
+// Single entry map
+$single: (key: value);
+
+// Map with trailing comma
+$trailing: (
+  key1: value1,
+  key2: value2,
+);
+
+// Map with complex keys
+$complex-keys: (
+  "string-key": value1,
+  123: value2,
+  (nested, list): value3,
+  $variable-key: value4,
+);
+
+// Map with complex values
+$complex-values: (
+  key1: (nested: map),
+  key2: (a, b, c),
+  key3: 1px + 2px,
+  key4: $variable-value,
+  key5: "string value",
+);
+
+// Deeply nested maps
+$deep: (
+  level1: (
+    level2: (
+      level3: (
+        level4: final-value
+      )
+    )
+  )
+);
+
+// Map with interpolation in keys
+$interpolated-key: (
+  #{$var}-key: value,
+  prefix-#{$suffix}: value2,
+  #{$a}-#{$b}: value3,
+);
+
+// Map with interpolation in values
+$interpolated-value: (
+  key1: #{$var},
+  key: #{$name},
+  key2: #{$a}-#{$b},
+  key3: prefix-#{$suffix},
+  key4: #{$a + $b},
+);
+
+// Map with calculations
+$calculations: (
+  width: 100px / 2,
+  height: 50px * 2,
+  padding: 10px + 5px,
+  margin: 20px - 5px,
+);
+
+// Map with functions
+$functions: (
+  color: rgb(255, 0, 0),
+  size: calc(100% - 20px),
+  transform: translate(10px, 20px),
+);
+
+// Map with special characters
+$special: (
+  "key-with-dash": value,
+  "key.with.dot": value,
+  "key_with_underscore": value,
+  "key with space": value,
+);
+
+// Map with boolean and null
+$types: (
+  bool-true: true,
+  bool-false: false,
+  null-value: null,
+  number: 42,
+  string: "text",
+);
+
+// Map as function parameter
+.test {
+  content: map-get((foo: bar, baz: qux), foo);
+  value: some-function((key: value));
+}
+
+// Map in variable declaration
+$config: (
+  theme: (
+    primary: #036,
+    secondary: #069,
+    accent: #f00,
+  ),
+  spacing: (
+    small: 4px,
+    medium: 8px,
+    large: 16px,
+    xlarge: 32px,
+  ),
+  breakpoints: (
+    mobile: 320px,
+    tablet: 768px,
+    desktop: 1024px,
+  ),
+);
+
+// Map with quoted keys
+$quoted: (
+  'single-quotes': value1,
+  "double-quotes": value2,
+  'mixed-"quotes"': value3,
+);
+
+// Map with escape sequences
+$escaped: (
+  key\-escaped: value,
+  "key\nwith\nnewlines": value,
+);
+
+// Map in list
+$map-in-list: ((key1: val1), (key2: val2), (key3: val3));
+
+// List in map
+$list-in-map: (
+  list1: (a, b, c),
+  list2: (1, 2, 3),
+);
+
+// Map with expressions as keys
+$expr-keys: (
+  (1 + 1): value,
+  ($var + "-suffix"): value,
+);
+
+// Map spanning multiple lines with different formatting
+$multiline: (
+  key1:
+    value1,
+  key2: value2,
+  key3:
+    (nested-key: nested-value),
+);
+
+// Unicode in map
+$unicode: (
+  émoji: 🎨,
+  日本語: 値,
+  ключ: значение,
+);
+
+

@@ -1,0 +1,21 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: other-wait-options.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+// Valid: using other waitUntil options
+page.waitForLoadState();
+
+page.waitForLoadState("load");
+
+page.waitForLoadState("domcontentloaded");
+
+page.waitForURL(url, { waitUntil: "load" });
+
+page.goto(url, { waitUntil: "domcontentloaded" });
+
+page.reload({ waitUntil: "commit" });
+
+```

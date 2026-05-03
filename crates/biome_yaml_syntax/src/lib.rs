@@ -8,6 +8,7 @@ mod syntax_node;
 pub use self::generated::*;
 use biome_rowan::{AstNode, RawSyntaxKind};
 pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
+pub use file_source::YamlFileSource;
 pub use syntax_node::*;
 
 impl From<u16> for YamlSyntaxKind {

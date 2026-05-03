@@ -3,25 +3,29 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-c.vue
 ---
 # Input
-```ts
+```vue
+<script setup lang="ts">
 const props = defineProps({
 	kind: { type: String },
 });
+</script>
 
 ```
 
 # Diagnostics
 ```
-invalid-c.vue:1:15 lint/nursery/useVueConsistentDefinePropsDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-c.vue:2:15 lint/nursery/useVueConsistentDefinePropsDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This defineProps declaration uses runtime declaration.
+  × This defineProps declaration uses runtime declaration.
   
-  > 1 │ const props = defineProps({
+    1 │ <script setup lang="ts">
+  > 2 │ const props = defineProps({
       │               ^^^^^^^^^^^^^
-  > 2 │ 	kind: { type: String },
-  > 3 │ });
+  > 3 │ 	kind: { type: String },
+  > 4 │ });
       │ ^^
-    4 │ 
+    5 │ </script>
+    6 │ 
   
   i It should be defined using type declaration like defineProps<...>(). 
   

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -30,7 +29,8 @@ file4.js
 ## `file1.js`
 
 ```js
-  statement(  )  
+statement();
+
 ```
 
 ## `file2.js`

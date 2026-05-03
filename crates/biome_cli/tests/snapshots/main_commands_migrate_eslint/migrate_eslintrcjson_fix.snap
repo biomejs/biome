@@ -65,7 +65,11 @@ expression: redactor(content)
 ```block
 migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i 100% (6/6) of the rules have been migrated.
+  i 6 ESLint rules found
+    - 6 have been migrated to Biome's rules
+    - 100% (6) of your ESLint rules are fully covered by Biome
+      - 100% (6) via direct migration to Biome rules
+  
   
 
 ```

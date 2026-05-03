@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```svelte
@@ -36,9 +37,9 @@ HtmlRoot {
                     html_literal_token: HTML_LITERAL@6..17 " obj.items " [] [],
                 },
                 item: SvelteEachAsKeyedItem {
-                    as_token: AS_KW@17..19 "as" [] [],
-                    name: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@19..24 " item" [] [],
+                    as_token: AS_KW@17..20 "as" [] [Whitespace(" ")],
+                    name: SvelteName {
+                        ident_token: IDENT@20..24 "item" [] [],
                     },
                     index: missing (optional),
                     key: missing (optional),
@@ -89,9 +90,9 @@ HtmlRoot {
                     html_literal_token: HTML_LITERAL@61..73 " getItems() " [] [],
                 },
                 item: SvelteEachAsKeyedItem {
-                    as_token: AS_KW@73..75 "as" [] [],
-                    name: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@75..80 " item" [] [],
+                    as_token: AS_KW@73..76 "as" [] [Whitespace(" ")],
+                    name: SvelteName {
+                        ident_token: IDENT@76..80 "item" [] [],
                     },
                     index: missing (optional),
                     key: missing (optional),
@@ -142,9 +143,9 @@ HtmlRoot {
                     html_literal_token: HTML_LITERAL@117..146 " items.filter(x => x.active) " [] [],
                 },
                 item: SvelteEachAsKeyedItem {
-                    as_token: AS_KW@146..148 "as" [] [],
-                    name: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@148..153 " item" [] [],
+                    as_token: AS_KW@146..149 "as" [] [Whitespace(" ")],
+                    name: SvelteName {
+                        ident_token: IDENT@149..153 "item" [] [],
                     },
                     index: missing (optional),
                     key: missing (optional),
@@ -207,9 +208,9 @@ HtmlRoot {
         2: HTML_TEXT_EXPRESSION@6..17
           0: HTML_LITERAL@6..17 " obj.items " [] []
         3: SVELTE_EACH_AS_KEYED_ITEM@17..24
-          0: AS_KW@17..19 "as" [] []
-          1: HTML_TEXT_EXPRESSION@19..24
-            0: HTML_LITERAL@19..24 " item" [] []
+          0: AS_KW@17..20 "as" [] [Whitespace(" ")]
+          1: SVELTE_NAME@20..24
+            0: IDENT@20..24 "item" [] []
           2: (empty)
           3: (empty)
         4: R_CURLY@24..25 "}" [] []
@@ -245,9 +246,9 @@ HtmlRoot {
         2: HTML_TEXT_EXPRESSION@61..73
           0: HTML_LITERAL@61..73 " getItems() " [] []
         3: SVELTE_EACH_AS_KEYED_ITEM@73..80
-          0: AS_KW@73..75 "as" [] []
-          1: HTML_TEXT_EXPRESSION@75..80
-            0: HTML_LITERAL@75..80 " item" [] []
+          0: AS_KW@73..76 "as" [] [Whitespace(" ")]
+          1: SVELTE_NAME@76..80
+            0: IDENT@76..80 "item" [] []
           2: (empty)
           3: (empty)
         4: R_CURLY@80..81 "}" [] []
@@ -283,9 +284,9 @@ HtmlRoot {
         2: HTML_TEXT_EXPRESSION@117..146
           0: HTML_LITERAL@117..146 " items.filter(x => x.active) " [] []
         3: SVELTE_EACH_AS_KEYED_ITEM@146..153
-          0: AS_KW@146..148 "as" [] []
-          1: HTML_TEXT_EXPRESSION@148..153
-            0: HTML_LITERAL@148..153 " item" [] []
+          0: AS_KW@146..149 "as" [] [Whitespace(" ")]
+          1: SVELTE_NAME@149..153
+            0: IDENT@149..153 "item" [] []
           2: (empty)
           3: (empty)
         4: R_CURLY@153..154 "}" [] []

@@ -1,0 +1,202 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+Heading 1
+=========
+
+Heading 2
+---------
+
+Another H1
+===
+
+Another H2
+---
+
+Multi-line content
+that spans lines
+================
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdSetextHeader {
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..9 "Heading 1" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@9..10 "\n" [] [],
+                },
+            ],
+            underline_token: MD_SETEXT_UNDERLINE_LITERAL@10..19 "=========" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@19..20 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@20..21 "\n" [] [],
+        },
+        MdSetextHeader {
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@21..30 "Heading 2" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@30..31 "\n" [] [],
+                },
+            ],
+            underline_token: MD_SETEXT_UNDERLINE_LITERAL@31..40 "---------" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@40..41 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@41..42 "\n" [] [],
+        },
+        MdSetextHeader {
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@42..52 "Another H1" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@52..53 "\n" [] [],
+                },
+            ],
+            underline_token: MD_SETEXT_UNDERLINE_LITERAL@53..56 "===" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@56..57 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@57..58 "\n" [] [],
+        },
+        MdSetextHeader {
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@58..68 "Another H2" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@68..69 "\n" [] [],
+                },
+            ],
+            underline_token: MD_SETEXT_UNDERLINE_LITERAL@69..72 "---" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@72..73 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@73..74 "\n" [] [],
+        },
+        MdSetextHeader {
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@74..79 "Multi" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@79..80 "-" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@80..92 "line content" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@92..93 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@93..109 "that spans lines" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@109..110 "\n" [] [],
+                },
+            ],
+            underline_token: MD_SETEXT_UNDERLINE_LITERAL@110..126 "================" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@126..127 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@127..127 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..127
+  0: (empty)
+  1: MD_BLOCK_LIST@0..127
+    0: MD_SETEXT_HEADER@0..19
+      0: MD_INLINE_ITEM_LIST@0..10
+        0: MD_TEXTUAL@0..9
+          0: MD_TEXTUAL_LITERAL@0..9 "Heading 1" [] []
+        1: MD_TEXTUAL@9..10
+          0: MD_TEXTUAL_LITERAL@9..10 "\n" [] []
+      1: MD_SETEXT_UNDERLINE_LITERAL@10..19 "=========" [] []
+    1: MD_NEWLINE@19..20
+      0: NEWLINE@19..20 "\n" [] []
+    2: MD_NEWLINE@20..21
+      0: NEWLINE@20..21 "\n" [] []
+    3: MD_SETEXT_HEADER@21..40
+      0: MD_INLINE_ITEM_LIST@21..31
+        0: MD_TEXTUAL@21..30
+          0: MD_TEXTUAL_LITERAL@21..30 "Heading 2" [] []
+        1: MD_TEXTUAL@30..31
+          0: MD_TEXTUAL_LITERAL@30..31 "\n" [] []
+      1: MD_SETEXT_UNDERLINE_LITERAL@31..40 "---------" [] []
+    4: MD_NEWLINE@40..41
+      0: NEWLINE@40..41 "\n" [] []
+    5: MD_NEWLINE@41..42
+      0: NEWLINE@41..42 "\n" [] []
+    6: MD_SETEXT_HEADER@42..56
+      0: MD_INLINE_ITEM_LIST@42..53
+        0: MD_TEXTUAL@42..52
+          0: MD_TEXTUAL_LITERAL@42..52 "Another H1" [] []
+        1: MD_TEXTUAL@52..53
+          0: MD_TEXTUAL_LITERAL@52..53 "\n" [] []
+      1: MD_SETEXT_UNDERLINE_LITERAL@53..56 "===" [] []
+    7: MD_NEWLINE@56..57
+      0: NEWLINE@56..57 "\n" [] []
+    8: MD_NEWLINE@57..58
+      0: NEWLINE@57..58 "\n" [] []
+    9: MD_SETEXT_HEADER@58..72
+      0: MD_INLINE_ITEM_LIST@58..69
+        0: MD_TEXTUAL@58..68
+          0: MD_TEXTUAL_LITERAL@58..68 "Another H2" [] []
+        1: MD_TEXTUAL@68..69
+          0: MD_TEXTUAL_LITERAL@68..69 "\n" [] []
+      1: MD_SETEXT_UNDERLINE_LITERAL@69..72 "---" [] []
+    10: MD_NEWLINE@72..73
+      0: NEWLINE@72..73 "\n" [] []
+    11: MD_NEWLINE@73..74
+      0: NEWLINE@73..74 "\n" [] []
+    12: MD_SETEXT_HEADER@74..126
+      0: MD_INLINE_ITEM_LIST@74..110
+        0: MD_TEXTUAL@74..79
+          0: MD_TEXTUAL_LITERAL@74..79 "Multi" [] []
+        1: MD_TEXTUAL@79..80
+          0: MD_TEXTUAL_LITERAL@79..80 "-" [] []
+        2: MD_TEXTUAL@80..92
+          0: MD_TEXTUAL_LITERAL@80..92 "line content" [] []
+        3: MD_TEXTUAL@92..93
+          0: MD_TEXTUAL_LITERAL@92..93 "\n" [] []
+        4: MD_TEXTUAL@93..109
+          0: MD_TEXTUAL_LITERAL@93..109 "that spans lines" [] []
+        5: MD_TEXTUAL@109..110
+          0: MD_TEXTUAL_LITERAL@109..110 "\n" [] []
+      1: MD_SETEXT_UNDERLINE_LITERAL@110..126 "================" [] []
+    13: MD_NEWLINE@126..127
+      0: NEWLINE@126..127 "\n" [] []
+  2: EOF@127..127 "" [] []
+
+```

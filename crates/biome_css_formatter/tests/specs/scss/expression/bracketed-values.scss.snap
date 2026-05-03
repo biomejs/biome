@@ -1,0 +1,41 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/expression/bracketed-values.scss
+---
+
+# Input
+
+```scss
+$lines:[full-start  ,  main-start
+/  main-end,
+  full-end];
+$columns:[col-start] minmax(200px,  1fr
+) [col-end];
+ $rows:[header-start] auto [header-end
+body-start] 1fr [body-end];
+   .grid{
+
+
+grid-template-columns:[wide-start]/[wide-end];
+ grid-template-rows:[header-start] auto
+  [header-end body-start] 1fr [body-end];
+ grid-column:[col-start]
+  /[col-end];
+	}
+
+```
+
+
+# Formatted
+
+```scss
+$lines: [full-start, main-start / main-end, full-end];
+$columns: [col-start] minmax(200px, 1fr) [col-end];
+$rows: [header-start] auto [header-end body-start] 1fr [body-end];
+.grid {
+	grid-template-columns: [wide-start] / [wide-end];
+	grid-template-rows: [header-start] auto [header-end body-start] 1fr [body-end];
+	grid-column: [col-start] / [col-end];
+}
+
+```

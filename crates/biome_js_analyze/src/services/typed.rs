@@ -2,8 +2,10 @@ use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleDomain, RuleKey,
     RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor,
 };
+use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsRoot, JsLanguage, JsSyntaxNode,
+    AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsRoot, JsClassDeclaration, JsClassExpression,
+    JsLanguage, JsObjectExpression, JsReferenceIdentifier, JsSyntaxNode,
 };
 use biome_js_type_info::Type;
 use biome_module_graph::ModuleResolver;
@@ -17,6 +19,7 @@ use std::sync::Arc;
 #[derive(Clone)]
 pub struct TypedService {
     resolver: Option<Arc<ModuleResolver>>,
+    model: Option<SemanticModel>,
 }
 
 impl TypedService {
@@ -25,6 +28,15 @@ impl TypedService {
         self.resolver
             .as_ref()
             .map(|resolver| resolver.resolved_type_of_expression(expression))
+            .unwrap_or_default()
+    }
+
+    /// Returns the [`Type`] of the value with the given `name`, as defined
+    /// in the scope that contains `range`.
+    pub fn type_of_named_value(&self, range: TextRange, name: &str) -> Type {
+        self.resolver
+            .as_ref()
+            .map(|resolver| resolver.resolved_type_of_named_value(range, name))
             .unwrap_or_default()
     }
 
@@ -56,6 +68,48 @@ impl TypedService {
             }
         }
     }
+
+    /// Returns the [`Type`] for a class/object member by navigating to the
+    /// parent and looking up the member by name.
+    pub fn type_of_member(&self, member_syntax: &JsSyntaxNode, member_name: &str) -> Type {
+        let parent_type = member_syntax
+            .ancestors()
+            .find_map(|ancestor| {
+                if let Some(class) = JsClassDeclaration::cast(ancestor.clone()) {
+                    return class
+                        .id()
+                        .ok()
+                        .and_then(|id| id.as_js_identifier_binding().cloned())
+                        .and_then(|id| id.name_token().ok())
+                        .map(|name| {
+                            let trimmed = name.token_text_trimmed();
+                            self.type_of_named_value(name.text_trimmed_range(), trimmed.text())
+                        });
+                }
+                if let Some(class_expr) = JsClassExpression::cast(ancestor.clone()) {
+                    return Some(
+                        self.type_of_expression(&AnyJsExpression::JsClassExpression(class_expr)),
+                    );
+                }
+                if let Some(obj_expr) = JsObjectExpression::cast(ancestor.clone()) {
+                    return Some(
+                        self.type_of_expression(&AnyJsExpression::JsObjectExpression(obj_expr)),
+                    );
+                }
+                None
+            })
+            .unwrap_or_default();
+
+        parent_type
+            .find_member_type(member_name)
+            .unwrap_or_default()
+    }
+
+    pub fn has_binding(&self, reference: &JsReferenceIdentifier) -> bool {
+        self.model
+            .as_ref()
+            .is_some_and(|model| model.binding(reference).is_some())
+    }
 }
 
 impl FromServices for TypedService {
@@ -68,17 +122,16 @@ impl FromServices for TypedService {
             let has_project_domain = rule_metadata
                 .domains
                 .iter()
-                .any(|d| d == &RuleDomain::Project);
+                .any(|d| d == &RuleDomain::Types);
             if !has_project_domain {
-                panic!(
-                    "The rule {rule_key} uses TypedService, but it is not in the project domain."
-                );
+                panic!("The rule {rule_key} uses TypedService, but it is not in the Types domain.");
             }
         }
 
         let resolver: Option<&Option<Arc<ModuleResolver>>> = services.get_service();
         let resolver = resolver.and_then(|resolver| resolver.as_ref().map(Arc::clone));
-        Ok(Self { resolver })
+        let model = services.get_service::<SemanticModel>().cloned();
+        Ok(Self { resolver, model })
     }
 }
 

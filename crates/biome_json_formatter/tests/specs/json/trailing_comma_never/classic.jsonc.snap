@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: json/trailing_comma_never/classic.jsonc
 ---
+
 # Input
 
 ```jsonc
@@ -16,43 +17,23 @@ info: json/trailing_comma_never/classic.jsonc
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Trailing commas: None
-Expand: Auto
-Bracket spacing: true
------
-
-```jsonc
+```json
 {
-	"list": [],
-	"list1": [],
-	"list2": [],
-	"list3": [],
-	"list4": []
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "json": {
+    "parser": {
+      "allowTrailingCommas": true
+    },
+    "formatter": {
+      "trailingCommas": "all"
+    }
+  }
 }
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Trailing commas: All
-Expand: Auto
-Bracket spacing: true
------
+# Formatted
 
 ```jsonc
 {
@@ -62,4 +43,5 @@ Bracket spacing: true
 	"list3": [],
 	"list4": [],
 }
+
 ```

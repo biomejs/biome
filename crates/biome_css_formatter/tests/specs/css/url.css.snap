@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/url.css
 ---
+
 # Input
 
 ```css
@@ -30,19 +31,7 @@ a {
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
------
+# Formatted
 
 ```css
 div {
@@ -64,6 +53,7 @@ a {
 
 	background: no-repeat url("https://example.com/\)\).jpg");
 }
+
 ```
 
 # Lines exceeding max width of 80 characters

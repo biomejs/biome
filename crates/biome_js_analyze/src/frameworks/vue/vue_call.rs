@@ -33,6 +33,7 @@ pub fn is_vue_compiler_macro_call(
     model.binding(&reference).is_none()
 }
 
+/// Checks if the given expression is a reference to a Vue API function (e.g., from `vue` package or `Vue` global).
 pub fn is_vue_api_reference(
     expression: &AnyJsExpression,
     model: &SemanticModel,
@@ -45,6 +46,26 @@ pub fn is_vue_api_reference(
         VUE_PACKAGE_NAMES,
         VUE_GLOBAL_NAME,
     )
+}
+
+/// Checks if the given call expression is a call to `toRefs` from the Vue package.
+///
+/// `toRefs` is used to convert a reactive object to a plain object where each property
+/// is a ref pointing to the corresponding property of the original object. This is commonly
+/// used with `defineProps` to destructure props while maintaining reactivity.
+///
+/// This function handles both imported `toRefs` and auto-imported `toRefs` in Vue `<script setup>`.
+///
+/// Example: `const { foo, bar } = toRefs(props)`
+pub fn is_to_refs_call(call: &JsCallExpression, model: &SemanticModel) -> bool {
+    let Some(callee) = call.callee().ok() else {
+        return false;
+    };
+    let Some(expression) = callee.inner_expression() else {
+        return false;
+    };
+
+    is_vue_api_reference(&expression, model, "toRefs")
 }
 
 const VUE_PACKAGE_NAMES: &[&str] = &["vue"];

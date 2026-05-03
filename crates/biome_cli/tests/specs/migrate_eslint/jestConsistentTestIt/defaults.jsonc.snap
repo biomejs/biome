@@ -1,0 +1,36 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: defaults.jsonc
+---
+## ESLint Config
+
+```json
+{ "rules": { "jest/consistent-test-it": "error" } }
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"recommended": false,
+			"nursery": {
+				"useConsistentTestIt": {
+					"level": "error",
+					"options": { "function": "test", "withinDescribe": "it" }
+				}
+			}
+		}
+	}
+}
+
+```

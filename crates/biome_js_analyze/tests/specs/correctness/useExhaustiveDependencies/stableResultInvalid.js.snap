@@ -42,7 +42,7 @@ stableResultInvalid.js:6:22 lint/correctness/useExhaustiveDependencies  FIXABLE 
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency dispatch to the list.
   
     6 │ ····const·doAction·=·useCallback(()·=>·dispatch(someAction()),·[dispatch]);
       │                                                                 ++++++++   

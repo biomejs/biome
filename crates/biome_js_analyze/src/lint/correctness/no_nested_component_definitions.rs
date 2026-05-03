@@ -90,8 +90,7 @@ declare_lint_rule! {
         name: "noNestedComponentDefinitions",
         language: "jsx",
         sources: &[
-            RuleSource::EslintReactX("no-nested-components").same(),
-            RuleSource::EslintReactXyz("no-nested-components").same(),
+            RuleSource::EslintReactX("no-nested-component-definitions").same(),
             RuleSource::EslintReactXyz("no-nested-component-definitions").same(),
         ],
         recommended: false,
@@ -112,6 +111,7 @@ impl Rule for NoNestedComponentDefinitions {
             && let Some(parent_component) = node
                 .syntax()
                 .ancestors()
+                .skip(1)
                 .skip_while(|ancestor| ancestor.eq(node.syntax()))
                 .find_map(|syntax| ReactComponentInfo::from_declaration(&syntax))
         {

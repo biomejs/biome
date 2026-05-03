@@ -1,0 +1,13 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: array.json
+---
+# Input
+```json
+[
+  "one",
+  "two",
+  "three"
+]
+
+```

@@ -1,0 +1,126 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<input {...} />
+<Component {...props />
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@0..1 "<" [] [],
+            name: HtmlTagName {
+                value_token: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                HtmlSpreadAttribute {
+                    l_curly_token: L_CURLY@7..8 "{" [] [],
+                    dotdotdot_token: DOT3@8..11 "..." [] [],
+                    argument: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@11..11 "" [] [],
+                    },
+                    r_curly_token: R_CURLY@11..13 "}" [] [Whitespace(" ")],
+                },
+            ],
+            slash_token: SLASH@13..14 "/" [] [],
+            r_angle_token: R_ANGLE@14..15 ">" [] [],
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@15..17 "<" [Newline("\n")] [],
+                name: HtmlComponentName {
+                    value_token: HTML_LITERAL@17..27 "Component" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlSpreadAttribute {
+                        l_curly_token: L_CURLY@27..28 "{" [] [],
+                        dotdotdot_token: DOT3@28..31 "..." [] [],
+                        argument: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@31..40 "props />\n" [] [],
+                        },
+                        r_curly_token: missing (required),
+                    },
+                ],
+                r_angle_token: missing (required),
+            },
+            children: HtmlElementList [],
+            closing_element: missing (required),
+        },
+    ],
+    eof_token: EOF@40..40 "" [] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..40
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..40
+    0: HTML_SELF_CLOSING_ELEMENT@0..15
+      0: L_ANGLE@0..1 "<" [] []
+      1: HTML_TAG_NAME@1..7
+        0: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@7..13
+        0: HTML_SPREAD_ATTRIBUTE@7..13
+          0: L_CURLY@7..8 "{" [] []
+          1: DOT3@8..11 "..." [] []
+          2: HTML_TEXT_EXPRESSION@11..11
+            0: HTML_LITERAL@11..11 "" [] []
+          3: R_CURLY@11..13 "}" [] [Whitespace(" ")]
+      3: SLASH@13..14 "/" [] []
+      4: R_ANGLE@14..15 ">" [] []
+    1: HTML_ELEMENT@15..40
+      0: HTML_OPENING_ELEMENT@15..40
+        0: L_ANGLE@15..17 "<" [Newline("\n")] []
+        1: HTML_COMPONENT_NAME@17..27
+          0: HTML_LITERAL@17..27 "Component" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@27..40
+          0: HTML_SPREAD_ATTRIBUTE@27..40
+            0: L_CURLY@27..28 "{" [] []
+            1: DOT3@28..31 "..." [] []
+            2: HTML_TEXT_EXPRESSION@31..40
+              0: HTML_LITERAL@31..40 "props />\n" [] []
+            3: (empty)
+        3: (empty)
+      1: HTML_ELEMENT_LIST@40..40
+      2: (empty)
+  4: EOF@40..40 "" [] []
+
+```
+
+## Diagnostics
+
+```
+spread.svelte:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+  
+    1 │ <input {...} />
+    2 │ <Component {...props />
+  > 3 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ <input {...} />
+    2 │ <Component {...props />
+  > 3 │ 
+      │ 
+  
+```

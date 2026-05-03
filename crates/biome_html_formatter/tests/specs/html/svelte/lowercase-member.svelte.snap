@@ -1,0 +1,29 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/lowercase-member.svelte
+---
+
+# Input
+
+```svelte
+<form.Field></form.Field>
+<form.Field attr="value" />
+<Data.Client></Data.Client>
+<foo.Bar.Baz />
+<form.Field data-foo.bar="value" />
+<foo.Bar attr.data-foo="value" />
+
+```
+
+
+# Formatted
+
+```svelte
+<form.Field></form.Field>
+<form.Field attr="value" />
+<Data.Client></Data.Client>
+<foo.Bar.Baz />
+<form.Field data-foo.bar="value" />
+<foo.Bar attr.data-foo="value" />
+
+```
