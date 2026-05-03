@@ -225,7 +225,7 @@ fn locate_utility(candidate: &AnyTwCandidate) -> Option<(usize, usize)> {
 
     for (layer_idx, layer) in PRESET.utilities.iter().enumerate() {
         for (idx, &target) in layer.classes.iter().enumerate() {
-            match match_utility(target, &utility_text) {
+            match matches_utility(target, &utility_text) {
                 UtilityHit::Exact => return Some((layer_idx, idx)),
                 UtilityHit::Partial(target_len) => {
                     if target_len > best_target_len {
@@ -254,7 +254,7 @@ enum UtilityHit {
 /// The parser splits `negative_token` from the candidate, so `utility_text` is
 /// never prefixed with `-`. The preset itself has no negative entries either,
 /// so both sides are clean.
-fn match_utility(target: &str, utility_text: &SyntaxNodeText) -> UtilityHit {
+fn matches_utility(target: &str, utility_text: &SyntaxNodeText) -> UtilityHit {
     if let Some(exact) = target.strip_suffix('$') {
         if utility_text == exact {
             return UtilityHit::Exact;
