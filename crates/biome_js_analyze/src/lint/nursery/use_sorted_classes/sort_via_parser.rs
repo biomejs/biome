@@ -280,7 +280,7 @@ fn matches_utility(target: &str, utility_text: &SyntaxNodeText) -> UtilityHit {
 ///   keeps going to prefer the *longest* matching target, so a more specific
 ///   entry like `peer-has` wins over the bare `peer` when both are present.
 fn locate_variant(variant_text: &SyntaxNodeText) -> Option<usize> {
-    let mut best: Option<usize> = None;
+    let mut best = None;
     let mut best_target_len = 0usize;
 
     for (idx, &target) in PRESET.variants.iter().enumerate() {
