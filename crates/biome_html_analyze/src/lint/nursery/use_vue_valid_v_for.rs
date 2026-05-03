@@ -311,7 +311,10 @@ fn check_template_child_keys(
     for child in container.children() {
         let child = match child {
             AnyHtmlElement::HtmlElement(element) => {
-                AnyHtmlTagElement::HtmlOpeningElement(element.opening_element().ok()?)
+                let Some(opening_element) = element.opening_element().ok() else {
+                    continue;
+                };
+                AnyHtmlTagElement::HtmlOpeningElement(opening_element)
             }
             AnyHtmlElement::HtmlSelfClosingElement(element) => {
                 AnyHtmlTagElement::HtmlSelfClosingElement(element)
@@ -319,7 +322,12 @@ fn check_template_child_keys(
             _ => continue,
         };
 
-        if child_uses_parent_binding_in_v_for(&child, iteration_value)? {
+        let Some(uses_parent_binding) = child_uses_parent_binding_in_v_for(&child, iteration_value)
+        else {
+            continue;
+        };
+
+        if uses_parent_binding {
             continue;
         }
 
