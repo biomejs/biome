@@ -1,0 +1,16 @@
+{
+  "$schema": "../../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "a11y": {
+        "useAnchorContent": {
+          "level": "error",
+          "options": {
+            "additionalRenderProps": ["as", "component"]
+          }
+        }
+      }
+    }
+  }
+}
