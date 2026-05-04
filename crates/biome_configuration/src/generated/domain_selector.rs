@@ -150,6 +150,7 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "noVueReservedProps"),
         RuleFilter::Rule("correctness", "noVueSetupPropsReactivityLoss"),
         RuleFilter::Rule("nursery", "noVueArrowFuncInWatch"),
+        RuleFilter::Rule("nursery", "noVueImportCompilerMacros"),
         RuleFilter::Rule("nursery", "noVueOptionsApi"),
         RuleFilter::Rule("nursery", "noVueRefAsOperand"),
         RuleFilter::Rule("nursery", "useVueConsistentDefinePropsDeclaration"),

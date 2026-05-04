@@ -2418,6 +2418,11 @@ See https://biomejs.dev/linter/rules/no-vue-arrow-func-in-watch
 	 */
 	noVueArrowFuncInWatch?: NoVueArrowFuncInWatchConfiguration;
 	/**
+	* Disallow importing Vue compiler macros.
+See https://biomejs.dev/linter/rules/no-vue-import-compiler-macros 
+	 */
+	noVueImportCompilerMacros?: NoVueImportCompilerMacrosConfiguration;
+	/**
 	* Disallow the use of Vue Options API.
 See https://biomejs.dev/linter/rules/no-vue-options-api 
 	 */
@@ -4492,6 +4497,9 @@ export type NoUselessTypeConversionConfiguration =
 export type NoVueArrowFuncInWatchConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueArrowFuncInWatchOptions;
+export type NoVueImportCompilerMacrosConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueImportCompilerMacrosOptions;
 export type NoVueOptionsApiConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueOptionsApiOptions;
@@ -6330,6 +6338,10 @@ export interface RuleWithNoVueArrowFuncInWatchOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueArrowFuncInWatchOptions;
 }
+export interface RuleWithNoVueImportCompilerMacrosOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueImportCompilerMacrosOptions;
+}
 export interface RuleWithNoVueOptionsApiOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueOptionsApiOptions;
@@ -8006,6 +8018,7 @@ Defaults to `false`.
 export type NoUselessReturnOptions = {};
 export type NoUselessTypeConversionOptions = {};
 export type NoVueArrowFuncInWatchOptions = {};
+export type NoVueImportCompilerMacrosOptions = {};
 export type NoVueOptionsApiOptions = {};
 export type NoVueRefAsOperandOptions = {};
 export type NoVueVIfWithVForOptions = {};
@@ -9154,6 +9167,7 @@ export type Category =
 	| "lint/nursery/noUselessReturn"
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueArrowFuncInWatch"
+	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueOptionsApi"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueVIfWithVFor"
