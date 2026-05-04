@@ -8,7 +8,9 @@ use xtask_glue::*;
 
 /// Returns the configuration schema as a string
 pub fn generate_schema_as_string() -> Result<String> {
-    let schema = rename_references_in_schema(schema_for!(Configuration));
+    let schema = strip_markdown_links_from_descriptions(rename_references_in_schema(schema_for!(
+        Configuration
+    )));
 
     let json_schema = to_string(&schema)?;
     let parsed = parse_json(&json_schema, JsonParserOptions::default());
@@ -28,6 +30,77 @@ pub fn generate_configuration_schema(mode: Mode) -> Result<()> {
     update(&schema_path_npm, schema.as_str(), &mode)?;
 
     Ok(())
+}
+
+fn strip_markdown_links_from_description(description: &str) -> String {
+    let mut result = String::new();
+    let mut remaining = description;
+
+    while let Some(open_bracket) = remaining.find('[') {
+        let (before_link, after_open_bracket) = remaining.split_at(open_bracket);
+        let after_open_bracket = &after_open_bracket['['.len_utf8()..];
+
+        let Some(close_bracket) = after_open_bracket.find(']') else {
+            break;
+        };
+
+        let label = &after_open_bracket[..close_bracket];
+        let after_label = &after_open_bracket[close_bracket + ']'.len_utf8()..];
+
+        let Some(after_open_paren) = after_label.strip_prefix('(') else {
+            result.push_str(before_link);
+            result.push('[');
+            remaining = after_open_bracket;
+            continue;
+        };
+
+        let Some(close_paren) = after_open_paren.find(')') else {
+            break;
+        };
+
+        let url = &after_open_paren[..close_paren];
+        result.push_str(before_link);
+        result.push_str(label);
+        result.push_str(" (");
+        result.push_str(url);
+        result.push(')');
+        remaining = &after_open_paren[close_paren + ')'.len_utf8()..];
+    }
+
+    result.push_str(remaining);
+    result
+}
+
+fn strip_markdown_links_from_descriptions(mut schema: Schema) -> Schema {
+    if let Some(obj) = schema.as_object_mut() {
+        strip_markdown_links_from_descriptions_in_object(obj);
+    }
+    schema
+}
+
+fn strip_markdown_links_from_descriptions_in_value(value: &mut Value) {
+    match value {
+        Value::Object(obj) => strip_markdown_links_from_descriptions_in_object(obj),
+        Value::Array(values) => {
+            for value in values {
+                strip_markdown_links_from_descriptions_in_value(value);
+            }
+        }
+        _ => {}
+    }
+}
+
+fn strip_markdown_links_from_descriptions_in_object(obj: &mut Map<String, Value>) {
+    if let Some(Value::String(description)) = obj.get_mut("description") {
+        let stripped_description = strip_markdown_links_from_description(description);
+        if stripped_description != *description {
+            *description = stripped_description;
+        }
+    }
+
+    for value in obj.values_mut() {
+        strip_markdown_links_from_descriptions_in_value(value);
+    }
 }
 
 /// Rename complex type names with simpler ones.
@@ -160,5 +233,26 @@ fn rename_references_in_object(obj: &mut Map<String, Value>) {
         if let Some(Value::Object(schema_obj)) = obj.get_mut(key) {
             rename_references_in_object(schema_obj);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::strip_markdown_links_from_description;
+
+    #[test]
+    fn strips_markdown_links_from_schema_descriptions() {
+        assert_eq!(
+            strip_markdown_links_from_description(
+                "A field for the [JSON schema](https://json-schema.org/) specification",
+            ),
+            "A field for the JSON schema (https://json-schema.org/) specification",
+        );
+        assert_eq!(
+            strip_markdown_links_from_description(
+                "Uses [React Fast Refresh](https://github.com/facebook/react/tree/main/packages/react-refresh), such as [`meta` in Remix](https://remix.run/docs/en/main/route/meta)",
+            ),
+            "Uses React Fast Refresh (https://github.com/facebook/react/tree/main/packages/react-refresh), such as `meta` in Remix (https://remix.run/docs/en/main/route/meta)",
+        );
     }
 }

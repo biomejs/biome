@@ -5,7 +5,7 @@
 	"type": "object",
 	"properties": {
 		"$schema": {
-			"description": "A field for the [JSON schema](https://json-schema.org/) specification",
+			"description": "A field for the JSON schema (https://json-schema.org/) specification",
 			"anyOf": [{ "$ref": "#/$defs/Schema" }, { "type": "null" }]
 		},
 		"assist": {
@@ -14110,12 +14110,12 @@
 			"type": "object",
 			"properties": {
 				"allowConstantExport": {
-					"description": "Allows the export of constants. This option is for environments that support it, such as [Vite](https://vitejs.dev/)",
+					"description": "Allows the export of constants. This option is for environments that support it, such as Vite (https://vitejs.dev/)",
 					"type": ["boolean", "null"],
 					"default": null
 				},
 				"allowExportNames": {
-					"description": "A list of names that can be additionally exported from the module This option is for exports that do not hinder [React Fast Refresh](https://github.com/facebook/react/tree/main/packages/react-refresh), such as [`meta` in Remix](https://remix.run/docs/en/main/route/meta)",
+					"description": "A list of names that can be additionally exported from the module This option is for exports that do not hinder React Fast Refresh (https://github.com/facebook/react/tree/main/packages/react-refresh), such as `meta` in Remix (https://remix.run/docs/en/main/route/meta)",
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				}
