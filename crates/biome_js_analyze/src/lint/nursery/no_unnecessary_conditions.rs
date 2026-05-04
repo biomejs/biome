@@ -760,7 +760,7 @@ fn check_comparison_necessity(
     // Only safe for loose equality (`==`/`!=`), where `null == undefined` is true.
     // Strict equality (`===`/`!==`) distinguishes null from undefined, so a value
     // typed as `null | undefined` could still go either way against a specific
-    // literal — skip those to avoid false positives.
+    // literal, so skip those to avoid false positives.
     // Note: this narrow pass does not detect `void 0` because it's a unary
     // expression, not an identifier.
     if conditional.is_nullish()
