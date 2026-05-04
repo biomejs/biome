@@ -2403,6 +2403,11 @@ See https://biomejs.dev/linter/rules/no-untrusted-licenses
 	 */
 	noUntrustedLicenses?: NoUntrustedLicensesConfiguration;
 	/**
+	* Disallow unnecessary .call() and .apply().
+See https://biomejs.dev/linter/rules/no-useless-call 
+	 */
+	noUselessCall?: NoUselessCallConfiguration;
+	/**
 	* Disallow redundant return statements.
 See https://biomejs.dev/linter/rules/no-useless-return 
 	 */
@@ -4478,6 +4483,9 @@ export type NoUnsafePlusOperandsConfiguration =
 export type NoUntrustedLicensesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUntrustedLicensesOptions;
+export type NoUselessCallConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessCallOptions;
 export type NoUselessReturnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessReturnOptions;
@@ -6308,6 +6316,10 @@ export interface RuleWithNoUntrustedLicensesOptions {
 	level: RulePlainConfiguration;
 	options?: NoUntrustedLicensesOptions;
 }
+export interface RuleWithNoUselessCallOptions {
+	level: RulePlainConfiguration;
+	options?: NoUselessCallOptions;
+}
 export interface RuleWithNoUselessReturnOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -7991,6 +8003,7 @@ Defaults to `false`.
 	 */
 	requireOsiApproved?: boolean;
 }
+export type NoUselessCallOptions = {};
 export type NoUselessReturnOptions = {};
 export type NoUselessTypeConversionOptions = {};
 export type NoVueArrowFuncInWatchOptions = {};
@@ -9138,6 +9151,7 @@ export type Category =
 	| "lint/nursery/noUntrustedLicenses"
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"
+	| "lint/nursery/noUselessCall"
 	| "lint/nursery/noUselessReturn"
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueArrowFuncInWatch"
