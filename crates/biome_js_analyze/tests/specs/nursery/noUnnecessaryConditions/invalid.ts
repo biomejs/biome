@@ -182,35 +182,35 @@ interface Config {
 }
 
 function unnecessaryOrOnMember(cfg: Config) {
-  return cfg.items || [];  // cfg.items is string[], always truthy — unnecessary
+  return cfg.items || [];  // cfg.items is string[], always truthy - unnecessary
 }
 
 // if-condition on always-truthy member (array is always truthy)
 function unnecessaryIfOnMember(cfg: Config) {
-  if (cfg.items) {  // cfg.items is string[], always truthy — flag
+  if (cfg.items) {  // cfg.items is string[], always truthy - flag
     return cfg.items[0];
   }
 }
 
-// x: string compared with null — always false
+// x: string compared with null - always false
 function cmpNullWithString(x: string) {
   return x === null;  // always false
 }
 
-// x: string compared with undefined — always false
+// x: string compared with undefined - always false
 function cmpUndefinedWithString(x: string) {
   return x !== undefined;  // always true
 }
 
-// Switch on literal union with a case outside the union — unreachable
+// Switch on literal union with a case outside the union - unreachable
 function switchOnUnionWithUnreachable(value: 'a' | 'b' | 'c') {
   switch (value) {
     case 'a': return 1;
-    case 'd': return 2;  // unreachable — 'd' is not in the union
+    case 'd': return 2;  // unreachable - 'd' is not in the union
   }
 }
 
-// Switch on literal true with case false — unreachable
+// Switch on literal true with case false - unreachable
 function switchOnTrue() {
   switch (true) {
     case false: return 1;  // unreachable
@@ -218,7 +218,7 @@ function switchOnTrue() {
   }
 }
 
-// Switch on literal number with impossible case — unreachable
+// Switch on literal number with impossible case - unreachable
 function switchOnSpecificNumber(value: 1 | 2 | 3) {
   switch (value) {
     case 4: return 4;  // unreachable
@@ -228,14 +228,14 @@ function switchOnSpecificNumber(value: 1 | 2 | 3) {
 // Unreachable `case` with non-decimal numeric literals (hex, binary, octal, separators).
 function switchOnNonDecimalLiterals(value: 1 | 2 | 3) {
   switch (value) {
-    case 0xFF: return "hex";      // 255 — unreachable
-    case 0b1010: return "bin";    // 10 — unreachable
-    case 0o17: return "oct";      // 15 — unreachable
-    case 1_000: return "sep";     // 1000 — unreachable
+    case 0xFF: return "hex";      // 255 - unreachable
+    case 0b1010: return "bin";    // 10 - unreachable
+    case 0o17: return "oct";      // 15 - unreachable
+    case 1_000: return "sep";     // 1000 - unreachable
   }
 }
 
-// Double-not on always-truthy types — still flagged (recursion inverts twice)
+// Double-not on always-truthy types - still flagged (recursion inverts twice)
 function doubleNotOnArray() {
   const xs: number[] = [];
   if (!!xs) {  // always true, should be flagged
@@ -243,7 +243,7 @@ function doubleNotOnArray() {
   }
 }
 
-// && with always-truthy member access — flagged
+// && with always-truthy member access - flagged
 interface AlwaysItems {
   items: string[];
 }
@@ -251,34 +251,34 @@ function andOnAlwaysTruthy(cfg: AlwaysItems) {
   return cfg.items && cfg.items[0];  // cfg.items is string[] always truthy, && is redundant
 }
 
-// Ternary with always-truthy member condition — flagged
+// Ternary with always-truthy member condition - flagged
 function ternaryOnAlwaysTruthy(cfg: AlwaysItems) {
   return cfg.items ? "yes" : "no";  // always "yes"
 }
 
-// Optional chain on a non-nullish call result — flagged
+// Optional chain on a non-nullish call result - flagged
 function callReturningNonNullish(): string {
   return "x";
 }
 const callChain = callReturningNonNullish()?.length;
 
-// `??` on a guaranteed object — flagged
+// `??` on a guaranteed object - flagged
 interface Settings { theme: string }
 function readSettings(s: Settings) {
   return s.theme ?? "light";
 }
 
-// `null` on the left-hand side of `===` against a non-nullish value — flagged
+// `null` on the left-hand side of `===` against a non-nullish value - flagged
 function leftNullCmp(x: number) {
   return null === x;
 }
 
-// `undefined` on the left-hand side of `!==` against a non-nullish value — flagged
+// `undefined` on the left-hand side of `!==` against a non-nullish value - flagged
 function leftUndefinedCmp(x: number) {
   return undefined !== x;
 }
 
-// `!` applied to a non-nullish member access — flagged via type information
+// `!` applied to a non-nullish member access - flagged via type information
 interface NonEmpty { items: string[] }
 function notOnAlwaysTruthyMember(c: NonEmpty) {
   if (!c.items) {

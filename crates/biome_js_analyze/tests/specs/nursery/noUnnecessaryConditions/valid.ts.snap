@@ -208,7 +208,7 @@ function fn(f: (() => string) | undefined) {
   return f?.();
 }
 
-// Nullable member access — must NOT be flagged
+// Nullable member access - must NOT be flagged
 interface MaybeConfig {
   items?: string[];
   name: string | undefined;
@@ -226,25 +226,25 @@ function validIfOnNullable(cfg: MaybeConfig) {
 
 // Legitimate null checks
 function validNullCheck(x: string | null) {
-  return x === null;  // necessary — x can be null
+  return x === null;  // necessary - x can be null
 }
 
 function validUndefinedCheck(x: string | undefined) {
-  return x !== undefined;  // necessary — x can be undefined
+  return x !== undefined;  // necessary - x can be undefined
 }
 
 function validNullishUnionCheck(x: string | null | undefined) {
-  return x == null;  // necessary — x can be null or undefined
+  return x == null;  // necessary - x can be null or undefined
 }
 
-// x: undefined | string compared with null — NOT detected by narrow pass
+// x: undefined | string compared with null - NOT detected by narrow pass
 // (neither string nor undefined is null, but the union type doesn't resolve
 // to non-nullish because it contains undefined, so is_non_nullish() is false)
 function cmpNullWithOptional(x: undefined | string) {
-  return x === null;  // always false — x is never null, but not flagged by narrow pass
+  return x === null;  // always false - x is never null, but not flagged by narrow pass
 }
 
-// Switch on literal union with all cases covered — no flag
+// Switch on literal union with all cases covered - no flag
 function switchOnLiteralUnion(value: 'a' | 'b' | 'c') {
   switch (value) {
     case 'a': return 1;
@@ -253,7 +253,7 @@ function switchOnLiteralUnion(value: 'a' | 'b' | 'c') {
   }
 }
 
-// Switch on literal union with default only — no flag
+// Switch on literal union with default only - no flag
 function switchOnUnionDefault(value: 'a' | 'b' | 'c') {
   switch (value) {
     default:
@@ -261,7 +261,7 @@ function switchOnUnionDefault(value: 'a' | 'b' | 'c') {
   }
 }
 
-// Switch on plain string — any string literal case is reachable
+// Switch on plain string - any string literal case is reachable
 function switchOnString(value: string) {
   switch (value) {
     case 'hello': return 1;
@@ -269,7 +269,7 @@ function switchOnString(value: string) {
   }
 }
 
-// Switch on plain number — any number literal case is reachable
+// Switch on plain number - any number literal case is reachable
 function switchOnNumber(value: number) {
   switch (value) {
     case 1: return 1;
@@ -286,7 +286,7 @@ function unnecessaryOrOnCall(cfg: _Config2) {
   return cfg.getCount() || 0;
 }
 
-// Nullish coalescing on genuinely nullable types — MUST NOT be flagged
+// Nullish coalescing on genuinely nullable types - MUST NOT be flagged
 function nullishStr(arg: string | undefined) {
   return arg ?? "default";
 }
@@ -299,7 +299,7 @@ function nullishUnion(arg: string | null | undefined) {
   return arg ?? "fallback";
 }
 
-// Double-not on nullable types — idiomatic boolean coercion, NOT flagged
+// Double-not on nullable types - idiomatic boolean coercion, NOT flagged
 function doubleNotCoerce(user: { name: string } | undefined) {
   return !!user;
 }

@@ -97,7 +97,9 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// When the type allows nullish or empty values, the check is meaningful:
+    /// When the type allows nullish or empty values, the check is meaningful.
+    /// The rule also does not report bindings that are reassigned to values of
+    /// different truthiness, since their narrowing cannot be inferred reliably.
     ///
     /// ```ts
     /// function head<T>(items: T[] | null) {
@@ -105,15 +107,11 @@ declare_lint_rule! {
     ///         return items[0];
     ///     }
     /// }
-    /// ```
     ///
-    /// ```ts
     /// function bar(arg: string | undefined) {
     ///     return arg?.length;
     /// }
-    /// ```
     ///
-    /// ```ts
     /// function f(v: 'a' | 'b' | 'c') {
     ///     switch (v) {
     ///         case 'a': break;
@@ -121,13 +119,7 @@ declare_lint_rule! {
     ///         case 'c': break;
     ///     }
     /// }
-    /// ```
     ///
-    /// Unlike the source rule, this rule doesn't flag bindings that are
-    /// reassigned to values of different truthiness, since their narrowing
-    /// can't be inferred reliably:
-    ///
-    /// ```ts
     /// let greeting = false;
     /// function update() { greeting = "Hello"; }
     /// if (greeting) {}
@@ -404,7 +396,8 @@ fn check_condition_necessity(
     expr: &AnyJsExpression,
     ctx: &RuleContext<NoUnnecessaryConditions>,
 ) -> Option<IssueKind> {
-    // if the expression is inside a catch, let's not flag it
+    // Skip expressions inside a `catch` clause: error variables are typed `unknown`
+    // or `any`, so the conditional check is meaningful.
     let inside_catch = expr
         .syntax()
         .ancestors()
@@ -474,7 +467,7 @@ fn check_condition_necessity(
             }
         }
         AnyJsExpression::JsUnaryExpression(unary_expr) => {
-            // Handle `!expr` — the truthiness of !expr is the inverse of expr's.
+            // Handle `!expr`: the truthiness of `!expr` is the inverse of `expr`'s.
             let Ok(JsUnaryOperator::LogicalNot) = unary_expr.operator() else {
                 return None;
             };
@@ -487,14 +480,14 @@ fn check_condition_necessity(
                     Some(IssueKind::AlwaysTruthyCondition(expr.range()))
                 }
                 // Other kinds (UnnecessaryOptionalChain, UnnecessaryCoalescing,
-                // UnnecessaryComparison) don't invert meaningfully — drop them here.
+                // UnnecessaryComparison) don't invert meaningfully, so drop them here.
                 _ => None,
             };
         }
         AnyJsExpression::JsStaticMemberExpression(_)
         | AnyJsExpression::JsComputedMemberExpression(_)
         | AnyJsExpression::JsCallExpression(_) => {
-            // Skip optional chains — those are handled separately and would
+            // Skip optional chains: those are handled separately and would
             // produce the wrong diagnostic kind.
             if is_optional_chain_expr(expr) {
                 return None;
@@ -554,7 +547,7 @@ fn check_nullish_necessity(
         _ => {}
     }
 
-    // Type-aware path: flag when the left-hand side is statically non-nullish.
+    // Type-aware path: report when the left-hand side is statically non-nullish.
     let ty = ctx.type_of_expression(expr);
     if ty.conditional_semantics().is_non_nullish() {
         return Some(IssueKind::UnnecessaryCoalescing(
@@ -588,7 +581,7 @@ fn check_optional_chain_necessity(
         _ => {}
     }
 
-    // Type-aware path: flag when the object is statically non-nullish.
+    // Type-aware path: report when the object is statically non-nullish.
     let ty = ctx.type_of_expression(expr);
     if ty.conditional_semantics().is_non_nullish() {
         return Some(IssueKind::UnnecessaryOptionalChain(
@@ -726,6 +719,18 @@ fn check_comparison_necessity(
 
     // Type-aware null/undefined comparison.
     // Only runs when the existing literal-only branches didn't match.
+    // Restricted to equality operators: relational operators like `<` and `>`
+    // produce value-dependent results even when one side is non-nullish.
+    if !matches!(
+        operator,
+        JsBinaryOperator::Equality
+            | JsBinaryOperator::Inequality
+            | JsBinaryOperator::StrictEquality
+            | JsBinaryOperator::StrictInequality
+    ) {
+        return None;
+    }
+
     let typed_side = match (left, right) {
         (
             AnyJsExpression::AnyJsLiteralExpression(AnyJsLiteralExpression::JsNullLiteralExpression(_)),
@@ -743,16 +748,27 @@ fn check_comparison_necessity(
     let ty = ctx.type_of_expression(typed_side);
     let conditional = ty.conditional_semantics();
 
-    // Is the non-null side known to be non-nullish? Then the comparison is unnecessary.
+    // Is the non-null side known to be non-nullish? Then the comparison is unnecessary
+    // for any equality operator: `x === null`, `x !== undefined`, `x == null` are
+    // all statically false/true.
     if conditional.is_non_nullish() {
         let range = TextRange::new(left.range().start(), right.range().end());
         return Some(IssueKind::UnnecessaryComparison(range));
     }
 
-    // Dual: if the typed side is known to BE nullish (e.g. the `undefined` identifier).
-    // Note: this narrow pass does not detect `void 0` because it's a JsUnaryExpression,
-    // not an identifier.
-    if conditional.is_nullish() {
+    // Dual: the typed side is known to BE nullish.
+    // Only safe for loose equality (`==`/`!=`), where `null == undefined` is true.
+    // Strict equality (`===`/`!==`) distinguishes null from undefined, so a value
+    // typed as `null | undefined` could still go either way against a specific
+    // literal — skip those to avoid false positives.
+    // Note: this narrow pass does not detect `void 0` because it's a unary
+    // expression, not an identifier.
+    if conditional.is_nullish()
+        && matches!(
+            operator,
+            JsBinaryOperator::Equality | JsBinaryOperator::Inequality
+        )
+    {
         let range = TextRange::new(left.range().start(), right.range().end());
         return Some(IssueKind::UnnecessaryComparison(range));
     }
@@ -788,7 +804,7 @@ fn extract_case_literal(test: &AnyJsExpression) -> Option<CaseLiteral> {
 
 /// Returns whether the given `ty` could possibly equal the given literal value.
 ///
-/// This is a narrow, conservative predicate — when in doubt (unknown types,
+/// This is a narrow, conservative predicate: when in doubt (unknown types,
 /// unresolved references, type variables, complex types), it returns `true`.
 /// Used to determine case-clause reachability: if this returns `false`, the
 /// `case` is statically guaranteed to never match.
@@ -825,7 +841,7 @@ fn single_type_could_equal_literal(ty: &Type, literal: &CaseLiteral) -> bool {
                 if matches!(raw, TypeData::String) {
                     return true;
                 }
-                // Otherwise it's a string literal — match on exact value.
+                // Otherwise it's a string literal: match on exact value.
                 return ty.is_string_literal(s.text());
             }
             false
@@ -846,13 +862,13 @@ fn single_type_could_equal_literal(ty: &Type, literal: &CaseLiteral) -> bool {
             ty.is_boolean_literal(*b)
         }
         CaseLiteral::Null => {
-            // Conservative: we also treat Undefined and VoidKeyword as possible
-            // matches for a null-literal case, to avoid flagging ambiguous
-            // narrow-pass cases. Strictly, `null === undefined` is false and
-            // `case null:` inside `switch (x: undefined)` IS unreachable — but
-            // detecting that requires distinguishing === semantics we do not yet
-            // model. TODO: tighten to only match TypeData::Null when
-            // disjointness becomes reliable.
+            // Conservative: also treat Undefined and VoidKeyword as possible
+            // matches for a null-literal case, to avoid false positives.
+            // Strictly, `null === undefined` is false, so `case null:` inside
+            // `switch (x: undefined)` is unreachable. Detecting that requires
+            // distinguishing strict-equality semantics we do not yet model.
+            // TODO: tighten to only match TypeData::Null when disjointness
+            // becomes reliable.
             matches!(raw, TypeData::Null | TypeData::Undefined | TypeData::VoidKeyword)
         }
     }
