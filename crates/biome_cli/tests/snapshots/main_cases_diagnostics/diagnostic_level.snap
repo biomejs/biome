@@ -42,15 +42,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 src/index.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Some imports or exports are not organized.
-  
-  > 1 │ import { graphql, useFragment, useMutation } from "react-relay";
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 2 │ import { FC, memo, useCallback } from "react";
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ 
-  
-  i Sort this chunk of imports.
+  × Sort this chunk of imports.
   
   > 1 │ import { graphql, useFragment, useMutation } from "react-relay";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

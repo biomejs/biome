@@ -12,12 +12,6 @@ export { A, B } from "" with { "k2": "", "k1": "" };
 ```
 unorganized-export-attributes.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Some imports or exports are not organized.
-  
-  > 1 │ export { A, B } from "" with { "k2": "", "k1": "" };
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ 
-  
   i Sort the attributes.
   
   > 1 │ export { A, B } from "" with { "k2": "", "k1": "" };

@@ -28,23 +28,13 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 file.astro:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Some imports or exports are not organized.
+  × Sort this chunk of imports.
   
     1 │ ---
   > 2 │ import { getLocale } from "astro:i18n";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   > 3 │ import { Code } from "astro:components";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ ---
-    5 │ <div></div>
-  
-  i Sort this chunk of imports.
-  
-  > 1 │ ---
-      │  ^^
-  > 2 │ import { getLocale } from "astro:i18n";
-  > 3 │ import { Code } from "astro:components";
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     4 │ ---
     5 │ <div></div>
   

@@ -14,14 +14,6 @@ import { Moment } from 'moment';
 ```
 mergeable-with_leading_newline.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  i Some imports or exports are not organized.
-  
-  > 2 │ import moment from 'moment';
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 3 │ import { Moment } from 'moment';
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ 
-  
   i Sort this chunk of imports.
   
   > 2 │ import moment from 'moment';

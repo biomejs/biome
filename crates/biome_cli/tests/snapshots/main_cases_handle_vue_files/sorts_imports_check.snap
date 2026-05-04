@@ -28,23 +28,13 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 file.vue:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Some imports or exports are not organized.
+  × Sort this chunk of imports.
   
     1 │ <script setup lang="ts">
   > 2 │ import Button from "./components/Button.vue";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   > 3 │ import * as vueUse from "vue-use";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ </script>
-    5 │ <template></template>
-  
-  i Sort this chunk of imports.
-  
-  > 1 │ <script setup lang="ts">
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^
-  > 2 │ import Button from "./components/Button.vue";
-  > 3 │ import * as vueUse from "vue-use";
-      │ ^^^^^^^^^
     4 │ </script>
     5 │ <template></template>
   

@@ -15,16 +15,6 @@ import { Moment } from 'moment';
 ```
 mergeable-with_header.js:3:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Some imports or exports are not organized.
-  
-    1 │ // Header comment
-    2 │ 
-  > 3 │ import moment from 'moment';
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 4 │ import { Moment } from 'moment';
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │ 
-  
   i Sort this chunk of imports.
   
     1 │ // Header comment

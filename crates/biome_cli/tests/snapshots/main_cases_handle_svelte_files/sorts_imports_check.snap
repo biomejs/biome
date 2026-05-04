@@ -28,23 +28,13 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 file.svelte:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Some imports or exports are not organized.
+  × Sort this chunk of imports.
   
     1 │ <script lang="ts">
   > 2 │ import Button from "./components/Button.svelte";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   > 3 │ import * as svelteUse from "svelte-use";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ </script>
-    5 │ <div></div>
-  
-  i Sort this chunk of imports.
-  
-  > 1 │ <script lang="ts">
-      │ ^^^^^^^^^^^^^^^^^^
-  > 2 │ import Button from "./components/Button.svelte";
-  > 3 │ import * as svelteUse from "svelte-use";
-      │ ^^^^^^^^^^^^^^^^^^^^^
     4 │ </script>
     5 │ <div></div>
   

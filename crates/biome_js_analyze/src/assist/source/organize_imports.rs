@@ -7,7 +7,6 @@ use biome_analyze::{
     ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource, SourceActionKind,
     context::RuleContext, declare_source_rule,
 };
-use biome_console::markup;
 use biome_diagnostics::category;
 use biome_js_factory::make;
 use biome_js_syntax::{
@@ -741,7 +740,7 @@ impl Rule for OrganizeImports {
             UnsortedExportChunk,
         }
         impl IssueKind {
-            const fn message(self) -> &'static str {
+            const fn message(&self) -> &'static str {
                 match self {
                     Self::MissingNewlineBetweenChunks => {
                         "This statement ends a chunk of imports or exports and thus must be preceded by a blank line. Add a newline before this statement."
@@ -773,10 +772,8 @@ impl Rule for OrganizeImports {
             let located_issue_kind = match issue {
                 Issue::AddLeadingNewline { slot_index } => {
                     let statement = root_items.iter().nth(*slot_index as usize)?;
-                    let statement = statement.syntax();
-                    let range = statement.text_trimmed_range();
                     LocatedIssueKind {
-                        range,
+                        range: statement.syntax().text_trimmed_range(),
                         kind: IssueKind::MissingNewlineBetweenChunks,
                     }
                 }
@@ -787,9 +784,8 @@ impl Rule for OrganizeImports {
                     newline_issue,
                 } => {
                     let statement = root_items.iter().nth(*slot_index as usize)?;
-                    let statement = statement.syntax();
                     let kind = if *are_specifiers_unsorted {
-                        if statement.kind() == JsSyntaxKind::JS_IMPORT {
+                        if matches!(statement, AnyJsModuleItem::JsImport(_)) {
                             IssueKind::UnorganizedImportedNames
                         } else {
                             IssueKind::UnorganizedExportedNames
@@ -808,18 +804,17 @@ impl Rule for OrganizeImports {
                             }
                         }
                     };
-                    let range = statement.text_trimmed_range();
+                    let range = statement.syntax().text_trimmed_range();
                     LocatedIssueKind { range, kind }
                 }
                 Issue::UnsortedChunk { slot_indexes } => {
-                    let first_statement = root_items.iter().nth(slot_indexes.start as usize)?;
-                    let first_statement = first_statement.syntax();
+                    let first_stmt = root_items.iter().nth(slot_indexes.start as usize)?;
                     let last_text_range = root_items
                         .iter()
                         .nth((slot_indexes.end - 1) as usize)?
                         .syntax()
                         .text_trimmed_range();
-                    let range = first_statement.text_trimmed_range().cover(last_text_range);
+                    let range = first_stmt.syntax().text_trimmed_range().cover(last_text_range);
                     let mut i = last_unsorted_chunk_message_index + 1;
                     // Remove issues that are covered by the current one.
                     while i < located_issue_kinds.len() {
@@ -830,7 +825,7 @@ impl Rule for OrganizeImports {
                         }
                     }
                     last_unsorted_chunk_message_index = located_issue_kinds.len();
-                    let kind = if first_statement.kind() == JsSyntaxKind::JS_IMPORT {
+                    let kind = if matches!(first_stmt, AnyJsModuleItem::JsImport(_)) {
                         IssueKind::UnsortedImportChunk
                     } else {
                         IssueKind::UnsortedExportChunk
@@ -839,24 +834,31 @@ impl Rule for OrganizeImports {
                 }
             };
             action_range = Some(if let Some(action_range) = action_range {
-                action_range.cover(located_issue_kind.range.clone())
+                action_range.cover(located_issue_kind.range)
             } else {
-                located_issue_kind.range.clone()
+                located_issue_kind.range
             });
             located_issue_kinds.push(located_issue_kind);
         }
-        let mut diagnostic = RuleDiagnostic::new(
-            category!("assist/source/organizeImports"),
-            action_range.or_else(|| Self::text_range(ctx, state)),
-            markup! {
+        // If we have only one detailed diagnostic, then use it as main diagnostic.
+        if located_issue_kinds.len() == 1 && let Some(localized) = located_issue_kinds.first() {
+            Some(RuleDiagnostic::new(
+                category!("assist/source/organizeImports"),
+                localized.range,
+                localized.kind.message(),
+            ))
+        } else {
+            let mut diagnostic = RuleDiagnostic::new(
+                category!("assist/source/organizeImports"),
+                action_range.or_else(|| Self::text_range(ctx, state)),
                 "Some imports or exports are not organized."
-            },
-        );
-        for located_issue_kind in located_issue_kinds {
-            diagnostic =
-                diagnostic.detail(located_issue_kind.range, located_issue_kind.kind.message());
+            );
+            for located_issue_kind in located_issue_kinds {
+                diagnostic =
+                    diagnostic.detail(located_issue_kind.range, located_issue_kind.kind.message());
+            }
+            Some(diagnostic)
         }
-        Some(diagnostic)
     }
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {

@@ -17,16 +17,6 @@ declare module "module" {
 ```
 ts-module.ts:2:2 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Some imports or exports are not organized.
-  
-    1 │ declare module "module" {
-  > 2 │ 	import type { B } from "b";
-      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 3 │ 	import type { A } from "a";
-      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ 
-    5 │ 	type X = [A, B];
-  
   i Sort this chunk of imports.
   
     1 │ declare module "module" {

@@ -23,20 +23,6 @@ import { ScopedPackage } from "@scope/package";
 ```
 single-chunk-imports.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Some imports or exports are not organized.
-  
-   > 1 │ import { Bun } from "bun:test";
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   > 2 │ // URL
-   > 3 │ import { URL } from "https://example.org";
-   > 4 │ import { Relative } from ".";
-        ...
-  > 10 │ import { B } from "b";
-  > 11 │ // This is a scoped package
-  > 12 │ import { ScopedPackage } from "@scope/package";
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    13 │ 
-  
   i Sort this chunk of imports.
   
    > 1 │ import { Bun } from "bun:test";

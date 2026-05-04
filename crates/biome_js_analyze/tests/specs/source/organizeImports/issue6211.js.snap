@@ -15,15 +15,6 @@ import { A } from "a";
 ```
 issue6211.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Some imports or exports are not organized.
-  
-  > 1 │ import { B } from "bc";
-      │ ^^^^^^^^^^^^^^^^^^^^^^^
-  > 2 │ import { C } from "bc";
-  > 3 │ import { A } from "a";
-      │ ^^^^^^^^^^^^^^^^^^^^^^
-    4 │ 
-  
   i Sort this chunk of imports.
   
   > 1 │ import { B } from "bc";
