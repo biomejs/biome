@@ -228,35 +228,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "Some imports or exports are not organized.",
-      "suggestions": [
-        {
-          "range": {
-            "end": {
-              "column": 33,
-              "line": 2
-            },
-            "start": {
-              "column": 1,
-              "line": 2
-            }
-          },
-          "text": "Sort these imports."
-        },
-        {
-          "range": {
-            "end": {
-              "column": 33,
-              "line": 2
-            },
-            "start": {
-              "column": 1,
-              "line": 1
-            }
-          },
-          "text": "Safe fix: Organize imports and exports (Biome)"
-        }
-      ]
+      "message": "Sort these imports."
     },
     {
       "code": {
@@ -432,35 +404,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "Some imports or exports are not organized.",
-      "suggestions": [
-        {
-          "range": {
-            "end": {
-              "column": 33,
-              "line": 2
-            },
-            "start": {
-              "column": 1,
-              "line": 2
-            }
-          },
-          "text": "Sort these imports."
-        },
-        {
-          "range": {
-            "end": {
-              "column": 33,
-              "line": 2
-            },
-            "start": {
-              "column": 1,
-              "line": 1
-            }
-          },
-          "text": "Safe fix: Organize imports and exports (Biome)"
-        }
-      ]
+      "message": "Sort these imports."
     },
     {
       "code": {

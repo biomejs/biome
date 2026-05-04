@@ -19,28 +19,6 @@ export { B, C } from "mod";
 ```
 mergeable_export.ts:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Some imports or exports are not organized.
-  
-    1 │ // Comment 1
-  > 2 │ export type { T4, T2 } from "mod";
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 3 │ // Comment 2
-  > 4 │ export type { T3, T1 } from "mod";
-  > 5 │ // Comment 3
-  > 6 │ export { A, D } from "mod";
-  > 7 │ // Comment 4
-  > 8 │ export { B, C } from "mod";
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    9 │ 
-  
-  i Sort the exported names.
-  
-    1 │ // Comment 1
-  > 2 │ export type { T4, T2 } from "mod";
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ // Comment 2
-    4 │ export type { T3, T1 } from "mod";
-  
   i Sort these exports.
   
     1 │ // Comment 1

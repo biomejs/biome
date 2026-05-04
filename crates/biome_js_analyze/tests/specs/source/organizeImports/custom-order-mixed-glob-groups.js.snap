@@ -16,26 +16,6 @@ import path from "./path";
 ```
 custom-order-mixed-glob-groups.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  i Some imports or exports are not organized.
-  
-  > 1 │ import { A } from "@my/lib";
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 2 │ import { B } from "@my/lib/subpath";
-  > 3 │ import alias from "@/alias";
-  > 4 │ import alias from "@scoped/package";
-  > 5 │ import path from "./path";
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    6 │ 
-  
-  i This statement ends a group that must be preceded by a blank line. Add a newline before this statement.
-  
-    1 │ import { A } from "@my/lib";
-    2 │ import { B } from "@my/lib/subpath";
-  > 3 │ import alias from "@/alias";
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ import alias from "@scoped/package";
-    5 │ import path from "./path";
-  
   i Sort these imports.
   
   > 1 │ import { A } from "@my/lib";

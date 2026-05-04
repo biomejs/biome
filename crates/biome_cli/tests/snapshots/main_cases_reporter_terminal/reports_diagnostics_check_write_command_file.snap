@@ -55,24 +55,7 @@ index.css format ━━━━━━━━━━━━━━━━━━━━━
   
 index.ts:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ✖ Some imports or exports are not organized.
-  
-  > 1 │ import { z} from "z"
-      │ ^^^^^^^^^^^^^^^^^^^^
-  > 2 │ import { z, b , a} from "lodash"
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ 
-    4 │ a ==b
-  
-  ℹ Sort the imported names.
-  
-    1 │ import { z} from "z"
-  > 2 │ import { z, b , a} from "lodash"
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ 
-    4 │ a ==b
-  
-  ℹ Sort these imports.
+  ✖ Sort these imports.
   
   > 1 │ import { z} from "z"
       │ ^^^^^^^^^^^^^^^^^^^^

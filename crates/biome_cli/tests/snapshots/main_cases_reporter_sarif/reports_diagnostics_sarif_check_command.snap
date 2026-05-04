@@ -294,7 +294,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           "ruleId": "assist/source/organizeImports",
           "level": "error",
           "message": {
-            "text": "Some imports or exports are not organized."
+            "text": "Sort these imports."
           },
           "locations": [
             {
@@ -464,7 +464,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
           "ruleId": "assist/source/organizeImports",
           "level": "error",
           "message": {
-            "text": "Some imports or exports are not organized."
+            "text": "Sort these imports."
           },
           "locations": [
             {

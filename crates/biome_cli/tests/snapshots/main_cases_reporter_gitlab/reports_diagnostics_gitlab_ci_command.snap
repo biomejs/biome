@@ -258,7 +258,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "Some imports or exports are not organized.",
+    "description": "Sort these imports.",
     "check_name": "assist/source/organizeImports",
     "fingerprint": "8459329872035046942",
     "severity": "critical",
@@ -678,7 +678,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "Some imports or exports are not organized.",
+    "description": "Sort these imports.",
     "check_name": "assist/source/organizeImports",
     "fingerprint": "15695086553598122883",
     "severity": "critical",

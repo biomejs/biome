@@ -766,7 +766,7 @@ impl Rule for OrganizeImports {
         let root = ctx.query();
         let root_items = root.items();
         let mut located_issue_kinds: Vec<LocatedIssueKind> = Vec::with_capacity(state.len());
-        let mut last_unsorted_chunk_message_index = 0;
+        let mut next_unsorted_chunk_message_index = 0;
         let mut action_range: Option<TextRange> = None;
         for issue in state {
             let located_issue_kind = match issue {
@@ -818,8 +818,8 @@ impl Rule for OrganizeImports {
                         .syntax()
                         .text_trimmed_range()
                         .cover(last_text_range);
-                    let mut i = last_unsorted_chunk_message_index + 1;
-                    // Remove issues that are covered by the current one.
+                    let mut i = next_unsorted_chunk_message_index;
+                    // Remove issues that are covered by the unsorted chunk diagnostic.
                     while i < located_issue_kinds.len() {
                         if range.contains_range(located_issue_kinds[i].range) {
                             located_issue_kinds.remove(i);
@@ -827,7 +827,7 @@ impl Rule for OrganizeImports {
                             i += 1;
                         }
                     }
-                    last_unsorted_chunk_message_index = located_issue_kinds.len();
+                    next_unsorted_chunk_message_index = located_issue_kinds.len() + 1;
                     let kind = if matches!(first_stmt, AnyJsModuleItem::JsImport(_)) {
                         IssueKind::UnsortedImportChunk
                     } else {

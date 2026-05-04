@@ -110,25 +110,14 @@ expression: redactor(content)
 		},
 		{
 			"severity": "error",
-			"message": "Some imports or exports are not organized.",
+			"message": "Sort these imports.",
 			"category": "assist/source/organizeImports",
 			"location": {
 				"path": "index.ts",
 				"start": { "line": 1, "column": 1 },
 				"end": { "line": 2, "column": 33 }
 			},
-			"advices": [
-				{
-					"start": { "line": 2, "column": 1 },
-					"end": { "line": 2, "column": 33 },
-					"text": "Sort these imports."
-				},
-				{
-					"start": { "line": 1, "column": 1 },
-					"end": { "line": 2, "column": 33 },
-					"text": "Safe fix: Organize imports and exports (Biome)"
-				}
-			]
+			"advices": []
 		},
 		{
 			"severity": "error",
@@ -221,25 +210,14 @@ expression: redactor(content)
 		},
 		{
 			"severity": "error",
-			"message": "Some imports or exports are not organized.",
+			"message": "Sort these imports.",
 			"category": "assist/source/organizeImports",
 			"location": {
 				"path": "main.ts",
 				"start": { "line": 1, "column": 1 },
 				"end": { "line": 2, "column": 33 }
 			},
-			"advices": [
-				{
-					"start": { "line": 2, "column": 1 },
-					"end": { "line": 2, "column": 33 },
-					"text": "Sort these imports."
-				},
-				{
-					"start": { "line": 1, "column": 1 },
-					"end": { "line": 2, "column": 33 },
-					"text": "Safe fix: Organize imports and exports (Biome)"
-				}
-			]
+			"advices": []
 		},
 		{
 			"severity": "error",
