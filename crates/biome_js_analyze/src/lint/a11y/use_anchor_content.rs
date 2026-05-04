@@ -65,9 +65,9 @@ declare_lint_rule! {
     /// <a><div aria-hidden="true"></div>content</a>
     /// ```
     ///
-    /// The following is valid because `<a>` is passed as a render prop to a custom component.
-    /// The receiving component renders the anchor as a wrapper around its own children, so the
-    /// final DOM will contain both the anchor's attributes and visible text content.
+    /// The following is valid because `<a>` is used as a JSX attribute value on a custom
+    /// component. The rule is suppressed for any such prop on a custom component, as the
+    /// component may render the anchor as a content wrapper whose children supply the link text.
     ///
     /// ```jsx
     /// <Button render={<a href="/home" aria-label="Home" />}>Home</Button>
@@ -108,7 +108,7 @@ impl Rule for UseAnchorContent {
                 return None;
             }
 
-            if is_render_prop_anchor(node) {
+            if is_jsx_attribute_anchor(node) {
                 return None;
             }
 
@@ -191,17 +191,15 @@ fn has_valid_anchor_content(node: &AnyJsxElement) -> bool {
         || node.has_spread_prop()
 }
 
-/// Returns true when the `<a>` element is the value of a JSX attribute that belongs to a
-/// custom component (render prop pattern).
+/// Returns true when the `<a>` element is the value of a JSX attribute on a custom component.
 ///
-/// In this pattern the receiving component renders the anchor element as a wrapper and places
-/// its own JSX children inside it, so the final DOM will contain both the anchor's attributes
-/// *and* real text content — making the lint check a false positive.
+/// A custom component may use the anchor as a content wrapper, injecting its own children into
+/// it, so the final DOM can contain both the anchor's attributes and visible text — making the
+/// lint check a false positive.
 ///
-/// Handles both self-closing (`<a />`) and open/close (`<a></a>`) forms, and parenthesized
-/// values (e.g. `render={(<a />)}`). Only skips the rule when the parent element is a custom
-/// component; native HTML elements (e.g. `<div render={<a />}>`) are still flagged.
-fn is_render_prop_anchor(node: &AnyJsxElement) -> bool {
+/// Handles self-closing (`<a />`), open/close (`<a></a>`), and parenthesized
+/// (`render={(<a />)}`) forms. Native HTML elements are not exempted.
+fn is_jsx_attribute_anchor(node: &AnyJsxElement) -> bool {
     let mut current = node.syntax().parent();
     loop {
         let Some(parent) = current else {
