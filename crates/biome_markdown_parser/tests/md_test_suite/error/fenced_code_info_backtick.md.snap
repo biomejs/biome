@@ -1,5 +1,6 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 192
 expression: snapshot
 ---
 
@@ -79,4 +80,27 @@ MdDocument {
       1: (empty)
   2: EOF@62..62 "" [] []
 
+```
+
+## Diagnostics
+
+```
+fenced_code_info_backtick.md:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Backtick fence info string cannot contain backtick characters.
+  
+    1 │ Backtick in info string should not open fence:
+  > 2 │ ``` lang`uage`
+      │         ^
+    3 │ 
+  
+  i stray backtick here
+  
+    1 │ Backtick in info string should not open fence:
+  > 2 │ ``` lang`uage`
+      │         ^
+    3 │ 
+  
+  i Use a tilde fence instead, or remove the backtick. Otherwise, the line is parsed as a paragraph, not a code block.
+  
 ```

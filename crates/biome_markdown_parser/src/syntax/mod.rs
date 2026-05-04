@@ -43,8 +43,8 @@ use biome_parser::{
 };
 use biome_rowan::TextSize;
 use fenced_code_block::{
-    at_fenced_code_block, info_string_has_backtick, parse_fenced_code_block,
-    parse_fenced_code_block_force,
+    at_fenced_code_block, backtick_info_violation, info_string_has_backtick,
+    parse_fenced_code_block, parse_fenced_code_block_force,
 };
 use header::{at_header, parse_header};
 use html_block::{at_html_block, at_html_block_interrupt, parse_html_block};
@@ -296,6 +296,11 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
         parse_fenced_code_block(p)
     } else if line_starts_with_fence(p) {
         parse_fenced_code_block_force(p)
+    } else if let Some(range) = backtick_info_violation(p) {
+        // Backtick-fence info strings cannot contain backticks (CommonMark §4.5);
+        // emit a diagnostic before delegating to paragraph parsing.
+        p.error(parse_error::info_string_contains_backtick(p, range));
+        parse_paragraph(p)
     } else if at_thematic_break_block(p) {
         let break_block = try_parse(p, |p| {
             let break_block = parse_thematic_break_block(p);
@@ -1091,6 +1096,10 @@ fn handle_line_continuation(
         return InlineNewlineAction::Break;
     }
 
+    // The invalid fence still belongs to this paragraph; only add the diagnostic.
+    if let Some(range) = backtick_info_violation(p) {
+        p.error(parse_error::info_string_contains_backtick(p, range));
+    }
     if p.at(MD_TEXTUAL_LITERAL) {
         let text = p.cur_text();
         if text.starts_with("```") || text.starts_with("~~~") {
