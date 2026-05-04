@@ -37,6 +37,7 @@ mod services;
 pub mod shared;
 mod suppression_action;
 mod syntax;
+mod typescript;
 pub mod utils;
 
 pub(crate) type JsRuleAction = RuleAction<JsLanguage>;

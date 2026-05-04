@@ -1,0 +1,120 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.tsx
+---
+# Input
+```tsx
+/* should not generate diagnostics */
+import { useEffect, useRef } from "react";
+
+function Valid1() {
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {}, 1000);
+    return () => clearTimeout(timeoutId);
+  }, []);
+}
+
+function Valid2() {
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {}, 1000);
+    return () => window.clearTimeout(timeoutId);
+  }, []);
+}
+
+function Valid3() {
+  useEffect(() => {
+    const timeoutId = global.setTimeout(() => {}, 1000);
+    return () => global.clearTimeout(timeoutId);
+  }, []);
+}
+
+function Valid4() {
+  useEffect(() => {
+    const timeoutId = globalThis.setTimeout(() => {}, 1000);
+    return () => globalThis.clearTimeout(timeoutId);
+  }, []);
+}
+
+function Valid5() {
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {}, 1000);
+    return () => globalThis.clearTimeout(timeoutId);
+  }, []);
+}
+
+function Valid6() {
+  useEffect(() => {
+    const timeoutId = globalThis.setTimeout(() => {}, 1000);
+    return () => clearTimeout(timeoutId);
+  }, []);
+}
+
+function Valid7() {
+  const timeoutIdRef = useRef<number | null>(null);
+  useEffect(() => {
+    timeoutIdRef.current = setTimeout(() => {}, 1000);
+    return () => {
+      if (timeoutIdRef.current !== null) {
+        clearTimeout(timeoutIdRef.current);
+      }
+    };
+  }, []);
+}
+
+function Valid8() {
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {}, 1000) as number;
+    return () => clearTimeout(timeoutId as number);
+  }, []);
+}
+
+function Valid9() {
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {}, 1000) as number;
+    return () => clearTimeout(timeoutId);
+  }, []);
+}
+
+function Valid10() {
+  useEffect(() => {
+    let timeoutId: number | null = null;
+    if (Math.random() > 0.5) {
+      timeoutId = setTimeout(() => {}, 1000);
+    }
+    return () => {
+      timeoutId && clearTimeout(timeoutId);
+    };
+  }, []);
+}
+
+function Valid11() {
+  useEffect(() => {
+    let timeoutId1: number | null = null;
+    let timeoutId2: number | null = null;
+    if (Math.random() > 0.5) {
+      timeoutId1 = setTimeout(() => {}, 1000);
+      timeoutId2 = setTimeout(() => {}, 1000);
+    }
+    return () => {
+      timeoutId1 && clearTimeout(timeoutId1);
+      timeoutId2 && clearTimeout(timeoutId2);
+    };
+  }, []);
+}
+
+function Valid12() {
+  useEffect(() => {
+    let timeoutId1: number | null;
+    let timeoutId2: number | null;
+    if (Math.random() > 0.5) {
+      timeoutId1 = setTimeout(() => {}, 1000);
+      timeoutId2 = setTimeout(() => {}, 1000);
+    }
+    return () => {
+      timeoutId1 && clearTimeout(timeoutId1);
+      timeoutId2 && clearTimeout(timeoutId2);
+    };
+  }, []);
+}
+
+```
