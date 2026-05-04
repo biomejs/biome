@@ -23,14 +23,8 @@ pub enum MarkdownLexContext {
     /// Normal markdown parsing with inline element detection.
     #[default]
     Regular,
-    /// Inside fenced code block - no markdown parsing.
-    #[expect(dead_code)]
-    FencedCodeBlock,
     /// Inside code info strings. Newlines end them.
     CodeInfoString,
-    /// Inside HTML block - minimal markdown parsing.
-    #[expect(dead_code)]
-    HtmlBlock,
     /// Inside link definition (after `]:`). Whitespace separates destination from title.
     LinkDefinition,
     /// Inside inline code span. Backslashes are literal per CommonMark §6.1.
@@ -48,6 +42,10 @@ pub enum MarkdownLexContext {
     /// separately. This allows the parser to consume trailing spaces as
     /// Whitespace trivia without swallowing the newline.
     HeadingContent,
+    /// After an ordered list marker (e.g. `1.`). Consumes only leading
+    /// spaces/tabs into a single token so the parser can capture them as
+    /// `MD_LIST_POST_MARKER_SPACE`.
+    ListPostMarker,
 }
 
 impl LexContext for MarkdownLexContext {
@@ -60,21 +58,15 @@ impl LexContext for MarkdownLexContext {
 /// Re-lexing context for when token interpretation changes.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum MarkdownReLexContext {
-    /// Re-lex using regular markdown rules.
-    #[expect(dead_code)]
-    Regular,
     /// Re-lex for link definition (whitespace is significant).
     LinkDefinition,
     /// Re-lex for emphasis (emit single tokens for partial consumption).
     EmphasisInline,
-    /// Re-lex for thematic break parts decomposition.
-    /// Decomposes MD_THEMATIC_BREAK_LITERAL into individual marker/space tokens.
-    /// Currently unused: we use `force_relex_in_context(MarkdownLexContext::ThematicBreakParts)`
-    /// directly, but kept for symmetry with the lex context enum.
-    #[expect(dead_code)]
-    ThematicBreakParts,
     /// Inside the code block list, where strings doesn't have particular meaning
     CodeInfoString,
+    /// After an ordered list marker. Splits leading whitespace from content
+    /// so the parser can capture it as `MD_LIST_POST_MARKER_SPACE`.
+    ListPostMarker,
 }
 
 /// An extremely fast, lookup table based, lossless Markdown lexer
@@ -144,6 +136,7 @@ impl<'src> Lexer<'src> for MarkdownLexer<'src> {
         if !kind.is_trivia()
             && kind != NEWLINE
             && kind != MD_HARD_LINE_LITERAL
+            && kind != UNICODE_BOM
             && !(kind == MD_TEXTUAL_LITERAL
                 && self.after_newline
                 && self.current_text_is_whitespace())
@@ -262,6 +255,8 @@ impl<'src> MarkdownLexer<'src> {
             WHS => {
                 if current == b'\n' || current == b'\r' {
                     self.consume_newline()
+                } else if matches!(context, MarkdownLexContext::ListPostMarker) {
+                    self.consume_list_post_marker_whitespace()
                 } else if matches!(context, MarkdownLexContext::ThematicBreakParts) {
                     // In ThematicBreakParts context, emit one MD_INDENT_CHAR per space/tab.
                     self.advance(1);
@@ -326,6 +321,13 @@ impl<'src> MarkdownLexer<'src> {
             // = at line start could be setext heading underline
             EQL if self.after_newline => self.consume_setext_underline_or_textual(),
             _ => {
+                if self.position == 0
+                    && let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM)
+                {
+                    self.unicode_bom_length = bom_size;
+                    return bom;
+                }
+
                 // Check for ordered list markers: digits followed by . or ) at line start
                 if current.is_ascii_digit()
                     && (self.after_newline || self.force_ordered_list_marker)
@@ -531,13 +533,6 @@ impl<'src> MarkdownLexer<'src> {
             .all(|b| *b == b' ' || *b == b'\t')
     }
 
-    /// Bumps the current byte and creates a lexed token of the passed in kind.
-    /// Reserved for single-byte token consumption patterns.
-    #[expect(dead_code)]
-    fn eat_byte(&mut self, tok: MarkdownSyntaxKind) -> MarkdownSyntaxKind {
-        self.advance(1);
-        tok
-    }
     /// Returns the byte at position `self.position + offset` or `None` if it is out of bounds.
     #[inline]
     fn byte_at(&self, offset: usize) -> Option<u8> {
@@ -645,6 +640,24 @@ impl<'src> MarkdownLexer<'src> {
     }
 
     /// Consume a single whitespace character at line start as text.
+    /// Consumes all leading spaces/tabs after an ordered list marker into a
+    /// single token. Per CommonMark §5.2, 1–4 spaces after the marker
+    /// determine the continuation indent; the parser captures them as
+    /// `MD_LIST_POST_MARKER_SPACE`.
+    fn consume_list_post_marker_whitespace(&mut self) -> MarkdownSyntaxKind {
+        self.assert_at_char_boundary();
+
+        while let Some(byte) = self.current_byte() {
+            if byte == b' ' || byte == b'\t' {
+                self.advance(1);
+            } else {
+                break;
+            }
+        }
+
+        MD_TEXTUAL_LITERAL
+    }
+
     fn consume_single_whitespace_as_text(&mut self) -> MarkdownSyntaxKind {
         self.assert_at_char_boundary();
 
@@ -1391,7 +1404,7 @@ impl<'src> MarkdownLexer<'src> {
 
 #[inline]
 fn is_space_or_tab_byte(byte: u8) -> bool {
-    matches!(lookup_byte(byte), WHS) && !matches!(byte, b'\n' | b'\r')
+    byte == b' ' || byte == b'\t'
 }
 
 #[inline]
@@ -1405,11 +1418,10 @@ impl<'src> ReLexer<'src> for MarkdownLexer<'src> {
         self.position = u32::from(self.current_start) as usize;
 
         let lex_context = match context {
-            MarkdownReLexContext::Regular => MarkdownLexContext::Regular,
             MarkdownReLexContext::LinkDefinition => MarkdownLexContext::LinkDefinition,
             MarkdownReLexContext::EmphasisInline => MarkdownLexContext::EmphasisInline,
-            MarkdownReLexContext::ThematicBreakParts => MarkdownLexContext::ThematicBreakParts,
             MarkdownReLexContext::CodeInfoString => MarkdownLexContext::CodeInfoString,
+            MarkdownReLexContext::ListPostMarker => MarkdownLexContext::ListPostMarker,
         };
 
         let re_lexed_kind = match self.current_byte() {

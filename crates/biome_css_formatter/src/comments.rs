@@ -1,13 +1,20 @@
 use crate::prelude::*;
+use crate::utils::comment_trivia::is_trailing_comment_on_node;
+use crate::utils::scss_include_comments::{
+    place_list_trailing_separator_comment, place_map_trailing_separator_comment,
+    place_separated_list_comment,
+};
 use biome_css_syntax::{
-    AnyCssDeclarationName, AnyCssRoot, CssComplexSelector, CssFunction, CssGenericProperty,
-    CssIdentifier, CssLanguage, CssSyntaxKind, ScssMapExpression, ScssMapExpressionPair, TextLen,
-    TextSize,
+    AnyCssDeclarationName, AnyCssRoot, CssComplexSelector, CssDeclarationOrRuleBlock, CssFunction,
+    CssGenericProperty, CssIdentifier, CssLanguage, CssSyntaxKind, ScssAtRootAtRule,
+    ScssAtRootSelector, ScssEachHeader, ScssExpression, ScssExpressionItemList, ScssIfAtRule,
+    ScssListExpression, ScssListExpressionElement, ScssMapExpression, ScssMapExpressionPair, T,
+    TextLen, TextSize, is_in_scss_include_arguments, single_expression_item,
 };
 use biome_diagnostics::category;
 use biome_formatter::comments::{
-    CommentKind, CommentPlacement, CommentStyle, CommentTextPosition, Comments, DecoratedComment,
-    SourceComment, is_doc_comment,
+    CommentKind, CommentPlacement, CommentStyle, Comments, DecoratedComment, SourceComment,
+    is_doc_comment,
 };
 use biome_formatter::formatter::Formatter;
 use biome_formatter::{FormatResult, FormatRule, write};
@@ -98,36 +105,24 @@ impl CommentStyle for CssCommentStyle {
         &self,
         comment: DecoratedComment<Self::Language>,
     ) -> CommentPlacement<Self::Language> {
-        match comment.text_position() {
-            CommentTextPosition::EndOfLine => handle_scss_map_trailing_separator_comment(comment)
-                .or_else(handle_function_comment)
-                .or_else(handle_generic_property_comment)
-                .or_else(handle_declaration_name_comment)
-                .or_else(handle_complex_selector_comment)
-                .or_else(handle_global_suppression),
-            CommentTextPosition::OwnLine => handle_scss_map_trailing_separator_comment(comment)
-                .or_else(handle_function_comment)
-                .or_else(handle_generic_property_comment)
-                .or_else(handle_declaration_name_comment)
-                .or_else(handle_complex_selector_comment)
-                .or_else(handle_global_suppression),
-            CommentTextPosition::SameLine => handle_scss_map_trailing_separator_comment(comment)
-                .or_else(handle_function_comment)
-                .or_else(handle_generic_property_comment)
-                .or_else(handle_declaration_name_comment)
-                .or_else(handle_complex_selector_comment)
-                .or_else(handle_global_suppression),
-        }
+        handle_scss_map_trailing_separator_comment(comment)
+            .or_else(place_separated_list_comment)
+            .or_else(handle_scss_list_trailing_separator_comment)
+            .or_else(handle_scss_each_iterable_comment)
+            .or_else(handle_scss_expression_item_trailing_line_comment)
+            .or_else(handle_scss_at_root_selector_comment)
+            .or_else(handle_scss_else_clause_comment)
+            .or_else(handle_function_comment)
+            .or_else(handle_generic_property_comment)
+            .or_else(handle_declaration_name_comment)
+            .or_else(handle_complex_selector_comment)
+            .or_else(handle_global_suppression)
     }
 }
 
 fn handle_scss_map_trailing_separator_comment(
     comment: DecoratedComment<CssLanguage>,
 ) -> CommentPlacement<CssLanguage> {
-    let Some(map_expression) = ScssMapExpression::cast_ref(comment.enclosing_node()) else {
-        return CommentPlacement::Default(comment);
-    };
-
     let Some(preceding_pair) = comment
         .preceding_node()
         .and_then(ScssMapExpressionPair::cast_ref)
@@ -135,33 +130,182 @@ fn handle_scss_map_trailing_separator_comment(
         return CommentPlacement::Default(comment);
     };
 
-    if !comment.kind().is_inline() || comment.text_position().is_own_line() {
-        return CommentPlacement::Default(comment);
-    }
-
-    let Some(following_token) = comment.following_token() else {
+    let Some(map_expression) =
+        ScssMapExpression::cast_ref(comment.enclosing_node()).or_else(|| {
+            preceding_pair
+                .syntax()
+                .ancestors()
+                .find_map(ScssMapExpression::cast)
+        })
+    else {
         return CommentPlacement::Default(comment);
     };
 
-    if following_token.kind() != CssSyntaxKind::R_PAREN {
+    place_map_trailing_separator_comment(&map_expression, &preceding_pair, comment)
+}
+
+fn handle_scss_list_trailing_separator_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(preceding_element) = comment
+        .preceding_node()
+        .and_then(ScssListExpressionElement::cast_ref)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let Some(list_expression) = preceding_element
+        .syntax()
+        .ancestors()
+        .find_map(ScssListExpression::cast)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    place_list_trailing_separator_comment(&list_expression, &preceding_element, comment)
+}
+
+/// Keeps `@each ... in /* comment */ (a, b)` comments with the iterable.
+fn handle_scss_each_iterable_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(expression) = comment.following_node().and_then(ScssExpression::cast_ref) else {
+        return CommentPlacement::Default(comment);
+    };
+
+    if !expression
+        .syntax()
+        .parent()
+        .is_some_and(|parent| ScssEachHeader::can_cast(parent.kind()))
+    {
         return CommentPlacement::Default(comment);
     }
 
-    // Keep `a: b /* comment */,` attached to the pair. Only move comments that
-    // live on the trailing separator path, e.g. `a: b, /* comment */)`.
-    let comment_range = comment.piece().text_range();
-    let is_pair_trailing_comment = preceding_pair.syntax().last_token().is_some_and(|token| {
-        token
-            .trailing_trivia()
-            .pieces()
-            .any(|piece| piece.is_comments() && piece.text_range() == comment_range)
-    });
-
-    if is_pair_trailing_comment {
+    if !single_expression_item(&expression).is_some_and(|item| {
+        item.as_scss_list_expression().is_some() || item.as_scss_map_expression().is_some()
+    }) {
         return CommentPlacement::Default(comment);
     }
 
-    CommentPlacement::dangling(map_expression.into_syntax(), comment)
+    CommentPlacement::leading(expression.into_syntax(), comment)
+}
+
+fn handle_scss_expression_item_trailing_line_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let (Some(preceding_node), Some(following_node)) =
+        (comment.preceding_node(), comment.following_node())
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    if !comment.kind().is_line()
+        || !comment.text_position().is_end_of_line()
+        || !is_trailing_comment_on_node(preceding_node, &comment)
+        || is_in_scss_include_arguments(preceding_node)
+    {
+        return CommentPlacement::Default(comment);
+    }
+
+    let Some(list) = preceding_node
+        .parent()
+        .filter(|parent| ScssExpressionItemList::can_cast(parent.kind()))
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    if following_node.parent().as_ref() == Some(&list) {
+        CommentPlacement::trailing(preceding_node.clone(), comment)
+    } else {
+        CommentPlacement::Default(comment)
+    }
+}
+
+fn handle_scss_at_root_selector_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    // Keep selector comments before `{`, matching Prettier's `@at-root` output.
+    if !comment.kind().is_line()
+        || !comment.text_position().is_own_line()
+        || comment
+            .following_token()
+            .is_none_or(|token| token.kind() != T!['{'])
+    {
+        return CommentPlacement::Default(comment);
+    }
+
+    let Some(selector) = comment
+        .preceding_node()
+        .and_then(ScssAtRootSelector::cast_ref)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let Some(at_root) = selector.syntax().parent().and_then(ScssAtRootAtRule::cast) else {
+        return CommentPlacement::Default(comment);
+    };
+
+    match at_root.block() {
+        Ok(block) => CommentPlacement::leading(block.into_syntax(), comment),
+        Err(_) => CommentPlacement::Default(comment),
+    }
+}
+
+fn handle_scss_else_clause_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(following_token_range) = comment
+        .following_token()
+        .filter(|token| token.kind() == T![@])
+        .map(|token| token.text_range())
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    if !comment.kind().is_line() || !comment.text_position().is_own_line() {
+        return CommentPlacement::Default(comment);
+    }
+
+    let Some(block) = comment
+        .preceding_node()
+        .and_then(CssDeclarationOrRuleBlock::cast_ref)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let Some(else_clause) = block
+        .syntax()
+        .parent()
+        .and_then(ScssIfAtRule::cast)
+        .and_then(|if_rule| if_rule.else_clause())
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    match else_clause.at_token() {
+        Ok(at_token) if at_token.text_range() == following_token_range => {
+            CommentPlacement::leading(else_clause.into_syntax(), comment)
+        }
+        _ => CommentPlacement::Default(comment),
+    }
+}
+
+fn handle_function_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let (Some(preceding_node), Some(following_node)) =
+        (comment.preceding_node(), comment.following_node())
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let is_inside_function = CssFunction::can_cast(comment.enclosing_node().kind());
+    let is_after_name = CssIdentifier::can_cast(preceding_node.kind());
+    if is_inside_function && is_after_name {
+        CommentPlacement::leading(following_node.clone(), comment)
+    } else {
+        CommentPlacement::Default(comment)
+    }
 }
 
 fn handle_generic_property_comment(
@@ -225,24 +369,6 @@ fn handle_declaration_name_comment(
             }
         }
         _ => CommentPlacement::Default(comment),
-    }
-}
-
-fn handle_function_comment(
-    comment: DecoratedComment<CssLanguage>,
-) -> CommentPlacement<CssLanguage> {
-    let (Some(preceding_node), Some(following_node)) =
-        (comment.preceding_node(), comment.following_node())
-    else {
-        return CommentPlacement::Default(comment);
-    };
-
-    let is_inside_function = CssFunction::can_cast(comment.enclosing_node().kind());
-    let is_after_name = CssIdentifier::can_cast(preceding_node.kind());
-    if is_inside_function && is_after_name {
-        CommentPlacement::leading(following_node.clone(), comment)
-    } else {
-        CommentPlacement::Default(comment)
     }
 }
 

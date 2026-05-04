@@ -1,5 +1,6 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 192
 expression: snapshot
 ---
 
@@ -223,22 +224,21 @@ MdDocument {
                     marker_token: R_ANGLE@84..85 ">" [] [],
                     post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@85..86 " " [] [],
                 },
-                MdParagraph {
-                    list: MdInlineItemList [
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@86..87 "*" [] [],
+                MdThematicBreakBlock {
+                    parts: MdThematicBreakPartList [
+                        MdThematicBreakChar {
+                            value: STAR@86..87 "*" [] [],
                         },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@87..88 "*" [] [],
+                        MdThematicBreakChar {
+                            value: STAR@87..88 "*" [] [],
                         },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@88..89 "*" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@89..90 "\n" [] [],
+                        MdThematicBreakChar {
+                            value: STAR@88..89 "*" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
+                },
+                MdNewline {
+                    value_token: NEWLINE@89..90 "\n" [] [],
                 },
             ],
         },
@@ -583,17 +583,16 @@ MdDocument {
           0: MD_QUOTE_INDENT_LIST@84..84
           1: R_ANGLE@84..85 ">" [] []
           2: MD_QUOTE_POST_MARKER_SPACE@85..86 " " [] []
-        2: MD_PARAGRAPH@86..90
-          0: MD_INLINE_ITEM_LIST@86..90
-            0: MD_TEXTUAL@86..87
-              0: MD_TEXTUAL_LITERAL@86..87 "*" [] []
-            1: MD_TEXTUAL@87..88
-              0: MD_TEXTUAL_LITERAL@87..88 "*" [] []
-            2: MD_TEXTUAL@88..89
-              0: MD_TEXTUAL_LITERAL@88..89 "*" [] []
-            3: MD_TEXTUAL@89..90
-              0: MD_TEXTUAL_LITERAL@89..90 "\n" [] []
-          1: (empty)
+        2: MD_THEMATIC_BREAK_BLOCK@86..89
+          0: MD_THEMATIC_BREAK_PART_LIST@86..89
+            0: MD_THEMATIC_BREAK_CHAR@86..87
+              0: STAR@86..87 "*" [] []
+            1: MD_THEMATIC_BREAK_CHAR@87..88
+              0: STAR@87..88 "*" [] []
+            2: MD_THEMATIC_BREAK_CHAR@88..89
+              0: STAR@88..89 "*" [] []
+        3: MD_NEWLINE@89..90
+          0: NEWLINE@89..90 "\n" [] []
     9: MD_NEWLINE@90..91
       0: NEWLINE@90..91 "\n" [] []
     10: MD_QUOTE@91..119

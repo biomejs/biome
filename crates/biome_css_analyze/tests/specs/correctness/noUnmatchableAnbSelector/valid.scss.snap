@@ -1,0 +1,15 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 103
+expression: valid.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+a:nth-child(#{$i}) {}
+a:nth-child(#{$zero}n + 0) {}
+a:nth-child(0n + #{$offset}) {}
+a:nth-child(0n + 0#{$offset}) {}
+a:nth-child(#{$sign}2n + #{$offset}) {}
+
+```

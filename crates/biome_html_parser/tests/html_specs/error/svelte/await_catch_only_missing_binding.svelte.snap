@@ -129,7 +129,7 @@ await_catch_only_missing_binding.svelte:1:22 parse ━━━━━━━━━�
   × Expected an expression, instead none was found.
   
   > 1 │ {#await promise catch}
-      │                      
+      │                      ^
     2 │   <p>Error!</p>
     3 │ {/await}
   

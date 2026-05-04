@@ -1,0 +1,263 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+function numericAssertion(a, b) {
+    return (a as number) > b ? a : b;
+}
+
+function numericAssertionAgain(a, b) {
+    return (a as number) > b ? a : b;
+}
+
+function nestedNumericAssertion(a, b) {
+    return (a as unknown as number) > b ? a : b;
+}
+
+var foo = 10;
+var inferredNumber = foo > bar ? bar : foo;
+
+var leftNumber = 10;
+var rightNumber = 20;
+var bothNumbers = leftNumber > rightNumber ? rightNumber : leftNumber;
+
+var annotatedFoo: number;
+var annotatedBar: number;
+var annotatedNumbers = annotatedFoo > annotatedBar ? annotatedBar : annotatedFoo;
+
+function numericBranchAssertion(a, b) {
+    return (a as number) > b ? (a as number) : b;
+}
+
+function numericAngleAssertion(a, b) {
+    return (<number>a) > b ? (<number>a) : b;
+}
+
+function nonNullNumber(a, b) {
+    return a! > b ? a! : b;
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:12 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    1 │ /* should generate diagnostics */
+    2 │ function numericAssertion(a, b) {
+  > 3 │     return (a as number) > b ? a : b;
+      │            ^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   function numericAssertion(a, b) {
+     3    │ - ····return·(a·as·number)·>·b·?·a·:·b;
+        3 │ + ····return·Math.max((a·as·number)·,·b);
+     4  4 │   }
+     5  5 │   
+  
+
+```
+
+```
+invalid.ts:7:12 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    6 │ function numericAssertionAgain(a, b) {
+  > 7 │     return (a as number) > b ? a : b;
+      │            ^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ }
+    9 │ 
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+     5  5 │   
+     6  6 │   function numericAssertionAgain(a, b) {
+     7    │ - ····return·(a·as·number)·>·b·?·a·:·b;
+        7 │ + ····return·Math.max((a·as·number)·,·b);
+     8  8 │   }
+     9  9 │   
+  
+
+```
+
+```
+invalid.ts:15:22 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    14 │ var foo = 10;
+  > 15 │ var inferredNumber = foo > bar ? bar : foo;
+       │                      ^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ var leftNumber = 10;
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    13 13 │   
+    14 14 │   var foo = 10;
+    15    │ - var·inferredNumber·=·foo·>·bar·?·bar·:·foo;
+       15 │ + var·inferredNumber·=·Math.min(foo·,·bar);
+    16 16 │   
+    17 17 │   var leftNumber = 10;
+  
+
+```
+
+```
+invalid.ts:19:19 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    17 │ var leftNumber = 10;
+    18 │ var rightNumber = 20;
+  > 19 │ var bothNumbers = leftNumber > rightNumber ? rightNumber : leftNumber;
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ 
+    21 │ var annotatedFoo: number;
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    17 17 │   var leftNumber = 10;
+    18 18 │   var rightNumber = 20;
+    19    │ - var·bothNumbers·=·leftNumber·>·rightNumber·?·rightNumber·:·leftNumber;
+       19 │ + var·bothNumbers·=·Math.min(leftNumber·,·rightNumber);
+    20 20 │   
+    21 21 │   var annotatedFoo: number;
+  
+
+```
+
+```
+invalid.ts:23:24 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    21 │ var annotatedFoo: number;
+    22 │ var annotatedBar: number;
+  > 23 │ var annotatedNumbers = annotatedFoo > annotatedBar ? annotatedBar : annotatedFoo;
+       │                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ 
+    25 │ function numericBranchAssertion(a, b) {
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    21 21 │   var annotatedFoo: number;
+    22 22 │   var annotatedBar: number;
+    23    │ - var·annotatedNumbers·=·annotatedFoo·>·annotatedBar·?·annotatedBar·:·annotatedFoo;
+       23 │ + var·annotatedNumbers·=·Math.min(annotatedFoo·,·annotatedBar);
+    24 24 │   
+    25 25 │   function numericBranchAssertion(a, b) {
+  
+
+```
+
+```
+invalid.ts:26:12 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    25 │ function numericBranchAssertion(a, b) {
+  > 26 │     return (a as number) > b ? (a as number) : b;
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ }
+    28 │ 
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    24 24 │   
+    25 25 │   function numericBranchAssertion(a, b) {
+    26    │ - ····return·(a·as·number)·>·b·?·(a·as·number)·:·b;
+       26 │ + ····return·Math.max((a·as·number)·,·b);
+    27 27 │   }
+    28 28 │   
+  
+
+```
+
+```
+invalid.ts:30:12 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    29 │ function numericAngleAssertion(a, b) {
+  > 30 │     return (<number>a) > b ? (<number>a) : b;
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ }
+    32 │ 
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    28 28 │   
+    29 29 │   function numericAngleAssertion(a, b) {
+    30    │ - ····return·(<number>a)·>·b·?·(<number>a)·:·b;
+       30 │ + ····return·Math.max((<number>a)·,·b);
+    31 31 │   }
+    32 32 │   
+  
+
+```
+
+```
+invalid.ts:34:12 lint/nursery/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    33 │ function nonNullNumber(a, b) {
+  > 34 │     return a! > b ? a! : b;
+       │            ^^^^^^^^^^^^^^^
+    35 │ }
+    36 │ 
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    32 32 │   
+    33 33 │   function nonNullNumber(a, b) {
+    34    │ - ····return·a!·>·b·?·a!·:·b;
+       34 │ + ····return·Math.max(a!·,·b);
+    35 35 │   }
+    36 36 │   
+  
+
+```

@@ -470,7 +470,7 @@ When choosing `minor` or `major`, make sure your PR targets the `next` branch in
 
 #### Writing a changeset
 
-The description of the changeset should follow the these guidelines:
+The description of the changeset should follow these guidelines:
 
 - Our changesets should be about **user-facing changes**. Internal changes don't
   need changesets. For example, if you refactored some code, but the user-facing

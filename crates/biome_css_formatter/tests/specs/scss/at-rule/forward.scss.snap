@@ -1,6 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: css/scss/at-rule/forward.scss
+info: scss/at-rule/forward.scss
 ---
 
 # Input
@@ -26,6 +26,8 @@ $spacing:4px !default,
 $radius: 2px
 );
 
+@forward "foo.scss" with ($components: red);
+
 @forward "theme" as theme-* show
 $color,
 button
@@ -47,11 +49,12 @@ $spacing:4px
 
 @forward "theme" as theme-*;
 
-@forward "theme" with (
-	$spacing: 4px !default,
-	$radius: 2px
+@forward "theme" with($spacing: 4px !default, $radius: 2px);
+
+@forward "foo.scss" with (
+	$components: red
 );
 
-@forward "theme" as theme-* show $color, button with ($spacing: 4px);
+@forward "theme" as theme-* show $color, button with($spacing: 4px);
 
 ```

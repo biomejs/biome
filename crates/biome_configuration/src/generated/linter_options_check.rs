@@ -85,6 +85,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noBarrelFile",
         TypeId::of::<biome_rule_options::no_barrel_file::NoBarrelFileOptions>(),
     ));
+    result.push((
+        "nursery",
+        "noBaseToString",
+        TypeId::of::<biome_rule_options::no_base_to_string::NoBaseToStringOptions>(),
+    ));
     result.push(("nursery", "noBeforeInteractiveScriptOutsideDocument", TypeId::of::<biome_rule_options::no_before_interactive_script_outside_document::NoBeforeInteractiveScriptOutsideDocumentOptions>()));
     result.push((
         "suspicious",
@@ -473,6 +478,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noExcessiveLinesPerFunction",
         TypeId::of::<
             biome_rule_options::no_excessive_lines_per_function::NoExcessiveLinesPerFunctionOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
+        "noExcessiveNestedCallbacks",
+        TypeId::of::<
+            biome_rule_options::no_excessive_nested_callbacks::NoExcessiveNestedCallbacksOptions,
         >(),
     ));
     result.push((
@@ -977,6 +989,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "suspicious",
         "noReactSpecificProps",
         TypeId::of::<biome_rule_options::no_react_specific_props::NoReactSpecificPropsOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noReactStringRefs",
+        TypeId::of::<biome_rule_options::no_react_string_refs::NoReactStringRefsOptions>(),
     ));
     result.push((
         "suspicious",
@@ -1507,6 +1524,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_vue_v_if_with_v_for::NoVueVIfWithVForOptions>(),
     ));
     result.push((
+        "nursery",
+        "noVueVOnNumberValues",
+        TypeId::of::<biome_rule_options::no_vue_v_on_number_values::NoVueVOnNumberValuesOptions>(),
+    ));
+    result.push((
         "suspicious",
         "noWith",
         TypeId::of::<biome_rule_options::no_with::NoWithOptions>(),
@@ -1953,6 +1975,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<
             biome_rule_options::use_lone_executable_definition::UseLoneExecutableDefinitionOptions,
         >(),
+    ));
+    result.push((
+        "nursery",
+        "useMathMinMax",
+        TypeId::of::<biome_rule_options::use_math_min_max::UseMathMinMaxOptions>(),
     ));
     result.push((
         "complexity",

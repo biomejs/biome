@@ -1,6 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: css/scss/at-rule/if-else.scss
+info: scss/at-rule/if-else.scss
 ---
 
 # Input
@@ -27,6 +27,17 @@ padding:
 }
 }
 
+@function normalize($section) {
+@if index($include, $section) {
+@return true;
+}
+// Keep this comment before else.
+@else if not index($exclude, $section) and index($include, all) {
+@return true;
+}
+@return false;
+}
+
 ```
 
 
@@ -49,6 +60,17 @@ padding:
 	} @else {
 		padding: 1rem;
 	}
+}
+
+@function normalize($section) {
+	@if index($include, $section) {
+		@return true;
+	}
+	// Keep this comment before else.
+	@else if not index($exclude, $section) and index($include, all) {
+		@return true;
+	}
+	@return false;
 }
 
 ```

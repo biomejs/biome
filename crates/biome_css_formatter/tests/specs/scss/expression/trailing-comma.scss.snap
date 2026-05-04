@@ -1,0 +1,43 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: scss/expression/trailing-comma.scss
+---
+
+# Input
+
+```scss
+$colors:hotpink deepskyblue firebrick,;
+$list:(a,);
+$families:("Helvetica","Arial",sans-serif,);
+$margin:0,2em,0,1.5em,;
+
+a{
+margin:$bar,;
+}
+
+@use "x" with ($family:(a,b));
+
+```
+
+
+# Formatted
+
+```scss
+$colors: hotpink deepskyblue firebrick;
+$list: (a);
+$families: ("Helvetica", "Arial", sans-serif);
+$margin: 0, 2em, 0, 1.5em;
+
+a {
+	margin: $bar;
+}
+
+@use "x" with (
+	$family: (
+		a,
+		b,
+	)
+);
+
+```

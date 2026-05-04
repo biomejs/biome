@@ -1,6 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: css/scss/at-rule/for.scss
+info: scss/at-rule/for.scss
 ---
 
 # Input
@@ -24,6 +24,9 @@ margin:$step;
 }
 }
 
+@for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var from 1 through 5{
+}
+
 ```
 
 
@@ -42,4 +45,15 @@ margin:$step;
 	}
 }
 
+@for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+	from 1
+	through 5
+{
+}
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   13: @for $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
 ```

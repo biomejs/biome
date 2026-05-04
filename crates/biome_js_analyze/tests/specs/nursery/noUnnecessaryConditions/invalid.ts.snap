@@ -160,6 +160,9 @@ if (ro) console.log();
 declare const partialObj2: Partial<{a: string}>;
 if (partialObj2) console.log();
 
+const date = new Date();
+if (date) console.log(date);
+
 ```
 
 # Diagnostics
@@ -884,6 +887,28 @@ invalid.ts:155:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━�
   > 155 │ if (partialObj2) console.log();
         │     ^^^^^^^^^^^
     156 │ 
+    157 │ const date = new Date();
+  
+  i The type being checked can never be falsy, making this condition redundant.
+  
+  i Remove the condition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/6611 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:158:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy based on the type.
+  
+    157 │ const date = new Date();
+  > 158 │ if (date) console.log(date);
+        │     ^^^^
+    159 │ 
   
   i The type being checked can never be falsy, making this condition redundant.
   

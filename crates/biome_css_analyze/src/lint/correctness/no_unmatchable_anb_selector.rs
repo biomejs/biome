@@ -3,7 +3,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_css_syntax::{
-    AnyCssPseudoClassNth, CssPseudoClassFunctionSelectorList, CssPseudoClassNthSelector,
+    AnyCssPseudoClassNth, AnyCssPseudoClassNthValue, CssPseudoClassFunctionSelectorList,
+    CssPseudoClassNthSelector, CssSyntaxToken,
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, SyntaxNodeCast};
@@ -102,11 +103,20 @@ fn is_unmatchable(nth: &AnyCssPseudoClassNth) -> bool {
     match nth {
         AnyCssPseudoClassNth::CssPseudoClassNthIdentifier(_) => false,
         AnyCssPseudoClassNth::CssPseudoClassNth(nth) => {
-            let coefficient = nth.value().and_then(|n| n.value_token().ok());
-            let constant = nth
-                .offset()
-                .and_then(|offset| offset.value().ok())
-                .and_then(|n| n.value_token().ok());
+            let coefficient = match nth.value() {
+                Some(value) => match static_nth_value(value) {
+                    Some(StaticNthValue::Number(token)) => Some(token),
+                    Some(StaticNthValue::Dynamic) | None => return false,
+                },
+                None => None,
+            };
+            let constant = match nth.offset() {
+                Some(offset) => match offset.value().ok().and_then(static_nth_value) {
+                    Some(StaticNthValue::Number(token)) => Some(token),
+                    Some(StaticNthValue::Dynamic) | None => return false,
+                },
+                None => None,
+            };
 
             match (coefficient, constant) {
                 (Some(a), Some(b)) => a.text_trimmed() == "0" && b.text_trimmed() == "0",
@@ -117,8 +127,26 @@ fn is_unmatchable(nth: &AnyCssPseudoClassNth) -> bool {
         AnyCssPseudoClassNth::CssPseudoClassNthNumber(nth) => nth
             .value()
             .ok()
-            .and_then(|n| n.value_token().ok())
-            .is_some_and(|n| n.text_trimmed() == "0"),
+            .and_then(static_nth_value)
+            .is_some_and(|value| match value {
+                StaticNthValue::Number(token) => token.text_trimmed() == "0",
+                StaticNthValue::Dynamic => false,
+            }),
+    }
+}
+
+enum StaticNthValue {
+    Number(CssSyntaxToken),
+    Dynamic,
+}
+
+fn static_nth_value(value: AnyCssPseudoClassNthValue) -> Option<StaticNthValue> {
+    match value {
+        AnyCssPseudoClassNthValue::CssNumber(number) => {
+            number.value_token().ok().map(StaticNthValue::Number)
+        }
+        AnyCssPseudoClassNthValue::ScssInterpolation(_)
+        | AnyCssPseudoClassNthValue::ScssInterpolatedNthValue(_) => Some(StaticNthValue::Dynamic),
     }
 }
 

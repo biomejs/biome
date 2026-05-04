@@ -48,8 +48,9 @@ use biome_markdown_syntax::{
     MdDocument, MdEntityReference, MdFencedCodeBlock, MdHardLine, MdHeader, MdHtmlBlock,
     MdIndentCodeBlock, MdInlineCode, MdInlineEmphasis, MdInlineHtml, MdInlineImage, MdInlineItalic,
     MdInlineItemList, MdInlineLink, MdLinkDestination, MdLinkLabel, MdLinkReferenceDefinition,
-    MdLinkTitle, MdOrderedListItem, MdParagraph, MdQuote, MdReferenceImage, MdReferenceLink,
-    MdReferenceLinkLabel, MdSetextHeader, MdSoftBreak, MdTextual, MdThematicBreakBlock,
+    MdLinkTitle, MdNewline, MdOrderedListItem, MdParagraph, MdQuote, MdQuotePrefix,
+    MdReferenceImage, MdReferenceLink, MdReferenceLinkLabel, MdSetextHeader, MdSoftBreak,
+    MdTextual, MdThematicBreakBlock,
 };
 use biome_rowan::{AstNode, AstNodeList, Direction, SyntaxNode, TextRange, WalkEvent};
 use percent_encoding::{AsciiSet, CONTROLS, utf8_percent_encode};
@@ -57,7 +58,10 @@ use std::collections::HashMap;
 
 use crate::parser::{ListItemIndent, ListTightness, QuoteIndent};
 use crate::syntax::reference::normalize_reference_label;
-use crate::syntax::{INDENT_CODE_BLOCK_SPACES, MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES};
+use crate::syntax::{
+    INDENT_CODE_BLOCK_SPACES, MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES,
+    is_dash_only_thematic_break_text,
+};
 
 /// Compute the column width of an `MdIndentTokenList`.
 fn indent_list_width(list: &biome_markdown_syntax::MdIndentTokenList) -> usize {
@@ -361,35 +365,87 @@ pub fn document_to_html(
 /// Collect link reference definitions from the document.
 fn collect_link_definitions(document: &MdDocument) -> HashMap<String, (String, Option<String>)> {
     let mut definitions = HashMap::new();
+    let link_definitions: Vec<_> = document
+        .syntax()
+        .descendants()
+        .filter_map(MdLinkReferenceDefinition::cast)
+        .collect();
 
-    for node in document.syntax().descendants() {
-        if let Some(def) = MdLinkReferenceDefinition::cast(node)
-            && let (Ok(label), Ok(dest)) = (def.label(), def.destination())
-        {
-            let label_text = collect_inline_text(&label.content());
-            let normalized = normalize_reference_label(&label_text);
-            if normalized.is_empty() {
-                continue;
-            }
+    for def in link_definitions
+        .iter()
+        .filter(|def| link_reference_definition_before_dash_setext_line(def))
+    {
+        insert_link_definition(&mut definitions, def);
+    }
 
-            // Only keep first definition (per CommonMark spec)
-            if definitions.contains_key(normalized.as_ref()) {
-                continue;
-            }
-
-            let url = collect_inline_text(&dest.content());
-            let url = process_link_destination(&url);
-
-            let title = def.title().map(|t| {
-                let text = collect_inline_text(&t.content());
-                process_link_title(&text)
-            });
-
-            definitions.insert(normalized.into_owned(), (url, title));
-        }
+    for def in &link_definitions {
+        insert_link_definition(&mut definitions, def);
     }
 
     definitions
+}
+
+fn insert_link_definition(
+    definitions: &mut HashMap<String, (String, Option<String>)>,
+    def: &MdLinkReferenceDefinition,
+) {
+    let (Ok(label), Ok(dest)) = (def.label(), def.destination()) else {
+        return;
+    };
+
+    let label_text = collect_inline_text(&label.content());
+    let normalized = normalize_reference_label(&label_text);
+    if normalized.is_empty() || definitions.contains_key(normalized.as_ref()) {
+        return;
+    }
+
+    let url = collect_inline_text(&dest.content());
+    let url = process_link_destination(&url);
+
+    let title = def.title().map(|t| {
+        let text = collect_inline_text(&t.content());
+        process_link_title(&text)
+    });
+
+    definitions.insert(normalized.into_owned(), (url, title));
+}
+
+fn link_reference_definition_before_dash_setext_line(def: &MdLinkReferenceDefinition) -> bool {
+    let mut newline_count = 0;
+
+    for element in def.syntax().siblings_with_tokens(Direction::Next).skip(1) {
+        let Some(node) = element.as_node() else {
+            continue;
+        };
+
+        if MdNewline::cast(node.clone()).is_some() {
+            newline_count += 1;
+            if newline_count > 1 {
+                return false;
+            }
+            continue;
+        }
+
+        if MdQuotePrefix::cast(node.clone()).is_some()
+            || MdContinuationIndent::cast(node.clone()).is_some()
+            || is_empty_paragraph(node)
+        {
+            continue;
+        }
+
+        if let Some(thematic) = MdThematicBreakBlock::cast(node.clone()) {
+            return is_dash_only_thematic_break_text(&thematic.syntax().text_trimmed().to_string());
+        }
+
+        return false;
+    }
+
+    false
+}
+
+fn is_empty_paragraph(node: &SyntaxNode<MarkdownLanguage>) -> bool {
+    MdParagraph::cast(node.clone())
+        .is_some_and(|paragraph| paragraph.syntax().text_trimmed().is_empty())
 }
 
 // ============================================================================
@@ -1781,7 +1837,9 @@ fn is_transparent_block(block: &AnyMdBlock) -> bool {
     matches!(
         block,
         AnyMdBlock::AnyMdLeafBlock(
-            AnyMdLeafBlock::MdNewline(_) | AnyMdLeafBlock::MdContinuationIndent(_),
+            AnyMdLeafBlock::MdNewline(_)
+                | AnyMdLeafBlock::MdContinuationIndent(_)
+                | AnyMdLeafBlock::MdLinkReferenceDefinition(_),
         ) | AnyMdBlock::MdQuotePrefix(_)
     )
 }
@@ -1807,6 +1865,16 @@ fn list_item_required_indent(entry: &ListItemIndent) -> usize {
 mod tests {
     use super::*;
     use crate::parse_markdown;
+
+    fn render(input: &str) -> String {
+        let parsed = parse_markdown(input);
+        document_to_html(
+            &parsed.tree(),
+            parsed.list_tightness(),
+            parsed.list_item_indents(),
+            parsed.quote_indents(),
+        )
+    }
 
     #[test]
     fn test_tab_expansion() {
@@ -1995,17 +2063,32 @@ mod tests {
 
     #[test]
     fn test_title_with_escaped_closing_quote() {
-        let parsed = parse_markdown("[a](/url \"title with \\\" quote\")\n");
-        let html = document_to_html(
-            &parsed.tree(),
-            parsed.list_tightness(),
-            parsed.list_item_indents(),
-            parsed.quote_indents(),
-        );
+        let html = render("[a](/url \"title with \\\" quote\")\n");
         assert_eq!(
             html,
             "<p><a href=\"/url\" title=\"title with &quot; quote\">a</a></p>\n"
         );
+    }
+
+    #[test]
+    fn test_dash_setext_reference_definition_priority() {
+        let html = render("[x]: /first\n***\n> [x]: /second \"title\"\n> ---\n[x]\n");
+        assert_eq!(
+            html,
+            "<hr />\n<blockquote>\n<p></p>\n<hr />\n</blockquote>\n<p><a href=\"/second\" title=\"title\">x</a></p>\n"
+        );
+    }
+
+    #[test]
+    fn test_spaced_dash_thematic_keeps_document_ordered_reference() {
+        let html = render("[x]: /first\n***\n[x]: /second \"title\"\n - - -\n[x]\n");
+        assert_eq!(html, "<hr />\n<hr />\n<p><a href=\"/first\">x</a></p>\n");
+    }
+
+    #[test]
+    fn test_blank_line_before_dash_keeps_document_ordered_reference() {
+        let html = render("[x]: /first\n***\n[x]: /second \"title\"\n\n---\n[x]\n");
+        assert_eq!(html, "<hr />\n<hr />\n<p><a href=\"/first\">x</a></p>\n");
     }
 
     #[test]

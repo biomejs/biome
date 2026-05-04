@@ -142,11 +142,10 @@ impl Rule for UseEnumInitializers {
                                 next_member_value = EnumInitializer::Integer(n + 1);
                             }
                         }
-                        AnyJsLiteralExpression::JsStringLiteralExpression(expr) => {
-                            if enum_member.name().ok()?.name() == expr.inner_string_text().ok() {
+                        AnyJsLiteralExpression::JsStringLiteralExpression(expr)
+                            if enum_member.name().ok()?.name() == expr.inner_string_text().ok() => {
                                 next_member_value = EnumInitializer::EnumName;
                             }
-                        }
                         _ => {}
                     }
                 }

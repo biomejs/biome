@@ -3,7 +3,7 @@ use crate::parser::CssParser;
 
 use crate::syntax::parse_error::scss_only_syntax_error;
 use crate::syntax::scss::{
-    is_at_scss_function, is_at_scss_interpolated_function, is_at_scss_interpolated_string,
+    is_at_scss_function, is_at_scss_interpolated_function_or_value, is_at_scss_interpolated_string,
     is_nth_at_scss_function, parse_scss_function, parse_scss_interpolated_function_or_value,
     parse_scss_interpolated_string,
 };
@@ -132,7 +132,18 @@ fn is_at_url_modifier_function_with_context(
     context: ValueParsingContext,
 ) -> bool {
     is_at_nth_url_modifier_function(p, 0, context)
-        || (context.is_scss_exclusive_syntax_allowed() && is_at_scss_interpolated_function(p))
+        || (context.is_scss_exclusive_syntax_allowed()
+            && is_at_scss_interpolated_url_modifier_function(p))
+}
+
+/// Detects interpolation-led SCSS function names inside URL modifiers.
+///
+/// URL modifier parsing must classify function-shaped interpolation before it
+/// can enter the regular value grammar, so this is the one parser boundary
+/// that still uses lexer-backed interpolation lookahead.
+#[inline]
+fn is_at_scss_interpolated_url_modifier_function(p: &mut CssParser) -> bool {
+    is_at_scss_interpolated_function_or_value(p) && p.source().is_at_scss_interpolated_function()
 }
 
 #[inline]
@@ -145,7 +156,7 @@ fn parse_url_modifier_function_with_context(
             CssSyntaxFeatures::Scss.parse_exclusive_syntax(p, parse_scss_function, |p, marker| {
                 scss_only_syntax_error(p, "SCSS qualified function names", marker.range(p))
             })
-        } else if is_at_scss_interpolated_function(p) {
+        } else if is_at_scss_interpolated_url_modifier_function(p) {
             CssSyntaxFeatures::Scss.parse_exclusive_syntax(
                 p,
                 parse_scss_interpolated_function_or_value,

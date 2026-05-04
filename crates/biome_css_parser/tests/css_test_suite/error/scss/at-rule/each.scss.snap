@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -36,17 +35,19 @@ CssRoot {
             at_token: AT@0..1 "@" [] [],
             rule: ScssEachAtRule {
                 each_token: EACH_KW@1..6 "each" [] [Whitespace(" ")],
-                bindings: ScssEachBindingList [],
-                in_token: IN_KW@6..9 "in" [] [Whitespace(" ")],
-                iterable: ScssExpression {
-                    items: ScssExpressionItemList [
-                        ScssVariable {
-                            dollar_token: DOLLAR@9..10 "$" [] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@10..15 "list" [] [Whitespace(" ")],
+                header: ScssEachHeader {
+                    bindings: ScssEachBindingList [],
+                    in_token: IN_KW@6..9 "in" [] [Whitespace(" ")],
+                    iterable: ScssExpression {
+                        items: ScssExpressionItemList [
+                            ScssVariable {
+                                dollar_token: DOLLAR@9..10 "$" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@10..15 "list" [] [Whitespace(" ")],
+                                },
                             },
-                        },
-                    ],
+                        ],
+                    },
                 },
                 block: CssDeclarationOrRuleBlock {
                     l_curly_token: L_CURLY@15..16 "{" [] [],
@@ -79,23 +80,25 @@ CssRoot {
             at_token: AT@32..35 "@" [Newline("\n"), Newline("\n")] [],
             rule: ScssEachAtRule {
                 each_token: EACH_KW@35..40 "each" [] [Whitespace(" ")],
-                bindings: ScssEachBindingList [
-                    ScssVariable {
-                        dollar_token: DOLLAR@40..41 "$" [] [],
-                        name: CssIdentifier {
-                            value_token: IDENT@41..46 "item" [] [Whitespace(" ")],
+                header: ScssEachHeader {
+                    bindings: ScssEachBindingList [
+                        ScssVariable {
+                            dollar_token: DOLLAR@40..41 "$" [] [],
+                            name: CssIdentifier {
+                                value_token: IDENT@41..46 "item" [] [Whitespace(" ")],
+                            },
                         },
-                    },
-                    missing separator,
-                    ScssVariable {
-                        dollar_token: DOLLAR@46..47 "$" [] [],
-                        name: CssIdentifier {
-                            value_token: IDENT@47..52 "list" [] [Whitespace(" ")],
+                        missing separator,
+                        ScssVariable {
+                            dollar_token: DOLLAR@46..47 "$" [] [],
+                            name: CssIdentifier {
+                                value_token: IDENT@47..52 "list" [] [Whitespace(" ")],
+                            },
                         },
-                    },
-                ],
-                in_token: missing (required),
-                iterable: missing (required),
+                    ],
+                    in_token: missing (required),
+                    iterable: missing (required),
+                },
                 block: CssDeclarationOrRuleBlock {
                     l_curly_token: L_CURLY@52..53 "{" [] [],
                     items: CssDeclarationOrRuleList [
@@ -127,16 +130,18 @@ CssRoot {
             at_token: AT@69..72 "@" [Newline("\n"), Newline("\n")] [],
             rule: ScssEachAtRule {
                 each_token: EACH_KW@72..77 "each" [] [Whitespace(" ")],
-                bindings: ScssEachBindingList [
-                    ScssVariable {
-                        dollar_token: DOLLAR@77..78 "$" [] [],
-                        name: CssIdentifier {
-                            value_token: IDENT@78..83 "item" [] [Whitespace(" ")],
+                header: ScssEachHeader {
+                    bindings: ScssEachBindingList [
+                        ScssVariable {
+                            dollar_token: DOLLAR@77..78 "$" [] [],
+                            name: CssIdentifier {
+                                value_token: IDENT@78..83 "item" [] [Whitespace(" ")],
+                            },
                         },
-                    },
-                ],
-                in_token: IN_KW@83..86 "in" [] [Whitespace(" ")],
-                iterable: missing (required),
+                    ],
+                    in_token: IN_KW@83..86 "in" [] [Whitespace(" ")],
+                    iterable: missing (required),
+                },
                 block: CssDeclarationOrRuleBlock {
                     l_curly_token: L_CURLY@86..87 "{" [] [],
                     items: CssDeclarationOrRuleList [
@@ -168,26 +173,28 @@ CssRoot {
             at_token: AT@103..106 "@" [Newline("\n"), Newline("\n")] [],
             rule: ScssEachAtRule {
                 each_token: EACH_KW@106..111 "each" [] [Whitespace(" ")],
-                bindings: ScssEachBindingList [
-                    ScssVariable {
-                        dollar_token: DOLLAR@111..112 "$" [] [],
-                        name: CssIdentifier {
-                            value_token: IDENT@112..115 "key" [] [],
-                        },
-                    },
-                    COMMA@115..117 "," [] [Whitespace(" ")],
-                    missing element,
-                ],
-                in_token: IN_KW@117..120 "in" [] [Whitespace(" ")],
-                iterable: ScssExpression {
-                    items: ScssExpressionItemList [
+                header: ScssEachHeader {
+                    bindings: ScssEachBindingList [
                         ScssVariable {
-                            dollar_token: DOLLAR@120..121 "$" [] [],
+                            dollar_token: DOLLAR@111..112 "$" [] [],
                             name: CssIdentifier {
-                                value_token: IDENT@121..125 "map" [] [Whitespace(" ")],
+                                value_token: IDENT@112..115 "key" [] [],
                             },
                         },
+                        COMMA@115..117 "," [] [Whitespace(" ")],
+                        missing element,
                     ],
+                    in_token: IN_KW@117..120 "in" [] [Whitespace(" ")],
+                    iterable: ScssExpression {
+                        items: ScssExpressionItemList [
+                            ScssVariable {
+                                dollar_token: DOLLAR@120..121 "$" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@121..125 "map" [] [Whitespace(" ")],
+                                },
+                            },
+                        ],
+                    },
                 },
                 block: CssDeclarationOrRuleBlock {
                     l_curly_token: L_CURLY@125..126 "{" [] [],
@@ -231,15 +238,16 @@ CssRoot {
       0: AT@0..1 "@" [] []
       1: SCSS_EACH_AT_RULE@1..32
         0: EACH_KW@1..6 "each" [] [Whitespace(" ")]
-        1: SCSS_EACH_BINDING_LIST@6..6
-        2: IN_KW@6..9 "in" [] [Whitespace(" ")]
-        3: SCSS_EXPRESSION@9..15
-          0: SCSS_EXPRESSION_ITEM_LIST@9..15
-            0: SCSS_VARIABLE@9..15
-              0: DOLLAR@9..10 "$" [] []
-              1: CSS_IDENTIFIER@10..15
-                0: IDENT@10..15 "list" [] [Whitespace(" ")]
-        4: CSS_DECLARATION_OR_RULE_BLOCK@15..32
+        1: SCSS_EACH_HEADER@6..15
+          0: SCSS_EACH_BINDING_LIST@6..6
+          1: IN_KW@6..9 "in" [] [Whitespace(" ")]
+          2: SCSS_EXPRESSION@9..15
+            0: SCSS_EXPRESSION_ITEM_LIST@9..15
+              0: SCSS_VARIABLE@9..15
+                0: DOLLAR@9..10 "$" [] []
+                1: CSS_IDENTIFIER@10..15
+                  0: IDENT@10..15 "list" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@15..32
           0: L_CURLY@15..16 "{" [] []
           1: CSS_DECLARATION_OR_RULE_LIST@16..30
             0: CSS_DECLARATION_WITH_SEMICOLON@16..30
@@ -259,19 +267,20 @@ CssRoot {
       0: AT@32..35 "@" [Newline("\n"), Newline("\n")] []
       1: SCSS_EACH_AT_RULE@35..69
         0: EACH_KW@35..40 "each" [] [Whitespace(" ")]
-        1: SCSS_EACH_BINDING_LIST@40..52
-          0: SCSS_VARIABLE@40..46
-            0: DOLLAR@40..41 "$" [] []
-            1: CSS_IDENTIFIER@41..46
-              0: IDENT@41..46 "item" [] [Whitespace(" ")]
+        1: SCSS_EACH_HEADER@40..52
+          0: SCSS_EACH_BINDING_LIST@40..52
+            0: SCSS_VARIABLE@40..46
+              0: DOLLAR@40..41 "$" [] []
+              1: CSS_IDENTIFIER@41..46
+                0: IDENT@41..46 "item" [] [Whitespace(" ")]
+            1: (empty)
+            2: SCSS_VARIABLE@46..52
+              0: DOLLAR@46..47 "$" [] []
+              1: CSS_IDENTIFIER@47..52
+                0: IDENT@47..52 "list" [] [Whitespace(" ")]
           1: (empty)
-          2: SCSS_VARIABLE@46..52
-            0: DOLLAR@46..47 "$" [] []
-            1: CSS_IDENTIFIER@47..52
-              0: IDENT@47..52 "list" [] [Whitespace(" ")]
-        2: (empty)
-        3: (empty)
-        4: CSS_DECLARATION_OR_RULE_BLOCK@52..69
+          2: (empty)
+        2: CSS_DECLARATION_OR_RULE_BLOCK@52..69
           0: L_CURLY@52..53 "{" [] []
           1: CSS_DECLARATION_OR_RULE_LIST@53..67
             0: CSS_DECLARATION_WITH_SEMICOLON@53..67
@@ -291,14 +300,15 @@ CssRoot {
       0: AT@69..72 "@" [Newline("\n"), Newline("\n")] []
       1: SCSS_EACH_AT_RULE@72..103
         0: EACH_KW@72..77 "each" [] [Whitespace(" ")]
-        1: SCSS_EACH_BINDING_LIST@77..83
-          0: SCSS_VARIABLE@77..83
-            0: DOLLAR@77..78 "$" [] []
-            1: CSS_IDENTIFIER@78..83
-              0: IDENT@78..83 "item" [] [Whitespace(" ")]
-        2: IN_KW@83..86 "in" [] [Whitespace(" ")]
-        3: (empty)
-        4: CSS_DECLARATION_OR_RULE_BLOCK@86..103
+        1: SCSS_EACH_HEADER@77..86
+          0: SCSS_EACH_BINDING_LIST@77..83
+            0: SCSS_VARIABLE@77..83
+              0: DOLLAR@77..78 "$" [] []
+              1: CSS_IDENTIFIER@78..83
+                0: IDENT@78..83 "item" [] [Whitespace(" ")]
+          1: IN_KW@83..86 "in" [] [Whitespace(" ")]
+          2: (empty)
+        2: CSS_DECLARATION_OR_RULE_BLOCK@86..103
           0: L_CURLY@86..87 "{" [] []
           1: CSS_DECLARATION_OR_RULE_LIST@87..101
             0: CSS_DECLARATION_WITH_SEMICOLON@87..101
@@ -318,21 +328,22 @@ CssRoot {
       0: AT@103..106 "@" [Newline("\n"), Newline("\n")] []
       1: SCSS_EACH_AT_RULE@106..142
         0: EACH_KW@106..111 "each" [] [Whitespace(" ")]
-        1: SCSS_EACH_BINDING_LIST@111..117
-          0: SCSS_VARIABLE@111..115
-            0: DOLLAR@111..112 "$" [] []
-            1: CSS_IDENTIFIER@112..115
-              0: IDENT@112..115 "key" [] []
-          1: COMMA@115..117 "," [] [Whitespace(" ")]
-          2: (empty)
-        2: IN_KW@117..120 "in" [] [Whitespace(" ")]
-        3: SCSS_EXPRESSION@120..125
-          0: SCSS_EXPRESSION_ITEM_LIST@120..125
-            0: SCSS_VARIABLE@120..125
-              0: DOLLAR@120..121 "$" [] []
-              1: CSS_IDENTIFIER@121..125
-                0: IDENT@121..125 "map" [] [Whitespace(" ")]
-        4: CSS_DECLARATION_OR_RULE_BLOCK@125..142
+        1: SCSS_EACH_HEADER@111..125
+          0: SCSS_EACH_BINDING_LIST@111..117
+            0: SCSS_VARIABLE@111..115
+              0: DOLLAR@111..112 "$" [] []
+              1: CSS_IDENTIFIER@112..115
+                0: IDENT@112..115 "key" [] []
+            1: COMMA@115..117 "," [] [Whitespace(" ")]
+            2: (empty)
+          1: IN_KW@117..120 "in" [] [Whitespace(" ")]
+          2: SCSS_EXPRESSION@120..125
+            0: SCSS_EXPRESSION_ITEM_LIST@120..125
+              0: SCSS_VARIABLE@120..125
+                0: DOLLAR@120..121 "$" [] []
+                1: CSS_IDENTIFIER@121..125
+                  0: IDENT@121..125 "map" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@125..142
           0: L_CURLY@125..126 "{" [] []
           1: CSS_DECLARATION_OR_RULE_LIST@126..140
             0: CSS_DECLARATION_WITH_SEMICOLON@126..140

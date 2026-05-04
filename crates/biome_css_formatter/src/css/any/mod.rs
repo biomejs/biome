@@ -77,6 +77,7 @@ pub(crate) mod property;
 pub(crate) mod pseudo_class;
 pub(crate) mod pseudo_class_nth;
 pub(crate) mod pseudo_class_nth_selector;
+pub(crate) mod pseudo_class_nth_value;
 pub(crate) mod pseudo_element;
 pub(crate) mod pseudo_value;
 pub(crate) mod query_feature;

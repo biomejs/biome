@@ -1,12 +1,25 @@
 use crate::prelude::*;
-use crate::utils::scss_map::{ScssMapOuterParenthesizedValuePayloadKind, scss_map_context};
-use biome_css_syntax::{ScssParenthesizedExpression, ScssParenthesizedExpressionFields};
+use crate::utils::comment_trivia::has_inline_trailing_comment;
+use crate::utils::scss_separator_comments::FormatScssSeparatorComments;
+use biome_css_syntax::{
+    ScssMapOuterParenthesizedValuePayloadKind, ScssParenthesizedExpression,
+    ScssParenthesizedExpressionFields, scss_include_keyword_argument_owner, scss_map_context,
+    unwrap_single_expression_item,
+};
 use biome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatScssParenthesizedExpression;
 
 impl FormatNodeRule<ScssParenthesizedExpression> for FormatScssParenthesizedExpression {
+    fn fmt_node(
+        &self,
+        node: &ScssParenthesizedExpression,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        self.fmt_node_with_scss_separator_comments(node, f)
+    }
+
     fn fmt_fields(
         &self,
         node: &ScssParenthesizedExpression,
@@ -21,22 +34,53 @@ impl FormatNodeRule<ScssParenthesizedExpression> for FormatScssParenthesizedExpr
 
         let outer_payload_kind =
             map_context.and_then(|context| context.outer_parenthesized_value_payload_kind);
-        let is_outer_parenthesized_map_value = outer_payload_kind.is_some();
 
         // Only `key: ((nested: map))`-style wrappers force expansion here.
         // `key: (value)` and `key: (a, b)` keep their normal scalar/list
         // behavior unless they break for other reasons.
-        let should_expand = is_outer_parenthesized_map_value
-            && outer_payload_kind == Some(ScssMapOuterParenthesizedValuePayloadKind::Map);
+        let has_nested_parenthesized_include_item = has_nested_parenthesized_include_item(node);
+        let should_expand = outer_payload_kind
+            == Some(ScssMapOuterParenthesizedValuePayloadKind::Map)
+            || should_expand_include_keyword_list_value(node)
+            || has_nested_parenthesized_include_item;
+        let trailing_comma = has_nested_parenthesized_include_item.then_some(token(","));
 
         write!(
             f,
             [group(&format_args![
                 l_paren_token.format(),
-                soft_block_indent(&expression.format()),
+                soft_block_indent(&format_args![expression.format(), trailing_comma]),
                 r_paren_token.format()
             ])
             .should_expand(should_expand)]
         )
     }
+
+    fn fmt_leading_comments(
+        &self,
+        node: &ScssParenthesizedExpression,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        self.fmt_leading_scss_separator_comments(node, f)
+    }
+}
+
+/// Returns `true` for `@include mix($arg: (...) /* end */)` wrappers.
+fn should_expand_include_keyword_list_value(node: &ScssParenthesizedExpression) -> bool {
+    let is_include_keyword_value = scss_include_keyword_argument_owner(node.syntax()).is_some();
+
+    has_inline_trailing_comment(node.syntax()) && is_include_keyword_value
+}
+
+/// Returns `true` for the outer value in `@include mix($arg: ((a)))`.
+fn has_nested_parenthesized_include_item(node: &ScssParenthesizedExpression) -> bool {
+    if scss_include_keyword_argument_owner(node.syntax()).is_none() {
+        return false;
+    }
+
+    node.expression().ok().is_some_and(|expression| {
+        expression.as_scss_parenthesized_expression().is_some()
+            || unwrap_single_expression_item(&expression)
+                .is_some_and(|item| item.as_scss_parenthesized_expression().is_some())
+    })
 }

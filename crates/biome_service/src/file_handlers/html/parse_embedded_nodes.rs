@@ -233,8 +233,7 @@ pub(crate) fn parse_embedded_nodes(
                 {
                     let is_v_on = directive
                         .name_token()
-                        .map(|t| t.text_trimmed() == "v-on")
-                        .unwrap_or(false);
+                        .is_ok_and(|t| t.text_trimmed() == "v-on");
                     if let Some(candidate) = build_vue_directive_candidate(&initializer, is_v_on) {
                         ctx.parse_and_push(
                             &candidate,

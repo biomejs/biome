@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
 info: markdown/spec/example-105.md
 ---
 
@@ -28,4 +29,27 @@ aaa
 ```md
 ``` ```
 aaa
+```
+
+# Errors
+```
+example-105.md:1:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Backtick fence info string cannot contain backtick characters.
+  
+  > 1 │ ``` ```
+      │     ^^^
+    2 │ aaa
+    3 │ 
+  
+  i stray backtick here
+  
+  > 1 │ ``` ```
+      │     ^^^
+    2 │ aaa
+    3 │ 
+  
+  i Use a tilde fence instead, or remove the backtick. Otherwise, the line is parsed as a paragraph, not a code block.
+  
+
 ```

@@ -15,6 +15,13 @@ pub use biome_rowan::{
     SyntaxNodeText, TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent,
 };
 pub use file_source::{CssFileLanguage, CssFileSource, CssVariant, EmbeddingKind};
+pub use scss_ext::{
+    ScssMapContext, ScssMapOuterParenthesizedValuePayloadKind, ScssMapPositionKind, ScssMapRole,
+    is_in_scss_include_arguments, is_in_scss_map_key, is_scss_map_key, is_scss_map_value,
+    scss_include_keyword_argument_owner, scss_keyword_argument_from_css_expression,
+    scss_keyword_argument_from_expression, scss_keyword_argument_from_syntax, scss_map_context,
+    single_expression_item, unwrap_single_expression_item,
+};
 pub use syntax_node::*;
 
 use crate::CssSyntaxKind::*;

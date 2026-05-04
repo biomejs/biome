@@ -3,7 +3,9 @@ use crate::syntax::block::parse_declaration_or_rule_list_block;
 use crate::syntax::scss::{
     expected_scss_expression, parse_scss_expression_until, parse_scss_variable,
 };
-use biome_css_syntax::CssSyntaxKind::{self, CSS_BOGUS, SCSS_EACH_AT_RULE, SCSS_EACH_BINDING_LIST};
+use biome_css_syntax::CssSyntaxKind::{
+    self, CSS_BOGUS, SCSS_EACH_AT_RULE, SCSS_EACH_BINDING_LIST, SCSS_EACH_HEADER,
+};
 use biome_css_syntax::T;
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
@@ -35,12 +37,15 @@ pub(crate) fn parse_scss_each_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(T![each]);
 
+    let header = p.start();
     ScssEachBindingList.parse_list(p);
 
     p.expect(T![in]);
 
     parse_scss_expression_until(p, SCSS_EACH_ITERABLE_END_SET)
         .or_add_diagnostic(p, expected_scss_expression);
+    header.complete(p, SCSS_EACH_HEADER);
+
     parse_declaration_or_rule_list_block(p);
 
     Present(m.complete(p, SCSS_EACH_AT_RULE))

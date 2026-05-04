@@ -1,6 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: css/scss/at-rule/media-interpolation.scss
+info: scss/at-rule/media-interpolation.scss
 ---
 
 # Input
@@ -11,6 +11,10 @@ info: css/scss/at-rule/media-interpolation.scss
 @media (#{$feature}: #{$value}) {.box {color:red;}}
 
 @media (#{$min} <= width <= #{$max}) {.box {color:red;}}
+
+@media #{$query} {.box {color:red;}}
+
+@media #{$query}, screen {.box {color:red;}}
 
 @container (#{$feature}: #{$value}) {.box {color:red;}}
 
@@ -33,6 +37,18 @@ info: css/scss/at-rule/media-interpolation.scss
 }
 
 @media (#{$min} <= width <= #{$max}) {
+	.box {
+		color: red;
+	}
+}
+
+@media #{$query} {
+	.box {
+		color: red;
+	}
+}
+
+@media #{$query}, screen {
 	.box {
 		color: red;
 	}

@@ -12,6 +12,12 @@ $primary:blue !default,
 $spacing: 8px
 );
 
+@use "theme"with($x: red);
+
+@use "theme" with ($primary: blue);
+
+@use "theme" with ($x: red);
+
 @use "theme" as theme with(
 $primary:blue
 );

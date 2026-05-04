@@ -2784,6 +2784,22 @@
 			]
 		},
 		"NoBarrelFileOptions": { "type": "object", "additionalProperties": false },
+		"NoBaseToStringConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoBaseToStringOptions" }
+			]
+		},
+		"NoBaseToStringOptions": {
+			"type": "object",
+			"properties": {
+				"ignoredTypeNames": {
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoBeforeInteractiveScriptOutsideDocumentConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3683,6 +3699,25 @@
 				"skipIifes": {
 					"description": "When this option is set to `true`, Immediately Invoked Function Expressions (IIFEs) are not checked for the maximum line limit.",
 					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
+		"NoExcessiveNestedCallbacksConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoExcessiveNestedCallbacksOptions" }
+			]
+		},
+		"NoExcessiveNestedCallbacksOptions": {
+			"type": "object",
+			"properties": {
+				"max": {
+					"description": "Maximum callback nesting depth allowed (default: 5)",
+					"type": ["integer", "null"],
+					"format": "uint8",
+					"maximum": 255,
+					"minimum": 0
 				}
 			},
 			"additionalProperties": false
@@ -4811,6 +4846,16 @@
 			]
 		},
 		"NoReactSpecificPropsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoReactStringRefsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoReactStringRefsOptions" }
+			]
+		},
+		"NoReactStringRefsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -6042,6 +6087,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueVOnNumberValuesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueVOnNumberValuesOptions" }
+			]
+		},
+		"NoVueVOnNumberValuesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoWithConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6071,6 +6126,13 @@
 					"description": "Disallow ambiguous anchor descriptions.\nSee https://biomejs.dev/linter/rules/no-ambiguous-anchor-text",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoAmbiguousAnchorTextConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noBaseToString": {
+					"description": "Require stringification to avoid values that only use the default object representation.\nSee https://biomejs.dev/linter/rules/no-base-to-string",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoBaseToStringConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6227,6 +6289,13 @@
 					"description": "Restrict the number of lines in a file.\nSee https://biomejs.dev/linter/rules/no-excessive-lines-per-file",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoExcessiveLinesPerFileConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noExcessiveNestedCallbacks": {
+					"description": "Enforce a maximum depth that callbacks can be nested.\nSee https://biomejs.dev/linter/rules/no-excessive-nested-callbacks",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoExcessiveNestedCallbacksConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6468,6 +6537,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noReactStringRefs": {
+					"description": "Disallow string refs in React components.\nSee https://biomejs.dev/linter/rules/no-react-string-refs",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReactStringRefsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noRedundantDefaultExport": {
 					"description": "Checks if a default export exports the same symbol as a named export.\nSee https://biomejs.dev/linter/rules/no-redundant-default-export",
 					"anyOf": [
@@ -6612,6 +6688,13 @@
 					"description": "Disallow using v-if and v-for directives on the same element.\nSee https://biomejs.dev/linter/rules/no-vue-v-if-with-v-for",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueVIfWithVForConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueVOnNumberValues": {
+					"description": "Disallow deprecated number modifiers on Vue v-on directives.\nSee https://biomejs.dev/linter/rules/no-vue-v-on-number-values",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueVOnNumberValuesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6791,6 +6874,13 @@
 					"description": "Require queries, mutations, subscriptions or fragments each to be located in separate files.\nSee https://biomejs.dev/linter/rules/use-lone-executable-definition",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseLoneExecutableDefinitionConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useMathMinMax": {
+					"description": "Prefer Math.min() and Math.max() over ternaries for simple comparisons.\nSee https://biomejs.dev/linter/rules/use-math-min-max",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseMathMinMaxConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7757,6 +7847,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoBaseToStringOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoBaseToStringOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoBeforeInteractiveScriptOutsideDocumentOptions": {
 			"type": "object",
 			"properties": {
@@ -8495,6 +8594,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoExcessiveLinesPerFunctionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoExcessiveNestedCallbacksOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoExcessiveNestedCallbacksOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9525,6 +9633,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoReactStringRefsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoReactStringRefsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoRedeclareOptions": {
 			"type": "object",
 			"properties": {
@@ -10549,6 +10666,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoVueVOnNumberValuesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueVOnNumberValuesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoWithOptions": {
 			"type": "object",
 			"properties": {
@@ -11447,6 +11573,16 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseLoneExecutableDefinitionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseMathMinMaxOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseMathMinMaxOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -14943,6 +15079,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseMathMinMaxConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseMathMinMaxOptions" }
+			]
+		},
+		"UseMathMinMaxOptions": { "type": "object", "additionalProperties": false },
 		"UseMaxParamsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },

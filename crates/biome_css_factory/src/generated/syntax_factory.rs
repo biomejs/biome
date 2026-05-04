@@ -3536,7 +3536,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && CssNumber::can_cast(element.kind())
+                    && AnyCssPseudoClassNthValue::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -4300,7 +4300,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && CssNumber::can_cast(element.kind())
+                    && AnyCssPseudoClassNthValue::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -4359,7 +4359,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && CssNumber::can_cast(element.kind())
+                    && AnyCssPseudoClassNthValue::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -6586,7 +6586,7 @@ impl SyntaxFactory for CssSyntaxFactory {
             }
             SCSS_EACH_AT_RULE => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
                     && element.kind() == T![each]
@@ -6595,6 +6595,32 @@ impl SyntaxFactory for CssSyntaxFactory {
                     current_element = elements.next();
                 }
                 slots.next_slot();
+                if let Some(element) = &current_element
+                    && ScssEachHeader::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && CssDeclarationOrRuleBlock::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SCSS_EACH_AT_RULE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SCSS_EACH_AT_RULE, children)
+            }
+            SCSS_EACH_HEADER => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
                 if let Some(element) = &current_element
                     && ScssEachBindingList::can_cast(element.kind())
                 {
@@ -6616,20 +6642,13 @@ impl SyntaxFactory for CssSyntaxFactory {
                     current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element
-                    && CssDeclarationOrRuleBlock::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        SCSS_EACH_AT_RULE.to_bogus(),
+                        SCSS_EACH_HEADER.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(SCSS_EACH_AT_RULE, children)
+                slots.into_node(SCSS_EACH_HEADER, children)
             }
             SCSS_ELSE_CLAUSE => {
                 let mut elements = (&children).into_iter();
@@ -7187,6 +7206,25 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(SCSS_INTERPOLATED_IDENTIFIER_HYPHEN, children)
             }
+            SCSS_INTERPOLATED_NTH_VALUE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && ScssInterpolatedNthValuePartList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SCSS_INTERPOLATED_NTH_VALUE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SCSS_INTERPOLATED_NTH_VALUE, children)
+            }
             SCSS_INTERPOLATED_STRING => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
@@ -7219,6 +7257,25 @@ impl SyntaxFactory for CssSyntaxFactory {
                     );
                 }
                 slots.into_node(SCSS_INTERPOLATED_STRING, children)
+            }
+            SCSS_INTERPOLATED_VALUE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && ScssInterpolatedValuePartList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SCSS_INTERPOLATED_VALUE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SCSS_INTERPOLATED_VALUE, children)
             }
             SCSS_INTERPOLATION => {
                 let mut elements = (&children).into_iter();
@@ -7396,6 +7453,25 @@ impl SyntaxFactory for CssSyntaxFactory {
                     );
                 }
                 slots.into_node(SCSS_MAP_EXPRESSION_PAIR, children)
+            }
+            SCSS_MEDIA_QUERY => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && ScssInterpolation::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SCSS_MEDIA_QUERY.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SCSS_MEDIA_QUERY, children)
             }
             SCSS_MIXIN_AT_RULE => {
                 let mut elements = (&children).into_iter();
@@ -8906,8 +8982,16 @@ impl SyntaxFactory for CssSyntaxFactory {
                 children,
                 AnyScssInterpolatedIdentifierPart::can_cast,
             ),
+            SCSS_INTERPOLATED_NTH_VALUE_PART_LIST => Self::make_node_list_syntax(
+                kind,
+                children,
+                AnyScssInterpolatedNthValuePart::can_cast,
+            ),
             SCSS_INTERPOLATED_STRING_PART_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyScssInterpolatedStringPart::can_cast)
+            }
+            SCSS_INTERPOLATED_VALUE_PART_LIST => {
+                Self::make_node_list_syntax(kind, children, AnyScssInterpolatedValuePart::can_cast)
             }
             SCSS_LIST_EXPRESSION_ELEMENT_LIST => Self::make_separated_list_syntax(
                 kind,

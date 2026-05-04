@@ -739,6 +739,18 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
+        "@typescript-eslint/no-base-to-string" => {
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_base_to_string
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
         "@typescript-eslint/no-deprecated" => {
             if !options.include_inspired {
                 results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
@@ -2266,6 +2278,18 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group
                 .unwrap_group_as_mut()
                 .no_excessive_lines_per_function
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "max-nested-callbacks" => {
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_excessive_nested_callbacks
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
@@ -4181,6 +4205,18 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
+        "react/no-string-refs" => {
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_react_string_refs
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
         "react/no-unknown-property" => {
             if !options.include_nursery {
                 results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
@@ -4541,6 +4577,18 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
+        "unicorn/prefer-math-min-max" => {
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .use_math_min_max
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
         "unicorn/prefer-module" => {
             if !options.include_inspired {
                 results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
@@ -4890,6 +4938,18 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group
                 .unwrap_group_as_mut()
                 .no_vue_data_object_declaration
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "vue/no-deprecated-v-on-number-modifiers" => {
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_vue_v_on_number_values
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }

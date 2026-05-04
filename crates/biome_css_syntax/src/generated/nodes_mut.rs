@@ -1998,7 +1998,7 @@ impl CssNthOffset {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_value(self, element: CssNumber) -> Self {
+    pub fn with_value(self, element: AnyCssPseudoClassNthValue) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -2454,7 +2454,7 @@ impl CssPseudoClassNth {
                 .splice_slots(0usize..=0usize, once(element.map(|element| element.into()))),
         )
     }
-    pub fn with_value(self, element: Option<CssNumber>) -> Self {
+    pub fn with_value(self, element: Option<AnyCssPseudoClassNthValue>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             1usize..=1usize,
             once(element.map(|element| element.into_syntax().into())),
@@ -2488,7 +2488,7 @@ impl CssPseudoClassNthNumber {
                 .splice_slots(0usize..=0usize, once(element.map(|element| element.into()))),
         )
     }
-    pub fn with_value(self, element: CssNumber) -> Self {
+    pub fn with_value(self, element: AnyCssPseudoClassNthValue) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -3738,28 +3738,36 @@ impl ScssEachAtRule {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_bindings(self, element: ScssEachBindingList) -> Self {
+    pub fn with_header(self, element: ScssEachHeader) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
+    pub fn with_block(self, element: CssDeclarationOrRuleBlock) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl ScssEachHeader {
+    pub fn with_bindings(self, element: ScssEachBindingList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
     pub fn with_in_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
     pub fn with_iterable(self, element: ScssExpression) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-    pub fn with_block(self, element: CssDeclarationOrRuleBlock) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(4usize..=4usize, once(Some(element.into_syntax().into()))),
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
@@ -4107,6 +4115,14 @@ impl ScssInterpolatedIdentifierHyphen {
         )
     }
 }
+impl ScssInterpolatedNthValue {
+    pub fn with_items(self, element: ScssInterpolatedNthValuePartList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl ScssInterpolatedString {
     pub fn with_opening_quote_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -4124,6 +4140,14 @@ impl ScssInterpolatedString {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into()))),
+        )
+    }
+}
+impl ScssInterpolatedValue {
+    pub fn with_items(self, element: ScssInterpolatedValuePartList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
@@ -4226,6 +4250,14 @@ impl ScssMapExpressionPair {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl ScssMediaQuery {
+    pub fn with_query(self, element: ScssInterpolation) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
 }

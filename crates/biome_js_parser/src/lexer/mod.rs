@@ -1906,39 +1906,29 @@ impl<'src> JsLexer<'src> {
                     self.eat_byte(T![.])
                 }
             }
-            BSL => {
-                if self.peek_byte() == Some(b'u') {
+            BSL if self.peek_byte() == Some(b'u') => {
+                self.next_byte();
+                let res = if self.peek_byte() == Some(b'{') {
                     self.next_byte();
-                    let res = if self.peek_byte() == Some(b'{') {
-                        self.next_byte();
-                        self.read_codepoint_escape_char()
-                    } else {
-                        self.read_unicode_escape_char()
-                    };
-
-                    match res {
-                        Ok(chr) => {
-                            if is_js_id_start(chr) {
-                                self.current_flags |= TokenFlags::UNICODE_ESCAPE;
-                                self.resolve_identifier(chr)
-                            } else {
-                                let err = ParseDiagnostic::new("unexpected unicode escape",
-                                                               start..self.position).with_hint("this escape is unexpected, as it does not designate the start of an identifier");
-                                self.push_diagnostic(err);
-                                self.next_byte();
-                                JsSyntaxKind::ERROR_TOKEN
-                            }
-                        }
-                        Err(_) => JsSyntaxKind::ERROR_TOKEN,
-                    }
+                    self.read_codepoint_escape_char()
                 } else {
-                    let err = ParseDiagnostic::new(
-                        format!("unexpected token `{}`", byte as char),
-                        start..self.position + 1,
-                    );
-                    self.push_diagnostic(err);
-                    self.next_byte();
-                    JsSyntaxKind::ERROR_TOKEN
+                    self.read_unicode_escape_char()
+                };
+
+                match res {
+                    Ok(chr) => {
+                        if is_js_id_start(chr) {
+                            self.current_flags |= TokenFlags::UNICODE_ESCAPE;
+                            self.resolve_identifier(chr)
+                        } else {
+                            let err = ParseDiagnostic::new("unexpected unicode escape",
+                                                               start..self.position).with_hint("this escape is unexpected, as it does not designate the start of an identifier");
+                            self.push_diagnostic(err);
+                            self.next_byte();
+                            JsSyntaxKind::ERROR_TOKEN
+                        }
+                    }
+                    Err(_) => JsSyntaxKind::ERROR_TOKEN,
                 }
             }
             QOT => {

@@ -38,13 +38,13 @@ use biome_markdown_syntax::{T, kind::MarkdownSyntaxKind::*};
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::RecoveryResult;
 use biome_parser::{
-    Parser,
+    CompletedMarker, Parser,
     prelude::ParsedSyntax::{self, *},
 };
 use biome_rowan::TextSize;
 use fenced_code_block::{
-    at_fenced_code_block, info_string_has_backtick, parse_fenced_code_block,
-    parse_fenced_code_block_force,
+    at_fenced_code_block, backtick_info_violation, info_string_has_backtick,
+    parse_fenced_code_block, parse_fenced_code_block_force,
 };
 use header::{at_header, parse_header};
 use html_block::{at_html_block, at_html_block_interrupt, parse_html_block};
@@ -106,6 +106,7 @@ pub(crate) const MAX_BLOCK_PREFIX_INDENT: usize = 3;
 
 pub(crate) fn parse_document(p: &mut MarkdownParser) {
     let m = p.start();
+    p.eat(UNICODE_BOM);
     let _ = parse_block_list(p);
     // Bump the EOF token - required by the grammar
     p.bump(T![EOF]);
@@ -259,11 +260,15 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
     // Handle standalone NEWLINE tokens as MdNewline nodes.
     // This prevents inter-block NEWLINEs from becoming "newline-only paragraphs".
     if p.at(NEWLINE) {
+        if p.at_blank_line() {
+            p.state_mut().link_reference_definition_continuation = false;
+        }
         let m = p.start();
         p.bump(NEWLINE);
         return Present(m.complete(p, MD_NEWLINE));
     }
     if at_blank_line_start(p) {
+        p.state_mut().link_reference_definition_continuation = false;
         // Consume blank-line whitespace as whitespace trivia (structural).
         while p.at(MD_TEXTUAL_LITERAL) {
             let text = p.cur_text();
@@ -282,12 +287,20 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
         return Absent;
     }
 
+    let allow_indent_code_block =
+        allow_indent_code_block && !p.state().link_reference_definition_continuation;
+
     let parsed = if allow_indent_code_block && at_indent_code_block(p) {
         parse_indent_code_block(p)
     } else if at_fenced_code_block(p) {
         parse_fenced_code_block(p)
     } else if line_starts_with_fence(p) {
         parse_fenced_code_block_force(p)
+    } else if let Some(range) = backtick_info_violation(p) {
+        // Backtick-fence info strings cannot contain backticks (CommonMark §4.5);
+        // emit a diagnostic before delegating to paragraph parsing.
+        p.error(parse_error::info_string_contains_backtick(p, range));
+        parse_paragraph(p)
     } else if at_thematic_break_block(p) {
         let break_block = try_parse(p, |p| {
             let break_block = parse_thematic_break_block(p);
@@ -355,7 +368,12 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
             Ok(link)
         });
         if let Ok(parsed) = link_result {
-            parsed
+            p.state_mut().link_reference_definition_continuation = true;
+            if link_reference_definition_before_dash_thematic_break(p) {
+                Present(parse_empty_paragraph(p))
+            } else {
+                parsed
+            }
         } else {
             parse_paragraph(p)
         }
@@ -403,6 +421,12 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
             p.bump_any();
         }
         return Absent;
+    }
+
+    if let Present(marker) = &parsed
+        && marker.kind(p) != MD_LINK_REFERENCE_DEFINITION
+    {
+        p.state_mut().link_reference_definition_continuation = false;
     }
 
     parsed
@@ -653,6 +677,34 @@ pub(crate) fn parse_paragraph(p: &mut MarkdownParser) -> ParsedSyntax {
         m.complete(p, MD_PARAGRAPH)
     };
     Present(completed)
+}
+
+pub(crate) fn parse_empty_paragraph(p: &mut MarkdownParser) -> CompletedMarker {
+    let paragraph = p.start();
+    let list = p.start();
+    list.complete(p, MD_INLINE_ITEM_LIST);
+    paragraph.complete(p, MD_PARAGRAPH)
+}
+
+fn link_reference_definition_before_dash_thematic_break(p: &mut MarkdownParser) -> bool {
+    if !p.at(NEWLINE) || p.at_blank_line() {
+        return false;
+    }
+
+    p.lookahead(|p| {
+        p.bump(NEWLINE);
+
+        while p.at(MD_TEXTUAL_LITERAL) {
+            let text = p.cur_text();
+            if text == " " || text == "\t" {
+                p.bump(MD_TEXTUAL_LITERAL);
+            } else {
+                break;
+            }
+        }
+
+        p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break(p)
+    })
 }
 
 fn inline_has_non_whitespace(p: &MarkdownParser, start: usize, end: usize) -> bool {
@@ -1044,16 +1096,10 @@ fn handle_line_continuation(
         return InlineNewlineAction::Break;
     }
 
-    if required_indent > 0 && p.state().list_nesting_depth >= 2 {
-        let marker_indent = p.state().list_item_marker_indent;
-        if marker_indent > 0 {
-            let indent = p.line_start_leading_indent();
-            if indent < required_indent && indent <= marker_indent {
-                return InlineNewlineAction::Break;
-            }
-        }
+    // The invalid fence still belongs to this paragraph; only add the diagnostic.
+    if let Some(range) = backtick_info_violation(p) {
+        p.error(parse_error::info_string_contains_backtick(p, range));
     }
-
     if p.at(MD_TEXTUAL_LITERAL) {
         let text = p.cur_text();
         if text.starts_with("```") || text.starts_with("~~~") {

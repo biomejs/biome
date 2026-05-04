@@ -1,6 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: css/scss/at-rule/each.scss
+info: scss/at-rule/each.scss
 ---
 
 # Input
@@ -29,6 +29,50 @@ color:red;
 }
 }
 
+@each $animal,$color,$cursor in (puma,black,default),(sea-slug,blue,pointer),(egret,white,move){
+}
+
+@each $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var in puma,sea-slug,egret,salamander{
+}
+
+@each $animal in /* animals */ puma,sea-slug,egret,salamander{
+}
+
+@each $animal in
+// animals
+puma,sea-slug,egret,salamander{
+}
+
+@each $animal,$color,$cursor in /* animals */ (puma,black,default),(sea-slug,blue,pointer){
+}
+
+@each $animal in /* animals */ $animals{
+}
+
+@each $animal in((puma),(sea-slug),(egret),(salamander)){}
+
+@each $element,$size in(h1:20px,h2:16px,h3:14px){}
+
+@each
+$element,
+$size
+in
+(
+h1
+:
+20px
+,
+h2
+:
+16px
+,
+h3
+:
+14px
+)
+{
+}
+
 ```
 
 
@@ -36,17 +80,13 @@ color:red;
 
 ```scss
 .a {
-	@each $item in $list {
+	@each $item in$list {
 		color: $item;
 	}
 }
 
 .b {
-	@each $key,
-	$value in (
-		primary: 16px,
-		secondary: 24px,
-	) {
+	@each $key, $value in(primary: 16px, secondary: 24px) {
 		font-size: $value;
 	}
 }
@@ -57,4 +97,47 @@ color:red;
 	}
 }
 
+@each $animal, $color, $cursor in (puma, black, default),
+	(sea-slug, blue, pointer), (egret, white, move)
+{
+}
+
+@each $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+		in puma,
+	sea-slug, egret, salamander
+{
+}
+
+@each $animal in /* animals */ puma, sea-slug, egret, salamander {
+}
+
+@each $animal
+		in // animals
+	puma,
+	sea-slug, egret, salamander
+{
+}
+
+@each $animal, $color, $cursor in /* animals */ (puma, black, default),
+	(sea-slug, blue, pointer)
+{
+}
+
+@each $animal in /* animals */ $animals {
+}
+
+@each $animal in((puma), (sea-slug), (egret), (salamander)) {
+}
+
+@each $element, $size in(h1: 20px, h2: 16px, h3: 14px) {
+}
+
+@each $element, $size in (h1: 20px, h2: 16px, h3: 14px) {
+}
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   24: @each $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
 ```

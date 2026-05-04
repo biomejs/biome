@@ -397,6 +397,52 @@ fn migrate_eslintrcjson_rule_options() {
 }
 
 #[test]
+fn migrate_eslintrcjson_nursery_rule_options() {
+    let biomejson = r#"{ "linter": { "enabled": true } }"#;
+    let eslintrc = r#"{
+        "rules": {
+            "@typescript-eslint/no-base-to-string": ["error", {
+                "ignoredTypeNames": ["Error", "CustomStringLike"],
+                "checkUnknown": true
+            }]
+        },
+        "overrides": [{
+            "files": ["default.ts"],
+            "rules": {
+                "@typescript-eslint/no-base-to-string": "error"
+            }
+        }]
+    }"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8Path::new("biome.json").into(), biomejson.as_bytes());
+    fs.insert(Utf8Path::new(".eslintrc.json").into(), eslintrc.as_bytes());
+
+    let mut console = BufferConsole::default();
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "migrate",
+                "eslint",
+                "--include-inspired",
+                "--include-nursery",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "migrate_eslintrcjson_nursery_rule_options",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn migrate_eslintrcjson_empty() {
     let biomejson = r#"{ "linter": { "enabled": true } }
 "#;

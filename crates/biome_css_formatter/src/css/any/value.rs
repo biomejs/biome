@@ -22,6 +22,7 @@ impl FormatRule<AnyCssValue> for FormatAnyCssValue {
             AnyCssValue::CssUnicodeRange(node) => node.format().fmt(f),
             AnyCssValue::ScssInterpolatedIdentifier(node) => node.format().fmt(f),
             AnyCssValue::ScssInterpolatedString(node) => node.format().fmt(f),
+            AnyCssValue::ScssInterpolatedValue(node) => node.format().fmt(f),
             AnyCssValue::ScssModuleMemberAccess(node) => node.format().fmt(f),
             AnyCssValue::ScssParentSelectorValue(node) => node.format().fmt(f),
             AnyCssValue::ScssVariable(node) => node.format().fmt(f),

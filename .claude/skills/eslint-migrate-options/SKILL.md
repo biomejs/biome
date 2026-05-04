@@ -290,16 +290,15 @@ At minimum, verify all of these:
 2. ESLint config with options produces the expected Biome options.
 3. Unsupported ESLint knobs do not break deserialization.
 4. Empty or partially specified nested options do not emit incorrect Biome config.
+5. If Biome's defaults differ from ESLint's, severity-only configs should not emit Biome options that change behavior.
 
-Use the migrator spec fixtures in `crates/biome_cli/tests/specs/migrate_eslint/` as the default test path for custom migrators.
+Use the migrator spec fixtures in `crates/biome_cli/tests/specs/migrate_eslint/` for custom migrators.
 
 - Add one fixture file per case.
 - Keep the fixture focused on `eslint` input and pre-migration `biome` config input.
 - Let the generated test runner in `eslint_to_biome.rs` discover the file and write the adjacent `.snap.new`.
-- Prefer adding or updating these fixture snapshots instead of writing a new full CLI test when you are verifying custom option migration behavior.
+- Add fixtures for every relevant option shape, including severity-only configs when defaults differ between ESLint and Biome.
 - After inspecting snapshot differences, use `cargo insta accept` to accept valid new snapshots, or `cargo insta reject` to reject invalid ones and keep iterating.
-
-CLI tests in `crates/biome_cli/tests/commands/migrate_eslint.rs` should be treated as smoke coverage for command wiring and end-to-end behavior, not the primary place to test custom migrators.
 
 Useful commands:
 

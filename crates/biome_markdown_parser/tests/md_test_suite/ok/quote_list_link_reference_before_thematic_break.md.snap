@@ -1,0 +1,170 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+> - [a]: /url
+> 	---
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdQuote {
+            prefix: MdQuotePrefix {
+                pre_marker_indent: MdQuoteIndentList [],
+                marker_token: R_ANGLE@0..1 ">" [] [],
+                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@1..2 " " [] [],
+            },
+            content: MdBlockList [
+                MdBulletListItem {
+                    md_bullet_list: MdBulletList [
+                        MdBullet {
+                            prefix: MdListMarkerPrefix {
+                                pre_marker_indent: MdIndentTokenList [],
+                                marker: MINUS@2..3 "-" [] [],
+                                post_marker_space_token: MD_LIST_POST_MARKER_SPACE@3..4 " " [] [],
+                                content_indent: MdIndentTokenList [],
+                            },
+                            content: MdBlockList [
+                                MdLinkReferenceDefinition {
+                                    indent: MdIndentTokenList [],
+                                    l_brack_token: L_BRACK@4..5 "[" [] [],
+                                    label: MdLinkLabel {
+                                        content: MdInlineItemList [
+                                            MdTextual {
+                                                value_token: MD_TEXTUAL_LITERAL@5..6 "a" [] [],
+                                            },
+                                        ],
+                                    },
+                                    r_brack_token: R_BRACK@6..7 "]" [] [],
+                                    colon_token: COLON@7..8 ":" [] [],
+                                    destination: MdLinkDestination {
+                                        content: MdInlineItemList [
+                                            MdTextual {
+                                                value_token: MD_TEXTUAL_LITERAL@8..9 " " [] [],
+                                            },
+                                            MdTextual {
+                                                value_token: MD_TEXTUAL_LITERAL@9..13 "/url" [] [],
+                                            },
+                                        ],
+                                    },
+                                    title: missing (optional),
+                                },
+                                MdParagraph {
+                                    list: MdInlineItemList [],
+                                    hard_line: missing (optional),
+                                },
+                                MdNewline {
+                                    value_token: NEWLINE@13..14 "\n" [] [],
+                                },
+                                MdQuotePrefix {
+                                    pre_marker_indent: MdQuoteIndentList [],
+                                    marker_token: R_ANGLE@14..15 ">" [] [],
+                                    post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@15..16 " " [] [],
+                                },
+                                MdContinuationIndent {
+                                    indent: MdIndentTokenList [
+                                        MdIndentToken {
+                                            md_indent_char_token: MD_INDENT_CHAR@16..17 "\t" [] [],
+                                        },
+                                    ],
+                                },
+                                MdThematicBreakBlock {
+                                    parts: MdThematicBreakPartList [
+                                        MdThematicBreakChar {
+                                            value: MINUS@17..18 "-" [] [],
+                                        },
+                                        MdThematicBreakChar {
+                                            value: MINUS@18..19 "-" [] [],
+                                        },
+                                        MdThematicBreakChar {
+                                            value: MINUS@19..20 "-" [] [],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                MdNewline {
+                    value_token: NEWLINE@20..21 "\n" [] [],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@21..21 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..21
+  0: (empty)
+  1: MD_BLOCK_LIST@0..21
+    0: MD_QUOTE@0..21
+      0: MD_QUOTE_PREFIX@0..2
+        0: MD_QUOTE_INDENT_LIST@0..0
+        1: R_ANGLE@0..1 ">" [] []
+        2: MD_QUOTE_POST_MARKER_SPACE@1..2 " " [] []
+      1: MD_BLOCK_LIST@2..21
+        0: MD_BULLET_LIST_ITEM@2..20
+          0: MD_BULLET_LIST@2..20
+            0: MD_BULLET@2..20
+              0: MD_LIST_MARKER_PREFIX@2..4
+                0: MD_INDENT_TOKEN_LIST@2..2
+                1: MINUS@2..3 "-" [] []
+                2: MD_LIST_POST_MARKER_SPACE@3..4 " " [] []
+                3: MD_INDENT_TOKEN_LIST@4..4
+              1: MD_BLOCK_LIST@4..20
+                0: MD_LINK_REFERENCE_DEFINITION@4..13
+                  0: MD_INDENT_TOKEN_LIST@4..4
+                  1: L_BRACK@4..5 "[" [] []
+                  2: MD_LINK_LABEL@5..6
+                    0: MD_INLINE_ITEM_LIST@5..6
+                      0: MD_TEXTUAL@5..6
+                        0: MD_TEXTUAL_LITERAL@5..6 "a" [] []
+                  3: R_BRACK@6..7 "]" [] []
+                  4: COLON@7..8 ":" [] []
+                  5: MD_LINK_DESTINATION@8..13
+                    0: MD_INLINE_ITEM_LIST@8..13
+                      0: MD_TEXTUAL@8..9
+                        0: MD_TEXTUAL_LITERAL@8..9 " " [] []
+                      1: MD_TEXTUAL@9..13
+                        0: MD_TEXTUAL_LITERAL@9..13 "/url" [] []
+                  6: (empty)
+                1: MD_PARAGRAPH@13..13
+                  0: MD_INLINE_ITEM_LIST@13..13
+                  1: (empty)
+                2: MD_NEWLINE@13..14
+                  0: NEWLINE@13..14 "\n" [] []
+                3: MD_QUOTE_PREFIX@14..16
+                  0: MD_QUOTE_INDENT_LIST@14..14
+                  1: R_ANGLE@14..15 ">" [] []
+                  2: MD_QUOTE_POST_MARKER_SPACE@15..16 " " [] []
+                4: MD_CONTINUATION_INDENT@16..17
+                  0: MD_INDENT_TOKEN_LIST@16..17
+                    0: MD_INDENT_TOKEN@16..17
+                      0: MD_INDENT_CHAR@16..17 "\t" [] []
+                5: MD_THEMATIC_BREAK_BLOCK@17..20
+                  0: MD_THEMATIC_BREAK_PART_LIST@17..20
+                    0: MD_THEMATIC_BREAK_CHAR@17..18
+                      0: MINUS@17..18 "-" [] []
+                    1: MD_THEMATIC_BREAK_CHAR@18..19
+                      0: MINUS@18..19 "-" [] []
+                    2: MD_THEMATIC_BREAK_CHAR@19..20
+                      0: MINUS@19..20 "-" [] []
+        1: MD_NEWLINE@20..21
+          0: NEWLINE@20..21 "\n" [] []
+  2: EOF@21..21 "" [] []
+
+```
