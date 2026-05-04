@@ -16,7 +16,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 ```
 issue6492.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Sort this chunk of imports.
+  i Sort these imports.
   
     1 │ // some comment
   > 2 │ import react from "@vitejs/plugin-react";

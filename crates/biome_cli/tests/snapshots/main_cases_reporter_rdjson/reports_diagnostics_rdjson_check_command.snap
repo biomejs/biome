@@ -241,7 +241,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
               "line": 2
             }
           },
-          "text": "Sort this chunk of imports."
+          "text": "Sort these imports."
         },
         {
           "range": {
@@ -445,7 +445,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
               "line": 2
             }
           },
-          "text": "Sort this chunk of imports."
+          "text": "Sort these imports."
         },
         {
           "range": {

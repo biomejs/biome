@@ -15,7 +15,7 @@ import { Moment } from 'moment';
 ```
 mergeable-with_header.js:3:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Sort this chunk of imports.
+  i Sort these imports.
   
     1 │ // Header comment
     2 │ 

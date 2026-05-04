@@ -164,7 +164,7 @@ The --json option is unstable/experimental and its output might change between p
 				{
 					"start": { "line": 2, "column": 1 },
 					"end": { "line": 2, "column": 33 },
-					"text": "Sort this chunk of imports."
+					"text": "Sort these imports."
 				},
 				{
 					"start": { "line": 1, "column": 1 },
@@ -275,7 +275,7 @@ The --json option is unstable/experimental and its output might change between p
 				{
 					"start": { "line": 2, "column": 1 },
 					"end": { "line": 2, "column": 33 },
-					"text": "Sort this chunk of imports."
+					"text": "Sort these imports."
 				},
 				{
 					"start": { "line": 1, "column": 1 },

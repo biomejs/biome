@@ -41,7 +41,7 @@ mergeable_export.ts:2:1 assist/source/organizeImports  FIXABLE  ━━━━━�
     3 │ // Comment 2
     4 │ export type { T3, T1 } from "mod";
   
-  i Sort this chunk of exports.
+  i Sort these exports.
   
     1 │ // Comment 1
   > 2 │ export type { T4, T2 } from "mod";

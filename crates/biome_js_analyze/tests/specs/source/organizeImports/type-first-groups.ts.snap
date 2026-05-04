@@ -21,7 +21,7 @@ import type T4 from "https://example.com";
 ```
 type-first-groups.ts:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Sort this chunk of imports.
+  i Sort these imports.
   
    > 1 │ import V1 from "bun:package";
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

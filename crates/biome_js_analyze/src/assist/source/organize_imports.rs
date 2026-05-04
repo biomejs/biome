@@ -743,7 +743,7 @@ impl Rule for OrganizeImports {
             const fn message(&self) -> &'static str {
                 match self {
                     Self::MissingNewlineBetweenChunks => {
-                        "This statement ends a chunk of imports or exports and thus must be preceded by a blank line. Add a newline before this statement."
+                        "This statement must be preceded by a blank line. Add a newline before this statement."
                     }
                     Self::MissingNewlineBetweenGroups => {
                         "This statement ends a group that must be preceded by a blank line. Add a newline before this statement."
@@ -754,8 +754,8 @@ impl Rule for OrganizeImports {
                     Self::UnorganizedImportedNames => "Sort the imported names.",
                     Self::UnorganizedExportedNames => "Sort the exported names.",
                     Self::UnorganizedAttributes => "Sort the attributes.",
-                    Self::UnsortedImportChunk => "Sort this chunk of imports.",
-                    Self::UnsortedExportChunk => "Sort this chunk of exports.",
+                    Self::UnsortedImportChunk => "Sort these imports.",
+                    Self::UnsortedExportChunk => "Sort these exports.",
                 }
             }
         }
@@ -814,7 +814,10 @@ impl Rule for OrganizeImports {
                         .nth((slot_indexes.end - 1) as usize)?
                         .syntax()
                         .text_trimmed_range();
-                    let range = first_stmt.syntax().text_trimmed_range().cover(last_text_range);
+                    let range = first_stmt
+                        .syntax()
+                        .text_trimmed_range()
+                        .cover(last_text_range);
                     let mut i = last_unsorted_chunk_message_index + 1;
                     // Remove issues that are covered by the current one.
                     while i < located_issue_kinds.len() {
@@ -841,7 +844,9 @@ impl Rule for OrganizeImports {
             located_issue_kinds.push(located_issue_kind);
         }
         // If we have only one detailed diagnostic, then use it as main diagnostic.
-        if located_issue_kinds.len() == 1 && let Some(localized) = located_issue_kinds.first() {
+        if located_issue_kinds.len() == 1
+            && let Some(localized) = located_issue_kinds.first()
+        {
             Some(RuleDiagnostic::new(
                 category!("assist/source/organizeImports"),
                 localized.range,
@@ -851,7 +856,7 @@ impl Rule for OrganizeImports {
             let mut diagnostic = RuleDiagnostic::new(
                 category!("assist/source/organizeImports"),
                 action_range.or_else(|| Self::text_range(ctx, state)),
-                "Some imports or exports are not organized."
+                "Some imports or exports are not organized.",
             );
             for located_issue_kind in located_issue_kinds {
                 diagnostic =

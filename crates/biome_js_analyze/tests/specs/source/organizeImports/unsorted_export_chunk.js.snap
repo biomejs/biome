@@ -38,7 +38,7 @@ unsorted_export_chunk.js:2:1 assist/source/organizeImports  FIXABLE  ━━━�
     13 │ export { X }
     14 │ 
   
-  i Sort this chunk of exports.
+  i Sort these exports.
   
     1 │ // File header comment to keep at the top
   > 2 │ export { A, B } from "y";
@@ -49,7 +49,7 @@ unsorted_export_chunk.js:2:1 assist/source/organizeImports  FIXABLE  ━━━�
     5 │ // Detached comment
     6 │ 
   
-  i Sort this chunk of exports.
+  i Sort these exports.
   
      7 │ // Attached comment S
    > 8 │ export * as S from "s";
@@ -60,7 +60,7 @@ unsorted_export_chunk.js:2:1 assist/source/organizeImports  FIXABLE  ━━━�
     11 │ function f() {}
     12 │ export { A } from "a";
   
-  i This statement ends a chunk of imports or exports and thus must be preceded by a blank line. Add a newline before this statement.
+  i This statement must be preceded by a blank line. Add a newline before this statement.
   
      9 │ // Attached S
     10 │ export { R } from "r";
@@ -69,7 +69,7 @@ unsorted_export_chunk.js:2:1 assist/source/organizeImports  FIXABLE  ━━━�
     12 │ export { A } from "a";
     13 │ export { X }
   
-  i This statement ends a chunk of imports or exports and thus must be preceded by a blank line. Add a newline before this statement.
+  i This statement must be preceded by a blank line. Add a newline before this statement.
   
     10 │ export { R } from "r";
     11 │ function f() {}

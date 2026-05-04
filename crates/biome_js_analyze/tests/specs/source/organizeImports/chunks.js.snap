@@ -45,7 +45,7 @@ chunks.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━�
     12 │ 
     13 │ // Attached E
   
-  i Sort this chunk of imports.
+  i Sort these imports.
   
     1 │ // Header file comment to keep at the top
   > 2 │ import { D } from "d";
@@ -55,7 +55,7 @@ chunks.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━�
     4 │ 
     5 │ // Detached comment (Start of Chunk 2)
   
-  i Sort this chunk of imports.
+  i Sort these imports.
   
      7 │ // Attached C
    > 8 │ import { C } from "c";

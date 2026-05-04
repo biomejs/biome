@@ -13,7 +13,7 @@ export { A };
 ```
 chunk-with-bare-export.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This statement ends a chunk of imports or exports and thus must be preceded by a blank line. Add a newline before this statement.
+  i This statement must be preceded by a blank line. Add a newline before this statement.
   
     1 │ import { A } from "package";
   > 2 │ export { A };

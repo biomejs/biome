@@ -14,7 +14,7 @@ export { b, d };
 ```
 mergeable-bare-exports.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Sort this chunk of exports.
+  i Sort these exports.
   
   > 1 │ export { a };
       │ ^^^^^^^^^^^^^

@@ -26,7 +26,7 @@ chunk_newline.js:4:1 assist/source/organizeImports  FIXABLE  ━━━━━━�
       │ ^^^^^^^^^^^^^^^^^^^^^^
     6 │ 
   
-  i This statement ends a chunk of imports or exports and thus must be preceded by a blank line. Add a newline before this statement.
+  i This statement must be preceded by a blank line. Add a newline before this statement.
   
     2 │ import "a";
     3 │ import { B } from "b";
@@ -35,7 +35,7 @@ chunk_newline.js:4:1 assist/source/organizeImports  FIXABLE  ━━━━━━�
     5 │ import { A } from "a";
     6 │ 
   
-  i This statement ends a chunk of imports or exports and thus must be preceded by a blank line. Add a newline before this statement.
+  i This statement must be preceded by a blank line. Add a newline before this statement.
   
     3 │ import { B } from "b";
     4 │ f();

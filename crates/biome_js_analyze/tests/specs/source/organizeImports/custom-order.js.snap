@@ -40,7 +40,7 @@ custom-order.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━�
     4 │ import { test as testNode } from "@scopeX/special"
     5 │ import { test as testNode } from "@scopeX/lib"
   
-  i Sort this chunk of imports.
+  i Sort these imports.
   
   > 1 │ import { test as testBun } from "bun:test"
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

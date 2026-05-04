@@ -14,7 +14,7 @@ import { A } from "a";
 ```
 unsorted-starts-with-blank-line.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
-  i Sort this chunk of imports.
+  i Sort these imports.
   
   > 2 │ import { B } from "b";
       │ ^^^^^^^^^^^^^^^^^^^^^^

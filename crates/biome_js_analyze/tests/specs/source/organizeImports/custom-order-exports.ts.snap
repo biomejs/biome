@@ -14,7 +14,7 @@ export type { T };
 ```
 custom-order-exports.ts:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Sort this chunk of exports.
+  i Sort these exports.
   
   > 1 │ export { O };
       │ ^^^^^^^^^^^^^

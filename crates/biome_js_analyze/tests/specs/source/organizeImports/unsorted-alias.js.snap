@@ -20,7 +20,7 @@ import { e } from '$e'
 ```
 unsorted-alias.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Sort this chunk of imports.
+  i Sort these imports.
   
      1 │ /* should generate diagnostics */
    > 2 │ import { aa } from './aa'

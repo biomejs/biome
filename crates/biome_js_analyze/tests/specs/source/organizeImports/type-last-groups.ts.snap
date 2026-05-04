@@ -17,7 +17,7 @@ import V3 from "package";
 ```
 type-last-groups.ts:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Sort this chunk of imports.
+  i Sort these imports.
   
   > 1 │ import type T1 from "bun:package";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

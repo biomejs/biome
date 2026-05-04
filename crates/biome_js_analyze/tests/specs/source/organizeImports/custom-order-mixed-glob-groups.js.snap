@@ -36,7 +36,7 @@ custom-order-mixed-glob-groups.js:1:1 assist/source/organizeImports  FIXABLE  �
     4 │ import alias from "@scoped/package";
     5 │ import path from "./path";
   
-  i Sort this chunk of imports.
+  i Sort these imports.
   
   > 1 │ import { A } from "@my/lib";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -92,7 +92,7 @@ file.js:3:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━�
 ```block
 file.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Sort this chunk of imports.
+  × Sort these imports.
   
   > 2 │ import { B, C } from "b.js"
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^

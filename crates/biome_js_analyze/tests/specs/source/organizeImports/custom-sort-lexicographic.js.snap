@@ -54,7 +54,7 @@ custom-sort-lexicographic.js:1:1 assist/source/organizeImports  FIXABLE  ━━�
     2 │ import { var1, var2, var21, var11, var12, var22 } from 'custom-package'
     3 │ import {
   
-  i Sort this chunk of imports.
+  i Sort these imports.
   
    > 1 │ import { Module, module, Module1, Module2, module2, module1, module21, module1, module2, module11  } from "@scopeX/special"
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

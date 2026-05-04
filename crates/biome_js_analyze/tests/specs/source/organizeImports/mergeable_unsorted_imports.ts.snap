@@ -48,7 +48,7 @@ mergeable_unsorted_imports.ts:2:1 assist/source/organizeImports  FIXABLE  ━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^
     24 │ 
   
-  i Sort this chunk of imports.
+  i Sort these imports.
   
      1 │ // File header comment
    > 2 │ import type { T1, T2 } from "mod";
@@ -62,7 +62,7 @@ mergeable_unsorted_imports.ts:2:1 assist/source/organizeImports  FIXABLE  ━━
     17 │ 
     18 │ // Chunk 2
   
-  i Sort this chunk of imports.
+  i Sort these imports.
   
     20 │ // Comment 9
   > 21 │ import type { U3 } from "package";

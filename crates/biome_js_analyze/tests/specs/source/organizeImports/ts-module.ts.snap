@@ -17,7 +17,7 @@ declare module "module" {
 ```
 ts-module.ts:2:2 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Sort this chunk of imports.
+  i Sort these imports.
   
     1 │ declare module "module" {
   > 2 │ 	import type { B } from "b";

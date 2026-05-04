@@ -12,7 +12,7 @@ import { Moment } from 'moment';
 ```
 issue5985.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Sort this chunk of imports.
+  i Sort these imports.
   
   > 1 │ import moment from 'moment';
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

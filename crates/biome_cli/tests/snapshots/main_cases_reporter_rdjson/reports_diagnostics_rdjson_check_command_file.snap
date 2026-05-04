@@ -202,7 +202,7 @@ expression: redactor(content)
               "line": 2
             }
           },
-          "text": "Sort this chunk of imports."
+          "text": "Sort these imports."
         },
         {
           "range": {
@@ -406,7 +406,7 @@ expression: redactor(content)
               "line": 2
             }
           },
-          "text": "Sort this chunk of imports."
+          "text": "Sort these imports."
         },
         {
           "range": {

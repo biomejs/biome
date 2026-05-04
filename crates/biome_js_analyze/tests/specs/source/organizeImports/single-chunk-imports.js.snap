@@ -23,7 +23,7 @@ import { ScopedPackage } from "@scope/package";
 ```
 single-chunk-imports.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Sort this chunk of imports.
+  i Sort these imports.
   
    > 1 │ import { Bun } from "bun:test";
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
