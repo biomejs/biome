@@ -5690,6 +5690,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUselessCallConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUselessCallOptions" }
+			]
+		},
+		"NoUselessCallOptions": { "type": "object", "additionalProperties": false },
 		"NoUselessCatchBindingConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6584,6 +6591,13 @@
 					"description": "Disallow dependencies with untrusted licenses.\nSee https://biomejs.dev/linter/rules/no-untrusted-licenses",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUntrustedLicensesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessCall": {
+					"description": "Disallow unnecessary .call() and .apply().\nSee https://biomejs.dev/linter/rules/no-useless-call",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUselessCallConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10218,6 +10232,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnwantedPolyfillioOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUselessCallOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUselessCallOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
