@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::JsxAttribute;
 use biome_js_syntax::JsxAttributeInitializerClause;
+use biome_js_syntax::JsxAttributeList;
 use biome_js_syntax::JsxElement;
 use biome_js_syntax::JsxExpressionAttributeValue;
 use biome_js_syntax::JsSyntaxKind;
@@ -64,10 +65,11 @@ declare_lint_rule! {
     /// <a><div aria-hidden="true"></div>content</a>
     /// ```
     ///
+    /// The following is valid because `<a>` is passed as a render prop to a custom component.
+    /// The receiving component renders the anchor as a wrapper around its own children, so the
+    /// final DOM will contain both the anchor's attributes and visible text content.
+    ///
     /// ```jsx
-    /// // Valid: <a> is a render prop value; the wrapping component renders its
-    /// // own children inside the anchor, so the final DOM has both attributes
-    /// // and visible text content.
     /// <Button render={<a href="/home" aria-label="Home" />}>Home</Button>
     /// ```
     ///
@@ -189,18 +191,16 @@ fn has_valid_anchor_content(node: &AnyJsxElement) -> bool {
         || node.has_spread_prop()
 }
 
-const RENDER_PROP_NAMES: &[&str] = &["render"];
-
-/// Returns true when the `<a>` element is the value of a JSX attribute whose
-/// name is in `RENDER_PROP_NAMES` (render prop pattern).
+/// Returns true when the `<a>` element is the value of a JSX attribute that belongs to a
+/// custom component (render prop pattern).
 ///
-/// In this pattern the receiving component renders the anchor element as a
-/// wrapper and places its own JSX children inside it, so the final DOM will
-/// contain both the anchor's attributes *and* real text content — making the
-/// lint check a false positive.
+/// In this pattern the receiving component renders the anchor element as a wrapper and places
+/// its own JSX children inside it, so the final DOM will contain both the anchor's attributes
+/// *and* real text content — making the lint check a false positive.
 ///
-/// Handles both self-closing (`<a />`) and open/close (`<a></a>`) forms, and
-/// parenthesized values (`render={(<a />)}`).
+/// Handles both self-closing (`<a />`) and open/close (`<a></a>`) forms, and parenthesized
+/// values (e.g. `render={(<a />)}`). Only skips the rule when the parent element is a custom
+/// component; native HTML elements (e.g. `<div render={<a />}>`) are still flagged.
 fn is_render_prop_anchor(node: &AnyJsxElement) -> bool {
     let mut current = node.syntax().parent();
     loop {
@@ -209,7 +209,7 @@ fn is_render_prop_anchor(node: &AnyJsxElement) -> bool {
         };
         if JsxExpressionAttributeValue::can_cast(parent.kind()) {
             let attr_value = JsxExpressionAttributeValue::unwrap_cast(parent);
-            return render_prop_name_matches(&attr_value, RENDER_PROP_NAMES);
+            return is_component_attribute(&attr_value).unwrap_or(false);
         }
         match parent.kind() {
             // Walk up through transparent wrapper nodes:
@@ -226,19 +226,14 @@ fn is_render_prop_anchor(node: &AnyJsxElement) -> bool {
     }
 }
 
-/// Returns true if the attribute containing `attr_value` has a name that
-/// appears in `allowed`.
-fn render_prop_name_matches(
-    attr_value: &JsxExpressionAttributeValue,
-    allowed: &[&str],
-) -> bool {
-    (|| -> Option<bool> {
-        let initializer =
-            JsxAttributeInitializerClause::cast(attr_value.syntax().parent()?)?;
-        let attribute = JsxAttribute::cast(initializer.syntax().parent()?)?;
-        let attr_name = attribute.name().ok()?;
-        let token = attr_name.as_jsx_name()?.value_token().ok()?;
-        Some(allowed.contains(&token.text_trimmed()))
-    })()
-    .unwrap_or(false)
+/// Returns `Some(true)` when `attr_value` is an attribute of a custom JSX component (i.e. an
+/// uppercase or member-expression name), `Some(false)` for native HTML elements, and `None`
+/// when the surrounding tree is malformed.
+fn is_component_attribute(attr_value: &JsxExpressionAttributeValue) -> Option<bool> {
+    let initializer = JsxAttributeInitializerClause::cast(attr_value.syntax().parent()?)?;
+    let attribute = JsxAttribute::cast(initializer.syntax().parent()?)?;
+    let element = attribute
+        .parent::<JsxAttributeList>()
+        .and_then(|list| list.parent::<AnyJsxElement>())?;
+    Some(element.is_custom_component())
 }
