@@ -4776,6 +4776,56 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoReactLeakedEventListenerConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoReactLeakedEventListenerOptions" }
+			]
+		},
+		"NoReactLeakedEventListenerOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoReactLeakedIntersectionObserverConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoReactLeakedIntersectionObserverOptions" }
+			]
+		},
+		"NoReactLeakedIntersectionObserverOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoReactLeakedIntervalConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoReactLeakedIntervalOptions" }
+			]
+		},
+		"NoReactLeakedIntervalOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoReactLeakedResizeObserverConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoReactLeakedResizeObserverOptions" }
+			]
+		},
+		"NoReactLeakedResizeObserverOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoReactLeakedTimeoutConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoReactLeakedTimeoutOptions" }
+			]
+		},
+		"NoReactLeakedTimeoutOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoReactNativeDeepImportsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6468,6 +6518,43 @@
 					"description": "Disallow the use of the deprecated __proto__ object property.\nSee https://biomejs.dev/linter/rules/no-proto",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoProtoConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noReactLeakedEventListener": {
+					"description": "Disallow forgetting to remove event listeners within useEffect.\nSee https://biomejs.dev/linter/rules/no-react-leaked-event-listener",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReactLeakedEventListenerConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noReactLeakedIntersectionObserver": {
+					"description": "Disallow forgetting to disconnect IntersectionObserver within useEffect.\nSee https://biomejs.dev/linter/rules/no-react-leaked-intersection-observer",
+					"anyOf": [
+						{
+							"$ref": "#/$defs/NoReactLeakedIntersectionObserverConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
+				"noReactLeakedInterval": {
+					"description": "Disallow forgetting to clear setInterval within useEffect.\nSee https://biomejs.dev/linter/rules/no-react-leaked-interval",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReactLeakedIntervalConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noReactLeakedResizeObserver": {
+					"description": "Disallow forgetting to disconnect ResizeObserver within useEffect.\nSee https://biomejs.dev/linter/rules/no-react-leaked-resize-observer",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReactLeakedResizeObserverConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noReactLeakedTimeout": {
+					"description": "Disallow forgetting to clear setTimeout within useEffect.\nSee https://biomejs.dev/linter/rules/no-react-leaked-timeout",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReactLeakedTimeoutConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9522,6 +9609,53 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoReactForwardRefOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoReactLeakedEventListenerOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoReactLeakedEventListenerOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoReactLeakedIntersectionObserverOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": {
+					"$ref": "#/$defs/NoReactLeakedIntersectionObserverOptions"
+				}
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoReactLeakedIntervalOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoReactLeakedIntervalOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoReactLeakedResizeObserverOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoReactLeakedResizeObserverOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoReactLeakedTimeoutOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoReactLeakedTimeoutOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
