@@ -957,6 +957,31 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noReactLeakedEventListener",
+        TypeId::of::<
+            biome_rule_options::no_react_leaked_event_listener::NoReactLeakedEventListenerOptions,
+        >(),
+    ));
+    result.push(("nursery", "noReactLeakedIntersectionObserver", TypeId::of::<biome_rule_options::no_react_leaked_intersection_observer::NoReactLeakedIntersectionObserverOptions>()));
+    result.push((
+        "nursery",
+        "noReactLeakedInterval",
+        TypeId::of::<biome_rule_options::no_react_leaked_interval::NoReactLeakedIntervalOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noReactLeakedResizeObserver",
+        TypeId::of::<
+            biome_rule_options::no_react_leaked_resize_observer::NoReactLeakedResizeObserverOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
+        "noReactLeakedTimeout",
+        TypeId::of::<biome_rule_options::no_react_leaked_timeout::NoReactLeakedTimeoutOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noReactNativeDeepImports",
         TypeId::of::<
             biome_rule_options::no_react_native_deep_imports::NoReactNativeDeepImportsOptions,
