@@ -95,7 +95,9 @@ impl Test262TestCase {
         let should_fail = self
             .meta
             .negative
-            .as_ref().as_ref().is_some_and(|neg| neg.phase == Phase::Parse);
+            .as_ref()
+            .as_ref()
+            .is_some_and(|neg| neg.phase == Phase::Parse);
 
         let options = JsParserOptions::default().with_parse_class_parameter_decorators();
         let files =

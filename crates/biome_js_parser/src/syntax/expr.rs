@@ -234,10 +234,9 @@ pub(super) fn parse_literal_expression(p: &mut JsParser) -> ParsedSyntax {
         JsSyntaxKind::TRUE_KW | JsSyntaxKind::FALSE_KW => {
             JsSyntaxKind::JS_BOOLEAN_LITERAL_EXPRESSION
         }
-        T![/] | T![/=]
-            if p.re_lex(JsReLexContext::Regex) == JS_REGEX_LITERAL => {
-                JS_REGEX_LITERAL_EXPRESSION
-            }
+        T![/] | T![/=] if p.re_lex(JsReLexContext::Regex) == JS_REGEX_LITERAL => {
+            JS_REGEX_LITERAL_EXPRESSION
+        }
         _ => return Absent,
     };
 
