@@ -1098,6 +1098,10 @@ where
         };
 
         // Strip trailing newlines if the option is set to false
+        dbg!(
+            "stripping?",
+            self.context.options().trailing_newline().value()
+        );
         let printed = if !self.context.options().trailing_newline().value() {
             printed.strip_trailing_newlines()
         } else {

@@ -96,6 +96,26 @@ impl MdFormatOptions {
         self.trailing_newline = trailing_newline;
         self
     }
+
+    pub fn set_indent_style(&mut self, indent_style: IndentStyle) {
+        self.indent_style = indent_style;
+    }
+
+    pub fn set_indent_width(&mut self, indent_width: IndentWidth) {
+        self.indent_width = indent_width;
+    }
+
+    pub fn set_line_ending(&mut self, line_ending: LineEnding) {
+        self.line_ending = line_ending;
+    }
+
+    pub fn set_line_width(&mut self, line_width: LineWidth) {
+        self.line_width = line_width;
+    }
+
+    pub fn set_trailing_newline(&mut self, trailing_newline: TrailingNewline) {
+        self.trailing_newline = trailing_newline;
+    }
 }
 
 impl MarkdownFormatContext {

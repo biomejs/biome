@@ -40,6 +40,7 @@ use biome_js_syntax::JsLanguage;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
+use biome_markdown_formatter::context::MdFormatOptions;
 use biome_markdown_syntax::MarkdownLanguage;
 use biome_plugin_loader::Plugins;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -1422,6 +1423,18 @@ impl OverrideSettings {
         }
     }
 
+    pub fn apply_override_markdown_format_options(
+        &self,
+        path: &Utf8Path,
+        options: &mut MdFormatOptions,
+    ) {
+        for pattern in self.patterns.iter() {
+            if pattern.is_file_included(path) {
+                pattern.apply_overrides_to_markdown_format_options(options);
+            }
+        }
+    }
+
     pub fn apply_override_js_parser_options(&self, path: &Utf8Path, options: &mut JsParserOptions) {
         for pattern in self.patterns.iter() {
             if pattern.is_file_included(path) {
@@ -1782,6 +1795,31 @@ impl OverrideSettingPattern {
             options.set_line_width(line_width);
         }
         if let Some(trailing_newline) = grit_formatter
+            .trailing_newline
+            .or(formatter.trailing_newline)
+        {
+            options.set_trailing_newline(trailing_newline);
+        }
+    }
+
+    fn apply_overrides_to_markdown_format_options(&self, options: &mut MdFormatOptions) {
+        let graphql_formatter = &self.languages.markdown.formatter;
+        let formatter = &self.formatter;
+
+        if let Some(indent_style) = graphql_formatter.indent_style.or(formatter.indent_style) {
+            options.set_indent_style(indent_style);
+        }
+        if let Some(indent_width) = graphql_formatter.indent_width.or(formatter.indent_width) {
+            options.set_indent_width(indent_width)
+        }
+        if let Some(line_ending) = graphql_formatter.line_ending.or(formatter.line_ending) {
+            options.set_line_ending(line_ending);
+        }
+        if let Some(line_width) = graphql_formatter.line_width.or(formatter.line_width) {
+            options.set_line_width(line_width);
+        }
+
+        if let Some(trailing_newline) = graphql_formatter
             .trailing_newline
             .or(formatter.trailing_newline)
         {

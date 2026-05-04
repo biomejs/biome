@@ -1,0 +1,31 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/trailing_newline/file.md
+---
+
+# Input
+
+```md
+This is a test
+
+
+
+```
+
+
+# Options
+
+```json
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "formatter": {
+    "trailingNewline": false
+  }
+}
+```
+
+# Formatted
+
+```md
+This is a test
+```

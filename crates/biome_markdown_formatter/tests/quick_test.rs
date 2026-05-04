@@ -4,7 +4,7 @@ use biome_markdown_parser::parse_markdown;
 #[ignore]
 #[test]
 fn quick_test() {
-    let source = "1.  foo\n\n    baz\n";
+    let source = "Test\n\n\n\n";
     let parse = parse_markdown(source);
 
     // Print CST
@@ -12,7 +12,7 @@ fn quick_test() {
     // print red tree
     eprintln!("{:#?}", parse.tree());
 
-    let options = MdFormatOptions::default();
+    let options = MdFormatOptions::default().with_trailing_newline(false.into());
     let result = biome_formatter::format_node(
         &parse.syntax(),
         MdFormatLanguage::new(options.clone()),

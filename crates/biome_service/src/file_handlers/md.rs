@@ -115,12 +115,17 @@ impl ServiceLanguage for MarkdownLanguage {
             .trailing_newline
             .or(global.trailing_newline)
             .unwrap_or_default();
-        MdFormatOptions::new()
+        dbg!(trailing_newline);
+        let mut options = MdFormatOptions::new()
             .with_indent_style(indent_style)
             .with_indent_width(indent_width)
             .with_line_width(line_width)
             .with_line_ending(line_ending)
-            .with_trailing_newline(trailing_newline)
+            .with_trailing_newline(trailing_newline);
+
+        overrides.apply_override_markdown_format_options(path, &mut options);
+
+        options
     }
 
     fn resolve_analyzer_options(

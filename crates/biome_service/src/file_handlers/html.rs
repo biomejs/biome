@@ -149,10 +149,10 @@ impl ServiceLanguage for HtmlLanguage {
 
     fn resolve_format_options(
         global: &crate::settings::FormatSettings,
-        overrides: &crate::settings::OverrideSettings,
+        overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
-        path: &biome_fs::BiomePath,
-        file_source: &super::DocumentFileSource,
+        path: &BiomePath,
+        file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
         let indent_style = language
             .indent_style
@@ -205,8 +205,8 @@ impl ServiceLanguage for HtmlLanguage {
         global: &Settings,
         _language: &Self::LinterSettings,
         _environment: Option<&Self::EnvironmentSettings>,
-        path: &biome_fs::BiomePath,
-        _file_source: &super::DocumentFileSource,
+        path: &BiomePath,
+        _file_source: &DocumentFileSource,
         suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
         let configuration =
