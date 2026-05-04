@@ -1,11 +1,12 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_html_syntax::{AnyHtmlAttributeInitializer, HtmlAttribute, inner_string_text};
 use biome_rowan::{TextRange, TextSize};
 use biome_rule_options::no_tailwind_arbitrary_value::NoTailwindArbitraryValueOptions;
-use biome_tailwind_parser::lint_utils::scan_tailwind_arbitrary_ranges;
+use biome_tailwind_parser::parse_tailwind;
+use biome_tailwind_syntax::lint_utils::arbitrary_ranges;
 
 declare_lint_rule! {
     /// Disallow arbitrary values in Tailwind CSS utility classes.
@@ -63,10 +64,18 @@ declare_lint_rule! {
     ///
     /// Default: `[]` (the `class` attribute is always checked).
     ///
+    /// ### functions
+    ///
+    /// This option has no effect for HTML. HTML attribute values are plain strings
+    /// and cannot contain function calls, so configuring `functions` is a no-op for
+    /// this rule. Use the `attributes` option instead to extend which attributes are
+    /// checked.
+    ///
     pub NoTailwindArbitraryValue {
         version: "next",
         name: "noTailwindArbitraryValue",
         language: "html",
+        sources: &[RuleSource::EslintTailwindcss("no-arbitrary-value").same()],
         domains: &[RuleDomain::Tailwind],
         recommended: false,
     }
@@ -106,14 +115,15 @@ impl Rule for NoTailwindArbitraryValue {
         };
 
         let text = inner_string_text(&token);
-        let quote_offset = if matches!(token.text_trimmed().as_bytes().first(), Some(b'"' | b'\'')) {
-            TextSize::from(1)
-        } else {
-            TextSize::from(0)
-        };
-        let content_start = token.text_trimmed_range().start() + quote_offset;
+        if !text.text().contains('[') {
+            return vec![];
+        }
 
-        scan_tailwind_arbitrary_ranges(text.text(), content_start)
+        // HTML attribute values are always quoted per spec
+        let content_start = token.text_trimmed_range().start() + TextSize::from(1);
+
+        let parse = parse_tailwind(text.text());
+        arbitrary_ranges(&parse.tree().candidates(), content_start)
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
@@ -123,6 +133,9 @@ impl Rule for NoTailwindArbitraryValue {
                 range,
                 markup! { "Found an arbitrary value in a Tailwind CSS class." },
             )
+            .note(markup! {
+                "Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor."
+            })
             .note(markup! {
                 "Use a named utility from your Tailwind configuration instead."
             }),
