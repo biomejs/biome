@@ -21,7 +21,7 @@ obj.foo.apply(obj, [1, 2, 3]);
 ```
 invalid.js:3:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This .call() is unnecessary.
+  i This .call() call is unnecessary.
   
     1 │ // should generate diagnostics
     2 │ 
@@ -29,6 +29,17 @@ invalid.js:3:1 lint/nursery/noUselessCall ━━━━━━━━━━━━�
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     4 │ foo.call(null, 1, 2, 3);
     5 │ foo.apply(undefined, [1, 2, 3]);
+  
+  i The receiver is null or undefined, so .call() does not change the relevant call semantics.
+  
+    1 │ // should generate diagnostics
+    2 │ 
+  > 3 │ foo.call(undefined, 1, 2, 3);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ foo.call(null, 1, 2, 3);
+    5 │ foo.apply(undefined, [1, 2, 3]);
+  
+  i Use a direct function call instead.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -38,13 +49,23 @@ invalid.js:3:1 lint/nursery/noUselessCall ━━━━━━━━━━━━�
 ```
 invalid.js:4:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This .call() is unnecessary.
+  i This .call() call is unnecessary.
   
     3 │ foo.call(undefined, 1, 2, 3);
   > 4 │ foo.call(null, 1, 2, 3);
       │ ^^^^^^^^^^^^^^^^^^^^^^^
     5 │ foo.apply(undefined, [1, 2, 3]);
     6 │ foo.apply(null, [1, 2, 3]);
+  
+  i The receiver is null or undefined, so .call() does not change the relevant call semantics.
+  
+    3 │ foo.call(undefined, 1, 2, 3);
+  > 4 │ foo.call(null, 1, 2, 3);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ foo.apply(undefined, [1, 2, 3]);
+    6 │ foo.apply(null, [1, 2, 3]);
+  
+  i Use a direct function call instead.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -54,7 +75,7 @@ invalid.js:4:1 lint/nursery/noUselessCall ━━━━━━━━━━━━�
 ```
 invalid.js:5:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This .apply() is unnecessary.
+  i This .apply() call is unnecessary.
   
     3 │ foo.call(undefined, 1, 2, 3);
     4 │ foo.call(null, 1, 2, 3);
@@ -62,6 +83,17 @@ invalid.js:5:1 lint/nursery/noUselessCall ━━━━━━━━━━━━�
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ foo.apply(null, [1, 2, 3]);
     7 │ 
+  
+  i The receiver is null or undefined, so .apply() does not change the relevant call semantics.
+  
+    3 │ foo.call(undefined, 1, 2, 3);
+    4 │ foo.call(null, 1, 2, 3);
+  > 5 │ foo.apply(undefined, [1, 2, 3]);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ foo.apply(null, [1, 2, 3]);
+    7 │ 
+  
+  i Use a direct function call instead.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -71,7 +103,7 @@ invalid.js:5:1 lint/nursery/noUselessCall ━━━━━━━━━━━━�
 ```
 invalid.js:6:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This .apply() is unnecessary.
+  i This .apply() call is unnecessary.
   
     4 │ foo.call(null, 1, 2, 3);
     5 │ foo.apply(undefined, [1, 2, 3]);
@@ -79,6 +111,17 @@ invalid.js:6:1 lint/nursery/noUselessCall ━━━━━━━━━━━━�
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
     7 │ 
     8 │ obj.foo.call(obj, 1, 2, 3);
+  
+  i The receiver is null or undefined, so .apply() does not change the relevant call semantics.
+  
+    4 │ foo.call(null, 1, 2, 3);
+    5 │ foo.apply(undefined, [1, 2, 3]);
+  > 6 │ foo.apply(null, [1, 2, 3]);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ obj.foo.call(obj, 1, 2, 3);
+  
+  i Use a direct function call instead.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -88,7 +131,7 @@ invalid.js:6:1 lint/nursery/noUselessCall ━━━━━━━━━━━━�
 ```
 invalid.js:8:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This .call() is unnecessary.
+  i This .call() call is unnecessary.
   
      6 │ foo.apply(null, [1, 2, 3]);
      7 │ 
@@ -96,6 +139,17 @@ invalid.js:8:1 lint/nursery/noUselessCall ━━━━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
      9 │ obj.foo.apply(obj, [1, 2, 3]);
     10 │ 
+  
+  i The receiver is the same object that a direct call would use, so .call() does not change the relevant call semantics.
+  
+     6 │ foo.apply(null, [1, 2, 3]);
+     7 │ 
+   > 8 │ obj.foo.call(obj, 1, 2, 3);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ obj.foo.apply(obj, [1, 2, 3]);
+    10 │ 
+  
+  i Use a direct function call instead.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -105,12 +159,21 @@ invalid.js:8:1 lint/nursery/noUselessCall ━━━━━━━━━━━━�
 ```
 invalid.js:9:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This .apply() is unnecessary.
+  i This .apply() call is unnecessary.
   
      8 │ obj.foo.call(obj, 1, 2, 3);
    > 9 │ obj.foo.apply(obj, [1, 2, 3]);
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     10 │ 
+  
+  i The receiver is the same object that a direct call would use, so .apply() does not change the relevant call semantics.
+  
+     8 │ obj.foo.call(obj, 1, 2, 3);
+   > 9 │ obj.foo.apply(obj, [1, 2, 3]);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+  
+  i Use a direct function call instead.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

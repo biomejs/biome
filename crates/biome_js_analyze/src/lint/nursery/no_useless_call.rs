@@ -65,7 +65,7 @@ declare_lint_rule! {
 
 impl Rule for NoUselessCall {
     type Query = Ast<JsCallExpression>;
-    type State = CallMethod;
+    type State = UselessCallState;
     type Signals = Option<Self::State>;
     type Options = NoUselessCallOptions;
 
@@ -88,34 +88,63 @@ impl Rule for NoUselessCall {
         }
 
         let target = member_expr.object().ok()?.omit_parentheses();
-        let is_useless_this_arg = if let AnyJsExpression::JsStaticMemberExpression(target_member) =
-            &target
+        let reason = if let AnyJsExpression::JsStaticMemberExpression(target_member) = &target
         {
             target_member
                 .object()
                 .ok()
                 .is_some_and(|object| are_same_simple_reference(&object, this_arg))
+                .then_some(UselessCallReason::SameReceiver)
         } else {
             this_arg
                 .as_static_value()
                 .is_some_and(|value| value.is_null_or_undefined())
+                .then_some(UselessCallReason::NullishReceiver)
         };
 
-        is_useless_this_arg.then_some(method)
+        Some(UselessCallState {
+            method,
+            reason: reason?,
+        })
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let call = ctx.query();
-        let method = state.name();
+        let method = state.method.name();
+
+        let detail = match state.reason {
+            UselessCallReason::NullishReceiver => markup! {
+                "The receiver is "<Emphasis>"null"</Emphasis>" or "<Emphasis>"undefined"</Emphasis>", so "<Emphasis>"."{method}"()"</Emphasis>" does not change the relevant call semantics."
+            },
+            UselessCallReason::SameReceiver => markup! {
+                "The receiver is the same object that a direct call would use, so "<Emphasis>"."{method}"()"</Emphasis>" does not change the relevant call semantics."
+            },
+        };
 
         Some(RuleDiagnostic::new(
             rule_category!(),
             call.range(),
             markup! {
-                "This "<Emphasis>"."{method}"()"</Emphasis>" is unnecessary."
+                "This "<Emphasis>"."{method}"()"</Emphasis>" call is unnecessary."
             },
-        ))
+        )
+        .detail(call.range(), detail)
+        .note(markup! {
+            "Use a direct function call instead."
+        }))
     }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct UselessCallState {
+    method: CallMethod,
+    reason: UselessCallReason,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum UselessCallReason {
+    NullishReceiver,
+    SameReceiver,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
