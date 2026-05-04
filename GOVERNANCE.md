@@ -324,7 +324,8 @@ Additionally, we may use funds for assigning [Project-Funded Bounties](#project-
 
 #### Expenses
 
-Core contributors are allowed to claim expenses related to conferences where they talk about Biome, or Biome workshops that they run. Expenses that can be claimed include, but are not limited to: trip (plane, train, etc.), meals, transport, parking.
+Core contributors are allowed to claim expenses related to conferences where they talk about Biome, run Biome workshops, or represent Biome in an official capacity (e.g., when Biome is nominated for or receiving an award).
+Expenses that can be claimed include, but are not limited to: trip (plane, train, etc.), meals, transport, parking.
   - The person will have to provide proof of attendance (badge, video, etc.);
   - Expenses will have to be uploaded via the open collective website.
   - Only the expenses that are afforded in the days of the workspace/conference are accepted:
