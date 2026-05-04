@@ -131,7 +131,7 @@ fn find_style_attribute(attributes: HtmlAttributeList) -> Option<HtmlAttribute> 
         if let Some(attribute) = attribute.as_html_attribute()
             && let Some(name) = attribute.name().ok()
             && let Some(value_token) = name.value_token().ok()
-            && value_token.text_trimmed().eq_ignore_ascii_case("style")
+            && value_token.text_trimmed().to_lowercase_cow() == "style"
         {
             return Some(attribute.clone());
         }

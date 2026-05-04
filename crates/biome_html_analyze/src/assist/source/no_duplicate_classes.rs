@@ -70,7 +70,7 @@ impl Rule for NoDuplicateClasses {
         // Only check "class" attribute
         let name = attribute.name().ok()?;
         let name_token = name.value_token().ok()?;
-        if !name_token.text_trimmed().eq_ignore_ascii_case("class") {
+        if name_token.text_trimmed() != "class" {
             return None;
         }
 

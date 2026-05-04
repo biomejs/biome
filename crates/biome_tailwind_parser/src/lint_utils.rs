@@ -55,9 +55,16 @@ pub fn push_modifier_range(
 }
 
 pub fn scan_tailwind_arbitrary_ranges(text: &str, content_start: TextSize) -> Vec<TextRange> {
+    if !text.contains('[') {
+        return Vec::new();
+    }
+
     let mut results = Vec::new();
 
     for (class_offset, class_name) in class_ranges(text) {
+        if !class_name.contains('[') {
+            continue;
+        }
         let parse = parse_tailwind(class_name);
         let class_start = content_start + text_size(class_offset);
 

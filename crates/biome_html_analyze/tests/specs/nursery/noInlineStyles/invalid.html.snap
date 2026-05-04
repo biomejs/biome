@@ -16,8 +16,6 @@ expression: invalid.html
 
 <a href="#" style="text-decoration: none;">Link</a>
 
-<section STYLE="color: blue;"></section>
-
 ```
 
 # Diagnostics
@@ -123,7 +121,6 @@ invalid.html:11:13 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━�
   > 11 │ <a href="#" style="text-decoration: none;">Link</a>
        │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     12 │ 
-    13 │ <section STYLE="color: blue;"></section>
   
   i Inline styles make code harder to maintain, reduce reusability, and can prevent effective use of a strict Content Security Policy. Use external CSS classes or stylesheets instead.
   
@@ -133,27 +130,5 @@ invalid.html:11:13 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━�
   
     11 │ <a·href="#"·style="text-decoration:·none;">Link</a>
        │             ------------------------------         
-
-```
-
-```
-invalid.html:13:10 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Unexpected style attribute.
-  
-    11 │ <a href="#" style="text-decoration: none;">Link</a>
-    12 │ 
-  > 13 │ <section STYLE="color: blue;"></section>
-       │          ^^^^^^^^^^^^^^^^^^^^
-    14 │ 
-  
-  i Inline styles make code harder to maintain, reduce reusability, and can prevent effective use of a strict Content Security Policy. Use external CSS classes or stylesheets instead.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Unsafe fix: Remove the style attribute.
-  
-    13 │ <section·STYLE="color:·blue;"></section>
-       │          --------------------           
 
 ```

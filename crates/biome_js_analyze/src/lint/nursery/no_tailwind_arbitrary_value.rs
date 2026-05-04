@@ -1,6 +1,6 @@
 use crate::shared::any_class_string_like::AnyClassStringLike;
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::JsSyntaxKind;
@@ -76,6 +76,7 @@ declare_lint_rule! {
         version: "next",
         name: "noTailwindArbitraryValue",
         language: "jsx",
+        sources: &[RuleSource::EslintTailwindcss("no-arbitrary-value").same()],
         domains: &[RuleDomain::Tailwind],
         recommended: false,
     }
