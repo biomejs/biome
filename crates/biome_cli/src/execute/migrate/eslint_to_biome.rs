@@ -155,7 +155,9 @@ impl biome_diagnostics::Diagnostic for MigrationResults {
             let total_migratable_count = directly_covered_count + inspired_count + nursery_count;
             let total_covered_count = total_migratable_count + formatter_covers_count;
             let total_covered_percent = (total_covered_count * 100).checked_div(count).unwrap_or(0);
-            let directly_covered_percent = (directly_covered_count * 100).checked_div(count).unwrap_or(0);
+            let directly_covered_percent = (directly_covered_count * 100)
+                .checked_div(count)
+                .unwrap_or(0);
 
             fmt.write_markup(markup! { <Emphasis>{count}" ESLint rules found\n"</Emphasis> })?;
             if formatter_covers_count > 0 {
