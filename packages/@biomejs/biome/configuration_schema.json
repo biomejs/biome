@@ -4958,6 +4958,23 @@
 			},
 			"additionalProperties": false
 		},
+		"NoRestrictedPropertiesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoRestrictedPropertiesOptions" }
+			]
+		},
+		"NoRestrictedPropertiesOptions": {
+			"type": "object",
+			"properties": {
+				"entries": {
+					"description": "Restriction entries for object/property access.\n\nEach entry can describe one of these cases:\n\n- exact object/property match:\n  `{ \"object\": \"require\", \"property\": \"ensure\" }`\n- property-wide restriction with allowed objects:\n  `{ \"property\": \"__defineGetter__\", \"allowObjects\": [\"Object\"] }`\n- object-wide restriction with allowed properties:\n  `{ \"object\": \"arguments\", \"allowProperties\": [\"length\"] }`",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/$defs/RestrictedPropertyEntry" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoRestrictedTypesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6506,6 +6523,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noRestrictedProperties": {
+					"description": "Disallow specific object properties.\nSee https://biomejs.dev/linter/rules/no-restricted-properties",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoRestrictedPropertiesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noReturnAssign": {
 					"description": "Disallow assignments in return statements.\nSee https://biomejs.dev/linter/rules/no-return-assign",
 					"anyOf": [
@@ -7479,6 +7503,34 @@
 		"RestrictedModifier": {
 			"type": "string",
 			"enum": ["abstract", "private", "protected", "readonly", "static"]
+		},
+		"RestrictedPropertyEntry": {
+			"type": "object",
+			"properties": {
+				"allowObjects": {
+					"description": "Objects that are allowed when `property` is restricted globally.\n\nExample:\n`{ \"property\": \"__defineGetter__\", \"allowObjects\": [\"Object\"] }`",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"allowProperties": {
+					"description": "Properties that are allowed when `object` is restricted globally.\n\nExample:\n`{ \"object\": \"arguments\", \"allowProperties\": [\"length\"] }`",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"message": {
+					"description": "Optional custom note appended to the diagnostic.",
+					"type": ["string", "null"]
+				},
+				"object": {
+					"description": "Object name to restrict.\n\nExample: `\"require\"` or `\"Object\"`.",
+					"type": ["string", "null"]
+				},
+				"property": {
+					"description": "Property name to restrict.\n\nExample: `\"ensure\"` or `\"__defineGetter__\"`.",
+					"type": ["string", "null"]
+				}
+			},
+			"additionalProperties": false
 		},
 		"RuleAssistPlainConfiguration": { "type": "string", "enum": ["off", "on"] },
 		"RuleAssistWithNoDuplicateClassesOptions": {
@@ -9660,6 +9712,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoRestrictedImportsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoRestrictedPropertiesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoRestrictedPropertiesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

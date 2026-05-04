@@ -1590,6 +1590,7 @@ dependencies = [
  "biome_resolver",
  "biome_rowan",
  "biome_string_case",
+ "biome_unicode_table",
  "camino",
  "enumflags2",
  "regex",

@@ -1038,6 +1038,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_restricted_imports::NoRestrictedImportsOptions>(),
     ));
     result.push((
+        "nursery",
+        "noRestrictedProperties",
+        TypeId::of::<biome_rule_options::no_restricted_properties::NoRestrictedPropertiesOptions>(),
+    ));
+    result.push((
         "style",
         "noRestrictedTypes",
         TypeId::of::<biome_rule_options::no_restricted_types::NoRestrictedTypesOptions>(),

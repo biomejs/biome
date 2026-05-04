@@ -1,0 +1,150 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidConfig.js
+---
+# Input
+```js
+foo.bar
+
+```
+
+# Diagnostics
+```
+invalidConfig.options:8:22 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'entries[].object' must be a valid JavaScript identifier.
+  
+     6 │         "noRestrictedProperties": {
+     7 │           "level": "error",
+   > 8 │           "options": {
+       │                      ^
+   > 9 │             "entries": [
+        ...
+  > 25 │             ]
+  > 26 │           }
+       │           ^
+    27 │         }
+    28 │       }
+  
+
+```
+
+```
+invalidConfig.options:8:22 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'entries[].allowObjects' cannot be used together with 'entries[].object'.
+  
+     6 │         "noRestrictedProperties": {
+     7 │           "level": "error",
+   > 8 │           "options": {
+       │                      ^
+   > 9 │             "entries": [
+        ...
+  > 25 │             ]
+  > 26 │           }
+       │           ^
+    27 │         }
+    28 │       }
+  
+
+```
+
+```
+invalidConfig.options:8:22 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'entries[].allowObjects' only accepts valid JavaScript identifiers.
+  
+     6 │         "noRestrictedProperties": {
+     7 │           "level": "error",
+   > 8 │           "options": {
+       │                      ^
+   > 9 │             "entries": [
+        ...
+  > 25 │             ]
+  > 26 │           }
+       │           ^
+    27 │         }
+    28 │       }
+  
+
+```
+
+```
+invalidConfig.options:8:22 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'entries[].allowProperties' cannot be used together with 'entries[].property'.
+  
+     6 │         "noRestrictedProperties": {
+     7 │           "level": "error",
+   > 8 │           "options": {
+       │                      ^
+   > 9 │             "entries": [
+        ...
+  > 25 │             ]
+  > 26 │           }
+       │           ^
+    27 │         }
+    28 │       }
+  
+
+```
+
+```
+invalidConfig.options:8:22 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'entries[]' must define at least one of 'object' or 'property'.
+  
+     6 │         "noRestrictedProperties": {
+     7 │           "level": "error",
+   > 8 │           "options": {
+       │                      ^
+   > 9 │             "entries": [
+        ...
+  > 25 │             ]
+  > 26 │           }
+       │           ^
+    27 │         }
+    28 │       }
+  
+
+```
+
+```
+invalidConfig.options:8:22 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'entries[]' must define at least one of 'object' or 'property'.
+  
+     6 │         "noRestrictedProperties": {
+     7 │           "level": "error",
+   > 8 │           "options": {
+       │                      ^
+   > 9 │             "entries": [
+        ...
+  > 25 │             ]
+  > 26 │           }
+       │           ^
+    27 │         }
+    28 │       }
+  
+
+```
+
+```
+invalidConfig.options:8:22 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'entries[].allowObjects' only accepts valid JavaScript identifiers.
+  
+     6 │         "noRestrictedProperties": {
+     7 │           "level": "error",
+   > 8 │           "options": {
+       │                      ^
+   > 9 │             "entries": [
+        ...
+  > 25 │             ]
+  > 26 │           }
+       │           ^
+    27 │         }
+    28 │       }
+  
+
+```

@@ -1,0 +1,31 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noRestrictedProperties": {
+          "level": "error",
+          "options": {
+            "entries": [
+              {
+                "object": "Object.prototype",
+                "allowObjects": ["globalThis.Object"]
+              },
+              {
+                "property": "kebab-case",
+                "allowProperties": ["not-valid"]
+              },
+              {
+                "allowObjects": ["Object"]
+              },
+              {
+                "allowObjects": ["globalThis.Object"],
+                "allowProperties": ["still-ok-as-a-property-name"]
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
