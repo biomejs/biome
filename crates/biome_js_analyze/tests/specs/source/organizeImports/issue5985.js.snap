@@ -10,9 +10,14 @@ import { Moment } from 'moment';
 
 # Diagnostics
 ```
-issue5985.js assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+issue5985.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Some imports or exports are not organized.
+  
+  > 1 │ import moment from 'moment';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 2 │ import { Moment } from 'moment';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
   i Sort this chunk of imports.
   

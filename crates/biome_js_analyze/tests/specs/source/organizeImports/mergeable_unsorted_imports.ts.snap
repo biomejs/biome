@@ -32,9 +32,21 @@ import { E } from "mod";
 
 # Diagnostics
 ```
-mergeable_unsorted_imports.ts assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+mergeable_unsorted_imports.ts:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Some imports or exports are not organized.
+  
+     1 │ // File header comment
+   > 2 │ import type { T1, T2 } from "mod";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 3 │ // Comment 2
+   > 4 │ import type { U1 } from "package";
+        ...
+  > 21 │ import type { U3 } from "package";
+  > 22 │ // Comment 10
+  > 23 │ import { E } from "mod";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ 
   
   i Sort this chunk of imports.
   

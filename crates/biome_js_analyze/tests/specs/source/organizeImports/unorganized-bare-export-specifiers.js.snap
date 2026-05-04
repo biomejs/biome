@@ -10,9 +10,13 @@ export { b, a }
 
 # Diagnostics
 ```
-unorganized-bare-export-specifiers.js assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+unorganized-bare-export-specifiers.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━
 
   i Some imports or exports are not organized.
+  
+  > 1 │ export { b, a }
+      │ ^^^^^^^^^^^^^^^
+    2 │ 
   
   i Sort the exported names.
   

@@ -157,8 +157,8 @@ The --json option is unstable/experimental and its output might change between p
 			"category": "assist/source/organizeImports",
 			"location": {
 				"path": "index.ts",
-				"start": { "line": 0, "column": 0 },
-				"end": { "line": 0, "column": 0 }
+				"start": { "line": 1, "column": 1 },
+				"end": { "line": 2, "column": 33 }
 			},
 			"advices": [
 				{
@@ -268,8 +268,8 @@ The --json option is unstable/experimental and its output might change between p
 			"category": "assist/source/organizeImports",
 			"location": {
 				"path": "main.ts",
-				"start": { "line": 0, "column": 0 },
-				"end": { "line": 0, "column": 0 }
+				"start": { "line": 1, "column": 1 },
+				"end": { "line": 2, "column": 33 }
 			},
 			"advices": [
 				{

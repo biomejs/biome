@@ -29,9 +29,21 @@ import { G } from "g";
 
 # Diagnostics
 ```
-chunks.js assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+chunks.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Some imports or exports are not organized.
+  
+     1 │ // Header file comment to keep at the top
+   > 2 │ import { D } from "d";
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+   > 3 │ import { B } from "b";
+   > 4 │ 
+        ...
+  > 10 │ // Attached A
+  > 11 │ import { A3, A1, A2 } from "a" with { "k2": "", "k1": "" };
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ // Attached E
   
   i Sort this chunk of imports.
   

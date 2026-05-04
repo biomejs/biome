@@ -9,9 +9,12 @@ import { B } from "b"; import { A } from "a"; function f() {}
 
 # Diagnostics
 ```
-one-liner.js assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+one-liner.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Some imports or exports are not organized.
+  
+  > 1 │ import { B } from "b"; import { A } from "a"; function f() {}
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
   i Sort this chunk of imports.
   

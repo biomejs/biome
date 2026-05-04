@@ -11,9 +11,15 @@ import {} from "a"
 
 # Diagnostics
 ```
-unsorted-imports-empty-header.js assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted-imports-empty-header.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
   i Some imports or exports are not organized.
+  
+  > 1 │ import {} from "b"
+      │ ^^^^^^^^^^^^^^^^^^
+  > 2 │ import {} from "a"
+      │ ^^^^^^^^^^^^^^^^^^
+    3 │ 
   
   i Sort this chunk of imports.
   

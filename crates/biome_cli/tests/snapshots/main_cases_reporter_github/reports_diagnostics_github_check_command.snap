@@ -76,7 +76,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-::error title=assist/source/organizeImports,file=index.ts,line=1,endLine=1,col=2,endColumn=2::Some imports or exports are not organized.
+::error title=assist/source/organizeImports,file=index.ts,line=1,endLine=2,col=1,endColumn=33::Some imports or exports are not organized.
 ```
 
 ```block
@@ -108,7 +108,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-::error title=assist/source/organizeImports,file=main.ts,line=1,endLine=1,col=2,endColumn=2::Some imports or exports are not organized.
+::error title=assist/source/organizeImports,file=main.ts,line=1,endLine=2,col=1,endColumn=33::Some imports or exports are not organized.
 ```
 
 ```block

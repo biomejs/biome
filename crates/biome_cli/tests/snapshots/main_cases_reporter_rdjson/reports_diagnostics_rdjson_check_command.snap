@@ -215,6 +215,19 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
         "url": "https://biomejs.dev/assist/actions/organize-imports",
         "value": "assist/source/organizeImports"
       },
+      "location": {
+        "path": "index.ts",
+        "range": {
+          "end": {
+            "column": 33,
+            "line": 2
+          },
+          "start": {
+            "column": 1,
+            "line": 1
+          }
+        }
+      },
       "message": "Some imports or exports are not organized.",
       "suggestions": [
         {
@@ -405,6 +418,19 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
       "code": {
         "url": "https://biomejs.dev/assist/actions/organize-imports",
         "value": "assist/source/organizeImports"
+      },
+      "location": {
+        "path": "main.ts",
+        "range": {
+          "end": {
+            "column": 33,
+            "line": 2
+          },
+          "start": {
+            "column": 1,
+            "line": 1
+          }
+        }
       },
       "message": "Some imports or exports are not organized.",
       "suggestions": [

@@ -13,9 +13,16 @@ export { A, B };
 
 # Diagnostics
 ```
-ts-declaration.d.ts assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ts-declaration.d.ts:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Some imports or exports are not organized.
+  
+  > 1 │ import B from "b";
+      │ ^^^^^^^^^^^^^^^^^^
+  > 2 │ import A from "a";
+      │ ^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ export { A, B };
   
   i Sort this chunk of imports.
   

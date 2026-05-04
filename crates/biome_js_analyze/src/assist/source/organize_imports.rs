@@ -768,13 +768,15 @@ impl Rule for OrganizeImports {
         let root_items = root.items();
         let mut located_issue_kinds: Vec<LocatedIssueKind> = Vec::with_capacity(state.len());
         let mut last_unsorted_chunk_message_index = 0;
+        let mut action_range: Option<TextRange> = None;
         for issue in state {
             let located_issue_kind = match issue {
                 Issue::AddLeadingNewline { slot_index } => {
                     let statement = root_items.iter().nth(*slot_index as usize)?;
                     let statement = statement.syntax();
+                    let range = statement.text_trimmed_range();
                     LocatedIssueKind {
-                        range: statement.text_trimmed_range(),
+                        range,
                         kind: IssueKind::MissingNewlineBetweenChunks,
                     }
                 }
@@ -786,7 +788,7 @@ impl Rule for OrganizeImports {
                 } => {
                     let statement = root_items.iter().nth(*slot_index as usize)?;
                     let statement = statement.syntax();
-                    let issue_kind = if *are_specifiers_unsorted {
+                    let kind = if *are_specifiers_unsorted {
                         if statement.kind() == JsSyntaxKind::JS_IMPORT {
                             IssueKind::UnorganizedImportedNames
                         } else {
@@ -806,10 +808,8 @@ impl Rule for OrganizeImports {
                             }
                         }
                     };
-                    LocatedIssueKind {
-                        range: statement.text_trimmed_range(),
-                        kind: issue_kind,
-                    }
+                    let range = statement.text_trimmed_range();
+                    LocatedIssueKind { range, kind }
                 }
                 Issue::UnsortedChunk { slot_indexes } => {
                     let first_statement = root_items.iter().nth(slot_indexes.start as usize)?;
@@ -819,33 +819,35 @@ impl Rule for OrganizeImports {
                         .nth((slot_indexes.end - 1) as usize)?
                         .syntax()
                         .text_trimmed_range();
-                    let text_range = first_statement.text_trimmed_range().cover(last_text_range);
+                    let range = first_statement.text_trimmed_range().cover(last_text_range);
                     let mut i = last_unsorted_chunk_message_index + 1;
                     // Remove issues that are covered by the current one.
                     while i < located_issue_kinds.len() {
-                        if text_range.contains_range(located_issue_kinds[i].range) {
+                        if range.contains_range(located_issue_kinds[i].range) {
                             located_issue_kinds.remove(i);
                         } else {
                             i += 1;
                         }
                     }
                     last_unsorted_chunk_message_index = located_issue_kinds.len();
-                    let issue_kind = if first_statement.kind() == JsSyntaxKind::JS_IMPORT {
+                    let kind = if first_statement.kind() == JsSyntaxKind::JS_IMPORT {
                         IssueKind::UnsortedImportChunk
                     } else {
                         IssueKind::UnsortedExportChunk
                     };
-                    LocatedIssueKind {
-                        range: text_range,
-                        kind: issue_kind,
-                    }
+                    LocatedIssueKind { range, kind }
                 }
             };
+            action_range = Some(if let Some(action_range) = action_range {
+                action_range.cover(located_issue_kind.range.clone())
+            } else {
+                located_issue_kind.range.clone()
+            });
             located_issue_kinds.push(located_issue_kind);
         }
         let mut diagnostic = RuleDiagnostic::new(
             category!("assist/source/organizeImports"),
-            None as Option<TextRange>,
+            action_range.or_else(|| Self::text_range(ctx, state)),
             markup! {
                 "Some imports or exports are not organized."
             },

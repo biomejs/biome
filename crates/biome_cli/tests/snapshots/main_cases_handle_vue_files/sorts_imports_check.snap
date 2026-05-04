@@ -26,9 +26,17 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-file.vue assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.vue:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Some imports or exports are not organized.
+  
+    1 │ <script setup lang="ts">
+  > 2 │ import Button from "./components/Button.vue";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 3 │ import * as vueUse from "vue-use";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ </script>
+    5 │ <template></template>
   
   i Sort this chunk of imports.
   

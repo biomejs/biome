@@ -22,9 +22,21 @@ export { X }
 
 # Diagnostics
 ```
-unsorted_export_chunk.js assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted_export_chunk.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Some imports or exports are not organized.
+  
+     1 │ // File header comment to keep at the top
+   > 2 │ export { A, B } from "y";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 3 │ // Attached comment X
+   > 4 │ export * from "x";
+        ...
+  > 11 │ function f() {}
+  > 12 │ export { A } from "a";
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    13 │ export { X }
+    14 │ 
   
   i Sort this chunk of exports.
   

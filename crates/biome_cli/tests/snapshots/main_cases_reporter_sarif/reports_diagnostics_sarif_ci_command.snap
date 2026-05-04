@@ -301,6 +301,12 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
               "physicalLocation": {
                 "artifactLocation": {
                   "uri": "index.ts"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 2,
+                  "endColumn": 33
                 }
               }
             }
@@ -465,6 +471,12 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
               "physicalLocation": {
                 "artifactLocation": {
                   "uri": "main.ts"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 2,
+                  "endColumn": 33
                 }
               }
             }

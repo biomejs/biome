@@ -142,9 +142,16 @@ index.css format ━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ```block
-index.ts assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+index.ts:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Some imports or exports are not organized.
+  
+  > 1 │ import { z} from "z"
+      │ ^^^^^^^^^^^^^^^^^^^^
+  > 2 │ import { z, b , a} from "lodash"
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ a ==b
   
   i Sort the imported names.
   

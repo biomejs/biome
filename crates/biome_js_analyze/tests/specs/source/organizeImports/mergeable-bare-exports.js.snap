@@ -12,9 +12,16 @@ export { b, d };
 
 # Diagnostics
 ```
-mergeable-bare-exports.js assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+mergeable-bare-exports.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Some imports or exports are not organized.
+  
+  > 1 │ export { a };
+      │ ^^^^^^^^^^^^^
+  > 2 │ export { c };
+  > 3 │ export { b, d };
+      │ ^^^^^^^^^^^^^^^^
+    4 │ 
   
   i Sort this chunk of exports.
   

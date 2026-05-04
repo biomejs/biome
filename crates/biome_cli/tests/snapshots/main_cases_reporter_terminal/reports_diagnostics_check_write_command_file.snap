@@ -53,9 +53,16 @@ index.css format ━━━━━━━━━━━━━━━━━━━━━
 
   ✖ Code formatting aborted due to parsing errors. To format code with errors, enable the 'formatter.formatWithErrors' option.
   
-index.ts assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+index.ts:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ✖ Some imports or exports are not organized.
+  
+  > 1 │ import { z} from "z"
+      │ ^^^^^^^^^^^^^^^^^^^^
+  > 2 │ import { z, b , a} from "lodash"
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ a ==b
   
   ℹ Sort the imported names.
   

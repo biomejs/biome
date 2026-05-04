@@ -12,9 +12,16 @@ import path from "node:path"
 
 # Diagnostics
 ```
-custom-order-unsorted-imports-missing-blank-lines.js assist/source/organizeImports  FIXABLE  ━━━━━━━━━━
+custom-order-unsorted-imports-missing-blank-lines.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━
 
   i Some imports or exports are not organized.
+  
+  > 1 │ import { test as testBun } from "bun:test"
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 2 │ import { test as testNode } from "node:test"
+  > 3 │ import path from "node:path"
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
   
   i This statement ends a group that must be preceded by a blank line. Add a newline before this statement.
   

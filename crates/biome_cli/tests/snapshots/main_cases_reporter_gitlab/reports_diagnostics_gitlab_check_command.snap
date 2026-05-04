@@ -260,7 +260,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
   {
     "description": "Some imports or exports are not organized.",
     "check_name": "assist/source/organizeImports",
-    "fingerprint": "8970064143624904929",
+    "fingerprint": "8459329872035046942",
     "severity": "critical",
     "location": {
       "path": "index.ts",
@@ -680,7 +680,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
   {
     "description": "Some imports or exports are not organized.",
     "check_name": "assist/source/organizeImports",
-    "fingerprint": "16289383351071945716",
+    "fingerprint": "15695086553598122883",
     "severity": "critical",
     "location": {
       "path": "main.ts",
