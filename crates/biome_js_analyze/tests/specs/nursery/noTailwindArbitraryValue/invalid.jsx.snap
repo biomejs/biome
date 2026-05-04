@@ -30,6 +30,8 @@ invalid.jsx:2:19 lint/nursery/noTailwindArbitraryValue ━━━━━━━━�
     3 │ <div className="text-[#555] bg-white" />;
     4 │ <div className="max-h-[calc(100dvh-40px)]" />;
   
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
   i Use a named utility from your Tailwind configuration instead.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -48,6 +50,8 @@ invalid.jsx:3:22 lint/nursery/noTailwindArbitraryValue ━━━━━━━━�
       │                      ^^^^^^
     4 │ <div className="max-h-[calc(100dvh-40px)]" />;
     5 │ <div className="hover:w-[400px]" />;
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
   
   i Use a named utility from your Tailwind configuration instead.
   
@@ -68,6 +72,8 @@ invalid.jsx:4:23 lint/nursery/noTailwindArbitraryValue ━━━━━━━━�
     5 │ <div className="hover:w-[400px]" />;
     6 │ <div className="sm:hover:text-[1.5rem]" />;
   
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
   i Use a named utility from your Tailwind configuration instead.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -86,6 +92,8 @@ invalid.jsx:5:25 lint/nursery/noTailwindArbitraryValue ━━━━━━━━�
       │                         ^^^^^^^
     6 │ <div className="sm:hover:text-[1.5rem]" />;
     7 │ <div className="text-red-500/[0.31]" />;
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
   
   i Use a named utility from your Tailwind configuration instead.
   
@@ -106,6 +114,8 @@ invalid.jsx:6:31 lint/nursery/noTailwindArbitraryValue ━━━━━━━━�
     7 │ <div className="text-red-500/[0.31]" />;
     8 │ <div className="[color:red]" />;
   
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
   i Use a named utility from your Tailwind configuration instead.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -124,6 +134,8 @@ invalid.jsx:7:30 lint/nursery/noTailwindArbitraryValue ━━━━━━━━�
       │                              ^^^^^^
     8 │ <div className="[color:red]" />;
     9 │ <div class="p-[10px]" />;
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
   
   i Use a named utility from your Tailwind configuration instead.
   
@@ -144,6 +156,8 @@ invalid.jsx:8:17 lint/nursery/noTailwindArbitraryValue ━━━━━━━━�
      9 │ <div class="p-[10px]" />;
     10 │ <div className={`w-[400px] ${condition ? "p-4" : "m-2"}`} />;
   
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
   i Use a named utility from your Tailwind configuration instead.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -162,6 +176,8 @@ invalid.jsx:9:15 lint/nursery/noTailwindArbitraryValue ━━━━━━━━�
        │               ^^^^^^
     10 │ <div className={`w-[400px] ${condition ? "p-4" : "m-2"}`} />;
     11 │ <div className={`${prefix} text-[#555]`} />;
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
   
   i Use a named utility from your Tailwind configuration instead.
   
@@ -182,6 +198,8 @@ invalid.jsx:10:20 lint/nursery/noTailwindArbitraryValue ━━━━━━━━
     11 │ <div className={`${prefix} text-[#555]`} />;
     12 │ 
   
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
   i Use a named utility from your Tailwind configuration instead.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -199,6 +217,8 @@ invalid.jsx:11:33 lint/nursery/noTailwindArbitraryValue ━━━━━━━━
   > 11 │ <div className={`${prefix} text-[#555]`} />;
        │                                 ^^^^^^
     12 │ 
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
   
   i Use a named utility from your Tailwind configuration instead.
   
