@@ -127,6 +127,63 @@ fn compare_classes(a: &ClassInfo, b: &ClassInfo) -> Ordering {
     Ordering::Equal
 }
 
+fn split_class_list(class_list: &str) -> Vec<&str> {
+    let mut result = Vec::new();
+    let mut token_start: Option<usize> = None;
+    let mut bracket_depth = 0usize;
+    let mut paren_depth = 0usize;
+    let mut quote: Option<char> = None;
+    let mut escaped = false;
+
+    for (index, ch) in class_list.char_indices() {
+        if let Some(active_quote) = quote {
+            if escaped {
+                escaped = false;
+                continue;
+            }
+            if ch == '\\' {
+                escaped = true;
+                continue;
+            }
+            if ch == active_quote {
+                quote = None;
+            }
+            continue;
+        }
+
+        if let Some(start) = token_start {
+            if ch.is_whitespace() && bracket_depth == 0 && paren_depth == 0 {
+                result.push(&class_list[start..index]);
+                token_start = None;
+                continue;
+            }
+
+            match ch {
+                '[' => bracket_depth += 1,
+                ']' => bracket_depth = bracket_depth.saturating_sub(1),
+                '(' => paren_depth += 1,
+                ')' => paren_depth = paren_depth.saturating_sub(1),
+                '\'' | '"' | '`' => quote = Some(ch),
+                _ => {}
+            }
+        } else if !ch.is_whitespace() {
+            token_start = Some(index);
+            match ch {
+                '[' => bracket_depth += 1,
+                '(' => paren_depth += 1,
+                '\'' | '"' | '`' => quote = Some(ch),
+                _ => {}
+            }
+        }
+    }
+
+    if let Some(start) = token_start {
+        result.push(&class_list[start..]);
+    }
+
+    result
+}
+
 /// Sort the given class string according to the given sort config.
 pub fn sort_class_name(
     class_name: &TokenText,
@@ -138,20 +195,21 @@ pub fn sort_class_name(
         .map_or((false, false), |ctx| ctx.get_ignore_flags());
 
     // Obtain classes by splitting the class string by whitespace.
-    let mut classes_iter = class_name.split_whitespace();
+    let mut classes = split_class_list(class_name.text());
     let class_str_prefix = if ignore_prefix {
-        classes_iter.next()
+        if classes.is_empty() {
+            None
+        } else {
+            Some(classes.remove(0))
+        }
     } else {
         None
     };
     let class_str_postfix = if ignore_postfix {
-        classes_iter.next_back()
+        classes.pop()
     } else {
         None
     };
-
-    // Collect the remaining classes into a vector if needed.
-    let classes: Vec<&str> = classes_iter.collect();
 
     // Separate custom classes from recognized classes, and compute the recognized classes' info.
     // Custom classes always go first, in the order that they appear in.
@@ -215,9 +273,9 @@ pub fn get_sort_class_name_range(
     range: &TextRange,
     template_literal_space_context: &Option<TemplateLiteralSpaceContext>,
 ) -> Option<TextRange> {
-    let mut class_iter = class_name.split_whitespace();
-    let first_class_len = class_iter.next().map_or(0, |s| s.len()) as u32;
-    let last_class_len = class_iter.next_back().map_or(0, |s| s.len()) as u32;
+    let classes = split_class_list(class_name.text());
+    let first_class_len = classes.first().map_or(0, |s| s.len()) as u32;
+    let last_class_len = classes.last().map_or(0, |s| s.len()) as u32;
 
     let (ignore_prefix, ignore_postfix) = template_literal_space_context
         .as_ref()
