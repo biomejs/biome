@@ -995,13 +995,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  ## Usage
  
  Install:
-@@ -281,12 +277,11 @@
- 
- #### `--ignore-path`
- 
--Path to a file containing patterns that describe files to ignore. By default, prettier looks for `./.prettierignore`.
-+Path to a file containing patterns that describe files to ignore.  By default, prettier looks for `./.prettierignore`.
- 
+@@ -286,7 +282,6 @@
  #### `--require-pragma`
  
  Require a special comment, called a pragma, to be present in the file's first docblock comment in order for prettier to format it.
@@ -1009,24 +1003,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  ```js
  /**
   * @prettier
-@@ -305,7 +300,7 @@
- 
- #### `--no-config`
- 
--Do not look for a configuration file. The default settings will be used.
-+Do not look for a configuration file.  The default settings will be used.
- 
- #### `--config-precedence`
- 
-@@ -331,7 +326,7 @@
- 
- #### `--write`
- 
--This rewrites all processed files in place. This is comparable to the `eslint --fix` workflow.
-+This rewrites all processed files in place.  This is comparable to the `eslint --fix` workflow.
- 
- ### ESLint
- 
 @@ -369,6 +364,7 @@
  }
  ```
@@ -1084,7 +1060,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 -| `2`     | `--tab-width <int>` | `tabWidth: <int>` |
 +Default | CLI Override | API Override
 +--------|--------------|-------------
-+ `2` | `--tab-width <int>` | `tabWidth: <int>`
++`2` | `--tab-width <int>` | `tabWidth: <int>`
  
  ### Tabs
  
@@ -1129,7 +1105,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 -| `false` | `--single-quote` | `singleQuote: <bool>` |
 +Default | CLI Override | API Override
 +--------|--------------|-------------
-+`false` |  `--single-quote` | `singleQuote: <bool>`
++`false` | `--single-quote` | `singleQuote: <bool>`
  
  ### Trailing Commas
  
@@ -1138,10 +1114,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  
  Valid options:
 -
--- `"none"` - No trailing commas.
+ - `"none"` - No trailing commas.
 -- `"es5"` - Trailing commas where valid in ES5 (objects, arrays, etc.)
 -- `"all"` - Trailing commas wherever possible (including function arguments). This requires node 8 or a [transform](https://babeljs.io/docs/plugins/syntax-trailing-function-commas/).
-+ - `"none"` - No trailing commas.
 + - `"es5"` - Trailing commas where valid in ES5 (objects, arrays, etc.)
 + - `"all"` - Trailing commas wherever possible (including function arguments). This requires node 8 or a [transform](https://babeljs.io/docs/plugins/syntax-trailing-function-commas/).
  
@@ -1158,9 +1133,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  
  Valid options:
 -
--- `true` - Example: `{ foo: bar }`.
+ - `true` - Example: `{ foo: bar }`.
 -- `false` - Example: `{foo: bar}`.
-+ - `true` - Example: `{ foo: bar }`.
 + - `false` - Example: `{foo: bar}`.
  
 -| Default | CLI Override           | API Override             |
@@ -1196,42 +1170,39 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 -| `Infinity` | `--range-end <int>`   | `rangeEnd: <int>`   |
 +Default | CLI Override | API Override
 +--------|--------------|-------------
-+`0`        | `--range-start <int>`| `rangeStart: <int>`
-+`Infinity` | `--range-end <int>`  | `rangeEnd: <int>`
++`0` | `--range-start <int>`| `rangeStart: <int>`
++`Infinity` | `--range-end <int>` | `rangeEnd: <int>`
  
  ### Parser
  
-@@ -668,20 +658,19 @@
+@@ -668,19 +658,18 @@
  Both the `babylon` and `flow` parsers support the same set of JavaScript features (including Flow). Prettier automatically infers the parser from the input file path, so you shouldn't have to change this setting.
  
  Built-in parsers:
-+ - [`babylon`](https://github.com/babel/babylon/)
+-
+ - [`babylon`](https://github.com/babel/babylon/)
+-- [`flow`](https://github.com/facebook/flow/tree/master/src/parser)
+-- [`typescript`](https://github.com/eslint/typescript-eslint-parser) _Since v1.4.0_
+-- [`postcss`](https://github.com/postcss/postcss) _Since v1.4.0_
+-- [`json`](https://github.com/babel/babylon/tree/f09eb3200f57ea94d51c2a5b1facf2149fb406bf#babylonparseexpressioncode-options) _Since v1.5.0_
+-- [`graphql`](https://github.com/graphql/graphql-js/tree/master/src/language) _Since v1.5.0_
 + - [`flow`](https://github.com/facebook/flow/tree/master/src/parser)
 + - [`typescript`](https://github.com/eslint/typescript-eslint-parser) _Since v1.4.0_
 + - [`postcss`](https://github.com/postcss/postcss) _Since v1.4.0_
 + - [`json`](https://github.com/babel/babylon/tree/f09eb3200f57ea94d51c2a5b1facf2149fb406bf#babylonparseexpressioncode-options) _Since v1.5.0_
 + - [`graphql`](https://github.com/graphql/graphql-js/tree/master/src/language) _Since v1.5.0_
  
--- [`babylon`](https://github.com/babel/babylon/)
--- [`flow`](https://github.com/facebook/flow/tree/master/src/parser)
--- [`typescript`](https://github.com/eslint/typescript-eslint-parser) _Since v1.4.0_
--- [`postcss`](https://github.com/postcss/postcss) _Since v1.4.0_
--- [`json`](https://github.com/babel/babylon/tree/f09eb3200f57ea94d51c2a5b1facf2149fb406bf#babylonparseexpressioncode-options) _Since v1.5.0_
--- [`graphql`](https://github.com/graphql/graphql-js/tree/master/src/language) _Since v1.5.0_
-+[Custom parsers](#custom-parser-api) are also supported.  _Since v1.5.0_
- 
--[Custom parsers](#custom-parser-api) are also supported. _Since v1.5.0_
-+Default | CLI Override | API Override
-+--------|--------------|-------------
-+`babylon` | `--parser <string>`<br />`--parser ./my-parser` | `parser: "<string>"`<br />`parser: require("./my-parser")`
+ [Custom parsers](#custom-parser-api) are also supported. _Since v1.5.0_
  
 -| Default   | CLI Override                                    | API Override                                               |
 -| --------- | ----------------------------------------------- | ---------------------------------------------------------- |
 -| `babylon` | `--parser <string>`<br />`--parser ./my-parser` | `parser: "<string>"`<br />`parser: require("./my-parser")` |
--
++Default | CLI Override | API Override
++--------|--------------|-------------
++`babylon` | `--parser <string>`<br />`--parser ./my-parser` | `parser: "<string>"`<br />`parser: require("./my-parser")`
+ 
  ### Filepath
  
- Specify the input filepath. This will be used to do parser inference.
 @@ -692,9 +681,9 @@
  cat foo | prettier --stdin-filepath foo.css
  ```
@@ -1563,7 +1534,7 @@ you can pass `--no-config` instead.
 
 #### `--ignore-path`
 
-Path to a file containing patterns that describe files to ignore.  By default, prettier looks for `./.prettierignore`.
+Path to a file containing patterns that describe files to ignore. By default, prettier looks for `./.prettierignore`.
 
 #### `--require-pragma`
 
@@ -1586,7 +1557,7 @@ prettier --single-quote --list-different "src/**/*.js"
 
 #### `--no-config`
 
-Do not look for a configuration file.  The default settings will be used.
+Do not look for a configuration file. The default settings will be used.
 
 #### `--config-precedence`
 
@@ -1612,7 +1583,7 @@ Prettier CLI will ignore files located in `node_modules` directory. To opt-out f
 
 #### `--write`
 
-This rewrites all processed files in place.  This is comparable to the `eslint --fix` workflow.
+This rewrites all processed files in place. This is comparable to the `eslint --fix` workflow.
 
 ### ESLint
 
@@ -1855,7 +1826,7 @@ Specify the number of spaces per indentation-level.
 
 Default | CLI Override | API Override
 --------|--------------|-------------
- `2` | `--tab-width <int>` | `tabWidth: <int>`
+`2` | `--tab-width <int>` | `tabWidth: <int>`
 
 ### Tabs
 
@@ -1888,7 +1859,7 @@ Notes:
 
 Default | CLI Override | API Override
 --------|--------------|-------------
-`false` |  `--single-quote` | `singleQuote: <bool>`
+`false` | `--single-quote` | `singleQuote: <bool>`
 
 ### Trailing Commas
 
@@ -1896,7 +1867,7 @@ Print trailing commas wherever possible when multi-line. (A single-line array,
 for example, never gets trailing commas.)
 
 Valid options:
- - `"none"` - No trailing commas.
+- `"none"` - No trailing commas.
  - `"es5"` - Trailing commas where valid in ES5 (objects, arrays, etc.)
  - `"all"` - Trailing commas wherever possible (including function arguments). This requires node 8 or a [transform](https://babeljs.io/docs/plugins/syntax-trailing-function-commas/).
 
@@ -1909,7 +1880,7 @@ Default | CLI Override | API Override
 Print spaces between brackets in object literals.
 
 Valid options:
- - `true` - Example: `{ foo: bar }`.
+- `true` - Example: `{ foo: bar }`.
  - `false` - Example: `{foo: bar}`.
 
 Default | CLI Override | API Override
@@ -1934,8 +1905,8 @@ These two options can be used to format code starting and ending at a given char
 
 Default | CLI Override | API Override
 --------|--------------|-------------
-`0`        | `--range-start <int>`| `rangeStart: <int>`
-`Infinity` | `--range-end <int>`  | `rangeEnd: <int>`
+`0` | `--range-start <int>`| `rangeStart: <int>`
+`Infinity` | `--range-end <int>` | `rangeEnd: <int>`
 
 ### Parser
 
@@ -1944,14 +1915,14 @@ Specify which parser to use.
 Both the `babylon` and `flow` parsers support the same set of JavaScript features (including Flow). Prettier automatically infers the parser from the input file path, so you shouldn't have to change this setting.
 
 Built-in parsers:
- - [`babylon`](https://github.com/babel/babylon/)
+- [`babylon`](https://github.com/babel/babylon/)
  - [`flow`](https://github.com/facebook/flow/tree/master/src/parser)
  - [`typescript`](https://github.com/eslint/typescript-eslint-parser) _Since v1.4.0_
  - [`postcss`](https://github.com/postcss/postcss) _Since v1.4.0_
  - [`json`](https://github.com/babel/babylon/tree/f09eb3200f57ea94d51c2a5b1facf2149fb406bf#babylonparseexpressioncode-options) _Since v1.5.0_
  - [`graphql`](https://github.com/graphql/graphql-js/tree/master/src/language) _Since v1.5.0_
 
-[Custom parsers](#custom-parser-api) are also supported.  _Since v1.5.0_
+[Custom parsers](#custom-parser-api) are also supported. _Since v1.5.0_
 
 Default | CLI Override | API Override
 --------|--------------|-------------
@@ -2252,13 +2223,13 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
   258: when prettier attempts to look up a [configuration file](#configuration-file). In order to skip this, you may
   266: This will provide you with a path to the configuration file, which you can pass to `--config`:
   272: You can also use `--config` if your configuration file lives somewhere where prettier cannot find it,
-  280: Path to a file containing patterns that describe files to ignore.  By default, prettier looks for `./.prettierignore`.
+  280: Path to a file containing patterns that describe files to ignore. By default, prettier looks for `./.prettierignore`.
   284: Require a special comment, called a pragma, to be present in the file's first docblock comment in order for prettier to format it.
   295: Another useful flag is `--list-different` (or `-l`) which prints the filenames of files that are different from Prettier formatting. If there are differences the script errors out, which is useful in a CI scenario.
   319: If a config file is found will evaluate it and ignore other CLI options. If no config file is found CLI options will evaluate as normal.
   321: This option adds support to editor integrations where users define their default configuration but want to respect project specific configuration.
   325: Prettier CLI will ignore files located in `node_modules` directory. To opt-out from this behavior use `--with-node-modules` flag.
-  329: This rewrites all processed files in place.  This is comparable to the `eslint --fix` workflow.
+  329: This rewrites all processed files in place. This is comparable to the `eslint --fix` workflow.
   333: If you are using ESLint, integrating Prettier to your workflow is straightforward:
   335: Just add Prettier as an ESLint rule using [eslint-plugin-prettier](https://github.com/prettier/eslint-plugin-prettier).
   351: We also recommend that you use [eslint-config-prettier](https://github.com/prettier/eslint-config-prettier) to disable all the existing formatting rules. It's a one liner that can be added on-top of any existing ESLint configuration.
