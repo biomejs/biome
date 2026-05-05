@@ -211,7 +211,9 @@ impl Rule for NoUselessFragments {
 
                 // The `Fragment` component supports only the "key" prop and react emits a warning for not supported props.
                 // We assume that the user knows - and fixed - that and only care about the prop that is actually supported.
-                let attribute_key =
+                // Astro additionally uses the "slot" prop on `<Fragment>` to forward children to a named slot,
+                // so a Fragment carrying a `slot` attribute is meaningful and must be preserved as well.
+                let has_meaningful_attribute =
                     opening_element
                         .attributes()
                         .into_iter()
@@ -220,14 +222,15 @@ impl Rule for NoUselessFragments {
                             let attribute_name = attribute.name().ok()?;
                             let attribute_name = attribute_name.as_jsx_name()?;
 
-                            if attribute_name.value_token().ok()?.text_trimmed() == "key" {
+                            let name = attribute_name.value_token().ok()?;
+                            if matches!(name.text_trimmed(), "key" | "slot") {
                                 Some(())
                             } else {
                                 None
                             }
                         });
 
-                if attribute_key.is_some() {
+                if has_meaningful_attribute.is_some() {
                     return None;
                 }
 
