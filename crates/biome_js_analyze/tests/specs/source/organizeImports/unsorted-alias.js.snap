@@ -20,15 +20,22 @@ import { e } from '$e'
 ```
 unsorted-alias.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Sort these imports.
   
-    1 │ /* should generate diagnostics */
-  > 2 │ import { aa } from './aa'
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ import { a } from '%f'
-    4 │ import { b } from '#b'
+     1 │ /* should generate diagnostics */
+   > 2 │ import { aa } from './aa'
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 3 │ import { a } from '%f'
+   > 4 │ import { b } from '#b'
+   > 5 │ import { bb } from './bb'
+   > 6 │ import { c } from '~c'
+   > 7 │ import { d } from '@/d'
+   > 8 │ import { cc } from '../cc'
+   > 9 │ import { e } from '$e'
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
      1  1 │   /* should generate diagnostics */
      2    │ - import·{·aa·}·from·'./aa'

@@ -2,6 +2,7 @@
 
 pub(crate) mod at_root_query_list;
 pub(crate) mod each_binding_list;
+pub(crate) mod each_value_list;
 pub(crate) mod expression_item_list;
 pub(crate) mod import_item_list;
 pub(crate) mod interpolated_identifier_part_list;

@@ -1,5 +1,10 @@
+use std::io;
+
 use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
-use biome_console::markup;
+use biome_console::{
+    fmt::{Display, Formatter},
+    markup,
+};
 use biome_js_syntax::{
     AnyJsBinding, AnyJsClass, AnyJsDeclarationClause, AnyJsExpression, AnyJsFunction,
     AnyJsFunctionBody, AnyJsGetter, AnyTsCastExpression, AnyTsIdentifierBinding, AnyTsType,
@@ -67,13 +72,16 @@ declare_lint_rule! {
     ///
     /// ## Known limitations
     ///
-    /// When a return uses a type assertion such as `as T`, the rule does
-    /// not flag the return unless it can prove that `T` is narrower than
-    /// `object`. Trusted cases include `unknown`, `any`, `typeof` queries,
-    /// conditional types, generic type parameters, and types the rule
-    /// cannot resolve. Intersections (`A & B`) are trusted when every
-    /// member is or when any member is `any`; unions (`A | B`) when at
-    /// least one is.
+    /// - Suggested replacement types are only shown when their textual
+    ///   representation is up to 80 characters long. Longer unions fall back to
+    ///   a generic note without the specific suggestion.
+    /// - When a return uses a type assertion such as `as T`, the rule does
+    ///   not flag the return unless it can prove that `T` is narrower than
+    ///   `object`. Trusted cases include `unknown`, `any`, `typeof` queries,
+    ///   conditional types, generic type parameters, and types the rule
+    ///   cannot resolve. Intersections (`A & B`) are trusted when every
+    ///   member is or when any member is `any`; unions (`A | B`) when at
+    ///   least one is.
     pub NoMisleadingReturnType {
         version: "2.4.11",
         name: "noMisleadingReturnType",
@@ -96,6 +104,15 @@ declare_node_union! {
 pub struct RuleState {
     annotation_range: TextRange,
     returns: Vec<Type>,
+    effective_return_ty: Type,
+    has_any_const_return: bool,
+}
+
+enum DescriptionKind {
+    /// Built from the actual return values (e.g. `"loading" | "idle"`).
+    Inferred,
+    /// Built by narrowing the annotation's union to its covered variants.
+    Narrowed,
 }
 
 /// Maximum iterations for type graph traversal to guard against infinite loops on cyclic types.
@@ -104,8 +121,201 @@ const MAX_TYPE_TRAVERSAL_ITERATIONS: usize = 50;
 /// Maximum iterations for expression traversal to guard against infinite loops.
 const MAX_EXPRESSION_TRAVERSAL_ITERATIONS: usize = 200;
 
-/// Upper bound on a rendered return-type suggestion.
+// #region display methods
+/// Upper bound on a narrowed return-type suggestion; longer unions fall back
+/// to the generic diagnostic note.
 const MAX_DESCRIPTION_LENGTH: usize = 80;
+
+/// Separator rendered between union members in the suggestion note.
+const SEPARATOR: &str = " | ";
+
+impl RuleState {
+    /// Returns the suggestion kind to render, or `None` to fall back to the
+    /// generic note.
+    fn description_kind(&self) -> Option<DescriptionKind> {
+        if self.has_any_const_return {
+            return can_render_inferred(&self.returns).then_some(DescriptionKind::Inferred);
+        }
+        if can_render_narrowed(&self.effective_return_ty, &self.returns) {
+            return Some(DescriptionKind::Narrowed);
+        }
+        can_render_inferred(&self.returns).then_some(DescriptionKind::Inferred)
+    }
+
+    /// Writes an inferred description like `"loading" | "idle"`.
+    fn write_inferred(&self, formatter: &mut Formatter<'_>) -> io::Result<()> {
+        let mut first = true;
+        for return_type in &self.returns {
+            if let TypeData::Literal(literal) = &**return_type {
+                if !first {
+                    formatter.write_str(SEPARATOR)?;
+                }
+                write_literal(formatter, literal.as_ref())?;
+                first = false;
+            }
+        }
+        Ok(())
+    }
+
+    /// Writes narrowed annotation variants (only those covered by the returns).
+    fn write_narrowed(&self, formatter: &mut Formatter<'_>) -> io::Result<()> {
+        let covers_any = |variant: &Type| {
+            self.returns.iter().any(|return_type| {
+                types_match(variant, return_type) || is_nonunion_wider(variant, return_type)
+            })
+        };
+        let mut first = true;
+        for variant in self.effective_return_ty.flattened_union_variants().filter(covers_any) {
+            if !first {
+                formatter.write_str(SEPARATOR)?;
+            }
+            write_variant(formatter, &variant)?;
+            first = false;
+        }
+        Ok(())
+    }
+}
+
+impl Display for RuleState {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> io::Result<()> {
+        match self.description_kind() {
+            Some(DescriptionKind::Inferred) => self.write_inferred(formatter),
+            Some(DescriptionKind::Narrowed) => self.write_narrowed(formatter),
+            None => Ok(()),
+        }
+    }
+}
+
+/// Rendered byte length of a string/number/boolean literal; `None` otherwise.
+fn literal_display_len(literal: &Literal) -> Option<usize> {
+    match literal {
+        Literal::String(value) => Some(value.as_str().len() + 2),
+        Literal::Number(value) => Some(value.as_str().len()),
+        Literal::Boolean(value) => Some(if value.as_bool() { 4 } else { 5 }),
+        _ => None,
+    }
+}
+
+/// Rejects literals whose rendered text contains `...`, `__internal`, or `typeof import(`.
+fn literal_content_ok(literal: &Literal) -> bool {
+    let text = match literal {
+        Literal::String(value) => value.as_str(),
+        Literal::Number(value) => value.as_str(),
+        _ => return true,
+    };
+    !text.contains("...") && !text.contains("__internal") && !text.contains("typeof import(")
+}
+
+/// Writes a string/number/boolean literal; writes nothing for other kinds.
+fn write_literal(formatter: &mut Formatter<'_>, literal: &Literal) -> io::Result<()> {
+    match literal {
+        Literal::String(value) => write!(formatter, "\"{}\"", value.as_str()),
+        Literal::Number(value) => formatter.write_str(value.as_str()),
+        Literal::Boolean(value) => formatter.write_str(if value.as_bool() { "true" } else { "false" }),
+        _ => Ok(()),
+    }
+}
+
+/// Rendered byte length of a primitive keyword or literal variant; `None` otherwise.
+fn variant_display_len(variant: &Type) -> Option<usize> {
+    match &**variant {
+        TypeData::String | TypeData::Number | TypeData::BigInt => Some(6),
+        TypeData::Boolean => Some(7),
+        TypeData::Literal(literal) => literal_display_len(literal.as_ref()),
+        _ => None,
+    }
+}
+
+/// Writes a primitive keyword or literal variant; writes nothing for other kinds.
+fn write_variant(formatter: &mut Formatter<'_>, variant: &Type) -> io::Result<()> {
+    match &**variant {
+        TypeData::String => formatter.write_str("string"),
+        TypeData::Number => formatter.write_str("number"),
+        TypeData::Boolean => formatter.write_str("boolean"),
+        TypeData::BigInt => formatter.write_str("bigint"),
+        TypeData::Literal(literal) => write_literal(formatter, literal.as_ref()),
+        _ => Ok(()),
+    }
+}
+
+/// `true` when every return is a displayable literal with clean content and
+/// the joined output fits within [`MAX_DESCRIPTION_LENGTH`].
+fn can_render_inferred(returns: &[Type]) -> bool {
+    let mut total_len = 0usize;
+    let mut has_any = false;
+    for return_type in returns {
+        let TypeData::Literal(literal) = &**return_type else {
+            return false;
+        };
+        if !literal_content_ok(literal.as_ref()) {
+            return false;
+        }
+        let Some(literal_len) = literal_display_len(literal.as_ref()) else {
+            return false;
+        };
+        if has_any {
+            total_len += SEPARATOR.len();
+        }
+        total_len += literal_len;
+        has_any = true;
+    }
+    has_any && total_len <= MAX_DESCRIPTION_LENGTH
+}
+
+/// Returns `true` when the annotation's union can be safely narrowed to only
+/// its covered variants within [`MAX_DESCRIPTION_LENGTH`].
+fn can_render_narrowed(annotation: &Type, returns: &[Type]) -> bool {
+    let covers_any = |variant: &Type| {
+        returns.iter().any(|return_type| {
+            types_match(variant, return_type) || is_nonunion_wider(variant, return_type)
+        })
+    };
+
+    let mut total = 0usize;
+    let mut covered = 0usize;
+    let mut all_renderable = true;
+    let mut has_widening = false;
+    let mut render_len = 0usize;
+    let mut first = true;
+
+    for variant in annotation.flattened_union_variants() {
+        total += 1;
+        if !covers_any(&variant) {
+            continue;
+        }
+        covered += 1;
+        if returns.iter().any(|return_type| {
+            !types_match(&variant, return_type) && is_nonunion_wider(&variant, return_type)
+        }) {
+            has_widening = true;
+        }
+        match variant_display_len(&variant) {
+            Some(len) => {
+                if !first {
+                    render_len += SEPARATOR.len();
+                }
+                render_len += len;
+                first = false;
+            }
+            None => all_renderable = false,
+        }
+    }
+
+    if covered == 0 || covered == total || !all_renderable {
+        return false;
+    }
+
+    // A widening variant would keep the narrowed annotation misleading, unless
+    // the single-literal-primitive bailout upstream would hide it.
+    let single_literal_bailout =
+        covered == 1 && is_single_literal_primitive_return(returns);
+    if has_widening && !single_literal_bailout {
+        return false;
+    }
+
+    render_len <= MAX_DESCRIPTION_LENGTH
+}
+// #endregion
 
 impl Rule for NoMisleadingReturnType {
     type Query = Typed<AnyFunctionLikeWithReturnType>;
@@ -176,13 +386,14 @@ impl Rule for NoMisleadingReturnType {
             "A wider return type hides the precise types that callers could rely on."
         });
 
-        let diag = match build_inferred_description(&state.returns) {
-            Some(desc) => diag.note(markup! {
-                "Consider using "{desc}" as the return type."
-            }),
-            None => diag.note(markup! {
+        let diag = if state.description_kind().is_some() {
+            diag.note(markup! {
+                "Consider using "{state}" as the return type."
+            })
+        } else {
+            diag.note(markup! {
                 "Narrow the return type to match what the function actually returns."
-            }),
+            })
         };
 
         Some(diag)
@@ -283,6 +494,10 @@ fn run_for_member_with_body(
         return_ty.clone()
     };
 
+    // Normalize `"a" | "b" | string` → `string` before widening checks.
+    let effective_return_ty =
+        collapse_union_absorbed_by_primitive(&effective_return_ty).unwrap_or(effective_return_ty);
+
     let needs_object_bookkeeping = matches!(&*effective_return_ty, TypeData::ObjectKeyword);
     let info = collect_return_info(ctx, body, needs_object_bookkeeping);
 
@@ -290,7 +505,7 @@ fn run_for_member_with_body(
         return None;
     }
 
-    if info.is_single_primitive_literal() {
+    if info.is_single_primitive_literal() && !effective_return_ty.is_union() {
         return None;
     }
 
@@ -306,6 +521,15 @@ fn run_for_member_with_body(
     }
 
     if info.types.iter().any(is_any_contaminated) {
+        return None;
+    }
+
+    // tsc collapses any union containing `unknown` to `unknown`.
+    if matches!(&*effective_return_ty, TypeData::Union(_))
+        && effective_return_ty
+            .flattened_union_variants()
+            .any(|v| matches!(&*v, TypeData::UnknownKeyword | TypeData::Unknown))
+    {
         return None;
     }
 
@@ -348,6 +572,8 @@ fn run_for_member_with_body(
     Some(RuleState {
         annotation_range,
         returns: info.types,
+        effective_return_ty,
+        has_any_const_return: info.has_any_const,
     })
 }
 
@@ -396,6 +622,32 @@ fn is_escape_hatch(ty: &Type) -> bool {
             | TypeData::Unknown
             | TypeData::ThisKeyword
     )
+}
+
+/// Returns the primitive a union collapses to at the TS level, when exactly
+/// one variant is a primitive and every other variant is a literal of it.
+fn collapse_union_absorbed_by_primitive(ty: &Type) -> Option<Type> {
+    if !matches!(&**ty, TypeData::Union(_)) {
+        return None;
+    }
+    let variants: Vec<Type> = ty.flattened_union_variants().collect();
+    let mut primitive: Option<Type> = None;
+    for variant in &variants {
+        if matches!(
+            &**variant,
+            TypeData::String | TypeData::Number | TypeData::Boolean | TypeData::BigInt
+        ) {
+            if primitive.is_some() {
+                return None;
+            }
+            primitive = Some(variant.clone());
+        }
+    }
+    let primitive = primitive?;
+    let all_absorbed = variants.iter().all(|variant| {
+        types_match(variant, &primitive) || is_nonunion_wider(&primitive, variant)
+    });
+    all_absorbed.then_some(primitive)
 }
 
 /// Checks whether `object` appears directly or as a union variant.
@@ -470,6 +722,10 @@ fn is_literal_of_primitive(ty: &Type) -> bool {
         }
         _ => false,
     }
+}
+
+fn is_single_literal_primitive_return(returns: &[Type]) -> bool {
+    returns.len() == 1 && is_literal_of_primitive(&returns[0])
 }
 
 /// Checks whether annotation differs from returns only by property-level
@@ -621,80 +877,6 @@ fn is_base_type_of_literal(base: &Type, literal: &Type) -> bool {
         }
         (TypeData::BigInt, TypeData::Literal(lit)) => matches!(lit.as_ref(), Literal::BigInt(_)),
         _ => false,
-    }
-}
-
-/// Return-set description suitable for embedding in a diagnostic via
-/// [`biome_console::fmt::Display`].
-struct InferredReturnDescription<'a> {
-    returns: &'a [Type],
-}
-
-/// Builds a description like `"loading" | "idle"` for the diagnostic note.
-fn build_inferred_description(returns: &[Type]) -> Option<InferredReturnDescription<'_>> {
-    let mut total = 0usize;
-    let mut has_any = false;
-    for ty in returns {
-        let TypeData::Literal(lit) = &**ty else {
-            return None;
-        };
-        if has_any {
-            total += 3; // " | "
-        }
-        has_any = true;
-        match lit.as_ref() {
-            Literal::String(s) => {
-                let text = s.as_str();
-                // Skip values that would look confusing in a diagnostic (e.g. "...").
-                if text.contains("...")
-                    || text.contains("__internal")
-                    || text.contains("typeof import(")
-                {
-                    return None;
-                }
-                total += 2 + text.len(); // surrounding quotes
-            }
-            Literal::Number(n) => total += n.as_str().len(),
-            Literal::Boolean(b) => total += if b.as_bool() { 4 } else { 5 },
-            _ => return None,
-        }
-        // Skip overly long descriptions.
-        if total > MAX_DESCRIPTION_LENGTH {
-            return None;
-        }
-    }
-    if !has_any {
-        return None;
-    }
-    Some(InferredReturnDescription { returns })
-}
-
-impl biome_console::fmt::Display for InferredReturnDescription<'_> {
-    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
-        let mut first = true;
-        for ty in self.returns {
-            let TypeData::Literal(lit) = &**ty else {
-                continue;
-            };
-            if !first {
-                biome_console::fmt::Display::fmt(&" | ", fmt)?;
-            }
-            first = false;
-            match lit.as_ref() {
-                Literal::String(s) => {
-                    biome_console::fmt::Display::fmt(&"\"", fmt)?;
-                    biome_console::fmt::Display::fmt(&s.as_str(), fmt)?;
-                    biome_console::fmt::Display::fmt(&"\"", fmt)?;
-                }
-                Literal::Number(n) => biome_console::fmt::Display::fmt(&n.as_str(), fmt)?,
-                Literal::Boolean(b) => biome_console::fmt::Display::fmt(
-                    &if b.as_bool() { "true" } else { "false" },
-                    fmt,
-                )?,
-                _ => {}
-            }
-        }
-        Ok(())
     }
 }
 
@@ -1707,7 +1889,8 @@ fn is_wider_than(annotated: &Type, inferred: &Type) -> bool {
     }
 }
 
-/// Checks whether a union annotation is wider than a set of return types.
+/// Flags when the annotation has an unreached variant or a variant strictly
+/// wider than a return that no other variant matches directly.
 fn is_union_wider_than_returns(annotated: &Type, returns: &[Type]) -> bool {
     let all_covered = returns.iter().all(|ret| {
         annotated
@@ -1719,15 +1902,20 @@ fn is_union_wider_than_returns(annotated: &Type, returns: &[Type]) -> bool {
         return false;
     }
 
-    let has_extra = annotated.flattened_union_variants().any(|ann_v| {
+    let variants: Vec<Type> = annotated.flattened_union_variants().collect();
+
+    let has_extra = variants.iter().any(|ann_v| {
         !returns
             .iter()
-            .any(|ret| types_match(&ann_v, ret) || is_nonunion_wider(&ann_v, ret))
+            .any(|ret| types_match(ann_v, ret) || is_nonunion_wider(ann_v, ret))
     });
 
-    let has_wider_variant = annotated
-        .flattened_union_variants()
-        .any(|ann_v| returns.iter().any(|ret| is_nonunion_wider(&ann_v, ret)));
+    // A return already matched directly by another variant is not treated as
+    // misleadingly widened.
+    let has_wider_variant = returns.iter().any(|ret| {
+        !variants.iter().any(|ann_v| types_match(ann_v, ret))
+            && variants.iter().any(|ann_v| is_nonunion_wider(ann_v, ret))
+    });
 
     has_extra || has_wider_variant
 }

@@ -6636,7 +6636,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && ScssExpression::can_cast(element.kind())
+                    && ScssEachValueList::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -8966,6 +8966,13 @@ impl SyntaxFactory for CssSyntaxFactory {
                 ScssVariable::can_cast,
                 T ! [,],
                 false,
+            ),
+            SCSS_EACH_VALUE_LIST => Self::make_separated_list_syntax(
+                kind,
+                children,
+                ScssExpression::can_cast,
+                T ! [,],
+                true,
             ),
             SCSS_EXPRESSION_ITEM_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyScssExpressionItem::can_cast)

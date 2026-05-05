@@ -3,6 +3,33 @@ use crate::markdown::auxiliary::inline_italic::FormatMdInlineItalicOptions;
 use crate::markdown::auxiliary::textual::FormatMdTextualOptions;
 use crate::prelude::*;
 use crate::shared::{TextPrintMode, TrimMode};
+use crate::words::{FormatWordGroup, ProseItem, WordStreamResult, build_word_stream_flat};
+use biome_formatter::Format;
+
+/// Formats a sequence of prose items as a single line — word groups joined by spaces.
+/// SoftBreak and HardBreak are treated as space separators if encountered.
+struct FormatSourceLine<'a>(&'a [ProseItem]);
+
+impl Format<MarkdownFormatContext> for FormatSourceLine<'_> {
+    fn fmt(&self, f: &mut MarkdownFormatter) -> FormatResult<()> {
+        let mut needs_space = false;
+        for item in self.0 {
+            match item {
+                ProseItem::WordGroup(atoms) => {
+                    if needs_space {
+                        write!(f, [space()])?;
+                    }
+                    FormatWordGroup(atoms).fmt(f)?;
+                    needs_space = true;
+                }
+                ProseItem::Space | ProseItem::SoftBreak | ProseItem::HardBreak(_) => {
+                    needs_space = true;
+                }
+            }
+        }
+        Ok(())
+    }
+}
 use biome_formatter::{FormatRuleWithOptions, write};
 use biome_markdown_syntax::{AnyMdInline, MdInlineItemList};
 
@@ -17,7 +44,9 @@ pub(crate) struct FormatMdInlineItemList {
 impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
     type Context = MarkdownFormatContext;
     fn fmt(&self, node: &MdInlineItemList, f: &mut MarkdownFormatter) -> FormatResult<()> {
-        if self.inside_list {
+        if self.print_mode.is_fill() {
+            return self.fmt_fill(node, f);
+        } else if self.inside_list {
             return self.fmt_inside_list(node, f);
         } else if self.print_mode.is_auto_link_like() {
             return self.fmt_auto_link_like(node, f);
@@ -504,6 +533,75 @@ impl FormatMdInlineItemList {
         }
 
         joiner.finish()
+    }
+
+    /// Formats prose with `proseWrap: "preserve"` semantics.
+    ///
+    /// Each source line is emitted as-is with `hard_line_break` between them.
+    /// Hard breaks (`  \n` or `\\\n`) are formatted using their original node.
+    ///
+    /// TODO: for `proseWrap: "always"`, replace sequential writes with `f.fill()`
+    /// using `soft_line_break_or_space()` separators between word-level entries.
+    /// The word stream from `build_word_stream_flat` already provides the
+    /// granularity needed — just change the emission strategy.
+    fn fmt_fill(&self, node: &MdInlineItemList, f: &mut MarkdownFormatter) -> FormatResult<()> {
+        let WordStreamResult {
+            stream,
+            has_trailing_break,
+        } = build_word_stream_flat(node, f).map_err(|_| FormatError::SyntaxError)?;
+
+        let mut is_first_line = true;
+        let mut line_start = 0;
+
+        for (i, item) in stream.iter().enumerate() {
+            match item {
+                ProseItem::HardBreak(hard_break) => {
+                    let line_items = &stream[line_start..i];
+                    if !line_items.is_empty() {
+                        if !is_first_line {
+                            write!(f, [hard_line_break()])?;
+                        }
+                        FormatSourceLine(line_items).fmt(f)?;
+                    }
+                    write!(
+                        f,
+                        [hard_break
+                            .format()
+                            .with_options(FormatMdFormatHardLineOptions {
+                                print_mode: TextPrintMode::Fill,
+                            })]
+                    )?;
+                    is_first_line = true;
+                    line_start = i + 1;
+                }
+                ProseItem::SoftBreak => {
+                    let line_items = &stream[line_start..i];
+                    if !line_items.is_empty() {
+                        if !is_first_line {
+                            write!(f, [hard_line_break()])?;
+                        }
+                        FormatSourceLine(line_items).fmt(f)?;
+                        is_first_line = false;
+                    }
+                    line_start = i + 1;
+                }
+                _ => {}
+            }
+        }
+        // Emit remaining content
+        let remaining = &stream[line_start..];
+        if !remaining.is_empty() {
+            if !is_first_line {
+                write!(f, [hard_line_break()])?;
+            }
+            FormatSourceLine(remaining).fmt(f)?;
+        }
+
+        if has_trailing_break {
+            write!(f, [hard_line_break()])?;
+        }
+
+        Ok(())
     }
 }
 

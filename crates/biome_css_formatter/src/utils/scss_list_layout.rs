@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::utils::comment_trivia::has_inline_trailing_comment;
 use crate::utils::scss_closing_comments::{
-    ClosingCommentSpacing, format_include_closing_comments, owns_include_closing_comments,
+    ClosingCommentSpacing, owns_include_closing_comments, write_include_closing_comments,
 };
 use biome_css_syntax::{
     ScssExpression, ScssListExpression, ScssListExpressionElementList, ScssListExpressionFields,
@@ -83,11 +83,20 @@ impl<'a> ScssListLayout<'a> {
         }
 
         let list_layout = IncludeListLayout::new(self.node, &elements, f);
-        let trailing_comma = format_with(|f| list_layout.write_trailing_comma(f));
-        let closing_comments = format_include_closing_comments(
-            self.node.syntax(),
-            ClosingCommentSpacing::SoftLineBreak,
-        );
+        let trailing_comma = format_with(|f| {
+            if list_layout.is_trailing_comma_forced {
+                write!(f, [token(",")])
+            } else {
+                write!(f, [if_group_breaks(&token(","))])
+            }
+        });
+        let closing_comments = format_with(|f| {
+            write_include_closing_comments(
+                self.node.syntax(),
+                ClosingCommentSpacing::SoftLineBreak,
+                f,
+            )
+        });
 
         if scss_map_context(self.node)
             .is_some_and(|context| context.is_outer_parenthesized_value_list)
@@ -101,7 +110,7 @@ impl<'a> ScssListLayout<'a> {
                     elements.format(),
                     trailing_comma, closing_comments
                 ])
-                .should_expand(list_layout.should_expand)]
+                .should_expand(list_layout.is_expanded)]
             )
         } else {
             write!(
@@ -112,12 +121,12 @@ impl<'a> ScssListLayout<'a> {
                     trailing_comma,
                     closing_comments
                 ]))
-                .should_expand(list_layout.should_expand)]
+                .should_expand(list_layout.is_expanded)]
             )
         }
     }
 
-    /// Returns `true` when this layout prints the node's dangling comments.
+    /// Checks whether this layout prints include closing comments.
     pub(crate) fn owns_dangling_comments(&self, f: &CssFormatter) -> bool {
         owns_include_closing_comments(self.node.syntax(), f)
     }
@@ -127,8 +136,8 @@ impl<'a> ScssListLayout<'a> {
 #[derive(Debug, Clone, Copy)]
 struct IncludeListLayout {
     is_keyword_parenthesized_list: bool,
-    force_trailing_comma: bool,
-    should_expand: bool,
+    is_trailing_comma_forced: bool,
+    is_expanded: bool,
 }
 
 impl IncludeListLayout {
@@ -139,29 +148,24 @@ impl IncludeListLayout {
     ) -> Self {
         let is_keyword_parenthesized_list =
             is_direct_include_keyword_parenthesized_list_value(node);
-        let keeps_source_trailing_separator =
+        let has_preserved_source_trailing_separator =
             elements.trailing_separator().is_some() && is_keyword_parenthesized_list;
 
         Self {
             is_keyword_parenthesized_list,
-            force_trailing_comma: owns_include_closing_comments(node.syntax(), f)
-                || keeps_source_trailing_separator,
-            should_expand: should_expand_include_keyword_list_value(node, f)
-                || keeps_source_trailing_separator,
-        }
-    }
-
-    fn write_trailing_comma(self, f: &mut CssFormatter) -> FormatResult<()> {
-        if self.force_trailing_comma {
-            write!(f, [token(",")])
-        } else {
-            write!(f, [if_group_breaks(&token(","))])
+            is_trailing_comma_forced: owns_include_closing_comments(node.syntax(), f)
+                || has_preserved_source_trailing_separator,
+            is_expanded: is_include_keyword_list_value_expanded_by_comments(node, f)
+                || has_preserved_source_trailing_separator,
         }
     }
 }
 
-/// Returns `true` for the inner list in `@include mix($arg: (a, b) /* end */)`.
-fn should_expand_include_keyword_list_value(node: &ScssListExpression, f: &CssFormatter) -> bool {
+/// Detects `@include mix($arg: (a, b) /* end */)`, where comments force expansion.
+fn is_include_keyword_list_value_expanded_by_comments(
+    node: &ScssListExpression,
+    f: &CssFormatter,
+) -> bool {
     let has_direct_trailing_comment = has_inline_trailing_comment(node.syntax());
     let has_expression_trailing_comment = node
         .syntax()
@@ -195,7 +199,7 @@ fn should_expand_include_keyword_list_value(node: &ScssListExpression, f: &CssFo
     has_trailing_comment || has_keyword_closing_comments
 }
 
-/// Returns `true` for the list in `@include mix($arg: (a, b))`.
+/// Detects the list in `@include mix($arg: (a, b))`.
 fn is_direct_include_keyword_parenthesized_list_value(node: &ScssListExpression) -> bool {
     let Some(parenthesized) = node
         .syntax()
@@ -209,10 +213,10 @@ fn is_direct_include_keyword_parenthesized_list_value(node: &ScssListExpression)
         return false;
     }
 
-    parenthesized_owns_list(&parenthesized, node)
+    is_list_owned_by_parentheses(&parenthesized, node)
 }
 
-/// Returns `true` for the list in `@use "x" with ($family: (a, b))`.
+/// Detects the list in `@use "x" with ($family: (a, b))`.
 fn is_module_configuration_parenthesized_list_value(node: &ScssListExpression) -> bool {
     let Some(parenthesized) = node
         .syntax()
@@ -222,7 +226,7 @@ fn is_module_configuration_parenthesized_list_value(node: &ScssListExpression) -
         return false;
     };
 
-    if !parenthesized_owns_list(&parenthesized, node) {
+    if !is_list_owned_by_parentheses(&parenthesized, node) {
         return false;
     }
 
@@ -239,26 +243,26 @@ fn is_module_configuration_parenthesized_list_value(node: &ScssListExpression) -
         })
 }
 
-/// Returns `true` for the list key in `(("a", "b"): value)`.
+/// Detects the list key in `(("a", "b"): value)`.
 fn is_parenthesized_map_key_list(node: &ScssListExpression) -> bool {
     node.syntax()
         .parent()
         .and_then(ScssParenthesizedExpression::cast)
         .is_some_and(|parenthesized| {
-            is_scss_map_key(&parenthesized) && parenthesized_owns_list(&parenthesized, node)
+            is_scss_map_key(&parenthesized) && is_list_owned_by_parentheses(&parenthesized, node)
         })
 }
 
-/// Returns `true` for the list in `(a, b)`.
+/// Detects a list directly wrapped by parentheses, such as `(a, b)`.
 fn is_parenthesized_list(node: &ScssListExpression) -> bool {
     node.syntax()
         .parent()
         .and_then(ScssParenthesizedExpression::cast)
-        .is_some_and(|parenthesized| parenthesized_owns_list(&parenthesized, node))
+        .is_some_and(|parenthesized| is_list_owned_by_parentheses(&parenthesized, node))
 }
 
-/// Returns `true` when `node` is the list inside `(a, b)`.
-fn parenthesized_owns_list(
+/// Detects the list owned by parentheses in `(a, b)`.
+fn is_list_owned_by_parentheses(
     parenthesized: &ScssParenthesizedExpression,
     node: &ScssListExpression,
 ) -> bool {

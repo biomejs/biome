@@ -857,20 +857,58 @@ fn classify_quote_break_after_newline(
 ) -> QuoteBreakKind {
     p.lookahead(|p| {
         consume_quote_prefix_without_virtual(p, quote_depth);
+        // CommonMark §4.3: a setext underline must sit in the same container
+        // as the paragraph it underlines. When the paragraph is inside a list
+        // item and the residual indent after the `>` prefix is below the
+        // list's required indent, the dash line cannot be a setext underline —
+        // it is a thematic break that ends the list. Reporting it as `Other`
+        // (vs `SetextUnderline`) keeps the `>` prefix unconsumed so the outer
+        // blockquote can re-process the line.
+        let required_indent = p.state().list_item_required_indent;
+        let residual_indent = leading_indent_at_current(p);
+        let underline_in_container = required_indent == 0 || residual_indent >= required_indent;
         with_virtual_line_start(p, p.cur_range().start(), |p| {
             // Re-lex at line start so the lexer produces block-level tokens
             // (e.g. MD_THEMATIC_BREAK_LITERAL for `---`) instead of MINUS.
             p.force_relex_at_line_start();
-            if p.at(MD_SETEXT_UNDERLINE_LITERAL)
-                || (p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break(p))
-            {
+            let at_setext = p.at(MD_SETEXT_UNDERLINE_LITERAL)
+                || (p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break(p));
+            if at_setext && underline_in_container {
                 QuoteBreakKind::SetextUnderline
-            } else if at_block_interrupt(p) || textual_looks_like_list_marker(p) {
+            } else if at_setext || at_block_interrupt(p) || textual_looks_like_list_marker(p) {
                 QuoteBreakKind::Other
             } else {
                 QuoteBreakKind::None
             }
         })
+    })
+}
+
+/// Count residual indent columns at the current parser position.
+///
+/// Used after lookahead consumes a container prefix such as `> `. This is not
+/// full line-start indent; it only measures spaces/tabs before the next block
+/// candidate without advancing the real parser.
+fn leading_indent_at_current(p: &mut MarkdownParser) -> usize {
+    p.lookahead(|p| {
+        let mut indent = 0usize;
+        while p.at(MD_TEXTUAL_LITERAL) {
+            let text = p.cur_text();
+            if text.is_empty() {
+                break;
+            }
+
+            for c in text.chars() {
+                match c {
+                    ' ' => indent += 1,
+                    '\t' => indent += TAB_STOP_SPACES - (indent % TAB_STOP_SPACES),
+                    _ => return indent,
+                }
+            }
+
+            p.bump(MD_TEXTUAL_LITERAL);
+        }
+        indent
     })
 }
 
@@ -1399,28 +1437,69 @@ fn scan_newline_in_inline_list(p: &mut MarkdownParser, has_content: bool) -> boo
     let required_indent = p.state().list_item_required_indent;
     if required_indent > 0 {
         let indent = p.line_start_leading_indent();
-        if indent < required_indent {
-            return true;
-        }
+        if indent >= required_indent {
+            scan_list_indent(p, required_indent);
 
-        scan_list_indent(p, required_indent);
-
-        // After stripping list indent, re-check setext/thematic markers
-        // to mirror newline handling in the parse path. Without this,
-        // prescan would include indent bytes and stop one iteration later.
-        // We intentionally skip the heavier post-indent block-interrupt
-        // check here; the following non-NEWLINE pass still catches
-        // interrupts for emphasis-context length calculation.
-        if has_content
-            && (p.at(MD_SETEXT_UNDERLINE_LITERAL)
-                || (p.at(MD_THEMATIC_BREAK_LITERAL)
-                    && is_dash_only_thematic_break_text(p.cur_text())))
-        {
+            // After stripping list indent, re-check setext/thematic markers
+            // to mirror newline handling in the parse path. Without this,
+            // prescan would include indent bytes and stop one iteration later.
+            // We intentionally skip the heavier post-indent block-interrupt
+            // check here; the following non-NEWLINE pass still catches
+            // interrupts for emphasis-context length calculation.
+            if has_content
+                && (p.at(MD_SETEXT_UNDERLINE_LITERAL)
+                    || (p.at(MD_THEMATIC_BREAK_LITERAL)
+                        && is_dash_only_thematic_break_text(p.cur_text())))
+            {
+                return true;
+            }
+        } else if at_block_interrupt_after_indent(p) {
+            // CommonMark §5.2: at insufficient indent we keep scanning so
+            // the emphasis context sees lazy-continuation delimiters, but
+            // a sibling/parent list marker (or other block interrupt) at
+            // the next line still ends the paragraph and must stop the
+            // scan early — without this, deeply nested list benchmarks
+            // walk through every leading-whitespace token of every
+            // following line.
             return true;
         }
     }
 
     false
+}
+
+/// Lookahead: skip leading whitespace tokens on the current line and
+/// return whether the resulting position is a block interrupt or list
+/// marker. Used to short-circuit lazy-continuation scanning when the
+/// next line actually starts a new block.
+///
+/// Per CommonMark §5.2, a line indented 4+ columns *past the parent
+/// list marker* is paragraph text (lazy continuation), never a block
+/// interrupt — return false in that window. Lines below that threshold
+/// can still be sibling/parent list markers, so we keep walking and
+/// re-check, which is what restores the fast path for deeply nested
+/// lists where absolute indent is already large.
+fn at_block_interrupt_after_indent(p: &mut MarkdownParser) -> bool {
+    p.lookahead(|p| {
+        let lazy_threshold = p.state().list_item_marker_indent + INDENT_CODE_BLOCK_SPACES;
+        let mut indent = 0usize;
+        while p.at(MD_TEXTUAL_LITERAL) && p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
+            for c in p.cur_text().chars() {
+                match c {
+                    ' ' => indent += 1,
+                    '\t' => indent += TAB_STOP_SPACES - (indent % TAB_STOP_SPACES),
+                    _ => {}
+                }
+            }
+            if indent >= lazy_threshold {
+                return false;
+            }
+            p.bump(MD_TEXTUAL_LITERAL);
+        }
+        with_virtual_line_start(p, p.cur_range().start(), |p| {
+            at_block_interrupt(p) || textual_looks_like_list_marker(p)
+        })
+    })
 }
 
 /// Strip list-item indent tokens during inline list length scanning.
