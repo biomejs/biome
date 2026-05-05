@@ -3,6 +3,7 @@
 <span>bind </span>
 <span>transition </span>
 <span>in </span>
+<span>of </span>
 <span>out </span>
 <span>class </span>
 <span>animate </span>

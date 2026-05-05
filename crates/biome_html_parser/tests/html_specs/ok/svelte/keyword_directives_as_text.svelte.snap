@@ -11,6 +11,7 @@ expression: snapshot
 <span>bind </span>
 <span>transition </span>
 <span>in </span>
+<span>of </span>
 <span>out </span>
 <span>class </span>
 <span>animate </span>
@@ -155,100 +156,123 @@ HtmlRoot {
             },
             children: HtmlElementList [
                 HtmlContent {
-                    value_token: HTML_LITERAL@105..109 "out" [] [Whitespace(" ")],
+                    value_token: HTML_LITERAL@105..108 "of" [] [Whitespace(" ")],
                 },
             ],
             closing_element: HtmlClosingElement {
-                l_angle_token: L_ANGLE@109..110 "<" [] [],
-                slash_token: SLASH@110..111 "/" [] [],
+                l_angle_token: L_ANGLE@108..109 "<" [] [],
+                slash_token: SLASH@109..110 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@111..115 "span" [] [],
+                    value_token: HTML_LITERAL@110..114 "span" [] [],
                 },
-                r_angle_token: R_ANGLE@115..116 ">" [] [],
+                r_angle_token: R_ANGLE@114..115 ">" [] [],
             },
         },
         HtmlElement {
             opening_element: HtmlOpeningElement {
-                l_angle_token: L_ANGLE@116..118 "<" [Newline("\n")] [],
+                l_angle_token: L_ANGLE@115..117 "<" [Newline("\n")] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@118..122 "span" [] [],
+                    value_token: HTML_LITERAL@117..121 "span" [] [],
                 },
                 attributes: HtmlAttributeList [],
-                r_angle_token: R_ANGLE@122..123 ">" [] [],
+                r_angle_token: R_ANGLE@121..122 ">" [] [],
             },
             children: HtmlElementList [
                 HtmlContent {
-                    value_token: HTML_LITERAL@123..129 "class" [] [Whitespace(" ")],
+                    value_token: HTML_LITERAL@122..126 "out" [] [Whitespace(" ")],
                 },
             ],
             closing_element: HtmlClosingElement {
-                l_angle_token: L_ANGLE@129..130 "<" [] [],
-                slash_token: SLASH@130..131 "/" [] [],
+                l_angle_token: L_ANGLE@126..127 "<" [] [],
+                slash_token: SLASH@127..128 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@131..135 "span" [] [],
+                    value_token: HTML_LITERAL@128..132 "span" [] [],
                 },
-                r_angle_token: R_ANGLE@135..136 ">" [] [],
+                r_angle_token: R_ANGLE@132..133 ">" [] [],
             },
         },
         HtmlElement {
             opening_element: HtmlOpeningElement {
-                l_angle_token: L_ANGLE@136..138 "<" [Newline("\n")] [],
+                l_angle_token: L_ANGLE@133..135 "<" [Newline("\n")] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@138..142 "span" [] [],
+                    value_token: HTML_LITERAL@135..139 "span" [] [],
                 },
                 attributes: HtmlAttributeList [],
-                r_angle_token: R_ANGLE@142..143 ">" [] [],
+                r_angle_token: R_ANGLE@139..140 ">" [] [],
             },
             children: HtmlElementList [
                 HtmlContent {
-                    value_token: HTML_LITERAL@143..151 "animate" [] [Whitespace(" ")],
+                    value_token: HTML_LITERAL@140..146 "class" [] [Whitespace(" ")],
                 },
             ],
             closing_element: HtmlClosingElement {
-                l_angle_token: L_ANGLE@151..152 "<" [] [],
-                slash_token: SLASH@152..153 "/" [] [],
+                l_angle_token: L_ANGLE@146..147 "<" [] [],
+                slash_token: SLASH@147..148 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@153..157 "span" [] [],
+                    value_token: HTML_LITERAL@148..152 "span" [] [],
                 },
-                r_angle_token: R_ANGLE@157..158 ">" [] [],
+                r_angle_token: R_ANGLE@152..153 ">" [] [],
             },
         },
         HtmlElement {
             opening_element: HtmlOpeningElement {
-                l_angle_token: L_ANGLE@158..160 "<" [Newline("\n")] [],
+                l_angle_token: L_ANGLE@153..155 "<" [Newline("\n")] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@160..161 "p" [] [],
+                    value_token: HTML_LITERAL@155..159 "span" [] [],
                 },
                 attributes: HtmlAttributeList [],
-                r_angle_token: R_ANGLE@161..162 ">" [] [],
+                r_angle_token: R_ANGLE@159..160 ">" [] [],
             },
             children: HtmlElementList [
                 HtmlContent {
-                    value_token: HTML_LITERAL@162..185 "use JavaScript on the" [Newline("\n"), Whitespace("\t")] [],
+                    value_token: HTML_LITERAL@160..168 "animate" [] [Whitespace(" ")],
                 },
             ],
             closing_element: HtmlClosingElement {
-                l_angle_token: L_ANGLE@185..187 "<" [Newline("\n")] [],
-                slash_token: SLASH@187..188 "/" [] [],
+                l_angle_token: L_ANGLE@168..169 "<" [] [],
+                slash_token: SLASH@169..170 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@188..189 "p" [] [],
+                    value_token: HTML_LITERAL@170..174 "span" [] [],
                 },
-                r_angle_token: R_ANGLE@189..190 ">" [] [],
+                r_angle_token: R_ANGLE@174..175 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@175..177 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@177..178 "p" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@178..179 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@179..202 "use JavaScript on the" [Newline("\n"), Whitespace("\t")] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@202..204 "<" [Newline("\n")] [],
+                slash_token: SLASH@204..205 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@205..206 "p" [] [],
+                },
+                r_angle_token: R_ANGLE@206..207 ">" [] [],
             },
         },
     ],
-    eof_token: EOF@190..191 "" [Newline("\n")] [],
+    eof_token: EOF@207..208 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: HTML_ROOT@0..191
+0: HTML_ROOT@0..208
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..190
+  3: HTML_ELEMENT_LIST@0..207
     0: HTML_ELEMENT@0..17
       0: HTML_OPENING_ELEMENT@0..6
         0: L_ANGLE@0..1 "<" [] []
@@ -329,70 +353,86 @@ HtmlRoot {
         2: HTML_TAG_NAME@93..97
           0: HTML_LITERAL@93..97 "span" [] []
         3: R_ANGLE@97..98 ">" [] []
-    5: HTML_ELEMENT@98..116
+    5: HTML_ELEMENT@98..115
       0: HTML_OPENING_ELEMENT@98..105
         0: L_ANGLE@98..100 "<" [Newline("\n")] []
         1: HTML_TAG_NAME@100..104
           0: HTML_LITERAL@100..104 "span" [] []
         2: HTML_ATTRIBUTE_LIST@104..104
         3: R_ANGLE@104..105 ">" [] []
-      1: HTML_ELEMENT_LIST@105..109
-        0: HTML_CONTENT@105..109
-          0: HTML_LITERAL@105..109 "out" [] [Whitespace(" ")]
-      2: HTML_CLOSING_ELEMENT@109..116
-        0: L_ANGLE@109..110 "<" [] []
-        1: SLASH@110..111 "/" [] []
-        2: HTML_TAG_NAME@111..115
-          0: HTML_LITERAL@111..115 "span" [] []
-        3: R_ANGLE@115..116 ">" [] []
-    6: HTML_ELEMENT@116..136
-      0: HTML_OPENING_ELEMENT@116..123
-        0: L_ANGLE@116..118 "<" [Newline("\n")] []
-        1: HTML_TAG_NAME@118..122
-          0: HTML_LITERAL@118..122 "span" [] []
-        2: HTML_ATTRIBUTE_LIST@122..122
-        3: R_ANGLE@122..123 ">" [] []
-      1: HTML_ELEMENT_LIST@123..129
-        0: HTML_CONTENT@123..129
-          0: HTML_LITERAL@123..129 "class" [] [Whitespace(" ")]
-      2: HTML_CLOSING_ELEMENT@129..136
-        0: L_ANGLE@129..130 "<" [] []
-        1: SLASH@130..131 "/" [] []
-        2: HTML_TAG_NAME@131..135
-          0: HTML_LITERAL@131..135 "span" [] []
-        3: R_ANGLE@135..136 ">" [] []
-    7: HTML_ELEMENT@136..158
-      0: HTML_OPENING_ELEMENT@136..143
-        0: L_ANGLE@136..138 "<" [Newline("\n")] []
-        1: HTML_TAG_NAME@138..142
-          0: HTML_LITERAL@138..142 "span" [] []
-        2: HTML_ATTRIBUTE_LIST@142..142
-        3: R_ANGLE@142..143 ">" [] []
-      1: HTML_ELEMENT_LIST@143..151
-        0: HTML_CONTENT@143..151
-          0: HTML_LITERAL@143..151 "animate" [] [Whitespace(" ")]
-      2: HTML_CLOSING_ELEMENT@151..158
-        0: L_ANGLE@151..152 "<" [] []
-        1: SLASH@152..153 "/" [] []
-        2: HTML_TAG_NAME@153..157
-          0: HTML_LITERAL@153..157 "span" [] []
-        3: R_ANGLE@157..158 ">" [] []
-    8: HTML_ELEMENT@158..190
-      0: HTML_OPENING_ELEMENT@158..162
-        0: L_ANGLE@158..160 "<" [Newline("\n")] []
-        1: HTML_TAG_NAME@160..161
-          0: HTML_LITERAL@160..161 "p" [] []
-        2: HTML_ATTRIBUTE_LIST@161..161
-        3: R_ANGLE@161..162 ">" [] []
-      1: HTML_ELEMENT_LIST@162..185
-        0: HTML_CONTENT@162..185
-          0: HTML_LITERAL@162..185 "use JavaScript on the" [Newline("\n"), Whitespace("\t")] []
-      2: HTML_CLOSING_ELEMENT@185..190
-        0: L_ANGLE@185..187 "<" [Newline("\n")] []
-        1: SLASH@187..188 "/" [] []
-        2: HTML_TAG_NAME@188..189
-          0: HTML_LITERAL@188..189 "p" [] []
-        3: R_ANGLE@189..190 ">" [] []
-  4: EOF@190..191 "" [Newline("\n")] []
+      1: HTML_ELEMENT_LIST@105..108
+        0: HTML_CONTENT@105..108
+          0: HTML_LITERAL@105..108 "of" [] [Whitespace(" ")]
+      2: HTML_CLOSING_ELEMENT@108..115
+        0: L_ANGLE@108..109 "<" [] []
+        1: SLASH@109..110 "/" [] []
+        2: HTML_TAG_NAME@110..114
+          0: HTML_LITERAL@110..114 "span" [] []
+        3: R_ANGLE@114..115 ">" [] []
+    6: HTML_ELEMENT@115..133
+      0: HTML_OPENING_ELEMENT@115..122
+        0: L_ANGLE@115..117 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@117..121
+          0: HTML_LITERAL@117..121 "span" [] []
+        2: HTML_ATTRIBUTE_LIST@121..121
+        3: R_ANGLE@121..122 ">" [] []
+      1: HTML_ELEMENT_LIST@122..126
+        0: HTML_CONTENT@122..126
+          0: HTML_LITERAL@122..126 "out" [] [Whitespace(" ")]
+      2: HTML_CLOSING_ELEMENT@126..133
+        0: L_ANGLE@126..127 "<" [] []
+        1: SLASH@127..128 "/" [] []
+        2: HTML_TAG_NAME@128..132
+          0: HTML_LITERAL@128..132 "span" [] []
+        3: R_ANGLE@132..133 ">" [] []
+    7: HTML_ELEMENT@133..153
+      0: HTML_OPENING_ELEMENT@133..140
+        0: L_ANGLE@133..135 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@135..139
+          0: HTML_LITERAL@135..139 "span" [] []
+        2: HTML_ATTRIBUTE_LIST@139..139
+        3: R_ANGLE@139..140 ">" [] []
+      1: HTML_ELEMENT_LIST@140..146
+        0: HTML_CONTENT@140..146
+          0: HTML_LITERAL@140..146 "class" [] [Whitespace(" ")]
+      2: HTML_CLOSING_ELEMENT@146..153
+        0: L_ANGLE@146..147 "<" [] []
+        1: SLASH@147..148 "/" [] []
+        2: HTML_TAG_NAME@148..152
+          0: HTML_LITERAL@148..152 "span" [] []
+        3: R_ANGLE@152..153 ">" [] []
+    8: HTML_ELEMENT@153..175
+      0: HTML_OPENING_ELEMENT@153..160
+        0: L_ANGLE@153..155 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@155..159
+          0: HTML_LITERAL@155..159 "span" [] []
+        2: HTML_ATTRIBUTE_LIST@159..159
+        3: R_ANGLE@159..160 ">" [] []
+      1: HTML_ELEMENT_LIST@160..168
+        0: HTML_CONTENT@160..168
+          0: HTML_LITERAL@160..168 "animate" [] [Whitespace(" ")]
+      2: HTML_CLOSING_ELEMENT@168..175
+        0: L_ANGLE@168..169 "<" [] []
+        1: SLASH@169..170 "/" [] []
+        2: HTML_TAG_NAME@170..174
+          0: HTML_LITERAL@170..174 "span" [] []
+        3: R_ANGLE@174..175 ">" [] []
+    9: HTML_ELEMENT@175..207
+      0: HTML_OPENING_ELEMENT@175..179
+        0: L_ANGLE@175..177 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@177..178
+          0: HTML_LITERAL@177..178 "p" [] []
+        2: HTML_ATTRIBUTE_LIST@178..178
+        3: R_ANGLE@178..179 ">" [] []
+      1: HTML_ELEMENT_LIST@179..202
+        0: HTML_CONTENT@179..202
+          0: HTML_LITERAL@179..202 "use JavaScript on the" [Newline("\n"), Whitespace("\t")] []
+      2: HTML_CLOSING_ELEMENT@202..207
+        0: L_ANGLE@202..204 "<" [Newline("\n")] []
+        1: SLASH@204..205 "/" [] []
+        2: HTML_TAG_NAME@205..206
+          0: HTML_LITERAL@205..206 "p" [] []
+        3: R_ANGLE@206..207 ">" [] []
+  4: EOF@207..208 "" [Newline("\n")] []
 
 ```

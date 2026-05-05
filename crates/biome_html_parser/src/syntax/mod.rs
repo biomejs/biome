@@ -901,10 +901,17 @@ impl TextExpression {
 
 #[inline]
 fn is_at_keyword(p: &mut HtmlParser) -> bool {
-    is_at_svelte_keyword(p) || is_at_html_keyword(p)
+    is_at_svelte_keyword(p) || is_at_html_keyword(p) || is_at_vue_keyword(p)
 }
 
 #[inline]
 fn is_at_html_keyword(p: &mut HtmlParser) -> bool {
     matches!(p.cur(), T![html] | T![doctype])
+}
+
+#[inline]
+fn is_at_vue_keyword(p: &mut HtmlParser) -> bool {
+    // `of` is lexed as a keyword for Vue's `v-for="item of items"` directive
+    // but must fall back to text in plain element content.
+    matches!(p.cur(), T![of])
 }

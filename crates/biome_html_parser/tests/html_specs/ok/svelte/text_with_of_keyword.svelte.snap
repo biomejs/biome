@@ -1,0 +1,372 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div>{x} of {y}</div>
+<div>{x} of {y} results</div>
+<div>Showing {a.length} of {b.count} results</div>
+<div>
+  Step {currentStep + 1}
+  of {steps.length} • complete
+</div>
+<p>{name} is one of the items</p>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..4 "div" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@4..5 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@5..6 "{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@6..7 "x" [] [],
+                    },
+                    r_curly_token: R_CURLY@7..9 "}" [] [Whitespace(" ")],
+                },
+                HtmlContent {
+                    value_token: HTML_LITERAL@9..12 "of" [] [Whitespace(" ")],
+                },
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@12..13 "{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@13..14 "y" [] [],
+                    },
+                    r_curly_token: R_CURLY@14..15 "}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@15..16 "<" [] [],
+                slash_token: SLASH@16..17 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@17..20 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@20..21 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@21..23 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@23..26 "div" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@26..27 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@27..28 "{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@28..29 "x" [] [],
+                    },
+                    r_curly_token: R_CURLY@29..31 "}" [] [Whitespace(" ")],
+                },
+                HtmlContent {
+                    value_token: HTML_LITERAL@31..34 "of" [] [Whitespace(" ")],
+                },
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@34..35 "{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@35..36 "y" [] [],
+                    },
+                    r_curly_token: R_CURLY@36..38 "}" [] [Whitespace(" ")],
+                },
+                HtmlContent {
+                    value_token: HTML_LITERAL@38..45 "results" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@45..46 "<" [] [],
+                slash_token: SLASH@46..47 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@47..50 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@50..51 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@51..53 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@53..56 "div" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@56..57 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@57..65 "Showing" [] [Whitespace(" ")],
+                },
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@65..66 "{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@66..74 "a.length" [] [],
+                    },
+                    r_curly_token: R_CURLY@74..76 "}" [] [Whitespace(" ")],
+                },
+                HtmlContent {
+                    value_token: HTML_LITERAL@76..79 "of" [] [Whitespace(" ")],
+                },
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@79..80 "{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@80..87 "b.count" [] [],
+                    },
+                    r_curly_token: R_CURLY@87..89 "}" [] [Whitespace(" ")],
+                },
+                HtmlContent {
+                    value_token: HTML_LITERAL@89..96 "results" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@96..97 "<" [] [],
+                slash_token: SLASH@97..98 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@98..101 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@101..102 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@102..104 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@104..107 "div" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@107..108 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@108..116 "Step" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                },
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@116..117 "{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@117..132 "currentStep + 1" [] [],
+                    },
+                    r_curly_token: R_CURLY@132..133 "}" [] [],
+                },
+                HtmlContent {
+                    value_token: HTML_LITERAL@133..139 "of" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                },
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@139..140 "{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@140..152 "steps.length" [] [],
+                    },
+                    r_curly_token: R_CURLY@152..154 "}" [] [Whitespace(" ")],
+                },
+                HtmlContent {
+                    value_token: HTML_LITERAL@154..166 "• complete" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@166..168 "<" [Newline("\n")] [],
+                slash_token: SLASH@168..169 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@169..172 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@172..173 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@173..175 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@175..176 "p" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@176..177 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@177..178 "{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@178..182 "name" [] [],
+                    },
+                    r_curly_token: R_CURLY@182..184 "}" [] [Whitespace(" ")],
+                },
+                HtmlContent {
+                    value_token: HTML_LITERAL@184..203 "is one of the items" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@203..204 "<" [] [],
+                slash_token: SLASH@204..205 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@205..206 "p" [] [],
+                },
+                r_angle_token: R_ANGLE@206..207 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@207..208 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..208
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..207
+    0: HTML_ELEMENT@0..21
+      0: HTML_OPENING_ELEMENT@0..5
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..4
+          0: HTML_LITERAL@1..4 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@4..4
+        3: R_ANGLE@4..5 ">" [] []
+      1: HTML_ELEMENT_LIST@5..15
+        0: HTML_SINGLE_TEXT_EXPRESSION@5..9
+          0: L_CURLY@5..6 "{" [] []
+          1: HTML_TEXT_EXPRESSION@6..7
+            0: HTML_LITERAL@6..7 "x" [] []
+          2: R_CURLY@7..9 "}" [] [Whitespace(" ")]
+        1: HTML_CONTENT@9..12
+          0: HTML_LITERAL@9..12 "of" [] [Whitespace(" ")]
+        2: HTML_SINGLE_TEXT_EXPRESSION@12..15
+          0: L_CURLY@12..13 "{" [] []
+          1: HTML_TEXT_EXPRESSION@13..14
+            0: HTML_LITERAL@13..14 "y" [] []
+          2: R_CURLY@14..15 "}" [] []
+      2: HTML_CLOSING_ELEMENT@15..21
+        0: L_ANGLE@15..16 "<" [] []
+        1: SLASH@16..17 "/" [] []
+        2: HTML_TAG_NAME@17..20
+          0: HTML_LITERAL@17..20 "div" [] []
+        3: R_ANGLE@20..21 ">" [] []
+    1: HTML_ELEMENT@21..51
+      0: HTML_OPENING_ELEMENT@21..27
+        0: L_ANGLE@21..23 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@23..26
+          0: HTML_LITERAL@23..26 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@26..26
+        3: R_ANGLE@26..27 ">" [] []
+      1: HTML_ELEMENT_LIST@27..45
+        0: HTML_SINGLE_TEXT_EXPRESSION@27..31
+          0: L_CURLY@27..28 "{" [] []
+          1: HTML_TEXT_EXPRESSION@28..29
+            0: HTML_LITERAL@28..29 "x" [] []
+          2: R_CURLY@29..31 "}" [] [Whitespace(" ")]
+        1: HTML_CONTENT@31..34
+          0: HTML_LITERAL@31..34 "of" [] [Whitespace(" ")]
+        2: HTML_SINGLE_TEXT_EXPRESSION@34..38
+          0: L_CURLY@34..35 "{" [] []
+          1: HTML_TEXT_EXPRESSION@35..36
+            0: HTML_LITERAL@35..36 "y" [] []
+          2: R_CURLY@36..38 "}" [] [Whitespace(" ")]
+        3: HTML_CONTENT@38..45
+          0: HTML_LITERAL@38..45 "results" [] []
+      2: HTML_CLOSING_ELEMENT@45..51
+        0: L_ANGLE@45..46 "<" [] []
+        1: SLASH@46..47 "/" [] []
+        2: HTML_TAG_NAME@47..50
+          0: HTML_LITERAL@47..50 "div" [] []
+        3: R_ANGLE@50..51 ">" [] []
+    2: HTML_ELEMENT@51..102
+      0: HTML_OPENING_ELEMENT@51..57
+        0: L_ANGLE@51..53 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@53..56
+          0: HTML_LITERAL@53..56 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@56..56
+        3: R_ANGLE@56..57 ">" [] []
+      1: HTML_ELEMENT_LIST@57..96
+        0: HTML_CONTENT@57..65
+          0: HTML_LITERAL@57..65 "Showing" [] [Whitespace(" ")]
+        1: HTML_SINGLE_TEXT_EXPRESSION@65..76
+          0: L_CURLY@65..66 "{" [] []
+          1: HTML_TEXT_EXPRESSION@66..74
+            0: HTML_LITERAL@66..74 "a.length" [] []
+          2: R_CURLY@74..76 "}" [] [Whitespace(" ")]
+        2: HTML_CONTENT@76..79
+          0: HTML_LITERAL@76..79 "of" [] [Whitespace(" ")]
+        3: HTML_SINGLE_TEXT_EXPRESSION@79..89
+          0: L_CURLY@79..80 "{" [] []
+          1: HTML_TEXT_EXPRESSION@80..87
+            0: HTML_LITERAL@80..87 "b.count" [] []
+          2: R_CURLY@87..89 "}" [] [Whitespace(" ")]
+        4: HTML_CONTENT@89..96
+          0: HTML_LITERAL@89..96 "results" [] []
+      2: HTML_CLOSING_ELEMENT@96..102
+        0: L_ANGLE@96..97 "<" [] []
+        1: SLASH@97..98 "/" [] []
+        2: HTML_TAG_NAME@98..101
+          0: HTML_LITERAL@98..101 "div" [] []
+        3: R_ANGLE@101..102 ">" [] []
+    3: HTML_ELEMENT@102..173
+      0: HTML_OPENING_ELEMENT@102..108
+        0: L_ANGLE@102..104 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@104..107
+          0: HTML_LITERAL@104..107 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@107..107
+        3: R_ANGLE@107..108 ">" [] []
+      1: HTML_ELEMENT_LIST@108..166
+        0: HTML_CONTENT@108..116
+          0: HTML_LITERAL@108..116 "Step" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+        1: HTML_SINGLE_TEXT_EXPRESSION@116..133
+          0: L_CURLY@116..117 "{" [] []
+          1: HTML_TEXT_EXPRESSION@117..132
+            0: HTML_LITERAL@117..132 "currentStep + 1" [] []
+          2: R_CURLY@132..133 "}" [] []
+        2: HTML_CONTENT@133..139
+          0: HTML_LITERAL@133..139 "of" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+        3: HTML_SINGLE_TEXT_EXPRESSION@139..154
+          0: L_CURLY@139..140 "{" [] []
+          1: HTML_TEXT_EXPRESSION@140..152
+            0: HTML_LITERAL@140..152 "steps.length" [] []
+          2: R_CURLY@152..154 "}" [] [Whitespace(" ")]
+        4: HTML_CONTENT@154..166
+          0: HTML_LITERAL@154..166 "• complete" [] []
+      2: HTML_CLOSING_ELEMENT@166..173
+        0: L_ANGLE@166..168 "<" [Newline("\n")] []
+        1: SLASH@168..169 "/" [] []
+        2: HTML_TAG_NAME@169..172
+          0: HTML_LITERAL@169..172 "div" [] []
+        3: R_ANGLE@172..173 ">" [] []
+    4: HTML_ELEMENT@173..207
+      0: HTML_OPENING_ELEMENT@173..177
+        0: L_ANGLE@173..175 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@175..176
+          0: HTML_LITERAL@175..176 "p" [] []
+        2: HTML_ATTRIBUTE_LIST@176..176
+        3: R_ANGLE@176..177 ">" [] []
+      1: HTML_ELEMENT_LIST@177..203
+        0: HTML_SINGLE_TEXT_EXPRESSION@177..184
+          0: L_CURLY@177..178 "{" [] []
+          1: HTML_TEXT_EXPRESSION@178..182
+            0: HTML_LITERAL@178..182 "name" [] []
+          2: R_CURLY@182..184 "}" [] [Whitespace(" ")]
+        1: HTML_CONTENT@184..203
+          0: HTML_LITERAL@184..203 "is one of the items" [] []
+      2: HTML_CLOSING_ELEMENT@203..207
+        0: L_ANGLE@203..204 "<" [] []
+        1: SLASH@204..205 "/" [] []
+        2: HTML_TAG_NAME@205..206
+          0: HTML_LITERAL@205..206 "p" [] []
+        3: R_ANGLE@206..207 ">" [] []
+  4: EOF@207..208 "" [Newline("\n")] []
+
+```

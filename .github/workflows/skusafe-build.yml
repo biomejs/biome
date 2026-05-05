@@ -1,0 +1,48 @@
+name: skusafe-build
+
+# Cheap on-push validation: confirms the parser changes still compile and
+# all biome_html_parser tests pass. Skipped on the `main` mirror branch
+# (which tracks upstream) and on release tags (covered by skusafe-release).
+
+on:
+  push:
+    branches-ignore:
+      - main
+    tags-ignore:
+      - 'skusafe-v*'
+  pull_request:
+    branches:
+      - 'fix/**'
+      - 'skusafe/**'
+
+concurrency:
+  group: skusafe-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  parser-tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: skusafe-build-linux-x64
+
+      - run: cargo test -p biome_html_parser
+
+  cli-build-check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: skusafe-build-linux-x64
+
+      # Faster than --release; we only want to confirm the workspace links.
+      - run: cargo check -p biome_cli

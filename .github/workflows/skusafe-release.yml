@@ -1,0 +1,139 @@
+name: skusafe-release
+
+# Builds the patched biome binaries for SKUSafe's platform matrix and
+# publishes them as .tgz assets on a GitHub Release. manama consumes them
+# via direct tarball URLs in package.json overrides.
+#
+# Triggers:
+#   - Tag push:        skusafe-v*           (e.g. skusafe-v2.4.14-skusafe.1)
+#   - Manual dispatch: provide `version`    (e.g. 2.4.14-skusafe.1)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (e.g. 2.4.14-skusafe.1) — without the skusafe-v tag prefix'
+        required: true
+  push:
+    tags:
+      - 'skusafe-v*'
+
+permissions:
+  contents: write   # required for softprops/action-gh-release
+
+jobs:
+  resolve-version:
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - id: v
+        run: |
+          if [[ -n "${{ inputs.version }}" ]]; then
+            VERSION="${{ inputs.version }}"
+          else
+            VERSION="${GITHUB_REF_NAME#skusafe-v}"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Resolved version: $VERSION"
+
+  build:
+    needs: resolve-version
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-14
+            target: aarch64-apple-darwin
+            pkg: cli-darwin-arm64
+          - os: ubuntu-24.04
+            target: x86_64-unknown-linux-gnu
+            pkg: cli-linux-x64
+          # Add more platforms here as needed:
+          #   { os: macos-14,    target: x86_64-apple-darwin,        pkg: cli-darwin-x64 }
+          #   { os: ubuntu-24.04-arm, target: aarch64-unknown-linux-gnu, pkg: cli-linux-arm64 }
+    runs-on: ${{ matrix.os }}
+    env:
+      VERSION: ${{ needs.resolve-version.outputs.version }}
+      BIOME_VERSION: ${{ needs.resolve-version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: skusafe-${{ matrix.target }}
+
+      - name: Bump versions
+        run: ./scripts/skusafe-prepare-release.sh "$VERSION"
+
+      - name: Build biome_cli
+        run: cargo build --release --target ${{ matrix.target }} -p biome_cli
+
+      - name: Stage binary into platform package
+        run: |
+          cp "target/${{ matrix.target }}/release/biome" "packages/@biomejs/${{ matrix.pkg }}/biome"
+          chmod +x "packages/@biomejs/${{ matrix.pkg }}/biome"
+
+      - name: npm pack
+        working-directory: packages/@biomejs/${{ matrix.pkg }}
+        run: |
+          # `files` field is missing on platform package.jsons upstream — they
+          # rely on npm's default which includes everything. We add the binary
+          # by name to be explicit.
+          npm pack
+          ls -la *.tgz
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.pkg }}
+          path: packages/@biomejs/${{ matrix.pkg }}/*.tgz
+
+  pack-wrapper:
+    needs: resolve-version
+    runs-on: ubuntu-24.04
+    env:
+      VERSION: ${{ needs.resolve-version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bump versions
+        run: ./scripts/skusafe-prepare-release.sh "$VERSION"
+
+      - name: npm pack wrapper
+        working-directory: packages/@biomejs/biome
+        run: |
+          npm pack
+          ls -la *.tgz
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: biome-wrapper
+          path: packages/@biomejs/biome/*.tgz
+
+  release:
+    needs: [resolve-version, build, pack-wrapper]
+    runs-on: ubuntu-24.04
+    env:
+      VERSION: ${{ needs.resolve-version.outputs.version }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: List artifacts
+        run: ls -la dist/
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: skusafe-v${{ env.VERSION }}
+          name: skusafe-v${{ env.VERSION }}
+          files: dist/*.tgz
+          generate_release_notes: true
+          # If the workflow was dispatched manually, create the tag too.
+          # On tag-push triggers this is a no-op.
+          target_commitish: ${{ github.sha }}
