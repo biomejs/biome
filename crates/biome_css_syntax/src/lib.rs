@@ -16,12 +16,12 @@ pub use biome_rowan::{
 };
 pub use file_source::{CssFileLanguage, CssFileSource, CssVariant, EmbeddingKind};
 pub use scss_ext::{
-    ScssMapContext, ScssMapOuterParenthesizedValuePayloadKind, ScssMapPositionKind, ScssMapRole,
-    is_in_scss_control_condition_sequence, is_in_scss_include_arguments, is_in_scss_map_key,
-    is_scss_map_key, is_scss_map_value, scss_include_keyword_argument_owner,
+    ScssMapContext, ScssMapPositionKind, ScssMapRole, is_in_scss_control_condition_sequence,
+    is_in_scss_include_arguments, is_in_scss_map_key, is_scss_map_key,
+    is_scss_map_outer_parenthesized_value_list, is_scss_map_outer_parenthesized_value_map,
+    is_scss_map_value, scss_include_keyword_argument_owner,
     scss_keyword_argument_from_css_expression, scss_keyword_argument_from_expression,
-    scss_keyword_argument_from_syntax, scss_map_context, single_expression_item,
-    unwrap_single_expression_item,
+    scss_keyword_argument_from_syntax, single_expression_item, unwrap_single_expression_item,
 };
 pub use syntax_node::*;
 

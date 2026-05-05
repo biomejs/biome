@@ -1,4 +1,4 @@
-use biome_css_syntax::{ScssExpression, single_expression_item};
+use biome_css_syntax::{AnyScssExpressionItem, ScssExpression, single_expression_item};
 
 /// Describes who owns wrapping for an `@if` or `@while` condition.
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
@@ -12,15 +12,20 @@ pub(crate) enum ScssControlConditionLayout {
 }
 
 impl ScssControlConditionLayout {
+    /// Chooses the owner for `@if` and `@while` condition wrapping.
+    ///
+    /// Examples: `@if foo($a, $b)` is call-owned, `@if ($a, $b)` is delimiter-owned.
     pub(crate) fn from_condition(condition: &ScssExpression) -> Self {
         let Some(item) = single_expression_item(condition) else {
             return Self::HeaderOwned;
         };
 
-        if item.as_scss_parenthesized_expression().is_some()
-            || item.as_scss_list_expression().is_some()
-            || item.as_scss_map_expression().is_some()
-        {
+        if matches!(
+            item,
+            AnyScssExpressionItem::ScssParenthesizedExpression(_)
+                | AnyScssExpressionItem::ScssListExpression(_)
+                | AnyScssExpressionItem::ScssMapExpression(_)
+        ) {
             return Self::DelimitedExpression;
         }
 

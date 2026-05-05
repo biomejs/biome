@@ -3,6 +3,7 @@ use crate::utils::comment_trivia::{
     has_inline_trailing_comment, has_same_group_leading_block_comment,
 };
 use crate::utils::scss_expression::is_self_breaking_value;
+use crate::utils::scss_include_keyword_value::has_top_level_include_keyword_parenthesized_value;
 use biome_css_syntax::{
     ScssKeywordArgument, ScssKeywordArgumentFields, is_in_scss_include_arguments,
 };
@@ -27,7 +28,10 @@ impl<'a> ScssKeywordArgumentLayout<'a> {
             value,
         } = node.as_fields();
 
-        let is_self_breaking = value.as_ref().is_ok_and(is_self_breaking_value);
+        let is_self_breaking = value.as_ref().is_ok_and(|value| {
+            is_self_breaking_value(value)
+                || has_top_level_include_keyword_parenthesized_value(node, value)
+        });
         let should_indent_self_breaking = is_self_breaking
             && is_in_scss_include_arguments(node.syntax())
             && has_same_group_leading_block_comment(node.syntax(), f);
@@ -71,8 +75,8 @@ impl<'a> ScssKeywordArgumentLayout<'a> {
 
 /// Formats the value in `$arg: value`.
 ///
-/// Self-breaking values such as `$arg: (a, b)` stay after the colon, while
-/// scalar values may break after it.
+/// Self-breaking values such as `$arg: (a, b)` and `$arg: 2 * (a)`
+/// stay after the colon, while scalar values may break after it.
 struct FormatScssKeywordArgumentValue<'a> {
     value: &'a dyn Format<CssFormatContext>,
     is_self_breaking: bool,
