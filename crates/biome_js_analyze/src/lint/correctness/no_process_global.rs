@@ -10,7 +10,7 @@ use biome_js_syntax::JsLanguage;
 use biome_js_syntax::JsModuleItemList;
 use biome_js_syntax::JsSyntaxKind;
 use biome_js_syntax::T;
-use biome_js_syntax::{AnyJsExpression, global_identifier};
+use biome_js_syntax::{AnyPossibleGlobalIdentifier, global_identifier};
 use biome_rowan::AstNode;
 use biome_rowan::BatchMutationExt;
 use biome_rowan::SyntaxElement;
@@ -61,7 +61,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoProcessGlobal {
-    type Query = Semantic<AnyJsExpression>;
+    type Query = Semantic<AnyPossibleGlobalIdentifier>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = NoProcessGlobalOptions;

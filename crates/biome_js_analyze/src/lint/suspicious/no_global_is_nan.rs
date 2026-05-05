@@ -3,7 +3,9 @@ use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_js_syntax::{AnyJsExpression, T, global_identifier};
+use biome_js_syntax::{
+    AnyJsExpression, AnyJsMemberExpression, AnyPossibleGlobalIdentifier, T, global_identifier,
+};
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_global_is_nan::NoGlobalIsNanOptions;
 
@@ -40,7 +42,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoGlobalIsNan {
-    type Query = Semantic<AnyJsExpression>;
+    type Query = Semantic<AnyPossibleGlobalIdentifier>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = NoGlobalIsNanOptions;
@@ -75,8 +77,8 @@ impl Rule for NoGlobalIsNan {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
         let (old, new) = match node {
-            AnyJsExpression::JsIdentifierExpression(expression) => (
-                node.clone(),
+            AnyPossibleGlobalIdentifier::JsIdentifierExpression(expression) => (
+                AnyJsExpression::from(node.clone()),
                 make::js_static_member_expression(
                     make::js_identifier_expression(make::js_reference_identifier(make::ident(
                         "Number",
@@ -86,31 +88,32 @@ impl Rule for NoGlobalIsNan {
                     make::js_name(expression.name().ok()?.value_token().ok()?).into(),
                 ),
             ),
-            AnyJsExpression::JsStaticMemberExpression(expression) => (
-                node.clone(),
-                make::js_static_member_expression(
+            AnyPossibleGlobalIdentifier::AnyJsMemberExpression(member) => match member {
+                AnyJsMemberExpression::JsStaticMemberExpression(expression) => (
+                    AnyJsExpression::from(node.clone()),
                     make::js_static_member_expression(
-                        expression.object().ok()?,
-                        make::token(T![.]),
-                        make::js_name(make::ident("Number")).into(),
-                    )
-                    .into(),
-                    expression.operator_token().ok()?,
-                    expression.member().ok()?,
-                ),
-            ),
-            AnyJsExpression::JsComputedMemberExpression(expression) => {
-                let object = expression.object().ok()?;
-                (
-                    object.clone(),
-                    make::js_static_member_expression(
-                        object,
-                        make::token(T![.]),
-                        make::js_name(make::ident("Number")).into(),
+                        make::js_static_member_expression(
+                            expression.object().ok()?,
+                            make::token(T![.]),
+                            make::js_name(make::ident("Number")).into(),
+                        )
+                        .into(),
+                        expression.operator_token().ok()?,
+                        expression.member().ok()?,
                     ),
-                )
-            }
-            _ => return None,
+                ),
+                AnyJsMemberExpression::JsComputedMemberExpression(expression) => {
+                    let object = expression.object().ok()?;
+                    (
+                        object.clone(),
+                        make::js_static_member_expression(
+                            object,
+                            make::token(T![.]),
+                            make::js_name(make::ident("Number")).into(),
+                        ),
+                    )
+                }
+            },
         };
         mutation.replace_node(old, new.into());
         Some(JsRuleAction::new(
