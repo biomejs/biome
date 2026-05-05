@@ -105,12 +105,9 @@ impl Format<CssFormatContext> for FormatScssEachMultiValueHeader<'_> {
         let first_value_syntax = first_value_node.syntax();
 
         if binding_count == 0 {
-            let separator = soft_line_break_or_space();
-            let mut fill = f.fill();
-
-            fill.entry(
-                &separator,
-                &group(&format_args![
+            return write!(
+                f,
+                [group(&format_args![
                     bindings.format(),
                     soft_line_break_or_space(),
                     in_token.format(),
@@ -118,17 +115,8 @@ impl Format<CssFormatContext> for FormatScssEachMultiValueHeader<'_> {
                     format_leading_comments(values.syntax()),
                     first_value_node.format(),
                     first_value.trailing_separator()?.format()
-                ]),
+                ])]
             );
-
-            for value in value_elements {
-                fill.entry(
-                    &separator,
-                    &format_args![value.node()?.format(), value.trailing_separator()?.format()],
-                );
-            }
-
-            return fill.finish();
         }
 
         let Some(second_value) = value_elements.next() else {
