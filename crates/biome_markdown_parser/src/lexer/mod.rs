@@ -1370,7 +1370,7 @@ impl<'src> MarkdownLexer<'src> {
     }
 
     /// Check if current position starts a potential hard line break pattern.
-    /// Returns true if there are 2+ spaces followed by a newline.
+    /// Returns true if enough trailing spaces are followed by a newline.
     fn is_potential_hard_line_break(&self) -> bool {
         // Must have at least one space at current position (already checked by caller)
         let mut offset = 0;
@@ -1382,9 +1382,9 @@ impl<'src> MarkdownLexer<'src> {
             offset += 1;
         }
 
-        if space_count >= 2 {
-            // A hard line break requires 2+ spaces followed by a newline
-            // (https://spec.commonmark.org/0.31.2/#hard-line-breaks).
+        if space_count >= MIN_HARD_BREAK_TRAILING_SPACES {
+            // A hard line break requires enough trailing spaces followed by a
+            // newline (https://spec.commonmark.org/0.31.2/#hard-line-breaks).
             // Trailing spaces at EOF are never a valid hard line break,
             // but they must be split from the preceding text so the
             // formatter can strip them without idempotency issues.
