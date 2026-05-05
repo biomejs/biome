@@ -4,8 +4,9 @@ use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
 use crate::file_handlers::svelte::SvelteFileHandler;
 use crate::file_handlers::{
-    Capabilities, CodeActionsParams, DiagnosticsAndActionsParams, DocumentFileSource, Features,
-    FixAllParams, FormatEmbedNode, LintParams, LintResults, ParseResult, UpdateSnippetsNodes,
+    AnalyzerVisitorCache, Capabilities, CodeActionsParams, DiagnosticsAndActionsParams,
+    DocumentFileSource, Features, FixAllParams, FormatEmbedNode, LintParams, LintResults,
+    ParseResult, UpdateSnippetsNodes,
 };
 use crate::projects::{GetFileFeaturesParams, ProjectKey, Projects};
 use crate::scanner::{
@@ -128,6 +129,9 @@ pub struct WorkspaceServer {
 
     /// Channel sender for sending notifications of service data updates.
     notification_tx: watch::Sender<ServiceNotification>,
+
+    /// Re-usable cache for analyzer visitors.
+    analyzer_cache: HashMap<ProjectKey, AnalyzerVisitorCache>,
 }
 
 /// The `Workspace` object is long-lived, so we want it to be able to cross
@@ -161,6 +165,7 @@ impl WorkspaceServer {
             scanner: Scanner::new(watcher_tx),
             fs,
             notification_tx,
+            analyzer_cache: HashMap::default(),
         }
     }
 
@@ -1123,6 +1128,9 @@ impl WorkspaceServer {
                     self.project_layout.remove_package(&package_path);
                 }
             }
+            if let Some(cache) = self.analyzer_cache.pin().get(&project_key) {
+                cache.evict_cache();
+            }
         } else if filename.is_some_and(|filename| filename == "tsconfig.json") {
             let package_path = path
                 .parent()
@@ -1138,6 +1146,9 @@ impl WorkspaceServer {
                     self.project_layout
                         .remove_tsconfig_from_package(&package_path);
                 }
+            }
+            if let Some(cache) = self.analyzer_cache.pin().get(&project_key) {
+                cache.evict_cache();
             }
         } else if let Some(turbo_filename) =
             filename.filter(|f| *f == "turbo.json" || *f == "turbo.jsonc")
@@ -1315,6 +1326,9 @@ impl Workspace for WorkspaceServer {
         };
 
         let project_key = self.projects.insert_project(path);
+        self.analyzer_cache
+            .pin()
+            .insert(project_key, Default::default());
 
         Ok(OpenProjectResult { project_key })
     }
@@ -1493,6 +1507,10 @@ impl Workspace for WorkspaceServer {
             }
         }
 
+        if let Some(cache) = self.analyzer_cache.pin().get(&project_key) {
+            cache.evict_cache();
+        }
+
         Ok(UpdateSettingsResult { diagnostics })
     }
 
@@ -1522,6 +1540,7 @@ impl Workspace for WorkspaceServer {
         self.module_graph.unload_path(&project_path);
         self.project_layout.unload_folder(&project_path);
         self.plugin_caches.pin().remove(&project_path);
+        self.analyzer_cache.pin().remove(&params.project_key);
 
         Ok(())
     }
@@ -1976,6 +1995,10 @@ impl Workspace for WorkspaceServer {
             .filter(|d| d.severity() >= Severity::Error)
             .count();
 
+        let analyzer_cache_guard = self.analyzer_cache.pin();
+        let analyzer_cache =
+            analyzer_cache_guard.get_or_insert(project_key, AnalyzerVisitorCache::default());
+
         let (diagnostics, errors, warnings, infos, skipped_diagnostics) = if (categories.is_lint()
             || categories.is_assist())
             && let Some(lint) = capabilities.analyzer.lint
@@ -2011,6 +2034,7 @@ impl Workspace for WorkspaceServer {
                 max_diagnostics,
                 diagnostic_level,
                 enforce_assist,
+                analyzer_cache,
             });
 
             let LintResults {
@@ -2051,6 +2075,7 @@ impl Workspace for WorkspaceServer {
                     max_diagnostics,
                     diagnostic_level,
                     enforce_assist,
+                    analyzer_cache,
                 });
 
                 diagnostics.extend(results.diagnostics);
@@ -2250,6 +2275,9 @@ impl Workspace for WorkspaceServer {
         let language =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
         let settings = self.settings_handle(&settings, inline_config);
+        let analyzer_cache_guard = self.analyzer_cache.pin();
+        let analyzer_cache =
+            analyzer_cache_guard.get_or_insert(project_key, AnalyzerVisitorCache::default());
 
         let mut result = code_actions(CodeActionsParams {
             parse,
@@ -2270,6 +2298,7 @@ impl Workspace for WorkspaceServer {
             working_directory: Some(working_directory.as_path()),
             compute_actions,
             snippet_services: None,
+            analyzer_cache,
         });
 
         for embedded_snippet in &embedded_snippets {
@@ -2300,6 +2329,7 @@ impl Workspace for WorkspaceServer {
                 working_directory: Some(working_directory.as_path()),
                 compute_actions,
                 snippet_services: Some(embedded_snippet.as_snippet_services()),
+                analyzer_cache,
             });
 
             result.actions.extend(embedded_actions_result.actions);
