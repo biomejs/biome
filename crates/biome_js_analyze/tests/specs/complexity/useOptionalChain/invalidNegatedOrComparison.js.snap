@@ -1,0 +1,369 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNegatedOrComparison.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// Each of the eight binary operators that yield the same boolean as the
+// optional-chain form when `foo` is nullish (because the left operand of
+// the comparison becomes `undefined`).
+!foo || foo.bar !== "x";
+!foo || foo.bar === "x";
+!foo || foo.bar != null;
+!foo || foo.bar == null;
+!foo || foo.bar > 0;
+!foo || foo.bar >= 0;
+!foo || foo.bar < 0;
+!foo || foo.bar <= 0;
+
+// Longer chains: every `!` on the left contributes a `?.` to the head of
+// the comparison.
+!foo || foo.bar.baz !== "x";
+!foo || !foo.bar || foo.bar.baz !== "x";
+!foo || !foo.bar || !foo.bar.baz || foo.bar.baz.buzz > 0;
+
+// Computed-member access and call expressions should also be covered.
+!foo || foo[bar] !== "x";
+!foo || foo.bar() !== undefined;
+
+// Prefix preserved: leading operands that don't match the chain are kept on
+// the left of `||`.
+bar || (!foo || foo.bar !== "x");
+
+```
+
+# Diagnostics
+```
+invalidNegatedOrComparison.js:6:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    4 │ // optional-chain form when `foo` is nullish (because the left operand of
+    5 │ // the comparison becomes `undefined`).
+  > 6 │ !foo || foo.bar !== "x";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ !foo || foo.bar === "x";
+    8 │ !foo || foo.bar != null;
+  
+  i Unsafe fix: Change to an optional chain.
+  
+     4  4 │   // optional-chain form when `foo` is nullish (because the left operand of
+     5  5 │   // the comparison becomes `undefined`).
+     6    │ - !foo·||·foo.bar·!==·"x";
+        6 │ + foo?.bar·!==·"x";
+     7  7 │   !foo || foo.bar === "x";
+     8  8 │   !foo || foo.bar != null;
+  
+
+```
+
+```
+invalidNegatedOrComparison.js:7:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    5 │ // the comparison becomes `undefined`).
+    6 │ !foo || foo.bar !== "x";
+  > 7 │ !foo || foo.bar === "x";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ !foo || foo.bar != null;
+    9 │ !foo || foo.bar == null;
+  
+  i Unsafe fix: Change to an optional chain.
+  
+     5  5 │   // the comparison becomes `undefined`).
+     6  6 │   !foo || foo.bar !== "x";
+     7    │ - !foo·||·foo.bar·===·"x";
+        7 │ + foo?.bar·===·"x";
+     8  8 │   !foo || foo.bar != null;
+     9  9 │   !foo || foo.bar == null;
+  
+
+```
+
+```
+invalidNegatedOrComparison.js:8:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+     6 │ !foo || foo.bar !== "x";
+     7 │ !foo || foo.bar === "x";
+   > 8 │ !foo || foo.bar != null;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ !foo || foo.bar == null;
+    10 │ !foo || foo.bar > 0;
+  
+  i Unsafe fix: Change to an optional chain.
+  
+     6  6 │   !foo || foo.bar !== "x";
+     7  7 │   !foo || foo.bar === "x";
+     8    │ - !foo·||·foo.bar·!=·null;
+        8 │ + foo?.bar·!=·null;
+     9  9 │   !foo || foo.bar == null;
+    10 10 │   !foo || foo.bar > 0;
+  
+
+```
+
+```
+invalidNegatedOrComparison.js:9:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+     7 │ !foo || foo.bar === "x";
+     8 │ !foo || foo.bar != null;
+   > 9 │ !foo || foo.bar == null;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ !foo || foo.bar > 0;
+    11 │ !foo || foo.bar >= 0;
+  
+  i Unsafe fix: Change to an optional chain.
+  
+     7  7 │   !foo || foo.bar === "x";
+     8  8 │   !foo || foo.bar != null;
+     9    │ - !foo·||·foo.bar·==·null;
+        9 │ + foo?.bar·==·null;
+    10 10 │   !foo || foo.bar > 0;
+    11 11 │   !foo || foo.bar >= 0;
+  
+
+```
+
+```
+invalidNegatedOrComparison.js:10:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+     8 │ !foo || foo.bar != null;
+     9 │ !foo || foo.bar == null;
+  > 10 │ !foo || foo.bar > 0;
+       │ ^^^^^^^^^^^^^^^^^^^
+    11 │ !foo || foo.bar >= 0;
+    12 │ !foo || foo.bar < 0;
+  
+  i Unsafe fix: Change to an optional chain.
+  
+     8  8 │   !foo || foo.bar != null;
+     9  9 │   !foo || foo.bar == null;
+    10    │ - !foo·||·foo.bar·>·0;
+       10 │ + foo?.bar·>·0;
+    11 11 │   !foo || foo.bar >= 0;
+    12 12 │   !foo || foo.bar < 0;
+  
+
+```
+
+```
+invalidNegatedOrComparison.js:11:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+     9 │ !foo || foo.bar == null;
+    10 │ !foo || foo.bar > 0;
+  > 11 │ !foo || foo.bar >= 0;
+       │ ^^^^^^^^^^^^^^^^^^^^
+    12 │ !foo || foo.bar < 0;
+    13 │ !foo || foo.bar <= 0;
+  
+  i Unsafe fix: Change to an optional chain.
+  
+     9  9 │   !foo || foo.bar == null;
+    10 10 │   !foo || foo.bar > 0;
+    11    │ - !foo·||·foo.bar·>=·0;
+       11 │ + foo?.bar·>=·0;
+    12 12 │   !foo || foo.bar < 0;
+    13 13 │   !foo || foo.bar <= 0;
+  
+
+```
+
+```
+invalidNegatedOrComparison.js:12:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    10 │ !foo || foo.bar > 0;
+    11 │ !foo || foo.bar >= 0;
+  > 12 │ !foo || foo.bar < 0;
+       │ ^^^^^^^^^^^^^^^^^^^
+    13 │ !foo || foo.bar <= 0;
+    14 │ 
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    10 10 │   !foo || foo.bar > 0;
+    11 11 │   !foo || foo.bar >= 0;
+    12    │ - !foo·||·foo.bar·<·0;
+       12 │ + foo?.bar·<·0;
+    13 13 │   !foo || foo.bar <= 0;
+    14 14 │   
+  
+
+```
+
+```
+invalidNegatedOrComparison.js:13:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    11 │ !foo || foo.bar >= 0;
+    12 │ !foo || foo.bar < 0;
+  > 13 │ !foo || foo.bar <= 0;
+       │ ^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ // Longer chains: every `!` on the left contributes a `?.` to the head of
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    11 11 │   !foo || foo.bar >= 0;
+    12 12 │   !foo || foo.bar < 0;
+    13    │ - !foo·||·foo.bar·<=·0;
+       13 │ + foo?.bar·<=·0;
+    14 14 │   
+    15 15 │   // Longer chains: every `!` on the left contributes a `?.` to the head of
+  
+
+```
+
+```
+invalidNegatedOrComparison.js:17:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    15 │ // Longer chains: every `!` on the left contributes a `?.` to the head of
+    16 │ // the comparison.
+  > 17 │ !foo || foo.bar.baz !== "x";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ !foo || !foo.bar || foo.bar.baz !== "x";
+    19 │ !foo || !foo.bar || !foo.bar.baz || foo.bar.baz.buzz > 0;
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    15 15 │   // Longer chains: every `!` on the left contributes a `?.` to the head of
+    16 16 │   // the comparison.
+    17    │ - !foo·||·foo.bar.baz·!==·"x";
+       17 │ + foo?.bar.baz·!==·"x";
+    18 18 │   !foo || !foo.bar || foo.bar.baz !== "x";
+    19 19 │   !foo || !foo.bar || !foo.bar.baz || foo.bar.baz.buzz > 0;
+  
+
+```
+
+```
+invalidNegatedOrComparison.js:18:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    16 │ // the comparison.
+    17 │ !foo || foo.bar.baz !== "x";
+  > 18 │ !foo || !foo.bar || foo.bar.baz !== "x";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ !foo || !foo.bar || !foo.bar.baz || foo.bar.baz.buzz > 0;
+    20 │ 
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    16 16 │   // the comparison.
+    17 17 │   !foo || foo.bar.baz !== "x";
+    18    │ - !foo·||·!foo.bar·||·foo.bar.baz·!==·"x";
+       18 │ + foo?.bar?.baz·!==·"x";
+    19 19 │   !foo || !foo.bar || !foo.bar.baz || foo.bar.baz.buzz > 0;
+    20 20 │   
+  
+
+```
+
+```
+invalidNegatedOrComparison.js:19:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    17 │ !foo || foo.bar.baz !== "x";
+    18 │ !foo || !foo.bar || foo.bar.baz !== "x";
+  > 19 │ !foo || !foo.bar || !foo.bar.baz || foo.bar.baz.buzz > 0;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ 
+    21 │ // Computed-member access and call expressions should also be covered.
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    17 17 │   !foo || foo.bar.baz !== "x";
+    18 18 │   !foo || !foo.bar || foo.bar.baz !== "x";
+    19    │ - !foo·||·!foo.bar·||·!foo.bar.baz·||·foo.bar.baz.buzz·>·0;
+       19 │ + foo?.bar?.baz?.buzz·>·0;
+    20 20 │   
+    21 21 │   // Computed-member access and call expressions should also be covered.
+  
+
+```
+
+```
+invalidNegatedOrComparison.js:22:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    21 │ // Computed-member access and call expressions should also be covered.
+  > 22 │ !foo || foo[bar] !== "x";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ !foo || foo.bar() !== undefined;
+    24 │ 
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    20 20 │   
+    21 21 │   // Computed-member access and call expressions should also be covered.
+    22    │ - !foo·||·foo[bar]·!==·"x";
+       22 │ + foo?.[bar]·!==·"x";
+    23 23 │   !foo || foo.bar() !== undefined;
+    24 24 │   
+  
+
+```
+
+```
+invalidNegatedOrComparison.js:23:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    21 │ // Computed-member access and call expressions should also be covered.
+    22 │ !foo || foo[bar] !== "x";
+  > 23 │ !foo || foo.bar() !== undefined;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ 
+    25 │ // Prefix preserved: leading operands that don't match the chain are kept on
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    21 21 │   // Computed-member access and call expressions should also be covered.
+    22 22 │   !foo || foo[bar] !== "x";
+    23    │ - !foo·||·foo.bar()·!==·undefined;
+       23 │ + foo?.bar()·!==·undefined;
+    24 24 │   
+    25 25 │   // Prefix preserved: leading operands that don't match the chain are kept on
+  
+
+```
+
+```
+invalidNegatedOrComparison.js:27:9 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    25 │ // Prefix preserved: leading operands that don't match the chain are kept on
+    26 │ // the left of `||`.
+  > 27 │ bar || (!foo || foo.bar !== "x");
+       │         ^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ 
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    25 25 │   // Prefix preserved: leading operands that don't match the chain are kept on
+    26 26 │   // the left of `||`.
+    27    │ - bar·||·(!foo·||·foo.bar·!==·"x");
+       27 │ + bar·||·(foo?.bar·!==·"x");
+    28 28 │   
+  
+
+```

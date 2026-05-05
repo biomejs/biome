@@ -1,0 +1,20 @@
+/* should not generate diagnostics */
+
+// Different identifiers — not the same chain on both sides.
+!foo || bar.baz !== "x";
+!foo || foo.bar !== "x" && other;
+
+// LHS is not a `!`-negated check.
+foo || foo.bar !== "x";
+foo === undefined || foo.bar !== "x";
+
+// Mixed operators on the LHS chain.
+!foo && foo.bar !== "x";
+
+// RHS is a non-comparison binary expression.
+!foo || foo.bar + 1;
+!foo || foo.bar | 0;
+
+// RHS comparison's left side is a bare identifier — already non-trivial
+// and doesn't need optional chaining.
+!foo || foo !== "x";

@@ -58,6 +58,10 @@ declare_lint_rule! {
     /// !foo || !foo.bar
     /// ```
     ///
+    /// ```js,expect_diagnostic
+    /// !foo || foo.bar !== "x"
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```js
@@ -102,6 +106,11 @@ pub struct LogicalAndChainNodes {
     /// Whether this chain was derived from a negated `||` chain like `!foo || !foo.bar`.
     /// When true, the fix wraps the result in `!` and uses `||` for prefix joining.
     negated: bool,
+    /// Whether this chain was derived from a negation + comparison `||` form
+    /// like `!foo || foo.bar !== "x"`. When true, the fix preserves the
+    /// trailing comparison untouched (it already lives inside `logical.right()`)
+    /// and uses `||` for prefix joining without wrapping the result in `!`.
+    comparison: bool,
 }
 
 pub enum UseOptionalChainState {
@@ -144,6 +153,27 @@ impl Rule for UseOptionalChain {
                     }
                     let chain_nodes =
                         chain.optional_chain_expression_nodes_from_negated_or(logical, model)?;
+                    return Some(UseOptionalChainState::LogicalAnd(chain_nodes));
+                }
+
+                // Check for negation + comparison `||` form like
+                // `!foo || foo.bar !== "x"`. The whole left side must still be
+                // a chain of `!`-negated nullability checks; the rightmost
+                // operand is a binary comparison whose left operand extends
+                // the chain.
+                if matches!(operator, JsLogicalOperator::LogicalOr)
+                    && let Some(chain_head) = extract_negation_comparison_head(logical)
+                    && is_negated_or_chain_left(logical)
+                {
+                    let chain = LogicalAndChain::from_expression(chain_head).ok()?;
+                    if chain
+                        .is_inside_another_negated_comparison_chain()
+                        .unwrap_or(false)
+                    {
+                        return None;
+                    }
+                    let chain_nodes = chain
+                        .optional_chain_expression_nodes_from_negated_comparison(logical, model)?;
                     return Some(UseOptionalChainState::LogicalAnd(chain_nodes));
                 }
 
@@ -241,9 +271,10 @@ impl Rule for UseOptionalChain {
                 // with the prefix on the left.
                 // E.g. `bar && foo && foo.length` → `bar && foo?.length`
                 // E.g. `!bar || !foo || !foo.length` → `!bar || !foo?.length`
+                // E.g. `!bar || !foo || foo.length !== 0` → `!bar || foo?.length !== 0`
                 let replacement = if let Some(prefix) = &chain_nodes.prefix {
                     let op_token = logical.operator_token().ok()?;
-                    let join_token = if chain_nodes.negated {
+                    let join_token = if chain_nodes.negated || chain_nodes.comparison {
                         make::token(T![||])
                     } else {
                         make::token(T![&&])
@@ -508,6 +539,13 @@ fn is_negated_or_chain(logical: &JsLogicalExpression) -> bool {
     {
         return false;
     }
+    is_negated_or_chain_left(logical)
+}
+
+/// Like `is_negated_or_chain`, but only checks the left side of `logical`.
+/// Used by the negation+comparison path where the rightmost operand is a
+/// comparison rather than a `!`-negated expression.
+fn is_negated_or_chain_left(logical: &JsLogicalExpression) -> bool {
     let mut current = logical.left().ok();
     while let Some(expr) = current.take() {
         match expr {
@@ -532,6 +570,39 @@ fn is_negated_or_chain(logical: &JsLogicalExpression) -> bool {
         }
     }
     false
+}
+
+/// If the right operand of `logical` is a binary comparison
+/// (`==`, `!=`, `===`, `!==`, `<`, `<=`, `>`, `>=`) with the form
+/// `chain <op> something`, returns the chain's left operand. Used to detect
+/// the negation + comparison form `!foo || foo.bar !== "x"`.
+fn extract_negation_comparison_head(logical: &JsLogicalExpression) -> Option<AnyJsExpression> {
+    let right = logical.right().ok()?.omit_parentheses();
+    let binary = right.as_js_binary_expression()?;
+    if !matches!(
+        binary.operator().ok()?,
+        JsBinaryOperator::Equality
+            | JsBinaryOperator::Inequality
+            | JsBinaryOperator::StrictEquality
+            | JsBinaryOperator::StrictInequality
+            | JsBinaryOperator::LessThan
+            | JsBinaryOperator::LessThanOrEqual
+            | JsBinaryOperator::GreaterThan
+            | JsBinaryOperator::GreaterThanOrEqual
+    ) {
+        return None;
+    }
+    let head = binary.left().ok()?;
+    // Require the head to look like a member or call chain so the rest of the
+    // logic can compare it against `!foo` operands. Plain identifiers are
+    // rejected because `!foo || foo !== "x"` reduces to `foo !== "x"` and
+    // doesn't need optional chaining.
+    match &head {
+        AnyJsExpression::JsStaticMemberExpression(_)
+        | AnyJsExpression::JsComputedMemberExpression(_)
+        | AnyJsExpression::JsCallExpression(_) => Some(head),
+        _ => None,
+    }
 }
 
 /// `LogicalAndChainOrdering` is the result of a comparison between two logical
@@ -723,8 +794,43 @@ impl LogicalAndChain {
             .and_then(|e| e.as_js_logical_expression())
             == Some(&parent)
         {
-            let stripped = strip_negation(&grand_parent.right().ok()?)?;
-            let gp_right_chain = Self::from_expression(stripped).ok()?;
+            let gp_right = grand_parent.right().ok()?;
+            // Either `!chain` or `chain <op> X` on the right side counts as
+            // an outer chain that swallows this inner one.
+            let gp_head = strip_negation(&gp_right)
+                .or_else(|| extract_negation_comparison_head(&grand_parent))?;
+            let gp_right_chain = Self::from_expression(gp_head).ok()?;
+            return match gp_right_chain.cmp_chain(self).ok()? {
+                LogicalAndChainOrdering::SubChain | LogicalAndChainOrdering::Equal => Some(true),
+                LogicalAndChainOrdering::Different => Some(false),
+            };
+        }
+        Some(false)
+    }
+
+    /// Like `is_inside_another_negated_chain`, but for the negation +
+    /// comparison form. The chain's "head" is the comparison's left operand,
+    /// not a `!`-negated expression, so the navigation differs by one step.
+    fn is_inside_another_negated_comparison_chain(&self) -> Option<bool> {
+        // self.head is the comparison's left operand (e.g. `foo.bar.baz`).
+        // Walk: head -> binary parent -> `||` parent -> grandparent `||`.
+        let binary = self.head.parent::<JsBinaryExpression>()?;
+        let parent = binary.parent::<JsLogicalExpression>()?;
+        let grand_parent = parent.parent::<JsLogicalExpression>()?;
+        if !matches!(grand_parent.operator().ok()?, JsLogicalOperator::LogicalOr) {
+            return Some(false);
+        }
+        if grand_parent
+            .left()
+            .ok()
+            .as_ref()
+            .and_then(|e| e.as_js_logical_expression())
+            == Some(&parent)
+        {
+            let gp_right = grand_parent.right().ok()?;
+            let gp_head = strip_negation(&gp_right)
+                .or_else(|| extract_negation_comparison_head(&grand_parent))?;
+            let gp_right_chain = Self::from_expression(gp_head).ok()?;
             return match gp_right_chain.cmp_chain(self).ok()? {
                 LogicalAndChainOrdering::SubChain | LogicalAndChainOrdering::Equal => Some(true),
                 LogicalAndChainOrdering::Different => Some(false),
@@ -989,6 +1095,7 @@ impl LogicalAndChain {
             nodes: optional_chain_expression_nodes,
             prefix,
             negated: false,
+            comparison: false,
         })
     }
 
@@ -1099,6 +1206,124 @@ impl LogicalAndChain {
             nodes: optional_chain_expression_nodes,
             prefix,
             negated: true,
+            comparison: false,
+        })
+    }
+
+    /// Like `optional_chain_expression_nodes_from_negated_or`, but the rightmost
+    /// operand of the `||` chain is a binary comparison `chain <op> X`
+    /// instead of `!chain`. The `||` operands to the LEFT must each still be
+    /// `!`-negated nullability checks of the same chain.
+    ///
+    /// Example: `!foo || !foo.bar || foo.bar.baz !== "x"` → walk left collecting
+    /// `bar` and `baz` as nodes that need `?.` conversion. The action wraps
+    /// `logical.right()` (the binary expression) by replacing the chain head
+    /// inside it, producing `foo?.bar?.baz !== "x"`.
+    fn optional_chain_expression_nodes_from_negated_comparison(
+        mut self,
+        logical: &JsLogicalExpression,
+        model: &SemanticModel,
+    ) -> Option<LogicalAndChainNodes> {
+        let mut optional_chain_expression_nodes = VecDeque::with_capacity(self.buf.len());
+        let mut next_chain_head = logical.left().ok();
+        let mut prev_branch: Option<Self> = None;
+        let mut prefix = None;
+        while let Some(expression) = next_chain_head.take() {
+            let original_expression = expression.clone();
+            let head = match expression {
+                AnyJsExpression::JsLogicalExpression(inner_logical) => {
+                    if matches!(inner_logical.operator().ok()?, JsLogicalOperator::LogicalOr) {
+                        next_chain_head = inner_logical.left().ok();
+                        strip_negation(&inner_logical.right().ok()?)?
+                    } else {
+                        return None;
+                    }
+                }
+                other => strip_negation(&other)?,
+            };
+            let branch =
+                Self::from_expression(normalized_optional_chain_like(head, model).ok()?).ok()?;
+            match self.cmp_chain(&branch).ok()? {
+                LogicalAndChainOrdering::SubChain => {
+                    if let Some(mut prev_branch) = prev_branch {
+                        let mut parts_to_pop = prev_branch.buf.len() - branch.buf.len() - 1;
+                        while parts_to_pop > 0 {
+                            if let (Some(left_part), Some(right_part)) =
+                                (prev_branch.buf.pop_back(), self.buf.pop_back())
+                            {
+                                match left_part {
+                                    AnyJsExpression::JsStaticMemberExpression(ref expr)
+                                        if expr
+                                            .operator_token()
+                                            .is_ok_and(|token| token.kind() == T![?.]) =>
+                                    {
+                                        optional_chain_expression_nodes.push_front(right_part);
+                                    }
+                                    AnyJsExpression::JsComputedMemberExpression(ref expr)
+                                        if expr.optional_chain_token().is_some() =>
+                                    {
+                                        optional_chain_expression_nodes.push_front(right_part);
+                                    }
+                                    AnyJsExpression::JsCallExpression(ref expr)
+                                        if expr.optional_chain_token().is_some() =>
+                                    {
+                                        optional_chain_expression_nodes.push_front(right_part);
+                                    }
+                                    _ => {}
+                                }
+                            }
+                            parts_to_pop -= 1;
+                        }
+                    }
+                    let mut tail = self.buf.split_off(branch.buf.len());
+                    if let Some(part) = tail.pop_front() {
+                        optional_chain_expression_nodes.push_front(part);
+                    }
+                    prev_branch = Some(branch);
+                }
+                LogicalAndChainOrdering::Equal => {}
+                LogicalAndChainOrdering::Different => {
+                    prefix = Some(original_expression);
+                    break;
+                }
+            }
+        }
+
+        if let Some(mut prev_branch) = prev_branch {
+            while let (Some(left_part), Some(right_part)) =
+                (prev_branch.buf.pop_back(), self.buf.pop_back())
+            {
+                match left_part {
+                    AnyJsExpression::JsStaticMemberExpression(ref expr)
+                        if expr
+                            .operator_token()
+                            .is_ok_and(|token| token.kind() == T![?.]) =>
+                    {
+                        optional_chain_expression_nodes.push_front(right_part);
+                    }
+                    AnyJsExpression::JsComputedMemberExpression(ref expr)
+                        if expr.optional_chain_token().is_some() =>
+                    {
+                        optional_chain_expression_nodes.push_front(right_part);
+                    }
+                    AnyJsExpression::JsCallExpression(ref expr)
+                        if expr.optional_chain_token().is_some() =>
+                    {
+                        optional_chain_expression_nodes.push_front(right_part);
+                    }
+                    _ => {}
+                }
+            }
+        }
+
+        if optional_chain_expression_nodes.is_empty() {
+            return None;
+        }
+        Some(LogicalAndChainNodes {
+            nodes: optional_chain_expression_nodes,
+            prefix,
+            negated: false,
+            comparison: true,
         })
     }
 }
