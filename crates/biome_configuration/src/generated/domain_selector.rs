@@ -156,6 +156,7 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "useVueConsistentDefinePropsDeclaration"),
         RuleFilter::Rule("nursery", "useVueDefineMacrosOrder"),
         RuleFilter::Rule("nursery", "useVueMultiWordComponentNames"),
+        RuleFilter::Rule("nursery", "useVueNextTickPromise"),
     ]
 });
 impl DomainSelector {
