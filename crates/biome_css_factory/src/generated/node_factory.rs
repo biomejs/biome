@@ -3229,14 +3229,14 @@ pub fn scss_each_at_rule(
 pub fn scss_each_header(
     bindings: ScssEachBindingList,
     in_token: SyntaxToken,
-    iterable: ScssExpression,
+    values: ScssEachValueList,
 ) -> ScssEachHeader {
     ScssEachHeader::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_EACH_HEADER,
         [
             Some(SyntaxElement::Node(bindings.into_syntax())),
             Some(SyntaxElement::Token(in_token)),
-            Some(SyntaxElement::Node(iterable.into_syntax())),
+            Some(SyntaxElement::Node(values.into_syntax())),
         ],
     ))
 }
@@ -5075,6 +5075,27 @@ where
     let length = items.len() + separators.len();
     ScssEachBindingList::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_EACH_BINDING_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
+pub fn scss_each_value_list<I, S>(items: I, separators: S) -> ScssEachValueList
+where
+    I: IntoIterator<Item = ScssExpression>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    ScssEachValueList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_EACH_VALUE_LIST,
         (0..length).map(|index| {
             if index % 2 == 0 {
                 Some(items.next()?.into_syntax().into())

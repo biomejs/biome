@@ -18,32 +18,17 @@ impl FormatNodeRule<ScssMapExpressionPair> for FormatScssMapExpressionPair {
             value,
         } = node.as_fields();
 
-        let child_value_is_self_breaking = value.as_ref().is_ok_and(is_self_breaking_value);
-
-        let formatted_value = format_with(|f| {
-            if child_value_is_self_breaking {
-                // Keep `key: (` on one line and let the value formatter decide
-                // its own internal breaks.
-                write!(f, [space(), value.format()])
-            } else {
-                // Match Prettier's map item shape:
-                // `key: value` may break as `key:\n  value`.
-                write!(
-                    f,
-                    [indent(&format_args![
-                        soft_line_break_or_space(),
-                        value.format()
-                    ])]
-                )
-            }
-        });
+        let is_self_breaking = value.as_ref().is_ok_and(is_self_breaking_value);
 
         write!(
             f,
             [group(&format_args![
                 key.format(),
                 colon_token.format(),
-                formatted_value
+                FormatScssMapExpressionPairValue {
+                    value: &value.format(),
+                    is_self_breaking,
+                }
             ])]
         )
     }
@@ -54,5 +39,30 @@ impl FormatNodeRule<ScssMapExpressionPair> for FormatScssMapExpressionPair {
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
         self.fmt_leading_scss_separator_comments(node, f)
+    }
+}
+
+/// Formats the value in `key: value`.
+///
+/// Self-breaking values such as `key: (a, b)` stay after the colon; scalar
+/// values may break as `key:\n  value`.
+struct FormatScssMapExpressionPairValue<'a> {
+    value: &'a dyn Format<CssFormatContext>,
+    is_self_breaking: bool,
+}
+
+impl Format<CssFormatContext> for FormatScssMapExpressionPairValue<'_> {
+    fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
+        if self.is_self_breaking {
+            write!(f, [space(), self.value])
+        } else {
+            write!(
+                f,
+                [indent(&format_args![
+                    soft_line_break_or_space(),
+                    self.value
+                ])]
+            )
+        }
     }
 }
