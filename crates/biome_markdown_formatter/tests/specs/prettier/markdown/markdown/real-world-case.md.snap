@@ -1064,19 +1064,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  ```js
  (text: string, parsers: object, options: object) => AST;
  ```
-@@ -552,11 +546,9 @@
- ```
- 
- ## Options
--
- Prettier ships with a handful of customizable format options, usable in both the CLI and API.
- 
- ### Print Width
--
- Specify the line length that the printer will wrap on.
- 
- > **For readability we recommend against using more than 80 characters:**
-@@ -565,125 +557,110 @@
+@@ -565,25 +559,25 @@
  >
  > Prettier, on the other hand, strives to fit the most code into every line. With the print width set to 120, prettier may produce overly compact, or otherwise undesirable code.
  
@@ -1088,7 +1076,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 +`80` | `--print-width <int>` | `printWidth: <int>`
  
  ### Tab Width
--
+ 
  Specify the number of spaces per indentation-level.
  
 -| Default | CLI Override        | API Override      |
@@ -1099,7 +1087,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 + `2` | `--tab-width <int>` | `tabWidth: <int>`
  
  ### Tabs
--
+ 
  Indent lines with tabs instead of spaces
  
 -| Default | CLI Override | API Override      |
@@ -1110,8 +1098,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 +`false` | `--use-tabs` | `useTabs: <bool>`
  
  ### Semicolons
--
- Print semicolons at the ends of statements.
+ 
+@@ -591,25 +585,24 @@
  
  Valid options:
  
@@ -1128,7 +1116,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 +`true` | `--no-semi` | `semi: <bool>`
  
  ### Quotes
--
+ 
  Use single quotes instead of double quotes.
  
  Notes:
@@ -1144,8 +1132,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 +`false` |  `--single-quote` | `singleQuote: <bool>`
  
  ### Trailing Commas
--
- Print trailing commas wherever possible when multi-line. (A single-line array,
+ 
+@@ -617,49 +610,46 @@
  for example, never gets trailing commas.)
  
  Valid options:
@@ -1165,25 +1153,25 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 +`"none"` | <code>--trailing-comma <none&#124;es5&#124;all></code> | <code>trailingComma: "<none&#124;es5&#124;all>"</code>
  
  ### Bracket Spacing
--
+ 
  Print spaces between brackets in object literals.
  
  Valid options:
-+ - `true` - Example: `{ foo: bar }`.
-+ - `false` - Example: `{foo: bar}`.
- 
+-
 -- `true` - Example: `{ foo: bar }`.
 -- `false` - Example: `{foo: bar}`.
-+Default | CLI Override | API Override
-+--------|--------------|-------------
-+`true` | `--no-bracket-spacing` | `bracketSpacing: <bool>`
++ - `true` - Example: `{ foo: bar }`.
++ - `false` - Example: `{foo: bar}`.
  
 -| Default | CLI Override           | API Override             |
 -| ------- | ---------------------- | ------------------------ |
 -| `true`  | `--no-bracket-spacing` | `bracketSpacing: <bool>` |
--
++Default | CLI Override | API Override
++--------|--------------|-------------
++`true` | `--no-bracket-spacing` | `bracketSpacing: <bool>`
+ 
  ### JSX Brackets
--
+ 
  Put the `>` of a multi-line JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
  
 -| Default | CLI Override              | API Override                 |
@@ -1194,7 +1182,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 +`false` | `--jsx-bracket-same-line` | `jsxBracketSameLine: <bool>`
  
  ### Range
--
+ 
  Format only a segment of a file.
  
  These two options can be used to format code starting and ending at a given character offset (inclusive and exclusive, respectively). The range will extend:
@@ -1212,19 +1200,11 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 +`Infinity` | `--range-end <int>`  | `rangeEnd: <int>`
  
  ### Parser
--
- Specify which parser to use.
  
+@@ -668,20 +658,19 @@
  Both the `babylon` and `flow` parsers support the same set of JavaScript features (including Flow). Prettier automatically infers the parser from the input file path, so you shouldn't have to change this setting.
  
  Built-in parsers:
--
--- [`babylon`](https://github.com/babel/babylon/)
--- [`flow`](https://github.com/facebook/flow/tree/master/src/parser)
--- [`typescript`](https://github.com/eslint/typescript-eslint-parser) _Since v1.4.0_
--- [`postcss`](https://github.com/postcss/postcss) _Since v1.4.0_
--- [`json`](https://github.com/babel/babylon/tree/f09eb3200f57ea94d51c2a5b1facf2149fb406bf#babylonparseexpressioncode-options) _Since v1.5.0_
--- [`graphql`](https://github.com/graphql/graphql-js/tree/master/src/language) _Since v1.5.0_
 + - [`babylon`](https://github.com/babel/babylon/)
 + - [`flow`](https://github.com/facebook/flow/tree/master/src/parser)
 + - [`typescript`](https://github.com/eslint/typescript-eslint-parser) _Since v1.4.0_
@@ -1232,22 +1212,27 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 + - [`json`](https://github.com/babel/babylon/tree/f09eb3200f57ea94d51c2a5b1facf2149fb406bf#babylonparseexpressioncode-options) _Since v1.5.0_
 + - [`graphql`](https://github.com/graphql/graphql-js/tree/master/src/language) _Since v1.5.0_
  
--[Custom parsers](#custom-parser-api) are also supported. _Since v1.5.0_
+-- [`babylon`](https://github.com/babel/babylon/)
+-- [`flow`](https://github.com/facebook/flow/tree/master/src/parser)
+-- [`typescript`](https://github.com/eslint/typescript-eslint-parser) _Since v1.4.0_
+-- [`postcss`](https://github.com/postcss/postcss) _Since v1.4.0_
+-- [`json`](https://github.com/babel/babylon/tree/f09eb3200f57ea94d51c2a5b1facf2149fb406bf#babylonparseexpressioncode-options) _Since v1.5.0_
+-- [`graphql`](https://github.com/graphql/graphql-js/tree/master/src/language) _Since v1.5.0_
 +[Custom parsers](#custom-parser-api) are also supported.  _Since v1.5.0_
  
--| Default   | CLI Override                                    | API Override                                               |
--| --------- | ----------------------------------------------- | ---------------------------------------------------------- |
--| `babylon` | `--parser <string>`<br />`--parser ./my-parser` | `parser: "<string>"`<br />`parser: require("./my-parser")` |
+-[Custom parsers](#custom-parser-api) are also supported. _Since v1.5.0_
 +Default | CLI Override | API Override
 +--------|--------------|-------------
 +`babylon` | `--parser <string>`<br />`--parser ./my-parser` | `parser: "<string>"`<br />`parser: require("./my-parser")`
  
- ### Filepath
+-| Default   | CLI Override                                    | API Override                                               |
+-| --------- | ----------------------------------------------- | ---------------------------------------------------------- |
+-| `babylon` | `--parser <string>`<br />`--parser ./my-parser` | `parser: "<string>"`<br />`parser: require("./my-parser")` |
 -
- Specify the input filepath. This will be used to do parser inference.
+ ### Filepath
  
- For example, the following will use `postcss` parser:
-@@ -692,12 +669,11 @@
+ Specify the input filepath. This will be used to do parser inference.
+@@ -692,9 +681,9 @@
  cat foo | prettier --stdin-filepath foo.css
  ```
  
@@ -1259,11 +1244,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 +None | `--stdin-filepath <string>` | `filepath: "<string>"`
  
  ### Require pragma
--
- Prettier can restrict itself to only format files that contain a special comment, called a pragma, at the top of the file. This is very useful
- when gradually transitioning large, unformatted codebases to prettier.
  
-@@ -717,9 +693,9 @@
+@@ -717,9 +706,9 @@
   */
  ```
  
@@ -1276,7 +1258,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  
  ## Configuration File
  
-@@ -863,15 +839,15 @@
+@@ -863,15 +852,15 @@
  - [`eslint-plugin-prettier`](https://github.com/prettier/eslint-plugin-prettier) plugs Prettier into your ESLint workflow
  - [`eslint-config-prettier`](https://github.com/prettier/eslint-config-prettier) turns off all ESLint rules that are unnecessary or might conflict with Prettier
  - [`prettier-eslint`](https://github.com/prettier/prettier-eslint)
@@ -1850,9 +1832,11 @@ matrix(
 ```
 
 ## Options
+
 Prettier ships with a handful of customizable format options, usable in both the CLI and API.
 
 ### Print Width
+
 Specify the line length that the printer will wrap on.
 
 > **For readability we recommend against using more than 80 characters:**
@@ -1866,6 +1850,7 @@ Default | CLI Override | API Override
 `80` | `--print-width <int>` | `printWidth: <int>`
 
 ### Tab Width
+
 Specify the number of spaces per indentation-level.
 
 Default | CLI Override | API Override
@@ -1873,6 +1858,7 @@ Default | CLI Override | API Override
  `2` | `--tab-width <int>` | `tabWidth: <int>`
 
 ### Tabs
+
 Indent lines with tabs instead of spaces
 
 Default | CLI Override | API Override
@@ -1880,6 +1866,7 @@ Default | CLI Override | API Override
 `false` | `--use-tabs` | `useTabs: <bool>`
 
 ### Semicolons
+
 Print semicolons at the ends of statements.
 
 Valid options:
@@ -1892,6 +1879,7 @@ Default | CLI Override | API Override
 `true` | `--no-semi` | `semi: <bool>`
 
 ### Quotes
+
 Use single quotes instead of double quotes.
 
 Notes:
@@ -1903,6 +1891,7 @@ Default | CLI Override | API Override
 `false` |  `--single-quote` | `singleQuote: <bool>`
 
 ### Trailing Commas
+
 Print trailing commas wherever possible when multi-line. (A single-line array,
 for example, never gets trailing commas.)
 
@@ -1916,6 +1905,7 @@ Default | CLI Override | API Override
 `"none"` | <code>--trailing-comma <none&#124;es5&#124;all></code> | <code>trailingComma: "<none&#124;es5&#124;all>"</code>
 
 ### Bracket Spacing
+
 Print spaces between brackets in object literals.
 
 Valid options:
@@ -1927,6 +1917,7 @@ Default | CLI Override | API Override
 `true` | `--no-bracket-spacing` | `bracketSpacing: <bool>`
 
 ### JSX Brackets
+
 Put the `>` of a multi-line JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
 
 Default | CLI Override | API Override
@@ -1934,6 +1925,7 @@ Default | CLI Override | API Override
 `false` | `--jsx-bracket-same-line` | `jsxBracketSameLine: <bool>`
 
 ### Range
+
 Format only a segment of a file.
 
 These two options can be used to format code starting and ending at a given character offset (inclusive and exclusive, respectively). The range will extend:
@@ -1946,6 +1938,7 @@ Default | CLI Override | API Override
 `Infinity` | `--range-end <int>`  | `rangeEnd: <int>`
 
 ### Parser
+
 Specify which parser to use.
 
 Both the `babylon` and `flow` parsers support the same set of JavaScript features (including Flow). Prettier automatically infers the parser from the input file path, so you shouldn't have to change this setting.
@@ -1965,6 +1958,7 @@ Default | CLI Override | API Override
 `babylon` | `--parser <string>`<br />`--parser ./my-parser` | `parser: "<string>"`<br />`parser: require("./my-parser")`
 
 ### Filepath
+
 Specify the input filepath. This will be used to do parser inference.
 
 For example, the following will use `postcss` parser:
@@ -1978,6 +1972,7 @@ Default | CLI Override | API Override
 None | `--stdin-filepath <string>` | `filepath: "<string>"`
 
 ### Require pragma
+
 Prettier can restrict itself to only format files that contain a special comment, called a pragma, at the top of the file. This is very useful
 when gradually transitioning large, unformatted codebases to prettier.
 
@@ -2285,49 +2280,49 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
   494: If you need to make modifications to the AST (such as codemods), or you want to provide an alternate parser, you can do so by setting the `parser` option to a function. The function signature of the parser function is:
   512: The `--parser` CLI option may be a path to a node.js module exporting a parse function.
   516: A JavaScript comment of `// prettier-ignore` will exclude the next node in the abstract syntax tree from formatting.
-  549: Prettier ships with a handful of customizable format options, usable in both the CLI and API.
-  556: > In code styleguides, maximum line length rules are often set to 100 or 120. However, when humans write code, they don't strive to reach the maximum number of columns on every line. Developers often use whitespace to break up long lines for readability. In practice, the average line length often ends up well below the maximum.
-  558: > Prettier, on the other hand, strives to fit the most code into every line. With the print width set to 120, prettier may produce overly compact, or otherwise undesirable code.
-  584:  - `false` - Only add semicolons at the beginning of lines that may introduce ASI failures.
-  595: - If the number of quotes outweighs the other quote, the quote which is less used will be used to format the string - Example: `"I'm double quoted"` results in `"I'm double quoted"` and `"This \"example\" is single quoted"` results in `'This "example" is single quoted'`.
-  608:  - `"all"` - Trailing commas wherever possible (including function arguments). This requires node 8 or a [transform](https://babeljs.io/docs/plugins/syntax-trailing-function-commas/).
-  612: `"none"` | <code>--trailing-comma <none&#124;es5&#124;all></code> | <code>trailingComma: "<none&#124;es5&#124;all>"</code>
-  626: Put the `>` of a multi-line JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
-  635: These two options can be used to format code starting and ending at a given character offset (inclusive and exclusive, respectively). The range will extend:
-  647: Both the `babylon` and `flow` parsers support the same set of JavaScript features (including Flow). Prettier automatically infers the parser from the input file path, so you shouldn't have to change this setting.
-  652:  - [`typescript`](https://github.com/eslint/typescript-eslint-parser) _Since v1.4.0_
-  654:  - [`json`](https://github.com/babel/babylon/tree/f09eb3200f57ea94d51c2a5b1facf2149fb406bf#babylonparseexpressioncode-options) _Since v1.5.0_
-  655:  - [`graphql`](https://github.com/graphql/graphql-js/tree/master/src/language) _Since v1.5.0_
-  661: `babylon` | `--parser <string>`<br />`--parser ./my-parser` | `parser: "<string>"`<br />`parser: require("./my-parser")`
-  677: Prettier can restrict itself to only format files that contain a special comment, called a pragma, at the top of the file. This is very useful
-  680: For example, a file with the following as its first comment will be formatted when `--require-pragma` is supplied:
-  702: Prettier uses [cosmiconfig](https://github.com/davidtheclark/cosmiconfig) for configuration file support.
-  705: - A `.prettierrc` file, written in YAML or JSON, with optional extensions: `.yaml/.yml/.json/.js`.
-  709: The configuration file will be resolved starting from the location of the file being formatted,
-  736: Prettier borrows eslint's [override format](http://eslint.org/docs/user-guide/configuring#example-configuration).
-  764: `excludeFiles` may be optionally provided to exclude files for a given rule, and may also be a string or array of strings.
-  777: For more information on how to use the CLI to locate a file, see the [CLI](#cli) section.
-  781: If you'd like a JSON schema to validate your configuration, one is available here: https://www.schemastore.org/prettierrc.
-  787: Atom users can simply install the [prettier-atom](https://github.com/prettier/prettier-atom) package and use
-  792: Emacs users should see [this repository](https://github.com/prettier/prettier-emacs)
-  797: Vim users can simply install either [sbdchd](https://github.com/sbdchd)/[neoformat](https://github.com/sbdchd/neoformat), [w0rp](https://github.com/w0rp)/[ale](https://github.com/w0rp/ale), or [prettier](https://github.com/prettier)/[vim-prettier](https://github.com/prettier/vim-prettier), for more details see [this directory](https://github.com/prettier/prettier/tree/master/editors/vim).
-  801: Can be installed using the extension sidebar. Search for `Prettier - JavaScript formatter`.
-  805: [Check its repository for configuration and shortcuts](https://github.com/prettier/prettier-vscode)
-  809: Install the [JavaScript Prettier extension](https://github.com/madskristensen/JavaScriptPrettier).
-  819: guide](https://github.com/jlongster/prettier/tree/master/editors/webstorm/README.md).
-  833: Prettier also supports [TypeScript](https://www.typescriptlang.org/), CSS, [Less](http://lesscss.org/), [SCSS](http://sass-lang.com), [JSON](http://json.org/), and [GraphQL](http://graphql.org/).
-  835: The minimum version of TypeScript supported is 2.1.3 as it introduces the ability to have leading `|` for type definitions which prettier outputs.
-  839: - [`eslint-plugin-prettier`](https://github.com/prettier/eslint-plugin-prettier) plugs Prettier into your ESLint workflow
-  840: - [`eslint-config-prettier`](https://github.com/prettier/eslint-config-prettier) turns off all ESLint rules that are unnecessary or might conflict with Prettier
-  847: - [`prettier-standard-formatter`](https://github.com/dtinth/prettier-standard-formatter)
-  851: - [`neutrino-preset-prettier`](https://github.com/SpencerCDixon/neutrino-preset-prettier) allows you to use Prettier as a Neutrino preset
-  852: - [`prettier_d`](https://github.com/josephfrazier/prettier_d.js) runs Prettier as a server to avoid Node.js startup delay. It also supports configuration via `.prettierrc`, `package.json`, and `.editorconfig`.
-  853: - [`Prettier Bookmarklet`](https://prettier.glitch.me/) provides a bookmarklet and exposes a REST API for Prettier that allows to format CodeMirror editor in your browser
-  854: - [`prettier-github`](https://github.com/jgierer12/prettier-github) formats code in GitHub comments
-  855: - [`rollup-plugin-prettier`](https://github.com/mjeanroy/rollup-plugin-prettier) allows you to use Prettier with Rollup
-  856: - [`markdown-magic-prettier`](https://github.com/camacho/markdown-magic-prettier) allows you to use Prettier to format JS [codeblocks](https://help.github.com/articles/creating-and-highlighting-code-blocks/) in Markdown files via [Markdown Magic](https://github.com/DavidWells/markdown-magic)
-  857: - [`tslint-plugin-prettier`](https://github.com/ikatyang/tslint-plugin-prettier) runs Prettier as a TSLint rule and reports differences as individual TSLint issues
-  858: - [`tslint-config-prettier`](https://github.com/alexjoverm/tslint-config-prettier) use TSLint with Prettier without any conflict
-  886: Show the world you're using _Prettier_ → [![styled with prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
-  889: [![styled with prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
+  550: Prettier ships with a handful of customizable format options, usable in both the CLI and API.
+  558: > In code styleguides, maximum line length rules are often set to 100 or 120. However, when humans write code, they don't strive to reach the maximum number of columns on every line. Developers often use whitespace to break up long lines for readability. In practice, the average line length often ends up well below the maximum.
+  560: > Prettier, on the other hand, strives to fit the most code into every line. With the print width set to 120, prettier may produce overly compact, or otherwise undesirable code.
+  589:  - `false` - Only add semicolons at the beginning of lines that may introduce ASI failures.
+  601: - If the number of quotes outweighs the other quote, the quote which is less used will be used to format the string - Example: `"I'm double quoted"` results in `"I'm double quoted"` and `"This \"example\" is single quoted"` results in `'This "example" is single quoted'`.
+  615:  - `"all"` - Trailing commas wherever possible (including function arguments). This requires node 8 or a [transform](https://babeljs.io/docs/plugins/syntax-trailing-function-commas/).
+  619: `"none"` | <code>--trailing-comma <none&#124;es5&#124;all></code> | <code>trailingComma: "<none&#124;es5&#124;all>"</code>
+  635: Put the `>` of a multi-line JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
+  645: These two options can be used to format code starting and ending at a given character offset (inclusive and exclusive, respectively). The range will extend:
+  658: Both the `babylon` and `flow` parsers support the same set of JavaScript features (including Flow). Prettier automatically infers the parser from the input file path, so you shouldn't have to change this setting.
+  663:  - [`typescript`](https://github.com/eslint/typescript-eslint-parser) _Since v1.4.0_
+  665:  - [`json`](https://github.com/babel/babylon/tree/f09eb3200f57ea94d51c2a5b1facf2149fb406bf#babylonparseexpressioncode-options) _Since v1.5.0_
+  666:  - [`graphql`](https://github.com/graphql/graphql-js/tree/master/src/language) _Since v1.5.0_
+  672: `babylon` | `--parser <string>`<br />`--parser ./my-parser` | `parser: "<string>"`<br />`parser: require("./my-parser")`
+  690: Prettier can restrict itself to only format files that contain a special comment, called a pragma, at the top of the file. This is very useful
+  693: For example, a file with the following as its first comment will be formatted when `--require-pragma` is supplied:
+  715: Prettier uses [cosmiconfig](https://github.com/davidtheclark/cosmiconfig) for configuration file support.
+  718: - A `.prettierrc` file, written in YAML or JSON, with optional extensions: `.yaml/.yml/.json/.js`.
+  722: The configuration file will be resolved starting from the location of the file being formatted,
+  749: Prettier borrows eslint's [override format](http://eslint.org/docs/user-guide/configuring#example-configuration).
+  777: `excludeFiles` may be optionally provided to exclude files for a given rule, and may also be a string or array of strings.
+  790: For more information on how to use the CLI to locate a file, see the [CLI](#cli) section.
+  794: If you'd like a JSON schema to validate your configuration, one is available here: https://www.schemastore.org/prettierrc.
+  800: Atom users can simply install the [prettier-atom](https://github.com/prettier/prettier-atom) package and use
+  805: Emacs users should see [this repository](https://github.com/prettier/prettier-emacs)
+  810: Vim users can simply install either [sbdchd](https://github.com/sbdchd)/[neoformat](https://github.com/sbdchd/neoformat), [w0rp](https://github.com/w0rp)/[ale](https://github.com/w0rp/ale), or [prettier](https://github.com/prettier)/[vim-prettier](https://github.com/prettier/vim-prettier), for more details see [this directory](https://github.com/prettier/prettier/tree/master/editors/vim).
+  814: Can be installed using the extension sidebar. Search for `Prettier - JavaScript formatter`.
+  818: [Check its repository for configuration and shortcuts](https://github.com/prettier/prettier-vscode)
+  822: Install the [JavaScript Prettier extension](https://github.com/madskristensen/JavaScriptPrettier).
+  832: guide](https://github.com/jlongster/prettier/tree/master/editors/webstorm/README.md).
+  846: Prettier also supports [TypeScript](https://www.typescriptlang.org/), CSS, [Less](http://lesscss.org/), [SCSS](http://sass-lang.com), [JSON](http://json.org/), and [GraphQL](http://graphql.org/).
+  848: The minimum version of TypeScript supported is 2.1.3 as it introduces the ability to have leading `|` for type definitions which prettier outputs.
+  852: - [`eslint-plugin-prettier`](https://github.com/prettier/eslint-plugin-prettier) plugs Prettier into your ESLint workflow
+  853: - [`eslint-config-prettier`](https://github.com/prettier/eslint-config-prettier) turns off all ESLint rules that are unnecessary or might conflict with Prettier
+  860: - [`prettier-standard-formatter`](https://github.com/dtinth/prettier-standard-formatter)
+  864: - [`neutrino-preset-prettier`](https://github.com/SpencerCDixon/neutrino-preset-prettier) allows you to use Prettier as a Neutrino preset
+  865: - [`prettier_d`](https://github.com/josephfrazier/prettier_d.js) runs Prettier as a server to avoid Node.js startup delay. It also supports configuration via `.prettierrc`, `package.json`, and `.editorconfig`.
+  866: - [`Prettier Bookmarklet`](https://prettier.glitch.me/) provides a bookmarklet and exposes a REST API for Prettier that allows to format CodeMirror editor in your browser
+  867: - [`prettier-github`](https://github.com/jgierer12/prettier-github) formats code in GitHub comments
+  868: - [`rollup-plugin-prettier`](https://github.com/mjeanroy/rollup-plugin-prettier) allows you to use Prettier with Rollup
+  869: - [`markdown-magic-prettier`](https://github.com/camacho/markdown-magic-prettier) allows you to use Prettier to format JS [codeblocks](https://help.github.com/articles/creating-and-highlighting-code-blocks/) in Markdown files via [Markdown Magic](https://github.com/DavidWells/markdown-magic)
+  870: - [`tslint-plugin-prettier`](https://github.com/ikatyang/tslint-plugin-prettier) runs Prettier as a TSLint rule and reports differences as individual TSLint issues
+  871: - [`tslint-config-prettier`](https://github.com/alexjoverm/tslint-config-prettier) use TSLint with Prettier without any conflict
+  899: Show the world you're using _Prettier_ → [![styled with prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
+  902: [![styled with prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
 ```
