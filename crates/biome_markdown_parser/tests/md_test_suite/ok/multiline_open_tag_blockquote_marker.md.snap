@@ -1,0 +1,121 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+Allowed: <div class="a"
+>ok</div> tag.
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..9 "Allowed: " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@9..10 "<" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@10..23 "div class=\"a\"" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@23..24 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdQuote {
+            prefix: MdQuotePrefix {
+                pre_marker_indent: MdQuoteIndentList [],
+                marker_token: R_ANGLE@24..25 ">" [] [],
+                post_marker_space_token: missing (optional),
+            },
+            content: MdBlockList [
+                MdParagraph {
+                    list: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@25..27 "ok" [] [],
+                        },
+                        MdInlineHtml {
+                            value: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@27..28 "<" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@28..32 "/div" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@32..33 ">" [] [],
+                                },
+                            ],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@33..38 " tag." [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@38..39 "\n" [] [],
+                        },
+                    ],
+                    hard_line: missing (optional),
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@39..39 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..39
+  0: (empty)
+  1: MD_BLOCK_LIST@0..39
+    0: MD_PARAGRAPH@0..24
+      0: MD_INLINE_ITEM_LIST@0..24
+        0: MD_TEXTUAL@0..9
+          0: MD_TEXTUAL_LITERAL@0..9 "Allowed: " [] []
+        1: MD_TEXTUAL@9..10
+          0: MD_TEXTUAL_LITERAL@9..10 "<" [] []
+        2: MD_TEXTUAL@10..23
+          0: MD_TEXTUAL_LITERAL@10..23 "div class=\"a\"" [] []
+        3: MD_TEXTUAL@23..24
+          0: MD_TEXTUAL_LITERAL@23..24 "\n" [] []
+      1: (empty)
+    1: MD_QUOTE@24..39
+      0: MD_QUOTE_PREFIX@24..25
+        0: MD_QUOTE_INDENT_LIST@24..24
+        1: R_ANGLE@24..25 ">" [] []
+        2: (empty)
+      1: MD_BLOCK_LIST@25..39
+        0: MD_PARAGRAPH@25..39
+          0: MD_INLINE_ITEM_LIST@25..39
+            0: MD_TEXTUAL@25..27
+              0: MD_TEXTUAL_LITERAL@25..27 "ok" [] []
+            1: MD_INLINE_HTML@27..33
+              0: MD_INLINE_ITEM_LIST@27..33
+                0: MD_TEXTUAL@27..28
+                  0: MD_TEXTUAL_LITERAL@27..28 "<" [] []
+                1: MD_TEXTUAL@28..32
+                  0: MD_TEXTUAL_LITERAL@28..32 "/div" [] []
+                2: MD_TEXTUAL@32..33
+                  0: MD_TEXTUAL_LITERAL@32..33 ">" [] []
+            2: MD_TEXTUAL@33..38
+              0: MD_TEXTUAL_LITERAL@33..38 " tag." [] []
+            3: MD_TEXTUAL@38..39
+              0: MD_TEXTUAL_LITERAL@38..39 "\n" [] []
+          1: (empty)
+  2: EOF@39..39 "" [] []
+
+```

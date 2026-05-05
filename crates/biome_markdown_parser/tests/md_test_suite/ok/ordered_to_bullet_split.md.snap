@@ -1,0 +1,122 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+1. ordered
+
+- bullet
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdOrderedListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MD_ORDERED_LIST_MARKER@0..2 "1." [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@2..3 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@3..10 "ordered" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@10..11 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@11..12 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@12..13 "-" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@13..14 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@14..20 "bullet" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@20..21 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@21..21 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..21
+  0: (empty)
+  1: MD_BLOCK_LIST@0..21
+    0: MD_ORDERED_LIST_ITEM@0..11
+      0: MD_BULLET_LIST@0..11
+        0: MD_BULLET@0..11
+          0: MD_LIST_MARKER_PREFIX@0..3
+            0: MD_INDENT_TOKEN_LIST@0..0
+            1: MD_ORDERED_LIST_MARKER@0..2 "1." [] []
+            2: MD_LIST_POST_MARKER_SPACE@2..3 " " [] []
+            3: MD_INDENT_TOKEN_LIST@3..3
+          1: MD_BLOCK_LIST@3..11
+            0: MD_PARAGRAPH@3..11
+              0: MD_INLINE_ITEM_LIST@3..11
+                0: MD_TEXTUAL@3..10
+                  0: MD_TEXTUAL_LITERAL@3..10 "ordered" [] []
+                1: MD_TEXTUAL@10..11
+                  0: MD_TEXTUAL_LITERAL@10..11 "\n" [] []
+              1: (empty)
+    1: MD_NEWLINE@11..12
+      0: NEWLINE@11..12 "\n" [] []
+    2: MD_BULLET_LIST_ITEM@12..21
+      0: MD_BULLET_LIST@12..21
+        0: MD_BULLET@12..21
+          0: MD_LIST_MARKER_PREFIX@12..14
+            0: MD_INDENT_TOKEN_LIST@12..12
+            1: MINUS@12..13 "-" [] []
+            2: MD_LIST_POST_MARKER_SPACE@13..14 " " [] []
+            3: MD_INDENT_TOKEN_LIST@14..14
+          1: MD_BLOCK_LIST@14..21
+            0: MD_PARAGRAPH@14..21
+              0: MD_INLINE_ITEM_LIST@14..21
+                0: MD_TEXTUAL@14..20
+                  0: MD_TEXTUAL_LITERAL@14..20 "bullet" [] []
+                1: MD_TEXTUAL@20..21
+                  0: MD_TEXTUAL_LITERAL@20..21 "\n" [] []
+              1: (empty)
+  2: EOF@21..21 "" [] []
+
+```
