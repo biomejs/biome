@@ -44,15 +44,11 @@ where
 /// Wrapper for nodes that receive SCSS separator-path comments.
 struct ScssSeparatorComments<'a> {
     node: &'a CssSyntaxNode,
-    is_active: bool,
 }
 
 impl<'a> ScssSeparatorComments<'a> {
     pub(crate) fn around(node: &'a CssSyntaxNode) -> Self {
-        Self {
-            node,
-            is_active: is_in_scss_include_arguments(node),
-        }
+        Self { node }
     }
 
     /// Formats a node with attached separator comments when needed.
@@ -61,7 +57,7 @@ impl<'a> ScssSeparatorComments<'a> {
         f: &mut CssFormatter,
         fmt_node: impl Fn(&mut CssFormatter) -> FormatResult<()>,
     ) -> FormatResult<()> {
-        if !self.is_active {
+        if !is_in_scss_include_arguments(self.node) {
             return fmt_node(f);
         }
 
@@ -75,7 +71,7 @@ impl<'a> ScssSeparatorComments<'a> {
 
     /// Prints or suppresses normal leading comments for this node.
     pub(crate) fn fmt_leading_comments(self, f: &mut CssFormatter) -> FormatResult<()> {
-        if self.is_active {
+        if is_in_scss_include_arguments(self.node) {
             Ok(())
         } else {
             write!(f, [format_leading_comments(self.node)])

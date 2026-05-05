@@ -1,5 +1,5 @@
 use crate::{
-    AnyScssExpression, CssLanguage, ScssListExpression, ScssMapExpressionPair,
+    AnyScssExpression, CssLanguage, ScssListExpression, ScssMapExpression, ScssMapExpressionPair,
     ScssParenthesizedExpression, unwrap_single_expression_item,
 };
 use biome_rowan::AstNode;
@@ -13,7 +13,7 @@ where
     N: AstNode<Language = CssLanguage>,
 {
     matches!(
-        scss_map_context(node),
+        ScssMapContext::from_node(node),
         Some(context)
             if context.role == ScssMapRole::Key
                 && context.position_kind == ScssMapPositionKind::Direct
@@ -29,7 +29,7 @@ where
     N: AstNode<Language = CssLanguage>,
 {
     matches!(
-        scss_map_context(node),
+        ScssMapContext::from_node(node),
         Some(context) if context.role == ScssMapRole::Key
     )
 }
@@ -44,60 +44,44 @@ where
     N: AstNode<Language = CssLanguage>,
 {
     matches!(
-        scss_map_context(node),
+        ScssMapContext::from_node(node),
         Some(context)
             if context.role == ScssMapRole::Value
                 && context.position_kind == ScssMapPositionKind::Direct
     )
 }
 
-/// Returns the SCSS map context for `node`, if it is inside a map pair.
+/// Returns `true` for the outer value wrapper whose payload is a map.
 ///
-/// Example: in `(key: (a, b))`, the outer `(a, b)` is `Value + Direct`, while
-/// `a` is `Value + Nested`.
-pub fn scss_map_context<N>(node: &N) -> Option<ScssMapContext>
-where
-    N: AstNode<Language = CssLanguage>,
-{
-    let (pair, role) = enclosing_pair_and_role(node)?;
+/// Example: in `(key: (a: b))`, `(a: b)` returns `true`.
+pub fn is_scss_map_outer_parenthesized_value_map(node: &ScssParenthesizedExpression) -> bool {
+    let Some((pair, ScssMapRole::Value)) = enclosing_pair_and_role(node) else {
+        return false;
+    };
+    let Ok(value) = pair.value() else {
+        return false;
+    };
 
-    match role {
-        ScssMapRole::Key => Some(ScssMapContext {
-            role,
-            position_kind: position_kind(node, &pair.key().ok()?),
-            outer_parenthesized_value_payload_kind: None,
-            is_outer_parenthesized_value_list: false,
-        }),
-        ScssMapRole::Value => {
-            let value = pair.value().ok()?;
+    outer_parenthesized_value(&value).is_some_and(|parenthesized| {
+        parenthesized.syntax() == node.syntax()
+            && outer_parenthesized_value_map(&parenthesized).is_some()
+    })
+}
 
-            let outer_parenthesized_value = outer_parenthesized_value(&value);
-            let outer_parenthesized_value_payload_kind = if outer_parenthesized_value
-                .as_ref()
-                .is_some_and(|parenthesized| parenthesized.syntax() == node.syntax())
-            {
-                outer_parenthesized_value
-                    .as_ref()
-                    .and_then(outer_parenthesized_value_payload_kind)
-            } else {
-                None
-            };
+/// Returns `true` for the list payload inside an outer value wrapper.
+///
+/// Example: in `(key: (a, b))`, `a, b` returns `true`.
+pub fn is_scss_map_outer_parenthesized_value_list(node: &ScssListExpression) -> bool {
+    let Some((pair, ScssMapRole::Value)) = enclosing_pair_and_role(node) else {
+        return false;
+    };
+    let Ok(value) = pair.value() else {
+        return false;
+    };
 
-            let outer_parenthesized_list = outer_parenthesized_value
-                .as_ref()
-                .and_then(outer_parenthesized_value_list);
-            let is_outer_parenthesized_value_list = outer_parenthesized_list
-                .as_ref()
-                .is_some_and(|list| list.syntax() == node.syntax());
-
-            Some(ScssMapContext {
-                role,
-                position_kind: position_kind(node, &value),
-                outer_parenthesized_value_payload_kind,
-                is_outer_parenthesized_value_list,
-            })
-        }
-    }
+    outer_parenthesized_value(&value)
+        .and_then(|parenthesized| outer_parenthesized_value_list(&parenthesized))
+        .is_some_and(|list| list.syntax() == node.syntax())
 }
 
 /// Whether a node is on the key or value side of the nearest enclosing
@@ -131,19 +115,6 @@ pub enum ScssMapPositionKind {
     Nested,
 }
 
-/// The payload wrapped by an outer parenthesized map value like
-/// `key: (<payload>)`.
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
-pub enum ScssMapOuterParenthesizedValuePayloadKind {
-    /// The wrapper contains a scalar, like `key: (value)`.
-    Scalar,
-    /// The wrapper contains a list, like `key: (a, b)`.
-    List,
-    /// The wrapper contains a nested map, like
-    /// `key: (other-key: other-value)`.
-    Map,
-}
-
 /// Shared SCSS map context for syntax consumers.
 ///
 /// Example: in `(key: (a, b))`, the outer `(a, b)` is `Value + Direct`, while
@@ -154,12 +125,34 @@ pub struct ScssMapContext {
     pub role: ScssMapRole,
     /// Whether the node is the outer expression or nested inside it.
     pub position_kind: ScssMapPositionKind,
-    /// The payload kind inside the outer wrapper in `key: (<payload>)`.
+}
+
+impl ScssMapContext {
+    /// Returns the SCSS map context for `node`, if it is inside a map pair.
     ///
-    /// When this is `Some(...)`, the current node is that outer wrapper.
-    pub outer_parenthesized_value_payload_kind: Option<ScssMapOuterParenthesizedValuePayloadKind>,
-    /// `true` for the list `a, b` in `key: (a, b)`.
-    pub is_outer_parenthesized_value_list: bool,
+    /// Example: in `(key: (a, b))`, the outer `(a, b)` is `Value + Direct`,
+    /// while `a` is `Value + Nested`.
+    pub fn from_node<N>(node: &N) -> Option<Self>
+    where
+        N: AstNode<Language = CssLanguage>,
+    {
+        let (pair, role) = enclosing_pair_and_role(node)?;
+
+        match role {
+            ScssMapRole::Key => Some(Self {
+                role,
+                position_kind: position_kind(node, &pair.key().ok()?),
+            }),
+            ScssMapRole::Value => {
+                let value = pair.value().ok()?;
+
+                Some(Self {
+                    role,
+                    position_kind: position_kind(node, &value),
+                })
+            }
+        }
+    }
 }
 
 /// Finds the nearest enclosing map pair and the side containing `node`.
@@ -228,7 +221,19 @@ fn outer_parenthesized_value(value: &AnyScssExpression) -> Option<ScssParenthesi
         })
 }
 
-/// Returns the list in a value like `key: (a, b)`.
+/// Returns the map payload inside `key: (a: b)`.
+fn outer_parenthesized_value_map(
+    parenthesized: &ScssParenthesizedExpression,
+) -> Option<ScssMapExpression> {
+    let expression = parenthesized.expression().ok()?;
+
+    expression.as_scss_map_expression().cloned().or_else(|| {
+        unwrap_single_expression_item(&expression)
+            .and_then(|item| item.as_scss_map_expression().cloned())
+    })
+}
+
+/// Returns the list payload inside `key: (a, b)`.
 fn outer_parenthesized_value_list(
     parenthesized: &ScssParenthesizedExpression,
 ) -> Option<ScssListExpression> {
@@ -238,32 +243,4 @@ fn outer_parenthesized_value_list(
         unwrap_single_expression_item(&expression)
             .and_then(|item| item.as_scss_list_expression().cloned())
     })
-}
-
-/// Classifies the payload of an outer parenthesized value wrapper.
-///
-/// Examples:
-/// - `key: (value)` -> `Scalar`
-/// - `key: (a, b)` -> `List`
-/// - `key: (other-key: other-value)` -> `Map`
-fn outer_parenthesized_value_payload_kind(
-    parenthesized: &ScssParenthesizedExpression,
-) -> Option<ScssMapOuterParenthesizedValuePayloadKind> {
-    let expression = parenthesized.expression().ok()?;
-
-    let is_map = expression.as_scss_map_expression().is_some()
-        || unwrap_single_expression_item(&expression)
-            .is_some_and(|item| item.as_scss_map_expression().is_some());
-    if is_map {
-        return Some(ScssMapOuterParenthesizedValuePayloadKind::Map);
-    }
-
-    let is_list = expression.as_scss_list_expression().is_some()
-        || unwrap_single_expression_item(&expression)
-            .is_some_and(|item| item.as_scss_list_expression().is_some());
-    if is_list {
-        return Some(ScssMapOuterParenthesizedValuePayloadKind::List);
-    }
-
-    Some(ScssMapOuterParenthesizedValuePayloadKind::Scalar)
 }
