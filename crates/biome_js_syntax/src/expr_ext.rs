@@ -775,11 +775,11 @@ impl AnyJsExpression {
 
     pub fn as_any_global_identifier_expression(&self) -> Option<AnyPossibleGlobalIdentifier> {
         match self {
-            AnyJsExpression::JsIdentifierExpression(expr) => Some(expr.clone().into()),
-            AnyJsExpression::JsComputedMemberExpression(expr) => {
+            Self::JsIdentifierExpression(expr) => Some(expr.clone().into()),
+            Self::JsComputedMemberExpression(expr) => {
                 Some(AnyJsMemberExpression::from(expr.clone()).into())
             }
-            AnyJsExpression::JsStaticMemberExpression(expr) => {
+            Self::JsStaticMemberExpression(expr) => {
                 Some(AnyJsMemberExpression::from(expr.clone()).into())
             }
             _ => None,
@@ -1654,19 +1654,15 @@ declare_node_union! {
 impl AnyPossibleGlobalIdentifier {
     pub fn as_js_reference_identifier(&self) -> Option<JsReferenceIdentifier> {
         match self {
-            AnyPossibleGlobalIdentifier::AnyJsMemberExpression(_) => None,
-            AnyPossibleGlobalIdentifier::JsIdentifierExpression(identifier) => {
-                identifier.name().ok()
-            }
+            Self::AnyJsMemberExpression(_) => None,
+            Self::JsIdentifierExpression(identifier) => identifier.name().ok(),
         }
     }
 
     pub fn as_any_js_member_expression(&self) -> Option<AnyJsMemberExpression> {
         match self {
-            AnyPossibleGlobalIdentifier::AnyJsMemberExpression(member_expression) => {
-                Some(member_expression.clone())
-            }
-            AnyPossibleGlobalIdentifier::JsIdentifierExpression(_) => None,
+            Self::AnyJsMemberExpression(member_expression) => Some(member_expression.clone()),
+            Self::JsIdentifierExpression(_) => None,
         }
     }
 }
@@ -1676,7 +1672,7 @@ impl From<AnyPossibleGlobalIdentifier> for AnyJsExpression {
         match value {
             AnyPossibleGlobalIdentifier::AnyJsMemberExpression(node) => node.into(),
             AnyPossibleGlobalIdentifier::JsIdentifierExpression(expression) => {
-                AnyJsExpression::JsIdentifierExpression(expression)
+                Self::JsIdentifierExpression(expression)
             }
         }
     }
