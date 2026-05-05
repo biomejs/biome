@@ -72,17 +72,16 @@ declare_lint_rule! {
     ///
     /// ## Known limitations
     ///
-    /// Suggested replacement types are only shown when their textual
-    /// representation is up to 80 characters long. Longer unions fall back to
-    /// a generic note without the specific suggestion.
-    ///
-    /// When a return uses a type assertion such as `as T`, the rule does
-    /// not flag the return unless it can prove that `T` is narrower than
-    /// `object`. Trusted cases include `unknown`, `any`, `typeof` queries,
-    /// conditional types, generic type parameters, and types the rule
-    /// cannot resolve. Intersections (`A & B`) are trusted when every
-    /// member is or when any member is `any`; unions (`A | B`) when at
-    /// least one is.
+    /// - Suggested replacement types are only shown when their textual
+    ///   representation is up to 80 characters long. Longer unions fall back to
+    ///   a generic note without the specific suggestion.
+    /// - When a return uses a type assertion such as `as T`, the rule does
+    ///   not flag the return unless it can prove that `T` is narrower than
+    ///   `object`. Trusted cases include `unknown`, `any`, `typeof` queries,
+    ///   conditional types, generic type parameters, and types the rule
+    ///   cannot resolve. Intersections (`A & B`) are trusted when every
+    ///   member is or when any member is `any`; unions (`A | B`) when at
+    ///   least one is.
     pub NoMisleadingReturnType {
         version: "2.4.11",
         name: "noMisleadingReturnType",
