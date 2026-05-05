@@ -64,7 +64,7 @@ use std::borrow::Cow;
 use std::collections::HashSet;
 use std::hash::{Hash, Hasher};
 use std::sync::Arc;
-use tracing::instrument;
+use tracing::{instrument, trace};
 
 pub mod astro;
 pub(crate) mod css;
@@ -2444,6 +2444,7 @@ impl AnalyzerVisitorCache {
     }
     pub(crate) fn insert_entry(&self, key: AnalyzerCacheKey, entry: CachedRuleSet) {
         if self.0.len() > Self::MAX_ENTRIES {
+            trace!("Evicted cache entry: {:?}", key);
             self.evict_cache();
         }
 
