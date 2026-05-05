@@ -17,7 +17,7 @@
 			"anyOf": [{ "$ref": "#/$defs/CssConfiguration" }, { "type": "null" }]
 		},
 		"extends": {
-			"description": "A list of paths to other JSON files, used to extends the current configuration.",
+			"description": "A list of paths to other JSON files, used to extend the current configuration.",
 			"anyOf": [{ "$ref": "#/$defs/Extends" }, { "type": "null" }]
 		},
 		"files": {

@@ -29,7 +29,7 @@ export interface Configuration {
 	 */
 	css?: CssConfiguration;
 	/**
-	 * A list of paths to other JSON files, used to extends the current configuration.
+	 * A list of paths to other JSON files, used to extend the current configuration.
 	 */
 	extends?: Extends;
 	/**
