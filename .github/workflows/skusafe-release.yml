@@ -57,7 +57,7 @@ jobs:
       VERSION: ${{ needs.resolve-version.outputs.version }}
       BIOME_VERSION: ${{ needs.resolve-version.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: dtolnay/rust-toolchain@stable
         with:
@@ -87,7 +87,7 @@ jobs:
           npm pack
           ls -la *.tgz
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: ${{ matrix.pkg }}
           path: packages/@biomejs/${{ matrix.pkg }}/*.tgz
@@ -98,7 +98,7 @@ jobs:
     env:
       VERSION: ${{ needs.resolve-version.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Bump versions
         run: ./scripts/skusafe-prepare-release.sh "$VERSION"
@@ -109,7 +109,7 @@ jobs:
           npm pack
           ls -la *.tgz
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: biome-wrapper
           path: packages/@biomejs/biome/*.tgz
@@ -120,7 +120,7 @@ jobs:
     env:
       VERSION: ${{ needs.resolve-version.outputs.version }}
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           path: dist
           merge-multiple: true
