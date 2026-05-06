@@ -1,14 +1,32 @@
 use crate::prelude::*;
+use crate::utils::comment_trivia::format_leading_comments_with_soft_lines;
 use crate::utils::scss_expression::is_self_breaking_value;
 use crate::utils::scss_separator_comments::FormatScssSeparatorComments;
-use biome_css_syntax::{ScssMapExpressionPair, ScssMapExpressionPairFields};
+use biome_css_syntax::{
+    ScssMapExpressionPair, ScssMapExpressionPairFields, is_in_scss_include_arguments,
+};
+use biome_formatter::comments::CommentKind;
 use biome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatScssMapExpressionPair;
 impl FormatNodeRule<ScssMapExpressionPair> for FormatScssMapExpressionPair {
     fn fmt_node(&self, node: &ScssMapExpressionPair, f: &mut CssFormatter) -> FormatResult<()> {
-        self.fmt_node_with_scss_separator_comments(node, f)
+        match ScssMapPairLeadingCommentLayout::for_pair(node, f) {
+            ScssMapPairLeadingCommentLayout::Separator => {
+                self.fmt_node_with_scss_separator_comments(node, f)
+            }
+            ScssMapPairLeadingCommentLayout::GroupWithPair => {
+                write!(
+                    f,
+                    [group(&format_args![
+                        format_leading_comments_with_soft_lines(node.syntax()),
+                        format_with(|f| self.fmt_fields(node, f))
+                    ])]
+                )
+            }
+            ScssMapPairLeadingCommentLayout::Default => self.fmt_fields(node, f),
+        }
     }
 
     fn fmt_fields(&self, node: &ScssMapExpressionPair, f: &mut CssFormatter) -> FormatResult<()> {
@@ -38,7 +56,38 @@ impl FormatNodeRule<ScssMapExpressionPair> for FormatScssMapExpressionPair {
         node: &ScssMapExpressionPair,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        self.fmt_leading_scss_separator_comments(node, f)
+        match ScssMapPairLeadingCommentLayout::for_pair(node, f) {
+            ScssMapPairLeadingCommentLayout::Separator
+            | ScssMapPairLeadingCommentLayout::GroupWithPair => Ok(()),
+            ScssMapPairLeadingCommentLayout::Default => {
+                write!(f, [format_leading_comments(node.syntax())])
+            }
+        }
+    }
+}
+
+/// How leading comments are printed for one SCSS map pair.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+enum ScssMapPairLeadingCommentLayout {
+    /// Include arguments use separator comments, e.g. `@include mix($a, /* c */ $b)`.
+    Separator,
+
+    /// `/* comment */ key: value` joins the pair group.
+    GroupWithPair,
+
+    /// Normal leading comments use the default comment printer.
+    Default,
+}
+
+impl ScssMapPairLeadingCommentLayout {
+    fn for_pair(node: &ScssMapExpressionPair, f: &CssFormatter) -> Self {
+        if is_in_scss_include_arguments(node.syntax()) {
+            Self::Separator
+        } else if should_group_leading_block_comments_with_pair(node, f) {
+            Self::GroupWithPair
+        } else {
+            Self::Default
+        }
     }
 }
 
@@ -65,4 +114,35 @@ impl Format<CssFormatContext> for FormatScssMapExpressionPairValue<'_> {
             )
         }
     }
+}
+
+/// Returns `true` for `/* comment */ key: value`.
+///
+/// The comment joins the pair group, so long comments break before `key`.
+fn should_group_leading_block_comments_with_pair(
+    node: &ScssMapExpressionPair,
+    f: &CssFormatter,
+) -> bool {
+    let leading_comments = f.comments().leading_comments(node.syntax());
+
+    if leading_comments.is_empty()
+        || !leading_comments.iter().all(|comment| {
+            matches!(
+                comment.kind(),
+                CommentKind::Block | CommentKind::InlineBlock
+            ) && comment.lines_after() <= 1
+        })
+    {
+        return false;
+    }
+
+    let Ok(value) = node.value() else {
+        return false;
+    };
+
+    if is_self_breaking_value(&value) {
+        return false;
+    }
+
+    true
 }

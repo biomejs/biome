@@ -62,8 +62,8 @@ impl<'a> ScssMapLayout<'a> {
             .iter()
             .any(|comment| comment.kind().is_line())
         {
-            // `(// comment)` would comment out the closing `)` and produce
-            // invalid SCSS.
+            // `(// comment)` comments out the closing `)`, so keep line
+            // comments on their own line.
             return write!(
                 f,
                 [group(&format_args![

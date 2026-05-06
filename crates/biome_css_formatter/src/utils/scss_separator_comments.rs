@@ -102,20 +102,18 @@ fn write_separator_leading_comments(
     f: &mut CssFormatter,
     indented_body: Option<&SeparatorCommentBody<'_>>,
 ) -> FormatResult<()> {
-    let comment_count = f.comments().leading_comments(node).len();
+    let comments = f.comments().clone();
+    let leading_comments = comments.leading_comments(node);
+    let comment_count = leading_comments.len();
 
-    for index in 0..comment_count {
-        let (comment, lines_after, kind) = {
-            let comment = f.comments().leading_comments(node)[index].clone();
-            let lines_after = comment.lines_after();
-            let kind = comment.kind();
-            (comment, lines_after, kind)
-        };
+    for (index, comment) in leading_comments.iter().enumerate() {
+        let lines_after = comment.lines_after();
+        let kind = comment.kind();
         let is_last_comment = index + 1 == comment_count;
 
         write!(
             f,
-            [FormatRefWithRule::new(&comment, FormatCssLeadingComment)]
+            [FormatRefWithRule::new(comment, FormatCssLeadingComment)]
         )?;
 
         match kind {
@@ -148,7 +146,7 @@ fn write_separator_leading_comments(
             }
         }
 
-        f.comments().leading_comments(node)[index].mark_formatted();
+        comment.mark_formatted();
     }
 
     Ok(())
