@@ -114,6 +114,18 @@ jobs:
           name: biome-wrapper
           path: packages/@biomejs/biome/*.tgz
 
+      # Schema is shipped alongside the tarballs so consumers can point
+      # biome.json `$schema` at a stable Release URL (Content-Type:
+      # application/json). The raw.githubusercontent.com URL on the tag
+      # also works as a fallback.
+      - name: Stage schema
+        run: cp packages/@biomejs/biome/configuration_schema.json schema.json
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: schema
+          path: schema.json
+
   release:
     needs: [resolve-version, build, pack-wrapper]
     runs-on: ubuntu-24.04
@@ -132,7 +144,9 @@ jobs:
         with:
           tag_name: skusafe-v${{ env.VERSION }}
           name: skusafe-v${{ env.VERSION }}
-          files: dist/*.tgz
+          files: |
+            dist/*.tgz
+            dist/schema.json
           generate_release_notes: true
           # If the workflow was dispatched manually, create the tag too.
           # On tag-push triggers this is a no-op.
