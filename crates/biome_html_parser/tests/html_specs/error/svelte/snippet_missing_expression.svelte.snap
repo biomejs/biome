@@ -22,17 +22,10 @@ HtmlRoot {
         SvelteSnippetBlock {
             opening_block: SvelteSnippetOpeningBlock {
                 sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
-                snippet_token: SNIPPET_KW@2..9 "snippet" [] [],
+                snippet_token: SNIPPET_KW@2..10 "snippet" [] [Whitespace(" ")],
                 expression: missing (required),
-                r_curly_token: missing (required),
-                children: HtmlElementList [
-                    HtmlContent {
-                        value_token: HTML_LITERAL@9..10 " " [] [],
-                    },
-                    HtmlContent {
-                        value_token: HTML_LITERAL@10..11 "}" [] [],
-                    },
-                ],
+                r_curly_token: R_CURLY@10..11 "}" [] [],
+                children: HtmlElementList [],
             },
             closing_block: missing (required),
         },
@@ -52,14 +45,10 @@ HtmlRoot {
     0: SVELTE_SNIPPET_BLOCK@0..11
       0: SVELTE_SNIPPET_OPENING_BLOCK@0..11
         0: SV_CURLY_HASH@0..2 "{#" [] []
-        1: SNIPPET_KW@2..9 "snippet" [] []
+        1: SNIPPET_KW@2..10 "snippet" [] [Whitespace(" ")]
         2: (empty)
-        3: (empty)
-        4: HTML_ELEMENT_LIST@9..11
-          0: HTML_CONTENT@9..10
-            0: HTML_LITERAL@9..10 " " [] []
-          1: HTML_CONTENT@10..11
-            0: HTML_LITERAL@10..11 "}" [] []
+        3: R_CURLY@10..11 "}" [] []
+        4: HTML_ELEMENT_LIST@11..11
       1: (empty)
   4: EOF@11..12 "" [Newline("\n")] []
 
@@ -68,12 +57,12 @@ HtmlRoot {
 ## Diagnostics
 
 ```
-snippet_missing_expression.svelte:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+snippet_missing_expression.svelte:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an expression, instead none was found.
   
   > 1 │ {#snippet }
-      │          ^
+      │           ^
     2 │ 
   
 snippet_missing_expression.svelte:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

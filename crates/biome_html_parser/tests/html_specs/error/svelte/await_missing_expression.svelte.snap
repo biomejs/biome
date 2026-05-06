@@ -61,9 +61,9 @@ HtmlRoot {
                 SvelteAwaitClausesList [
                     SvelteAwaitThenBlock {
                         sv_curly_colon_token: SV_CURLY_COLON@28..31 "{:" [Newline("\n")] [],
-                        then_token: THEN_KW@31..35 "then" [] [],
+                        then_token: THEN_KW@31..36 "then" [] [Whitespace(" ")],
                         name: HtmlTextExpression {
-                            html_literal_token: HTML_LITERAL@35..41 " value" [] [],
+                            html_literal_token: HTML_LITERAL@36..41 "value" [] [],
                         },
                         r_curly_token: R_CURLY@41..42 "}" [] [],
                         children: HtmlElementList [
@@ -146,9 +146,9 @@ HtmlRoot {
       1: SVELTE_AWAIT_CLAUSES_LIST@28..72
         0: SVELTE_AWAIT_THEN_BLOCK@28..72
           0: SV_CURLY_COLON@28..31 "{:" [Newline("\n")] []
-          1: THEN_KW@31..35 "then" [] []
-          2: HTML_TEXT_EXPRESSION@35..41
-            0: HTML_LITERAL@35..41 " value" [] []
+          1: THEN_KW@31..36 "then" [] [Whitespace(" ")]
+          2: HTML_TEXT_EXPRESSION@36..41
+            0: HTML_LITERAL@36..41 "value" [] []
           3: R_CURLY@41..42 "}" [] []
           4: HTML_ELEMENT_LIST@42..72
             0: HTML_ELEMENT@42..72
