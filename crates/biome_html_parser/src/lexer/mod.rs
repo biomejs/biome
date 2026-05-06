@@ -500,15 +500,15 @@ impl<'src> HtmlLexer<'src> {
     /// brackets until the matching closing bracket is found.
     fn consume_single_text_expression(&mut self) -> HtmlSyntaxKind {
         if let Some(current) = self.current_byte() {
-            // emit leading whitespace as trivia so it's not part of the expression literal
-            if lookup_byte(current) == WHS {
-                return self.consume_newline_or_whitespaces();
-            }
-            // when immediately at `}`, lex it as R_CURLY so the parser can recognize
-            // it as the closing brace rather than emitting an empty HTML_LITERAL
-            if current == b'}' {
-                self.advance(1);
-                return R_CURLY;
+            match lookup_byte(current) {
+                // emit leading whitespace as trivia so it's not part of the expression literal
+                WHS => return self.consume_newline_or_whitespaces(),
+                // when immediately at `}`, lex it as R_CURLY so the parser can recognize
+                // it as the closing brace rather than emitting an empty HTML_LITERAL
+                BEC => {
+                    return self.consume_byte(T!['}'])
+                }
+                _ => {}
             }
         }
 
