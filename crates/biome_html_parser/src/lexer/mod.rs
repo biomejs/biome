@@ -505,9 +505,7 @@ impl<'src> HtmlLexer<'src> {
                 WHS => return self.consume_newline_or_whitespaces(),
                 // when immediately at `}`, lex it as R_CURLY so the parser can recognize
                 // it as the closing brace rather than emitting an empty HTML_LITERAL
-                BEC => {
-                    return self.consume_byte(T!['}'])
-                }
+                BEC => return self.consume_byte(T!['}']),
                 _ => {}
             }
         }
