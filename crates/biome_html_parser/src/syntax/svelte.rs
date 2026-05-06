@@ -1287,6 +1287,7 @@ const SVELTE_DIRECTIVE_KEYWORDS: TokenSet<HtmlSyntaxKind> = token_set!(
     T![bind],
     T![transition],
     T![in],
+    T![of],
     T![out],
     T![class],
     T![style],
