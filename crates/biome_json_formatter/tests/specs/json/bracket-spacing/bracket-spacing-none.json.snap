@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: json/bracket-spacing/bracket-spacing-none.json
 ---
+
 # Input
 
 ```json
@@ -10,38 +11,22 @@ info: json/bracket-spacing/bracket-spacing-none.json
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Trailing commas: None
-Expand: Auto
-Bracket spacing: true
------
+# Options
 
 ```json
-{ "foo": { "bar": { "baz": "qux" } } }
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "json": {
+    "formatter": {
+      "bracketSpacing": false
+    }
+  }
+}
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Trailing commas: None
-Expand: Auto
-Bracket spacing: false
------
+# Formatted
 
 ```json
 {"foo": {"bar": {"baz": "qux"}}}
+
 ```

@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: json/comments/multiline.json
 ---
+
 # Input
 
 ```json
@@ -25,43 +26,29 @@ info: json/comments/multiline.json
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Trailing commas: None
-Expand: Auto
-Bracket spacing: true
------
+# Formatted
 
 ```json
 /**
- * Leading
- **/ {
+* Leading
+**/ {
 	/**
-	 * Leading
-	 **/
-	"number": 1123123213123123123123122311231232131231231231231223 /**
-	 * Trailing
-	 **/,
+	* Leading
+	**/
+	"number": 1123123213123123123123122311231232131231231231231223,/**
+* Trailing
+**/
 	"string": "some-long-long-long-long-long-long-long-string",
-	"array": [12312321, { "another-number": 12321321, "string": "some-string" }],
-	"object": {
-		"array": [
-			123214123,
-			"some-long-long-string",
-			[12312312, "some-long-long-string"]
-		]
-	},
+	"array": [12312321, {"another-number": 12321321, "string": "some-string"}],
+	"object": {"array":  [123214123, "some-long-long-string", [12312312, "some-long-long-string"]]},
 	"null": null
 } /**
- * Trailing
- **/
+* Trailing
+**/
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   12: 	"object": {"array":  [123214123, "some-long-long-string", [12312312, "some-long-long-string"]]},
 ```

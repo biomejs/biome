@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/declaration_empty.css
 ---
+
 # Input
 
 ```css
@@ -55,19 +56,7 @@ b {
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
------
+# Formatted
 
 ```css
 a {
@@ -106,4 +95,5 @@ b {
 		content: "foo";
 	}
 }
+
 ```

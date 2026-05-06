@@ -403,7 +403,7 @@ impl GritSyntaxKind {
             UNDEFINED_KW => "undefined",
             LIKE_KW => "like",
             RETURN_KW => "return",
-            EOF => "EOF",
+            EOF => "",
             GRIT_STRING_LITERAL => "string literal",
             _ => return None,
         };

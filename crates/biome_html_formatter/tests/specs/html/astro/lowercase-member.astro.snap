@@ -1,0 +1,37 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: astro/lowercase-member.astro
+---
+
+# Input
+
+```astro
+---
+let form;
+let foo;
+let Data;
+---
+<form.Field></form.Field>
+<form.Field attr="value" />
+<Data.Client></Data.Client>
+<foo.Bar.Baz />
+<form.Field data-foo.bar="value" />
+<foo.Bar attr.data-foo="value" />
+
+```
+
+
+# Formatted
+
+```astro
+---
+---
+
+<form.Field></form.Field>
+<form.Field attr="value" />
+<Data.Client></Data.Client>
+<foo.Bar.Baz />
+<form.Field data-foo.bar="value" />
+<foo.Bar attr.data-foo="value" />
+
+```

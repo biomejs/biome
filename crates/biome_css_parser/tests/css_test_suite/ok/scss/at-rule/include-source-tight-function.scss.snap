@@ -1,0 +1,354 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@include transition(min-height ($spacer/2) ease-in-out);
+@include transition(min-height($spacer/2) ease-in-out);
+@include transition(min-height ($spacer / 2) ease-in-out);
+@include transition(min-height($spacer / 2) ease-in-out);
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: ScssIncludeAtRule {
+                include_token: INCLUDE_KW@1..9 "include" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@9..19 "transition" [] [],
+                },
+                arguments: ScssIncludeArgumentList {
+                    l_paren_token: L_PAREN@19..20 "(" [] [],
+                    items: CssParameterList [
+                        ScssExpression {
+                            items: ScssExpressionItemList [
+                                CssIdentifier {
+                                    value_token: IDENT@20..31 "min-height" [] [Whitespace(" ")],
+                                },
+                                ScssParenthesizedExpression {
+                                    l_paren_token: L_PAREN@31..32 "(" [] [],
+                                    expression: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            ScssBinaryExpression {
+                                                left: ScssVariable {
+                                                    dollar_token: DOLLAR@32..33 "$" [] [],
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@33..39 "spacer" [] [],
+                                                    },
+                                                },
+                                                operator: SLASH@39..40 "/" [] [],
+                                                right: CssNumber {
+                                                    value_token: CSS_NUMBER_LITERAL@40..41 "2" [] [],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                    r_paren_token: R_PAREN@41..43 ")" [] [Whitespace(" ")],
+                                },
+                                CssIdentifier {
+                                    value_token: IDENT@43..54 "ease-in-out" [] [],
+                                },
+                            ],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@54..55 ")" [] [],
+                },
+                block: missing (optional),
+                semicolon_token: SEMICOLON@55..56 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@56..58 "@" [Newline("\n")] [],
+            rule: ScssIncludeAtRule {
+                include_token: INCLUDE_KW@58..66 "include" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@66..76 "transition" [] [],
+                },
+                arguments: ScssIncludeArgumentList {
+                    l_paren_token: L_PAREN@76..77 "(" [] [],
+                    items: CssParameterList [
+                        ScssExpression {
+                            items: ScssExpressionItemList [
+                                CssFunction {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@77..87 "min-height" [] [],
+                                    },
+                                    l_paren_token: L_PAREN@87..88 "(" [] [],
+                                    items: CssParameterList [
+                                        ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                ScssBinaryExpression {
+                                                    left: ScssVariable {
+                                                        dollar_token: DOLLAR@88..89 "$" [] [],
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@89..95 "spacer" [] [],
+                                                        },
+                                                    },
+                                                    operator: SLASH@95..96 "/" [] [],
+                                                    right: CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@96..97 "2" [] [],
+                                                    },
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                    r_paren_token: R_PAREN@97..99 ")" [] [Whitespace(" ")],
+                                },
+                                CssIdentifier {
+                                    value_token: IDENT@99..110 "ease-in-out" [] [],
+                                },
+                            ],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@110..111 ")" [] [],
+                },
+                block: missing (optional),
+                semicolon_token: SEMICOLON@111..112 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@112..114 "@" [Newline("\n")] [],
+            rule: ScssIncludeAtRule {
+                include_token: INCLUDE_KW@114..122 "include" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@122..132 "transition" [] [],
+                },
+                arguments: ScssIncludeArgumentList {
+                    l_paren_token: L_PAREN@132..133 "(" [] [],
+                    items: CssParameterList [
+                        ScssExpression {
+                            items: ScssExpressionItemList [
+                                CssIdentifier {
+                                    value_token: IDENT@133..144 "min-height" [] [Whitespace(" ")],
+                                },
+                                ScssParenthesizedExpression {
+                                    l_paren_token: L_PAREN@144..145 "(" [] [],
+                                    expression: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            ScssBinaryExpression {
+                                                left: ScssVariable {
+                                                    dollar_token: DOLLAR@145..146 "$" [] [],
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@146..153 "spacer" [] [Whitespace(" ")],
+                                                    },
+                                                },
+                                                operator: SLASH@153..155 "/" [] [Whitespace(" ")],
+                                                right: CssNumber {
+                                                    value_token: CSS_NUMBER_LITERAL@155..156 "2" [] [],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                    r_paren_token: R_PAREN@156..158 ")" [] [Whitespace(" ")],
+                                },
+                                CssIdentifier {
+                                    value_token: IDENT@158..169 "ease-in-out" [] [],
+                                },
+                            ],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@169..170 ")" [] [],
+                },
+                block: missing (optional),
+                semicolon_token: SEMICOLON@170..171 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@171..173 "@" [Newline("\n")] [],
+            rule: ScssIncludeAtRule {
+                include_token: INCLUDE_KW@173..181 "include" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@181..191 "transition" [] [],
+                },
+                arguments: ScssIncludeArgumentList {
+                    l_paren_token: L_PAREN@191..192 "(" [] [],
+                    items: CssParameterList [
+                        ScssExpression {
+                            items: ScssExpressionItemList [
+                                CssFunction {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@192..202 "min-height" [] [],
+                                    },
+                                    l_paren_token: L_PAREN@202..203 "(" [] [],
+                                    items: CssParameterList [
+                                        ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                ScssBinaryExpression {
+                                                    left: ScssVariable {
+                                                        dollar_token: DOLLAR@203..204 "$" [] [],
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@204..211 "spacer" [] [Whitespace(" ")],
+                                                        },
+                                                    },
+                                                    operator: SLASH@211..213 "/" [] [Whitespace(" ")],
+                                                    right: CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@213..214 "2" [] [],
+                                                    },
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                    r_paren_token: R_PAREN@214..216 ")" [] [Whitespace(" ")],
+                                },
+                                CssIdentifier {
+                                    value_token: IDENT@216..227 "ease-in-out" [] [],
+                                },
+                            ],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@227..228 ")" [] [],
+                },
+                block: missing (optional),
+                semicolon_token: SEMICOLON@228..229 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@229..230 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..230
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..229
+    0: CSS_AT_RULE@0..56
+      0: AT@0..1 "@" [] []
+      1: SCSS_INCLUDE_AT_RULE@1..56
+        0: INCLUDE_KW@1..9 "include" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@9..19
+          0: IDENT@9..19 "transition" [] []
+        2: SCSS_INCLUDE_ARGUMENT_LIST@19..55
+          0: L_PAREN@19..20 "(" [] []
+          1: CSS_PARAMETER_LIST@20..54
+            0: SCSS_EXPRESSION@20..54
+              0: SCSS_EXPRESSION_ITEM_LIST@20..54
+                0: CSS_IDENTIFIER@20..31
+                  0: IDENT@20..31 "min-height" [] [Whitespace(" ")]
+                1: SCSS_PARENTHESIZED_EXPRESSION@31..43
+                  0: L_PAREN@31..32 "(" [] []
+                  1: SCSS_EXPRESSION@32..41
+                    0: SCSS_EXPRESSION_ITEM_LIST@32..41
+                      0: SCSS_BINARY_EXPRESSION@32..41
+                        0: SCSS_VARIABLE@32..39
+                          0: DOLLAR@32..33 "$" [] []
+                          1: CSS_IDENTIFIER@33..39
+                            0: IDENT@33..39 "spacer" [] []
+                        1: SLASH@39..40 "/" [] []
+                        2: CSS_NUMBER@40..41
+                          0: CSS_NUMBER_LITERAL@40..41 "2" [] []
+                  2: R_PAREN@41..43 ")" [] [Whitespace(" ")]
+                2: CSS_IDENTIFIER@43..54
+                  0: IDENT@43..54 "ease-in-out" [] []
+          2: R_PAREN@54..55 ")" [] []
+        3: (empty)
+        4: SEMICOLON@55..56 ";" [] []
+    1: CSS_AT_RULE@56..112
+      0: AT@56..58 "@" [Newline("\n")] []
+      1: SCSS_INCLUDE_AT_RULE@58..112
+        0: INCLUDE_KW@58..66 "include" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@66..76
+          0: IDENT@66..76 "transition" [] []
+        2: SCSS_INCLUDE_ARGUMENT_LIST@76..111
+          0: L_PAREN@76..77 "(" [] []
+          1: CSS_PARAMETER_LIST@77..110
+            0: SCSS_EXPRESSION@77..110
+              0: SCSS_EXPRESSION_ITEM_LIST@77..110
+                0: CSS_FUNCTION@77..99
+                  0: CSS_IDENTIFIER@77..87
+                    0: IDENT@77..87 "min-height" [] []
+                  1: L_PAREN@87..88 "(" [] []
+                  2: CSS_PARAMETER_LIST@88..97
+                    0: SCSS_EXPRESSION@88..97
+                      0: SCSS_EXPRESSION_ITEM_LIST@88..97
+                        0: SCSS_BINARY_EXPRESSION@88..97
+                          0: SCSS_VARIABLE@88..95
+                            0: DOLLAR@88..89 "$" [] []
+                            1: CSS_IDENTIFIER@89..95
+                              0: IDENT@89..95 "spacer" [] []
+                          1: SLASH@95..96 "/" [] []
+                          2: CSS_NUMBER@96..97
+                            0: CSS_NUMBER_LITERAL@96..97 "2" [] []
+                  3: R_PAREN@97..99 ")" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@99..110
+                  0: IDENT@99..110 "ease-in-out" [] []
+          2: R_PAREN@110..111 ")" [] []
+        3: (empty)
+        4: SEMICOLON@111..112 ";" [] []
+    2: CSS_AT_RULE@112..171
+      0: AT@112..114 "@" [Newline("\n")] []
+      1: SCSS_INCLUDE_AT_RULE@114..171
+        0: INCLUDE_KW@114..122 "include" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@122..132
+          0: IDENT@122..132 "transition" [] []
+        2: SCSS_INCLUDE_ARGUMENT_LIST@132..170
+          0: L_PAREN@132..133 "(" [] []
+          1: CSS_PARAMETER_LIST@133..169
+            0: SCSS_EXPRESSION@133..169
+              0: SCSS_EXPRESSION_ITEM_LIST@133..169
+                0: CSS_IDENTIFIER@133..144
+                  0: IDENT@133..144 "min-height" [] [Whitespace(" ")]
+                1: SCSS_PARENTHESIZED_EXPRESSION@144..158
+                  0: L_PAREN@144..145 "(" [] []
+                  1: SCSS_EXPRESSION@145..156
+                    0: SCSS_EXPRESSION_ITEM_LIST@145..156
+                      0: SCSS_BINARY_EXPRESSION@145..156
+                        0: SCSS_VARIABLE@145..153
+                          0: DOLLAR@145..146 "$" [] []
+                          1: CSS_IDENTIFIER@146..153
+                            0: IDENT@146..153 "spacer" [] [Whitespace(" ")]
+                        1: SLASH@153..155 "/" [] [Whitespace(" ")]
+                        2: CSS_NUMBER@155..156
+                          0: CSS_NUMBER_LITERAL@155..156 "2" [] []
+                  2: R_PAREN@156..158 ")" [] [Whitespace(" ")]
+                2: CSS_IDENTIFIER@158..169
+                  0: IDENT@158..169 "ease-in-out" [] []
+          2: R_PAREN@169..170 ")" [] []
+        3: (empty)
+        4: SEMICOLON@170..171 ";" [] []
+    3: CSS_AT_RULE@171..229
+      0: AT@171..173 "@" [Newline("\n")] []
+      1: SCSS_INCLUDE_AT_RULE@173..229
+        0: INCLUDE_KW@173..181 "include" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@181..191
+          0: IDENT@181..191 "transition" [] []
+        2: SCSS_INCLUDE_ARGUMENT_LIST@191..228
+          0: L_PAREN@191..192 "(" [] []
+          1: CSS_PARAMETER_LIST@192..227
+            0: SCSS_EXPRESSION@192..227
+              0: SCSS_EXPRESSION_ITEM_LIST@192..227
+                0: CSS_FUNCTION@192..216
+                  0: CSS_IDENTIFIER@192..202
+                    0: IDENT@192..202 "min-height" [] []
+                  1: L_PAREN@202..203 "(" [] []
+                  2: CSS_PARAMETER_LIST@203..214
+                    0: SCSS_EXPRESSION@203..214
+                      0: SCSS_EXPRESSION_ITEM_LIST@203..214
+                        0: SCSS_BINARY_EXPRESSION@203..214
+                          0: SCSS_VARIABLE@203..211
+                            0: DOLLAR@203..204 "$" [] []
+                            1: CSS_IDENTIFIER@204..211
+                              0: IDENT@204..211 "spacer" [] [Whitespace(" ")]
+                          1: SLASH@211..213 "/" [] [Whitespace(" ")]
+                          2: CSS_NUMBER@213..214
+                            0: CSS_NUMBER_LITERAL@213..214 "2" [] []
+                  3: R_PAREN@214..216 ")" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@216..227
+                  0: IDENT@216..227 "ease-in-out" [] []
+          2: R_PAREN@227..228 ")" [] []
+        3: (empty)
+        4: SEMICOLON@228..229 ";" [] []
+  2: EOF@229..230 "" [Newline("\n")] []
+
+```

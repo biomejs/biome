@@ -2,6 +2,7 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```css
@@ -83,7 +84,7 @@ expression: snapshot
 ```
 CssRoot {
     bom_token: missing (optional),
-    rules: CssRuleList [
+    items: CssRootItemList [
         CssAtRule {
             at_token: AT@0..85 "@" [Comments("/*\n  ERROR CASE 1: Mi ..."), Newline("\n")] [],
             rule: CssContainerAtRule {
@@ -118,23 +119,14 @@ CssRoot {
                             right: CssContainerStyleInParens {
                                 l_paren_token: L_PAREN@120..121 "(" [] [],
                                 query: CssDeclaration {
-                                    property: CssBogusProperty {
-                                        items: [
-                                            CssDashedIdentifier {
-                                                value_token: IDENT@121..124 "--b" [] [],
-                                            },
-                                            COLON@124..126 ":" [] [Whitespace(" ")],
-                                            CssBogus {
-                                                items: [
-                                                    CssIdentifier {
-                                                        value_token: IDENT@126..131 "blue" [] [Whitespace(" ")],
-                                                    },
-                                                    CssBogusPropertyValue {
-                                                        items: [
-                                                            L_CURLY@131..132 "{" [] [],
-                                                        ],
-                                                    },
-                                                ],
+                                    property: CssGenericProperty {
+                                        name: CssDashedIdentifier {
+                                            value_token: IDENT@121..124 "--b" [] [],
+                                        },
+                                        colon_token: COLON@124..126 ":" [] [Whitespace(" ")],
+                                        value: CssGenericComponentValueList [
+                                            CssIdentifier {
+                                                value_token: IDENT@126..131 "blue" [] [Whitespace(" ")],
                                             },
                                         ],
                                     },
@@ -146,11 +138,10 @@ CssRoot {
                         r_paren_token: missing (required),
                     },
                 },
-                block: CssBogusBlock {
-                    items: [
-                        CssRuleList [],
-                        R_CURLY@132..134 "}" [Newline("\n")] [],
-                    ],
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@131..132 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@132..134 "}" [Newline("\n")] [],
                 },
             },
         },
@@ -325,23 +316,14 @@ CssRoot {
                         style_token: STYLE_KW@663..669 "style" [] [Whitespace(" ")],
                         l_paren_token: missing (required),
                         query: CssDeclaration {
-                            property: CssBogusProperty {
-                                items: [
-                                    CssDashedIdentifier {
-                                        value_token: IDENT@669..672 "--b" [] [],
-                                    },
-                                    COLON@672..674 ":" [] [Whitespace(" ")],
-                                    CssBogus {
-                                        items: [
-                                            CssIdentifier {
-                                                value_token: IDENT@674..678 "red" [] [Whitespace(" ")],
-                                            },
-                                            CssBogusPropertyValue {
-                                                items: [
-                                                    L_CURLY@678..679 "{" [] [],
-                                                ],
-                                            },
-                                        ],
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@669..672 "--b" [] [],
+                                },
+                                colon_token: COLON@672..674 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@674..678 "red" [] [Whitespace(" ")],
                                     },
                                 ],
                             },
@@ -350,11 +332,10 @@ CssRoot {
                         r_paren_token: missing (required),
                     },
                 },
-                block: CssBogusBlock {
-                    items: [
-                        CssRuleList [],
-                        R_CURLY@679..681 "}" [Newline("\n")] [],
-                    ],
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@678..679 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@679..681 "}" [Newline("\n")] [],
                 },
             },
         },
@@ -667,18 +648,18 @@ CssRoot {
 ```
 0: CSS_ROOT@0..1437
   0: (empty)
-  1: CSS_RULE_LIST@0..1436
+  1: CSS_ROOT_ITEM_LIST@0..1436
     0: CSS_AT_RULE@0..134
       0: AT@0..85 "@" [Comments("/*\n  ERROR CASE 1: Mi ..."), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@85..134
-        0: CSS_CONTAINER_AT_RULE_DECLARATOR@85..132
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@85..131
           0: CONTAINER_KW@85..95 "container" [] [Whitespace(" ")]
           1: CSS_CUSTOM_IDENTIFIER@95..100
             0: IDENT@95..100 "name" [] [Whitespace(" ")]
-          2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@100..132
+          2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@100..131
             0: STYLE_KW@100..105 "style" [] []
             1: L_PAREN@105..106 "(" [] []
-            2: CSS_CONTAINER_STYLE_OR_QUERY@106..132
+            2: CSS_CONTAINER_STYLE_OR_QUERY@106..131
               0: CSS_CONTAINER_STYLE_IN_PARENS@106..117
                 0: L_PAREN@106..107 "(" [] []
                 1: CSS_DECLARATION@107..115
@@ -692,24 +673,23 @@ CssRoot {
                   1: (empty)
                 2: R_PAREN@115..117 ")" [] [Whitespace(" ")]
               1: OR_KW@117..120 "or" [] [Whitespace(" ")]
-              2: CSS_CONTAINER_STYLE_IN_PARENS@120..132
+              2: CSS_CONTAINER_STYLE_IN_PARENS@120..131
                 0: L_PAREN@120..121 "(" [] []
-                1: CSS_DECLARATION@121..132
-                  0: CSS_BOGUS_PROPERTY@121..132
+                1: CSS_DECLARATION@121..131
+                  0: CSS_GENERIC_PROPERTY@121..131
                     0: CSS_DASHED_IDENTIFIER@121..124
                       0: IDENT@121..124 "--b" [] []
                     1: COLON@124..126 ":" [] [Whitespace(" ")]
-                    2: CSS_BOGUS@126..132
+                    2: CSS_GENERIC_COMPONENT_VALUE_LIST@126..131
                       0: CSS_IDENTIFIER@126..131
                         0: IDENT@126..131 "blue" [] [Whitespace(" ")]
-                      1: CSS_BOGUS_PROPERTY_VALUE@131..132
-                        0: L_CURLY@131..132 "{" [] []
                   1: (empty)
                 2: (empty)
             3: (empty)
-        1: CSS_BOGUS_BLOCK@132..134
-          0: CSS_RULE_LIST@132..132
-          1: R_CURLY@132..134 "}" [Newline("\n")] []
+        1: CSS_RULE_BLOCK@131..134
+          0: L_CURLY@131..132 "{" [] []
+          1: CSS_RULE_LIST@132..132
+          2: R_CURLY@132..134 "}" [Newline("\n")] []
     1: CSS_AT_RULE@134..304
       0: AT@134..239 "@" [Newline("\n"), Newline("\n"), Comments("/*\n  ERROR CASE 2: Ex ..."), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@239..304
@@ -821,28 +801,27 @@ CssRoot {
     5: CSS_AT_RULE@553..681
       0: AT@553..648 "@" [Newline("\n"), Newline("\n"), Comments("/*\n  ERROR CASE 5: Mi ..."), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@648..681
-        0: CSS_CONTAINER_AT_RULE_DECLARATOR@648..679
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@648..678
           0: CONTAINER_KW@648..658 "container" [] [Whitespace(" ")]
           1: CSS_CUSTOM_IDENTIFIER@658..663
             0: IDENT@658..663 "name" [] [Whitespace(" ")]
-          2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@663..679
+          2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@663..678
             0: STYLE_KW@663..669 "style" [] [Whitespace(" ")]
             1: (empty)
-            2: CSS_DECLARATION@669..679
-              0: CSS_BOGUS_PROPERTY@669..679
+            2: CSS_DECLARATION@669..678
+              0: CSS_GENERIC_PROPERTY@669..678
                 0: CSS_DASHED_IDENTIFIER@669..672
                   0: IDENT@669..672 "--b" [] []
                 1: COLON@672..674 ":" [] [Whitespace(" ")]
-                2: CSS_BOGUS@674..679
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@674..678
                   0: CSS_IDENTIFIER@674..678
                     0: IDENT@674..678 "red" [] [Whitespace(" ")]
-                  1: CSS_BOGUS_PROPERTY_VALUE@678..679
-                    0: L_CURLY@678..679 "{" [] []
               1: (empty)
             3: (empty)
-        1: CSS_BOGUS_BLOCK@679..681
-          0: CSS_RULE_LIST@679..679
-          1: R_CURLY@679..681 "}" [Newline("\n")] []
+        1: CSS_RULE_BLOCK@678..681
+          0: L_CURLY@678..679 "{" [] []
+          1: CSS_RULE_LIST@679..679
+          2: R_CURLY@679..681 "}" [Newline("\n")] []
     6: CSS_AT_RULE@681..826
       0: AT@681..787 "@" [Newline("\n"), Newline("\n"), Comments("/*\n  ERROR CASE 6: In ..."), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@787..826
@@ -1034,7 +1013,7 @@ CssRoot {
 ```
 at_rule_container_style_query_error.css:5:48 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected value or character.
+  × expected `)` but instead found `{`
   
     3 │   - Missing ")" after (--b: blue)
     4 │ */
@@ -1043,28 +1022,7 @@ at_rule_container_style_query_error.css:5:48 parse ━━━━━━━━━�
     6 │ }
     7 │ 
   
-  i Expected one of:
-  
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
-  
-at_rule_container_style_query_error.css:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `)` but instead found `}`
-  
-    4 │ */
-    5 │ @container name style((--b: red) or (--b: blue {
-  > 6 │ }
-      │ ^
-    7 │ 
-    8 │ /*
-  
-  i Remove }
+  i Remove {
   
 at_rule_container_style_query_error.css:12:67 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1129,7 +1087,7 @@ at_rule_container_style_query_error.css:33:23 parse ━━━━━━━━━�
   
 at_rule_container_style_query_error.css:33:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected value or character.
+  × expected `)` but instead found `{`
   
     31 │   - "style" must be followed by "("
     32 │ */
@@ -1138,28 +1096,7 @@ at_rule_container_style_query_error.css:33:32 parse ━━━━━━━━━�
     34 │ }
     35 │ 
   
-  i Expected one of:
-  
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
-  
-at_rule_container_style_query_error.css:34:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `)` but instead found `}`
-  
-    32 │ */
-    33 │ @container name style --b: red {
-  > 34 │ }
-       │ ^
-    35 │ 
-    36 │ /*
-  
-  i Remove }
+  i Remove {
   
 at_rule_container_style_query_error.css:40:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

@@ -39,6 +39,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     let parse_config = JsonParserOptions {
         allow_comments: test_directory.contains("allow_comments"),
         allow_trailing_commas: test_directory.contains("allow_trailing_commas"),
+        allow_metavariables: false,
     };
 
     let parsed = parse_json(&content, parse_config);
@@ -115,10 +116,8 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
                 );
             }
         }
-        ExpectedOutcome::Fail => {
-            if parsed.diagnostics().is_empty() {
-                panic!("Failing test must have diagnostics");
-            }
+        ExpectedOutcome::Fail if parsed.diagnostics().is_empty() => {
+            panic!("Failing test must have diagnostics");
         }
         _ => {}
     }

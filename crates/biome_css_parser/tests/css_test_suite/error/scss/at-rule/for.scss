@@ -1,0 +1,17 @@
+@for from 1 through 3 {
+  width: 1px;
+}
+
+@for $i 1 through 3 {
+  width: 1px;
+}
+
+@for $i from 1 {
+  width: 1px;
+}
+
+@for $i from 1 to {
+  width: 1px;
+}
+
+@for $i from 1 through 3

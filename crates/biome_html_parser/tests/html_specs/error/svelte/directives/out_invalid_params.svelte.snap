@@ -1,0 +1,143 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div out:fade={{ duration: >Incomplete</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlBogusAttribute {
+                        items: [
+                            OUT_KW@5..8 "out" [] [],
+                            HtmlBogus {
+                                items: [
+                                    COLON@8..9 ":" [] [],
+                                    SvelteName {
+                                        ident_token: IDENT@9..13 "fade" [] [],
+                                    },
+                                    SvelteDirectiveModifierList [],
+                                    HtmlBogus {
+                                        items: [
+                                            EQ@13..14 "=" [] [],
+                                            HtmlBogusTextExpression {
+                                                items: [
+                                                    L_CURLY@14..15 "{" [] [],
+                                                    L_CURLY@15..17 "{" [] [Whitespace(" ")],
+                                                    HTML_LITERAL@17..38 "duration: >Incomplete" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+                r_angle_token: missing (required),
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@38..39 "<" [] [],
+                slash_token: SLASH@39..40 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@40..43 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@43..44 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@44..45 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..45
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..44
+    0: HTML_ELEMENT@0..44
+      0: HTML_OPENING_ELEMENT@0..38
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..38
+          0: HTML_BOGUS_ATTRIBUTE@5..38
+            0: OUT_KW@5..8 "out" [] []
+            1: HTML_BOGUS@8..38
+              0: COLON@8..9 ":" [] []
+              1: SVELTE_NAME@9..13
+                0: IDENT@9..13 "fade" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@13..13
+              3: HTML_BOGUS@13..38
+                0: EQ@13..14 "=" [] []
+                1: HTML_BOGUS_TEXT_EXPRESSION@14..38
+                  0: L_CURLY@14..15 "{" [] []
+                  1: L_CURLY@15..17 "{" [] [Whitespace(" ")]
+                  2: HTML_LITERAL@17..38 "duration: >Incomplete" [] []
+        3: (empty)
+      1: HTML_ELEMENT_LIST@38..38
+      2: HTML_CLOSING_ELEMENT@38..44
+        0: L_ANGLE@38..39 "<" [] []
+        1: SLASH@39..40 "/" [] []
+        2: HTML_TAG_NAME@40..43
+          0: HTML_LITERAL@40..43 "div" [] []
+        3: R_ANGLE@43..44 ">" [] []
+  4: EOF@44..45 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+out_invalid_params.svelte:1:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found a text expression that doesn't have the closing expression:
+  
+  > 1 │ <div out:fade={{ duration: >Incomplete</div>
+      │               ^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i This is where the opening expression was found:
+  
+  > 1 │ <div out:fade={{ duration: >Incomplete</div>
+      │               ^
+    2 │ 
+  
+out_invalid_params.svelte:1:39 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an attribute but instead found '<'.
+  
+  > 1 │ <div out:fade={{ duration: >Incomplete</div>
+      │                                       ^
+    2 │ 
+  
+  i Expected an attribute here.
+  
+  > 1 │ <div out:fade={{ duration: >Incomplete</div>
+      │                                       ^
+    2 │ 
+  
+```

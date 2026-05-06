@@ -11,10 +11,14 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
         // These tokens, when parsed to proc_macro2::TokenStream, generates a stream of bytes
         // that can't be recognized by [quote].
         // Hence, they need to be thread differently
-        if "{}[]()` ".contains(token) {
-            // should be wrapped in single quotes
+        if "{}[]()` \"".contains(token) {
+            // should be wrapped in single quotes (as char literals)
             let c = token.chars().next().unwrap();
             quote! { #c }
+        } else if *token == "'" {
+            // Single quote needs to be wrapped in double quotes (as string literal)
+            let token = Literal::string(token);
+            quote! { #token }
         } else if should_token_be_quoted(token) {
             // should be wrapped in double quotes
             let token = Literal::string(token);
@@ -102,7 +106,7 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                     let tok = match self {
                         #(#punctuation => #punctuation_strings,)*
                         #(#full_keywords => #all_keyword_to_strings,)*
-                        EOF => "EOF",
+                        EOF => "",
                         JS_STRING_LITERAL => "string literal",
                         _ => return None,
                     };
@@ -116,7 +120,7 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                     let tok = match self {
                         #(#punctuation => #punctuation_strings,)*
                         #(#full_keywords => #all_keyword_to_strings,)*
-                        EOF => "EOF",
+                        EOF => "",
                         CSS_STRING_LITERAL => "string literal",
                         _ => return None,
                     };
@@ -130,7 +134,7 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                     let tok = match self {
                         #(#punctuation => #punctuation_strings,)*
                         #(#full_keywords => #all_keyword_to_strings,)*
-                        EOF => "EOF",
+                        EOF => "",
                         JSON_STRING_LITERAL => "string literal",
                         _ => return None,
                     };
@@ -144,7 +148,7 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                     let tok = match self {
                         #(#punctuation => #punctuation_strings,)*
                         #(#full_keywords => #all_keyword_to_strings,)*
-                        EOF => "EOF",
+                        EOF => "",
                         _ => return None,
                     };
                     Some(tok)
@@ -157,7 +161,7 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                     let tok = match self {
                         #(#punctuation => #punctuation_strings,)*
                         #(#full_keywords => #all_keyword_to_strings,)*
-                        EOF => "EOF",
+                        EOF => "",
                         GRIT_STRING_LITERAL => "string literal",
                         _ => return None,
                     };
@@ -171,7 +175,7 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                     let tok = match self {
                         #(#punctuation => #punctuation_strings,)*
                         #(#full_keywords => #all_keyword_to_strings,)*
-                        EOF => "EOF",
+                        EOF => "",
                         HTML_STRING_LITERAL => "string literal",
                         _ => return None,
                     };
@@ -185,7 +189,7 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                     let tok = match self {
                         #(#punctuation => #punctuation_strings,)*
                         #(#full_keywords => #all_keyword_to_strings,)*
-                        EOF => "EOF",
+                        EOF => "",
                         GRAPHQL_STRING_LITERAL => "string literal",
                         _ => return None,
                     };
@@ -199,7 +203,7 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                     let tok = match self {
                         #(#punctuation => #punctuation_strings,)*
                         #(#full_keywords => #all_keyword_to_strings,)*
-                        EOF => "EOF",
+                        EOF => "",
                         FLOW_START => "start of a flow node",
                         FLOW_END => "end of a flow node",
                         MAPPING_START => "start of a block mapping",

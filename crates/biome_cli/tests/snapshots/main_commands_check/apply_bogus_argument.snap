@@ -1,11 +1,12 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `fix.js`
 
 ```js
 function _13_1_3_fun(arguments) { }
+
 ```
 
 # Termination Message
@@ -28,17 +29,7 @@ fix.js:1:22 parse ━━━━━━━━━━━━━━━━━━━━�
   
   > 1 │ function _13_1_3_fun(arguments) { }
       │                      ^^^^^^^^^
-  
-
-```
-
-```block
-fix.js:1:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Illegal use of `arguments` as an identifier in strict mode
-  
-  > 1 │ function _13_1_3_fun(arguments) { }
-      │                      ^^^^^^^^^
+    2 │ 
   
 
 ```
@@ -53,5 +44,5 @@ fix.js format ━━━━━━━━━━━━━━━━━━━━━━
 
 ```block
 Checked 1 file in <TIME>. No fixes applied.
-Found 3 errors.
+Found 2 errors.
 ```

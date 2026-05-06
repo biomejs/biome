@@ -1,0 +1,21 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/directive_use_basic.svelte
+---
+
+# Input
+
+```svelte
+<div use:clickOutside>Click outside handler</div>
+<button use:longpress={{duration: 500}}>Long press me</button>
+
+```
+
+
+# Formatted
+
+```svelte
+<div use:clickOutside>Click outside handler</div>
+<button use:longpress={{duration: 500}}>Long press me</button>
+
+```

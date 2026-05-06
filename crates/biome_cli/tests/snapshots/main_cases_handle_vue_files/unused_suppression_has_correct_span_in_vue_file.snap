@@ -1,0 +1,50 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.vue`
+
+```vue
+<template>
+  <div>Hello</div>
+</template>
+
+<script lang="ts" setup>
+console.log("foo");
+// biome-ignore lint/correctness/noUnusedImports: migrating to biome
+import { mdiSquareOutline } from "@mdi/js";
+</script>
+```
+
+# Emitted Messages
+
+```block
+file.vue:7:1 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
+  
+    5 │ <script lang="ts" setup>
+    6 │ console.log("foo");
+  > 7 │ // biome-ignore lint/correctness/noUnusedImports: migrating to biome
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ import { mdiSquareOutline } from "@mdi/js";
+    9 │ </script>
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 warning.
+```

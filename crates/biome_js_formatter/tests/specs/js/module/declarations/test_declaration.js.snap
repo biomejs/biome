@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/declarations/test_declaration.js
 ---
+
 # Input
 
 ```js
@@ -31,33 +32,19 @@ describe(`${foo + bar} wroooooooooooooooooooooooooooooong string`,
   () => {}
 );
 
+// TestOptions pattern (Vitest)
+describe("with retry option", { retry: 2 }, () => {
+  it("does something", () => {});
+});
+
+it("with timeout option", { timeout: 5000 }, () => {
+  console.log("test");
+});
 
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
------
+# Formatted
 
 ```js
 describe("test", () => {
@@ -81,4 +68,14 @@ it(`${foo + bar}
 describe(`${foo + bar}`, () => {});
 
 describe(`${foo + bar} wroooooooooooooooooooooooooooooong string`, () => {});
+
+// TestOptions pattern (Vitest)
+describe("with retry option", { retry: 2 }, () => {
+	it("does something", () => {});
+});
+
+it("with timeout option", { timeout: 5000 }, () => {
+	console.log("test");
+});
+
 ```

@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```svelte
@@ -28,9 +29,9 @@ HtmlRoot {
                     html_literal_token: HTML_LITERAL@7..37 " import('./Component.svelte') " [] [],
                 },
                 then_clause: SvelteAwaitThenClause {
-                    then_token: THEN_KW@37..41 "then" [] [],
+                    then_token: THEN_KW@37..42 "then" [] [Whitespace(" ")],
                     name: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@41..64 " { default: Component }" [] [],
+                        html_literal_token: HTML_LITERAL@42..64 "{ default: Component }" [] [],
                     },
                 },
                 catch_clause: missing (optional),
@@ -38,7 +39,7 @@ HtmlRoot {
                 children: HtmlElementList [
                     HtmlSelfClosingElement {
                         l_angle_token: L_ANGLE@65..69 "<" [Newline("\n"), Whitespace("  ")] [],
-                        name: HtmlTagName {
+                        name: HtmlComponentName {
                             value_token: HTML_LITERAL@69..79 "Component" [] [Whitespace(" ")],
                         },
                         attributes: HtmlAttributeList [],
@@ -74,15 +75,15 @@ HtmlRoot {
         2: HTML_TEXT_EXPRESSION@7..37
           0: HTML_LITERAL@7..37 " import('./Component.svelte') " [] []
         3: SVELTE_AWAIT_THEN_CLAUSE@37..64
-          0: THEN_KW@37..41 "then" [] []
-          1: HTML_TEXT_EXPRESSION@41..64
-            0: HTML_LITERAL@41..64 " { default: Component }" [] []
+          0: THEN_KW@37..42 "then" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@42..64
+            0: HTML_LITERAL@42..64 "{ default: Component }" [] []
         4: (empty)
         5: R_CURLY@64..65 "}" [] []
         6: HTML_ELEMENT_LIST@65..81
           0: HTML_SELF_CLOSING_ELEMENT@65..81
             0: L_ANGLE@65..69 "<" [Newline("\n"), Whitespace("  ")] []
-            1: HTML_TAG_NAME@69..79
+            1: HTML_COMPONENT_NAME@69..79
               0: HTML_LITERAL@69..79 "Component" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@79..79
             3: SLASH@79..80 "/" [] []

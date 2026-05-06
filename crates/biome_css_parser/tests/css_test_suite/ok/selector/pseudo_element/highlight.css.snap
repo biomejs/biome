@@ -2,6 +2,7 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```css
@@ -22,7 +23,7 @@ div::highlight(foo) {
 ```
 CssRoot {
     bom_token: missing (optional),
-    rules: CssRuleList [
+    items: CssRootItemList [
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
@@ -127,7 +128,7 @@ CssRoot {
 ```
 0: CSS_ROOT@0..74
   0: (empty)
-  1: CSS_RULE_LIST@0..73
+  1: CSS_ROOT_ITEM_LIST@0..73
     0: CSS_QUALIFIED_RULE@0..23
       0: CSS_SELECTOR_LIST@0..20
         0: CSS_COMPOUND_SELECTOR@0..20

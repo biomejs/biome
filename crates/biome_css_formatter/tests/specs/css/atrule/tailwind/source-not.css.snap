@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atrule/tailwind/source-not.css
 ---
+
 # Input
 
 ```css
@@ -10,34 +11,21 @@ info: css/atrule/tailwind/source-not.css
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
------
-
-```css
-@source not "../routes/utils/ds.tsx";
+```json
+{
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  }
+}
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
------
+# Formatted
 
 ```css
 @source not "../routes/utils/ds.tsx";
+
 ```

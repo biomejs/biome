@@ -1,11 +1,13 @@
 use YamlSyntaxKind::*;
 use biome_parser::{
     CompletedMarker, Parser,
-    parse_lists::ParseSeparatedList,
+    parse_lists::{ParseNodeList, ParseSeparatedList},
     parse_recovery::{ParseRecovery, RecoveryResult},
     prelude::ParsedSyntax::{self, *},
 };
 use biome_yaml_syntax::{T, YamlSyntaxKind};
+
+use crate::parser::property::PropertyList;
 
 use super::{
     YamlParser,
@@ -27,6 +29,7 @@ pub(crate) fn parse_any_flow_node(p: &mut YamlParser) -> ParsedSyntax {
 
 pub(crate) fn parse_flow_json_node(p: &mut YamlParser) -> CompletedMarker {
     let m = p.start();
+    PropertyList.parse_list(p);
 
     if is_at_flow_sequence(p) {
         parse_flow_sequence(p);
@@ -43,6 +46,7 @@ pub(crate) fn parse_flow_json_node(p: &mut YamlParser) -> CompletedMarker {
 
 pub(crate) fn parse_flow_yaml_node(p: &mut YamlParser) -> CompletedMarker {
     let m = p.start();
+    PropertyList.parse_list(p);
     parse_plain_scalar(p);
     m.complete(p, YAML_FLOW_YAML_NODE)
 }

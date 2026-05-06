@@ -85,6 +85,137 @@ expression: valid.css
   transition:·opacity·1s·ease;
 }
 
+.contain-intrinsic {
+  contain-intrinsic-inline-size: auto;
+  contain-intrinsic-block-size: auto;
+  contain-intrinsic-size: auto;
+  contain-intrinsic-width: 100px;
+  contain-intrinsic-height: 50px;
+}
+
+.containment {
+  contain: layout;
+  container: gallery / inline-size;
+  container-name: gallery;
+  container-type: inline-size;
+  content-visibility: auto;
+}
+
+.font-synthesis {
+  font-synthesis: weight style;
+  font-synthesis-weight: none;
+  font-synthesis-style: normal;
+  font-synthesis-small-caps: none;
+}
+
+.colors {
+  base-palette: #ffffff;
+  override-colors: none;
+  font-palette: #555555;
+  color: #000000;
+}
+
+.text {
+  hyphens: auto;
+  hyphenate-character: "\00AD";
+  line-break: auto;
+  word-break: break-word;
+  text-wrap: pretty;
+  text-wrap-mode: balance;
+  text-wrap-style: normal;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  tab-size: 4;
+  white-space: normal;
+  white-space-collapse: preserve;
+}
+
+.text-decoration {
+  text-decoration: underline;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-style: solid;
+  text-decoration-color: currentColor;
+  text-decoration-skip-ink: auto;
+}
+
+.ruby {
+  ruby-position: over;
+  ruby-align: center;
+}
+
+.color-adjustment {
+  color-scheme: light dark;
+  forced-color-adjust: none;
+  print-color-adjust: exact;
+}
+
+.masking {
+  clip: rect(0 0 0 0);
+  clip-path: inset(0);
+  clip-rule: nonzero;
+  mask: none;
+  mask-type: luminance;
+}
+
+.shapes {
+  shape-outside: circle(50% at 50% 50%);
+  shape-image-threshold: 0.5;
+  shape-margin: 10px;
+}
+
+.writing-modes {
+  direction: ltr;
+  unicode-bidi: embed;
+  writing-mode: horizontal-tb;
+  text-orientation: mixed;
+  text-combine-upright: none;
+}
+
+.svg {
+  marker: none;
+  marker-start: none;
+  marker-mid: none;
+  marker-end: none;
+  stop-color: #000000;
+  stop-opacity: 1;
+  paint-order: normal;
+  shape-rendering: auto;
+  text-rendering: auto;
+}
+
+.transforms {
+  transform: none;
+  transform-origin: center center;
+  transform-box: border-box;
+  transform-style: flat;
+  rotate: 0deg;
+  scale: 1;
+  translate: 0 0;
+  perspective: none;
+  perspective-origin: 50% 50%;
+  backface-visibility: visible;
+}
+
+.view-transitions {
+  view-transition-name: none;
+  view-transition-class: none;
+}
+
+.animations {
+  animation-fill-mode: both;
+  animation-play-state: running;
+  animation-composition: replace;
+}
+
+.motion-path {
+  offset: 0px;
+  offset-position: 0px 0px;
+  offset-path: none;
+  offset-distance: 0%;
+  offset-rotate: 0deg;
+  offset-anchor: 50% 50%;
+}
 
 /**
  * https://github.com/biomejs/biome/issues/6105

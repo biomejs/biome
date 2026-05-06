@@ -1,0 +1,17 @@
+# Prettier test files that Biome should completely ignore.
+# One path prefix per line, relative to the prettier/ directory.
+# Ignored files produce no snapshot and are excluded from compatibility reports.
+
+# YAML/custom front matter (not CSS syntax)
+css/front-matter/
+css/yaml/
+
+# PostCSS-specific syntax (mixins, variable interpolation, nesting props)
+css/postcss-plugins/
+css/postcss-8-improment/
+
+# Less-like @variable syntax
+css/atword/
+
+# Prettier editor cursor placeholder tests
+css/cursor/

@@ -1,8 +1,8 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: attributes/multiline/break.html
-snapshot_kind: text
 ---
+
 # Input
 
 ```html
@@ -11,41 +11,18 @@ snapshot_kind: text
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Attribute Position: Auto
-Bracket same line: false
-Whitespace sensitivity: css
-Indent script and style: false
-Self close void elements: never
------
-
-```html
-<div foo="bar" disabled bar="foo"></div>
+```json
+{
+  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "formatter": {
+    "attributePosition": "multiline"
+  }
+}
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Attribute Position: Multiline
-Bracket same line: false
-Whitespace sensitivity: css
-Indent script and style: false
-Self close void elements: never
------
+# Formatted
 
 ```html
 <div
@@ -53,4 +30,5 @@ Self close void elements: never
 	disabled
 	bar="foo"
 ></div>
+
 ```

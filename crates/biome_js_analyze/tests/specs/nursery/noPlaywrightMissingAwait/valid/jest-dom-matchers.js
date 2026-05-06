@@ -1,0 +1,19 @@
+/* should NOT generate diagnostics — jest-dom matchers are synchronous */
+import { expect } from "vitest";
+import { screen } from "@testing-library/react";
+
+test("renders correctly", () => {
+    const element = screen.getByRole("button");
+    expect(element).toBeChecked();
+    expect(element).toBeDisabled();
+    expect(element).toBeEmpty();
+    expect(element).toBeEnabled();
+    expect(element).toBeVisible();
+    expect(element).toHaveAccessibleDescription("desc");
+    expect(element).toHaveAccessibleErrorMessage("err");
+    expect(element).toHaveAccessibleName("name");
+    expect(element).toHaveAttribute("disabled");
+    expect(element).toHaveClass("active");
+    expect(element).toHaveRole("button");
+    expect(element).toHaveValue("hello");
+});

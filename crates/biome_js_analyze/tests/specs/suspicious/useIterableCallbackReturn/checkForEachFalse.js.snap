@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: checkForEachFalse.js
+---
+# Input
+```js
+// should not generate diagnostics
+
+[1, 2, 3].forEach(function(el) {
+    return el * 2;
+});
+
+```

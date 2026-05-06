@@ -1,0 +1,43 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/inline_links.md
+---
+
+# Input
+
+```md
+[hello](#world)
+
+[  spaced  ](#link)
+
+[link](https://example.com "title")
+
+[link](https://example.com "  spaced title  ")
+
+text with [inline](link) in the middle
+
+[link with **bold**](url)
+
+[foo](<https://example.com>)
+
+```
+
+
+# Formatted
+
+```md
+[hello](#world)
+
+[  spaced  ](#link)
+
+[link](https://example.com "title")
+
+[link](https://example.com "  spaced title  ")
+
+text with [inline](link) in the middle
+
+[link with **bold**](url)
+
+[foo](<https://example.com>)
+
+```

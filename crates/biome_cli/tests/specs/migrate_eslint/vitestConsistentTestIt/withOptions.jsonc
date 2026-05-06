@@ -1,0 +1,11 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": {
+      "vitest/consistent-test-it": ["error", {
+        "fn": "it",
+        "withinDescribe": "test"
+      }]
+    }
+  }
+}

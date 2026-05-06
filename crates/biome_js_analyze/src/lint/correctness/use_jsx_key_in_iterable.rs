@@ -7,9 +7,9 @@ use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunctionBody, AnyJsMemberExpression, AnyJsObjectMember, AnyJsStatement,
-    AnyJsSwitchClause, AnyJsxAttribute, AnyJsxChild, JsArrayExpression, JsCallExpression,
-    JsFunctionBody, JsObjectExpression, JsStatementList, JsxAttributeList, JsxExpressionChild,
-    JsxTagExpression,
+    AnyJsSwitchClause, AnyJsxAttribute, AnyJsxChild, JsArrayElementList, JsArrayExpression,
+    JsCallArgumentList, JsCallArguments, JsCallExpression, JsFunctionBody, JsNewExpression,
+    JsObjectExpression, JsStatementList, JsxAttributeList, JsxExpressionChild, JsxTagExpression,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TextRange, declare_node_union};
 use biome_rule_options::use_jsx_key_in_iterable::UseJsxKeyInIterableOptions;
@@ -62,7 +62,7 @@ declare_lint_rule! {
         version: "1.6.0",
         name: "useJsxKeyInIterable",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("jsx-key").same(), RuleSource::EslintQwik("jsx-key").same()],
+        sources: &[RuleSource::EslintReact("jsx-key").same(), RuleSource::EslintQwik("jsx-key").same(), RuleSource::EslintReactX("no-missing-key").same(), RuleSource::EslintReactXyz("no-missing-key").same()],
         recommended: true,
         severity: Severity::Error,
         domains: &[RuleDomain::React, RuleDomain::Qwik],
@@ -127,6 +127,10 @@ fn handle_collections(
     model: &SemanticModel,
     options: &UseJsxKeyInIterableOptions,
 ) -> Vec<TextRange> {
+    if should_ignore_check(node) {
+        return Vec::new();
+    }
+
     let is_inside_jsx = node.parent::<JsxExpressionChild>().is_some();
     node.elements()
         .iter()
@@ -211,6 +215,18 @@ fn handle_iterators(
         }
         _ => None,
     }
+}
+
+fn should_ignore_check(node: &JsArrayExpression) -> bool {
+    // Map constructors don't need key in arrays e.g new Map([["Partial", <div></div>]])
+    node.parent::<JsArrayElementList>()
+        .and_then(|n| n.parent::<JsArrayExpression>())
+        .and_then(|n| n.parent::<JsCallArgumentList>())
+        .and_then(|n| n.parent::<JsCallArguments>())
+        .and_then(|n| n.parent::<JsNewExpression>())
+        .and_then(|n| n.callee().ok())
+        .and_then(|c| c.get_callee_member_name())
+        .is_some_and(|t| t.token_text_trimmed() == "Map")
 }
 
 /// Inspects each statement for variable declarations and return statements to find potential React components.
@@ -413,11 +429,10 @@ fn handle_jsx_child(
                     ranges.push(open_node.range());
                 }
             }
-            AnyJsxChild::JsxSelfClosingElement(node) => {
-                if !has_key_attribute(&node.attributes()) {
+            AnyJsxChild::JsxSelfClosingElement(node)
+                if !has_key_attribute(&node.attributes()) => {
                     ranges.push(node.range());
                 }
-            }
             AnyJsxChild::JsxExpressionChild(node) => {
                 let expr = node.expression()?;
                 if let Some(child_ranges) =
@@ -426,11 +441,10 @@ fn handle_jsx_child(
                     ranges.extend(child_ranges);
                 }
             }
-            AnyJsxChild::JsxFragment(node) => {
-                if options.check_shorthand_fragments() {
+            AnyJsxChild::JsxFragment(node)
+                if options.check_shorthand_fragments() => {
                     ranges.push(node.range())
                 }
-            }
             _ => {}
         }
     }

@@ -1,0 +1,35 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/declaration/nested-properties-complex-value.scss
+---
+
+# Input
+
+```scss
+.theme{
+  spacing:(1px+2px)*3{
+    size:1px;
+  }
+
+  palette:map.get($colors,primary){
+    family:red;
+  }
+}
+
+```
+
+
+# Formatted
+
+```scss
+.theme {
+	spacing: (1px + 2px) * 3 {
+		size: 1px;
+	}
+
+	palette: map.get($colors, primary) {
+		family: red;
+	}
+}
+
+```

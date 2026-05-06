@@ -13,11 +13,14 @@ use std::fmt::Debug;
 use std::{ops::Deref, sync::Arc};
 
 use crate::conditionals::ConditionalType;
+use crate::globals::GLOBAL_REGEXP_ID;
 use crate::{
     GLOBAL_RESOLVER, Literal, ResolvedTypeData, ResolvedTypeId, ResolvedTypeMember, TypeData,
     TypeId, TypeReference, TypeResolver, UNKNOWN_DATA,
     globals::{
-        GLOBAL_ARRAY_ID, GLOBAL_NUMBER_ID, GLOBAL_PROMISE_ID, GLOBAL_STRING_ID, GLOBAL_UNKNOWN_ID,
+        GLOBAL_ARRAY_ID, GLOBAL_ASYNC_DISPOSABLE_ID, GLOBAL_DISPOSABLE_ID, GLOBAL_NUMBER_ID,
+        GLOBAL_PROMISE_ID, GLOBAL_STRING_ID, GLOBAL_SYMBOL_ASYNC_DISPOSE_ID,
+        GLOBAL_SYMBOL_DISPOSE_ID, GLOBAL_UNKNOWN_ID,
     },
 };
 
@@ -65,6 +68,64 @@ impl Deref for Type {
 impl Type {
     pub fn from_id(resolver: Arc<dyn TypeResolver>, id: ResolvedTypeId) -> Self {
         Self { resolver, id }
+    }
+
+    /// Returns a new [`Type`] for `id`, reusing this type's resolver. The
+    /// caller must ensure the resolver can resolve `id`; pass a predefined
+    /// global ID for safety.
+    pub fn with_id(&self, id: ResolvedTypeId) -> Self {
+        debug_assert!(
+            self.resolver.get_by_resolved_id(id).is_some(),
+            "Type::with_id called with id {id:?} unknown to this resolver"
+        );
+        Self {
+            resolver: self.resolver.clone(),
+            id,
+        }
+    }
+
+    /// Returns resolved union variants with boolean entries canonicalized.
+    ///
+    /// This is for callers that have already materialized union-like variants
+    /// as [`Type`] values. It removes `true` and `false` when `boolean` is
+    /// present, replaces the pair `true` and `false` with `boolean`, and
+    /// keeps at most one `boolean` keyword variant when several aliased
+    /// references resolve to the same keyword.
+    pub fn normalized_boolean_union_variants(mut types: Vec<Self>) -> Vec<Self> {
+        let has_boolean = types.iter().any(|ty| matches!(&**ty, TypeData::Boolean));
+        let has_true = types.iter().any(|ty| ty.is_boolean_literal(true));
+        let has_false = types.iter().any(|ty| ty.is_boolean_literal(false));
+
+        if !(has_boolean || has_true && has_false) {
+            return types;
+        }
+
+        let template = (!has_boolean)
+            .then(|| {
+                types
+                    .iter()
+                    .find(|ty| ty.is_boolean_literal(true) || ty.is_boolean_literal(false))
+                    .cloned()
+            })
+            .flatten();
+
+        let mut seen_boolean = false;
+        types.retain(|ty| {
+            if matches!(&**ty, TypeData::Boolean) {
+                if seen_boolean {
+                    return false;
+                }
+                seen_boolean = true;
+                return true;
+            }
+            !ty.is_boolean_literal(true) && !ty.is_boolean_literal(false)
+        });
+
+        if !seen_boolean && let Some(template) = template {
+            types.push(template.with_id(crate::globals_ids::GLOBAL_BOOLEAN_ID));
+        }
+
+        types
     }
 
     /// Returns this type's [`TypeId`].
@@ -226,6 +287,20 @@ impl Type {
             .is_some_and(|ty| ty.is_instance_of(self.resolver.as_ref(), GLOBAL_PROMISE_ID))
     }
 
+    /// Returns whether this type is an instance of `RegExp`.
+    pub fn is_regexp_instance(&self) -> bool {
+        self.resolved_data()
+            .is_some_and(|ty| ty.is_instance_of(self.resolver.as_ref(), GLOBAL_REGEXP_ID))
+    }
+
+    /// Returns whether this type is a regexp literal such as `/test/`
+    pub fn is_regexp_literal(&self) -> bool {
+        self.as_raw_data().is_some_and(|ty| match ty {
+            TypeData::Literal(literal) => matches!(literal.as_ref(), Literal::RegExp(_)),
+            _ => false,
+        })
+    }
+
     /// Returns whether this type is a string.
     pub fn is_string_or_string_literal(&self) -> bool {
         self.id == GLOBAL_STRING_ID
@@ -247,6 +322,53 @@ impl Type {
         })
     }
 
+    pub fn is_disposable(&self) -> bool {
+        if self.id == GLOBAL_DISPOSABLE_ID {
+            return true;
+        }
+
+        self.resolved_data().is_some_and(|ty| {
+            ty.find_member(self.resolver.as_ref(), |member| {
+                member.is_index_signature_with_ty(|ty| {
+                    self.resolve(ty)
+                        .is_some_and(|ty| ty.id == GLOBAL_SYMBOL_DISPOSE_ID)
+                })
+            })
+            .is_some()
+        })
+    }
+
+    pub fn is_async_disposable(&self) -> bool {
+        if self.id == GLOBAL_ASYNC_DISPOSABLE_ID {
+            return true;
+        }
+
+        self.resolved_data().is_some_and(|ty| {
+            ty.find_member(self.resolver.as_ref(), |member| {
+                member.is_index_signature_with_ty(|ty| {
+                    self.resolve(ty)
+                        .is_some_and(|ty| ty.id == GLOBAL_SYMBOL_ASYNC_DISPOSE_ID)
+                })
+            })
+            .is_some()
+        })
+    }
+
+    /// Looks up a named member in the resolved type data and returns
+    /// its type with the correct module context applied.
+    pub fn find_member_type(&self, name: &str) -> Option<Self> {
+        self.resolved_data()
+            .and_then(|data| {
+                data.find_member(self.resolver.as_ref(), |m| {
+                    m.as_raw_member().kind.has_name(name)
+                })
+            })
+            .and_then(|member| {
+                let ty_ref = member.ty();
+                self.resolve(&ty_ref)
+            })
+    }
+
     pub fn resolve(&self, ty: &TypeReference) -> Option<Self> {
         self.resolver
             .resolve_reference(&self.id.apply_module_id_to_reference(ty))
@@ -265,10 +387,7 @@ impl Type {
 
     fn with_resolved_id(&self, id: ResolvedTypeId) -> Self {
         let mut id = id;
-        loop {
-            let Some(resolved_data) = self.resolver.get_by_resolved_id(id) else {
-                break;
-            };
+        while let Some(resolved_data) = self.resolver.get_by_resolved_id(id) {
             match resolved_data.as_raw_data() {
                 TypeData::Reference(TypeReference::Resolved(resolved_id)) => {
                     id = resolved_data.apply_module_id(*resolved_id);

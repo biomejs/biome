@@ -234,12 +234,16 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::JsExportNamedSpecifier::new_unchecked(node) };
                     $body
                 }
-                $crate::JsSyntaxKind::JS_EXPRESSION_SNIPPED => {
-                    let $pattern = unsafe { $crate::JsExpressionSnipped::new_unchecked(node) };
+                $crate::JsSyntaxKind::JS_EXPRESSION_SNIPPET => {
+                    let $pattern = unsafe { $crate::JsExpressionSnippet::new_unchecked(node) };
                     $body
                 }
                 $crate::JsSyntaxKind::JS_EXPRESSION_STATEMENT => {
                     let $pattern = unsafe { $crate::JsExpressionStatement::new_unchecked(node) };
+                    $body
+                }
+                $crate::JsSyntaxKind::JS_EXPRESSION_TEMPLATE_ROOT => {
+                    let $pattern = unsafe { $crate::JsExpressionTemplateRoot::new_unchecked(node) };
                     $body
                 }
                 $crate::JsSyntaxKind::JS_EXTENDS_CLAUSE => {
@@ -593,6 +597,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::JsSuperExpression::new_unchecked(node) };
                     $body
                 }
+                $crate::JsSyntaxKind::JS_SVELTE_SNIPPET_ROOT => {
+                    let $pattern = unsafe { $crate::JsSvelteSnippetRoot::new_unchecked(node) };
+                    $body
+                }
                 $crate::JsSyntaxKind::JS_SWITCH_STATEMENT => {
                     let $pattern = unsafe { $crate::JsSwitchStatement::new_unchecked(node) };
                     $body
@@ -722,6 +730,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT => {
                     let $pattern = unsafe { $crate::JsxSelfClosingElement::new_unchecked(node) };
+                    $body
+                }
+                $crate::JsSyntaxKind::JSX_SHORTHAND_ATTRIBUTE => {
+                    let $pattern = unsafe { $crate::JsxShorthandAttribute::new_unchecked(node) };
                     $body
                 }
                 $crate::JsSyntaxKind::JSX_SPREAD_ATTRIBUTE => {

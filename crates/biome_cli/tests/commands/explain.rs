@@ -6,28 +6,6 @@ use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 
 #[test]
-fn explain_help() {
-    let fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-
-    let (fs, result) = run_cli(
-        fs,
-        &mut console,
-        Args::from(["explain", "--help"].as_slice()),
-    );
-
-    assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "explain_help",
-        fs,
-        console,
-        result,
-    ));
-}
-
-#[test]
 fn explain_valid_rule() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

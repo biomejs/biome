@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```svelte
@@ -35,8 +36,14 @@ HtmlRoot {
                 children: HtmlElementList [
                     HtmlSelfClosingElement {
                         l_angle_token: L_ANGLE@18..21 "<" [Newline("\n"), Whitespace("\t")] [],
-                        name: HtmlTagName {
-                            value_token: HTML_LITERAL@21..38 "Icons.DotsBounce" [] [Whitespace(" ")],
+                        name: HtmlMemberName {
+                            object: HtmlComponentName {
+                                value_token: HTML_LITERAL@21..26 "Icons" [] [],
+                            },
+                            dot_token: DOT@26..27 "." [] [],
+                            member: HtmlTagName {
+                                value_token: HTML_LITERAL@27..38 "DotsBounce" [] [Whitespace(" ")],
+                            },
                         },
                         attributes: HtmlAttributeList [],
                         slash_token: SLASH@38..39 "/" [] [],
@@ -47,9 +54,9 @@ HtmlRoot {
             clauses: SvelteAwaitClausesList [
                 SvelteAwaitCatchBlock {
                     sv_curly_colon_token: SV_CURLY_COLON@40..43 "{:" [Newline("\n")] [],
-                    catch_token: CATCH_KW@43..48 "catch" [] [],
+                    catch_token: CATCH_KW@43..49 "catch" [] [Whitespace(" ")],
                     name: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@48..54 " error" [] [],
+                        html_literal_token: HTML_LITERAL@49..54 "error" [] [],
                     },
                     r_curly_token: R_CURLY@54..55 "}" [] [],
                     children: HtmlElementList [
@@ -117,17 +124,21 @@ HtmlRoot {
         6: HTML_ELEMENT_LIST@18..40
           0: HTML_SELF_CLOSING_ELEMENT@18..40
             0: L_ANGLE@18..21 "<" [Newline("\n"), Whitespace("\t")] []
-            1: HTML_TAG_NAME@21..38
-              0: HTML_LITERAL@21..38 "Icons.DotsBounce" [] [Whitespace(" ")]
+            1: HTML_MEMBER_NAME@21..38
+              0: HTML_COMPONENT_NAME@21..26
+                0: HTML_LITERAL@21..26 "Icons" [] []
+              1: DOT@26..27 "." [] []
+              2: HTML_TAG_NAME@27..38
+                0: HTML_LITERAL@27..38 "DotsBounce" [] [Whitespace(" ")]
             2: HTML_ATTRIBUTE_LIST@38..38
             3: SLASH@38..39 "/" [] []
             4: R_ANGLE@39..40 ">" [] []
       1: SVELTE_AWAIT_CLAUSES_LIST@40..106
         0: SVELTE_AWAIT_CATCH_BLOCK@40..106
           0: SV_CURLY_COLON@40..43 "{:" [Newline("\n")] []
-          1: CATCH_KW@43..48 "catch" [] []
-          2: HTML_TEXT_EXPRESSION@48..54
-            0: HTML_LITERAL@48..54 " error" [] []
+          1: CATCH_KW@43..49 "catch" [] [Whitespace(" ")]
+          2: HTML_TEXT_EXPRESSION@49..54
+            0: HTML_LITERAL@49..54 "error" [] []
           3: R_CURLY@54..55 "}" [] []
           4: HTML_ELEMENT_LIST@55..106
             0: HTML_ELEMENT@55..106

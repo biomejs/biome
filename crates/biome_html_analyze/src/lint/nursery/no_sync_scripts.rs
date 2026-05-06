@@ -2,9 +2,11 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_html_syntax::HtmlOpeningElement;
+use biome_html_syntax::{HtmlFileSource, HtmlOpeningElement, element_ext::AnyHtmlTagElement};
 use biome_rowan::AstNode;
 use biome_rule_options::no_sync_scripts::NoSyncScriptsOptions;
+
+use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Prevent the usage of synchronous scripts.
@@ -44,10 +46,13 @@ impl Rule for NoSyncScripts {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let binding = ctx.query();
+        let source_type = ctx.source_type::<HtmlFileSource>();
 
-        let name = binding.name().ok()?;
-        let value_token = name.value_token().ok()?;
-        if value_token.text_trimmed() != "script" {
+        if !is_html_tag(
+            &AnyHtmlTagElement::from(binding.clone()),
+            source_type,
+            "script",
+        ) {
             return None;
         }
 

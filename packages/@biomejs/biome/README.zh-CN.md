@@ -18,8 +18,8 @@
   [ci-url]: https://github.com/biomejs/biome/actions/workflows/main.yml
   [discord-badge]: https://badgen.net/discord/online-members/BypW39g6Yc?icon=discord&label=discord&color=60a5fa
   [discord-url]: https://biomejs.dev/chat
-  [npm-badge]: https://badgen.net/npm/v/@biomejs/biome?icon=npm&color=60a5fa&label=%40biomejs%2Fbiome
-  [npm-url]: https://www.npmjs.com/package/@biomejs/biome/v/latest
+  [npm-badge]: https://npmx.dev/api/registry/badge/version/@biomejs/biome?color=60a5fa&style=shieldsio&label=%40biomejs%2Fbiome
+  [npm-url]: https://npmx.dev/package/@biomejs/biome
   [vscode-badge]: https://img.shields.io/visual-studio-marketplace/v/biomejs.biome?label=Visual%20Studio%20Marketplace&labelColor=374151&color=60a5fa
   [vscode-url]: https://marketplace.visualstudio.com/items?itemName=biomejs.biome
   [open-vsx-badge]: https://img.shields.io/visual-studio-marketplace/v/biomejs.biome?label=Open%20VSX%20Registry&logo=data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2aWV3Qm94PSI0LjYgNSA5Ni4yIDEyMi43IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogIDxwYXRoIGQ9Ik0zMCA0NC4yTDUyLjYgNUg3LjN6TTQuNiA4OC41aDQ1LjNMMjcuMiA0OS40em01MSAwbDIyLjYgMzkuMiAyMi42LTM5LjJ6IiBmaWxsPSIjYzE2MGVmIi8+CiAgPHBhdGggZD0iTTUyLjYgNUwzMCA0NC4yaDQ1LjJ6TTI3LjIgNDkuNGwyMi43IDM5LjEgMjIuNi0zOS4xem01MSAwTDU1LjYgODguNWg0NS4yeiIgZmlsbD0iI2E2MGVlNSIvPgo8L3N2Zz4=&labelColor=374151&color=60a5fa
@@ -38,7 +38,7 @@
 
 **Biome 是一个[快速的格式化工具](./benchmark#formatting)**，适用于 _JavaScript_、_TypeScript_、_JSX_、_JSON_ 等，与 _Prettier_ 的兼容性达到了 **[97%](https://console.algora.io/challenges/prettier)**。
 
-**Biome 是一个[高性能的 Linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)**，适用于 _JavaScript_、_TypeScript_、_JSX_ 等，包含了来自 ESLint、typescript-eslint 和[其他来源](https://github.com/biomejs/biome/discussions/3)的 **[340 余项规则](https://biomejs.dev/zh-cn/linter/javascript/rules/)**。它**输出详细且有上下文诊断信息**，能帮助你优化代码，成为一名更好的程序员！
+**Biome 是一个[高性能的 Linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)**，适用于 _JavaScript_、_TypeScript_、_JSX_ 等，包含了来自 ESLint、typescript-eslint 和[其他来源](https://github.com/biomejs/biome/discussions/3)的 **[450 余项规则](https://biomejs.dev/zh-cn/linter/javascript/rules/)**。它**输出详细且有上下文诊断信息**，能帮助你优化代码，成为一名更好的程序员！
 
 **Biome** 从一开始就设计为[在编辑器中交互式使用](https://biomejs.dev/zh-cn/guides/editors/first-party-extensions/)。它可以在你编写代码时格式化并检查出不规范的代码。
 
@@ -111,9 +111,6 @@ npx @biomejs/biome ci ./src
 <table>
   <tbody>
     <tr>
-      <td align="center" valign="middle">
-        <a href="https://l2beat.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://images.opencollective.com/l2beat/c2b2a27/logo/256.png" height="100" alt="L2BEAT logo"></a>
-      </td>
       <td align="center" valign="middle">
         <a href="https://lokalise.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/14294501?s=200&v=4" height="100" alt="Lokalise logo"></a>
       </td>

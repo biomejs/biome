@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/array/trailing-commas/none/array_trailing_commas.js
 ---
+
 # Input
 
 ```js
@@ -19,64 +20,20 @@ const a = [
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
------
-
-```js
-const a = [
-	longlonglonglongItem1longlonglonglongItem1,
-	longlonglonglongItem1longlonglonglongItem2,
-	longlonglonglongItem1longlonglonglongItem3,
-];
-
-// destructuring
-[
-	adsadasdasdasdasdasdasdasdasdasdas,
-	dsadsadasdasdasdasdasdasdasd,
-	dsadsadasdasdasdasdasdasdasd,
-] = [1, 2, 10];
+```json
+{
+  "$schema": "../../../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "javascript": {
+    "formatter": {
+      "trailingCommas": "none"
+    }
+  }
+}
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: None
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
------
+# Formatted
 
 ```js
 const a = [
@@ -91,4 +48,5 @@ const a = [
 	dsadsadasdasdasdasdasdasdasd,
 	dsadsadasdasdasdasdasdasdasd
 ] = [1, 2, 10];
+
 ```

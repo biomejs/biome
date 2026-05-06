@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: json/empty.json
 ---
+
 # Input
 
 ```json
@@ -9,23 +10,10 @@ info: json/empty.json
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Trailing commas: None
-Expand: Auto
-Bracket spacing: true
------
+# Formatted
 
 ```json
+
 ```
 
 

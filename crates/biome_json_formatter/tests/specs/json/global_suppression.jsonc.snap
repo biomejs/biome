@@ -1,0 +1,43 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: json/global_suppression.jsonc
+---
+
+# Input
+
+```jsonc
+// biome-ignore-all format: test
+
+
+{
+
+
+	    "a": "b", "c": "d", "e": "f"
+}
+
+// biome-ignore-all format: intentional
+{"code":true}
+
+// Biome format should keep this comment
+
+```
+
+
+# Formatted
+
+```jsonc
+// biome-ignore-all format: test
+
+
+{
+
+
+	    "a": "b", "c": "d", "e": "f"
+}
+
+// biome-ignore-all format: intentional
+{"code":true}
+
+// Biome format should keep this comment
+
+```

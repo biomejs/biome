@@ -2,7 +2,9 @@
 mod generate_bindings;
 #[cfg(feature = "configuration")]
 mod generate_configuration;
-#[cfg(feature = "license")]
+#[cfg(feature = "external_data")]
+mod generate_css_baseline;
+#[cfg(feature = "external_data")]
 mod generate_license;
 #[cfg(feature = "configuration")]
 mod generate_migrate_eslint;
@@ -15,8 +17,9 @@ use crate::generate_bindings::generate_workspace_bindings;
 use crate::generate_configuration::generate_rule_options;
 #[cfg(feature = "configuration")]
 use crate::generate_configuration::generate_rules_configuration;
-
-#[cfg(feature = "license")]
+#[cfg(feature = "external_data")]
+use crate::generate_css_baseline::generate_css_baseline;
+#[cfg(feature = "external_data")]
 use crate::generate_license::generate_license;
 #[cfg(feature = "configuration")]
 use crate::generate_migrate_eslint::generate_migrate_eslint;
@@ -33,8 +36,11 @@ fn main() -> Result<()> {
     let result = task_command().fallback_to_usage().run();
 
     match result {
-        TaskCommand::Formatter => {
-            generate_formatters();
+        TaskCommand::Formatter {
+            allow_dirty,
+            allow_staged,
+        } => {
+            generate_formatters(allow_dirty, allow_staged);
         }
         TaskCommand::Analyzer => {
             generate_analyzer()?;
@@ -58,7 +64,7 @@ fn main() -> Result<()> {
             generate_workspace_bindings(Overwrite)?;
         }
         TaskCommand::License => {
-            #[cfg(feature = "license")]
+            #[cfg(feature = "external_data")]
             generate_license(Overwrite)?;
         }
         TaskCommand::Grammar(language_list) => {
@@ -66,6 +72,10 @@ fn main() -> Result<()> {
         }
         TaskCommand::Unicode => {
             generate_tables()?;
+        }
+        TaskCommand::CssBaseline => {
+            #[cfg(feature = "external_data")]
+            generate_css_baseline(Overwrite)?;
         }
         TaskCommand::NewRule {
             category,
@@ -81,7 +91,7 @@ fn main() -> Result<()> {
         TaskCommand::All => {
             generate_tables()?;
             generate_ast(Overwrite, vec![])?;
-            generate_formatters();
+            generate_formatters(false, false);
             generate_analyzer()?;
             #[cfg(feature = "configuration")]
             generate_rules_configuration(Overwrite)?;

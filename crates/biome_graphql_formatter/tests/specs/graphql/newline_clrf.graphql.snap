@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: graphql/newline_clrf.graphql
 ---
+
 # Input
 
 ```graphql
@@ -15,20 +16,7 @@ type SomeTime {
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Bracket spacing: true
-Quote style: Double Quotes
------
+# Formatted
 
 ```graphql
 type SomeTime {
@@ -37,4 +25,5 @@ type SomeTime {
 	"""
 	id: ID!
 }
+
 ```

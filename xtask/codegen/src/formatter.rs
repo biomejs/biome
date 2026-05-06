@@ -21,12 +21,12 @@ struct GitRepo {
 }
 
 impl GitRepo {
-    fn open() -> Self {
+    fn open(allow_dirty: bool, allow_staged: bool) -> Self {
         let root = project_root();
         let repo = Repository::discover(&root).expect("failed to open git repo");
 
-        let mut allow_staged = false;
-        let mut allow_dirty = false;
+        let mut allow_staged = allow_staged;
+        let mut allow_dirty = allow_dirty;
         for arg in env::args() {
             match arg.as_str() {
                 "--allow-staged" => {
@@ -241,8 +241,8 @@ enum NodeKind {
     Union { variants: Vec<String> },
 }
 
-pub fn generate_formatters() {
-    let repo = GitRepo::open();
+pub fn generate_formatters(allow_dirty: bool, allow_staged: bool) {
+    let repo = GitRepo::open(allow_dirty, allow_staged);
 
     for language in ALL_LANGUAGE_KIND {
         generate_formatter(&repo, language);
@@ -562,6 +562,7 @@ enum NodeDialect {
     Jsx,
     Json,
     Css,
+    Scss,
     Grit,
     Graphql,
     Html,
@@ -569,6 +570,8 @@ enum NodeDialect {
     Svelte,
     Vue,
     Tailwind,
+    Yaml,
+    Markdown,
 }
 
 impl NodeDialect {
@@ -579,9 +582,12 @@ impl NodeDialect {
             Self::Jsx,
             Self::Json,
             Self::Css,
+            Self::Scss,
             Self::Grit,
             Self::Graphql,
             Self::Html,
+            Self::Yaml,
+            Self::Markdown,
         ]
     }
 
@@ -596,6 +602,7 @@ impl NodeDialect {
             Self::Jsx => "jsx",
             Self::Json => "json",
             Self::Css => "css",
+            Self::Scss => "scss",
             Self::Grit => "grit",
             Self::Graphql => "graphql",
             Self::Html => "html",
@@ -603,6 +610,8 @@ impl NodeDialect {
             Self::Svelte => "svelte",
             Self::Vue => "vue",
             Self::Tailwind => "tailwind",
+            Self::Yaml => "yaml",
+            Self::Markdown => "markdown",
         }
     }
 
@@ -613,6 +622,7 @@ impl NodeDialect {
             "Ts" => Self::Ts,
             "Json" => Self::Json,
             "Css" => Self::Css,
+            "Scss" => Self::Scss,
             "Grit" => Self::Grit,
             "Graphql" => Self::Graphql,
             "Html" => Self::Html,
@@ -620,6 +630,8 @@ impl NodeDialect {
             "Svelte" => Self::Svelte,
             "Vue" => Self::Vue,
             "Tw" => Self::Tailwind,
+            "Yaml" => Self::Yaml,
+            "Md" => Self::Markdown,
             _ => {
                 eprintln!("missing prefix {name}");
                 Self::Js
@@ -915,7 +927,7 @@ impl LanguageKind {
             Self::Grit => "GritFormatter",
             Self::Html => "HtmlFormatter",
             Self::Yaml => "YamlFormatter",
-            Self::Markdown => "DemoFormatter",
+            Self::Markdown => "MarkdownFormatter",
             Self::Tailwind => "TailwindFormatter",
         };
 
@@ -931,7 +943,7 @@ impl LanguageKind {
             Self::Grit => "GritFormatContext",
             Self::Html => "HtmlFormatContext",
             Self::Yaml => "YamlFormatContext",
-            Self::Markdown => "DemoFormatterContext",
+            Self::Markdown => "MarkdownFormatContext",
             Self::Tailwind => "TailwindFormatContext",
         };
 

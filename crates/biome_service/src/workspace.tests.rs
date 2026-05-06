@@ -8,16 +8,12 @@ use biome_configuration::analyzer::{RuleGroup, RuleSelector};
 use biome_configuration::{
     Configuration, FilesConfiguration, OverrideGlobs, OverridePattern, Overrides,
 };
-use biome_diagnostics::Diagnostic;
+use biome_diagnostics::{Diagnostic, Severity};
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_js_syntax::{JsFileSource, TextSize};
 use biome_plugin_loader::{PluginConfiguration, Plugins};
 use camino::Utf8PathBuf;
 use insta::{assert_debug_snapshot, assert_snapshot};
-
-use crate::file_handlers::DocumentFileSource;
-use crate::projects::ProjectKey;
-use crate::{Workspace, WorkspaceError};
 
 use super::{
     CloseFileParams, CloseProjectParams, FileContent, FileFeaturesResult, FileGuard,
@@ -25,6 +21,10 @@ use super::{
     OpenProjectResult, PullDiagnosticsParams, ScanKind, ScanProjectParams, UpdateKind,
     UpdateModuleGraphParams, UpdateSettingsParams, server,
 };
+use crate::file_handlers::DocumentFileSource;
+use crate::projects::ProjectKey;
+use crate::settings::ModuleGraphResolutionKind;
+use crate::{Workspace, WorkspaceError};
 
 fn create_server() -> (Box<dyn Workspace>, ProjectKey) {
     let workspace = server(Arc::new(MemoryFileSystem::default()), None);
@@ -52,6 +52,7 @@ fn debug_control_flow() {
             content: FileContent::from_client(SOURCE),
             document_file_source: Some(DocumentFileSource::from(JsFileSource::default())),
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -74,6 +75,7 @@ fn recognize_typescript_definition_file() {
             content: FileContent::from_client("export const foo: number"),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -95,6 +97,7 @@ fn correctly_handle_json_files() {
             content: FileContent::from_client(r#"{"a": 42}"#),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -110,6 +113,7 @@ fn correctly_handle_json_files() {
             content: FileContent::from_client(r#"{"a": 42}//comment"#),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -125,6 +129,7 @@ fn correctly_handle_json_files() {
             content: FileContent::from_client(r#"{"a": 42,}"#),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -140,6 +145,7 @@ fn correctly_handle_json_files() {
             content: FileContent::from_client(r#"{"a": 42}//comment"#),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -155,6 +161,7 @@ fn correctly_handle_json_files() {
             content: FileContent::from_client(r#"{"a": 42,}"#),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -170,6 +177,7 @@ fn correctly_handle_json_files() {
             content: FileContent::from_client(r#"{"a": 42}//comment"#),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -189,6 +197,7 @@ fn correctly_handle_json_files() {
             content: FileContent::from_client(r#"{"a": 42}//comment"#),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -208,6 +217,7 @@ fn correctly_handle_json_files() {
             content: FileContent::from_client(r#"{"a": 42,}"#),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -231,6 +241,7 @@ fn correctly_handle_json_files() {
             content: FileContent::from_client(r#"{"a": 42,}//comment"#),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -267,6 +278,7 @@ type User {
             ),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -298,6 +310,7 @@ fn correctly_pulls_lint_diagnostics() {
             ),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -312,6 +325,9 @@ fn correctly_pulls_lint_diagnostics() {
         vec![RuleSelector::Rule(RuleGroup::Style.as_str(), "useDeprecatedReason").into()],
         vec![],
         true,
+        None,
+        Severity::Hint,
+        false,
     );
     assert!(result.is_ok());
     let diagnostics = result.unwrap().diagnostics;
@@ -333,6 +349,7 @@ fn pull_grit_debug_info() {
             ),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -404,6 +421,7 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -456,6 +474,7 @@ fn too_large_files_are_tracked_but_not_parsed() {
             },
             workspace_directory: None,
             extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
         })
         .unwrap();
 
@@ -466,6 +485,7 @@ fn too_large_files_are_tracked_but_not_parsed() {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -515,6 +535,7 @@ fn plugins_are_loaded_and_used_during_analysis() {
             },
             workspace_directory: Some(BiomePath::new("/project")),
             extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
         })
         .unwrap();
 
@@ -525,6 +546,7 @@ fn plugins_are_loaded_and_used_during_analysis() {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -536,11 +558,15 @@ fn plugins_are_loaded_and_used_during_analysis() {
             only: Vec::new(),
             skip: Vec::new(),
             enabled_rules: Vec::new(),
-            pull_code_actions: true,
+            include_code_fix: true,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
         })
         .unwrap();
     assert_debug_snapshot!(result.diagnostics);
-    assert_eq!(result.errors, 0);
+    assert_eq!(result.errors, 1);
 }
 
 #[test]
@@ -583,6 +609,7 @@ language css;
             },
             workspace_directory: Some(BiomePath::new("/project")),
             extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
         })
         .unwrap();
 
@@ -593,6 +620,7 @@ language css;
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -604,7 +632,11 @@ language css;
             only: Vec::new(),
             skip: Vec::new(),
             enabled_rules: Vec::new(),
-            pull_code_actions: true,
+            include_code_fix: true,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
         })
         .unwrap();
     assert_debug_snapshot!(result.diagnostics);
@@ -647,6 +679,7 @@ fn plugins_may_use_invalid_span() {
             },
             workspace_directory: Some(BiomePath::new("/project")),
             extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
         })
         .unwrap();
 
@@ -657,6 +690,7 @@ fn plugins_may_use_invalid_span() {
             content: FileContent::FromServer,
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -668,11 +702,15 @@ fn plugins_may_use_invalid_span() {
             only: Vec::new(),
             skip: Vec::new(),
             enabled_rules: Vec::new(),
-            pull_code_actions: true,
+            include_code_fix: true,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
         })
         .unwrap();
     assert_debug_snapshot!(result.diagnostics);
-    assert_eq!(result.errors, 0);
+    assert_eq!(result.errors, 1);
 }
 
 #[test]
@@ -765,6 +803,7 @@ const hasOwn = Object.hasOwn({ foo: 'bar' }, 'foo');"#,
             },
             workspace_directory: Some(BiomePath::new("/project")),
             extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
         })
         .unwrap();
 
@@ -786,6 +825,7 @@ const hasOwn = Object.hasOwn({ foo: 'bar' }, 'foo');"#,
                 content: FileContent::FromServer,
                 document_file_source: None,
                 persist_node_cache: false,
+                inline_config: None,
             })
             .unwrap();
 
@@ -797,7 +837,11 @@ const hasOwn = Object.hasOwn({ foo: 'bar' }, 'foo');"#,
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: Vec::new(),
-                pull_code_actions: true,
+                include_code_fix: true,
+                inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: Severity::Hint,
+                enforce_assist: false,
             })
             .unwrap();
         // Filter only diagnostics with category name "plugin"
@@ -844,6 +888,7 @@ class Person {
             ),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -878,6 +923,7 @@ class Person {
             ),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -912,6 +958,7 @@ class Person {
             ),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -948,6 +995,7 @@ async function test() {
             ),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -965,6 +1013,7 @@ export const debounce = function debounce() {};
             ),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -980,6 +1029,7 @@ export const squash = function squash() {};
             ),
             document_file_source: None,
             persist_node_cache: false,
+            inline_config: None,
         })
         .unwrap();
 
@@ -987,12 +1037,14 @@ export const squash = function squash() {};
         .update_module_graph(UpdateModuleGraphParams {
             path: BiomePath::new("/project/file.js"),
             update_kind: UpdateKind::AddOrUpdate,
+            project_key,
         })
         .unwrap();
     workspace
         .update_module_graph(UpdateModuleGraphParams {
             path: BiomePath::new("/project/utils.js"),
             update_kind: UpdateKind::AddOrUpdate,
+            project_key,
         })
         .unwrap();
 
@@ -1000,6 +1052,7 @@ export const squash = function squash() {};
         .update_module_graph(UpdateModuleGraphParams {
             path: BiomePath::new("/project/dynamic.js"),
             update_kind: UpdateKind::AddOrUpdate,
+            project_key,
         })
         .unwrap();
 

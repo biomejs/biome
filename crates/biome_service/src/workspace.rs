@@ -52,13 +52,13 @@
 //!   format a file with a language that does not have a formatter
 
 mod client;
-mod document;
+pub(crate) mod document;
 mod server;
 
 use biome_analyze::{ActionCategory, RuleCategories};
 use biome_configuration::{Configuration, analyzer::AnalyzerSelector};
 use biome_console::{Markup, MarkupBuf, markup};
-use biome_diagnostics::{CodeSuggestion, serde::Diagnostic};
+use biome_diagnostics::{Applicability, CodeSuggestion, Severity, serde::Diagnostic};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_grit_patterns::GritTargetLanguage;
@@ -68,7 +68,9 @@ use biome_resolver::FsWithResolverProxy;
 use biome_text_edit::TextEdit;
 use camino::Utf8Path;
 use crossbeam::channel::bounded;
-pub use document::{AnyEmbeddedSnippet, CssDocumentServices, DocumentServices, EmbeddedSnippet};
+pub use document::{
+    AnyEmbeddedSnippet, CssDocumentServices, DocumentServices, EmbeddedSnippet, JsDocumentServices,
+};
 use enumflags2::{BitFlags, bitflags};
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
@@ -95,6 +97,7 @@ pub use crate::{
 #[cfg(feature = "schema")]
 use schemars::{Schema, SchemaGenerator};
 
+use crate::settings::{ModuleGraphResolutionKind, SettingsWithEditor};
 pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 pub use server::OpenFileReason;
 
@@ -121,8 +124,15 @@ pub struct SupportsFeatureParams {
     pub path: BiomePath,
     pub features: FeatureName,
 
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
+
     #[serde(default, skip_serializing_if = "is_false")]
     pub skip_ignore_check: bool,
+
+    /// Features that shouldn't be enabled
+    #[serde(default, skip_serializing_if = "FeatureName::is_empty")]
+    pub not_requested_features: FeatureName,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, Default)]
@@ -188,7 +198,7 @@ impl FeaturesSupported {
     #[inline]
     pub(crate) fn with_settings_and_language(
         mut self,
-        settings: &Settings,
+        settings: &SettingsWithEditor,
         path: &Utf8Path,
         capabilities: &Capabilities,
     ) -> Self {
@@ -228,14 +238,23 @@ impl FeaturesSupported {
             }
         }
 
-        if let Some(experimental_full_html_support) = settings.experimental_full_html_support
+        if let Some(experimental_full_html_support) =
+            settings.as_ref().experimental_full_html_support
             && experimental_full_html_support.value()
         {
             self.insert(FeatureKind::HtmlFullSupport, SupportKind::Supported);
         }
 
-        debug!("The file has the following feature sets: {:?}", &self);
+        debug!("The file has the following feature sets: {}", &self);
 
+        self
+    }
+
+    #[inline]
+    pub fn with_not_requested_features(mut self, feature_name: FeatureName) -> Self {
+        for feature in feature_name.iter() {
+            self.insert(feature, SupportKind::NotRequested);
+        }
         self
     }
 
@@ -265,6 +284,12 @@ impl FeaturesSupported {
     fn supports(&self, feature: FeatureKind) -> bool {
         let support_kind = self.0[feature.index()];
         matches!(support_kind, SupportKind::Supported)
+    }
+
+    #[inline]
+    pub fn feature_is_not_enabled(&self, feature: FeatureKind) -> bool {
+        let support_kind = self.0[feature.index()];
+        matches!(support_kind, SupportKind::FeatureNotEnabled)
     }
 
     pub fn supports_lint(&self) -> bool {
@@ -325,7 +350,10 @@ impl FeaturesSupported {
 
     /// The file is ignored only if all the features marked it as ignored
     pub fn is_ignored(&self) -> bool {
-        self.0.iter().all(|support_kind| support_kind.is_ignored())
+        self.0
+            .iter()
+            .filter(|support_kind| !support_kind.is_not_requested())
+            .all(|support_kind| support_kind.is_ignored())
     }
 
     /// The file is protected only if all the features marked it as protected
@@ -339,6 +367,7 @@ impl FeaturesSupported {
     pub fn is_not_supported(&self) -> bool {
         self.0
             .iter()
+            .filter(|support_kind| !support_kind.is_not_requested())
             .all(|support_kind| support_kind.is_not_supported())
     }
 
@@ -346,6 +375,7 @@ impl FeaturesSupported {
     pub fn is_not_enabled(&self) -> bool {
         self.0
             .iter()
+            .filter(|support_kind| !support_kind.is_not_requested())
             .all(|support_kind| support_kind.is_not_enabled())
     }
 
@@ -516,6 +546,9 @@ pub enum SupportKind {
     FeatureNotEnabled,
     /// The file is not capable of having this feature
     FileNotSupported,
+    /// Particular state used when a client (e.g. CLI) doesn't require a particular feature.
+    /// It's very much ignore [SupportKind::Ignored], but it's silent
+    NotRequested,
 }
 
 impl Display for SupportKind {
@@ -526,6 +559,7 @@ impl Display for SupportKind {
             Self::Protected => write!(f, "Protected"),
             Self::FeatureNotEnabled => write!(f, "FeatureNotEnabled"),
             Self::FileNotSupported => write!(f, "FileNotSupported"),
+            Self::NotRequested => write!(f, "NotRequested"),
         }
     }
 }
@@ -545,6 +579,9 @@ impl SupportKind {
     }
     pub const fn is_protected(&self) -> bool {
         matches!(self, Self::Protected)
+    }
+    pub const fn is_not_requested(&self) -> bool {
+        matches!(self, Self::NotRequested)
     }
 }
 
@@ -618,6 +655,12 @@ impl FeatureKind {
     rename_all = "camelCase"
 )]
 pub struct FeatureName(BitFlags<FeatureKind>);
+
+impl Default for FeatureName {
+    fn default() -> Self {
+        Self::empty()
+    }
+}
 
 impl Display for FeatureName {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -708,6 +751,11 @@ impl FeaturesBuilder {
         self
     }
 
+    pub fn without_formatter(mut self) -> Self {
+        self.0.remove(FeatureKind::Format);
+        self
+    }
+
     pub fn with_linter(mut self) -> Self {
         self.0.insert(FeatureKind::Lint);
         self
@@ -731,6 +779,11 @@ impl FeaturesBuilder {
         self
     }
 
+    pub fn without_search(mut self) -> Self {
+        self.0.remove(FeatureKind::Search);
+        self
+    }
+
     pub fn build(self) -> FeatureName {
         FeatureName(self.0)
     }
@@ -745,6 +798,8 @@ pub struct UpdateSettingsParams {
     pub workspace_directory: Option<BiomePath>,
     #[serde(skip_serializing_if = "Vec::is_empty", default)]
     pub extended_configurations: Vec<(BiomePath, Configuration)>,
+    #[serde(default)]
+    pub module_graph_resolution_kind: ModuleGraphResolutionKind,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -781,6 +836,9 @@ pub struct OpenFileParams {
     /// the file is opened through the LSP Proxy.
     #[serde(default)]
     pub persist_node_cache: bool,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
 }
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -918,6 +976,9 @@ pub struct ChangeFileParams {
     pub path: BiomePath,
     pub content: String,
     pub version: i32,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -938,6 +999,7 @@ pub struct CloseFileParams {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateModuleGraphParams {
+    pub project_key: ProjectKey,
     pub path: BiomePath,
     /// The kind of update to apply to the module graph
     pub update_kind: UpdateKind,
@@ -965,8 +1027,32 @@ pub struct PullDiagnosticsParams {
     /// Rules to apply on top of the configuration
     #[serde(default)]
     pub enabled_rules: Vec<AnalyzerSelector>,
-    /// When `false` the diagnostics, don't have code frames of the code actions (fixes, suppressions, etc.)
-    pub pull_code_actions: bool,
+    /// When `true`, diagnostics include code suggestions for rule fixes.
+    #[serde(default)]
+    pub include_code_fix: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
+
+    /// Max limit of diagnostics types to pull. This limit is meant to cap the number of [Diagnostic] to pull.
+    /// However, the workspace still processes ALL diagnostics coming from the analyzer to compute their severity.
+    /// If no value is provided, the workspace will pull all diagnostics.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub max_diagnostics: Option<u32>,
+
+    /// Minimum severity for a diagnostic to be included. Diagnostics with a
+    /// severity below this threshold are ignored entirely (not counted, not
+    /// serialized). Defaults to [`Severity::Hint`] (include everything).
+    #[serde(default = "default_diagnostic_level")]
+    pub diagnostic_level: Severity,
+
+    /// When true, promote assist diagnostics (`assist/*`) to error severity
+    /// before applying the diagnostic_level filter.
+    #[serde(default)]
+    pub enforce_assist: bool,
+}
+
+fn default_diagnostic_level() -> Severity {
+    Severity::Hint
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -975,6 +1061,11 @@ pub struct PullDiagnosticsParams {
 pub struct PullDiagnosticsResult {
     pub diagnostics: Vec<Diagnostic>,
     pub errors: usize,
+    pub warnings: usize,
+    pub infos: usize,
+    /// Number of parse errors (subset of `errors`). Used by `--skip-parse-errors`
+    /// to distinguish parse errors from analyzer errors.
+    pub parse_errors: usize,
     pub skipped_diagnostics: u64,
 }
 
@@ -994,6 +1085,16 @@ pub struct PullActionsParams {
     pub enabled_rules: Vec<AnalyzerSelector>,
     #[serde(default)]
     pub categories: RuleCategories,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
+    /// When `false`, returned actions have `suggestion: None` (no `BatchMutation`
+    /// computed). Used by `codeAction/resolve` to defer edit computation.
+    #[serde(default = "default_true")]
+    pub compute_actions: bool,
+}
+
+fn default_true() -> bool {
+    true
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1010,6 +1111,8 @@ pub struct PullDiagnosticsAndActionsParams {
     pub enabled_rules: Vec<AnalyzerSelector>,
     #[serde(default)]
     pub categories: RuleCategories,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1032,7 +1135,10 @@ pub struct PullActionsResult {
 pub struct CodeAction {
     pub category: ActionCategory,
     pub rule_name: Option<(Cow<'static, str>, Cow<'static, str>)>,
-    pub suggestion: CodeSuggestion,
+    /// The computed code suggestion with text edit. `None` when the action was
+    /// returned without computing edits (deferred for `codeAction/resolve`).
+    pub suggestion: Option<CodeSuggestion>,
+    pub applicability: Option<Applicability>,
     pub offset: Option<TextSize>,
 }
 
@@ -1042,6 +1148,8 @@ pub struct CodeAction {
 pub struct FormatFileParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1051,6 +1159,8 @@ pub struct FormatRangeParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
     pub range: TextRange,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1060,6 +1170,8 @@ pub struct FormatOnTypeParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
     pub offset: TextSize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
 }
 
 #[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize, PartialEq)]
@@ -1093,6 +1205,8 @@ pub struct FixFileParams {
     pub rule_categories: RuleCategories,
     #[serde(default)]
     pub suppression_reason: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inline_config: Option<Configuration>,
 }
 
 #[derive(Debug, Default, serde::Serialize, serde::Deserialize)]
@@ -1283,6 +1397,10 @@ pub struct PathIsIgnoredParams {
     pub project_key: ProjectKey,
     /// The path to inspect
     pub path: BiomePath,
+    /// Whether the path is a directory. Used to skip stat calls when the caller
+    /// already knows the file type from the filesystem traversal.
+    #[serde(default)]
+    pub is_dir: bool,
     /// Whether the path is ignored for specific features e.g. `formatter.includes`.
     /// When this field is empty, Biome checks only `files.includes`.
     pub features: FeatureName,
@@ -1695,6 +1813,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             path: self.path.clone(),
             version,
             content,
+            inline_config: None,
         })
     }
 
@@ -1705,12 +1824,16 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         })
     }
 
+    #[expect(clippy::too_many_arguments)]
     pub fn pull_diagnostics(
         &self,
         categories: RuleCategories,
         only: Vec<AnalyzerSelector>,
         skip: Vec<AnalyzerSelector>,
         pull_code_actions: bool,
+        max_diagnostics: Option<u32>,
+        diagnostic_level: Severity,
+        enforce_assist: bool,
     ) -> Result<PullDiagnosticsResult, WorkspaceError> {
         self.workspace.pull_diagnostics(PullDiagnosticsParams {
             project_key: self.project_key,
@@ -1719,7 +1842,11 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             only,
             skip,
             enabled_rules: vec![],
-            pull_code_actions,
+            include_code_fix: pull_code_actions,
+            inline_config: None,
+            max_diagnostics,
+            diagnostic_level,
+            enforce_assist,
         })
     }
 
@@ -1741,6 +1868,8 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             suppression_reason,
             enabled_rules,
             categories,
+            inline_config: None,
+            compute_actions: true,
         })
     }
 
@@ -1748,6 +1877,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         self.workspace.format_file(FormatFileParams {
             project_key: self.project_key,
             path: self.path.clone(),
+            inline_config: None,
         })
     }
 
@@ -1763,6 +1893,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             project_key: self.project_key,
             path: self.path.clone(),
             range,
+            inline_config: None,
         })
     }
 
@@ -1771,6 +1902,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             project_key: self.project_key,
             path: self.path.clone(),
             offset,
+            inline_config: None,
         })
     }
 
@@ -1793,6 +1925,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             rule_categories,
             suppression_reason,
             enabled_rules: vec![],
+            inline_config: None,
         })
     }
 

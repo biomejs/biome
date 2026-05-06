@@ -23,13 +23,17 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-check.js:1:6 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected constant condition.
+  × This condition always evaluates to the same value.
   
-  > 1 │ for(;true;);
-      │      ^^^^
+  > 1 │ for (; true; );
+      │        ^^^^
     2 │ 
+  
+  i Constant conditions make branches and loops harder to reason about because they cannot react to runtime values.
+  
+  i Replace it with a condition that depends on changing values, or remove the condition if it is intentional.
   
 
 ```

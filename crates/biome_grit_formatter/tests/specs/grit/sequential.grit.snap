@@ -1,8 +1,8 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: grit/sequential.grit
-snapshot_kind: text
 ---
+
 # Input
 
 ```grit
@@ -14,25 +14,14 @@ sequential {
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Attribute Position: Auto
------
+# Formatted
 
 ```grit
 sequential {
 	bubble file($body) where $body <: contains `console.log($message)` => `console.warn($message)`,
 	bubble file($body) where $body <: contains `console.warn($message)` => `console.info($message)`
 }
+
 ```
 
 # Lines exceeding max width of 80 characters

@@ -4,3 +4,12 @@ await Promise.resolve('value');
 
 const createValue = async () => 'value';
 await createValue();
+
+// Cross-module calls whose return type can't be resolved should not
+// produce false positives. Biome doesn't parse .d.ts from node_modules,
+// so these remain as unresolved TypeofExpression types.
+import fs from "node:fs/promises";
+await fs.readFile("test.txt", "utf-8");
+
+import { someFunction } from "some-external-package";
+await someFunction();

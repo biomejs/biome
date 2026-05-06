@@ -1,0 +1,188 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: extracted-locator-overlapping.js
+---
+# Input
+```js
+test('extracted locator with toBeVisible', async ({ page }) => {
+    const loc = page.locator('.item');
+    expect(loc).toBeVisible();
+});
+
+test('extracted locator with toBeChecked', async ({ page }) => {
+    const button = page.getByRole('checkbox');
+    expect(button).toBeChecked();
+});
+
+test('extracted chained locator', async ({ page }) => {
+    const nested = page.locator('.parent').locator('.child');
+    expect(nested).toBeVisible();
+});
+
+test('extracted locator from frame', async ({ page }) => {
+    const el = frame.locator('.item');
+    expect(el).toBeVisible();
+});
+
+test('not chain with extracted locator', async ({ page }) => {
+    const btn = page.getByRole("button");
+    expect(btn).not.toBeVisible();
+});
+
+test('expect.soft with extracted locator', async ({ page }) => {
+    const link = page.getByRole("link");
+    expect.soft(link).toBeVisible();
+});
+
+```
+
+# Diagnostics
+```
+extracted-locator-overlapping.js:3:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━
+
+  i Async matcher toBeVisible must be awaited or returned.
+  
+    1 │ test('extracted locator with toBeVisible', async ({ page }) => {
+    2 │     const loc = page.locator('.item');
+  > 3 │     expect(loc).toBeVisible();
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ });
+    5 │ 
+  
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await before the call.
+  
+    3 │ ····await·expect(loc).toBeVisible();
+      │     ++++++                          
+
+```
+
+```
+extracted-locator-overlapping.js:8:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━
+
+  i Async matcher toBeChecked must be awaited or returned.
+  
+     6 │ test('extracted locator with toBeChecked', async ({ page }) => {
+     7 │     const button = page.getByRole('checkbox');
+   > 8 │     expect(button).toBeChecked();
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ });
+    10 │ 
+  
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await before the call.
+  
+    8 │ ····await·expect(button).toBeChecked();
+      │     ++++++                             
+
+```
+
+```
+extracted-locator-overlapping.js:13:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━
+
+  i Async matcher toBeVisible must be awaited or returned.
+  
+    11 │ test('extracted chained locator', async ({ page }) => {
+    12 │     const nested = page.locator('.parent').locator('.child');
+  > 13 │     expect(nested).toBeVisible();
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ });
+    15 │ 
+  
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await before the call.
+  
+    13 │ ····await·expect(nested).toBeVisible();
+       │     ++++++                             
+
+```
+
+```
+extracted-locator-overlapping.js:18:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━
+
+  i Async matcher toBeVisible must be awaited or returned.
+  
+    16 │ test('extracted locator from frame', async ({ page }) => {
+    17 │     const el = frame.locator('.item');
+  > 18 │     expect(el).toBeVisible();
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ });
+    20 │ 
+  
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await before the call.
+  
+    18 │ ····await·expect(el).toBeVisible();
+       │     ++++++                         
+
+```
+
+```
+extracted-locator-overlapping.js:23:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━
+
+  i Async matcher toBeVisible must be awaited or returned.
+  
+    21 │ test('not chain with extracted locator', async ({ page }) => {
+    22 │     const btn = page.getByRole("button");
+  > 23 │     expect(btn).not.toBeVisible();
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ });
+    25 │ 
+  
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await before the call.
+  
+    23 │ ····await·expect(btn).not.toBeVisible();
+       │     ++++++                              
+
+```
+
+```
+extracted-locator-overlapping.js:28:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━
+
+  i Async matcher toBeVisible must be awaited or returned.
+  
+    26 │ test('expect.soft with extracted locator', async ({ page }) => {
+    27 │     const link = page.getByRole("link");
+  > 28 │     expect.soft(link).toBeVisible();
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ });
+    30 │ 
+  
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await before the call.
+  
+    28 │ ····await·expect.soft(link).toBeVisible();
+       │     ++++++                                
+
+```

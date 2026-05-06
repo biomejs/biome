@@ -1,0 +1,19 @@
+@if $state == idle {
+  color: gray;
+} @else if $state == loading {
+  color: blue;
+} @else if $state == success {
+  color: green;
+} @else {
+  color: red;
+}
+
+.layout {
+  @if $dense and $touch {
+    gap: 0.25rem;
+  } @else if $dense {
+    gap: 0.5rem;
+  } @else {
+    gap: 1rem;
+  }
+}

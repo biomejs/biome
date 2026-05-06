@@ -1,0 +1,13 @@
+@forward;
+
+@forward "theme" show;
+
+@forward "theme" hide , $color;
+
+@forward "theme" as theme*;
+
+@forward "theme" as theme - *;
+
+@forward "theme" as theme-;
+
+@forward "theme" with ($spacing:);

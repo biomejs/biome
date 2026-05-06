@@ -1,0 +1,43 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: inlineTypeImports.jsonc
+---
+## ESLint Config
+
+```json
+{
+	"rules": {
+		"@typescript-eslint/consistent-type-imports": [
+			"error",
+			{ "fixStyle": "inline-type-imports" }
+		]
+	}
+}
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"recommended": false,
+			"style": {
+				"useImportType": {
+					"level": "error",
+					"options": { "style": "inlineType" }
+				}
+			}
+		}
+	}
+}
+
+```

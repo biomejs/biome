@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```astro
@@ -61,7 +62,7 @@ HtmlRoot {
                 },
                 HtmlSelfClosingElement {
                     l_angle_token: L_ANGLE@107..110 "<" [Newline("\n"), Whitespace("\t")] [],
-                    name: HtmlTagName {
+                    name: HtmlComponentName {
                         value_token: HTML_LITERAL@110..118 "Counter" [] [Whitespace(" ")],
                     },
                     attributes: HtmlAttributeList [],
@@ -126,7 +127,7 @@ HtmlRoot {
           4: R_ANGLE@106..107 ">" [] []
         1: HTML_SELF_CLOSING_ELEMENT@107..120
           0: L_ANGLE@107..110 "<" [Newline("\n"), Whitespace("\t")] []
-          1: HTML_TAG_NAME@110..118
+          1: HTML_COMPONENT_NAME@110..118
             0: HTML_LITERAL@110..118 "Counter" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@118..118
           3: SLASH@118..119 "/" [] []

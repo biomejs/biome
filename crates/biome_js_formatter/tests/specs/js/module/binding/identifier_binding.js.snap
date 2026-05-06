@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/binding/identifier_binding.js
 ---
+
 # Input
 
 ```js
@@ -12,60 +13,25 @@ let abcde = "very long value that will cause a line break", fghij = "this should
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
------
-
-```js
-let x = y;
-
-let abcde = "very long value that will cause a line break",
-	fghij = "this should end up on the next line";
+```json
+{
+  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "javascript": {
+    "formatter": {
+      "bracketSpacing": false
+    }
+  }
+}
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: false
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
------
+# Formatted
 
 ```js
 let x = y;
 
 let abcde = "very long value that will cause a line break",
 	fghij = "this should end up on the next line";
+
 ```

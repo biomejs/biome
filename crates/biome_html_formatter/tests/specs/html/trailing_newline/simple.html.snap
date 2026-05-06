@@ -1,0 +1,47 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: trailing_newline/simple.html
+---
+
+# Input
+
+```html
+<!doctype html>
+<html>
+<head>
+  <title>Test</title>
+</head>
+<body>
+  <h1>Hello</h1>
+</body>
+</html>
+
+```
+
+
+# Options
+
+```json
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "html": {
+    "formatter": {
+      "trailingNewline": false
+    }
+  }
+}
+```
+
+# Formatted
+
+```html
+<!doctype html>
+<html>
+	<head>
+		<title>Test</title>
+	</head>
+	<body>
+		<h1>Hello</h1>
+	</body>
+</html>
+```

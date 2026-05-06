@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/type/intersection_type.ts
 ---
+
 # Input
 
 ```ts
@@ -67,29 +68,7 @@ type SoftBreakBetweenNotObjectTypeInChain = {} & SomeLongType & {
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
------
+# Formatted
 
 ```ts
 type ShortIntersection = A & B;
@@ -203,4 +182,5 @@ type SoftBreakBetweenNotObjectTypeInChain = {} & SomeLongType & {
 	NotObjectLongLongLongLongLongLongType2 & {
 		somelonglonglongkey: SomeLongLongType;
 	} & { somelonglonglongkey: SomeLongLongType };
+
 ```

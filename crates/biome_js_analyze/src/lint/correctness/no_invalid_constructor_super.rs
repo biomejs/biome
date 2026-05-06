@@ -122,6 +122,7 @@ impl Rule for NoInvalidConstructorSuper {
         let extends_clause = node
             .syntax()
             .ancestors()
+            .skip(1)
             .find_map(|node| AnyJsClass::cast(node)?.extends_clause());
 
         match (super_range, extends_clause) {

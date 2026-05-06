@@ -1,0 +1,25 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/directive_style_important.svelte
+---
+
+# Input
+
+```svelte
+<div style:color="red">Normal style</div>
+<div style:color|important="blue">Important style</div>
+<p style:background-color={bgColor} style:font-size|important="16px">Multiple styles</p>
+
+```
+
+
+# Formatted
+
+```svelte
+<div style:color="red">Normal style</div>
+<div style:color|important="blue">Important style</div>
+<p style:background-color={bgColor} style:font-size|important="16px">
+	Multiple styles
+</p>
+
+```

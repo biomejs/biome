@@ -1,7 +1,6 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalid.css
-snapshot_kind: text
 ---
 # Input
 ```css
@@ -12,6 +11,12 @@ a { font-family: Times; }
 a { FONT: italic 300 16px/30px Arial, " Arial"; }
 a { font: normal 14px/32px -apple-system, BlinkMacSystemFont; }
 a { font: 1em Lucida Grande, Arial, "sans-serif" }
+
+/* styles inside @supports blocks should still be checked */
+@supports (font: -apple-system-body) {
+  a { font-family: Arial; }
+}
+
 ```
 
 # Diagnostics
@@ -142,6 +147,7 @@ invalid.css:6:43 lint/a11y/useGenericFontNames ━━━━━━━━━━━
   > 6 │ a { font: normal 14px/32px -apple-system, BlinkMacSystemFont; }
       │                                           ^^^^^^^^^^^^^^^^^^
     7 │ a { font: 1em Lucida Grande, Arial, "sans-serif" }
+    8 │ 
   
   i Consider adding a generic font family as a fallback.
   
@@ -164,6 +170,32 @@ invalid.css:7:37 lint/a11y/useGenericFontNames ━━━━━━━━━━━
     6 │ a { font: normal 14px/32px -apple-system, BlinkMacSystemFont; }
   > 7 │ a { font: 1em Lucida Grande, Arial, "sans-serif" }
       │                                     ^^^^^^^^^^^^
+    8 │ 
+    9 │ /* styles inside @supports blocks should still be checked */
+  
+  i Consider adding a generic font family as a fallback.
+  
+  i For examples and more information, see the MDN Web Docs
+  
+  - serif
+  - sans-serif
+  - monospace
+  - etc.
+  
+
+```
+
+```
+invalid.css:11:20 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Generic font family missing.
+  
+     9 │ /* styles inside @supports blocks should still be checked */
+    10 │ @supports (font: -apple-system-body) {
+  > 11 │   a { font-family: Arial; }
+       │                    ^^^^^
+    12 │ }
+    13 │ 
   
   i Consider adding a generic font family as a fallback.
   

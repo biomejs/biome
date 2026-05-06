@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```astro
@@ -32,7 +33,7 @@ HtmlRoot {
         HtmlElement {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@47..50 "<" [Newline("\n"), Newline("\n")] [],
-                name: HtmlTagName {
+                name: HtmlComponentName {
                     value_token: HTML_LITERAL@50..55 "Base" [] [Whitespace(" ")],
                 },
                 attributes: HtmlAttributeList [
@@ -54,7 +55,7 @@ HtmlRoot {
             closing_element: HtmlClosingElement {
                 l_angle_token: L_ANGLE@67..69 "<" [Newline("\n")] [],
                 slash_token: SLASH@69..70 "/" [] [],
-                name: HtmlTagName {
+                name: HtmlComponentName {
                     value_token: HTML_LITERAL@70..74 "Base" [] [],
                 },
                 r_angle_token: R_ANGLE@74..75 ">" [] [],
@@ -80,7 +81,7 @@ HtmlRoot {
     0: HTML_ELEMENT@47..75
       0: HTML_OPENING_ELEMENT@47..67
         0: L_ANGLE@47..50 "<" [Newline("\n"), Newline("\n")] []
-        1: HTML_TAG_NAME@50..55
+        1: HTML_COMPONENT_NAME@50..55
           0: HTML_LITERAL@50..55 "Base" [] [Whitespace(" ")]
         2: HTML_ATTRIBUTE_LIST@55..66
           0: HTML_ATTRIBUTE@55..66
@@ -95,7 +96,7 @@ HtmlRoot {
       2: HTML_CLOSING_ELEMENT@67..75
         0: L_ANGLE@67..69 "<" [Newline("\n")] []
         1: SLASH@69..70 "/" [] []
-        2: HTML_TAG_NAME@70..74
+        2: HTML_COMPONENT_NAME@70..74
           0: HTML_LITERAL@70..74 "Base" [] []
         3: R_ANGLE@74..75 ">" [] []
   4: EOF@75..76 "" [Newline("\n")] []

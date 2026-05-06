@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: whitespace/preserve-space-after-element.html
 ---
+
 # Input
 
 ```html
@@ -12,24 +13,9 @@ info: whitespace/preserve-space-after-element.html
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Attribute Position: Auto
-Bracket same line: false
-Whitespace sensitivity: css
-Indent script and style: false
-Self close void elements: never
------
+# Formatted
 
 ```html
 <p><span>Foo</span> Bar</p>
+
 ```

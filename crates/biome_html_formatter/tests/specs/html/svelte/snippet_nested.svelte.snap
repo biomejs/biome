@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: svelte/snippet_nested.svelte
 ---
+
 # Input
 
 ```svelte
@@ -16,23 +17,7 @@ info: svelte/snippet_nested.svelte
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Attribute Position: Auto
-Bracket same line: false
-Whitespace sensitivity: css
-Indent script and style: false
-Self close void elements: never
------
+# Formatted
 
 ```svelte
 {#snippet outer()}
@@ -42,4 +27,5 @@ Self close void elements: never
 		{/snippet}
 	</div>
 {/snippet}
+
 ```

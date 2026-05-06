@@ -13,14 +13,14 @@ set windows-powershell := true
 install-tools:
 	cargo install cargo-binstall
 	cargo binstall cargo-insta wasm-opt
-	cargo binstall wasm-bindgen-cli --version 0.2.105
+	cargo binstall wasm-bindgen-cli --version 0.2.117
 	pnpm install
 
 # Upgrades the tools needed to develop
 upgrade-tools:
 	cargo install cargo-binstall --force
 	cargo binstall cargo-insta wasm-opt --force
-	cargo binstall wasm-bindgen-cli --version 0.2.105 --force
+	cargo binstall wasm-bindgen-cli --version 0.2.117 --force
 
 # Generate all files across crates and tools. You rarely want to use it locally.
 gen-all:
@@ -56,6 +56,9 @@ gen-analyzer:
 gen-rules:
   cargo run -p xtask_codegen -- analyzer
 
+# Generates Baseline data for CSS features from web-features
+gen-css-baseline:
+  cargo run -p xtask_codegen --features xtask_codegen/external_data -- css-baseline
 
 gen-configuration:
   cargo run -p xtask_codegen --features configuration -- configuration
@@ -65,8 +68,8 @@ gen-migrate:
   cargo run -p xtask_codegen --features configuration -- migrate-eslint
 
 # Generates the initial files for all formatter crates
-gen-formatter:
-  cargo run -p xtask_codegen -- formatter
+gen-formatter *args='':
+  cargo run -p xtask_codegen -- formatter {{args}}
 
 # Generates the Tailwind CSS preset for utility class sorting
 [working-directory: 'packages/tailwindcss-config-analyzer']
@@ -222,13 +225,40 @@ _touch file:
 test:
 	cargo test --no-fail-fast
 
-# Run tests for the crate passed as argument e.g. just test-create biome_cli
+# Run tests for the crate passed as argument e.g. just test-crate biome_cli
 test-crate name:
 	cargo test -p {{name}} --no-fail-fast
 
 # Run doc tests
 test-doc:
 	cargo test --doc
+
+# Run CommonMark conformance tests for the markdown parser
+test-markdown-conformance:
+	cargo run -p xtask_coverage -- --suites=markdown/commonmark
+
+# Generate differential fuzz corpus for the markdown parser using commonmark.js
+# Requires `pnpm install` from the repo root (commonmark is a root devDependency).
+fuzz-markdown-generate count="1000" seed="42":
+	node crates/biome_markdown_parser/tests/fuzz_generate_corpus.cjs \
+		--count={{count}} --seed={{seed}} \
+		--output=crates/biome_markdown_parser/tests/fuzz_corpus/corpus.jsonl
+
+# Run differential fuzzer comparing Biome markdown output against commonmark.js
+# Runs the checked-in seed corpus plus any generated corpus.jsonl
+fuzz-markdown-differential:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	CORPUS="$(pwd)/crates/biome_markdown_parser/tests/fuzz_corpus/corpus.jsonl"
+	if [ -f "$CORPUS" ]; then
+		FUZZ_CORPUS="$CORPUS" cargo test -p biome_markdown_parser --test fuzz_differential -- --ignored --nocapture
+	else
+		cargo test -p biome_markdown_parser --test fuzz_differential -- --ignored --nocapture
+	fi
+
+# Update the CommonMark spec.json to a specific version
+update-commonmark-spec version:
+	./scripts/update-commonmark-spec.sh {{version}}
 
 # Tests a lint rule. The name of the rule needs to be camel case
 test-lintrule name:
@@ -274,6 +304,10 @@ ready:
 # Creates a new changeset for the final changelog
 new-changeset:
   pnpm changeset
+
+# Creates a new changeset without interaction
+new-changeset-empty:
+  pnpm changeset --empty
 
 # Create new crate
 new-crate name:

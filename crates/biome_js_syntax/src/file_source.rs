@@ -119,6 +119,24 @@ impl Language {
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
+pub enum SvelteFileKind {
+    /// A `.svelte` component document where JavaScript is extracted from `<script>` blocks.
+    ///
+    /// Component documents still need Svelte-specific parsing and may re-infer
+    /// their JS/TS source type from `<script ...>` content.
+    #[default]
+    Component,
+    /// A `.svelte.js` / `.svelte.ts` source module parsed as a regular JS/TS module.
+    ///
+    /// Source modules already carry their JS/TS source type and should use the
+    /// normal JS document capabilities directly instead of component extraction.
+    SourceModule,
+}
+
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(
+    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
+)]
 pub enum EmbeddingKind {
     Astro {
         /// Whether the script is inside Astro frontmatter
@@ -127,8 +145,30 @@ pub enum EmbeddingKind {
     Vue {
         /// Whether the script is inside script tag with setup attribute
         setup: bool,
+        /// Where the bindings are defined
+        is_source: bool,
+        /// Whether this is a v-on event handler (e.g., @click="handler")
+        event_handler: bool,
+        /// Whether this embed should be parsed as statements (module/script).
+        /// When `false`, the content is parsed as an expression via `parse_template_expression`.
+        /// Source-level embeds (`<script>`) use `true`; directives and text expressions use `false`.
+        allow_statements: bool,
     },
-    Svelte,
+    Svelte {
+        /// Where the bindings are defined
+        is_source: bool,
+        /// `kind` models whether the Svelte file is a component document or a
+        /// source module. That distinction controls whether downstream code
+        /// extracts `<script>` content or treats the file as a standalone JS/TS
+        /// module, while `is_source` still tracks where bindings come from.
+        kind: SvelteFileKind,
+
+        /// Whether this is the declaration of a function, usually declared in `#snippet`
+        is_function_signature: bool,
+
+        /// Whether this is a `{@const name = value}` block.
+        is_const_block: bool,
+    },
     #[default]
     None,
 }
@@ -144,10 +184,55 @@ impl EmbeddingKind {
         matches!(self, Self::Vue { .. })
     }
     pub const fn is_vue_setup(&self) -> bool {
-        matches!(self, Self::Vue { setup: true })
+        matches!(self, Self::Vue { setup: true, .. })
+    }
+    pub const fn is_vue_event_handler(&self) -> bool {
+        matches!(
+            self,
+            Self::Vue {
+                event_handler: true,
+                ..
+            }
+        )
     }
     pub const fn is_svelte(&self) -> bool {
-        matches!(self, Self::Svelte)
+        matches!(self, Self::Svelte { .. })
+    }
+    pub const fn is_svelte_function_signature(&self) -> bool {
+        matches!(
+            self,
+            Self::Svelte {
+                is_function_signature: true,
+                ..
+            }
+        )
+    }
+    pub const fn is_svelte_component(&self) -> bool {
+        matches!(
+            self,
+            Self::Svelte {
+                kind: SvelteFileKind::Component,
+                ..
+            }
+        )
+    }
+    pub const fn is_svelte_source_module(&self) -> bool {
+        matches!(
+            self,
+            Self::Svelte {
+                kind: SvelteFileKind::SourceModule,
+                ..
+            }
+        )
+    }
+    pub const fn is_svelte_const_block(&self) -> bool {
+        matches!(
+            self,
+            Self::Svelte {
+                is_const_block: true,
+                ..
+            }
+        )
     }
 }
 
@@ -213,25 +298,37 @@ impl JsFileSource {
     }
 
     pub fn astro() -> Self {
-        Self::ts().with_embedding_kind(EmbeddingKind::Astro { frontmatter: false })
-    }
-    pub fn astro_frontmatter() -> Self {
         Self::ts().with_embedding_kind(EmbeddingKind::Astro { frontmatter: true })
     }
 
     /// Vue file definition
     pub fn vue() -> Self {
-        Self::js_module().with_embedding_kind(EmbeddingKind::Vue { setup: false })
+        Self::js_module().with_embedding_kind(EmbeddingKind::Vue {
+            setup: false,
+            is_source: true,
+            event_handler: false,
+            allow_statements: true,
+        })
     }
 
     /// Vue file definition with setup attribute
     pub fn vue_setup() -> Self {
-        Self::js_module().with_embedding_kind(EmbeddingKind::Vue { setup: true })
+        Self::js_module().with_embedding_kind(EmbeddingKind::Vue {
+            setup: true,
+            is_source: true,
+            event_handler: false,
+            allow_statements: true,
+        })
     }
 
     /// Svelte file definition
     pub fn svelte() -> Self {
-        Self::js_module().with_embedding_kind(EmbeddingKind::Svelte)
+        Self::js_module().with_embedding_kind(EmbeddingKind::Svelte {
+            is_source: true,
+            is_function_signature: false,
+            kind: SvelteFileKind::Component,
+            is_const_block: false,
+        })
     }
 
     pub const fn with_module_kind(mut self, kind: ModuleKind) -> Self {
@@ -294,8 +391,64 @@ impl JsFileSource {
         self.variant.is_jsx()
     }
 
+    pub const fn is_embedded(&self) -> bool {
+        matches!(
+            self.embedding_kind,
+            EmbeddingKind::Svelte { .. } | EmbeddingKind::Vue { .. } | EmbeddingKind::Astro { .. }
+        )
+    }
+
+    /// The code is embedded, and that's where bindings are defined.
+    pub const fn is_embedded_source(&self) -> bool {
+        matches!(
+            self.embedding_kind,
+            EmbeddingKind::Svelte {
+                is_source: true,
+                ..
+            } | EmbeddingKind::Vue {
+                is_source: true,
+                ..
+            } | EmbeddingKind::Astro { frontmatter: true }
+        )
+    }
+
+    /// Returns true if this is a template expression that should be parsed as an expression
+    /// rather than as a module/script. Template expressions in frameworks like Vue ({{ }}),
+    /// Svelte ({ }), and Astro ({ }), as well as Vue directive values (`v-bind:class="..."`),
+    /// should parse `{ duration }` as an object literal, not as a block statement.
+    pub const fn is_template_expression(&self) -> bool {
+        matches!(
+            self.embedding_kind,
+            EmbeddingKind::Svelte {
+                is_source: false,
+                ..
+            } | EmbeddingKind::Vue {
+                allow_statements: false,
+                ..
+            } | EmbeddingKind::Astro { frontmatter: false }
+        )
+    }
+
+    /// Returns true if this is a Vue event handler (v-on directive)
+    pub const fn is_vue_event_handler(&self) -> bool {
+        self.embedding_kind.is_vue_event_handler()
+    }
+
+    /// Returns true if this is a Svelte `{@const}` block
+    pub const fn is_svelte_const_block(&self) -> bool {
+        self.embedding_kind.is_svelte_const_block()
+    }
+
     pub const fn as_embedding_kind(&self) -> &EmbeddingKind {
         &self.embedding_kind
+    }
+
+    pub const fn is_svelte_component(&self) -> bool {
+        self.embedding_kind.is_svelte_component()
+    }
+
+    pub const fn is_svelte_source_module(&self) -> bool {
+        self.embedding_kind.is_svelte_source_module()
     }
 
     pub fn file_extension(&self) -> &str {
@@ -325,17 +478,58 @@ impl JsFileSource {
         }
     }
 
+    /// Returns whether the path points to a Svelte source-module file.
+    ///
+    /// These files are JavaScript/TypeScript modules with Svelte semantics
+    /// (for example, `$store` auto-subscriptions), not `.svelte` component
+    /// documents with embedded `<script>` content.
+    pub fn is_svelte_source_module_path(path: &Utf8Path) -> bool {
+        let Some(file_name) = path
+            .file_name()
+            .map(|file_name| file_name.to_ascii_lowercase_cow())
+        else {
+            return false;
+        };
+
+        Self::is_svelte_source_module_file_name(file_name.as_ref())
+    }
+
+    fn is_svelte_source_module_file_name(file_name: &str) -> bool {
+        file_name.ends_with(".svelte.ts")
+            || file_name.ends_with(".svelte.test.ts")
+            || file_name.ends_with(".svelte.spec.ts")
+            || file_name.ends_with(".svelte.js")
+            || file_name.ends_with(".svelte.test.js")
+            || file_name.ends_with(".svelte.spec.js")
+    }
+
     /// Try to return the JS file source corresponding to this file name from well-known files
     pub fn try_from_well_known(path: &Utf8Path) -> Result<Self, FileSourceError> {
         // Be careful with definition files, because `Path::extension()` only
         // returns the extension after the _last_ dot:
-        let file_name = path.file_name().ok_or(FileSourceError::MissingFileName)?;
+        let file_name = path
+            .file_name()
+            .map(|file_name| file_name.to_ascii_lowercase_cow())
+            .ok_or(FileSourceError::MissingFileName)?;
         if file_name.ends_with(".d.ts") {
             return Self::try_from_extension("d.ts");
         } else if file_name.ends_with(".d.mts") {
             return Self::try_from_extension("d.mts");
         } else if file_name.ends_with(".d.cts") {
             return Self::try_from_extension("d.cts");
+        } else if Self::is_svelte_source_module_file_name(file_name.as_ref()) {
+            let source = if file_name.ends_with(".ts") {
+                Self::ts()
+            } else {
+                Self::js_module()
+            };
+
+            return Ok(source.with_embedding_kind(EmbeddingKind::Svelte {
+                is_source: true,
+                is_function_signature: false,
+                kind: SvelteFileKind::SourceModule,
+                is_const_block: false,
+            }));
         }
 
         match path.extension() {
@@ -448,5 +642,26 @@ impl From<Language> for JsFileSource {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn detects_svelte_typescript_source_modules_case_insensitively() {
+        let source = JsFileSource::try_from(Utf8Path::new("component.SVELTE.TS")).unwrap();
+
+        assert!(source.is_svelte_source_module());
+        assert!(source.is_typescript());
+    }
+
+    #[test]
+    fn detects_svelte_javascript_source_modules_case_insensitively() {
+        let source = JsFileSource::try_from(Utf8Path::new("component.SVELTE.TEST.JS")).unwrap();
+
+        assert!(source.is_svelte_source_module());
+        assert!(!source.is_typescript());
     }
 }

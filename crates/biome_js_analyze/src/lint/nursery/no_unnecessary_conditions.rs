@@ -90,7 +90,7 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintTypeScript("no-unnecessary-condition").inspired()],
         recommended: false,
         severity: Severity::Warning,
-        domains: &[RuleDomain::Project],
+        domains: &[RuleDomain::Types],
         issue_number: Some("6611"),
     }
 }
@@ -313,6 +313,7 @@ fn check_condition_necessity(
     let inside_catch = expr
         .syntax()
         .ancestors()
+        .skip(1)
         .any(|ancestor| JsCatchClause::can_cast(ancestor.kind()));
 
     if inside_catch {
@@ -509,38 +510,34 @@ fn check_comparison_necessity(
                 )
             {
                 match operator {
-                    JsBinaryOperator::LessThan => {
-                        if left_val < right_val {
+                    JsBinaryOperator::LessThan
+                        if left_val < right_val => {
                             return Some(IssueKind::UnnecessaryComparison(TextRange::new(
                                 left.range().start(),
                                 right.range().end(),
                             )));
                         }
-                    }
-                    JsBinaryOperator::GreaterThan => {
-                        if left_val > right_val {
+                    JsBinaryOperator::GreaterThan
+                        if left_val > right_val => {
                             return Some(IssueKind::UnnecessaryComparison(TextRange::new(
                                 left.range().start(),
                                 right.range().end(),
                             )));
                         }
-                    }
-                    JsBinaryOperator::GreaterThanOrEqual => {
-                        if left_val >= right_val {
+                    JsBinaryOperator::GreaterThanOrEqual
+                        if left_val >= right_val => {
                             return Some(IssueKind::UnnecessaryComparison(TextRange::new(
                                 left.range().start(),
                                 right.range().end(),
                             )));
                         }
-                    }
-                    JsBinaryOperator::LessThanOrEqual => {
-                        if left_val <= right_val {
+                    JsBinaryOperator::LessThanOrEqual
+                        if left_val <= right_val => {
                             return Some(IssueKind::UnnecessaryComparison(TextRange::new(
                                 left.range().start(),
                                 right.range().end(),
                             )));
                         }
-                    }
                     JsBinaryOperator::Equality
                     | JsBinaryOperator::StrictEquality
                     | JsBinaryOperator::Inequality

@@ -3,7 +3,8 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-full-options-api.vue
 ---
 # Input
-```ts
+```vue
+<script>
 // should generate diagnostics
 // Full Options API component with multiple properties - all should be flagged
 export default {
@@ -31,26 +32,28 @@ export default {
     console.log('mounted')
   }
 }
+</script>
+
 
 ```
 
 # Diagnostics
 ```
-invalid-full-options-api.vue:3:16 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-full-options-api.vue:4:16 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Using the Options API is not allowed.
   
-     1 │ // should generate diagnostics
-     2 │ // Full Options API component with multiple properties - all should be flagged
-   > 3 │ export default {
+     2 │ // should generate diagnostics
+     3 │ // Full Options API component with multiple properties - all should be flagged
+   > 4 │ export default {
        │                ^
-   > 4 │   name: 'MyComponent',
+   > 5 │   name: 'MyComponent',
         ...
-  > 25 │     console.log('mounted')
-  > 26 │   }
-  > 27 │ }
+  > 27 │   }
+  > 28 │ }
        │ ^
-    28 │ 
+    29 │ </script>
+    30 │ 
   
   i Although the Options API is still supported by Vue, using the Composition API is recommended, and makes it possible to use Vue's Vapor mode for better performance.
   

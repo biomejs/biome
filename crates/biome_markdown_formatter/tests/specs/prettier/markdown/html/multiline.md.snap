@@ -1,0 +1,78 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/html/multiline.md
+---
+
+# Input
+
+```md
+1.  Some test text, the goal is to have the html table below nested within this number. When formating on save Prettier will continue to add an indent each time pushing the table further and further out of sync. 
+
+    <table class="table table-striped">
+    <tr>
+    <th>Test</th>
+    <th>Table</th>
+    </tr>
+    <tbody>
+        <tr>
+        <td>will</td>
+        <td>be</td>
+        </tr>
+        <tr>
+        <td>pushed</td>
+        <td>When</td>
+        </tr>
+        <tr>
+        <td>Format on</td>
+        <td>Save</td>
+        </tr>
+    </tbody>
+    </table>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+-1.  Some test text, the goal is to have the html table below nested within this number. When formating on save Prettier will continue to add an indent each time pushing the table further and further out of sync.
++1.  Some test text, the goal is to have the html table below nested within this number. When formating on save Prettier will continue to add an indent each time pushing the table further and further out of sync. 
+ 
+     <table class="table table-striped">
+     <tr>
+```
+
+# Output
+
+```md
+1.  Some test text, the goal is to have the html table below nested within this number. When formating on save Prettier will continue to add an indent each time pushing the table further and further out of sync. 
+
+    <table class="table table-striped">
+    <tr>
+    <th>Test</th>
+    <th>Table</th>
+    </tr>
+    <tbody>
+        <tr>
+        <td>will</td>
+        <td>be</td>
+        </tr>
+        <tr>
+        <td>pushed</td>
+        <td>When</td>
+        </tr>
+        <tr>
+        <td>Format on</td>
+        <td>Save</td>
+        </tr>
+    </tbody>
+    </table>
+```
+
+# Lines exceeding max width of 80 characters
+```
+    1: 1.  Some test text, the goal is to have the html table below nested within this number. When formating on save Prettier will continue to add an indent each time pushing the table further and further out of sync. 
+```

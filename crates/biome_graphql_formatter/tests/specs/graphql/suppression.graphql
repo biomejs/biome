@@ -1,0 +1,25 @@
+# biome-ignore-all format: test reason
+
+{
+	hero
+	@deprecated(reason: "Deprecated", reason: "Deprecated",
+
+
+		reason: "Deprecated")
+	@addExternalFields(source: "profiles")
+}
+
+# biome-ignore-all format: intentional
+query { hero }
+
+# Biome format should keep this comment
+
+
+{
+	hero
+	@deprecated(reason: "Deprecated", reason: "Deprecated",
+
+
+		reason: "Deprecated")
+	@addExternalFields(source: "profiles")
+}

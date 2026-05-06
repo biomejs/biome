@@ -66,3 +66,13 @@ inline-size
 
 @container ( WIDTH <= 150px ) {  }
 @container ( 150px <= WIDTH ) {  }
+
+@container scroll-state(scrolled: bottom) {  }
+
+@container scroll-state(stuck: top) {  }
+
+@container not scroll-state(stuck) {  }
+
+@container card scroll-state(scrolled: bottom) {  }
+
+@container   scroll-state(  scrolled:   bottom  )   {  }

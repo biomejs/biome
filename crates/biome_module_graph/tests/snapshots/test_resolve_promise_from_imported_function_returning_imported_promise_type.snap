@@ -2,6 +2,7 @@
 source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
 ---
+
 # `/src/index.ts` (Not imported by resolver)
 
 ## Source
@@ -48,7 +49,7 @@ export type PromisedResult = Promise<{ result: true | false }>;
 ```
 Exports {
   "PromisedResult" => {
-    ExportOwnExport => JsOwnExport::Binding(0)
+    ExportOwnExport => JsOwnExport::Binding(12..26)
   }
 }
 Imports {
@@ -59,10 +60,8 @@ Imports {
 ## Exported Bindings
 
 ```
-BindingId(0) => JsBindingData {
-  Name: PromisedResult,
-  Type: Module(0) TypeId(4),
-  Declaration kind: Type
+PromisedResult  => BindingTypeData {
+  Types Module(0) TypeId(3),
 }
 ```
 
@@ -73,14 +72,12 @@ Module TypeId(0) => bool: true
 
 Module TypeId(1) => bool: false
 
-Module TypeId(2) => Module(0) TypeId(0) | Module(0) TypeId(1)
-
-Module TypeId(3) => Object {
+Module TypeId(2) => Object {
   prototype: No prototype
-  members: ["result": Module(0) TypeId(2)]
+  members: ["result": boolean]
 }
 
-Module TypeId(4) => instanceof Promise<Module(0) TypeId(3)>
+Module TypeId(3) => instanceof Promise<Module(0) TypeId(2)>
 ```
 
 # `/src/returnPromiseResult.ts` (Module 1)
@@ -102,7 +99,7 @@ export { returnPromiseResult };
 ```
 Exports {
   "returnPromiseResult" => {
-    ExportOwnExport => JsOwnExport::Binding(1)
+    ExportOwnExport => JsOwnExport::Binding(77..96)
   }
 }
 Imports {
@@ -117,10 +114,8 @@ Imports {
 ## Exported Bindings
 
 ```
-BindingId(1) => JsBindingData {
-  Name: returnPromiseResult,
-  Type: Module(0) TypeId(7),
-  Declaration kind: HoistedValue
+returnPromiseResult => BindingTypeData {
+  Types Module(0) TypeId(7),
 }
 ```
 
@@ -172,5 +167,5 @@ Full TypeId(1) => namespace for ModuleId(2)
 
 Full TypeId(2) => Module(1) TypeId(7)
 
-Full TypeId(3) => instanceof Promise<Module(2) TypeId(3)>
+Full TypeId(3) => instanceof Promise<Module(2) TypeId(2)>
 ```

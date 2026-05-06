@@ -65,24 +65,30 @@ impl std::fmt::Display for RuleGroup {
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum ActionName {
+    NoDuplicateClasses,
     OrganizeImports,
     UseSortedAttributes,
+    UseSortedInterfaceMembers,
     UseSortedKeys,
     UseSortedProperties,
 }
 impl ActionName {
     pub const fn as_str(self) -> &'static str {
         match self {
+            Self::NoDuplicateClasses => "noDuplicateClasses",
             Self::OrganizeImports => "organizeImports",
             Self::UseSortedAttributes => "useSortedAttributes",
+            Self::UseSortedInterfaceMembers => "useSortedInterfaceMembers",
             Self::UseSortedKeys => "useSortedKeys",
             Self::UseSortedProperties => "useSortedProperties",
         }
     }
     pub const fn group(self) -> RuleGroup {
         match self {
+            Self::NoDuplicateClasses => RuleGroup::Source,
             Self::OrganizeImports => RuleGroup::Source,
             Self::UseSortedAttributes => RuleGroup::Source,
+            Self::UseSortedInterfaceMembers => RuleGroup::Source,
             Self::UseSortedKeys => RuleGroup::Source,
             Self::UseSortedProperties => RuleGroup::Source,
         }
@@ -92,8 +98,10 @@ impl std::str::FromStr for ActionName {
     type Err = &'static str;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
+            "noDuplicateClasses" => Ok(Self::NoDuplicateClasses),
             "organizeImports" => Ok(Self::OrganizeImports),
             "useSortedAttributes" => Ok(Self::UseSortedAttributes),
+            "useSortedInterfaceMembers" => Ok(Self::UseSortedInterfaceMembers),
             "useSortedKeys" => Ok(Self::UseSortedKeys),
             "useSortedProperties" => Ok(Self::UseSortedProperties),
             _ => Err("This rule name doesn't exist."),

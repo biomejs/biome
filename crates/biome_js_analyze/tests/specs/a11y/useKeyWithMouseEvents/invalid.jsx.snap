@@ -1,10 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
-snapshot_kind: text
 ---
 # Input
 ```jsx
+/* should generate diagnostics */
 <div onMouseOver={() => {}} />;
 <div onMouseOut={() => {}} />;
 <div onMouseOver={() => {}} onFocus={undefined} />;
@@ -19,30 +19,15 @@ snapshot_kind: text
 
 # Diagnostics
 ```
-invalid.jsx:1:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:2:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × onMouseOver must be accompanied by onFocus for accessibility.
   
-  > 1 │ <div onMouseOver={() => {}} />;
+    1 │ /* should generate diagnostics */
+  > 2 │ <div onMouseOver={() => {}} />;
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ <div onMouseOut={() => {}} />;
-    3 │ <div onMouseOver={() => {}} onFocus={undefined} />;
-  
-  i Actions triggered using mouse events should have corresponding events to account for keyboard-only navigation.
-  
-
-```
-
-```
-invalid.jsx:2:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × onMouseOut must be accompanied by onBlur for accessibility.
-  
-    1 │ <div onMouseOver={() => {}} />;
-  > 2 │ <div onMouseOut={() => {}} />;
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ <div onMouseOver={() => {}} onFocus={undefined} />;
-    4 │ <div onMouseOut={() => {}} onBlur={undefined} />;
+    3 │ <div onMouseOut={() => {}} />;
+    4 │ <div onMouseOver={() => {}} onFocus={undefined} />;
   
   i Actions triggered using mouse events should have corresponding events to account for keyboard-only navigation.
   
@@ -52,14 +37,14 @@ invalid.jsx:2:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━�
 ```
 invalid.jsx:3:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × onMouseOver must be accompanied by onFocus for accessibility.
+  × onMouseOut must be accompanied by onBlur for accessibility.
   
-    1 │ <div onMouseOver={() => {}} />;
-    2 │ <div onMouseOut={() => {}} />;
-  > 3 │ <div onMouseOver={() => {}} onFocus={undefined} />;
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ <div onMouseOut={() => {}} onBlur={undefined} />;
-    5 │ <div onMouseOver={() => {}} onFocus={null} />;
+    1 │ /* should generate diagnostics */
+    2 │ <div onMouseOver={() => {}} />;
+  > 3 │ <div onMouseOut={() => {}} />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ <div onMouseOver={() => {}} onFocus={undefined} />;
+    5 │ <div onMouseOut={() => {}} onBlur={undefined} />;
   
   i Actions triggered using mouse events should have corresponding events to account for keyboard-only navigation.
   
@@ -69,14 +54,14 @@ invalid.jsx:3:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━�
 ```
 invalid.jsx:4:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × onMouseOut must be accompanied by onBlur for accessibility.
+  × onMouseOver must be accompanied by onFocus for accessibility.
   
-    2 │ <div onMouseOut={() => {}} />;
-    3 │ <div onMouseOver={() => {}} onFocus={undefined} />;
-  > 4 │ <div onMouseOut={() => {}} onBlur={undefined} />;
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │ <div onMouseOver={() => {}} onFocus={null} />;
-    6 │ <div onMouseOut={() => {}} onBlur={null} />;
+    2 │ <div onMouseOver={() => {}} />;
+    3 │ <div onMouseOut={() => {}} />;
+  > 4 │ <div onMouseOver={() => {}} onFocus={undefined} />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ <div onMouseOut={() => {}} onBlur={undefined} />;
+    6 │ <div onMouseOver={() => {}} onFocus={null} />;
   
   i Actions triggered using mouse events should have corresponding events to account for keyboard-only navigation.
   
@@ -86,14 +71,14 @@ invalid.jsx:4:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━�
 ```
 invalid.jsx:5:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × onMouseOver must be accompanied by onFocus for accessibility.
+  × onMouseOut must be accompanied by onBlur for accessibility.
   
-    3 │ <div onMouseOver={() => {}} onFocus={undefined} />;
-    4 │ <div onMouseOut={() => {}} onBlur={undefined} />;
-  > 5 │ <div onMouseOver={() => {}} onFocus={null} />;
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    6 │ <div onMouseOut={() => {}} onBlur={null} />;
-    7 │ <div onMouseOver={() => {}}></div>;
+    3 │ <div onMouseOut={() => {}} />;
+    4 │ <div onMouseOver={() => {}} onFocus={undefined} />;
+  > 5 │ <div onMouseOut={() => {}} onBlur={undefined} />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ <div onMouseOver={() => {}} onFocus={null} />;
+    7 │ <div onMouseOut={() => {}} onBlur={null} />;
   
   i Actions triggered using mouse events should have corresponding events to account for keyboard-only navigation.
   
@@ -103,14 +88,14 @@ invalid.jsx:5:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━�
 ```
 invalid.jsx:6:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × onMouseOut must be accompanied by onBlur for accessibility.
+  × onMouseOver must be accompanied by onFocus for accessibility.
   
-    4 │ <div onMouseOut={() => {}} onBlur={undefined} />;
-    5 │ <div onMouseOver={() => {}} onFocus={null} />;
-  > 6 │ <div onMouseOut={() => {}} onBlur={null} />;
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    7 │ <div onMouseOver={() => {}}></div>;
-    8 │ <div onMouseOut={() => {}}></div>;
+    4 │ <div onMouseOver={() => {}} onFocus={undefined} />;
+    5 │ <div onMouseOut={() => {}} onBlur={undefined} />;
+  > 6 │ <div onMouseOver={() => {}} onFocus={null} />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ <div onMouseOut={() => {}} onBlur={null} />;
+    8 │ <div onMouseOver={() => {}}></div>;
   
   i Actions triggered using mouse events should have corresponding events to account for keyboard-only navigation.
   
@@ -120,14 +105,14 @@ invalid.jsx:6:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━�
 ```
 invalid.jsx:7:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × onMouseOver must be accompanied by onFocus for accessibility.
+  × onMouseOut must be accompanied by onBlur for accessibility.
   
-    5 │ <div onMouseOver={() => {}} onFocus={null} />;
-    6 │ <div onMouseOut={() => {}} onBlur={null} />;
-  > 7 │ <div onMouseOver={() => {}}></div>;
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    8 │ <div onMouseOut={() => {}}></div>;
-    9 │ <div {...spread} onMouseOut={() => {}}></div>;
+    5 │ <div onMouseOut={() => {}} onBlur={undefined} />;
+    6 │ <div onMouseOver={() => {}} onFocus={null} />;
+  > 7 │ <div onMouseOut={() => {}} onBlur={null} />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ <div onMouseOver={() => {}}></div>;
+    9 │ <div onMouseOut={() => {}}></div>;
   
   i Actions triggered using mouse events should have corresponding events to account for keyboard-only navigation.
   
@@ -137,14 +122,14 @@ invalid.jsx:7:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━�
 ```
 invalid.jsx:8:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × onMouseOut must be accompanied by onBlur for accessibility.
+  × onMouseOver must be accompanied by onFocus for accessibility.
   
-     6 │ <div onMouseOut={() => {}} onBlur={null} />;
-     7 │ <div onMouseOver={() => {}}></div>;
-   > 8 │ <div onMouseOut={() => {}}></div>;
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-     9 │ <div {...spread} onMouseOut={() => {}}></div>;
-    10 │ <div {...spread} onMouseOver={() => {}}></div>;
+     6 │ <div onMouseOver={() => {}} onFocus={null} />;
+     7 │ <div onMouseOut={() => {}} onBlur={null} />;
+   > 8 │ <div onMouseOver={() => {}}></div>;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ <div onMouseOut={() => {}}></div>;
+    10 │ <div {...spread} onMouseOut={() => {}}></div>;
   
   i Actions triggered using mouse events should have corresponding events to account for keyboard-only navigation.
   
@@ -156,11 +141,12 @@ invalid.jsx:9:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━�
 
   × onMouseOut must be accompanied by onBlur for accessibility.
   
-     7 │ <div onMouseOver={() => {}}></div>;
-     8 │ <div onMouseOut={() => {}}></div>;
-   > 9 │ <div {...spread} onMouseOut={() => {}}></div>;
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    10 │ <div {...spread} onMouseOver={() => {}}></div>;
+     7 │ <div onMouseOut={() => {}} onBlur={null} />;
+     8 │ <div onMouseOver={() => {}}></div>;
+   > 9 │ <div onMouseOut={() => {}}></div>;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ <div {...spread} onMouseOut={() => {}}></div>;
+    11 │ <div {...spread} onMouseOver={() => {}}></div>;
   
   i Actions triggered using mouse events should have corresponding events to account for keyboard-only navigation.
   
@@ -170,11 +156,27 @@ invalid.jsx:9:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━�
 ```
 invalid.jsx:10:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  × onMouseOut must be accompanied by onBlur for accessibility.
+  
+     8 │ <div onMouseOver={() => {}}></div>;
+     9 │ <div onMouseOut={() => {}}></div>;
+  > 10 │ <div {...spread} onMouseOut={() => {}}></div>;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ <div {...spread} onMouseOver={() => {}}></div>;
+  
+  i Actions triggered using mouse events should have corresponding events to account for keyboard-only navigation.
+  
+
+```
+
+```
+invalid.jsx:11:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
   × onMouseOver must be accompanied by onFocus for accessibility.
   
-     8 │ <div onMouseOut={() => {}}></div>;
-     9 │ <div {...spread} onMouseOut={() => {}}></div>;
-  > 10 │ <div {...spread} onMouseOver={() => {}}></div>;
+     9 │ <div onMouseOut={() => {}}></div>;
+    10 │ <div {...spread} onMouseOut={() => {}}></div>;
+  > 11 │ <div {...spread} onMouseOver={() => {}}></div>;
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
   i Actions triggered using mouse events should have corresponding events to account for keyboard-only navigation.

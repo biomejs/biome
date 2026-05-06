@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/variables.css
 ---
+
 # Input
 
 ```css
@@ -50,19 +51,7 @@ info: css/variables.css
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
------
+# Formatted
 
 ```css
 .foo {
@@ -93,4 +82,5 @@ Quote style: Double Quotes
 
 	prop: hsl(var(--hue, 0) var(--sat, 100) var(--light, 1));
 }
+
 ```

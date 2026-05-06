@@ -17,6 +17,7 @@ fn evaluate_any_simple_selector(selector: &AnyCssSimpleSelector) -> Specificity 
     match selector {
         AnyCssSimpleSelector::CssTypeSelector(_) => TYPE_SPECIFICITY,
         AnyCssSimpleSelector::CssUniversalSelector(_) => ZERO_SPECIFICITY,
+        AnyCssSimpleSelector::ScssPlaceholderSelector(_) => CLASS_SPECIFICITY,
     }
 }
 

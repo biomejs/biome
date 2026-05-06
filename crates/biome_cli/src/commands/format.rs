@@ -1,6 +1,10 @@
+use crate::CliDiagnostic;
 use crate::cli_options::CliOptions;
-use crate::commands::{CommandRunner, LoadEditorConfig, get_files_to_process_with_cli_options};
-use crate::{CliDiagnostic, Execution, TraversalMode};
+use crate::commands::get_files_to_process_with_cli_options;
+use crate::runner::execution::{AnalyzerSelectors, Execution, VcsTargeted};
+use crate::runner::impls::commands::traversal::{LoadEditorConfig, TraversalCommand};
+use crate::runner::impls::executions::summary_verb::SummaryVerbExecution;
+use crate::runner::impls::process_file::format::FormatProcessFile;
 use biome_configuration::css::{CssFormatterConfiguration, CssParserConfiguration};
 use biome_configuration::graphql::GraphqlFormatterConfiguration;
 use biome_configuration::html::HtmlFormatterConfiguration;
@@ -8,12 +12,17 @@ use biome_configuration::javascript::JsFormatterConfiguration;
 use biome_configuration::json::{JsonFormatterConfiguration, JsonParserConfiguration};
 use biome_configuration::vcs::VcsConfiguration;
 use biome_configuration::{Configuration, FilesConfiguration, FormatterConfiguration};
-use biome_console::Console;
+use biome_console::{Console, MarkupBuf};
 use biome_deserialize::Merge;
+use biome_diagnostics::{Category, category};
 use biome_fs::FileSystem;
+use biome_service::workspace::{
+    FeatureKind, FeatureName, FeaturesBuilder, FeaturesSupported, ScanKind, SupportKind,
+};
 use biome_service::{Workspace, WorkspaceError};
 use camino::Utf8PathBuf;
 use std::ffi::OsString;
+use std::time::Duration;
 
 pub(crate) struct FormatCommandPayload {
     pub(crate) javascript_formatter: Option<JsFormatterConfiguration>,
@@ -35,6 +44,73 @@ pub(crate) struct FormatCommandPayload {
     pub(crate) css_parser: Option<CssParserConfiguration>,
 }
 
+struct FormatExecution {
+    stdin_file_path: Option<String>,
+    write: bool,
+    skip_parse_errors: bool,
+
+    /// A flag to know vcs integrated options such as `--staged` or `--changed` are enabled
+    vcs_targeted: VcsTargeted,
+}
+
+impl Execution for FormatExecution {
+    fn wanted_features(&self) -> FeatureName {
+        FeaturesBuilder::new().with_formatter().build()
+    }
+
+    fn not_requested_features(&self) -> FeatureName {
+        FeaturesBuilder::new()
+            .with_linter()
+            .with_assist()
+            .with_search()
+            .build()
+    }
+
+    fn can_handle(&self, features: FeaturesSupported) -> bool {
+        features.supports_format()
+    }
+
+    fn is_vcs_targeted(&self) -> bool {
+        self.vcs_targeted.changed || self.vcs_targeted.staged
+    }
+
+    fn supports_kind(&self, file_features: &FeaturesSupported) -> Option<SupportKind> {
+        Some(file_features.support_kind_for(FeatureKind::Format))
+    }
+
+    fn get_stdin_file_path(&self) -> Option<&str> {
+        self.stdin_file_path.as_deref()
+    }
+
+    fn as_diagnostic_category(&self) -> &'static Category {
+        category!("format")
+    }
+
+    fn should_skip_parse_errors(&self) -> bool {
+        self.skip_parse_errors
+    }
+
+    fn requires_write_access(&self) -> bool {
+        self.write
+    }
+
+    fn analyzer_selectors(&self) -> AnalyzerSelectors {
+        AnalyzerSelectors::default()
+    }
+
+    fn is_format(&self) -> bool {
+        true
+    }
+
+    fn summary_phrase(&self, files: usize, duration: &Duration) -> MarkupBuf {
+        if self.requires_write_access() {
+            SummaryVerbExecution.summary_verb("Formatted", files, duration)
+        } else {
+            SummaryVerbExecution.summary_verb("Checked", files, duration)
+        }
+    }
+}
+
 impl LoadEditorConfig for FormatCommandPayload {
     fn should_load_editor_config(&self, fs_configuration: &Configuration) -> bool {
         self.formatter_configuration
@@ -44,8 +120,33 @@ impl LoadEditorConfig for FormatCommandPayload {
     }
 }
 
-impl CommandRunner for FormatCommandPayload {
-    const COMMAND_NAME: &'static str = "format";
+impl TraversalCommand for FormatCommandPayload {
+    type ProcessFile = FormatProcessFile;
+
+    fn command_name(&self) -> &'static str {
+        "format"
+    }
+
+    fn minimal_scan_kind(&self) -> Option<ScanKind> {
+        Some(ScanKind::KnownFiles)
+    }
+
+    fn get_execution(
+        &self,
+        cli_options: &CliOptions,
+        _console: &mut dyn Console,
+        _workspace: &dyn Workspace,
+    ) -> Result<Box<dyn Execution>, CliDiagnostic> {
+        Ok(Box::new(FormatExecution {
+            stdin_file_path: self.stdin_file_path.clone(),
+            write: self.write || self.fix,
+            skip_parse_errors: cli_options.skip_parse_errors,
+            vcs_targeted: VcsTargeted {
+                staged: self.staged,
+                changed: self.changed,
+            },
+        }))
+    }
 
     fn merge_configuration(
         &mut self,
@@ -128,30 +229,6 @@ impl CommandRunner for FormatCommandPayload {
             configuration,
         )?
         .unwrap_or(self.paths.clone());
-
         Ok(paths)
-    }
-
-    fn get_stdin_file_path(&self) -> Option<&str> {
-        self.stdin_file_path.as_deref()
-    }
-
-    fn should_write(&self) -> bool {
-        self.write || self.fix
-    }
-
-    fn get_execution(
-        &self,
-        cli_options: &CliOptions,
-        console: &mut dyn Console,
-        _workspace: &dyn Workspace,
-    ) -> Result<Execution, CliDiagnostic> {
-        Ok(Execution::new(TraversalMode::Format {
-            skip_parse_errors: cli_options.skip_parse_errors,
-            write: self.should_write(),
-            stdin: self.get_stdin(console)?,
-            vcs_targeted: (self.staged, self.changed).into(),
-        })
-        .set_report(cli_options))
     }
 }

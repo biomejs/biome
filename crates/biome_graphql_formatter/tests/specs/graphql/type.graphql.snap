@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: graphql/type.graphql
 ---
+
 # Input
 
 ```graphql
@@ -21,20 +22,7 @@ query ($storyId: ID!, $like: Boolean,
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Bracket spacing: true
-Quote style: Double Quotes
------
+# Formatted
 
 ```graphql
 query (
@@ -47,4 +35,5 @@ query (
 ) {
 	likeStory(storyId: $storyId)
 }
+
 ```

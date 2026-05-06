@@ -3,11 +3,12 @@ use biome_analyze::{
     ServiceBag, ServicesDiagnostic, SyntaxVisitor,
 };
 use biome_css_semantic::model::SemanticModel;
-use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
+use biome_css_syntax::{AnyCssRoot, CssLanguage, CssSyntaxNode};
 use biome_rowan::AstNode;
+use std::sync::Arc;
 
 pub struct SemanticServices {
-    model: SemanticModel,
+    model: Arc<SemanticModel>,
 }
 
 impl SemanticServices {
@@ -22,7 +23,7 @@ impl FromServices for SemanticServices {
         _rule_metadata: &RuleMetadata,
         services: &ServiceBag,
     ) -> Result<Self, ServicesDiagnostic> {
-        let model: &SemanticModel = services
+        let model: &Arc<SemanticModel> = services
             .get_service()
             .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["SemanticModel"]))?;
 
@@ -70,7 +71,7 @@ where
     type Language = CssLanguage;
     type Services = SemanticServices;
 
-    fn build_visitor(analyzer: &mut impl AddVisitor<CssLanguage>, _root: &CssRoot) {
+    fn build_visitor(analyzer: &mut impl AddVisitor<CssLanguage>, _root: &AnyCssRoot) {
         analyzer.add_visitor(Phases::Syntax, SyntaxVisitor::default);
     }
 

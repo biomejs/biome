@@ -164,13 +164,12 @@ impl Rule for NoUnreachableSuper {
                                 }
                                 super_ = Some(range);
                             }
-                            JsSyntaxKind::JS_THIS_EXPRESSION => {
-                                if super_.is_none() {
+                            JsSyntaxKind::JS_THIS_EXPRESSION
+                                if super_.is_none() => {
                                     return Some(RuleState::ThisWithoutSuper {
                                         this: node.text_trimmed_range(),
                                     });
                                 }
-                            }
                             _ if AnyJsControlFlowRoot::can_cast(node.kind()) => {
                                 iter.skip_subtree();
                             }

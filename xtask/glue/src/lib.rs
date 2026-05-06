@@ -52,6 +52,11 @@ pub fn reformat_with_command(text: impl Display, command: impl Display) -> Resul
 
 pub const PREAMBLE: &str = "Generated file, do not edit by hand, see `xtask/codegen`";
 pub fn prepend_generated_preamble(content: impl Display) -> String {
+    let content = content.to_string();
+    assert!(
+        !content.contains(PREAMBLE),
+        "content already contains the generated preamble — was reformat() called twice?"
+    );
     format!("//! {PREAMBLE}\n\n{content}")
 }
 
@@ -99,4 +104,23 @@ pub fn ensure_rustfmt() -> Result<()> {
     IS_RUSTFMT_CHECKED.get_or_init(|| ());
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn prepend_generated_preamble_adds_preamble() {
+        let result = prepend_generated_preamble("fn main() {}");
+        assert!(result.starts_with("//!"));
+        assert_eq!(result.matches(PREAMBLE).count(), 1);
+    }
+
+    #[test]
+    #[should_panic(expected = "content already contains the generated preamble")]
+    fn prepend_generated_preamble_rejects_duplicate() {
+        let once = prepend_generated_preamble("fn main() {}");
+        prepend_generated_preamble(once);
+    }
 }

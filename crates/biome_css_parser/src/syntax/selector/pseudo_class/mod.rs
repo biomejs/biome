@@ -17,6 +17,9 @@ use self::function_compound_selector_list::{
 use self::function_identifier::{
     is_at_pseudo_class_function_identifier, parse_pseudo_class_function_identifier,
 };
+pub(crate) use self::function_nth::{
+    PSEUDO_CLASS_NTH_SIGN_SET, parse_pseudo_class_nth_dimension_value,
+};
 use self::function_nth::{is_at_pseudo_class_function_nth, parse_pseudo_class_function_nth};
 use self::function_relative_selector_list::{
     is_at_pseudo_class_function_relative_selector_list,
@@ -42,6 +45,7 @@ use crate::syntax::selector::pseudo_class::function_custom_identifier_list::{
     is_at_pseudo_class_function_custom_identifier_list,
     parse_pseudo_class_function_custom_identifier_list,
 };
+use crate::syntax::selector::pseudo_class::function_selector::is_at_vue_pseudo_class_function_selector;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
 use biome_parser::Parser;
@@ -83,7 +87,8 @@ fn parse_pseudo_class(p: &mut CssParser) -> ParsedSyntax {
 
     if is_at_pseudo_class_function_identifier(p) {
         parse_pseudo_class_function_identifier(p)
-    } else if is_at_pseudo_class_function_selector(p) {
+    } else if is_at_pseudo_class_function_selector(p) || is_at_vue_pseudo_class_function_selector(p)
+    {
         parse_pseudo_class_function_selector(p)
     } else if is_at_pseudo_class_function_selector_list(p) {
         parse_pseudo_class_function_selector_list(p)

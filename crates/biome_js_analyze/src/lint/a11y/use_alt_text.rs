@@ -11,7 +11,7 @@ declare_lint_rule! {
     /// Enforce that all elements that require alternative text have meaningful information to relay back to the end user.
     ///
     /// This is a critical component of accessibility for screen reader users in order for them to understand the content's purpose on the page.
-    /// By default, this rule checks for alternative text on the following elements: `<img>`, `<area>`, `<input type="image">`, and `<object>`.
+    /// This rule checks for alternative text on the following elements: `<img>`, `<area>`, `<input type="image">`, and `<object>`.
     ///
     /// ## Examples
     ///
@@ -113,32 +113,29 @@ impl Rule for UseAltText {
                     }
                 }
             }
-            "img" => {
-                if !has_alt && !has_aria_label && !has_aria_labelledby && !aria_hidden {
+            "img"
+                if !has_alt && !has_aria_label && !has_aria_labelledby && !aria_hidden => {
                     return Some((ValidatedElement::Img, element.syntax().text_trimmed_range()));
                 }
-            }
-            "area" => {
-                if !has_alt && !has_aria_label && !has_aria_labelledby && !aria_hidden {
+            "area"
+                if !has_alt && !has_aria_label && !has_aria_labelledby && !aria_hidden => {
                     return Some((
                         ValidatedElement::Area,
                         element.syntax().text_trimmed_range(),
                     ));
                 }
-            }
-            "input" => {
+            "input"
                 if has_type_image_attribute(element)
                     && !has_alt
                     && !has_aria_label
                     && !has_aria_labelledby
                     && !aria_hidden
-                {
+                => {
                     return Some((
                         ValidatedElement::Input,
                         element.syntax().text_trimmed_range(),
                     ));
                 }
-            }
             _ => {}
         }
 

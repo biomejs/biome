@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-svelte-ts-expressions.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script lang="ts">
+// this makes it typescript
+</script>
+
+<div
+	onclick={(e) => {
+		if ((e.target as HTMLElement).closest("button")) {
+			return;
+		}
+		e.currentTarget.parentElement?.querySelector("input")?.focus();
+	}}
+>
+</div>
+
+```

@@ -1,0 +1,29 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/expression/map-value-list-expansion.scss
+---
+
+# Input
+
+```scss
+$map:(key:(#d82d2d,#666),other-key:(#52bf4a,#fff),);
+
+
+```
+
+
+# Formatted
+
+```scss
+$map: (
+	key: (
+		#d82d2d,
+		#666,
+	),
+	other-key: (
+		#52bf4a,
+		#fff,
+	),
+);
+
+```

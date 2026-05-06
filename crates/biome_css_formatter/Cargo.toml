@@ -32,7 +32,8 @@ biome_suppression = { workspace = true }
 [dev-dependencies]
 biome_configuration  = { path = "../biome_configuration" }
 biome_css_parser     = { path = "../biome_css_parser" }
-biome_formatter      = { workspace = true, features = ["countme"] }
+biome_css_syntax     = { path = "../biome_css_syntax", features = ["scss"] }
+biome_formatter      = { path = "../biome_formatter", features = ["countme"] }
 biome_formatter_test = { path = "../biome_formatter_test" }
 biome_fs             = { path = "../biome_fs" }
 biome_parser         = { path = "../biome_parser" }
@@ -43,6 +44,7 @@ countme              = { workspace = true, features = ["enable"] }
 criterion            = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 serde                = { workspace = true, features = ["derive"] }
 serde_json           = { workspace = true }
+similar-asserts      = { workspace = true }
 tests_macros         = { path = "../tests_macros" }
 
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]

@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atrule/import.css
 ---
+
 # Input
 
 ```css
@@ -175,19 +176,7 @@ st.css');
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
------
+# Formatted
 
 ```css
 @import url("./style.css");
@@ -339,7 +328,7 @@ st.css");
 @import url("./test.css") /* Comment */
 	layer(/* Comment */ /* Comment */ default) /* Comment */
 	supports(
-		/* Comment */ /* Comment */ /* Comment */ display: flex /* Comment */
+		/* Comment */ display /* Comment */ /* Comment */: flex /* Comment */
 	) /* Comment */
 	screen /* Comment */ and /* Comment */ (
 		/* Comment */ /* Comment */ /* Comment */ min-width: 400px /* Comment */
@@ -373,6 +362,7 @@ st.css");
 
 @import "test.css" supports(display: flex);
 @import url("tabs.css") layer(framework.component);
+
 ```
 
 # Lines exceeding max width of 80 characters

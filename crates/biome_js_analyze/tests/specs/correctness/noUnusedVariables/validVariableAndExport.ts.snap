@@ -14,5 +14,3 @@ interface a {
 export { a };
 
 ```
-
-

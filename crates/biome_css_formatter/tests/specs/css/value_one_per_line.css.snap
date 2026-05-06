@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/value_one_per_line.css
 ---
+
 # Input
 
 ```css
@@ -26,19 +27,7 @@ html {
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
------
+# Formatted
 
 ```css
 html {
@@ -58,4 +47,5 @@ html {
 		"Segoe UI Symbol",
 		"Noto Color Emoji";
 }
+
 ```

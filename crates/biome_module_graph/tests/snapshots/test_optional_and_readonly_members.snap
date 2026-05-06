@@ -1,0 +1,57 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export interface Config {
+	name: string;
+	age?: number;
+	readonly id: string;
+	readonly label?: string;
+}
+```
+
+## Module Info
+
+```
+Exports {
+  "Config" => {
+    ExportOwnExport => JsOwnExport::Binding(17..23)
+  }
+}
+Imports {
+  No imports
+}
+```
+
+## Exported Bindings
+
+```
+Config  => BindingTypeData {
+  Types Module(0) TypeId(2),
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => number | undefined
+
+Module TypeId(1) => string | undefined
+
+Module TypeId(2) => interface "Config" {
+  extends: []
+  type_args: []
+  members: [
+    "name": string,
+    "age"?: Module(0) TypeId(0),
+    "id": string,
+    "label"?: Module(0) TypeId(1)
+  ]
+}
+```

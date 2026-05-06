@@ -463,6 +463,32 @@ fn test_resolve_type_definitions() {
     );
 
     assert_eq!(
+        resolve("types-and-main", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/node_modules/types-and-main/types/index.d.ts"
+        )))
+    );
+
+    assert_eq!(
+        resolve("source-main", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/node_modules/source-main/src/index.ts"
+        )))
+    );
+
+    assert_eq!(
+        resolve("runtime-main", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/node_modules/runtime-main/dist/index.d.ts"
+        )))
+    );
+
+    assert_eq!(
+        resolve("untyped-main", &base_dir, &fs, &options),
+        Err(ResolveError::DirectoryWithoutDefault)
+    );
+
+    assert_eq!(
         resolve("react", &base_dir.join("src"), &fs, &options),
         Ok(Utf8PathBuf::from(format!(
             "{base_dir}/node_modules/@types/react/index.d.ts"
@@ -744,5 +770,70 @@ fn test_resolve_extension_alias_not_apply_to_extension_nor_main_files() {
         resolve("./dir2/index", &base_dir, &fs, &options),
         Ok(Utf8PathBuf::from(format!("{base_dir}/dir2/index.js"))),
         "file",
+    );
+}
+
+/// Tests that exports patterns are sorted by specificity per the Node.js
+/// PATTERN_KEY_COMPARE algorithm (longer prefix wins), so `./features/*`
+/// takes priority over `./*` when resolving `features/svelte`.
+///
+/// Regression test for https://github.com/biomejs/biome/issues/9370
+#[test]
+fn test_resolve_exports_pattern_specificity() {
+    let base_dir = get_fixtures_path("resolver_cases_8");
+    let fs = OsFileSystem::new(base_dir.clone());
+
+    // Exact match: "." -> "./src/presets/default.json"
+    assert_eq!(
+        resolve(
+            "@kcconfigs/biome",
+            &base_dir,
+            &fs,
+            &ResolveOptions::default()
+        ),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/node_modules/@kcconfigs/biome/src/presets/default.json"
+        ))),
+        "exact match on root export",
+    );
+    // Pattern match: "./*" -> "./src/presets/*.json"
+    assert_eq!(
+        resolve(
+            "@kcconfigs/biome/default",
+            &base_dir,
+            &fs,
+            &ResolveOptions::default()
+        ),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/node_modules/@kcconfigs/biome/src/presets/default.json"
+        ))),
+        "wildcard match on ./* pattern",
+    );
+
+    // More specific pattern: "./features/*" must take priority over "./*"
+    // This is the core bug from #9370.
+    assert_eq!(
+        resolve(
+            "@kcconfigs/biome/features/svelte",
+            &base_dir,
+            &fs,
+            &ResolveOptions::default()
+        ),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/node_modules/@kcconfigs/biome/src/features/svelte.json"
+        ))),
+        "./features/* must match before ./* for features/svelte",
+    );
+
+    // Null target: "./features/private-internal/*" -> null (explicitly excluded)
+    assert_eq!(
+        resolve(
+            "@kcconfigs/biome/features/private-internal/secret",
+            &base_dir,
+            &fs,
+            &ResolveOptions::default()
+        ),
+        Err(ResolveError::NotFound),
+        "null target should block resolution",
     );
 }

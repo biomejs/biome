@@ -1,0 +1,47 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+# Emitted Messages
+
+```block
+Starts the Biome daemon server process.
+
+Usage: start [--log-prefix-name=STRING] [--log-path=PATH] [--log-level=<none|debug|info|warn|error>]
+[--log-kind=<pretty|compact|json>] [--watcher-kind=<polling|recommended|none>] [
+--watcher-polling-interval=NUMBER]
+
+Options to control logging (CLI and Daemon)
+        --log-file=STRING  Optional path/file to redirect log messages to. This option is applicable
+                           only to the CLI.
+                           If omitted, logs are printed to stdout.
+                           [env:BIOME_LOG_FILE: N/A]
+        --log-prefix-name=STRING  [env:BIOME_LOG_PREFIX_NAME: N/A]
+                           [default: server.log]
+        --log-path=PATH    Allows changing the folder where logs are stored. This option is
+                           applicable only to the daemon.
+                           [env:BIOME_LOG_PATH: N/A]
+                           [default: <BIOME_DIR>/biome-logs]
+        --log-level=<none|debug|info|warn|error>  The level of logging. In order, from the most
+                           verbose to the least verbose: debug, info, warn, error.
+                           The value `none` won't show any logging.
+                           [env:BIOME_LOG_LEVEL: N/A]
+                           [default: none]
+        --log-kind=<pretty|compact|json>  What the log should look like.
+                           [env:BIOME_LOG_KIND: N/A]
+                           [default: pretty]
+
+Controls various aspects of the Biome Daemon.
+        --watcher-kind=<polling|recommended|none>  Controls how the Biome file watcher should
+                           behave.
+                           [env:BIOME_WATCHER_KIND: N/A]
+                           [default: recommended]
+        --watcher-polling-interval=NUMBER  The polling interval in milliseconds. This is only
+                           applicable when using the polling watcher.
+                           [env:BIOME_WATCHER_POLLING_INTERVAL: N/A]
+                           [default: 2000]
+
+Available options:
+    -h, --help             Prints help information
+
+```

@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/quote_style/normalize_quotes.css
 ---
+
 # Input
 
 ```css
@@ -33,57 +34,20 @@ div {
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
------
-
-```css
-[attr="double"] {
-	background: url("/double/quoted/path");
+```json
+{
+    "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+    "css": {
+        "formatter": {
+            "quoteStyle": "single"
+        }
+    }
 }
-
-[attr="single"] {
-	background: url("/single/quoted/path");
-}
-
-[attr="no-quotes"] {
-	/* this url-token should stay unquoted */
-	background: url(/unquoted/path);
-}
-
-[attr="\eescaped"] {
-}
-
-div {
-	width: 0\eestays-unquoted;
-	--\eeunquoted: green;
-	color: var(--\eeunquoted);
-}
-
-@charset· "UTF-8";
-@charset "iso-8859-15";
-@charset "any-string-is-okay";
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Single Quotes
------
+# Formatted
 
 ```css
 [attr='double'] {
@@ -111,4 +75,5 @@ div {
 @charset· "UTF-8";
 @charset "iso-8859-15";
 @charset "any-string-is-okay";
+
 ```

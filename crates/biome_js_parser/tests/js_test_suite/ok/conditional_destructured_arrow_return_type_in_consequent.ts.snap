@@ -1,0 +1,178 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```ts
+const slotFn = isFirstMount
+  ? ({ item }: Filter): Slot => item
+  : other;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@0..6 "const" [] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@6..13 "slotFn" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@13..15 "=" [] [Whitespace(" ")],
+                            expression: JsConditionalExpression {
+                                test: JsIdentifierExpression {
+                                    name: JsReferenceIdentifier {
+                                        value_token: IDENT@15..27 "isFirstMount" [] [],
+                                    },
+                                },
+                                question_mark_token: QUESTION@27..32 "?" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                consequent: JsArrowFunctionExpression {
+                                    async_token: missing (optional),
+                                    type_parameters: missing (optional),
+                                    parameters: JsParameters {
+                                        l_paren_token: L_PAREN@32..33 "(" [] [],
+                                        items: JsParameterList [
+                                            JsFormalParameter {
+                                                decorators: JsDecoratorList [],
+                                                binding: JsObjectBindingPattern {
+                                                    l_curly_token: L_CURLY@33..35 "{" [] [Whitespace(" ")],
+                                                    properties: JsObjectBindingPatternPropertyList [
+                                                        JsObjectBindingPatternShorthandProperty {
+                                                            identifier: JsIdentifierBinding {
+                                                                name_token: IDENT@35..40 "item" [] [Whitespace(" ")],
+                                                            },
+                                                            init: missing (optional),
+                                                        },
+                                                    ],
+                                                    r_curly_token: R_CURLY@40..41 "}" [] [],
+                                                },
+                                                question_mark_token: missing (optional),
+                                                type_annotation: TsTypeAnnotation {
+                                                    colon_token: COLON@41..43 ":" [] [Whitespace(" ")],
+                                                    ty: TsReferenceType {
+                                                        name: JsReferenceIdentifier {
+                                                            value_token: IDENT@43..49 "Filter" [] [],
+                                                        },
+                                                        type_arguments: missing (optional),
+                                                    },
+                                                },
+                                                initializer: missing (optional),
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@49..50 ")" [] [],
+                                    },
+                                    return_type_annotation: TsReturnTypeAnnotation {
+                                        colon_token: COLON@50..52 ":" [] [Whitespace(" ")],
+                                        ty: TsReferenceType {
+                                            name: JsReferenceIdentifier {
+                                                value_token: IDENT@52..57 "Slot" [] [Whitespace(" ")],
+                                            },
+                                            type_arguments: missing (optional),
+                                        },
+                                    },
+                                    fat_arrow_token: FAT_ARROW@57..60 "=>" [] [Whitespace(" ")],
+                                    body: JsIdentifierExpression {
+                                        name: JsReferenceIdentifier {
+                                            value_token: IDENT@60..64 "item" [] [],
+                                        },
+                                    },
+                                },
+                                colon_token: COLON@64..69 ":" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                alternate: JsIdentifierExpression {
+                                    name: JsReferenceIdentifier {
+                                        value_token: IDENT@69..74 "other" [] [],
+                                    },
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@74..75 ";" [] [],
+        },
+    ],
+    eof_token: EOF@75..76 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..76
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..75
+    0: JS_VARIABLE_STATEMENT@0..75
+      0: JS_VARIABLE_DECLARATION@0..74
+        0: (empty)
+        1: CONST_KW@0..6 "const" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@6..74
+          0: JS_VARIABLE_DECLARATOR@6..74
+            0: JS_IDENTIFIER_BINDING@6..13
+              0: IDENT@6..13 "slotFn" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@13..74
+              0: EQ@13..15 "=" [] [Whitespace(" ")]
+              1: JS_CONDITIONAL_EXPRESSION@15..74
+                0: JS_IDENTIFIER_EXPRESSION@15..27
+                  0: JS_REFERENCE_IDENTIFIER@15..27
+                    0: IDENT@15..27 "isFirstMount" [] []
+                1: QUESTION@27..32 "?" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+                2: JS_ARROW_FUNCTION_EXPRESSION@32..64
+                  0: (empty)
+                  1: (empty)
+                  2: JS_PARAMETERS@32..50
+                    0: L_PAREN@32..33 "(" [] []
+                    1: JS_PARAMETER_LIST@33..49
+                      0: JS_FORMAL_PARAMETER@33..49
+                        0: JS_DECORATOR_LIST@33..33
+                        1: JS_OBJECT_BINDING_PATTERN@33..41
+                          0: L_CURLY@33..35 "{" [] [Whitespace(" ")]
+                          1: JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST@35..40
+                            0: JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY@35..40
+                              0: JS_IDENTIFIER_BINDING@35..40
+                                0: IDENT@35..40 "item" [] [Whitespace(" ")]
+                              1: (empty)
+                          2: R_CURLY@40..41 "}" [] []
+                        2: (empty)
+                        3: TS_TYPE_ANNOTATION@41..49
+                          0: COLON@41..43 ":" [] [Whitespace(" ")]
+                          1: TS_REFERENCE_TYPE@43..49
+                            0: JS_REFERENCE_IDENTIFIER@43..49
+                              0: IDENT@43..49 "Filter" [] []
+                            1: (empty)
+                        4: (empty)
+                    2: R_PAREN@49..50 ")" [] []
+                  3: TS_RETURN_TYPE_ANNOTATION@50..57
+                    0: COLON@50..52 ":" [] [Whitespace(" ")]
+                    1: TS_REFERENCE_TYPE@52..57
+                      0: JS_REFERENCE_IDENTIFIER@52..57
+                        0: IDENT@52..57 "Slot" [] [Whitespace(" ")]
+                      1: (empty)
+                  4: FAT_ARROW@57..60 "=>" [] [Whitespace(" ")]
+                  5: JS_IDENTIFIER_EXPRESSION@60..64
+                    0: JS_REFERENCE_IDENTIFIER@60..64
+                      0: IDENT@60..64 "item" [] []
+                3: COLON@64..69 ":" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+                4: JS_IDENTIFIER_EXPRESSION@69..74
+                  0: JS_REFERENCE_IDENTIFIER@69..74
+                    0: IDENT@69..74 "other" [] []
+      1: SEMICOLON@74..75 ";" [] []
+  4: EOF@75..76 "" [Newline("\n")] []
+
+```

@@ -8,8 +8,8 @@ use camino::Utf8Path;
 const FIX_BEFORE: &str = "(1 >= -0)";
 const FIX_AFTER: &str = "(1 >= 0)";
 
-const DEBUGGER_BEFORE: &str = "debugger";
-const DEBUGGER_AFTER: &str = "";
+const DEBUGGER_BEFORE: &str = "debugger;\n";
+const DEBUGGER_AFTER: &str = "\n";
 
 const SIMPLE_NUMBERS_BEFORE: &str = "({ 0x1: 1 });";
 const SIMPLE_NUMBERS_AFTER: &str = "({ 1: 1 });";

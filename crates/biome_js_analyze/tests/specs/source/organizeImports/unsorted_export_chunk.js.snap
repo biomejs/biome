@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: unsorted_export_chunk.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -17,6 +16,7 @@ export * as S from "s";
 export { R } from "r";
 function f() {}
 export { A } from "a";
+export { X }
 
 ```
 
@@ -24,15 +24,61 @@ export { A } from "a";
 ```
 unsorted_export_chunk.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Some imports or exports are not organized.
+  
+     1 │ // File header comment to keep at the top
+   > 2 │ export { A, B } from "y";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 3 │ // Attached comment X
+   > 4 │ export * from "x";
+        ...
+  > 11 │ function f() {}
+  > 12 │ export { A } from "a";
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    13 │ export { X }
+    14 │ 
+  
+  i Sort these exports.
   
     1 │ // File header comment to keep at the top
   > 2 │ export { A, B } from "y";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ // Attached comment X
-    4 │ export * from "x";
+  > 3 │ // Attached comment X
+  > 4 │ export * from "x";
+      │ ^^^^^^^^^^^^^^^^^^
+    5 │ // Detached comment
+    6 │ 
   
-  i Safe fix: Organize Imports (Biome)
+  i Sort these exports.
+  
+     7 │ // Attached comment S
+   > 8 │ export * as S from "s";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+   > 9 │ // Attached S
+  > 10 │ export { R } from "r";
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    11 │ function f() {}
+    12 │ export { A } from "a";
+  
+  i This statement must be preceded by a blank line. Add a newline before this statement.
+  
+     9 │ // Attached S
+    10 │ export { R } from "r";
+  > 11 │ function f() {}
+       │ ^^^^^^^^^^^^^^^
+    12 │ export { A } from "a";
+    13 │ export { X }
+  
+  i This statement must be preceded by a blank line. Add a newline before this statement.
+  
+    10 │ export { R } from "r";
+    11 │ function f() {}
+  > 12 │ export { A } from "a";
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    13 │ export { X }
+    14 │ 
+  
+  i Safe fix: Organize imports and exports (Biome)
   
      1  1 │   // File header comment to keep at the top
      2    │ - export·{·A,·B·}·from·"y";
@@ -57,7 +103,7 @@ unsorted_export_chunk.js:2:1 assist/source/organizeImports  FIXABLE  ━━━�
     11 14 │   function f() {}
        15 │ + 
     12 16 │   export { A } from "a";
-    13 17 │   
+    13 17 │   export { X }
   
 
 ```

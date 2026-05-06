@@ -13,19 +13,7 @@ div:first-of-type div {}
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
------
+# Formatted
 
 ```css
 :first-of-type {
@@ -36,6 +24,5 @@ div:first-of-type {
 }
 div:first-of-type div {
 }
+
 ```
-
-

@@ -1,4 +1,6 @@
 use crate::JsRuleAction;
+use crate::services::embedded_bindings::EmbeddedBindings;
+use crate::services::embedded_value_references::EmbeddedValueReferences;
 use crate::{services::semantic::Semantic, utils::rename::RenameSymbolExtensions};
 use biome_analyze::RuleSource;
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
@@ -8,9 +10,10 @@ use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::{
-    AnyJsExpression, JsClassExpression, JsFileSource, JsForStatement, JsFunctionExpression,
-    JsIdentifierExpression, JsModuleItemList, JsSequenceExpression, JsSyntaxKind, JsSyntaxNode,
-    TsConditionalType, TsDeclarationModule, TsInferType,
+    AnyJsExpression, EmbeddingKind, JsClassExpression, JsFileSource, JsForStatement,
+    JsFunctionExpression, JsIdentifierExpression, JsModuleItemList, JsSequenceExpression,
+    JsSyntaxKind, JsSyntaxNode, TsConditionalType, TsDeclarationModule, TsInferType,
+    TsInterfaceDeclaration, TsTypeAliasDeclaration,
 };
 use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult};
 use biome_rule_options::no_unused_variables::NoUnusedVariablesOptions;
@@ -90,6 +93,29 @@ declare_lint_rule! {
     /// const car = { brand: "Tesla", year: 2019, countryCode: "US" };
     /// const { brand, ...rest } = car;
     /// console.log(rest);
+    /// ```
+    ///
+    /// TypeScript namespaces that participate in declaration merging with an exported
+    /// or referenced value of the same name are not flagged.
+    /// ```ts
+    /// const MyComponent = () => {};
+    /// namespace MyComponent {
+    ///     export type Props = { id: string };
+    /// }
+    /// export default MyComponent;
+    /// ```
+    ///
+    /// In Astro files, a top-level interface or a type alias named `Props` is always ignored
+    /// as it's implicitly read by the framework.
+    /// ```astro,ignore
+    /// ---
+    /// interface Props {
+    ///   name: string;
+    ///   greeting?: string;
+    /// }
+    ///
+    /// const { name, greeting } = Astro.props;
+    /// ---
     /// ```
     ///
     /// ## Options
@@ -292,10 +318,16 @@ impl Rule for NoUnusedVariables {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let binding = ctx.query();
         let model = ctx.model();
-        let is_declaration_file = ctx
-            .source_type::<JsFileSource>()
-            .language()
-            .is_definition_file();
+        let embedded_bindings = ctx
+            .get_service::<EmbeddedBindings>()
+            .expect("embedded bindings service");
+        let embedded_references = ctx
+            .get_service::<EmbeddedValueReferences>()
+            .expect("embedded references service");
+
+        let file_source = ctx.source_type::<JsFileSource>();
+
+        let is_declaration_file = file_source.language().is_definition_file();
         if is_declaration_file
             && let Some(items) = binding
                 .syntax()
@@ -312,9 +344,49 @@ impl Rule for NoUnusedVariables {
             }
         }
 
+        let binding_name = binding.name_token().ok()?;
+        let binding_name = binding_name.text_trimmed();
+
         // Ignore name prefixed with `_`
-        let is_underscore_prefixed = binding.name_token().ok()?.text_trimmed().starts_with('_');
-        if !is_underscore_prefixed && is_unused(model, binding) {
+        let is_underscore_prefixed = binding_name.starts_with('_');
+        // Only suppress noUnusedVariables for imports and variable declarations in
+        // embedded script blocks. Function/class/type declarations should still be
+        // flagged unless they are actually referenced in the template
+        // (handled by is_used_as_reference below).
+        // Eventually, we should probably not ignore bindings in embedded blocks, because they might be genuinely unused.
+        let is_defined_in_embedded_binding = embedded_bindings.contains_binding(binding_name)
+            && binding
+                .declaration()
+                .map(|d| d.parent_binding_pattern_declaration().unwrap_or(d))
+                .is_some_and(|d| {
+                    matches!(
+                        d,
+                        AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
+                            | AnyJsBindingDeclaration::JsNamedImportSpecifier(_)
+                            | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
+                            | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_)
+                            | AnyJsBindingDeclaration::JsVariableDeclarator(_)
+                    )
+                });
+        let is_used_as_reference = embedded_references.is_used_as_value(binding_name);
+
+        if is_underscore_prefixed || is_defined_in_embedded_binding || is_used_as_reference {
+            return None;
+        }
+
+        // In Astro files, a top-level type/interface `Props` is always ignored as it's implicitly
+        // read by the framework.
+        if binding_name == "Props"
+            && let EmbeddingKind::Astro { .. } = file_source.as_embedding_kind()
+            && let AnyJsIdentifierBinding::TsIdentifierBinding(binding) = binding
+            && (TsInterfaceDeclaration::can_cast(binding.syntax().parent()?.kind())
+                || TsTypeAliasDeclaration::can_cast(binding.syntax().parent()?.kind()))
+            && JsModuleItemList::can_cast(binding.syntax().grand_parent()?.kind())
+        {
+            return None;
+        }
+
+        if is_unused(model, binding) {
             suggested_fix_if_unused(binding, ctx.options())
         } else {
             None
@@ -341,15 +413,13 @@ impl Rule for NoUnusedVariables {
             AnyJsIdentifierBinding::TsLiteralEnumMemberName(node) => node.value().ok()?,
         };
 
-        let diag = RuleDiagnostic::new(
+        let mut diag = RuleDiagnostic::new(
             rule_category!(),
             binding.syntax().text_trimmed_range(),
             markup! {
                 "This "{symbol_type}" "<Emphasis>{binding_name.text_trimmed()}</Emphasis>" is unused."
             },
-        );
-
-        let mut diag = diag.note(
+        ).note(
             markup! {
                 "Unused variables are often the result of typos, incomplete refactors, or other sources of bugs."
             },
@@ -411,6 +481,111 @@ impl Rule for NoUnusedVariables {
     }
 }
 
+fn containing_statement_list(decl: &AnyJsBindingDeclaration) -> Option<JsSyntaxNode> {
+    decl.syntax().ancestors().find(|a| {
+        matches!(
+            a.kind(),
+            JsSyntaxKind::JS_MODULE_ITEM_LIST | JsSyntaxKind::JS_STATEMENT_LIST
+        )
+    })
+}
+
+fn is_namespace_merge_value_declaration(decl: &AnyJsBindingDeclaration) -> bool {
+    matches!(
+        decl,
+        AnyJsBindingDeclaration::JsVariableDeclarator(_)
+            | AnyJsBindingDeclaration::JsFunctionDeclaration(_)
+            | AnyJsBindingDeclaration::JsClassDeclaration(_)
+            | AnyJsBindingDeclaration::TsEnumDeclaration(_)
+    )
+}
+
+fn is_namespace_merge_value_used(
+    model: &SemanticModel,
+    namespace: &AnyJsIdentifierBinding,
+    other: &AnyJsIdentifierBinding,
+    name: &str,
+) -> Option<bool> {
+    if other.syntax().text_trimmed_range() == namespace.syntax().text_trimmed_range() {
+        return None;
+    }
+
+    if other.name_token().ok()?.text_trimmed() != name {
+        return None;
+    }
+
+    let other_decl = other.declaration()?;
+    if !is_namespace_merge_value_declaration(&other_decl) {
+        return None;
+    }
+
+    Some(model.is_exported(other) || !is_unused(model, other))
+}
+
+fn is_namespace_merged_with_used_value(
+    model: &SemanticModel,
+    binding: &AnyJsIdentifierBinding,
+) -> Option<bool> {
+    let decl = binding.declaration()?;
+    let name_token = binding.name_token().ok()?;
+    let name = name_token.text_trimmed();
+    let statement_list = containing_statement_list(&decl)?;
+    let scope = model.scope(&statement_list);
+
+    for scope_binding in scope.bindings() {
+        let other = scope_binding.tree();
+        if let Some(is_used) = is_namespace_merge_value_used(model, binding, &other, name) {
+            return Some(is_used);
+        }
+    }
+
+    Some(false)
+}
+
+fn is_value_merged_with_exported_namespace(
+    model: &SemanticModel,
+    binding: &AnyJsIdentifierBinding,
+) -> Option<bool> {
+    let decl = binding.declaration()?;
+    let name_token = binding.name_token().ok()?;
+    let name = name_token.text_trimmed();
+    let statement_list = containing_statement_list(&decl)?;
+    let scope = model.scope(&statement_list);
+
+    // Namespace declarations must follow the value they merge with, so the
+    // scope name lookup points directly at the merged namespace when it exists.
+    let namespace = scope.get_binding(name)?.tree();
+    if namespace.syntax().text_trimmed_range() == binding.syntax().text_trimmed_range() {
+        return Some(false);
+    }
+
+    let namespace_decl = namespace.declaration()?;
+    if !matches!(
+        namespace_decl,
+        AnyJsBindingDeclaration::TsModuleDeclaration(_)
+    ) {
+        return Some(false);
+    }
+
+    Some(model.is_exported(&namespace))
+}
+
+fn is_declaration_merged_with_used(
+    model: &SemanticModel,
+    binding: &AnyJsIdentifierBinding,
+) -> Option<bool> {
+    let decl = binding.declaration()?;
+    match decl {
+        AnyJsBindingDeclaration::TsModuleDeclaration(_) => {
+            is_namespace_merged_with_used_value(model, binding)
+        }
+        _ if is_namespace_merge_value_declaration(&decl) => {
+            is_value_merged_with_exported_namespace(model, binding)
+        }
+        _ => None,
+    }
+}
+
 /// Returns `true` if `binding` is considered as unused.
 pub fn is_unused(model: &SemanticModel, binding: &AnyJsIdentifierBinding) -> bool {
     if matches!(binding, AnyJsIdentifierBinding::TsLiteralEnumMemberName(_)) {
@@ -429,12 +604,11 @@ pub fn is_unused(model: &SemanticModel, binding: &AnyJsIdentifierBinding) -> boo
         return false;
     }
 
-    // We need to check if all uses of this binding are somehow recursive or unused
     let Some(declaration) = binding.declaration() else {
         return false;
     };
     let declaration = declaration.syntax();
-    binding
+    let unused_by_refs = binding
         .all_references(model)
         .filter_map(|reference| {
             let ref_parent = reference.syntax().parent()?;
@@ -498,7 +672,11 @@ pub fn is_unused(model: &SemanticModel, binding: &AnyJsIdentifierBinding) -> boo
             }
             // Always false when the ref is outside the declaration
             false
-        })
+        });
+    if !unused_by_refs {
+        return false;
+    }
+    !is_declaration_merged_with_used(model, binding).unwrap_or(false)
 }
 
 /// Returns `true` if `expr` is unused.

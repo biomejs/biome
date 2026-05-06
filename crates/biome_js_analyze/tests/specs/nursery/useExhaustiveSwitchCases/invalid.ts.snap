@@ -84,6 +84,49 @@ declare const value5: (string & { foo: 'bar' }) | '1' | 1 | null | undefined;
 switch (value5) {
 }
 
+type Status = "loading" | "ready" | "error";
+declare const p: Pick<{s: Status}, "s">;
+switch (p.s) { case "loading": break; case "ready": break; }
+
+function switchReq(x: Required<{kind?: "a" | "b" | "c"}>) {
+	switch (x.kind) { case "a": break; case "b": break; }
+}
+
+function switchRo(x: Readonly<{kind: "x" | "y" | "z"}>) {
+	switch (x.kind) { case "x": break; }
+}
+
+type Bool = true | false;
+function switchBool(value: Bool): number {
+	switch (value) {
+		case true:
+			return 1;
+	}
+}
+
+type BooleanStatus = true | false | "skip";
+declare const value6: BooleanStatus;
+switch (value6) {
+	case true:
+		break;
+	case "skip":
+		break;
+}
+
+type AliasedBoolean = boolean;
+function switchAliasedBoolean(value: boolean | AliasedBoolean): number {
+	switch (value) {
+		case true:
+			return 1;
+	}
+}
+
+function exhaustiveSwitchOnAsConstStringDiscriminant(): void {
+	const wrappedSwitch = { kind: "wrapped" as const };
+	switch (wrappedSwitch.kind) {
+	}
+}
+
 ```
 
 # Diagnostics
@@ -120,18 +163,18 @@ invalid.ts:13:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
   
   i Unsafe fix: Add the missing cases to the switch statement.
   
-    15 15 │   		result = 1;
-    16 16 │   		break;
-    17    │ - → }
-       17 │ + → }
-       18 │ + → case·"Tuesday":·throw·new·Error("TODO:·Not·implemented·yet");
-       19 │ + → case·"Wednesday":·throw·new·Error("TODO:·Not·implemented·yet");
-       20 │ + → case·"Thursday":·throw·new·Error("TODO:·Not·implemented·yet");
-       21 │ + → case·"Friday":·throw·new·Error("TODO:·Not·implemented·yet");
-       22 │ + → case·"Saturday":·throw·new·Error("TODO:·Not·implemented·yet");
-       23 │ + → case·"Sunday":·throw·new·Error("TODO:·Not·implemented·yet");
-    18 24 │   }
-    19 25 │   
+     15  15 │       result = 1;
+     16  16 │       break;
+     17     │ - → }
+         17 │ + → }
+         18 │ + → case·"Tuesday":·throw·new·Error("TODO:·Not·implemented·yet");
+         19 │ + → case·"Wednesday":·throw·new·Error("TODO:·Not·implemented·yet");
+         20 │ + → case·"Thursday":·throw·new·Error("TODO:·Not·implemented·yet");
+         21 │ + → case·"Friday":·throw·new·Error("TODO:·Not·implemented·yet");
+         22 │ + → case·"Saturday":·throw·new·Error("TODO:·Not·implemented·yet");
+         23 │ + → case·"Sunday":·throw·new·Error("TODO:·Not·implemented·yet");
+     18  24 │   }
+     19  25 │   
   
 
 ```
@@ -166,18 +209,18 @@ invalid.ts:20:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
   
   i Unsafe fix: Add the missing cases to the switch statement.
   
-    18 18 │   }
-    19 19 │   
-    20    │ - switch·(day)·{
-       20 │ + switch·(day)·{case·"Monday":·throw·new·Error("TODO:·Not·implemented·yet");
-       21 │ + ··case·"Tuesday":·throw·new·Error("TODO:·Not·implemented·yet");
-       22 │ + ··case·"Wednesday":·throw·new·Error("TODO:·Not·implemented·yet");
-       23 │ + ··case·"Thursday":·throw·new·Error("TODO:·Not·implemented·yet");
-       24 │ + ··case·"Friday":·throw·new·Error("TODO:·Not·implemented·yet");
-       25 │ + ··case·"Saturday":·throw·new·Error("TODO:·Not·implemented·yet");
-       26 │ + ··case·"Sunday":·throw·new·Error("TODO:·Not·implemented·yet");
-    21 27 │   }
-    22 28 │   
+     18  18 │   }
+     19  19 │   
+     20     │ - switch·(day)·{
+         20 │ + switch·(day)·{case·"Monday":·throw·new·Error("TODO:·Not·implemented·yet");
+         21 │ + ··case·"Tuesday":·throw·new·Error("TODO:·Not·implemented·yet");
+         22 │ + ··case·"Wednesday":·throw·new·Error("TODO:·Not·implemented·yet");
+         23 │ + ··case·"Thursday":·throw·new·Error("TODO:·Not·implemented·yet");
+         24 │ + ··case·"Friday":·throw·new·Error("TODO:·Not·implemented·yet");
+         25 │ + ··case·"Saturday":·throw·new·Error("TODO:·Not·implemented·yet");
+         26 │ + ··case·"Sunday":·throw·new·Error("TODO:·Not·implemented·yet");
+     21  27 │   }
+     22  28 │   
   
 
 ```
@@ -208,14 +251,14 @@ invalid.ts:29:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
   
   i Unsafe fix: Add the missing cases to the switch statement.
   
-    29 29 │   	switch (value) {
-    30 30 │   		case 'a':
-    31    │ - → → → return·1;
-       31 │ + → → → return·1;
-       32 │ + → → case·"b":·throw·new·Error("TODO:·Not·implemented·yet");
-       33 │ + → → case·"c":·throw·new·Error("TODO:·Not·implemented·yet");
-    32 34 │   	}
-    33 35 │   }
+     29  29 │     switch (value) {
+     30  30 │       case 'a':
+     31     │ - → → → return·1;
+         31 │ + → → → return·1;
+         32 │ + → → case·"b":·throw·new·Error("TODO:·Not·implemented·yet");
+         33 │ + → → case·"c":·throw·new·Error("TODO:·Not·implemented·yet");
+     32  34 │     }
+     33  35 │   }
   
 
 ```
@@ -246,14 +289,14 @@ invalid.ts:42:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
   
   i Unsafe fix: Add the missing cases to the switch statement.
   
-    42 42 │   	switch (value) {
-    43 43 │   		case 'a':
-    44    │ - → → → return·1;
-       44 │ + → → → return·1;
-       45 │ + → → case·1:·throw·new·Error("TODO:·Not·implemented·yet");
-       46 │ + → → case·true:·throw·new·Error("TODO:·Not·implemented·yet");
-    45 47 │   	}
-    46 48 │   }
+     42  42 │     switch (value) {
+     43  43 │       case 'a':
+     44     │ - → → → return·1;
+         44 │ + → → → return·1;
+         45 │ + → → case·1:·throw·new·Error("TODO:·Not·implemented·yet");
+         46 │ + → → case·true:·throw·new·Error("TODO:·Not·implemented·yet");
+     45  47 │     }
+     46  48 │   }
   
 
 ```
@@ -283,13 +326,13 @@ invalid.ts:51:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
   
   i Unsafe fix: Add the missing cases to the switch statement.
   
-    51 51 │   	switch (value.type) {
-    52 52 │   		case 'A':
-    53    │ - → → → return·1;
-       53 │ + → → → return·1;
-       54 │ + → → case·"B":·throw·new·Error("TODO:·Not·implemented·yet");
-    54 55 │   	}
-    55 56 │   }
+     51  51 │     switch (value.type) {
+     52  52 │       case 'A':
+     53     │ - → → → return·1;
+         53 │ + → → → return·1;
+         54 │ + → → case·"B":·throw·new·Error("TODO:·Not·implemented·yet");
+     54  55 │     }
+     55  56 │   }
   
 
 ```
@@ -375,13 +418,13 @@ invalid.ts:66:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
   
   i Unsafe fix: Add the missing cases to the switch statement.
   
-    66 66 │   switch (value3) {
-    67 67 │   	case 'literal':
-    68    │ - → → break;
-       68 │ + → → break;
-       69 │ + → case·1:·throw·new·Error("TODO:·Not·implemented·yet");
-    69 70 │   }
-    70 71 │   
+     66  66 │   switch (value3) {
+     67  67 │     case 'literal':
+     68     │ - → → break;
+         68 │ + → → break;
+         69 │ + → case·1:·throw·new·Error("TODO:·Not·implemented·yet");
+     69  70 │   }
+     70  71 │   
   
 
 ```
@@ -411,13 +454,13 @@ invalid.ts:72:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
   
   i Unsafe fix: Add the missing cases to the switch statement.
   
-    72 72 │   switch (value4) {
-    73 73 │   	case '1':
-    74    │ - → → break;
-       74 │ + → → break;
-       75 │ + → case·"2":·throw·new·Error("TODO:·Not·implemented·yet");
-    75 76 │   }
-    76 77 │   
+     72  72 │   switch (value4) {
+     73  73 │     case '1':
+     74     │ - → → break;
+         74 │ + → → break;
+         75 │ + → case·"2":·throw·new·Error("TODO:·Not·implemented·yet");
+     75  76 │   }
+     76  77 │   
   
 
 ```
@@ -433,6 +476,7 @@ invalid.ts:78:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
   > 79 │ }
        │ ^
     80 │ 
+    81 │ type Status = "loading" | "ready" | "error";
   
   i Some variants of the union type are not handled here.
   
@@ -447,15 +491,237 @@ invalid.ts:78:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
   
   i Unsafe fix: Add the missing cases to the switch statement.
   
-    76 76 │   
-    77 77 │   declare const value5: (string & { foo: 'bar' }) | '1' | 1 | null | undefined;
-    78    │ - switch·(value5)·{
-       78 │ + switch·(value5)·{case·"1":·throw·new·Error("TODO:·Not·implemented·yet");
-       79 │ + ··case·1:·throw·new·Error("TODO:·Not·implemented·yet");
-       80 │ + ··case·null:·throw·new·Error("TODO:·Not·implemented·yet");
-       81 │ + ··case·undefined:·throw·new·Error("TODO:·Not·implemented·yet");
-    79 82 │   }
-    80 83 │   
+     76  76 │   
+     77  77 │   declare const value5: (string & { foo: 'bar' }) | '1' | 1 | null | undefined;
+     78     │ - switch·(value5)·{
+         78 │ + switch·(value5)·{case·"1":·throw·new·Error("TODO:·Not·implemented·yet");
+         79 │ + ··case·1:·throw·new·Error("TODO:·Not·implemented·yet");
+         80 │ + ··case·null:·throw·new·Error("TODO:·Not·implemented·yet");
+         81 │ + ··case·undefined:·throw·new·Error("TODO:·Not·implemented·yet");
+     79  82 │   }
+     80  83 │   
   
+
+```
+
+```
+invalid.ts:83:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    81 │ type Status = "loading" | "ready" | "error";
+    82 │ declare const p: Pick<{s: Status}, "s">;
+  > 83 │ switch (p.s) { case "loading": break; case "ready": break; }
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    84 │ 
+    85 │ function switchReq(x: Required<{kind?: "a" | "b" | "c"}>) {
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - "error"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    83 │ switch·(p.s)·{·case·"loading":·break;·case·"ready":·break;·case·"error":·throw·new·Error("TODO:·Not·implemented·yet");·}
+       │                                                            ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
+
+```
+
+```
+invalid.ts:86:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    85 │ function switchReq(x: Required<{kind?: "a" | "b" | "c"}>) {
+  > 86 │ 	switch (x.kind) { case "a": break; case "b": break; }
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    87 │ }
+    88 │ 
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - "c"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    86 │ → switch·(x.kind)·{·case·"a":·break;·case·"b":·break;·case·"c":·throw·new·Error("TODO:·Not·implemented·yet");·}
+       │                                                       ++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
+
+```
+
+```
+invalid.ts:90:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    89 │ function switchRo(x: Readonly<{kind: "x" | "y" | "z"}>) {
+  > 90 │ 	switch (x.kind) { case "x": break; }
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    91 │ }
+    92 │ 
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - "y"
+  - "z"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    90 │ → switch·(x.kind)·{·case·"x":·break;·case·"y":·throw·new·Error("TODO:·Not·implemented·yet");case·"z":·throw·new·Error("TODO:·Not·implemented·yet");·}
+       │                                      +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
+
+```
+
+```
+invalid.ts:95:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+     93 │ type Bool = true | false;
+     94 │ function switchBool(value: Bool): number {
+   > 95 │ 	switch (value) {
+        │ 	^^^^^^^^^^^^^^^^
+   > 96 │ 		case true:
+   > 97 │ 			return 1;
+   > 98 │ 	}
+        │ 	^
+     99 │ }
+    100 │ 
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - false
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+     95  95 │     switch (value) {
+     96  96 │       case true:
+     97     │ - → → → return·1;
+         97 │ + → → → return·1;
+         98 │ + → → case·false:·throw·new·Error("TODO:·Not·implemented·yet");
+     98  99 │     }
+     99 100 │   }
+  
+
+```
+
+```
+invalid.ts:103:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    101 │ type BooleanStatus = true | false | "skip";
+    102 │ declare const value6: BooleanStatus;
+  > 103 │ switch (value6) {
+        │ ^^^^^^^^^^^^^^^^^
+  > 104 │ 	case true:
+  > 105 │ 		break;
+  > 106 │ 	case "skip":
+  > 107 │ 		break;
+  > 108 │ }
+        │ ^
+    109 │ 
+    110 │ type AliasedBoolean = boolean;
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - false
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    105 105 │       break;
+    106 106 │     case "skip":
+    107     │ - → → break;
+        107 │ + → → break;
+        108 │ + → case·false:·throw·new·Error("TODO:·Not·implemented·yet");
+    108 109 │   }
+    109 110 │   
+  
+
+```
+
+```
+invalid.ts:112:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    110 │ type AliasedBoolean = boolean;
+    111 │ function switchAliasedBoolean(value: boolean | AliasedBoolean): number {
+  > 112 │ 	switch (value) {
+        │ 	^^^^^^^^^^^^^^^^
+  > 113 │ 		case true:
+  > 114 │ 			return 1;
+  > 115 │ 	}
+        │ 	^
+    116 │ }
+    117 │ 
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - false
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    112 112 │     switch (value) {
+    113 113 │       case true:
+    114     │ - → → → return·1;
+        114 │ + → → → return·1;
+        115 │ + → → case·false:·throw·new·Error("TODO:·Not·implemented·yet");
+    115 116 │     }
+    116 117 │   }
+  
+
+```
+
+```
+invalid.ts:120:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    118 │ function exhaustiveSwitchOnAsConstStringDiscriminant(): void {
+    119 │ 	const wrappedSwitch = { kind: "wrapped" as const };
+  > 120 │ 	switch (wrappedSwitch.kind) {
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 121 │ 	}
+        │ 	^
+    122 │ }
+    123 │ 
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - "wrapped"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    120 │ → switch·(wrappedSwitch.kind)·{case·"wrapped":·throw·new·Error("TODO:·Not·implemented·yet");
+        │                                +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ```

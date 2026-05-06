@@ -6,6 +6,7 @@ mod css;
 mod cst;
 mod generated;
 mod prelude;
+mod scss;
 mod separated;
 mod tailwind;
 mod trivia;
@@ -37,7 +38,7 @@ use biome_string_case::StrLikeExtension;
 
 /// Used to get an object that knows how to format this object.
 pub(crate) trait AsFormat<Context> {
-    type Format<'a>: biome_formatter::Format<Context>
+    type Format<'a>: Format<Context>
     where
         Self: 'a;
 
@@ -190,14 +191,23 @@ where
     N: AstNode<Language = CssLanguage>,
 {
     fn fmt(&self, node: &N, f: &mut CssFormatter) -> FormatResult<()> {
-        if self.is_suppressed(node, f) {
+        if self.is_suppressed(node, f) || self.is_global_suppressed(node, f) {
             return write!(f, [format_suppressed_node(node.syntax())]);
         }
 
         self.fmt_leading_comments(node, f)?;
-        self.fmt_fields(node, f)?;
+        self.fmt_node(node, f)?;
         self.fmt_dangling_comments(node, f)?;
         self.fmt_trailing_comments(node, f)
+    }
+
+    /// Formats the node body after leading comments and before dangling or
+    /// trailing comments.
+    ///
+    /// Override this when a node needs more than raw `fmt_fields`, for example
+    /// to keep `/* comment */ $arg: 1px` grouped as one `@include` argument.
+    fn fmt_node(&self, node: &N, f: &mut CssFormatter) -> FormatResult<()> {
+        self.fmt_fields(node, f)
     }
 
     fn fmt_fields(&self, node: &N, f: &mut CssFormatter) -> FormatResult<()>;
@@ -205,6 +215,11 @@ where
     /// Returns `true` if the node has a suppression comment and should use the same formatting as in the source document.
     fn is_suppressed(&self, node: &N, f: &CssFormatter) -> bool {
         f.context().comments().is_suppressed(node.syntax())
+    }
+
+    /// Returns `true` if the node has a global suppression comment and should use the same formatting as in the source document.
+    fn is_global_suppressed(&self, node: &N, f: &CssFormatter) -> bool {
+        f.context().comments().is_global_suppressed(node.syntax())
     }
 
     /// Formats the [leading comments](biome_formatter::comments#leading-comments) of the node.
@@ -409,14 +424,70 @@ pub fn format_sub_tree(options: CssFormatOptions, root: &CssSyntaxNode) -> Forma
 mod tests {
     use crate::context::CssFormatOptions;
     use crate::format_node;
+    use crate::{CssFormatContext, CssFormatLanguage, CssFormatter, FormatNodeRule};
     use biome_css_parser::{CssParserOptions, parse_css};
+    use biome_css_syntax::{CssFileSource, CssRoot};
+    use biome_formatter::prelude::token;
+    use biome_formatter::{
+        Buffer, FormatLanguage, FormatRefWithRule, FormatResult, FormatRule, write,
+    };
+    use biome_rowan::AstNode;
 
     #[test]
     fn smoke_test() {
         let src = r#"html {}"#;
-        let parse = parse_css(src, CssParserOptions::default());
+        let parse = parse_css(src, CssFileSource::css(), CssParserOptions::default());
         let options = CssFormatOptions::default();
         let formatted = format_node(options, &parse.syntax()).unwrap();
         assert_eq!(formatted.print().unwrap().as_code(), "html {\n}\n");
+    }
+
+    #[test]
+    fn format_node_rule_uses_fmt_node_hook() {
+        #[derive(Debug, Clone, Default)]
+        struct ProbeRule;
+
+        impl FormatNodeRule<CssRoot> for ProbeRule {
+            fn fmt_node(&self, _: &CssRoot, f: &mut CssFormatter) -> FormatResult<()> {
+                write!(f, [token("fmt_node")])
+            }
+
+            fn fmt_fields(&self, _: &CssRoot, f: &mut CssFormatter) -> FormatResult<()> {
+                write!(f, [token("fmt_fields")])
+            }
+
+            fn fmt_leading_comments(&self, _: &CssRoot, _: &mut CssFormatter) -> FormatResult<()> {
+                Ok(())
+            }
+
+            fn fmt_dangling_comments(&self, _: &CssRoot, _: &mut CssFormatter) -> FormatResult<()> {
+                Ok(())
+            }
+
+            fn fmt_trailing_comments(&self, _: &CssRoot, _: &mut CssFormatter) -> FormatResult<()> {
+                Ok(())
+            }
+        }
+
+        impl FormatRule<CssRoot> for ProbeRule {
+            type Context = CssFormatContext;
+
+            fn fmt(&self, node: &CssRoot, f: &mut CssFormatter) -> FormatResult<()> {
+                FormatNodeRule::fmt(self, node, f)
+            }
+        }
+
+        let parse = parse_css("html {}", CssFileSource::css(), CssParserOptions::default());
+        let root = CssRoot::cast(parse.syntax().clone()).unwrap();
+        let context = CssFormatLanguage::new(CssFormatOptions::default()).create_context(
+            root.syntax(),
+            None,
+            false,
+        );
+
+        let formatted =
+            biome_formatter::format!(context, [FormatRefWithRule::new(&root, ProbeRule)]).unwrap();
+
+        assert_eq!(formatted.print().unwrap().as_code(), "fmt_node");
     }
 }

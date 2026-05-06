@@ -5,3 +5,8 @@ a { font-family: Times; }
 a { FONT: italic 300 16px/30px Arial, " Arial"; }
 a { font: normal 14px/32px -apple-system, BlinkMacSystemFont; }
 a { font: 1em Lucida Grande, Arial, "sans-serif" }
+
+/* styles inside @supports blocks should still be checked */
+@supports (font: -apple-system-body) {
+  a { font-family: Arial; }
+}

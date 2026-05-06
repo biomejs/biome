@@ -57,6 +57,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[
             RuleSource::EslintTypeScript("no-require-imports").same(),
+            RuleSource::EslintTypeScript("no-var-requires").same(),
             RuleSource::EslintImport("no-commonjs").same(),
         ],
         recommended: false,

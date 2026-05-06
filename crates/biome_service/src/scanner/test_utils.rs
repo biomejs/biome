@@ -3,7 +3,7 @@ use std::sync::mpsc;
 use crate::projects::ProjectKey;
 use crate::{WatcherInstruction, WorkspaceError};
 use biome_diagnostics::serde::Diagnostic;
-use biome_fs::{BiomePath, FileSystem};
+use biome_fs::{BiomePath, FileSystem, PathKind};
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashSet;
 use rustc_hash::{FxBuildHasher, FxHashSet};
@@ -90,6 +90,7 @@ impl WorkspaceWatcherBridge for MockWorkspaceWatcherBridge<'_> {
         project_key: ProjectKey,
         scan_kind: &ScanKind,
         path: &Utf8Path,
+        _path_kind: Option<PathKind>,
     ) -> Result<bool, WorkspaceError> {
         assert_eq!(project_key, self.project_key);
         assert_eq!(*scan_kind, self.scan_kind);
@@ -128,14 +129,22 @@ impl WorkspaceWatcherBridge for MockWorkspaceWatcherBridge<'_> {
         self.tx.send(()).expect("can send notification");
     }
 
-    fn unload_file(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError> {
+    fn unload_file(
+        &self,
+        path: &Utf8Path,
+        _project_key: ProjectKey,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
         self.indexed_files.pin().remove(path);
         self.tx.send(()).expect("can send notification");
 
         Ok(vec![])
     }
 
-    fn unload_path(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError> {
+    fn unload_path(
+        &self,
+        path: &Utf8Path,
+        _project_key: ProjectKey,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
         self.indexed_files.pin().remove(path);
         self.indexed_folders.pin().remove(path);
         self.tx.send(()).expect("can send notification");

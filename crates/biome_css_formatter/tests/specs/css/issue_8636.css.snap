@@ -1,8 +1,8 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 211
 info: css/issue_8636.css
 ---
+
 # Input
 
 ```css
@@ -18,19 +18,7 @@ info: css/issue_8636.css
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
------
+# Formatted
 
 ```css
 :root {
@@ -41,6 +29,5 @@ Quote style: Double Quotes
 		0px 2px 4px 0px var(--special-shadow-blue90-6, rgba(0, 0, 0, 0.06)),
 		0px 8px 16px 0px var(--special-shadow-blue90-6, rgba(0, 0, 0, 0.06));
 }
+
 ```
-
-

@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/object/trailing-commas/none/object_trailing_commas.js
 ---
+
 # Input
 
 ```js
@@ -18,63 +19,20 @@ const {  	adsadasdasdasdasdasdasdasdasdasdas,
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
------
-
-```js
-const b = {
-	longlonglonglongField1,
-	longlonglonglongField2,
-	longlonglonglongField3,
-};
-
-const {
-	adsadasdasdasdasdasdasdasdasdasdas,
-	dsadsadasdasdasdasdasdasdasd,
-	dsadsadasdasdasdasdasdasdasd,
-} = o;
+```json
+{
+  "$schema": "../../../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "javascript": {
+    "formatter": {
+      "trailingCommas": "none"
+    }
+  }
+}
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: None
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
------
+# Formatted
 
 ```js
 const b = {
@@ -88,4 +46,5 @@ const {
 	dsadsadasdasdasdasdasdasdasd,
 	dsadsadasdasdasdasdasdasdasd
 } = o;
+
 ```

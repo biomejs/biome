@@ -1,0 +1,36 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: numeric_option.jsonc
+---
+## ESLint Config
+
+```json
+{ "rules": { "max-nested-callbacks": ["error", 4] } }
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"recommended": false,
+			"nursery": {
+				"noExcessiveNestedCallbacks": {
+					"level": "error",
+					"options": { "max": 4 }
+				}
+			}
+		}
+	}
+}
+
+```

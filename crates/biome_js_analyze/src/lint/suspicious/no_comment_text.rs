@@ -97,15 +97,14 @@ impl Rule for NoCommentText {
                 continue;
             }
             match bytes_iter.next()? {
-                (_, b'/') => {
+                (_, b'/')
                     // Ignore `://` (`https://`, ...)
-                    if index == 0 || bytes.get(index - 1) != Some(&b':') {
+                    if (index == 0 || bytes.get(index - 1) != Some(&b':')) => {
                         let end = bytes_iter
                             .find(|(_, c)| c == &b'\n')
                             .map_or(bytes.len(), |(index, _)| index);
                         return Some(index..end);
                     }
-                }
                 (_, b'*') => {
                     let mut end = 0;
                     while let Some((_, byte)) = bytes_iter.next() {

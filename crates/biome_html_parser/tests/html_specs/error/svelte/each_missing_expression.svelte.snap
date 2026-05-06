@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```svelte
@@ -28,9 +29,9 @@ HtmlRoot {
                         EACH_KW@2..6 "each" [] [],
                         HTML_LITERAL@6..7 " " [] [],
                         SvelteEachAsKeyedItem {
-                            as_token: AS_KW@7..9 "as" [] [],
-                            name: HtmlTextExpression {
-                                html_literal_token: HTML_LITERAL@9..14 " item" [] [],
+                            as_token: AS_KW@7..10 "as" [] [Whitespace(" ")],
+                            name: SvelteName {
+                                ident_token: IDENT@10..14 "item" [] [],
                             },
                             index: missing (optional),
                             key: missing (optional),
@@ -93,9 +94,9 @@ HtmlRoot {
         1: EACH_KW@2..6 "each" [] []
         2: HTML_LITERAL@6..7 " " [] []
         3: SVELTE_EACH_AS_KEYED_ITEM@7..14
-          0: AS_KW@7..9 "as" [] []
-          1: HTML_TEXT_EXPRESSION@9..14
-            0: HTML_LITERAL@9..14 " item" [] []
+          0: AS_KW@7..10 "as" [] [Whitespace(" ")]
+          1: SVELTE_NAME@10..14
+            0: IDENT@10..14 "item" [] []
           2: (empty)
           3: (empty)
         4: R_CURLY@14..15 "}" [] []

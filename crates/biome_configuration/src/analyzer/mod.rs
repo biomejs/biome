@@ -715,6 +715,22 @@ impl RuleSelector {
         }
     }
 
+    pub fn from_group_and_rule(group: &str, rule: &str) -> Option<Self> {
+        if let Ok(group) = linter::RuleGroup::from_str(group)
+            && let Some(rule) = Rules::has_rule(group, rule)
+        {
+            return Some(Self::Rule(group.as_str(), rule));
+        }
+
+        if let Ok(group) = assist::RuleGroup::from_str(group)
+            && let Some(rule) = Actions::has_rule(group, rule)
+        {
+            return Some(Self::Rule(group.as_str(), rule));
+        }
+
+        None
+    }
+
     pub fn match_rule<R>(&self) -> bool
     where
         R: Rule,
@@ -934,6 +950,8 @@ pub trait RuleGroupExt: Default + Merge + Debug + From<GroupPlainConfiguration> 
     // Preset rules shouldn't populate disabled rules
     // because that will make specific rules cannot be enabled later.
     fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>];
+    /// Returns all non-domain rules of this group, as a list of [RuleFilter]
+    fn non_domain_rules_as_filters() -> &'static [RuleFilter<'static>];
     /// Returns all rules of this group, as a list of [RuleFilter]
     fn all_rules_as_filters() -> &'static [RuleFilter<'static>];
     fn collect_preset_rules(
@@ -1062,7 +1080,7 @@ where
                     | GroupPlainConfiguration::Info
                     | GroupPlainConfiguration::Warn
                     | GroupPlainConfiguration::Error => {
-                        filters.extend(G::all_rules_as_filters());
+                        filters.extend(G::non_domain_rules_as_filters());
                         filters
                     }
                 }
@@ -1105,7 +1123,7 @@ where
         match self {
             Self::Plain(plain) => {
                 if *plain != GroupPlainConfiguration::Off {
-                    enabled_rules.extend(G::all_rules_as_filters());
+                    enabled_rules.extend(G::non_domain_rules_as_filters());
                 }
             }
             Self::Group(group) => group.collect_preset_rules(parent_is_recommended, enabled_rules),
@@ -1166,6 +1184,42 @@ impl<G: Deserializable> Deserializable for SeverityOrGroup<G> {
 mod test {
     use crate::analyzer::RuleSelector;
     use std::str::FromStr;
+
+    #[test]
+    fn from_group_and_rule_valid() {
+        let selector = RuleSelector::from_group_and_rule("style", "useConst");
+        assert_eq!(selector, Some(RuleSelector::Rule("style", "useConst")));
+    }
+
+    #[test]
+    fn from_group_and_rule_invalid_rule() {
+        assert_eq!(RuleSelector::from_group_and_rule("style", "notARule"), None);
+    }
+
+    #[test]
+    fn from_group_and_rule_invalid_group() {
+        assert_eq!(
+            RuleSelector::from_group_and_rule("notAGroup", "useConst"),
+            None
+        );
+    }
+
+    #[test]
+    fn from_group_and_rule_assist() {
+        let selector = RuleSelector::from_group_and_rule("source", "organizeImports");
+        assert_eq!(
+            selector,
+            Some(RuleSelector::Rule("source", "organizeImports"))
+        );
+    }
+
+    #[test]
+    fn from_group_and_rule_assist_invalid_rule() {
+        assert_eq!(
+            RuleSelector::from_group_and_rule("source", "notARule"),
+            None
+        );
+    }
 
     #[test]
     fn lsp_filter_to_rule_selector() {

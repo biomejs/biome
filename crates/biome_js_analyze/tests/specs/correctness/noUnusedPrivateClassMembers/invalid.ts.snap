@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 146
 expression: invalid.ts
 ---
 # Input
@@ -71,7 +70,7 @@ invalid.ts:2:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
      1  1 │   class TsBioo {
      2    │ - → private·unusedProperty·=·5;
      3  2 │   
-     4  3 │   	private unusedMethod() {
+     4  3 │     private unusedMethod() {
   
 
 ```
@@ -121,7 +120,7 @@ invalid.ts:10:22 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
     10    │ - → constructor(private·nusedProperty·=·3){
        10 │ + → constructor(_nusedProperty·=·3){
     11 11 │   
-    12 12 │   	}
+    12 12 │     }
   
 
 ```
@@ -143,7 +142,7 @@ invalid.ts:17:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
     16 16 │   class TsOnlyWrite {
     17    │ - → private·usedOnlyInWrite·=·5;
     18 17 │   
-    19 18 │   	method() {
+    19 18 │     method() {
   
 
 ```
@@ -165,7 +164,7 @@ invalid.ts:25:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
     24 24 │   class TsSelfUpdate {
     25    │ - → private·usedOnlyToUpdateItself·=·5;
     26 25 │   
-    27 26 │   	method() {
+    27 26 │     method() {
   
 
 ```
@@ -186,7 +185,7 @@ invalid.ts:33:14 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
     31 31 │   
     32 32 │   class TsAccessor {
     33    │ - → private·get·unusedAccessor()·{·}
-    34 33 │   	private set unusedAccessor(value) { }
+    34 33 │     private set unusedAccessor(value) { }
     35 34 │   }
   
 
@@ -207,7 +206,7 @@ invalid.ts:34:14 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
   i Unsafe fix: Remove unused declaration.
   
     32 32 │   class TsAccessor {
-    33 33 │   	private get unusedAccessor() { }
+    33 33 │     private get unusedAccessor() { }
     34    │ - → private·set·unusedAccessor(value)·{·}
     35 34 │   }
     36 35 │   
@@ -232,7 +231,7 @@ invalid.ts:39:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
     37 37 │   // github.com/biomejs/biome/issues/6165
     38 38 │   class TsBioo2 {
     39    │ - → private·unusedProperty·=·5;
-    40 39 │   	private unusedMethod() {}
+    40 39 │     private unusedMethod() {}
     41 40 │   
   
 
@@ -253,10 +252,10 @@ invalid.ts:40:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
   i Unsafe fix: Remove unused declaration.
   
     38 38 │   class TsBioo2 {
-    39 39 │   	private unusedProperty = 5;
+    39 39 │     private unusedProperty = 5;
     40    │ - → private·unusedMethod()·{}
     41 40 │   
-    42 41 │   	private usedProperty = 4;
+    42 41 │     private usedProperty = 4;
   
 
 ```

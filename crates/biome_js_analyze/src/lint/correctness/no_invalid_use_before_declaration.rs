@@ -147,9 +147,7 @@ impl Rule for NoInvalidUseBeforeDeclaration {
                     // ```
                     if reference_syntax
                         .parent()
-                        .kind()
-                        .filter(|parent_kind| AnyJsExportNamedSpecifier::can_cast(*parent_kind))
-                        .is_none()
+                        .kind().as_ref().is_none_or(|parent_kind| !AnyJsExportNamedSpecifier::can_cast(*parent_kind))
                         // Don't report variables used in another control flow root (function, classes, ...)
                         // For example:
                         //
@@ -169,7 +167,7 @@ impl Rule for NoInvalidUseBeforeDeclaration {
                         // type Y = typeof X;
                         // const X = 0;
                         // ```
-                        && !AnyJsIdentifierUsage::cast_ref(reference_syntax)
+                        && !AnyJsIdentifierUsage::cast_ref(&reference_syntax)
                             .is_some_and(|usage| usage.is_only_type())
                     {
                         result.push(InvalidUseBeforeDeclaration {
@@ -203,10 +201,16 @@ impl Rule for NoInvalidUseBeforeDeclaration {
                 reference_range,
                 markup! { "This "{declaration_kind_text}" is used before its declaration." },
             )
+            .note(markup! {
+                "Using a "{declaration_kind_text}" before it is declared makes the code depend on declaration order and hoisting behavior."
+            })
             .detail(
                 declaration_range,
                 markup! { "The "{declaration_kind_text}" is declared here:" },
-            ),
+            )
+            .note(markup! {
+                "Move this use after the declaration, or move the declaration earlier."
+            }),
         )
     }
 }

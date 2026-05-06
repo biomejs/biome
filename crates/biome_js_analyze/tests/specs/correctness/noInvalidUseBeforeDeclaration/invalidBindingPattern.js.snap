@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidBindingPattern.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -40,6 +39,10 @@ invalidBindingPattern.js:1:18 lint/correctness/noInvalidUseBeforeDeclaration ━
     2 │ function f([b = a, a = 0]) {}
     3 │ function f({ x: [b = a, { a = 0 }] }) {}
   
+  i Using a variable before it is declared makes the code depend on declaration order and hoisting behavior.
+  
+  i Move this use after the declaration, or move the declaration earlier.
+  
 
 ```
 
@@ -61,6 +64,10 @@ invalidBindingPattern.js:2:17 lint/correctness/noInvalidUseBeforeDeclaration ━
       │                    ^
     3 │ function f({ x: [b = a, { a = 0 }] }) {}
     4 │ function f({ a = a }) {}
+  
+  i Using a variable before it is declared makes the code depend on declaration order and hoisting behavior.
+  
+  i Move this use after the declaration, or move the declaration earlier.
   
 
 ```
@@ -86,6 +93,10 @@ invalidBindingPattern.js:3:22 lint/correctness/noInvalidUseBeforeDeclaration ━
     4 │ function f({ a = a }) {}
     5 │ {
   
+  i Using a variable before it is declared makes the code depend on declaration order and hoisting behavior.
+  
+  i Move this use after the declaration, or move the declaration earlier.
+  
 
 ```
 
@@ -109,6 +120,10 @@ invalidBindingPattern.js:4:18 lint/correctness/noInvalidUseBeforeDeclaration ━
       │              ^
     5 │ {
     6 │ 	const { b = a, a = 0 } = {};
+  
+  i Using a variable before it is declared makes the code depend on declaration order and hoisting behavior.
+  
+  i Move this use after the declaration, or move the declaration earlier.
   
 
 ```
@@ -134,6 +149,10 @@ invalidBindingPattern.js:6:14 lint/correctness/noInvalidUseBeforeDeclaration ━
     7 │ }
     8 │ {
   
+  i Using a variable before it is declared makes the code depend on declaration order and hoisting behavior.
+  
+  i Move this use after the declaration, or move the declaration earlier.
+  
 
 ```
 
@@ -158,6 +177,10 @@ invalidBindingPattern.js:9:13 lint/correctness/noInvalidUseBeforeDeclaration ━
     10 │ }
     11 │ {
   
+  i Using a variable before it is declared makes the code depend on declaration order and hoisting behavior.
+  
+  i Move this use after the declaration, or move the declaration earlier.
+  
 
 ```
 
@@ -181,6 +204,10 @@ invalidBindingPattern.js:13:11 lint/correctness/noInvalidUseBeforeDeclaration �
        │ 		             ^
     14 │ 	} = {};
     15 │ }
+  
+  i Using a variable before it is declared makes the code depend on declaration order and hoisting behavior.
+  
+  i Move this use after the declaration, or move the declaration earlier.
   
 
 ```

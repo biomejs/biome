@@ -4,10 +4,13 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsModuleItem, AnyJsStatement, JsModule, export_ext::AnyJsExported};
-use biome_rowan::{AstNode, TextRange};
+use biome_js_syntax::{
+    AnyJsModuleItem, AnyJsStatement, JsIdentifierExpression, JsModule, JsPropertyObjectMember,
+    JsShorthandPropertyObjectMember, export_ext::AnyJsExported,
+};
+use biome_rowan::{AstNode, SyntaxNodeCast, TextRange};
 use biome_rule_options::use_component_export_only_modules::UseComponentExportOnlyModulesOptions;
-use rustc_hash::FxHashMap;
+use rustc_hash::{FxHashMap, FxHashSet};
 
 declare_lint_rule! {
     /// Enforce declaring components only within modules that export React Components exclusively.
@@ -214,6 +217,55 @@ impl Rule for UseComponentExportOnlyModules {
                 }
             }
         }
+
+        // Collect identifiers referenced as object property values in exported expressions.
+        // If a local component is referenced as an object property value,
+        // it should not be reported as unexported.
+        // This handles patterns like TanStack Router:
+        //   export const Route = createFileRoute('/')({ component: HomeComponent })
+        //   function HomeComponent() { ... }
+        //
+        // We only exempt components referenced in object literals (like { component: X })
+        // and not direct function call arguments (like hoge(X)), because the latter
+        // might be non-standard HOCs that could break Fast Refresh.
+        let referenced_ids: FxHashSet<Box<str>> = exported_non_component_ids
+            .iter()
+            .filter_map(|item| item.exported.as_ref())
+            .flat_map(|exported| {
+                exported
+                    .syntax()
+                    .descendants()
+                    .filter_map(JsIdentifierExpression::cast)
+                    .filter(|id| {
+                        // Only include identifiers that are object property values
+                        id.syntax()
+                            .parent()
+                            .is_some_and(|parent| parent.cast::<JsPropertyObjectMember>().is_some())
+                    })
+                    .filter_map(|id| id.name().ok())
+                    .filter_map(|name| name.value_token().ok())
+                    .map(|token| token.text_trimmed().into())
+            })
+            .collect();
+
+        // Also collect shorthand property references like { HomeComponent }
+        let shorthand_ids: FxHashSet<Box<str>> = exported_non_component_ids
+            .iter()
+            .filter_map(|item| item.exported.as_ref())
+            .flat_map(|exported| {
+                exported
+                    .syntax()
+                    .descendants()
+                    .filter_map(JsShorthandPropertyObjectMember::cast)
+                    .filter_map(|prop| prop.name().ok())
+                    .filter_map(|name| name.value_token().ok())
+                    .map(|token| token.text_trimmed().into())
+            })
+            .collect();
+
+        // Remove components that are referenced as object property values
+        local_components
+            .retain(|name, _| !referenced_ids.contains(name) && !shorthand_ids.contains(name));
 
         if !exported_component_ids.is_empty() {
             return exported_non_component_ids

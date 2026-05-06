@@ -1,0 +1,238 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+function tooManyParams(a, b, c, d, e, f, g, h) {
+    return a + b + c + d + e + f + g + h;
+}
+
+function namedFunction(a, b, c, d, e, f, g, h, i) {
+    return a + b + c + d + e + f + g + h + i;
+}
+
+const fn1 = function(a, b, c, d, e, f, g, h) {
+    return a + b + c + d + e + f + g + h;
+};
+
+const fn2 = function namedFnExpression(a, b, c, d, e, f, g, h, i) {
+    return a + b + c + d + e + f + g + h + i;
+};
+
+const arrow1 = (a, b, c, d, e, f, g, h) => {
+    return a + b + c + d + e + f + g + h;
+};
+
+const arrow2 = (a, b, c, d, e, f, g, h, i) => a + b + c + d + e + f + g + h + i;
+
+class MyClass {
+    method(a, b, c, d, e, f, g, h) {
+        return a + b + c + d + e + f + g + h;
+    }
+
+    constructor(a, b, c, d, e, f, g, h, i) {
+        this.sum = a + b + c + d + e + f + g + h + i;
+    }
+}
+
+const obj = {
+    method(a, b, c, d, e, f, g, h) {
+        return a + b + c + d + e + f + g + h;
+    }
+};
+
+function withThisParam(this, a, b, c, d, e, f, g) {
+    return a + b + c + d + e + f + g;
+}
+
+```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
+# Diagnostics
+```
+invalid.js:1:23 lint/complexity/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Function has 8 parameters, but only 4 are allowed.
+  
+  > 1 │ function tooManyParams(a, b, c, d, e, f, g, h) {
+      │                       ^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │     return a + b + c + d + e + f + g + h;
+    3 │ }
+  
+  i Functions with many parameters are hard to read and maintain.
+  
+  i Consider using an options object, splitting into smaller functions, or grouping related parameters.
+  
+
+```
+
+```
+invalid.js:5:23 lint/complexity/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Function has 9 parameters, but only 4 are allowed.
+  
+    3 │ }
+    4 │ 
+  > 5 │ function namedFunction(a, b, c, d, e, f, g, h, i) {
+      │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │     return a + b + c + d + e + f + g + h + i;
+    7 │ }
+  
+  i Functions with many parameters are hard to read and maintain.
+  
+  i Consider using an options object, splitting into smaller functions, or grouping related parameters.
+  
+
+```
+
+```
+invalid.js:9:21 lint/complexity/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Function has 8 parameters, but only 4 are allowed.
+  
+     7 │ }
+     8 │ 
+   > 9 │ const fn1 = function(a, b, c, d, e, f, g, h) {
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │     return a + b + c + d + e + f + g + h;
+    11 │ };
+  
+  i Functions with many parameters are hard to read and maintain.
+  
+  i Consider using an options object, splitting into smaller functions, or grouping related parameters.
+  
+
+```
+
+```
+invalid.js:13:39 lint/complexity/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Function has 9 parameters, but only 4 are allowed.
+  
+    11 │ };
+    12 │ 
+  > 13 │ const fn2 = function namedFnExpression(a, b, c, d, e, f, g, h, i) {
+       │                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │     return a + b + c + d + e + f + g + h + i;
+    15 │ };
+  
+  i Functions with many parameters are hard to read and maintain.
+  
+  i Consider using an options object, splitting into smaller functions, or grouping related parameters.
+  
+
+```
+
+```
+invalid.js:17:16 lint/complexity/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Function has 8 parameters, but only 4 are allowed.
+  
+    15 │ };
+    16 │ 
+  > 17 │ const arrow1 = (a, b, c, d, e, f, g, h) => {
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │     return a + b + c + d + e + f + g + h;
+    19 │ };
+  
+  i Functions with many parameters are hard to read and maintain.
+  
+  i Consider using an options object, splitting into smaller functions, or grouping related parameters.
+  
+
+```
+
+```
+invalid.js:21:16 lint/complexity/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Function has 9 parameters, but only 4 are allowed.
+  
+    19 │ };
+    20 │ 
+  > 21 │ const arrow2 = (a, b, c, d, e, f, g, h, i) => a + b + c + d + e + f + g + h + i;
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ 
+    23 │ class MyClass {
+  
+  i Functions with many parameters are hard to read and maintain.
+  
+  i Consider using an options object, splitting into smaller functions, or grouping related parameters.
+  
+
+```
+
+```
+invalid.js:24:11 lint/complexity/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Function has 8 parameters, but only 4 are allowed.
+  
+    23 │ class MyClass {
+  > 24 │     method(a, b, c, d, e, f, g, h) {
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │         return a + b + c + d + e + f + g + h;
+    26 │     }
+  
+  i Functions with many parameters are hard to read and maintain.
+  
+  i Consider using an options object, splitting into smaller functions, or grouping related parameters.
+  
+
+```
+
+```
+invalid.js:28:16 lint/complexity/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Function has 9 parameters, but only 4 are allowed.
+  
+    26 │     }
+    27 │ 
+  > 28 │     constructor(a, b, c, d, e, f, g, h, i) {
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │         this.sum = a + b + c + d + e + f + g + h + i;
+    30 │     }
+  
+  i Functions with many parameters are hard to read and maintain.
+  
+  i Consider using an options object, splitting into smaller functions, or grouping related parameters.
+  
+
+```
+
+```
+invalid.js:34:11 lint/complexity/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Function has 8 parameters, but only 4 are allowed.
+  
+    33 │ const obj = {
+  > 34 │     method(a, b, c, d, e, f, g, h) {
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^
+    35 │         return a + b + c + d + e + f + g + h;
+    36 │     }
+  
+  i Functions with many parameters are hard to read and maintain.
+  
+  i Consider using an options object, splitting into smaller functions, or grouping related parameters.
+  
+
+```
+
+```
+invalid.js:39:23 lint/complexity/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Function has 8 parameters, but only 4 are allowed.
+  
+    37 │ };
+    38 │ 
+  > 39 │ function withThisParam(this, a, b, c, d, e, f, g) {
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │     return a + b + c + d + e + f + g;
+    41 │ }
+  
+  i Functions with many parameters are hard to read and maintain.
+  
+  i Consider using an options object, splitting into smaller functions, or grouping related parameters.
+  
+
+```

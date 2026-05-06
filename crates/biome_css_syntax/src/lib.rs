@@ -4,6 +4,7 @@
 mod file_source;
 mod generated;
 mod import_ext;
+mod scss_ext;
 pub mod selector_ext;
 pub mod stmt_ext;
 mod string_ext;
@@ -13,7 +14,15 @@ pub use self::generated::*;
 pub use biome_rowan::{
     SyntaxNodeText, TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent,
 };
-pub use file_source::{CssFileSource, CssVariant};
+pub use file_source::{CssFileLanguage, CssFileSource, CssVariant, EmbeddingKind};
+pub use scss_ext::{
+    ScssMapContext, ScssMapPositionKind, ScssMapRole, is_in_scss_control_condition_sequence,
+    is_in_scss_include_arguments, is_in_scss_map_key, is_scss_map_key,
+    is_scss_map_outer_parenthesized_value_list, is_scss_map_outer_parenthesized_value_map,
+    is_scss_map_value, scss_include_keyword_argument_owner,
+    scss_keyword_argument_from_css_expression, scss_keyword_argument_from_expression,
+    scss_keyword_argument_from_syntax, single_expression_item, unwrap_single_expression_item,
+};
 pub use syntax_node::*;
 
 use crate::CssSyntaxKind::*;
@@ -102,6 +111,7 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
                 | CSS_BOGUS_CUSTOM_IDENTIFIER
                 | CSS_BOGUS_UNICODE_RANGE_VALUE
                 | CSS_BOGUS_SUPPORTS_CONDITION
+                | CSS_BOGUS_FUNCTION_PARAMETER
         )
     }
 
@@ -129,11 +139,18 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
             kind if AnyCssDeclarationOrRuleBlock::can_cast(*kind) => CSS_BOGUS_BLOCK,
             kind if AnyCssConditionalBlock::can_cast(*kind) => CSS_BOGUS_BLOCK,
             kind if AnyCssFontFeatureValuesBlock::can_cast(*kind) => CSS_BOGUS_BLOCK,
+            kind if AnyCssPageAtRuleBlock::can_cast(*kind) => CSS_BOGUS_BLOCK,
             kind if AnyCssUnicodeValue::can_cast(*kind) => CSS_BOGUS_UNICODE_RANGE_VALUE,
             kind if AnyCssSupportsCondition::can_cast(*kind) => CSS_BOGUS_SUPPORTS_CONDITION,
             kind if AnyCssIfBranch::can_cast(*kind) => CSS_BOGUS_IF_BRANCH,
             kind if AnyCssIfTest::can_cast(*kind) => CSS_BOGUS_IF_TEST,
             kind if AnyCssIfTestBooleanExpr::can_cast(*kind) => CSS_BOGUS_IF_TEST_BOOLEAN_EXPR,
+            kind if AnyCssSyntax::can_cast(*kind) => CSS_BOGUS_SYNTAX,
+            kind if AnyCssSyntaxSingleComponent::can_cast(*kind) => {
+                CSS_BOGUS_SYNTAX_SINGLE_COMPONENT
+            }
+            kind if AnyCssAttrName::can_cast(*kind) => CSS_BOGUS_ATTR_NAME,
+            kind if AnyCssFunctionParameter::can_cast(*kind) => CSS_BOGUS_FUNCTION_PARAMETER,
 
             _ => CSS_BOGUS,
         }

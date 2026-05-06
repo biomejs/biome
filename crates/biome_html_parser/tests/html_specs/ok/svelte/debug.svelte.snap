@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```svelte
@@ -9,6 +10,7 @@ expression: snapshot
 {@debug something}
 {@debug debug}
 {@debug something, something, something}
+{@debug each}
 
 ```
 
@@ -65,19 +67,29 @@ HtmlRoot {
             ],
             r_curly_token: R_CURLY@82..83 "}" [] [],
         },
+        SvelteDebugBlock {
+            sv_curly_at_token: SV_CURLY_AT@83..86 "{@" [Newline("\n")] [],
+            debug_token: DEBUG_KW@86..92 "debug" [] [Whitespace(" ")],
+            bindings: SvelteBindingList [
+                SvelteName {
+                    ident_token: IDENT@92..96 "each" [] [],
+                },
+            ],
+            r_curly_token: R_CURLY@96..97 "}" [] [],
+        },
     ],
-    eof_token: EOF@83..84 "" [Newline("\n")] [],
+    eof_token: EOF@97..98 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: HTML_ROOT@0..84
+0: HTML_ROOT@0..98
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..83
+  3: HTML_ELEMENT_LIST@0..97
     0: SVELTE_DEBUG_BLOCK@0..8
       0: SV_CURLY_AT@0..2 "{@" [] []
       1: DEBUG_KW@2..7 "debug" [] []
@@ -110,6 +122,13 @@ HtmlRoot {
         4: SVELTE_NAME@73..82
           0: IDENT@73..82 "something" [] []
       3: R_CURLY@82..83 "}" [] []
-  4: EOF@83..84 "" [Newline("\n")] []
+    4: SVELTE_DEBUG_BLOCK@83..97
+      0: SV_CURLY_AT@83..86 "{@" [Newline("\n")] []
+      1: DEBUG_KW@86..92 "debug" [] [Whitespace(" ")]
+      2: SVELTE_BINDING_LIST@92..96
+        0: SVELTE_NAME@92..96
+          0: IDENT@92..96 "each" [] []
+      3: R_CURLY@96..97 "}" [] []
+  4: EOF@97..98 "" [Newline("\n")] []
 
 ```

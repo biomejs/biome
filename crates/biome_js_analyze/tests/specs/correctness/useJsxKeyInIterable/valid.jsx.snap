@@ -156,6 +156,11 @@ export default component$(() => {
     </div>
   );
 });
+
+new Map([
+    ["None", <TriangleDownIcon sx={{ fontSize: "1.25rem", color: "error.main" }} />],
+]);
+
 ```
 
 _Note: The parser emitted 11 diagnostics which are not shown here._

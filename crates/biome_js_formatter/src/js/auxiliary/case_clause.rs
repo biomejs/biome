@@ -70,12 +70,22 @@ impl FormatNodeRule<JsCaseClause> for FormatJsCaseClause {
         //   default:
         //     break;
         // }
+        // If the case clause has a trailing line comment after the colon
+        // (e.g. `case 1337: // ELITE`), we must not hug the block statement on
+        // the same line. Doing so produces `case 1337: { // ELITE`, and on the
+        // next format pass the comment is reparsed as a leading comment inside
+        // the block, causing it to move to its own line — an idempotence bug.
+        // The comment is stored as a trailing comment of the `test` node.
+        let has_trailing_comment = test
+            .as_ref()
+            .is_ok_and(|test| f.comments().has_trailing_comments(test.syntax()));
+
         if consequent.is_empty() {
             // Print nothing to ensure that trailing comments on the same line
             // are printed on the same line. The parent list formatter takes
             // care of inserting a hard line break between cases.
             Ok(())
-        } else if is_single_block_statement {
+        } else if is_single_block_statement && !has_trailing_comment {
             write![f, [space(), consequent.format()]]
         } else {
             // no line break needed after because it is added by the indent in the switch statement

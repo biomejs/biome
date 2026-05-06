@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-non-strict-mode.cjs
-snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -34,7 +33,7 @@ function f() {
 ```
 invalid-non-strict-mode.cjs:7:12 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'foo'. Consider to delete it or rename it.
+  × 'foo' is redeclared in the same scope.
   
     5 │ 	}
     6 │ 	default: {
@@ -52,13 +51,17 @@ invalid-non-strict-mode.cjs:7:12 lint/suspicious/noRedeclare ━━━━━━�
     4 │ 		break;
     5 │ 	}
   
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
+  
 
 ```
 
 ```
 invalid-non-strict-mode.cjs:19:13 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Shouldn't redeclare 'foo'. Consider to delete it or rename it.
+  × 'foo' is redeclared in the same scope.
   
     17 │ 		}
     18 │ 		default: {
@@ -75,6 +78,10 @@ invalid-non-strict-mode.cjs:19:13 lint/suspicious/noRedeclare ━━━━━━
        │ 			         ^^^
     16 │ 			break;
     17 │ 		}
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
   
 
 ```

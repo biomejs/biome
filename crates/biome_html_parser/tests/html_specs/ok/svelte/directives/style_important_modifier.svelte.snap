@@ -1,0 +1,104 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div style:color|important="red">Important red</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteStyleDirective {
+                        style_token: STYLE_KW@5..10 "style" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@10..11 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@11..26 "color|important" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@26..27 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@27..32 "\"red\"" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@32..33 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@33..46 "Important red" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@46..47 "<" [] [],
+                slash_token: SLASH@47..48 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@48..51 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@51..52 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@52..53 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..53
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..52
+    0: HTML_ELEMENT@0..52
+      0: HTML_OPENING_ELEMENT@0..33
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..32
+          0: SVELTE_STYLE_DIRECTIVE@5..32
+            0: STYLE_KW@5..10 "style" [] []
+            1: SVELTE_DIRECTIVE_VALUE@10..32
+              0: COLON@10..11 ":" [] []
+              1: SVELTE_LITERAL@11..26
+                0: HTML_LITERAL@11..26 "color|important" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@26..26
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@26..32
+                0: EQ@26..27 "=" [] []
+                1: HTML_STRING@27..32
+                  0: HTML_STRING_LITERAL@27..32 "\"red\"" [] []
+        3: R_ANGLE@32..33 ">" [] []
+      1: HTML_ELEMENT_LIST@33..46
+        0: HTML_CONTENT@33..46
+          0: HTML_LITERAL@33..46 "Important red" [] []
+      2: HTML_CLOSING_ELEMENT@46..52
+        0: L_ANGLE@46..47 "<" [] []
+        1: SLASH@47..48 "/" [] []
+        2: HTML_TAG_NAME@48..51
+          0: HTML_LITERAL@48..51 "div" [] []
+        3: R_ANGLE@51..52 ">" [] []
+  4: EOF@52..53 "" [Newline("\n")] []
+
+```

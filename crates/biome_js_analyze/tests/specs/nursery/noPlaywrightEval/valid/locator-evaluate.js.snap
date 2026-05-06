@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: locator-evaluate.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+const text = await page.locator('.foo').evaluate(el => el.textContent);
+const texts = await page.locator('.foo').evaluateAll(els => els.map(el => el.textContent));
+
+
+```

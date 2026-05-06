@@ -1,0 +1,160 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+{#each list as item (item)}
+  <li animate:flip>{item}</li>
+{/each}
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        SvelteEachBlock {
+            opening_block: SvelteEachOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                each_token: EACH_KW@2..6 "each" [] [],
+                list: HtmlTextExpression {
+                    html_literal_token: HTML_LITERAL@6..12 " list " [] [],
+                },
+                item: SvelteEachAsKeyedItem {
+                    as_token: AS_KW@12..15 "as" [] [Whitespace(" ")],
+                    name: SvelteName {
+                        ident_token: IDENT@15..20 "item" [] [Whitespace(" ")],
+                    },
+                    index: missing (optional),
+                    key: SvelteEachKey {
+                        l_paren_token: L_PAREN@20..21 "(" [] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@21..25 "item" [] [],
+                        },
+                        r_paren_token: R_PAREN@25..26 ")" [] [],
+                    },
+                },
+                r_curly_token: R_CURLY@26..27 "}" [] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@27..31 "<" [Newline("\n"), Whitespace("  ")] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@31..34 "li" [] [Whitespace(" ")],
+                        },
+                        attributes: HtmlAttributeList [
+                            SvelteAnimateDirective {
+                                animate_token: ANIMATE_KW@34..41 "animate" [] [],
+                                value: SvelteDirectiveValue {
+                                    colon_token: COLON@41..42 ":" [] [],
+                                    property: SvelteName {
+                                        ident_token: IDENT@42..46 "flip" [] [],
+                                    },
+                                    modifiers: SvelteDirectiveModifierList [],
+                                    initializer: missing (optional),
+                                },
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@46..47 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlSingleTextExpression {
+                            l_curly_token: L_CURLY@47..48 "{" [] [],
+                            expression: HtmlTextExpression {
+                                html_literal_token: HTML_LITERAL@48..52 "item" [] [],
+                            },
+                            r_curly_token: R_CURLY@52..53 "}" [] [],
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@53..54 "<" [] [],
+                        slash_token: SLASH@54..55 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@55..57 "li" [] [],
+                        },
+                        r_angle_token: R_ANGLE@57..58 ">" [] [],
+                    },
+                },
+            ],
+            else_clause: missing (optional),
+            closing_block: SvelteEachClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@58..61 "{/" [Newline("\n")] [],
+                each_token: EACH_KW@61..65 "each" [] [],
+                r_curly_token: R_CURLY@65..66 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@66..67 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..67
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..66
+    0: SVELTE_EACH_BLOCK@0..66
+      0: SVELTE_EACH_OPENING_BLOCK@0..27
+        0: SV_CURLY_HASH@0..2 "{#" [] []
+        1: EACH_KW@2..6 "each" [] []
+        2: HTML_TEXT_EXPRESSION@6..12
+          0: HTML_LITERAL@6..12 " list " [] []
+        3: SVELTE_EACH_AS_KEYED_ITEM@12..26
+          0: AS_KW@12..15 "as" [] [Whitespace(" ")]
+          1: SVELTE_NAME@15..20
+            0: IDENT@15..20 "item" [] [Whitespace(" ")]
+          2: (empty)
+          3: SVELTE_EACH_KEY@20..26
+            0: L_PAREN@20..21 "(" [] []
+            1: HTML_TEXT_EXPRESSION@21..25
+              0: HTML_LITERAL@21..25 "item" [] []
+            2: R_PAREN@25..26 ")" [] []
+        4: R_CURLY@26..27 "}" [] []
+      1: HTML_ELEMENT_LIST@27..58
+        0: HTML_ELEMENT@27..58
+          0: HTML_OPENING_ELEMENT@27..47
+            0: L_ANGLE@27..31 "<" [Newline("\n"), Whitespace("  ")] []
+            1: HTML_TAG_NAME@31..34
+              0: HTML_LITERAL@31..34 "li" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE_LIST@34..46
+              0: SVELTE_ANIMATE_DIRECTIVE@34..46
+                0: ANIMATE_KW@34..41 "animate" [] []
+                1: SVELTE_DIRECTIVE_VALUE@41..46
+                  0: COLON@41..42 ":" [] []
+                  1: SVELTE_NAME@42..46
+                    0: IDENT@42..46 "flip" [] []
+                  2: SVELTE_DIRECTIVE_MODIFIER_LIST@46..46
+                  3: (empty)
+            3: R_ANGLE@46..47 ">" [] []
+          1: HTML_ELEMENT_LIST@47..53
+            0: HTML_SINGLE_TEXT_EXPRESSION@47..53
+              0: L_CURLY@47..48 "{" [] []
+              1: HTML_TEXT_EXPRESSION@48..52
+                0: HTML_LITERAL@48..52 "item" [] []
+              2: R_CURLY@52..53 "}" [] []
+          2: HTML_CLOSING_ELEMENT@53..58
+            0: L_ANGLE@53..54 "<" [] []
+            1: SLASH@54..55 "/" [] []
+            2: HTML_TAG_NAME@55..57
+              0: HTML_LITERAL@55..57 "li" [] []
+            3: R_ANGLE@57..58 ">" [] []
+      2: (empty)
+      3: SVELTE_EACH_CLOSING_BLOCK@58..66
+        0: SV_CURLY_SLASH@58..61 "{/" [Newline("\n")] []
+        1: EACH_KW@61..65 "each" [] []
+        2: R_CURLY@65..66 "}" [] []
+  4: EOF@66..67 "" [Newline("\n")] []
+
+```

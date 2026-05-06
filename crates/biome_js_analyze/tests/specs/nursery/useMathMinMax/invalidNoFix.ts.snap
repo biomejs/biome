@@ -1,0 +1,114 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNoFix.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// These are cases that we can't fix automatically because we aren't confident that the operands are idempotent. For example, if the operands are function calls, we can't be sure that they will return the same value if we call them again, so we can't safely replace them with a single call to Math.min or Math.max. But, we still should flag them to let the user decide how to deal with it.
+
+foo() > bar() ? foo() : bar();
+
+foo.bar() > 10 ? 10 : foo.bar();
+
+async function asyncEdge() {
+    return await foo.bar() > 10 ? 10 : await foo.bar();
+}
+
+function groupedTest() {
+    return (foo.bar() > 10) ? 10 : foo.bar();
+}
+
+```
+
+# Diagnostics
+```
+invalidNoFix.ts:5:1 lint/nursery/useMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    3 │ // These are cases that we can't fix automatically because we aren't confident that the operands are idempotent. For example, if the operands are function calls, we can't be sure that they will return the same value if we call them again, so we can't safely replace them with a single call to Math.min or Math.max. But, we still should flag them to let the user decide how to deal with it.
+    4 │ 
+  > 5 │ foo() > bar() ? foo() : bar();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ foo.bar() > 10 ? 10 : foo.bar();
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i Consider using Math.max() instead.
+  
+  i Biome could not provide a fix because it can't guarantee that both arguments don't have side effects.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.ts:7:1 lint/nursery/useMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    5 │ foo() > bar() ? foo() : bar();
+    6 │ 
+  > 7 │ foo.bar() > 10 ? 10 : foo.bar();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ async function asyncEdge() {
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Consider using Math.min() instead.
+  
+  i Biome could not provide a fix because it can't guarantee that both arguments don't have side effects.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.ts:10:12 lint/nursery/useMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+     9 │ async function asyncEdge() {
+  > 10 │     return await foo.bar() > 10 ? 10 : await foo.bar();
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ }
+    12 │ 
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Consider using Math.min() instead.
+  
+  i Biome could not provide a fix because it can't guarantee that both arguments don't have side effects.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.ts:14:12 lint/nursery/useMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    13 │ function groupedTest() {
+  > 14 │     return (foo.bar() > 10) ? 10 : foo.bar();
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ }
+    16 │ 
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Consider using Math.min() instead.
+  
+  i Biome could not provide a fix because it can't guarantee that both arguments don't have side effects.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

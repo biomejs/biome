@@ -43,3 +43,9 @@ if (x == 0) {
 while (x < 5) {
 	x = x + 1;
 }
+
+// Arrow function expression body - assignment is the return value
+let a0 = 0;
+const f0 = b => a0 += b;
+const f1 = (x, y) => x += y;
+const f2 = x => a0 = b = x;

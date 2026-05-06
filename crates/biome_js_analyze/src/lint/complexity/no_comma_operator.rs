@@ -66,6 +66,7 @@ impl Rule for NoCommaOperator {
                 return None;
             }
         }
+
         Some(())
     }
 

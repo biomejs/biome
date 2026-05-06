@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/arrow/arrow_nested.js
 ---
+
 # Input
 
 ```js
@@ -36,78 +37,20 @@ runtimeAgent.getProperties(
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
------
-
-```js
-Seq(typeDef.interface.groups).forEach((group) =>
-	Seq(group.members).forEach((member, memberName) =>
-		markdownDoc(member.doc, {
-			typePath: typePath.concat(memberName.slice(1)),
-			signatures: member.signatures,
-		}),
-	),
-);
-
-const promiseFromCallback = (fn) =>
-	new Promise((resolve, reject) =>
-		fn((err, result) => {
-			if (err) return reject(err);
-			return resolve(result);
-		}),
-	);
-
-runtimeAgent.getProperties(
-	objectId,
-	false, // ownProperties
-	false, // accessorPropertiesOnly
-	false, // generatePreview
-	(error, properties, internalProperties) => {
-		return 1;
-	},
-);
+```json
+{
+  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "javascript": {
+    "formatter": {
+      "arrowParentheses": "asNeeded"
+    }
+  }
+}
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: As needed
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
------
+# Formatted
 
 ```js
 Seq(typeDef.interface.groups).forEach(group =>
@@ -136,4 +79,5 @@ runtimeAgent.getProperties(
 		return 1;
 	},
 );
+
 ```

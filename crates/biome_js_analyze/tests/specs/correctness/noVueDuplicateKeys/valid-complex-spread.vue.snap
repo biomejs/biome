@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-complex-spread.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+export default {
+  ...foo(),
+  props: {
+    ...foo(),
+    foo: String
+  },
+  computed: {
+    ...mapGetters({
+      test: 'getTest'
+    }),
+    bar: {
+      get () {}
+    }
+  },
+  data: {
+    ...foo(),
+    dat: null
+  },
+  methods: {
+    ...foo(),
+    test () {}
+  },
+  data () {
+    return {
+      ...dat
+    }
+  }
+}
+</script>
+```

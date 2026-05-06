@@ -1,0 +1,107 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<p transition:fade|local>Fades only when y changes</p>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..3 "p" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteTransitionDirective {
+                        transition_token: TRANSITION_KW@3..13 "transition" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@13..14 ":" [] [],
+                            property: SvelteName {
+                                ident_token: IDENT@14..18 "fade" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [
+                                SvelteDirectiveModifier {
+                                    bitwise_or_token: PIPE@18..19 "|" [] [],
+                                    name: SvelteName {
+                                        ident_token: IDENT@19..24 "local" [] [],
+                                    },
+                                },
+                            ],
+                            initializer: missing (optional),
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@24..25 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@25..50 "Fades only when y changes" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@50..51 "<" [] [],
+                slash_token: SLASH@51..52 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@52..53 "p" [] [],
+                },
+                r_angle_token: R_ANGLE@53..54 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@54..55 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..55
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..54
+    0: HTML_ELEMENT@0..54
+      0: HTML_OPENING_ELEMENT@0..25
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..3
+          0: HTML_LITERAL@1..3 "p" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@3..24
+          0: SVELTE_TRANSITION_DIRECTIVE@3..24
+            0: TRANSITION_KW@3..13 "transition" [] []
+            1: SVELTE_DIRECTIVE_VALUE@13..24
+              0: COLON@13..14 ":" [] []
+              1: SVELTE_NAME@14..18
+                0: IDENT@14..18 "fade" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@18..24
+                0: SVELTE_DIRECTIVE_MODIFIER@18..24
+                  0: PIPE@18..19 "|" [] []
+                  1: SVELTE_NAME@19..24
+                    0: IDENT@19..24 "local" [] []
+              3: (empty)
+        3: R_ANGLE@24..25 ">" [] []
+      1: HTML_ELEMENT_LIST@25..50
+        0: HTML_CONTENT@25..50
+          0: HTML_LITERAL@25..50 "Fades only when y changes" [] []
+      2: HTML_CLOSING_ELEMENT@50..54
+        0: L_ANGLE@50..51 "<" [] []
+        1: SLASH@51..52 "/" [] []
+        2: HTML_TAG_NAME@52..53
+          0: HTML_LITERAL@52..53 "p" [] []
+        3: R_ANGLE@53..54 ">" [] []
+  4: EOF@54..55 "" [Newline("\n")] []
+
+```

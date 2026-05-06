@@ -12,7 +12,7 @@ var x = 1; { let x = 2; }
 ```
 invalid-08.js:1:18 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable shadows another variable with the same name in the outer scope.
+  ! This variable shadows another variable with the same name in the outer scope.
   
   > 1 │ var x = 1; { let x = 2; }
       │                  ^
