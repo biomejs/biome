@@ -29,6 +29,8 @@ invalid.html:2:15 lint/nursery/noTailwindArbitraryValue ━━━━━━━━
     3 │ <div class="text-[#555] bg-white"></div>
     4 │ <div class="max-h-[calc(100dvh-40px)]"></div>
   
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
   i Use a named utility from your Tailwind configuration instead.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -47,6 +49,8 @@ invalid.html:3:18 lint/nursery/noTailwindArbitraryValue ━━━━━━━━
       │                  ^^^^^^
     4 │ <div class="max-h-[calc(100dvh-40px)]"></div>
     5 │ <div class="hover:w-[400px]"></div>
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
   
   i Use a named utility from your Tailwind configuration instead.
   
@@ -67,6 +71,8 @@ invalid.html:4:19 lint/nursery/noTailwindArbitraryValue ━━━━━━━━
     5 │ <div class="hover:w-[400px]"></div>
     6 │ <div class="text-red-500/[0.31]"></div>
   
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
   i Use a named utility from your Tailwind configuration instead.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -85,6 +91,8 @@ invalid.html:5:21 lint/nursery/noTailwindArbitraryValue ━━━━━━━━
       │                     ^^^^^^^
     6 │ <div class="text-red-500/[0.31]"></div>
     7 │ <div class="[color:red]"></div>
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
   
   i Use a named utility from your Tailwind configuration instead.
   
@@ -105,6 +113,8 @@ invalid.html:6:26 lint/nursery/noTailwindArbitraryValue ━━━━━━━━
     7 │ <div class="[color:red]"></div>
     8 │ <div classList="p-[10px]"></div>
   
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
   i Use a named utility from your Tailwind configuration instead.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -123,6 +133,8 @@ invalid.html:7:13 lint/nursery/noTailwindArbitraryValue ━━━━━━━━
       │             ^^^^^^^^^^^
     8 │ <div classList="p-[10px]"></div>
     9 │ <div CLASS="m-[2px]"></div>
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
   
   i Use a named utility from your Tailwind configuration instead.
   
@@ -143,6 +155,8 @@ invalid.html:8:19 lint/nursery/noTailwindArbitraryValue ━━━━━━━━
      9 │ <div CLASS="m-[2px]"></div>
     10 │ <div CLASSLIST="p-[10px]"></div>
   
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
   i Use a named utility from your Tailwind configuration instead.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -162,6 +176,8 @@ invalid.html:9:15 lint/nursery/noTailwindArbitraryValue ━━━━━━━━
     10 │ <div CLASSLIST="p-[10px]"></div>
     11 │ 
   
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
   i Use a named utility from your Tailwind configuration instead.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -179,6 +195,8 @@ invalid.html:10:19 lint/nursery/noTailwindArbitraryValue ━━━━━━━�
   > 10 │ <div CLASSLIST="p-[10px]"></div>
        │                   ^^^^^^
     11 │ 
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
   
   i Use a named utility from your Tailwind configuration instead.
   

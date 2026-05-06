@@ -6,7 +6,8 @@ use biome_console::markup;
 use biome_js_syntax::JsSyntaxKind;
 use biome_rowan::{TextRange, TextSize, TokenText};
 use biome_rule_options::no_tailwind_arbitrary_value::NoTailwindArbitraryValueOptions;
-use biome_tailwind_parser::lint_utils::scan_tailwind_arbitrary_ranges;
+use biome_tailwind_parser::parse_tailwind;
+use biome_tailwind_syntax::lint_utils::arbitrary_ranges;
 
 declare_lint_rule! {
     /// Disallow arbitrary values in Tailwind CSS utility classes.
@@ -106,6 +107,9 @@ impl Rule for NoTailwindArbitraryValue {
                 markup! { "Found an arbitrary value in a Tailwind CSS class." },
             )
             .note(markup! {
+                "Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor."
+            })
+            .note(markup! {
                 "Use a named utility from your Tailwind configuration instead."
             }),
         )
@@ -161,5 +165,10 @@ fn arbitrary_ranges_in_node(node: &AnyClassStringLike) -> Vec<TextRange> {
         return vec![];
     };
 
-    scan_tailwind_arbitrary_ranges(source.text.text(), source.content_start)
+    if !source.text.text().contains('[') {
+        return vec![];
+    }
+
+    let parse = parse_tailwind(source.text.text());
+    arbitrary_ranges(&parse.tree().candidates(), source.content_start)
 }
