@@ -21,8 +21,6 @@ use phf::{phf_map, phf_set};
 use super::predicates;
 
 use Branch::*;
-use ThemeNamespace::*;
-use ValueType::*;
 `;
 
 const STRUCT_DEFS = `// Sort metadata for a single utility class.
@@ -222,7 +220,7 @@ function formatBranch(
 	const idx = propIdx.get(b.sort_property) ?? propCount;
 	switch (b.kind) {
 		case "Named":
-			return `Named(${b.namespace}, ${idx}, ${b.property_count})`;
+			return `Named(ThemeNamespace::${b.namespace}, ${idx}, ${b.property_count})`;
 		case "NamedKeyword": {
 			const key = b.keywords.join("\0");
 			const pool = keywordIdx.get(key);
@@ -234,9 +232,9 @@ function formatBranch(
 			return `NamedKeyword(${pool}, ${idx}, ${b.property_count})`;
 		}
 		case "NamedTyped":
-			return `NamedTyped(${b.value_type}, ${idx}, ${b.property_count})`;
+			return `NamedTyped(ValueType::${b.value_type}, ${idx}, ${b.property_count})`;
 		case "Typed":
-			return `Typed(${b.value_type}, ${idx}, ${b.property_count})`;
+			return `Typed(ValueType::${b.value_type}, ${idx}, ${b.property_count})`;
 		case "Arbitrary":
 			return `Arbitrary(${idx}, ${b.property_count})`;
 	}
