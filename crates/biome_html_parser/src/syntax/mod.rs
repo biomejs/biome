@@ -849,12 +849,13 @@ fn parse_single_text_expression_content(p: &mut HtmlParser) -> ParsedSyntax {
         return Absent;
     }
     if p.cur_text().is_empty() {
-        p.bump_remap(HTML_LITERAL);
+        p.re_lex(HtmlReLexContext::Svelte);
         return Absent;
     }
     if p.cur_text().trim().is_empty() {
         return Absent;
     }
+
     let m = p.start();
 
     p.bump_remap(HTML_LITERAL);
@@ -876,6 +877,10 @@ impl TextExpression {
                         HTML_LITERAL,
                         HtmlLexContext::TextExpression(self.kind),
                     );
+                } else if p.cur_text().is_empty() {
+                    m.abandon(p);
+                    p.re_lex(HtmlReLexContext::Svelte);
+                    return Absent;
                 } else if !p.at(T!['}']) {
                     p.bump_remap(HTML_LITERAL);
                 } else {
