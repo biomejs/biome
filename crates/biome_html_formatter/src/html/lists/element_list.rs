@@ -198,6 +198,17 @@ use biome_html_syntax::{
 };
 use biome_rowan::AstNode;
 
+/// True for `{expr}` / `{{expr}}` / Svelte block siblings — i.e. anything inside
+/// element content where surrounding whitespace is a JS context (discarded) rather
+/// than HTML text (renders as a visible space). Used by the list formatter to avoid
+/// inserting line breaks between two adjacent `{}` expressions.
+fn is_text_expression(element: &AnyHtmlElement) -> bool {
+    matches!(
+        element,
+        AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::AnyHtmlTextExpression(_))
+    )
+}
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlElementList {
     layout: HtmlChildListLayout,
@@ -694,14 +705,29 @@ impl FormatHtmlElementList {
                         // Check if the next child is also an inline element with no whitespace between.
                         // If so, we'll set prev_inline_group_id so the next element can use it for
                         // conditional line breaks.
-                        let next_is_adjacent_inline =
-                            if let Some(HtmlChild::NonText(non_text_next)) = children_iter.peek() {
-                                let next_css_display = get_element_css_display(non_text_next);
-                                css_display.is_externally_whitespace_sensitive(f)
-                                    && next_css_display.is_externally_whitespace_sensitive(f)
-                            } else {
-                                false
-                            };
+                        //
+                        // Special case: when both siblings are `{...}` text expressions, suppress
+                        // the conditional break. Whitespace between `}` and `{` is HTML text and
+                        // renders as a visible space — but whitespace inside `{}` is a JS context
+                        // and is discarded. So a long `{a}{b}` must wrap inside one of the
+                        // expressions (the JS formatter will choose), never between them.
+                        let both_are_text_expressions = is_text_expression(non_text)
+                            && matches!(
+                                children_iter.peek(),
+                                Some(HtmlChild::NonText(next)) if is_text_expression(next),
+                            );
+
+                        let next_is_adjacent_inline = if both_are_text_expressions {
+                            false
+                        } else if let Some(HtmlChild::NonText(non_text_next)) =
+                            children_iter.peek()
+                        {
+                            let next_css_display = get_element_css_display(non_text_next);
+                            css_display.is_externally_whitespace_sensitive(f)
+                                && next_css_display.is_externally_whitespace_sensitive(f)
+                        } else {
+                            false
+                        };
 
                         let line_mode = match children_iter.peek() {
                             Some(HtmlChild::Word(_)) => {

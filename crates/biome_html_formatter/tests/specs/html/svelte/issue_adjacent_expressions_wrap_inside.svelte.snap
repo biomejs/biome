@@ -1,0 +1,29 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/issue_adjacent_expressions_wrap_inside.svelte
+---
+
+# Input
+
+```svelte
+<div class="some-classes">
+  <span
+    >{data?.columns[i].macros.total_fat.display_value}{data?.columns[i].macros
+      .total_fat.unit}</span
+  >
+</div>
+
+```
+
+
+# Formatted
+
+```svelte
+<div class="some-classes">
+	<span
+		>{data?.columns[i].macros.total_fat.display_value}{data?.columns[i].macros
+      .total_fat.unit}</span
+	>
+</div>
+
+```

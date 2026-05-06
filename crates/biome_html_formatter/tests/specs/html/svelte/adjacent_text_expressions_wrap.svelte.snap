@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/adjacent_text_expressions_wrap.svelte
+---
+
+# Input
+
+```svelte
+<span>{data?.columns[i].macros.total_fat.display_value}{data?.columns[i].macros.total_fat.unit}</span>
+
+<div>{firstName}{lastName}</div>
+
+<p>Result: {data?.columns[i].macros.total_fat.display_value}{data?.columns[i].macros.total_fat.unit} done</p>
+
+```
+
+
+# Formatted
+
+```svelte
+<span
+	>{data?.columns[i].macros.total_fat.display_value}{data?.columns[i].macros.total_fat.unit}</span
+>
+
+<div>{firstName}{lastName}</div>
+
+<p>
+	Result:
+	{data?.columns[i].macros.total_fat.display_value}{data?.columns[i].macros.total_fat.unit}
+	done
+</p>
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    2: 	>{data?.columns[i].macros.total_fat.display_value}{data?.columns[i].macros.total_fat.unit}</span
+    9: 	{data?.columns[i].macros.total_fat.display_value}{data?.columns[i].macros.total_fat.unit}
+```
