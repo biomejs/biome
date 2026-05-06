@@ -51,10 +51,10 @@ where
     )
 }
 
-/// Returns `true` for the outer value wrapper whose payload is a map.
+/// Returns `true` for the outer value wrapper in a map pair.
 ///
-/// Example: in `(key: (a: b))`, `(a: b)` returns `true`.
-pub fn is_scss_map_outer_parenthesized_value_map(node: &ScssParenthesizedExpression) -> bool {
+/// Example: in `(key: (value))`, `(value)` returns `true`.
+pub fn is_scss_map_outer_parenthesized_value(node: &ScssParenthesizedExpression) -> bool {
     let Some((pair, ScssMapRole::Value)) = enclosing_pair_and_role(node) else {
         return false;
     };
@@ -62,10 +62,19 @@ pub fn is_scss_map_outer_parenthesized_value_map(node: &ScssParenthesizedExpress
         return false;
     };
 
-    outer_parenthesized_value(&value).is_some_and(|parenthesized| {
-        parenthesized.syntax() == node.syntax()
-            && outer_parenthesized_value_map(&parenthesized).is_some()
-    })
+    outer_parenthesized_value(&value)
+        .is_some_and(|parenthesized| parenthesized.syntax() == node.syntax())
+}
+
+/// Returns `true` for the outer value wrapper whose payload is a map.
+///
+/// Example: in `(key: (a: b))`, `(a: b)` returns `true`.
+pub fn is_scss_map_outer_parenthesized_value_map(node: &ScssParenthesizedExpression) -> bool {
+    if !is_scss_map_outer_parenthesized_value(node) {
+        return false;
+    }
+
+    outer_parenthesized_value_map(node).is_some()
 }
 
 /// Returns `true` for the list payload inside an outer value wrapper.

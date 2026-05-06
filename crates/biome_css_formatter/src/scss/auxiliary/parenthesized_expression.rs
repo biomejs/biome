@@ -4,7 +4,7 @@ use crate::utils::scss_include_keyword_value::is_top_level_include_keyword_paren
 use crate::utils::scss_separator_comments::FormatScssSeparatorComments;
 use biome_css_syntax::{
     AnyScssExpression, AnyScssExpressionItem, ScssParenthesizedExpression,
-    ScssParenthesizedExpressionFields, is_scss_map_outer_parenthesized_value_map,
+    ScssParenthesizedExpressionFields, is_scss_map_outer_parenthesized_value,
     scss_include_keyword_argument_owner, unwrap_single_expression_item,
 };
 use biome_formatter::{format_args, write};
@@ -49,13 +49,13 @@ impl<'a> ScssParenthesizedExpressionLayout<'a> {
         Self { node }
     }
 
-    /// Formats the comma owned by include value parentheses.
+    /// Formats the trailing comma inside parentheses that Prettier breaks.
     ///
-    /// Example: `@include mix($arg: (a))` prints `(a,)`.
+    /// Examples: `@include mix($arg: (a))`, `key: (value)`.
     fn trailing_comma(&self) -> impl Format<CssFormatContext> + '_ {
         format_with(|f| {
             if self.should_print_trailing_comma() {
-                write!(f, [token(",")])
+                write!(f, [if_group_breaks(&token(","))])
             } else {
                 Ok(())
             }
@@ -64,31 +64,43 @@ impl<'a> ScssParenthesizedExpressionLayout<'a> {
 
     /// Expands parenthesized map values and include keyword values.
     ///
-    /// Examples: `key: ((nested: map))`, `@include mix($arg: (a))`.
+    /// Examples: `key: (value)`, `@include mix($arg: (a))`.
     fn should_expand(&self) -> bool {
-        is_scss_map_outer_parenthesized_value_map(self.node)
+        is_scss_map_outer_parenthesized_value(self.node)
             || is_top_level_include_keyword_parenthesized_value(self.node)
             || self.has_nested_include_parentheses()
             || self.has_include_trailing_comment()
     }
 
-    /// Prints a comma for include values that Prettier treats as lists.
+    /// Allows a trailing comma for parentheses Prettier treats as one-item lists.
     ///
-    /// Examples: `@include mix($arg: (a))`, `@include mix($arg: ((a)))`.
+    /// Examples: `@include mix($arg: (a))`, `key: (value)`.
     fn should_print_trailing_comma(&self) -> bool {
-        self.has_nested_include_parentheses() || self.should_print_include_value_comma()
+        self.should_print_map_trailing_comma()
+            || self.has_nested_include_parentheses()
+            || self.should_print_include_trailing_comma()
     }
 
-    /// Prints the top-level include value comma unless the child owns it.
+    /// Allows the trailing comma in maps such as `key: (value)`.
+    fn should_print_map_trailing_comma(&self) -> bool {
+        is_scss_map_outer_parenthesized_value(self.node)
+            && self
+                .node
+                .expression()
+                .ok()
+                .is_some_and(|expression| !expression_owns_list_comma(&expression))
+    }
+
+    /// Allows the top-level include comma unless the child list owns commas.
     ///
     /// Example: `$arg: (a)` prints a comma, but `$arg: (a, b)` does not.
-    fn should_print_include_value_comma(&self) -> bool {
+    fn should_print_include_trailing_comma(&self) -> bool {
         is_top_level_include_keyword_parenthesized_value(self.node)
             && self
                 .node
                 .expression()
                 .ok()
-                .is_some_and(|expression| !expression_owns_trailing_comma(&expression))
+                .is_some_and(|expression| !expression_owns_list_comma(&expression))
     }
 
     /// Detects the outer include value in `@include mix($arg: ((a)))`.
@@ -136,16 +148,12 @@ impl Format<CssFormatContext> for ScssParenthesizedExpressionLayout<'_> {
     }
 }
 
-/// Lists and maps already print their own comma in `$arg: (a, b)`.
-fn expression_owns_trailing_comma(expression: &AnyScssExpression) -> bool {
-    matches!(
-        expression,
-        AnyScssExpression::ScssListExpression(_) | AnyScssExpression::ScssMapExpression(_)
-    ) || unwrap_single_expression_item(expression).is_some_and(|item| {
-        matches!(
-            item,
-            AnyScssExpressionItem::ScssListExpression(_)
-                | AnyScssExpressionItem::ScssMapExpression(_)
-        )
-    })
+/// Lists already print their own item comma in `$arg: (a, b)`.
+///
+/// Maps only print pair separators, so `key: ((a: b))` still needs the outer
+/// scalar comma after the nested map.
+fn expression_owns_list_comma(expression: &AnyScssExpression) -> bool {
+    matches!(expression, AnyScssExpression::ScssListExpression(_))
+        || unwrap_single_expression_item(expression)
+            .is_some_and(|item| matches!(item, AnyScssExpressionItem::ScssListExpression(_)))
 }
