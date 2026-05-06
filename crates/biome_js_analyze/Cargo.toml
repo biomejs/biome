@@ -49,6 +49,7 @@ bitvec                   = "1.0.1"
 camino                   = { workspace = true }
 enumflags2               = { workspace = true }
 globset                  = { workspace = true }
+phf                      = { workspace = true }
 regex                    = { workspace = true }
 roaring                  = "0.11.3"
 rustc-hash               = { workspace = true }

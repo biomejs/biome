@@ -1,9 +1,11 @@
 mod class_info;
 pub mod class_lexer;
+mod predicates;
 mod presets;
 mod sort;
 mod sort_config;
 mod tailwind_preset;
+mod tailwind_preset_v4;
 
 use self::{
     presets::UseSortedClassesPreset, sort::get_sort_class_name_range, sort::sort_class_name,
