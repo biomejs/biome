@@ -1,5 +1,5 @@
-<span>{data?.columns[i].macros.total_fat.display_value}{data?.columns[i].macros.total_fat.unit}</span>
+<span>{data?.columns[i].fields.subfield.attribute.amount}{data?.columns[i].fields.subfield.attribute.suffix}</span>
 
 <div>{firstName}{lastName}</div>
 
-<p>Result: {data?.columns[i].macros.total_fat.display_value}{data?.columns[i].macros.total_fat.unit} done</p>
+<p>Result: {data?.columns[i].fields.subfield.attribute.amount}{data?.columns[i].fields.subfield.attribute.suffix} done</p>

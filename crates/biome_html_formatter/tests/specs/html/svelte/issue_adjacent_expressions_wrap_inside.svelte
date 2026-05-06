@@ -1,6 +1,6 @@
 <div class="some-classes">
   <span
-    >{data?.columns[i].macros.total_fat.display_value}{data?.columns[i].macros
-      .total_fat.unit}</span
+    >{data?.columns[i].fields.subfield.attribute.amount}{data?.columns[i].fields
+      .subfield.attribute.suffix}</span
   >
 </div>

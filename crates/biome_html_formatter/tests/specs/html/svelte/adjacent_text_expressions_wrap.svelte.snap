@@ -6,11 +6,11 @@ info: svelte/adjacent_text_expressions_wrap.svelte
 # Input
 
 ```svelte
-<span>{data?.columns[i].macros.total_fat.display_value}{data?.columns[i].macros.total_fat.unit}</span>
+<span>{data?.columns[i].fields.subfield.attribute.amount}{data?.columns[i].fields.subfield.attribute.suffix}</span>
 
 <div>{firstName}{lastName}</div>
 
-<p>Result: {data?.columns[i].macros.total_fat.display_value}{data?.columns[i].macros.total_fat.unit} done</p>
+<p>Result: {data?.columns[i].fields.subfield.attribute.amount}{data?.columns[i].fields.subfield.attribute.suffix} done</p>
 
 ```
 
@@ -19,14 +19,14 @@ info: svelte/adjacent_text_expressions_wrap.svelte
 
 ```svelte
 <span
-	>{data?.columns[i].macros.total_fat.display_value}{data?.columns[i].macros.total_fat.unit}</span
+	>{data?.columns[i].fields.subfield.attribute.amount}{data?.columns[i].fields.subfield.attribute.suffix}</span
 >
 
 <div>{firstName}{lastName}</div>
 
 <p>
 	Result:
-	{data?.columns[i].macros.total_fat.display_value}{data?.columns[i].macros.total_fat.unit}
+	{data?.columns[i].fields.subfield.attribute.amount}{data?.columns[i].fields.subfield.attribute.suffix}
 	done
 </p>
 
@@ -34,6 +34,6 @@ info: svelte/adjacent_text_expressions_wrap.svelte
 
 # Lines exceeding max width of 80 characters
 ```
-    2: 	>{data?.columns[i].macros.total_fat.display_value}{data?.columns[i].macros.total_fat.unit}</span
-    9: 	{data?.columns[i].macros.total_fat.display_value}{data?.columns[i].macros.total_fat.unit}
+    2: 	>{data?.columns[i].fields.subfield.attribute.amount}{data?.columns[i].fields.subfield.attribute.suffix}</span
+    9: 	{data?.columns[i].fields.subfield.attribute.amount}{data?.columns[i].fields.subfield.attribute.suffix}
 ```
