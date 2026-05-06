@@ -11,3 +11,6 @@ Valid options:
 
 - `true` - Add a semicolon at the end of every statement.
 - `false` - Only add semicolons at the beginning of lines that may introduce ASI failures.
+
+
+- With leading text

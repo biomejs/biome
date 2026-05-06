@@ -74,8 +74,7 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
                                 write!(
                                     f,
                                     [text.format().with_options(FormatMdTextualOptions {
-                                        should_remove: true,
-                                        ..Default::default()
+                                        print_mode: TextPrintMode::Remove
                                     })]
                                 )
                             });
@@ -87,8 +86,7 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
                                 f,
                                 [
                                     text.format().with_options(FormatMdTextualOptions {
-                                        should_remove: true,
-                                        ..Default::default()
+                                        print_mode: TextPrintMode::Remove
                                     }),
                                     hard_line_break()
                                 ]
@@ -98,7 +96,6 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
                         joiner.entry(&entry);
                     } else {
                         joiner.entry(&text.format().with_options(FormatMdTextualOptions {
-                            should_remove: false,
                             print_mode: if (self.print_mode.is_trim_start() && index == 0)
                                 || (self.print_mode.is_keep_leading_spaces() && seen_new_line)
                             {
@@ -183,8 +180,8 @@ impl FormatMdInlineItemList {
 
         for (i, item) in items.iter().enumerate() {
             match item {
-                AnyMdInline::MdTextual(text) => {
-                    if text.is_newline()? {
+                AnyMdInline::MdTextual(md_text) => {
+                    if md_text.is_newline()? {
                         seen_new_line = true;
                         after_hard_line = false;
                         // Paragraph content has started — any spaces that come
@@ -194,23 +191,23 @@ impl FormatMdInlineItemList {
                             write!(
                                 f,
                                 [
-                                    text.format().with_options(FormatMdTextualOptions {
-                                        should_remove: true,
-                                        ..Default::default()
+                                    md_text.format().with_options(FormatMdTextualOptions {
+                                        print_mode: TextPrintMode::Remove
                                     }),
                                     hard_line_break()
                                 ]
                             )
                         }));
-                    } else if at_paragraph_start && text.value_token()?.text() == " " {
+                    } else if at_paragraph_start && md_text.value_token()?.text() == " " {
                         // Leading space at the start of a loose paragraph —
                         // strip unconditionally (these are pure excess past the
                         // continuation indent).
-                        joiner.entry(&text.format().with_options(FormatMdTextualOptions {
-                            should_remove: true,
-                            ..Default::default()
+                        joiner.entry(&md_text.format().with_options(FormatMdTextualOptions {
+                            print_mode: TextPrintMode::Remove,
                         }));
-                    } else if seen_new_line && !after_hard_line && text.value_token()?.text() == " "
+                    } else if seen_new_line
+                        && !after_hard_line
+                        && md_text.value_token()?.text() == " "
                     {
                         // Soft-wrap continuation excess. Single extra space is
                         // a typo (strip); two or more mean intentional
@@ -224,8 +221,7 @@ impl FormatMdInlineItemList {
                             let was_after_newline = seen_new_line;
                             seen_new_line = false;
                             after_hard_line = false;
-                            joiner.entry(&text.format().with_options(FormatMdTextualOptions {
-                                should_remove: false,
+                            joiner.entry(&md_text.format().with_options(FormatMdTextualOptions {
                                 print_mode: if was_after_newline
                                     && self.print_mode.is_keep_leading_spaces()
                                 {
@@ -237,9 +233,8 @@ impl FormatMdInlineItemList {
                         } else {
                             // Single excess space before content — remove it.
                             seen_new_line = false;
-                            joiner.entry(&text.format().with_options(FormatMdTextualOptions {
-                                should_remove: true,
-                                ..Default::default()
+                            joiner.entry(&md_text.format().with_options(FormatMdTextualOptions {
+                                print_mode: TextPrintMode::Remove,
                             }));
                         }
                     } else {
@@ -247,16 +242,48 @@ impl FormatMdInlineItemList {
                         at_paragraph_start = false;
                         seen_new_line = false;
                         after_hard_line = false;
-                        joiner.entry(&text.format().with_options(FormatMdTextualOptions {
-                            should_remove: false,
-                            print_mode: if was_after_newline
-                                && self.print_mode.is_keep_leading_spaces()
-                            {
+
+                        let next_is_newline_or_end = items.get(i + 1).is_none_or(|n| {
+                            matches!(n, AnyMdInline::MdTextual(t) if t.is_newline().unwrap_or_default())
+                        });
+                        let print_mode =
+                            if was_after_newline && self.print_mode.is_keep_leading_spaces() {
                                 self.print_mode
                             } else {
                                 TextPrintMode::default()
-                            },
-                        }));
+                            };
+
+                        if next_is_newline_or_end {
+                            let token = md_text.value_token()?;
+                            let trimmed = token.text().trim_end();
+                            if trimmed.len() < token.text().len() {
+                                joiner.entry(&format_with(|f: &mut MarkdownFormatter| {
+                                    f.context()
+                                        .comments()
+                                        .mark_suppression_checked(md_text.syntax());
+
+                                    write!(
+                                        f,
+                                        [format_replaced(
+                                            &token,
+                                            &text(trimmed, token.text_trimmed_range().start())
+                                        )]
+                                    )
+                                }));
+                            } else {
+                                joiner.entry(
+                                    &md_text
+                                        .format()
+                                        .with_options(FormatMdTextualOptions { print_mode }),
+                                );
+                            }
+                        } else {
+                            joiner.entry(
+                                &md_text
+                                    .format()
+                                    .with_options(FormatMdTextualOptions { print_mode }),
+                            );
+                        }
                     }
                 }
                 AnyMdInline::MdHardLine(hard_line) => {
@@ -322,8 +349,7 @@ impl FormatMdInlineItemList {
                 && let AnyMdInline::MdTextual(text) = item
             {
                 joiner.entry(&text.format().with_options(FormatMdTextualOptions {
-                    should_remove: true,
-                    ..Default::default()
+                    print_mode: TextPrintMode::Remove,
                 }));
                 continue;
             }
@@ -373,8 +399,7 @@ impl FormatMdInlineItemList {
                 match item {
                     AnyMdInline::MdTextual(text) => {
                         joiner.entry(&text.format().with_options(FormatMdTextualOptions {
-                            should_remove: true,
-                            print_mode: TextPrintMode::trim_start(),
+                            print_mode: TextPrintMode::Remove,
                         }));
                     }
                     AnyMdInline::MdHardLine(hard_line) => {
@@ -435,7 +460,6 @@ impl FormatMdInlineItemList {
                 AnyMdInline::MdTextual(text) => {
                     joiner.entry(&text.format().with_options(FormatMdTextualOptions {
                         print_mode: TextPrintMode::Trim(TrimMode::NormalizeWords),
-                        ..Default::default()
                     }));
                 }
                 AnyMdInline::MdInlineItalic(italic) => {
@@ -461,14 +485,13 @@ impl FormatMdInlineItemList {
             match item {
                 AnyMdInline::MdTextual(text) if !handled_first => {
                     handled_first = true;
-                    if text.is_empty_and_not_newline().unwrap_or(false)
-                        || text.is_newline().unwrap_or(false)
+                    if text.is_empty_and_not_newline().unwrap_or_default()
+                        || text.is_newline().unwrap_or_default()
                     {
                         // First token is trailing whitespace/newline from the
                         // info string line — remove it entirely.
                         joiner.entry(&text.format().with_options(FormatMdTextualOptions {
-                            should_remove: true,
-                            ..Default::default()
+                            print_mode: TextPrintMode::Remove,
                         }));
                     } else {
                         let token = text.value_token()?;
@@ -476,8 +499,7 @@ impl FormatMdInlineItemList {
                         if token_text.trim().is_empty() {
                             // Mixed whitespace + newline (e.g. "    \n") — remove.
                             joiner.entry(&text.format().with_options(FormatMdTextualOptions {
-                                should_remove: true,
-                                ..Default::default()
+                                print_mode: TextPrintMode::Remove,
                             }));
                         } else {
                             // First token has content — keep as-is.
@@ -485,7 +507,7 @@ impl FormatMdInlineItemList {
                         }
                     }
                 }
-                AnyMdInline::MdTextual(text) if text.is_newline().unwrap_or(false) => {
+                AnyMdInline::MdTextual(text) if text.is_newline().unwrap_or_default() => {
                     // After a newline, reset the skip counter for the next line.
                     joiner.entry(&text.format());
                 }
