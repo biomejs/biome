@@ -210,9 +210,18 @@ pub(super) fn node_to_args_pairs(
                             .as_ref()
                             .and_then(|params| params.get(i))
                             .map(|p| p.strip_prefix(lang.metavariable_prefix()).unwrap_or(p))
-                            .ok_or_else(|| NodeLikeArgumentError::TooManyArguments {
-                                name: fn_name.to_string(),
-                                max_args: expected_params.as_ref().map_or(0, |p| p.len()),
+                            .ok_or_else(|| {
+                                if let Some(params) = expected_params.as_ref() {
+                                    NodeLikeArgumentError::TooManyArguments {
+                                        name: fn_name.to_string(),
+                                        max_args: params.len(),
+                                    }
+                                } else {
+                                    NodeLikeArgumentError::MissingArgumentName {
+                                        name: fn_name.to_string(),
+                                        variable: String::new(),
+                                    }
+                                }
                             })?
                             .to_owned()
                     }
