@@ -155,3 +155,9 @@ jobs:
           # If the workflow was dispatched manually, create the tag too.
           # On tag-push triggers this is a no-op.
           target_commitish: ${{ github.sha }}
+          # SKUome is a fork, and GitHub forces forks' GITHUB_TOKEN to be
+          # read-only — so creating a Release fails with 403 unless we use
+          # a fine-grained PAT stored as RELEASE_TOKEN. Falls back to
+          # GITHUB_TOKEN for ergonomics during local testing; the secret
+          # has to be set on the repo for tag-push releases to publish.
+          token: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
