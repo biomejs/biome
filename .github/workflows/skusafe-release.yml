@@ -23,7 +23,8 @@ permissions:
 
 jobs:
   resolve-version:
-    runs-on: ubuntu-24.04
+    # Switch runners via RUNNER_PROVIDER repo variable: 'blacksmith' or default to standard GH-hosted.
+    runs-on: ${{ vars.RUNNER_PROVIDER == 'blacksmith' && 'blacksmith-2vcpu-ubuntu-2404' || 'ubuntu-24.04' }}
     outputs:
       version: ${{ steps.v.outputs.version }}
     steps:
@@ -44,15 +45,18 @@ jobs:
       matrix:
         include:
           - os: macos-14
+            blacksmith_os: blacksmith-8vcpu-macos-latest
             target: aarch64-apple-darwin
             pkg: cli-darwin-arm64
           - os: ubuntu-24.04
+            blacksmith_os: blacksmith-8vcpu-ubuntu-2404
             target: x86_64-unknown-linux-gnu
             pkg: cli-linux-x64
           # Add more platforms here as needed:
-          #   { os: macos-14,    target: x86_64-apple-darwin,        pkg: cli-darwin-x64 }
-          #   { os: ubuntu-24.04-arm, target: aarch64-unknown-linux-gnu, pkg: cli-linux-arm64 }
-    runs-on: ${{ matrix.os }}
+          #   { os: macos-14, blacksmith_os: blacksmith-8vcpu-macos-latest, target: x86_64-apple-darwin, pkg: cli-darwin-x64 }
+          #   { os: ubuntu-24.04-arm, blacksmith_os: blacksmith-8vcpu-ubuntu-2404-arm, target: aarch64-unknown-linux-gnu, pkg: cli-linux-arm64 }
+    # 8 vCPU is a sweet spot for Rust release builds; bigger runners help.
+    runs-on: ${{ vars.RUNNER_PROVIDER == 'blacksmith' && matrix.blacksmith_os || matrix.os }}
     env:
       VERSION: ${{ needs.resolve-version.outputs.version }}
       BIOME_VERSION: ${{ needs.resolve-version.outputs.version }}
@@ -94,7 +98,7 @@ jobs:
 
   pack-wrapper:
     needs: resolve-version
-    runs-on: ubuntu-24.04
+    runs-on: ${{ vars.RUNNER_PROVIDER == 'blacksmith' && 'blacksmith-2vcpu-ubuntu-2404' || 'ubuntu-24.04' }}
     env:
       VERSION: ${{ needs.resolve-version.outputs.version }}
     steps:
@@ -128,7 +132,7 @@ jobs:
 
   release:
     needs: [resolve-version, build, pack-wrapper]
-    runs-on: ubuntu-24.04
+    runs-on: ${{ vars.RUNNER_PROVIDER == 'blacksmith' && 'blacksmith-2vcpu-ubuntu-2404' || 'ubuntu-24.04' }}
     env:
       VERSION: ${{ needs.resolve-version.outputs.version }}
     steps:

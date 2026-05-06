@@ -1,8 +1,9 @@
 name: skusafe-build
 
-# Cheap on-push validation: confirms the parser changes still compile and
-# all biome_html_parser tests pass. Skipped on the `main` mirror branch
-# (which tracks upstream) and on release tags (covered by skusafe-release).
+# Cheap on-push validation: confirms the parser/formatter changes still
+# compile and all biome_html_{parser,formatter} tests pass. Skipped on the
+# `main` mirror branch (which tracks upstream) and on release tags
+# (covered by skusafe-release).
 
 on:
   push:
@@ -20,8 +21,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  parser-tests:
-    runs-on: ubuntu-24.04
+  html-tests:
+    # Switch runners via RUNNER_PROVIDER repo variable: 'blacksmith' or default.
+    runs-on: ${{ vars.RUNNER_PROVIDER == 'blacksmith' && 'blacksmith-8vcpu-ubuntu-2404' || 'ubuntu-24.04' }}
     steps:
       - uses: actions/checkout@v5
 
@@ -31,10 +33,11 @@ jobs:
         with:
           shared-key: skusafe-build-linux-x64
 
-      - run: cargo test -p biome_html_parser
+      - run: cargo test -p biome_html_parser -p biome_html_formatter
 
   cli-build-check:
-    runs-on: ubuntu-24.04
+    # Switch runners via RUNNER_PROVIDER repo variable: 'blacksmith' or default.
+    runs-on: ${{ vars.RUNNER_PROVIDER == 'blacksmith' && 'blacksmith-8vcpu-ubuntu-2404' || 'ubuntu-24.04' }}
     steps:
       - uses: actions/checkout@v5
 
