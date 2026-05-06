@@ -1,0 +1,37 @@
+// Phase 1 (v4 base utility sort) test cases.
+//
+// Out of scope (Phase 2): variants, bracketed arbitrary values, modifiers
+// (`/50`), important (`!`), negative prefixes beyond curated `-utility` keys.
+[
+	// ─── static utilities ──────────────────────────────────────────
+	// STATIC_UTILITIES exact-match keywords. Sorted by property_idx,
+	// then property_count desc, then registration_idx.
+
+	"flex block absolute",
+	"static visible flex",                         // already sorted
+	"sr-only block flex absolute relative",        // sr-only multi-prop floats up
+	"pointer-events-none collapse static visible", // visibility group tie-broken by reg_idx
+	"flex",                                        // single-token passthrough
+
+	// ─── functional + named value ──────────────────────────────────
+	// Named (theme namespace), NamedKeyword (hardcoded keyword pool),
+	// NamedTyped (Number / Percentage / Ratio predicates).
+
+	"bg-red-500 flex p-4",   // ThemeNamespace::Color
+	"p-4 m-2 flex",          // NamedTyped(Number)
+	"text-lg bg-red-500 p-4",
+	"p-4 p-2",               // same basename, stable input order
+	"origin-top flex p-4",   // NamedKeyword pool
+	"flex-1 flex p-4",       // STATIC `flex` wins over functional `flex` basename
+
+	// ─── unknown classes ───────────────────────────────────────────
+	// Tokens that resolve to no branch float to the front and keep
+	// their relative input order (stable sort).
+
+	"p-4 foo flex",
+	"baz p-4 foo flex bar",
+	"bg-rainbow flex bg-red-500", // basename matches but value resolves to nothing → unknown
+	"foo bar baz",                // all unknown — output unchanged
+	"flex p-",                    // empty value after `-` → unknown
+	"myCustom flex p-4"
+]
