@@ -196,9 +196,16 @@ function renderFunctionalUtilities(
 	const populated = utils.functional.filter((u) => u.branches.length > 0);
 	const entries = populated.map((u) => {
 		const items = u.branches
-			.map((b) => formatBranch(b, propIdx, propCount, keywordIdx))
-			.join(", ");
-		return `    ${rustString(u.basename)} => FunctionalEntry { registration_idx: ${u.registration_idx}, branches: &[${items}] },`;
+			.map(
+				(b) => `            ${formatBranch(b, propIdx, propCount, keywordIdx)},`,
+			)
+			.join("\n");
+		return `    ${rustString(u.basename)} => FunctionalEntry {
+        registration_idx: ${u.registration_idx},
+        branches: &[
+${items}
+        ],
+    },`;
 	});
 	return `pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_map! {
 ${entries.join("\n")}

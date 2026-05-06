@@ -1436,317 +1436,2580 @@ pub static STATIC_UTILITIES: phf::Map<&'static str, UtilityEntry> = phf_map! {
 };
 
 pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_map! {
-    "-inset" => FunctionalEntry { registration_idx: 0, branches: &[Named(Spacing, 4, 1), NamedTyped(Number, 4, 1), NamedTyped(Ratio, 4, 1), Arbitrary(4, 1)] },
-    "inset" => FunctionalEntry { registration_idx: 1, branches: &[Named(Spacing, 4, 1), NamedTyped(Number, 4, 1), NamedTyped(Ratio, 4, 1), Arbitrary(4, 1)] },
-    "-inset-x" => FunctionalEntry { registration_idx: 2, branches: &[Named(Spacing, 5, 1), NamedTyped(Number, 5, 1), NamedTyped(Ratio, 5, 1), Arbitrary(5, 1)] },
-    "inset-x" => FunctionalEntry { registration_idx: 3, branches: &[Named(Spacing, 5, 1), NamedTyped(Number, 5, 1), NamedTyped(Ratio, 5, 1), Arbitrary(5, 1)] },
-    "-inset-y" => FunctionalEntry { registration_idx: 4, branches: &[Named(Spacing, 6, 1), NamedTyped(Number, 6, 1), NamedTyped(Ratio, 6, 1), Arbitrary(6, 1)] },
-    "inset-y" => FunctionalEntry { registration_idx: 5, branches: &[Named(Spacing, 6, 1), NamedTyped(Number, 6, 1), NamedTyped(Ratio, 6, 1), Arbitrary(6, 1)] },
-    "-inset-s" => FunctionalEntry { registration_idx: 6, branches: &[Named(Spacing, 7, 1), NamedTyped(Number, 7, 1), NamedTyped(Ratio, 7, 1), Arbitrary(7, 1)] },
-    "inset-s" => FunctionalEntry { registration_idx: 7, branches: &[Named(Spacing, 7, 1), NamedTyped(Number, 7, 1), NamedTyped(Ratio, 7, 1), Arbitrary(7, 1)] },
-    "-inset-e" => FunctionalEntry { registration_idx: 8, branches: &[Named(Spacing, 8, 1), NamedTyped(Number, 8, 1), NamedTyped(Ratio, 8, 1), Arbitrary(8, 1)] },
-    "inset-e" => FunctionalEntry { registration_idx: 9, branches: &[Named(Spacing, 8, 1), NamedTyped(Number, 8, 1), NamedTyped(Ratio, 8, 1), Arbitrary(8, 1)] },
-    "-inset-bs" => FunctionalEntry { registration_idx: 10, branches: &[Named(Spacing, 9, 1), NamedTyped(Number, 9, 1), NamedTyped(Ratio, 9, 1), Arbitrary(9, 1)] },
-    "inset-bs" => FunctionalEntry { registration_idx: 11, branches: &[Named(Spacing, 9, 1), NamedTyped(Number, 9, 1), NamedTyped(Ratio, 9, 1), Arbitrary(9, 1)] },
-    "-inset-be" => FunctionalEntry { registration_idx: 12, branches: &[Named(Spacing, 10, 1), NamedTyped(Number, 10, 1), NamedTyped(Ratio, 10, 1), Arbitrary(10, 1)] },
-    "inset-be" => FunctionalEntry { registration_idx: 13, branches: &[Named(Spacing, 10, 1), NamedTyped(Number, 10, 1), NamedTyped(Ratio, 10, 1), Arbitrary(10, 1)] },
-    "-top" => FunctionalEntry { registration_idx: 14, branches: &[Named(Spacing, 11, 1), NamedTyped(Number, 11, 1), NamedTyped(Ratio, 11, 1), Arbitrary(11, 1)] },
-    "top" => FunctionalEntry { registration_idx: 15, branches: &[Named(Spacing, 11, 1), NamedTyped(Number, 11, 1), NamedTyped(Ratio, 11, 1), Arbitrary(11, 1)] },
-    "-right" => FunctionalEntry { registration_idx: 16, branches: &[Named(Spacing, 12, 1), NamedTyped(Number, 12, 1), NamedTyped(Ratio, 12, 1), Arbitrary(12, 1)] },
-    "right" => FunctionalEntry { registration_idx: 17, branches: &[Named(Spacing, 12, 1), NamedTyped(Number, 12, 1), NamedTyped(Ratio, 12, 1), Arbitrary(12, 1)] },
-    "-bottom" => FunctionalEntry { registration_idx: 18, branches: &[Named(Spacing, 13, 1), NamedTyped(Number, 13, 1), NamedTyped(Ratio, 13, 1), Arbitrary(13, 1)] },
-    "bottom" => FunctionalEntry { registration_idx: 19, branches: &[Named(Spacing, 13, 1), NamedTyped(Number, 13, 1), NamedTyped(Ratio, 13, 1), Arbitrary(13, 1)] },
-    "-left" => FunctionalEntry { registration_idx: 20, branches: &[Named(Spacing, 14, 1), NamedTyped(Number, 14, 1), NamedTyped(Ratio, 14, 1), Arbitrary(14, 1)] },
-    "left" => FunctionalEntry { registration_idx: 21, branches: &[Named(Spacing, 14, 1), NamedTyped(Number, 14, 1), NamedTyped(Ratio, 14, 1), Arbitrary(14, 1)] },
-    "-z" => FunctionalEntry { registration_idx: 22, branches: &[NamedTyped(Number, 16, 1), Arbitrary(16, 1)] },
-    "z" => FunctionalEntry { registration_idx: 23, branches: &[NamedTyped(Number, 16, 1), Arbitrary(16, 1), NamedKeyword(0, 16, 1)] },
-    "-order" => FunctionalEntry { registration_idx: 24, branches: &[NamedTyped(Number, 17, 1), Arbitrary(17, 1)] },
-    "order" => FunctionalEntry { registration_idx: 25, branches: &[NamedTyped(Number, 17, 1), Arbitrary(17, 1), NamedKeyword(1, 17, 1)] },
-    "-col" => FunctionalEntry { registration_idx: 26, branches: &[NamedTyped(Number, 18, 1), Arbitrary(18, 1)] },
-    "col" => FunctionalEntry { registration_idx: 27, branches: &[NamedTyped(Number, 18, 1), Arbitrary(18, 1), NamedKeyword(0, 18, 1)] },
-    "col-span" => FunctionalEntry { registration_idx: 28, branches: &[NamedTyped(Number, 18, 1), Arbitrary(18, 1), NamedKeyword(2, 18, 1)] },
-    "-col-start" => FunctionalEntry { registration_idx: 29, branches: &[NamedTyped(Number, 19, 1), Arbitrary(19, 1)] },
-    "col-start" => FunctionalEntry { registration_idx: 30, branches: &[NamedTyped(Number, 19, 1), Arbitrary(19, 1), NamedKeyword(0, 19, 1)] },
-    "-col-end" => FunctionalEntry { registration_idx: 31, branches: &[NamedTyped(Number, 20, 1), Arbitrary(20, 1)] },
-    "col-end" => FunctionalEntry { registration_idx: 32, branches: &[NamedTyped(Number, 20, 1), Arbitrary(20, 1), NamedKeyword(0, 20, 1)] },
-    "-row" => FunctionalEntry { registration_idx: 33, branches: &[NamedTyped(Number, 21, 1), Arbitrary(21, 1)] },
-    "row" => FunctionalEntry { registration_idx: 34, branches: &[NamedTyped(Number, 21, 1), Arbitrary(21, 1), NamedKeyword(0, 21, 1)] },
-    "row-span" => FunctionalEntry { registration_idx: 35, branches: &[NamedTyped(Number, 21, 1), Arbitrary(21, 1), NamedKeyword(2, 21, 1)] },
-    "-row-start" => FunctionalEntry { registration_idx: 36, branches: &[NamedTyped(Number, 22, 1), Arbitrary(22, 1)] },
-    "row-start" => FunctionalEntry { registration_idx: 37, branches: &[NamedTyped(Number, 22, 1), Arbitrary(22, 1), NamedKeyword(0, 22, 1)] },
-    "-row-end" => FunctionalEntry { registration_idx: 38, branches: &[NamedTyped(Number, 23, 1), Arbitrary(23, 1)] },
-    "row-end" => FunctionalEntry { registration_idx: 39, branches: &[NamedTyped(Number, 23, 1), Arbitrary(23, 1), NamedKeyword(0, 23, 1)] },
-    "-m" => FunctionalEntry { registration_idx: 40, branches: &[Named(Spacing, 27, 1), NamedTyped(Number, 27, 1), Arbitrary(27, 1)] },
-    "m" => FunctionalEntry { registration_idx: 41, branches: &[Named(Spacing, 27, 1), NamedTyped(Number, 27, 1), Arbitrary(27, 1)] },
-    "-mx" => FunctionalEntry { registration_idx: 42, branches: &[Named(Spacing, 28, 1), NamedTyped(Number, 28, 1), Arbitrary(28, 1)] },
-    "mx" => FunctionalEntry { registration_idx: 43, branches: &[Named(Spacing, 28, 1), NamedTyped(Number, 28, 1), Arbitrary(28, 1)] },
-    "-my" => FunctionalEntry { registration_idx: 44, branches: &[Named(Spacing, 29, 1), NamedTyped(Number, 29, 1), Arbitrary(29, 1)] },
-    "my" => FunctionalEntry { registration_idx: 45, branches: &[Named(Spacing, 29, 1), NamedTyped(Number, 29, 1), Arbitrary(29, 1)] },
-    "-ms" => FunctionalEntry { registration_idx: 46, branches: &[Named(Spacing, 30, 1), NamedTyped(Number, 30, 1), Arbitrary(30, 1)] },
-    "ms" => FunctionalEntry { registration_idx: 47, branches: &[Named(Spacing, 30, 1), NamedTyped(Number, 30, 1), Arbitrary(30, 1)] },
-    "-me" => FunctionalEntry { registration_idx: 48, branches: &[Named(Spacing, 31, 1), NamedTyped(Number, 31, 1), Arbitrary(31, 1)] },
-    "me" => FunctionalEntry { registration_idx: 49, branches: &[Named(Spacing, 31, 1), NamedTyped(Number, 31, 1), Arbitrary(31, 1)] },
-    "-mbs" => FunctionalEntry { registration_idx: 50, branches: &[Named(Spacing, 32, 1), NamedTyped(Number, 32, 1), Arbitrary(32, 1)] },
-    "mbs" => FunctionalEntry { registration_idx: 51, branches: &[Named(Spacing, 32, 1), NamedTyped(Number, 32, 1), Arbitrary(32, 1)] },
-    "-mbe" => FunctionalEntry { registration_idx: 52, branches: &[Named(Spacing, 33, 1), NamedTyped(Number, 33, 1), Arbitrary(33, 1)] },
-    "mbe" => FunctionalEntry { registration_idx: 53, branches: &[Named(Spacing, 33, 1), NamedTyped(Number, 33, 1), Arbitrary(33, 1)] },
-    "-mt" => FunctionalEntry { registration_idx: 54, branches: &[Named(Spacing, 34, 1), NamedTyped(Number, 34, 1), Arbitrary(34, 1)] },
-    "mt" => FunctionalEntry { registration_idx: 55, branches: &[Named(Spacing, 34, 1), NamedTyped(Number, 34, 1), Arbitrary(34, 1)] },
-    "-mr" => FunctionalEntry { registration_idx: 56, branches: &[Named(Spacing, 35, 1), NamedTyped(Number, 35, 1), Arbitrary(35, 1)] },
-    "mr" => FunctionalEntry { registration_idx: 57, branches: &[Named(Spacing, 35, 1), NamedTyped(Number, 35, 1), Arbitrary(35, 1)] },
-    "-mb" => FunctionalEntry { registration_idx: 58, branches: &[Named(Spacing, 36, 1), NamedTyped(Number, 36, 1), Arbitrary(36, 1)] },
-    "mb" => FunctionalEntry { registration_idx: 59, branches: &[Named(Spacing, 36, 1), NamedTyped(Number, 36, 1), Arbitrary(36, 1)] },
-    "-ml" => FunctionalEntry { registration_idx: 60, branches: &[Named(Spacing, 37, 1), NamedTyped(Number, 37, 1), Arbitrary(37, 1)] },
-    "ml" => FunctionalEntry { registration_idx: 61, branches: &[Named(Spacing, 37, 1), NamedTyped(Number, 37, 1), Arbitrary(37, 1)] },
-    "line-clamp" => FunctionalEntry { registration_idx: 62, branches: &[NamedTyped(Number, 139, 4), Arbitrary(139, 4), NamedKeyword(3, 139, 4)] },
-    "block" => FunctionalEntry { registration_idx: 63, branches: &[Named(Spacing, 354, 1), NamedTyped(Number, 354, 1), NamedTyped(Ratio, 354, 1), Arbitrary(354, 1)] },
-    "inline" => FunctionalEntry { registration_idx: 64, branches: &[Named(Spacing, 354, 1), Named(Container, 354, 1), NamedTyped(Number, 354, 1), NamedTyped(Ratio, 354, 1), Arbitrary(354, 1)] },
-    "flex" => FunctionalEntry { registration_idx: 65, branches: &[NamedTyped(Number, 48, 1), NamedTyped(Ratio, 48, 1), Arbitrary(48, 1)] },
-    "aspect" => FunctionalEntry { registration_idx: 66, branches: &[Named(Aspect, 41, 1), NamedTyped(Ratio, 41, 1), Arbitrary(41, 1), NamedKeyword(4, 41, 1)] },
-    "max-w-screen" => FunctionalEntry { registration_idx: 67, branches: &[Named(Breakpoint, 46, 1)] },
-    "size" => FunctionalEntry { registration_idx: 68, branches: &[Named(Spacing, 45, 2), NamedTyped(Number, 45, 2), NamedTyped(Ratio, 45, 2), Arbitrary(45, 2)] },
-    "w" => FunctionalEntry { registration_idx: 69, branches: &[Named(Spacing, 45, 1), Named(Container, 45, 1), NamedTyped(Number, 45, 1), NamedTyped(Ratio, 45, 1), Arbitrary(45, 1)] },
-    "min-w" => FunctionalEntry { registration_idx: 70, branches: &[Named(Spacing, 47, 1), Named(Container, 47, 1), NamedTyped(Number, 47, 1), NamedTyped(Ratio, 47, 1), Arbitrary(47, 1)] },
-    "max-w" => FunctionalEntry { registration_idx: 71, branches: &[Named(Spacing, 46, 1), Named(Container, 46, 1), NamedTyped(Number, 46, 1), NamedTyped(Ratio, 46, 1), Arbitrary(46, 1), NamedKeyword(5, 46, 1)] },
-    "h" => FunctionalEntry { registration_idx: 72, branches: &[Named(Spacing, 42, 1), NamedTyped(Number, 42, 1), NamedTyped(Ratio, 42, 1), Arbitrary(42, 1)] },
-    "min-h" => FunctionalEntry { registration_idx: 73, branches: &[Named(Spacing, 44, 1), NamedTyped(Number, 44, 1), NamedTyped(Ratio, 44, 1), Arbitrary(44, 1)] },
-    "max-h" => FunctionalEntry { registration_idx: 74, branches: &[Named(Spacing, 43, 1), NamedTyped(Number, 43, 1), NamedTyped(Ratio, 43, 1), Arbitrary(43, 1)] },
-    "min-inline" => FunctionalEntry { registration_idx: 75, branches: &[Named(Spacing, 354, 1), Named(Container, 354, 1), NamedTyped(Number, 354, 1), NamedTyped(Ratio, 354, 1), Arbitrary(354, 1)] },
-    "max-inline" => FunctionalEntry { registration_idx: 76, branches: &[Named(Spacing, 354, 1), Named(Container, 354, 1), NamedTyped(Number, 354, 1), NamedTyped(Ratio, 354, 1), Arbitrary(354, 1)] },
-    "min-block" => FunctionalEntry { registration_idx: 77, branches: &[Named(Spacing, 354, 1), NamedTyped(Number, 354, 1), NamedTyped(Ratio, 354, 1), Arbitrary(354, 1)] },
-    "max-block" => FunctionalEntry { registration_idx: 78, branches: &[Named(Spacing, 354, 1), NamedTyped(Number, 354, 1), NamedTyped(Ratio, 354, 1), Arbitrary(354, 1)] },
-    "shrink" => FunctionalEntry { registration_idx: 79, branches: &[NamedTyped(Number, 49, 1), Arbitrary(49, 1)] },
-    "grow" => FunctionalEntry { registration_idx: 80, branches: &[NamedTyped(Number, 50, 1), Arbitrary(50, 1)] },
-    "basis" => FunctionalEntry { registration_idx: 81, branches: &[Named(Spacing, 51, 1), Named(Container, 51, 1), NamedTyped(Number, 51, 1), NamedTyped(Ratio, 51, 1), Arbitrary(51, 1)] },
-    "border-spacing" => FunctionalEntry { registration_idx: 82, branches: &[Named(Spacing, 354, 3), NamedTyped(Number, 354, 3), Arbitrary(354, 3)] },
-    "border-spacing-x" => FunctionalEntry { registration_idx: 83, branches: &[Named(Spacing, 354, 2), NamedTyped(Number, 354, 2), Arbitrary(354, 2)] },
-    "border-spacing-y" => FunctionalEntry { registration_idx: 84, branches: &[Named(Spacing, 354, 2), NamedTyped(Number, 354, 2), Arbitrary(354, 2)] },
-    "origin" => FunctionalEntry { registration_idx: 85, branches: &[Arbitrary(56, 1), NamedKeyword(6, 56, 1)] },
-    "perspective-origin" => FunctionalEntry { registration_idx: 86, branches: &[Arbitrary(354, 1), NamedKeyword(6, 354, 1)] },
-    "perspective" => FunctionalEntry { registration_idx: 87, branches: &[Named(Perspective, 354, 1), Arbitrary(354, 1), NamedKeyword(3, 354, 1)] },
-    "-translate" => FunctionalEntry { registration_idx: 88, branches: &[Named(Spacing, 58, 3), NamedTyped(Number, 58, 3), NamedTyped(Ratio, 58, 3), Arbitrary(58, 3)] },
-    "translate" => FunctionalEntry { registration_idx: 89, branches: &[Named(Spacing, 58, 3), NamedTyped(Number, 58, 3), NamedTyped(Ratio, 58, 3), Arbitrary(58, 3)] },
-    "-translate-x" => FunctionalEntry { registration_idx: 90, branches: &[Named(Spacing, 58, 2), NamedTyped(Number, 58, 2), NamedTyped(Ratio, 58, 2), Arbitrary(58, 2)] },
-    "translate-x" => FunctionalEntry { registration_idx: 91, branches: &[Named(Spacing, 58, 2), NamedTyped(Number, 58, 2), NamedTyped(Ratio, 58, 2), Arbitrary(58, 2)] },
-    "-translate-y" => FunctionalEntry { registration_idx: 92, branches: &[Named(Spacing, 59, 2), NamedTyped(Number, 59, 2), NamedTyped(Ratio, 59, 2), Arbitrary(59, 2)] },
-    "translate-y" => FunctionalEntry { registration_idx: 93, branches: &[Named(Spacing, 59, 2), NamedTyped(Number, 59, 2), NamedTyped(Ratio, 59, 2), Arbitrary(59, 2)] },
-    "-translate-z" => FunctionalEntry { registration_idx: 94, branches: &[Named(Spacing, 60, 2), NamedTyped(Number, 60, 2), Arbitrary(60, 2)] },
-    "translate-z" => FunctionalEntry { registration_idx: 95, branches: &[Named(Spacing, 60, 2), NamedTyped(Number, 60, 2), Arbitrary(60, 2)] },
-    "-scale" => FunctionalEntry { registration_idx: 96, branches: &[NamedTyped(Number, 62, 4), Arbitrary(61, 1)] },
-    "scale" => FunctionalEntry { registration_idx: 97, branches: &[NamedTyped(Number, 62, 4), Arbitrary(61, 1)] },
-    "-scale-x" => FunctionalEntry { registration_idx: 98, branches: &[NamedTyped(Number, 62, 2), Arbitrary(62, 2)] },
-    "scale-x" => FunctionalEntry { registration_idx: 99, branches: &[NamedTyped(Number, 62, 2), Arbitrary(62, 2)] },
-    "-scale-y" => FunctionalEntry { registration_idx: 100, branches: &[NamedTyped(Number, 63, 2), Arbitrary(63, 2)] },
-    "scale-y" => FunctionalEntry { registration_idx: 101, branches: &[NamedTyped(Number, 63, 2), Arbitrary(63, 2)] },
-    "-scale-z" => FunctionalEntry { registration_idx: 102, branches: &[NamedTyped(Number, 64, 2), Arbitrary(64, 2)] },
-    "scale-z" => FunctionalEntry { registration_idx: 103, branches: &[NamedTyped(Number, 64, 2), Arbitrary(64, 2)] },
-    "-rotate" => FunctionalEntry { registration_idx: 104, branches: &[NamedTyped(Number, 65, 1), Arbitrary(65, 1)] },
-    "rotate" => FunctionalEntry { registration_idx: 105, branches: &[NamedTyped(Number, 65, 1), Arbitrary(65, 1)] },
-    "-rotate-x" => FunctionalEntry { registration_idx: 106, branches: &[NamedTyped(Number, 66, 2), Arbitrary(66, 2)] },
-    "rotate-x" => FunctionalEntry { registration_idx: 107, branches: &[NamedTyped(Number, 66, 2), Arbitrary(66, 2)] },
-    "-rotate-y" => FunctionalEntry { registration_idx: 108, branches: &[NamedTyped(Number, 67, 2), Arbitrary(67, 2)] },
-    "rotate-y" => FunctionalEntry { registration_idx: 109, branches: &[NamedTyped(Number, 67, 2), Arbitrary(67, 2)] },
-    "-rotate-z" => FunctionalEntry { registration_idx: 110, branches: &[NamedTyped(Number, 68, 2), Arbitrary(68, 2)] },
-    "rotate-z" => FunctionalEntry { registration_idx: 111, branches: &[NamedTyped(Number, 68, 2), Arbitrary(68, 2)] },
-    "-skew" => FunctionalEntry { registration_idx: 112, branches: &[NamedTyped(Number, 69, 3), Arbitrary(69, 3)] },
-    "skew" => FunctionalEntry { registration_idx: 113, branches: &[NamedTyped(Number, 69, 3), Arbitrary(69, 3)] },
-    "-skew-x" => FunctionalEntry { registration_idx: 114, branches: &[NamedTyped(Number, 69, 2), Arbitrary(69, 2)] },
-    "skew-x" => FunctionalEntry { registration_idx: 115, branches: &[NamedTyped(Number, 69, 2), Arbitrary(69, 2)] },
-    "-skew-y" => FunctionalEntry { registration_idx: 116, branches: &[NamedTyped(Number, 70, 2), Arbitrary(70, 2)] },
-    "skew-y" => FunctionalEntry { registration_idx: 117, branches: &[NamedTyped(Number, 70, 2), Arbitrary(70, 2)] },
-    "transform" => FunctionalEntry { registration_idx: 118, branches: &[Arbitrary(71, 1)] },
-    "cursor" => FunctionalEntry { registration_idx: 119, branches: &[Arbitrary(73, 1)] },
-    "-scroll-m" => FunctionalEntry { registration_idx: 120, branches: &[Named(Spacing, 83, 1), NamedTyped(Number, 83, 1), Arbitrary(83, 1)] },
-    "scroll-m" => FunctionalEntry { registration_idx: 121, branches: &[Named(Spacing, 83, 1), NamedTyped(Number, 83, 1), Arbitrary(83, 1)] },
-    "-scroll-mx" => FunctionalEntry { registration_idx: 122, branches: &[Named(Spacing, 84, 1), NamedTyped(Number, 84, 1), Arbitrary(84, 1)] },
-    "scroll-mx" => FunctionalEntry { registration_idx: 123, branches: &[Named(Spacing, 84, 1), NamedTyped(Number, 84, 1), Arbitrary(84, 1)] },
-    "-scroll-my" => FunctionalEntry { registration_idx: 124, branches: &[Named(Spacing, 85, 1), NamedTyped(Number, 85, 1), Arbitrary(85, 1)] },
-    "scroll-my" => FunctionalEntry { registration_idx: 125, branches: &[Named(Spacing, 85, 1), NamedTyped(Number, 85, 1), Arbitrary(85, 1)] },
-    "-scroll-ms" => FunctionalEntry { registration_idx: 126, branches: &[Named(Spacing, 86, 1), NamedTyped(Number, 86, 1), Arbitrary(86, 1)] },
-    "scroll-ms" => FunctionalEntry { registration_idx: 127, branches: &[Named(Spacing, 86, 1), NamedTyped(Number, 86, 1), Arbitrary(86, 1)] },
-    "-scroll-me" => FunctionalEntry { registration_idx: 128, branches: &[Named(Spacing, 87, 1), NamedTyped(Number, 87, 1), Arbitrary(87, 1)] },
-    "scroll-me" => FunctionalEntry { registration_idx: 129, branches: &[Named(Spacing, 87, 1), NamedTyped(Number, 87, 1), Arbitrary(87, 1)] },
-    "-scroll-mbs" => FunctionalEntry { registration_idx: 130, branches: &[Named(Spacing, 88, 1), NamedTyped(Number, 88, 1), Arbitrary(88, 1)] },
-    "scroll-mbs" => FunctionalEntry { registration_idx: 131, branches: &[Named(Spacing, 88, 1), NamedTyped(Number, 88, 1), Arbitrary(88, 1)] },
-    "-scroll-mbe" => FunctionalEntry { registration_idx: 132, branches: &[Named(Spacing, 89, 1), NamedTyped(Number, 89, 1), Arbitrary(89, 1)] },
-    "scroll-mbe" => FunctionalEntry { registration_idx: 133, branches: &[Named(Spacing, 89, 1), NamedTyped(Number, 89, 1), Arbitrary(89, 1)] },
-    "-scroll-mt" => FunctionalEntry { registration_idx: 134, branches: &[Named(Spacing, 90, 1), NamedTyped(Number, 90, 1), Arbitrary(90, 1)] },
-    "scroll-mt" => FunctionalEntry { registration_idx: 135, branches: &[Named(Spacing, 90, 1), NamedTyped(Number, 90, 1), Arbitrary(90, 1)] },
-    "-scroll-mr" => FunctionalEntry { registration_idx: 136, branches: &[Named(Spacing, 91, 1), NamedTyped(Number, 91, 1), Arbitrary(91, 1)] },
-    "scroll-mr" => FunctionalEntry { registration_idx: 137, branches: &[Named(Spacing, 91, 1), NamedTyped(Number, 91, 1), Arbitrary(91, 1)] },
-    "-scroll-mb" => FunctionalEntry { registration_idx: 138, branches: &[Named(Spacing, 92, 1), NamedTyped(Number, 92, 1), Arbitrary(92, 1)] },
-    "scroll-mb" => FunctionalEntry { registration_idx: 139, branches: &[Named(Spacing, 92, 1), NamedTyped(Number, 92, 1), Arbitrary(92, 1)] },
-    "-scroll-ml" => FunctionalEntry { registration_idx: 140, branches: &[Named(Spacing, 93, 1), NamedTyped(Number, 93, 1), Arbitrary(93, 1)] },
-    "scroll-ml" => FunctionalEntry { registration_idx: 141, branches: &[Named(Spacing, 93, 1), NamedTyped(Number, 93, 1), Arbitrary(93, 1)] },
-    "scroll-p" => FunctionalEntry { registration_idx: 142, branches: &[Named(Spacing, 94, 1), NamedTyped(Number, 94, 1), Arbitrary(94, 1)] },
-    "scroll-px" => FunctionalEntry { registration_idx: 143, branches: &[Named(Spacing, 95, 1), NamedTyped(Number, 95, 1), Arbitrary(95, 1)] },
-    "scroll-py" => FunctionalEntry { registration_idx: 144, branches: &[Named(Spacing, 96, 1), NamedTyped(Number, 96, 1), Arbitrary(96, 1)] },
-    "scroll-ps" => FunctionalEntry { registration_idx: 145, branches: &[Named(Spacing, 97, 1), NamedTyped(Number, 97, 1), Arbitrary(97, 1)] },
-    "scroll-pe" => FunctionalEntry { registration_idx: 146, branches: &[Named(Spacing, 98, 1), NamedTyped(Number, 98, 1), Arbitrary(98, 1)] },
-    "scroll-pbs" => FunctionalEntry { registration_idx: 147, branches: &[Named(Spacing, 99, 1), NamedTyped(Number, 99, 1), Arbitrary(99, 1)] },
-    "scroll-pbe" => FunctionalEntry { registration_idx: 148, branches: &[Named(Spacing, 100, 1), NamedTyped(Number, 100, 1), Arbitrary(100, 1)] },
-    "scroll-pt" => FunctionalEntry { registration_idx: 149, branches: &[Named(Spacing, 101, 1), NamedTyped(Number, 101, 1), Arbitrary(101, 1)] },
-    "scroll-pr" => FunctionalEntry { registration_idx: 150, branches: &[Named(Spacing, 102, 1), NamedTyped(Number, 102, 1), Arbitrary(102, 1)] },
-    "scroll-pb" => FunctionalEntry { registration_idx: 151, branches: &[Named(Spacing, 103, 1), NamedTyped(Number, 103, 1), Arbitrary(103, 1)] },
-    "scroll-pl" => FunctionalEntry { registration_idx: 152, branches: &[Named(Spacing, 104, 1), NamedTyped(Number, 104, 1), Arbitrary(104, 1)] },
-    "list" => FunctionalEntry { registration_idx: 153, branches: &[Arbitrary(106, 1), NamedKeyword(7, 106, 1)] },
-    "list-image" => FunctionalEntry { registration_idx: 154, branches: &[Arbitrary(107, 1), NamedKeyword(3, 107, 1)] },
-    "columns" => FunctionalEntry { registration_idx: 155, branches: &[Named(Container, 109, 1), NamedTyped(Number, 109, 1), Arbitrary(109, 1), NamedKeyword(0, 109, 1)] },
-    "auto-cols" => FunctionalEntry { registration_idx: 156, branches: &[Arbitrary(113, 1), NamedKeyword(8, 113, 1)] },
-    "auto-rows" => FunctionalEntry { registration_idx: 157, branches: &[Arbitrary(115, 1), NamedKeyword(8, 115, 1)] },
-    "grid-cols" => FunctionalEntry { registration_idx: 158, branches: &[NamedTyped(Number, 116, 1), Arbitrary(116, 1), NamedKeyword(9, 116, 1)] },
-    "grid-rows" => FunctionalEntry { registration_idx: 159, branches: &[NamedTyped(Number, 117, 1), Arbitrary(117, 1), NamedKeyword(9, 117, 1)] },
-    "gap" => FunctionalEntry { registration_idx: 160, branches: &[Named(Spacing, 126, 1), NamedTyped(Number, 126, 1), Arbitrary(126, 1)] },
-    "gap-x" => FunctionalEntry { registration_idx: 161, branches: &[Named(Spacing, 127, 1), NamedTyped(Number, 127, 1), Arbitrary(127, 1)] },
-    "gap-y" => FunctionalEntry { registration_idx: 162, branches: &[Named(Spacing, 128, 1), NamedTyped(Number, 128, 1), Arbitrary(128, 1)] },
-    "-space-x" => FunctionalEntry { registration_idx: 163, branches: &[Named(Spacing, 129, 3), NamedTyped(Number, 129, 3), Arbitrary(129, 3)] },
-    "space-x" => FunctionalEntry { registration_idx: 164, branches: &[Named(Spacing, 129, 3), NamedTyped(Number, 129, 3), Arbitrary(129, 3)] },
-    "-space-y" => FunctionalEntry { registration_idx: 165, branches: &[Named(Spacing, 130, 3), NamedTyped(Number, 130, 3), Arbitrary(130, 3)] },
-    "space-y" => FunctionalEntry { registration_idx: 166, branches: &[Named(Spacing, 130, 3), NamedTyped(Number, 130, 3), Arbitrary(130, 3)] },
-    "accent" => FunctionalEntry { registration_idx: 167, branches: &[Named(Color, 305, 1), Arbitrary(305, 1), NamedKeyword(10, 305, 1)] },
-    "caret" => FunctionalEntry { registration_idx: 168, branches: &[Named(Color, 304, 1), Arbitrary(304, 1), NamedKeyword(10, 304, 1)] },
-    "divide" => FunctionalEntry { registration_idx: 169, branches: &[Named(Color, 183, 1), Arbitrary(183, 1), NamedKeyword(10, 183, 1)] },
-    "rounded" => FunctionalEntry { registration_idx: 170, branches: &[Named(Radius, 146, 1), Arbitrary(146, 1), NamedKeyword(11, 146, 1)] },
-    "rounded-s" => FunctionalEntry { registration_idx: 171, branches: &[Named(Radius, 153, 2), Arbitrary(153, 2), NamedKeyword(11, 153, 2)] },
-    "rounded-e" => FunctionalEntry { registration_idx: 172, branches: &[Named(Radius, 154, 2), Arbitrary(154, 2), NamedKeyword(11, 154, 2)] },
-    "rounded-t" => FunctionalEntry { registration_idx: 173, branches: &[Named(Radius, 157, 2), Arbitrary(157, 2), NamedKeyword(11, 157, 2)] },
-    "rounded-r" => FunctionalEntry { registration_idx: 174, branches: &[Named(Radius, 158, 2), Arbitrary(158, 2), NamedKeyword(11, 158, 2)] },
-    "rounded-b" => FunctionalEntry { registration_idx: 175, branches: &[Named(Radius, 159, 2), Arbitrary(159, 2), NamedKeyword(11, 159, 2)] },
-    "rounded-l" => FunctionalEntry { registration_idx: 176, branches: &[Named(Radius, 157, 2), Arbitrary(157, 2), NamedKeyword(11, 157, 2)] },
-    "rounded-ss" => FunctionalEntry { registration_idx: 177, branches: &[Named(Radius, 153, 1), Arbitrary(153, 1), NamedKeyword(11, 153, 1)] },
-    "rounded-se" => FunctionalEntry { registration_idx: 178, branches: &[Named(Radius, 154, 1), Arbitrary(154, 1), NamedKeyword(11, 154, 1)] },
-    "rounded-ee" => FunctionalEntry { registration_idx: 179, branches: &[Named(Radius, 155, 1), Arbitrary(155, 1), NamedKeyword(11, 155, 1)] },
-    "rounded-es" => FunctionalEntry { registration_idx: 180, branches: &[Named(Radius, 156, 1), Arbitrary(156, 1), NamedKeyword(11, 156, 1)] },
-    "rounded-tl" => FunctionalEntry { registration_idx: 181, branches: &[Named(Radius, 157, 1), Arbitrary(157, 1), NamedKeyword(11, 157, 1)] },
-    "rounded-tr" => FunctionalEntry { registration_idx: 182, branches: &[Named(Radius, 158, 1), Arbitrary(158, 1), NamedKeyword(11, 158, 1)] },
-    "rounded-br" => FunctionalEntry { registration_idx: 183, branches: &[Named(Radius, 159, 1), Arbitrary(159, 1), NamedKeyword(11, 159, 1)] },
-    "rounded-bl" => FunctionalEntry { registration_idx: 184, branches: &[Named(Radius, 160, 1), Arbitrary(160, 1), NamedKeyword(11, 160, 1)] },
-    "border" => FunctionalEntry { registration_idx: 185, branches: &[Named(Color, 183, 1), NamedTyped(Number, 172, 2), Arbitrary(183, 1), Typed(Length, 172, 2), Typed(LineWidth, 172, 2), NamedKeyword(10, 183, 1)] },
-    "border-x" => FunctionalEntry { registration_idx: 186, branches: &[Named(Color, 184, 1), NamedTyped(Number, 173, 2), Arbitrary(184, 1), Typed(Length, 173, 2), Typed(LineWidth, 173, 2), NamedKeyword(10, 184, 1)] },
-    "border-y" => FunctionalEntry { registration_idx: 187, branches: &[Named(Color, 185, 1), NamedTyped(Number, 174, 2), Arbitrary(185, 1), Typed(Length, 174, 2), Typed(LineWidth, 174, 2), NamedKeyword(10, 185, 1)] },
-    "border-s" => FunctionalEntry { registration_idx: 188, branches: &[Named(Color, 186, 1), NamedTyped(Number, 175, 2), Arbitrary(186, 1), Typed(Length, 175, 2), Typed(LineWidth, 175, 2), NamedKeyword(10, 186, 1)] },
-    "border-e" => FunctionalEntry { registration_idx: 189, branches: &[Named(Color, 187, 1), NamedTyped(Number, 176, 2), Arbitrary(187, 1), Typed(Length, 176, 2), Typed(LineWidth, 176, 2), NamedKeyword(10, 187, 1)] },
-    "border-bs" => FunctionalEntry { registration_idx: 190, branches: &[Named(Color, 188, 1), NamedTyped(Number, 177, 2), Arbitrary(188, 1), Typed(Length, 177, 2), Typed(LineWidth, 177, 2), NamedKeyword(10, 188, 1)] },
-    "border-be" => FunctionalEntry { registration_idx: 191, branches: &[Named(Color, 189, 1), NamedTyped(Number, 178, 2), Arbitrary(189, 1), Typed(Length, 178, 2), Typed(LineWidth, 178, 2), NamedKeyword(10, 189, 1)] },
-    "border-t" => FunctionalEntry { registration_idx: 192, branches: &[Named(Color, 190, 1), NamedTyped(Number, 179, 2), Arbitrary(190, 1), Typed(Length, 179, 2), Typed(LineWidth, 179, 2), NamedKeyword(10, 190, 1)] },
-    "border-r" => FunctionalEntry { registration_idx: 193, branches: &[Named(Color, 191, 1), NamedTyped(Number, 180, 2), Arbitrary(191, 1), Typed(Length, 180, 2), Typed(LineWidth, 180, 2), NamedKeyword(10, 191, 1)] },
-    "border-b" => FunctionalEntry { registration_idx: 194, branches: &[Named(Color, 192, 1), NamedTyped(Number, 181, 2), Arbitrary(192, 1), Typed(Length, 181, 2), Typed(LineWidth, 181, 2), NamedKeyword(10, 192, 1)] },
-    "border-l" => FunctionalEntry { registration_idx: 195, branches: &[Named(Color, 193, 1), NamedTyped(Number, 182, 2), Arbitrary(193, 1), Typed(Length, 182, 2), Typed(LineWidth, 182, 2), NamedKeyword(10, 193, 1)] },
-    "divide-x" => FunctionalEntry { registration_idx: 196, branches: &[NamedTyped(Number, 354, 4), Arbitrary(354, 4)] },
-    "divide-y" => FunctionalEntry { registration_idx: 197, branches: &[NamedTyped(Number, 133, 5), Arbitrary(133, 5)] },
-    "bg-size" => FunctionalEntry { registration_idx: 198, branches: &[Arbitrary(247, 1)] },
-    "bg-position" => FunctionalEntry { registration_idx: 199, branches: &[Arbitrary(250, 1)] },
-    "-bg-linear" => FunctionalEntry { registration_idx: 200, branches: &[NamedTyped(Number, 196, 3), NamedTyped(Ratio, 196, 3), Typed(Angle, 196, 2)] },
-    "bg-linear" => FunctionalEntry { registration_idx: 201, branches: &[NamedTyped(Number, 196, 3), NamedTyped(Ratio, 196, 3), Arbitrary(196, 2), NamedKeyword(12, 196, 3)] },
-    "-bg-conic" => FunctionalEntry { registration_idx: 202, branches: &[NamedTyped(Number, 196, 2), NamedTyped(Ratio, 196, 2), Arbitrary(196, 2)] },
-    "bg-conic" => FunctionalEntry { registration_idx: 203, branches: &[NamedTyped(Number, 196, 2), NamedTyped(Ratio, 196, 2), Arbitrary(196, 2)] },
-    "bg-radial" => FunctionalEntry { registration_idx: 204, branches: &[Arbitrary(196, 2)] },
-    "bg" => FunctionalEntry { registration_idx: 205, branches: &[Named(Color, 194, 1), Named(BackgroundImage, 195, 1), Arbitrary(194, 1), Typed(Length, 247, 1), Typed(Percentage, 250, 1), Typed(Url, 195, 1), Typed(Position, 250, 1), Typed(BgSize, 247, 1), Typed(Image, 195, 1), NamedKeyword(10, 194, 1)] },
-    "from" => FunctionalEntry { registration_idx: 206, branches: &[Named(Color, 199, 2), NamedTyped(Percentage, 200, 1), Arbitrary(199, 2), Typed(Length, 200, 1), Typed(Percentage, 200, 1), NamedKeyword(10, 199, 2)] },
-    "via" => FunctionalEntry { registration_idx: 207, branches: &[Named(Color, 201, 3), NamedTyped(Percentage, 202, 1), Arbitrary(201, 3), Typed(Length, 202, 1), Typed(Percentage, 202, 1), NamedKeyword(10, 201, 3)] },
-    "to" => FunctionalEntry { registration_idx: 208, branches: &[Named(Color, 203, 2), NamedTyped(Percentage, 204, 1), Arbitrary(203, 2), Typed(Length, 204, 1), Typed(Percentage, 204, 1), NamedKeyword(10, 203, 2)] },
-    "mask" => FunctionalEntry { registration_idx: 209, branches: &[Arbitrary(205, 1), Typed(Length, 256, 1), Typed(Percentage, 258, 1), Typed(Position, 258, 1), Typed(BgSize, 256, 1)] },
-    "mask-size" => FunctionalEntry { registration_idx: 210, branches: &[Arbitrary(256, 1)] },
-    "mask-position" => FunctionalEntry { registration_idx: 211, branches: &[Arbitrary(258, 1)] },
-    "mask-x-from" => FunctionalEntry { registration_idx: 212, branches: &[Named(Color, 205, 7), NamedTyped(Number, 205, 7), NamedTyped(Percentage, 205, 7), Arbitrary(205, 7), NamedKeyword(10, 205, 7)] },
-    "mask-x-to" => FunctionalEntry { registration_idx: 213, branches: &[Named(Color, 205, 7), NamedTyped(Number, 205, 7), NamedTyped(Percentage, 205, 7), Arbitrary(205, 7), NamedKeyword(10, 205, 7)] },
-    "mask-y-from" => FunctionalEntry { registration_idx: 214, branches: &[Named(Color, 205, 7), NamedTyped(Number, 205, 7), NamedTyped(Percentage, 205, 7), Arbitrary(205, 7), NamedKeyword(10, 205, 7)] },
-    "mask-y-to" => FunctionalEntry { registration_idx: 215, branches: &[Named(Color, 205, 7), NamedTyped(Number, 205, 7), NamedTyped(Percentage, 205, 7), Arbitrary(205, 7), NamedKeyword(10, 205, 7)] },
-    "mask-t-from" => FunctionalEntry { registration_idx: 216, branches: &[Named(Color, 205, 5), NamedTyped(Number, 205, 5), NamedTyped(Percentage, 205, 5), Arbitrary(205, 5), NamedKeyword(10, 205, 5)] },
-    "mask-t-to" => FunctionalEntry { registration_idx: 217, branches: &[Named(Color, 205, 5), NamedTyped(Number, 205, 5), NamedTyped(Percentage, 205, 5), Arbitrary(205, 5), NamedKeyword(10, 205, 5)] },
-    "mask-r-from" => FunctionalEntry { registration_idx: 218, branches: &[Named(Color, 205, 5), NamedTyped(Number, 205, 5), NamedTyped(Percentage, 205, 5), Arbitrary(205, 5), NamedKeyword(10, 205, 5)] },
-    "mask-r-to" => FunctionalEntry { registration_idx: 219, branches: &[Named(Color, 205, 5), NamedTyped(Number, 205, 5), NamedTyped(Percentage, 205, 5), Arbitrary(205, 5), NamedKeyword(10, 205, 5)] },
-    "mask-b-from" => FunctionalEntry { registration_idx: 220, branches: &[Named(Color, 205, 5), NamedTyped(Number, 205, 5), NamedTyped(Percentage, 205, 5), Arbitrary(205, 5), NamedKeyword(10, 205, 5)] },
-    "mask-b-to" => FunctionalEntry { registration_idx: 221, branches: &[Named(Color, 205, 5), NamedTyped(Number, 205, 5), NamedTyped(Percentage, 205, 5), Arbitrary(205, 5), NamedKeyword(10, 205, 5)] },
-    "mask-l-from" => FunctionalEntry { registration_idx: 222, branches: &[Named(Color, 205, 5), NamedTyped(Number, 205, 5), NamedTyped(Percentage, 205, 5), Arbitrary(205, 5), NamedKeyword(10, 205, 5)] },
-    "mask-l-to" => FunctionalEntry { registration_idx: 223, branches: &[Named(Color, 205, 5), NamedTyped(Number, 205, 5), NamedTyped(Percentage, 205, 5), Arbitrary(205, 5), NamedKeyword(10, 205, 5)] },
-    "-mask-linear" => FunctionalEntry { registration_idx: 224, branches: &[NamedTyped(Number, 205, 4), Arbitrary(205, 4)] },
-    "mask-linear" => FunctionalEntry { registration_idx: 225, branches: &[NamedTyped(Number, 205, 4), Arbitrary(205, 4)] },
-    "mask-linear-from" => FunctionalEntry { registration_idx: 226, branches: &[Named(Color, 205, 5), NamedTyped(Number, 205, 5), NamedTyped(Percentage, 205, 5), Arbitrary(205, 5), NamedKeyword(10, 205, 5)] },
-    "mask-linear-to" => FunctionalEntry { registration_idx: 227, branches: &[Named(Color, 205, 5), NamedTyped(Number, 205, 5), NamedTyped(Percentage, 205, 5), Arbitrary(205, 5), NamedKeyword(10, 205, 5)] },
-    "mask-radial-at" => FunctionalEntry { registration_idx: 228, branches: &[Arbitrary(235, 1)] },
-    "mask-radial" => FunctionalEntry { registration_idx: 229, branches: &[Arbitrary(205, 4)] },
-    "mask-radial-from" => FunctionalEntry { registration_idx: 230, branches: &[Named(Color, 205, 5), NamedTyped(Number, 205, 5), NamedTyped(Percentage, 205, 5), Arbitrary(205, 5), NamedKeyword(10, 205, 5)] },
-    "mask-radial-to" => FunctionalEntry { registration_idx: 231, branches: &[Named(Color, 205, 5), NamedTyped(Number, 205, 5), NamedTyped(Percentage, 205, 5), Arbitrary(205, 5), NamedKeyword(10, 205, 5)] },
-    "-mask-conic" => FunctionalEntry { registration_idx: 232, branches: &[NamedTyped(Number, 205, 4), Arbitrary(205, 4)] },
-    "mask-conic" => FunctionalEntry { registration_idx: 233, branches: &[NamedTyped(Number, 205, 4), Arbitrary(205, 4)] },
-    "mask-conic-from" => FunctionalEntry { registration_idx: 234, branches: &[Named(Color, 205, 5), NamedTyped(Number, 205, 5), NamedTyped(Percentage, 205, 5), Arbitrary(205, 5), NamedKeyword(10, 205, 5)] },
-    "mask-conic-to" => FunctionalEntry { registration_idx: 235, branches: &[Named(Color, 205, 5), NamedTyped(Number, 205, 5), NamedTyped(Percentage, 205, 5), Arbitrary(205, 5), NamedKeyword(10, 205, 5)] },
-    "fill" => FunctionalEntry { registration_idx: 236, branches: &[Named(Color, 261, 1), Arbitrary(261, 1), NamedKeyword(10, 261, 1)] },
-    "stroke" => FunctionalEntry { registration_idx: 237, branches: &[Named(Color, 262, 1), NamedTyped(Number, 263, 1), NamedTyped(Ratio, 263, 1), Arbitrary(262, 1), Typed(Length, 263, 1), Typed(Percentage, 263, 1), Typed(Number, 263, 1), NamedKeyword(10, 262, 1)] },
-    "object" => FunctionalEntry { registration_idx: 238, branches: &[Arbitrary(265, 1), NamedKeyword(6, 265, 1)] },
-    "p" => FunctionalEntry { registration_idx: 239, branches: &[Named(Spacing, 266, 1), NamedTyped(Number, 266, 1), Arbitrary(266, 1)] },
-    "px" => FunctionalEntry { registration_idx: 240, branches: &[Named(Spacing, 267, 1), NamedTyped(Number, 267, 1), Arbitrary(267, 1)] },
-    "py" => FunctionalEntry { registration_idx: 241, branches: &[Named(Spacing, 268, 1), NamedTyped(Number, 268, 1), Arbitrary(268, 1)] },
-    "ps" => FunctionalEntry { registration_idx: 242, branches: &[Named(Spacing, 269, 1), NamedTyped(Number, 269, 1), Arbitrary(269, 1)] },
-    "pe" => FunctionalEntry { registration_idx: 243, branches: &[Named(Spacing, 270, 1), NamedTyped(Number, 270, 1), Arbitrary(270, 1)] },
-    "pbs" => FunctionalEntry { registration_idx: 244, branches: &[Named(Spacing, 271, 1), NamedTyped(Number, 271, 1), Arbitrary(271, 1)] },
-    "pbe" => FunctionalEntry { registration_idx: 245, branches: &[Named(Spacing, 272, 1), NamedTyped(Number, 272, 1), Arbitrary(272, 1)] },
-    "pt" => FunctionalEntry { registration_idx: 246, branches: &[Named(Spacing, 273, 1), NamedTyped(Number, 273, 1), Arbitrary(273, 1)] },
-    "pr" => FunctionalEntry { registration_idx: 247, branches: &[Named(Spacing, 274, 1), NamedTyped(Number, 274, 1), Arbitrary(274, 1)] },
-    "pb" => FunctionalEntry { registration_idx: 248, branches: &[Named(Spacing, 275, 1), NamedTyped(Number, 275, 1), Arbitrary(275, 1)] },
-    "pl" => FunctionalEntry { registration_idx: 249, branches: &[Named(Spacing, 276, 1), NamedTyped(Number, 276, 1), Arbitrary(276, 1)] },
-    "-indent" => FunctionalEntry { registration_idx: 250, branches: &[Named(Spacing, 278, 1), NamedTyped(Number, 278, 1), Arbitrary(278, 1)] },
-    "indent" => FunctionalEntry { registration_idx: 251, branches: &[Named(Spacing, 278, 1), NamedTyped(Number, 278, 1), Arbitrary(278, 1)] },
-    "align" => FunctionalEntry { registration_idx: 252, branches: &[Arbitrary(279, 1)] },
-    "font" => FunctionalEntry { registration_idx: 253, branches: &[Named(Font, 280, 1), Named(FontWeight, 354, 2), Arbitrary(280, 1), Typed(Color, 354, 2), Typed(Length, 354, 2), Typed(Percentage, 354, 2), Typed(Number, 354, 2), Typed(Integer, 354, 2), Typed(Ratio, 354, 2), Typed(Angle, 354, 2), Typed(Url, 354, 2), Typed(Position, 354, 2), Typed(BgSize, 354, 2), Typed(LineWidth, 354, 2), Typed(Image, 354, 2), Typed(AbsoluteSize, 354, 2), Typed(RelativeSize, 354, 2), Typed(Vector, 354, 2)] },
-    "font-features" => FunctionalEntry { registration_idx: 254, branches: &[Arbitrary(281, 1)] },
-    "font-stretch" => FunctionalEntry { registration_idx: 255, branches: &[Arbitrary(295, 1)] },
-    "placeholder" => FunctionalEntry { registration_idx: 256, branches: &[Named(Color, 292, 1), Arbitrary(292, 1), NamedKeyword(10, 292, 1)] },
-    "decoration" => FunctionalEntry { registration_idx: 257, branches: &[Named(Color, 298, 1), NamedTyped(Number, 300, 1), Arbitrary(298, 1), Typed(Length, 300, 1), Typed(Percentage, 300, 1), NamedKeyword(10, 298, 1)] },
-    "animate" => FunctionalEntry { registration_idx: 258, branches: &[Named(Animate, 72, 1), Arbitrary(72, 1), NamedKeyword(3, 72, 1)] },
-    "filter" => FunctionalEntry { registration_idx: 259, branches: &[Arbitrary(334, 1)] },
-    "backdrop-filter" => FunctionalEntry { registration_idx: 260, branches: &[Arbitrary(354, 2)] },
-    "blur" => FunctionalEntry { registration_idx: 261, branches: &[Named(Blur, 325, 2), Arbitrary(325, 2), NamedKeyword(3, 325, 2)] },
-    "backdrop-blur" => FunctionalEntry { registration_idx: 262, branches: &[Named(Blur, 335, 3), Arbitrary(335, 3), NamedKeyword(3, 335, 3)] },
-    "brightness" => FunctionalEntry { registration_idx: 263, branches: &[NamedTyped(Number, 326, 2), Arbitrary(326, 2)] },
-    "backdrop-brightness" => FunctionalEntry { registration_idx: 264, branches: &[NamedTyped(Number, 336, 3), Arbitrary(336, 3)] },
-    "contrast" => FunctionalEntry { registration_idx: 265, branches: &[NamedTyped(Number, 327, 2), Arbitrary(327, 2)] },
-    "backdrop-contrast" => FunctionalEntry { registration_idx: 266, branches: &[NamedTyped(Number, 337, 3), Arbitrary(337, 3)] },
-    "grayscale" => FunctionalEntry { registration_idx: 267, branches: &[NamedTyped(Number, 329, 2), Arbitrary(329, 2)] },
-    "backdrop-grayscale" => FunctionalEntry { registration_idx: 268, branches: &[NamedTyped(Number, 338, 3), Arbitrary(338, 3)] },
-    "-hue-rotate" => FunctionalEntry { registration_idx: 269, branches: &[NamedTyped(Number, 330, 2), Arbitrary(330, 2)] },
-    "hue-rotate" => FunctionalEntry { registration_idx: 270, branches: &[NamedTyped(Number, 330, 2), Arbitrary(330, 2)] },
-    "-backdrop-hue-rotate" => FunctionalEntry { registration_idx: 271, branches: &[NamedTyped(Number, 339, 3), Arbitrary(339, 3)] },
-    "backdrop-hue-rotate" => FunctionalEntry { registration_idx: 272, branches: &[NamedTyped(Number, 339, 3), Arbitrary(339, 3)] },
-    "invert" => FunctionalEntry { registration_idx: 273, branches: &[NamedTyped(Number, 331, 2), Arbitrary(331, 2)] },
-    "backdrop-invert" => FunctionalEntry { registration_idx: 274, branches: &[NamedTyped(Number, 340, 3), Arbitrary(340, 3)] },
-    "saturate" => FunctionalEntry { registration_idx: 275, branches: &[NamedTyped(Number, 332, 2), Arbitrary(332, 2)] },
-    "backdrop-saturate" => FunctionalEntry { registration_idx: 276, branches: &[NamedTyped(Number, 342, 3), Arbitrary(342, 3)] },
-    "sepia" => FunctionalEntry { registration_idx: 277, branches: &[NamedTyped(Number, 333, 2), Arbitrary(333, 2)] },
-    "backdrop-sepia" => FunctionalEntry { registration_idx: 278, branches: &[NamedTyped(Number, 343, 3), Arbitrary(343, 3)] },
-    "drop-shadow" => FunctionalEntry { registration_idx: 279, branches: &[Named(Color, 354, 2), Named(DropShadow, 354, 3), Arbitrary(354, 3), Typed(Color, 354, 2), NamedKeyword(10, 354, 2)] },
-    "backdrop-opacity" => FunctionalEntry { registration_idx: 280, branches: &[NamedTyped(Number, 341, 3), Arbitrary(341, 3)] },
-    "transition" => FunctionalEntry { registration_idx: 281, branches: &[Arbitrary(345, 3), NamedKeyword(13, 345, 3), NamedKeyword(3, 345, 1)] },
-    "delay" => FunctionalEntry { registration_idx: 282, branches: &[NamedTyped(Number, 347, 1), Arbitrary(347, 1)] },
-    "duration" => FunctionalEntry { registration_idx: 283, branches: &[NamedTyped(Number, 354, 2), Arbitrary(354, 2)] },
-    "ease" => FunctionalEntry { registration_idx: 284, branches: &[Named(Ease, 354, 2), Arbitrary(354, 2), NamedKeyword(14, 354, 1), NamedKeyword(15, 354, 2)] },
-    "will-change" => FunctionalEntry { registration_idx: 285, branches: &[Arbitrary(350, 1)] },
-    "content" => FunctionalEntry { registration_idx: 286, branches: &[Arbitrary(354, 2)] },
-    "contain" => FunctionalEntry { registration_idx: 287, branches: &[Arbitrary(351, 1)] },
-    "leading" => FunctionalEntry { registration_idx: 288, branches: &[Named(Spacing, 354, 2), Named(Leading, 354, 2), NamedTyped(Number, 354, 2), Arbitrary(354, 2), NamedKeyword(3, 354, 2)] },
-    "-tracking" => FunctionalEntry { registration_idx: 289, branches: &[Named(Tracking, 354, 2), Arbitrary(354, 2)] },
-    "tracking" => FunctionalEntry { registration_idx: 290, branches: &[Named(Tracking, 354, 2), Arbitrary(354, 2)] },
-    "outline" => FunctionalEntry { registration_idx: 291, branches: &[Named(Color, 324, 1), NamedTyped(Number, 354, 2), Arbitrary(324, 1), Typed(Length, 354, 2), Typed(Percentage, 354, 2), Typed(Number, 354, 2), NamedKeyword(10, 324, 1)] },
-    "-outline-offset" => FunctionalEntry { registration_idx: 292, branches: &[NamedTyped(Number, 323, 1), Arbitrary(323, 1)] },
-    "outline-offset" => FunctionalEntry { registration_idx: 293, branches: &[NamedTyped(Number, 323, 1), Arbitrary(323, 1)] },
-    "opacity" => FunctionalEntry { registration_idx: 294, branches: &[NamedTyped(Number, 307, 1), Arbitrary(307, 1)] },
-    "-underline-offset" => FunctionalEntry { registration_idx: 295, branches: &[NamedTyped(Number, 301, 1), Arbitrary(301, 1)] },
-    "underline-offset" => FunctionalEntry { registration_idx: 296, branches: &[NamedTyped(Number, 301, 1), Arbitrary(301, 1), NamedKeyword(0, 301, 1)] },
-    "text" => FunctionalEntry { registration_idx: 297, branches: &[Named(Color, 292, 1), Named(Text, 282, 1), Arbitrary(292, 1), Typed(Length, 282, 1), Typed(Percentage, 282, 1), Typed(AbsoluteSize, 282, 1), Typed(RelativeSize, 282, 1), NamedKeyword(10, 292, 1)] },
-    "text-shadow" => FunctionalEntry { registration_idx: 298, branches: &[Named(Color, 354, 1), Named(TextShadow, 354, 1), Arbitrary(354, 1), Typed(Color, 354, 1), NamedKeyword(10, 354, 1), NamedKeyword(3, 354, 1)] },
-    "shadow" => FunctionalEntry { registration_idx: 299, branches: &[Named(Color, 312, 1), Named(Shadow, 311, 2), Arbitrary(311, 2), Typed(Color, 312, 1), NamedKeyword(10, 312, 1), NamedKeyword(3, 311, 2)] },
-    "inset-shadow" => FunctionalEntry { registration_idx: 300, branches: &[Named(Color, 316, 1), Named(InsetShadow, 315, 2), Arbitrary(315, 2), Typed(Color, 316, 1), NamedKeyword(10, 316, 1), NamedKeyword(3, 315, 2)] },
-    "ring" => FunctionalEntry { registration_idx: 301, branches: &[Named(Color, 314, 1), NamedTyped(Number, 313, 2), Arbitrary(314, 1), Typed(Length, 313, 2), NamedKeyword(10, 314, 1)] },
-    "inset-ring" => FunctionalEntry { registration_idx: 302, branches: &[Named(Color, 318, 1), NamedTyped(Number, 317, 2), Arbitrary(318, 1), Typed(Length, 317, 2), NamedKeyword(10, 318, 1)] },
-    "ring-offset" => FunctionalEntry { registration_idx: 303, branches: &[Named(Color, 320, 1), NamedTyped(Number, 319, 2), Arbitrary(320, 1), Typed(Length, 319, 2), NamedKeyword(10, 320, 1)] },
-    "@container" => FunctionalEntry { registration_idx: 304, branches: &[Arbitrary(0, 1)] },
-    "flex-shrink" => FunctionalEntry { registration_idx: 305, branches: &[NamedTyped(Number, 49, 1), Arbitrary(49, 1)] },
-    "flex-grow" => FunctionalEntry { registration_idx: 306, branches: &[NamedTyped(Number, 50, 1), Arbitrary(50, 1)] },
-    "-start" => FunctionalEntry { registration_idx: 307, branches: &[Named(Spacing, 7, 1), NamedTyped(Number, 7, 1), NamedTyped(Ratio, 7, 1), Arbitrary(7, 1)] },
-    "start" => FunctionalEntry { registration_idx: 308, branches: &[Named(Spacing, 7, 1), NamedTyped(Number, 7, 1), NamedTyped(Ratio, 7, 1), Arbitrary(7, 1)] },
-    "-end" => FunctionalEntry { registration_idx: 309, branches: &[Named(Spacing, 8, 1), NamedTyped(Number, 8, 1), NamedTyped(Ratio, 8, 1), Arbitrary(8, 1)] },
-    "end" => FunctionalEntry { registration_idx: 310, branches: &[Named(Spacing, 8, 1), NamedTyped(Number, 8, 1), NamedTyped(Ratio, 8, 1), Arbitrary(8, 1)] },
+    "-inset" => FunctionalEntry {
+        registration_idx: 0,
+        branches: &[
+            Named(Spacing, 4, 1),
+            NamedTyped(Number, 4, 1),
+            NamedTyped(Ratio, 4, 1),
+            Arbitrary(4, 1),
+        ],
+    },
+    "inset" => FunctionalEntry {
+        registration_idx: 1,
+        branches: &[
+            Named(Spacing, 4, 1),
+            NamedTyped(Number, 4, 1),
+            NamedTyped(Ratio, 4, 1),
+            Arbitrary(4, 1),
+        ],
+    },
+    "-inset-x" => FunctionalEntry {
+        registration_idx: 2,
+        branches: &[
+            Named(Spacing, 5, 1),
+            NamedTyped(Number, 5, 1),
+            NamedTyped(Ratio, 5, 1),
+            Arbitrary(5, 1),
+        ],
+    },
+    "inset-x" => FunctionalEntry {
+        registration_idx: 3,
+        branches: &[
+            Named(Spacing, 5, 1),
+            NamedTyped(Number, 5, 1),
+            NamedTyped(Ratio, 5, 1),
+            Arbitrary(5, 1),
+        ],
+    },
+    "-inset-y" => FunctionalEntry {
+        registration_idx: 4,
+        branches: &[
+            Named(Spacing, 6, 1),
+            NamedTyped(Number, 6, 1),
+            NamedTyped(Ratio, 6, 1),
+            Arbitrary(6, 1),
+        ],
+    },
+    "inset-y" => FunctionalEntry {
+        registration_idx: 5,
+        branches: &[
+            Named(Spacing, 6, 1),
+            NamedTyped(Number, 6, 1),
+            NamedTyped(Ratio, 6, 1),
+            Arbitrary(6, 1),
+        ],
+    },
+    "-inset-s" => FunctionalEntry {
+        registration_idx: 6,
+        branches: &[
+            Named(Spacing, 7, 1),
+            NamedTyped(Number, 7, 1),
+            NamedTyped(Ratio, 7, 1),
+            Arbitrary(7, 1),
+        ],
+    },
+    "inset-s" => FunctionalEntry {
+        registration_idx: 7,
+        branches: &[
+            Named(Spacing, 7, 1),
+            NamedTyped(Number, 7, 1),
+            NamedTyped(Ratio, 7, 1),
+            Arbitrary(7, 1),
+        ],
+    },
+    "-inset-e" => FunctionalEntry {
+        registration_idx: 8,
+        branches: &[
+            Named(Spacing, 8, 1),
+            NamedTyped(Number, 8, 1),
+            NamedTyped(Ratio, 8, 1),
+            Arbitrary(8, 1),
+        ],
+    },
+    "inset-e" => FunctionalEntry {
+        registration_idx: 9,
+        branches: &[
+            Named(Spacing, 8, 1),
+            NamedTyped(Number, 8, 1),
+            NamedTyped(Ratio, 8, 1),
+            Arbitrary(8, 1),
+        ],
+    },
+    "-inset-bs" => FunctionalEntry {
+        registration_idx: 10,
+        branches: &[
+            Named(Spacing, 9, 1),
+            NamedTyped(Number, 9, 1),
+            NamedTyped(Ratio, 9, 1),
+            Arbitrary(9, 1),
+        ],
+    },
+    "inset-bs" => FunctionalEntry {
+        registration_idx: 11,
+        branches: &[
+            Named(Spacing, 9, 1),
+            NamedTyped(Number, 9, 1),
+            NamedTyped(Ratio, 9, 1),
+            Arbitrary(9, 1),
+        ],
+    },
+    "-inset-be" => FunctionalEntry {
+        registration_idx: 12,
+        branches: &[
+            Named(Spacing, 10, 1),
+            NamedTyped(Number, 10, 1),
+            NamedTyped(Ratio, 10, 1),
+            Arbitrary(10, 1),
+        ],
+    },
+    "inset-be" => FunctionalEntry {
+        registration_idx: 13,
+        branches: &[
+            Named(Spacing, 10, 1),
+            NamedTyped(Number, 10, 1),
+            NamedTyped(Ratio, 10, 1),
+            Arbitrary(10, 1),
+        ],
+    },
+    "-top" => FunctionalEntry {
+        registration_idx: 14,
+        branches: &[
+            Named(Spacing, 11, 1),
+            NamedTyped(Number, 11, 1),
+            NamedTyped(Ratio, 11, 1),
+            Arbitrary(11, 1),
+        ],
+    },
+    "top" => FunctionalEntry {
+        registration_idx: 15,
+        branches: &[
+            Named(Spacing, 11, 1),
+            NamedTyped(Number, 11, 1),
+            NamedTyped(Ratio, 11, 1),
+            Arbitrary(11, 1),
+        ],
+    },
+    "-right" => FunctionalEntry {
+        registration_idx: 16,
+        branches: &[
+            Named(Spacing, 12, 1),
+            NamedTyped(Number, 12, 1),
+            NamedTyped(Ratio, 12, 1),
+            Arbitrary(12, 1),
+        ],
+    },
+    "right" => FunctionalEntry {
+        registration_idx: 17,
+        branches: &[
+            Named(Spacing, 12, 1),
+            NamedTyped(Number, 12, 1),
+            NamedTyped(Ratio, 12, 1),
+            Arbitrary(12, 1),
+        ],
+    },
+    "-bottom" => FunctionalEntry {
+        registration_idx: 18,
+        branches: &[
+            Named(Spacing, 13, 1),
+            NamedTyped(Number, 13, 1),
+            NamedTyped(Ratio, 13, 1),
+            Arbitrary(13, 1),
+        ],
+    },
+    "bottom" => FunctionalEntry {
+        registration_idx: 19,
+        branches: &[
+            Named(Spacing, 13, 1),
+            NamedTyped(Number, 13, 1),
+            NamedTyped(Ratio, 13, 1),
+            Arbitrary(13, 1),
+        ],
+    },
+    "-left" => FunctionalEntry {
+        registration_idx: 20,
+        branches: &[
+            Named(Spacing, 14, 1),
+            NamedTyped(Number, 14, 1),
+            NamedTyped(Ratio, 14, 1),
+            Arbitrary(14, 1),
+        ],
+    },
+    "left" => FunctionalEntry {
+        registration_idx: 21,
+        branches: &[
+            Named(Spacing, 14, 1),
+            NamedTyped(Number, 14, 1),
+            NamedTyped(Ratio, 14, 1),
+            Arbitrary(14, 1),
+        ],
+    },
+    "-z" => FunctionalEntry {
+        registration_idx: 22,
+        branches: &[
+            NamedTyped(Number, 16, 1),
+            Arbitrary(16, 1),
+        ],
+    },
+    "z" => FunctionalEntry {
+        registration_idx: 23,
+        branches: &[
+            NamedKeyword(0, 16, 1),
+            NamedTyped(Number, 16, 1),
+            Arbitrary(16, 1),
+        ],
+    },
+    "-order" => FunctionalEntry {
+        registration_idx: 24,
+        branches: &[
+            NamedTyped(Number, 17, 1),
+            Arbitrary(17, 1),
+        ],
+    },
+    "order" => FunctionalEntry {
+        registration_idx: 25,
+        branches: &[
+            NamedKeyword(1, 17, 1),
+            NamedTyped(Number, 17, 1),
+            Arbitrary(17, 1),
+        ],
+    },
+    "-col" => FunctionalEntry {
+        registration_idx: 26,
+        branches: &[
+            NamedTyped(Number, 18, 1),
+            Arbitrary(18, 1),
+        ],
+    },
+    "col" => FunctionalEntry {
+        registration_idx: 27,
+        branches: &[
+            NamedKeyword(0, 18, 1),
+            NamedTyped(Number, 18, 1),
+            Arbitrary(18, 1),
+        ],
+    },
+    "col-span" => FunctionalEntry {
+        registration_idx: 28,
+        branches: &[
+            NamedKeyword(2, 18, 1),
+            NamedTyped(Number, 18, 1),
+            Arbitrary(18, 1),
+        ],
+    },
+    "-col-start" => FunctionalEntry {
+        registration_idx: 29,
+        branches: &[
+            NamedTyped(Number, 19, 1),
+            Arbitrary(19, 1),
+        ],
+    },
+    "col-start" => FunctionalEntry {
+        registration_idx: 30,
+        branches: &[
+            NamedKeyword(0, 19, 1),
+            NamedTyped(Number, 19, 1),
+            Arbitrary(19, 1),
+        ],
+    },
+    "-col-end" => FunctionalEntry {
+        registration_idx: 31,
+        branches: &[
+            NamedTyped(Number, 20, 1),
+            Arbitrary(20, 1),
+        ],
+    },
+    "col-end" => FunctionalEntry {
+        registration_idx: 32,
+        branches: &[
+            NamedKeyword(0, 20, 1),
+            NamedTyped(Number, 20, 1),
+            Arbitrary(20, 1),
+        ],
+    },
+    "-row" => FunctionalEntry {
+        registration_idx: 33,
+        branches: &[
+            NamedTyped(Number, 21, 1),
+            Arbitrary(21, 1),
+        ],
+    },
+    "row" => FunctionalEntry {
+        registration_idx: 34,
+        branches: &[
+            NamedKeyword(0, 21, 1),
+            NamedTyped(Number, 21, 1),
+            Arbitrary(21, 1),
+        ],
+    },
+    "row-span" => FunctionalEntry {
+        registration_idx: 35,
+        branches: &[
+            NamedKeyword(2, 21, 1),
+            NamedTyped(Number, 21, 1),
+            Arbitrary(21, 1),
+        ],
+    },
+    "-row-start" => FunctionalEntry {
+        registration_idx: 36,
+        branches: &[
+            NamedTyped(Number, 22, 1),
+            Arbitrary(22, 1),
+        ],
+    },
+    "row-start" => FunctionalEntry {
+        registration_idx: 37,
+        branches: &[
+            NamedKeyword(0, 22, 1),
+            NamedTyped(Number, 22, 1),
+            Arbitrary(22, 1),
+        ],
+    },
+    "-row-end" => FunctionalEntry {
+        registration_idx: 38,
+        branches: &[
+            NamedTyped(Number, 23, 1),
+            Arbitrary(23, 1),
+        ],
+    },
+    "row-end" => FunctionalEntry {
+        registration_idx: 39,
+        branches: &[
+            NamedKeyword(0, 23, 1),
+            NamedTyped(Number, 23, 1),
+            Arbitrary(23, 1),
+        ],
+    },
+    "-m" => FunctionalEntry {
+        registration_idx: 40,
+        branches: &[
+            Named(Spacing, 27, 1),
+            NamedTyped(Number, 27, 1),
+            Arbitrary(27, 1),
+        ],
+    },
+    "m" => FunctionalEntry {
+        registration_idx: 41,
+        branches: &[
+            Named(Spacing, 27, 1),
+            NamedTyped(Number, 27, 1),
+            Arbitrary(27, 1),
+        ],
+    },
+    "-mx" => FunctionalEntry {
+        registration_idx: 42,
+        branches: &[
+            Named(Spacing, 28, 1),
+            NamedTyped(Number, 28, 1),
+            Arbitrary(28, 1),
+        ],
+    },
+    "mx" => FunctionalEntry {
+        registration_idx: 43,
+        branches: &[
+            Named(Spacing, 28, 1),
+            NamedTyped(Number, 28, 1),
+            Arbitrary(28, 1),
+        ],
+    },
+    "-my" => FunctionalEntry {
+        registration_idx: 44,
+        branches: &[
+            Named(Spacing, 29, 1),
+            NamedTyped(Number, 29, 1),
+            Arbitrary(29, 1),
+        ],
+    },
+    "my" => FunctionalEntry {
+        registration_idx: 45,
+        branches: &[
+            Named(Spacing, 29, 1),
+            NamedTyped(Number, 29, 1),
+            Arbitrary(29, 1),
+        ],
+    },
+    "-ms" => FunctionalEntry {
+        registration_idx: 46,
+        branches: &[
+            Named(Spacing, 30, 1),
+            NamedTyped(Number, 30, 1),
+            Arbitrary(30, 1),
+        ],
+    },
+    "ms" => FunctionalEntry {
+        registration_idx: 47,
+        branches: &[
+            Named(Spacing, 30, 1),
+            NamedTyped(Number, 30, 1),
+            Arbitrary(30, 1),
+        ],
+    },
+    "-me" => FunctionalEntry {
+        registration_idx: 48,
+        branches: &[
+            Named(Spacing, 31, 1),
+            NamedTyped(Number, 31, 1),
+            Arbitrary(31, 1),
+        ],
+    },
+    "me" => FunctionalEntry {
+        registration_idx: 49,
+        branches: &[
+            Named(Spacing, 31, 1),
+            NamedTyped(Number, 31, 1),
+            Arbitrary(31, 1),
+        ],
+    },
+    "-mbs" => FunctionalEntry {
+        registration_idx: 50,
+        branches: &[
+            Named(Spacing, 32, 1),
+            NamedTyped(Number, 32, 1),
+            Arbitrary(32, 1),
+        ],
+    },
+    "mbs" => FunctionalEntry {
+        registration_idx: 51,
+        branches: &[
+            Named(Spacing, 32, 1),
+            NamedTyped(Number, 32, 1),
+            Arbitrary(32, 1),
+        ],
+    },
+    "-mbe" => FunctionalEntry {
+        registration_idx: 52,
+        branches: &[
+            Named(Spacing, 33, 1),
+            NamedTyped(Number, 33, 1),
+            Arbitrary(33, 1),
+        ],
+    },
+    "mbe" => FunctionalEntry {
+        registration_idx: 53,
+        branches: &[
+            Named(Spacing, 33, 1),
+            NamedTyped(Number, 33, 1),
+            Arbitrary(33, 1),
+        ],
+    },
+    "-mt" => FunctionalEntry {
+        registration_idx: 54,
+        branches: &[
+            Named(Spacing, 34, 1),
+            NamedTyped(Number, 34, 1),
+            Arbitrary(34, 1),
+        ],
+    },
+    "mt" => FunctionalEntry {
+        registration_idx: 55,
+        branches: &[
+            Named(Spacing, 34, 1),
+            NamedTyped(Number, 34, 1),
+            Arbitrary(34, 1),
+        ],
+    },
+    "-mr" => FunctionalEntry {
+        registration_idx: 56,
+        branches: &[
+            Named(Spacing, 35, 1),
+            NamedTyped(Number, 35, 1),
+            Arbitrary(35, 1),
+        ],
+    },
+    "mr" => FunctionalEntry {
+        registration_idx: 57,
+        branches: &[
+            Named(Spacing, 35, 1),
+            NamedTyped(Number, 35, 1),
+            Arbitrary(35, 1),
+        ],
+    },
+    "-mb" => FunctionalEntry {
+        registration_idx: 58,
+        branches: &[
+            Named(Spacing, 36, 1),
+            NamedTyped(Number, 36, 1),
+            Arbitrary(36, 1),
+        ],
+    },
+    "mb" => FunctionalEntry {
+        registration_idx: 59,
+        branches: &[
+            Named(Spacing, 36, 1),
+            NamedTyped(Number, 36, 1),
+            Arbitrary(36, 1),
+        ],
+    },
+    "-ml" => FunctionalEntry {
+        registration_idx: 60,
+        branches: &[
+            Named(Spacing, 37, 1),
+            NamedTyped(Number, 37, 1),
+            Arbitrary(37, 1),
+        ],
+    },
+    "ml" => FunctionalEntry {
+        registration_idx: 61,
+        branches: &[
+            Named(Spacing, 37, 1),
+            NamedTyped(Number, 37, 1),
+            Arbitrary(37, 1),
+        ],
+    },
+    "line-clamp" => FunctionalEntry {
+        registration_idx: 62,
+        branches: &[
+            NamedKeyword(3, 139, 4),
+            NamedTyped(Number, 139, 4),
+            Arbitrary(139, 4),
+        ],
+    },
+    "block" => FunctionalEntry {
+        registration_idx: 63,
+        branches: &[
+            Named(Spacing, 354, 1),
+            NamedTyped(Number, 354, 1),
+            NamedTyped(Ratio, 354, 1),
+            Arbitrary(354, 1),
+        ],
+    },
+    "inline" => FunctionalEntry {
+        registration_idx: 64,
+        branches: &[
+            Named(Spacing, 354, 1),
+            Named(Container, 354, 1),
+            NamedTyped(Number, 354, 1),
+            NamedTyped(Ratio, 354, 1),
+            Arbitrary(354, 1),
+        ],
+    },
+    "flex" => FunctionalEntry {
+        registration_idx: 65,
+        branches: &[
+            NamedTyped(Number, 48, 1),
+            NamedTyped(Ratio, 48, 1),
+            Arbitrary(48, 1),
+        ],
+    },
+    "aspect" => FunctionalEntry {
+        registration_idx: 66,
+        branches: &[
+            NamedKeyword(4, 41, 1),
+            Named(Aspect, 41, 1),
+            NamedTyped(Ratio, 41, 1),
+            Arbitrary(41, 1),
+        ],
+    },
+    "max-w-screen" => FunctionalEntry {
+        registration_idx: 67,
+        branches: &[
+            Named(Breakpoint, 46, 1),
+        ],
+    },
+    "size" => FunctionalEntry {
+        registration_idx: 68,
+        branches: &[
+            Named(Spacing, 45, 2),
+            NamedTyped(Number, 45, 2),
+            NamedTyped(Ratio, 45, 2),
+            Arbitrary(45, 2),
+        ],
+    },
+    "w" => FunctionalEntry {
+        registration_idx: 69,
+        branches: &[
+            Named(Spacing, 45, 1),
+            Named(Container, 45, 1),
+            NamedTyped(Number, 45, 1),
+            NamedTyped(Ratio, 45, 1),
+            Arbitrary(45, 1),
+        ],
+    },
+    "min-w" => FunctionalEntry {
+        registration_idx: 70,
+        branches: &[
+            Named(Spacing, 47, 1),
+            Named(Container, 47, 1),
+            NamedTyped(Number, 47, 1),
+            NamedTyped(Ratio, 47, 1),
+            Arbitrary(47, 1),
+        ],
+    },
+    "max-w" => FunctionalEntry {
+        registration_idx: 71,
+        branches: &[
+            NamedKeyword(5, 46, 1),
+            Named(Spacing, 46, 1),
+            Named(Container, 46, 1),
+            NamedTyped(Number, 46, 1),
+            NamedTyped(Ratio, 46, 1),
+            Arbitrary(46, 1),
+        ],
+    },
+    "h" => FunctionalEntry {
+        registration_idx: 72,
+        branches: &[
+            Named(Spacing, 42, 1),
+            NamedTyped(Number, 42, 1),
+            NamedTyped(Ratio, 42, 1),
+            Arbitrary(42, 1),
+        ],
+    },
+    "min-h" => FunctionalEntry {
+        registration_idx: 73,
+        branches: &[
+            Named(Spacing, 44, 1),
+            NamedTyped(Number, 44, 1),
+            NamedTyped(Ratio, 44, 1),
+            Arbitrary(44, 1),
+        ],
+    },
+    "max-h" => FunctionalEntry {
+        registration_idx: 74,
+        branches: &[
+            Named(Spacing, 43, 1),
+            NamedTyped(Number, 43, 1),
+            NamedTyped(Ratio, 43, 1),
+            Arbitrary(43, 1),
+        ],
+    },
+    "min-inline" => FunctionalEntry {
+        registration_idx: 75,
+        branches: &[
+            Named(Spacing, 354, 1),
+            Named(Container, 354, 1),
+            NamedTyped(Number, 354, 1),
+            NamedTyped(Ratio, 354, 1),
+            Arbitrary(354, 1),
+        ],
+    },
+    "max-inline" => FunctionalEntry {
+        registration_idx: 76,
+        branches: &[
+            Named(Spacing, 354, 1),
+            Named(Container, 354, 1),
+            NamedTyped(Number, 354, 1),
+            NamedTyped(Ratio, 354, 1),
+            Arbitrary(354, 1),
+        ],
+    },
+    "min-block" => FunctionalEntry {
+        registration_idx: 77,
+        branches: &[
+            Named(Spacing, 354, 1),
+            NamedTyped(Number, 354, 1),
+            NamedTyped(Ratio, 354, 1),
+            Arbitrary(354, 1),
+        ],
+    },
+    "max-block" => FunctionalEntry {
+        registration_idx: 78,
+        branches: &[
+            Named(Spacing, 354, 1),
+            NamedTyped(Number, 354, 1),
+            NamedTyped(Ratio, 354, 1),
+            Arbitrary(354, 1),
+        ],
+    },
+    "shrink" => FunctionalEntry {
+        registration_idx: 79,
+        branches: &[
+            NamedTyped(Number, 49, 1),
+            Arbitrary(49, 1),
+        ],
+    },
+    "grow" => FunctionalEntry {
+        registration_idx: 80,
+        branches: &[
+            NamedTyped(Number, 50, 1),
+            Arbitrary(50, 1),
+        ],
+    },
+    "basis" => FunctionalEntry {
+        registration_idx: 81,
+        branches: &[
+            Named(Spacing, 51, 1),
+            Named(Container, 51, 1),
+            NamedTyped(Number, 51, 1),
+            NamedTyped(Ratio, 51, 1),
+            Arbitrary(51, 1),
+        ],
+    },
+    "border-spacing" => FunctionalEntry {
+        registration_idx: 82,
+        branches: &[
+            Named(Spacing, 354, 3),
+            NamedTyped(Number, 354, 3),
+            Arbitrary(354, 3),
+        ],
+    },
+    "border-spacing-x" => FunctionalEntry {
+        registration_idx: 83,
+        branches: &[
+            Named(Spacing, 354, 2),
+            NamedTyped(Number, 354, 2),
+            Arbitrary(354, 2),
+        ],
+    },
+    "border-spacing-y" => FunctionalEntry {
+        registration_idx: 84,
+        branches: &[
+            Named(Spacing, 354, 2),
+            NamedTyped(Number, 354, 2),
+            Arbitrary(354, 2),
+        ],
+    },
+    "origin" => FunctionalEntry {
+        registration_idx: 85,
+        branches: &[
+            NamedKeyword(6, 56, 1),
+            Arbitrary(56, 1),
+        ],
+    },
+    "perspective-origin" => FunctionalEntry {
+        registration_idx: 86,
+        branches: &[
+            NamedKeyword(6, 354, 1),
+            Arbitrary(354, 1),
+        ],
+    },
+    "perspective" => FunctionalEntry {
+        registration_idx: 87,
+        branches: &[
+            NamedKeyword(3, 354, 1),
+            Named(Perspective, 354, 1),
+            Arbitrary(354, 1),
+        ],
+    },
+    "-translate" => FunctionalEntry {
+        registration_idx: 88,
+        branches: &[
+            Named(Spacing, 58, 3),
+            NamedTyped(Number, 58, 3),
+            NamedTyped(Ratio, 58, 3),
+            Arbitrary(58, 3),
+        ],
+    },
+    "translate" => FunctionalEntry {
+        registration_idx: 89,
+        branches: &[
+            Named(Spacing, 58, 3),
+            NamedTyped(Number, 58, 3),
+            NamedTyped(Ratio, 58, 3),
+            Arbitrary(58, 3),
+        ],
+    },
+    "-translate-x" => FunctionalEntry {
+        registration_idx: 90,
+        branches: &[
+            Named(Spacing, 58, 2),
+            NamedTyped(Number, 58, 2),
+            NamedTyped(Ratio, 58, 2),
+            Arbitrary(58, 2),
+        ],
+    },
+    "translate-x" => FunctionalEntry {
+        registration_idx: 91,
+        branches: &[
+            Named(Spacing, 58, 2),
+            NamedTyped(Number, 58, 2),
+            NamedTyped(Ratio, 58, 2),
+            Arbitrary(58, 2),
+        ],
+    },
+    "-translate-y" => FunctionalEntry {
+        registration_idx: 92,
+        branches: &[
+            Named(Spacing, 59, 2),
+            NamedTyped(Number, 59, 2),
+            NamedTyped(Ratio, 59, 2),
+            Arbitrary(59, 2),
+        ],
+    },
+    "translate-y" => FunctionalEntry {
+        registration_idx: 93,
+        branches: &[
+            Named(Spacing, 59, 2),
+            NamedTyped(Number, 59, 2),
+            NamedTyped(Ratio, 59, 2),
+            Arbitrary(59, 2),
+        ],
+    },
+    "-translate-z" => FunctionalEntry {
+        registration_idx: 94,
+        branches: &[
+            Named(Spacing, 60, 2),
+            NamedTyped(Number, 60, 2),
+            Arbitrary(60, 2),
+        ],
+    },
+    "translate-z" => FunctionalEntry {
+        registration_idx: 95,
+        branches: &[
+            Named(Spacing, 60, 2),
+            NamedTyped(Number, 60, 2),
+            Arbitrary(60, 2),
+        ],
+    },
+    "-scale" => FunctionalEntry {
+        registration_idx: 96,
+        branches: &[
+            NamedTyped(Number, 62, 4),
+            Arbitrary(61, 1),
+        ],
+    },
+    "scale" => FunctionalEntry {
+        registration_idx: 97,
+        branches: &[
+            NamedTyped(Number, 62, 4),
+            Arbitrary(61, 1),
+        ],
+    },
+    "-scale-x" => FunctionalEntry {
+        registration_idx: 98,
+        branches: &[
+            NamedTyped(Number, 62, 2),
+            Arbitrary(62, 2),
+        ],
+    },
+    "scale-x" => FunctionalEntry {
+        registration_idx: 99,
+        branches: &[
+            NamedTyped(Number, 62, 2),
+            Arbitrary(62, 2),
+        ],
+    },
+    "-scale-y" => FunctionalEntry {
+        registration_idx: 100,
+        branches: &[
+            NamedTyped(Number, 63, 2),
+            Arbitrary(63, 2),
+        ],
+    },
+    "scale-y" => FunctionalEntry {
+        registration_idx: 101,
+        branches: &[
+            NamedTyped(Number, 63, 2),
+            Arbitrary(63, 2),
+        ],
+    },
+    "-scale-z" => FunctionalEntry {
+        registration_idx: 102,
+        branches: &[
+            NamedTyped(Number, 64, 2),
+            Arbitrary(64, 2),
+        ],
+    },
+    "scale-z" => FunctionalEntry {
+        registration_idx: 103,
+        branches: &[
+            NamedTyped(Number, 64, 2),
+            Arbitrary(64, 2),
+        ],
+    },
+    "-rotate" => FunctionalEntry {
+        registration_idx: 104,
+        branches: &[
+            NamedTyped(Number, 65, 1),
+            Arbitrary(65, 1),
+        ],
+    },
+    "rotate" => FunctionalEntry {
+        registration_idx: 105,
+        branches: &[
+            NamedTyped(Number, 65, 1),
+            Arbitrary(65, 1),
+        ],
+    },
+    "-rotate-x" => FunctionalEntry {
+        registration_idx: 106,
+        branches: &[
+            NamedTyped(Number, 66, 2),
+            Arbitrary(66, 2),
+        ],
+    },
+    "rotate-x" => FunctionalEntry {
+        registration_idx: 107,
+        branches: &[
+            NamedTyped(Number, 66, 2),
+            Arbitrary(66, 2),
+        ],
+    },
+    "-rotate-y" => FunctionalEntry {
+        registration_idx: 108,
+        branches: &[
+            NamedTyped(Number, 67, 2),
+            Arbitrary(67, 2),
+        ],
+    },
+    "rotate-y" => FunctionalEntry {
+        registration_idx: 109,
+        branches: &[
+            NamedTyped(Number, 67, 2),
+            Arbitrary(67, 2),
+        ],
+    },
+    "-rotate-z" => FunctionalEntry {
+        registration_idx: 110,
+        branches: &[
+            NamedTyped(Number, 68, 2),
+            Arbitrary(68, 2),
+        ],
+    },
+    "rotate-z" => FunctionalEntry {
+        registration_idx: 111,
+        branches: &[
+            NamedTyped(Number, 68, 2),
+            Arbitrary(68, 2),
+        ],
+    },
+    "-skew" => FunctionalEntry {
+        registration_idx: 112,
+        branches: &[
+            NamedTyped(Number, 69, 3),
+            Arbitrary(69, 3),
+        ],
+    },
+    "skew" => FunctionalEntry {
+        registration_idx: 113,
+        branches: &[
+            NamedTyped(Number, 69, 3),
+            Arbitrary(69, 3),
+        ],
+    },
+    "-skew-x" => FunctionalEntry {
+        registration_idx: 114,
+        branches: &[
+            NamedTyped(Number, 69, 2),
+            Arbitrary(69, 2),
+        ],
+    },
+    "skew-x" => FunctionalEntry {
+        registration_idx: 115,
+        branches: &[
+            NamedTyped(Number, 69, 2),
+            Arbitrary(69, 2),
+        ],
+    },
+    "-skew-y" => FunctionalEntry {
+        registration_idx: 116,
+        branches: &[
+            NamedTyped(Number, 70, 2),
+            Arbitrary(70, 2),
+        ],
+    },
+    "skew-y" => FunctionalEntry {
+        registration_idx: 117,
+        branches: &[
+            NamedTyped(Number, 70, 2),
+            Arbitrary(70, 2),
+        ],
+    },
+    "transform" => FunctionalEntry {
+        registration_idx: 118,
+        branches: &[
+            Arbitrary(71, 1),
+        ],
+    },
+    "cursor" => FunctionalEntry {
+        registration_idx: 119,
+        branches: &[
+            Arbitrary(73, 1),
+        ],
+    },
+    "-scroll-m" => FunctionalEntry {
+        registration_idx: 120,
+        branches: &[
+            Named(Spacing, 83, 1),
+            NamedTyped(Number, 83, 1),
+            Arbitrary(83, 1),
+        ],
+    },
+    "scroll-m" => FunctionalEntry {
+        registration_idx: 121,
+        branches: &[
+            Named(Spacing, 83, 1),
+            NamedTyped(Number, 83, 1),
+            Arbitrary(83, 1),
+        ],
+    },
+    "-scroll-mx" => FunctionalEntry {
+        registration_idx: 122,
+        branches: &[
+            Named(Spacing, 84, 1),
+            NamedTyped(Number, 84, 1),
+            Arbitrary(84, 1),
+        ],
+    },
+    "scroll-mx" => FunctionalEntry {
+        registration_idx: 123,
+        branches: &[
+            Named(Spacing, 84, 1),
+            NamedTyped(Number, 84, 1),
+            Arbitrary(84, 1),
+        ],
+    },
+    "-scroll-my" => FunctionalEntry {
+        registration_idx: 124,
+        branches: &[
+            Named(Spacing, 85, 1),
+            NamedTyped(Number, 85, 1),
+            Arbitrary(85, 1),
+        ],
+    },
+    "scroll-my" => FunctionalEntry {
+        registration_idx: 125,
+        branches: &[
+            Named(Spacing, 85, 1),
+            NamedTyped(Number, 85, 1),
+            Arbitrary(85, 1),
+        ],
+    },
+    "-scroll-ms" => FunctionalEntry {
+        registration_idx: 126,
+        branches: &[
+            Named(Spacing, 86, 1),
+            NamedTyped(Number, 86, 1),
+            Arbitrary(86, 1),
+        ],
+    },
+    "scroll-ms" => FunctionalEntry {
+        registration_idx: 127,
+        branches: &[
+            Named(Spacing, 86, 1),
+            NamedTyped(Number, 86, 1),
+            Arbitrary(86, 1),
+        ],
+    },
+    "-scroll-me" => FunctionalEntry {
+        registration_idx: 128,
+        branches: &[
+            Named(Spacing, 87, 1),
+            NamedTyped(Number, 87, 1),
+            Arbitrary(87, 1),
+        ],
+    },
+    "scroll-me" => FunctionalEntry {
+        registration_idx: 129,
+        branches: &[
+            Named(Spacing, 87, 1),
+            NamedTyped(Number, 87, 1),
+            Arbitrary(87, 1),
+        ],
+    },
+    "-scroll-mbs" => FunctionalEntry {
+        registration_idx: 130,
+        branches: &[
+            Named(Spacing, 88, 1),
+            NamedTyped(Number, 88, 1),
+            Arbitrary(88, 1),
+        ],
+    },
+    "scroll-mbs" => FunctionalEntry {
+        registration_idx: 131,
+        branches: &[
+            Named(Spacing, 88, 1),
+            NamedTyped(Number, 88, 1),
+            Arbitrary(88, 1),
+        ],
+    },
+    "-scroll-mbe" => FunctionalEntry {
+        registration_idx: 132,
+        branches: &[
+            Named(Spacing, 89, 1),
+            NamedTyped(Number, 89, 1),
+            Arbitrary(89, 1),
+        ],
+    },
+    "scroll-mbe" => FunctionalEntry {
+        registration_idx: 133,
+        branches: &[
+            Named(Spacing, 89, 1),
+            NamedTyped(Number, 89, 1),
+            Arbitrary(89, 1),
+        ],
+    },
+    "-scroll-mt" => FunctionalEntry {
+        registration_idx: 134,
+        branches: &[
+            Named(Spacing, 90, 1),
+            NamedTyped(Number, 90, 1),
+            Arbitrary(90, 1),
+        ],
+    },
+    "scroll-mt" => FunctionalEntry {
+        registration_idx: 135,
+        branches: &[
+            Named(Spacing, 90, 1),
+            NamedTyped(Number, 90, 1),
+            Arbitrary(90, 1),
+        ],
+    },
+    "-scroll-mr" => FunctionalEntry {
+        registration_idx: 136,
+        branches: &[
+            Named(Spacing, 91, 1),
+            NamedTyped(Number, 91, 1),
+            Arbitrary(91, 1),
+        ],
+    },
+    "scroll-mr" => FunctionalEntry {
+        registration_idx: 137,
+        branches: &[
+            Named(Spacing, 91, 1),
+            NamedTyped(Number, 91, 1),
+            Arbitrary(91, 1),
+        ],
+    },
+    "-scroll-mb" => FunctionalEntry {
+        registration_idx: 138,
+        branches: &[
+            Named(Spacing, 92, 1),
+            NamedTyped(Number, 92, 1),
+            Arbitrary(92, 1),
+        ],
+    },
+    "scroll-mb" => FunctionalEntry {
+        registration_idx: 139,
+        branches: &[
+            Named(Spacing, 92, 1),
+            NamedTyped(Number, 92, 1),
+            Arbitrary(92, 1),
+        ],
+    },
+    "-scroll-ml" => FunctionalEntry {
+        registration_idx: 140,
+        branches: &[
+            Named(Spacing, 93, 1),
+            NamedTyped(Number, 93, 1),
+            Arbitrary(93, 1),
+        ],
+    },
+    "scroll-ml" => FunctionalEntry {
+        registration_idx: 141,
+        branches: &[
+            Named(Spacing, 93, 1),
+            NamedTyped(Number, 93, 1),
+            Arbitrary(93, 1),
+        ],
+    },
+    "scroll-p" => FunctionalEntry {
+        registration_idx: 142,
+        branches: &[
+            Named(Spacing, 94, 1),
+            NamedTyped(Number, 94, 1),
+            Arbitrary(94, 1),
+        ],
+    },
+    "scroll-px" => FunctionalEntry {
+        registration_idx: 143,
+        branches: &[
+            Named(Spacing, 95, 1),
+            NamedTyped(Number, 95, 1),
+            Arbitrary(95, 1),
+        ],
+    },
+    "scroll-py" => FunctionalEntry {
+        registration_idx: 144,
+        branches: &[
+            Named(Spacing, 96, 1),
+            NamedTyped(Number, 96, 1),
+            Arbitrary(96, 1),
+        ],
+    },
+    "scroll-ps" => FunctionalEntry {
+        registration_idx: 145,
+        branches: &[
+            Named(Spacing, 97, 1),
+            NamedTyped(Number, 97, 1),
+            Arbitrary(97, 1),
+        ],
+    },
+    "scroll-pe" => FunctionalEntry {
+        registration_idx: 146,
+        branches: &[
+            Named(Spacing, 98, 1),
+            NamedTyped(Number, 98, 1),
+            Arbitrary(98, 1),
+        ],
+    },
+    "scroll-pbs" => FunctionalEntry {
+        registration_idx: 147,
+        branches: &[
+            Named(Spacing, 99, 1),
+            NamedTyped(Number, 99, 1),
+            Arbitrary(99, 1),
+        ],
+    },
+    "scroll-pbe" => FunctionalEntry {
+        registration_idx: 148,
+        branches: &[
+            Named(Spacing, 100, 1),
+            NamedTyped(Number, 100, 1),
+            Arbitrary(100, 1),
+        ],
+    },
+    "scroll-pt" => FunctionalEntry {
+        registration_idx: 149,
+        branches: &[
+            Named(Spacing, 101, 1),
+            NamedTyped(Number, 101, 1),
+            Arbitrary(101, 1),
+        ],
+    },
+    "scroll-pr" => FunctionalEntry {
+        registration_idx: 150,
+        branches: &[
+            Named(Spacing, 102, 1),
+            NamedTyped(Number, 102, 1),
+            Arbitrary(102, 1),
+        ],
+    },
+    "scroll-pb" => FunctionalEntry {
+        registration_idx: 151,
+        branches: &[
+            Named(Spacing, 103, 1),
+            NamedTyped(Number, 103, 1),
+            Arbitrary(103, 1),
+        ],
+    },
+    "scroll-pl" => FunctionalEntry {
+        registration_idx: 152,
+        branches: &[
+            Named(Spacing, 104, 1),
+            NamedTyped(Number, 104, 1),
+            Arbitrary(104, 1),
+        ],
+    },
+    "list" => FunctionalEntry {
+        registration_idx: 153,
+        branches: &[
+            NamedKeyword(7, 106, 1),
+            Arbitrary(106, 1),
+        ],
+    },
+    "list-image" => FunctionalEntry {
+        registration_idx: 154,
+        branches: &[
+            NamedKeyword(3, 107, 1),
+            Arbitrary(107, 1),
+        ],
+    },
+    "columns" => FunctionalEntry {
+        registration_idx: 155,
+        branches: &[
+            NamedKeyword(0, 109, 1),
+            Named(Container, 109, 1),
+            NamedTyped(Number, 109, 1),
+            Arbitrary(109, 1),
+        ],
+    },
+    "auto-cols" => FunctionalEntry {
+        registration_idx: 156,
+        branches: &[
+            NamedKeyword(8, 113, 1),
+            Arbitrary(113, 1),
+        ],
+    },
+    "auto-rows" => FunctionalEntry {
+        registration_idx: 157,
+        branches: &[
+            NamedKeyword(8, 115, 1),
+            Arbitrary(115, 1),
+        ],
+    },
+    "grid-cols" => FunctionalEntry {
+        registration_idx: 158,
+        branches: &[
+            NamedKeyword(9, 116, 1),
+            NamedTyped(Number, 116, 1),
+            Arbitrary(116, 1),
+        ],
+    },
+    "grid-rows" => FunctionalEntry {
+        registration_idx: 159,
+        branches: &[
+            NamedKeyword(9, 117, 1),
+            NamedTyped(Number, 117, 1),
+            Arbitrary(117, 1),
+        ],
+    },
+    "gap" => FunctionalEntry {
+        registration_idx: 160,
+        branches: &[
+            Named(Spacing, 126, 1),
+            NamedTyped(Number, 126, 1),
+            Arbitrary(126, 1),
+        ],
+    },
+    "gap-x" => FunctionalEntry {
+        registration_idx: 161,
+        branches: &[
+            Named(Spacing, 127, 1),
+            NamedTyped(Number, 127, 1),
+            Arbitrary(127, 1),
+        ],
+    },
+    "gap-y" => FunctionalEntry {
+        registration_idx: 162,
+        branches: &[
+            Named(Spacing, 128, 1),
+            NamedTyped(Number, 128, 1),
+            Arbitrary(128, 1),
+        ],
+    },
+    "-space-x" => FunctionalEntry {
+        registration_idx: 163,
+        branches: &[
+            Named(Spacing, 129, 3),
+            NamedTyped(Number, 129, 3),
+            Arbitrary(129, 3),
+        ],
+    },
+    "space-x" => FunctionalEntry {
+        registration_idx: 164,
+        branches: &[
+            Named(Spacing, 129, 3),
+            NamedTyped(Number, 129, 3),
+            Arbitrary(129, 3),
+        ],
+    },
+    "-space-y" => FunctionalEntry {
+        registration_idx: 165,
+        branches: &[
+            Named(Spacing, 130, 3),
+            NamedTyped(Number, 130, 3),
+            Arbitrary(130, 3),
+        ],
+    },
+    "space-y" => FunctionalEntry {
+        registration_idx: 166,
+        branches: &[
+            Named(Spacing, 130, 3),
+            NamedTyped(Number, 130, 3),
+            Arbitrary(130, 3),
+        ],
+    },
+    "accent" => FunctionalEntry {
+        registration_idx: 167,
+        branches: &[
+            NamedKeyword(10, 305, 1),
+            Named(Color, 305, 1),
+            Arbitrary(305, 1),
+        ],
+    },
+    "caret" => FunctionalEntry {
+        registration_idx: 168,
+        branches: &[
+            NamedKeyword(10, 304, 1),
+            Named(Color, 304, 1),
+            Arbitrary(304, 1),
+        ],
+    },
+    "divide" => FunctionalEntry {
+        registration_idx: 169,
+        branches: &[
+            NamedKeyword(10, 183, 1),
+            Named(Color, 183, 1),
+            Arbitrary(183, 1),
+        ],
+    },
+    "rounded" => FunctionalEntry {
+        registration_idx: 170,
+        branches: &[
+            NamedKeyword(11, 146, 1),
+            Named(Radius, 146, 1),
+            Arbitrary(146, 1),
+        ],
+    },
+    "rounded-s" => FunctionalEntry {
+        registration_idx: 171,
+        branches: &[
+            NamedKeyword(11, 153, 2),
+            Named(Radius, 153, 2),
+            Arbitrary(153, 2),
+        ],
+    },
+    "rounded-e" => FunctionalEntry {
+        registration_idx: 172,
+        branches: &[
+            NamedKeyword(11, 154, 2),
+            Named(Radius, 154, 2),
+            Arbitrary(154, 2),
+        ],
+    },
+    "rounded-t" => FunctionalEntry {
+        registration_idx: 173,
+        branches: &[
+            NamedKeyword(11, 157, 2),
+            Named(Radius, 157, 2),
+            Arbitrary(157, 2),
+        ],
+    },
+    "rounded-r" => FunctionalEntry {
+        registration_idx: 174,
+        branches: &[
+            NamedKeyword(11, 158, 2),
+            Named(Radius, 158, 2),
+            Arbitrary(158, 2),
+        ],
+    },
+    "rounded-b" => FunctionalEntry {
+        registration_idx: 175,
+        branches: &[
+            NamedKeyword(11, 159, 2),
+            Named(Radius, 159, 2),
+            Arbitrary(159, 2),
+        ],
+    },
+    "rounded-l" => FunctionalEntry {
+        registration_idx: 176,
+        branches: &[
+            NamedKeyword(11, 157, 2),
+            Named(Radius, 157, 2),
+            Arbitrary(157, 2),
+        ],
+    },
+    "rounded-ss" => FunctionalEntry {
+        registration_idx: 177,
+        branches: &[
+            NamedKeyword(11, 153, 1),
+            Named(Radius, 153, 1),
+            Arbitrary(153, 1),
+        ],
+    },
+    "rounded-se" => FunctionalEntry {
+        registration_idx: 178,
+        branches: &[
+            NamedKeyword(11, 154, 1),
+            Named(Radius, 154, 1),
+            Arbitrary(154, 1),
+        ],
+    },
+    "rounded-ee" => FunctionalEntry {
+        registration_idx: 179,
+        branches: &[
+            NamedKeyword(11, 155, 1),
+            Named(Radius, 155, 1),
+            Arbitrary(155, 1),
+        ],
+    },
+    "rounded-es" => FunctionalEntry {
+        registration_idx: 180,
+        branches: &[
+            NamedKeyword(11, 156, 1),
+            Named(Radius, 156, 1),
+            Arbitrary(156, 1),
+        ],
+    },
+    "rounded-tl" => FunctionalEntry {
+        registration_idx: 181,
+        branches: &[
+            NamedKeyword(11, 157, 1),
+            Named(Radius, 157, 1),
+            Arbitrary(157, 1),
+        ],
+    },
+    "rounded-tr" => FunctionalEntry {
+        registration_idx: 182,
+        branches: &[
+            NamedKeyword(11, 158, 1),
+            Named(Radius, 158, 1),
+            Arbitrary(158, 1),
+        ],
+    },
+    "rounded-br" => FunctionalEntry {
+        registration_idx: 183,
+        branches: &[
+            NamedKeyword(11, 159, 1),
+            Named(Radius, 159, 1),
+            Arbitrary(159, 1),
+        ],
+    },
+    "rounded-bl" => FunctionalEntry {
+        registration_idx: 184,
+        branches: &[
+            NamedKeyword(11, 160, 1),
+            Named(Radius, 160, 1),
+            Arbitrary(160, 1),
+        ],
+    },
+    "border" => FunctionalEntry {
+        registration_idx: 185,
+        branches: &[
+            NamedKeyword(10, 183, 1),
+            Named(Color, 183, 1),
+            NamedTyped(Number, 172, 2),
+            Typed(Length, 172, 2),
+            Typed(LineWidth, 172, 2),
+            Arbitrary(183, 1),
+        ],
+    },
+    "border-x" => FunctionalEntry {
+        registration_idx: 186,
+        branches: &[
+            NamedKeyword(10, 184, 1),
+            Named(Color, 184, 1),
+            NamedTyped(Number, 173, 2),
+            Typed(Length, 173, 2),
+            Typed(LineWidth, 173, 2),
+            Arbitrary(184, 1),
+        ],
+    },
+    "border-y" => FunctionalEntry {
+        registration_idx: 187,
+        branches: &[
+            NamedKeyword(10, 185, 1),
+            Named(Color, 185, 1),
+            NamedTyped(Number, 174, 2),
+            Typed(Length, 174, 2),
+            Typed(LineWidth, 174, 2),
+            Arbitrary(185, 1),
+        ],
+    },
+    "border-s" => FunctionalEntry {
+        registration_idx: 188,
+        branches: &[
+            NamedKeyword(10, 186, 1),
+            Named(Color, 186, 1),
+            NamedTyped(Number, 175, 2),
+            Typed(Length, 175, 2),
+            Typed(LineWidth, 175, 2),
+            Arbitrary(186, 1),
+        ],
+    },
+    "border-e" => FunctionalEntry {
+        registration_idx: 189,
+        branches: &[
+            NamedKeyword(10, 187, 1),
+            Named(Color, 187, 1),
+            NamedTyped(Number, 176, 2),
+            Typed(Length, 176, 2),
+            Typed(LineWidth, 176, 2),
+            Arbitrary(187, 1),
+        ],
+    },
+    "border-bs" => FunctionalEntry {
+        registration_idx: 190,
+        branches: &[
+            NamedKeyword(10, 188, 1),
+            Named(Color, 188, 1),
+            NamedTyped(Number, 177, 2),
+            Typed(Length, 177, 2),
+            Typed(LineWidth, 177, 2),
+            Arbitrary(188, 1),
+        ],
+    },
+    "border-be" => FunctionalEntry {
+        registration_idx: 191,
+        branches: &[
+            NamedKeyword(10, 189, 1),
+            Named(Color, 189, 1),
+            NamedTyped(Number, 178, 2),
+            Typed(Length, 178, 2),
+            Typed(LineWidth, 178, 2),
+            Arbitrary(189, 1),
+        ],
+    },
+    "border-t" => FunctionalEntry {
+        registration_idx: 192,
+        branches: &[
+            NamedKeyword(10, 190, 1),
+            Named(Color, 190, 1),
+            NamedTyped(Number, 179, 2),
+            Typed(Length, 179, 2),
+            Typed(LineWidth, 179, 2),
+            Arbitrary(190, 1),
+        ],
+    },
+    "border-r" => FunctionalEntry {
+        registration_idx: 193,
+        branches: &[
+            NamedKeyword(10, 191, 1),
+            Named(Color, 191, 1),
+            NamedTyped(Number, 180, 2),
+            Typed(Length, 180, 2),
+            Typed(LineWidth, 180, 2),
+            Arbitrary(191, 1),
+        ],
+    },
+    "border-b" => FunctionalEntry {
+        registration_idx: 194,
+        branches: &[
+            NamedKeyword(10, 192, 1),
+            Named(Color, 192, 1),
+            NamedTyped(Number, 181, 2),
+            Typed(Length, 181, 2),
+            Typed(LineWidth, 181, 2),
+            Arbitrary(192, 1),
+        ],
+    },
+    "border-l" => FunctionalEntry {
+        registration_idx: 195,
+        branches: &[
+            NamedKeyword(10, 193, 1),
+            Named(Color, 193, 1),
+            NamedTyped(Number, 182, 2),
+            Typed(Length, 182, 2),
+            Typed(LineWidth, 182, 2),
+            Arbitrary(193, 1),
+        ],
+    },
+    "divide-x" => FunctionalEntry {
+        registration_idx: 196,
+        branches: &[
+            NamedTyped(Number, 354, 4),
+            Arbitrary(354, 4),
+        ],
+    },
+    "divide-y" => FunctionalEntry {
+        registration_idx: 197,
+        branches: &[
+            NamedTyped(Number, 133, 5),
+            Arbitrary(133, 5),
+        ],
+    },
+    "bg-size" => FunctionalEntry {
+        registration_idx: 198,
+        branches: &[
+            Arbitrary(247, 1),
+        ],
+    },
+    "bg-position" => FunctionalEntry {
+        registration_idx: 199,
+        branches: &[
+            Arbitrary(250, 1),
+        ],
+    },
+    "-bg-linear" => FunctionalEntry {
+        registration_idx: 200,
+        branches: &[
+            NamedTyped(Number, 196, 3),
+            NamedTyped(Ratio, 196, 3),
+            Typed(Angle, 196, 2),
+        ],
+    },
+    "bg-linear" => FunctionalEntry {
+        registration_idx: 201,
+        branches: &[
+            NamedKeyword(12, 196, 3),
+            NamedTyped(Number, 196, 3),
+            NamedTyped(Ratio, 196, 3),
+            Arbitrary(196, 2),
+        ],
+    },
+    "-bg-conic" => FunctionalEntry {
+        registration_idx: 202,
+        branches: &[
+            NamedTyped(Number, 196, 2),
+            NamedTyped(Ratio, 196, 2),
+            Arbitrary(196, 2),
+        ],
+    },
+    "bg-conic" => FunctionalEntry {
+        registration_idx: 203,
+        branches: &[
+            NamedTyped(Number, 196, 2),
+            NamedTyped(Ratio, 196, 2),
+            Arbitrary(196, 2),
+        ],
+    },
+    "bg-radial" => FunctionalEntry {
+        registration_idx: 204,
+        branches: &[
+            Arbitrary(196, 2),
+        ],
+    },
+    "bg" => FunctionalEntry {
+        registration_idx: 205,
+        branches: &[
+            NamedKeyword(10, 194, 1),
+            Named(Color, 194, 1),
+            Named(BackgroundImage, 195, 1),
+            Typed(Length, 247, 1),
+            Typed(Percentage, 250, 1),
+            Typed(Url, 195, 1),
+            Typed(Position, 250, 1),
+            Typed(BgSize, 247, 1),
+            Typed(Image, 195, 1),
+            Arbitrary(194, 1),
+        ],
+    },
+    "from" => FunctionalEntry {
+        registration_idx: 206,
+        branches: &[
+            NamedKeyword(10, 199, 2),
+            Named(Color, 199, 2),
+            NamedTyped(Percentage, 200, 1),
+            Typed(Length, 200, 1),
+            Typed(Percentage, 200, 1),
+            Arbitrary(199, 2),
+        ],
+    },
+    "via" => FunctionalEntry {
+        registration_idx: 207,
+        branches: &[
+            NamedKeyword(10, 201, 3),
+            Named(Color, 201, 3),
+            NamedTyped(Percentage, 202, 1),
+            Typed(Length, 202, 1),
+            Typed(Percentage, 202, 1),
+            Arbitrary(201, 3),
+        ],
+    },
+    "to" => FunctionalEntry {
+        registration_idx: 208,
+        branches: &[
+            NamedKeyword(10, 203, 2),
+            Named(Color, 203, 2),
+            NamedTyped(Percentage, 204, 1),
+            Typed(Length, 204, 1),
+            Typed(Percentage, 204, 1),
+            Arbitrary(203, 2),
+        ],
+    },
+    "mask" => FunctionalEntry {
+        registration_idx: 209,
+        branches: &[
+            Typed(Length, 256, 1),
+            Typed(Percentage, 258, 1),
+            Typed(Position, 258, 1),
+            Typed(BgSize, 256, 1),
+            Arbitrary(205, 1),
+        ],
+    },
+    "mask-size" => FunctionalEntry {
+        registration_idx: 210,
+        branches: &[
+            Arbitrary(256, 1),
+        ],
+    },
+    "mask-position" => FunctionalEntry {
+        registration_idx: 211,
+        branches: &[
+            Arbitrary(258, 1),
+        ],
+    },
+    "mask-x-from" => FunctionalEntry {
+        registration_idx: 212,
+        branches: &[
+            NamedKeyword(10, 205, 7),
+            Named(Color, 205, 7),
+            NamedTyped(Number, 205, 7),
+            NamedTyped(Percentage, 205, 7),
+            Arbitrary(205, 7),
+        ],
+    },
+    "mask-x-to" => FunctionalEntry {
+        registration_idx: 213,
+        branches: &[
+            NamedKeyword(10, 205, 7),
+            Named(Color, 205, 7),
+            NamedTyped(Number, 205, 7),
+            NamedTyped(Percentage, 205, 7),
+            Arbitrary(205, 7),
+        ],
+    },
+    "mask-y-from" => FunctionalEntry {
+        registration_idx: 214,
+        branches: &[
+            NamedKeyword(10, 205, 7),
+            Named(Color, 205, 7),
+            NamedTyped(Number, 205, 7),
+            NamedTyped(Percentage, 205, 7),
+            Arbitrary(205, 7),
+        ],
+    },
+    "mask-y-to" => FunctionalEntry {
+        registration_idx: 215,
+        branches: &[
+            NamedKeyword(10, 205, 7),
+            Named(Color, 205, 7),
+            NamedTyped(Number, 205, 7),
+            NamedTyped(Percentage, 205, 7),
+            Arbitrary(205, 7),
+        ],
+    },
+    "mask-t-from" => FunctionalEntry {
+        registration_idx: 216,
+        branches: &[
+            NamedKeyword(10, 205, 5),
+            Named(Color, 205, 5),
+            NamedTyped(Number, 205, 5),
+            NamedTyped(Percentage, 205, 5),
+            Arbitrary(205, 5),
+        ],
+    },
+    "mask-t-to" => FunctionalEntry {
+        registration_idx: 217,
+        branches: &[
+            NamedKeyword(10, 205, 5),
+            Named(Color, 205, 5),
+            NamedTyped(Number, 205, 5),
+            NamedTyped(Percentage, 205, 5),
+            Arbitrary(205, 5),
+        ],
+    },
+    "mask-r-from" => FunctionalEntry {
+        registration_idx: 218,
+        branches: &[
+            NamedKeyword(10, 205, 5),
+            Named(Color, 205, 5),
+            NamedTyped(Number, 205, 5),
+            NamedTyped(Percentage, 205, 5),
+            Arbitrary(205, 5),
+        ],
+    },
+    "mask-r-to" => FunctionalEntry {
+        registration_idx: 219,
+        branches: &[
+            NamedKeyword(10, 205, 5),
+            Named(Color, 205, 5),
+            NamedTyped(Number, 205, 5),
+            NamedTyped(Percentage, 205, 5),
+            Arbitrary(205, 5),
+        ],
+    },
+    "mask-b-from" => FunctionalEntry {
+        registration_idx: 220,
+        branches: &[
+            NamedKeyword(10, 205, 5),
+            Named(Color, 205, 5),
+            NamedTyped(Number, 205, 5),
+            NamedTyped(Percentage, 205, 5),
+            Arbitrary(205, 5),
+        ],
+    },
+    "mask-b-to" => FunctionalEntry {
+        registration_idx: 221,
+        branches: &[
+            NamedKeyword(10, 205, 5),
+            Named(Color, 205, 5),
+            NamedTyped(Number, 205, 5),
+            NamedTyped(Percentage, 205, 5),
+            Arbitrary(205, 5),
+        ],
+    },
+    "mask-l-from" => FunctionalEntry {
+        registration_idx: 222,
+        branches: &[
+            NamedKeyword(10, 205, 5),
+            Named(Color, 205, 5),
+            NamedTyped(Number, 205, 5),
+            NamedTyped(Percentage, 205, 5),
+            Arbitrary(205, 5),
+        ],
+    },
+    "mask-l-to" => FunctionalEntry {
+        registration_idx: 223,
+        branches: &[
+            NamedKeyword(10, 205, 5),
+            Named(Color, 205, 5),
+            NamedTyped(Number, 205, 5),
+            NamedTyped(Percentage, 205, 5),
+            Arbitrary(205, 5),
+        ],
+    },
+    "-mask-linear" => FunctionalEntry {
+        registration_idx: 224,
+        branches: &[
+            NamedTyped(Number, 205, 4),
+            Arbitrary(205, 4),
+        ],
+    },
+    "mask-linear" => FunctionalEntry {
+        registration_idx: 225,
+        branches: &[
+            NamedTyped(Number, 205, 4),
+            Arbitrary(205, 4),
+        ],
+    },
+    "mask-linear-from" => FunctionalEntry {
+        registration_idx: 226,
+        branches: &[
+            NamedKeyword(10, 205, 5),
+            Named(Color, 205, 5),
+            NamedTyped(Number, 205, 5),
+            NamedTyped(Percentage, 205, 5),
+            Arbitrary(205, 5),
+        ],
+    },
+    "mask-linear-to" => FunctionalEntry {
+        registration_idx: 227,
+        branches: &[
+            NamedKeyword(10, 205, 5),
+            Named(Color, 205, 5),
+            NamedTyped(Number, 205, 5),
+            NamedTyped(Percentage, 205, 5),
+            Arbitrary(205, 5),
+        ],
+    },
+    "mask-radial-at" => FunctionalEntry {
+        registration_idx: 228,
+        branches: &[
+            Arbitrary(235, 1),
+        ],
+    },
+    "mask-radial" => FunctionalEntry {
+        registration_idx: 229,
+        branches: &[
+            Arbitrary(205, 4),
+        ],
+    },
+    "mask-radial-from" => FunctionalEntry {
+        registration_idx: 230,
+        branches: &[
+            NamedKeyword(10, 205, 5),
+            Named(Color, 205, 5),
+            NamedTyped(Number, 205, 5),
+            NamedTyped(Percentage, 205, 5),
+            Arbitrary(205, 5),
+        ],
+    },
+    "mask-radial-to" => FunctionalEntry {
+        registration_idx: 231,
+        branches: &[
+            NamedKeyword(10, 205, 5),
+            Named(Color, 205, 5),
+            NamedTyped(Number, 205, 5),
+            NamedTyped(Percentage, 205, 5),
+            Arbitrary(205, 5),
+        ],
+    },
+    "-mask-conic" => FunctionalEntry {
+        registration_idx: 232,
+        branches: &[
+            NamedTyped(Number, 205, 4),
+            Arbitrary(205, 4),
+        ],
+    },
+    "mask-conic" => FunctionalEntry {
+        registration_idx: 233,
+        branches: &[
+            NamedTyped(Number, 205, 4),
+            Arbitrary(205, 4),
+        ],
+    },
+    "mask-conic-from" => FunctionalEntry {
+        registration_idx: 234,
+        branches: &[
+            NamedKeyword(10, 205, 5),
+            Named(Color, 205, 5),
+            NamedTyped(Number, 205, 5),
+            NamedTyped(Percentage, 205, 5),
+            Arbitrary(205, 5),
+        ],
+    },
+    "mask-conic-to" => FunctionalEntry {
+        registration_idx: 235,
+        branches: &[
+            NamedKeyword(10, 205, 5),
+            Named(Color, 205, 5),
+            NamedTyped(Number, 205, 5),
+            NamedTyped(Percentage, 205, 5),
+            Arbitrary(205, 5),
+        ],
+    },
+    "fill" => FunctionalEntry {
+        registration_idx: 236,
+        branches: &[
+            NamedKeyword(10, 261, 1),
+            Named(Color, 261, 1),
+            Arbitrary(261, 1),
+        ],
+    },
+    "stroke" => FunctionalEntry {
+        registration_idx: 237,
+        branches: &[
+            NamedKeyword(10, 262, 1),
+            Named(Color, 262, 1),
+            NamedTyped(Number, 263, 1),
+            NamedTyped(Ratio, 263, 1),
+            Typed(Length, 263, 1),
+            Typed(Percentage, 263, 1),
+            Typed(Number, 263, 1),
+            Arbitrary(262, 1),
+        ],
+    },
+    "object" => FunctionalEntry {
+        registration_idx: 238,
+        branches: &[
+            NamedKeyword(6, 265, 1),
+            Arbitrary(265, 1),
+        ],
+    },
+    "p" => FunctionalEntry {
+        registration_idx: 239,
+        branches: &[
+            Named(Spacing, 266, 1),
+            NamedTyped(Number, 266, 1),
+            Arbitrary(266, 1),
+        ],
+    },
+    "px" => FunctionalEntry {
+        registration_idx: 240,
+        branches: &[
+            Named(Spacing, 267, 1),
+            NamedTyped(Number, 267, 1),
+            Arbitrary(267, 1),
+        ],
+    },
+    "py" => FunctionalEntry {
+        registration_idx: 241,
+        branches: &[
+            Named(Spacing, 268, 1),
+            NamedTyped(Number, 268, 1),
+            Arbitrary(268, 1),
+        ],
+    },
+    "ps" => FunctionalEntry {
+        registration_idx: 242,
+        branches: &[
+            Named(Spacing, 269, 1),
+            NamedTyped(Number, 269, 1),
+            Arbitrary(269, 1),
+        ],
+    },
+    "pe" => FunctionalEntry {
+        registration_idx: 243,
+        branches: &[
+            Named(Spacing, 270, 1),
+            NamedTyped(Number, 270, 1),
+            Arbitrary(270, 1),
+        ],
+    },
+    "pbs" => FunctionalEntry {
+        registration_idx: 244,
+        branches: &[
+            Named(Spacing, 271, 1),
+            NamedTyped(Number, 271, 1),
+            Arbitrary(271, 1),
+        ],
+    },
+    "pbe" => FunctionalEntry {
+        registration_idx: 245,
+        branches: &[
+            Named(Spacing, 272, 1),
+            NamedTyped(Number, 272, 1),
+            Arbitrary(272, 1),
+        ],
+    },
+    "pt" => FunctionalEntry {
+        registration_idx: 246,
+        branches: &[
+            Named(Spacing, 273, 1),
+            NamedTyped(Number, 273, 1),
+            Arbitrary(273, 1),
+        ],
+    },
+    "pr" => FunctionalEntry {
+        registration_idx: 247,
+        branches: &[
+            Named(Spacing, 274, 1),
+            NamedTyped(Number, 274, 1),
+            Arbitrary(274, 1),
+        ],
+    },
+    "pb" => FunctionalEntry {
+        registration_idx: 248,
+        branches: &[
+            Named(Spacing, 275, 1),
+            NamedTyped(Number, 275, 1),
+            Arbitrary(275, 1),
+        ],
+    },
+    "pl" => FunctionalEntry {
+        registration_idx: 249,
+        branches: &[
+            Named(Spacing, 276, 1),
+            NamedTyped(Number, 276, 1),
+            Arbitrary(276, 1),
+        ],
+    },
+    "-indent" => FunctionalEntry {
+        registration_idx: 250,
+        branches: &[
+            Named(Spacing, 278, 1),
+            NamedTyped(Number, 278, 1),
+            Arbitrary(278, 1),
+        ],
+    },
+    "indent" => FunctionalEntry {
+        registration_idx: 251,
+        branches: &[
+            Named(Spacing, 278, 1),
+            NamedTyped(Number, 278, 1),
+            Arbitrary(278, 1),
+        ],
+    },
+    "align" => FunctionalEntry {
+        registration_idx: 252,
+        branches: &[
+            Arbitrary(279, 1),
+        ],
+    },
+    "font" => FunctionalEntry {
+        registration_idx: 253,
+        branches: &[
+            Named(Font, 280, 1),
+            Named(FontWeight, 354, 2),
+            Typed(Color, 354, 2),
+            Typed(Length, 354, 2),
+            Typed(Percentage, 354, 2),
+            Typed(Number, 354, 2),
+            Typed(Integer, 354, 2),
+            Typed(Ratio, 354, 2),
+            Typed(Angle, 354, 2),
+            Typed(Url, 354, 2),
+            Typed(Position, 354, 2),
+            Typed(BgSize, 354, 2),
+            Typed(LineWidth, 354, 2),
+            Typed(Image, 354, 2),
+            Typed(AbsoluteSize, 354, 2),
+            Typed(RelativeSize, 354, 2),
+            Typed(Vector, 354, 2),
+            Arbitrary(280, 1),
+        ],
+    },
+    "font-features" => FunctionalEntry {
+        registration_idx: 254,
+        branches: &[
+            Arbitrary(281, 1),
+        ],
+    },
+    "font-stretch" => FunctionalEntry {
+        registration_idx: 255,
+        branches: &[
+            Arbitrary(295, 1),
+        ],
+    },
+    "placeholder" => FunctionalEntry {
+        registration_idx: 256,
+        branches: &[
+            NamedKeyword(10, 292, 1),
+            Named(Color, 292, 1),
+            Arbitrary(292, 1),
+        ],
+    },
+    "decoration" => FunctionalEntry {
+        registration_idx: 257,
+        branches: &[
+            NamedKeyword(10, 298, 1),
+            Named(Color, 298, 1),
+            NamedTyped(Number, 300, 1),
+            Typed(Length, 300, 1),
+            Typed(Percentage, 300, 1),
+            Arbitrary(298, 1),
+        ],
+    },
+    "animate" => FunctionalEntry {
+        registration_idx: 258,
+        branches: &[
+            NamedKeyword(3, 72, 1),
+            Named(Animate, 72, 1),
+            Arbitrary(72, 1),
+        ],
+    },
+    "filter" => FunctionalEntry {
+        registration_idx: 259,
+        branches: &[
+            Arbitrary(334, 1),
+        ],
+    },
+    "backdrop-filter" => FunctionalEntry {
+        registration_idx: 260,
+        branches: &[
+            Arbitrary(354, 2),
+        ],
+    },
+    "blur" => FunctionalEntry {
+        registration_idx: 261,
+        branches: &[
+            NamedKeyword(3, 325, 2),
+            Named(Blur, 325, 2),
+            Arbitrary(325, 2),
+        ],
+    },
+    "backdrop-blur" => FunctionalEntry {
+        registration_idx: 262,
+        branches: &[
+            NamedKeyword(3, 335, 3),
+            Named(Blur, 335, 3),
+            Arbitrary(335, 3),
+        ],
+    },
+    "brightness" => FunctionalEntry {
+        registration_idx: 263,
+        branches: &[
+            NamedTyped(Number, 326, 2),
+            Arbitrary(326, 2),
+        ],
+    },
+    "backdrop-brightness" => FunctionalEntry {
+        registration_idx: 264,
+        branches: &[
+            NamedTyped(Number, 336, 3),
+            Arbitrary(336, 3),
+        ],
+    },
+    "contrast" => FunctionalEntry {
+        registration_idx: 265,
+        branches: &[
+            NamedTyped(Number, 327, 2),
+            Arbitrary(327, 2),
+        ],
+    },
+    "backdrop-contrast" => FunctionalEntry {
+        registration_idx: 266,
+        branches: &[
+            NamedTyped(Number, 337, 3),
+            Arbitrary(337, 3),
+        ],
+    },
+    "grayscale" => FunctionalEntry {
+        registration_idx: 267,
+        branches: &[
+            NamedTyped(Number, 329, 2),
+            Arbitrary(329, 2),
+        ],
+    },
+    "backdrop-grayscale" => FunctionalEntry {
+        registration_idx: 268,
+        branches: &[
+            NamedTyped(Number, 338, 3),
+            Arbitrary(338, 3),
+        ],
+    },
+    "-hue-rotate" => FunctionalEntry {
+        registration_idx: 269,
+        branches: &[
+            NamedTyped(Number, 330, 2),
+            Arbitrary(330, 2),
+        ],
+    },
+    "hue-rotate" => FunctionalEntry {
+        registration_idx: 270,
+        branches: &[
+            NamedTyped(Number, 330, 2),
+            Arbitrary(330, 2),
+        ],
+    },
+    "-backdrop-hue-rotate" => FunctionalEntry {
+        registration_idx: 271,
+        branches: &[
+            NamedTyped(Number, 339, 3),
+            Arbitrary(339, 3),
+        ],
+    },
+    "backdrop-hue-rotate" => FunctionalEntry {
+        registration_idx: 272,
+        branches: &[
+            NamedTyped(Number, 339, 3),
+            Arbitrary(339, 3),
+        ],
+    },
+    "invert" => FunctionalEntry {
+        registration_idx: 273,
+        branches: &[
+            NamedTyped(Number, 331, 2),
+            Arbitrary(331, 2),
+        ],
+    },
+    "backdrop-invert" => FunctionalEntry {
+        registration_idx: 274,
+        branches: &[
+            NamedTyped(Number, 340, 3),
+            Arbitrary(340, 3),
+        ],
+    },
+    "saturate" => FunctionalEntry {
+        registration_idx: 275,
+        branches: &[
+            NamedTyped(Number, 332, 2),
+            Arbitrary(332, 2),
+        ],
+    },
+    "backdrop-saturate" => FunctionalEntry {
+        registration_idx: 276,
+        branches: &[
+            NamedTyped(Number, 342, 3),
+            Arbitrary(342, 3),
+        ],
+    },
+    "sepia" => FunctionalEntry {
+        registration_idx: 277,
+        branches: &[
+            NamedTyped(Number, 333, 2),
+            Arbitrary(333, 2),
+        ],
+    },
+    "backdrop-sepia" => FunctionalEntry {
+        registration_idx: 278,
+        branches: &[
+            NamedTyped(Number, 343, 3),
+            Arbitrary(343, 3),
+        ],
+    },
+    "drop-shadow" => FunctionalEntry {
+        registration_idx: 279,
+        branches: &[
+            NamedKeyword(10, 354, 2),
+            Named(Color, 354, 2),
+            Named(DropShadow, 354, 3),
+            Typed(Color, 354, 2),
+            Arbitrary(354, 3),
+        ],
+    },
+    "backdrop-opacity" => FunctionalEntry {
+        registration_idx: 280,
+        branches: &[
+            NamedTyped(Number, 341, 3),
+            Arbitrary(341, 3),
+        ],
+    },
+    "transition" => FunctionalEntry {
+        registration_idx: 281,
+        branches: &[
+            NamedKeyword(13, 345, 3),
+            NamedKeyword(3, 345, 1),
+            Arbitrary(345, 3),
+        ],
+    },
+    "delay" => FunctionalEntry {
+        registration_idx: 282,
+        branches: &[
+            NamedTyped(Number, 347, 1),
+            Arbitrary(347, 1),
+        ],
+    },
+    "duration" => FunctionalEntry {
+        registration_idx: 283,
+        branches: &[
+            NamedTyped(Number, 354, 2),
+            Arbitrary(354, 2),
+        ],
+    },
+    "ease" => FunctionalEntry {
+        registration_idx: 284,
+        branches: &[
+            NamedKeyword(14, 354, 1),
+            NamedKeyword(15, 354, 2),
+            Named(Ease, 354, 2),
+            Arbitrary(354, 2),
+        ],
+    },
+    "will-change" => FunctionalEntry {
+        registration_idx: 285,
+        branches: &[
+            Arbitrary(350, 1),
+        ],
+    },
+    "content" => FunctionalEntry {
+        registration_idx: 286,
+        branches: &[
+            Arbitrary(354, 2),
+        ],
+    },
+    "contain" => FunctionalEntry {
+        registration_idx: 287,
+        branches: &[
+            Arbitrary(351, 1),
+        ],
+    },
+    "leading" => FunctionalEntry {
+        registration_idx: 288,
+        branches: &[
+            NamedKeyword(3, 354, 2),
+            Named(Spacing, 354, 2),
+            Named(Leading, 354, 2),
+            NamedTyped(Number, 354, 2),
+            Arbitrary(354, 2),
+        ],
+    },
+    "-tracking" => FunctionalEntry {
+        registration_idx: 289,
+        branches: &[
+            Named(Tracking, 354, 2),
+            Arbitrary(354, 2),
+        ],
+    },
+    "tracking" => FunctionalEntry {
+        registration_idx: 290,
+        branches: &[
+            Named(Tracking, 354, 2),
+            Arbitrary(354, 2),
+        ],
+    },
+    "outline" => FunctionalEntry {
+        registration_idx: 291,
+        branches: &[
+            NamedKeyword(10, 324, 1),
+            Named(Color, 324, 1),
+            NamedTyped(Number, 354, 2),
+            Typed(Length, 354, 2),
+            Typed(Percentage, 354, 2),
+            Typed(Number, 354, 2),
+            Arbitrary(324, 1),
+        ],
+    },
+    "-outline-offset" => FunctionalEntry {
+        registration_idx: 292,
+        branches: &[
+            NamedTyped(Number, 323, 1),
+            Arbitrary(323, 1),
+        ],
+    },
+    "outline-offset" => FunctionalEntry {
+        registration_idx: 293,
+        branches: &[
+            NamedTyped(Number, 323, 1),
+            Arbitrary(323, 1),
+        ],
+    },
+    "opacity" => FunctionalEntry {
+        registration_idx: 294,
+        branches: &[
+            NamedTyped(Number, 307, 1),
+            Arbitrary(307, 1),
+        ],
+    },
+    "-underline-offset" => FunctionalEntry {
+        registration_idx: 295,
+        branches: &[
+            NamedTyped(Number, 301, 1),
+            Arbitrary(301, 1),
+        ],
+    },
+    "underline-offset" => FunctionalEntry {
+        registration_idx: 296,
+        branches: &[
+            NamedKeyword(0, 301, 1),
+            NamedTyped(Number, 301, 1),
+            Arbitrary(301, 1),
+        ],
+    },
+    "text" => FunctionalEntry {
+        registration_idx: 297,
+        branches: &[
+            NamedKeyword(10, 292, 1),
+            Named(Color, 292, 1),
+            Named(Text, 282, 1),
+            Typed(Length, 282, 1),
+            Typed(Percentage, 282, 1),
+            Typed(AbsoluteSize, 282, 1),
+            Typed(RelativeSize, 282, 1),
+            Arbitrary(292, 1),
+        ],
+    },
+    "text-shadow" => FunctionalEntry {
+        registration_idx: 298,
+        branches: &[
+            NamedKeyword(10, 354, 1),
+            NamedKeyword(3, 354, 1),
+            Named(Color, 354, 1),
+            Named(TextShadow, 354, 1),
+            Typed(Color, 354, 1),
+            Arbitrary(354, 1),
+        ],
+    },
+    "shadow" => FunctionalEntry {
+        registration_idx: 299,
+        branches: &[
+            NamedKeyword(10, 312, 1),
+            NamedKeyword(3, 311, 2),
+            Named(Color, 312, 1),
+            Named(Shadow, 311, 2),
+            Typed(Color, 312, 1),
+            Arbitrary(311, 2),
+        ],
+    },
+    "inset-shadow" => FunctionalEntry {
+        registration_idx: 300,
+        branches: &[
+            NamedKeyword(10, 316, 1),
+            NamedKeyword(3, 315, 2),
+            Named(Color, 316, 1),
+            Named(InsetShadow, 315, 2),
+            Typed(Color, 316, 1),
+            Arbitrary(315, 2),
+        ],
+    },
+    "ring" => FunctionalEntry {
+        registration_idx: 301,
+        branches: &[
+            NamedKeyword(10, 314, 1),
+            Named(Color, 314, 1),
+            NamedTyped(Number, 313, 2),
+            Typed(Length, 313, 2),
+            Arbitrary(314, 1),
+        ],
+    },
+    "inset-ring" => FunctionalEntry {
+        registration_idx: 302,
+        branches: &[
+            NamedKeyword(10, 318, 1),
+            Named(Color, 318, 1),
+            NamedTyped(Number, 317, 2),
+            Typed(Length, 317, 2),
+            Arbitrary(318, 1),
+        ],
+    },
+    "ring-offset" => FunctionalEntry {
+        registration_idx: 303,
+        branches: &[
+            NamedKeyword(10, 320, 1),
+            Named(Color, 320, 1),
+            NamedTyped(Number, 319, 2),
+            Typed(Length, 319, 2),
+            Arbitrary(320, 1),
+        ],
+    },
+    "@container" => FunctionalEntry {
+        registration_idx: 304,
+        branches: &[
+            Arbitrary(0, 1),
+        ],
+    },
+    "flex-shrink" => FunctionalEntry {
+        registration_idx: 305,
+        branches: &[
+            NamedTyped(Number, 49, 1),
+            Arbitrary(49, 1),
+        ],
+    },
+    "flex-grow" => FunctionalEntry {
+        registration_idx: 306,
+        branches: &[
+            NamedTyped(Number, 50, 1),
+            Arbitrary(50, 1),
+        ],
+    },
+    "-start" => FunctionalEntry {
+        registration_idx: 307,
+        branches: &[
+            Named(Spacing, 7, 1),
+            NamedTyped(Number, 7, 1),
+            NamedTyped(Ratio, 7, 1),
+            Arbitrary(7, 1),
+        ],
+    },
+    "start" => FunctionalEntry {
+        registration_idx: 308,
+        branches: &[
+            Named(Spacing, 7, 1),
+            NamedTyped(Number, 7, 1),
+            NamedTyped(Ratio, 7, 1),
+            Arbitrary(7, 1),
+        ],
+    },
+    "-end" => FunctionalEntry {
+        registration_idx: 309,
+        branches: &[
+            Named(Spacing, 8, 1),
+            NamedTyped(Number, 8, 1),
+            NamedTyped(Ratio, 8, 1),
+            Arbitrary(8, 1),
+        ],
+    },
+    "end" => FunctionalEntry {
+        registration_idx: 310,
+        branches: &[
+            Named(Spacing, 8, 1),
+            NamedTyped(Number, 8, 1),
+            NamedTyped(Ratio, 8, 1),
+            Arbitrary(8, 1),
+        ],
+    },
 };
 
 static THEME_KEYS_COLOR: phf::Set<&'static str> = phf_set! {

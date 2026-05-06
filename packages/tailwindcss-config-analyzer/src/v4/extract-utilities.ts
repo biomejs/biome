@@ -335,6 +335,17 @@ function addKeywordBranches(
 	}
 }
 
+// Branch resolve precedence — most specific match first. Stable sort
+// keeps relative order within the same kind (e.g. multiple `Typed`
+// entries stay in ValueType-catalog order from the probe matrix).
+const BRANCH_KIND_ORDER: Record<Branch["kind"], number> = {
+	NamedKeyword: 0,
+	Named: 1,
+	NamedTyped: 2,
+	Typed: 3,
+	Arbitrary: 4,
+};
+
 function dedupeBranches(branches: Branch[]): Branch[] {
 	const seen = new Set<string>();
 	const out: Branch[] = [];
@@ -361,5 +372,8 @@ function dedupeBranches(branches: Branch[]): Branch[] {
 		seen.add(key);
 		out.push(b);
 	}
+	out.sort(
+		(a, b) => BRANCH_KIND_ORDER[a.kind] - BRANCH_KIND_ORDER[b.kind],
+	);
 	return out;
 }
