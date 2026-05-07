@@ -10,7 +10,63 @@ use biome_js_syntax::{
     JsxAttribute, JsxString,
 };
 use biome_rowan::{AstNode, TokenText, declare_node_union};
+use biome_rule_options::no_duplicate_classes::NoDuplicateClassesOptions;
+use biome_rule_options::no_tailwind_arbitrary_value::NoTailwindArbitraryValueOptions;
 use biome_rule_options::use_sorted_classes::UseSortedClassesOptions;
+
+/// Trait for option types that specify which class attributes and functions to check.
+pub trait ClassStringOptions {
+    fn has_attribute(&self, name: &str) -> bool;
+    fn has_function(&self, name: &str) -> bool;
+    fn match_function(&self, name: &str) -> bool;
+}
+
+impl ClassStringOptions for UseSortedClassesOptions {
+    fn has_attribute(&self, name: &str) -> bool {
+        self.has_attribute(name)
+    }
+    fn has_function(&self, name: &str) -> bool {
+        self.has_function(name)
+    }
+    fn match_function(&self, name: &str) -> bool {
+        self.match_function(name)
+    }
+}
+
+impl ClassStringOptions for NoDuplicateClassesOptions {
+    fn has_attribute(&self, name: &str) -> bool {
+        (**self).has_attribute(name)
+    }
+    fn has_function(&self, name: &str) -> bool {
+        (**self).has_function(name)
+    }
+    fn match_function(&self, name: &str) -> bool {
+        (**self).match_function(name)
+    }
+}
+
+const CLASS_ATTRIBUTES: [&str; 2] = ["class", "className"];
+
+impl ClassStringOptions for NoTailwindArbitraryValueOptions {
+    fn has_attribute(&self, name: &str) -> bool {
+        CLASS_ATTRIBUTES.contains(&name)
+            || self.attributes.iter().flatten().any(|v| v.as_ref() == name)
+    }
+    fn has_function(&self, name: &str) -> bool {
+        self.functions.iter().flatten().any(|v| v.as_ref() == name)
+    }
+    fn match_function(&self, name: &str) -> bool {
+        self.functions.iter().flatten().any(|matcher| {
+            let mut matcher_parts = matcher.split('.');
+            let mut name_parts = name.split('.');
+            let all_parts_match = matcher_parts
+                .by_ref()
+                .zip(name_parts.by_ref())
+                .all(|(m, p)| m == "*" || m == p);
+            all_parts_match && matcher_parts.next().is_none() && name_parts.next().is_none()
+        })
+    }
+}
 
 fn get_callee_name(call_expression: &JsCallExpression) -> Option<TokenText> {
     call_expression
@@ -25,7 +81,7 @@ fn get_callee_name(call_expression: &JsCallExpression) -> Option<TokenText> {
 
 fn is_call_expression_of_target_function(
     call_expression: &JsCallExpression,
-    options: &UseSortedClassesOptions,
+    options: &impl ClassStringOptions,
 ) -> bool {
     get_callee_name(call_expression).is_some_and(|name| options.has_function(name.text()))
 }
@@ -47,7 +103,7 @@ declare_node_union! {
     pub AnyClassStringLike = JsStringLiteralExpression | JsxString | JsTemplateChunkElement | JsLiteralMemberName
 }
 
-fn inspect_string_literal(node: &JsSyntaxNode, options: &UseSortedClassesOptions) -> Option<bool> {
+fn inspect_string_literal(node: &JsSyntaxNode, options: &impl ClassStringOptions) -> Option<bool> {
     let mut in_arguments = false;
     let mut in_function = false;
     for ancestor in node.ancestors().skip(1) {
@@ -80,7 +136,7 @@ impl AnyClassStringLike {
     /// Returns `Some(true)` if the node is in a context that should be checked
     /// (e.g., a `class` or `className` attribute, or inside a utility function call).
     /// Returns `None` if the node should be skipped.
-    pub fn should_visit(&self, options: &UseSortedClassesOptions) -> Option<bool> {
+    pub fn should_visit(&self, options: &impl ClassStringOptions) -> Option<bool> {
         match self {
             Self::JsStringLiteralExpression(string_literal) => {
                 inspect_string_literal(string_literal.syntax(), options)

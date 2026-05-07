@@ -6,7 +6,6 @@ use biome_console::markup;
 use biome_js_syntax::JsSyntaxKind;
 use biome_rowan::{TextRange, TextSize, TokenText};
 use biome_rule_options::no_tailwind_arbitrary_value::NoTailwindArbitraryValueOptions;
-use biome_rule_options::use_sorted_classes::UseSortedClassesOptions;
 use biome_tailwind_parser::parse_tailwind;
 use biome_tailwind_syntax::lint_utils::arbitrary_ranges;
 
@@ -93,16 +92,24 @@ impl Rule for NoTailwindArbitraryValue {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let options = ctx.options();
-        let sorted_options = UseSortedClassesOptions {
-            attributes: options.attributes.clone(),
-            functions: options.functions.clone(),
+
+        let Some(source) = class_string_source(node) else {
+            return vec![];
         };
-        if node.should_visit(&sorted_options).is_none() {
+
+        // Arbitrary values and properties always contain `[`. This cheap check
+        // runs before `should_visit`, whose ancestor walk would otherwise execute
+        // for every string literal in the file, not just class strings.
+        if !source.text.text().contains('[') {
             return vec![];
         }
 
-        arbitrary_ranges_in_node(node)
+        if node.should_visit(ctx.options()).is_none() {
+            return vec![];
+        }
+
+        let parse = parse_tailwind(source.text.text());
+        arbitrary_ranges(&parse.tree().candidates(), source.content_start)
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
@@ -164,17 +171,4 @@ fn class_string_source(node: &AnyClassStringLike) -> Option<ClassStringSource> {
             })
         }
     }
-}
-
-fn arbitrary_ranges_in_node(node: &AnyClassStringLike) -> Vec<TextRange> {
-    let Some(source) = class_string_source(node) else {
-        return vec![];
-    };
-
-    if !source.text.text().contains('[') {
-        return vec![];
-    }
-
-    let parse = parse_tailwind(source.text.text());
-    arbitrary_ranges(&parse.tree().candidates(), source.content_start)
 }
