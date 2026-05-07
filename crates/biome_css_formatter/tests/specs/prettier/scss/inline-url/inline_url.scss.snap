@@ -66,15 +66,6 @@ info: scss/inline-url/inline_url.scss
 ```diff
 --- Prettier
 +++ Biome
-@@ -28,7 +28,7 @@
- 
- .validUnquotedUrlsThatAreParsedBySass {
-   background: url($foo);
--  background: url($foo + $bar);
-+  background: url($foo+$bar);
-   background: url($foo*3);
-   background: url($foo/$bar);
- }
 @@ -42,7 +42,7 @@
    background-image: url(http://123.com);
    background: url(path/to/123.jpg);
@@ -121,7 +112,7 @@ info: scss/inline-url/inline_url.scss
 
 .validUnquotedUrlsThatAreParsedBySass {
   background: url($foo);
-  background: url($foo+$bar);
+  background: url($foo + $bar);
   background: url($foo*3);
   background: url($foo/$bar);
 }
