@@ -65,13 +65,6 @@ declare_lint_rule! {
     ///
     /// Default: `[]` (the `class` attribute is always checked).
     ///
-    /// ### functions
-    ///
-    /// This option has no effect for HTML. HTML attribute values are plain strings
-    /// and cannot contain function calls, so configuring `functions` is a no-op for
-    /// this rule. Use the `attributes` option instead to extend which attributes are
-    /// checked.
-    ///
     pub NoTailwindArbitraryValue {
         version: "next",
         name: "noTailwindArbitraryValue",
