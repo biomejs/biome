@@ -150,14 +150,12 @@ YamlRoot {
 ```
 multi_line_plain_token_broken_out_parent_flow.yaml:4:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `bc`
+  × Insufficient indentation in flow collection
   
     2 │   xyz:
     3 │     [a
   > 4 │  bc]
-      │  ^^
+      │  
     5 │ 
-  
-  i Remove bc
   
 ```
