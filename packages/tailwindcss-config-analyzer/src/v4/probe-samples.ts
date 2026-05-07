@@ -67,8 +67,9 @@ export const ARBITRARY_PROBES: {
 	{ type: "BgSize", marker: "bg-size", value: "cover" },
 	{ type: "LineWidth", marker: "line-width", value: "thin" },
 	{ type: "Image", marker: "image", value: "linear-gradient(red,blue)" },
-	{ type: "FamilyName", marker: "family-name", value: "Arial" },
-	{ type: "GenericName", marker: "generic-name", value: "serif" },
+	// `FamilyName` / `GenericName` removed: their probe is always deduped
+	// against the `Arbitrary` fallback for the `font-` utility (both route to
+	// `font-family`). See `value-types.ts` for the rationale.
 	{ type: "AbsoluteSize", marker: "absolute-size", value: "small" },
 	{ type: "RelativeSize", marker: "relative-size", value: "larger" },
 	{ type: "Vector", marker: "vector", value: "1_0_0" },

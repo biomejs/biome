@@ -16,6 +16,14 @@ const HEADER = `//! AUTO-GENERATED. DO NOT EDIT MANUALLY.
 //! - default theme:   https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/theme.css
 //! - infer-data-type: https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/src/utils/infer-data-type.ts
 
+// Some preset items are intentionally unused while the v4 sort algorithm is
+// still being implemented incrementally:
+// - \`PROPERTY_ORDER\` is consumed only when classifying arbitrary CSS
+//   (\`[mask:none]\`), which is a TODO.
+// - \`Branch::ArbitraryTyped\` and \`Branch::Arbitrary\` payload fields fire only for
+//   bracketed arbitrary values (\`p-[10px]\`), which is a TODO.
+#![expect(dead_code, reason = "intentionally unused while sort algorithm is being implemented; see TODO comment above")]
+
 use phf::{phf_map, phf_set};
 
 use super::predicates;
@@ -33,21 +41,21 @@ pub struct UtilityEntry {
 
 // One dispatch branch inside a functional utility's compileFn.
 //
-// - Named:        named-path theme-namespace lookup
-//                 (\`text-lg\` ↔ \`--text-lg\`).
-// - NamedKeyword: named-path hardcoded keyword set baked into the
-//                 compileFn (\`origin-top\`, \`accent-current\`).
-//                 First field is an index into \`KEYWORD_POOL\`.
-// - NamedTyped:   named-path predicate match for bare value patterns
-//                 (\`p-4\` Number, \`from-25%\` Percentage, \`w-1/2\` Ratio).
-// - Typed:        arbitrary-path predicate match used for utilities
-//                 whose property differs by CSS value type
-//                 (\`from-[#fff]\` → \`--tw-gradient-from\`,
-//                 \`from-[10px]\` → \`--tw-gradient-from-position\`).
-// - Arbitrary:    arbitrary-path fallback used when the utility emits
-//                 the same property regardless of value type
-//                 (\`p-[10px]\`, \`p-[#fff]\` → \`padding\`).
-//                 Resolved after every \`Typed\` branch.
+// - Named:           named-path theme-namespace lookup
+//                    (\`text-lg\` ↔ \`--text-lg\`).
+// - NamedKeyword:    named-path hardcoded keyword set baked into the
+//                    compileFn (\`origin-top\`, \`accent-current\`).
+//                    First field is an index into \`KEYWORD_POOL\`.
+// - NamedTyped:      named-path predicate match for bare value patterns
+//                    (\`p-4\` Number, \`from-25%\` Percentage, \`w-1/2\` Ratio).
+// - ArbitraryTyped:  arbitrary-path predicate match used for utilities
+//                    whose property differs by CSS value type
+//                    (\`from-[#fff]\` → \`--tw-gradient-from\`,
+//                    \`from-[10px]\` → \`--tw-gradient-from-position\`).
+// - Arbitrary:       arbitrary-path fallback used when the utility emits
+//                    the same property regardless of value type
+//                    (\`p-[10px]\`, \`p-[#fff]\` → \`padding\`).
+//                    Resolved after every \`ArbitraryTyped\` branch.
 //
 // Keyword sets are interned in \`KEYWORD_POOL\` and referenced by index
 // so that \`Branch\` stays small (the largest variant payload is now
@@ -57,7 +65,7 @@ pub enum Branch {
     Named(ThemeNamespace, u16, u8),
     NamedKeyword(u16, u16, u8),
     NamedTyped(ValueType, u16, u8),
-    Typed(ValueType, u16, u8),
+    ArbitraryTyped(ValueType, u16, u8),
     Arbitrary(u16, u8),
 }
 
@@ -173,13 +181,13 @@ function collectKeywordPool(utils: ExtractedUtilities): {
 
 function renderKeywordPool(pool: string[][]): string {
 	if (pool.length === 0) {
-		return "static KEYWORD_POOL: &[&[&'static str]] = &[];\n";
+		return "pub(super) static KEYWORD_POOL: &[&[&str]] = &[];\n";
 	}
 	const items = pool.map((kws) => {
 		const inner = kws.map(rustString).join(", ");
 		return `    &[${inner}],`;
 	});
-	return `static KEYWORD_POOL: &[&[&'static str]] = &[
+	return `pub(super) static KEYWORD_POOL: &[&[&str]] = &[
 ${items.join("\n")}
 ];
 `;
@@ -195,7 +203,8 @@ function renderFunctionalUtilities(
 	const entries = populated.map((u) => {
 		const items = u.branches
 			.map(
-				(b) => `            ${formatBranch(b, propIdx, propCount, keywordIdx)},`,
+				(b) =>
+					`            ${formatBranch(b, propIdx, propCount, keywordIdx)},`,
 			)
 			.join("\n");
 		return `    ${rustString(u.basename)} => FunctionalEntry {
@@ -233,8 +242,8 @@ function formatBranch(
 		}
 		case "NamedTyped":
 			return `NamedTyped(ValueType::${b.value_type}, ${idx}, ${b.property_count})`;
-		case "Typed":
-			return `Typed(ValueType::${b.value_type}, ${idx}, ${b.property_count})`;
+		case "ArbitraryTyped":
+			return `ArbitraryTyped(ValueType::${b.value_type}, ${idx}, ${b.property_count})`;
 		case "Arbitrary":
 			return `Arbitrary(${idx}, ${b.property_count})`;
 	}

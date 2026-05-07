@@ -15,7 +15,7 @@
 //        a. Nonsense `<basename>-[abcxyz]` — establishes the utility's
 //           type-blind fallback property, if any.
 //        b. (basename × every ValueType, with explicit dataType marker)
-//           `<basename>-[<marker>:<sample>]` — emit `Typed` only when
+//           `<basename>-[<marker>:<sample>]` — emit `ArbitraryTyped` only when
 //           the resulting (property, count) differs from the nonsense
 //           fallback. Equal results are absorbed by the `Arbitrary`
 //           entry.
@@ -71,7 +71,7 @@ export type Branch =
 			property_count: number;
 	  }
 	| {
-			kind: "Typed";
+			kind: "ArbitraryTyped";
 			value_type: ValueType;
 			sort_property: string;
 			property_count: number;
@@ -167,7 +167,7 @@ type ProbeSlot =
 	| { basename: string; kind: "ns"; variant: ThemeNamespaceVariant }
 	| { basename: string; kind: "named-typed"; type: ValueType }
 	| { basename: string; kind: "nonsense" }
-	| { basename: string; kind: "typed"; type: ValueType };
+	| { basename: string; kind: "ArbitraryTyped"; type: ValueType };
 
 function extractFunctionalBranches(
 	ds: Awaited<ReturnType<typeof __unstable__loadDesignSystem>>,
@@ -188,7 +188,7 @@ function extractFunctionalBranches(
 		probeMeta.push({ basename, kind: "nonsense" });
 		for (const p of ARBITRARY_PROBES) {
 			probeClasses.push(`${basename}-[${p.marker}:${p.value}]`);
-			probeMeta.push({ basename, kind: "typed", type: p.type });
+			probeMeta.push({ basename, kind: "ArbitraryTyped", type: p.type });
 		}
 	}
 	const probeCss = ds.candidatesToCss(probeClasses);
@@ -206,7 +206,7 @@ function extractFunctionalBranches(
 					? `nt:${meta.type}`
 					: meta.kind === "nonsense"
 						? "nonsense"
-						: `t:${meta.type}`;
+						: `at:${meta.type}`;
 		if (!css) {
 			map.set(slotKey, null);
 		} else {
@@ -255,7 +255,7 @@ function extractFunctionalBranches(
 			});
 		}
 		for (const p of ARBITRARY_PROBES) {
-			const r = map.get(`t:${p.type}`);
+			const r = map.get(`at:${p.type}`);
 			if (!r) continue;
 			if (
 				nonsense &&
@@ -265,7 +265,7 @@ function extractFunctionalBranches(
 				continue;
 			}
 			branches.push({
-				kind: "Typed",
+				kind: "ArbitraryTyped",
 				value_type: p.type,
 				sort_property: r.sort_property,
 				property_count: r.property_count,
@@ -336,13 +336,13 @@ function addKeywordBranches(
 }
 
 // Branch resolve precedence — most specific match first. Stable sort
-// keeps relative order within the same kind (e.g. multiple `Typed`
+// keeps relative order within the same kind (e.g. multiple `ArbitraryTyped`
 // entries stay in ValueType-catalog order from the probe matrix).
 const BRANCH_KIND_ORDER: Record<Branch["kind"], number> = {
 	NamedKeyword: 0,
 	Named: 1,
 	NamedTyped: 2,
-	Typed: 3,
+	ArbitraryTyped: 3,
 	Arbitrary: 4,
 };
 
@@ -361,7 +361,7 @@ function dedupeBranches(branches: Branch[]): Branch[] {
 			case "NamedTyped":
 				key = `NT|${b.value_type}|${b.sort_property}|${b.property_count}`;
 				break;
-			case "Typed":
+			case "ArbitraryTyped":
 				key = `T|${b.value_type}|${b.sort_property}|${b.property_count}`;
 				break;
 			case "Arbitrary":

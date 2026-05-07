@@ -131,10 +131,8 @@ impl<'a> Iterator for Segments<'a> {
                 b'(' => self.stack.push(b')'),
                 b'[' => self.stack.push(b']'),
                 b'{' => self.stack.push(b'}'),
-                b')' | b']' | b'}' => {
-                    if self.stack.last().copied() == Some(c) {
-                        self.stack.pop();
-                    }
+                b')' | b']' | b'}' if self.stack.last() == Some(&c) => {
+                    self.stack.pop();
                 }
                 _ => {}
             }
@@ -514,51 +512,15 @@ pub fn is_image(value: &str) -> bool {
     count > 0
 }
 
-// ── font-family pieces ───────────────────────────────────────────
-
-/// Mirrors <https://github.com/tailwindlabs/tailwindcss/blob/v4.2.2/packages/tailwindcss/src/utils/infer-data-type.ts#L132>
-/// (`isFamilyName`).
-pub fn is_family_name(value: &str) -> bool {
-    let mut count = 0usize;
-    for part in segment(value, b',') {
-        let bytes = part.as_bytes();
-        if bytes.is_empty() {
-            continue;
-        }
-        // Mirrors Tailwind: a digit-leading part disqualifies the entire
-        // value; whitespace-leading parts pass through (charCode is < 48).
-        let c = bytes[0];
-        if c >= b'0' && c <= b'9' {
-            return false;
-        }
-        if part.starts_with("var(") {
-            continue;
-        }
-        count += 1;
-    }
-    count > 0
-}
-
-/// Mirrors <https://github.com/tailwindlabs/tailwindcss/blob/v4.2.2/packages/tailwindcss/src/utils/infer-data-type.ts#L114>
-/// (`isGenericName`).
-pub fn is_generic_name(value: &str) -> bool {
-    matches!(
-        value,
-        "serif"
-            | "sans-serif"
-            | "monospace"
-            | "cursive"
-            | "fantasy"
-            | "system-ui"
-            | "ui-serif"
-            | "ui-sans-serif"
-            | "ui-monospace"
-            | "ui-rounded"
-            | "math"
-            | "emoji"
-            | "fangsong"
-    )
-}
+// `is_family_name` and `is_generic_name` are intentionally not ported.
+// Tailwind v4 only consults these types from the `font-` utility, which
+// routes both of them — and any other unrecognized arbitrary value — to the
+// same property (`font-family`). The codegen's branch-dedupe step therefore
+// always collapses ArbitraryTyped(FamilyName)/ArbitraryTyped(GenericName)
+// into the existing Arbitrary fallback, so a runtime predicate would never
+// be called. Re-introduce both if a future utility disambiguates property
+// by these types. Reference:
+// <https://github.com/tailwindlabs/tailwindcss/blob/v4.2.2/packages/tailwindcss/src/utils/infer-data-type.ts#L114>
 
 /// Mirrors <https://github.com/tailwindlabs/tailwindcss/blob/v4.2.2/packages/tailwindcss/src/utils/infer-data-type.ts#L148>
 /// (`isAbsoluteSize`).
@@ -741,21 +703,6 @@ mod tests {
         assert!(is_image("image-set(url(a.png))"));
         assert!(!is_image("red"));
         assert!(!is_image(""));
-    }
-
-    #[test]
-    fn family_name() {
-        assert!(is_family_name("Inter"));
-        assert!(is_family_name("\"Helvetica Neue\", Arial"));
-        assert!(!is_family_name("123name"));
-    }
-
-    #[test]
-    fn generic_name() {
-        assert!(is_generic_name("serif"));
-        assert!(is_generic_name("sans-serif"));
-        assert!(is_generic_name("ui-rounded"));
-        assert!(!is_generic_name("Arial"));
     }
 
     #[test]
