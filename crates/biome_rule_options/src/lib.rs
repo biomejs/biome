@@ -468,6 +468,7 @@ pub mod use_strict_mode;
 pub mod use_string_starts_ends_with;
 pub mod use_symbol_description;
 pub mod use_template;
+pub mod use_test_hooks_in_order;
 pub mod use_test_hooks_on_top;
 pub mod use_this_in_class_methods;
 pub mod use_throw_new_error;

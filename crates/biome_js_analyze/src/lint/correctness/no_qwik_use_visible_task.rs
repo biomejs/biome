@@ -51,7 +51,8 @@ impl Rule for NoQwikUseVisibleTask {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call_expression = ctx.query();
         let callee = call_expression.callee().ok()?.omit_parentheses();
-        let (_, name) = global_identifier(&callee)?;
+        let (_, name) =
+            global_identifier(&callee.as_any_global_identifier_expression()?)?;
 
         if name.text() == "useVisibleTask$" {
             let Some(arguments) = call_expression.arguments().ok() else {

@@ -308,6 +308,7 @@ define_categories! {
     "lint/nursery/useSortedClasses": "https://biomejs.dev/linter/rules/use-sorted-classes",
     "lint/nursery/useSpread": "https://biomejs.dev/linter/rules/use-spread",
     "lint/nursery/useStringStartsEndsWith": "https://biomejs.dev/linter/rules/use-string-starts-ends-with",
+    "lint/nursery/useTestHooksInOrder": "https://biomejs.dev/linter/rules/use-test-hooks-in-order",
     "lint/nursery/useTestHooksOnTop": "https://biomejs.dev/linter/rules/use-test-hooks-on-top",
     "lint/nursery/useThisInClassMethods": "https://biomejs.dev/linter/rules/use-this-in-class-methods",
     "lint/nursery/useUnicodeRegex": "https://biomejs.dev/linter/rules/use-unicode-regex",

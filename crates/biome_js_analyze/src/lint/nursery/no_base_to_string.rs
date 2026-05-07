@@ -196,7 +196,12 @@ fn run_builtin_string_call(
     node: &JsCallExpression,
 ) -> Option<RuleState> {
     let callee = node.callee().ok()?;
-    let (reference, name) = global_identifier(&callee.clone().omit_parentheses())?;
+    let (reference, name) = global_identifier(
+        &callee
+            .clone()
+            .omit_parentheses()
+            .as_any_global_identifier_expression()?,
+    )?;
     if name.text() != "String" || ctx.has_binding(&reference) {
         return None;
     }
