@@ -2,7 +2,8 @@ use biome_rowan::{AstNode, AstNodeList, TextRange, TextSize};
 
 use crate::{AnyTwCandidate, AnyTwFullCandidate, AnyTwModifier, AnyTwValue, TwCandidateList};
 
-/// Collects text ranges of all arbitrary values in the given candidate list.
+/// Core business logic of the `noTailwindArbitraryValue` rule - collects text ranges
+/// of all arbitrary values and arbitrary properties in the given candidate list.
 ///
 /// `content_start` is the source offset of the first character of the parsed
 /// string, used to translate parse-relative ranges into source ranges.
@@ -17,10 +18,7 @@ pub fn arbitrary_ranges(candidates: &TwCandidateList, content_start: TextSize) -
         match candidate.candidate() {
             Ok(AnyTwCandidate::TwArbitraryCandidate(candidate)) => {
                 let range = candidate.syntax().text_trimmed_range();
-                results.push(TextRange::new(
-                    content_start + range.start(),
-                    content_start + range.end(),
-                ));
+                results.push(range + content_start);
             }
             Ok(AnyTwCandidate::TwFunctionalCandidate(candidate)) => {
                 push_arbitrary_value_range(&mut results, content_start, candidate.value().ok());
@@ -40,10 +38,7 @@ fn push_arbitrary_value_range(
 ) {
     if let Some(AnyTwValue::TwArbitraryValue(value)) = value {
         let range = value.syntax().text_trimmed_range();
-        results.push(TextRange::new(
-            content_start + range.start(),
-            content_start + range.end(),
-        ));
+        results.push(range + content_start);
     }
 }
 
