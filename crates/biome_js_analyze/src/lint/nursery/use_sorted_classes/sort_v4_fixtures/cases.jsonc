@@ -24,6 +24,25 @@
 	"origin-top flex p-4",   // NamedKeyword pool
 	"flex-1 flex p-4",       // STATIC `flex` wins over functional `flex` basename
 
+	// font basename — Named(Font) for `--font-*` theme keys,
+	// Named(FontWeight) for `--font-weight-*` theme keys.
+	"font-bold flex p-4",
+	"font-serif font-bold flex",
+	"font-medium font-sans p-4",
+
+	// w basename — Named(Spacing) for `--spacing-*` keys,
+	// NamedTyped(Number) for bare integers, NamedTyped(Ratio) for fractions.
+	"w-10 flex p-4",         // NamedTyped(Number)
+	"w-1/2 flex p-4",        // NamedTyped(Ratio)
+	"w-full flex p-4",       // Named(Spacing) — `--spacing-full` theme key
+	"w-screen w-10 w-full",  // multi-value same basename, stable order
+
+	// aspect basename — NamedKeyword pool (auto/square),
+	// Named(Aspect) (theme keys like `video`), NamedTyped(Ratio).
+	"aspect-square flex",    // NamedKeyword
+	"aspect-video flex",     // Named(Aspect)
+	"aspect-9/16 flex",      // NamedTyped(Ratio)
+
 	// ─── unknown classes ───────────────────────────────────────────
 	// Tokens that resolve to no branch float to the front and keep
 	// their relative input order (stable sort).
