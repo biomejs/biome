@@ -8314,6 +8314,11 @@ export interface NoReactNativeRawTextOptions {
 }
 export type NoReactStringRefsOptions = {};
 export type NoRestrictedDependenciesOptions = {};
+/**
+	* Options for the `noTailwindArbitraryValue` rule.
+
+Controls which attributes and utility functions are checked for arbitrary values. 
+	 */
 export interface NoTailwindArbitraryValueOptions {
 	/**
 	 * Additional attributes that will be checked.
