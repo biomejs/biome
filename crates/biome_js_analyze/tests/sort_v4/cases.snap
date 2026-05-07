@@ -1,7 +1,7 @@
 ---
-source: crates/biome_js_analyze/src/lint/nursery/use_sorted_classes/sort_v4.rs
+source: crates/biome_js_analyze/tests/sort_v4_test.rs
 expression: rendered
-input_file: crates/biome_js_analyze/src/lint/nursery/use_sorted_classes/sort_v4_fixtures/cases.jsonc
+input_file: crates/biome_js_analyze/tests/sort_v4/cases.jsonc
 ---
 input:  flex block absolute
 sorted: absolute block flex
