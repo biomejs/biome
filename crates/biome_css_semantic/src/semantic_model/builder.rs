@@ -147,7 +147,9 @@ impl SemanticModelBuilder {
                 };
 
                 if let Some(&parent_id) = self.current_rule_stack.last() {
-                    self.all_rules[parent_id.index()].child_ids.push(new_rule_id);
+                    self.all_rules[parent_id.index()]
+                        .child_ids
+                        .push(new_rule_id);
                 }
 
                 self.all_rules.push(new_rule);
@@ -305,7 +307,10 @@ fn resolve_selector(current: &[CssSyntaxToken], parents: &[Selector]) -> Vec<Res
         .map(|parent| {
             let parent_tokens = &parent.resolved.0;
             if has_amp {
-                let amp_count = current.iter().filter(|t| t.kind() == CssSyntaxKind::AMP).count();
+                let amp_count = current
+                    .iter()
+                    .filter(|t| t.kind() == CssSyntaxKind::AMP)
+                    .count();
                 let non_amp_count = current.len() - amp_count;
                 let capacity = amp_count * parent_tokens.len() + non_amp_count;
 
