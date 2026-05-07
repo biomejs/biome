@@ -1,12 +1,3 @@
-//! Tailwind v4 class sorter built on top of `biome_tailwind_parser`.
-//!
-//! Walks the parsed candidates, builds a `SortKey` for each, and emits
-//! the candidates in sorted order. Tokens we cannot place yet
-//! (variants, negative prefix, important, modifiers, arbitrary values,
-//! CSS-variable values, arbitrary CSS, parser-bogus) are kept as
-//! `Unknown` and float to the front in source order. Each `// TODO:`
-//! comment marks a class of inputs that needs follow-up work.
-
 use std::cmp::Ordering;
 
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxNodeText};
@@ -60,7 +51,6 @@ impl SortKey {
     /// class awaiting follow-up implementation.
     fn from_candidate(candidate: &AnyTwFullCandidate) -> Self {
         let AnyTwFullCandidate::TwFullCandidate(node) = candidate else {
-            // TwBogusCandidate — parser recovery, treat as unknown.
             return Self::Unknown;
         };
 
