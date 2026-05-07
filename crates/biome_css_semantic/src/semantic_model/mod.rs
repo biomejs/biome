@@ -49,7 +49,8 @@ mod tests {
 
         let root = parse.tree();
         let model = super::semantic_model(&root);
-        let rule = model.rules().first().unwrap();
+        let rules = model.rules();
+        let rule = rules.first().unwrap();
 
         assert_eq!(rule.selectors.len(), 1);
         assert_eq!(rule.declarations.len(), 2);
@@ -72,7 +73,8 @@ mod tests {
 
         let root = parse.tree();
         let model = super::semantic_model(&root);
-        let rule = model.rules().first().unwrap();
+        let rules = model.rules();
+        let rule = rules.first().unwrap();
         assert_eq!(rule.selectors.len(), 1);
         assert_eq!(rule.declarations.len(), 1);
         assert_eq!(rule.child_ids.len(), 1);
@@ -100,7 +102,8 @@ mod tests {
 
         let root = parse.tree();
         let model = super::semantic_model(&root);
-        let rule = model.rules().first().unwrap();
+        let rules = model.rules();
+        let rule = rules.first().unwrap();
 
         assert_eq!(rule.selectors.len(), 1);
         assert_eq!(rule.declarations.len(), 0);
@@ -128,7 +131,8 @@ mod tests {
 
         let root = parse.tree();
         let model = super::semantic_model(&root);
-        let rule = model.rules().first().unwrap();
+        let rules = model.rules();
+        let rule = rules.first().unwrap();
 
         assert_eq!(rule.selectors.len(), 1);
         assert_eq!(rule.declarations.len(), 0);
