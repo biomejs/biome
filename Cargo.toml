@@ -126,7 +126,7 @@ indexmap                     = { version = "2.14.0" }
 insta                        = "1.47.2"
 jiff                         = "0.2.24"
 libc                         = "0.2.186"
-mimalloc                     = "0.1.50"
+mimalloc                     = "0.1.48"
 papaya                       = "0.2.4"
 path-absolutize              = { version = "3.1.1", features = ["use_unix_paths_on_wasm"], optional = false }
 phf                          = { version = "0.13.1", features = ["macros"] }
