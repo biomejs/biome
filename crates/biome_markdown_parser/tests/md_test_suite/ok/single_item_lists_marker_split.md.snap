@@ -1,0 +1,122 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+* item one
+
+- item two
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: STAR@0..1 "*" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@1..2 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@2..10 "item one" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@10..11 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@11..12 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@12..13 "-" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@13..14 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@14..22 "item two" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@22..23 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@23..23 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..23
+  0: (empty)
+  1: MD_BLOCK_LIST@0..23
+    0: MD_BULLET_LIST_ITEM@0..11
+      0: MD_BULLET_LIST@0..11
+        0: MD_BULLET@0..11
+          0: MD_LIST_MARKER_PREFIX@0..2
+            0: MD_INDENT_TOKEN_LIST@0..0
+            1: STAR@0..1 "*" [] []
+            2: MD_LIST_POST_MARKER_SPACE@1..2 " " [] []
+            3: MD_INDENT_TOKEN_LIST@2..2
+          1: MD_BLOCK_LIST@2..11
+            0: MD_PARAGRAPH@2..11
+              0: MD_INLINE_ITEM_LIST@2..11
+                0: MD_TEXTUAL@2..10
+                  0: MD_TEXTUAL_LITERAL@2..10 "item one" [] []
+                1: MD_TEXTUAL@10..11
+                  0: MD_TEXTUAL_LITERAL@10..11 "\n" [] []
+              1: (empty)
+    1: MD_NEWLINE@11..12
+      0: NEWLINE@11..12 "\n" [] []
+    2: MD_BULLET_LIST_ITEM@12..23
+      0: MD_BULLET_LIST@12..23
+        0: MD_BULLET@12..23
+          0: MD_LIST_MARKER_PREFIX@12..14
+            0: MD_INDENT_TOKEN_LIST@12..12
+            1: MINUS@12..13 "-" [] []
+            2: MD_LIST_POST_MARKER_SPACE@13..14 " " [] []
+            3: MD_INDENT_TOKEN_LIST@14..14
+          1: MD_BLOCK_LIST@14..23
+            0: MD_PARAGRAPH@14..23
+              0: MD_INLINE_ITEM_LIST@14..23
+                0: MD_TEXTUAL@14..22
+                  0: MD_TEXTUAL_LITERAL@14..22 "item two" [] []
+                1: MD_TEXTUAL@22..23
+                  0: MD_TEXTUAL_LITERAL@22..23 "\n" [] []
+              1: (empty)
+  2: EOF@23..23 "" [] []
+
+```

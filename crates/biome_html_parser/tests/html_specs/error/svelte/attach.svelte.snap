@@ -28,9 +28,9 @@ HtmlRoot {
                 attributes: HtmlAttributeList [
                     SvelteAttachAttribute {
                         sv_curly_at_token: SV_CURLY_AT@5..7 "{@" [] [],
-                        attach_token: ATTACH_KW@7..13 "attach" [] [],
+                        attach_token: ATTACH_KW@7..14 "attach" [] [Whitespace(" ")],
                         expression: HtmlTextExpression {
-                            html_literal_token: HTML_LITERAL@13..25 " >...</div>\n" [] [],
+                            html_literal_token: HTML_LITERAL@14..25 ">...</div>\n" [] [],
                         },
                         r_curly_token: missing (required),
                     },
@@ -61,9 +61,9 @@ HtmlRoot {
         2: HTML_ATTRIBUTE_LIST@5..25
           0: SVELTE_ATTACH_ATTRIBUTE@5..25
             0: SV_CURLY_AT@5..7 "{@" [] []
-            1: ATTACH_KW@7..13 "attach" [] []
-            2: HTML_TEXT_EXPRESSION@13..25
-              0: HTML_LITERAL@13..25 " >...</div>\n" [] []
+            1: ATTACH_KW@7..14 "attach" [] [Whitespace(" ")]
+            2: HTML_TEXT_EXPRESSION@14..25
+              0: HTML_LITERAL@14..25 ">...</div>\n" [] []
             3: (empty)
         3: (empty)
       1: HTML_ELEMENT_LIST@25..25

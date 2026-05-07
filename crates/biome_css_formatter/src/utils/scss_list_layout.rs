@@ -6,8 +6,8 @@ use crate::utils::scss_closing_comments::{
 use biome_css_syntax::{
     ScssExpression, ScssListExpression, ScssListExpressionElementList, ScssListExpressionFields,
     ScssModuleConfiguration, ScssParenthesizedExpression, is_in_scss_include_arguments,
-    is_scss_map_key, scss_include_keyword_argument_owner, scss_map_context, single_expression_item,
-    unwrap_single_expression_item,
+    is_scss_map_key, is_scss_map_outer_parenthesized_value_list,
+    scss_include_keyword_argument_owner, single_expression_item, unwrap_single_expression_item,
 };
 use biome_formatter::{format_args, write};
 use biome_rowan::{AstNode, AstSeparatedList};
@@ -25,82 +25,76 @@ impl<'a> ScssListLayout<'a> {
     pub(crate) fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
         let ScssListExpressionFields { elements } = self.node.as_fields();
 
-        if !is_in_scss_include_arguments(self.node.syntax()) {
-            let is_module_configuration_value_list =
-                is_module_configuration_parenthesized_list_value(self.node);
+        if is_in_scss_include_arguments(self.node.syntax()) {
+            return self.fmt_include_list(&elements, f);
+        }
 
-            if is_module_configuration_value_list {
-                return write!(
-                    f,
-                    [group(&format_args![
-                        soft_line_break(),
-                        elements.format(),
-                        token(",")
-                    ])
-                    .should_expand(true)]
-                );
-            }
-
-            if scss_map_context(self.node)
-                .is_some_and(|context| context.is_outer_parenthesized_value_list)
-            {
-                // `key: (a, b)` gets its block indent from the parentheses;
-                // the list only forces item breaks and the trailing comma.
-                return write!(
-                    f,
-                    [group(&format_args![
-                        elements.format(),
-                        if_group_breaks(&token(","))
-                    ])
-                    .should_expand(true)]
-                );
-            }
-
-            if is_parenthesized_map_key_list(self.node) {
-                // `(("a", "b"): value)` already gets indented by the key's
-                // parentheses, so the list only controls its own breaks.
-                return write!(
-                    f,
-                    [group(&format_args![
-                        elements.format(),
-                        if_group_breaks(&token(","))
-                    ])]
-                );
-            }
-
-            if is_parenthesized_list(self.node) {
-                // In `(a, b)`, the parentheses own the line break and indent.
-                return write!(f, [group(&format_args![elements.format()])]);
-            }
-
+        if is_module_configuration_parenthesized_list_value(self.node) {
             return write!(
                 f,
-                [group(&indent(&format_args![
+                [group(&format_args![
                     soft_line_break(),
-                    elements.format()
-                ]))]
+                    elements.format(),
+                    token(",")
+                ])
+                .should_expand(true)]
             );
         }
 
-        let list_layout = IncludeListLayout::new(self.node, &elements, f);
-        let trailing_comma = format_with(|f| {
-            if list_layout.is_trailing_comma_forced {
-                write!(f, [token(",")])
-            } else {
-                write!(f, [if_group_breaks(&token(","))])
-            }
-        });
-        let closing_comments = format_with(|f| {
-            write_include_closing_comments(
-                self.node.syntax(),
-                ClosingCommentSpacing::SoftLineBreak,
+        if is_scss_map_outer_parenthesized_value_list(self.node) {
+            // `key: (a, b)` gets its block indent from the parentheses;
+            // the list only forces item breaks and the trailing comma.
+            return write!(
                 f,
-            )
-        });
+                [group(&format_args![
+                    elements.format(),
+                    if_group_breaks(&token(","))
+                ])
+                .should_expand(true)]
+            );
+        }
 
-        if scss_map_context(self.node)
-            .is_some_and(|context| context.is_outer_parenthesized_value_list)
-            || list_layout.is_keyword_parenthesized_list
+        if is_parenthesized_map_key_list(self.node) {
+            // `(("a", "b"): value)` already gets indented by the key's
+            // parentheses, so the list only controls its own breaks.
+            return write!(
+                f,
+                [group(&format_args![
+                    elements.format(),
+                    if_group_breaks(&token(","))
+                ])]
+            );
+        }
+
+        if is_parenthesized_list(self.node) {
+            // In `(a, b)`, the parentheses own the line break and indent.
+            return write!(f, [group(&format_args![elements.format()])]);
+        }
+
+        write!(
+            f,
+            [group(&indent(&format_args![
+                soft_line_break(),
+                elements.format()
+            ]))]
+        )
+    }
+
+    /// Formats lists inside `@include`, where keyword values own commas/comments.
+    ///
+    /// Example: `@include mix($arg: (a, b) /* end */)`.
+    fn fmt_include_list(
+        &self,
+        elements: &ScssListExpressionElementList,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        let should_force_trailing_comma = self.should_force_include_trailing_comma(elements, f);
+        let trailing_comma = Self::include_trailing_comma(should_force_trailing_comma);
+        let closing_comments = self.include_closing_comments();
+        let should_expand = self.should_expand_include_list(elements, f);
+
+        if is_scss_map_outer_parenthesized_value_list(self.node)
+            || self.is_parenthesized_include_list()
         {
             // Format the list in `key: (a, b)`. The surrounding parentheses are
             // handled by `FormatScssParenthesizedExpression`.
@@ -110,7 +104,7 @@ impl<'a> ScssListLayout<'a> {
                     elements.format(),
                     trailing_comma, closing_comments
                 ])
-                .should_expand(list_layout.is_expanded)]
+                .should_expand(should_expand)]
             )
         } else {
             write!(
@@ -121,43 +115,90 @@ impl<'a> ScssListLayout<'a> {
                     trailing_comma,
                     closing_comments
                 ]))
-                .should_expand(list_layout.is_expanded)]
+                .should_expand(should_expand)]
             )
         }
+    }
+
+    /// Formats the comma after an include argument list.
+    ///
+    /// Example: `@include mix($arg: (a))` prints the keyword list comma.
+    fn include_trailing_comma(should_force: bool) -> impl Format<CssFormatContext> {
+        format_with(move |f| {
+            if should_force {
+                write!(f, [token(",")])
+            } else {
+                write!(f, [if_group_breaks(&token(","))])
+            }
+        })
+    }
+
+    /// Formats include-owned comments before the closing `)`.
+    ///
+    /// Example: `@include mix((a, b) /* end */)`.
+    fn include_closing_comments(&self) -> impl Format<CssFormatContext> + '_ {
+        format_with(|f| {
+            write_include_closing_comments(
+                self.node.syntax(),
+                ClosingCommentSpacing::SoftLineBreak,
+                f,
+            )
+        })
+    }
+
+    /// Forces a comma when include parens or comments own the list shape.
+    ///
+    /// Examples: `@include mix($arg: (a))`, `@include mix((a) /* end */)`.
+    fn should_force_include_trailing_comma(
+        &self,
+        elements: &ScssListExpressionElementList,
+        f: &CssFormatter,
+    ) -> bool {
+        owns_include_closing_comments(self.node.syntax(), f)
+            || self.should_force_include_parenthesized_list_layout(elements)
+    }
+
+    /// Expands include keyword lists that need visible item/comment boundaries.
+    ///
+    /// Examples: `@include mix($arg: (a))`, `@include mix($arg: (a) /* end */)`.
+    fn should_expand_include_list(
+        &self,
+        elements: &ScssListExpressionElementList,
+        f: &CssFormatter,
+    ) -> bool {
+        is_include_keyword_list_value_expanded_by_comments(self.node, f)
+            || self.should_force_include_parenthesized_list_layout(elements)
+    }
+
+    /// Forces expansion and a comma for include keyword lists in parens.
+    ///
+    /// Examples: `$arg: (a)`, `$arg: (a,)`.
+    fn should_force_include_parenthesized_list_layout(
+        &self,
+        elements: &ScssListExpressionElementList,
+    ) -> bool {
+        self.is_parenthesized_include_list()
+            && (elements.len() > 0 || elements.trailing_separator().is_some())
+    }
+
+    /// Detects the list in `@include mix($arg: (a, b))`.
+    fn is_parenthesized_include_list(&self) -> bool {
+        let Some(parenthesized) = self
+            .node
+            .syntax()
+            .parent()
+            .and_then(ScssParenthesizedExpression::cast)
+        else {
+            return false;
+        };
+
+        scss_include_keyword_argument_owner(parenthesized.syntax()).is_some()
+            && is_list_owned_by_parentheses(&parenthesized, self.node)
     }
 
     /// Checks whether this layout prints include closing comments.
     pub(crate) fn owns_dangling_comments(&self, f: &CssFormatter) -> bool {
         owns_include_closing_comments(self.node.syntax(), f)
-    }
-}
-
-/// Prettier-style decisions for lists inside include arguments.
-#[derive(Debug, Clone, Copy)]
-struct IncludeListLayout {
-    is_keyword_parenthesized_list: bool,
-    is_trailing_comma_forced: bool,
-    is_expanded: bool,
-}
-
-impl IncludeListLayout {
-    fn new(
-        node: &ScssListExpression,
-        elements: &ScssListExpressionElementList,
-        f: &CssFormatter,
-    ) -> Self {
-        let is_keyword_parenthesized_list =
-            is_direct_include_keyword_parenthesized_list_value(node);
-        let has_preserved_source_trailing_separator =
-            elements.trailing_separator().is_some() && is_keyword_parenthesized_list;
-
-        Self {
-            is_keyword_parenthesized_list,
-            is_trailing_comma_forced: owns_include_closing_comments(node.syntax(), f)
-                || has_preserved_source_trailing_separator,
-            is_expanded: is_include_keyword_list_value_expanded_by_comments(node, f)
-                || has_preserved_source_trailing_separator,
-        }
     }
 }
 
@@ -197,23 +238,6 @@ fn is_include_keyword_list_value_expanded_by_comments(
         .has_dangling_comments(keyword_argument.syntax());
 
     has_trailing_comment || has_keyword_closing_comments
-}
-
-/// Detects the list in `@include mix($arg: (a, b))`.
-fn is_direct_include_keyword_parenthesized_list_value(node: &ScssListExpression) -> bool {
-    let Some(parenthesized) = node
-        .syntax()
-        .parent()
-        .and_then(ScssParenthesizedExpression::cast)
-    else {
-        return false;
-    };
-
-    if scss_include_keyword_argument_owner(parenthesized.syntax()).is_none() {
-        return false;
-    }
-
-    is_list_owned_by_parentheses(&parenthesized, node)
 }
 
 /// Detects the list in `@use "x" with ($family: (a, b))`.
