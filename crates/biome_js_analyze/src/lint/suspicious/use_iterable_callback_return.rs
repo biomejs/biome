@@ -172,7 +172,12 @@ impl Rule for UseIterableCallbackReturn {
         }
 
         if let Some(global_name) = method_config.global_name {
-            let (_, name) = global_identifier(&member_expression.object().ok()?)?;
+            let (_, name) = global_identifier(
+                &member_expression
+                    .object()
+                    .ok()?
+                    .as_any_global_identifier_expression()?,
+            )?;
             if name.text() != global_name {
                 return None;
             }

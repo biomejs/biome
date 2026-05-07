@@ -1,0 +1,30 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/comment/issue-10922.yml
+---
+# Input
+
+```yml
+foo: bar
+
+# End Comment - Don't remove previous empty line
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1 @@
+-foo: bar
+-# End Comment - Don't remove previous empty line
++foo: bar
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+foo: bar```

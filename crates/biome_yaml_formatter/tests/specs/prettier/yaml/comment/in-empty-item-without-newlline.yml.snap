@@ -1,0 +1,28 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/comment/in-empty-item-without-newlline.yml
+---
+# Input
+
+```yml
+a:
+  #123
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1 @@
+-a:
+-  #123
++a:
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+a:```

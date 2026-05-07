@@ -15613,6 +15613,7 @@ impl AnyCssUrlModifier {
 pub enum AnyCssUrlValue {
     CssString(CssString),
     CssUrlValueRaw(CssUrlValueRaw),
+    ScssExpression(ScssExpression),
     ScssInterpolatedString(ScssInterpolatedString),
 }
 impl AnyCssUrlValue {
@@ -15625,6 +15626,12 @@ impl AnyCssUrlValue {
     pub fn as_css_url_value_raw(&self) -> Option<&CssUrlValueRaw> {
         match &self {
             Self::CssUrlValueRaw(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_expression(&self) -> Option<&ScssExpression> {
+        match &self {
+            Self::ScssExpression(item) => Some(item),
             _ => None,
         }
     }
@@ -40183,6 +40190,11 @@ impl From<CssUrlValueRaw> for AnyCssUrlValue {
         Self::CssUrlValueRaw(node)
     }
 }
+impl From<ScssExpression> for AnyCssUrlValue {
+    fn from(node: ScssExpression) -> Self {
+        Self::ScssExpression(node)
+    }
+}
 impl From<ScssInterpolatedString> for AnyCssUrlValue {
     fn from(node: ScssInterpolatedString) -> Self {
         Self::ScssInterpolatedString(node)
@@ -40192,17 +40204,19 @@ impl AstNode for AnyCssUrlValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssString::KIND_SET
         .union(CssUrlValueRaw::KIND_SET)
+        .union(ScssExpression::KIND_SET)
         .union(ScssInterpolatedString::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_STRING | CSS_URL_VALUE_RAW | SCSS_INTERPOLATED_STRING
+            CSS_STRING | CSS_URL_VALUE_RAW | SCSS_EXPRESSION | SCSS_INTERPOLATED_STRING
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_STRING => Self::CssString(CssString { syntax }),
             CSS_URL_VALUE_RAW => Self::CssUrlValueRaw(CssUrlValueRaw { syntax }),
+            SCSS_EXPRESSION => Self::ScssExpression(ScssExpression { syntax }),
             SCSS_INTERPOLATED_STRING => {
                 Self::ScssInterpolatedString(ScssInterpolatedString { syntax })
             }
@@ -40214,6 +40228,7 @@ impl AstNode for AnyCssUrlValue {
         match self {
             Self::CssString(it) => it.syntax(),
             Self::CssUrlValueRaw(it) => it.syntax(),
+            Self::ScssExpression(it) => it.syntax(),
             Self::ScssInterpolatedString(it) => it.syntax(),
         }
     }
@@ -40221,6 +40236,7 @@ impl AstNode for AnyCssUrlValue {
         match self {
             Self::CssString(it) => it.into_syntax(),
             Self::CssUrlValueRaw(it) => it.into_syntax(),
+            Self::ScssExpression(it) => it.into_syntax(),
             Self::ScssInterpolatedString(it) => it.into_syntax(),
         }
     }
@@ -40230,6 +40246,7 @@ impl std::fmt::Debug for AnyCssUrlValue {
         match self {
             Self::CssString(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUrlValueRaw(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolatedString(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -40239,6 +40256,7 @@ impl From<AnyCssUrlValue> for SyntaxNode {
         match n {
             AnyCssUrlValue::CssString(it) => it.into_syntax(),
             AnyCssUrlValue::CssUrlValueRaw(it) => it.into_syntax(),
+            AnyCssUrlValue::ScssExpression(it) => it.into_syntax(),
             AnyCssUrlValue::ScssInterpolatedString(it) => it.into_syntax(),
         }
     }

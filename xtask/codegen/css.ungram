@@ -2083,6 +2083,7 @@ AnyCssUrlModifier =
 AnyCssUrlValue =
 	CssUrlValueRaw
 	| CssString
+	| ScssExpression
 	| ScssInterpolatedString
 
 CssParameterList = AnyCssExpression (',' AnyCssExpression)* ','?

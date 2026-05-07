@@ -1,0 +1,44 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-2-9-single-document-with-two-comments.yml
+---
+# Input
+
+```yml
+---
+hr: # 1998 hr ranking
+  - Mark McGwire
+  - Sammy Sosa
+rbi:
+  # 1998 rbi ranking
+  - Sammy Sosa
+  - Ken Griffey
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -5,4 +5,4 @@
+ rbi:
+   # 1998 rbi ranking
+   - Sammy Sosa
+-  - Ken Griffey
++  - Ken Griffey
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+---
+hr: # 1998 hr ranking
+  - Mark McGwire
+  - Sammy Sosa
+rbi:
+  # 1998 rbi ranking
+  - Sammy Sosa
+  - Ken Griffey```

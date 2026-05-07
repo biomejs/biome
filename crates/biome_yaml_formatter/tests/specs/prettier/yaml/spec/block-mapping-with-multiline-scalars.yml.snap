@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/block-mapping-with-multiline-scalars.yml
+---
+# Input
+
+```yml
+? a
+  true
+: null
+  d
+? e
+  42
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -3,4 +3,4 @@
+ : null
+   d
+ ? e
+-  42
++  42
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+? a
+  true
+: null
+  d
+? e
+  42```

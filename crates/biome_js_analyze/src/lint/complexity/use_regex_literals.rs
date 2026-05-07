@@ -174,7 +174,8 @@ fn extract_valid_pattern(
                 }
                 _ => return None,
             };
-            let (reference, name) = global_identifier(&object)?;
+            let (reference, name) =
+                global_identifier(&object.as_any_global_identifier_expression()?)?;
             if model.binding(&reference).is_some() || name.text() != "String" || member != "raw" {
                 return None;
             }
@@ -273,7 +274,11 @@ fn create_regex(pattern: &str, flags: &StaticValue, string_kind: StringKind) -> 
 }
 
 fn is_regexp_object(expr: AnyJsExpression, model: &SemanticModel) -> bool {
-    match global_identifier(&expr.omit_parentheses()) {
+    match expr
+        .omit_parentheses()
+        .as_any_global_identifier_expression()
+        .and_then(|e| global_identifier(&e))
+    {
         Some((reference, name)) => match model.binding(&reference) {
             Some(_) if !reference.is_global_this() && !reference.has_name("window") => false,
             _ => name.text() == "RegExp",

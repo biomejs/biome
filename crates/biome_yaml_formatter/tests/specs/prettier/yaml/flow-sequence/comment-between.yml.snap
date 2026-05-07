@@ -1,0 +1,42 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/flow-sequence/comment-between.yml
+---
+# Input
+
+```yml
+[
+? 123
+# comment
+: 456
+]
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,5 @@
+ [
+-  ? 123
+-  # comment
+-  : 456,
+-]
++? 123
++# comment
++: 456
++]
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+[
+? 123
+# comment
+: 456
+]```

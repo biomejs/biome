@@ -7022,6 +7022,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useTestHooksInOrder": {
+					"description": "Enforce that test lifecycle hooks are declared in the order they execute.\nSee https://biomejs.dev/linter/rules/use-test-hooks-in-order",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseTestHooksInOrderConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useTestHooksOnTop": {
 					"description": "Enforce that lifecycle hooks appear before any test cases in the same block.\nSee https://biomejs.dev/linter/rules/use-test-hooks-on-top",
 					"anyOf": [
@@ -12095,6 +12102,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseTestHooksInOrderOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseTestHooksInOrderOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseTestHooksOnTopOptions": {
 			"type": "object",
 			"properties": {
@@ -15740,6 +15756,16 @@
 			]
 		},
 		"UseTemplateOptions": { "type": "object", "additionalProperties": false },
+		"UseTestHooksInOrderConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseTestHooksInOrderOptions" }
+			]
+		},
+		"UseTestHooksInOrderOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseTestHooksOnTopConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },

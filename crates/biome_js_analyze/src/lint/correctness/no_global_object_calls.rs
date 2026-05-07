@@ -105,7 +105,8 @@ impl Rule for NoGlobalObjectCalls {
         let node = ctx.query();
         let model = ctx.model();
         let callee = node.callee().ok()?.omit_parentheses();
-        let (reference, name) = global_identifier(&callee)?;
+        let (reference, name) =
+            global_identifier(&callee.as_any_global_identifier_expression()?)?;
         let non_callable = NonCallableGlobals::from_str(name.text()).ok()?;
         model
             .binding(&reference)

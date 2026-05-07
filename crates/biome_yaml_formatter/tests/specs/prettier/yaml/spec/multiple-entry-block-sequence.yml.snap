@@ -1,0 +1,33 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/multiple-entry-block-sequence.yml
+---
+# Input
+
+```yml
+- foo
+- bar
+- 42
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,3 +1,3 @@
+ - foo
+ - bar
+-- 42
++- 42
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+- foo
+- bar
+- 42```

@@ -67,7 +67,8 @@ impl Rule for NoConsole {
         let member_expression = ctx.query();
         let model = ctx.model();
         let object = member_expression.object().ok()?;
-        let (reference, name) = global_identifier(&object)?;
+        let (reference, name) =
+            global_identifier(&object.as_any_global_identifier_expression()?)?;
         if name.text() != "console" {
             return None;
         }

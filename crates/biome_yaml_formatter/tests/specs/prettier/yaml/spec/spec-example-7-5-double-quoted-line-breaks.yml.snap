@@ -1,0 +1,42 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-7-5-double-quoted-line-breaks.yml
+---
+# Input
+
+```yml
+"folded 
+to a space,	
+ 
+to a line feed, or 	\
+ \ 	non-content"
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,5 @@
+-"folded
+-to a space,
+-
++"folded 
++to a space,	
++ 
+ to a line feed, or 	\
+-\ 	non-content"
++ \ 	non-content"
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+"folded 
+to a space,	
+ 
+to a line feed, or 	\
+ \ 	non-content"```

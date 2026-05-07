@@ -1,0 +1,74 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-7-10-plain-characters.yml
+---
+# Input
+
+```yml
+# Outside flow collection:
+- ::vector
+- ": - ()"
+- Up, up, and away!
+- -123
+- http://example.com/foo#bar
+# Inside flow collection:
+- [ ::vector,
+  ": - ()",
+  "Up, up and away!",
+  -123,
+  http://example.com/foo#bar ]
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,8 +1,11 @@
+-# Outside flow collection:
+ - ::vector
+ - ": - ()"
+ - Up, up, and away!
+ - -123
+ - http://example.com/foo#bar
+ # Inside flow collection:
+-- [::vector, ": - ()", "Up, up and away!", -123, http://example.com/foo#bar]
++- [ ::vector,
++  ": - ()",
++  "Up, up and away!",
++  -123,
++  http://example.com/foo
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+- ::vector
+- ": - ()"
+- Up, up, and away!
+- -123
+- http://example.com/foo#bar
+# Inside flow collection:
+- [ ::vector,
+  ": - ()",
+  "Up, up and away!",
+  -123,
+  http://example.com/foo```
+
+# Errors
+```
+spec-example-7-10-plain-characters.yml:12:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `]`
+  
+    10 │   "Up, up and away!",
+    11 │   -123,
+  > 12 │   http://example.com/foo#bar ]
+       │                               
+    13 │ 
+  
+
+```

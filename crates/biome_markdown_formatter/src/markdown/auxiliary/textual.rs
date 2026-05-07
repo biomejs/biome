@@ -5,7 +5,6 @@ use biome_markdown_syntax::{MdTextual, MdTextualFields};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdTextual {
-    should_remove: bool,
     print_mode: TextPrintMode,
 }
 impl FormatNodeRule<MdTextual> for FormatMdTextual {
@@ -14,7 +13,7 @@ impl FormatNodeRule<MdTextual> for FormatMdTextual {
 
         let value_token = value_token?;
 
-        if self.should_remove {
+        if self.print_mode.is_remove() {
             format_removed(&value_token).fmt(f)
         } else if self.print_mode.is_clean() {
             // Clean mode: strip spaces/tabs but preserve newlines.
@@ -104,9 +103,8 @@ impl FormatNodeRule<MdTextual> for FormatMdTextual {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default)]
+#[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdTextualOptions {
-    pub(crate) should_remove: bool,
     pub(crate) print_mode: TextPrintMode,
 }
 
@@ -114,7 +112,6 @@ impl FormatRuleWithOptions<MdTextual> for FormatMdTextual {
     type Options = FormatMdTextualOptions;
 
     fn with_options(mut self, options: Self::Options) -> Self {
-        self.should_remove = options.should_remove;
         self.print_mode = options.print_mode;
         self
     }

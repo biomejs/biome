@@ -4,7 +4,7 @@ use biome_markdown_parser::parse_markdown;
 #[ignore]
 #[test]
 fn quick_test() {
-    let source = "hello world\n";
+    let source = "-   With leading text\n- With leading text\n";
     let parse = parse_markdown(source);
 
     // Print CST

@@ -2657,6 +2657,11 @@ See https://biomejs.dev/linter/rules/use-string-starts-ends-with
 	 */
 	useStringStartsEndsWith?: UseStringStartsEndsWithConfiguration;
 	/**
+	* Enforce that test lifecycle hooks are declared in the order they execute.
+See https://biomejs.dev/linter/rules/use-test-hooks-in-order 
+	 */
+	useTestHooksInOrder?: UseTestHooksInOrderConfiguration;
+	/**
 	* Enforce that lifecycle hooks appear before any test cases in the same block.
 See https://biomejs.dev/linter/rules/use-test-hooks-on-top 
 	 */
@@ -4658,6 +4663,9 @@ export type UseSpreadConfiguration =
 export type UseStringStartsEndsWithConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseStringStartsEndsWithOptions;
+export type UseTestHooksInOrderConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseTestHooksInOrderOptions;
 export type UseTestHooksOnTopConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTestHooksOnTopOptions;
@@ -6574,6 +6582,10 @@ export interface RuleWithUseStringStartsEndsWithOptions {
 	level: RulePlainConfiguration;
 	options?: UseStringStartsEndsWithOptions;
 }
+export interface RuleWithUseTestHooksInOrderOptions {
+	level: RulePlainConfiguration;
+	options?: UseTestHooksInOrderOptions;
+}
 export interface RuleWithUseTestHooksOnTopOptions {
 	level: RulePlainConfiguration;
 	options?: UseTestHooksOnTopOptions;
@@ -8263,6 +8275,7 @@ export interface UseSortedClassesOptions {
 }
 export type UseSpreadOptions = {};
 export type UseStringStartsEndsWithOptions = {};
+export type UseTestHooksInOrderOptions = {};
 export type UseTestHooksOnTopOptions = {};
 /**
  * Options for the `useThisInClassMethods` rule.
@@ -9318,6 +9331,7 @@ export type Category =
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useStringStartsEndsWith"
+	| "lint/nursery/useTestHooksInOrder"
 	| "lint/nursery/useTestHooksOnTop"
 	| "lint/nursery/useThisInClassMethods"
 	| "lint/nursery/useUnicodeRegex"
