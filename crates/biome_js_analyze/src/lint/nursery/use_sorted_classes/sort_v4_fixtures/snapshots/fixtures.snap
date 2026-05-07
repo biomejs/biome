@@ -1,0 +1,85 @@
+---
+source: crates/biome_js_analyze/src/lint/nursery/use_sorted_classes/sort_v4.rs
+expression: rendered
+input_file: crates/biome_js_analyze/src/lint/nursery/use_sorted_classes/sort_v4_fixtures/cases.jsonc
+---
+input:  flex block absolute
+sorted: absolute block flex
+---
+input:  static visible flex
+sorted: visible static flex
+---
+input:  sr-only block flex absolute relative
+sorted: sr-only absolute relative block flex
+---
+input:  pointer-events-none collapse static visible
+sorted: pointer-events-none visible collapse static
+---
+input:  flex
+sorted: flex
+---
+input:  bg-red-500 flex p-4
+sorted: flex bg-red-500 p-4
+---
+input:  p-4 m-2 flex
+sorted: m-2 flex p-4
+---
+input:  text-lg bg-red-500 p-4
+sorted: bg-red-500 p-4 text-lg
+---
+input:  p-4 p-2
+sorted: p-4 p-2
+---
+input:  origin-top flex p-4
+sorted: flex origin-top p-4
+---
+input:  flex-1 flex p-4
+sorted: flex flex-1 p-4
+---
+input:  font-bold flex p-4
+sorted: flex p-4 font-bold
+---
+input:  font-serif font-bold flex
+sorted: flex font-serif font-bold
+---
+input:  font-medium font-sans p-4
+sorted: p-4 font-sans font-medium
+---
+input:  w-10 flex p-4
+sorted: flex w-10 p-4
+---
+input:  w-1/2 flex p-4
+sorted: w-1/2 flex p-4
+---
+input:  w-full flex p-4
+sorted: w-full flex p-4
+---
+input:  w-screen w-10 w-full
+sorted: w-screen w-full w-10
+---
+input:  aspect-square flex
+sorted: flex aspect-square
+---
+input:  aspect-video flex
+sorted: flex aspect-video
+---
+input:  aspect-9/16 flex
+sorted: aspect-9/16 flex
+---
+input:  p-4 foo flex
+sorted: foo flex p-4
+---
+input:  baz p-4 foo flex bar
+sorted: baz foo bar flex p-4
+---
+input:  bg-rainbow flex bg-red-500
+sorted: bg-rainbow flex bg-red-500
+---
+input:  foo bar baz
+sorted: foo bar baz
+---
+input:  flex p-
+sorted: p- flex
+---
+input:  myCustom flex p-4
+sorted: myCustom flex p-4
