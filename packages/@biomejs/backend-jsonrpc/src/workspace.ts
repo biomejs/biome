@@ -29,7 +29,7 @@ export interface Configuration {
 	 */
 	css?: CssConfiguration;
 	/**
-	 * A list of paths to other JSON files, used to extends the current configuration.
+	 * A list of paths to other JSON files, used to extend the current configuration.
 	 */
 	extends?: Extends;
 	/**
@@ -2423,6 +2423,11 @@ See https://biomejs.dev/linter/rules/no-vue-arrow-func-in-watch
 	 */
 	noVueArrowFuncInWatch?: NoVueArrowFuncInWatchConfiguration;
 	/**
+	* Disallow importing Vue compiler macros.
+See https://biomejs.dev/linter/rules/no-vue-import-compiler-macros 
+	 */
+	noVueImportCompilerMacros?: NoVueImportCompilerMacrosConfiguration;
+	/**
 	* Disallow the use of Vue Options API.
 See https://biomejs.dev/linter/rules/no-vue-options-api 
 	 */
@@ -2652,6 +2657,11 @@ See https://biomejs.dev/linter/rules/use-test-hooks-on-top
 	 */
 	useTestHooksOnTop?: UseTestHooksOnTopConfiguration;
 	/**
+	* Enforce that class methods utilize this.
+See https://biomejs.dev/linter/rules/use-this-in-class-methods 
+	 */
+	useThisInClassMethods?: UseThisInClassMethodsConfiguration;
+	/**
 	* Enforce the use of the u or v flag for regular expressions.
 See https://biomejs.dev/linter/rules/use-unicode-regex 
 	 */
@@ -2691,6 +2701,11 @@ See https://biomejs.dev/linter/rules/use-vue-hyphenated-attributes
 See https://biomejs.dev/linter/rules/use-vue-multi-word-component-names 
 	 */
 	useVueMultiWordComponentNames?: UseVueMultiWordComponentNamesConfiguration;
+	/**
+	* Enforces Promise syntax when using Vue nextTick.
+See https://biomejs.dev/linter/rules/use-vue-next-tick-promise 
+	 */
+	useVueNextTickPromise?: UseVueNextTickPromiseConfiguration;
 	/**
 	* Enforce that elements using v-for also specify a unique key.
 See https://biomejs.dev/linter/rules/use-vue-v-for-key 
@@ -4500,6 +4515,9 @@ export type NoUselessTypeConversionConfiguration =
 export type NoVueArrowFuncInWatchConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueArrowFuncInWatchOptions;
+export type NoVueImportCompilerMacrosConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueImportCompilerMacrosOptions;
 export type NoVueOptionsApiConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueOptionsApiOptions;
@@ -4635,6 +4653,9 @@ export type UseStringStartsEndsWithConfiguration =
 export type UseTestHooksOnTopConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTestHooksOnTopOptions;
+export type UseThisInClassMethodsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseThisInClassMethodsOptions;
 export type UseUnicodeRegexConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUnicodeRegexOptions;
@@ -4659,6 +4680,9 @@ export type UseVueHyphenatedAttributesConfiguration =
 export type UseVueMultiWordComponentNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueMultiWordComponentNamesOptions;
+export type UseVueNextTickPromiseConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueNextTickPromiseOptions;
 export type UseVueVForKeyConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueVForKeyOptions;
@@ -6342,6 +6366,10 @@ export interface RuleWithNoVueArrowFuncInWatchOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueArrowFuncInWatchOptions;
 }
+export interface RuleWithNoVueImportCompilerMacrosOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueImportCompilerMacrosOptions;
+}
 export interface RuleWithNoVueOptionsApiOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueOptionsApiOptions;
@@ -6538,6 +6566,10 @@ export interface RuleWithUseTestHooksOnTopOptions {
 	level: RulePlainConfiguration;
 	options?: UseTestHooksOnTopOptions;
 }
+export interface RuleWithUseThisInClassMethodsOptions {
+	level: RulePlainConfiguration;
+	options?: UseThisInClassMethodsOptions;
+}
 export interface RuleWithUseUnicodeRegexOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6574,6 +6606,10 @@ export interface RuleWithUseVueHyphenatedAttributesOptions {
 export interface RuleWithUseVueMultiWordComponentNamesOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueMultiWordComponentNamesOptions;
+}
+export interface RuleWithUseVueNextTickPromiseOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueNextTickPromiseOptions;
 }
 export interface RuleWithUseVueVForKeyOptions {
 	level: RulePlainConfiguration;
@@ -8021,6 +8057,7 @@ Defaults to `false`.
 export type NoUselessReturnOptions = {};
 export type NoUselessTypeConversionOptions = {};
 export type NoVueArrowFuncInWatchOptions = {};
+export type NoVueImportCompilerMacrosOptions = {};
 export type NoVueOptionsApiOptions = {};
 export type NoVueRefAsOperandOptions = {};
 export type NoVueVIfWithVForOptions = {};
@@ -8200,6 +8237,31 @@ export interface UseSortedClassesOptions {
 export type UseSpreadOptions = {};
 export type UseStringStartsEndsWithOptions = {};
 export type UseTestHooksOnTopOptions = {};
+/**
+ * Options for the `useThisInClassMethods` rule.
+ */
+export interface UseThisInClassMethodsOptions {
+	/**
+	* Whether members of classes with an `implements` clause should be ignored.
+
+Defaults to `"none"`, which means implemented classes are checked like any other class.
+Use `"all"` to ignore every eligible member in such classes, or `"public-fields"`
+to ignore only public members in them. 
+	 */
+	ignoreClassesWithImplements?: IgnoreClassesWithImplements;
+	/**
+	* Method names that should be ignored by the rule.
+
+Defaults to `[]`. 
+	 */
+	ignoreMethods?: string[];
+	/**
+	* Whether methods marked with `override` should be ignored.
+
+Defaults to `false`. 
+	 */
+	ignoreOverrideMethods?: boolean;
+}
 export type UseUnicodeRegexOptions = {};
 export type UseVarsOnTopOptions = {};
 export interface UseVueConsistentDefinePropsDeclarationOptions {
@@ -8241,6 +8303,7 @@ export interface UseVueMultiWordComponentNamesOptions {
 	 */
 	ignores?: string[];
 }
+export type UseVueNextTickPromiseOptions = {};
 export type UseVueVForKeyOptions = {};
 export type UseVueValidTemplateRootOptions = {};
 export type UseVueValidVBindOptions = {};
@@ -8705,6 +8768,10 @@ export type MethodSignatureStyle = "property" | "method";
  */
 export type TestFunctionKind = "it" | "test";
 export type CheckInputType = "off" | "loose" | "strict";
+/**
+ * Controls how `useThisInClassMethods` treats classes that implement interfaces.
+ */
+export type IgnoreClassesWithImplements = "none" | "all" | "public-fields";
 export type DeclarationStyle = "type" | "runtime";
 export type VueDirectiveStyle = "shorthand" | "longhand";
 export type VueDirectiveStyle2 = "shorthand" | "longhand";
@@ -9170,6 +9237,7 @@ export type Category =
 	| "lint/nursery/noUselessReturn"
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueArrowFuncInWatch"
+	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueOptionsApi"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueVIfWithVFor"
@@ -9223,6 +9291,7 @@ export type Category =
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useStringStartsEndsWith"
 	| "lint/nursery/useTestHooksOnTop"
+	| "lint/nursery/useThisInClassMethods"
 	| "lint/nursery/useUnicodeRegex"
 	| "lint/nursery/useUniqueArgumentNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"
@@ -9236,6 +9305,7 @@ export type Category =
 	| "lint/nursery/useVueDefineMacrosOrder"
 	| "lint/nursery/useVueHyphenatedAttributes"
 	| "lint/nursery/useVueMultiWordComponentNames"
+	| "lint/nursery/useVueNextTickPromise"
 	| "lint/nursery/useVueVForKey"
 	| "lint/nursery/useVueValidTemplateRoot"
 	| "lint/nursery/useVueValidVBind"

@@ -110,12 +110,12 @@ expression: redactor(content)
 		},
 		{
 			"severity": "error",
-			"message": "The imports and exports are not sorted.",
+			"message": "Sort these imports.",
 			"category": "assist/source/organizeImports",
 			"location": {
 				"path": "index.ts",
 				"start": { "line": 1, "column": 1 },
-				"end": { "line": 1, "column": 21 }
+				"end": { "line": 2, "column": 33 }
 			},
 			"advices": []
 		},
@@ -210,12 +210,12 @@ expression: redactor(content)
 		},
 		{
 			"severity": "error",
-			"message": "The imports and exports are not sorted.",
+			"message": "Sort these imports.",
 			"category": "assist/source/organizeImports",
 			"location": {
 				"path": "main.ts",
 				"start": { "line": 1, "column": 1 },
-				"end": { "line": 1, "column": 21 }
+				"end": { "line": 2, "column": 33 }
 			},
 			"advices": []
 		},

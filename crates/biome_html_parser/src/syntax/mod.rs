@@ -13,12 +13,11 @@ use crate::syntax::astro::{
 };
 use crate::syntax::parse_error::*;
 use crate::syntax::svelte::{
-    is_at_svelte_directive_start, is_at_svelte_keyword, parse_attach_attribute,
-    parse_svelte_at_block, parse_svelte_directive, parse_svelte_hash_block,
-    parse_svelte_spread_or_expression,
+    SVELTE_KEYWORDS, is_at_svelte_directive_start, parse_attach_attribute, parse_svelte_at_block,
+    parse_svelte_directive, parse_svelte_hash_block, parse_svelte_spread_or_expression,
 };
 use crate::syntax::vue::{
-    parse_vue_directive, parse_vue_v_bind_shorthand_directive, parse_vue_v_for_value,
+    VUE_KEYWORDS, parse_vue_directive, parse_vue_v_bind_shorthand_directive, parse_vue_v_for_value,
     parse_vue_v_on_shorthand_directive, parse_vue_v_slot_shorthand_directive,
 };
 use crate::token_source::{
@@ -849,12 +848,13 @@ fn parse_single_text_expression_content(p: &mut HtmlParser) -> ParsedSyntax {
         return Absent;
     }
     if p.cur_text().is_empty() {
-        p.bump_remap(HTML_LITERAL);
+        p.re_lex(HtmlReLexContext::Svelte);
         return Absent;
     }
     if p.cur_text().trim().is_empty() {
         return Absent;
     }
+
     let m = p.start();
 
     p.bump_remap(HTML_LITERAL);
@@ -876,6 +876,10 @@ impl TextExpression {
                         HTML_LITERAL,
                         HtmlLexContext::TextExpression(self.kind),
                     );
+                } else if p.cur_text().is_empty() {
+                    m.abandon(p);
+                    p.re_lex(HtmlReLexContext::Svelte);
+                    return Absent;
                 } else if !p.at(T!['}']) {
                     p.bump_remap(HTML_LITERAL);
                 } else {
@@ -899,12 +903,12 @@ impl TextExpression {
     }
 }
 
-#[inline]
-fn is_at_keyword(p: &mut HtmlParser) -> bool {
-    is_at_svelte_keyword(p) || is_at_html_keyword(p)
-}
+const ALL_POSSIBLE_KEYWORDS: TokenSet<HtmlSyntaxKind> =
+    HTML_KEYWORDS.union(SVELTE_KEYWORDS).union(VUE_KEYWORDS);
+
+const HTML_KEYWORDS: TokenSet<HtmlSyntaxKind> = token_set!(T![html], T![doctype]);
 
 #[inline]
-fn is_at_html_keyword(p: &mut HtmlParser) -> bool {
-    matches!(p.cur(), T![html] | T![doctype])
+fn is_at_keyword(p: &mut HtmlParser) -> bool {
+    p.at_ts(ALL_POSSIBLE_KEYWORDS)
 }

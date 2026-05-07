@@ -1,6 +1,8 @@
+use crate::CssSyntaxKind::{SCSS_IF_AT_RULE, SCSS_WHILE_AT_RULE};
 use crate::{
-    AnyCssExpression, AnyScssExpression, AnyScssExpressionItem, CssSyntaxNode, ScssExpression,
-    ScssKeywordArgument,
+    AnyCssExpression, AnyScssExpression, AnyScssExpressionItem, CssLanguage, CssSyntaxNode,
+    ScssExpression, ScssIfAtRule, ScssKeywordArgument, ScssParenthesizedExpression,
+    ScssWhileAtRule,
 };
 use biome_rowan::{AstNode, AstNodeList};
 
@@ -42,4 +44,56 @@ pub fn single_expression_item(expression: &ScssExpression) -> Option<AnyScssExpr
     let first = items.next()?;
 
     items.next().is_none().then_some(first)
+}
+
+/// Detects expressions owned by a top-level control condition.
+///
+/// `@if $a == 0 {}` and `@if ($a == 0) {}` match `$a == 0`.
+/// `@if foo($a == 0) {}` does not because `$a == 0` belongs to `foo(...)`.
+pub fn is_in_scss_control_condition_sequence<N>(node: &N) -> bool
+where
+    N: AstNode<Language = CssLanguage>,
+{
+    node.syntax()
+        .ancestors()
+        .find_map(ScssExpression::cast)
+        .is_some_and(|expression| {
+            is_direct_control_condition(&expression)
+                || is_parenthesized_control_condition_expression(&expression)
+        })
+}
+
+/// Checks that `$a == 0` is the direct condition in `@if $a == 0 {}`.
+fn is_direct_control_condition(expression: &ScssExpression) -> bool {
+    expression.syntax().parent().is_some_and(|parent| {
+        let condition = match parent.kind() {
+            SCSS_IF_AT_RULE => ScssIfAtRule::unwrap_cast(parent).condition(),
+            SCSS_WHILE_AT_RULE => ScssWhileAtRule::unwrap_cast(parent).condition(),
+            _ => return false,
+        };
+
+        condition.is_ok_and(|condition| condition.syntax() == expression.syntax())
+    })
+}
+
+/// Checks `$a == 0` inside transparent condition parens: `@if ($a == 0) {}`.
+fn is_parenthesized_control_condition_expression(expression: &ScssExpression) -> bool {
+    let Some(parenthesized) = expression
+        .syntax()
+        .parent()
+        .and_then(ScssParenthesizedExpression::cast)
+    else {
+        return false;
+    };
+
+    let Some(parent_expression) = parenthesized
+        .syntax()
+        .parent()
+        .and_then(ScssExpression::cast)
+    else {
+        return false;
+    };
+
+    is_direct_control_condition(&parent_expression)
+        || is_parenthesized_control_condition_expression(&parent_expression)
 }

@@ -34,9 +34,9 @@ HtmlRoot {
         SvelteIfBlock {
             opening_block: SvelteIfOpeningBlock {
                 sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
-                if_token: IF_KW@2..4 "if" [] [],
+                if_token: IF_KW@2..5 "if" [] [Whitespace(" ")],
                 expression: HtmlTextExpression {
-                    html_literal_token: HTML_LITERAL@4..18 " answer === 42" [] [],
+                    html_literal_token: HTML_LITERAL@5..18 "answer === 42" [] [],
                 },
                 r_curly_token: R_CURLY@18..19 "}" [] [],
                 children: HtmlElementList [
@@ -76,9 +76,9 @@ HtmlRoot {
         SvelteIfBlock {
             opening_block: SvelteIfOpeningBlock {
                 sv_curly_hash_token: SV_CURLY_HASH@56..60 "{#" [Newline("\n"), Newline("\n")] [],
-                if_token: IF_KW@60..62 "if" [] [],
+                if_token: IF_KW@60..63 "if" [] [Whitespace(" ")],
                 expression: HtmlTextExpression {
-                    html_literal_token: HTML_LITERAL@62..76 " answer === 42" [] [],
+                    html_literal_token: HTML_LITERAL@63..76 "answer === 42" [] [],
                 },
                 r_curly_token: R_CURLY@76..77 "}" [] [],
                 children: HtmlElementList [
@@ -108,9 +108,9 @@ HtmlRoot {
                     SvelteIfBlock {
                         opening_block: SvelteIfOpeningBlock {
                             sv_curly_hash_token: SV_CURLY_HASH@108..112 "{#" [Newline("\n"), Whitespace("\t")] [],
-                            if_token: IF_KW@112..114 "if" [] [],
+                            if_token: IF_KW@112..115 "if" [] [Whitespace(" ")],
                             expression: HtmlTextExpression {
-                                html_literal_token: HTML_LITERAL@114..128 " answer === 42" [] [],
+                                html_literal_token: HTML_LITERAL@115..128 "answer === 42" [] [],
                             },
                             r_curly_token: R_CURLY@128..129 "}" [] [],
                             children: HtmlElementList [
@@ -140,9 +140,9 @@ HtmlRoot {
                                 SvelteIfBlock {
                                     opening_block: SvelteIfOpeningBlock {
                                         sv_curly_hash_token: SV_CURLY_HASH@162..168 "{#" [Newline("\n"), Whitespace("  \t")] [],
-                                        if_token: IF_KW@168..170 "if" [] [],
+                                        if_token: IF_KW@168..171 "if" [] [Whitespace(" ")],
                                         expression: HtmlTextExpression {
-                                            html_literal_token: HTML_LITERAL@170..184 " answer === 42" [] [],
+                                            html_literal_token: HTML_LITERAL@171..184 "answer === 42" [] [],
                                         },
                                         r_curly_token: R_CURLY@184..185 "}" [] [],
                                         children: HtmlElementList [
@@ -215,9 +215,9 @@ HtmlRoot {
     0: SVELTE_IF_BLOCK@0..56
       0: SVELTE_IF_OPENING_BLOCK@0..50
         0: SV_CURLY_HASH@0..2 "{#" [] []
-        1: IF_KW@2..4 "if" [] []
-        2: HTML_TEXT_EXPRESSION@4..18
-          0: HTML_LITERAL@4..18 " answer === 42" [] []
+        1: IF_KW@2..5 "if" [] [Whitespace(" ")]
+        2: HTML_TEXT_EXPRESSION@5..18
+          0: HTML_LITERAL@5..18 "answer === 42" [] []
         3: R_CURLY@18..19 "}" [] []
         4: HTML_ELEMENT_LIST@19..50
           0: HTML_ELEMENT@19..50
@@ -245,9 +245,9 @@ HtmlRoot {
     1: SVELTE_IF_BLOCK@56..244
       0: SVELTE_IF_OPENING_BLOCK@56..238
         0: SV_CURLY_HASH@56..60 "{#" [Newline("\n"), Newline("\n")] []
-        1: IF_KW@60..62 "if" [] []
-        2: HTML_TEXT_EXPRESSION@62..76
-          0: HTML_LITERAL@62..76 " answer === 42" [] []
+        1: IF_KW@60..63 "if" [] [Whitespace(" ")]
+        2: HTML_TEXT_EXPRESSION@63..76
+          0: HTML_LITERAL@63..76 "answer === 42" [] []
         3: R_CURLY@76..77 "}" [] []
         4: HTML_ELEMENT_LIST@77..238
           0: HTML_ELEMENT@77..108
@@ -269,9 +269,9 @@ HtmlRoot {
           1: SVELTE_IF_BLOCK@108..238
             0: SVELTE_IF_OPENING_BLOCK@108..230
               0: SV_CURLY_HASH@108..112 "{#" [Newline("\n"), Whitespace("\t")] []
-              1: IF_KW@112..114 "if" [] []
-              2: HTML_TEXT_EXPRESSION@114..128
-                0: HTML_LITERAL@114..128 " answer === 42" [] []
+              1: IF_KW@112..115 "if" [] [Whitespace(" ")]
+              2: HTML_TEXT_EXPRESSION@115..128
+                0: HTML_LITERAL@115..128 "answer === 42" [] []
               3: R_CURLY@128..129 "}" [] []
               4: HTML_ELEMENT_LIST@129..230
                 0: HTML_ELEMENT@129..162
@@ -293,9 +293,9 @@ HtmlRoot {
                 1: SVELTE_IF_BLOCK@162..230
                   0: SVELTE_IF_OPENING_BLOCK@162..220
                     0: SV_CURLY_HASH@162..168 "{#" [Newline("\n"), Whitespace("  \t")] []
-                    1: IF_KW@168..170 "if" [] []
-                    2: HTML_TEXT_EXPRESSION@170..184
-                      0: HTML_LITERAL@170..184 " answer === 42" [] []
+                    1: IF_KW@168..171 "if" [] [Whitespace(" ")]
+                    2: HTML_TEXT_EXPRESSION@171..184
+                      0: HTML_LITERAL@171..184 "answer === 42" [] []
                     3: R_CURLY@184..185 "}" [] []
                     4: HTML_ELEMENT_LIST@185..220
                       0: HTML_ELEMENT@185..220

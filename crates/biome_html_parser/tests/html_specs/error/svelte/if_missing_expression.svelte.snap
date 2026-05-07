@@ -25,62 +25,53 @@ HtmlRoot {
     frontmatter: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
-        HtmlBogusElement {
-            items: [
-                HtmlBogus {
-                    items: [
-                        SV_CURLY_HASH@0..2 "{#" [] [],
-                        IF_KW@2..4 "if" [] [],
-                        HTML_LITERAL@4..4 "" [] [],
-                        R_CURLY@4..5 "}" [] [],
-                        HtmlElementList [
-                            HtmlElement {
-                                opening_element: HtmlOpeningElement {
-                                    l_angle_token: L_ANGLE@5..8 "<" [Newline("\n"), Whitespace("\t")] [],
-                                    name: HtmlTagName {
-                                        value_token: HTML_LITERAL@8..12 "span" [] [],
-                                    },
-                                    attributes: HtmlAttributeList [],
-                                    r_angle_token: R_ANGLE@12..13 ">" [] [],
-                                },
-                                children: HtmlElementList [
-                                    HtmlContent {
-                                        value_token: HTML_LITERAL@13..31 "without whitespace" [] [],
-                                    },
-                                ],
-                                closing_element: HtmlClosingElement {
-                                    l_angle_token: L_ANGLE@31..32 "<" [] [],
-                                    slash_token: SLASH@32..33 "/" [] [],
-                                    name: HtmlTagName {
-                                        value_token: HTML_LITERAL@33..37 "span" [] [],
-                                    },
-                                    r_angle_token: R_ANGLE@37..38 ">" [] [],
-                                },
+        SvelteIfBlock {
+            opening_block: SvelteIfOpeningBlock {
+                sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
+                if_token: IF_KW@2..4 "if" [] [],
+                expression: missing (required),
+                r_curly_token: R_CURLY@4..5 "}" [] [],
+                children: HtmlElementList [
+                    HtmlElement {
+                        opening_element: HtmlOpeningElement {
+                            l_angle_token: L_ANGLE@5..8 "<" [Newline("\n"), Whitespace("\t")] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@8..12 "span" [] [],
+                            },
+                            attributes: HtmlAttributeList [],
+                            r_angle_token: R_ANGLE@12..13 ">" [] [],
+                        },
+                        children: HtmlElementList [
+                            HtmlContent {
+                                value_token: HTML_LITERAL@13..31 "without whitespace" [] [],
                             },
                         ],
-                    ],
-                },
-                SvelteElseIfClauseList [],
-                SvelteIfClosingBlock {
-                    sv_curly_slash_token: SV_CURLY_SLASH@38..41 "{/" [Newline("\n")] [],
-                    if_token: IF_KW@41..43 "if" [] [],
-                    r_curly_token: R_CURLY@43..44 "}" [] [],
-                },
-            ],
+                        closing_element: HtmlClosingElement {
+                            l_angle_token: L_ANGLE@31..32 "<" [] [],
+                            slash_token: SLASH@32..33 "/" [] [],
+                            name: HtmlTagName {
+                                value_token: HTML_LITERAL@33..37 "span" [] [],
+                            },
+                            r_angle_token: R_ANGLE@37..38 ">" [] [],
+                        },
+                    },
+                ],
+            },
+            else_if_clauses: SvelteElseIfClauseList [],
+            else_clause: missing (optional),
+            closing_block: SvelteIfClosingBlock {
+                sv_curly_slash_token: SV_CURLY_SLASH@38..41 "{/" [Newline("\n")] [],
+                if_token: IF_KW@41..43 "if" [] [],
+                r_curly_token: R_CURLY@43..44 "}" [] [],
+            },
         },
         SvelteIfBlock {
             opening_block: SvelteIfOpeningBlock {
                 sv_curly_hash_token: SV_CURLY_HASH@44..48 "{#" [Newline("\n"), Newline("\n")] [],
-                if_token: IF_KW@48..50 "if" [] [],
+                if_token: IF_KW@48..51 "if" [] [Whitespace(" ")],
                 expression: missing (required),
-                r_curly_token: missing (required),
+                r_curly_token: R_CURLY@51..52 "}" [] [],
                 children: HtmlElementList [
-                    HtmlContent {
-                        value_token: HTML_LITERAL@50..51 " " [] [],
-                    },
-                    HtmlContent {
-                        value_token: HTML_LITERAL@51..52 "}" [] [],
-                    },
                     HtmlElement {
                         opening_element: HtmlOpeningElement {
                             l_angle_token: L_ANGLE@52..55 "<" [Newline("\n"), Whitespace("\t")] [],
@@ -127,11 +118,11 @@ HtmlRoot {
   1: (empty)
   2: (empty)
   3: HTML_ELEMENT_LIST@0..88
-    0: HTML_BOGUS_ELEMENT@0..44
-      0: HTML_BOGUS@0..38
+    0: SVELTE_IF_BLOCK@0..44
+      0: SVELTE_IF_OPENING_BLOCK@0..38
         0: SV_CURLY_HASH@0..2 "{#" [] []
         1: IF_KW@2..4 "if" [] []
-        2: HTML_LITERAL@4..4 "" [] []
+        2: (empty)
         3: R_CURLY@4..5 "}" [] []
         4: HTML_ELEMENT_LIST@5..38
           0: HTML_ELEMENT@5..38
@@ -151,22 +142,19 @@ HtmlRoot {
                 0: HTML_LITERAL@33..37 "span" [] []
               3: R_ANGLE@37..38 ">" [] []
       1: SVELTE_ELSE_IF_CLAUSE_LIST@38..38
-      2: SVELTE_IF_CLOSING_BLOCK@38..44
+      2: (empty)
+      3: SVELTE_IF_CLOSING_BLOCK@38..44
         0: SV_CURLY_SLASH@38..41 "{/" [Newline("\n")] []
         1: IF_KW@41..43 "if" [] []
         2: R_CURLY@43..44 "}" [] []
     1: SVELTE_IF_BLOCK@44..88
       0: SVELTE_IF_OPENING_BLOCK@44..82
         0: SV_CURLY_HASH@44..48 "{#" [Newline("\n"), Newline("\n")] []
-        1: IF_KW@48..50 "if" [] []
+        1: IF_KW@48..51 "if" [] [Whitespace(" ")]
         2: (empty)
-        3: (empty)
-        4: HTML_ELEMENT_LIST@50..82
-          0: HTML_CONTENT@50..51
-            0: HTML_LITERAL@50..51 " " [] []
-          1: HTML_CONTENT@51..52
-            0: HTML_LITERAL@51..52 "}" [] []
-          2: HTML_ELEMENT@52..82
+        3: R_CURLY@51..52 "}" [] []
+        4: HTML_ELEMENT_LIST@52..82
+          0: HTML_ELEMENT@52..82
             0: HTML_OPENING_ELEMENT@52..60
               0: L_ANGLE@52..55 "<" [Newline("\n"), Whitespace("\t")] []
               1: HTML_TAG_NAME@55..59
@@ -204,17 +192,18 @@ if_missing_expression.svelte:1:5 parse ━━━━━━━━━━━━━�
     2 │ 	<span>without whitespace</span>
     3 │ {/if}
   
-if_missing_expression.svelte:5:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+if_missing_expression.svelte:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `}` but instead found ` `
+  × Expected an expression, instead none was found.
   
-    3 │ {/if}
-    4 │ 
+  > 1 │ {#if}
+      │      
+  > 2 │ 	<span>without whitespace</span>
+  > 3 │ {/if}
+  > 4 │ 
   > 5 │ {#if }
-      │     ^
+      │ ^^^^^^
     6 │ 	<span>with whitespace</span>
     7 │ {/if}
-  
-  i Remove  
   
 ```

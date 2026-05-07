@@ -8,7 +8,7 @@ use camino::Utf8Path;
 #[test]
 fn migrate_eslintrcjson() {
     let biomejson = r#"{ "linter": { "enabled": true } }"#;
-    let eslintrc = r#"{
+    let eslintrc = r##"{
         "ignorePatterns": [
             "**/*.test.js", // trailing comma amd comment
         ],
@@ -35,7 +35,7 @@ fn migrate_eslintrcjson() {
             }
         }],
         "unknownField": "ignored"
-    }"#;
+    }"##;
 
     let fs = MemoryFileSystem::default();
     fs.insert(Utf8Path::new("biome.json").into(), biomejson.as_bytes());
@@ -61,7 +61,7 @@ fn migrate_eslintrcjson() {
 #[test]
 fn migrate_eslintrc() {
     let biomejson = r#"{ "linter": { "enabled": true } }"#;
-    let eslintrc = r#"{
+    let eslintrc = r##"{
         "ignorePatterns": [
             "**/*.test.js", // trailing comma amd comment
         ],
@@ -88,7 +88,7 @@ fn migrate_eslintrc() {
             }
         }],
         "unknownField": "ignored"
-    }"#;
+    }"##;
 
     let fs = MemoryFileSystem::default();
     fs.insert(Utf8Path::new("biome.json").into(), biomejson.as_bytes());
@@ -436,6 +436,48 @@ fn migrate_eslintrcjson_nursery_rule_options() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "migrate_eslintrcjson_nursery_rule_options",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn migrate_eslintrcjson_class_methods_use_this_options() {
+    let biomejson = r#"{ "linter": { "enabled": true } }"#;
+    let eslintrc = r##"{
+        "rules": {
+            "class-methods-use-this": ["error", {
+                "exceptMethods": ["render", "#serialize"],
+                "enforceForClassFields": false,
+                "ignoreOverrideMethods": true,
+                "ignoreClassesWithImplements": "public-fields"
+            }]
+        },
+        "overrides": [{
+            "files": ["severity-only.js"],
+            "rules": {
+                "class-methods-use-this": ["warn", {
+                    "enforceForClassFields": true
+                }]
+            }
+        }]
+    }"##;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8Path::new("biome.json").into(), biomejson.as_bytes());
+    fs.insert(Utf8Path::new(".eslintrc.json").into(), eslintrc.as_bytes());
+
+    let mut console = BufferConsole::default();
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["migrate", "eslint", "--include-nursery"].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "migrate_eslintrcjson_class_methods_use_this_options",
         fs,
         console,
         result,

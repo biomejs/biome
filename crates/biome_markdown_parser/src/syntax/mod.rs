@@ -103,6 +103,18 @@ pub(crate) const TAB_STOP_SPACES: usize = 4;
 /// CommonMark allows 0-3 spaces of optional indentation before block-level
 /// markers (blockquotes §5.1, list items §5.2/§5.3, ATX headings §4.2, etc.).
 pub(crate) const MAX_BLOCK_PREFIX_INDENT: usize = 3;
+/// CommonMark §5.2 caps ordered list markers at 9 digits.
+pub(crate) const MAX_ORDERED_LIST_MARKER_DIGITS: usize = 9;
+/// CommonMark §4.2 caps ATX headings at 6 levels (`#` through `######`).
+pub(crate) const MAX_ATX_HEADING_LEVEL: usize = 6;
+/// CommonMark §6.7 hard line breaks require at least 2 trailing spaces.
+pub(crate) const MIN_HARD_BREAK_TRAILING_SPACES: usize = 2;
+/// CommonMark §4.1 thematic breaks require a run of at least 3 matching
+/// characters (`-`, `_`, or `*`).
+pub(crate) const MIN_THEMATIC_BREAK_RUN: usize = 3;
+/// CommonMark §4.5 fenced code blocks require an opening fence of at
+/// least 3 backticks or tildes.
+pub(crate) const MIN_FENCE_RUN_LENGTH: usize = 3;
 
 pub(crate) fn parse_document(p: &mut MarkdownParser) {
     let m = p.start();
@@ -1970,7 +1982,7 @@ fn check_too_many_hashes(p: &mut MarkdownParser) -> Option<(biome_rowan::TextRan
         let range = p.cur_range();
         let count = p.cur_text().len();
 
-        if count > 6 {
+        if count > MAX_ATX_HEADING_LEVEL {
             Some((range, count))
         } else {
             None
@@ -1993,7 +2005,7 @@ fn is_valid_atx_heading_start(p: &mut MarkdownParser) -> bool {
         let hash_count = p.cur_text().len();
 
         // Too many hashes - not a valid heading (must be 1-6)
-        if hash_count > 6 {
+        if hash_count > MAX_ATX_HEADING_LEVEL {
             return false;
         }
 

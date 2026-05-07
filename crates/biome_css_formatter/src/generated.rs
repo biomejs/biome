@@ -10781,6 +10781,31 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssEachBindingList {
         )
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssEachValueList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssEachValueList,
+        crate::scss::lists::each_value_list::FormatScssEachValueList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::lists::each_value_list::FormatScssEachValueList::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssEachValueList {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssEachValueList,
+        crate::scss::lists::each_value_list::FormatScssEachValueList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::lists::each_value_list::FormatScssEachValueList::default(),
+        )
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::ScssExpressionItemList {
     type Format<'a> = FormatRefWithRule<
         'a,

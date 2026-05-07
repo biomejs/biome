@@ -4,12 +4,7 @@ use biome_markdown_parser::parse_markdown;
 #[ignore]
 #[test]
 fn quick_test() {
-    let source = r#"# Header 1
-## Header 2
-### Header 3
-#### Header 4
-##### Header 5
-###### Header 6"#;
+    let source = "hello world\n";
     let parse = parse_markdown(source);
 
     // Print CST

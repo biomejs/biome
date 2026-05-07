@@ -27,7 +27,7 @@ $map: (
 ```diff
 --- Prettier
 +++ Biome
-@@ -6,17 +6,15 @@
+@@ -6,8 +6,8 @@
      "key": "value",
      "key": "value",
    ): (
@@ -38,28 +38,29 @@ $map: (
    (
      "key": "value",
      "key": "value",
+@@ -15,8 +15,8 @@
      "key": "value",
      "key": "value",
-     "key": "value",
--  ): (
+   ): (
 -      "list",
 -    ),
-+  ): ("list"),
++    "list",
++  ),
    (
      "list",
      "list",
-@@ -28,9 +26,7 @@
+@@ -29,8 +29,8 @@
      "list",
      "list",
-     "list",
--  ): (
+   ): (
 -      "list",
 -    ),
-+  ): ("list"),
++    "list",
++  ),
    (
      "list",
      "list",
-@@ -43,13 +39,14 @@
+@@ -43,13 +43,14 @@
      "list",
      "list",
    ): (
@@ -98,7 +99,9 @@ $map: (
     "key": "value",
     "key": "value",
     "key": "value",
-  ): ("list"),
+  ): (
+    "list",
+  ),
   (
     "list",
     "list",
@@ -110,7 +113,9 @@ $map: (
     "list",
     "list",
     "list",
-  ): ("list"),
+  ): (
+    "list",
+  ),
   (
     "list",
     "list",

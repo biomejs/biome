@@ -499,6 +499,13 @@ impl<'src> HtmlLexer<'src> {
     /// Consumes tokens within a single text expression ('{...}') while tracking nested
     /// brackets until the matching closing bracket is found.
     fn consume_single_text_expression(&mut self) -> HtmlSyntaxKind {
+        // emit leading whitespace as trivia so it's not part of the expression literal
+        if let Some(current) = self.current_byte()
+            && lookup_byte(current) == WHS
+        {
+            return self.consume_newline_or_whitespaces();
+        }
+
         let mut brackets_stack = 0;
         while let Some(current) = self.current_byte() {
             match current {

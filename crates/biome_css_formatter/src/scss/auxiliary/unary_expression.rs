@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use biome_css_syntax::{
-    AnyCssFunction, CssSyntaxKind, ScssIfAtRule, ScssUnaryExpression, ScssUnaryExpressionFields, T,
+    AnyCssFunction, ScssParenthesizedExpression, ScssUnaryExpression, ScssUnaryExpressionFields, T,
+    is_in_scss_control_condition_sequence,
 };
 use biome_formatter::write;
 
@@ -15,48 +16,27 @@ impl FormatNodeRule<ScssUnaryExpression> for FormatScssUnaryExpression {
         let operator = operator?;
         let expression = expression?;
 
-        let is_parenthesized = matches!(
-            expression.syntax().kind(),
-            CssSyntaxKind::SCSS_PARENTHESIZED_EXPRESSION
-        );
-        let needs_space = matches!(operator.kind(), T![not]) && !is_parenthesized;
-        let keeps_minus_function_space = matches!(operator.kind(), T![-])
+        let is_parenthesized = ScssParenthesizedExpression::can_cast(expression.syntax().kind());
+        let is_spaced_not_expression = matches!(operator.kind(), T![not]) && !is_parenthesized;
+        let is_source_spaced_minus_function = matches!(operator.kind(), T![-])
             && AnyCssFunction::can_cast(expression.syntax().kind())
             && operator.has_trailing_whitespace();
 
-        if needs_space {
-            if is_in_scss_if_condition(node) {
-                write!(
-                    f,
-                    [
-                        operator.format(),
-                        soft_line_break_or_space(),
-                        expression.format()
-                    ]
-                )
-            } else {
-                write!(f, [operator.format(), space(), expression.format()])
-            }
-        } else if keeps_minus_function_space {
+        if is_spaced_not_expression {
+            let separator = format_with(|f| {
+                if is_in_scss_control_condition_sequence(node) {
+                    write!(f, [soft_line_break_or_space()])
+                } else {
+                    write!(f, [space()])
+                }
+            });
+
+            write!(f, [operator.format(), separator, expression.format()])
+        } else if is_source_spaced_minus_function {
             // Prettier keeps the source space in `- pow()`.
             write!(f, [operator.format(), space(), expression.format()])
         } else {
             write!(f, [operator.format(), expression.format()])
         }
     }
-}
-
-fn is_in_scss_if_condition(node: &ScssUnaryExpression) -> bool {
-    let range = node.syntax().text_trimmed_range();
-
-    node.syntax().ancestors().skip(1).any(|ancestor| {
-        ScssIfAtRule::cast_ref(&ancestor)
-            .and_then(|if_rule| if_rule.condition().ok())
-            .is_some_and(|condition| {
-                condition
-                    .syntax()
-                    .text_trimmed_range()
-                    .contains_range(range)
-            })
-    })
 }

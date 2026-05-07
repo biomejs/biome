@@ -53,8 +53,10 @@ use crate::syntax::quote::{
 use crate::syntax::thematic_break_block::parse_thematic_break_block;
 use crate::syntax::with_virtual_line_start;
 use crate::syntax::{
-    INDENT_CODE_BLOCK_SPACES, MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES, at_block_interrupt,
-    at_indent_code_block, is_paragraph_like, is_whitespace_only, parse_empty_paragraph,
+    INDENT_CODE_BLOCK_SPACES, MAX_ATX_HEADING_LEVEL, MAX_BLOCK_PREFIX_INDENT,
+    MAX_ORDERED_LIST_MARKER_DIGITS, MIN_FENCE_RUN_LENGTH, MIN_THEMATIC_BREAK_RUN, TAB_STOP_SPACES,
+    at_block_interrupt, at_indent_code_block, is_paragraph_like, is_whitespace_only,
+    parse_empty_paragraph,
 };
 use crate::syntax::{parse_any_block_with_indent_code_policy, parse_paragraph};
 use biome_rowan::{TextRange, TextSize};
@@ -260,7 +262,7 @@ fn is_thematic_break_pattern(p: &mut MarkdownParser) -> bool {
         }
     }
 
-    count >= 3
+    count >= MIN_THEMATIC_BREAK_RUN
 }
 
 fn at_bullet_list_item_with_base_indent(p: &mut MarkdownParser, base_indent: usize) -> bool {
@@ -1268,7 +1270,7 @@ pub(crate) fn textual_starts_with_ordered_marker(text: &str) -> bool {
     while let Some(c) = chars.peek().copied() {
         if c.is_ascii_digit() {
             digit_count += 1;
-            if digit_count > 9 {
+            if digit_count > MAX_ORDERED_LIST_MARKER_DIGITS {
                 return false;
             }
             chars.next();
@@ -1319,7 +1321,7 @@ fn quote_only_line_indent_at_current(p: &MarkdownParser, depth: usize) -> Option
     let mut i = start;
     for _ in 0..depth {
         let mut column = 0usize;
-        while i < line_end && column < 3 {
+        while i < line_end && column < MAX_BLOCK_PREFIX_INDENT {
             match bytes[i] {
                 b' ' => {
                     column += 1;
@@ -1386,7 +1388,7 @@ fn next_quote_content_indent(p: &MarkdownParser, depth: usize) -> Option<usize> 
         let mut i = line_start;
         for _ in 0..depth {
             let mut column = 0usize;
-            while i < line_end && column < 3 {
+            while i < line_end && column < MAX_BLOCK_PREFIX_INDENT {
                 match bytes[i] {
                     b' ' => {
                         column += 1;
@@ -2023,7 +2025,7 @@ fn parse_first_line_blocks(
         if p.at(TRIPLE_BACKTICK) || p.at(TRIPLE_TILDE) {
             return true;
         }
-        (p.at(BACKTICK) || p.at(TILDE)) && p.cur_text().len() >= 3
+        (p.at(BACKTICK) || p.at(TILDE)) && p.cur_text().len() >= MIN_FENCE_RUN_LENGTH
     });
 
     if fenced_code_start {
@@ -2344,7 +2346,7 @@ fn is_dash_only_thematic_break_line_text(text: &str) -> bool {
         }
     }
 
-    dash_count >= 3
+    dash_count >= MIN_THEMATIC_BREAK_RUN
 }
 
 fn emit_current_line_indent_list_bytes(p: &mut MarkdownParser, mut byte_count: usize) {
@@ -2377,7 +2379,7 @@ fn parse_first_line_atx_heading(p: &mut MarkdownParser, state: &mut ListItemLoop
         }
         let text = p.cur_text();
         let hash_count = text.len();
-        if !(1..=6).contains(&hash_count) {
+        if !(1..=MAX_ATX_HEADING_LEVEL).contains(&hash_count) {
             return None;
         }
         p.bump(p.cur());

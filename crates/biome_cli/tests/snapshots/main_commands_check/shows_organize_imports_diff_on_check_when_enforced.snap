@@ -66,14 +66,14 @@ check.js:2:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━�
 ```block
 check.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The imports and exports are not sorted.
+  × Sort the imported names.
   
   > 1 │ import { lorem, foom, bar } from "foo";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ import * as something from "../something";
     3 │ 
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
     1   │ - import·{·lorem,·foom,·bar·}·from·"foo";
       1 │ + import·{·bar,·foom,·lorem·}·from·"foo";

@@ -144,14 +144,16 @@ index.css format ━━━━━━━━━━━━━━━━━━━━━
 ```block
 index.ts:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The imports and exports are not sorted.
+  × Sort these imports.
   
   > 1 │ import { z} from "z"
       │ ^^^^^^^^^^^^^^^^^^^^
-    2 │ import { z, b , a} from "lodash"
+  > 2 │ import { z, b , a} from "lodash"
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     3 │ 
+    4 │ a ==b
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
      1    │ - import·{·z}·from·"z"
      2    │ - import·{·z,·b·,·a}·from·"lodash"

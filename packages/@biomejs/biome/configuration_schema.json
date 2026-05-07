@@ -17,7 +17,7 @@
 			"anyOf": [{ "$ref": "#/$defs/CssConfiguration" }, { "type": "null" }]
 		},
 		"extends": {
-			"description": "A list of paths to other JSON files, used to extends the current configuration.",
+			"description": "A list of paths to other JSON files, used to extend the current configuration.",
 			"anyOf": [{ "$ref": "#/$defs/Extends" }, { "type": "null" }]
 		},
 		"files": {
@@ -2086,6 +2086,26 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"IgnoreClassesWithImplements": {
+			"description": "Controls how `useThisInClassMethods` treats classes that implement interfaces.",
+			"oneOf": [
+				{
+					"description": "Check members in classes that implement interfaces the same way as any other class.",
+					"type": "string",
+					"const": "none"
+				},
+				{
+					"description": "Ignore every eligible instance member in classes that implement at least one interface.",
+					"type": "string",
+					"const": "all"
+				},
+				{
+					"description": "Ignore only public eligible members in classes that implement at least one interface.\n\nProtected and private members in those classes are still checked.",
+					"type": "string",
+					"const": "public-fields"
+				}
+			]
 		},
 		"ImportGroup": {
 			"anyOf": [
@@ -6005,6 +6025,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueImportCompilerMacrosConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueImportCompilerMacrosOptions" }
+			]
+		},
+		"NoVueImportCompilerMacrosOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueOptionsApiConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6641,6 +6671,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noVueImportCompilerMacros": {
+					"description": "Disallow importing Vue compiler macros.\nSee https://biomejs.dev/linter/rules/no-vue-import-compiler-macros",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueImportCompilerMacrosConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noVueOptionsApi": {
 					"description": "Disallow the use of Vue Options API.\nSee https://biomejs.dev/linter/rules/no-vue-options-api",
 					"anyOf": [
@@ -6962,6 +6999,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useThisInClassMethods": {
+					"description": "Enforce that class methods utilize this.\nSee https://biomejs.dev/linter/rules/use-this-in-class-methods",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseThisInClassMethodsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useUnicodeRegex": {
 					"description": "Enforce the use of the u or v flag for regular expressions.\nSee https://biomejs.dev/linter/rules/use-unicode-regex",
 					"anyOf": [
@@ -7017,6 +7061,13 @@
 					"description": "Enforce multi-word component names in Vue components.\nSee https://biomejs.dev/linter/rules/use-vue-multi-word-component-names",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVueMultiWordComponentNamesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueNextTickPromise": {
+					"description": "Enforces Promise syntax when using Vue nextTick.\nSee https://biomejs.dev/linter/rules/use-vue-next-tick-promise",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueNextTickPromiseConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10574,6 +10625,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoVueImportCompilerMacrosOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueImportCompilerMacrosOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoVueOptionsApiOptions": {
 			"type": "object",
 			"properties": {
@@ -12005,6 +12065,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseThisInClassMethodsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseThisInClassMethodsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseThrowNewErrorOptions": {
 			"type": "object",
 			"properties": {
@@ -12212,6 +12281,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseVueMultiWordComponentNamesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseVueNextTickPromiseOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueNextTickPromiseOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -15633,6 +15711,35 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseThisInClassMethodsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseThisInClassMethodsOptions" }
+			]
+		},
+		"UseThisInClassMethodsOptions": {
+			"description": "Options for the `useThisInClassMethods` rule.",
+			"type": "object",
+			"properties": {
+				"ignoreClassesWithImplements": {
+					"description": "Whether members of classes with an `implements` clause should be ignored.\n\nDefaults to `\"none\"`, which means implemented classes are checked like any other class.\nUse `\"all\"` to ignore every eligible member in such classes, or `\"public-fields\"`\nto ignore only public members in them.",
+					"anyOf": [
+						{ "$ref": "#/$defs/IgnoreClassesWithImplements" },
+						{ "type": "null" }
+					]
+				},
+				"ignoreMethods": {
+					"description": "Method names that should be ignored by the rule.\n\nDefaults to `[]`.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"ignoreOverrideMethods": {
+					"description": "Whether methods marked with `override` should be ignored.\n\nDefaults to `false`.",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseThrowNewErrorConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -15933,6 +16040,16 @@
 					"items": { "type": "string" }
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseVueNextTickPromiseConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueNextTickPromiseOptions" }
+			]
+		},
+		"UseVueNextTickPromiseOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseVueVForKeyConfiguration": {

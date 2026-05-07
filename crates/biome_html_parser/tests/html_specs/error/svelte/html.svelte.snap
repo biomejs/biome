@@ -21,9 +21,9 @@ HtmlRoot {
     html: HtmlElementList [
         SvelteHtmlBlock {
             sv_curly_at_token: SV_CURLY_AT@0..2 "{@" [] [],
-            html_token: HTML_KW@2..6 "html" [] [],
+            html_token: HTML_KW@2..7 "html" [] [Whitespace(" ")],
             expression: HtmlTextExpression {
-                html_literal_token: HTML_LITERAL@6..15 " '<div>'\n" [] [],
+                html_literal_token: HTML_LITERAL@7..15 "'<div>'\n" [] [],
             },
             r_curly_token: missing (required),
         },
@@ -42,9 +42,9 @@ HtmlRoot {
   3: HTML_ELEMENT_LIST@0..15
     0: SVELTE_HTML_BLOCK@0..15
       0: SV_CURLY_AT@0..2 "{@" [] []
-      1: HTML_KW@2..6 "html" [] []
-      2: HTML_TEXT_EXPRESSION@6..15
-        0: HTML_LITERAL@6..15 " '<div>'\n" [] []
+      1: HTML_KW@2..7 "html" [] [Whitespace(" ")]
+      2: HTML_TEXT_EXPRESSION@7..15
+        0: HTML_LITERAL@7..15 "'<div>'\n" [] []
       3: (empty)
   4: EOF@15..15 "" [] []
 
