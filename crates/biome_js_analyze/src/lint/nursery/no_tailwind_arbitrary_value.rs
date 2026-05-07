@@ -6,7 +6,6 @@ use biome_console::markup;
 use biome_js_syntax::JsSyntaxKind;
 use biome_rowan::{TextRange, TextSize, TokenText};
 use biome_rule_options::no_tailwind_arbitrary_value::NoTailwindArbitraryValueOptions;
-use biome_rule_options::use_sorted_classes::UseSortedClassesOptions;
 use biome_tailwind_parser::parse_tailwind;
 use biome_tailwind_syntax::lint_utils::arbitrary_ranges;
 
@@ -94,11 +93,7 @@ impl Rule for NoTailwindArbitraryValue {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let options = ctx.options();
-        let sorted_options = UseSortedClassesOptions {
-            attributes: options.attributes.clone(),
-            functions: options.functions.clone(),
-        };
-        if node.should_visit(&sorted_options).is_none() {
+        if node.should_visit(options).is_none() {
             return vec![];
         }
 
