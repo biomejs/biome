@@ -10,6 +10,7 @@ use tower_lsp_server::ls_types::{
 
 pub(crate) const DEFAULT_CODE_ACTION_CAPABILITIES: &[&str] = &[
     "quickfix.biome",
+    "quickfix.biome.migrateConfiguration",
     // quickfix.suppressRule
     SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY,
     SUPPRESSION_INLINE_ACTION_CATEGORY,

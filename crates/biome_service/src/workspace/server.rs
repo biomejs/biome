@@ -26,24 +26,28 @@ use crate::workspace::{
     FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFileContentParams,
     GetFormatterIRParams, GetModuleGraphParams, GetModuleGraphResult, GetRegisteredTypesParams,
     GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, GetTypeInfoParams,
-    IgnoreKind, OpenFileParams, OpenFileResult, OpenProjectParams, OpenProjectResult,
-    ParsePatternParams, ParsePatternResult, PathIsIgnoredParams, PatternId, PullActionsParams,
-    PullActionsResult, PullDiagnosticsAndActionsParams, PullDiagnosticsAndActionsResult,
-    PullDiagnosticsParams, PullDiagnosticsResult, RageEntry, RageParams, RageResult, RenameParams,
-    RenameResult, ScanKind, ScanProjectParams, ScanProjectResult, SearchPatternParams,
-    SearchResults, ServerInfo, ServiceNotification, Settings, SupportsFeatureParams,
-    UpdateModuleGraphParams, UpdateSettingsParams, UpdateSettingsResult,
+    IgnoreKind, MigrateConfigurationParams, MigrateConfigurationResult, OpenFileParams,
+    OpenFileResult, OpenProjectParams, OpenProjectResult, ParsePatternParams, ParsePatternResult,
+    PathIsIgnoredParams, PatternId, PullActionsParams, PullActionsResult,
+    PullConfigurationActionsParams, PullConfigurationActionsResult,
+    PullConfigurationDiagnosticsParams, PullConfigurationDiagnosticsResult,
+    PullDiagnosticsAndActionsParams, PullDiagnosticsAndActionsResult, PullDiagnosticsParams,
+    PullDiagnosticsResult, RageEntry, RageParams, RageResult, RenameParams, RenameResult, ScanKind,
+    ScanProjectParams, ScanProjectResult, SearchPatternParams, SearchResults, ServerInfo,
+    ServiceNotification, Settings, SupportsFeatureParams, UpdateModuleGraphParams,
+    UpdateSettingsParams, UpdateSettingsResult,
 };
 use crate::{Workspace, WorkspaceError};
-use biome_analyze::{AnalyzerPluginVec, RuleCategory};
+use biome_analyze::{ActionCategory, AnalyzerPluginVec, RuleCategory};
 use biome_configuration::bool::Bool;
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::VcsClientKind;
 use biome_configuration::{BiomeDiagnostic, Configuration, ConfigurationPathHint};
+use biome_console::markup;
 use biome_css_syntax::{AnyCssRoot, CssVariant};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
-use biome_diagnostics::print_diagnostic_to_string;
+use biome_diagnostics::{Applicability, print_diagnostic_to_string};
 use biome_diagnostics::{
     Diagnostic, DiagnosticExt, Severity, serde::Diagnostic as SerdeDiagnostic,
 };
@@ -52,8 +56,10 @@ use biome_fs::{BiomePath, ConfigName, PathKind, normalize_path};
 use biome_grit_patterns::{CompilePatternOptions, GritQuery, compile_pattern_with_options};
 use biome_html_syntax::HtmlRoot;
 use biome_js_syntax::{AnyJsRoot, EmbeddingKind, LanguageVariant, ModuleKind};
-use biome_json_parser::JsonParserOptions;
-use biome_json_syntax::JsonFileSource;
+use biome_json_formatter::format_node;
+use biome_json_parser::{JsonParserOptions, parse_json_with_cache};
+use biome_json_syntax::{JsonFileSource, JsonLanguage};
+use biome_migrate::migrate_configuration_tree;
 use biome_module_graph::{HtmlEmbeddedContent, ModuleDependencies, ModuleDiagnostic, ModuleGraph};
 use biome_package::{Catalogs, PackageJson, PackageType};
 use biome_parser::AnyParse;
@@ -62,11 +68,12 @@ use biome_plugin_loader::Plugins;
 use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
 use biome_project_layout::ProjectLayout;
 use biome_resolver::FsWithResolverProxy;
-use biome_rowan::{NodeCache, SendNode};
+use biome_rowan::{AstNode, NodeCache, SendNode};
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
 use papaya::HashMap;
 use rustc_hash::{FxBuildHasher, FxHashMap};
+use std::borrow::Cow;
 use std::fmt::Debug;
 use std::panic::RefUnwindSafe;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -226,6 +233,59 @@ impl WorkspaceServer {
         }
     }
 
+    fn supported_analyzer_categories(
+        &self,
+        project_key: ProjectKey,
+        path: &BiomePath,
+        settings: &Settings,
+        capabilities: &Capabilities,
+        inline_config: Option<Configuration>,
+        mut categories: RuleCategories,
+    ) -> Result<RuleCategories, WorkspaceError> {
+        let mut requested_features = FeaturesBuilder::new();
+
+        if categories.is_lint() {
+            requested_features = requested_features.with_linter();
+        }
+
+        if categories.is_assist() {
+            requested_features = requested_features.with_assist();
+        }
+
+        let requested_features = requested_features.build();
+        if requested_features.is_empty() {
+            return Ok(categories);
+        }
+
+        let language =
+            self.get_file_source(path, settings.experimental_full_html_support_enabled());
+        let settings = self.settings_handle(settings, inline_config);
+        let file_features = self
+            .projects
+            .get_file_features(GetFileFeaturesParams {
+                fs: self.fs.as_ref(),
+                project_key,
+                path,
+                requested_features,
+                language,
+                capabilities,
+                handle: &settings,
+                skip_ignore_check: false,
+                not_requested_features: FeaturesBuilder::new().build(),
+            })?
+            .features_supported;
+
+        if categories.is_lint() && !file_features.supports_lint() {
+            categories.remove(RuleCategory::Lint);
+        }
+
+        if categories.is_assist() && !file_features.supports_assist() {
+            categories.remove(RuleCategory::Action);
+        }
+
+        Ok(categories)
+    }
+
     /// Starts the watcher.
     ///
     /// This method will not return until the watcher stops.
@@ -293,6 +353,16 @@ impl WorkspaceServer {
         }
 
         None
+    }
+
+    fn is_root_biome_config(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
+        path.file_name()
+            .is_some_and(|file_name| ConfigName::file_names().contains(&file_name))
+            && path.parent().is_some_and(|directory| {
+                self.projects
+                    .get_project_path(project_key)
+                    .is_some_and(|project_path| directory == project_path)
+            })
     }
 
     /// Gets the supported capabilities for a given file path.
@@ -1773,6 +1843,138 @@ impl Workspace for WorkspaceServer {
         Ok(CheckFileSizeResult { file_size, limit })
     }
 
+    fn migrate_configuration(
+        &self,
+        params: MigrateConfigurationParams,
+    ) -> Result<MigrateConfigurationResult, WorkspaceError> {
+        if !params.path.is_config() {
+            return Ok(MigrateConfigurationResult::default());
+        }
+
+        let original_content = self.get_file_content(GetFileContentParams {
+            project_key: params.project_key,
+            path: params.path.clone(),
+        })?;
+
+        let file_source = JsonFileSource::try_from(params.path.as_path()).unwrap_or_default();
+        let mut cache = NodeCache::default();
+        let parse = parse_json_with_cache(
+            &original_content,
+            &mut cache,
+            JsonParserOptions::from(&file_source),
+        );
+        if parse.has_errors() {
+            return Ok(MigrateConfigurationResult::default());
+        }
+
+        let Some(migrated_tree) = migrate_configuration_tree(
+            &parse.tree(),
+            biome_analyze::AnalysisFilter::default(),
+            params.path.as_path(),
+            self.is_root_biome_config(params.project_key, params.path.as_path()),
+        ) else {
+            return Ok(MigrateConfigurationResult::default());
+        };
+
+        let settings = self
+            .projects
+            .get_settings_based_on_path(params.project_key, &params.path)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let settings_handle = self.settings_handle(&settings, None);
+        let document_file_source = DocumentFileSource::from(file_source);
+        let options =
+            settings_handle.format_options::<JsonLanguage>(&params.path, &document_file_source);
+        let formatted =
+            format_node(options, migrated_tree.syntax()).map_err(WorkspaceError::FormatError)?;
+        let migrated_content = formatted
+            .print()
+            .map_err(WorkspaceError::PrintError)?
+            .as_code()
+            .to_string();
+
+        Ok(MigrateConfigurationResult {
+            content: (migrated_content != original_content).then_some(migrated_content),
+        })
+    }
+
+    fn pull_configuration_diagnostics(
+        &self,
+        params: PullConfigurationDiagnosticsParams,
+    ) -> Result<PullConfigurationDiagnosticsResult, WorkspaceError> {
+        if !params.path.is_config() {
+            return Ok(PullConfigurationDiagnosticsResult {
+                diagnostics: Vec::new(),
+                errors: 0,
+            });
+        }
+
+        let content = self.get_file_content(GetFileContentParams {
+            project_key: params.project_key,
+            path: params.path.clone(),
+        })?;
+        let file_source = JsonFileSource::try_from(params.path.as_path()).unwrap_or_default();
+        let parser_options = JsonParserOptions::from(&file_source);
+        let deserialized: Deserialized<Configuration> =
+            deserialize_from_json_str(&content, parser_options, "config");
+        let diagnostics: Vec<_> = deserialized
+            .into_diagnostics()
+            .into_iter()
+            .map(|diagnostic| {
+                SerdeDiagnostic::new(diagnostic.with_file_path(params.path.to_string()))
+            })
+            .collect();
+        let errors = diagnostics
+            .iter()
+            .filter(|diagnostic| diagnostic.severity() <= Severity::Error)
+            .count();
+
+        Ok(PullConfigurationDiagnosticsResult {
+            diagnostics,
+            errors,
+        })
+    }
+
+    fn pull_configuration_actions(
+        &self,
+        params: PullConfigurationActionsParams,
+    ) -> Result<PullConfigurationActionsResult, WorkspaceError> {
+        let Some(migrated_content) = self
+            .migrate_configuration(MigrateConfigurationParams {
+                project_key: params.project_key,
+                path: params.path.clone(),
+            })?
+            .content
+        else {
+            return Ok(PullConfigurationActionsResult {
+                actions: Vec::new(),
+            });
+        };
+
+        let original_content = self.get_file_content(GetFileContentParams {
+            project_key: params.project_key,
+            path: params.path,
+        })?;
+        let mut builder = TextEdit::builder();
+        builder.replace(&original_content, &migrated_content);
+        let suggestion = builder.finish();
+
+        Ok(PullConfigurationActionsResult {
+            actions: vec![CodeAction {
+                category: ActionCategory::QuickFix(Cow::Borrowed("migrateConfiguration")),
+                rule_name: None,
+                suggestion: Some(CodeSuggestion {
+                    span: TextRange::default(),
+                    applicability: Applicability::Always,
+                    msg: markup!("Migrate configuration file").to_owned(),
+                    suggestion,
+                    labels: Vec::new(),
+                }),
+                applicability: Some(Applicability::Always),
+                offset: None,
+            }],
+        })
+    }
+
     /// Changes the content of an open file.
     fn change_file(
         &self,
@@ -1988,6 +2190,14 @@ impl Workspace for WorkspaceServer {
         let language =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
         let capabilities = self.features.get_capabilities(language);
+        let categories = self.supported_analyzer_categories(
+            project_key,
+            &path,
+            &settings,
+            &capabilities,
+            inline_config.clone(),
+            categories,
+        )?;
 
         let parse_errors = parse
             .diagnostics()
@@ -2158,6 +2368,14 @@ impl Workspace for WorkspaceServer {
         let language =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
         let capabilities = self.features.get_capabilities(language);
+        let categories = self.supported_analyzer_categories(
+            project_key,
+            &path,
+            &settings,
+            &capabilities,
+            inline_config.clone(),
+            categories,
+        )?;
         let result = if (categories.is_lint() || categories.is_assist())
             && let Some(pull_diagnostics_and_actions) =
                 capabilities.analyzer.pull_diagnostics_and_actions

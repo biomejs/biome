@@ -19,7 +19,7 @@ use biome_service::file_handlers::vue::VueFileHandler;
 use biome_service::workspace::{
     CheckFileSizeParams, FeaturesBuilder, FileFeaturesResult, FixFileMode, FixFileParams,
     GetFileContentParams, IgnoreKind, PathIsIgnoredParams, ProjectKey, PullActionsParams,
-    SupportsFeatureParams,
+    PullConfigurationActionsParams, SupportsFeatureParams,
 };
 use biome_service::{WorkspaceError, extension_error};
 use serde_json::Value;
@@ -34,6 +34,8 @@ use tracing::{debug, info};
 const FIX_ALL_CATEGORY: ActionCategory = ActionCategory::Source(SourceActionKind::FixAll);
 const ORGANIZE_IMPORTS_CATEGORY: ActionCategory =
     ActionCategory::Source(SourceActionKind::OrganizeImports);
+const CONFIG_MIGRATE_QUICKFIX_CATEGORY: ActionCategory =
+    ActionCategory::QuickFix(Cow::Borrowed("migrateConfiguration"));
 
 fn fix_all_kind() -> CodeActionKind {
     match FIX_ALL_CATEGORY.to_str() {
@@ -91,10 +93,6 @@ pub(crate) fn code_actions(
             .build(),
     })?;
 
-    if !file_features.supports_lint() && !file_features.supports_assist() {
-        info!("Linter and assist are disabled.");
-        return Ok(Some(Vec::new()));
-    }
     let mut categories = RuleCategoriesBuilder::default();
     if file_features.supports_lint() {
         categories = categories.with_lint();
@@ -115,6 +113,7 @@ pub(crate) fn code_actions(
     let mut has_organize_imports = false;
     let mut filters = Vec::new();
     if let Some(filter) = &params.context.only {
+        filters.reserve(filter.len());
         for kind in filter {
             let kind = kind.as_str();
             if FIX_ALL_CATEGORY.matches(kind) {
@@ -130,6 +129,20 @@ pub(crate) fn code_actions(
     let position_encoding = session.position_encoding();
 
     let diagnostics = params.context.diagnostics;
+    let migrate_configuration_action = config_migrate_code_action(
+        session,
+        &url,
+        &path,
+        &doc.line_index,
+        position_encoding,
+        &filters,
+        doc.project_key,
+    )?;
+    if !file_features.supports_lint() && !file_features.supports_assist() {
+        info!("Linter and assist are disabled.");
+        return Ok(migrate_configuration_action.map(|action| vec![action]));
+    }
+
     let content = session.workspace.get_file_content(GetFileContentParams {
         project_key: doc.project_key,
         path: path.clone(),
@@ -325,6 +338,7 @@ pub(crate) fn code_actions(
             Some(CodeActionOrCommand::CodeAction(lsp_action))
         })
         .chain(fix_all)
+        .chain(migrate_configuration_action)
         .collect();
 
     // If any actions is marked as fixing a diagnostic, hide other actions
@@ -556,16 +570,6 @@ fn fix_all(
     })?;
     let should_format = file_features.supports_format();
 
-    if session.workspace.is_path_ignored(PathIsIgnoredParams {
-        path: path.clone(),
-        is_dir: false,
-        project_key: doc.project_key,
-        features: analyzer_features,
-        ignore_kind: IgnoreKind::Ancestors,
-    })? {
-        return Ok(None);
-    }
-
     let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {
         project_key: doc.project_key,
         path: path.clone(),
@@ -700,4 +704,46 @@ fn fix_all(
         disabled: None,
         data: None,
     })))
+}
+
+fn config_migrate_code_action(
+    session: &Session,
+    url: &Uri,
+    path: &BiomePath,
+    line_index: &LineIndex,
+    position_encoding: biome_lsp_converters::PositionEncoding,
+    filters: &[&str],
+    project_key: biome_service::projects::ProjectKey,
+) -> Result<Option<CodeActionOrCommand>, Error> {
+    if !path.is_config() {
+        return Ok(None);
+    }
+
+    if !filters.is_empty()
+        && !filters
+            .iter()
+            .any(|filter| CONFIG_MIGRATE_QUICKFIX_CATEGORY.matches(filter))
+    {
+        return Ok(None);
+    }
+
+    let Some(action) = session
+        .workspace
+        .pull_configuration_actions(PullConfigurationActionsParams {
+            project_key,
+            path: path.clone(),
+        })?
+        .actions
+        .into_iter()
+        .next()
+    else {
+        return Ok(None);
+    };
+
+    Ok(
+        utils::code_fix_to_lsp(url, line_index, position_encoding, &[], action)
+            .ok()
+            .flatten()
+            .map(CodeActionOrCommand::CodeAction),
+    )
 }

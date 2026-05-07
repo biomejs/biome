@@ -24,7 +24,7 @@ use biome_service::projects::ProjectKey;
 use biome_service::settings::ModuleGraphResolutionKind;
 use biome_service::workspace::{
     FeaturesBuilder, GetFileContentParams, OpenProjectParams, OpenProjectResult,
-    PullDiagnosticsParams, SupportsFeatureParams,
+    PullConfigurationDiagnosticsParams, PullDiagnosticsParams, SupportsFeatureParams,
 };
 use biome_service::workspace::{FileFeaturesResult, ServiceNotification};
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
@@ -445,7 +445,10 @@ impl Session {
             not_requested_features: FeaturesBuilder::new().with_search().build(),
         })?;
 
-        if !file_features.supports_lint() && !file_features.supports_assist() {
+        if !biome_path.is_config()
+            && !file_features.supports_lint()
+            && !file_features.supports_assist()
+        {
             self.client
                 .publish_diagnostics(url.clone(), vec![], Some(doc.version))
                 .await;
@@ -454,7 +457,7 @@ impl Session {
 
         let diagnostics: Vec<Diagnostic> = {
             let mut categories = RuleCategoriesBuilder::default().with_syntax();
-            if self.configuration_status().is_loaded() {
+            if self.configuration_status().is_loaded() || biome_path.is_config() {
                 if file_features.supports_lint() {
                     categories = categories.with_lint();
                 }
@@ -462,19 +465,30 @@ impl Session {
                     categories = categories.with_assist();
                 }
             }
-            let result = self.workspace.pull_diagnostics(PullDiagnosticsParams {
-                project_key: doc.project_key,
-                path: biome_path.clone(),
-                categories: categories.build(),
-                only: Vec::new(),
-                skip: Vec::new(),
-                enabled_rules: Vec::new(),
-                include_code_fix: false,
-                inline_config: self.inline_config(),
-                max_diagnostics: None,
-                diagnostic_level: Severity::Information,
-                enforce_assist: false,
-            })?;
+            let diagnostics = if biome_path.is_config() {
+                self.workspace
+                    .pull_configuration_diagnostics(PullConfigurationDiagnosticsParams {
+                        project_key: doc.project_key,
+                        path: biome_path.clone(),
+                    })?
+                    .diagnostics
+            } else {
+                self.workspace
+                    .pull_diagnostics(PullDiagnosticsParams {
+                        project_key: doc.project_key,
+                        path: biome_path.clone(),
+                        categories: categories.build(),
+                        only: Vec::new(),
+                        skip: Vec::new(),
+                        enabled_rules: Vec::new(),
+                        include_code_fix: false,
+                        inline_config: self.inline_config(),
+                        max_diagnostics: None,
+                        diagnostic_level: Severity::Information,
+                        enforce_assist: false,
+                    })?
+                    .diagnostics
+            };
 
             let offset = if file_features.supports_full_html_support() {
                 None
@@ -497,8 +511,7 @@ impl Session {
                 })
             };
 
-            result
-                .diagnostics
+            diagnostics
                 .into_iter()
                 .filter_map(|d| {
                     match utils::diagnostic_to_lsp(

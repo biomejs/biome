@@ -12,7 +12,7 @@ use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::analyzer::assist::AssistConfiguration;
 use biome_configuration::{Configuration, FormatterConfiguration, LinterConfiguration};
 use biome_diagnostics::PrintDescription;
-use biome_fs::{BiomePath, MemoryFileSystem, TemporaryFs};
+use biome_fs::{BiomePath, ConfigName, MemoryFileSystem, TemporaryFs};
 use biome_service::workspace::{
     FileContent, GetFileContentParams, GetModuleGraphParams, GetModuleGraphResult,
     GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenFileResult, OpenProjectParams,
@@ -1975,6 +1975,732 @@ async fn plugin_load_error_show_message() -> Result<()> {
         typ: MessageType::WARNING,
         message: "The plugin loading has failed. Biome will report only parsing errors until the file is fixed or its usage is disabled.".to_string(),
     })));
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn pull_biome_configuration_migrate_quick_fix() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+    let outdated_json_config = r#"{
+  "files": {
+    "experimentalScannerIgnores": ["dist"]
+  }
+}
+"#;
+    let outdated_jsonc_config = r#"{
+  // keep comment support
+  "files": {
+    "experimentalScannerIgnores": ["dist",],
+  },
+}
+"#;
+
+    for file_name in ConfigName::file_names() {
+        let outdated_config = if file_name.ends_with('c') {
+            outdated_jsonc_config
+        } else {
+            outdated_json_config
+        };
+        fs.insert(to_utf8_file_path_buf(test_uri(file_name)), outdated_config);
+    }
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    for file_name in ConfigName::file_names() {
+        let uri = test_uri(file_name);
+        let language_id = if file_name.ends_with('c') {
+            "jsonc"
+        } else {
+            "json"
+        };
+        let outdated_config = if file_name.ends_with('c') {
+            outdated_jsonc_config
+        } else {
+            outdated_json_config
+        };
+
+        server
+            .open_named_document(outdated_config, uri.clone(), language_id)
+            .await?;
+        let range = Range {
+            start: Position {
+                line: 1,
+                character: 2,
+            },
+            end: Position {
+                line: 1,
+                character: 38,
+            },
+        };
+        let diagnostics = vec![create_deserialize_diagnostic(
+            range,
+            "This configuration is deprecated.",
+        )];
+
+        let res: CodeActionResponse = server
+            .request(
+                "textDocument/codeAction",
+                "pull_code_actions",
+                CodeActionParams {
+                    text_document: TextDocumentIdentifier { uri: uri.clone() },
+                    range,
+                    context: CodeActionContext {
+                        diagnostics: diagnostics.clone(),
+                        only: Some(vec![CodeActionKind::QUICKFIX]),
+                        ..Default::default()
+                    },
+                    work_done_progress_params: WorkDoneProgressParams {
+                        work_done_token: None,
+                    },
+                    partial_result_params: PartialResultParams {
+                        partial_result_token: None,
+                    },
+                },
+            )
+            .await?
+            .context("codeAction returned None")?;
+
+        assert_eq!(res.len(), 1, "expected one action for {file_name}");
+        let CodeActionOrCommand::CodeAction(action) = &res[0] else {
+            panic!("expected code action");
+        };
+        assert_eq!(action.title, "Migrate configuration file");
+        assert_eq!(
+            action.kind,
+            Some(CodeActionKind::new("quickfix.biome.migrateConfiguration"))
+        );
+        assert_eq!(action.diagnostics, None);
+
+        server
+            .notify(
+                "textDocument/didClose",
+                DidCloseTextDocumentParams {
+                    text_document: TextDocumentIdentifier { uri },
+                },
+            )
+            .await?;
+    }
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn pull_biome_configuration_migrate_quick_fix_from_published_root_config_diagnostics()
+-> Result<()> {
+    let fs = MemoryFileSystem::default();
+    let outdated_config = r#"{
+  "files": {
+    "experimentalScannerIgnores": ["dist"]
+  }
+}
+"#;
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), outdated_config);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .open_named_document(outdated_config, uri!("biome.json"), "json")
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+    let diagnostics = match notification {
+        Some(ServerNotification::PublishDiagnostics(params)) => params.diagnostics,
+        other => panic!("unexpected notification: {other:?}"),
+    };
+
+    assert!(!diagnostics.is_empty());
+    assert!(diagnostics.iter().any(|diagnostic| {
+        diagnostic.source.as_deref() == Some("biome")
+            && matches!(
+                diagnostic.code.as_ref(),
+                Some(NumberOrString::String(code)) if code == "deserialize"
+            )
+    }));
+
+    let res: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("biome.json"),
+                },
+                range: diagnostics[0].range,
+                context: CodeActionContext {
+                    diagnostics: diagnostics.clone(),
+                    only: Some(vec![CodeActionKind::QUICKFIX]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    assert_eq!(res.len(), 1);
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn pull_biome_configuration_migrate_quick_fix_from_published_deserialize_diagnostics()
+-> Result<()> {
+    let fs = MemoryFileSystem::default();
+    let outdated_config = r#"{
+  "files": {
+    "experimentalScannerIgnores": ["dist"]
+  },
+  "formatter": {
+    "indentStyle": "magic"
+  }
+}
+"#;
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), outdated_config);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .open_named_document(outdated_config, uri!("biome.json"), "json")
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+    let diagnostics = match notification {
+        Some(ServerNotification::PublishDiagnostics(params)) => params.diagnostics,
+        other => panic!("unexpected notification: {other:?}"),
+    };
+
+    assert!(diagnostics.iter().any(|diagnostic| {
+        diagnostic.source.as_deref() == Some("biome")
+            && matches!(
+                diagnostic.code.as_ref(),
+                Some(NumberOrString::String(code)) if code == "deserialize"
+            )
+    }));
+
+    let res: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("biome.json"),
+                },
+                range: diagnostics[0].range,
+                context: CodeActionContext {
+                    diagnostics: diagnostics.clone(),
+                    only: Some(vec![CodeActionKind::QUICKFIX]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    assert_eq!(res.len(), 1);
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn pull_diagnostics_for_root_biome_json_reports_schema_mismatch() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+    let outdated_config = r#"{
+  "$schema": "https://biomejs.dev/schemas/0.0.1/schema.json"
+}
+"#;
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), outdated_config);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .open_named_document(outdated_config, uri!("biome.json"), "json")
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+    let diagnostics = match notification {
+        Some(ServerNotification::PublishDiagnostics(params)) => params.diagnostics,
+        other => panic!("unexpected notification: {other:?}"),
+    };
+
+    assert!(diagnostics.iter().any(|diagnostic| {
+        diagnostic
+            .message
+            .contains("The configuration schema version does not match the CLI version")
+    }));
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn broken_root_biome_json_updates_diagnostics_after_did_change() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+    let broken_config = r#"{
+  "formatter": {
+    "indentStyle": "magic"
+  }
+}
+"#;
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), broken_config);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .open_named_document(broken_config, uri!("biome.json"), "json")
+        .await?;
+
+    let first_notification =
+        wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+    let first_diagnostics = match first_notification {
+        Some(ServerNotification::PublishDiagnostics(params)) => params.diagnostics,
+        other => panic!("unexpected notification: {other:?}"),
+    };
+
+    assert!(first_diagnostics.iter().any(|diagnostic| {
+        diagnostic.source.as_deref() == Some("biome")
+            && matches!(
+                diagnostic.code.as_ref(),
+                Some(NumberOrString::String(code)) if code == "deserialize"
+            )
+    }));
+
+    server
+        .notify(
+            "textDocument/didChange",
+            DidChangeTextDocumentParams {
+                text_document: VersionedTextDocumentIdentifier {
+                    uri: uri!("biome.json"),
+                    version: 1,
+                },
+                content_changes: vec![TextDocumentContentChangeEvent {
+                    range: None,
+                    range_length: None,
+                    text: String::from("{}\n"),
+                }],
+            },
+        )
+        .await?;
+
+    let second_notification =
+        wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+    let second_diagnostics = match second_notification {
+        Some(ServerNotification::PublishDiagnostics(params)) => params.diagnostics,
+        other => panic!("unexpected notification: {other:?}"),
+    };
+
+    assert!(second_diagnostics.is_empty());
+
+    server
+        .notify(
+            "textDocument/didClose",
+            DidCloseTextDocumentParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("biome.json"),
+                },
+            },
+        )
+        .await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn pull_biome_configuration_migrate_quick_fix_from_published_schema_mismatch_diagnostics()
+-> Result<()> {
+    let fs = MemoryFileSystem::default();
+    let outdated_config = r#"{
+  "$schema": "https://biomejs.dev/schemas/0.0.1/schema.json"
+}
+"#;
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), outdated_config);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .open_named_document(outdated_config, uri!("biome.json"), "json")
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+    let diagnostics = match notification {
+        Some(ServerNotification::PublishDiagnostics(params)) => params.diagnostics,
+        other => panic!("unexpected notification: {other:?}"),
+    };
+
+    assert!(diagnostics.iter().any(|diagnostic| {
+        diagnostic
+            .message
+            .contains("The configuration schema version does not match the CLI version")
+    }));
+
+    let res: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("biome.json"),
+                },
+                range: diagnostics[0].range,
+                context: CodeActionContext {
+                    diagnostics: diagnostics.clone(),
+                    only: Some(vec![CodeActionKind::QUICKFIX]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    assert_eq!(res.len(), 1);
+
+    server
+        .notify(
+            "textDocument/didClose",
+            DidCloseTextDocumentParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("biome.json"),
+                },
+            },
+        )
+        .await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn pull_biome_configuration_migrate_quick_fix_returns_edit() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+    let outdated_config = r#"{
+  // keep comment support
+  "files": {
+    "experimentalScannerIgnores": ["dist",],
+  },
+}
+"#;
+    fs.insert(to_utf8_file_path_buf(uri!("biome.jsonc")), outdated_config);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .open_named_document(outdated_config, uri!("biome.jsonc"), "jsonc")
+        .await?;
+
+    let res: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("biome.jsonc"),
+                },
+                range: Range {
+                    start: Position {
+                        line: 2,
+                        character: 4,
+                    },
+                    end: Position {
+                        line: 2,
+                        character: 32,
+                    },
+                },
+                context: CodeActionContext {
+                    diagnostics: vec![],
+                    only: Some(vec![CodeActionKind::QUICKFIX]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    let CodeActionOrCommand::CodeAction(action) = &res[0] else {
+        panic!("expected code action");
+    };
+    assert_eq!(action.diagnostics, None);
+    let edit = action.edit.as_ref().context("expected workspace edit")?;
+    let changes = edit.changes.as_ref().context("expected text changes")?;
+    let edits = changes
+        .get(&uri!("biome.jsonc"))
+        .context("expected config edit")?;
+    assert_eq!(edits.len(), 1);
+    assert_eq!(
+        edits[0].new_text,
+        concat!(
+            "{\n",
+            "\t// keep comment support\n",
+            "\t\"files\": {\n",
+            "\t\t\"includes\": [\"**\", \"!!**/dist\"]\n",
+            "\t}\n",
+            "}\n"
+        )
+    );
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn pull_biome_configuration_migrate_quick_fix_is_not_offered_for_up_to_date_config()
+-> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .open_named_document("{}\n", uri!("biome.json"), "json")
+        .await?;
+
+    let res: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("biome.json"),
+                },
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 0,
+                    },
+                    end: Position {
+                        line: 0,
+                        character: 1,
+                    },
+                },
+                context: CodeActionContext {
+                    diagnostics: vec![create_deserialize_diagnostic(
+                        Range {
+                            start: Position {
+                                line: 0,
+                                character: 0,
+                            },
+                            end: Position {
+                                line: 0,
+                                character: 1,
+                            },
+                        },
+                        "This configuration is deprecated.",
+                    )],
+                    only: Some(vec![CodeActionKind::QUICKFIX]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    assert!(res.is_empty());
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn pull_biome_configuration_migrate_quick_fix_is_not_offered_for_parse_errors() -> Result<()>
+{
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .open_named_document(
+            "{\n  \"files\": {\n    \"experimentalScannerIgnores\": [\"dist\"\n  }\n}\n",
+            uri!("biome.json"),
+            "json",
+        )
+        .await?;
+
+    let res: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("biome.json"),
+                },
+                range: Range {
+                    start: Position {
+                        line: 2,
+                        character: 4,
+                    },
+                    end: Position {
+                        line: 2,
+                        character: 32,
+                    },
+                },
+                context: CodeActionContext {
+                    diagnostics: vec![create_deserialize_diagnostic(
+                        Range {
+                            start: Position {
+                                line: 2,
+                                character: 4,
+                            },
+                            end: Position {
+                                line: 2,
+                                character: 32,
+                            },
+                        },
+                        "This configuration is deprecated.",
+                    )],
+                    only: Some(vec![CodeActionKind::QUICKFIX]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    assert!(res.is_empty());
 
     server.close_document().await?;
 
@@ -5813,6 +6539,27 @@ fn assert_diagnostics_count(server_notification: &ServerNotification, expected_c
         ServerNotification::ShowMessage(_) => {
             panic!("Unexpected notification: {server_notification:?}",);
         }
+    }
+}
+
+/// Create a diagnostic with the "deserialize" code.
+fn create_deserialize_diagnostic(range: Range, message: impl Into<String>) -> Diagnostic {
+    Diagnostic {
+        range,
+        severity: Some(DiagnosticSeverity::ERROR),
+        code: Some(NumberOrString::String(String::from("deserialize"))),
+        code_description: None,
+        source: Some(String::from("biome")),
+        message: message.into(),
+        ..Default::default()
+    }
+}
+
+fn test_uri(path: &str) -> Uri {
+    if cfg!(windows) {
+        Uri::from_str(&format!("file:///z%3A/workspace/{path}")).unwrap()
+    } else {
+        Uri::from_str(&format!("file:///workspace/{path}")).unwrap()
     }
 }
 

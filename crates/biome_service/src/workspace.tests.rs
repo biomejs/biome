@@ -11,15 +11,16 @@ use biome_configuration::{
 use biome_diagnostics::{Diagnostic, Severity};
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_js_syntax::{JsFileSource, TextSize};
+use biome_json_syntax::JsonFileSource;
 use biome_plugin_loader::{PluginConfiguration, Plugins};
 use camino::Utf8PathBuf;
 use insta::{assert_debug_snapshot, assert_snapshot};
 
 use super::{
     CloseFileParams, CloseProjectParams, FileContent, FileFeaturesResult, FileGuard,
-    GetModuleGraphParams, GetSyntaxTreeParams, OpenFileParams, OpenProjectParams,
-    OpenProjectResult, PullDiagnosticsParams, ScanKind, ScanProjectParams, UpdateKind,
-    UpdateModuleGraphParams, UpdateSettingsParams, server,
+    GetModuleGraphParams, GetSyntaxTreeParams, MigrateConfigurationParams, OpenFileParams,
+    OpenProjectParams, OpenProjectResult, PullDiagnosticsParams, ScanKind, ScanProjectParams,
+    UpdateKind, UpdateModuleGraphParams, UpdateSettingsParams, server,
 };
 use crate::file_handlers::DocumentFileSource;
 use crate::projects::ProjectKey;
@@ -256,6 +257,136 @@ fn correctly_handle_json_files() {
             .format_file()
             .is_ok()
     );
+}
+
+#[test]
+fn migrate_configuration_returns_formatted_content() {
+    let (workspace, project_key) = create_server();
+    let source = r#"{
+  // keep comment support
+  "files": {
+    "experimentalScannerIgnores": ["dist",],
+  },
+}
+"#;
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("biome.jsonc"),
+            content: FileContent::from_client(source),
+            document_file_source: Some(DocumentFileSource::from(
+                JsonFileSource::json_allow_comments_and_trailing_commas("jsonc"),
+            )),
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .migrate_configuration(MigrateConfigurationParams {
+            project_key,
+            path: BiomePath::new("biome.jsonc"),
+        })
+        .unwrap();
+
+    assert_snapshot!(result.content.unwrap(), @r#"
+{
+	// keep comment support
+	"files": {
+		"includes": ["**", "!!**/dist"]
+	}
+}
+"#);
+}
+
+#[test]
+fn migrate_configuration_returns_none_for_up_to_date_config() {
+    let (workspace, project_key) = create_server();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("biome.json"),
+            content: FileContent::from_client("{}\n"),
+            document_file_source: Some(DocumentFileSource::from(JsonFileSource::json())),
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .migrate_configuration(MigrateConfigurationParams {
+            project_key,
+            path: BiomePath::new("biome.json"),
+        })
+        .unwrap();
+
+    assert_eq!(result.content, None);
+}
+
+#[test]
+fn migrate_configuration_marks_nested_biome_json_as_non_root() {
+    let fs = MemoryFileSystem::default();
+    let workspace = server(Arc::new(fs), None);
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: Utf8PathBuf::from("/project").into(),
+            open_uninitialized: true,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/packages/pkg/biome.json"),
+            content: FileContent::from_client("{}\n"),
+            document_file_source: Some(DocumentFileSource::from(JsonFileSource::json())),
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .migrate_configuration(MigrateConfigurationParams {
+            project_key,
+            path: BiomePath::new("/project/packages/pkg/biome.json"),
+        })
+        .unwrap();
+
+    assert_eq!(result.content.as_deref(), Some("{ \"root\": false }\n"));
+}
+
+#[test]
+fn migrate_configuration_does_not_mark_root_biome_json_as_non_root() {
+    let fs = MemoryFileSystem::default();
+    let workspace = server(Arc::new(fs), None);
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: Utf8PathBuf::from("/project").into(),
+            open_uninitialized: true,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/biome.json"),
+            content: FileContent::from_client("{}\n"),
+            document_file_source: Some(DocumentFileSource::from(JsonFileSource::json())),
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .migrate_configuration(MigrateConfigurationParams {
+            project_key,
+            path: BiomePath::new("/project/biome.json"),
+        })
+        .unwrap();
+
+    assert_eq!(result.content, None);
 }
 
 #[test]

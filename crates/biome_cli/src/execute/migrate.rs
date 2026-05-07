@@ -2,7 +2,7 @@ use crate::commands::MigrateSubCommand;
 use crate::diagnostics::MigrationDiagnostic;
 use crate::runner::diagnostics::{ContentDiffAdvice, MigrateDiffDiagnostic};
 use crate::{CliDiagnostic, CliSession};
-use biome_analyze::{ActionFilter, AnalysisFilter};
+use biome_analyze::AnalysisFilter;
 use biome_configuration::Configuration;
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{Console, ConsoleExt, markup};
@@ -13,16 +13,13 @@ use biome_diagnostics::{
 };
 use biome_fs::{BiomePath, ConfigName, OpenOptions};
 use biome_json_parser::{JsonParserOptions, parse_json_with_cache};
-use biome_json_syntax::{JsonFileSource, JsonRoot};
-use biome_migrate::{ControlFlow, migrate_configuration};
-use biome_rowan::{AstNode, NodeCache};
+use biome_json_syntax::JsonFileSource;
+use biome_migrate::migrate_configuration_tree;
+use biome_rowan::NodeCache;
 use biome_service::Workspace;
 use biome_service::projects::ProjectKey;
-use biome_service::workspace::{
-    ChangeFileParams, FileContent, FixAction, FormatFileParams, OpenFileParams,
-};
+use biome_service::workspace::{ChangeFileParams, FileContent, FormatFileParams, OpenFileParams};
 use camino::Utf8PathBuf;
-use std::borrow::Cow;
 use std::collections::BTreeSet;
 use std::fmt::Debug;
 
@@ -365,53 +362,21 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
             Ok(result)
         }
         None => {
-            let mut tree = parsed.tree();
-            let mut actions = Vec::new();
             let is_root = workspace.fs().working_directory().is_some_and(|wd| {
                 configuration_file_path.strip_prefix(wd).is_ok_and(|path| {
                     path.starts_with(ConfigName::biome_json())
                         || path.starts_with(ConfigName::biome_jsonc())
                 })
             });
-            loop {
-                let (action, _) = migrate_configuration(
-                    &tree,
-                    AnalysisFilter::default(),
-                    configuration_file_path.as_path(),
-                    is_root,
-                    |signal| {
-                        if let Some(action) = signal.actions(ActionFilter::rule_fix()).next() {
-                            return ControlFlow::Break(action);
-                        }
-                        ControlFlow::Continue(())
-                    },
-                );
-                match action {
-                    Some(action) => {
-                        if let (root, Some((range, _))) =
-                            action.mutation.commit_with_text_range_and_edit(true)
-                        {
-                            tree = match JsonRoot::cast(root) {
-                                Some(tree) => tree,
-                                None => {
-                                    return Err(CliDiagnostic::check_error(category!("migrate")));
-                                }
-                            };
-                            actions.push(FixAction {
-                                rule_name: action.rule_name.map(|(group, rule)| {
-                                    (Cow::Borrowed(group), Cow::Borrowed(rule))
-                                }),
-                                range,
-                            });
-                        }
-                    }
-                    None => {
-                        break;
-                    }
-                }
-            }
-
-            let new_configuration_content = tree.to_string();
+            let new_configuration_content = match migrate_configuration_tree(
+                &parsed.tree(),
+                AnalysisFilter::default(),
+                configuration_file_path.as_path(),
+                is_root,
+            ) {
+                Some(tree) => tree.to_string(),
+                None => biome_config_content.clone(),
+            };
             if biome_config_content != new_configuration_content {
                 if write {
                     let mut configuration_file = biome_config_file;

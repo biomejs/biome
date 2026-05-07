@@ -2,11 +2,14 @@ use super::{
     ChangeFileParams, ChangeFileResult, CloseFileParams, FileExitsParams, FixFileParams,
     FixFileResult, FormatFileParams, FormatOnTypeParams, FormatRangeParams,
     GetControlFlowGraphParams, GetFormatterIRParams, GetModuleGraphParams, GetModuleGraphResult,
-    GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams,
-    OpenFileResult, PullActionsParams, PullActionsResult, PullDiagnosticsAndActionsParams,
-    PullDiagnosticsAndActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RenameParams,
-    RenameResult, ScanProjectParams, ScanProjectResult, SearchPatternParams, SearchResults,
-    SupportsFeatureParams, UpdateModuleGraphParams, UpdateSettingsParams, UpdateSettingsResult,
+    GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, MigrateConfigurationParams,
+    MigrateConfigurationResult, OpenFileParams, OpenFileResult, PullActionsParams,
+    PullActionsResult, PullConfigurationActionsParams, PullConfigurationActionsResult,
+    PullConfigurationDiagnosticsParams, PullConfigurationDiagnosticsResult,
+    PullDiagnosticsAndActionsParams, PullDiagnosticsAndActionsResult, PullDiagnosticsParams,
+    PullDiagnosticsResult, RenameParams, RenameResult, ScanProjectParams, ScanProjectResult,
+    SearchPatternParams, SearchResults, SupportsFeatureParams, UpdateModuleGraphParams,
+    UpdateSettingsParams, UpdateSettingsResult,
 };
 use crate::workspace::{
     CheckFileSizeParams, CheckFileSizeResult, CloseProjectParams, FileFeaturesResult,
@@ -155,6 +158,27 @@ where
         params: CheckFileSizeParams,
     ) -> Result<CheckFileSizeResult, WorkspaceError> {
         self.request("biome/check_file_size", params)
+    }
+
+    fn migrate_configuration(
+        &self,
+        params: MigrateConfigurationParams,
+    ) -> Result<MigrateConfigurationResult, WorkspaceError> {
+        self.request("biome/migrate_configuration", params)
+    }
+
+    fn pull_configuration_diagnostics(
+        &self,
+        params: PullConfigurationDiagnosticsParams,
+    ) -> Result<PullConfigurationDiagnosticsResult, WorkspaceError> {
+        self.request("biome/pull_configuration_diagnostics", params)
+    }
+
+    fn pull_configuration_actions(
+        &self,
+        params: PullConfigurationActionsParams,
+    ) -> Result<PullConfigurationActionsResult, WorkspaceError> {
+        self.request("biome/pull_configuration_actions", params)
     }
 
     fn change_file(&self, params: ChangeFileParams) -> Result<ChangeFileResult, WorkspaceError> {

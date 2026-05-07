@@ -949,6 +949,53 @@ pub struct GetFileContentParams {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
+pub struct MigrateConfigurationParams {
+    pub project_key: ProjectKey,
+    pub path: BiomePath,
+}
+
+#[derive(Debug, Default, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct MigrateConfigurationResult {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct PullConfigurationDiagnosticsParams {
+    pub project_key: ProjectKey,
+    pub path: BiomePath,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct PullConfigurationDiagnosticsResult {
+    pub diagnostics: Vec<Diagnostic>,
+    pub errors: usize,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct PullConfigurationActionsParams {
+    pub project_key: ProjectKey,
+    pub path: BiomePath,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct PullConfigurationActionsResult {
+    pub actions: Vec<CodeAction>,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct CheckFileSizeParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
@@ -1599,6 +1646,24 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
         &self,
         params: CheckFileSizeParams,
     ) -> Result<CheckFileSizeResult, WorkspaceError>;
+
+    /// Migrates a configuration file, and it returns its content.
+    fn migrate_configuration(
+        &self,
+        params: MigrateConfigurationParams,
+    ) -> Result<MigrateConfigurationResult, WorkspaceError>;
+
+    /// Retrieves configuration diagnostics for a configuration file.
+    fn pull_configuration_diagnostics(
+        &self,
+        params: PullConfigurationDiagnosticsParams,
+    ) -> Result<PullConfigurationDiagnosticsResult, WorkspaceError>;
+
+    /// Retrieves code actions available for a configuration file.
+    fn pull_configuration_actions(
+        &self,
+        params: PullConfigurationActionsParams,
+    ) -> Result<PullConfigurationActionsResult, WorkspaceError>;
 
     /// Changes the content of an open file.
     fn change_file(&self, params: ChangeFileParams) -> Result<ChangeFileResult, WorkspaceError>;
