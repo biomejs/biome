@@ -9,17 +9,10 @@
 //! These are the 17 predicates that `ValueType::matches` dispatches to
 //! from `tailwind_preset_v4.rs`.
 
-use std::sync::LazyLock;
-
 use phf::{phf_set, Set};
-use regex::Regex;
 use smallvec::SmallVec;
 
-// ── shared regex sources ─────────────────────────────────────────
-
-/// `[+-]?\d*\.?\d+(?:[eE][+-]?\d+)?` — used as the building block of
-/// every numeric pattern below.
-const HAS_NUMBER: &str = r"[+-]?\d*\.?\d+(?:[eE][+-]?\d+)?";
+// ── shared scanners ──────────────────────────────────────────────
 
 const LENGTH_UNITS: &[&str] = &[
     "cm", "mm", "Q", "in", "pc", "pt", "px", "em", "ex", "ch", "rem", "lh", "rlh", "vw", "vh",
@@ -29,37 +22,102 @@ const LENGTH_UNITS: &[&str] = &[
 
 const ANGLE_UNITS: &[&str] = &["deg", "rad", "grad", "turn"];
 
-static IS_NUMBER: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(&format!(r"^{HAS_NUMBER}$")).unwrap());
+const GRADIENT_FN_PREFIXES: &[&str] = &[
+    "linear-gradient(",
+    "radial-gradient(",
+    "conic-gradient(",
+    "repeating-linear-gradient(",
+    "repeating-radial-gradient(",
+    "repeating-conic-gradient(",
+];
 
-static IS_PERCENTAGE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(&format!(r"^{HAS_NUMBER}%$")).unwrap());
+const IMAGE_FN_PREFIXES: &[&str] = &["element(", "image(", "image-set(", "cross-fade("];
 
-static IS_FRACTION: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(&format!(r"^{HAS_NUMBER}\s*/\s*{HAS_NUMBER}$")).unwrap()
-});
+/// Case-insensitive prefixes — `is_color` matches CSS color functions
+/// regardless of letter casing (`rgb(...)`, `RGB(...)`, etc.).
+const COLOR_FN_PREFIXES: &[&str] = &[
+    "rgb(",
+    "rgba(",
+    "hsl(",
+    "hsla(",
+    "hwb(",
+    "color(",
+    "lab(",
+    "lch(",
+    "oklab(",
+    "oklch(",
+    "light-dark(",
+    "color-mix(",
+];
 
-static IS_LENGTH: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(&format!(r"^{HAS_NUMBER}({})$", LENGTH_UNITS.join("|"))).unwrap()
-});
+/// Mirrors Tailwind's `HAS_NUMBER` pattern anchored over the full string:
+/// `[+-]?\d*\.?\d+(?:[eE][+-]?\d+)?`. The integer / fractional pieces are
+/// each optional individually, but at least one digit must appear before
+/// or after the optional dot.
+fn is_number_str(s: &str) -> bool {
+    let bytes = s.as_bytes();
+    let n = bytes.len();
+    let mut i = 0;
+    if i < n && matches!(bytes[i], b'+' | b'-') {
+        i += 1;
+    }
+    let int_start = i;
+    while i < n && bytes[i].is_ascii_digit() {
+        i += 1;
+    }
+    let int_digits = i - int_start;
+    let has_dot = i < n && bytes[i] == b'.';
+    if has_dot {
+        i += 1;
+    }
+    let frac_start = i;
+    while i < n && bytes[i].is_ascii_digit() {
+        i += 1;
+    }
+    let frac_digits = i - frac_start;
+    if has_dot {
+        if frac_digits == 0 {
+            return false;
+        }
+    } else if int_digits == 0 {
+        return false;
+    }
+    if i < n && matches!(bytes[i], b'e' | b'E') {
+        i += 1;
+        if i < n && matches!(bytes[i], b'+' | b'-') {
+            i += 1;
+        }
+        let exp_start = i;
+        while i < n && bytes[i].is_ascii_digit() {
+            i += 1;
+        }
+        if i == exp_start {
+            return false;
+        }
+    }
+    i == n
+}
 
-static IS_ANGLE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(&format!(r"^{HAS_NUMBER}({})$", ANGLE_UNITS.join("|"))).unwrap()
-});
+/// `<number><unit>` where `<unit>` is one of the supplied suffixes.
+fn is_number_with_unit(value: &str, units: &[&str]) -> bool {
+    units.iter().any(|unit| {
+        value
+            .strip_suffix(unit)
+            .is_some_and(|prefix| !prefix.is_empty() && is_number_str(prefix))
+    })
+}
 
-static IS_VECTOR: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(&format!(r"^{HAS_NUMBER} +{HAS_NUMBER} +{HAS_NUMBER}$")).unwrap()
-});
+fn starts_with_any(value: &str, prefixes: &[&str]) -> bool {
+    prefixes.iter().any(|prefix| value.starts_with(prefix))
+}
 
-static IS_GRADIENT_FN: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^(repeating-)?(conic|linear|radial)-gradient\(").unwrap());
-
-static IS_IMAGE_FN: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^(?:element|image|cross-fade|image-set)\(").unwrap());
-
-static IS_COLOR_FN: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?i)^(rgba?|hsla?|hwb|color|(ok)?(lab|lch)|light-dark|color-mix)\(").unwrap()
-});
+fn starts_with_any_ascii_ci(value: &str, prefixes: &[&str]) -> bool {
+    let v_bytes = value.as_bytes();
+    prefixes.iter().any(|prefix| {
+        let p_bytes = prefix.as_bytes();
+        v_bytes.len() >= p_bytes.len() && v_bytes[..p_bytes.len()].eq_ignore_ascii_case(p_bytes)
+    })
+}
 
 // ── shared helpers ───────────────────────────────────────────────
 
@@ -166,19 +224,31 @@ pub fn is_url(value: &str) -> bool {
 /// Mirrors <https://github.com/tailwindlabs/tailwindcss/blob/v4.2.2/packages/tailwindcss/src/utils/infer-data-type.ts#L173>
 /// (`isNumber`).
 pub fn is_number(value: &str) -> bool {
-    IS_NUMBER.is_match(value) || has_math_fn(value)
+    is_number_str(value) || has_math_fn(value)
 }
 
 /// Mirrors <https://github.com/tailwindlabs/tailwindcss/blob/v4.2.2/packages/tailwindcss/src/utils/infer-data-type.ts#L181>
 /// (`isPercentage`).
 pub fn is_percentage(value: &str) -> bool {
-    IS_PERCENTAGE.is_match(value) || has_math_fn(value)
+    let matches_pattern = value
+        .strip_suffix('%')
+        .is_some_and(|prefix| !prefix.is_empty() && is_number_str(prefix));
+    matches_pattern || has_math_fn(value)
 }
 
 /// Mirrors <https://github.com/tailwindlabs/tailwindcss/blob/v4.2.2/packages/tailwindcss/src/utils/infer-data-type.ts#L189>
 /// (`isFraction`; mapped to the `ratio` data-type by Tailwind).
 pub fn is_ratio(value: &str) -> bool {
-    IS_FRACTION.is_match(value) || has_math_fn(value)
+    if let Some(slash) = value.find('/') {
+        // `^<num>\s*/\s*<num>$` — whitespace allowed only around the slash,
+        // not at the outer ends.
+        let left = value[..slash].trim_end();
+        let right = value[slash + 1..].trim_start();
+        if is_number_str(left) && is_number_str(right) {
+            return true;
+        }
+    }
+    has_math_fn(value)
 }
 
 /// `Number.isInteger(num) && num >= 0 && String(num) === String(value)`.
@@ -204,19 +274,52 @@ pub fn is_integer(value: &str) -> bool {
 /// Mirrors <https://github.com/tailwindlabs/tailwindcss/blob/v4.2.2/packages/tailwindcss/src/utils/infer-data-type.ts#L236>
 /// (`isLength`).
 pub fn is_length(value: &str) -> bool {
-    IS_LENGTH.is_match(value) || has_math_fn(value)
+    is_number_with_unit(value, LENGTH_UNITS) || has_math_fn(value)
 }
 
 /// Mirrors <https://github.com/tailwindlabs/tailwindcss/blob/v4.2.2/packages/tailwindcss/src/utils/infer-data-type.ts#L324>
 /// (`isAngle`).
 pub fn is_angle(value: &str) -> bool {
-    IS_ANGLE.is_match(value)
+    is_number_with_unit(value, ANGLE_UNITS)
 }
 
 /// Mirrors <https://github.com/tailwindlabs/tailwindcss/blob/v4.2.2/packages/tailwindcss/src/utils/infer-data-type.ts#L339>
 /// (`isVector`).
 pub fn is_vector(value: &str) -> bool {
-    IS_VECTOR.is_match(value)
+    // `^<num> +<num> +<num>$` — three numbers separated by 1+ spaces, no
+    // leading/trailing whitespace.
+    let bytes = value.as_bytes();
+    let n = bytes.len();
+    if n == 0 {
+        return false;
+    }
+    let mut numbers = 0;
+    let mut i = 0;
+    loop {
+        let start = i;
+        while i < n && bytes[i] != b' ' {
+            i += 1;
+        }
+        // Empty token guards leading whitespace and double spaces.
+        if i == start {
+            return false;
+        }
+        if !is_number_str(&value[start..i]) {
+            return false;
+        }
+        numbers += 1;
+        if i == n {
+            break;
+        }
+        while i < n && bytes[i] == b' ' {
+            i += 1;
+        }
+        // Trailing whitespace not allowed by the original anchor.
+        if i == n {
+            return false;
+        }
+    }
+    numbers == 3
 }
 
 // ── color ────────────────────────────────────────────────────────
@@ -424,7 +527,7 @@ pub fn is_color(value: &str) -> bool {
     if value.as_bytes().first() == Some(&b'#') {
         return true;
     }
-    if IS_COLOR_FN.is_match(value) {
+    if starts_with_any_ascii_ci(value, COLOR_FN_PREFIXES) {
         return true;
     }
     named_color_match(value)
@@ -507,7 +610,9 @@ pub fn is_image(value: &str) -> bool {
             count += 1;
             continue;
         }
-        if IS_GRADIENT_FN.is_match(part) || IS_IMAGE_FN.is_match(part) {
+        if starts_with_any(part, GRADIENT_FN_PREFIXES)
+            || starts_with_any(part, IMAGE_FN_PREFIXES)
+        {
             count += 1;
             continue;
         }
