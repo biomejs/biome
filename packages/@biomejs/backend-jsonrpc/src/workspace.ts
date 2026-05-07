@@ -8015,6 +8015,11 @@ Defaults to `true`.
 	ignoreTypeValueShadow?: boolean;
 }
 export type NoSyncScriptsOptions = {};
+/**
+	* Options for the `noTailwindArbitraryValue` rule.
+
+Controls which attributes and utility functions are checked for arbitrary values. 
+	 */
 export interface NoTailwindArbitraryValueOptions {
 	/**
 	 * Additional attributes that will be checked.

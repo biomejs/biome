@@ -5245,6 +5245,7 @@
 			]
 		},
 		"NoTailwindArbitraryValueOptions": {
+			"description": "Options for the `noTailwindArbitraryValue` rule.\n\nControls which attributes and utility functions are checked for arbitrary values.",
 			"type": "object",
 			"properties": {
 				"attributes": {
