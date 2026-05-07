@@ -372,8 +372,6 @@ function dedupeBranches(branches: Branch[]): Branch[] {
 		seen.add(key);
 		out.push(b);
 	}
-	out.sort(
-		(a, b) => BRANCH_KIND_ORDER[a.kind] - BRANCH_KIND_ORDER[b.kind],
-	);
+	out.sort((a, b) => BRANCH_KIND_ORDER[a.kind] - BRANCH_KIND_ORDER[b.kind]);
 	return out;
 }
