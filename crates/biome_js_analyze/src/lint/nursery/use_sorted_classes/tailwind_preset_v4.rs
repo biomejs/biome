@@ -127,21 +127,21 @@ pub struct UtilityEntry {
 
 // One dispatch branch inside a functional utility's compileFn.
 //
-// - Named:        named-path theme-namespace lookup
-//                 (`text-lg` ↔ `--text-lg`).
-// - NamedKeyword: named-path hardcoded keyword set baked into the
-//                 compileFn (`origin-top`, `accent-current`).
-//                 First field is an index into `KEYWORD_POOL`.
-// - NamedTyped:   named-path predicate match for bare value patterns
-//                 (`p-4` Number, `from-25%` Percentage, `w-1/2` Ratio).
-// - ArbitraryTyped:        arbitrary-path predicate match used for utilities
-//                 whose property differs by CSS value type
-//                 (`from-[#fff]` → `--tw-gradient-from`,
-//                 `from-[10px]` → `--tw-gradient-from-position`).
-// - Arbitrary:    arbitrary-path fallback used when the utility emits
-//                 the same property regardless of value type
-//                 (`p-[10px]`, `p-[#fff]` → `padding`).
-//                 Resolved after every `ArbitraryTyped` branch.
+// - Named:           named-path theme-namespace lookup
+//                    (`text-lg` ↔ `--text-lg`).
+// - NamedKeyword:    named-path hardcoded keyword set baked into the
+//                    compileFn (`origin-top`, `accent-current`).
+//                    First field is an index into `KEYWORD_POOL`.
+// - NamedTyped:      named-path predicate match for bare value patterns
+//                    (`p-4` Number, `from-25%` Percentage, `w-1/2` Ratio).
+// - ArbitraryTyped:  arbitrary-path predicate match used for utilities
+//                    whose property differs by CSS value type
+//                    (`from-[#fff]` → `--tw-gradient-from`,
+//                    `from-[10px]` → `--tw-gradient-from-position`).
+// - Arbitrary:       arbitrary-path fallback used when the utility emits
+//                    the same property regardless of value type
+//                    (`p-[10px]`, `p-[#fff]` → `padding`).
+//                    Resolved after every `ArbitraryTyped` branch.
 //
 // Keyword sets are interned in `KEYWORD_POOL` and referenced by index
 // so that `Branch` stays small (the largest variant payload is now

@@ -1,9 +1,3 @@
-// v4 base utility sort fixtures.
-//
-// Out of scope (kept as Unknown for now): variants, bracketed arbitrary values,
-// modifiers (`/50`), important (`!`), negative prefixes beyond curated
-// `-utility` keys. Each unhandled shape is tagged with a `// TODO:` comment in
-// `sort_v4.rs`.
 [
 	// ─── static utilities ──────────────────────────────────────────
 	// STATIC_UTILITIES exact-match keywords. Sorted by property_idx,
