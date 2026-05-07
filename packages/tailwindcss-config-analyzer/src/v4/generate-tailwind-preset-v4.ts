@@ -1,7 +1,7 @@
 // Entry point for the Tailwind v4 preset codegen.
 //
 // Usage:
-//   pnpm --filter tailwindcss-config-analyzer gen:tailwind-preset-v4
+//   pnpm --filter tailwindcss-config-analyzer execute:v4
 //
 // Output:
 //   crates/biome_js_analyze/src/lint/nursery/use_sorted_classes/tailwind_preset_v4.rs

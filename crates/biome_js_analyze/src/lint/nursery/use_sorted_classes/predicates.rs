@@ -480,6 +480,10 @@ pub fn is_bg_size(value: &str) -> bool {
         if values.len() != 1 && values.len() != 2 {
             return false;
         }
+        // Mirrors Tailwind: an invalid token in a multi-segment list is
+        // silently skipped instead of failing the whole value (so e.g.
+        // `cover, foo` returns true). Don't add `return false` here —
+        // diverging would change predicate semantics versus Tailwind.
         if values
             .iter()
             .all(|v| *v == "auto" || is_length(v) || is_percentage(v))

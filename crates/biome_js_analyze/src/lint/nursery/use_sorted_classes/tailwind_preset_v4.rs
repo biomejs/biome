@@ -1,5 +1,5 @@
 //! AUTO-GENERATED. DO NOT EDIT MANUALLY.
-//! Run `pnpm gen:tailwind-preset-v4` from `packages/tailwindcss-config-analyzer`.
+//! Run `pnpm execute:v4` from `packages/tailwindcss-config-analyzer`.
 //!
 //! Source references (Tailwind v4):
 //! - property-order:  https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/src/property-order.ts
