@@ -11,9 +11,10 @@ use biome_tailwind_syntax::lint_utils::arbitrary_ranges;
 declare_lint_rule! {
     /// Disallow arbitrary values in Tailwind CSS utility classes.
     ///
-    /// Arbitrary values (e.g. `w-[400px]`, `text-[#555]`, `[color:red]`) bypass
-    /// Tailwind's configured theme scales. This rule reports them so teams can
-    /// keep styling constrained to named utilities from their Tailwind configuration.
+    /// Arbitrary values (e.g. `w-[400px]`, `text-[#555]`) and arbitrary properties
+    /// (e.g. `[color:red]`) bypass Tailwind's configured theme scales. This rule reports
+    /// them so teams can keep styling constrained to named utilities from their Tailwind
+    /// configuration.
     ///
     /// ## Examples
     ///
