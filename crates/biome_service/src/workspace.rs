@@ -96,7 +96,7 @@ pub use crate::{
 };
 #[cfg(feature = "schema")]
 use schemars::{Schema, SchemaGenerator};
-mod db;
+pub mod db;
 use crate::settings::{EditorFeatures, ModuleGraphResolutionKind, SettingsWithEditor};
 pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 #[cfg(feature = "lang_grit")]

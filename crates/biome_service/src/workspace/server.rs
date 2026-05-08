@@ -56,8 +56,8 @@ use biome_js_syntax::{AnyJsRoot, EmbeddingKind, JsFileSource, LanguageVariant, M
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
 use biome_module_graph::{
-    HtmlEmbeddedContent, ModuleDependencies, ModuleDiagnostic, ModuleGraph, ModuleInfo,
-    ModuleInfoKind,
+    HtmlEmbeddedContent, ModuleDb, ModuleDependencies, ModuleDiagnostic, ModuleInfo, ModuleInfoKind,
+    PathInfoCache, resolve_css_module, resolve_html_module, resolve_js_module,
 };
 use biome_package::{Catalogs, PackageJson, PackageType};
 use biome_parser::AnyParse;
@@ -90,9 +90,6 @@ pub struct WorkspaceServer {
 
     /// The layout of projects and their internal packages.
     project_layout: Arc<ProjectLayout>,
-
-    /// Module graph tracking inferred information across modules.
-    module_graph: Arc<ModuleGraph>,
 
     /// Keeps all loaded plugins in memory, per project.
     #[cfg(feature = "plugins")]
@@ -138,7 +135,7 @@ pub struct WorkspaceServer {
     /// Re-usable cache for analyzer visitors.
     analyzer_cache: HashMap<ProjectKey, AnalyzerVisitorCache>,
 
-    db: Option<crate::workspace::db::DbState>,
+    db: db::DbState,
 }
 
 fn resolve_git_path(base: &Utf8Path, path: &str) -> Utf8PathBuf {
@@ -217,7 +214,6 @@ impl WorkspaceServer {
         notification_tx: watch::Sender<ServiceNotification>,
         search_provider: Arc<dyn SearchQuery>,
         threads: Option<usize>,
-        needs_db: bool,
     ) -> Self {
         init_thread_pool(threads);
 
@@ -225,7 +221,6 @@ impl WorkspaceServer {
             features: Features::new(),
             projects: Default::default(),
             project_layout: Default::default(),
-            module_graph: Default::default(),
             #[cfg(feature = "plugins")]
             plugin_caches: Default::default(),
             documents: Default::default(),
@@ -236,13 +231,20 @@ impl WorkspaceServer {
             fs,
             notification_tx,
             analyzer_cache: HashMap::default(),
-            db: needs_db.then_some(db::DbState::default()),
+            db: db::DbState::default(),
         }
     }
 
-    /// Returns the module graph, for use in tests.
-    pub fn module_graph(&self) -> Arc<ModuleGraph> {
-        self.module_graph.clone()
+    /// Returns an `Arc<dyn ModuleDb>` clone, for passing to analyzers.
+    fn module_db(&self) -> Arc<dyn ModuleDb> {
+        let db = self.db.db.lock().expect("db lock poisoned");
+        Arc::new(db.clone())
+    }
+
+    /// Returns the module db for use in tests.
+    #[cfg(feature = "testing")]
+    pub fn get_module_db_for_test(&self) -> Arc<dyn ModuleDb> {
+        self.module_db()
     }
 
     /// Indexes a list of files into the module graph for test purposes.
@@ -1419,39 +1421,32 @@ impl WorkspaceServer {
                     services.as_js_services(),
                 ) {
                     if let Some(semantic_model) = services.semantic_model.clone() {
-                        let result = self.module_graph.update_graph_for_js_paths(
+                        let (module_info, deps, diagnostics) = resolve_js_module(
+                            js_root,
+                            path,
                             self.fs.as_ref(),
                             &self.project_layout,
-                            &[(path, js_root.clone(), Arc::new(semantic_model.clone()))],
+                            Arc::new(semantic_model),
+                            &self.db.path_info_cache,
                             infer_types,
                         );
-                        if let Some(module_info) =
-                            self.module_graph.js_module_info_for_path(path.as_path())
-                        {
-                            self.db_set_module_info(path, ModuleInfoKind::Js(module_info));
-                        }
-                        result
+                        self.db_set_module_info(path, ModuleInfoKind::Js(module_info));
+                        (deps, diagnostics)
                     } else {
                         Default::default()
                     }
                 } else if let Some(css_root) =
                     SendNode::into_language_root::<AnyCssRoot>(root.clone())
                 {
-                    let semantic_model = services
-                        .as_css_services()
-                        .and_then(|s| s.semantic_model.as_ref());
-                    let result = self.module_graph.update_graph_for_css_paths(
+                    let (module_info, deps, diagnostics) = resolve_css_module(
+                        css_root,
+                        path,
                         self.fs.as_ref(),
                         &self.project_layout,
-                        &[(path, css_root)],
-                        semantic_model,
+                        &self.db.path_info_cache,
                     );
-                    if let Some(module_info) =
-                        self.module_graph.css_module_info_for_path(path.as_path())
-                    {
-                        self.db_set_module_info(path, ModuleInfoKind::Css(module_info));
-                    }
-                    result
+                    self.db_set_module_info(path, ModuleInfoKind::Css(module_info));
+                    (deps, diagnostics)
                 } else if let Some(html_root) =
                     SendNode::into_language_root::<HtmlRoot>(root.clone())
                 {
@@ -1480,23 +1475,21 @@ impl WorkspaceServer {
                                 .collect()
                         })
                         .unwrap_or_default();
-                    let result = self.module_graph.update_graph_for_html_paths(
+                    let (module_info, deps, diagnostics) = resolve_html_module(
+                        html_root,
+                        &embedded_content,
+                        path,
                         self.fs.as_ref(),
                         &self.project_layout,
-                        &[(path, html_root, embedded_content)],
+                        &self.db.path_info_cache,
                     );
-                    if let Some(module_info) =
-                        self.module_graph.html_module_info_for_path(path.as_path())
-                    {
-                        self.db_set_module_info(path, ModuleInfoKind::Html(module_info));
-                    }
-                    result
+                    self.db_set_module_info(path, ModuleInfoKind::Html(module_info));
+                    (deps, diagnostics)
                 } else {
                     Default::default()
                 }
             }
             UpdateKind::Removed => {
-                self.module_graph.update_graph_for_removed_paths(&[path]);
                 self.db_remove_module(path);
                 Default::default()
             }
@@ -1506,10 +1499,7 @@ impl WorkspaceServer {
     fn lock_db(
         &self,
     ) -> Result<std::sync::MutexGuard<'_, db::ProjectDatabase>, WorkspaceError> {
-        self.db
-            .as_ref()
-            .ok_or_else(WorkspaceError::db_not_available)?
-            .lock_db()
+        self.db.lock_db()
     }
 
     fn db_set_module_info(&self, path: &Utf8Path, kind: ModuleInfoKind) {
@@ -1532,6 +1522,21 @@ impl WorkspaceServer {
             return;
         };
         db.modules.pin().remove(path);
+    }
+
+    fn db_unload_path(&self, path: &Utf8Path) {
+        let Ok(db) = self.lock_db() else {
+            return;
+        };
+        let modules = db.modules.pin();
+        let to_remove: Vec<Utf8PathBuf> = modules
+            .keys()
+            .filter(|p| p.starts_with(path))
+            .cloned()
+            .collect();
+        for p in to_remove {
+            modules.remove(&p);
+        }
     }
 
     /// Updates the state of any services relevant to the given `path`.
@@ -1809,7 +1814,7 @@ impl Workspace for WorkspaceServer {
             }
         }
 
-        self.module_graph.unload_path(&project_path);
+        self.db_unload_path(&project_path);
         self.project_layout.unload_folder(&project_path);
         #[cfg(feature = "plugins")]
         {
@@ -1979,7 +1984,7 @@ impl Workspace for WorkspaceServer {
             .ok_or_else(self.build_capability_error(&params.path))?;
         let parse = self.get_parse(&params.path).ok();
 
-        debug_type_info(&params.path, parse, self.module_graph.clone())
+        debug_type_info(&params.path, parse, self.module_db())
     }
 
     fn get_registered_types(
@@ -2313,7 +2318,7 @@ impl Workspace for WorkspaceServer {
                 skip: &skip,
                 language,
                 categories,
-                module_graph: self.module_graph.clone(),
+                module_db: self.module_db(),
                 project_layout: self.project_layout.clone(),
                 suppression_reason: None,
                 enabled_selectors: &enabled_rules,
@@ -2354,7 +2359,7 @@ impl Workspace for WorkspaceServer {
                     skip: &skip,
                     language: file_source,
                     categories,
-                    module_graph: self.module_graph.clone(),
+                    module_db: self.module_db(),
                     project_layout: self.project_layout.clone(),
                     suppression_reason: None,
                     enabled_selectors: &enabled_rules,
@@ -2477,7 +2482,7 @@ impl Workspace for WorkspaceServer {
                 skip: &skip,
                 language,
                 categories,
-                module_graph: self.module_graph.clone(),
+                module_db: self.module_db(),
                 project_layout: self.project_layout.clone(),
                 suppression_reason: None,
                 enabled_selectors: &enabled_rules,
@@ -2507,7 +2512,7 @@ impl Workspace for WorkspaceServer {
                     skip: &skip,
                     language: file_source,
                     categories,
-                    module_graph: self.module_graph.clone(),
+                    module_db: self.module_db(),
                     project_layout: self.project_layout.clone(),
                     suppression_reason: None,
                     enabled_selectors: &enabled_rules,
@@ -2581,7 +2586,7 @@ impl Workspace for WorkspaceServer {
             range,
             settings: &settings,
             path: &path,
-            module_graph: self.module_graph.clone(),
+            module_db: self.module_db(),
             project_layout: self.project_layout.clone(),
             language,
             only: &only,
@@ -2612,7 +2617,7 @@ impl Workspace for WorkspaceServer {
                 range,
                 settings: &settings,
                 path: &path,
-                module_graph: self.module_graph.clone(),
+                module_db: self.module_db(),
                 project_layout: self.project_layout.clone(),
                 language: file_source,
                 only: &only,
@@ -2841,7 +2846,7 @@ impl Workspace for WorkspaceServer {
                     settings: &settings,
                     should_format,
                     biome_path: &path,
-                    module_graph: self.module_graph.clone(),
+                    module_db: self.module_db(),
                     project_layout: self.project_layout.clone(),
                     document_file_source,
                     only: &only,
@@ -2876,7 +2881,7 @@ impl Workspace for WorkspaceServer {
             settings: &settings,
             should_format,
             biome_path: &path,
-            module_graph: self.module_graph.clone(),
+            module_db: self.module_db(),
             project_layout: self.project_layout.clone(),
             document_file_source: language,
             only: &only,
@@ -2971,6 +2976,8 @@ impl Workspace for WorkspaceServer {
             return Ok(None);
         };
 
+        let module_db = self.module_db();
+
         for snippet in embedded_snippets {
             if let DefinitionReference::LocalEmbedded { range, .. } = &definition_ref {
                 let offset = snippet.content_offset();
@@ -2991,7 +2998,7 @@ impl Workspace for WorkspaceServer {
             let result = resolve_definition(ResolveDefinitionParams {
                 path: &effective_path,
                 definition_ref: &definition_ref,
-                module_graph: &self.module_graph,
+                module_db: module_db.as_ref(),
                 offset: Some(snippet.content_offset()),
                 services: snippet.as_snippet_services(),
             });
@@ -3012,7 +3019,7 @@ impl Workspace for WorkspaceServer {
         Ok(resolve_definition(ResolveDefinitionParams {
             path: &effective_path,
             definition_ref: &definition_ref,
-            module_graph: &self.module_graph,
+            module_db: module_db.as_ref(),
             offset: None,
             services: &services,
         }))
@@ -3143,13 +3150,11 @@ impl Workspace for WorkspaceServer {
         &self,
         _params: GetModuleGraphParams,
     ) -> Result<GetModuleGraphResult, WorkspaceError> {
-        let module_graph = self.module_graph.data();
+        let db = self.lock_db()?;
         let mut data = FxHashMap::default();
-
-        for (path, info) in module_graph.iter() {
-            data.insert(path.as_str().to_string(), info.dump());
-        }
-
+        db.for_each_module(&mut |path, kind| {
+            data.insert(path.as_str().to_string(), kind.dump());
+        });
         Ok(GetModuleGraphResult { data })
     }
 }
@@ -3194,7 +3199,7 @@ impl WorkspaceScannerBridge for WorkspaceServer {
                     .into_iter()
                     .any(|package_path| package_path.starts_with(workspace_root))
             }),
-            _ => self.module_graph.contains(path),
+            _ => self.lock_db().is_ok_and(|db| db.contains(path)),
         }
     }
 
@@ -3386,7 +3391,7 @@ impl WorkspaceScannerBridge for WorkspaceServer {
         self.scanner.unload_folder(path.to_path_buf());
 
         // Unloads all descendants of the path.
-        self.module_graph.unload_path(path);
+        self.db_unload_path(path);
         self.project_layout.unload_folder(path);
 
         // Finally unloads the path itself.

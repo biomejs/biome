@@ -47,6 +47,7 @@ static_assertions = { workspace = true }
 [dev-dependencies]
 biome_configuration = { path = "../biome_configuration" }
 biome_css_formatter = { path = "../biome_css_formatter" }
+biome_db = { path = "../biome_db" }
 biome_css_parser = { path = "../biome_css_parser" }
 biome_deserialize = { path = "../biome_deserialize" }
 biome_html_formatter = { path = "../biome_html_formatter" }

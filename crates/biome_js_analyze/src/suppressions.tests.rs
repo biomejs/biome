@@ -22,12 +22,10 @@ fn quick_test() {
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
     let semantic_model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
 
-    let services = crate::JsAnalyzerServices::from((
-        Default::default(),
-        project_layout_with_top_level_dependencies(dependencies),
-        JsFileSource::tsx(),
-        Some(semantic_model),
-    ));
+    let services = crate::JsAnalyzerServices::default()
+        .with_source_type(JsFileSource::tsx())
+        .with_semantic_model(semantic_model)
+        .with_project_layout(project_layout_with_top_level_dependencies(dependencies));
 
     crate::analyze(
         &parsed.tree(),
@@ -812,12 +810,9 @@ const foo0 = function (bar: string) {
     let root = parsed.tree();
     let semantic_model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
 
-    let services = crate::JsAnalyzerServices::from((
-        Default::default(),
-        Default::default(),
-        JsFileSource::ts(),
-        Some(semantic_model),
-    ));
+    let services = crate::JsAnalyzerServices::default()
+        .with_source_type(JsFileSource::ts())
+        .with_semantic_model(semantic_model);
 
     crate::analyze(&root, filter, &options, &[], services, |signal| {
         if let Some(diag) = signal.diagnostic() {

@@ -1,5 +1,5 @@
+use crate::db::inputs::ModuleDb;
 use crate::module_graph::ModuleInfoKind;
-use crate::CssModuleInfo;
 use biome_console::markup;
 use biome_rowan::{TextRange, TokenText};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -46,18 +46,12 @@ pub struct ImportTreeNode {
     pub parent_components: Vec<Self>,
 }
 
-/// Trait for types that can provide module data for import tree traversal.
-pub trait ModuleDataProvider {
-    fn for_each_module(&self, f: &mut dyn FnMut(&Utf8Path, &ModuleInfoKind));
-    fn css_module_info_for_path(&self, path: &Utf8Path) -> Option<CssModuleInfo>;
-}
-
 /// Iterator for lazily traversing the import tree upward from a JS file,
 /// yielding CSS files imported by parent components (minimal data for performance).
 ///
 /// Uses depth-first search (DFS) with an iterative stack to explore the import tree.
 pub struct ImportTreeTraversal<'a> {
-    pub(crate) module_database: &'a dyn ModuleDataProvider,
+    pub(crate) module_database: &'a dyn ModuleDb,
     /// DFS stack of file paths to process
     pub(crate) stack: Vec<Utf8PathBuf>,
     /// Set of already-visited files to prevent cycles

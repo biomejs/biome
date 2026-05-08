@@ -5,7 +5,7 @@ use biome_fs::BiomePath;
 use biome_html_syntax::{
     AnyHtmlAttributeInitializer, HtmlAttribute, HtmlComponentName, HtmlRoot, HtmlTextExpression,
 };
-use biome_module_graph::ModuleGraph;
+use biome_module_graph::ModuleDb;
 use biome_rowan::{AstNode, TextRange, TokenAtOffset};
 use camino::Utf8Path;
 
@@ -107,7 +107,7 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
                 local_name,
                 source,
                 params.path.as_path(),
-                params.module_graph,
+                params.module_db,
                 &mut result,
             );
         }
@@ -124,10 +124,10 @@ fn resolve_import_definition(
     _local_name: &str,
     source: &str,
     current_path: &Utf8Path,
-    module_graph: &ModuleGraph,
+    module_db: &dyn ModuleDb,
     result: &mut GoToDefinitionResult,
 ) -> Option<()> {
-    let module_info = module_graph.html_module_info_for_path(current_path)?;
+    let module_info = module_db.html_module_info_for_path(current_path)?;
     let html_import = module_info
         .static_import_paths
         .get(source)
@@ -136,7 +136,7 @@ fn resolve_import_definition(
     let target_path = html_import.as_path()?;
 
     // Skip files not in the module graph
-    if !module_graph.contains(target_path) {
+    if !module_db.contains(target_path) {
         return None;
     }
 

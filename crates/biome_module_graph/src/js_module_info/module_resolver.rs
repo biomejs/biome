@@ -12,7 +12,7 @@ use biome_rowan::{AstNode, RawSyntaxKind, Text, TextRange, TokenText};
 use rustc_hash::{FxHashMap, FxHashSet};
 
 use crate::{
-    JsExport, JsImportPath, JsOwnExport, ModuleGraph,
+    JsExport, JsImportPath, JsOwnExport, ModuleDb,
     js_module_info::{JsModuleInfoInner, utils::reached_too_many_types},
 };
 
@@ -30,7 +30,7 @@ const MODULE_0_ID: ResolverId = ResolverId::from_level(TypeResolverLevel::Thin);
 ///
 /// This resolver is instantiated for a given module using
 /// [`Self::for_module()`]. Besides the module info, it also receives a
-/// reference to the [`ModuleGraph`] so that other modules can be resolved.
+/// reference to a [`ModuleDb`] so that other modules can be resolved.
 ///
 /// The module for which this resolver is created is referred to as "module 0",
 /// because it is stored at the first index of the resolver's [`Self::modules`]
@@ -43,7 +43,7 @@ const MODULE_0_ID: ResolverId = ResolverId::from_level(TypeResolverLevel::Thin);
 ///
 /// The module resolver is typically consumed through the `Typed` service.
 pub struct ModuleResolver {
-    module_graph: Arc<ModuleGraph>,
+    module_db: Arc<dyn ModuleDb>,
 
     /// Modules from which this resolver is using types.
     ///
@@ -73,7 +73,7 @@ pub struct ModuleResolver {
 }
 
 impl ModuleResolver {
-    pub fn for_module(module_info: JsModuleInfo, module_graph: Arc<ModuleGraph>) -> Self {
+    pub fn for_module(module_info: JsModuleInfo, module_db: Arc<dyn ModuleDb>) -> Self {
         let infer_types = module_info.infer_types;
 
         let types = if infer_types {
@@ -82,7 +82,7 @@ impl ModuleResolver {
             TypeStore::default()
         };
         let mut resolver = Self {
-            module_graph,
+            module_db,
             modules: vec![module_info],
             modules_by_path: Default::default(),
             expressions: Default::default(),
@@ -210,7 +210,7 @@ impl ModuleResolver {
             Entry::Occupied(entry) => Some(*entry.get()),
             Entry::Vacant(entry) => {
                 let path = entry.key().as_path()?;
-                let module_info = self.module_graph.js_module_info_for_path(path)?;
+                let module_info = self.module_db.js_module_info_for_path(path)?;
                 let module_id = ModuleId::new(self.modules.len());
                 self.modules.push(module_info);
                 self.types

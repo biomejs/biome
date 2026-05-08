@@ -2,17 +2,23 @@ use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleDomain, RuleKey,
     RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor,
 };
-use biome_module_graph::{JsModuleInfo, ModuleGraph};
+use biome_module_graph::{JsModuleInfo, ModuleDb};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{AstNode, Language, SyntaxNode, TextRange};
 use camino::Utf8Path;
 use std::sync::Arc;
 
-#[derive(Debug, Clone)]
-pub struct ModuleGraphService(Arc<ModuleGraph>, Arc<ProjectLayout>);
+#[derive(Clone)]
+pub struct DbService(Arc<dyn ModuleDb>, Arc<ProjectLayout>);
 
-impl ModuleGraphService {
-    pub fn module_graph(&self) -> &ModuleGraph {
+impl std::fmt::Debug for DbService {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("DbService").finish_non_exhaustive()
+    }
+}
+
+impl DbService {
+    pub fn db(&self) -> &dyn ModuleDb {
         self.0.as_ref()
     }
 
@@ -25,7 +31,7 @@ impl ModuleGraphService {
     }
 }
 
-impl FromServices for ModuleGraphService {
+impl FromServices for DbService {
     fn from_services(
         rule_key: &RuleKey,
         rule_metadata: &RuleMetadata,
@@ -38,30 +44,30 @@ impl FromServices for ModuleGraphService {
                 .any(|d| d == &RuleDomain::Project);
             if !has_project_domain {
                 panic!(
-                    "The rule {rule_key} uses ModuleGraphService, but it is not in the Project domain."
+                    "The rule {rule_key} uses DbService, but it is not in the Project domain."
                 );
             }
         }
-        let module_graph: &Arc<ModuleGraph> = services
+        let module_db: &Arc<dyn ModuleDb> = services
             .get_service()
-            .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["ModuleGraph"]))?;
+            .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["ModuleDb"]))?;
 
         let project_layout: &Arc<ProjectLayout> = services
             .get_service()
             .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["ProjectLayout"]))?;
 
-        Ok(Self(module_graph.clone(), project_layout.clone()))
+        Ok(Self(module_db.clone(), project_layout.clone()))
     }
 }
 
-impl Phase for ModuleGraphService {
+impl Phase for DbService {
     fn phase() -> Phases {
         Phases::Syntax
     }
 }
 
 /// Query type usable by lint rules that matches import statements and uses the
-/// [ModuleGraph] to resolve their specifiers.
+/// database to resolve their specifiers.
 #[derive(Clone)]
 pub struct ResolvedImports<N>(N);
 
@@ -84,7 +90,7 @@ where
     type Output = N;
 
     type Language = L;
-    type Services = ModuleGraphService;
+    type Services = DbService;
 
     fn build_visitor(analyzer: &mut impl AddVisitor<L>, _: &L::Root) {
         analyzer.add_visitor(Phases::Syntax, SyntaxVisitor::default);

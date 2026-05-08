@@ -7,7 +7,10 @@ use biome_js_syntax::{
     AnyJsObjectMember, AnyJsxAttributeValue, JsExpressionTemplateRoot, JsFileSource, JsxAttribute,
     binding_ext::AnyJsBindingDeclaration,
 };
-use biome_module_graph::{ImportTreeDisplay, ImportTreeNode};
+use biome_module_graph::{
+    ImportTreeDisplay, ImportTreeNode, build_import_tree, build_import_tree_for_html,
+    traverse_import_tree_for_classes, traverse_import_tree_for_html_classes,
+};
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, TextSize, declare_node_union};
 use biome_rule_options::no_undeclared_classes::NoUndeclaredClassesOptions;
 
@@ -95,7 +98,7 @@ impl Rule for NoUndeclaredClasses {
             return Vec::new();
         }
 
-        let module_graph = ctx.module_graph();
+        let db = ctx.db();
         let file_path = ctx.file_path();
 
         // Determine whether to use JS or HTML traversal based on file type.
@@ -107,12 +110,9 @@ impl Rule for NoUndeclaredClasses {
         // Collect all reachable CSS steps. If no CSS is reachable at all,
         // skip to avoid false positives on files without any stylesheets.
         let css_steps: Vec<_> = if is_html_like {
-            module_graph
-                .traverse_import_tree_for_html_classes(file_path)
-                .collect()
+            traverse_import_tree_for_html_classes(db, file_path).collect()
         } else {
-            module_graph
-                .traverse_import_tree_for_classes(file_path)
+            traverse_import_tree_for_classes(db, file_path)
         };
 
         if css_steps.is_empty() {
@@ -130,9 +130,9 @@ impl Rule for NoUndeclaredClasses {
 
             if !found_class {
                 let import_tree = if is_html_like {
-                    module_graph.build_import_tree_for_html(file_path)
+                    build_import_tree_for_html(db, file_path)
                 } else {
-                    module_graph.build_import_tree(file_path)
+                    build_import_tree(db, file_path)
                 };
                 signals.push(UndeclaredClass {
                     range: entry.range,
@@ -280,14 +280,12 @@ fn run_without_semantic(
         return Vec::new();
     }
 
-    let module_graph = ctx.module_graph();
+    let db = ctx.db();
     let file_path = ctx.file_path();
 
     // Collect all reachable CSS steps. If no CSS is reachable at all,
     // skip to avoid false positives on files without any stylesheets.
-    let css_steps: Vec<_> = module_graph
-        .traverse_import_tree_for_html_classes(file_path)
-        .collect();
+    let css_steps: Vec<_> = traverse_import_tree_for_html_classes(db, file_path).collect();
 
     if css_steps.is_empty() {
         return Vec::new();
@@ -302,7 +300,7 @@ fn run_without_semantic(
         });
 
         if !found_class {
-            let import_tree = module_graph.build_import_tree_for_html(file_path);
+            let import_tree = build_import_tree_for_html(db, file_path);
             signals.push(UndeclaredClass {
                 range: entry.range,
                 name: entry.name.clone(),

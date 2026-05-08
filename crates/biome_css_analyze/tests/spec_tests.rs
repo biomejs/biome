@@ -168,17 +168,15 @@ pub(crate) fn analyze_and_snap(
 
     let needs_module_graph = NeedsModuleGraph::new(filter.enabled_rules).compute();
     let project_layout = project_layout_for_test_file(input_file, &mut diagnostics);
-    let module_graph = if needs_module_graph {
-        module_graph_for_css_test_file(input_file, &project_layout)
-    } else {
-        Default::default()
-    };
 
-    let services = CssAnalyzerServices::default()
+    let mut services = CssAnalyzerServices::default()
         .with_file_source(source_type)
         .with_semantic_model(&semantic_model)
-        .with_module_graph(module_graph)
         .with_project_layout(project_layout);
+    if needs_module_graph {
+        let module_db = module_graph_for_css_test_file(input_file, &services.project_layout.clone().unwrap());
+        services = services.with_module_db(module_db);
+    }
 
     let (_, errors) =
         biome_css_analyze::analyze(&root, filter, &options, services, plugins, |event| {

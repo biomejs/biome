@@ -673,7 +673,6 @@ impl ServerFactory {
                 service_tx,
                 Arc::new(biome_service::workspace::GritSearchQuery::default()),
                 None,
-                true,
             )),
             sessions: Sessions::default(),
             next_session_key: AtomicU64::new(0),
@@ -695,6 +694,7 @@ impl ServerFactory {
                 service_tx,
                 Arc::new(GritSearchQuery::default()),
                 None,
+                true
             )),
             sessions: Sessions::default(),
             next_session_key: AtomicU64::new(0),

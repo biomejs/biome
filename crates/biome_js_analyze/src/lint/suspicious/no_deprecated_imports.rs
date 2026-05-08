@@ -4,7 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike, JsModuleSource};
-use biome_module_graph::{JsImportPath, JsModuleInfo, ModuleGraph};
+use biome_module_graph::{JsImportPath, JsModuleInfo, ModuleDb};
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_deprecated_imports::NoDeprecatedImportsOptions;
 use camino::Utf8Path;
@@ -90,7 +90,7 @@ impl Rule for NoDeprecatedImports {
 
         match node {
             AnyJsImportLike::JsModuleSource(node) => {
-                get_deprecated_imports_from_module_source(node, target_path, ctx.module_graph())
+                get_deprecated_imports_from_module_source(node, target_path, ctx.db())
             }
 
             // TODO: require() and import() calls should also be handled here, but tracking the
@@ -123,9 +123,9 @@ impl Rule for NoDeprecatedImports {
 fn get_deprecated_imports_from_module_source(
     node: &JsModuleSource,
     target_path: &Utf8Path,
-    module_graph: &ModuleGraph,
+    module_db: &dyn ModuleDb,
 ) -> Vec<NoDeprecatedImportsState> {
-    let Some(module_info) = module_graph.js_module_info_for_path(target_path) else {
+    let Some(module_info) = module_db.js_module_info_for_path(target_path) else {
         return Vec::new();
     };
 
@@ -134,7 +134,7 @@ fn get_deprecated_imports_from_module_source(
     };
 
     import_clause.filter_map_all_imported_symbols(|name, range| {
-        find_deprecation(&module_info, module_graph, &name)
+        find_deprecation(&module_info, module_db, &name)
             .map(|message| NoDeprecatedImportsState { range, message })
     })
 }
@@ -148,11 +148,11 @@ fn get_deprecated_imports_from_module_source(
 /// - Returns `None` if the symbol is not deprecated or cannot be found.
 fn find_deprecation(
     module_info: &JsModuleInfo,
-    module_graph: &ModuleGraph,
+    module_db: &dyn ModuleDb,
     name: &str,
 ) -> Option<Option<String>> {
     module_info
-        .find_jsdoc_for_exported_symbol(module_graph, name)
+        .find_jsdoc_for_exported_symbol(module_db, name)
         .and_then(|jsdoc| {
             let mut is_deprecated = false;
             let mut message = String::new();
