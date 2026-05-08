@@ -96,7 +96,7 @@ pub use crate::{
 };
 #[cfg(feature = "schema")]
 use schemars::{Schema, SchemaGenerator};
-
+mod db;
 use crate::settings::{EditorFeatures, ModuleGraphResolutionKind, SettingsWithEditor};
 pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 #[cfg(feature = "lang_grit")]
@@ -1824,6 +1824,7 @@ pub fn server(fs: Arc<dyn FsWithResolverProxy>, threads: Option<usize>) -> Box<d
         service_tx,
         Arc::new(search_provider),
         threads,
+        false
     ))
 }
 

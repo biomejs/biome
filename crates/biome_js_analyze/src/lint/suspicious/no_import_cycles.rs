@@ -1,4 +1,4 @@
-use crate::services::module_graph::ResolvedImports;
+use crate::services::database::ResolvedImports;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };

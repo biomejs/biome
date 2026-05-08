@@ -7,7 +7,7 @@ use biome_js_syntax::{
     AnyJsRoot, AnyJsxAttributeValue, JsImport, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode,
     JsVariableDeclarator, JsxAttribute, JsxReferenceIdentifier, JsxString,
 };
-use biome_module_graph::{JsOwnExport, ModuleGraph, ModuleInfo};
+use biome_module_graph::{JsOwnExport, ModuleGraph, ModuleInfoKind};
 use biome_rowan::{AstNode, AstSeparatedList, TokenAtOffset, TokenText};
 use camino::Utf8Path;
 use std::ops::Add;
@@ -201,7 +201,7 @@ fn resolve_import_definition(
 ) -> Option<()> {
     let module_info = module_graph.module_info_for_path(current_path)?;
     match module_info {
-        ModuleInfo::Js(module_info) => {
+        ModuleInfoKind::Js(module_info) => {
             let import_path = module_info
                 .static_import_paths
                 .get(specifier)
@@ -232,8 +232,8 @@ fn resolve_import_definition(
                 },
             }
         }
-        ModuleInfo::Css(_) => {}
-        ModuleInfo::Html(module_info) => {
+        ModuleInfoKind::Css(_) => {}
+        ModuleInfoKind::Html(module_info) => {
             let resolved_path = module_info
                 .static_import_paths
                 .get(specifier)

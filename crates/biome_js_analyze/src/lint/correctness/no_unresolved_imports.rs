@@ -10,7 +10,7 @@ use biome_rowan::{AstNode, Text, TextRange, TokenText};
 use biome_rule_options::no_unresolved_imports::NoUnresolvedImportsOptions;
 use camino::{Utf8Path, Utf8PathBuf};
 
-use crate::services::module_graph::ResolvedImports;
+use crate::services::database::ResolvedImports;
 
 declare_lint_rule! {
     /// Warn when importing non-existing exports.

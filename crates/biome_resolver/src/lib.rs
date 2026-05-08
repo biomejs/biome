@@ -1,5 +1,6 @@
 #![deny(clippy::use_self)]
 
+pub mod db;
 mod errors;
 mod node_builtins;
 mod resolver_fs_proxy;

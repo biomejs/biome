@@ -6,15 +6,15 @@ mod scope;
 mod utils;
 mod visitor;
 
-use crate::ModuleGraph;
 use crate::css_module_info::CssClassReference;
-use biome_js_semantic::ScopeId;
-use biome_js_syntax::AnyJsImportLike;
+use crate::{ModuleDependencies, ModuleGraph};
+use biome_js_semantic::{ScopeId, SemanticModel};
+use biome_js_syntax::{AnyJsImportLike, AnyJsRoot};
 use biome_js_type_info::{
     FormatTypeContext, ImportSymbol, ResolvedTypeId, TypeData, TypeReference,
 };
 use biome_jsdoc_comment::JsdocComment;
-use biome_resolver::ResolvedPath;
+use biome_resolver::{FsWithResolverProxy, ResolvedPath};
 use biome_rowan::{Text, TextRange};
 use camino::Utf8Path;
 use indexmap::IndexMap;
@@ -26,7 +26,11 @@ use std::{collections::BTreeMap, ops::Deref, sync::Arc};
 use scope::JsScope;
 
 use crate::diagnostics::ModuleDiagnostic;
+use crate::module_graph::ModuleGraphFsProxy;
+use crate::path_info_cache::PathInfoCache;
 pub(super) use binding::JsBindingData;
+use biome_fs::BiomePath;
+use biome_project_layout::ProjectLayout;
 pub use diagnostics::JsModuleInfoDiagnostic;
 pub use module_resolver::ModuleResolver;
 pub(crate) use visitor::JsModuleVisitor;
@@ -410,7 +414,7 @@ impl JsModuleInfoInner {
 /// Exports come in three varieties: "own" exports that are defined in the
 /// module itself, re-exports for named exports, and re-exports that apply to
 /// all symbols from another module.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Hash)]
 pub enum JsExport {
     /// An export that is defined in this module.
     Own(JsOwnExport),
@@ -451,7 +455,7 @@ impl JsExport {
 ///
 /// It could point to any kind of resource, such as JavaScript files, CSS files,
 /// images, and so on.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct JsImport {
     /// The specifier for the imported as it appeared in the source text.
     pub specifier: Text,
@@ -472,7 +476,7 @@ pub struct JsImport {
 ///
 /// Exports can reference bindings, types of expressions or other references for
 /// which no binding exists, or namespaces defined by exports of another module.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Hash)]
 pub enum JsOwnExport {
     /// An export that references a binding by its text range.
     /// The range can be used to look up type augmentation data.
@@ -494,7 +498,7 @@ pub enum JsOwnExport {
 
 /// Information about an export statement that re-exports all symbols from
 /// another module.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Hash)]
 pub struct JsReexport {
     /// Where this export statement is located.
     pub export_range: Option<TextRange>,
@@ -564,4 +568,36 @@ pub struct SerializedJsModuleInfo {
 
     /// CSS class names referenced in JSX `className` or `class` attributes.
     pub referenced_classes: BTreeSet<String>,
+}
+
+// TODO: add valid docstrings
+pub fn resolve_js_module(
+    root: AnyJsRoot,
+    path: &BiomePath,
+    fs: &dyn FsWithResolverProxy,
+    project_layout: &ProjectLayout,
+    semantic_model: Arc<SemanticModel>,
+    path_info_cache: &PathInfoCache,
+    enable_type_inference: bool,
+) -> (JsModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>) {
+    let directory = path.parent().unwrap_or(path);
+    let fs_proxy = ModuleGraphFsProxy::new(fs, path_info_cache, project_layout);
+    let visitor = JsModuleVisitor::new(
+        root,
+        path.to_path_buf(),
+        directory,
+        &fs_proxy,
+        semantic_model,
+        enable_type_inference,
+    );
+
+    let module_info = visitor.collect_info();
+    let mut dependencies = ModuleDependencies::default();
+    for import_path in module_info.all_import_paths() {
+        if let Some(p) = import_path.as_path() {
+            dependencies.insert(p.to_path_buf());
+        }
+    }
+    let diagnostics = module_info.diagnostics().to_vec();
+    (module_info, dependencies, diagnostics)
 }

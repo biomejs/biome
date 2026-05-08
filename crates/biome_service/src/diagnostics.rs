@@ -100,11 +100,25 @@ pub enum WorkspaceError {
     /// Go-to definition requires the linter or assist to be enabled.
     GoToDefinitionDisabled(GoToDefinitionDisabled),
 
+    /// The database is not available or its lock is poisoned.
+    DbError(DbError),
+
     /// Emitted when the rust gate feature isn't enabled
     FeatureNotEnabled(FeatureNotEnabledDiagnostic),
 }
 
 impl WorkspaceError {
+    pub fn db_not_available() -> Self {
+        Self::DbError(DbError {
+            reason: "The database is not available for this workspace.".to_string(),
+        })
+    }
+
+    pub fn db_lock_poisoned() -> Self {
+        Self::DbError(DbError {
+            reason: "The database lock is poisoned. This is a bug in Biome.".to_string(),
+        })
+    }
     pub fn format_with_errors_disabled() -> Self {
         Self::FormatWithErrorsDisabled(FormatWithErrorsDisabled)
     }
@@ -747,6 +761,20 @@ pub struct ConfigurationOutsideProject {
     tags(INTERNAL)
 )]
 pub struct FeatureNotEnabledDiagnostic;
+
+#[derive(Debug, Diagnostic, Serialize, Deserialize)]
+#[diagnostic(
+    category = "internalError/db",
+    severity = Error,
+    message(
+        message("Database error: "<Info>{self.reason}</Info>),
+        description = "Database error: {reason}",
+    ),
+    tags(INTERNAL)
+)]
+pub struct DbError {
+    pub reason: String,
+}
 
 #[cfg(test)]
 mod test {
