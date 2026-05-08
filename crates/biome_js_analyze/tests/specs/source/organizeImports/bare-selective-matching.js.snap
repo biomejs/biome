@@ -1,0 +1,43 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: bare-selective-matching.js
+---
+# Input
+```js
+import "./e.css";
+import d from "./d.js";
+import "./c.css";
+import "./x.js";
+import "./b.css";
+import "./a.css";
+
+```
+
+# Diagnostics
+```
+bare-selective-matching.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+  > 1 │ import "./e.css";
+      │ ^^^^^^^^^^^^^^^^^
+    2 │ import d from "./d.js";
+    3 │ import "./c.css";
+  
+  i Safe fix: Organize Imports (Biome)
+  
+    1   │ - import·"./e.css";
+    2   │ - import·d·from·"./d.js";
+    3   │ - import·"./c.css";
+      1 │ + import·"./c.css";
+      2 │ + import·"./e.css";
+      3 │ + import·d·from·"./d.js";
+    4 4 │   import "./x.js";
+    5   │ - import·"./b.css";
+    6   │ - import·"./a.css";
+      5 │ + import·"./a.css";
+      6 │ + import·"./b.css";
+    7 7 │   
+  
+
+```
