@@ -2286,7 +2286,7 @@ if(a === -0) {}
     );
 
     let expected_code_action = CodeActionOrCommand::CodeAction(CodeAction {
-        title: String::from("Organize Imports (Biome)"),
+        title: String::from("Organize imports and exports (Biome)"),
         kind: Some(CodeActionKind::new("source.organizeImports.biome")),
         diagnostics: None,
         edit: Some(WorkspaceEdit {

@@ -18,6 +18,8 @@ use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
 
+pub const VUE_KEYWORDS: TokenSet<HtmlSyntaxKind> = token_set!(T![of], T![in]);
+
 pub(crate) fn parse_vue_directive(p: &mut HtmlParser) -> ParsedSyntax {
     if !p.at(HTML_LITERAL) {
         return Absent;

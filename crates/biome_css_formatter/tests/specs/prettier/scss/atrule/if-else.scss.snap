@@ -189,80 +189,6 @@ p {
    }
    @if $type == ocean {
    } @else if $type == matador {
-@@ -64,13 +64,11 @@
-     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables
-   {
-     color: blue;
--  } @else if
--    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables ==
-+  } @else if $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables ==
-     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables
-   {
-     color: red;
--  } @else if
--    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables ==
-+  } @else if $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables ==
-     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables
-   {
-     color: green;
-@@ -79,44 +77,23 @@
-   }
-   @if $very-very-very-long-var == 0 and $very-very-very-long-var == 0 {
-   }
--  @if $very-very-very-very-very-very-long-var ==
--    0 and
--    $very-very-very-long-var ==
--    0
-+  @if $very-very-very-very-very-very-long-var == 0 and
-+    $very-very-very-long-var == 0
-   {
-   }
--  @if $very-very-very-very-very-very-very-very-very-very-very-long-var ==
--    0 and
--    $very-very-very-very-very-very-very-very-very-very-very-long-var ==
--    0
-+  @if $very-very-very-very-very-very-very-very-very-very-very-long-var == 0 and
-+    $very-very-very-very-very-very-very-very-very-very-very-long-var == 0
-   {
-   }
--  @if $base-font-size !=
--    16px or
--    $base-line-height !=
--    24px or
--    $base-unit !=
--    "em" or
--    $h1-font-size !=
--    2 *
--    $base-font-size or
--    $h2-font-size !=
--    1.5 *
--    $base-font-size or
--    $h3-font-size !=
--    1.17 *
--    $base-font-size or
--    $h4-font-size !=
--    1 *
--    $base-font-size or
--    $h5-font-size !=
--    0.83 *
--    $base-font-size or
--    $h6-font-size !=
--    0.67 *
--    $base-font-size or
--    $indent-amount !=
--    40px
-+  @if $base-font-size != 16px or $base-line-height != 24px or
-+    $base-unit != "em" or
-+    $h1-font-size != 2 * $base-font-size or
-+    $h2-font-size != 1.5 * $base-font-size or
-+    $h3-font-size != 1.17 * $base-font-size or
-+    $h4-font-size != 1 * $base-font-size or
-+    $h5-font-size != 0.83 * $base-font-size or
-+    $h6-font-size != 0.67 * $base-font-size or
-+    $indent-amount != 40px
-   {
-   }
-   @if (str-slice($item, 0, 1) == ":") {
 ```
 
 # Output
@@ -334,11 +260,13 @@ p {
     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables
   {
     color: blue;
-  } @else if $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables ==
+  } @else if
+    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables ==
     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables
   {
     color: red;
-  } @else if $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables ==
+  } @else if
+    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables ==
     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables
   {
     color: green;
@@ -347,23 +275,44 @@ p {
   }
   @if $very-very-very-long-var == 0 and $very-very-very-long-var == 0 {
   }
-  @if $very-very-very-very-very-very-long-var == 0 and
-    $very-very-very-long-var == 0
+  @if $very-very-very-very-very-very-long-var ==
+    0 and
+    $very-very-very-long-var ==
+    0
   {
   }
-  @if $very-very-very-very-very-very-very-very-very-very-very-long-var == 0 and
-    $very-very-very-very-very-very-very-very-very-very-very-long-var == 0
+  @if $very-very-very-very-very-very-very-very-very-very-very-long-var ==
+    0 and
+    $very-very-very-very-very-very-very-very-very-very-very-long-var ==
+    0
   {
   }
-  @if $base-font-size != 16px or $base-line-height != 24px or
-    $base-unit != "em" or
-    $h1-font-size != 2 * $base-font-size or
-    $h2-font-size != 1.5 * $base-font-size or
-    $h3-font-size != 1.17 * $base-font-size or
-    $h4-font-size != 1 * $base-font-size or
-    $h5-font-size != 0.83 * $base-font-size or
-    $h6-font-size != 0.67 * $base-font-size or
-    $indent-amount != 40px
+  @if $base-font-size !=
+    16px or
+    $base-line-height !=
+    24px or
+    $base-unit !=
+    "em" or
+    $h1-font-size !=
+    2 *
+    $base-font-size or
+    $h2-font-size !=
+    1.5 *
+    $base-font-size or
+    $h3-font-size !=
+    1.17 *
+    $base-font-size or
+    $h4-font-size !=
+    1 *
+    $base-font-size or
+    $h5-font-size !=
+    0.83 *
+    $base-font-size or
+    $h6-font-size !=
+    0.67 *
+    $base-font-size or
+    $indent-amount !=
+    40px
   {
   }
   @if (str-slice($item, 0, 1) == ":") {
@@ -381,8 +330,8 @@ p {
 ```
    63:   @if $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables ==
    64:     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables
-   67:   } @else if $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables ==
-   68:     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables
-   71:   } @else if $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables ==
-   72:     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables
+   68:     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables ==
+   69:     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables
+   73:     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables ==
+   74:     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-variables
 ```

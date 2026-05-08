@@ -5,6 +5,7 @@ use crate::syntax::scss::{
 };
 use biome_css_syntax::CssSyntaxKind::{
     self, CSS_BOGUS, SCSS_EACH_AT_RULE, SCSS_EACH_BINDING_LIST, SCSS_EACH_HEADER,
+    SCSS_EACH_VALUE_LIST,
 };
 use biome_css_syntax::T;
 use biome_parser::parse_lists::ParseSeparatedList;
@@ -13,8 +14,8 @@ use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
 use biome_parser::{Parser, TokenSet, token_set};
 
-const SCSS_EACH_ITERABLE_END_SET: TokenSet<CssSyntaxKind> = token_set![T!['{']];
 const SCSS_EACH_BINDING_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T![,], T![in], T!['{']];
+const SCSS_EACH_VALUE_END_SET: TokenSet<CssSyntaxKind> = token_set![T![,], T!['{']];
 
 /// Parses the SCSS `@each` at-rule.
 ///
@@ -42,8 +43,7 @@ pub(crate) fn parse_scss_each_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     p.expect(T![in]);
 
-    parse_scss_expression_until(p, SCSS_EACH_ITERABLE_END_SET)
-        .or_add_diagnostic(p, expected_scss_expression);
+    ScssEachValueList.parse_list(p);
     header.complete(p, SCSS_EACH_HEADER);
 
     parse_declaration_or_rule_list_block(p);
@@ -111,5 +111,59 @@ impl ParseSeparatedList for ScssEachBindingList {
 
     fn allow_empty(&self) -> bool {
         false
+    }
+}
+
+struct ScssEachValueListParseRecovery;
+
+impl ParseRecovery for ScssEachValueListParseRecovery {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
+
+    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at_ts(SCSS_EACH_VALUE_END_SET)
+    }
+}
+
+/// Parses top-level values after `in`.
+///
+/// Example: `@each $item in puma, sea-slug {}`
+struct ScssEachValueList;
+impl ParseSeparatedList for ScssEachValueList {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const LIST_KIND: Self::Kind = SCSS_EACH_VALUE_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        parse_scss_expression_until(p, SCSS_EACH_VALUE_END_SET)
+    }
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(T!['{'])
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        parsed_element.or_recover(p, &ScssEachValueListParseRecovery, expected_scss_expression)
+    }
+
+    fn allow_empty(&self) -> bool {
+        false
+    }
+
+    fn separating_element_kind(&mut self) -> Self::Kind {
+        T![,]
+    }
+
+    fn allow_trailing_separating_element(&self) -> bool {
+        true
+    }
+
+    fn diagnose_missing_element(&mut self, p: &mut Self::Parser<'_>) {
+        p.error(expected_scss_expression(p, p.cur_range()));
     }
 }

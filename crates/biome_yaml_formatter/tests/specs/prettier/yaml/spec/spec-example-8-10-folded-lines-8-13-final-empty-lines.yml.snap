@@ -1,0 +1,80 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-8-10-folded-lines-8-13-final-empty-lines.yml
+---
+# Input
+
+```yml
+>
+
+ folded
+ line
+
+ next
+ line
+   * bullet
+
+   * list
+   * lines
+
+ last
+ line
+
+# Comment
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,16 +1,16 @@
+ >
+ 
+-  folded
+-  line
++ folded
++ line
+ 
+-  next
+-  line
+-    * bullet
++ next
++ line
++   * bullet
+ 
+-    * list
+-    * lines
++   * list
++   * lines
+ 
+-  last
+-  line
++ last
++ line
+ 
+ # Comment
+```
+
+# Output
+
+```yml
+>
+
+ folded
+ line
+
+ next
+ line
+   * bullet
+
+   * list
+   * lines
+
+ last
+ line
+
+# Comment
+```

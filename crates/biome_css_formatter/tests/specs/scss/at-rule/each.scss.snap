@@ -73,6 +73,10 @@ h3
 {
 }
 
+@each in puma,sea-slug{
+color:red;
+}
+
 ```
 
 
@@ -133,6 +137,10 @@ h3
 }
 
 @each $element, $size in (h1: 20px, h2: 16px, h3: 14px) {
+}
+
+@each in puma, sea-slug {
+	color: red;
 }
 
 ```

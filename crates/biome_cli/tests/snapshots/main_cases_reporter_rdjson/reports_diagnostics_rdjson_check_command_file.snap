@@ -180,8 +180,8 @@ expression: redactor(content)
         "path": "index.ts",
         "range": {
           "end": {
-            "column": 21,
-            "line": 1
+            "column": 33,
+            "line": 2
           },
           "start": {
             "column": 1,
@@ -189,7 +189,7 @@ expression: redactor(content)
           }
         }
       },
-      "message": "The imports and exports are not sorted."
+      "message": "Sort these imports."
     },
     {
       "code": {
@@ -356,8 +356,8 @@ expression: redactor(content)
         "path": "main.ts",
         "range": {
           "end": {
-            "column": 21,
-            "line": 1
+            "column": 33,
+            "line": 2
           },
           "start": {
             "column": 1,
@@ -365,7 +365,7 @@ expression: redactor(content)
           }
         }
       },
-      "message": "The imports and exports are not sorted."
+      "message": "Sort these imports."
     },
     {
       "code": {

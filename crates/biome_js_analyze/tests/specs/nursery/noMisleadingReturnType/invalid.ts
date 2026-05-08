@@ -165,3 +165,42 @@ function objectWithConstPropertyFromIdentifier(): { a: string } {
     const result = { a: "x" as const };
     return result;
 }
+
+function singleWithNull(): string | null { return "hello"; }
+function singleWithExtraPrimitive(): string | number { return "hello"; }
+function singleBoolWithNull(): boolean | null { return true; }
+function singleWithExtraLiteral(): string | 0 { return "hello"; }
+function threeVariantsSingleReturn(): string | number | null { return "hello"; }
+function partialReduce(b: boolean): string | number | null { if (b) return "a"; return 1; }
+function multiLiteralNarrow(b: boolean): string | null { if (b) return "a"; return "b"; }
+function exactMatchDropNull(b: boolean): "a" | "b" | null { if (b) return "a"; return "b"; }
+function asConstUnionAnnotation(): string | null { return "hello" as const; }
+
+async function asyncUnionNull(): Promise<string | null> { return "hello"; }
+
+const arrowUnionNull = (): string | null => "hello";
+
+class UnionClass { getValue(): string | null { return "hello"; } }
+
+const unionObj = { getValue(): string | null { return "hello"; } };
+
+class UnionGetter { get value(): string | null { return "hello"; } }
+
+function nestedUnion(): string | (number | null) { return "hello"; }
+
+type SimpleAlias = string | null;
+function simpleAliasUnion(): SimpleAlias { return "hello"; }
+
+function throwBranchUnion(b: boolean): string | null {
+    if (b) throw new Error("fail");
+    return "hello";
+}
+
+async function asyncUnionBothReturns(b: boolean): Promise<string | null> {
+    if (b) return "hello";
+    return null;
+}
+
+function partialAbsorbUnion(b: boolean): "a" | "b" | string | null { if (b) return "a"; return null; }
+
+function crossPrimitiveUnion(): "a" | string | 1 { return "a"; }

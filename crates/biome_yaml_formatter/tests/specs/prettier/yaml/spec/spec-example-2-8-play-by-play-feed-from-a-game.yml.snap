@@ -1,0 +1,52 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-2-8-play-by-play-feed-from-a-game.yml
+---
+# Input
+
+```yml
+---
+time: 20:03:20
+player: Sammy Sosa
+action: strike (miss)
+...
+---
+time: 20:03:47
+player: Sammy Sosa
+action: grand slam
+...
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,7 +2,9 @@
+ time: 20:03:20
+ player: Sammy Sosa
+ action: strike (miss)
++...
+ ---
+ time: 20:03:47
+ player: Sammy Sosa
+ action: grand slam
++...
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+---
+time: 20:03:20
+player: Sammy Sosa
+action: strike (miss)
+...
+---
+time: 20:03:47
+player: Sammy Sosa
+action: grand slam
+...```

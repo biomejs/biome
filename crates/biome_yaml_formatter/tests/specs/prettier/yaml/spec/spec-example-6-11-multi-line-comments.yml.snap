@@ -1,0 +1,37 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-6-11-multi-line-comments.yml
+---
+# Input
+
+```yml
+key:    # Comment
+        # lines
+  value
+
+
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,3 +1,3 @@
+-key: # Comment
+-  # lines
+-  value
++key:    # Comment
++        # lines
++  value
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+key:    # Comment
+        # lines
+  value```

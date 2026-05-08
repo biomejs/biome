@@ -9410,7 +9410,7 @@ impl ScssEachHeader {
         ScssEachHeaderFields {
             bindings: self.bindings(),
             in_token: self.in_token(),
-            iterable: self.iterable(),
+            values: self.values(),
         }
     }
     pub fn bindings(&self) -> ScssEachBindingList {
@@ -9419,8 +9419,8 @@ impl ScssEachHeader {
     pub fn in_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn iterable(&self) -> SyntaxResult<ScssExpression> {
-        support::required_node(&self.syntax, 2usize)
+    pub fn values(&self) -> ScssEachValueList {
+        support::list(&self.syntax, 2usize)
     }
 }
 impl Serialize for ScssEachHeader {
@@ -9435,7 +9435,7 @@ impl Serialize for ScssEachHeader {
 pub struct ScssEachHeaderFields {
     pub bindings: ScssEachBindingList,
     pub in_token: SyntaxResult<SyntaxToken>,
-    pub iterable: SyntaxResult<ScssExpression>,
+    pub values: ScssEachValueList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssElseClause {
@@ -15613,6 +15613,7 @@ impl AnyCssUrlModifier {
 pub enum AnyCssUrlValue {
     CssString(CssString),
     CssUrlValueRaw(CssUrlValueRaw),
+    ScssExpression(ScssExpression),
     ScssInterpolatedString(ScssInterpolatedString),
 }
 impl AnyCssUrlValue {
@@ -15625,6 +15626,12 @@ impl AnyCssUrlValue {
     pub fn as_css_url_value_raw(&self) -> Option<&CssUrlValueRaw> {
         match &self {
             Self::CssUrlValueRaw(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_expression(&self) -> Option<&ScssExpression> {
+        match &self {
+            Self::ScssExpression(item) => Some(item),
             _ => None,
         }
     }
@@ -27765,7 +27772,7 @@ impl std::fmt::Debug for ScssEachHeader {
             f.debug_struct("ScssEachHeader")
                 .field("bindings", &self.bindings())
                 .field("in_token", &support::DebugSyntaxResult(self.in_token()))
-                .field("iterable", &support::DebugSyntaxResult(self.iterable()))
+                .field("values", &self.values())
                 .finish()
         } else {
             f.debug_struct("ScssEachHeader").finish()
@@ -40183,6 +40190,11 @@ impl From<CssUrlValueRaw> for AnyCssUrlValue {
         Self::CssUrlValueRaw(node)
     }
 }
+impl From<ScssExpression> for AnyCssUrlValue {
+    fn from(node: ScssExpression) -> Self {
+        Self::ScssExpression(node)
+    }
+}
 impl From<ScssInterpolatedString> for AnyCssUrlValue {
     fn from(node: ScssInterpolatedString) -> Self {
         Self::ScssInterpolatedString(node)
@@ -40192,17 +40204,19 @@ impl AstNode for AnyCssUrlValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssString::KIND_SET
         .union(CssUrlValueRaw::KIND_SET)
+        .union(ScssExpression::KIND_SET)
         .union(ScssInterpolatedString::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_STRING | CSS_URL_VALUE_RAW | SCSS_INTERPOLATED_STRING
+            CSS_STRING | CSS_URL_VALUE_RAW | SCSS_EXPRESSION | SCSS_INTERPOLATED_STRING
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_STRING => Self::CssString(CssString { syntax }),
             CSS_URL_VALUE_RAW => Self::CssUrlValueRaw(CssUrlValueRaw { syntax }),
+            SCSS_EXPRESSION => Self::ScssExpression(ScssExpression { syntax }),
             SCSS_INTERPOLATED_STRING => {
                 Self::ScssInterpolatedString(ScssInterpolatedString { syntax })
             }
@@ -40214,6 +40228,7 @@ impl AstNode for AnyCssUrlValue {
         match self {
             Self::CssString(it) => it.syntax(),
             Self::CssUrlValueRaw(it) => it.syntax(),
+            Self::ScssExpression(it) => it.syntax(),
             Self::ScssInterpolatedString(it) => it.syntax(),
         }
     }
@@ -40221,6 +40236,7 @@ impl AstNode for AnyCssUrlValue {
         match self {
             Self::CssString(it) => it.into_syntax(),
             Self::CssUrlValueRaw(it) => it.into_syntax(),
+            Self::ScssExpression(it) => it.into_syntax(),
             Self::ScssInterpolatedString(it) => it.into_syntax(),
         }
     }
@@ -40230,6 +40246,7 @@ impl std::fmt::Debug for AnyCssUrlValue {
         match self {
             Self::CssString(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUrlValueRaw(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolatedString(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -40239,6 +40256,7 @@ impl From<AnyCssUrlValue> for SyntaxNode {
         match n {
             AnyCssUrlValue::CssString(it) => it.into_syntax(),
             AnyCssUrlValue::CssUrlValueRaw(it) => it.into_syntax(),
+            AnyCssUrlValue::ScssExpression(it) => it.into_syntax(),
             AnyCssUrlValue::ScssInterpolatedString(it) => it.into_syntax(),
         }
     }
@@ -49375,6 +49393,88 @@ impl IntoIterator for ScssEachBindingList {
 impl IntoIterator for &ScssEachBindingList {
     type Item = SyntaxResult<ScssVariable>;
     type IntoIter = AstSeparatedListNodesIterator<Language, ScssVariable>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct ScssEachValueList {
+    syntax_list: SyntaxList,
+}
+impl ScssEachValueList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for ScssEachValueList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_EACH_VALUE_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_EACH_VALUE_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for ScssEachValueList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstSeparatedList for ScssEachValueList {
+    type Language = Language;
+    type Node = ScssExpression;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for ScssEachValueList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("ScssEachValueList ")?;
+        f.debug_list().entries(self.elements()).finish()
+    }
+}
+impl IntoIterator for ScssEachValueList {
+    type Item = SyntaxResult<ScssExpression>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, ScssExpression>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for &ScssEachValueList {
+    type Item = SyntaxResult<ScssExpression>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, ScssExpression>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

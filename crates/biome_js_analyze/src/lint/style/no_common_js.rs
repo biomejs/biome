@@ -123,7 +123,8 @@ declare_node_union! {
 
 fn is_require_call_expression(node: &JsCallExpression) -> Option<JsReferenceIdentifier> {
     let callee = node.callee().ok()?;
-    let (reference, name) = global_identifier(&callee.omit_parentheses())?;
+    let (reference, name) =
+        global_identifier(&callee.omit_parentheses().as_any_global_identifier_expression()?)?;
 
     if name.text() == "require" {
         return Some(reference);
@@ -134,7 +135,8 @@ fn is_require_call_expression(node: &JsCallExpression) -> Option<JsReferenceIden
 
 fn is_common_js_exports(node: &JsStaticMemberAssignment) -> Option<JsReferenceIdentifier> {
     let object = node.object().ok()?;
-    let (reference, name) = global_identifier(&object.omit_parentheses())?;
+    let (reference, name) =
+        global_identifier(&object.omit_parentheses().as_any_global_identifier_expression()?)?;
     let object_name = name.text();
 
     // exports.*

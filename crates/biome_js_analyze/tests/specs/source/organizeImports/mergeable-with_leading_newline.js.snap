@@ -14,14 +14,15 @@ import { Moment } from 'moment';
 ```
 mergeable-with_leading_newline.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Sort these imports.
   
   > 2 │ import moment from 'moment';
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ import { Moment } from 'moment';
+  > 3 │ import { Moment } from 'moment';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     4 │ 
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
     1 1 │   
     2   │ - import·moment·from·'moment';

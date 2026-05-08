@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validClassFields.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+class WithFields {
+    field = () => this.value;
+    other = function () {
+        return this.value;
+    };
+
+    accessor fieldAccessor = () => this.value;
+
+    static ignored = () => {};
+    nonCallable = 1;
+}
+
+```

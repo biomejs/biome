@@ -1,0 +1,57 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-7-24-flow-nodes.yml
+---
+
+# Input
+
+```yml
+- !!str "a"
+- 'b'
+- &anchor "c"
+- *anchor
+- !!str
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,5 @@
+ - !!str "a"
+-- "b"
++- 'b'
+ - &anchor "c"
+ - *anchor
+-- !!str
++- !!str
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+- !!str "a"
+- 'b'
+- &anchor "c"
+- *anchor
+- !!str```
+
+# Errors
+```
+spec-example-7-24-flow-nodes.yml:4:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `*`
+  
+    2 │ - 'b'
+    3 │ - &anchor "c"
+  > 4 │ - *anchor
+      │   ^
+    5 │ - !!str
+    6 │ 
+  
+
+```

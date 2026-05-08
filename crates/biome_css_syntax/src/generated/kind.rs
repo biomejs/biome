@@ -581,6 +581,7 @@ pub enum CssSyntaxKind {
     SCSS_EACH_AT_RULE,
     SCSS_EACH_HEADER,
     SCSS_EACH_BINDING_LIST,
+    SCSS_EACH_VALUE_LIST,
     SCSS_FOR_AT_RULE,
     SCSS_FORWARD_AS_CLAUSE,
     SCSS_FORWARD_AT_RULE,
@@ -822,6 +823,7 @@ impl CssSyntaxKind {
                 | CSS_FUNCTION_PARAMETER_LIST
                 | SCSS_AT_ROOT_QUERY_LIST
                 | SCSS_EACH_BINDING_LIST
+                | SCSS_EACH_VALUE_LIST
                 | SCSS_EXTEND_TARGET_COMPONENT_LIST
                 | SCSS_IMPORT_ITEM_LIST
                 | SCSS_INCLUDE_ARGUMENT_LIST

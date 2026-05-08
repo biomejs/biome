@@ -12,13 +12,13 @@ export { A, B } from "" with { "k2": "", "k1": "" };
 ```
 unorganized-export-attributes.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Sort the attributes.
   
   > 1 │ export { A, B } from "" with { "k2": "", "k1": "" };
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ 
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
     1   │ - export·{·A,·B·}·from·""·with·{·"k2":·"",·"k1":·""·};
       1 │ + export·{·A,·B·}·from·""·with·{·"k1":·"",·"k2":·""·};

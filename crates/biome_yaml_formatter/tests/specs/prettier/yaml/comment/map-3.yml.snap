@@ -1,0 +1,57 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/comment/map-3.yml
+---
+
+# Input
+
+```yml
+foo1:
+  - foo
+
+  # - foo
+
+  # - foo
+
+  - foo
+
+foo2:
+  - foo2
+
+  # first line
+  # next line
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -8,7 +8,4 @@
+   - foo
+ 
+ foo2:
+-  - foo2
+-
+-  # first line
+-  # next line
++  - foo2
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+foo1:
+  - foo
+
+  # - foo
+
+  # - foo
+
+  - foo
+
+foo2:
+  - foo2```

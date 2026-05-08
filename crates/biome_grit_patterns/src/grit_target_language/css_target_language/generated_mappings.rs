@@ -571,7 +571,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "ScssContentAtRule" => &[("arguments", 1)],
         "ScssDebugAtRule" => &[("value", 1)],
         "ScssEachAtRule" => &[("header", 1), ("block", 2)],
-        "ScssEachHeader" => &[("bindings", 0), ("iterable", 2)],
+        "ScssEachHeader" => &[("bindings", 0), ("values", 2)],
         "ScssElseClause" => &[("body", 2)],
         "ScssErrorAtRule" => &[("value", 1)],
         "ScssExpression" => &[("items", 0)],

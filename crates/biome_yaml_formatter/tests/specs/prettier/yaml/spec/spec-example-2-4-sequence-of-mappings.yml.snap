@@ -1,0 +1,53 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-2-4-sequence-of-mappings.yml
+---
+# Input
+
+```yml
+-
+  name: Mark McGwire
+  hr:   65
+  avg:  0.278
+-
+  name: Sammy Sosa
+  hr:   63
+  avg:  0.288
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,6 +1,8 @@
+-- name: Mark McGwire
+-  hr: 65
+-  avg: 0.278
+-- name: Sammy Sosa
+-  hr: 63
+-  avg: 0.288
++-
++  name: Mark McGwire
++  hr:   65
++  avg:  0.278
++-
++  name: Sammy Sosa
++  hr:   63
++  avg:  0.288
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+-
+  name: Mark McGwire
+  hr:   65
+  avg:  0.278
+-
+  name: Sammy Sosa
+  hr:   63
+  avg:  0.288```

@@ -11,7 +11,6 @@ use biome_rowan::{
 use biome_string_case::StrOnlyExtension;
 use rustc_hash::FxHashMap;
 use std::collections::BTreeMap;
-use std::hash::Hash;
 use std::sync::Arc;
 
 /// The façade for all semantic information of a CSS document.
@@ -36,9 +35,13 @@ impl SemanticModel {
         self.root.to_language_root::<AnyCssRoot>()
     }
 
-    /// Returns a slice of all rules in the CSS document.
-    pub fn rules(&self) -> &[Rule] {
-        &self.data.rules
+    /// Returns all top-level rules in the CSS document.
+    pub fn rules(&self) -> Vec<&Rule> {
+        self.data
+            .top_level_rule_ids
+            .iter()
+            .filter_map(|id| self.data.all_rules.get(id.index()))
+            .collect()
     }
 
     pub fn global_custom_variables(&self) -> &FxHashMap<String, CssGlobalCustomVariable> {
@@ -46,7 +49,7 @@ impl SemanticModel {
     }
 
     pub fn get_rule_by_id(&self, id: &RuleId) -> Option<&Rule> {
-        self.data.rules_by_id.get(id)
+        self.data.all_rules.get(id.index())
     }
 
     /// Returns the rule that contains the given range.
@@ -56,28 +59,30 @@ impl SemanticModel {
         // the comparison semantics of TextRange.
 
         // Handle the edge case where the target range starts from 0.
-        if target_range.start() == TextSize::from(0) {
+        let rule_id = if target_range.start() == TextSize::from(0) {
             self.data
-                .range_to_rule
+                .range_to_rule_id
                 .iter()
                 .rev()
                 .find(|&(&range, _)| range.contains_range(target_range))
-                .map(|(_, rule)| rule)
+                .map(|(_, id)| id)
         } else {
             self.data
-                .range_to_rule
+                .range_to_rule_id
                 .range(..=target_range)
                 .rev()
                 .find(|&(&range, _)| range.contains_range(target_range))
-                .map(|(_, rule)| rule)
-        }
+                .map(|(_, id)| id)
+        };
+        rule_id.and_then(|id| self.data.all_rules.get(id.index()))
     }
 
     /// Returns an iterator over the specificity of all rules in source order.
     pub fn specificity_of_rules(&self) -> impl Iterator<Item = Specificity> + '_ {
         self.data
-            .range_to_rule
+            .range_to_rule_id
             .values()
+            .filter_map(|id| self.data.all_rules.get(id.index()))
             .flat_map(|rule| rule.selectors())
             .map(|selector| selector.specificity())
     }
@@ -93,14 +98,14 @@ impl SemanticModel {
 /// and a list of all rules in the document.
 #[derive(Debug)]
 pub(crate) struct SemanticModelData {
-    /// List of all top-level rules in the CSS document
-    pub(crate) rules: Vec<Rule>,
+    /// Single source of truth for all rules, indexed by RuleId
+    pub(crate) all_rules: Vec<Rule>,
+    /// IDs of top-level rules only
+    pub(crate) top_level_rule_ids: Vec<RuleId>,
     /// Map of CSS variables declared in the `:root` selector or using the @property rule.
     pub(crate) global_custom_variables: FxHashMap<String, CssGlobalCustomVariable>,
-    /// Map of all the rules by their id
-    pub(crate) rules_by_id: FxHashMap<RuleId, Rule>,
-    /// Map of the range of each rule to the rule itself
-    pub(crate) range_to_rule: BTreeMap<TextRange, Rule>,
+    /// Map from text range to RuleId
+    pub(crate) range_to_rule_id: BTreeMap<TextRange, RuleId>,
 }
 
 /// Represents a CSS rule set, including its selectors, declarations, and nested rules.

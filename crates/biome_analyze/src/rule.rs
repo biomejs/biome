@@ -1407,7 +1407,7 @@ pub trait Rule: RuleMeta + Sized {
         None
     }
 
-    /// Create a code action that allows to suppress the rule. The function
+    /// Create a code action that allows you to suppress the rule. The function
     /// returns the node to which the suppression comment is applied.
     fn inline_suppression(
         ctx: &RuleContext<Self>,
