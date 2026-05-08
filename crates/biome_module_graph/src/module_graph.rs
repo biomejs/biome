@@ -65,6 +65,11 @@ impl ModuleGraph {
         self.data.pin().contains_key(path)
     }
 
+    /// Returns a generic module for the given path
+    pub fn module_info_for_path(&self, path: &Utf8Path) -> Option<ModuleInfo> {
+        self.data.pin().get(path).cloned()
+    }
+
     /// Returns the module info, such as imports and exports and their types,
     /// for the given `path`.
     pub fn js_module_info_for_path(&self, path: &Utf8Path) -> Option<JsModuleInfo> {
@@ -1066,7 +1071,7 @@ impl ModuleGraph {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ModuleInfo {
     Js(JsModuleInfo),
     Css(CssModuleInfo),

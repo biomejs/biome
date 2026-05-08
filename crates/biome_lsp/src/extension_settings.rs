@@ -2,6 +2,7 @@ use std::str::FromStr;
 
 use biome_configuration::Configuration;
 use biome_service::settings::{EditorFeature, EditorFeatures};
+use biome_service::workspace::ScanKind;
 use camino::Utf8PathBuf;
 use serde::{Deserialize, Serialize};
 use serde_json::{Error, Value};
@@ -91,5 +92,15 @@ impl ExtensionSettings {
         }
 
         features
+    }
+
+    /// Which [ScanKind] is required for the current editor features
+    pub(crate) fn scan_kind_from_editor_features(&self) -> ScanKind {
+        let features = self.editor_features();
+        if features.contains(EditorFeature::GotoDefinition) {
+            ScanKind::Project
+        } else {
+            ScanKind::KnownFiles
+        }
     }
 }

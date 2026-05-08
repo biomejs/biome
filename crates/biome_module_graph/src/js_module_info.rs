@@ -91,6 +91,12 @@ impl JsModuleInfo {
         module_graph.find_exported_symbol(self, name)
     }
 
+    /// Finds the default exported symbol
+    #[inline]
+    pub fn find_js_default_export_symbol(&self, module_graph: &ModuleGraph) -> Option<JsOwnExport> {
+        module_graph.find_exported_symbol(self, "default")
+    }
+
     /// Finds an exported symbol by `name`, using the `module_graph` to
     /// lookup re-exports if necessary.
     #[inline]

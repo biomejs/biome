@@ -6,8 +6,7 @@ use crate::file_handlers::svelte::SvelteFileHandler;
 use crate::file_handlers::{
     AnalyzerVisitorCache, Capabilities, CodeActionsParams, DiagnosticsAndActionsParams,
     DocumentFileSource, Features, FixAllParams, FormatEmbedNode, LintParams, LintResults,
-    ParseResult, ResolveBindingParams,
-    ResolveDefinitionParams, UpdateSnippetsNodes,
+    ParseResult, ResolveBindingParams, ResolveDefinitionParams, UpdateSnippetsNodes,
 };
 use crate::projects::{GetFileFeaturesParams, ProjectKey, Projects};
 use crate::scanner::{
@@ -838,8 +837,7 @@ impl WorkspaceServer {
                 Some(def_ref) => match def_ref {
                     DefinitionReference::Local { .. }
                     | DefinitionReference::Import { .. }
-                    | DefinitionReference::HtmlComponent { .. }
-                    | DefinitionReference::DynamicImport { .. } => default_caps,
+                    | DefinitionReference::HtmlComponent { .. } => default_caps,
                     DefinitionReference::LocalEmbedded { to_language, .. } => match to_language {
                         LocalEmbeddedLanguage::Js => {
                             self.features

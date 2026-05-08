@@ -78,6 +78,7 @@ pub(crate) fn resolve_binding_html(params: ResolveBindingParams) -> Option<Defin
             && let Some(source) = binding.source()
         {
             return Some(DefinitionReference::HtmlComponent {
+                local_name: binding.token_text().to_string(),
                 source: source.to_string(),
             });
         }
@@ -101,8 +102,9 @@ pub(crate) fn resolve_binding_html(params: ResolveBindingParams) -> Option<Defin
 pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoToDefinitionResult> {
     let mut result = GoToDefinitionResult::default();
     match params.definition_ref {
-        DefinitionReference::HtmlComponent { source } => {
+        DefinitionReference::HtmlComponent { local_name, source } => {
             resolve_import_definition(
+                local_name,
                 source,
                 params.path.as_path(),
                 params.module_graph,
@@ -112,14 +114,14 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
         DefinitionReference::Local { .. }
         | DefinitionReference::Import { .. }
         | DefinitionReference::CssClass { .. }
-        | DefinitionReference::LocalEmbedded { .. }
-        | DefinitionReference::DynamicImport { .. } => {}
+        | DefinitionReference::LocalEmbedded { .. } => {}
     }
 
     Some(result)
 }
 
 fn resolve_import_definition(
+    _local_name: &str,
     source: &str,
     current_path: &Utf8Path,
     module_graph: &ModuleGraph,

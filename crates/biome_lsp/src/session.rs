@@ -1177,7 +1177,10 @@ impl Session {
         };
 
         let scan_kind = ProjectScanComputer::new(&configuration).compute();
-        let scan_kind = if scan_kind.is_none() {
+        // We give the editor priority
+        let scan_kind = if !self.scan_kind_from_editor_features().is_none() {
+            self.scan_kind_from_editor_features()
+        } else if scan_kind.is_none() {
             ScanKind::KnownFiles
         } else {
             scan_kind
@@ -1312,6 +1315,13 @@ impl Session {
             .read()
             .unwrap()
             .requires_configuration()
+    }
+
+    pub(crate) fn scan_kind_from_editor_features(&self) -> ScanKind {
+        self.extension_settings
+            .read()
+            .unwrap()
+            .scan_kind_from_editor_features()
     }
 
     pub(crate) fn inline_config(&self) -> Option<Configuration> {

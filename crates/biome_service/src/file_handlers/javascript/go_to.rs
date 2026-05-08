@@ -4,12 +4,11 @@ use biome_css_syntax::{TextRange, TextSize};
 use biome_fs::BiomePath;
 use biome_js_syntax::binding_ext::AnyJsIdentifierBinding;
 use biome_js_syntax::{
-    AnyJsRoot, AnyJsxAttributeValue, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode,
+    AnyJsRoot, AnyJsxAttributeValue, JsImport, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode,
     JsVariableDeclarator, JsxAttribute, JsxReferenceIdentifier, JsxString,
 };
-use biome_js_type_info::ImportSymbol;
-use biome_module_graph::{JsOwnExport, ModuleGraph};
-use biome_rowan::{AstNode, AstSeparatedList, TokenAtOffset};
+use biome_module_graph::{JsOwnExport, ModuleGraph, ModuleInfo};
+use biome_rowan::{AstNode, AstSeparatedList, TokenAtOffset, TokenText};
 use camino::Utf8Path;
 use std::ops::Add;
 
@@ -39,9 +38,12 @@ pub(crate) fn resolve_binding(params: ResolveBindingParams) -> Option<Definition
             && let Some(binding) = semantic_model.binding(&reference)
         {
             let binding_syntax = binding.syntax();
-            if is_under_import_clause(&binding_syntax) {
+            if let Some(specifier) = is_under_import_clause(&binding_syntax) {
                 let name = binding.syntax().text_trimmed().to_string();
-                return Some(DefinitionReference::Import { local_name: name });
+                return Some(DefinitionReference::Import {
+                    local_name: name,
+                    specifier: specifier.to_string(),
+                });
             }
             if let Some(result) = retrieve_reference_under_dynamic_import(&binding_syntax) {
                 return Some(result);
@@ -56,9 +58,12 @@ pub(crate) fn resolve_binding(params: ResolveBindingParams) -> Option<Definition
             && let Some(binding) = semantic_model.binding(&reference)
         {
             let binding_syntax = binding.syntax();
-            if is_under_import_clause(&binding_syntax) {
+            if let Some(specifier) = is_under_import_clause(&binding_syntax) {
                 let name = binding_syntax.text_trimmed().to_string();
-                return Some(DefinitionReference::Import { local_name: name });
+                return Some(DefinitionReference::Import {
+                    local_name: name,
+                    specifier: specifier.to_string(),
+                });
             }
             if let Some(result) = retrieve_reference_under_dynamic_import(&binding_syntax) {
                 return Some(result);
@@ -74,9 +79,10 @@ pub(crate) fn resolve_binding(params: ResolveBindingParams) -> Option<Definition
             let binding_range = binding_node.name_token().ok()?.text_trimmed_range();
             let binding_text = binding_node.name_token().ok()?.text_trimmed().to_string();
 
-            if is_under_import_clause(binding_node.syntax()) {
+            if let Some(specifier) = is_under_import_clause(binding_node.syntax()) {
                 return Some(DefinitionReference::Import {
                     local_name: binding_text,
+                    specifier: specifier.to_string(),
                 });
             }
             if let Some(result) = retrieve_reference_under_dynamic_import(binding_node.syntax()) {
@@ -93,8 +99,8 @@ pub(crate) fn resolve_binding(params: ResolveBindingParams) -> Option<Definition
 }
 
 /// Checks if a syntax node is under an import clause.
-fn is_under_import_clause(node: &JsSyntaxNode) -> bool {
-    node.ancestors().skip(1).any(|ancestor| {
+fn is_under_import_clause(node: &JsSyntaxNode) -> Option<TokenText> {
+    if !node.ancestors().skip(1).any(|ancestor| {
         matches!(
             ancestor.kind(),
             JsSyntaxKind::JS_IMPORT_NAMED_CLAUSE
@@ -102,7 +108,13 @@ fn is_under_import_clause(node: &JsSyntaxNode) -> bool {
                 | JsSyntaxKind::JS_IMPORT_NAMESPACE_CLAUSE
                 | JsSyntaxKind::JS_IMPORT_COMBINED_CLAUSE
         )
-    })
+    }) {
+        return None;
+    }
+
+    let js_import = node.ancestors().skip(1).find_map(JsImport::cast)?;
+
+    js_import.source_text().ok()
 }
 
 fn retrieve_reference_under_dynamic_import(
@@ -133,7 +145,7 @@ fn retrieve_reference_under_dynamic_import(
         .as_any_js_literal_expression()?
         .as_js_string_literal_expression()?;
 
-    Some(DefinitionReference::DynamicImport {
+    Some(DefinitionReference::Import {
         local_name: identifier.text_trimmed().to_string(),
         specifier: argument.inner_string_text().ok()?.to_string(),
     })
@@ -146,19 +158,11 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
         DefinitionReference::Local { range } => {
             result.store(params.path.clone(), *range);
         }
-        DefinitionReference::Import { local_name } => {
-            resolve_import_definition(
-                local_name,
-                params.path.as_path(),
-                params.module_graph,
-                &mut result,
-            );
-        }
-        DefinitionReference::DynamicImport {
+        DefinitionReference::Import {
             local_name,
             specifier,
         } => {
-            resolve_dynamic_import_definition(
+            resolve_import_definition(
                 local_name,
                 specifier,
                 params.path.as_path(),
@@ -166,8 +170,9 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
                 &mut result,
             );
         }
-        DefinitionReference::HtmlComponent { source } => {
+        DefinitionReference::HtmlComponent { local_name, source } => {
             resolve_import_definition(
+                local_name,
                 source,
                 params.path.as_path(),
                 params.module_graph,
@@ -189,78 +194,83 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
 /// Resolves an imported symbol to its definition in the target module.
 fn resolve_import_definition(
     local_name: &str,
-    current_path: &Utf8Path,
-    module_graph: &ModuleGraph,
-    result: &mut GoToDefinitionResult,
-) -> Option<()> {
-    let module_info = module_graph.js_module_info_for_path(current_path)?;
-    let js_import = module_info.static_imports.get(local_name)?;
-
-    let target_path = js_import.resolved_path.as_path()?;
-
-    // Skip files not in the module graph
-    if !module_graph.contains(target_path) {
-        return None;
-    }
-
-    let target_module = module_graph.js_module_info_for_path(target_path)?;
-
-    let export_name = match &js_import.symbol {
-        ImportSymbol::Named(name) => name.text(),
-        ImportSymbol::Default => "default",
-        ImportSymbol::All => {
-            result.store(
-                BiomePath::new(target_path),
-                TextRange::new(TextSize::from(0), TextSize::from(0)),
-            );
-            return Some(());
-            // Namespace import: navigate to the target module file
-        }
-    };
-
-    let own_export = target_module.find_js_exported_symbol(module_graph, export_name)?;
-
-    match own_export {
-        JsOwnExport::Binding(range) => {
-            result.store(BiomePath::new(target_path), range);
-        }
-        // Type-only exports and namespace exports don't have a binding location
-        JsOwnExport::Type(_) | JsOwnExport::Namespace(_) => {}
-    }
-
-    Some(())
-}
-
-fn resolve_dynamic_import_definition(
-    local_name: &str,
     specifier: &str,
     current_path: &Utf8Path,
     module_graph: &ModuleGraph,
     result: &mut GoToDefinitionResult,
 ) -> Option<()> {
-    let module_info = module_graph.js_module_info_for_path(current_path)?;
-    let import_path = module_info.dynamic_import_paths.get(specifier)?;
-    let target_path = import_path.resolved_path.as_path()?;
+    let module_info = module_graph.module_info_for_path(current_path)?;
+    match module_info {
+        ModuleInfo::Js(module_info) => {
+            let import_path = module_info
+                .static_import_paths
+                .get(specifier)
+                .or(module_info.dynamic_import_paths.get(specifier))?;
 
-    if !module_graph.contains(target_path) {
-        return None;
-    }
+            let target_path = import_path.resolved_path.as_path()?;
 
-    let target_module = module_graph.js_module_info_for_path(target_path)?;
-    match target_module.find_js_exported_symbol(module_graph, local_name) {
-        // In this case we found the file, but we don't know the symbol, which means that module
-        // imported like `const foo = await import('./foo')`. In this case, we send the user
-        // to the top of the file.
-        None => {
-            result.store(
-                BiomePath::new(target_path),
-                TextRange::new(TextSize::from(0), TextSize::from(0)),
-            );
+            // Skip files not in the module graph
+            if !module_graph.contains(target_path) {
+                return None;
+            }
+
+            let target_module = module_graph.js_module_info_for_path(target_path)?;
+
+            match target_module
+                .find_js_exported_symbol(module_graph, local_name)
+                .or(target_module.find_js_default_export_symbol(module_graph))
+            {
+                None => {
+                    result.store(
+                        BiomePath::new(target_path),
+                        TextRange::new(TextSize::from(0), TextSize::from(0)),
+                    );
+                }
+                Some(own_export) => match own_export {
+                    JsOwnExport::Binding(range) => result.store(BiomePath::new(target_path), range),
+                    JsOwnExport::Type(_) | JsOwnExport::Namespace(_) => {}
+                },
+            }
         }
-        Some(own_export) => match own_export {
-            JsOwnExport::Binding(range) => result.store(BiomePath::new(target_path), range),
-            JsOwnExport::Type(_) | JsOwnExport::Namespace(_) => {}
-        },
+        ModuleInfo::Css(_) => {}
+        ModuleInfo::Html(module_info) => {
+            let resolved_path = module_info
+                .static_import_paths
+                .get(specifier)
+                .or(module_info.dynamic_import_paths.get(specifier))?;
+
+            let target_path = resolved_path.as_path()?;
+
+            // Skip files not in the module graph
+            if !module_graph.contains(target_path) {
+                return None;
+            }
+
+            // Check if we need to resolve from a JS file
+            if let Some(module) = module_graph.js_module_info_for_path(target_path) {
+                match module.find_js_exported_symbol(module_graph, local_name) {
+                    None => {
+                        result.store(
+                            BiomePath::new(target_path),
+                            TextRange::new(TextSize::from(0), TextSize::from(0)),
+                        );
+                    }
+                    Some(own_export) => match own_export {
+                        JsOwnExport::Binding(range) => {
+                            result.store(BiomePath::new(target_path), range)
+                        }
+                        JsOwnExport::Type(_) | JsOwnExport::Namespace(_) => {}
+                    },
+                }
+            }
+            // if not, it's the whole file as a component
+            else {
+                result.store(
+                    BiomePath::new(target_path),
+                    TextRange::new(TextSize::from(0), TextSize::from(0)),
+                );
+            }
+        }
     };
 
     Some(())

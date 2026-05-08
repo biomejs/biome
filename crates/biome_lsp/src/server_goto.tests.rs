@@ -466,6 +466,57 @@ async fn goto_definition_jsx_component_cross_file() -> Result<()> {
 }
 
 #[tokio::test]
+async fn goto_definition_vue_component_cross_file() -> Result<()> {
+    // From
+    // Line 0: `<script>import Button from './Button.vue'</script><template><Button /></template>`
+    //          0123456789012345678901234567890123456789012345678901234567890 -> 62
+    let (res, fs) = goto_definition_cross_file(CrossFileTestParams {
+        name: "goto_definition_vue_component_cross_file",
+        config: r#"{ "linter": { "enabled": true },  "html": { "experimentalFullSupportEnabled": true } }"#,
+        files: vec![
+            ("Button.vue", "<template><button>Hello!</button></template>\n"),
+            ("App.vue", "<script>import Button from './Button.vue'</script><template><Button /></template>\n"),
+        ],
+        open_file: "App.vue",
+        language_id: "vue",
+        source: "<script>import Button from './Button.vue'</script><template><Button /></template>\n",
+        cursor: pos(0, 61),
+    })
+        .await?;
+
+    assert_definition(res, file_uri(&fs, "Button.vue"), range(0, 0, 0, 0));
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn goto_definition_vue_javascript_cross_file() -> Result<()> {
+    // From
+    // Line 0: `<script>import {foo} from './foo.ts'</script>`
+    //          01234567890123456 -> 26
+    // To
+    // Line 0: `export function foo() {}`
+    //          01234567890123456 -> 16
+    let (res, fs) = goto_definition_cross_file(CrossFileTestParams {
+        name: "goto_definition_vue_javascript_cross_file",
+        config: r#"{ "linter": { "enabled": true },  "html": { "experimentalFullSupportEnabled": true } }"#,
+        files: vec![
+            ("foo.ts", "export function foo() {}\n"),
+            ("App.vue", "<script>import {foo} from './foo.ts'</script>\n"),
+        ],
+        open_file: "App.vue",
+        language_id: "vue",
+        source: "<script>import {foo} from './foo.ts'</script>\n",
+        cursor: pos(0, 16),
+    })
+        .await?;
+
+    assert_definition(res, file_uri(&fs, "foo.ts"), range(0, 16, 0, 19));
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn goto_definition_dynamic_import_variable_declarator() -> Result<()> {
     // Cursor on `utils` in `const utils = await import(...)` at line 0, character 6
     let (res, fs) = goto_definition_cross_file(CrossFileTestParams {
