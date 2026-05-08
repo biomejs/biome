@@ -59,6 +59,7 @@ $concat2: foo + bar;
 $concat3: "str" + ing;
 
 // Division expressions (SCSS division context)
+$division0: 10 / 2;
 $division1: (10 / 2);
 $division2: (100px / 10);
 $division3: $a / $b;
