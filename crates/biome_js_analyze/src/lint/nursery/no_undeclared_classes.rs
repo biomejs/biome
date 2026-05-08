@@ -1,4 +1,4 @@
-use crate::services::module_graph::ResolvedImports;
+use crate::services::database::ResolvedImports;
 use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_semantic::SemanticModel;
@@ -113,7 +113,6 @@ impl Rule for NoUndeclaredClasses {
         } else {
             module_graph
                 .traverse_import_tree_for_classes(file_path)
-                .collect()
         };
 
         if css_steps.is_empty() {

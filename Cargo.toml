@@ -104,6 +104,7 @@ biome_yaml_factory           = { path = "./crates/biome_yaml_factory", version =
 biome_yaml_formatter         = { path = "./crates/biome_yaml_formatter", version = "0.1.0" }
 biome_yaml_parser            = { path = "./crates/biome_yaml_parser", version = "0.0.1" }
 biome_yaml_syntax            = { path = "./crates/biome_yaml_syntax", version = "0.0.1" }
+biome_db                     = { path = "./crates/biome_db", version = "0.0.1" }
 boa_engine                   = "0.21.1"
 boxcar                       = "0.2.14"
 bpaf                         = { version = "0.9.25", features = ["derive"] }
@@ -167,6 +168,7 @@ uuid                         = "1.18.1"
 walkdir                      = "2.5.0"
 web-time                     = "1.1.0"
 windows                      = "0.62.2"
+salsa                        = "0.26.2"
 xtask_codegen                = { path = "xtask/codegen" }
 xtask_coverage               = { path = "xtask/coverage" }
 xtask_glue                   = { path = "xtask/glue" }

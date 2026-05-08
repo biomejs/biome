@@ -9,7 +9,7 @@ use biome_js_formatter::context::JsFormatOptions;
 use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::JsFileSource;
-use biome_module_graph::{JsExport, JsOwnExport, ModuleGraph, ModuleInfo, ModuleResolver};
+use biome_module_graph::{JsExport, JsOwnExport, ModuleGraph, ModuleInfoKind, ModuleResolver};
 use biome_resolver::ResolvedPath;
 use biome_rowan::AstNode;
 use biome_test_utils::{dump_registered_module_types, dump_registered_types};
@@ -151,7 +151,7 @@ impl<'a> ModuleGraphSnapshot<'a> {
             if let Some(data) = dependency_data.get(file_name.as_path()) {
                 content.push_str("\n\n## Module Info\n\n");
                 match data {
-                    ModuleInfo::Js(data) => {
+                    ModuleInfoKind::Js(data) => {
                         content.push_str("```\n");
                         content.push_str(&data.to_string());
 
@@ -259,12 +259,12 @@ impl<'a> ModuleGraphSnapshot<'a> {
 
                         dump_registered_module_types(&mut content, &data.types());
                     }
-                    ModuleInfo::Css(css_data) => {
+                    ModuleInfoKind::Css(css_data) => {
                         content.push_str("```\n");
                         content.push_str(&css_data.to_string());
                         content.push_str("\n```\n\n");
                     }
-                    ModuleInfo::Html(html_data) => {
+                    ModuleInfoKind::Html(html_data) => {
                         content.push_str("```\n");
                         content.push_str(&html_data.to_string());
                         content.push_str("\n```\n\n");

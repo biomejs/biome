@@ -672,6 +672,7 @@ impl ServerFactory {
                 instruction_tx,
                 service_tx,
                 None,
+                true,
             )),
             sessions: Sessions::default(),
             next_session_key: AtomicU64::new(0),
@@ -687,7 +688,7 @@ impl ServerFactory {
         let (service_tx, service_rx) = watch::channel(ServiceNotification::IndexUpdated);
         Self {
             cancellation: Arc::default(),
-            workspace: Arc::new(WorkspaceServer::new(fs, watcher_tx, service_tx, None)),
+            workspace: Arc::new(WorkspaceServer::new(fs, watcher_tx, service_tx, None, true)),
             sessions: Sessions::default(),
             next_session_key: AtomicU64::new(0),
             stop_on_disconnect: true,

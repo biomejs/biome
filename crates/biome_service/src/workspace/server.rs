@@ -57,7 +57,10 @@ use biome_html_syntax::HtmlRoot;
 use biome_js_syntax::{AnyJsRoot, EmbeddingKind, JsFileSource, LanguageVariant, ModuleKind};
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
-use biome_module_graph::{HtmlEmbeddedContent, ModuleDependencies, ModuleDiagnostic, ModuleGraph};
+use biome_module_graph::{
+    HtmlEmbeddedContent, ModuleDependencies, ModuleDiagnostic, ModuleGraph, ModuleInfo,
+    ModuleInfoKind,
+};
 use biome_package::{Catalogs, PackageJson, PackageType};
 use biome_parser::AnyParse;
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -135,6 +138,8 @@ pub struct WorkspaceServer {
 
     /// Re-usable cache for analyzer visitors.
     analyzer_cache: HashMap<ProjectKey, AnalyzerVisitorCache>,
+
+    db: Option<crate::workspace::db::DbState>,
 }
 
 /// The `Workspace` object is long-lived, so we want it to be able to cross
@@ -152,6 +157,7 @@ impl WorkspaceServer {
         watcher_tx: Sender<WatcherInstruction>,
         notification_tx: watch::Sender<ServiceNotification>,
         threads: Option<usize>,
+        needs_db: bool,
     ) -> Self {
         init_thread_pool(threads);
 
@@ -169,6 +175,7 @@ impl WorkspaceServer {
             fs,
             notification_tx,
             analyzer_cache: HashMap::default(),
+            db: needs_db.then_some(db::DbState::default()),
         }
     }
 
@@ -558,6 +565,8 @@ impl WorkspaceServer {
                     .insert(path.clone(), node_cache);
             }
 
+            self.db_set_file_data(path.as_path(), any_parse.unwrap_as_send_node());
+
             (Some(Ok(any_parse)), services)
         };
 
@@ -728,6 +737,10 @@ impl WorkspaceServer {
         // If the document was never opened by the scanner, we don't care
         // about updating service data.
         Ok(InternalOpenFileResult::default())
+    }
+
+    fn db_set_file_data(&self, _path: &Utf8Path, _root: SendNode) {
+        // TODO: Phase 5 — store parsed AST in Salsa for semantic model tracking
     }
 
     /// Retrieves all diagnostics that belong to a document. It contains diagnostics that belong to embedded snippets too
@@ -1338,23 +1351,24 @@ impl WorkspaceServer {
     ) -> (ModuleDependencies, Vec<ModuleDiagnostic>) {
         match update_kind {
             UpdateKind::AddedOrChanged(_, root, services) => {
-                // NOTE: add a new else if branch to handle other language roots
                 if let (Some(js_root), Some(services)) = (
                     SendNode::into_language_root::<AnyJsRoot>(root.clone()),
                     services.as_js_services(),
                 ) {
-                    // Module graph requires a semantic model to operate.
-                    // If the semantic model is not available (e.g., due to parse errors),
-                    // we skip module graph updates for this file.
                     if let Some(semantic_model) = services.semantic_model.clone() {
-                        self.module_graph.update_graph_for_js_paths(
+                        let result = self.module_graph.update_graph_for_js_paths(
                             self.fs.as_ref(),
                             &self.project_layout,
-                            &[(path, js_root, Arc::new(semantic_model))],
+                            &[(path, js_root.clone(), Arc::new(semantic_model.clone()))],
                             infer_types,
-                        )
+                        );
+                        if let Some(module_info) =
+                            self.module_graph.js_module_info_for_path(path.as_path())
+                        {
+                            self.db_set_module_info(path, ModuleInfoKind::Js(module_info));
+                        }
+                        result
                     } else {
-                        // No semantic model available - return empty result
                         Default::default()
                     }
                 } else if let Some(css_root) =
@@ -1363,18 +1377,21 @@ impl WorkspaceServer {
                     let semantic_model = services
                         .as_css_services()
                         .and_then(|s| s.semantic_model.as_ref());
-                    self.module_graph.update_graph_for_css_paths(
+                    let result = self.module_graph.update_graph_for_css_paths(
                         self.fs.as_ref(),
                         &self.project_layout,
                         &[(path, css_root)],
                         semantic_model,
-                    )
+                    );
+                    if let Some(module_info) =
+                        self.module_graph.css_module_info_for_path(path.as_path())
+                    {
+                        self.db_set_module_info(path, ModuleInfoKind::Css(module_info));
+                    }
+                    result
                 } else if let Some(html_root) =
                     SendNode::into_language_root::<HtmlRoot>(root.clone())
                 {
-                    // Map embedded snippets to HtmlEmbeddedContent variants.
-                    // CSS blocks carry EmbeddingApplicability (resolved via file_source_index).
-                    // JS blocks carry static import specifiers for upward traversal.
                     let embedded_content: Vec<HtmlEmbeddedContent> = self
                         .documents
                         .pin()
@@ -1400,20 +1417,58 @@ impl WorkspaceServer {
                                 .collect()
                         })
                         .unwrap_or_default();
-                    self.module_graph.update_graph_for_html_paths(
+                    let result = self.module_graph.update_graph_for_html_paths(
                         self.fs.as_ref(),
                         &self.project_layout,
                         &[(path, html_root, embedded_content)],
-                    )
+                    );
+                    if let Some(module_info) =
+                        self.module_graph.html_module_info_for_path(path.as_path())
+                    {
+                        self.db_set_module_info(path, ModuleInfoKind::Html(module_info));
+                    }
+                    result
                 } else {
                     Default::default()
                 }
             }
             UpdateKind::Removed => {
                 self.module_graph.update_graph_for_removed_paths(&[path]);
-                (ModuleDependencies::default(), vec![])
+                self.db_remove_module(path);
+                Default::default()
             }
         }
+    }
+
+    fn lock_db(
+        &self,
+    ) -> Result<std::sync::MutexGuard<'_, db::ProjectDatabase>, WorkspaceError> {
+        self.db
+            .as_ref()
+            .ok_or_else(WorkspaceError::db_not_available)?
+            .lock_db()
+    }
+
+    fn db_set_module_info(&self, path: &Utf8Path, kind: ModuleInfoKind) {
+        let Ok(mut db) = self.lock_db() else {
+            return;
+        };
+        let path_buf = path.to_path_buf();
+
+        let existing = db.modules.pin().get(&path_buf).copied();
+        if let Some(md) = existing {
+            salsa::Setter::to(md.set_kind(&mut *db), kind);
+        } else {
+            let md = ModuleInfo::new(&*db, path_buf.clone(), kind);
+            db.modules.pin().insert(path_buf, md);
+        }
+    }
+
+    fn db_remove_module(&self, path: &Utf8Path) {
+        let Ok(db) = self.lock_db() else {
+            return;
+        };
+        db.modules.pin().remove(path);
     }
 
     /// Updates the state of any services relevant to the given `path`.
@@ -2050,7 +2105,7 @@ impl Workspace for WorkspaceServer {
             content,
             version: Some(version),
             file_source_index: index,
-            syntax: Some(Ok(parsed.any_parse)),
+            syntax: Some(Ok(parsed.any_parse.clone())),
             embedded_snippets,
             services: services.clone(),
         };
@@ -2065,6 +2120,8 @@ impl Workspace for WorkspaceServer {
         documents
             .insert(path.clone().into(), document)
             .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
+
+        self.db_set_file_data(path.as_path(), parsed.any_parse.unwrap_as_send_node());
 
         let mut final_diagnostics = vec![];
 
@@ -2877,6 +2934,8 @@ impl Workspace for WorkspaceServer {
 
         self.documents.pin().remove(path);
         self.node_cache.lock().unwrap().remove(path);
+
+        // TODO: Phase 5 — clear AST from Salsa when file is closed
 
         if self.is_indexed(path) {
             // This may look counter-intuitive, but we need to consider that the

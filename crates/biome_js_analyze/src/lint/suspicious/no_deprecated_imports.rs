@@ -9,7 +9,7 @@ use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_deprecated_imports::NoDeprecatedImportsOptions;
 use camino::Utf8Path;
 
-use crate::services::module_graph::ResolvedImports;
+use crate::services::database::ResolvedImports;
 
 declare_lint_rule! {
     /// Restrict imports of deprecated exports.
