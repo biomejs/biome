@@ -496,7 +496,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
         settings,
         path,
-        module_graph: _,
+        module_db: _,
         project_layout,
         language,
         only,

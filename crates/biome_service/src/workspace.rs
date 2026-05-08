@@ -98,7 +98,7 @@ pub use crate::{
 pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 #[cfg(feature = "schema")]
 use schemars::{Schema, SchemaGenerator};
-mod db;
+pub mod db;
 
 pub use server::OpenFileReason;
 
@@ -1811,7 +1811,7 @@ pub fn server(fs: Arc<dyn FsWithResolverProxy>, threads: Option<usize>) -> Box<d
     let (watcher_tx, _) = bounded(0);
     let (service_tx, _) = watch::channel(ServiceNotification::IndexUpdated);
     Box::new(WorkspaceServer::new(
-        fs, watcher_tx, service_tx, threads, false,
+        fs, watcher_tx, service_tx, threads,
     ))
 }
 

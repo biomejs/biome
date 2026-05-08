@@ -16,7 +16,7 @@ use biome_aria::AriaRoles;
 use biome_diagnostics::Error as DiagnosticError;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage};
-use biome_module_graph::{ModuleGraph, ModuleResolver};
+use biome_module_graph::{ModuleDb, ModuleResolver};
 use biome_package::TurboJson;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{TextRange, TokenText};
@@ -49,7 +49,7 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
 
 #[derive(Default)]
 pub struct JsAnalyzerServices {
-    module_graph: Arc<ModuleGraph>,
+    module_db: Option<Arc<dyn ModuleDb>>,
     project_layout: Arc<ProjectLayout>,
     source_type: JsFileSource,
     embedded_bindings: Vec<Vec<(TextRange, TokenText)>>,
@@ -59,22 +59,22 @@ pub struct JsAnalyzerServices {
 
 impl
     From<(
-        Arc<ModuleGraph>,
+        Arc<dyn ModuleDb>,
         Arc<ProjectLayout>,
         JsFileSource,
         Option<SemanticModel>,
     )> for JsAnalyzerServices
 {
     fn from(
-        (module_graph, project_layout, source_type, semantic_model): (
-            Arc<ModuleGraph>,
+        (module_db, project_layout, source_type, semantic_model): (
+            Arc<dyn ModuleDb>,
             Arc<ProjectLayout>,
             JsFileSource,
             Option<SemanticModel>,
         ),
     ) -> Self {
         Self {
-            module_graph,
+            module_db: Some(module_db),
             project_layout,
             source_type,
             embedded_bindings: Default::default(),
@@ -84,16 +84,16 @@ impl
     }
 }
 
-impl From<(Arc<ModuleGraph>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerServices {
+impl From<(Arc<dyn ModuleDb>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerServices {
     fn from(
-        (module_graph, project_layout, source_type): (
-            Arc<ModuleGraph>,
+        (module_db, project_layout, source_type): (
+            Arc<dyn ModuleDb>,
             Arc<ProjectLayout>,
             JsFileSource,
         ),
     ) -> Self {
         Self {
-            module_graph,
+            module_db: Some(module_db),
             project_layout,
             source_type,
             embedded_bindings: Default::default(),
@@ -106,7 +106,7 @@ impl From<(Arc<ModuleGraph>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerSe
 impl From<&AnyJsRoot> for JsAnalyzerServices {
     fn from(_value: &AnyJsRoot) -> Self {
         Self {
-            module_graph: Arc::new(ModuleGraph::default()),
+            module_db: None,
             project_layout: Arc::new(ProjectLayout::default()),
             source_type: JsFileSource::default(),
             embedded_bindings: Default::default(),
@@ -117,6 +117,26 @@ impl From<&AnyJsRoot> for JsAnalyzerServices {
 }
 
 impl JsAnalyzerServices {
+    pub fn with_source_type(mut self, source_type: JsFileSource) -> Self {
+        self.source_type = source_type;
+        self
+    }
+
+    pub fn with_semantic_model(mut self, model: SemanticModel) -> Self {
+        self.semantic_model = Some(model);
+        self
+    }
+
+    pub fn with_module_db(mut self, module_db: Arc<dyn ModuleDb>) -> Self {
+        self.module_db = Some(module_db);
+        self
+    }
+
+    pub fn with_project_layout(mut self, project_layout: Arc<ProjectLayout>) -> Self {
+        self.project_layout = project_layout;
+        self
+    }
+
     pub fn set_embedded_bindings(&mut self, bindings: Vec<Vec<(TextRange, TokenText)>>) {
         self.embedded_bindings = bindings;
     }
@@ -176,7 +196,7 @@ where
     visit_registry(&mut registry);
 
     let JsAnalyzerServices {
-        module_graph,
+        module_db,
         project_layout,
         source_type,
         embedded_bindings,
@@ -228,14 +248,17 @@ where
     let turborepo_configs: Vec<Arc<TurboJson>> =
         project_layout.find_all_turbo_json_for_path(file_path.as_ref());
 
-    let type_resolver = module_graph
-        .js_module_info_for_path(file_path.as_ref())
-        .map(|module_info| ModuleResolver::for_module(module_info, module_graph.clone()))
-        .map(Arc::new);
+    let type_resolver = module_db.as_ref().and_then(|db| {
+        db.js_module_info_for_path(file_path.as_ref())
+            .map(|module_info| ModuleResolver::for_module(module_info, db.clone()))
+            .map(Arc::new)
+    });
 
     services.insert_service(Arc::new(AriaRoles));
     services.insert_service(source_type);
-    services.insert_service(module_graph);
+    if let Some(module_db) = module_db {
+        services.insert_service(module_db);
+    }
     services.insert_service(node_manifest);
     services.insert_service(turborepo_configs);
     services.insert_service(file_path);

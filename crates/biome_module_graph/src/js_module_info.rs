@@ -7,14 +7,14 @@ mod utils;
 mod visitor;
 
 use crate::css_module_info::CssClassReference;
-use crate::{ModuleDependencies, ModuleGraph};
-use biome_js_semantic::{ScopeId, SemanticModel};
-use biome_js_syntax::{AnyJsImportLike, AnyJsRoot};
+use crate::db::inputs::ModuleDb;
+use biome_js_semantic::ScopeId;
+use biome_js_syntax::AnyJsImportLike;
 use biome_js_type_info::{
     FormatTypeContext, ImportSymbol, ResolvedTypeId, TypeData, TypeReference,
 };
 use biome_jsdoc_comment::JsdocComment;
-use biome_resolver::{FsWithResolverProxy, ResolvedPath};
+use biome_resolver::ResolvedPath;
 use biome_rowan::{Text, TextRange};
 use camino::Utf8Path;
 use indexmap::IndexMap;
@@ -26,11 +26,7 @@ use std::{collections::BTreeMap, ops::Deref, sync::Arc};
 use scope::JsScope;
 
 use crate::diagnostics::ModuleDiagnostic;
-use crate::module_graph::ModuleGraphFsProxy;
-use crate::path_info_cache::PathInfoCache;
 pub(super) use binding::JsBindingData;
-use biome_fs::BiomePath;
-use biome_project_layout::ProjectLayout;
 pub use diagnostics::JsModuleInfoDiagnostic;
 pub use module_resolver::ModuleResolver;
 pub(crate) use visitor::JsModuleVisitor;
@@ -58,7 +54,7 @@ impl Display for BindingTypeData {
     }
 }
 
-/// Information restricted to a single module in the [ModuleGraph].
+/// Information restricted to a single JS/TS module.
 #[derive(Clone, Debug)]
 pub struct JsModuleInfo(pub(super) Arc<JsModuleInfoInner>);
 
@@ -84,32 +80,30 @@ impl JsModuleInfo {
         self.diagnostics.as_slice()
     }
 
-    /// Finds an exported symbol by `name`, using the `module_graph` to
-    /// lookup re-exports if necessary.
+    /// Finds an exported symbol by `name`, following re-exports through the db.
     #[inline]
     pub fn find_js_exported_symbol(
         &self,
-        module_graph: &ModuleGraph,
+        db: &dyn ModuleDb,
         name: &str,
     ) -> Option<JsOwnExport> {
-        module_graph.find_exported_symbol(self, name)
+        crate::module_graph::find_exported_symbol(db, self, name)
     }
 
-    /// Finds the default exported symbol
+    /// Finds the default exported symbol.
     #[inline]
-    pub fn find_js_default_export_symbol(&self, module_graph: &ModuleGraph) -> Option<JsOwnExport> {
-        module_graph.find_exported_symbol(self, "default")
+    pub fn find_js_default_export_symbol(&self, db: &dyn ModuleDb) -> Option<JsOwnExport> {
+        crate::module_graph::find_exported_symbol(db, self, "default")
     }
 
-    /// Finds an exported symbol by `name`, using the `module_graph` to
-    /// lookup re-exports if necessary.
+    /// Finds JSDoc for an exported symbol by `name`, following re-exports through the db.
     #[inline]
     pub fn find_jsdoc_for_exported_symbol(
         &self,
-        module_graph: &ModuleGraph,
+        db: &dyn ModuleDb,
         name: &str,
     ) -> Option<JsdocComment> {
-        module_graph.find_jsdoc_for_exported_symbol(self, name)
+        crate::module_graph::find_jsdoc_for_exported_symbol(db, self, name)
     }
 
     /// Returns the module's global scope.
@@ -201,7 +195,7 @@ pub struct JsModuleInfoInner {
     ///
     /// Maps from the local imported name to a [JsImport] with the absolute path
     /// it resolves to. The resolved path may be looked up as key in the
-    /// [ModuleGraph::data] map, although it is not required to exist
+    /// [ModuleDb] map, although it is not required to exist
     /// (for instance, if the path is outside the project's scope).
     ///
     /// Note that re-exports may introduce additional dependencies, because they
@@ -214,7 +208,7 @@ pub struct JsModuleInfoInner {
     ///
     /// Maps from the source specifier name to a [JsImportPath] with the
     /// absolute path it resolves to. The resolved path may be looked up as key
-    /// in the [ModuleGraph::data] map, although it is not required to exist
+    /// in the [ModuleDb] map, although it is not required to exist
     /// (for instance, if the path is outside the project's scope).
     pub static_import_paths: IndexMap<Text, JsImportPath>,
 
@@ -227,7 +221,7 @@ pub struct JsModuleInfoInner {
     ///
     /// Maps from the source specifier name to a [JsImportPath] with the
     /// absolute path it resolves to. The resolved path may be looked up as key
-    /// in the [ModuleGraph::data] map, although it is not required to exist
+    /// in the [ModuleDb] map, although it is not required to exist
     /// (for instance, if the path is outside the project's scope).
     ///
     /// Paths found in `require()` expressions in CommonJS sources are also
@@ -570,34 +564,3 @@ pub struct SerializedJsModuleInfo {
     pub referenced_classes: BTreeSet<String>,
 }
 
-// TODO: add valid docstrings
-pub fn resolve_js_module(
-    root: AnyJsRoot,
-    path: &BiomePath,
-    fs: &dyn FsWithResolverProxy,
-    project_layout: &ProjectLayout,
-    semantic_model: Arc<SemanticModel>,
-    path_info_cache: &PathInfoCache,
-    enable_type_inference: bool,
-) -> (JsModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>) {
-    let directory = path.parent().unwrap_or(path);
-    let fs_proxy = ModuleGraphFsProxy::new(fs, path_info_cache, project_layout);
-    let visitor = JsModuleVisitor::new(
-        root,
-        path.to_path_buf(),
-        directory,
-        &fs_proxy,
-        semantic_model,
-        enable_type_inference,
-    );
-
-    let module_info = visitor.collect_info();
-    let mut dependencies = ModuleDependencies::default();
-    for import_path in module_info.all_import_paths() {
-        if let Some(p) = import_path.as_path() {
-            dependencies.insert(p.to_path_buf());
-        }
-    }
-    let diagnostics = module_info.diagnostics().to_vec();
-    (module_info, dependencies, diagnostics)
-}

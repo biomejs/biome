@@ -1,13 +1,26 @@
 use crate::module_graph::ModuleInfoKind;
 use crate::{CssModuleInfo, HtmlModuleInfo, JsModuleInfo, ModuleInfo};
 use biome_db::Db;
-use camino::Utf8Path;
+use camino::{Utf8Path, Utf8PathBuf};
 
 /// Extends `Db` with module-graph-specific lookups.
 #[salsa::db]
 pub trait ModuleDb: Db {
     /// Given a path, it retrieves its corresponding module info.
     fn module_for_path(&self, path: &Utf8Path) -> Option<ModuleInfo>;
+
+    /// Iterates over all indexed modules.
+    ///
+    /// This is needed for reverse-dependency lookups (finding which files
+    /// import a given path). A future optimization would be a dedicated
+    /// reverse-dependency index, but iterating the full set is correct and
+    /// sufficient for now.
+    fn for_each_module(&self, f: &mut dyn FnMut(&Utf8Path, &ModuleInfoKind));
+
+    /// Returns whether the given `path` is indexed.
+    fn contains(&self, path: &Utf8Path) -> bool {
+        self.module_for_path(path).is_some()
+    }
 
     /// Returns the JS module info for the given `path`.
     fn js_module_info_for_path(&self, path: &Utf8Path) -> Option<JsModuleInfo> {
@@ -34,5 +47,20 @@ pub trait ModuleDb: Db {
                 ModuleInfoKind::Html(module_info) => Some(module_info.clone()),
                 _ => None,
             })
+    }
+
+    /// Returns the module info kind for the given `path`.
+    fn module_info_for_path(&self, path: &Utf8Path) -> Option<ModuleInfoKind> {
+        self.module_for_path(path)
+            .map(|info| info.kind(self).clone())
+    }
+
+    /// Collects all module paths and their kinds.
+    fn all_modules(&self) -> Vec<(Utf8PathBuf, ModuleInfoKind)> {
+        let mut result = Vec::new();
+        self.for_each_module(&mut |path, kind| {
+            result.push((path.to_path_buf(), kind.clone()));
+        });
+        result
     }
 }

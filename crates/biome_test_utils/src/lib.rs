@@ -20,7 +20,11 @@ use biome_html_syntax::HtmlRoot;
 use biome_js_parser::{AnyJsRoot, JsParserOptions};
 use biome_js_type_info::{TypeData, TypeResolver};
 use biome_json_parser::ParseDiagnostic;
-use biome_module_graph::{HtmlEmbeddedContent, ModuleGraph};
+use biome_module_graph::{
+    HtmlEmbeddedContent, ModuleDb, ModuleInfoKind, PathInfoCache, resolve_css_module,
+    resolve_js_module,
+};
+use biome_service::workspace::db::ProjectDatabase;
 use biome_package::{Catalogs, Manifest, PackageJson, TsConfigJson, TurboJson};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
@@ -256,23 +260,46 @@ where
 pub fn module_graph_for_test_file(
     input_file: &Utf8Path,
     project_layout: &ProjectLayout,
-) -> Arc<ModuleGraph> {
-    let module_graph = ModuleGraph::default();
-
+) -> Arc<dyn ModuleDb> {
+    let mut db = ProjectDatabase::default();
+    let path_info_cache = PathInfoCache::default();
     let dir = input_file.parent().unwrap().to_path_buf();
     let fs = OsFileSystem::new(dir.clone());
 
-    // Collect and populate JS/JSX/TS/TSX paths
     let js_paths = get_js_like_paths_in_dir(&dir);
     let js_roots = get_added_js_paths(&fs, &js_paths);
-    module_graph.update_graph_for_js_paths(&fs, project_layout, &js_roots, true);
+    for (path, root, semantic_model) in js_roots {
+        let (module_info, _, _) = resolve_js_module(
+            root,
+            path,
+            &fs,
+            project_layout,
+            semantic_model,
+            &path_info_cache,
+            true,
+        );
+        let md = biome_module_graph::ModuleInfo::new(
+            &db,
+            path.as_path().to_path_buf(),
+            ModuleInfoKind::Js(module_info),
+        );
+        db.insert_module(path.as_path().to_path_buf(), md);
+    }
 
-    // Collect and populate CSS paths
     let css_paths = get_css_like_paths_in_dir(&dir);
     let css_roots = get_css_added_paths(&fs, &css_paths);
-    module_graph.update_graph_for_css_paths(&fs, project_layout, &css_roots, None);
+    for (path, root) in css_roots {
+        let (module_info, _, _) =
+            resolve_css_module(root, path, &fs, project_layout, &path_info_cache);
+        let md = biome_module_graph::ModuleInfo::new(
+            &db,
+            path.as_path().to_path_buf(),
+            ModuleInfoKind::Css(module_info),
+        );
+        db.insert_module(path.as_path().to_path_buf(), md);
+    }
 
-    Arc::new(module_graph)
+    Arc::new(db)
 }
 
 /// Builds a module graph for a CSS test file by scanning the directory for all
@@ -285,23 +312,46 @@ pub fn module_graph_for_test_file(
 pub fn module_graph_for_css_test_file(
     input_file: &Utf8Path,
     project_layout: &ProjectLayout,
-) -> Arc<ModuleGraph> {
-    let module_graph = ModuleGraph::default();
-
+) -> Arc<dyn ModuleDb> {
+    let mut db = ProjectDatabase::default();
+    let path_info_cache = PathInfoCache::default();
     let dir = input_file.parent().unwrap().to_path_buf();
     let fs = OsFileSystem::new(dir.clone());
 
-    // Collect and populate CSS paths.
     let css_paths = get_css_like_paths_in_dir(Utf8Path::new(&dir));
     let css_roots = get_css_added_paths(&fs, &css_paths);
-    module_graph.update_graph_for_css_paths(&fs, project_layout, &css_roots, None);
+    for (path, root) in css_roots {
+        let (module_info, _, _) =
+            resolve_css_module(root, path, &fs, project_layout, &path_info_cache);
+        let md = biome_module_graph::ModuleInfo::new(
+            &db,
+            path.as_path().to_path_buf(),
+            ModuleInfoKind::Css(module_info),
+        );
+        db.insert_module(path.as_path().to_path_buf(), md);
+    }
 
-    // Also collect JS/JSX paths — they may contain `className` references.
     let js_paths = get_js_like_paths_in_dir(Utf8Path::new(&dir));
     let js_roots = get_added_js_paths(&fs, &js_paths);
-    module_graph.update_graph_for_js_paths(&fs, project_layout, &js_roots, false);
+    for (path, root, semantic_model) in js_roots {
+        let (module_info, _, _) = resolve_js_module(
+            root,
+            path,
+            &fs,
+            project_layout,
+            semantic_model,
+            &path_info_cache,
+            false,
+        );
+        let md = biome_module_graph::ModuleInfo::new(
+            &db,
+            path.as_path().to_path_buf(),
+            ModuleInfoKind::Js(module_info),
+        );
+        db.insert_module(path.as_path().to_path_buf(), md);
+    }
 
-    Arc::new(module_graph)
+    Arc::new(db)
 }
 
 /// Builds a module graph for an HTML test file by opening all files in the
@@ -318,7 +368,7 @@ pub fn module_graph_for_css_test_file(
 pub fn module_graph_for_html_test_file(
     input_file: &Utf8Path,
     _project_layout: &ProjectLayout,
-) -> Arc<ModuleGraph> {
+) -> Arc<dyn ModuleDb> {
     let dir = input_file.parent().unwrap().to_path_buf();
 
     // Load all files from the test directory into a MemoryFileSystem.
@@ -369,7 +419,7 @@ pub fn module_graph_for_html_test_file(
     });
     workspace.index_files_for_test(project_key, files_with_sources);
 
-    workspace.module_graph()
+    workspace.get_module_db_for_test()
 }
 
 /// Recursively collects all file paths under `dir` into `out`.

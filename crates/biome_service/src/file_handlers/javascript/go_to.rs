@@ -7,7 +7,7 @@ use biome_js_syntax::{
     AnyJsRoot, AnyJsxAttributeValue, JsImport, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode,
     JsVariableDeclarator, JsxAttribute, JsxReferenceIdentifier, JsxString,
 };
-use biome_module_graph::{JsOwnExport, ModuleGraph, ModuleInfoKind};
+use biome_module_graph::{JsOwnExport, ModuleDb, ModuleInfoKind};
 use biome_rowan::{AstNode, AstSeparatedList, TokenAtOffset, TokenText};
 use camino::Utf8Path;
 use std::ops::Add;
@@ -166,7 +166,7 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
                 local_name,
                 specifier,
                 params.path.as_path(),
-                params.module_graph,
+                params.module_db,
                 &mut result,
             );
         }
@@ -175,7 +175,7 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
                 local_name,
                 source,
                 params.path.as_path(),
-                params.module_graph,
+                params.module_db,
                 &mut result,
             );
         }
@@ -196,10 +196,10 @@ fn resolve_import_definition(
     local_name: &str,
     specifier: &str,
     current_path: &Utf8Path,
-    module_graph: &ModuleGraph,
+    module_db: &dyn ModuleDb,
     result: &mut GoToDefinitionResult,
 ) -> Option<()> {
-    let module_info = module_graph.module_info_for_path(current_path)?;
+    let module_info = module_db.module_info_for_path(current_path)?;
     match module_info {
         ModuleInfoKind::Js(module_info) => {
             let import_path = module_info
@@ -210,15 +210,15 @@ fn resolve_import_definition(
             let target_path = import_path.resolved_path.as_path()?;
 
             // Skip files not in the module graph
-            if !module_graph.contains(target_path) {
+            if !module_db.contains(target_path) {
                 return None;
             }
 
-            let target_module = module_graph.js_module_info_for_path(target_path)?;
+            let target_module = module_db.js_module_info_for_path(target_path)?;
 
             match target_module
-                .find_js_exported_symbol(module_graph, local_name)
-                .or(target_module.find_js_default_export_symbol(module_graph))
+                .find_js_exported_symbol(module_db, local_name)
+                .or(target_module.find_js_default_export_symbol(module_db))
             {
                 None => {
                     result.store(
@@ -242,13 +242,13 @@ fn resolve_import_definition(
             let target_path = resolved_path.as_path()?;
 
             // Skip files not in the module graph
-            if !module_graph.contains(target_path) {
+            if !module_db.contains(target_path) {
                 return None;
             }
 
             // Check if we need to resolve from a JS file
-            if let Some(module) = module_graph.js_module_info_for_path(target_path) {
-                match module.find_js_exported_symbol(module_graph, local_name) {
+            if let Some(module) = module_db.js_module_info_for_path(target_path) {
+                match module.find_js_exported_symbol(module_db, local_name) {
                     None => {
                         result.store(
                             BiomePath::new(target_path),

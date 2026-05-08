@@ -22,10 +22,13 @@ pub use diagnostics::ModuleDiagnostic;
 pub use js_module_info::{
     BindingTypeData, JsExport, JsImport, JsImportPath, JsImportPhase, JsModuleInfo,
     JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleResolver, SerializedJsModuleInfo,
-    resolve_js_module,
 };
 pub use module_graph::{
-    ModuleDependencies, ModuleGraph, ModuleInfo, ModuleInfoKind, SUPPORTED_EXTENSIONS,
-    SerializedModuleInfo, resolve_css_module, resolve_html_module,
+    ModuleDependencies, ModuleInfo, ModuleInfoKind, SUPPORTED_EXTENSIONS, SerializedModuleInfo,
+    build_diagnostic_traversal_chain, build_import_tree, build_import_tree_for_html,
+    collect_available_classes_for_js_file, find_css_class_definition, find_exported_symbol,
+    find_jsdoc_for_exported_symbol, is_class_referenced_by_importers, resolve_css_module,
+    resolve_html_module, resolve_js_module, transitive_importers_of,
+    traverse_import_tree_for_classes, traverse_import_tree_for_html_classes,
 };
 pub use path_info_cache::{PathInfoCache, prepopulate_directory_path_info};
