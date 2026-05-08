@@ -1,0 +1,265 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```text
+w-[calc(100%_-)] bg-[rgb(0_0_0/)] bg-[url(/img/mountains.jpg] [width:calc(100%_-)]
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@0..1 "w" [] [],
+                minus_token: DASH@1..2 "-" [] [],
+                value: TwArbitraryValue {
+                    l_brack_token: L_BRACKET@2..3 "[" [] [],
+                    value: CssGenericComponentValueList [
+                        CssFunction {
+                            name: CssIdentifier {
+                                ident_token: IDENT@3..7 "calc" [] [],
+                            },
+                            l_paren_token: L_PAREN@7..8 "(" [] [],
+                            parameters: CssParameterList [
+                                CssBinaryExpression {
+                                    left: CssListOfComponentValuesExpression {
+                                        css_component_value_list: CssComponentValueList [
+                                            CssPercentage {
+                                                value_token: CSS_NUMBER_LITERAL@8..11 "100" [] [],
+                                                remainder_token: PERCENT@11..13 "%" [] [Whitespace("_")],
+                                            },
+                                        ],
+                                    },
+                                    operator: DASH@13..14 "-" [] [],
+                                    right: missing (required),
+                                },
+                            ],
+                            r_paren_token: R_PAREN@14..15 ")" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACKET@15..17 "]" [] [Whitespace(" ")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@17..19 "bg" [] [],
+                minus_token: DASH@19..20 "-" [] [],
+                value: TwArbitraryValue {
+                    l_brack_token: L_BRACKET@20..21 "[" [] [],
+                    value: CssGenericComponentValueList [
+                        CssFunction {
+                            name: CssIdentifier {
+                                ident_token: IDENT@21..24 "rgb" [] [],
+                            },
+                            l_paren_token: L_PAREN@24..25 "(" [] [],
+                            parameters: CssParameterList [
+                                CssBinaryExpression {
+                                    left: CssListOfComponentValuesExpression {
+                                        css_component_value_list: CssComponentValueList [
+                                            CssNumber {
+                                                value_token: CSS_NUMBER_LITERAL@25..27 "0" [] [Whitespace("_")],
+                                            },
+                                            CssNumber {
+                                                value_token: CSS_NUMBER_LITERAL@27..29 "0" [] [Whitespace("_")],
+                                            },
+                                            CssNumber {
+                                                value_token: CSS_NUMBER_LITERAL@29..30 "0" [] [],
+                                            },
+                                        ],
+                                    },
+                                    operator: SLASH@30..31 "/" [] [],
+                                    right: missing (required),
+                                },
+                            ],
+                            r_paren_token: R_PAREN@31..32 ")" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACKET@32..34 "]" [] [Whitespace(" ")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@34..36 "bg" [] [],
+                minus_token: DASH@36..37 "-" [] [],
+                value: TwBogusValue {
+                    items: [
+                        L_BRACKET@37..38 "[" [] [],
+                        TwBogus {
+                            items: [
+                                CssUrlFunction {
+                                    url_token: URL_KW@38..41 "url" [] [],
+                                    l_paren_token: L_PAREN@41..42 "(" [] [],
+                                    value: CssUrlValueRaw {
+                                        value_token: CSS_URL_VALUE_RAW_LITERAL@42..62 "/img/mountains.jpg]" [] [Whitespace(" ")],
+                                    },
+                                    r_paren_token: missing (required),
+                                },
+                                CssBogusPropertyValue {
+                                    items: [
+                                        CSS_URL_VALUE_RAW_LITERAL@62..80 "[width:calc(100%_-" [] [],
+                                        R_PAREN@80..81 ")" [] [],
+                                    ],
+                                },
+                            ],
+                        },
+                        R_BRACKET@81..82 "]" [] [],
+                    ],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@82..83 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..83
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..82
+    0: TW_FULL_CANDIDATE@0..17
+      0: TW_VARIANT_LIST@0..0
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@0..17
+        0: TW_BASE@0..1 "w" [] []
+        1: DASH@1..2 "-" [] []
+        2: TW_ARBITRARY_VALUE@2..17
+          0: L_BRACKET@2..3 "[" [] []
+          1: CSS_GENERIC_COMPONENT_VALUE_LIST@3..15
+            0: CSS_FUNCTION@3..15
+              0: CSS_IDENTIFIER@3..7
+                0: IDENT@3..7 "calc" [] []
+              1: L_PAREN@7..8 "(" [] []
+              2: CSS_PARAMETER_LIST@8..14
+                0: CSS_BINARY_EXPRESSION@8..14
+                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@8..13
+                    0: CSS_COMPONENT_VALUE_LIST@8..13
+                      0: CSS_PERCENTAGE@8..13
+                        0: CSS_NUMBER_LITERAL@8..11 "100" [] []
+                        1: PERCENT@11..13 "%" [] [Whitespace("_")]
+                  1: DASH@13..14 "-" [] []
+                  2: (empty)
+              3: R_PAREN@14..15 ")" [] []
+          2: R_BRACKET@15..17 "]" [] [Whitespace(" ")]
+        3: (empty)
+      3: (empty)
+    1: TW_FULL_CANDIDATE@17..34
+      0: TW_VARIANT_LIST@17..17
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@17..34
+        0: TW_BASE@17..19 "bg" [] []
+        1: DASH@19..20 "-" [] []
+        2: TW_ARBITRARY_VALUE@20..34
+          0: L_BRACKET@20..21 "[" [] []
+          1: CSS_GENERIC_COMPONENT_VALUE_LIST@21..32
+            0: CSS_FUNCTION@21..32
+              0: CSS_IDENTIFIER@21..24
+                0: IDENT@21..24 "rgb" [] []
+              1: L_PAREN@24..25 "(" [] []
+              2: CSS_PARAMETER_LIST@25..31
+                0: CSS_BINARY_EXPRESSION@25..31
+                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@25..30
+                    0: CSS_COMPONENT_VALUE_LIST@25..30
+                      0: CSS_NUMBER@25..27
+                        0: CSS_NUMBER_LITERAL@25..27 "0" [] [Whitespace("_")]
+                      1: CSS_NUMBER@27..29
+                        0: CSS_NUMBER_LITERAL@27..29 "0" [] [Whitespace("_")]
+                      2: CSS_NUMBER@29..30
+                        0: CSS_NUMBER_LITERAL@29..30 "0" [] []
+                  1: SLASH@30..31 "/" [] []
+                  2: (empty)
+              3: R_PAREN@31..32 ")" [] []
+          2: R_BRACKET@32..34 "]" [] [Whitespace(" ")]
+        3: (empty)
+      3: (empty)
+    2: TW_FULL_CANDIDATE@34..82
+      0: TW_VARIANT_LIST@34..34
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@34..82
+        0: TW_BASE@34..36 "bg" [] []
+        1: DASH@36..37 "-" [] []
+        2: TW_BOGUS_VALUE@37..82
+          0: L_BRACKET@37..38 "[" [] []
+          1: TW_BOGUS@38..81
+            0: CSS_URL_FUNCTION@38..62
+              0: URL_KW@38..41 "url" [] []
+              1: L_PAREN@41..42 "(" [] []
+              2: CSS_URL_VALUE_RAW@42..62
+                0: CSS_URL_VALUE_RAW_LITERAL@42..62 "/img/mountains.jpg]" [] [Whitespace(" ")]
+              3: (empty)
+            1: CSS_BOGUS_PROPERTY_VALUE@62..81
+              0: CSS_URL_VALUE_RAW_LITERAL@62..80 "[width:calc(100%_-" [] []
+              1: R_PAREN@80..81 ")" [] []
+          2: R_BRACKET@81..82 "]" [] []
+        3: (empty)
+      3: (empty)
+  2: EOF@82..83 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+css-arbitrary-values.txt:1:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found ')'.
+  
+  > 1 │ w-[calc(100%_-)] bg-[rgb(0_0_0/)] bg-[url(/img/mountains.jpg] [width:calc(100%_-)]
+      │               ^
+    2 │ 
+  
+  i Expected a value here.
+  
+  > 1 │ w-[calc(100%_-)] bg-[rgb(0_0_0/)] bg-[url(/img/mountains.jpg] [width:calc(100%_-)]
+      │               ^
+    2 │ 
+  
+css-arbitrary-values.txt:1:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found ')'.
+  
+  > 1 │ w-[calc(100%_-)] bg-[rgb(0_0_0/)] bg-[url(/img/mountains.jpg] [width:calc(100%_-)]
+      │                                ^
+    2 │ 
+  
+  i Expected a value here.
+  
+  > 1 │ w-[calc(100%_-)] bg-[rgb(0_0_0/)] bg-[url(/img/mountains.jpg] [width:calc(100%_-)]
+      │                                ^
+    2 │ 
+  
+css-arbitrary-values.txt:1:63 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `[width:calc(100%_-`
+  
+  > 1 │ w-[calc(100%_-)] bg-[rgb(0_0_0/)] bg-[url(/img/mountains.jpg] [width:calc(100%_-)]
+      │                                                               ^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i Remove [width:calc(100%_-
+  
+```

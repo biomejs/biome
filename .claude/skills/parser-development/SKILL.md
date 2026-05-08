@@ -197,7 +197,7 @@ impl ParseSeparatedList for ArrayElementsList {
 
     fn is_at_list_end(&self, p: &mut Parser) -> bool {
         // Stop at array closing bracket or file end
-        p.at(T![']']) || p.at(EOF)
+        p.at(T![']'])
     }
 
     fn recover(
