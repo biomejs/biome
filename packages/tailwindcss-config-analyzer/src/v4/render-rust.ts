@@ -213,10 +213,7 @@ function renderBranchList(
 	keywordIdx: Map<string, number>,
 ): string {
 	return branches
-		.map(
-			(b) =>
-				`${indent}${formatBranch(b, propIdx, propCount, keywordIdx)},`,
-		)
+		.map((b) => `${indent}${formatBranch(b, propIdx, propCount, keywordIdx)},`)
 		.join("\n");
 }
 
