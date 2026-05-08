@@ -2652,6 +2652,11 @@ See https://biomejs.dev/linter/rules/use-string-starts-ends-with
 	 */
 	useStringStartsEndsWith?: UseStringStartsEndsWithConfiguration;
 	/**
+	* Enforce using fewer Tailwind utilities instead of multiple utilities that are functionally the same.
+See https://biomejs.dev/linter/rules/use-tailwind-shorthand-classes 
+	 */
+	useTailwindShorthandClasses?: UseTailwindShorthandClassesConfiguration;
+	/**
 	* Enforce that test lifecycle hooks are declared in the order they execute.
 See https://biomejs.dev/linter/rules/use-test-hooks-in-order 
 	 */
@@ -4660,6 +4665,9 @@ export type UseSpreadConfiguration =
 export type UseStringStartsEndsWithConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseStringStartsEndsWithOptions;
+export type UseTailwindShorthandClassesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseTailwindShorthandClassesOptions;
 export type UseTestHooksInOrderConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTestHooksInOrderOptions;
@@ -6578,6 +6586,11 @@ export interface RuleWithUseStringStartsEndsWithOptions {
 	level: RulePlainConfiguration;
 	options?: UseStringStartsEndsWithOptions;
 }
+export interface RuleWithUseTailwindShorthandClassesOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseTailwindShorthandClassesOptions;
+}
 export interface RuleWithUseTestHooksInOrderOptions {
 	level: RulePlainConfiguration;
 	options?: UseTestHooksInOrderOptions;
@@ -8260,6 +8273,16 @@ export interface UseSortedClassesOptions {
 }
 export type UseSpreadOptions = {};
 export type UseStringStartsEndsWithOptions = {};
+export interface UseTailwindShorthandClassesOptions {
+	/**
+	 * Additional attributes that will be treated as Tailwind class lists.
+	 */
+	attributes?: string[];
+	/**
+	 * Names of functions or tagged templates whose string arguments should be checked.
+	 */
+	functions?: string[];
+}
 export type UseTestHooksInOrderOptions = {};
 export type UseTestHooksOnTopOptions = {};
 /**
@@ -9317,6 +9340,7 @@ export type Category =
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useStringStartsEndsWith"
 	| "lint/nursery/useTestHooksInOrder"
+	| "lint/nursery/useTailwindShorthandClasses"
 	| "lint/nursery/useTestHooksOnTop"
 	| "lint/nursery/useThisInClassMethods"
 	| "lint/nursery/useUnicodeRegex"

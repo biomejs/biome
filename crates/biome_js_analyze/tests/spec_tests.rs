@@ -23,6 +23,7 @@ use std::ops::Deref;
 use std::sync::Arc;
 use std::{fs::read_to_string, slice};
 
+// Spec cases are discovered from the filesystem during macro expansion.
 tests_macros::gen_tests! {"tests/specs/**/*.{cjs,cts,js,mjs,jsx,tsx,ts,json,jsonc,svelte,vue,html,astro}", crate::run_test, "module"}
 tests_macros::gen_tests! {"tests/suppression/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_suppression_test, "module"}
 tests_macros::gen_tests! {"tests/multiple_rules/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_multi_rule_test, "module"}

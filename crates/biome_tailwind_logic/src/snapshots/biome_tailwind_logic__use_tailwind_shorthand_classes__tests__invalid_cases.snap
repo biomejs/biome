@@ -1,0 +1,232 @@
+---
+source: crates/biome_tailwind_logic/src/use_tailwind_shorthand_classes.rs
+expression: snapshot
+---
+## Input
+
+```text
+ml-2 mr-2
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["ml-2", "mr-2"]
+  replacements: ["mx"]
+  replace_whole_node: false
+Fixed: `mx-2`
+
+## Input
+
+```text
+pl-2 pr-2 pt-2 pb-2
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["pl-2", "pr-2", "pt-2", "pb-2"]
+  replacements: ["p"]
+  replace_whole_node: false
+Fixed: `p-2`
+
+## Input
+
+```text
+hover:w-4 hover:h-4
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["hover:w-4", "hover:h-4"]
+  replacements: ["size"]
+  replace_whole_node: false
+Fixed: `hover:size-4`
+
+## Input
+
+```text
+border-x border-y
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["border-x", "border-y"]
+  replacements: ["border"]
+  replace_whole_node: false
+Fixed: `border`
+
+## Input
+
+```text
+overflow-hidden text-ellipsis whitespace-nowrap
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["overflow-hidden", "text-ellipsis", "whitespace-nowrap"]
+  replacements: ["truncate"]
+  replace_whole_node: true
+Fixed: `truncate`
+
+## Input
+
+```text
+ml-2 mr-2 text-blue-500 font-bold
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["ml-2", "mr-2"]
+  replacements: ["mx"]
+  replace_whole_node: false
+Fixed: `mx-2 text-blue-500 font-bold`
+
+## Input
+
+```text
+mr-3 ml-3
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["ml-3", "mr-3"]
+  replacements: ["mx"]
+  replace_whole_node: false
+Fixed: `mx-3 `
+
+## Input
+
+```text
+pt-1 pr-1 pb-1 pl-1
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["pl-1", "pr-1", "pt-1", "pb-1"]
+  replacements: ["p"]
+  replace_whole_node: false
+Fixed: `p-1 `
+
+## Input
+
+```text
+border-x border-y overflow-hidden text-ellipsis whitespace-nowrap w-8 h-8
+```
+
+Violations: 3
+- Violation 1
+  nodes: ["w-8", "h-8"]
+  replacements: ["size"]
+  replace_whole_node: false
+- Violation 2
+  nodes: ["border-x", "border-y"]
+  replacements: ["border"]
+  replace_whole_node: false
+- Violation 3
+  nodes: ["overflow-hidden", "text-ellipsis", "whitespace-nowrap"]
+  replacements: ["truncate"]
+  replace_whole_node: true
+Fixed: `border truncate size-8`
+
+## Input
+
+```text
+hover:w-10 hover:h-10 bg-gray-100 p-4
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["hover:w-10", "hover:h-10"]
+  replacements: ["size"]
+  replace_whole_node: false
+Fixed: `hover:size-10 bg-gray-100 p-4`
+
+## Input
+
+```text
+-mt-2 -mb-2
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["-mt-2", "-mb-2"]
+  replacements: ["my"]
+  replace_whole_node: false
+Fixed: `-my-2`
+
+## Input
+
+```text
+pl-6 pr-6 py-6
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["pl-6", "pr-6"]
+  replacements: ["px"]
+  replace_whole_node: false
+Fixed: `px-6 py-6`
+
+## Input
+
+```text
+w-4 h-4
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["w-4", "h-4"]
+  replacements: ["size"]
+  replace_whole_node: false
+Fixed: `size-4`
+
+## Input
+
+```text
+pt-4 pr-2 pb-4 pl-4
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["pt-4", "pb-4"]
+  replacements: ["py"]
+  replace_whole_node: false
+Fixed: `pr-2 py-4 pl-4`
+
+## Input
+
+```text
+w-[10px] h-[10px]
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["w-[10px]", "h-[10px]"]
+  replacements: ["size"]
+  replace_whole_node: false
+Fixed: `size-[10px]`
+
+## Input
+
+```text
+sm:hover:w-4 sm:hover:h-4
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["sm:hover:w-4", "sm:hover:h-4"]
+  replacements: ["size"]
+  replace_whole_node: false
+Fixed: `sm:hover:size-4`
+
+## Input
+
+```text
+size-4 w-4 h-4
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["w-4", "h-4"]
+  replacements: []
+  replace_whole_node: false
+Fixed: `size-4 `

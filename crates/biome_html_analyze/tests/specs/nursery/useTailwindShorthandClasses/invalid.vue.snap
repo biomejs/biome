@@ -1,0 +1,267 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+
+<template>
+  <div class="w-4 h-4"></div>
+  <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+  <BaseIcon class="inline-block sm:hover:w-6 sm:hover:h-6 text-blue-500" />
+  <button class="rounded-md px-4 pt-2 pr-2 pb-2 pl-2 disabled:opacity-50">
+    Save
+  </button>
+  <div class="mr-3 ml-3 [&_svg]:w-[1.25rem] [&_svg]:h-[1.25rem]"></div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:4:15 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    3 │ <template>
+  > 4 │   <div class="w-4 h-4"></div>
+      │               ^^^
+    5 │   <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+    6 │   <BaseIcon class="inline-block sm:hover:w-6 sm:hover:h-6 text-blue-500" />
+  
+  i Compressible utility used here.
+  
+    3 │ <template>
+  > 4 │   <div class="w-4 h-4"></div>
+      │                   ^^^
+    5 │   <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+    6 │   <BaseIcon class="inline-block sm:hover:w-6 sm:hover:h-6 text-blue-500" />
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     2  2 │   
+     3  3 │   <template>
+     4    │ - ··<div·class="w-4·h-4"></div>
+        4 │ + ··<div·class="size-4"></div>
+     5  5 │     <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+     6  6 │     <BaseIcon class="inline-block sm:hover:w-6 sm:hover:h-6 text-blue-500" />
+  
+
+```
+
+```
+invalid.vue:5:15 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    3 │ <template>
+    4 │   <div class="w-4 h-4"></div>
+  > 5 │   <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+      │               ^^^^^^^^^^^^^^^
+    6 │   <BaseIcon class="inline-block sm:hover:w-6 sm:hover:h-6 text-blue-500" />
+    7 │   <button class="rounded-md px-4 pt-2 pr-2 pb-2 pl-2 disabled:opacity-50">
+  
+  i Compressible utility used here.
+  
+    3 │ <template>
+    4 │   <div class="w-4 h-4"></div>
+  > 5 │   <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+      │                               ^^^^^^^^^^^^^
+    6 │   <BaseIcon class="inline-block sm:hover:w-6 sm:hover:h-6 text-blue-500" />
+    7 │   <button class="rounded-md px-4 pt-2 pr-2 pb-2 pl-2 disabled:opacity-50">
+  
+  i Compressible utility used here.
+  
+    3 │ <template>
+    4 │   <div class="w-4 h-4"></div>
+  > 5 │   <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+      │                                             ^^^^^^^^^^^^^^^^^
+    6 │   <BaseIcon class="inline-block sm:hover:w-6 sm:hover:h-6 text-blue-500" />
+    7 │   <button class="rounded-md px-4 pt-2 pr-2 pb-2 pl-2 disabled:opacity-50">
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     3  3 │   <template>
+     4  4 │     <div class="w-4 h-4"></div>
+     5    │ - ··<div·class='overflow-hidden·text-ellipsis·whitespace-nowrap'></div>
+        5 │ + ··<div·class='truncate'></div>
+     6  6 │     <BaseIcon class="inline-block sm:hover:w-6 sm:hover:h-6 text-blue-500" />
+     7  7 │     <button class="rounded-md px-4 pt-2 pr-2 pb-2 pl-2 disabled:opacity-50">
+  
+
+```
+
+```
+invalid.vue:6:33 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    4 │   <div class="w-4 h-4"></div>
+    5 │   <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+  > 6 │   <BaseIcon class="inline-block sm:hover:w-6 sm:hover:h-6 text-blue-500" />
+      │                                 ^^^^^^^^^^^^
+    7 │   <button class="rounded-md px-4 pt-2 pr-2 pb-2 pl-2 disabled:opacity-50">
+    8 │     Save
+  
+  i Compressible utility used here.
+  
+    4 │   <div class="w-4 h-4"></div>
+    5 │   <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+  > 6 │   <BaseIcon class="inline-block sm:hover:w-6 sm:hover:h-6 text-blue-500" />
+      │                                              ^^^^^^^^^^^^
+    7 │   <button class="rounded-md px-4 pt-2 pr-2 pb-2 pl-2 disabled:opacity-50">
+    8 │     Save
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     4  4 │     <div class="w-4 h-4"></div>
+     5  5 │     <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+     6    │ - ··<BaseIcon·class="inline-block·sm:hover:w-6·sm:hover:h-6·text-blue-500"·/>
+        6 │ + ··<BaseIcon·class="inline-block·sm:hover:size-6·text-blue-500"·/>
+     7  7 │     <button class="rounded-md px-4 pt-2 pr-2 pb-2 pl-2 disabled:opacity-50">
+     8  8 │       Save
+  
+
+```
+
+```
+invalid.vue:7:49 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    5 │   <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+    6 │   <BaseIcon class="inline-block sm:hover:w-6 sm:hover:h-6 text-blue-500" />
+  > 7 │   <button class="rounded-md px-4 pt-2 pr-2 pb-2 pl-2 disabled:opacity-50">
+      │                                                 ^^^^
+    8 │     Save
+    9 │   </button>
+  
+  i Compressible utility used here.
+  
+    5 │   <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+    6 │   <BaseIcon class="inline-block sm:hover:w-6 sm:hover:h-6 text-blue-500" />
+  > 7 │   <button class="rounded-md px-4 pt-2 pr-2 pb-2 pl-2 disabled:opacity-50">
+      │                                       ^^^^
+    8 │     Save
+    9 │   </button>
+  
+  i Compressible utility used here.
+  
+    5 │   <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+    6 │   <BaseIcon class="inline-block sm:hover:w-6 sm:hover:h-6 text-blue-500" />
+  > 7 │   <button class="rounded-md px-4 pt-2 pr-2 pb-2 pl-2 disabled:opacity-50">
+      │                                  ^^^^
+    8 │     Save
+    9 │   </button>
+  
+  i Compressible utility used here.
+  
+    5 │   <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+    6 │   <BaseIcon class="inline-block sm:hover:w-6 sm:hover:h-6 text-blue-500" />
+  > 7 │   <button class="rounded-md px-4 pt-2 pr-2 pb-2 pl-2 disabled:opacity-50">
+      │                                            ^^^^
+    8 │     Save
+    9 │   </button>
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     5  5 │     <div class='overflow-hidden text-ellipsis whitespace-nowrap'></div>
+     6  6 │     <BaseIcon class="inline-block sm:hover:w-6 sm:hover:h-6 text-blue-500" />
+     7    │ - ··<button·class="rounded-md·px-4·pt-2·pr-2·pb-2·pl-2·disabled:opacity-50">
+        7 │ + ··<button·class="rounded-md·px-4·p-2·disabled:opacity-50">
+     8  8 │       Save
+     9  9 │     </button>
+  
+
+```
+
+```
+invalid.vue:10:20 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+     8 │     Save
+     9 │   </button>
+  > 10 │   <div class="mr-3 ml-3 [&_svg]:w-[1.25rem] [&_svg]:h-[1.25rem]"></div>
+       │                    ^^^^
+    11 │ </template>
+    12 │ 
+  
+  i Compressible utility used here.
+  
+     8 │     Save
+     9 │   </button>
+  > 10 │   <div class="mr-3 ml-3 [&_svg]:w-[1.25rem] [&_svg]:h-[1.25rem]"></div>
+       │               ^^^^
+    11 │ </template>
+    12 │ 
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     8  8 │       Save
+     9  9 │     </button>
+    10    │ - ··<div·class="mr-3·ml-3·[&_svg]:w-[1.25rem]·[&_svg]:h-[1.25rem]"></div>
+       10 │ + ··<div·class="mx-3·[&_svg]:w-[1.25rem]·[&_svg]:h-[1.25rem]"></div>
+    11 11 │   </template>
+    12 12 │   
+  
+
+```
+
+```
+invalid.vue:10:25 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+     8 │     Save
+     9 │   </button>
+  > 10 │   <div class="mr-3 ml-3 [&_svg]:w-[1.25rem] [&_svg]:h-[1.25rem]"></div>
+       │                         ^^^^^^^^^^^^^^^^^^^
+    11 │ </template>
+    12 │ 
+  
+  i Compressible utility used here.
+  
+     8 │     Save
+     9 │   </button>
+  > 10 │   <div class="mr-3 ml-3 [&_svg]:w-[1.25rem] [&_svg]:h-[1.25rem]"></div>
+       │                                             ^^^^^^^^^^^^^^^^^^^
+    11 │ </template>
+    12 │ 
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     8  8 │       Save
+     9  9 │     </button>
+    10    │ - ··<div·class="mr-3·ml-3·[&_svg]:w-[1.25rem]·[&_svg]:h-[1.25rem]"></div>
+       10 │ + ··<div·class="mr-3·ml-3·[&_svg]:size-[1.25rem]"></div>
+    11 11 │   </template>
+    12 12 │   
+  
+
+```

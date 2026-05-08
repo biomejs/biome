@@ -5,6 +5,7 @@ mod assist;
 mod lint;
 mod registry;
 mod suppression_action;
+mod tailwind;
 mod utils;
 
 pub use crate::registry::visit_registry;
