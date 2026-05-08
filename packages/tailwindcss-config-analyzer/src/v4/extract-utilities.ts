@@ -49,6 +49,7 @@ export type StaticUtility = {
 	registration_idx: number;
 	sort_property: string;
 	property_count: number;
+	negative_registration_idx: number | null;
 };
 
 export type Branch =
@@ -86,7 +87,12 @@ export type FunctionalUtility = {
 	basename: string;
 	registration_idx: number;
 	branches: Branch[];
+	negative: Negative | null;
 };
+
+export type Negative =
+	| { kind: "SameBranches"; registration_idx: number }
+	| { kind: "Distinct"; registration_idx: number; branches: Branch[] };
 
 export type ExtractedUtilities = {
 	static: StaticUtility[];
@@ -128,16 +134,42 @@ export async function extractUtilities(): Promise<ExtractedUtilities> {
 		probeTokens,
 	});
 
-	const functionalUtilities: FunctionalUtility[] = [];
+	type RawNegative = { registration_idx: number; branches: Branch[] };
+	const positives = new Map<string, FunctionalUtility>();
+	const negatives = new Map<string, RawNegative>();
 	for (let i = 0; i < functionalKeys.length; i++) {
-		const basename = functionalKeys[i];
-		const branches = dedupeBranches(branchesByBasename.get(basename) ?? []);
-		functionalUtilities.push({
-			basename,
-			registration_idx: i,
-			branches,
-		});
+		const key = functionalKeys[i];
+		const branches = dedupeBranches(branchesByBasename.get(key) ?? []);
+		if (key.startsWith("-")) {
+			negatives.set(key.slice(1), { registration_idx: i, branches });
+		} else {
+			positives.set(key, {
+				basename: key,
+				registration_idx: i,
+				branches,
+				negative: null,
+			});
+		}
 	}
+	for (const [basename, neg] of negatives) {
+		const positive = positives.get(basename);
+		if (!positive) {
+			throw new Error(
+				`Negative basename '-${basename}' has no positive counterpart`,
+			);
+		}
+		positive.negative = sameBranches(positive.branches, neg.branches)
+			? { kind: "SameBranches", registration_idx: neg.registration_idx }
+			: {
+					kind: "Distinct",
+					registration_idx: neg.registration_idx,
+					branches: neg.branches,
+				};
+	}
+	// Preserve the original Tailwind registration order of positive entries.
+	const functionalUtilities = [...positives.values()].sort(
+		(a, b) => a.registration_idx - b.registration_idx,
+	);
 
 	return { static: staticUtilities, functional: functionalUtilities };
 }
@@ -147,18 +179,49 @@ function extractStatic(
 	staticKeys: string[],
 ): StaticUtility[] {
 	const staticCss = ds.candidatesToCss(staticKeys);
-	const out: StaticUtility[] = [];
+	type Raw = {
+		name: string;
+		registration_idx: number;
+		sort_property: string;
+		property_count: number;
+	};
+	const positives = new Map<string, Raw>();
+	const negativeRegByName = new Map<string, number>();
 	for (let i = 0; i < staticKeys.length; i++) {
 		const css = staticCss[i];
 		if (!css) continue;
 		const { sort_property, property_count } = parseDeclarations(css);
 		if (!sort_property) continue;
+		const name = staticKeys[i];
+		if (name.startsWith("-")) {
+			negativeRegByName.set(name.slice(1), i);
+		} else {
+			positives.set(name, {
+				name,
+				registration_idx: i,
+				sort_property,
+				property_count,
+			});
+		}
+	}
+	const out: StaticUtility[] = [];
+	for (const p of positives.values()) {
 		out.push({
-			name: staticKeys[i],
-			registration_idx: i,
-			sort_property,
-			property_count,
+			name: p.name,
+			registration_idx: p.registration_idx,
+			sort_property: p.sort_property,
+			property_count: p.property_count,
+			negative_registration_idx: negativeRegByName.get(p.name) ?? null,
 		});
+	}
+	// Preserve original Tailwind registration order.
+	out.sort((a, b) => a.registration_idx - b.registration_idx);
+	for (const [name] of negativeRegByName) {
+		if (!positives.has(name)) {
+			throw new Error(
+				`Negative static utility '-${name}' has no positive counterpart`,
+			);
+		}
 	}
 	return out;
 }
@@ -346,28 +409,34 @@ const BRANCH_KIND_ORDER: Record<Branch["kind"], number> = {
 	Arbitrary: 4,
 };
 
+function sameBranches(a: Branch[], b: Branch[]): boolean {
+	if (a.length !== b.length) return false;
+	for (let i = 0; i < a.length; i++) {
+		if (branchKey(a[i]) !== branchKey(b[i])) return false;
+	}
+	return true;
+}
+
+function branchKey(b: Branch): string {
+	switch (b.kind) {
+		case "Named":
+			return `N|${b.namespace}|${b.sort_property}|${b.property_count}`;
+		case "NamedKeyword":
+			return `K|${b.keywords.join(",")}|${b.sort_property}|${b.property_count}`;
+		case "NamedTyped":
+			return `NT|${b.value_type}|${b.sort_property}|${b.property_count}`;
+		case "ArbitraryTyped":
+			return `T|${b.value_type}|${b.sort_property}|${b.property_count}`;
+		case "Arbitrary":
+			return `A|${b.sort_property}|${b.property_count}`;
+	}
+}
+
 function dedupeBranches(branches: Branch[]): Branch[] {
 	const seen = new Set<string>();
 	const out: Branch[] = [];
 	for (const b of branches) {
-		let key: string;
-		switch (b.kind) {
-			case "Named":
-				key = `N|${b.namespace}|${b.sort_property}|${b.property_count}`;
-				break;
-			case "NamedKeyword":
-				key = `K|${b.keywords.join(",")}|${b.sort_property}|${b.property_count}`;
-				break;
-			case "NamedTyped":
-				key = `NT|${b.value_type}|${b.sort_property}|${b.property_count}`;
-				break;
-			case "ArbitraryTyped":
-				key = `T|${b.value_type}|${b.sort_property}|${b.property_count}`;
-				break;
-			case "Arbitrary":
-				key = `A|${b.sort_property}|${b.property_count}`;
-				break;
-		}
+		const key = branchKey(b);
 		if (seen.has(key)) continue;
 		seen.add(key);
 		out.push(b);

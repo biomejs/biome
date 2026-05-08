@@ -1,6 +1,10 @@
 // Render the auto-generated Rust file `tailwind_preset_v4.rs`.
 
-import type { Branch, ExtractedUtilities } from "./extract-utilities.js";
+import type {
+	Branch,
+	ExtractedUtilities,
+	FunctionalUtility,
+} from "./extract-utilities.js";
 import {
 	THEME_NAMESPACES,
 	type ThemeNamespacePrefix,
@@ -29,14 +33,15 @@ use phf::{phf_map, phf_set};
 use super::predicates;
 
 use Branch::*;
+use Negative::*;
 `;
 
-const STRUCT_DEFS = `// Sort metadata for a single utility class.
-#[derive(Copy, Clone)]
+const STRUCT_DEFS = `#[derive(Copy, Clone)]
 pub struct UtilityEntry {
     pub property_idx: u16,
     pub property_count: u8,
     pub registration_idx: u16,
+    pub negative_registration_idx: Option<u16>,
 }
 
 // One dispatch branch inside a functional utility's compileFn.
@@ -56,10 +61,6 @@ pub struct UtilityEntry {
 //                    the same property regardless of value type
 //                    (\`p-[10px]\`, \`p-[#fff]\` → \`padding\`).
 //                    Resolved after every \`ArbitraryTyped\` branch.
-//
-// Keyword sets are interned in \`KEYWORD_POOL\` and referenced by index
-// so that \`Branch\` stays small (the largest variant payload is now
-// three u16s + a u8 instead of a fat slice pointer).
 #[derive(Copy, Clone)]
 pub enum Branch {
     Named(ThemeNamespace, u16, u8),
@@ -73,6 +74,13 @@ pub enum Branch {
 pub struct FunctionalEntry {
     pub registration_idx: u16,
     pub branches: &'static [Branch],
+    pub negative: Option<Negative>,
+}
+
+#[derive(Copy, Clone)]
+pub enum Negative {
+    SameBranches { registration_idx: u16 },
+    Distinct { registration_idx: u16, branches: &'static [Branch] },
 }
 `;
 
@@ -150,7 +158,11 @@ function renderStaticUtilities(
 ): string {
 	const lines = utils.static.map((u) => {
 		const idx = propIdx.get(u.sort_property) ?? propCount;
-		return `    ${rustString(u.name)} => UtilityEntry { property_idx: ${idx}, property_count: ${u.property_count}, registration_idx: ${u.registration_idx} },`;
+		const negReg =
+			u.negative_registration_idx === null
+				? "None"
+				: `Some(${u.negative_registration_idx})`;
+		return `    ${rustString(u.name)} => UtilityEntry { property_idx: ${idx}, property_count: ${u.property_count}, registration_idx: ${u.registration_idx}, negative_registration_idx: ${negReg} },`;
 	});
 	return `pub static STATIC_UTILITIES: phf::Map<&'static str, UtilityEntry> = phf_map! {
 ${lines.join("\n")}
@@ -193,25 +205,75 @@ ${items.join("\n")}
 `;
 }
 
+function renderBranchList(
+	indent: string,
+	branches: Branch[],
+	propIdx: Map<string, number>,
+	propCount: number,
+	keywordIdx: Map<string, number>,
+): string {
+	return branches
+		.map(
+			(b) =>
+				`${indent}${formatBranch(b, propIdx, propCount, keywordIdx)},`,
+		)
+		.join("\n");
+}
+
+function renderNegative(
+	u: FunctionalUtility,
+	propIdx: Map<string, number>,
+	propCount: number,
+	keywordIdx: Map<string, number>,
+): string {
+	if (u.negative === null) {
+		return "        negative: None,";
+	}
+	switch (u.negative.kind) {
+		case "SameBranches":
+			return `        negative: Some(SameBranches { registration_idx: ${u.negative.registration_idx} }),`;
+		case "Distinct": {
+			const items = renderBranchList(
+				"                ",
+				u.negative.branches,
+				propIdx,
+				propCount,
+				keywordIdx,
+			);
+			return `        negative: Some(Distinct {
+            registration_idx: ${u.negative.registration_idx},
+            branches: &[
+${items}
+            ],
+        }),`;
+		}
+	}
+}
+
 function renderFunctionalUtilities(
 	utils: ExtractedUtilities,
 	propIdx: Map<string, number>,
 	propCount: number,
 	keywordIdx: Map<string, number>,
 ): string {
-	const populated = utils.functional.filter((u) => u.branches.length > 0);
+	const populated = utils.functional.filter(
+		(u) => u.branches.length > 0 || u.negative !== null,
+	);
 	const entries = populated.map((u) => {
-		const items = u.branches
-			.map(
-				(b) =>
-					`            ${formatBranch(b, propIdx, propCount, keywordIdx)},`,
-			)
-			.join("\n");
+		const items = renderBranchList(
+			"            ",
+			u.branches,
+			propIdx,
+			propCount,
+			keywordIdx,
+		);
+		const negative = renderNegative(u, propIdx, propCount, keywordIdx);
 		return `    ${rustString(u.basename)} => FunctionalEntry {
         registration_idx: ${u.registration_idx},
         branches: &[
 ${items}
         ],
+${negative}
     },`;
 	});
 	return `pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_map! {
