@@ -39,6 +39,24 @@
 	"aspect-video flex",     // Named(Aspect)
 	"aspect-9/16 flex",      // NamedTyped(Ratio)
 
+	// ─── negative-prefixed functional utilities ────────────────────
+	// Parser splits `-` off; classify routes through `entry.negative`
+	// to pick the correct (registration_idx, branches) slot.
+
+	"p-4 flex -mt-2",            // SameBranches: -mt reuses mt's branches
+	"flex mt-3 -mt-2",           // negative + positive of same basename, distinct reg_idx
+	"flex -mt-2 -inset-2",       // two SameBranches negatives sorted by their own reg_idx
+	"flex -bg-red-500 p-4",      // -bg has no negative entry → Unknown → floats to front
+	"p-4 flex -z-auto",          // -z drops NamedKeyword(auto) → resolve fails → Unknown
+	"p-4 flex -z-10",            // Distinct: -z keeps NamedTyped(Number), routes to z-index
+
+	// negative static utilities. The parser strips the leading `-` and
+	// hands us a TwStaticCandidate; classify uses
+	// `negative_registration_idx` to pick the matching slot, falling
+	// back to Unknown when it's `None` (Tailwind doesn't register a
+	// negative form).
+	"flex p-4 -flex",            // -flex: negative_registration_idx is None → Unknown
+
 	// ─── unknown classes ───────────────────────────────────────────
 	// Tokens that resolve to no branch float to the front and keep
 	// their relative input order (stable sort).

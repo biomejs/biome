@@ -66,6 +66,27 @@ sorted: flex aspect-video
 input:  aspect-9/16 flex
 sorted: aspect-9/16 flex
 ---
+input:  p-4 flex -mt-2
+sorted: -mt-2 flex p-4
+---
+input:  flex mt-3 -mt-2
+sorted: -mt-2 mt-3 flex
+---
+input:  flex -mt-2 -inset-2
+sorted: -inset-2 -mt-2 flex
+---
+input:  flex -bg-red-500 p-4
+sorted: -bg-red-500 flex p-4
+---
+input:  p-4 flex -z-auto
+sorted: -z-auto flex p-4
+---
+input:  p-4 flex -z-10
+sorted: -z-10 flex p-4
+---
+input:  flex p-4 -flex
+sorted: -flex flex p-4
+---
 input:  p-4 foo flex
 sorted: foo flex p-4
 ---

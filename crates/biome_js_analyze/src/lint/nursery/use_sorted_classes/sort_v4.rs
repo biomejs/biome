@@ -3,7 +3,9 @@ use std::cmp::Ordering;
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxNodeText};
 use biome_tailwind_syntax::{AnyTwCandidate, AnyTwFullCandidate, AnyTwValue, TwRoot};
 
-use super::tailwind_preset_v4::{Branch, FUNCTIONAL_UTILITIES, KEYWORD_POOL, STATIC_UTILITIES};
+use super::tailwind_preset_v4::{
+    Branch, FUNCTIONAL_UTILITIES, KEYWORD_POOL, Negative, STATIC_UTILITIES,
+};
 
 /// Sort the candidates of a parsed Tailwind class list and return the joined,
 /// space-separated result.
@@ -58,16 +60,12 @@ impl SortKey {
         if !node.variants().is_empty() {
             return Self::Unknown;
         }
-        // TODO: negative prefix (`-mt-2`). The parser splits the leading `-`
-        // off into `negative_token`; the preset still keys curated negatives
-        // like `-inset` under their dashed name, so reconciliation is needed.
-        if node.negative_token().is_some() {
-            return Self::Unknown;
-        }
         // TODO: important suffix (`flex!`).
         if node.excl_token().is_some() {
             return Self::Unknown;
         }
+
+        let is_negative = node.negative_token().is_some();
 
         let Ok(inner) = node.candidate() else {
             return Self::Unknown;
@@ -84,10 +82,18 @@ impl SortKey {
                 let Some(entry) = STATIC_UTILITIES.get(name.text_trimmed()) else {
                     return Self::Unknown;
                 };
+                let registration_idx = if is_negative {
+                    let Some(neg) = entry.negative_registration_idx else {
+                        return Self::Unknown;
+                    };
+                    neg
+                } else {
+                    entry.registration_idx
+                };
                 Self::Known {
                     property_idx: entry.property_idx,
                     property_count: entry.property_count,
-                    registration_idx: entry.registration_idx,
+                    registration_idx,
                 }
             }
 
@@ -103,6 +109,22 @@ impl SortKey {
                 let Some(entry) = FUNCTIONAL_UTILITIES.get(base.text_trimmed()) else {
                     return Self::Unknown;
                 };
+
+                let (registration_idx, branches) = if is_negative {
+                    match entry.negative {
+                        None => return Self::Unknown,
+                        Some(Negative::SameBranches { registration_idx }) => {
+                            (registration_idx, entry.branches)
+                        }
+                        Some(Negative::Distinct {
+                            registration_idx,
+                            branches,
+                        }) => (registration_idx, branches),
+                    }
+                } else {
+                    (entry.registration_idx, entry.branches)
+                };
+
                 let Ok(value) = f.value() else {
                     return Self::Unknown;
                 };
@@ -120,12 +142,8 @@ impl SortKey {
                         let Ok(value_token) = named.value_token() else {
                             return Self::Unknown;
                         };
-                        resolve_branch(
-                            entry.branches,
-                            value_token.text_trimmed(),
-                            entry.registration_idx,
-                        )
-                        .unwrap_or(Self::Unknown)
+                        resolve_branch(branches, value_token.text_trimmed(), registration_idx)
+                            .unwrap_or(Self::Unknown)
                     }
                 }
             }
