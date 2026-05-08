@@ -1,6 +1,7 @@
 use super::*;
 use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
+use crate::workspace::UpdateSettingsParams;
 use biome_configuration::{
     FormatterConfiguration, JsConfiguration,
     analyzer::AnalyzerSelector,
@@ -41,6 +42,7 @@ fn commonjs_file_rejects_import_statement() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -150,6 +152,7 @@ fn pnpm_workspace_update_reapplies_catalogs() {
                 document_file_source: None,
                 persist_node_cache: false,
                 inline_config: None,
+                editor_features: None,
             },
         )
         .unwrap();
@@ -192,6 +195,7 @@ fn store_embedded_nodes_with_current_ranges() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -254,6 +258,7 @@ fn format_html_with_scripts_and_css() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -364,6 +369,7 @@ function Foo({cond}) {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -375,6 +381,7 @@ function Foo({cond}) {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -481,6 +488,7 @@ function Foo({cond}) {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -492,6 +500,7 @@ function Foo({cond}) {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -559,6 +568,7 @@ fn pull_diagnostics_and_actions_for_js_file() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -640,6 +650,7 @@ fn no_diagnostics_for_unsupported_script_types() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -703,6 +714,7 @@ const items = ['a', 'b'];
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -769,6 +781,7 @@ const Bar = styled(Component)`
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -837,6 +850,7 @@ styled.div`
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -910,6 +924,7 @@ const PortfolioIcon = styled.div`
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -973,6 +988,7 @@ fn issue_9994() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -1080,6 +1096,7 @@ const Container = styled.div`
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -1204,6 +1221,7 @@ const Baz = graphql`
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -1290,6 +1308,7 @@ const highlight = foo`some tagged template` // unknown tagged template
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -1356,6 +1375,7 @@ graphql(`
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -1412,6 +1432,7 @@ fn issue_9484_propagate_expand_after_embed() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -1478,6 +1499,7 @@ const Table = () => {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -1517,6 +1539,7 @@ fn lsp_language_hints_keep_svelte_source_module_path_semantics() {
             document_file_source: Some(DocumentFileSource::from_language_id("typescript", None)),
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -1528,6 +1551,7 @@ fn lsp_language_hints_keep_svelte_source_module_path_semantics() {
             document_file_source: Some(DocumentFileSource::from_language_id("javascript", None)),
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -1577,6 +1601,7 @@ fn no_undeclared_classes_reports_unknown_class() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -1640,6 +1665,7 @@ fn no_undeclared_classes_passes_when_class_is_defined() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -1697,6 +1723,7 @@ fn no_undeclared_classes_silent_without_style_info() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -1754,6 +1781,7 @@ fn no_undeclared_classes_reports_only_undeclared_in_multi_class() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -1812,6 +1840,7 @@ fn no_unused_classes_reports_unreferenced_class() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -1876,6 +1905,7 @@ fn no_unused_classes_passes_when_class_is_referenced_in_jsx() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -1934,6 +1964,7 @@ fn no_unused_classes_reports_only_unreferenced_classes() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
@@ -2009,6 +2040,7 @@ fn no_unused_classes_passes_with_transitive_css_import() {
                 document_file_source: None,
                 persist_node_cache: false,
                 inline_config: None,
+                editor_features: None,
             })
             .unwrap();
     }
@@ -2035,4 +2067,931 @@ fn no_unused_classes_passes_with_transitive_css_import() {
             "Expected no diagnostics for {path} — all classes are transitively referenced"
         );
     }
+}
+
+#[test]
+fn go_to_definition_named_import() {
+    const UTILS_CONTENT: &str = "export function greet() { return 'hello'; }\n";
+    const MAIN_CONTENT: &str = "import { greet } from './utils.js';\ngreet();\n";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/utils.js"),
+        UTILS_CONTENT.as_bytes(),
+    );
+    fs.insert(
+        Utf8PathBuf::from("/project/main.js"),
+        MAIN_CONTENT.as_bytes(),
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+
+    // Cursor on `greet` in `import { greet }` — byte offset 9 (start of "greet")
+    let cursor_range = TextRange::new(TextSize::from(9), TextSize::from(9));
+
+    let result = workspace
+        .go_to_definition(GoToDefinitionParams {
+            project_key,
+            enabled: true,
+            path: BiomePath::new("/project/main.js"),
+            cursor_range,
+        })
+        .unwrap();
+
+    let definition = result.expect("should find a definition");
+    assert_eq!(definition.matches.len(), 1);
+    let (path, range) = &definition.matches[0];
+    assert_eq!(path.as_path(), Utf8Path::new("/project/utils.js"));
+    // The `greet` binding in utils.js starts at byte 16 (after "export function ")
+    assert_eq!(range.start(), TextSize::from(16));
+    assert_eq!(range.end(), TextSize::from(21));
+}
+
+#[test]
+fn go_to_definition_default_import() {
+    const UTILS_CONTENT: &str = "export default function myFunc() { return 42; }\n";
+    const MAIN_CONTENT: &str = "import myFunc from './utils.js';\nmyFunc();\n";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/utils.js"),
+        UTILS_CONTENT.as_bytes(),
+    );
+    fs.insert(
+        Utf8PathBuf::from("/project/main.js"),
+        MAIN_CONTENT.as_bytes(),
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+
+    // Cursor on `myFunc` in `import myFunc` — byte offset 7
+    let cursor_range = TextRange::new(TextSize::from(7), TextSize::from(7));
+
+    let result = workspace
+        .go_to_definition(GoToDefinitionParams {
+            project_key,
+            enabled: true,
+            path: BiomePath::new("/project/main.js"),
+            cursor_range,
+        })
+        .unwrap();
+
+    let definition = result.expect("should find a definition for default import");
+    assert_eq!(definition.matches.len(), 1);
+    let (path, _range) = &definition.matches[0];
+    assert_eq!(path.as_path(), Utf8Path::new("/project/utils.js"));
+}
+
+#[test]
+fn go_to_definition_same_file_local_binding() {
+    const CONTENT: &str = "const myVar = 42;\nconsole.log(myVar);\n";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/main.js"), CONTENT.as_bytes());
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+
+    // Cursor on `myVar` in `console.log(myVar)` — byte offset 30
+    let cursor_range = TextRange::new(TextSize::from(30), TextSize::from(30));
+
+    let result = workspace
+        .go_to_definition(GoToDefinitionParams {
+            project_key,
+            enabled: true,
+            path: BiomePath::new("/project/main.js"),
+            cursor_range,
+        })
+        .unwrap();
+
+    let definition = result.expect("should find a local definition");
+    assert_eq!(definition.matches.len(), 1);
+    let (path, range) = &definition.matches[0];
+    assert_eq!(path.as_path(), Utf8Path::new("/project/main.js"));
+    // `myVar` is declared at byte 6 (after "const ")
+    assert_eq!(range.start(), TextSize::from(6));
+}
+
+#[test]
+fn go_to_definition_returns_none_for_node_modules() {
+    const UTILS_CONTENT: &str = "export function helper() {}\n";
+    const MAIN_CONTENT: &str = "import { helper } from 'external-pkg';\n";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/node_modules/external-pkg/index.js"),
+        UTILS_CONTENT.as_bytes(),
+    );
+    fs.insert(
+        Utf8PathBuf::from("/project/main.js"),
+        MAIN_CONTENT.as_bytes(),
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+
+    // Cursor on `helper` in `import { helper }` — byte offset 9
+    let cursor_range = TextRange::new(TextSize::from(9), TextSize::from(9));
+
+    let result = workspace
+        .go_to_definition(GoToDefinitionParams {
+            project_key,
+            enabled: true,
+            path: BiomePath::new("/project/main.js"),
+            cursor_range,
+        })
+        .unwrap();
+
+    match result {
+        None => {}
+        Some(definition) => {
+            assert!(
+                definition.matches.is_empty(),
+                "should not resolve node_modules imports, got: {:?}",
+                definition.matches
+            );
+        }
+    }
+}
+
+#[test]
+fn go_to_definition_returns_none_for_cursor_on_non_identifier() {
+    const CONTENT: &str = "const x = 1;\n";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/main.js"), CONTENT.as_bytes());
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+
+    // Cursor on `=` at byte offset 8
+    let cursor_range = TextRange::new(TextSize::from(8), TextSize::from(8));
+
+    let result = workspace
+        .go_to_definition(GoToDefinitionParams {
+            project_key,
+            enabled: true,
+            path: BiomePath::new("/project/main.js"),
+            cursor_range,
+        })
+        .unwrap();
+
+    assert!(
+        result.is_none(),
+        "should return None when cursor is not on an identifier"
+    );
+}
+
+#[test]
+fn go_to_definition_jsx_classname_to_css() {
+    // `.btn { color: red; }\n` — "btn" starts at offset 1
+    const CSS_CONTENT: &str = ".btn { color: red; }\n";
+    // `import './styles.css';\n<div className="btn" />\n`
+    // "btn" in className is at offset 38 (after the opening quote at 37)
+    const JSX_CONTENT: &str = "import './styles.css';\n<div className=\"btn\" />\n";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/styles.css"),
+        CSS_CONTENT.as_bytes(),
+    );
+    fs.insert(
+        Utf8PathBuf::from("/project/App.jsx"),
+        JSX_CONTENT.as_bytes(),
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+
+    // Cursor on "btn" inside className="btn" — byte offset 39
+    let cursor_range = TextRange::new(TextSize::from(39), TextSize::from(39));
+
+    let result = workspace
+        .go_to_definition(GoToDefinitionParams {
+            project_key,
+            enabled: true,
+            path: BiomePath::new("/project/App.jsx"),
+            cursor_range,
+        })
+        .unwrap();
+
+    let definition = result.expect("should resolve className to CSS class");
+    assert_eq!(definition.matches.len(), 1);
+    let (path, range) = &definition.matches[0];
+    assert_eq!(path, &BiomePath::new("/project/styles.css"));
+    // "btn" in `.btn` starts at offset 1 (after the dot)
+    assert_eq!(range, &TextRange::new(TextSize::from(1), TextSize::from(4)));
+}
+
+#[test]
+fn go_to_definition_jsx_classname_multiple_classes() {
+    const CSS_CONTENT: &str = ".foo { } .bar { } .baz { }\n";
+    // `import './styles.css';\n<div className="foo bar baz" />\n`
+    const JSX_CONTENT: &str = "import './styles.css';\n<div className=\"foo bar baz\" />\n";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/styles.css"),
+        CSS_CONTENT.as_bytes(),
+    );
+    fs.insert(
+        Utf8PathBuf::from("/project/App.jsx"),
+        JSX_CONTENT.as_bytes(),
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+
+    // Cursor on "bar" inside className="foo bar baz" — "bar" starts at offset 43
+    let cursor_range = TextRange::new(TextSize::from(43), TextSize::from(43));
+
+    let result = workspace
+        .go_to_definition(GoToDefinitionParams {
+            project_key,
+            enabled: true,
+            path: BiomePath::new("/project/App.jsx"),
+            cursor_range,
+        })
+        .unwrap();
+
+    let definition = result.expect("should resolve to .bar in CSS");
+    assert_eq!(definition.matches.len(), 1);
+    let (path, range) = &definition.matches[0];
+    assert_eq!(path, &BiomePath::new("/project/styles.css"));
+    // ".bar" is at offset 9, so "bar" name starts at 10
+    assert_eq!(
+        range,
+        &TextRange::new(TextSize::from(10), TextSize::from(13))
+    );
+}
+
+#[test]
+fn go_to_definition_html_class_to_css() {
+    const CSS_CONTENT: &str = ".header { margin: 0; }\n";
+    const HTML_CONTENT: &str =
+        "<link rel=\"stylesheet\" href=\"./styles.css\" />\n<div class=\"header\">Hello</div>\n";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/styles.css"),
+        CSS_CONTENT.as_bytes(),
+    );
+    fs.insert(
+        Utf8PathBuf::from("/project/index.html"),
+        HTML_CONTENT.as_bytes(),
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+
+    // Cursor on "header" inside class="header" — find the offset
+    // `<link rel="stylesheet" href="./styles.css" />\n<div class="header">Hello</div>\n`
+    // The `class="header"` part: "header" starts after the quote
+    let class_value_start = HTML_CONTENT.find("\"header\"").unwrap() + 1; // after the quote
+    let cursor_range = TextRange::new(
+        TextSize::from(class_value_start as u32),
+        TextSize::from(class_value_start as u32),
+    );
+
+    let result = workspace
+        .go_to_definition(GoToDefinitionParams {
+            project_key,
+            enabled: true,
+            path: BiomePath::new("/project/index.html"),
+            cursor_range,
+        })
+        .unwrap();
+
+    let definition = result.expect("should resolve HTML class to CSS class");
+    assert_eq!(definition.matches.len(), 1);
+    let (path, range) = &definition.matches[0];
+    assert_eq!(path, &BiomePath::new("/project/styles.css"));
+    // "header" in `.header` starts at offset 1
+    assert_eq!(range, &TextRange::new(TextSize::from(1), TextSize::from(7)));
+}
+
+#[test]
+fn go_to_definition_html_class_inline_style() {
+    const HTML_CONTENT: &str =
+        "<style>.card { padding: 1rem; }</style>\n<div class=\"card\">Content</div>\n";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/index.html"),
+        HTML_CONTENT.as_bytes(),
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::NoScanner,
+            verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/index.html"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    // Cursor on "card" inside class="card"
+    let class_value_start = HTML_CONTENT.find("\"card\"").unwrap() + 1;
+    let cursor_range = TextRange::new(
+        TextSize::from(class_value_start as u32),
+        TextSize::from(class_value_start as u32),
+    );
+
+    let result = workspace
+        .go_to_definition(GoToDefinitionParams {
+            project_key,
+            enabled: true,
+            path: BiomePath::new("/project/index.html"),
+            cursor_range,
+        })
+        .unwrap();
+
+    // Inline style classes should resolve to the same HTML file
+    let definition = result.expect("should resolve HTML class to inline style");
+    assert_eq!(definition.matches.len(), 1);
+    let (path, range) = &definition.matches[0];
+    assert_eq!(path, &BiomePath::new("/project/index.html"));
+    // "card" in `.card` inside <style> block — must be in parent document coordinates
+    let style_offset = HTML_CONTENT.find("<style>").unwrap() + "<style>".len();
+    // ".card" starts at offset 0 in snippet, "card" at offset 1
+    let expected_start = style_offset + 1;
+    let expected_end = expected_start + 4;
+    assert_eq!(
+        range,
+        &TextRange::new(
+            TextSize::from(expected_start as u32),
+            TextSize::from(expected_end as u32),
+        ),
+        "range should be in parent document coordinates"
+    );
+}
+
+/// Regression: `.foobar` must NOT match a lookup for `foo`.
+/// Substring matching would incorrectly resolve `foo` to the `.foobar` rule.
+#[test]
+fn go_to_definition_inline_style_no_substring_match() {
+    const HTML_CONTENT: &str =
+        "<style>.foobar { color: red; }</style>\n<div class=\"foo\">Content</div>\n";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/index.html"),
+        HTML_CONTENT.as_bytes(),
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+
+    let class_value_start = HTML_CONTENT.find("\"foo\"").unwrap() + 1;
+    let cursor_range = TextRange::new(
+        TextSize::from(class_value_start as u32),
+        TextSize::from(class_value_start as u32),
+    );
+
+    let result = workspace
+        .go_to_definition(GoToDefinitionParams {
+            project_key,
+            enabled: true,
+            path: BiomePath::new("/project/index.html"),
+            cursor_range,
+        })
+        .unwrap();
+
+    match result {
+        None => {}
+        Some(definition) => {
+            assert!(
+                definition.matches.is_empty(),
+                "`.foobar` should not match a lookup for `foo`, got: {:?}",
+                definition.matches
+            );
+        }
+    }
+}
+
+#[test]
+fn go_to_definition_vue_class_to_inline_style() {
+    const VUE_CONTENT: &str = "\
+<template>
+  <div class=\"card\">Hello</div>
+</template>
+
+<style>
+.card { padding: 1rem; }
+</style>
+";
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/App.vue"), VUE_CONTENT.as_bytes());
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    let configuration =
+        biome_deserialize::json::deserialize_from_json_str::<biome_configuration::Configuration>(
+            r#"{ "html": { "experimentalFullSupportEnabled": true } }"#,
+            biome_json_parser::JsonParserOptions::default(),
+            "",
+        )
+        .into_deserialized()
+        .unwrap();
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            configuration,
+            workspace_directory: Some(BiomePath::new("/")),
+            extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .unwrap();
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::NoScanner,
+            verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/App.vue"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    // Cursor on "card" inside class="card"
+    let class_value_start = VUE_CONTENT.find("\"card\"").unwrap() + 1;
+    let cursor_range = TextRange::new(
+        TextSize::from(class_value_start as u32),
+        TextSize::from(class_value_start as u32),
+    );
+
+    let result = workspace
+        .go_to_definition(GoToDefinitionParams {
+            project_key,
+            enabled: true,
+            path: BiomePath::new("/App.vue"),
+            cursor_range,
+        })
+        .unwrap();
+
+    let definition = result.expect("should resolve Vue class to inline style");
+    assert_eq!(definition.matches.len(), 1);
+    let (path, range) = &definition.matches[0];
+    assert_eq!(path, &BiomePath::new("/App.vue"));
+    // "card" in `.card` inside <style> block — range must be in parent document coordinates
+    let style_offset = VUE_CONTENT.find("<style>").unwrap() + "<style>\n".len();
+    // ".card" starts at offset 0 in snippet, "card" at offset 1
+    let expected_start = style_offset + 1;
+    let expected_end = expected_start + 4;
+    assert_eq!(
+        range,
+        &TextRange::new(
+            TextSize::from(expected_start as u32),
+            TextSize::from(expected_end as u32),
+        ),
+        "range should be in parent document coordinates, not snippet-local"
+    );
+}
+
+#[test]
+fn go_to_definition_vue_class_with_script_and_style() {
+    const VUE_CONTENT: &str = "\
+<script setup>
+import { foo } from './file.ts';
+foo();
+</script>
+
+<div class=\"btn\">Hello</div>
+
+<style>
+.btn {
+    bottom: 0;
+}
+</style>
+";
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/App.vue"), VUE_CONTENT.as_bytes());
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    let configuration =
+        biome_deserialize::json::deserialize_from_json_str::<biome_configuration::Configuration>(
+            r#"{ "html": { "experimentalFullSupportEnabled": true } }"#,
+            biome_json_parser::JsonParserOptions::default(),
+            "",
+        )
+        .into_deserialized()
+        .unwrap();
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            configuration,
+            workspace_directory: Some(BiomePath::new("/")),
+            extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .unwrap();
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::NoScanner,
+            verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/App.vue"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    // Cursor on "btn" inside class="btn"
+    let class_value_start = VUE_CONTENT.find("\"btn\"").unwrap() + 1;
+    let cursor_range = TextRange::new(
+        TextSize::from(class_value_start as u32),
+        TextSize::from(class_value_start as u32),
+    );
+
+    let result = workspace
+        .go_to_definition(GoToDefinitionParams {
+            project_key,
+            enabled: true,
+            path: BiomePath::new("/App.vue"),
+            cursor_range,
+        })
+        .unwrap();
+
+    let definition = result.expect("should resolve Vue class to inline style with script present");
+    assert_eq!(definition.matches.len(), 1);
+    let (path, range) = &definition.matches[0];
+    assert_eq!(path, &BiomePath::new("/App.vue"));
+    // "btn" in `.btn` inside <style> — must be in parent document coordinates
+    let style_offset = VUE_CONTENT.find("<style>").unwrap() + "<style>\n".len();
+    let expected_start = style_offset + 1; // skip the dot in `.btn`
+    let expected_end = expected_start + 3;
+    assert_eq!(
+        range,
+        &TextRange::new(
+            TextSize::from(expected_start as u32),
+            TextSize::from(expected_end as u32),
+        ),
+        "range should be in parent document coordinates when both script and style exist"
+    );
+}
+
+#[test]
+fn go_to_definition_vue_class_to_external_css() {
+    const CSS_CONTENT: &str = ".wrapper { display: flex; }\n";
+    const VUE_CONTENT: &str = "\
+<link rel=\"stylesheet\" href=\"./styles.css\" />
+<template>
+  <div class=\"wrapper\">Hello</div>
+</template>
+";
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/styles.css"), CSS_CONTENT.as_bytes());
+    fs.insert(Utf8PathBuf::from("/App.vue"), VUE_CONTENT.as_bytes());
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    let configuration =
+        biome_deserialize::json::deserialize_from_json_str::<biome_configuration::Configuration>(
+            r#"{ "html": { "experimentalFullSupportEnabled": true } }"#,
+            biome_json_parser::JsonParserOptions::default(),
+            "",
+        )
+        .into_deserialized()
+        .unwrap();
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            configuration,
+            workspace_directory: Some(BiomePath::new("/")),
+            extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .unwrap();
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+
+    // Cursor on "wrapper" inside class="wrapper"
+    let class_value_start = VUE_CONTENT.find("\"wrapper\"").unwrap() + 1;
+    let cursor_range = TextRange::new(
+        TextSize::from(class_value_start as u32),
+        TextSize::from(class_value_start as u32),
+    );
+
+    let result = workspace
+        .go_to_definition(GoToDefinitionParams {
+            project_key,
+            enabled: true,
+            path: BiomePath::new("/App.vue"),
+            cursor_range,
+        })
+        .unwrap();
+
+    let definition = result.expect("should resolve Vue class to external CSS");
+    assert_eq!(definition.matches.len(), 1);
+    let (path, range) = &definition.matches[0];
+    assert_eq!(path, &BiomePath::new("/styles.css"));
+    // "wrapper" in `.wrapper` starts at offset 1
+    assert_eq!(range, &TextRange::new(TextSize::from(1), TextSize::from(8)));
+}
+
+#[test]
+fn go_to_definition_html_class_to_css_imported_from_script() {
+    const CSS_CONTENT: &str = ".foo { color: red; }\n";
+    // Astro-like: CSS imported via JS in a <script> block
+    const HTML_CONTENT: &str = "\
+<script>
+import './styles.css';
+</script>
+
+<div class=\"foo\">Hello</div>
+
+<style>
+.local { margin: 0; }
+</style>
+";
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/styles.css"), CSS_CONTENT.as_bytes());
+    fs.insert(Utf8PathBuf::from("/index.html"), HTML_CONTENT.as_bytes());
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+
+    // Cursor on "foo" inside class="foo"
+    let class_value_start = HTML_CONTENT.find("\"foo\"").unwrap() + 1;
+    let cursor_range = TextRange::new(
+        TextSize::from(class_value_start as u32),
+        TextSize::from(class_value_start as u32),
+    );
+
+    let result = workspace
+        .go_to_definition(GoToDefinitionParams {
+            project_key,
+            enabled: true,
+            path: BiomePath::new("/index.html"),
+            cursor_range,
+        })
+        .unwrap();
+
+    let definition = result.expect("should resolve class to CSS imported from script block");
+    assert_eq!(definition.matches.len(), 1);
+    let (path, range) = &definition.matches[0];
+    assert_eq!(path, &BiomePath::new("/styles.css"));
+    // "foo" in `.foo` starts at offset 1
+    assert_eq!(range, &TextRange::new(TextSize::from(1), TextSize::from(4)));
+}
+
+#[test]
+fn go_to_definition_css_class_multiple_matches() {
+    // `.btn` defined in two separate stylesheets, both imported by a JSX file.
+    const CSS_A: &str = ".btn { color: red; }\n";
+    const CSS_B: &str = ".btn { font-size: 16px; }\n";
+    const JSX_CONTENT: &str = "import './a.css';\nimport './b.css';\n<div className=\"btn\" />\n";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/a.css"), CSS_A.as_bytes());
+    fs.insert(Utf8PathBuf::from("/project/b.css"), CSS_B.as_bytes());
+    fs.insert(
+        Utf8PathBuf::from("/project/App.jsx"),
+        JSX_CONTENT.as_bytes(),
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+
+    // "btn" inside className="btn"
+    let btn_start = JSX_CONTENT.find("\"btn\"").unwrap() + 1;
+    let cursor_range = TextRange::new(
+        TextSize::from(btn_start as u32),
+        TextSize::from(btn_start as u32),
+    );
+
+    let result = workspace
+        .go_to_definition(GoToDefinitionParams {
+            project_key,
+            enabled: true,
+            path: BiomePath::new("/project/App.jsx"),
+            cursor_range,
+        })
+        .unwrap();
+
+    let definition = result.expect("should resolve className to CSS class in both files");
+    assert_eq!(definition.matches.len(), 2, "expected two matches");
+
+    let paths: Vec<_> = definition.matches.iter().map(|(p, _)| p.clone()).collect();
+    assert!(
+        paths.contains(&BiomePath::new("/project/a.css")),
+        "should contain a.css"
+    );
+    assert!(
+        paths.contains(&BiomePath::new("/project/b.css")),
+        "should contain b.css"
+    );
+
+    // Both define `.btn` at the same position: "btn" starts at offset 1
+    let expected_range = TextRange::new(TextSize::from(1), TextSize::from(4));
+    for (_, range) in &definition.matches {
+        assert_eq!(range, &expected_range);
+    }
+}
+
+#[test]
+fn go_to_definition_css_class_via_transitive_import() {
+    // App.jsx imports app.css, which @imports components.css.
+    // `.card` is defined only in components.css — go-to-definition should find it.
+    const COMPONENTS_CSS: &str = ".card { border: 1px solid; }\n";
+    const APP_CSS: &str = "@import './components.css';\n.wrapper { display: flex; }\n";
+    const JSX_CONTENT: &str = "import './app.css';\n<div className=\"card\" />\n";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/components.css"),
+        COMPONENTS_CSS.as_bytes(),
+    );
+    fs.insert(Utf8PathBuf::from("/project/app.css"), APP_CSS.as_bytes());
+    fs.insert(
+        Utf8PathBuf::from("/project/App.jsx"),
+        JSX_CONTENT.as_bytes(),
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+
+    // Cursor on "card" inside className="card"
+    let card_start = JSX_CONTENT.find("\"card\"").unwrap() + 1;
+    let cursor_range = TextRange::new(
+        TextSize::from(card_start as u32),
+        TextSize::from(card_start as u32),
+    );
+
+    let result = workspace
+        .go_to_definition(GoToDefinitionParams {
+            project_key,
+            enabled: true,
+            path: BiomePath::new("/project/App.jsx"),
+            cursor_range,
+        })
+        .unwrap();
+
+    let definition = result.expect("should resolve className to CSS class in transitive import");
+    assert_eq!(definition.matches.len(), 1);
+    let (path, range) = &definition.matches[0];
+    assert_eq!(path, &BiomePath::new("/project/components.css"));
+    // "card" in `.card` starts at offset 1 (after the dot)
+    assert_eq!(range, &TextRange::new(TextSize::from(1), TextSize::from(5)));
 }

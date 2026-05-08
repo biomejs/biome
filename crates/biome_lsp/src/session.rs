@@ -21,7 +21,7 @@ use biome_service::file_handlers::astro::AstroFileHandler;
 use biome_service::file_handlers::svelte::SvelteFileHandler;
 use biome_service::file_handlers::vue::VueFileHandler;
 use biome_service::projects::ProjectKey;
-use biome_service::settings::ModuleGraphResolutionKind;
+use biome_service::settings::{EditorFeature, ModuleGraphResolutionKind};
 use biome_service::workspace::{
     FeaturesBuilder, GetFileContentParams, OpenProjectParams, OpenProjectResult,
     PullDiagnosticsParams, SupportsFeatureParams,
@@ -643,6 +643,25 @@ impl Session {
         result
     }
 
+    pub(crate) fn can_register_goto_definition(&self) -> bool {
+        let result = self
+            .initialize_params
+            .get()
+            .and_then(|c| c.client_capabilities.text_document.as_ref())
+            .and_then(|c| c.definition.as_ref())
+            .and_then(|c| c.dynamic_registration)
+            == Some(true)
+            && self
+                .extension_settings
+                .read()
+                .unwrap()
+                .editor_features()
+                .contains(EditorFeature::GotoDefinition);
+        info!("Can register gotoDefinition: {result}");
+
+        result
+    }
+
     /// Get the current workspace folders
     pub(crate) fn get_workspace_folders(&self) -> Option<Vec<WorkspaceFolder>> {
         self.workspace_folders.read().unwrap().clone()
@@ -1158,7 +1177,10 @@ impl Session {
         };
 
         let scan_kind = ProjectScanComputer::new(&configuration).compute();
-        let scan_kind = if scan_kind.is_none() {
+        // We give the editor priority
+        let scan_kind = if !self.scan_kind_from_editor_features().is_none() {
+            self.scan_kind_from_editor_features()
+        } else if scan_kind.is_none() {
             ScanKind::KnownFiles
         } else {
             scan_kind
@@ -1293,6 +1315,13 @@ impl Session {
             .read()
             .unwrap()
             .requires_configuration()
+    }
+
+    pub(crate) fn scan_kind_from_editor_features(&self) -> ScanKind {
+        self.extension_settings
+            .read()
+            .unwrap()
+            .scan_kind_from_editor_features()
     }
 
     pub(crate) fn inline_config(&self) -> Option<Configuration> {

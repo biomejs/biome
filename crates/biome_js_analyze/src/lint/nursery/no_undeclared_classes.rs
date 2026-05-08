@@ -125,7 +125,7 @@ impl Rule for NoUndeclaredClasses {
         for entry in &class_entries {
             let found_class = css_steps.iter().any(|step| {
                 step.css_classes
-                    .iter()
+                    .values()
                     .any(|c| c.text() == entry.name.as_ref())
             });
 
@@ -298,7 +298,7 @@ fn run_without_semantic(
     for entry in &entries {
         let found_class = css_steps.iter().any(|step| {
             step.css_classes
-                .iter()
+                .values()
                 .any(|c| c.text() == entry.name.as_ref())
         });
 

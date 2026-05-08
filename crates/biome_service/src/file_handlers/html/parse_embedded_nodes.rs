@@ -1013,6 +1013,7 @@ fn parse_matched_embed(
             let mut services = CssDocumentServices::default();
             if ctx.settings.as_ref().is_linter_enabled()
                 || ctx.settings.as_ref().is_assist_enabled()
+                || ctx.settings.needs_document_services()
             {
                 services = services.with_css_semantic_model(&parse.tree());
             }

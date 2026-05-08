@@ -9901,6 +9901,10 @@ export interface Duration {
 export interface OpenFileParams {
 	content: FileContent;
 	documentFileSource?: DocumentFileSource;
+	/**
+	 * Used to enable further document services e.g. semantic model
+	 */
+	editorFeatures?: EditorFeatures;
 	inlineConfig?: Configuration;
 	path: BiomePath;
 	/**
@@ -9926,6 +9930,7 @@ export type DocumentFileSource =
 	| { Html: HtmlFileSource }
 	| { Grit: GritFileSource }
 	| { Markdown: MdFileSource };
+export type EditorFeatures = EditorFeature[];
 export interface JsFileSource {
 	/**
 	* Used to mark if the JavaScript is embedded inside some particular files. This affects the parsing.
@@ -9963,6 +9968,7 @@ export interface GritFileSource {
 export interface MdFileSource {
 	variant: MarkdownVariant;
 }
+export type EditorFeature = "gotoDefinition";
 export type EmbeddingKind =
 	| "None"
 	| {
@@ -10085,6 +10091,10 @@ export interface OpenFileResult {
 }
 export interface ChangeFileParams {
 	content: string;
+	/**
+	 * Used to enable further document services e.g. semantic model
+	 */
+	editorFeatures?: EditorFeatures;
 	inlineConfig?: Configuration;
 	path: BiomePath;
 	projectKey: ProjectKey;

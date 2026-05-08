@@ -28,9 +28,10 @@ use biome_js_type_info::ImportSymbol;
 use biome_jsdoc_comment::JsdocComment;
 use biome_project_layout::ProjectLayout;
 use biome_resolver::{FsWithResolverProxy, PathInfo};
+use biome_rowan::{TextRange, TextSize};
 use camino::{Utf8Path, Utf8PathBuf};
 pub(crate) use fs_proxy::ModuleGraphFsProxy;
-use indexmap::IndexSet;
+use indexmap::IndexMap;
 use papaya::{HashMap, HashMapRef, LocalGuard};
 use rustc_hash::{FxBuildHasher, FxHashSet};
 use std::collections::VecDeque;
@@ -62,6 +63,11 @@ impl ModuleGraph {
     /// Returns whether the given `path` is indexed in the module graph.
     pub fn contains(&self, path: &Utf8Path) -> bool {
         self.data.pin().contains_key(path)
+    }
+
+    /// Returns a generic module for the given path
+    pub fn module_info_for_path(&self, path: &Utf8Path) -> Option<ModuleInfo> {
+        self.data.pin().get(path).cloned()
     }
 
     /// Returns the module info, such as imports and exports and their types,
@@ -284,6 +290,98 @@ impl ModuleGraph {
         })
     }
 
+    /// Finds the CSS file and text range where a class is defined, searching
+    /// all available paths: JS imports, HTML inline styles, linked stylesheets,
+    /// CSS imports from embedded `<script>` blocks, and transitive CSS `@import`
+    /// chains.
+    ///
+    /// Returns a list of the CSS file path, the selector range, and an optional content
+    /// offset for inline `<style>` blocks (needed to translate snippet-local
+    /// ranges to parent document coordinates).
+    pub fn find_css_class_definition(
+        &self,
+        path: &Utf8Path,
+        class_name: &str,
+    ) -> Vec<(Utf8PathBuf, TextRange, Option<TextSize>)> {
+        let mut result = Vec::new();
+        let mut visited_css = FxHashSet::default();
+
+        // 1. Check inline style classes in HTML-like files (carry content_offset)
+        if let Some(html_info) = self.html_module_info_for_path(path) {
+            for class_def in &html_info.style_classes {
+                if class_def.name.text() == class_name {
+                    result.push((
+                        path.to_path_buf(),
+                        class_def.range,
+                        class_def.content_offset,
+                    ));
+                }
+            }
+        }
+
+        // 2. Check CSS files reachable from HTML (linked stylesheets + script imports)
+        for step in self.traverse_import_tree_for_html_classes(path) {
+            if step.css_path == path {
+                continue; // Already checked inline styles above
+            }
+
+            self.search_css_class_transitive(
+                &step.css_path,
+                class_name,
+                &mut result,
+                &mut visited_css,
+            );
+        }
+
+        // 3. Check CSS files imported by JS (e.g., `import './styles.css'` in JSX)
+        for step in self.traverse_import_tree_for_classes(path) {
+            self.search_css_class_transitive(
+                &step.css_path,
+                class_name,
+                &mut result,
+                &mut visited_css,
+            );
+        }
+
+        result
+    }
+
+    /// Searches a CSS file and all files it transitively `@import`s for a class
+    /// definition, with cycle protection.
+    fn search_css_class_transitive(
+        &self,
+        css_path: &Utf8Path,
+        class_name: &str,
+        result: &mut Vec<(Utf8PathBuf, TextRange, Option<TextSize>)>,
+        visited: &mut FxHashSet<Utf8PathBuf>,
+    ) {
+        let mut queue = VecDeque::new();
+        queue.push_back(css_path.to_path_buf());
+
+        while let Some(current) = queue.pop_front() {
+            if !visited.insert(current.clone()) {
+                continue;
+            }
+
+            let Some(css_info) = self.css_module_info_for_path(&current) else {
+                continue;
+            };
+
+            for (range, token) in css_info.classes.iter() {
+                if token.text() == class_name {
+                    result.push((current.clone(), *range, None));
+                }
+            }
+
+            // Follow @import edges
+            for import in css_info.imports.values() {
+                if let Some(imported_path) = import.resolved_path.as_path() {
+                    queue.push_back(imported_path.to_path_buf());
+                }
+            }
+        }
+    }
+
     /// Builds diagnostic information with full component chains for error reporting.
     ///
     /// This re-traverses the import tree to build the component chain for each CSS file.
@@ -443,10 +541,10 @@ impl ModuleGraph {
             // For same-file checks, scoped styles still apply to the component's own
             // elements, so both Global and Local classes are valid. Only when classes
             // are traversed from imported/parent files do we restrict to Global.
-            let all_inline_classes: IndexSet<_> = html_info
+            let all_inline_classes: IndexMap<_, _> = html_info
                 .style_classes
                 .iter()
-                .map(|c| c.name.clone())
+                .map(|c| (c.range, c.name.clone()))
                 .collect();
             if !all_inline_classes.is_empty() {
                 inline_steps.push(CssClassStep {
@@ -455,9 +553,22 @@ impl ModuleGraph {
                 });
             }
 
-            // 2. Directly linked external stylesheets.
+            // 2. Directly linked external stylesheets (<link rel="stylesheet">).
             for stylesheet_path in &html_info.imported_stylesheets {
                 if let Some(path) = stylesheet_path.as_path()
+                    && let Some(css_info) = self.css_module_info_for_path(path)
+                {
+                    linked_steps.push(CssClassStep {
+                        css_path: path.to_path_buf(),
+                        css_classes: css_info.classes.clone(),
+                    });
+                }
+            }
+
+            // 2b. CSS files imported from embedded <script> blocks
+            // (e.g., `import "./index.css"` in Astro frontmatter).
+            for import_path in html_info.static_import_paths.values() {
+                if let Some(path) = import_path.as_path()
                     && let Some(css_info) = self.css_module_info_for_path(path)
                 {
                     linked_steps.push(CssClassStep {
@@ -564,7 +675,7 @@ impl ModuleGraph {
                 if let Some(path) = import_path.as_path()
                     && let Some(css_info) = self.css_module_info_for_path(path)
                 {
-                    for class in css_info.classes.iter() {
+                    for class in css_info.classes.values() {
                         let class_name = class.text().to_string();
                         available_classes.insert(class_name.clone());
                     }
@@ -623,7 +734,7 @@ impl ModuleGraph {
                                 if let Some(path) = import_path.as_path()
                                     && let Some(css_info) = self.css_module_info_for_path(path)
                                 {
-                                    for class in css_info.classes.iter() {
+                                    for class in css_info.classes.values() {
                                         let class_name = class.text().to_string();
                                         available_classes.insert(class_name.clone());
                                     }
@@ -652,7 +763,7 @@ impl ModuleGraph {
                                 if let Some(path) = stylesheet_path.as_path()
                                     && let Some(css_info) = self.css_module_info_for_path(path)
                                 {
-                                    for class in css_info.classes.iter() {
+                                    for class in css_info.classes.values() {
                                         let class_name = class.text().to_string();
                                         available_classes.insert(class_name.clone());
                                     }
@@ -960,7 +1071,7 @@ impl ModuleGraph {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ModuleInfo {
     Js(JsModuleInfo),
     Css(CssModuleInfo),

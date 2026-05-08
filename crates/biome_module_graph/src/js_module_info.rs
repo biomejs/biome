@@ -91,6 +91,12 @@ impl JsModuleInfo {
         module_graph.find_exported_symbol(self, name)
     }
 
+    /// Finds the default exported symbol
+    #[inline]
+    pub fn find_js_default_export_symbol(&self, module_graph: &ModuleGraph) -> Option<JsOwnExport> {
+        module_graph.find_exported_symbol(self, "default")
+    }
+
     /// Finds an exported symbol by `name`, using the `module_graph` to
     /// lookup re-exports if necessary.
     #[inline]
@@ -171,6 +177,17 @@ impl JsModuleInfo {
                 })
                 .collect::<BTreeSet<_>>(),
         }
+    }
+
+    pub fn find_resolved_path_by_symbol(&self, name: &str) -> Option<&Utf8Path> {
+        self.static_imports
+            .get(name)
+            .and_then(|import| import.resolved_path.as_path())
+            .or_else(|| {
+                self.dynamic_import_paths
+                    .get(name)
+                    .and_then(|import| import.resolved_path.as_path())
+            })
     }
 }
 

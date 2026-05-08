@@ -13,6 +13,9 @@ publish              = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[package.metadata.cargo-udeps.ignore]
+development = ["biome_service"]
+
 [dependencies]
 biome_analyze            = { workspace = true, features = ["serde"] }
 biome_configuration      = { workspace = true }
@@ -88,6 +91,7 @@ web-time                 = { workspace = true }
 
 [dev-dependencies]
 biome_configuration = { path = "../biome_configuration", features = ["test-utils"] }
+biome_service       = { path = ".", features = ["testing"] }
 insta               = { workspace = true }
 
 [features]

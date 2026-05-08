@@ -1,11 +1,14 @@
+mod go_to;
+
 use super::{
-    AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams, EnabledForPath,
-    ExtensionHandler, FixAllParams, LintParams, LintResults, ParseResult, ProcessFixAll,
-    ProcessLint, SearchCapabilities, search,
+    AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams, EditorCapabilities,
+    EnabledForPath, ExtensionHandler, FixAllParams, LintParams, LintResults, ParseResult,
+    ProcessFixAll, ProcessLint, SearchCapabilities, search,
 };
 use crate::WorkspaceError;
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
+use crate::file_handlers::css::go_to::resolve_definition;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FormatterCapabilities, ParserCapabilities,
 };
@@ -405,6 +408,10 @@ impl ExtensionHandler for CssFileHandler {
                 linter: Some(linter_enabled),
                 assist: Some(assist_enabled),
                 search: Some(search_enabled),
+            },
+            editors: EditorCapabilities {
+                resolve_binding: None,
+                resolve_definition: Some(resolve_definition),
             },
         }
     }

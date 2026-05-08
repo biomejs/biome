@@ -93,6 +93,9 @@ pub enum WorkspaceError {
 
     /// Error in the workspace watcher.
     WatchError(WatchError),
+
+    /// Go-to definition requires the linter or assist to be enabled.
+    GoToDefinitionDisabled(GoToDefinitionDisabled),
 }
 
 impl WorkspaceError {
@@ -156,6 +159,10 @@ impl WorkspaceError {
             file_path: file_path.into(),
             verbose_advice: ProtectedFileAdvice,
         })
+    }
+
+    pub fn go_to_definition_disabled() -> Self {
+        Self::GoToDefinitionDisabled(GoToDefinitionDisabled)
     }
 
     pub fn is_editor_config_error(&self) -> bool {
@@ -312,6 +319,14 @@ impl Panic {
     message = "Code formatting aborted due to parsing errors. To format code with errors, enable the 'formatter.formatWithErrors' option."
 )]
 pub struct FormatWithErrorsDisabled;
+
+#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[diagnostic(
+    category = "project",
+    severity = Warning,
+    message = "Go-to definition is available only when linting or assist are enabled, or the editor setting is enabled."
+)]
+pub struct GoToDefinitionDisabled;
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(

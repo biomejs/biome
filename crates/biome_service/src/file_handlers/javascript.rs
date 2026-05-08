@@ -1,9 +1,11 @@
+mod go_to;
+
 use super::{
     AnalyzerCapabilities, AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams,
-    DebugCapabilities, DiagnosticsAndActionsParams, EnabledForPath, ExtensionHandler,
-    FormatEmbedNode, FormatterCapabilities, LintParams, LintResults, ParseEmbedResult, ParseResult,
-    ParserCapabilities, ProcessDiagnosticsAndActions, ProcessFixAll, ProcessLint,
-    SearchCapabilities, UpdateSnippetsNodes, search,
+    DebugCapabilities, DiagnosticsAndActionsParams, EditorCapabilities, EnabledForPath,
+    ExtensionHandler, FormatEmbedNode, FormatterCapabilities, LintParams, LintResults,
+    ParseEmbedResult, ParseResult, ParserCapabilities, ProcessDiagnosticsAndActions, ProcessFixAll,
+    ProcessLint, SearchCapabilities, UpdateSnippetsNodes, search,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
@@ -12,6 +14,7 @@ use crate::embed::types::{
     EmbedCandidate, EmbedContent, GuestLanguage, HostLanguage, TemplateTagKind,
 };
 use crate::file_handlers::FixAllParams;
+use crate::file_handlers::javascript::go_to::{resolve_binding, resolve_definition};
 use crate::settings::{
     OverrideSettings, Settings, SettingsWithEditor, check_feature_activity,
     check_override_feature_activity,
@@ -534,6 +537,10 @@ impl ExtensionHandler for JsFileHandler {
             search: SearchCapabilities {
                 search: Some(search),
             },
+            editors: EditorCapabilities {
+                resolve_binding: Some(resolve_binding),
+                resolve_definition: Some(resolve_definition),
+            },
         }
     }
 }
@@ -990,7 +997,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
     ));
 
     if let Some(embedded_bindings) = params.document_services.embedded_bindings() {
-        services.set_embedded_bindings(embedded_bindings.bindings)
+        services.set_embedded_bindings(embedded_bindings.bindings_without_source())
     }
 
     if let Some(value_refs) = params.document_services.embedded_value_references() {
@@ -1185,7 +1192,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             ));
 
             if let Some(embedded_bindings) = params.document_services.embedded_bindings() {
-                services.set_embedded_bindings(embedded_bindings.bindings)
+                services.set_embedded_bindings(embedded_bindings.bindings_without_source())
             }
 
             if let Some(value_refs) = params.document_services.embedded_value_references() {
@@ -1251,7 +1258,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         ));
 
         if let Some(embedded_bindings) = params.document_services.embedded_bindings() {
-            services.set_embedded_bindings(embedded_bindings.bindings)
+            services.set_embedded_bindings(embedded_bindings.bindings_without_source())
         }
 
         if let Some(value_refs) = params.document_services.embedded_value_references() {
@@ -1306,7 +1313,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         ));
 
         if let Some(embedded_bindings) = params.document_services.embedded_bindings() {
-            services.set_embedded_bindings(embedded_bindings.bindings)
+            services.set_embedded_bindings(embedded_bindings.bindings_without_source())
         }
 
         if let Some(value_refs) = params.document_services.embedded_value_references() {

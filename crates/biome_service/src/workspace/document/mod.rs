@@ -291,7 +291,7 @@ pub struct DocumentServices {
     /// Service to track value references from non-source snippets
     value_references: Option<EmbeddedValueReferences>,
 
-    /// The document doesn't have any services
+    /// Services for the language that the document belongs to.
     language: LanguageServices,
 }
 
