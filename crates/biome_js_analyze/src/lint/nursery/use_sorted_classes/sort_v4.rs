@@ -188,3 +188,131 @@ fn resolve_branch(branches: &[Branch], value: &str, registration_idx: u16) -> Op
     None
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_tailwind_parser::parse_tailwind;
+
+    use super::super::tailwind_preset_v4::ValueType;
+
+    fn known(property_idx: u16, property_count: u8, registration_idx: u16) -> SortKey {
+        SortKey::Known {
+            property_idx,
+            property_count,
+            registration_idx,
+        }
+    }
+
+    fn sort(input: &str) -> String {
+        sort_class_list(&parse_tailwind(input).tree())
+    }
+
+    // region: compare
+
+    #[test]
+    fn compare_unknown_is_less_than_known() {
+        assert_eq!(
+            compare(&SortKey::Unknown, &known(5, 1, 0)),
+            Ordering::Less
+        );
+        assert_eq!(
+            compare(&known(5, 1, 0), &SortKey::Unknown),
+            Ordering::Greater
+        );
+    }
+
+    #[test]
+    fn compare_unknown_pair_is_equal_so_stable_sort_keeps_input_order() {
+        assert_eq!(
+            compare(&SortKey::Unknown, &SortKey::Unknown),
+            Ordering::Equal
+        );
+    }
+
+    #[test]
+    fn compare_orders_by_property_idx_ascending() {
+        assert_eq!(compare(&known(3, 1, 0), &known(5, 1, 0)), Ordering::Less);
+    }
+
+    #[test]
+    fn compare_breaks_property_idx_tie_by_property_count_descending() {
+        // sr-only-shape utility (count=9) wins over a single-property one.
+        let wider = known(5, 9, 100);
+        let narrow = known(5, 1, 0);
+        assert_eq!(compare(&wider, &narrow), Ordering::Less);
+    }
+
+    #[test]
+    fn compare_breaks_full_tie_by_registration_idx_ascending() {
+        let early = known(5, 1, 1);
+        let late = known(5, 1, 9);
+        assert_eq!(compare(&early, &late), Ordering::Less);
+    }
+
+    #[test]
+    fn compare_returns_equal_for_identical_known_keys() {
+        assert_eq!(compare(&known(5, 1, 0), &known(5, 1, 0)), Ordering::Equal);
+    }
+
+    // endregion: compare
+
+    // region: resolve_branch
+
+    #[test]
+    fn resolve_branch_returns_first_matching_branch() {
+        // Two NamedTyped(Number) branches with different property_idx;
+        // first one to match wins.
+        let branches = &[
+            Branch::NamedTyped(ValueType::Number, 10, 1),
+            Branch::NamedTyped(ValueType::Number, 20, 1),
+        ];
+        assert_eq!(
+            resolve_branch(branches, "5", 99),
+            Some(known(10, 1, 99))
+        );
+    }
+
+    #[test]
+    fn resolve_branch_skips_arbitrary_typed_for_bare_value() {
+        // Only the bracketed code-path activates ArbitraryTyped / Arbitrary;
+        // bare values fall through.
+        let branches = &[
+            Branch::ArbitraryTyped(ValueType::Number, 10, 1),
+            Branch::Arbitrary(20, 1),
+        ];
+        assert_eq!(resolve_branch(branches, "5", 99), None);
+    }
+
+    #[test]
+    fn resolve_branch_passes_registration_idx_through() {
+        let branches = &[Branch::NamedTyped(ValueType::Number, 1, 1)];
+        assert_eq!(
+            resolve_branch(branches, "0", 42),
+            Some(known(1, 1, 42))
+        );
+    }
+
+    #[test]
+    fn resolve_branch_returns_none_when_value_matches_no_branch() {
+        let branches = &[Branch::NamedTyped(ValueType::Number, 1, 1)];
+        // "abc" is not a number → no branch matches.
+        assert_eq!(resolve_branch(branches, "abc", 0), None);
+    }
+
+    // endregion: resolve_branch
+
+    // region: sort_class_list edge cases
+
+    #[test]
+    fn sort_returns_empty_for_empty_input() {
+        assert_eq!(sort(""), "");
+    }
+
+    #[test]
+    fn sort_returns_empty_for_whitespace_only_input() {
+        assert_eq!(sort("   "), "");
+    }
+
+    // endregion: sort_class_list edge cases
+}
+
