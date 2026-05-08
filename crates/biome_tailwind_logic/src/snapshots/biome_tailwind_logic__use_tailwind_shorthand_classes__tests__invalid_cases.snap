@@ -1,0 +1,535 @@
+---
+source: crates/biome_tailwind_logic/src/use_tailwind_shorthand_classes.rs
+expression: snapshot
+---
+## Input
+
+```text
+pl-2 pr-2 pt-2 pb-2
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["pl-2", "pr-2", "pt-2", "pb-2"]
+  replacements: ["p"]
+  static replacements: []
+Fixed: `p-2`
+
+## Input
+
+```text
+hover:w-4 hover:h-4
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["hover:w-4", "hover:h-4"]
+  replacements: ["size"]
+  static replacements: []
+Fixed: `hover:size-4`
+
+## Input
+
+```text
+ml-2 mr-2
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["ml-2", "mr-2"]
+  replacements: ["mx"]
+  static replacements: []
+Fixed: `mx-2`
+
+## Input
+
+```text
+ml-2 mr-2 text-blue-500 font-bold
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["ml-2", "mr-2"]
+  replacements: ["mx"]
+  static replacements: []
+Fixed: `mx-2 text-blue-500 font-bold`
+
+## Input
+
+```text
+mr-3 ml-3
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["ml-3", "mr-3"]
+  replacements: ["mx"]
+  static replacements: []
+Fixed: `mx-3`
+
+## Input
+
+```text
+mt-2 mb-2
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["mt-2", "mb-2"]
+  replacements: ["my"]
+  static replacements: []
+Fixed: `my-2`
+
+## Input
+
+```text
+-mt-2 -mb-2
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["-mt-2", "-mb-2"]
+  replacements: ["my"]
+  static replacements: []
+Fixed: `-my-2`
+
+## Input
+
+```text
+pl-2 pr-2
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["pl-2", "pr-2"]
+  replacements: ["px"]
+  static replacements: []
+Fixed: `px-2`
+
+## Input
+
+```text
+pt-2 pb-2
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["pt-2", "pb-2"]
+  replacements: ["py"]
+  static replacements: []
+Fixed: `py-2`
+
+## Input
+
+```text
+pt-4 pr-2 pb-4 pl-4
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["pt-4", "pb-4"]
+  replacements: ["py"]
+  static replacements: []
+Fixed: `pr-2 py-4 pl-4`
+
+## Input
+
+```text
+border-x border-y
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["border-x", "border-y"]
+  replacements: ["border"]
+  static replacements: []
+Fixed: `border`
+
+## Input
+
+```text
+border-l-2 border-r-2
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["border-l-2", "border-r-2"]
+  replacements: ["border-x"]
+  static replacements: []
+Fixed: `border-x-2`
+
+## Input
+
+```text
+border-t-2 border-b-2
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["border-t-2", "border-b-2"]
+  replacements: ["border-y"]
+  static replacements: []
+Fixed: `border-y-2`
+
+## Input
+
+```text
+scroll-ml-2 scroll-mr-2
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["scroll-ml-2", "scroll-mr-2"]
+  replacements: ["scroll-mx"]
+  static replacements: []
+Fixed: `scroll-mx-2`
+
+## Input
+
+```text
+scroll-mt-2 scroll-mb-2
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["scroll-mt-2", "scroll-mb-2"]
+  replacements: ["scroll-my"]
+  static replacements: []
+Fixed: `scroll-my-2`
+
+## Input
+
+```text
+scroll-pl-2 scroll-pr-2
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["scroll-pl-2", "scroll-pr-2"]
+  replacements: ["scroll-px"]
+  static replacements: []
+Fixed: `scroll-px-2`
+
+## Input
+
+```text
+scroll-pt-2 scroll-pb-2
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["scroll-pt-2", "scroll-pb-2"]
+  replacements: ["scroll-py"]
+  static replacements: []
+Fixed: `scroll-py-2`
+
+## Input
+
+```text
+divide-x-4 divide-y-4
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["divide-x-4", "divide-y-4"]
+  replacements: ["divide"]
+  static replacements: []
+Fixed: `divide-4`
+
+## Input
+
+```text
+rotate-x-45 rotate-y-45
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["rotate-x-45", "rotate-y-45"]
+  replacements: ["rotate"]
+  static replacements: []
+Fixed: `rotate-45`
+
+## Input
+
+```text
+right-4 left-4
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["right-4", "left-4"]
+  replacements: ["inset-x"]
+  static replacements: []
+Fixed: `inset-x-4`
+
+## Input
+
+```text
+bottom-4 top-4
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["bottom-4", "top-4"]
+  replacements: ["inset-y"]
+  static replacements: []
+Fixed: `inset-y-4`
+
+## Input
+
+```text
+overflow-hidden text-ellipsis whitespace-nowrap
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["overflow-hidden", "text-ellipsis", "whitespace-nowrap"]
+  replacements: ["truncate"]
+  static replacements: ["truncate"]
+Fixed: `truncate`
+
+## Input
+
+```text
+pt-1 pr-1 pb-1 pl-1
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["pl-1", "pr-1", "pt-1", "pb-1"]
+  replacements: ["p"]
+  static replacements: []
+Fixed: `p-1`
+
+## Input
+
+```text
+border-x border-y overflow-hidden text-ellipsis whitespace-nowrap w-8 h-8
+```
+
+Violations: 3
+- Violation 1
+  nodes: ["w-8", "h-8"]
+  replacements: ["size"]
+  static replacements: []
+- Violation 2
+  nodes: ["border-x", "border-y"]
+  replacements: ["border"]
+  static replacements: []
+- Violation 3
+  nodes: ["overflow-hidden", "text-ellipsis", "whitespace-nowrap"]
+  replacements: ["truncate"]
+  static replacements: ["truncate"]
+Fixed: `border truncate size-8`
+
+## Input
+
+```text
+hover:w-10 hover:h-10 bg-gray-100 p-4
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["hover:w-10", "hover:h-10"]
+  replacements: ["size"]
+  static replacements: []
+Fixed: `hover:size-10 bg-gray-100 p-4`
+
+## Input
+
+```text
+ps-6 pe-6 py-6
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["ps-6", "pe-6", "py-6"]
+  replacements: ["p"]
+  static replacements: []
+Fixed: `p-6`
+
+## Input
+
+```text
+w-4 h-4
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["w-4", "h-4"]
+  replacements: ["size"]
+  static replacements: []
+Fixed: `size-4`
+
+## Input
+
+```text
+w-[10px] h-[10px]
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["w-[10px]", "h-[10px]"]
+  replacements: ["size"]
+  static replacements: []
+Fixed: `size-[10px]`
+
+## Input
+
+```text
+sm:hover:w-4 sm:hover:h-4
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["sm:hover:w-4", "sm:hover:h-4"]
+  replacements: ["size"]
+  static replacements: []
+Fixed: `sm:hover:size-4`
+
+## Input
+
+```text
+size-4 w-4 h-4
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["w-4", "h-4"]
+  replacements: ["size"]
+  static replacements: []
+Fixed: `size-4`
+
+## Input
+
+```text
+w-4 h-4 size-4
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["w-4", "h-4"]
+  replacements: ["size"]
+  static replacements: []
+Fixed: `size-4`
+
+## Input
+
+```text
+scale-x-20% scale-y-20% scale-z-20%
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["scale-x-20%", "scale-y-20%", "scale-z-20%"]
+  replacements: ["scale", "scale-3d"]
+  static replacements: ["scale-3d"]
+Fixed: `scale-20% scale-3d`
+
+## Input
+
+```text
+-scale-x-20% -scale-y-20% -scale-z-20%
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["-scale-x-20%", "-scale-y-20%", "-scale-z-20%"]
+  replacements: ["scale", "scale-3d"]
+  static replacements: ["scale-3d"]
+Fixed: `-scale-20% scale-3d`
+
+## Input
+
+```text
+scale-x-20%! scale-y-20%! scale-z-20%!
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["scale-x-20%!", "scale-y-20%!", "scale-z-20%!"]
+  replacements: ["scale", "scale-3d"]
+  static replacements: ["scale-3d"]
+Fixed: `scale-20%! scale-3d!`
+
+## Input
+
+```text
+truncate overflow-hidden text-ellipsis whitespace-nowrap
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["overflow-hidden", "text-ellipsis", "whitespace-nowrap"]
+  replacements: ["truncate"]
+  static replacements: ["truncate"]
+Fixed: `truncate`
+
+## Input
+
+```text
+scale-3d scale-x-20% scale-y-20% scale-z-20%
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["scale-x-20%", "scale-y-20%", "scale-z-20%"]
+  replacements: ["scale"]
+  static replacements: []
+Fixed: `scale-3d scale-20%`
+
+## Input
+
+```text
+content-center justify-center
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["content-center", "justify-center"]
+  replacements: ["place-content"]
+  static replacements: []
+Fixed: `place-content-center`
+
+## Input
+
+```text
+hover:overflow-hidden focus:overflow-hidden focus:text-ellipsis focus:whitespace-nowrap
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["focus:overflow-hidden", "focus:text-ellipsis", "focus:whitespace-nowrap"]
+  replacements: ["truncate"]
+  static replacements: ["truncate"]
+Fixed: `hover:overflow-hidden focus:truncate`
+
+## Input
+
+```text
+overflow-hidden! text-ellipsis! whitespace-nowrap!
+```
+
+Violations: 1
+- Violation 1
+  nodes: ["overflow-hidden!", "text-ellipsis!", "whitespace-nowrap!"]
+  replacements: ["truncate"]
+  static replacements: ["truncate"]
+Fixed: `truncate!`
+
+## Input
+
+```text
+hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap focus:overflow-hidden focus:text-ellipsis focus:whitespace-nowrap
+```
+
+Violations: 2
+- Violation 1
+  nodes: ["hover:overflow-hidden", "hover:text-ellipsis", "hover:whitespace-nowrap"]
+  replacements: ["truncate"]
+  static replacements: ["truncate"]
+- Violation 2
+  nodes: ["focus:overflow-hidden", "focus:text-ellipsis", "focus:whitespace-nowrap"]
+  replacements: ["truncate"]
+  static replacements: ["truncate"]
+Fixed: `hover:truncate focus:truncate`
