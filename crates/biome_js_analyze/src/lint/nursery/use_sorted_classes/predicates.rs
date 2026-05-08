@@ -12,7 +12,7 @@
 use phf::{phf_set, Set};
 use smallvec::SmallVec;
 
-// ── shared scanners ──────────────────────────────────────────────
+// region: shared scanners
 
 const LENGTH_UNITS: &[&str] = &[
     "cm", "mm", "Q", "in", "pc", "pt", "px", "em", "ex", "ch", "rem", "lh", "rlh", "vw", "vh",
@@ -119,7 +119,9 @@ fn starts_with_any_ascii_ci(value: &str, prefixes: &[&str]) -> bool {
     })
 }
 
-// ── shared helpers ───────────────────────────────────────────────
+// endregion: shared scanners
+
+// region: shared helpers
 
 const MATH_FUNCTIONS: &[&str] = &[
     "calc(", "min(", "max(", "clamp(", "mod(", "rem(", "sin(", "cos(", "tan(", "asin(", "acos(",
@@ -213,7 +215,9 @@ fn segment<'a>(input: &'a str, sep: u8) -> Segments<'a> {
     }
 }
 
-// ── primitive predicates ─────────────────────────────────────────
+// endregion: shared helpers
+
+// region: primitive predicates
 
 /// Mirrors <https://github.com/tailwindlabs/tailwindcss/blob/v4.2.2/packages/tailwindcss/src/utils/infer-data-type.ts#L63>
 /// (`isUrl`).
@@ -322,7 +326,9 @@ pub fn is_vector(value: &str) -> bool {
     numbers == 3
 }
 
-// ── color ────────────────────────────────────────────────────────
+// endregion: primitive predicates
+
+// region: color
 
 /// Longest entry in `NAMED_COLORS` is `"lightgoldenrodyellow"` (20 chars).
 /// Round up to a small power of two to keep the stack buffer cheap.
@@ -533,7 +539,9 @@ pub fn is_color(value: &str) -> bool {
     named_color_match(value)
 }
 
-// ── line-width / position / bg-size / image ──────────────────────
+// endregion: color
+
+// region: line-width / position / bg-size / image
 
 /// Mirrors <https://github.com/tailwindlabs/tailwindcss/blob/v4.2.2/packages/tailwindcss/src/utils/infer-data-type.ts#L69>
 /// (`isLineWidth`).
@@ -653,7 +661,9 @@ pub fn is_relative_size(value: &str) -> bool {
     matches!(value, "larger" | "smaller")
 }
 
-// ── tests ────────────────────────────────────────────────────────
+// endregion: line-width / position / bg-size / image
+
+// region: tests
 
 #[cfg(test)]
 mod tests {
@@ -824,3 +834,5 @@ mod tests {
         assert!(!is_relative_size("large"));
     }
 }
+
+// endregion: tests
