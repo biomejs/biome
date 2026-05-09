@@ -117,14 +117,14 @@ MdDocument {
                     prefix: MdListMarkerPrefix {
                         pre_marker_indent: MdIndentTokenList [],
                         marker: MINUS@43..44 "-" [] [],
-                        post_marker_space_token: missing (optional),
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@44..45 " " [] [],
                         content_indent: MdIndentTokenList [],
                     },
                     content: MdBlockList [
                         MdParagraph {
                             list: MdInlineItemList [
                                 MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@44..50 " after" [] [],
+                                    value_token: MD_TEXTUAL_LITERAL@45..50 "after" [] [],
                                 },
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@50..51 "\n" [] [],
@@ -209,16 +209,16 @@ MdDocument {
             1: MD_NEWLINE@42..43
               0: NEWLINE@42..43 "\n" [] []
         1: MD_BULLET@43..51
-          0: MD_LIST_MARKER_PREFIX@43..44
+          0: MD_LIST_MARKER_PREFIX@43..45
             0: MD_INDENT_TOKEN_LIST@43..43
             1: MINUS@43..44 "-" [] []
-            2: (empty)
-            3: MD_INDENT_TOKEN_LIST@44..44
-          1: MD_BLOCK_LIST@44..51
-            0: MD_PARAGRAPH@44..51
-              0: MD_INLINE_ITEM_LIST@44..51
-                0: MD_TEXTUAL@44..50
-                  0: MD_TEXTUAL_LITERAL@44..50 " after" [] []
+            2: MD_LIST_POST_MARKER_SPACE@44..45 " " [] []
+            3: MD_INDENT_TOKEN_LIST@45..45
+          1: MD_BLOCK_LIST@45..51
+            0: MD_PARAGRAPH@45..51
+              0: MD_INLINE_ITEM_LIST@45..51
+                0: MD_TEXTUAL@45..50
+                  0: MD_TEXTUAL_LITERAL@45..50 "after" [] []
                 1: MD_TEXTUAL@50..51
                   0: MD_TEXTUAL_LITERAL@50..51 "\n" [] []
               1: (empty)

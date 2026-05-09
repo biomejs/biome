@@ -1,0 +1,49 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-6-8-flow-folding.yml
+---
+# Input
+
+```yml
+"
+  foo 
+ 
+  	 bar
+
+  baz
+"
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,7 @@
+ "
+-foo
++  foo 
++ 
++  	 bar
+ 
+-bar
+-
+-baz
+-"
++  baz
++"
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+"
+  foo 
+ 
+  	 bar
+
+  baz
+"```

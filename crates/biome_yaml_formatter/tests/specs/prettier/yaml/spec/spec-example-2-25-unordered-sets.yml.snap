@@ -1,0 +1,43 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-2-25-unordered-sets.yml
+---
+# Input
+
+```yml
+# Sets are represented as a
+# Mapping where each key is
+# associated with a null value
+--- !!set
+? Mark McGwire
+? Sammy Sosa
+? Ken Griff
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,8 +1,4 @@
+-# Sets are represented as a
+-# Mapping where each key is
+-# associated with a null value
+----
+-!!set
++--- !!set
+ ? Mark McGwire
+ ? Sammy Sosa
+ ? Ken Griff
+```
+
+# Output
+
+```yml
+--- !!set
+? Mark McGwire
+? Sammy Sosa
+? Ken Griff
+```

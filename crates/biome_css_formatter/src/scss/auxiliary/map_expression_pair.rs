@@ -1,12 +1,34 @@
 use crate::prelude::*;
-use crate::utils::scss_expression::unwrap_single_expression_item;
-use crate::utils::scss_map::{is_in_scss_map_key, is_scss_map_value};
-use biome_css_syntax::{AnyScssExpression, ScssMapExpressionPair, ScssMapExpressionPairFields};
+use crate::utils::comment_trivia::format_leading_comments_with_soft_lines;
+use crate::utils::scss_expression::is_self_breaking_value;
+use crate::utils::scss_separator_comments::FormatScssSeparatorComments;
+use biome_css_syntax::{
+    ScssMapExpressionPair, ScssMapExpressionPairFields, is_in_scss_include_arguments,
+};
+use biome_formatter::comments::CommentKind;
 use biome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatScssMapExpressionPair;
 impl FormatNodeRule<ScssMapExpressionPair> for FormatScssMapExpressionPair {
+    fn fmt_node(&self, node: &ScssMapExpressionPair, f: &mut CssFormatter) -> FormatResult<()> {
+        match ScssMapPairLeadingCommentLayout::for_pair(node, f) {
+            ScssMapPairLeadingCommentLayout::Separator => {
+                self.fmt_node_with_scss_separator_comments(node, f)
+            }
+            ScssMapPairLeadingCommentLayout::GroupWithPair => {
+                write!(
+                    f,
+                    [group(&format_args![
+                        format_leading_comments_with_soft_lines(node.syntax()),
+                        format_with(|f| self.fmt_fields(node, f))
+                    ])]
+                )
+            }
+            ScssMapPairLeadingCommentLayout::Default => self.fmt_fields(node, f),
+        }
+    }
+
     fn fmt_fields(&self, node: &ScssMapExpressionPair, f: &mut CssFormatter) -> FormatResult<()> {
         let ScssMapExpressionPairFields {
             key,
@@ -14,64 +36,113 @@ impl FormatNodeRule<ScssMapExpressionPair> for FormatScssMapExpressionPair {
             value,
         } = node.as_fields();
 
-        let child_value_manages_its_own_breaking =
-            value.as_ref().is_ok_and(value_manages_its_own_breaking);
-
-        // Pairs inside a map key may wrap after `:` so long keys do not push a
-        // scalar value too far to the right.
-        let allow_scalar_value_wrap = is_in_scss_map_key(node);
-        let value_is_direct_map_value = value.as_ref().ok().is_some_and(is_scss_map_value);
-
-        let formatted_value = format_with(|f| {
-            if child_value_manages_its_own_breaking {
-                // Keep `key: (` on one line and let the value formatter decide
-                // its own internal breaks.
-                write!(f, [space(), value.format()])
-            } else if allow_scalar_value_wrap && value_is_direct_map_value {
-                // Allow long keys to wrap a scalar value after the colon:
-                //
-                // "very long key":
-                //   "value",
-                write!(
-                    f,
-                    [indent(&format_args![
-                        soft_line_break_or_space(),
-                        value.format()
-                    ])]
-                )
-            } else {
-                write!(f, [space(), value.format()])
-            }
-        });
+        let is_self_breaking = value.as_ref().is_ok_and(is_self_breaking_value);
 
         write!(
             f,
             [group(&format_args![
                 key.format(),
-                group(&format_args![colon_token.format(), formatted_value])
+                colon_token.format(),
+                FormatScssMapExpressionPairValue {
+                    value: &value.format(),
+                    is_self_breaking,
+                }
             ])]
         )
     }
+
+    fn fmt_leading_comments(
+        &self,
+        node: &ScssMapExpressionPair,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        match ScssMapPairLeadingCommentLayout::for_pair(node, f) {
+            ScssMapPairLeadingCommentLayout::Separator
+            | ScssMapPairLeadingCommentLayout::GroupWithPair => Ok(()),
+            ScssMapPairLeadingCommentLayout::Default => {
+                write!(f, [format_leading_comments(node.syntax())])
+            }
+        }
+    }
 }
 
-/// Returns `true` when the expression value can break internally without
-/// needing the enclosing `key: value` pair to also break after the colon.
+/// How leading comments are printed for one SCSS map pair.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+enum ScssMapPairLeadingCommentLayout {
+    /// Include arguments use separator comments, e.g. `@include mix($a, /* c */ $b)`.
+    Separator,
+
+    /// `/* comment */ key: value` joins the pair group.
+    GroupWithPair,
+
+    /// Normal leading comments use the default comment printer.
+    Default,
+}
+
+impl ScssMapPairLeadingCommentLayout {
+    fn for_pair(node: &ScssMapExpressionPair, f: &CssFormatter) -> Self {
+        if is_in_scss_include_arguments(node.syntax()) {
+            Self::Separator
+        } else if should_group_leading_block_comments_with_pair(node, f) {
+            Self::GroupWithPair
+        } else {
+            Self::Default
+        }
+    }
+}
+
+/// Formats the value in `key: value`.
 ///
-/// Parenthesized, list, and map values own their internal layout, so the pair
-/// formatter keeps `key: (` on the same line and lets the child decide where to
-/// break.
-fn value_manages_its_own_breaking(value: &AnyScssExpression) -> bool {
-    matches!(
-        value,
-        AnyScssExpression::ScssListExpression(_)
-            | AnyScssExpression::ScssMapExpression(_)
-            | AnyScssExpression::ScssParenthesizedExpression(_)
-    ) || unwrap_single_expression_item(value).is_some_and(|item| {
-        matches!(
-            item,
-            biome_css_syntax::AnyScssExpressionItem::ScssListExpression(_)
-                | biome_css_syntax::AnyScssExpressionItem::ScssMapExpression(_)
-                | biome_css_syntax::AnyScssExpressionItem::ScssParenthesizedExpression(_)
-        )
-    })
+/// Self-breaking values such as `key: (a, b)` stay after the colon; scalar
+/// values may break as `key:\n  value`.
+struct FormatScssMapExpressionPairValue<'a> {
+    value: &'a dyn Format<CssFormatContext>,
+    is_self_breaking: bool,
+}
+
+impl Format<CssFormatContext> for FormatScssMapExpressionPairValue<'_> {
+    fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
+        if self.is_self_breaking {
+            write!(f, [space(), self.value])
+        } else {
+            write!(
+                f,
+                [indent(&format_args![
+                    soft_line_break_or_space(),
+                    self.value
+                ])]
+            )
+        }
+    }
+}
+
+/// Returns `true` for `/* comment */ key: value`.
+///
+/// The comment joins the pair group, so long comments break before `key`.
+fn should_group_leading_block_comments_with_pair(
+    node: &ScssMapExpressionPair,
+    f: &CssFormatter,
+) -> bool {
+    let leading_comments = f.comments().leading_comments(node.syntax());
+
+    if leading_comments.is_empty()
+        || !leading_comments.iter().all(|comment| {
+            matches!(
+                comment.kind(),
+                CommentKind::Block | CommentKind::InlineBlock
+            ) && comment.lines_after() <= 1
+        })
+    {
+        return false;
+    }
+
+    let Ok(value) = node.value() else {
+        return false;
+    };
+
+    if is_self_breaking_value(&value) {
+        return false;
+    }
+
+    true
 }

@@ -441,6 +441,7 @@ pub(crate) fn parse_link_block(p: &mut MarkdownParser) -> ParsedSyntax {
         }
     }
 
+    p.force_relex_regular();
     Present(m.complete(p, MD_LINK_REFERENCE_DEFINITION))
 }
 

@@ -132,14 +132,13 @@ impl Rule for UseValidLang {
                 }
             }
 
-            (Some(language), None, None) => {
-                if !is_valid_language(language) {
+            (Some(language), None, None)
+                if !is_valid_language(language) => {
                     return Some(UseValidLangState {
                         attribute_range: attribute_value.range(),
                         invalid_kind: InvalidKind::Language,
                     });
                 }
-            }
             _ => {}
         }
 

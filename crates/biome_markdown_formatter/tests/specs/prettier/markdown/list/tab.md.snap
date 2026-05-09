@@ -50,8 +50,8 @@ info: markdown/list/tab.md
 -  - bar
  
 + 	- foo
-+ 	- foo
-+ 	- bar
++	- foo
++	- bar
 +
  - Text
  
@@ -83,8 +83,8 @@ info: markdown/list/tab.md
 - Text
 
  	- foo
- 	- foo
- 	- bar
+	- foo
+	- bar
 
 - Text
 

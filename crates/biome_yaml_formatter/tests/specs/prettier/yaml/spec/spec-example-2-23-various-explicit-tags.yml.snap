@@ -1,0 +1,69 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-2-23-various-explicit-tags.yml
+---
+
+# Input
+
+```yml
+---
+not-date: !!str 2002-04-28
+
+picture: !!binary |
+ R0lGODlhDAAMAIQAAP//9/X
+ 17unp5WZmZgAAAOfn515eXv
+ Pz7Y6OjuDg4J+fn5OTk6enp
+ 56enmleECcgggoBADs=
+
+application specific tag: !something |
+ The semantics of the tag
+ above may be different for
+ different documents.
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,12 +2,12 @@
+ not-date: !!str 2002-04-28
+ 
+ picture: !!binary |
+-  R0lGODlhDAAMAIQAAP//9/X
+-  17unp5WZmZgAAAOfn515eXv
+-  Pz7Y6OjuDg4J+fn5OTk6enp
+-  56enmleECcgggoBADs=
++ R0lGODlhDAAMAIQAAP//9/X
++ 17unp5WZmZgAAAOfn515eXv
++ Pz7Y6OjuDg4J+fn5OTk6enp
++ 56enmleECcgggoBADs=
+ 
+ application specific tag: !something |
+-  The semantics of the tag
+-  above may be different for
+-  different documents.
++ The semantics of the tag
++ above may be different for
++ different documents.
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+---
+not-date: !!str 2002-04-28
+
+picture: !!binary |
+ R0lGODlhDAAMAIQAAP//9/X
+ 17unp5WZmZgAAAOfn515eXv
+ Pz7Y6OjuDg4J+fn5OTk6enp
+ 56enmleECcgggoBADs=
+
+application specific tag: !something |
+ The semantics of the tag
+ above may be different for
+ different documents.```

@@ -93,10 +93,11 @@ impl TryFrom<&Vec<Attribute>> for ContainerAttrs {
             } else if attr.path.is_ident("serde") {
                 parse_meta_list(&attr.parse_meta()?, |meta| {
                     match meta {
-                        Meta::Path(path) if path.is_ident("deny_unknown_fields") => {
-                            if opts.unknown_fields.is_none() {
-                                opts.unknown_fields = Some(UnknownFields::Deny);
-                            }
+                        Meta::Path(path)
+                            if path.is_ident("deny_unknown_fields")
+                                && opts.unknown_fields.is_none() =>
+                        {
+                            opts.unknown_fields = Some(UnknownFields::Deny);
                         }
                         Meta::NameValue(MetaNameValue {
                             path,

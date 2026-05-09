@@ -677,10 +677,8 @@ impl FormatElements for [FormatElement] {
                 FormatElement::Tag(EndLineSuffix) => {
                     ignore_depth -= 1;
                 }
-                FormatElement::Interned(interned) if ignore_depth == 0 => {
-                    if interned.will_break() {
-                        return true;
-                    }
+                FormatElement::Interned(interned) if ignore_depth == 0 && interned.will_break() => {
+                    return true;
                 }
 
                 element if ignore_depth == 0 && element.will_break() => {
@@ -709,10 +707,10 @@ impl FormatElements for [FormatElement] {
                 FormatElement::Tag(EndLineSuffix) => {
                     ignore_depth -= 1;
                 }
-                FormatElement::Interned(interned) if ignore_depth == 0 => {
-                    if interned.may_directly_break() {
-                        return true;
-                    }
+                FormatElement::Interned(interned)
+                    if ignore_depth == 0 && interned.may_directly_break() =>
+                {
+                    return true;
                 }
 
                 element if ignore_depth == 0 && element.may_directly_break() => {

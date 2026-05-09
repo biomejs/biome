@@ -337,7 +337,7 @@ pub fn snapshot() -> Vec<RuleProfile> {
 pub fn drain_sorted_by_total(reset_after: bool) -> Vec<RuleProfile> {
     let mut profiles = with_profiler(|p| p.snapshot()).unwrap_or_default();
 
-    profiles.sort_by(|a, b| b.total.cmp(&a.total));
+    profiles.sort_by_key(|b| std::cmp::Reverse(b.total));
 
     if reset_after {
         reset();
@@ -358,7 +358,7 @@ impl biome_console::fmt::Display for DisplayProfiles {
     fn fmt(&self, f: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
         let mut profiles = self.0.clone();
         // Sort by total time descending
-        profiles.sort_by(|a, b| b.total.cmp(&a.total));
+        profiles.sort_by_key(|b| std::cmp::Reverse(b.total));
         let limit = self.1.unwrap_or(profiles.len()).min(profiles.len());
 
         // minimum width of 5, or wider if needed for larger counts

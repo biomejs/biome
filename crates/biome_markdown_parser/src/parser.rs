@@ -73,6 +73,9 @@ pub(crate) struct MarkdownParserState {
     pub(crate) emphasis_context: Option<EmphasisContext>,
     /// Normalized link reference definitions collected in a prepass.
     pub(crate) link_reference_definitions: HashSet<String>,
+    /// Whether a following non-blank line should be treated as paragraph
+    /// continuation after a link reference definition.
+    pub(crate) link_reference_definition_continuation: bool,
     /// Recorded tight/loose list results keyed by list node range.
     pub(crate) list_tightness: Vec<ListTightness>,
     /// Recorded list item indents keyed by bullet node range.

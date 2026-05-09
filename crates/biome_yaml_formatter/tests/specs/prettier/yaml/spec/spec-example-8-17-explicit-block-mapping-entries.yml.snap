@@ -1,0 +1,38 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-8-17-explicit-block-mapping-entries.yml
+---
+# Input
+
+```yml
+? explicit key # Empty value
+? |
+  block key
+: - one # Explicit compact
+  - two # block value
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,4 +2,4 @@
+ ? |
+   block key
+ : - one # Explicit compact
+-  - two # block value
++  - two 
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+? explicit key # Empty value
+? |
+  block key
+: - one # Explicit compact
+  - two ```

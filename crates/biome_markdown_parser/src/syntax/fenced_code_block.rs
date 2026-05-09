@@ -36,6 +36,7 @@ use biome_parser::{
         TokenSource,
     },
 };
+use biome_rowan::TextRange;
 
 /// Minimum number of fence characters required per CommonMark §4.5.
 const MIN_FENCE_LENGTH: usize = 3;
@@ -478,6 +479,53 @@ pub(crate) fn info_string_has_backtick(p: &mut MarkdownParser) -> bool {
         }
 
         false
+    })
+}
+
+/// Locate a stray backtick in a backtick-fenced code block info string.
+///
+/// CommonMark §4.5 forbids backtick characters in the info string of a
+/// backtick fence. When the info string contains a backtick, the line
+/// is not a fenced code block and falls through to paragraph parsing;
+/// this helper returns the byte range of the offending backtick so the
+/// caller can attach a diagnostic.
+///
+/// Concrete behavior:
+/// - Returns `None` unless the current line can start a fence at
+///   indent ≤ `MAX_BLOCK_PREFIX_INDENT`.
+/// - Returns `None` for tilde fences — they may legally contain backticks.
+/// - Returns `Some(range)` for the first `BACKTICK` or triple-backtick
+///   token after the opening fence; otherwise `None`.
+/// - Runs entirely under `lookahead`, so parser state is unchanged on return.
+pub(crate) fn backtick_info_violation(p: &mut MarkdownParser) -> Option<TextRange> {
+    p.lookahead(|p| {
+        if !p.at_start_of_input() && !is_line_start_within_indent(p, MAX_BLOCK_PREFIX_INDENT) {
+            return None;
+        }
+        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
+
+        let rest = p.source_after_current();
+        let (fence_char, _) = detect_fence(rest)?;
+        if fence_char != '`' {
+            return None;
+        }
+
+        if p.at(T!["```"]) {
+            p.bump(T!["```"]);
+        } else if p.at(BACKTICK) {
+            p.bump(BACKTICK);
+        } else {
+            return None;
+        }
+
+        while !p.at_inline_end() {
+            if p.at(BACKTICK) || p.at(T!["```"]) {
+                return Some(p.cur_range());
+            }
+            p.bump(p.cur());
+        }
+
+        None
     })
 }
 

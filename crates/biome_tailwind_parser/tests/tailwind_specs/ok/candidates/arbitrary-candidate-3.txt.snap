@@ -24,7 +24,11 @@ TwRoot {
                 l_brack_token: L_BRACKET@0..1 "[" [] [],
                 property_token: TW_PROPERTY@1..11 "background" [] [],
                 colon_token: COLON@11..12 ":" [] [],
-                value_token: TW_VALUE@12..16 "blue" [] [],
+                value: CssGenericComponentValueList [
+                    CssIdentifier {
+                        ident_token: IDENT@12..16 "blue" [] [],
+                    },
+                ],
                 r_brack_token: R_BRACKET@16..17 "]" [] [],
                 modifier: missing (optional),
             },
@@ -48,7 +52,9 @@ TwRoot {
         0: L_BRACKET@0..1 "[" [] []
         1: TW_PROPERTY@1..11 "background" [] []
         2: COLON@11..12 ":" [] []
-        3: TW_VALUE@12..16 "blue" [] []
+        3: CSS_GENERIC_COMPONENT_VALUE_LIST@12..16
+          0: CSS_IDENTIFIER@12..16
+            0: IDENT@12..16 "blue" [] []
         4: R_BRACKET@16..17 "]" [] []
         5: (empty)
       3: (empty)

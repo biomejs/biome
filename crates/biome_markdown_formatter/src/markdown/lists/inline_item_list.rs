@@ -3,6 +3,33 @@ use crate::markdown::auxiliary::inline_italic::FormatMdInlineItalicOptions;
 use crate::markdown::auxiliary::textual::FormatMdTextualOptions;
 use crate::prelude::*;
 use crate::shared::{TextPrintMode, TrimMode};
+use crate::words::{FormatWordGroup, ProseItem, WordStreamResult, build_word_stream_flat};
+use biome_formatter::Format;
+
+/// Formats a sequence of prose items as a single line — word groups joined by spaces.
+/// SoftBreak and HardBreak are treated as space separators if encountered.
+struct FormatSourceLine<'a>(&'a [ProseItem]);
+
+impl Format<MarkdownFormatContext> for FormatSourceLine<'_> {
+    fn fmt(&self, f: &mut MarkdownFormatter) -> FormatResult<()> {
+        let mut needs_space = false;
+        for item in self.0 {
+            match item {
+                ProseItem::WordGroup(atoms) => {
+                    if needs_space {
+                        write!(f, [space()])?;
+                    }
+                    FormatWordGroup(atoms).fmt(f)?;
+                    needs_space = true;
+                }
+                ProseItem::Space | ProseItem::SoftBreak | ProseItem::HardBreak(_) => {
+                    needs_space = true;
+                }
+            }
+        }
+        Ok(())
+    }
+}
 use biome_formatter::{FormatRuleWithOptions, write};
 use biome_markdown_syntax::{AnyMdInline, MdInlineItemList};
 
@@ -17,7 +44,9 @@ pub(crate) struct FormatMdInlineItemList {
 impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
     type Context = MarkdownFormatContext;
     fn fmt(&self, node: &MdInlineItemList, f: &mut MarkdownFormatter) -> FormatResult<()> {
-        if self.inside_list {
+        if self.print_mode.is_fill() {
+            return self.fmt_fill(node, f);
+        } else if self.inside_list {
             return self.fmt_inside_list(node, f);
         } else if self.print_mode.is_auto_link_like() {
             return self.fmt_auto_link_like(node, f);
@@ -45,8 +74,7 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
                                 write!(
                                     f,
                                     [text.format().with_options(FormatMdTextualOptions {
-                                        should_remove: true,
-                                        ..Default::default()
+                                        print_mode: TextPrintMode::Remove
                                     })]
                                 )
                             });
@@ -58,8 +86,7 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
                                 f,
                                 [
                                     text.format().with_options(FormatMdTextualOptions {
-                                        should_remove: true,
-                                        ..Default::default()
+                                        print_mode: TextPrintMode::Remove
                                     }),
                                     hard_line_break()
                                 ]
@@ -69,7 +96,6 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
                         joiner.entry(&entry);
                     } else {
                         joiner.entry(&text.format().with_options(FormatMdTextualOptions {
-                            should_remove: false,
                             print_mode: if (self.print_mode.is_trim_start() && index == 0)
                                 || (self.print_mode.is_keep_leading_spaces() && seen_new_line)
                             {
@@ -154,8 +180,8 @@ impl FormatMdInlineItemList {
 
         for (i, item) in items.iter().enumerate() {
             match item {
-                AnyMdInline::MdTextual(text) => {
-                    if text.is_newline()? {
+                AnyMdInline::MdTextual(md_text) => {
+                    if md_text.is_newline()? {
                         seen_new_line = true;
                         after_hard_line = false;
                         // Paragraph content has started — any spaces that come
@@ -165,23 +191,23 @@ impl FormatMdInlineItemList {
                             write!(
                                 f,
                                 [
-                                    text.format().with_options(FormatMdTextualOptions {
-                                        should_remove: true,
-                                        ..Default::default()
+                                    md_text.format().with_options(FormatMdTextualOptions {
+                                        print_mode: TextPrintMode::Remove
                                     }),
                                     hard_line_break()
                                 ]
                             )
                         }));
-                    } else if at_paragraph_start && text.value_token()?.text() == " " {
+                    } else if at_paragraph_start && md_text.value_token()?.text() == " " {
                         // Leading space at the start of a loose paragraph —
                         // strip unconditionally (these are pure excess past the
                         // continuation indent).
-                        joiner.entry(&text.format().with_options(FormatMdTextualOptions {
-                            should_remove: true,
-                            ..Default::default()
+                        joiner.entry(&md_text.format().with_options(FormatMdTextualOptions {
+                            print_mode: TextPrintMode::Remove,
                         }));
-                    } else if seen_new_line && !after_hard_line && text.value_token()?.text() == " "
+                    } else if seen_new_line
+                        && !after_hard_line
+                        && md_text.value_token()?.text() == " "
                     {
                         // Soft-wrap continuation excess. Single extra space is
                         // a typo (strip); two or more mean intentional
@@ -195,8 +221,7 @@ impl FormatMdInlineItemList {
                             let was_after_newline = seen_new_line;
                             seen_new_line = false;
                             after_hard_line = false;
-                            joiner.entry(&text.format().with_options(FormatMdTextualOptions {
-                                should_remove: false,
+                            joiner.entry(&md_text.format().with_options(FormatMdTextualOptions {
                                 print_mode: if was_after_newline
                                     && self.print_mode.is_keep_leading_spaces()
                                 {
@@ -208,9 +233,8 @@ impl FormatMdInlineItemList {
                         } else {
                             // Single excess space before content — remove it.
                             seen_new_line = false;
-                            joiner.entry(&text.format().with_options(FormatMdTextualOptions {
-                                should_remove: true,
-                                ..Default::default()
+                            joiner.entry(&md_text.format().with_options(FormatMdTextualOptions {
+                                print_mode: TextPrintMode::Remove,
                             }));
                         }
                     } else {
@@ -218,16 +242,48 @@ impl FormatMdInlineItemList {
                         at_paragraph_start = false;
                         seen_new_line = false;
                         after_hard_line = false;
-                        joiner.entry(&text.format().with_options(FormatMdTextualOptions {
-                            should_remove: false,
-                            print_mode: if was_after_newline
-                                && self.print_mode.is_keep_leading_spaces()
-                            {
+
+                        let next_is_newline_or_end = items.get(i + 1).is_none_or(|n| {
+                            matches!(n, AnyMdInline::MdTextual(t) if t.is_newline().unwrap_or_default())
+                        });
+                        let print_mode =
+                            if was_after_newline && self.print_mode.is_keep_leading_spaces() {
                                 self.print_mode
                             } else {
                                 TextPrintMode::default()
-                            },
-                        }));
+                            };
+
+                        if next_is_newline_or_end {
+                            let token = md_text.value_token()?;
+                            let trimmed = token.text().trim_end();
+                            if trimmed.len() < token.text().len() {
+                                joiner.entry(&format_with(|f: &mut MarkdownFormatter| {
+                                    f.context()
+                                        .comments()
+                                        .mark_suppression_checked(md_text.syntax());
+
+                                    write!(
+                                        f,
+                                        [format_replaced(
+                                            &token,
+                                            &text(trimmed, token.text_trimmed_range().start())
+                                        )]
+                                    )
+                                }));
+                            } else {
+                                joiner.entry(
+                                    &md_text
+                                        .format()
+                                        .with_options(FormatMdTextualOptions { print_mode }),
+                                );
+                            }
+                        } else {
+                            joiner.entry(
+                                &md_text
+                                    .format()
+                                    .with_options(FormatMdTextualOptions { print_mode }),
+                            );
+                        }
                     }
                 }
                 AnyMdInline::MdHardLine(hard_line) => {
@@ -293,8 +349,7 @@ impl FormatMdInlineItemList {
                 && let AnyMdInline::MdTextual(text) = item
             {
                 joiner.entry(&text.format().with_options(FormatMdTextualOptions {
-                    should_remove: true,
-                    ..Default::default()
+                    print_mode: TextPrintMode::Remove,
                 }));
                 continue;
             }
@@ -344,8 +399,7 @@ impl FormatMdInlineItemList {
                 match item {
                     AnyMdInline::MdTextual(text) => {
                         joiner.entry(&text.format().with_options(FormatMdTextualOptions {
-                            should_remove: true,
-                            print_mode: TextPrintMode::trim_start(),
+                            print_mode: TextPrintMode::Remove,
                         }));
                     }
                     AnyMdInline::MdHardLine(hard_line) => {
@@ -406,7 +460,6 @@ impl FormatMdInlineItemList {
                 AnyMdInline::MdTextual(text) => {
                     joiner.entry(&text.format().with_options(FormatMdTextualOptions {
                         print_mode: TextPrintMode::Trim(TrimMode::NormalizeWords),
-                        ..Default::default()
                     }));
                 }
                 AnyMdInline::MdInlineItalic(italic) => {
@@ -432,14 +485,13 @@ impl FormatMdInlineItemList {
             match item {
                 AnyMdInline::MdTextual(text) if !handled_first => {
                     handled_first = true;
-                    if text.is_empty_and_not_newline().unwrap_or(false)
-                        || text.is_newline().unwrap_or(false)
+                    if text.is_empty_and_not_newline().unwrap_or_default()
+                        || text.is_newline().unwrap_or_default()
                     {
                         // First token is trailing whitespace/newline from the
                         // info string line — remove it entirely.
                         joiner.entry(&text.format().with_options(FormatMdTextualOptions {
-                            should_remove: true,
-                            ..Default::default()
+                            print_mode: TextPrintMode::Remove,
                         }));
                     } else {
                         let token = text.value_token()?;
@@ -447,8 +499,7 @@ impl FormatMdInlineItemList {
                         if token_text.trim().is_empty() {
                             // Mixed whitespace + newline (e.g. "    \n") — remove.
                             joiner.entry(&text.format().with_options(FormatMdTextualOptions {
-                                should_remove: true,
-                                ..Default::default()
+                                print_mode: TextPrintMode::Remove,
                             }));
                         } else {
                             // First token has content — keep as-is.
@@ -456,7 +507,7 @@ impl FormatMdInlineItemList {
                         }
                     }
                 }
-                AnyMdInline::MdTextual(text) if text.is_newline().unwrap_or(false) => {
+                AnyMdInline::MdTextual(text) if text.is_newline().unwrap_or_default() => {
                     // After a newline, reset the skip counter for the next line.
                     joiner.entry(&text.format());
                 }
@@ -504,6 +555,75 @@ impl FormatMdInlineItemList {
         }
 
         joiner.finish()
+    }
+
+    /// Formats prose with `proseWrap: "preserve"` semantics.
+    ///
+    /// Each source line is emitted as-is with `hard_line_break` between them.
+    /// Hard breaks (`  \n` or `\\\n`) are formatted using their original node.
+    ///
+    /// TODO: for `proseWrap: "always"`, replace sequential writes with `f.fill()`
+    /// using `soft_line_break_or_space()` separators between word-level entries.
+    /// The word stream from `build_word_stream_flat` already provides the
+    /// granularity needed — just change the emission strategy.
+    fn fmt_fill(&self, node: &MdInlineItemList, f: &mut MarkdownFormatter) -> FormatResult<()> {
+        let WordStreamResult {
+            stream,
+            has_trailing_break,
+        } = build_word_stream_flat(node, f).map_err(|_| FormatError::SyntaxError)?;
+
+        let mut is_first_line = true;
+        let mut line_start = 0;
+
+        for (i, item) in stream.iter().enumerate() {
+            match item {
+                ProseItem::HardBreak(hard_break) => {
+                    let line_items = &stream[line_start..i];
+                    if !line_items.is_empty() {
+                        if !is_first_line {
+                            write!(f, [hard_line_break()])?;
+                        }
+                        FormatSourceLine(line_items).fmt(f)?;
+                    }
+                    write!(
+                        f,
+                        [hard_break
+                            .format()
+                            .with_options(FormatMdFormatHardLineOptions {
+                                print_mode: TextPrintMode::Fill,
+                            })]
+                    )?;
+                    is_first_line = true;
+                    line_start = i + 1;
+                }
+                ProseItem::SoftBreak => {
+                    let line_items = &stream[line_start..i];
+                    if !line_items.is_empty() {
+                        if !is_first_line {
+                            write!(f, [hard_line_break()])?;
+                        }
+                        FormatSourceLine(line_items).fmt(f)?;
+                        is_first_line = false;
+                    }
+                    line_start = i + 1;
+                }
+                _ => {}
+            }
+        }
+        // Emit remaining content
+        let remaining = &stream[line_start..];
+        if !remaining.is_empty() {
+            if !is_first_line {
+                write!(f, [hard_line_break()])?;
+            }
+            FormatSourceLine(remaining).fmt(f)?;
+        }
+
+        if has_trailing_break {
+            write!(f, [hard_line_break()])?;
+        }
+
+        Ok(())
     }
 }
 

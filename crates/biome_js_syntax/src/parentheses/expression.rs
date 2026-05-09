@@ -714,8 +714,7 @@ impl NeedsParentheses for TsInstantiationExpression {
             .is_some_and(|member_expr| {
                 member_expr
                     .object()
-                    .map(|object| object.syntax() == self.syntax())
-                    .unwrap_or(false)
+                    .is_ok_and(|object| object.syntax() == self.syntax())
             })
     }
 }

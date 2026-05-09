@@ -1,5 +1,238 @@
 # @biomejs/biome
 
+## 2.4.14
+
+### Patch Changes
+
+- [#9393](https://github.com/biomejs/biome/pull/9393) [`491b171`](https://github.com/biomejs/biome/commit/491b171e245aa1ad1063662d4408692b4fc11eae) Thanks [@dyc3](https://github.com/dyc3)! - Added the nursery rule [`useTestHooksOnTop`](https://biomejs.dev/linter/rules/use-test-hooks-on-top) in the `test` domain. The rule flags lifecycle hooks (`beforeEach`, `beforeAll`, `afterEach`, `afterAll`) that appear after test cases in the same block, enforcing that hooks are defined before any test case.
+
+- [#10157](https://github.com/biomejs/biome/pull/10157) [`eefc5ab`](https://github.com/biomejs/biome/commit/eefc5ab81709e78068774b0f5bc56af448a733d1) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#7882](https://github.com/biomejs/biome/issues/7882): The HTML parser will now emit better diagnostics when it encounters a void element with a closing tag, such as `<br></br>`. Previously, the parser would emit multiple diagnostics with conflicting advice. Now it emits a single diagnostic that clearly states that void elements should not have closing tags.
+
+- [#10054](https://github.com/biomejs/biome/pull/10054) [`0e9f569`](https://github.com/biomejs/biome/commit/0e9f5696b1f2dec6e0d1f81b39192bdb07ab0c1a) Thanks [@minseong0324](https://github.com/minseong0324)! - [`noMisleadingReturnType`](https://biomejs.dev/linter/rules/no-misleading-return-type/) no longer misses widening from concrete object types, class instances, object literals, tuples, functions, and regular expressions to `: object`.
+
+  A function annotated `: object` returning an object literal:
+
+  ```ts
+  function f(): object {
+    return { retry: true };
+  }
+  ```
+
+- [#10116](https://github.com/biomejs/biome/pull/10116) [`53269eb`](https://github.com/biomejs/biome/commit/53269ebe0a2f718213483444696b88c7e8d0e7c4) Thanks [@jiwon79](https://github.com/jiwon79)! - Fixed [#6201](https://github.com/biomejs/biome/issues/6201): [`noUselessEscapeInRegex`](https://biomejs.dev/linter/rules/no-useless-escape-in-regex/) no longer flags an escaped backslash followed by `-` as a useless escape. Patterns like `/[\\-]/` are now considered valid because the second `\` is the escaped backslash, not an unnecessary escape of the trailing dash.
+
+- [#10092](https://github.com/biomejs/biome/pull/10092) [`33d8543`](https://github.com/biomejs/biome/commit/33d8543da451e272000b84a8e29114d72923cdc1) Thanks [@Conaclos](https://github.com/Conaclos)! - Fixed [#9097](https://github.com/biomejs/biome/issues/9097): [`organizeImports`](https://biomejs.dev/assist/actions/organize-imports/) no longer adds a blank line between a never-matched group and a matched group.
+
+  Given the following `organizeImports` options:
+
+  ```json
+  {
+    "groups": [":NODE:", ":BLANK_LINE:", ":PACKAGE:", ":BLANK_LINE:", ":PATH:"]
+  }
+  ```
+
+  The following code...
+
+  ```js
+  // Comment
+  import "package";
+  import "./file.js";
+  ```
+
+  ...was organized as:
+
+  ```diff
+  +
+    // Comment
+    import "package";
+  +
+    import "./file.js";
+  ```
+
+  A blank line was added even though the group ':NODE:' doesn't match any imports here.
+  `:BLANK_LINE:` between never-matched groups and matched groups are now ignored.
+  The code is now organized as:
+
+  ```diff
+    // Comment
+    import "package";
+  +
+    import "./file.js";
+  ```
+
+- [#10138](https://github.com/biomejs/biome/pull/10138) [`a10b6c1`](https://github.com/biomejs/biome/commit/a10b6c119d1f3862da918ce7617ee365bb534c6e) Thanks [@dyc3](https://github.com/dyc3)! - Fixed Vue `v-for` handling for [`noUndeclaredVariables`](https://biomejs.dev/linter/rules/no-undeclared-variables/) and [`noUnusedVariables`](https://biomejs.dev/linter/rules/no-unused-variables/). Biome now recognizes variables declared by `v-for` directives and references to iterated values in Vue templates.
+
+- [#10115](https://github.com/biomejs/biome/pull/10115) [`d428d76`](https://github.com/biomejs/biome/commit/d428d76ba8be7131090c199cefa36613a332e75b) Thanks [@minseong0324](https://github.com/minseong0324)! - [`noMisleadingReturnType`](https://biomejs.dev/linter/rules/no-misleading-return-type/) no longer reports false positives when a union return type's `boolean` variant is covered by both `true` and `false` returns.
+
+- [#9922](https://github.com/biomejs/biome/pull/9922) [`7acf1e0`](https://github.com/biomejs/biome/commit/7acf1e0890d1e52b1cfa940554f6ebbd1bae20b3) Thanks [@dyc3](https://github.com/dyc3)! - Added the new nursery rule [`noReactStringRefs`](https://biomejs.dev/linter/rules/no-react-string-refs/), which disallows legacy React string refs such as `ref="hello"` and `this.refs.hello`.
+
+  Biome also reports template-literal refs such as ``ref={`hello`}``, so React code can consistently migrate to callback refs, `createRef()`, or `useRef()`.
+
+- [#10010](https://github.com/biomejs/biome/pull/10010) [`f3e76ab`](https://github.com/biomejs/biome/commit/f3e76ab7befecca7cdc7a04edac1350de31029de) Thanks [@dyc3](https://github.com/dyc3)! - Fixed a bug in the LSP file watcher registration so Biome now watches `.biome.json` and `.biome.jsonc` configuration files and reloads workspace settings when they change.
+
+- [#10176](https://github.com/biomejs/biome/pull/10176) [`8a40ef8`](https://github.com/biomejs/biome/commit/8a40ef835db83277a15b4f0455b5b9b69c719ad3) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#10011](https://github.com/biomejs/biome/issues/10011): The [`noThisInStatic`](https://biomejs.dev/linter/rules/no-this-in-static/) rule no longer reports `this` when it is used as the constructor target in `new this(...)`, which is required for inherited static factory methods.
+
+- [#10163](https://github.com/biomejs/biome/pull/10163) [`6867e96`](https://github.com/biomejs/biome/commit/6867e96dacf0b96dfbefd51f95a29136d90b7bb4) Thanks [@jiwon79](https://github.com/jiwon79)! - Fixed [#9884](https://github.com/biomejs/biome/issues/9884): The [`useSortedAttributes`](https://biomejs.dev/assist/actions/use-sorted-attributes/) auto-fix no longer corrupts source code when both an outer JSX element and a nested JSX-valued attribute have unsorted attributes in the same pass. Multiple unsorted groups separated by spread or shorthand attributes within the same JSX element are now reported as a single diagnostic.
+
+- [#10079](https://github.com/biomejs/biome/pull/10079) [`d29dd19`](https://github.com/biomejs/biome/commit/d29dd1916bdfa4a13dba95cad57f61c65cb5739c) Thanks [@Damix48](https://github.com/Damix48)! - Fixed false positive in `noAssignInExpressions` for Svelte `{@const}` blocks. Assignments in `{@const name = value}` are now correctly recognized as declarations rather than accidental assignments in expressions.
+
+- [#10080](https://github.com/biomejs/biome/pull/10080) [`5d8fdac`](https://github.com/biomejs/biome/commit/5d8fdac6d26987904130c2ef0db797c295922f08) Thanks [@Damix48](https://github.com/Damix48)! - Fixed parsing of closing parentheses in Svelte `{#each}` block key expressions. Biome now correctly parses method calls and other parenthesised expressions used as keys.
+
+  For example, the following snippets are now parsed correctly:
+
+  ```svelte
+  {#each numbers as number, index (number.toString())}
+    <p>{number}</p>
+  {/each}
+
+  {#each numbers as number (key(number))}
+    <p>{number}</p>
+  {/each}
+  ```
+
+- [#10140](https://github.com/biomejs/biome/pull/10140) [`e7024b9`](https://github.com/biomejs/biome/commit/e7024b92638090a9b8ccd064e0662f7994164621) Thanks [@solithcy](https://github.com/solithcy)! - Fixed [#10135](https://github.com/biomejs/biome/issues/10135): Biome no longer crashes on missing Svelte template expressions.
+
+  The following code snippet longer panics:
+
+  ```svelte
+  {#if }
+   <p>^ this would previously crash</p>
+  {/if}
+  {@const }
+  <p>    ^ this would also crash</p>
+  ```
+
+- [#10111](https://github.com/biomejs/biome/pull/10111) [`7818009`](https://github.com/biomejs/biome/commit/7818009e23e12758d00665be6faf8471ca0b0027) Thanks [@jiwon79](https://github.com/jiwon79)! - Fixed [#9997](https://github.com/biomejs/biome/issues/9997): [`noDuplicateSelectors`](https://biomejs.dev/linter/rules/no-duplicate-selectors/) no longer reports false positives for selectors inside `@scope` queries. Biome now treats `@scope` as a separate at-rule context, like `@media`, `@supports`, `@container`, and `@starting-style`.
+
+  The following snippet is no longer flagged as a duplicate:
+
+  ```css
+  .Example {
+    padding: 0;
+  }
+
+  @scope (.theme-dark) {
+    .Example {
+      color: white;
+    }
+  }
+  ```
+
+- [#9926](https://github.com/biomejs/biome/pull/9926) [`d62b331`](https://github.com/biomejs/biome/commit/d62b331726c1b730ca2d1c38325ce6196beee7a4) Thanks [@dyc3](https://github.com/dyc3)! - Added the nursery lint rule [`useMathMinMax`](https://biomejs.dev/linter/rules/use-math-min-max/), which prefers `Math.min()` and `Math.max()` over equivalent ternary comparisons.
+
+  For example, this code:
+
+  ```js
+  const min = a < b ? a : b;
+  ```
+
+  is much more readable when rewritten as:
+
+  ```js
+  const min = Math.min(a, b);
+  ```
+
+- [#10115](https://github.com/biomejs/biome/pull/10115) [`d428d76`](https://github.com/biomejs/biome/commit/d428d76ba8be7131090c199cefa36613a332e75b) Thanks [@minseong0324](https://github.com/minseong0324)! - [`useExhaustiveSwitchCases`](https://biomejs.dev/linter/rules/use-exhaustive-switch-cases/) now flags missing `true`/`false` cases for `boolean` discriminants, including when `boolean` is a union variant.
+
+- [#10125](https://github.com/biomejs/biome/pull/10125) [`a55a0b6`](https://github.com/biomejs/biome/commit/a55a0b6fe03f772316b76937b1292096cdc8a661) Thanks [@bmish](https://github.com/bmish)! - Fixed a resolver bug where packages that define a typed entry point through `package.json`'s `main` field but omit `types` were ignored during type-aware resolution. Type-aware rules such as [`noFloatingPromises`](https://biomejs.dev/linter/rules/no-floating-promises/) can now inspect imports from those packages.
+
+- [#10117](https://github.com/biomejs/biome/pull/10117) [`895e809`](https://github.com/biomejs/biome/commit/895e809dc799cd6aa70032fbb56dfe0f9c0f6f39) Thanks [@denizdogan](https://github.com/denizdogan)! - Added support for the `corner-shape` family of CSS properties and the `superellipse()`/`squircle()` value functions, so [`noUnknownProperty`](https://biomejs.dev/linter/rules/no-unknown-property/) and [`noUnknownFunction`](https://biomejs.dev/linter/rules/no-unknown-function/) no longer flag them as unknown.
+
+  New known properties: `corner-shape`, `corner-block-end-shape`, `corner-block-start-shape`, `corner-bottom-left-shape`, `corner-bottom-right-shape`, `corner-bottom-shape`, `corner-end-end-shape`, `corner-end-start-shape`, `corner-inline-end-shape`, `corner-inline-start-shape`, `corner-left-shape`, `corner-right-shape`, `corner-start-end-shape`, `corner-start-start-shape`, `corner-top-left-shape`, `corner-top-right-shape`, `corner-top-shape`.
+
+  New known value functions: `superellipse()`, `squircle()`.
+
+- [#8620](https://github.com/biomejs/biome/pull/8620) [`8df8f73`](https://github.com/biomejs/biome/commit/8df8f73ca1c18a688f64f304f0b9089797258a1e) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#8062](https://github.com/biomejs/biome/issues/8062): Added support for parsing Vue `v-for` directives more accurately.
+
+- [#10191](https://github.com/biomejs/biome/pull/10191) [`aa055cd`](https://github.com/biomejs/biome/commit/aa055cd74f82fac691dfa2f65dbfd255213cb884) Thanks [@guney](https://github.com/guney)! - Now the rule [`noStaticElementInteractions`](https://biomejs.dev/linter/rules/no-static-element-interactions/) doesn't trigger custom elements.
+
+- [#9757](https://github.com/biomejs/biome/pull/9757) [`2c62594`](https://github.com/biomejs/biome/commit/2c62594b84ae62fd5fa130adff917a1bcd8dfddd) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#9099](https://github.com/biomejs/biome/issues/9099): the HTML formatter collapsing non-text children (inline elements, Svelte expressions, comments) onto a single line when the source had them on separate lines. Biome now preserves the user's intended line breaks for exclusively non-text children.
+
+  For example, the following Svelte snippet is now preserved instead of being collapsed to `<div>{name}<!-- comment --></div>`:
+
+  ```svelte
+  <div>
+    {name}<!-- comment -->
+  </div>
+  ```
+
+  Similarly, HTML elements like `<span>` inside a `<div>` are now preserved when written on their own line:
+
+  ```html
+  <div>
+    <span>text</span>
+  </div>
+  ```
+
+- [#10105](https://github.com/biomejs/biome/pull/10105) [`e7c1a6d`](https://github.com/biomejs/biome/commit/e7c1a6d5319908cf613f7fa80667e6981435508d) Thanks [@jiwon79](https://github.com/jiwon79)! - Fixed [#10039](https://github.com/biomejs/biome/issues/10039): [`useReadonlyClassProperties`](https://biomejs.dev/linter/rules/use-readonly-class-properties/) now detects unreassigned private members in class expressions and export default classes, not only in class declarations.
+
+  The following patterns are now correctly flagged:
+
+  ```ts
+  const AnonClass = class {
+    #prop = 123;
+    constructor() {
+      console.log(this.#prop);
+    }
+  };
+
+  export default class {
+    #prop = 123;
+    constructor() {
+      console.log(this.#prop);
+    }
+  }
+  ```
+
+- [#10141](https://github.com/biomejs/biome/pull/10141) [`46a77d0`](https://github.com/biomejs/biome/commit/46a77d0a35e8dbbcefeca264e8630af83b21f1d9) Thanks [@minseong0324](https://github.com/minseong0324)! - Improved [`noUnnecessaryConditions`](https://biomejs.dev/linter/rules/no-unnecessary-conditions/) to detect conditions that are always truthy because they check built-in global class instances such as `Date`, `Map`, `Set`, `WeakMap`, and `Error`.
+
+- [#10178](https://github.com/biomejs/biome/pull/10178) [`7b05a89`](https://github.com/biomejs/biome/commit/7b05a893df8c9c950871b83ff1b3ae28113e8b15) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#10177](https://github.com/biomejs/biome/issues/10177): The HTML parser no longer reports lowercase `html` or `doctype` text as invalid after void elements such as `<br>`.
+
+- [#10155](https://github.com/biomejs/biome/pull/10155) [`0d4595d`](https://github.com/biomejs/biome/commit/0d4595dae68b034bd6de3bdfd15437a34fa53cb2) Thanks [@jiwon79](https://github.com/jiwon79)! - Fixed [#10045](https://github.com/biomejs/biome/issues/10045): the CSS formatter no longer compounds indentation inside nested functional pseudo-classes such as `:not(:where(...))`, `:is(:where(...))`, and similar combinations. The same fix also removes one level of unnecessary indentation that was added inside any pseudo-class function whose argument list wrapped onto multiple lines, including `:nth-child(... of ...)`, `::part(...)`, and `:active-view-transition-type(...)`.
+  The following snippet is now correctly formatted, matching Prettier.
+
+  ```css
+  input:not(
+    :where(
+      [type="submit"],
+      [type="checkbox"],
+      [type="radio"],
+      [type="button"],
+      [type="reset"]
+    )
+  ) {
+    inline-size: 100%;
+  }
+  ```
+
+- [#10112](https://github.com/biomejs/biome/pull/10112) [`6f0251e`](https://github.com/biomejs/biome/commit/6f0251ea12cddb6edcbf512e5608a7b502762423) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#10110](https://github.com/biomejs/biome/issues/10110): Biome's parser now accepts surrogate code points in JavaScript string `\u{...}` escapes.
+
+- [#10141](https://github.com/biomejs/biome/pull/10141) [`46a77d0`](https://github.com/biomejs/biome/commit/46a77d0a35e8dbbcefeca264e8630af83b21f1d9) Thanks [@minseong0324](https://github.com/minseong0324)! - Improved [`noMisleadingReturnType`](https://biomejs.dev/linter/rules/no-misleading-return-type/) to detect `object` return annotations that hide built-in global class instances such as `Date`, `Map`, `Set`, `WeakMap`, and `Error`.
+
+- [#10083](https://github.com/biomejs/biome/pull/10083) [`4a664c1`](https://github.com/biomejs/biome/commit/4a664c1c9ebee339ee4a8b971b0a345aa4dbbe70) Thanks [@ematipico](https://github.com/ematipico)! - Added two new options to [`noShadow`](https://biomejs.dev/linter/rules/no-shadow/), both defaulting to `true` to match typescript-eslint's behavior.
+
+  Fixed [#9482](https://github.com/biomejs/biome/issues/9482): Added `ignoreFunctionTypeParameterNameValueShadow` option. When enabled, parameter names inside function type annotations (e.g. `(options: unknown) => void`) are not flagged as shadowing outer variables.
+
+  Fixed [#7812](https://github.com/biomejs/biome/issues/7812): Added `ignoreTypeValueShadow` option. When enabled, a value binding that shares its name with a type-only declaration (type alias or interface) is not flagged, since types and values occupy separate namespaces in TypeScript.
+
+- [#9286](https://github.com/biomejs/biome/pull/9286) [`52695cf`](https://github.com/biomejs/biome/commit/52695cf52b3ff42ddfcaef040cfaa00e9a93a4b7) Thanks [@Hugo-Polloli](https://github.com/Hugo-Polloli)! - Fixed [#6316](https://github.com/biomejs/biome/issues/6316): Biome now resolves Svelte `$store` references to the underlying `store` binding in semantic analysis, preventing false `noUndeclaredVariables` diagnostics when the store is declared.
+
+- [#10188](https://github.com/biomejs/biome/pull/10188) [`ae659dd`](https://github.com/biomejs/biome/commit/ae659ddbd317753c4feb5e4d223b9159d272d01b) Thanks [@dyc3](https://github.com/dyc3)! - Added a new nursery rule [`noExcessiveNestedCallbacks`](https://biomejs.dev/linter/rules/no-excessive-nested-callbacks/), which disallows callbacks nested deeper than the configured maximum.
+
+- [#9757](https://github.com/biomejs/biome/pull/9757) [`2c62594`](https://github.com/biomejs/biome/commit/2c62594b84ae62fd5fa130adff917a1bcd8dfddd) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#9450](https://github.com/biomejs/biome/issues/9450): the HTML formatter now correctly preserves multiline formatting for nested `<template>` elements (e.g. `<template #body>`) when the source has children on separate lines. Previously, the children were collapsed onto a single line.
+
+  ```diff
+   <template>
+     <UModal>
+  -    <template #body> <p>content</p> </template>
+  +    <template #body>
+  +      <p>content</p>
+  +    </template>
+     </UModal>
+   </template>
+  ```
+
+- [#10118](https://github.com/biomejs/biome/pull/10118) [`c6edcb4`](https://github.com/biomejs/biome/commit/c6edcb493d42f05179167a8ff3be4549908e9d0b) Thanks [@Netail](https://github.com/Netail)! - Fixed [#10024](https://github.com/biomejs/biome/issues/10024): `biome migrate eslint` correctly migrates `eslint` rules that belong to multiple Biome rules.
+
 ## 2.4.13
 
 ### Patch Changes

@@ -1266,7 +1266,7 @@ impl ParseNodeList for ModifiersList {
 
 // #region Check functions
 
-const SVELTE_KEYWORDS: TokenSet<HtmlSyntaxKind> = token_set!(
+pub const SVELTE_KEYWORDS: TokenSet<HtmlSyntaxKind> = token_set!(
     T![if],
     T![else],
     T![each],

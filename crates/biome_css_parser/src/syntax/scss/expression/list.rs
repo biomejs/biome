@@ -154,7 +154,7 @@ pub(crate) fn complete_empty_scss_expression(p: &mut CssParser) -> CompletedMark
 ///
 /// Docs: https://sass-lang.com/documentation/syntax/structure
 #[inline]
-fn parse_scss_expression_with_options(
+pub(super) fn parse_scss_expression_with_options(
     p: &mut CssParser,
     options: ScssExpressionOptions,
 ) -> ParsedSyntax {
@@ -233,7 +233,7 @@ fn parse_scss_expression_item(p: &mut CssParser, options: ScssExpressionOptions)
         return parse_generic_component_value(p);
     }
 
-    let expression = parse_scss_binary_expression(p, 0).or_else(|| {
+    let expression = parse_scss_binary_expression(p, 0, options).or_else(|| {
         if p.at(T![...]) {
             report_and_bump_scss_ellipsis(p);
         }
@@ -287,12 +287,12 @@ fn parse_scss_keyword_argument(p: &mut CssParser, options: ScssExpressionOptions
     parse_scss_expression_with_options(
         p,
         ScssExpressionOptions {
-            end_ts: options.end_ts,
             allows_empty_value: false,
             allows_keyword_arguments: false,
             allows_ellipsis: false,
             stops_before_variable_modifiers: false,
             stops_at_string_quote: false,
+            ..options
         },
     )
     .or_add_diagnostic(p, expected_component_value);

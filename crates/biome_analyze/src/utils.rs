@@ -114,7 +114,7 @@ where
 /// The separator is always kept if some comments are attached.
 ///
 /// This utility is notably useful when a delimited list with an optional last separator is reordered.
-/// It allows to add missing separators and remove an extra separator.
+/// It allows you to add missing separators and remove an extra separator.
 /// Usually, you collect every pair of nodes and separators in a vector and then pass a mutable iterator to `fix_separators`.
 ///
 /// See [sorted_separated_list_by] as a usage example.

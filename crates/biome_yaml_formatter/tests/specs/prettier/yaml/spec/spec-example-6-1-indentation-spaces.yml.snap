@@ -1,0 +1,63 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-6-1-indentation-spaces.yml
+---
+# Input
+
+```yml
+  # Leading comment line spaces are
+   # neither content nor indentation.
+    
+Not indented:
+ By one space: |
+    By four
+      spaces
+ Flow style: [    # Leading spaces
+   By two,        # in flow style
+  Also by two,    # are neither
+  	Still by two   # content nor
+    ]             # indentation.
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,13 +1,9 @@
+-# Leading comment line spaces are
+-# neither content nor indentation.
+-
+ Not indented:
+-  By one space: |
++ By one space: |
+     By four
+       spaces
+-  Flow style: # Leading spaces
+-    [
+-      By two, # in flow style
+-      Also by two, # are neither
+-      Still by two, # content nor
+-    ] # indentation.
++ Flow style: [    # Leading spaces
++   By two,        # in flow style
++  Also by two,    # are neither
++  	Still by two   # content nor
++    ]
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+Not indented:
+ By one space: |
+    By four
+      spaces
+ Flow style: [    # Leading spaces
+   By two,        # in flow style
+  Also by two,    # are neither
+  	Still by two   # content nor
+    ]```

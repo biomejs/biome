@@ -1,0 +1,79 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/include-inline-comments.scss
+---
+
+# Input
+
+```scss
+@include inline-comments(
+1px,/* after positional block */
+$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg:1px,// after keyword line
+2px 4px 6px,/* before close */
+);
+
+@include inline-comments(
+1px,// after positional line
+$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1:2px,/* after keyword block */
+$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2:10,
+2px 4px 6px// before close line
+);
+
+@include separator-line-comments(
+1px // separator line
+, 2px
+);
+
+@include nested-parameter-separator-line-comments(
+fn(
+1px // nested separator line
+, 2px
+)
+);
+
+```
+
+
+# Formatted
+
+```scss
+@include inline-comments(
+	1px,
+	/* after positional block */
+	$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg:
+		1px,
+	// after keyword line
+	2px 4px 6px /* before close */
+);
+
+@include inline-comments(
+	1px,
+	// after positional line
+	$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1:
+		2px,
+	/* after keyword block */
+	$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2:
+		10,
+	2px 4px 6px // before close line
+);
+
+@include separator-line-comments(
+	1px, // separator line
+	2px
+);
+
+@include nested-parameter-separator-line-comments(
+	fn(
+		1px, // nested separator line
+		2px
+	)
+);
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    4: 	$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg:
+   13: 	$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg1:
+   16: 	$very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-arg2:
+```

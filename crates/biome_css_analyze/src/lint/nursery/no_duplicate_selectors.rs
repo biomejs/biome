@@ -4,7 +4,8 @@ use biome_css_semantic::model::{AnyRuleStart, RuleId};
 use biome_css_syntax::AnyCssRoot;
 use biome_diagnostics::Severity;
 use biome_rowan::TextRange;
-use rustc_hash::{FxHashMap, FxHashSet};
+use rustc_hash::{FxBuildHasher, FxHashMap, FxHashSet};
+use std::hash::{BuildHasher, Hasher};
 
 use biome_rule_options::no_duplicate_selectors::NoDuplicateSelectorsOptions;
 
@@ -105,19 +106,21 @@ impl Rule for NoDuplicateSelectors {
         let model = ctx.model();
         let root = ctx.root();
 
-        // Maps (at_rule_context, normalized_selector_list_key) → first occurrence range.
-        let mut seen: FxHashMap<(Vec<RuleId>, String), TextRange> = FxHashMap::default();
-        let mut duplicates: Vec<DuplicateSelectorList> = Vec::new();
-        let mut visited: FxHashSet<RuleId> = FxHashSet::default();
+        // Maps (context_hash, normalized_selector_list_key) → first occurrence range.
+        let mut seen = FxHashMap::default();
+        let mut duplicates = Vec::new();
+        let mut visited = FxHashSet::default();
 
         // Iterative DFS using an explicit stack with sentinel frames for context pop.
         enum Frame {
             Visit(RuleId),
-            /// Sentinel: pop one entry from `at_rule_context` after a subtree is done.
+            /// Sentinel: pop one entry from the context hash stack after a subtree is done.
             PopAtRule,
         }
 
-        let mut at_rule_context: Vec<RuleId> = Vec::new();
+        // Stack of running hashes representing the at-rule nesting context.
+        // Seed with 0 for top-level (no at-rule context).
+        let mut context_hash_stack = vec![0u64];
         // Seed the stack with all top-level rules (reversed so they process in order).
         let mut stack: Vec<Frame> = model
             .rules()
@@ -129,7 +132,7 @@ impl Rule for NoDuplicateSelectors {
         while let Some(frame) = stack.pop() {
             match frame {
                 Frame::PopAtRule => {
-                    at_rule_context.pop();
+                    context_hash_stack.pop();
                 }
                 Frame::Visit(rule_id) => {
                     let rule = match model.get_rule_by_id(&rule_id) {
@@ -151,8 +154,11 @@ impl Rule for NoDuplicateSelectors {
                     );
 
                     if is_at_rule {
-                        at_rule_context.push(rule.id());
-                        // Push a sentinel so we pop after this subtree is processed.
+                        let parent_hash = *context_hash_stack.last().unwrap();
+                        let mut hasher = FxBuildHasher.build_hasher();
+                        hasher.write_u64(parent_hash);
+                        hasher.write_u32(rule.id().index() as u32);
+                        context_hash_stack.push(hasher.finish());
                         stack.push(Frame::PopAtRule);
                     }
 
@@ -171,7 +177,8 @@ impl Rule for NoDuplicateSelectors {
                         normalized_selectors.sort();
 
                         let list_key = normalized_selectors.join(", ");
-                        let context_key = (at_rule_context.clone(), list_key.clone());
+                        let context_hash = *context_hash_stack.last().unwrap();
+                        let context_key = (context_hash, list_key.clone());
                         let rule_range = rule.range(&root);
 
                         match seen.get(&context_key) {

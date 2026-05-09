@@ -72,7 +72,7 @@ fn identifier_is_global_document(
 
 /// Check `expr` is `document`
 fn is_global_document(expr: &AnyJsExpression, model: &SemanticModel) -> Option<()> {
-    let (reference, name) = global_identifier(expr)?;
+    let (reference, name) = global_identifier(&expr.as_any_global_identifier_expression()?)?;
 
     // `expr` is global document
     if identifier_is_global_document(&reference, &name, model) {

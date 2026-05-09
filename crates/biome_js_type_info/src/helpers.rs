@@ -8,10 +8,11 @@ use hashbrown::{HashTable, hash_table::Entry};
 use rustc_hash::FxHasher;
 
 use crate::{
-    BindingId, Class, Interface, Intersection, Module, Namespace, Object, Resolvable,
+    BindingId, Class, Interface, Intersection, Literal, Module, Namespace, Object, Resolvable,
     ResolvedTypeData, ResolvedTypeId, ResolvedTypeMember, ResolverId, Type, TypeData, TypeInstance,
     TypeMember, TypeReference, TypeResolver, Union,
     globals::{GLOBAL_ARRAY_ID, GLOBAL_PROMISE_ID, GLOBAL_TYPE_MEMBERS},
+    globals_ids::GLOBAL_BOOLEAN_ID,
 };
 
 impl<'a> ResolvedTypeData<'a> {
@@ -262,9 +263,10 @@ impl TypeData {
 
     /// Creates a union of type references.
     ///
-    /// References are automatically deduplicated. If only a single type
-    /// remains, an instance of `Self::Reference` is returned instead of
-    /// `Self::Union`.
+    /// References are deduplicated, nested unions are flattened, and boolean
+    /// entries are canonicalized: `boolean | true` becomes `boolean`, and
+    /// `true | false` becomes `boolean`. If only a single type remains, an
+    /// instance of `Self::Reference` is returned instead of `Self::Union`.
     pub fn union_of(resolver: &dyn TypeResolver, types: Box<[TypeReference]>) -> Self {
         // We use a hash table in addition to a vector to quickly check for
         // duplicates, without messing with the original order.
@@ -312,12 +314,67 @@ impl TypeData {
             }
         }
 
+        normalize_boolean_union_variants(resolver, &mut vec);
+
         match vec.len().cmp(&1) {
             Ordering::Greater => Self::Union(Box::new(Union(vec.into()))),
             Ordering::Equal => Self::reference(vec.remove(0)),
             Ordering::Less => Self::NeverKeyword,
         }
     }
+}
+
+/// Canonicalizes boolean entries in `variants`: drops `true` and `false`
+/// when `boolean` is present, and inserts `boolean` if both literals appear
+/// without it.
+fn normalize_boolean_union_variants(
+    resolver: &dyn TypeResolver,
+    variants: &mut Vec<TypeReference>,
+) {
+    let has_boolean = variants
+        .iter()
+        .any(|ty| is_boolean_keyword_reference(resolver, ty));
+    let has_true = variants
+        .iter()
+        .any(|ty| is_boolean_literal_reference(resolver, ty, true));
+    let has_false = variants
+        .iter()
+        .any(|ty| is_boolean_literal_reference(resolver, ty, false));
+
+    if !(has_boolean || has_true && has_false) {
+        return;
+    }
+
+    variants.retain(|ty| {
+        !is_boolean_literal_reference(resolver, ty, true)
+            && !is_boolean_literal_reference(resolver, ty, false)
+    });
+
+    if !has_boolean {
+        variants.push(TypeReference::Resolved(GLOBAL_BOOLEAN_ID));
+    }
+}
+
+/// Whether `ty` resolves to the boolean literal `value`.
+fn is_boolean_literal_reference(
+    resolver: &dyn TypeResolver,
+    ty: &TypeReference,
+    value: bool,
+) -> bool {
+    let Some(resolved) = resolver.resolve_and_get(ty) else {
+        return false;
+    };
+    let TypeData::Literal(literal) = resolved.as_raw_data() else {
+        return false;
+    };
+    matches!(literal.as_ref(), Literal::Boolean(b) if b.as_bool() == value)
+}
+
+/// Whether `ty` resolves to the `boolean` keyword.
+fn is_boolean_keyword_reference(resolver: &dyn TypeResolver, ty: &TypeReference) -> bool {
+    resolver
+        .resolve_and_get(ty)
+        .is_some_and(|resolved| matches!(resolved.as_raw_data(), TypeData::Boolean))
 }
 
 #[inline(always)]

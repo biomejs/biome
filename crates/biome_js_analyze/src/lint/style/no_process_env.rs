@@ -62,7 +62,8 @@ impl Rule for NoProcessEnv {
             return None;
         }
 
-        let (reference, name) = global_identifier(&object)?;
+        let (reference, name) =
+            global_identifier(&object.as_any_global_identifier_expression()?)?;
         if name.text() != "process" {
             return None;
         }

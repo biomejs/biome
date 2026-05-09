@@ -8,9 +8,27 @@ use biome_deserialize::Deserializable;
 use biome_deserialize_macros::Deserializable;
 use biome_rule_options::restricted_regex::RestrictedRegex;
 use biome_rule_options::{
-    no_shadow, use_consistent_array_type, use_consistent_member_accessibility, use_import_type,
-    use_naming_convention,
+    no_base_to_string, no_shadow, use_consistent_array_type, use_consistent_member_accessibility,
+    use_import_type, use_naming_convention,
 };
+
+#[derive(Debug, Default, Deserializable)]
+#[deserializable(unknown_fields = "allow")]
+pub(crate) struct NoBaseToStringOptions {
+    #[deserializable(rename = "ignoredTypeNames")]
+    ignored_type_names: Option<Box<[Box<str>]>>,
+    #[deserializable(rename = "checkUnknown")]
+    check_unknown: Option<bool>,
+}
+
+impl From<NoBaseToStringOptions> for no_base_to_string::NoBaseToStringOptions {
+    fn from(value: NoBaseToStringOptions) -> Self {
+        let _ = value.check_unknown;
+        Self {
+            ignored_type_names: value.ignored_type_names,
+        }
+    }
+}
 
 #[derive(Debug, Default, Deserializable)]
 pub(crate) struct ArrayTypeOptions {

@@ -29,3 +29,26 @@ foo
 ``` aa ```
 foo
 ```
+
+# Errors
+```
+example-112.md:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Backtick fence info string cannot contain backtick characters.
+  
+  > 1 │ ``` aa ```
+      │        ^^^
+    2 │ foo
+    3 │ 
+  
+  i stray backtick here
+  
+  > 1 │ ``` aa ```
+      │        ^^^
+    2 │ foo
+    3 │ 
+  
+  i Use a tilde fence instead, or remove the backtick. Otherwise, the line is parsed as a paragraph, not a code block.
+  
+
+```

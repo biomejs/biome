@@ -1,0 +1,104 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/flow-sequence/trailing-comma/flow-sequence.yml
+---
+# Input
+
+```yml
+failing:
+  [
+    "object-does-not-fit-within-print-width", "------",
+    "TEST", "comma IS added here"
+  ]
+
+expected:
+  [
+    "object-fits-within-print-width", "",
+    "TEST", "comma NOT here"
+  ]
+
+---
+
+does not suffice: >
+  [
+    "object-does-not-fit-within-print-width", "------",
+    "TEST", "comma NOT here — but object's now a string due to '>'"
+  ]
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,16 +1,19 @@
+ failing:
+   [
+-    "object-does-not-fit-within-print-width",
+-    "------",
+-    "TEST",
+-    "comma IS added here",
++    "object-does-not-fit-within-print-width", "------",
++    "TEST", "comma IS added here"
+   ]
+ 
+-expected: ["object-fits-within-print-width", "", "TEST", "comma NOT here"]
++expected:
++  [
++    "object-fits-within-print-width", "",
++    "TEST", "comma NOT here"
++  ]
+ 
+ ---
++
+ does not suffice: >
+   [
+     "object-does-not-fit-within-print-width", "------",
+     "TEST", "comma NOT here — but object's now a string due to '>'"
+-  ]
++  ]
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+failing:
+  [
+    "object-does-not-fit-within-print-width", "------",
+    "TEST", "comma IS added here"
+  ]
+
+expected:
+  [
+    "object-fits-within-print-width", "",
+    "TEST", "comma NOT here"
+  ]
+
+---
+
+does not suffice: >
+  [
+    "object-does-not-fit-within-print-width", "------",
+    "TEST", "comma NOT here — but object's now a string due to '>'"
+  ]```
+
+# Errors
+```
+flow-sequence.yml:15:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `does not suffice`
+  
+    13 │ ---
+    14 │ 
+  > 15 │ does not suffice: >
+       │ ^^^^^^^^^^^^^^^^
+    16 │   [
+    17 │     "object-does-not-fit-within-print-width", "------",
+  
+  i Remove does not suffice
+  
+
+```

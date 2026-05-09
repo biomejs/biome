@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use biome_css_syntax::{ScssForAtRule, ScssForAtRuleFields};
-use biome_formatter::write;
+use biome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatScssForAtRule;
@@ -22,16 +22,20 @@ impl FormatNodeRule<ScssForAtRule> for FormatScssForAtRule {
             [
                 for_token.format(),
                 space(),
-                variable.format(),
-                space(),
-                from_token.format(),
-                space(),
-                lower_bound.format(),
-                space(),
-                operator.format(),
-                space(),
-                upper_bound.format(),
-                space(),
+                group(&format_args![
+                    variable.format(),
+                    indent(&format_args![
+                        soft_line_break_or_space(),
+                        from_token.format(),
+                        space(),
+                        lower_bound.format(),
+                        soft_line_break_or_space(),
+                        operator.format(),
+                        space(),
+                        upper_bound.format()
+                    ]),
+                    soft_line_break_or_space()
+                ]),
                 block.format()
             ]
         )

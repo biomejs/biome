@@ -147,9 +147,7 @@ impl Rule for NoInvalidUseBeforeDeclaration {
                     // ```
                     if reference_syntax
                         .parent()
-                        .kind()
-                        .filter(|parent_kind| AnyJsExportNamedSpecifier::can_cast(*parent_kind))
-                        .is_none()
+                        .kind().as_ref().is_none_or(|parent_kind| !AnyJsExportNamedSpecifier::can_cast(*parent_kind))
                         // Don't report variables used in another control flow root (function, classes, ...)
                         // For example:
                         //

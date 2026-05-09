@@ -407,8 +407,7 @@ impl AnyJsClassDeclaration {
             Self::JsClassExportDefaultDeclaration(decl) => decl.class_token(),
             Self::JsClassDeclaration(decl) => decl.class_token(),
         })
-        .map(|token| token.text_range())
-        .unwrap_or(self.range())
+        .map_or(self.range(), |token| token.text_range())
     }
 }
 

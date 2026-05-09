@@ -291,7 +291,7 @@ fn main() -> io::Result<()> {
     };
 
     // We print the code even if it cannot be parsed,
-    // this allows to debug the code by directly looking at it.
+    // this allows you to debug the code by directly looking at it.
     let out_dir = env::var("OUT_DIR").unwrap();
     fs::write(PathBuf::from(out_dir).join("roles_and_attributes.rs"), ast)?;
 

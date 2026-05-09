@@ -34,7 +34,7 @@ packages/prettier-compare/
 4. **IR Comparison**: Show intermediate representation from both formatters
 5. **Diagnostics Section**: Display syntax errors from both tools
 6. **Watch Mode**: Rebuild WASM on Rust file changes with debounce and spinner
-7. **All Languages**: Support JS/TS, JSON, CSS, HTML, GraphQL, etc.
+7. **All Languages**: Support JS/TS, JSON, CSS, HTML, Vue, GraphQL, etc.
 
 ## Usage
 

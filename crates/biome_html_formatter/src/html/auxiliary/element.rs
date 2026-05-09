@@ -4,8 +4,8 @@ use crate::verbatim::{format_html_leading_comments, format_html_leading_comments
 use crate::{html::lists::element_list::FormatHtmlElementList, prelude::*};
 use biome_formatter::{CstFormatContext, FormatRefWithRule, FormatRuleWithOptions, write};
 use biome_html_syntax::{
-    AnyHtmlTagName, HtmlElement, HtmlElementFields, HtmlElementList, HtmlRoot,
-    HtmlSelfClosingElement, HtmlSyntaxToken,
+    AnyHtmlContent, AnyHtmlElement, AnyHtmlTagName, HtmlElement, HtmlElementFields,
+    HtmlElementList, HtmlRoot, HtmlSelfClosingElement, HtmlSyntaxToken,
 };
 use biome_rowan::TokenText;
 use biome_string_case::StrLikeExtension;
@@ -140,7 +140,6 @@ impl FormatHtmlElement {
             .is_some_and(|ancestor| HtmlRoot::can_cast(ancestor.kind()));
         let is_template_element = get_tag_name_text(&tag_name)
             .is_some_and(|tt| tt.to_ascii_lowercase_cow() == "template");
-
         let should_be_verbatim = match tag_name {
             AnyHtmlTagName::HtmlComponentName(_) | AnyHtmlTagName::HtmlMemberName(_) => false,
             AnyHtmlTagName::HtmlTagName(tag_name) => HTML_VERBATIM_TAGS.iter().any(|tag| {
@@ -188,14 +187,12 @@ impl FormatHtmlElement {
         let forces_break_children = should_force_break_content
             // If `<template>` is at the root level, always force multiline formatting of its children.
             || (is_root_element_list && is_template_element)
-            // Nested `<template>` elements with a leading newline
-            // and direct element children should also force multiline, since `<template>` acts
-            // as a structural container in frameworks like Vue/Svelte.
-            // Without a leading newline (e.g. `<template #body><p>foo</p></template>`),
-            // the children stay inline.
-            || (is_template_element
-                && content_has_leading_newline
-                && has_non_text_child(&children));
+            // Elements with a leading newline and direct element children should force
+            // multiline unless they mix text with element children. Without a leading
+            // newline (e.g. `<span><em>foo</em></span>`), the children stay inline.
+            || (content_has_leading_newline
+                && has_non_text_child(&children)
+                && !has_text_child(&children));
 
         // "Borrowing" in this context refers to tokens in nodes that would normally be
         // formatted by that node's formatter, but are instead formatted by a sibling
@@ -348,5 +345,17 @@ fn has_non_text_child(node: &HtmlElementList) -> bool {
     node.iter().any(|child| {
         HtmlElement::can_cast(child.syntax().kind())
             || HtmlSelfClosingElement::can_cast(child.syntax().kind())
+    })
+}
+
+fn has_text_child(node: &HtmlElementList) -> bool {
+    node.iter().any(|child| {
+        let AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::HtmlContent(content)) = child else {
+            return false;
+        };
+
+        content
+            .value_token()
+            .is_ok_and(|token| !token.text_trimmed().is_empty())
     })
 }

@@ -178,13 +178,7 @@ input:not(/* comment 125 */[/* comment 126 */disabled/* comment 127 */]/* commen
  .powerPathNavigator .helm button:active:not(.disabledButton),
  .powerPathNavigator table.powerPathInfo th:active,
  .powerPathNavigator table.powerPathInfo th:active + th:last-child {
-@@ -11,14 +11,12 @@
- 
- .foo,
- /* comment 3 */
--.bar {
-+  .bar {
-   display: block;
+@@ -16,9 +16,7 @@
  }
  
  /* comment 4 */
@@ -209,11 +203,10 @@ input:not(/* comment 125 */[/* comment 126 */disabled/* comment 127 */]/* commen
 +.element,
  /* comment 20 */
 -,
--/* comment 21 */
+ /* comment 21 */
 -.element
 -/* comment 22 */ {
-+  /* comment 21 */
-+  .element /* comment 22 */
++.element /* comment 22 */
 +{
  }
  
@@ -342,8 +335,8 @@ input:not(/* comment 125 */[/* comment 126 */disabled/* comment 127 */]/* commen
  
 -span:nth-child(/* comment 106 */2n/* comment 107 */+/* comment 108 */1/* comment 109 */) {
 +span:/* comment 106 */ nth-child(
-+    2n /* comment 107 */ + /* comment 108 */ 1 /* comment 109 */
-+  ) {
++  2n /* comment 107 */ + /* comment 108 */ 1 /* comment 109 */
++) {
  }
  
 -/* comment 110 */
@@ -382,8 +375,8 @@ input:not(/* comment 125 */[/* comment 126 */disabled/* comment 127 */]/* commen
  
 -input:not(/* comment 125 */[/* comment 126 */disabled/* comment 127 */]/* comment 128 */) {
 +input:/* comment 125 */ not(
-+    [/* comment 126 */ disabled /* comment 127 */] /* comment 128 */
-+  ) {
++  [/* comment 126 */ disabled /* comment 127 */] /* comment 128 */
++) {
  }
  
 -/* comment 129 */
@@ -497,7 +490,7 @@ input:not(/* comment 125 */[/* comment 126 */disabled/* comment 127 */]/* commen
 
 .foo,
 /* comment 3 */
-  .bar {
+.bar {
   display: block;
 }
 
@@ -518,8 +511,8 @@ input:not(/* comment 125 */[/* comment 126 */disabled/* comment 127 */]/* commen
 /* comment 19 */
 .element,
 /* comment 20 */
-  /* comment 21 */
-  .element /* comment 22 */
+/* comment 21 */
+.element /* comment 22 */
 {
 }
 
@@ -605,8 +598,8 @@ p:/* comment 104 */ lang(/* comment 105 */ it) {
 }
 
 span:/* comment 106 */ nth-child(
-    2n /* comment 107 */ + /* comment 108 */ 1 /* comment 109 */
-  ) {
+  2n /* comment 107 */ + /* comment 108 */ 1 /* comment 109 */
+) {
 }
 
 /* comment 110 */ ::-webkit-progress-bar {
@@ -632,8 +625,8 @@ span:/* comment 106 */ nth-child(
 }
 
 input:/* comment 125 */ not(
-    [/* comment 126 */ disabled /* comment 127 */] /* comment 128 */
-  ) {
+  [/* comment 126 */ disabled /* comment 127 */] /* comment 128 */
+) {
 }
 
 /* comment 129 */ h1 /* comment 130 */,
