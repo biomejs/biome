@@ -30,6 +30,7 @@ biome_css_formatter          = { path = "./crates/biome_css_formatter", version 
 biome_css_parser             = { path = "./crates/biome_css_parser", version = "0.5.7" }
 biome_css_semantic           = { path = "./crates/biome_css_semantic", version = "0.0.0" }
 biome_css_syntax             = { path = "./crates/biome_css_syntax", version = "0.5.7" }
+biome_db                     = { path = "./crates/biome_db", version = "0.0.1" }
 biome_deserialize            = { path = "./crates/biome_deserialize", version = "0.6.0" }
 biome_deserialize_macros     = { path = "./crates/biome_deserialize_macros", version = "0.6.0" }
 biome_diagnostics            = { path = "./crates/biome_diagnostics", version = "0.5.7" }
@@ -105,7 +106,6 @@ biome_yaml_factory           = { path = "./crates/biome_yaml_factory", version =
 biome_yaml_formatter         = { path = "./crates/biome_yaml_formatter", version = "0.1.0" }
 biome_yaml_parser            = { path = "./crates/biome_yaml_parser", version = "0.0.1" }
 biome_yaml_syntax            = { path = "./crates/biome_yaml_syntax", version = "0.0.1" }
-biome_db                     = { path = "./crates/biome_db", version = "0.0.1" }
 boa_engine                   = "0.21.1"
 boxcar                       = "0.2.14"
 bpaf                         = { version = "0.9.26", features = ["derive"] }
@@ -143,6 +143,7 @@ regex                        = "1.12.3"
 reqwest                      = { version = "0.12.19", default-features = false }
 rust-lapper                  = "1.2.0"
 rustc-hash                   = "2.1.2"
+salsa                        = "0.26.2"
 schemars                     = { version = "1.2.1", features = ["indexmap2", "smallvec1"] }
 serde                        = { version = "1.0.228", features = ["derive"] }
 serde_json                   = "1.0.149"
@@ -168,7 +169,6 @@ uuid                         = "1.18.1"
 walkdir                      = "2.5.0"
 web-time                     = "1.1.0"
 windows                      = "0.62.2"
-salsa                        = "0.26.2"
 xtask_codegen                = { path = "xtask/codegen" }
 xtask_coverage               = { path = "xtask/coverage" }
 xtask_glue                   = { path = "xtask/glue" }
