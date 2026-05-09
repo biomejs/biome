@@ -1,6 +1,6 @@
 use crate::WorkspaceError;
-pub use biome_module_graph::ProjectDatabase;
 use biome_module_graph::PathInfoCache;
+pub use biome_module_graph::ProjectDatabase;
 use std::sync::{Mutex, MutexGuard};
 
 /// Represents the state of the database in the workspace.
