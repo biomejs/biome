@@ -2364,6 +2364,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useVueValidVFor",
+        TypeId::of::<biome_rule_options::use_vue_valid_v_for::UseVueValidVForOptions>(),
+    ));
+    result.push((
+        "nursery",
         "useVueValidVHtml",
         TypeId::of::<biome_rule_options::use_vue_valid_v_html::UseVueValidVHtmlOptions>(),
     ));

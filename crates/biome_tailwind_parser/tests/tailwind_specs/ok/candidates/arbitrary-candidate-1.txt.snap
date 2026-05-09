@@ -24,7 +24,24 @@ TwRoot {
                 l_brack_token: L_BRACKET@0..1 "[" [] [],
                 property_token: TW_PROPERTY@1..13 "--pattern-fg" [] [],
                 colon_token: COLON@13..14 ":" [] [],
-                value_token: TW_VALUE@14..35 "var(--color-gray-950)" [] [],
+                value: CssGenericComponentValueList [
+                    CssFunction {
+                        name: CssIdentifier {
+                            ident_token: IDENT@14..17 "var" [] [],
+                        },
+                        l_paren_token: L_PAREN@17..18 "(" [] [],
+                        parameters: CssParameterList [
+                            CssListOfComponentValuesExpression {
+                                css_component_value_list: CssComponentValueList [
+                                    CssDashedIdentifier {
+                                        ident_token: IDENT@18..34 "--color-gray-950" [] [],
+                                    },
+                                ],
+                            },
+                        ],
+                        r_paren_token: R_PAREN@34..35 ")" [] [],
+                    },
+                ],
                 r_brack_token: R_BRACKET@35..36 "]" [] [],
                 modifier: TwModifier {
                     slash_token: SLASH@36..37 "/" [] [],
@@ -53,7 +70,17 @@ TwRoot {
         0: L_BRACKET@0..1 "[" [] []
         1: TW_PROPERTY@1..13 "--pattern-fg" [] []
         2: COLON@13..14 ":" [] []
-        3: TW_VALUE@14..35 "var(--color-gray-950)" [] []
+        3: CSS_GENERIC_COMPONENT_VALUE_LIST@14..35
+          0: CSS_FUNCTION@14..35
+            0: CSS_IDENTIFIER@14..17
+              0: IDENT@14..17 "var" [] []
+            1: L_PAREN@17..18 "(" [] []
+            2: CSS_PARAMETER_LIST@18..34
+              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@18..34
+                0: CSS_COMPONENT_VALUE_LIST@18..34
+                  0: CSS_DASHED_IDENTIFIER@18..34
+                    0: IDENT@18..34 "--color-gray-950" [] []
+            3: R_PAREN@34..35 ")" [] []
         4: R_BRACKET@35..36 "]" [] []
         5: TW_MODIFIER@36..38
           0: SLASH@36..37 "/" [] []

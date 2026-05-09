@@ -829,6 +829,7 @@ dependencies = [
  "biome_tailwind_parser",
  "biome_tailwind_syntax",
  "biome_test_utils",
+ "biome_unicode_table",
  "camino",
  "codspeed-criterion-compat",
  "filetime",

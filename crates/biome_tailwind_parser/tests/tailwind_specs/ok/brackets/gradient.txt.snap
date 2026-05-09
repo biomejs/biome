@@ -25,7 +25,19 @@ TwRoot {
                 minus_token: DASH@9..10 "-" [] [],
                 value: TwArbitraryValue {
                     l_brack_token: L_BRACKET@10..11 "[" [] [],
-                    value_token: TW_VALUE@11..21 "at_50%_75%" [] [],
+                    value: CssGenericComponentValueList [
+                        CssIdentifier {
+                            ident_token: IDENT@11..14 "at" [] [Whitespace("_")],
+                        },
+                        CssPercentage {
+                            value_token: CSS_NUMBER_LITERAL@14..16 "50" [] [],
+                            remainder_token: PERCENT@16..18 "%" [] [Whitespace("_")],
+                        },
+                        CssPercentage {
+                            value_token: CSS_NUMBER_LITERAL@18..20 "75" [] [],
+                            remainder_token: PERCENT@20..21 "%" [] [],
+                        },
+                    ],
                     r_brack_token: R_BRACKET@21..23 "]" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
@@ -103,7 +115,15 @@ TwRoot {
         1: DASH@9..10 "-" [] []
         2: TW_ARBITRARY_VALUE@10..23
           0: L_BRACKET@10..11 "[" [] []
-          1: TW_VALUE@11..21 "at_50%_75%" [] []
+          1: CSS_GENERIC_COMPONENT_VALUE_LIST@11..21
+            0: CSS_IDENTIFIER@11..14
+              0: IDENT@11..14 "at" [] [Whitespace("_")]
+            1: CSS_PERCENTAGE@14..18
+              0: CSS_NUMBER_LITERAL@14..16 "50" [] []
+              1: PERCENT@16..18 "%" [] [Whitespace("_")]
+            2: CSS_PERCENTAGE@18..21
+              0: CSS_NUMBER_LITERAL@18..20 "75" [] []
+              1: PERCENT@20..21 "%" [] []
           2: R_BRACKET@21..23 "]" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
