@@ -57,7 +57,7 @@ use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
 use biome_module_graph::{
     HtmlEmbeddedContent, ModuleDb, ModuleDependencies, ModuleDiagnostic, ModuleInfo,
-    ModuleInfoKind, resolve_css_module, resolve_html_module, resolve_js_module,
+    ModuleInfoKind, ProjectDatabase, resolve_css_module, resolve_html_module, resolve_js_module,
 };
 use biome_package::{Catalogs, PackageJson, PackageType};
 use biome_parser::AnyParse;
@@ -75,7 +75,7 @@ use papaya::HashMap;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::fmt::Debug;
 use std::panic::RefUnwindSafe;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, MutexGuard};
 use std::time::Duration;
 use tokio::sync::watch;
 use tracing::{info, instrument, warn};
@@ -235,15 +235,15 @@ impl WorkspaceServer {
         }
     }
 
-    /// Returns an `Arc<dyn ModuleDb>` clone, for passing to analyzers.
-    fn module_db(&self) -> Arc<dyn ModuleDb> {
+    /// Returns a clone of the project database for passing to analyzers.
+    fn module_db(&self) -> ProjectDatabase {
         let db = self.db.db.lock().expect("db lock poisoned");
-        Arc::new(db.clone())
+        db.clone()
     }
 
     /// Returns the module db for use in tests.
     #[cfg(feature = "testing")]
-    pub fn get_module_db_for_test(&self) -> Arc<dyn ModuleDb> {
+    pub fn get_module_db_for_test(&self) -> ProjectDatabase {
         self.module_db()
     }
 
@@ -628,8 +628,6 @@ impl WorkspaceServer {
                     .insert(path.clone(), node_cache);
             }
 
-            self.db_set_file_data(path.as_path(), any_parse.unwrap_as_send_node());
-
             (Some(Ok(any_parse)), services)
         };
 
@@ -800,10 +798,6 @@ impl WorkspaceServer {
         // If the document was never opened by the scanner, we don't care
         // about updating service data.
         Ok(InternalOpenFileResult::default())
-    }
-
-    fn db_set_file_data(&self, _path: &Utf8Path, _root: SendNode) {
-        // TODO: Phase 5 — store parsed AST in Salsa for semantic model tracking
     }
 
     /// Retrieves all diagnostics that belong to a document. It contains diagnostics that belong to embedded snippets too
@@ -1496,10 +1490,11 @@ impl WorkspaceServer {
         }
     }
 
-    fn lock_db(&self) -> Result<std::sync::MutexGuard<'_, db::ProjectDatabase>, WorkspaceError> {
+    fn lock_db(&self) -> Result<MutexGuard<'_, ProjectDatabase>, WorkspaceError> {
         self.db.lock_db()
     }
 
+    /// Stores a [ModuleInfo] in the database
     fn db_set_module_info(&self, path: &Utf8Path, kind: ModuleInfoKind) {
         let Ok(mut db) = self.lock_db() else {
             return;
@@ -1515,6 +1510,7 @@ impl WorkspaceServer {
         }
     }
 
+    /// Removes a [ModuleInfo] from the database
     fn db_remove_module(&self, path: &Utf8Path) {
         let Ok(db) = self.lock_db() else {
             return;
@@ -1522,6 +1518,7 @@ impl WorkspaceServer {
         db.modules.pin().remove(path);
     }
 
+    /// Purges the path from the database
     fn db_unload_path(&self, path: &Utf8Path) {
         let Ok(db) = self.lock_db() else {
             return;
@@ -2204,8 +2201,6 @@ impl Workspace for WorkspaceServer {
         documents
             .insert(path.clone().into(), document)
             .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
-
-        self.db_set_file_data(path.as_path(), parsed.any_parse.unwrap_as_send_node());
 
         let mut final_diagnostics = vec![];
 
@@ -2996,7 +2991,7 @@ impl Workspace for WorkspaceServer {
             let result = resolve_definition(ResolveDefinitionParams {
                 path: &effective_path,
                 definition_ref: &definition_ref,
-                module_db: module_db.as_ref(),
+                module_db: &module_db,
                 offset: Some(snippet.content_offset()),
                 services: snippet.as_snippet_services(),
             });
@@ -3017,7 +3012,7 @@ impl Workspace for WorkspaceServer {
         Ok(resolve_definition(ResolveDefinitionParams {
             path: &effective_path,
             definition_ref: &definition_ref,
-            module_db: module_db.as_ref(),
+            module_db: &module_db,
             offset: None,
             services: &services,
         }))

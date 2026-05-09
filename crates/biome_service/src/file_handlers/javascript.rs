@@ -74,7 +74,7 @@ use biome_js_syntax::{
     TextRange, TextSize, TokenAtOffset,
 };
 use biome_js_type_info::{GlobalsResolver, ScopeId, TypeData, TypeResolver};
-use biome_module_graph::ModuleDb;
+use biome_module_graph::{ModuleDb, ProjectDatabase};
 use biome_parser::AnyParse;
 use biome_rowan::{
     AstNode, AstNodeList, BatchMutation, BatchMutationExt, Direction, NodeCache, SendNode,
@@ -85,7 +85,6 @@ use either::Either;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::fmt::Debug;
-use std::sync::Arc;
 use tracing::{debug, debug_span, error, instrument, trace_span};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -844,7 +843,7 @@ fn debug_formatter_ir(
 fn debug_type_info(
     path: &BiomePath,
     parse: Option<AnyParse>,
-    module_db: Arc<dyn ModuleDb>,
+    module_db: ProjectDatabase,
 ) -> Result<String, WorkspaceError> {
     let Some(parse) = parse else {
         let result = module_db.js_module_info_for_path(path);

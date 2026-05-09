@@ -6,7 +6,7 @@ use biome_html_syntax::{
     HtmlSelfClosingElement,
 };
 use biome_module_graph::{
-    ImportTreeDisplay, ImportTreeNode, build_import_tree_for_html,
+    ImportTreeDisplay, ImportTreeNode, ModuleDb, build_import_tree_for_html,
     traverse_import_tree_for_html_classes,
 };
 use biome_rowan::{AstNode, TextRange, TextSize};
@@ -104,12 +104,15 @@ impl Rule for NoUndeclaredClasses {
 
         let db = ctx.db();
         let file_path = ctx.file_path();
+        let Some(module) = db.module_for_path(file_path) else {
+            return Vec::new();
+        };
 
         // Collect all CSS steps reachable from this file (inline styles, linked
         // stylesheets, and CSS imported by parent files via upward traversal).
         // If no CSS is reachable at all, skip to avoid false positives on
         // completely unstyled files.
-        let css_steps: Vec<_> = traverse_import_tree_for_html_classes(db, file_path).collect();
+        let css_steps: Vec<_> = traverse_import_tree_for_html_classes(db, module);
 
         if css_steps.is_empty() {
             return Vec::new();

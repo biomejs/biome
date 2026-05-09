@@ -9,12 +9,11 @@ use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::JsFileSource;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_module_graph::{
-    ModuleDb, ModuleInfoKind, PathInfoCache, resolve_css_module, resolve_html_module,
+    ModuleInfoKind, PathInfoCache, ProjectDatabase, resolve_css_module, resolve_html_module,
     resolve_js_module,
 };
 use biome_project_layout::ProjectLayout;
 use biome_service::workspace::DocumentFileSource;
-use biome_service::workspace::db::ProjectDatabase;
 use biome_test_utils::{get_added_js_paths, get_css_added_paths, get_html_added_paths};
 use camino::Utf8PathBuf;
 
@@ -25,7 +24,7 @@ pub use codeblock::*;
 /// The builder can be reused to create cheap instances of analyzer services
 /// for multiple code blocks.
 pub struct AnalyzerServicesBuilder {
-    module_db: Arc<dyn ModuleDb>,
+    module_db: ProjectDatabase,
     project_layout: Arc<ProjectLayout>,
 }
 
@@ -42,7 +41,7 @@ impl AnalyzerServicesBuilder {
         if files.is_empty() {
             let db = ProjectDatabase::default();
             return Self {
-                module_db: Arc::new(db),
+                module_db: db,
                 project_layout: Default::default(),
             };
         }
@@ -148,7 +147,7 @@ impl AnalyzerServicesBuilder {
         }
 
         Self {
-            module_db: Arc::new(db),
+            module_db: db,
             project_layout: Arc::new(layout),
         }
     }

@@ -14,16 +14,18 @@
 
 pub(crate) mod fs_proxy;
 
-use crate::css_module_info::traverse::ImportTreeTraversal;
 use crate::css_module_info::{
-    CssClassStep, CssModuleInfo, CssModuleVisitor, CssTraversalStep, ImportTreeNode,
-    SerializedCssModuleInfo,
+    CssModuleInfo, CssModuleVisitor, ImportTreeNode, SerializedCssModuleInfo,
 };
 use crate::db::inputs::ModuleDb;
+use crate::db::queries::{
+    transitive_importers_of, traverse_import_tree_for_classes,
+    traverse_import_tree_for_html_classes,
+};
 use crate::html_module_info::{
     HtmlEmbeddedContent, HtmlModuleInfo, HtmlModuleVisitor, SerializedHtmlModuleInfo,
 };
-use crate::path_info_cache::{PathInfoCache, prepopulate_directory_path_info};
+use crate::path_info_cache::PathInfoCache;
 use crate::{
     JsExport, JsModuleInfo, JsOwnExport, ModuleDiagnostic, SerializedJsModuleInfo,
     js_module_info::JsModuleVisitor,
@@ -39,7 +41,6 @@ use biome_resolver::FsWithResolverProxy;
 use biome_rowan::{TextRange, TextSize};
 use camino::{Utf8Path, Utf8PathBuf};
 pub(crate) use fs_proxy::ModuleGraphFsProxy;
-use indexmap::IndexMap;
 use rustc_hash::FxHashSet;
 use std::collections::VecDeque;
 use std::ops::Deref;
@@ -48,9 +49,7 @@ pub const SUPPORTED_EXTENSIONS: &[&str] = &[
     "ts", "tsx", "mts", "cts", "js", "jsx", "mjs", "cjs", "json", "node",
 ];
 
-// ---------------------------------------------------------------------------
-// Resolve functions (pure — produce module info without storing it)
-// ---------------------------------------------------------------------------
+// #region Resolve functions (pure — produce module info without storing it)
 
 /// Resolves a JS/TS file into its module info.
 ///
@@ -65,7 +64,7 @@ pub fn resolve_js_module(
     path_info_cache: &PathInfoCache,
     enable_type_inference: bool,
 ) -> (JsModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>) {
-    prepopulate_directory_path_info(path_info_cache, fs, &[path]);
+    path_info_cache.prepopulate_directory_path_info(fs, &[path]);
 
     let directory = path.parent().unwrap_or(path);
     let fs_proxy = ModuleGraphFsProxy::new(fs, path_info_cache, project_layout);
@@ -96,7 +95,7 @@ pub fn resolve_css_module(
     project_layout: &ProjectLayout,
     path_info_cache: &PathInfoCache,
 ) -> (CssModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>) {
-    prepopulate_directory_path_info(path_info_cache, fs, &[path]);
+    path_info_cache.prepopulate_directory_path_info(fs, &[path]);
 
     let directory = path.parent().unwrap_or(path);
     let fs_proxy = ModuleGraphFsProxy::new(fs, path_info_cache, project_layout);
@@ -120,7 +119,7 @@ pub fn resolve_html_module(
     project_layout: &ProjectLayout,
     path_info_cache: &PathInfoCache,
 ) -> (HtmlModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>) {
-    prepopulate_directory_path_info(path_info_cache, fs, &[path]);
+    path_info_cache.prepopulate_directory_path_info(fs, &[path]);
 
     let directory = path.parent().unwrap_or(path);
     let fs_proxy = ModuleGraphFsProxy::new(fs, path_info_cache, project_layout);
@@ -151,71 +150,9 @@ pub fn resolve_html_module(
     (module, dependencies, Vec::new())
 }
 
-// ---------------------------------------------------------------------------
-// Query functions (read from &dyn ModuleDb)
-// ---------------------------------------------------------------------------
+// #endregion
 
-/// Returns all files that transitively import `path` (through CSS `@import`
-/// chains and HTML `<link>` references).
-///
-/// The returned set includes only JS/HTML files (potential class consumers),
-/// not intermediate CSS files.
-pub fn transitive_importers_of(db: &dyn ModuleDb, path: &Utf8Path) -> Vec<Utf8PathBuf> {
-    let mut result = Vec::new();
-    let mut visited: FxHashSet<Utf8PathBuf> = FxHashSet::default();
-    let mut queue = VecDeque::new();
-    queue.push_back(path.to_path_buf());
-
-    while let Some(current) = queue.pop_front() {
-        if !visited.insert(current.clone()) {
-            continue;
-        }
-
-        db.for_each_module(&mut |file_path, module_info| {
-            if file_path == current.as_path() {
-                return;
-            }
-            let imports_current = match module_info {
-                ModuleInfoKind::Js(js_info) => js_info
-                    .static_import_paths
-                    .values()
-                    .chain(js_info.dynamic_import_paths.values())
-                    .any(|p| p.as_path() == Some(current.as_path())),
-                ModuleInfoKind::Css(css_info) => css_info
-                    .imports
-                    .values()
-                    .any(|p| p.resolved_path.as_path() == Some(current.as_path())),
-                ModuleInfoKind::Html(html_info) => {
-                    html_info
-                        .imported_stylesheets
-                        .iter()
-                        .any(|p| p.as_path() == Some(current.as_path()))
-                        || html_info
-                            .static_import_paths
-                            .values()
-                            .any(|p| p.as_path() == Some(current.as_path()))
-                        || html_info
-                            .dynamic_import_paths
-                            .values()
-                            .any(|p| p.as_path() == Some(current.as_path()))
-                }
-            };
-
-            if imports_current && !visited.contains(file_path) {
-                match module_info {
-                    ModuleInfoKind::Js(_) | ModuleInfoKind::Html(_) => {
-                        result.push(file_path.to_path_buf());
-                    }
-                    ModuleInfoKind::Css(_) => {
-                        queue.push_back(file_path.to_path_buf());
-                    }
-                }
-            }
-        });
-    }
-
-    result
-}
+// #region: Query functions (read from &dyn ModuleDb)
 
 /// Returns `true` if the given CSS `class_name` is referenced in any
 /// JS or HTML file that transitively imports `css_path`.
@@ -224,7 +161,10 @@ pub fn is_class_referenced_by_importers(
     css_path: &Utf8Path,
     class_name: &str,
 ) -> bool {
-    let importers = transitive_importers_of(db, css_path);
+    let Some(module) = db.module_for_path(css_path) else {
+        return false;
+    };
+    let importers = transitive_importers_of(db, module);
 
     for importer_path in &importers {
         if is_class_used_in_component_tree(db, importer_path, class_name) {
@@ -293,8 +233,10 @@ pub fn find_css_class_definition(
     class_name: &str,
 ) -> Vec<(Utf8PathBuf, TextRange, Option<TextSize>)> {
     let mut result = Vec::new();
+    let Some(module) = db.module_for_path(path) else {
+        return result;
+    };
     let mut visited_css = FxHashSet::default();
-
     if let Some(html_info) = db.html_module_info_for_path(path) {
         for class_def in &html_info.style_classes {
             if class_def.name.text() == class_name {
@@ -307,7 +249,7 @@ pub fn find_css_class_definition(
         }
     }
 
-    for step in traverse_import_tree_for_html_classes(db, path) {
+    for step in traverse_import_tree_for_html_classes(db, module) {
         if step.css_path == path {
             continue;
         }
@@ -321,7 +263,7 @@ pub fn find_css_class_definition(
         );
     }
 
-    for step in traverse_import_tree_for_classes(db, path) {
+    for step in traverse_import_tree_for_classes(db, module) {
         search_css_class_transitive(
             db,
             &step.css_path,
@@ -365,15 +307,6 @@ fn search_css_class_transitive(
             }
         }
     }
-}
-
-/// Builds diagnostic information with full component chains for error reporting.
-pub fn build_diagnostic_traversal_chain(
-    db: &dyn ModuleDb,
-    js_path: &Utf8Path,
-) -> Vec<CssTraversalStep> {
-    let (_classes, traversal_path) = collect_available_classes_for_js_file(db, js_path);
-    traversal_path
 }
 
 /// Builds a tree structure representing the import relationships for diagnostic display.
@@ -474,114 +407,6 @@ fn build_parent_nodes(
     parents
 }
 
-/// Returns CSS class steps for the given JS file by traversing its imports.
-pub fn traverse_import_tree_for_classes(
-    db: &dyn ModuleDb,
-    js_path: &Utf8Path,
-) -> Vec<CssClassStep> {
-    let mut results = Vec::new();
-
-    if let Some(js_info) = db.js_module_info_for_path(js_path) {
-        for import_path in js_info.static_import_paths.values() {
-            if let Some(path) = import_path.as_path()
-                && let Some(css_info) = db.css_module_info_for_path(path)
-            {
-                results.push(CssClassStep {
-                    css_path: path.to_path_buf(),
-                    css_classes: css_info.classes.clone(),
-                });
-            }
-        }
-    }
-
-    let stack = vec![js_path.to_path_buf()];
-    let mut visited = FxHashSet::default();
-    visited.insert(js_path.to_path_buf());
-
-    let traversal = ImportTreeTraversal {
-        module_database: db,
-        stack,
-        visited,
-        current_css_iter: None,
-    };
-    results.extend(traversal);
-    results
-}
-
-/// Returns CSS class steps for the given HTML file.
-pub fn traverse_import_tree_for_html_classes<'a>(
-    db: &'a dyn ModuleDb,
-    html_path: &'a Utf8Path,
-) -> impl Iterator<Item = CssClassStep> + 'a {
-    let mut inline_steps = Vec::new();
-    let mut linked_steps = Vec::new();
-
-    if let Some(html_info) = db.html_module_info_for_path(html_path) {
-        let all_inline_classes: IndexMap<_, _> = html_info
-            .style_classes
-            .iter()
-            .map(|c| (c.range, c.name.clone()))
-            .collect();
-        if !all_inline_classes.is_empty() {
-            inline_steps.push(CssClassStep {
-                css_path: html_path.to_path_buf(),
-                css_classes: all_inline_classes,
-            });
-        }
-
-        for stylesheet_path in &html_info.imported_stylesheets {
-            if let Some(path) = stylesheet_path.as_path()
-                && let Some(css_info) = db.css_module_info_for_path(path)
-            {
-                linked_steps.push(CssClassStep {
-                    css_path: path.to_path_buf(),
-                    css_classes: css_info.classes.clone(),
-                });
-            }
-        }
-
-        for import_path in html_info.static_import_paths.values() {
-            if let Some(path) = import_path.as_path()
-                && let Some(css_info) = db.css_module_info_for_path(path)
-            {
-                linked_steps.push(CssClassStep {
-                    css_path: path.to_path_buf(),
-                    css_classes: css_info.classes.clone(),
-                });
-            }
-        }
-
-        for import_path in html_info
-            .static_import_paths
-            .values()
-            .chain(html_info.dynamic_import_paths.values())
-        {
-            if let Some(path) = import_path.as_path()
-                && let Some(css_info) = db.css_module_info_for_path(path)
-            {
-                linked_steps.push(CssClassStep {
-                    css_path: path.to_path_buf(),
-                    css_classes: css_info.classes.clone(),
-                });
-            }
-        }
-    }
-
-    let stack = vec![html_path.to_path_buf()];
-    let mut visited = FxHashSet::default();
-    visited.insert(html_path.to_path_buf());
-
-    inline_steps
-        .into_iter()
-        .chain(linked_steps)
-        .chain(ImportTreeTraversal {
-            module_database: db,
-            stack,
-            visited,
-            current_css_iter: None,
-        })
-}
-
 /// Builds a tree structure for an HTML file's import relationships (diagnostic display).
 pub fn build_import_tree_for_html(
     db: &dyn ModuleDb,
@@ -611,130 +436,6 @@ pub fn build_import_tree_for_html(
     root.parent_components = build_parent_nodes(db, html_path, &mut visited);
 
     Some(root)
-}
-
-/// Collects all CSS classes available through the import tree of the given JS file.
-pub fn collect_available_classes_for_js_file(
-    db: &dyn ModuleDb,
-    js_path: &Utf8Path,
-) -> (FxHashSet<String>, Vec<CssTraversalStep>) {
-    let mut available_classes = FxHashSet::default();
-    let mut traversal_path = Vec::new();
-    let mut visited = FxHashSet::default();
-    let all_modules = db.all_modules();
-
-    if let Some(js_info) = db.js_module_info_for_path(js_path) {
-        for import_path in js_info
-            .static_import_paths
-            .values()
-            .chain(js_info.dynamic_import_paths.values())
-        {
-            if let Some(path) = import_path.as_path()
-                && let Some(css_info) = db.css_module_info_for_path(path)
-            {
-                for class in css_info.classes.values() {
-                    let class_name = class.text().to_string();
-                    available_classes.insert(class_name);
-                }
-                traversal_path.push(CssTraversalStep {
-                    css_path: path.to_path_buf(),
-                    importer_path: js_path.to_path_buf(),
-                    component_chain: vec![js_path.to_path_buf()],
-                    is_direct: true,
-                });
-            }
-        }
-    }
-
-    let mut queue: VecDeque<_> = VecDeque::new();
-    queue.push_back((js_path.to_path_buf(), vec![js_path.to_path_buf()]));
-    visited.insert(js_path.to_path_buf());
-
-    while let Some((current_path, current_chain)) = queue.pop_front() {
-        for (file_path, module_info) in &all_modules {
-            if visited.contains(file_path.as_path()) {
-                continue;
-            }
-
-            let imports_current = match module_info {
-                ModuleInfoKind::Js(js_info) => js_info
-                    .static_import_paths
-                    .values()
-                    .chain(js_info.dynamic_import_paths.values())
-                    .any(|p| p.as_path() == Some(current_path.as_path())),
-                ModuleInfoKind::Html(html_info) => html_info
-                    .imported_stylesheets
-                    .iter()
-                    .chain(html_info.static_import_paths.values())
-                    .chain(html_info.dynamic_import_paths.values())
-                    .any(|p| p.as_path() == Some(current_path.as_path())),
-                ModuleInfoKind::Css(_) => false,
-            };
-
-            if imports_current {
-                visited.insert(file_path.clone());
-
-                match module_info {
-                    ModuleInfoKind::Js(js_info) => {
-                        let mut new_chain = current_chain.clone();
-                        new_chain.push(file_path.clone());
-
-                        for import_path in js_info
-                            .static_import_paths
-                            .values()
-                            .chain(js_info.dynamic_import_paths.values())
-                        {
-                            if let Some(path) = import_path.as_path()
-                                && let Some(css_info) = db.css_module_info_for_path(path)
-                            {
-                                for class in css_info.classes.values() {
-                                    let class_name = class.text().to_string();
-                                    available_classes.insert(class_name);
-                                }
-                                traversal_path.push(CssTraversalStep {
-                                    css_path: path.to_path_buf(),
-                                    importer_path: file_path.clone(),
-                                    component_chain: new_chain.clone(),
-                                    is_direct: false,
-                                });
-                            }
-                        }
-                        queue.push_back((file_path.clone(), new_chain));
-                    }
-                    ModuleInfoKind::Html(html_info) => {
-                        let mut new_chain = current_chain.clone();
-                        new_chain.push(file_path.clone());
-
-                        for stylesheet_path in html_info
-                            .imported_stylesheets
-                            .iter()
-                            .chain(html_info.static_import_paths.values())
-                            .chain(html_info.dynamic_import_paths.values())
-                        {
-                            if let Some(path) = stylesheet_path.as_path()
-                                && let Some(css_info) = db.css_module_info_for_path(path)
-                            {
-                                for class in css_info.classes.values() {
-                                    let class_name = class.text().to_string();
-                                    available_classes.insert(class_name);
-                                }
-                                traversal_path.push(CssTraversalStep {
-                                    css_path: path.to_path_buf(),
-                                    importer_path: file_path.clone(),
-                                    component_chain: new_chain.clone(),
-                                    is_direct: false,
-                                });
-                            }
-                        }
-                        queue.push_back((file_path.clone(), new_chain));
-                    }
-                    ModuleInfoKind::Css(_) => {}
-                }
-            }
-        }
-    }
-
-    (available_classes, traversal_path)
 }
 
 /// Follows re-exports across modules to find the original definition of a symbol.
@@ -851,9 +552,9 @@ pub fn find_jsdoc_for_exported_symbol(
     None
 }
 
-// ---------------------------------------------------------------------------
-// Types (Salsa input, enums, serialization, dependencies)
-// ---------------------------------------------------------------------------
+// #endregion
+
+// #region: Types (Salsa input, enums, serialization, dependencies)
 #[salsa::input]
 #[derive(Debug)]
 pub struct ModuleInfo {
@@ -998,3 +699,5 @@ impl IntoIterator for ModuleDependencies {
         self.0.into_iter()
     }
 }
+
+//#endregion

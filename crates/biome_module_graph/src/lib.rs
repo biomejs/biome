@@ -18,6 +18,11 @@ pub use biome_css_syntax::EmbeddingStyleApplicability;
 pub use biome_js_type_info::ImportSymbol;
 pub use biome_resolver::ResolvedPath;
 pub use db::inputs::ModuleDb;
+pub use db::project_database::ProjectDatabase;
+pub use db::queries::{
+    collect_available_classes_for_js_file, transitive_importers_of,
+    traverse_import_tree_for_classes, traverse_import_tree_for_html_classes,
+};
 pub use diagnostics::ModuleDiagnostic;
 pub use js_module_info::{
     BindingTypeData, JsExport, JsImport, JsImportPath, JsImportPhase, JsModuleInfo,
@@ -25,10 +30,8 @@ pub use js_module_info::{
 };
 pub use module_graph::{
     ModuleDependencies, ModuleInfo, ModuleInfoKind, SUPPORTED_EXTENSIONS, SerializedModuleInfo,
-    build_diagnostic_traversal_chain, build_import_tree, build_import_tree_for_html,
-    collect_available_classes_for_js_file, find_css_class_definition, find_exported_symbol,
+    build_import_tree, build_import_tree_for_html, find_css_class_definition, find_exported_symbol,
     find_jsdoc_for_exported_symbol, is_class_referenced_by_importers, resolve_css_module,
-    resolve_html_module, resolve_js_module, transitive_importers_of,
-    traverse_import_tree_for_classes, traverse_import_tree_for_html_classes,
+    resolve_html_module, resolve_js_module,
 };
-pub use path_info_cache::{PathInfoCache, prepopulate_directory_path_info};
+pub use path_info_cache::PathInfoCache;

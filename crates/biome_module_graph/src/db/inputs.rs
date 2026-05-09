@@ -10,11 +10,6 @@ pub trait ModuleDb: Db {
     fn module_for_path(&self, path: &Utf8Path) -> Option<ModuleInfo>;
 
     /// Iterates over all indexed modules.
-    ///
-    /// This is needed for reverse-dependency lookups (finding which files
-    /// import a given path). A future optimization would be a dedicated
-    /// reverse-dependency index, but iterating the full set is correct and
-    /// sufficient for now.
     fn for_each_module(&self, f: &mut dyn FnMut(&Utf8Path, &ModuleInfoKind));
 
     /// Returns whether the given `path` is indexed.

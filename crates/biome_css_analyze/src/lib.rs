@@ -20,7 +20,7 @@ use biome_analyze::{
 };
 use biome_css_syntax::{CssFileSource, CssLanguage, TextRange};
 use biome_diagnostics::Error;
-use biome_module_graph::ModuleDb;
+use biome_module_graph::ProjectDatabase;
 use biome_project_layout::ProjectLayout;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
@@ -38,7 +38,7 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
 pub struct CssAnalyzerServices<'a> {
     pub semantic_model: Option<&'a biome_css_semantic::model::SemanticModel>,
     pub file_source: CssFileSource,
-    pub module_db: Option<Arc<dyn ModuleDb>>,
+    pub module_db: Option<ProjectDatabase>,
     pub project_layout: Option<Arc<ProjectLayout>>,
 }
 
@@ -65,7 +65,7 @@ impl<'a> CssAnalyzerServices<'a> {
         self
     }
 
-    pub fn with_module_db(mut self, module_db: Arc<dyn ModuleDb>) -> Self {
+    pub fn with_module_db(mut self, module_db: ProjectDatabase) -> Self {
         self.module_db = Some(module_db);
         self
     }

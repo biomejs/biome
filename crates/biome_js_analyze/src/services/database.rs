@@ -2,14 +2,14 @@ use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleDomain, RuleKey,
     RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor,
 };
-use biome_module_graph::{JsModuleInfo, ModuleDb};
+use biome_module_graph::{JsModuleInfo, ModuleDb, ProjectDatabase};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{AstNode, Language, SyntaxNode, TextRange};
 use camino::Utf8Path;
 use std::sync::Arc;
 
 #[derive(Clone)]
-pub struct DbService(Arc<dyn ModuleDb>, Arc<ProjectLayout>);
+pub struct DbService(ProjectDatabase, Arc<ProjectLayout>);
 
 impl std::fmt::Debug for DbService {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -18,8 +18,8 @@ impl std::fmt::Debug for DbService {
 }
 
 impl DbService {
-    pub fn db(&self) -> &dyn ModuleDb {
-        self.0.as_ref()
+    pub fn db(&self) -> &ProjectDatabase {
+        &self.0
     }
 
     pub fn module_info_for_path(&self, path: &Utf8Path) -> Option<JsModuleInfo> {
@@ -46,7 +46,7 @@ impl FromServices for DbService {
                 panic!("The rule {rule_key} uses DbService, but it is not in the Project domain.");
             }
         }
-        let module_db: &Arc<dyn ModuleDb> = services
+        let module_db: &ProjectDatabase = services
             .get_service()
             .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["ModuleDb"]))?;
 
