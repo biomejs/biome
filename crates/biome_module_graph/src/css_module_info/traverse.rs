@@ -112,8 +112,7 @@ impl<'a> Iterator for ImportTreeTraversal<'a> {
                         .values()
                         .filter_map(|import_path| {
                             let path = import_path.as_path()?;
-                            let css_info =
-                                self.module_database.css_module_info_for_path(path)?;
+                            let css_info = self.module_database.css_module_info_for_path(path)?;
 
                             Some(CssClassStep {
                                 css_path: path.to_path_buf(),
@@ -128,8 +127,7 @@ impl<'a> Iterator for ImportTreeTraversal<'a> {
                         .chain(html_info.dynamic_import_paths.values())
                         .filter_map(|stylesheet_path| {
                             let path = stylesheet_path.as_path()?;
-                            let css_info =
-                                self.module_database.css_module_info_for_path(path)?;
+                            let css_info = self.module_database.css_module_info_for_path(path)?;
 
                             Some(CssClassStep {
                                 css_path: path.to_path_buf(),

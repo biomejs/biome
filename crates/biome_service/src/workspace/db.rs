@@ -16,7 +16,9 @@ pub(crate) struct DbState {
 
 impl DbState {
     pub(crate) fn lock_db(&self) -> Result<MutexGuard<'_, ProjectDatabase>, WorkspaceError> {
-        self.db.lock().map_err(|_| WorkspaceError::db_lock_poisoned())
+        self.db
+            .lock()
+            .map_err(|_| WorkspaceError::db_lock_poisoned())
     }
 }
 

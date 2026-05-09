@@ -82,11 +82,7 @@ impl JsModuleInfo {
 
     /// Finds an exported symbol by `name`, following re-exports through the db.
     #[inline]
-    pub fn find_js_exported_symbol(
-        &self,
-        db: &dyn ModuleDb,
-        name: &str,
-    ) -> Option<JsOwnExport> {
+    pub fn find_js_exported_symbol(&self, db: &dyn ModuleDb, name: &str) -> Option<JsOwnExport> {
         crate::module_graph::find_exported_symbol(db, self, name)
     }
 
@@ -563,4 +559,3 @@ pub struct SerializedJsModuleInfo {
     /// CSS class names referenced in JSX `className` or `class` attributes.
     pub referenced_classes: BTreeSet<String>,
 }
-

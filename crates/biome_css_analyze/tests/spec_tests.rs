@@ -174,7 +174,8 @@ pub(crate) fn analyze_and_snap(
         .with_semantic_model(&semantic_model)
         .with_project_layout(project_layout);
     if needs_module_graph {
-        let module_db = module_graph_for_css_test_file(input_file, &services.project_layout.clone().unwrap());
+        let module_db =
+            module_graph_for_css_test_file(input_file, &services.project_layout.clone().unwrap());
         services = services.with_module_db(module_db);
     }
 

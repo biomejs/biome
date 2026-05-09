@@ -56,8 +56,8 @@ use biome_js_syntax::{AnyJsRoot, EmbeddingKind, JsFileSource, LanguageVariant, M
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
 use biome_module_graph::{
-    HtmlEmbeddedContent, ModuleDb, ModuleDependencies, ModuleDiagnostic, ModuleInfo, ModuleInfoKind,
-    PathInfoCache, resolve_css_module, resolve_html_module, resolve_js_module,
+    HtmlEmbeddedContent, ModuleDb, ModuleDependencies, ModuleDiagnostic, ModuleInfo,
+    ModuleInfoKind, resolve_css_module, resolve_html_module, resolve_js_module,
 };
 use biome_package::{Catalogs, PackageJson, PackageType};
 use biome_parser::AnyParse;
@@ -1496,9 +1496,7 @@ impl WorkspaceServer {
         }
     }
 
-    fn lock_db(
-        &self,
-    ) -> Result<std::sync::MutexGuard<'_, db::ProjectDatabase>, WorkspaceError> {
+    fn lock_db(&self) -> Result<std::sync::MutexGuard<'_, db::ProjectDatabase>, WorkspaceError> {
         self.db.lock_db()
     }
 

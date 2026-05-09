@@ -25,10 +25,10 @@ use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_value::{JsonObject, JsonString};
 use biome_module_graph::{
     HtmlEmbeddedContent, ImportSymbol, JsExport, JsImport, JsImportPath, JsImportPhase,
-    JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleDiagnostic, ModuleDb, ModuleInfo,
+    JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleDb, ModuleDiagnostic, ModuleInfo,
     ModuleInfoKind, ModuleResolver, PathInfoCache, ResolvedPath,
-    collect_available_classes_for_js_file, is_class_referenced_by_importers,
-    resolve_css_module, resolve_html_module, resolve_js_module, transitive_importers_of,
+    collect_available_classes_for_js_file, is_class_referenced_by_importers, resolve_css_module,
+    resolve_html_module, resolve_js_module, transitive_importers_of,
     traverse_import_tree_for_html_classes,
 };
 use biome_package::{Dependencies, PackageJson};
@@ -104,30 +104,14 @@ fn build_js_db(
     db
 }
 
-fn build_css_db(
-    fs: &dyn biome_resolver::FsWithResolverProxy,
-    layout: &ProjectLayout,
-    css_roots: &[(&BiomePath, biome_css_syntax::AnyCssRoot)],
-) -> TestDb {
-    let db = TestDb::default();
-    let path_info_cache = PathInfoCache::default();
-    for (path, root) in css_roots {
-        let (module_info, _, _) =
-            resolve_css_module(root.clone(), path, fs, layout, &path_info_cache);
-        let md = ModuleInfo::new(
-            &db,
-            path.as_path().to_path_buf(),
-            ModuleInfoKind::Css(module_info),
-        );
-        db.modules.pin().insert(path.as_path().to_path_buf(), md);
-    }
-    db
-}
-
 fn build_html_db(
     fs: &dyn biome_resolver::FsWithResolverProxy,
     layout: &ProjectLayout,
-    html_data: &[(&BiomePath, biome_html_syntax::HtmlRoot, Vec<HtmlEmbeddedContent>)],
+    html_data: &[(
+        &BiomePath,
+        biome_html_syntax::HtmlRoot,
+        Vec<HtmlEmbeddedContent>,
+    )],
 ) -> TestDb {
     let db = TestDb::default();
     let path_info_cache = PathInfoCache::default();
@@ -200,7 +184,11 @@ fn add_html_modules(
     db: &TestDb,
     fs: &dyn biome_resolver::FsWithResolverProxy,
     layout: &ProjectLayout,
-    html_data: &[(&BiomePath, biome_html_syntax::HtmlRoot, Vec<HtmlEmbeddedContent>)],
+    html_data: &[(
+        &BiomePath,
+        biome_html_syntax::HtmlRoot,
+        Vec<HtmlEmbeddedContent>,
+    )],
 ) {
     let path_info_cache = PathInfoCache::default();
     for (path, root, embedded_content) in html_data {
@@ -3006,8 +2994,7 @@ export function App() {
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
     // App.tsx should be found as consumer of components.css (via app.css)
-    let consumers =
-        transitive_importers_of(&db, Utf8Path::new("/src/styles/components.css"));
+    let consumers = transitive_importers_of(&db, Utf8Path::new("/src/styles/components.css"));
     assert!(
         consumers
             .iter()
@@ -3627,14 +3614,15 @@ fn test_vue_mixed_scoped_and_unscoped() {
     assert_eq!(html_info.style_classes.len(), 2);
 
     // Only Global class appears in the traversal.
-    let traversal_classes: Vec<_> = traverse_import_tree_for_html_classes(&db, Utf8Path::new("/src/Mixed.vue"))
-        .flat_map(|step| {
-            step.css_classes
-                .values()
-                .map(|c| c.text().to_string())
-                .collect::<Vec<_>>()
-        })
-        .collect();
+    let traversal_classes: Vec<_> =
+        traverse_import_tree_for_html_classes(&db, Utf8Path::new("/src/Mixed.vue"))
+            .flat_map(|step| {
+                step.css_classes
+                    .values()
+                    .map(|c| c.text().to_string())
+                    .collect::<Vec<_>>()
+            })
+            .collect();
 
     assert!(
         traversal_classes.contains(&"global-btn".to_string()),
@@ -3881,9 +3869,10 @@ fn test_vue_upward_traversal() {
     );
 
     // Verify upward traversal finds btn from app.css
-    let available_classes: Vec<_> = traverse_import_tree_for_html_classes(&db, Utf8Path::new("/src/Button.vue"))
-        .flat_map(|step| step.css_classes.into_values())
-        .collect();
+    let available_classes: Vec<_> =
+        traverse_import_tree_for_html_classes(&db, Utf8Path::new("/src/Button.vue"))
+            .flat_map(|step| step.css_classes.into_values())
+            .collect();
 
     assert!(
         available_classes.iter().any(|c| c.text() == "btn"),
