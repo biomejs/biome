@@ -43,9 +43,7 @@ impl FromServices for DbService {
                 .iter()
                 .any(|d| d == &RuleDomain::Project);
             if !has_project_domain {
-                panic!(
-                    "The rule {rule_key} uses DbService, but it is not in the Project domain."
-                );
+                panic!("The rule {rule_key} uses DbService, but it is not in the Project domain.");
             }
         }
         let module_db: &Arc<dyn ModuleDb> = services

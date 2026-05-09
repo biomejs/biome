@@ -24,7 +24,6 @@ use biome_module_graph::{
     HtmlEmbeddedContent, ModuleDb, ModuleInfoKind, PathInfoCache, resolve_css_module,
     resolve_js_module,
 };
-use biome_service::workspace::db::ProjectDatabase;
 use biome_package::{Catalogs, Manifest, PackageJson, TsConfigJson, TurboJson};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
@@ -35,6 +34,7 @@ use biome_service::settings::{
     ModuleGraphResolutionKind, ServiceLanguage, Settings, SettingsHandle,
 };
 use biome_service::test_utils::setup_workspace_and_open_project;
+use biome_service::workspace::db::ProjectDatabase;
 use biome_service::workspace::{
     PullDiagnosticsParams, ScanKind, ScanProjectParams, UpdateSettingsParams,
 };
@@ -261,7 +261,7 @@ pub fn module_graph_for_test_file(
     input_file: &Utf8Path,
     project_layout: &ProjectLayout,
 ) -> Arc<dyn ModuleDb> {
-    let mut db = ProjectDatabase::default();
+    let db = ProjectDatabase::default();
     let path_info_cache = PathInfoCache::default();
     let dir = input_file.parent().unwrap().to_path_buf();
     let fs = OsFileSystem::new(dir.clone());
@@ -313,7 +313,7 @@ pub fn module_graph_for_css_test_file(
     input_file: &Utf8Path,
     project_layout: &ProjectLayout,
 ) -> Arc<dyn ModuleDb> {
-    let mut db = ProjectDatabase::default();
+    let db = ProjectDatabase::default();
     let path_info_cache = PathInfoCache::default();
     let dir = input_file.parent().unwrap().to_path_buf();
     let fs = OsFileSystem::new(dir.clone());

@@ -1810,9 +1810,7 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 pub fn server(fs: Arc<dyn FsWithResolverProxy>, threads: Option<usize>) -> Box<dyn Workspace> {
     let (watcher_tx, _) = bounded(0);
     let (service_tx, _) = watch::channel(ServiceNotification::IndexUpdated);
-    Box::new(WorkspaceServer::new(
-        fs, watcher_tx, service_tx, threads,
-    ))
+    Box::new(WorkspaceServer::new(fs, watcher_tx, service_tx, threads))
 }
 
 /// Convenience function for constructing a client instance of [Workspace]

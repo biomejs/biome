@@ -7,13 +7,18 @@
 //! Module info is stored as Salsa inputs in a `ProjectDatabase`. Query and
 //! traversal functions in this module accept `&dyn ModuleDb` to look up data.
 
+// Salsa's `#[salsa::input]` macro generates `use<...>` capture syntax that
+// clippy flags as redundant. We cannot suppress it on the struct itself because
+// the lint fires inside the macro expansion.
+#![allow(impl_trait_redundant_captures)]
+
 pub(crate) mod fs_proxy;
 
+use crate::css_module_info::traverse::ImportTreeTraversal;
 use crate::css_module_info::{
     CssClassStep, CssModuleInfo, CssModuleVisitor, CssTraversalStep, ImportTreeNode,
     SerializedCssModuleInfo,
 };
-use crate::css_module_info::traverse::ImportTreeTraversal;
 use crate::db::inputs::ModuleDb;
 use crate::html_module_info::{
     HtmlEmbeddedContent, HtmlModuleInfo, HtmlModuleVisitor, SerializedHtmlModuleInfo,
@@ -307,7 +312,13 @@ pub fn find_css_class_definition(
             continue;
         }
 
-        search_css_class_transitive(db, &step.css_path, class_name, &mut result, &mut visited_css);
+        search_css_class_transitive(
+            db,
+            &step.css_path,
+            class_name,
+            &mut result,
+            &mut visited_css,
+        );
     }
 
     for step in traverse_import_tree_for_classes(db, path) {
@@ -413,14 +424,12 @@ fn build_parent_nodes(
                 .values()
                 .chain(js_info.dynamic_import_paths.values())
                 .any(|p| p.as_path() == Some(current_path)),
-            ModuleInfoKind::Html(html_info) => {
-                html_info
-                    .imported_stylesheets
-                    .iter()
-                    .chain(html_info.static_import_paths.values())
-                    .chain(html_info.dynamic_import_paths.values())
-                    .any(|p| p.as_path() == Some(current_path))
-            }
+            ModuleInfoKind::Html(html_info) => html_info
+                .imported_stylesheets
+                .iter()
+                .chain(html_info.static_import_paths.values())
+                .chain(html_info.dynamic_import_paths.values())
+                .any(|p| p.as_path() == Some(current_path)),
             ModuleInfoKind::Css(_) => false,
         };
 
@@ -466,19 +475,21 @@ fn build_parent_nodes(
 }
 
 /// Returns CSS class steps for the given JS file by traversing its imports.
-pub fn traverse_import_tree_for_classes(db: &dyn ModuleDb, js_path: &Utf8Path) -> Vec<CssClassStep> {
+pub fn traverse_import_tree_for_classes(
+    db: &dyn ModuleDb,
+    js_path: &Utf8Path,
+) -> Vec<CssClassStep> {
     let mut results = Vec::new();
 
     if let Some(js_info) = db.js_module_info_for_path(js_path) {
         for import_path in js_info.static_import_paths.values() {
-            if let Some(path) = import_path.as_path() {
-                if let Some(css_info) = db.css_module_info_for_path(path) {
+            if let Some(path) = import_path.as_path()
+                && let Some(css_info) = db.css_module_info_for_path(path) {
                     results.push(CssClassStep {
                         css_path: path.to_path_buf(),
                         css_classes: css_info.classes.clone(),
                     });
                 }
-            }
         }
     }
 
@@ -748,7 +759,6 @@ pub fn find_exported_symbol(
                             Ok(path) if seen_paths.insert(path.to_path_buf()) => {
                                 if let Some(module) = db.js_module_info_for_path(path) {
                                     stack.push((module, lookup));
-                                    continue;
                                 }
                             }
                             _ => break,
@@ -759,7 +769,6 @@ pub fn find_exported_symbol(
                             && let Some(module) = db.js_module_info_for_path(path)
                         {
                             stack.push((module, symbol_name));
-                            continue;
                         }
                     }
                 }
@@ -811,7 +820,6 @@ pub fn find_jsdoc_for_exported_symbol(
                             Ok(path) if seen_paths.insert(path.to_path_buf()) => {
                                 if let Some(module) = db.js_module_info_for_path(path) {
                                     stack.push((module, lookup));
-                                    continue;
                                 }
                             }
                             _ => break,
@@ -822,7 +830,6 @@ pub fn find_jsdoc_for_exported_symbol(
                             && let Some(module) = db.js_module_info_for_path(path)
                         {
                             stack.push((module, symbol_name));
-                            continue;
                         }
                     }
                 }
@@ -846,7 +853,6 @@ pub fn find_jsdoc_for_exported_symbol(
 // ---------------------------------------------------------------------------
 // Types (Salsa input, enums, serialization, dependencies)
 // ---------------------------------------------------------------------------
-
 #[salsa::input]
 #[derive(Debug)]
 pub struct ModuleInfo {

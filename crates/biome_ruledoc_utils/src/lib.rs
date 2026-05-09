@@ -96,7 +96,7 @@ impl AnalyzerServicesBuilder {
             fs.insert(path_buf, src);
         }
 
-        let mut db = ProjectDatabase::default();
+        let db = ProjectDatabase::default();
 
         let js_added_paths = get_added_js_paths(&fs, &js_paths);
         for (path, root, semantic_model) in js_added_paths {
