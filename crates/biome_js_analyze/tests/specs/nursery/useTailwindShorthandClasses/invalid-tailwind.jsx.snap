@@ -1,0 +1,32 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-tailwind.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+
+return <div className="bg-["></div>
+
+```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
+# Diagnostics
+```
+invalid-tailwind.jsx:3:27 lint/nursery/useTailwindShorthandClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Expected a value but instead found '['.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ return <div className="bg-["></div>
+      │                           ^
+    4 │ 
+  
+  i Biome could not analyze this Tailwind class list because it contains invalid syntax.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

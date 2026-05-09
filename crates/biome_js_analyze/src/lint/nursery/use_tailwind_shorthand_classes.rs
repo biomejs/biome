@@ -7,7 +7,8 @@ use biome_analyze::{
     declare_lint_rule,
 };
 use biome_console::markup;
-use biome_rowan::{AstNode, BatchMutationExt};
+use biome_diagnostics::{Diagnostic, MessageAndDescription};
+use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 use biome_rule_options::use_tailwind_shorthand_classes::UseTailwindShorthandClassesOptions;
 use biome_tailwind_logic::use_tailwind_shorthand_classes::{
     TailwindShorthandViolation, analyze_tailwind_shorthand, auto_fix,
@@ -15,9 +16,15 @@ use biome_tailwind_logic::use_tailwind_shorthand_classes::{
 use biome_tailwind_parser::parse_tailwind;
 use biome_tailwind_syntax::TwRoot;
 
-pub struct TailwindShorthandState {
-    root: TwRoot,
-    violation: TailwindShorthandViolation,
+pub enum TailwindShorthandState {
+    ParseError {
+        range: TextRange,
+        message: MessageAndDescription,
+    },
+    Violation {
+        root: TwRoot,
+        violation: TailwindShorthandViolation,
+    },
 }
 
 declare_lint_rule! {
@@ -150,13 +157,23 @@ impl Rule for UseTailwindShorthandClasses {
         };
         let parse = parse_tailwind(value.text());
         if parse.has_errors() {
-            return Vec::new().into_boxed_slice();
+            return parse
+                .diagnostics()
+                .iter()
+                .filter_map(|diagnostic| {
+                    Some(TailwindShorthandState::ParseError {
+                        range: host_range(ctx.query(), diagnostic.location().span?)?,
+                        message: diagnostic.message.clone(),
+                    })
+                })
+                .collect::<Vec<_>>()
+                .into_boxed_slice();
         }
 
         let root = parse.tree();
         analyze_tailwind_shorthand(&root.candidates())
             .into_iter()
-            .map(|violation| TailwindShorthandState {
+            .map(|violation| TailwindShorthandState::Violation {
                 root: root.clone(),
                 violation,
             })
@@ -165,9 +182,22 @@ impl Rule for UseTailwindShorthandClasses {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let violation = match state {
+            TailwindShorthandState::ParseError { range, message } => {
+                return Some(
+                    RuleDiagnostic::new(rule_category!(), *range, markup! {{message}}).note(
+                        markup! {
+                            "Biome could not analyze this Tailwind class list because it contains invalid syntax."
+                        },
+                    ),
+                );
+            }
+            TailwindShorthandState::Violation { violation, .. } => violation,
+        };
+
         let first_range = host_range(
             ctx.query(),
-            state.violation.uncompressed_nodes.first()?.range(),
+            violation.uncompressed_nodes.first()?.range(),
         )?;
 
         let mut diagnostic = RuleDiagnostic::new(
@@ -178,7 +208,7 @@ impl Rule for UseTailwindShorthandClasses {
             },
         );
 
-        for candidate in state.violation.uncompressed_nodes.iter().skip(1) {
+        for candidate in violation.uncompressed_nodes.iter().skip(1) {
             if let Some(range) = host_range(ctx.query(), candidate.range()) {
                 diagnostic = diagnostic.detail(
                     range,
@@ -197,7 +227,11 @@ impl Rule for UseTailwindShorthandClasses {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
-        let fixed = auto_fix(&state.root, &state.violation)?.commit().to_string();
+        let TailwindShorthandState::Violation { root, violation } = state else {
+            return None;
+        };
+
+        let fixed = auto_fix(root, violation)?.commit().to_string();
         let mut mutation = ctx.root().begin();
         apply_fixed_class_string(
             &mut mutation,
