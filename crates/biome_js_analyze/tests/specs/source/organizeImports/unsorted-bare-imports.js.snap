@@ -15,14 +15,17 @@ import "a" with { att2: "", att1: "" };
 ```
 unsorted-bare-imports.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Sort these imports.
   
   > 1 │ import "b";
       │ ^^^^^^^^^^^
-    2 │ import "a";
-    3 │ import "c";
+  > 2 │ import "a";
+  > 3 │ import "c";
+  > 4 │ import "a" with { att2: "", att1: "" };
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
     1   │ - import·"b";
       1 │ + import·"a"·with·{·att1:·"",·att2:·""·};

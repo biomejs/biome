@@ -27,14 +27,21 @@ import "./not-a-style.csssssss"
 ```
 style-grouping.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Sort these imports.
   
-  > 1 │ import A from "./a.js"
-      │ ^^^^^^^^^^^^^^^^^^^^^^
-    2 │ import "./style.css"
-    3 │ import B from "./b.js"
+   > 1 │ import A from "./a.js"
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+   > 2 │ import "./style.css"
+   > 3 │ import B from "./b.js"
+   > 4 │ import "./style.sass"
+        ...
+  > 13 │ import G from "./g.js"
+  > 14 │ import "./style.less"
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    15 │ import H from "./h.js"
+    16 │ import "./not-a-style.csssssss"
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
      1    │ - import·A·from·"./a.js"
      2    │ - import·"./style.css"

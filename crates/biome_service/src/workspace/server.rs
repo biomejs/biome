@@ -2845,13 +2845,10 @@ impl Workspace for WorkspaceServer {
                 services: snippet.as_snippet_services(),
             });
 
-            match result {
-                None => {}
-                Some(result) => {
-                    if !result.matches.is_empty() {
-                        return Ok(Some(result));
-                    }
-                }
+            if let Some(result) = result
+                && !result.matches.is_empty()
+            {
+                return Ok(Some(result));
             }
         }
 

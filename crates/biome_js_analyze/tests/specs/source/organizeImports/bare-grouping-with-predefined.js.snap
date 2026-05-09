@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 149
 expression: bare-grouping-with-predefined.js
 ---
 # Input
@@ -17,14 +16,18 @@ import "whatwg-fetch";
 ```
 bare-grouping-with-predefined.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Sort these imports.
   
   > 1 │ import { render } from "react-dom";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ import "./polyfill";
-    3 │ import fs from "node:fs";
+  > 2 │ import "./polyfill";
+  > 3 │ import fs from "node:fs";
+  > 4 │ import { Button } from "@/components/Button";
+  > 5 │ import "whatwg-fetch";
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
     1   │ - import·{·render·}·from·"react-dom";
     2   │ - import·"./polyfill";

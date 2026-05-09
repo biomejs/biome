@@ -7,7 +7,6 @@ use biome_analyze::{
     ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource, SourceActionKind,
     context::RuleContext, declare_source_rule,
 };
-use biome_console::markup;
 use biome_diagnostics::category;
 use biome_js_factory::make;
 use biome_js_syntax::{

@@ -15,14 +15,17 @@ import { A } from "./file.js";
 ```
 custom-order-with-bare-imports.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Sort these imports.
   
   > 1 │ import * as path from "node:path";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ import "node:path";
-    3 │ import "./file.js";
+  > 2 │ import "node:path";
+  > 3 │ import "./file.js";
+  > 4 │ import { A } from "./file.js";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
     1   │ - import·*·as·path·from·"node:path";
     2   │ - import·"node:path";

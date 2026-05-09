@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 149
 expression: bare-grouping-only.js
 ---
 # Input
@@ -15,14 +14,16 @@ import "mmm-polyfill";
 ```
 bare-grouping-only.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Sort these imports.
   
   > 1 │ import "zzz-polyfill";
       │ ^^^^^^^^^^^^^^^^^^^^^^
-    2 │ import "aaa-polyfill";
-    3 │ import "mmm-polyfill";
+  > 2 │ import "aaa-polyfill";
+  > 3 │ import "mmm-polyfill";
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
     1   │ - import·"zzz-polyfill";
     2   │ - import·"aaa-polyfill";
