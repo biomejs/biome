@@ -39,20 +39,20 @@ impl PathInfoCache {
             }
         }
     }
-}
 
-pub fn prepopulate_directory_path_info(
-    path_info_cache: &PathInfoCache,
-    fs: &dyn FsWithResolverProxy,
-    paths: &[&BiomePath],
-) {
-    for path in paths {
-        let mut parent = path.parent();
-        while let Some(dir) = parent {
-            if path_info_cache.get_or_insert(dir, fs).is_some() {
-                break; // already cached, ancestors are too
+    pub fn prepopulate_directory_path_info(
+        &self,
+        fs: &dyn FsWithResolverProxy,
+        paths: &[&BiomePath],
+    ) {
+        for path in paths {
+            let mut parent = path.parent();
+            while let Some(dir) = parent {
+                if self.get_or_insert(dir, fs).is_some() {
+                    break; // already cached, ancestors are too
+                }
+                parent = dir.parent();
             }
-            parent = dir.parent();
         }
     }
 }

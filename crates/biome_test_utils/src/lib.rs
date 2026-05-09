@@ -21,7 +21,7 @@ use biome_js_parser::{AnyJsRoot, JsParserOptions};
 use biome_js_type_info::{TypeData, TypeResolver};
 use biome_json_parser::ParseDiagnostic;
 use biome_module_graph::{
-    HtmlEmbeddedContent, ModuleDb, ModuleInfoKind, PathInfoCache, resolve_css_module,
+    HtmlEmbeddedContent, ModuleInfoKind, PathInfoCache, ProjectDatabase, resolve_css_module,
     resolve_js_module,
 };
 use biome_package::{Catalogs, Manifest, PackageJson, TsConfigJson, TurboJson};
@@ -34,7 +34,6 @@ use biome_service::settings::{
     ModuleGraphResolutionKind, ServiceLanguage, Settings, SettingsHandle,
 };
 use biome_service::test_utils::setup_workspace_and_open_project;
-use biome_service::workspace::db::ProjectDatabase;
 use biome_service::workspace::{
     PullDiagnosticsParams, ScanKind, ScanProjectParams, UpdateSettingsParams,
 };
@@ -260,7 +259,7 @@ where
 pub fn module_graph_for_test_file(
     input_file: &Utf8Path,
     project_layout: &ProjectLayout,
-) -> Arc<dyn ModuleDb> {
+) -> ProjectDatabase {
     let db = ProjectDatabase::default();
     let path_info_cache = PathInfoCache::default();
     let dir = input_file.parent().unwrap().to_path_buf();
@@ -299,7 +298,7 @@ pub fn module_graph_for_test_file(
         db.insert_module(path.as_path().to_path_buf(), md);
     }
 
-    Arc::new(db)
+    db
 }
 
 /// Builds a module graph for a CSS test file by scanning the directory for all
@@ -312,7 +311,7 @@ pub fn module_graph_for_test_file(
 pub fn module_graph_for_css_test_file(
     input_file: &Utf8Path,
     project_layout: &ProjectLayout,
-) -> Arc<dyn ModuleDb> {
+) -> ProjectDatabase {
     let db = ProjectDatabase::default();
     let path_info_cache = PathInfoCache::default();
     let dir = input_file.parent().unwrap().to_path_buf();
@@ -351,7 +350,7 @@ pub fn module_graph_for_css_test_file(
         db.insert_module(path.as_path().to_path_buf(), md);
     }
 
-    Arc::new(db)
+    db
 }
 
 /// Builds a module graph for an HTML test file by opening all files in the
@@ -368,7 +367,7 @@ pub fn module_graph_for_css_test_file(
 pub fn module_graph_for_html_test_file(
     input_file: &Utf8Path,
     _project_layout: &ProjectLayout,
-) -> Arc<dyn ModuleDb> {
+) -> ProjectDatabase {
     let dir = input_file.parent().unwrap().to_path_buf();
 
     // Load all files from the test directory into a MemoryFileSystem.

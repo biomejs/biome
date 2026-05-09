@@ -3,15 +3,14 @@ use biome_analyze::{
     RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor,
 };
 use biome_css_syntax::{AnyCssRoot, CssLanguage, CssSyntaxNode};
-use biome_module_graph::ModuleDb;
+use biome_module_graph::ProjectDatabase;
 use biome_rowan::AstNode;
-use std::sync::Arc;
 
-/// Service providing access to the [`ModuleDb`] for CSS lint rules.
+/// Service providing access to the module database for CSS lint rules.
 ///
 /// Only available for rules in the [`RuleDomain::Project`] domain.
 #[derive(Clone)]
-pub struct CssDbService(Arc<dyn ModuleDb>);
+pub struct CssDbService(ProjectDatabase);
 
 impl std::fmt::Debug for CssDbService {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -20,8 +19,8 @@ impl std::fmt::Debug for CssDbService {
 }
 
 impl CssDbService {
-    pub fn db(&self) -> &dyn ModuleDb {
-        self.0.as_ref()
+    pub fn db(&self) -> &ProjectDatabase {
+        &self.0
     }
 }
 
@@ -43,7 +42,7 @@ impl FromServices for CssDbService {
             }
         }
 
-        let module_db: &Arc<dyn ModuleDb> = services
+        let module_db: &ProjectDatabase = services
             .get_service()
             .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["ModuleDb"]))?;
 

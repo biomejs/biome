@@ -26,7 +26,7 @@ use biome_json_value::{JsonObject, JsonString};
 use biome_module_graph::{
     HtmlEmbeddedContent, ImportSymbol, JsExport, JsImport, JsImportPath, JsImportPhase,
     JsModuleInfoDiagnostic, JsOwnExport, JsReexport, ModuleDb, ModuleDiagnostic, ModuleInfo,
-    ModuleInfoKind, ModuleResolver, PathInfoCache, ResolvedPath,
+    ModuleInfoKind, ModuleResolver, PathInfoCache, ProjectDatabase, ResolvedPath,
     collect_available_classes_for_js_file, is_class_referenced_by_importers, resolve_css_module,
     resolve_html_module, resolve_js_module, transitive_importers_of,
     traverse_import_tree_for_html_classes,
@@ -41,48 +41,15 @@ use biome_service::test_utils::setup_workspace_and_open_project;
 use biome_service::workspace::UpdateSettingsParams;
 use biome_test_utils::{get_added_js_paths, get_css_added_paths};
 use camino::{Utf8Path, Utf8PathBuf};
-use salsa::Storage;
 use walkdir::WalkDir;
-
-/// Test-only database implementing `ModuleDb`.
-///
-/// Provides the same interface as `ProjectDatabase` from `biome_service`,
-/// but with a public `modules` field for direct insertion in tests.
-#[salsa::db]
-#[derive(Default, Clone)]
-struct TestDb {
-    modules: papaya::HashMap<Utf8PathBuf, ModuleInfo>,
-    storage: Storage<TestDb>,
-}
-
-#[salsa::db]
-impl salsa::Database for TestDb {}
-
-#[salsa::db]
-impl biome_db::Db for TestDb {}
-
-#[salsa::db]
-impl ModuleDb for TestDb {
-    fn module_for_path(&self, path: &Utf8Path) -> Option<ModuleInfo> {
-        self.modules.pin().get(path).copied()
-    }
-
-    fn for_each_module(&self, f: &mut dyn FnMut(&Utf8Path, &ModuleInfoKind)) {
-        let modules = self.modules.pin();
-        for (path, &module_info) in modules.iter() {
-            let kind = module_info.kind(self);
-            f(path.as_path(), &kind);
-        }
-    }
-}
 
 fn build_js_db(
     fs: &dyn biome_resolver::FsWithResolverProxy,
     layout: &ProjectLayout,
     added_paths: &[(&BiomePath, AnyJsRoot, Arc<biome_js_semantic::SemanticModel>)],
     infer_types: bool,
-) -> TestDb {
-    let db = TestDb::default();
+) -> ProjectDatabase {
+    let db = ProjectDatabase::default();
     let path_info_cache = PathInfoCache::default();
     for (path, root, semantic_model) in added_paths {
         let (module_info, _, _) = resolve_js_module(
@@ -99,7 +66,9 @@ fn build_js_db(
             path.as_path().to_path_buf(),
             ModuleInfoKind::Js(module_info),
         );
-        db.modules.pin().insert(path.as_path().to_path_buf(), md);
+        db.modules
+            .pin()
+            .insert(path.as_path().to_path_buf(), md);
     }
     db
 }
@@ -112,8 +81,8 @@ fn build_html_db(
         biome_html_syntax::HtmlRoot,
         Vec<HtmlEmbeddedContent>,
     )],
-) -> TestDb {
-    let db = TestDb::default();
+) -> ProjectDatabase {
+    let db = ProjectDatabase::default();
     let path_info_cache = PathInfoCache::default();
     for (path, root, embedded_content) in html_data {
         let (module_info, _, _) = resolve_html_module(
@@ -129,13 +98,15 @@ fn build_html_db(
             path.as_path().to_path_buf(),
             ModuleInfoKind::Html(module_info),
         );
-        db.modules.pin().insert(path.as_path().to_path_buf(), md);
+        db.modules
+            .pin()
+            .insert(path.as_path().to_path_buf(), md);
     }
     db
 }
 
 fn add_js_modules(
-    db: &TestDb,
+    db: &ProjectDatabase,
     fs: &dyn biome_resolver::FsWithResolverProxy,
     layout: &ProjectLayout,
     added_paths: &[(&BiomePath, AnyJsRoot, Arc<biome_js_semantic::SemanticModel>)],
@@ -157,12 +128,14 @@ fn add_js_modules(
             path.as_path().to_path_buf(),
             ModuleInfoKind::Js(module_info),
         );
-        db.modules.pin().insert(path.as_path().to_path_buf(), md);
+        db.modules
+            .pin()
+            .insert(path.as_path().to_path_buf(), md);
     }
 }
 
 fn add_css_modules(
-    db: &TestDb,
+    db: &ProjectDatabase,
     fs: &dyn biome_resolver::FsWithResolverProxy,
     layout: &ProjectLayout,
     css_roots: &[(&BiomePath, biome_css_syntax::AnyCssRoot)],
@@ -176,12 +149,14 @@ fn add_css_modules(
             path.as_path().to_path_buf(),
             ModuleInfoKind::Css(module_info),
         );
-        db.modules.pin().insert(path.as_path().to_path_buf(), md);
+        db.modules
+            .pin()
+            .insert(path.as_path().to_path_buf(), md);
     }
 }
 
 fn add_html_modules(
-    db: &TestDb,
+    db: &ProjectDatabase,
     fs: &dyn biome_resolver::FsWithResolverProxy,
     layout: &ProjectLayout,
     html_data: &[(
@@ -205,7 +180,9 @@ fn add_html_modules(
             path.as_path().to_path_buf(),
             ModuleInfoKind::Html(module_info),
         );
-        db.modules.pin().insert(path.as_path().to_path_buf(), md);
+        db.modules
+            .pin()
+            .insert(path.as_path().to_path_buf(), md);
     }
 }
 
@@ -583,7 +560,7 @@ fn test_export_default_imported_binding() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc: Arc<dyn ModuleDb> = Arc::new(db.clone());
+    let db_arc = db.clone();
     let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
 
     // Test that the default export's type is correctly resolved as a function returning number
@@ -842,7 +819,7 @@ export const promise = makePromiseCb();
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc: Arc<dyn ModuleDb> = Arc::new(db.clone());
+    let db_arc = db.clone();
     let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
 
     let promise_id = resolver
@@ -872,7 +849,7 @@ fn test_resolve_generic_mapped_value() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc: Arc<dyn ModuleDb> = Arc::new(db.clone());
+    let db_arc = db.clone();
     let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
 
     let mapped_id = resolver
@@ -931,7 +908,7 @@ fn test_resolve_generic_return_value_with_multiple_modules() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc: Arc<dyn ModuleDb> = Arc::new(db.clone());
+    let db_arc = db.clone();
     let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
 
     let result_id = resolver
@@ -974,7 +951,7 @@ fn test_resolve_import_as_namespace() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc: Arc<dyn ModuleDb> = Arc::new(db.clone());
+    let db_arc = db.clone();
     let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
 
     let result_id = resolver
@@ -1015,8 +992,8 @@ fn test_resolve_nested_function_call_with_namespace_in_return_type() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc: Arc<dyn ModuleDb> = Arc::new(db.clone());
-    let resolver = ModuleResolver::for_module(index_module, db_arc);
+    let db_arc = db.clone();
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
 
     let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(&resolver);
     snapshot.assert_snapshot("test_resolve_nested_function_call_with_namespace_in_return_type");
@@ -1048,7 +1025,7 @@ fn test_resolve_return_value_of_function() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc: Arc<dyn ModuleDb> = Arc::new(db.clone());
+    let db_arc = db.clone();
     let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
 
     let foo_id = resolver
@@ -1103,7 +1080,7 @@ fn test_resolve_type_of_property_with_getter() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc: Arc<dyn ModuleDb> = Arc::new(db.clone());
+    let db_arc = db.clone();
     let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
 
     let foo_id = resolver
@@ -1131,16 +1108,13 @@ fn test_writable_annotated_binding_does_not_become_singleton_union() {
     let added_paths = [BiomePath::new("/src/index.ts")];
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
-    let module_graph = Arc::new(ModuleGraph::default());
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
+    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
 
-    let index_module = module_graph
+    let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let resolver = Arc::new(ModuleResolver::for_module(
-        index_module,
-        module_graph.clone(),
-    ));
+    let db_arc = db.clone();
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
 
     let sink_id = resolver
         .resolve_type_of(&Text::new_static("sink"), ScopeId::GLOBAL)
@@ -1230,7 +1204,7 @@ fn class_this_test_helper(case_name: &str, prefix: &str) {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc: Arc<dyn ModuleDb> = Arc::new(db.clone());
+    let db_arc = db.clone();
     let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
 
     for i in 1..=7 {
@@ -1302,7 +1276,7 @@ fn test_resolve_type_of_this_in_object() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc: Arc<dyn ModuleDb> = Arc::new(db.clone());
+    let db_arc = db.clone();
     let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
 
     for i in 1..=5 {
@@ -1391,7 +1365,7 @@ fn test_resolve_type_of_this_in_class_wrong_scope() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc: Arc<dyn ModuleDb> = Arc::new(db.clone());
+    let db_arc = db.clone();
     let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
 
     for i in 1..=5 {
@@ -1766,7 +1740,7 @@ fn test_resolve_react_types() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc: Arc<dyn ModuleDb> = Arc::new(db.clone());
+    let db_arc = db.clone();
     let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
 
     let use_callback_id = resolver
@@ -1863,7 +1837,7 @@ fn test_resolve_single_reexport() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc: Arc<dyn ModuleDb> = Arc::new(db.clone());
+    let db_arc = db.clone();
     let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
 
     let result_id = resolver
@@ -1924,7 +1898,7 @@ fn test_resolve_type_of_union_from_imported_module() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc: Arc<dyn ModuleDb> = Arc::new(db.clone());
+    let db_arc = db.clone();
     let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
 
     let result_id = resolver
@@ -1987,7 +1961,7 @@ fn test_resolve_multiple_reexports() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc: Arc<dyn ModuleDb> = Arc::new(db.clone());
+    let db_arc = db.clone();
     let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
 
     let result1_id = resolver
@@ -2075,7 +2049,7 @@ fn test_resolve_promise_from_imported_function_returning_imported_promise_type()
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc: Arc<dyn ModuleDb> = Arc::new(db.clone());
+    let db_arc = db.clone();
     let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
 
     let resolved_id = resolver
@@ -2135,7 +2109,7 @@ fn test_resolve_promise_from_imported_function_returning_reexported_promise_type
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc: Arc<dyn ModuleDb> = Arc::new(db.clone());
+    let db_arc = db.clone();
     let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
 
     let resolved_id = resolver
@@ -2186,7 +2160,7 @@ const { mutate } = useSWRConfig();
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc: Arc<dyn ModuleDb> = Arc::new(db.clone());
+    let db_arc = db.clone();
     let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
 
     let use_swr_config_id = resolver
@@ -2243,7 +2217,7 @@ type Intersection = Foo & Bar;"#,
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc: Arc<dyn ModuleDb> = Arc::new(db.clone());
+    let db_arc = db.clone();
     let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
 
     let intersection_id = resolver
@@ -2335,7 +2309,7 @@ fn test_resolve_swr_types() {
         })
     );
 
-    let db_arc: Arc<dyn ModuleDb> = Arc::new(db.clone());
+    let db_arc = db.clone();
     let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
 
     let mutate_id = resolver
@@ -2376,7 +2350,7 @@ function f() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("index.ts"))
         .expect("module must exist");
-    let db_arc: Arc<dyn ModuleDb> = Arc::new(db.clone());
+    let db_arc = db.clone();
     let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
 
     let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(resolver.as_ref());
@@ -2409,7 +2383,7 @@ function g() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("index.ts"))
         .expect("module must exist");
-    let db_arc: Arc<dyn ModuleDb> = Arc::new(db.clone());
+    let db_arc = db.clone();
     let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
 
     let snapshot = ModuleGraphSnapshot::new(&db, &fs).with_resolver(resolver.as_ref());
@@ -2710,7 +2684,7 @@ fn test_namespace_reexport_type_inference() {
     let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let db_arc: Arc<dyn ModuleDb> = Arc::new(db.clone());
+    let db_arc = db.clone();
     let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
 
     let result_id = resolver
@@ -2761,7 +2735,7 @@ export function App() {
     let js_paths = [BiomePath::new("/src/App.jsx")];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = TestDb::default();
+    let db = ProjectDatabase::default();
     add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
@@ -2840,7 +2814,7 @@ export function Component() {
     let js_paths = [BiomePath::new("/src/Component.jsx")];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = TestDb::default();
+    let db = ProjectDatabase::default();
     add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
@@ -2895,12 +2869,13 @@ export function App() {
     let js_paths = [BiomePath::new("/src/App.jsx")];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = TestDb::default();
+    let db = ProjectDatabase::default();
     add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
     // CSS class consumers of base.css must include App.jsx (via theme.css).
-    let importers = transitive_importers_of(&db, Utf8Path::new("/src/base.css"));
+    let module = db.module_for_path(Utf8Path::new("/src/base.css")).unwrap();
+    let importers = transitive_importers_of(&db, module);
     assert!(
         importers
             .iter()
@@ -2989,12 +2964,13 @@ export function App() {
     let js_paths = [BiomePath::new("/src/App.tsx")];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = TestDb::default();
+    let db = ProjectDatabase::default();
     add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
     // App.tsx should be found as consumer of components.css (via app.css)
-    let consumers = transitive_importers_of(&db, Utf8Path::new("/src/styles/components.css"));
+    let module = db.module_for_path(Utf8Path::new("/src/styles/components.css")).unwrap();
+    let consumers = transitive_importers_of(&db, module);
     assert!(
         consumers
             .iter()
@@ -3098,12 +3074,13 @@ export function Dashboard() {
     ];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = TestDb::default();
+    let db = ProjectDatabase::default();
     add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
     // Both entry points should be found as consumers
-    let consumers = transitive_importers_of(&db, Utf8Path::new("/src/components.css"));
+    let module = db.module_for_path(Utf8Path::new("/src/components.css")).unwrap();
+    let consumers = transitive_importers_of(&db, module);
     assert_eq!(
         consumers.len(),
         2,
@@ -3190,12 +3167,13 @@ export function App() {
     let js_paths = [BiomePath::new("/src/App.tsx")];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = TestDb::default();
+    let db = ProjectDatabase::default();
     add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
     // App.tsx should be found even for deeply nested base.css
-    let consumers = transitive_importers_of(&db, Utf8Path::new("/src/base.css"));
+    let module = db.module_for_path(Utf8Path::new("/src/base.css")).unwrap();
+    let consumers = transitive_importers_of(&db, module);
     assert!(
         consumers
             .iter()
@@ -3244,12 +3222,12 @@ export function App() {
     let js_paths = [BiomePath::new("/src/App.jsx")];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = TestDb::default();
+    let db = ProjectDatabase::default();
     add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
     let (classes, traversal) =
-        collect_available_classes_for_js_file(&db, Utf8Path::new("/src/App.jsx"));
+        collect_available_classes_for_js_file(&db, db.module_for_path(Utf8Path::new("/src/App.jsx")).unwrap());
 
     // Should find both CSS classes
     assert!(classes.contains("button"), "Should find .button class");
@@ -3302,12 +3280,12 @@ export function App() {
     let js_paths = [BiomePath::new("/src/App.jsx")];
     let js_roots = get_added_js_paths(&fs, &js_paths);
 
-    let db = TestDb::default();
+    let db = ProjectDatabase::default();
     add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
     let (classes, traversal) =
-        collect_available_classes_for_js_file(&db, Utf8Path::new("/src/App.jsx"));
+        collect_available_classes_for_js_file(&db, db.module_for_path(Utf8Path::new("/src/App.jsx")).unwrap());
 
     // Should find all CSS classes from both imports
     assert!(classes.contains("btn"), "Should find .btn class");
@@ -3475,7 +3453,9 @@ fn test_html_inline_style_classes_are_global() {
     );
 
     // The traversal must yield the class.
-    let found = traverse_import_tree_for_html_classes(&db, Utf8Path::new("/src/index.html"))
+    let module = db.module_for_path(Utf8Path::new("/src/index.html")).unwrap();
+    let found = traverse_import_tree_for_html_classes(&db, module)
+        .iter()
         .any(|step| step.css_classes.values().any(|c| c.text() == "card"));
     assert!(found, "Global class must appear in traversal");
 }
@@ -3540,7 +3520,9 @@ fn test_vue_unscoped_style_classes_are_global() {
         "Vue unscoped <style> is Global"
     );
 
-    let found = traverse_import_tree_for_html_classes(&db, Utf8Path::new("/src/Comp.vue"))
+    let module = db.module_for_path(Utf8Path::new("/src/Comp.vue")).unwrap();
+    let found = traverse_import_tree_for_html_classes(&db, module)
+        .iter()
         .any(|step| step.css_classes.values().any(|c| c.text() == "card"));
     assert!(found, "Global class must appear in traversal");
 }
@@ -3579,7 +3561,9 @@ fn test_vue_scoped_style_classes_are_local_and_hidden() {
 
     // The traversal DOES yield local inline classes for same-file checks,
     // because scoped styles still apply to the component's own elements.
-    let found = traverse_import_tree_for_html_classes(&db, Utf8Path::new("/src/Scoped.vue"))
+    let module = db.module_for_path(Utf8Path::new("/src/Scoped.vue")).unwrap();
+    let found = traverse_import_tree_for_html_classes(&db, module)
+        .iter()
         .any(|step| step.css_classes.values().any(|c| c.text() == "alpha"));
     assert!(
         found,
@@ -3614,8 +3598,10 @@ fn test_vue_mixed_scoped_and_unscoped() {
     assert_eq!(html_info.style_classes.len(), 2);
 
     // Only Global class appears in the traversal.
+    let module = db.module_for_path(Utf8Path::new("/src/Mixed.vue")).unwrap();
     let traversal_classes: Vec<_> =
-        traverse_import_tree_for_html_classes(&db, Utf8Path::new("/src/Mixed.vue"))
+        traverse_import_tree_for_html_classes(&db, module)
+            .into_iter()
             .flat_map(|step| {
                 step.css_classes
                     .values()
@@ -3660,7 +3646,9 @@ fn test_astro_local_style_classes_are_hidden() {
     // Local inline classes appear in same-file traversal: scoped styles still
     // apply to the component's own elements. Scoping only restricts leaking to
     // parent/consumer files.
-    let found = traverse_import_tree_for_html_classes(&db, Utf8Path::new("/src/Page.astro"))
+    let module = db.module_for_path(Utf8Path::new("/src/Page.astro")).unwrap();
+    let found = traverse_import_tree_for_html_classes(&db, module)
+        .iter()
         .any(|step| step.css_classes.values().any(|c| c.text() == "hero"));
     assert!(
         found,
@@ -3681,7 +3669,9 @@ fn test_astro_global_style_classes_are_visible() {
     let layout = ProjectLayout::default();
     let db = build_html_db(&fs, &layout, &[(&html_path, html_root, vec![css])]);
 
-    let found = traverse_import_tree_for_html_classes(&db, Utf8Path::new("/src/Layout.astro"))
+    let module = db.module_for_path(Utf8Path::new("/src/Layout.astro")).unwrap();
+    let found = traverse_import_tree_for_html_classes(&db, module)
+        .iter()
         .any(|step| step.css_classes.values().any(|c| c.text() == "wrapper"));
     assert!(found, "Astro is:global class must appear in traversal");
 }
@@ -3719,7 +3709,9 @@ fn test_svelte_local_style_classes_are_hidden() {
     // Local inline classes appear in same-file traversal: scoped styles still
     // apply to the component's own elements. Scoping only restricts leaking to
     // parent/consumer files.
-    let found = traverse_import_tree_for_html_classes(&db, Utf8Path::new("/src/Button.svelte"))
+    let module = db.module_for_path(Utf8Path::new("/src/Button.svelte")).unwrap();
+    let found = traverse_import_tree_for_html_classes(&db, module)
+        .iter()
         .any(|step| step.css_classes.values().any(|c| c.text() == "btn"));
     assert!(
         found,
@@ -3762,7 +3754,9 @@ fn test_svelte_global_pseudo_class_is_visible() {
     );
 
     // And it must appear in the traversal.
-    let found = traverse_import_tree_for_html_classes(&db, Utf8Path::new("/src/Global.svelte"))
+    let module = db.module_for_path(Utf8Path::new("/src/Global.svelte")).unwrap();
+    let found = traverse_import_tree_for_html_classes(&db, module)
+        .iter()
         .any(|step| step.css_classes.values().any(|c| c.text() == "prose"));
     assert!(found, ":global class must appear in traversal");
 }
@@ -3793,7 +3787,7 @@ fn test_vue_upward_traversal() {
     fs.insert("/src/Button.vue".into(), "");
 
     let layout = ProjectLayout::default();
-    let db = TestDb::default();
+    let db = ProjectDatabase::default();
 
     // Add CSS
     let css_paths = [BiomePath::new("/src/app.css")];
@@ -3869,8 +3863,10 @@ fn test_vue_upward_traversal() {
     );
 
     // Verify upward traversal finds btn from app.css
+    let module = db.module_for_path(Utf8Path::new("/src/Button.vue")).unwrap();
     let available_classes: Vec<_> =
-        traverse_import_tree_for_html_classes(&db, Utf8Path::new("/src/Button.vue"))
+        traverse_import_tree_for_html_classes(&db, module)
+            .into_iter()
             .flat_map(|step| step.css_classes.into_values())
             .collect();
 
@@ -3924,7 +3920,7 @@ import Button from "./Button.vue";
 
     let db = build_module_db_via_workspace(&files);
     let snapshot_files = files_to_snapshot_vec(&files);
-    let snapshot = ModuleGraphSnapshot::from_files(db.as_ref(), snapshot_files);
+    let snapshot = ModuleGraphSnapshot::from_files(&db, snapshot_files);
     snapshot.assert_snapshot("test_vue_component_imports_snapshot");
 }
 
@@ -3965,7 +3961,7 @@ import Hero from "./Hero.astro";
 
     let db = build_module_db_via_workspace(&files);
     let snapshot_files = files_to_snapshot_vec(&files);
-    let snapshot = ModuleGraphSnapshot::from_files(db.as_ref(), snapshot_files);
+    let snapshot = ModuleGraphSnapshot::from_files(&db, snapshot_files);
     snapshot.assert_snapshot("test_astro_component_imports_snapshot");
 }
 
@@ -4008,7 +4004,7 @@ import Card from "./Card.svelte";
 
     let db = build_module_db_via_workspace(&files);
     let snapshot_files = files_to_snapshot_vec(&files);
-    let snapshot = ModuleGraphSnapshot::from_files(db.as_ref(), snapshot_files);
+    let snapshot = ModuleGraphSnapshot::from_files(&db, snapshot_files);
     snapshot.assert_snapshot("test_svelte_component_imports_snapshot");
 }
 
@@ -4020,7 +4016,7 @@ import Card from "./Card.svelte";
 /// This mirrors production behavior: `open_file` triggers
 /// `parse_embedded_nodes`, which correctly extracts `<style>`, `<script>`, and
 /// Astro frontmatter (`---...---`) blocks with their scoping semantics.
-fn build_module_db_via_workspace(files: &[(&str, &str)]) -> Arc<dyn ModuleDb> {
+fn build_module_db_via_workspace(files: &[(&str, &str)]) -> ProjectDatabase {
     let mem_fs = MemoryFileSystem::default();
     for (path, content) in files {
         mem_fs.insert(Utf8PathBuf::from(*path), *content);
@@ -4074,13 +4070,13 @@ fn test_property_const_assertion_flows_through_module_resolver() {
     let added_paths = [BiomePath::new("/src/index.ts")];
     let added_paths = get_added_js_paths(&fs, &added_paths);
 
-    let module_graph = Arc::new(ModuleGraph::default());
-    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
+    let db = build_js_db(&fs, &ProjectLayout::default(), &added_paths, true);
 
-    let index_module = module_graph
+    let index_module = db
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let resolver = Arc::new(ModuleResolver::for_module(index_module, module_graph));
+    let db_arc = db.clone();
+    let resolver = Arc::new(ModuleResolver::for_module(index_module, db_arc));
     let object = resolver.resolved_type_of_named_value(TextRange::default(), "object");
     let TypeData::Object(object) = object.deref() else {
         panic!("expected object type");

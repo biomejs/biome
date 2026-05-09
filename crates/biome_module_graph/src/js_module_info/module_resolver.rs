@@ -12,7 +12,7 @@ use biome_rowan::{AstNode, RawSyntaxKind, Text, TextRange, TokenText};
 use rustc_hash::{FxHashMap, FxHashSet};
 
 use crate::{
-    JsExport, JsImportPath, JsOwnExport, ModuleDb,
+    JsExport, JsImportPath, JsOwnExport, ModuleDb, ProjectDatabase,
     js_module_info::{JsModuleInfoInner, utils::reached_too_many_types},
 };
 
@@ -43,7 +43,7 @@ const MODULE_0_ID: ResolverId = ResolverId::from_level(TypeResolverLevel::Thin);
 ///
 /// The module resolver is typically consumed through the `Typed` service.
 pub struct ModuleResolver {
-    module_db: Arc<dyn ModuleDb>,
+    module_db: ProjectDatabase,
 
     /// Modules from which this resolver is using types.
     ///
@@ -73,7 +73,7 @@ pub struct ModuleResolver {
 }
 
 impl ModuleResolver {
-    pub fn for_module(module_info: JsModuleInfo, module_db: Arc<dyn ModuleDb>) -> Self {
+    pub fn for_module(module_info: JsModuleInfo, module_db: ProjectDatabase) -> Self {
         let infer_types = module_info.infer_types;
 
         let types = if infer_types {

@@ -9,7 +9,7 @@ use std::vec::IntoIter;
 
 /// Minimal step for efficient CSS class checking during traversal.
 /// Used in the happy path where we're just checking if classes exist.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct CssClassStep {
     /// The path of the CSS file discovered in this step
     pub css_path: Utf8PathBuf,
@@ -19,7 +19,7 @@ pub struct CssClassStep {
 
 /// Rich diagnostic information including component chain.
 /// Only built when generating error diagnostics (class not found).
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct CssTraversalStep {
     /// The path of the CSS file discovered in this step
     pub css_path: Utf8PathBuf,

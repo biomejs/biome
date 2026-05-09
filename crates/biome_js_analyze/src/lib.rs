@@ -16,7 +16,7 @@ use biome_aria::AriaRoles;
 use biome_diagnostics::Error as DiagnosticError;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage};
-use biome_module_graph::{ModuleDb, ModuleResolver};
+use biome_module_graph::{ModuleDb, ModuleResolver, ProjectDatabase};
 use biome_package::TurboJson;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{TextRange, TokenText};
@@ -49,7 +49,7 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
 
 #[derive(Default)]
 pub struct JsAnalyzerServices {
-    module_db: Option<Arc<dyn ModuleDb>>,
+    module_db: Option<ProjectDatabase>,
     project_layout: Arc<ProjectLayout>,
     source_type: JsFileSource,
     embedded_bindings: Vec<Vec<(TextRange, TokenText)>>,
@@ -59,7 +59,7 @@ pub struct JsAnalyzerServices {
 
 impl
     From<(
-        Arc<dyn ModuleDb>,
+        ProjectDatabase,
         Arc<ProjectLayout>,
         JsFileSource,
         Option<SemanticModel>,
@@ -67,7 +67,7 @@ impl
 {
     fn from(
         (module_db, project_layout, source_type, semantic_model): (
-            Arc<dyn ModuleDb>,
+            ProjectDatabase,
             Arc<ProjectLayout>,
             JsFileSource,
             Option<SemanticModel>,
@@ -84,10 +84,10 @@ impl
     }
 }
 
-impl From<(Arc<dyn ModuleDb>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerServices {
+impl From<(ProjectDatabase, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerServices {
     fn from(
         (module_db, project_layout, source_type): (
-            Arc<dyn ModuleDb>,
+            ProjectDatabase,
             Arc<ProjectLayout>,
             JsFileSource,
         ),
@@ -127,7 +127,7 @@ impl JsAnalyzerServices {
         self
     }
 
-    pub fn with_module_db(mut self, module_db: Arc<dyn ModuleDb>) -> Self {
+    pub fn with_module_db(mut self, module_db: ProjectDatabase) -> Self {
         self.module_db = Some(module_db);
         self
     }

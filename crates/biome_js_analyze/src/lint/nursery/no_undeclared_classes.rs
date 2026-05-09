@@ -8,7 +8,7 @@ use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration,
 };
 use biome_module_graph::{
-    ImportTreeDisplay, ImportTreeNode, build_import_tree, build_import_tree_for_html,
+    ImportTreeDisplay, ImportTreeNode, ModuleDb, build_import_tree, build_import_tree_for_html,
     traverse_import_tree_for_classes, traverse_import_tree_for_html_classes,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, TextSize, declare_node_union};
@@ -106,13 +106,15 @@ impl Rule for NoUndeclaredClasses {
         // from frontmatter are accessed via the HTML traversal.
         let file_source = ctx.source_type::<JsFileSource>();
         let is_html_like = file_source.as_embedding_kind().is_astro();
-
+        let Some(module) = db.module_for_path(file_path) else {
+            return Vec::new();
+        };
         // Collect all reachable CSS steps. If no CSS is reachable at all,
         // skip to avoid false positives on files without any stylesheets.
         let css_steps: Vec<_> = if is_html_like {
-            traverse_import_tree_for_html_classes(db, file_path).collect()
+            traverse_import_tree_for_html_classes(db, module)
         } else {
-            traverse_import_tree_for_classes(db, file_path)
+            traverse_import_tree_for_classes(db, module)
         };
 
         if css_steps.is_empty() {
@@ -282,10 +284,13 @@ fn run_without_semantic(
 
     let db = ctx.db();
     let file_path = ctx.file_path();
+    let Some(module) = db.module_for_path(file_path) else {
+        return Vec::new();
+    };
 
     // Collect all reachable CSS steps. If no CSS is reachable at all,
     // skip to avoid false positives on files without any stylesheets.
-    let css_steps: Vec<_> = traverse_import_tree_for_html_classes(db, file_path).collect();
+    let css_steps: Vec<_> = traverse_import_tree_for_html_classes(db, module);
 
     if css_steps.is_empty() {
         return Vec::new();
