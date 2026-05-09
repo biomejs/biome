@@ -66,9 +66,7 @@ fn build_js_db(
             path.as_path().to_path_buf(),
             ModuleInfoKind::Js(module_info),
         );
-        db.modules
-            .pin()
-            .insert(path.as_path().to_path_buf(), md);
+        db.modules.pin().insert(path.as_path().to_path_buf(), md);
     }
     db
 }
@@ -98,9 +96,7 @@ fn build_html_db(
             path.as_path().to_path_buf(),
             ModuleInfoKind::Html(module_info),
         );
-        db.modules
-            .pin()
-            .insert(path.as_path().to_path_buf(), md);
+        db.modules.pin().insert(path.as_path().to_path_buf(), md);
     }
     db
 }
@@ -128,9 +124,7 @@ fn add_js_modules(
             path.as_path().to_path_buf(),
             ModuleInfoKind::Js(module_info),
         );
-        db.modules
-            .pin()
-            .insert(path.as_path().to_path_buf(), md);
+        db.modules.pin().insert(path.as_path().to_path_buf(), md);
     }
 }
 
@@ -149,9 +143,7 @@ fn add_css_modules(
             path.as_path().to_path_buf(),
             ModuleInfoKind::Css(module_info),
         );
-        db.modules
-            .pin()
-            .insert(path.as_path().to_path_buf(), md);
+        db.modules.pin().insert(path.as_path().to_path_buf(), md);
     }
 }
 
@@ -180,9 +172,7 @@ fn add_html_modules(
             path.as_path().to_path_buf(),
             ModuleInfoKind::Html(module_info),
         );
-        db.modules
-            .pin()
-            .insert(path.as_path().to_path_buf(), md);
+        db.modules.pin().insert(path.as_path().to_path_buf(), md);
     }
 }
 
@@ -2969,7 +2959,9 @@ export function App() {
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
     // App.tsx should be found as consumer of components.css (via app.css)
-    let module = db.module_for_path(Utf8Path::new("/src/styles/components.css")).unwrap();
+    let module = db
+        .module_for_path(Utf8Path::new("/src/styles/components.css"))
+        .unwrap();
     let consumers = transitive_importers_of(&db, module);
     assert!(
         consumers
@@ -3079,7 +3071,9 @@ export function Dashboard() {
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
     // Both entry points should be found as consumers
-    let module = db.module_for_path(Utf8Path::new("/src/components.css")).unwrap();
+    let module = db
+        .module_for_path(Utf8Path::new("/src/components.css"))
+        .unwrap();
     let consumers = transitive_importers_of(&db, module);
     assert_eq!(
         consumers.len(),
@@ -3226,8 +3220,10 @@ export function App() {
     add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
-    let (classes, traversal) =
-        collect_available_classes_for_js_file(&db, db.module_for_path(Utf8Path::new("/src/App.jsx")).unwrap());
+    let (classes, traversal) = collect_available_classes_for_js_file(
+        &db,
+        db.module_for_path(Utf8Path::new("/src/App.jsx")).unwrap(),
+    );
 
     // Should find both CSS classes
     assert!(classes.contains("button"), "Should find .button class");
@@ -3284,8 +3280,10 @@ export function App() {
     add_css_modules(&db, &fs, &ProjectLayout::default(), &css_roots);
     add_js_modules(&db, &fs, &ProjectLayout::default(), &js_roots, false);
 
-    let (classes, traversal) =
-        collect_available_classes_for_js_file(&db, db.module_for_path(Utf8Path::new("/src/App.jsx")).unwrap());
+    let (classes, traversal) = collect_available_classes_for_js_file(
+        &db,
+        db.module_for_path(Utf8Path::new("/src/App.jsx")).unwrap(),
+    );
 
     // Should find all CSS classes from both imports
     assert!(classes.contains("btn"), "Should find .btn class");
@@ -3453,7 +3451,9 @@ fn test_html_inline_style_classes_are_global() {
     );
 
     // The traversal must yield the class.
-    let module = db.module_for_path(Utf8Path::new("/src/index.html")).unwrap();
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.html"))
+        .unwrap();
     let found = traverse_import_tree_for_html_classes(&db, module)
         .iter()
         .any(|step| step.css_classes.values().any(|c| c.text() == "card"));
@@ -3561,7 +3561,9 @@ fn test_vue_scoped_style_classes_are_local_and_hidden() {
 
     // The traversal DOES yield local inline classes for same-file checks,
     // because scoped styles still apply to the component's own elements.
-    let module = db.module_for_path(Utf8Path::new("/src/Scoped.vue")).unwrap();
+    let module = db
+        .module_for_path(Utf8Path::new("/src/Scoped.vue"))
+        .unwrap();
     let found = traverse_import_tree_for_html_classes(&db, module)
         .iter()
         .any(|step| step.css_classes.values().any(|c| c.text() == "alpha"));
@@ -3599,16 +3601,15 @@ fn test_vue_mixed_scoped_and_unscoped() {
 
     // Only Global class appears in the traversal.
     let module = db.module_for_path(Utf8Path::new("/src/Mixed.vue")).unwrap();
-    let traversal_classes: Vec<_> =
-        traverse_import_tree_for_html_classes(&db, module)
-            .into_iter()
-            .flat_map(|step| {
-                step.css_classes
-                    .values()
-                    .map(|c| c.text().to_string())
-                    .collect::<Vec<_>>()
-            })
-            .collect();
+    let traversal_classes: Vec<_> = traverse_import_tree_for_html_classes(&db, module)
+        .into_iter()
+        .flat_map(|step| {
+            step.css_classes
+                .values()
+                .map(|c| c.text().to_string())
+                .collect::<Vec<_>>()
+        })
+        .collect();
 
     assert!(
         traversal_classes.contains(&"global-btn".to_string()),
@@ -3646,7 +3647,9 @@ fn test_astro_local_style_classes_are_hidden() {
     // Local inline classes appear in same-file traversal: scoped styles still
     // apply to the component's own elements. Scoping only restricts leaking to
     // parent/consumer files.
-    let module = db.module_for_path(Utf8Path::new("/src/Page.astro")).unwrap();
+    let module = db
+        .module_for_path(Utf8Path::new("/src/Page.astro"))
+        .unwrap();
     let found = traverse_import_tree_for_html_classes(&db, module)
         .iter()
         .any(|step| step.css_classes.values().any(|c| c.text() == "hero"));
@@ -3669,7 +3672,9 @@ fn test_astro_global_style_classes_are_visible() {
     let layout = ProjectLayout::default();
     let db = build_html_db(&fs, &layout, &[(&html_path, html_root, vec![css])]);
 
-    let module = db.module_for_path(Utf8Path::new("/src/Layout.astro")).unwrap();
+    let module = db
+        .module_for_path(Utf8Path::new("/src/Layout.astro"))
+        .unwrap();
     let found = traverse_import_tree_for_html_classes(&db, module)
         .iter()
         .any(|step| step.css_classes.values().any(|c| c.text() == "wrapper"));
@@ -3709,7 +3714,9 @@ fn test_svelte_local_style_classes_are_hidden() {
     // Local inline classes appear in same-file traversal: scoped styles still
     // apply to the component's own elements. Scoping only restricts leaking to
     // parent/consumer files.
-    let module = db.module_for_path(Utf8Path::new("/src/Button.svelte")).unwrap();
+    let module = db
+        .module_for_path(Utf8Path::new("/src/Button.svelte"))
+        .unwrap();
     let found = traverse_import_tree_for_html_classes(&db, module)
         .iter()
         .any(|step| step.css_classes.values().any(|c| c.text() == "btn"));
@@ -3754,7 +3761,9 @@ fn test_svelte_global_pseudo_class_is_visible() {
     );
 
     // And it must appear in the traversal.
-    let module = db.module_for_path(Utf8Path::new("/src/Global.svelte")).unwrap();
+    let module = db
+        .module_for_path(Utf8Path::new("/src/Global.svelte"))
+        .unwrap();
     let found = traverse_import_tree_for_html_classes(&db, module)
         .iter()
         .any(|step| step.css_classes.values().any(|c| c.text() == "prose"));
@@ -3863,12 +3872,13 @@ fn test_vue_upward_traversal() {
     );
 
     // Verify upward traversal finds btn from app.css
-    let module = db.module_for_path(Utf8Path::new("/src/Button.vue")).unwrap();
-    let available_classes: Vec<_> =
-        traverse_import_tree_for_html_classes(&db, module)
-            .into_iter()
-            .flat_map(|step| step.css_classes.into_values())
-            .collect();
+    let module = db
+        .module_for_path(Utf8Path::new("/src/Button.vue"))
+        .unwrap();
+    let available_classes: Vec<_> = traverse_import_tree_for_html_classes(&db, module)
+        .into_iter()
+        .flat_map(|step| step.css_classes.into_values())
+        .collect();
 
     assert!(
         available_classes.iter().any(|c| c.text() == "btn"),
