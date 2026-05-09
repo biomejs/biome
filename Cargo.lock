@@ -855,6 +855,7 @@ dependencies = [
  "biome_string_case",
  "biome_suppression",
  "biome_test_utils",
+ "biome_unicode_table",
  "camino",
  "codspeed-criterion-compat",
  "filetime",
@@ -1723,6 +1724,8 @@ dependencies = [
  "biome_string_case",
  "biome_text_edit",
  "biome_unicode_table",
+ "biome_yaml_formatter",
+ "biome_yaml_syntax",
  "boxcar",
  "bpaf",
  "camino",
@@ -1917,12 +1920,19 @@ dependencies = [
  "biome_deserialize",
  "biome_diagnostics",
  "biome_formatter",
+ "biome_formatter_test",
+ "biome_fs",
+ "biome_parser",
  "biome_rowan",
+ "biome_service",
  "biome_suppression",
  "biome_yaml_parser",
  "biome_yaml_syntax",
+ "camino",
+ "countme",
  "schemars",
  "serde",
+ "tests_macros",
 ]
 
 [[package]]
@@ -3760,12 +3770,12 @@ dependencies = [
 
 [[package]]
 name = "indexmap"
-version = "2.13.1"
+version = "2.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "45a8a2b9cb3e0b0c1803dbb0758ffac5de2f425b23c28f518faabd9d805342ff"
+checksum = "d466e9454f08e4a911e14806c24e16fba1b4c121d1ea474396f396069cf949d9"
 dependencies = [
  "equivalent",
- "hashbrown 0.16.1",
+ "hashbrown 0.17.0",
  "serde",
  "serde_core",
 ]
@@ -3819,11 +3829,11 @@ dependencies = [
 
 [[package]]
 name = "insta"
-version = "1.46.3"
+version = "1.47.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e82db8c87c7f1ccecb34ce0c24399b8a73081427f3c7c50a5d597925356115e4"
+checksum = "7b4a6248eb93a4401ed2f37dfe8ea592d3cf05b7cf4f8efa867b6895af7e094e"
 dependencies = [
- "console 0.15.5",
+ "console 0.16.0",
  "globset",
  "once_cell",
  "similar",

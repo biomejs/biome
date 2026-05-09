@@ -484,12 +484,13 @@ pub fn traverse_import_tree_for_classes(
     if let Some(js_info) = db.js_module_info_for_path(js_path) {
         for import_path in js_info.static_import_paths.values() {
             if let Some(path) = import_path.as_path()
-                && let Some(css_info) = db.css_module_info_for_path(path) {
-                    results.push(CssClassStep {
-                        css_path: path.to_path_buf(),
-                        css_classes: css_info.classes.clone(),
-                    });
-                }
+                && let Some(css_info) = db.css_module_info_for_path(path)
+            {
+                results.push(CssClassStep {
+                    css_path: path.to_path_buf(),
+                    css_classes: css_info.classes.clone(),
+                });
+            }
         }
     }
 
