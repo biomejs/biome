@@ -1146,6 +1146,10 @@ fn handle_line_continuation(
         return InlineNewlineAction::Break;
     }
 
+    // The invalid fence still belongs to this paragraph; only add the diagnostic.
+    if let Some(range) = backtick_info_violation(p) {
+        p.error(parse_error::info_string_contains_backtick(p, range));
+    }
     if p.at(MD_TEXTUAL_LITERAL) {
         let text = p.cur_text();
         if text.starts_with("```") || text.starts_with("~~~") {
