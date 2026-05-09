@@ -18,6 +18,9 @@ b
 y,  $b:
 z
   );
+keyword-args-empty-line:keyword-args-empty-line($a: 1,
+
+$b: 2);
 mixed-args:mixed-args(  y,
   $b:
 z );
@@ -68,6 +71,11 @@ key ));
 	two-positional-args: two-positional-args(a, b);
 	one-keyword-arg: one-keyword-arg($a: z);
 	two-keyword-args: two-keyword-args($a: y, $b: z);
+	keyword-args-empty-line: keyword-args-empty-line(
+		$a: 1,
+
+		$b: 2
+	);
 	mixed-args: mixed-args(y, $b: z);
 	interpolated-start: #{1 + 1}foo(arg);
 	interpolated-mid: foo#{1 + 1}bar(arg);

@@ -172,7 +172,12 @@ impl Rule for UseIterableCallbackReturn {
         }
 
         if let Some(global_name) = method_config.global_name {
-            let (_, name) = global_identifier(&member_expression.object().ok()?)?;
+            let (_, name) = global_identifier(
+                &member_expression
+                    .object()
+                    .ok()?
+                    .as_any_global_identifier_expression()?,
+            )?;
             if name.text() != global_name {
                 return None;
             }
@@ -367,8 +372,7 @@ fn get_function_returns_info(cfg: &JsControlFlowGraph) -> FunctionReturnsInfo {
                             if let Some(return_stmt) = JsReturnStatement::cast_ref(node) {
                                 let range = return_stmt
                                     .return_token()
-                                    .map(|token| token.text_range())
-                                    .unwrap_or(return_stmt.range());
+                                    .map_or(return_stmt.range(), |token| token.text_range());
                                 if return_stmt.argument().is_none() {
                                     function_returns_info.returns_without_value.push(range);
                                 } else {

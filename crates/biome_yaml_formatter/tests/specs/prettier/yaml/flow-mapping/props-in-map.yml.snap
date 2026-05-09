@@ -1,0 +1,28 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/flow-mapping/props-in-map.yml
+---
+
+# Input
+
+```yml
+a: !!map &anchor {a: 1}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1 @@
+-a: !!map &anchor { a: 1 }
++a: !!map &anchor {a: 1}
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+a: !!map &anchor {a: 1}```

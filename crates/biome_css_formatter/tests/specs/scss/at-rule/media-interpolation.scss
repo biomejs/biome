@@ -4,4 +4,8 @@
 
 @media (#{$min} <= width <= #{$max}) {.box {color:red;}}
 
+@media #{$query} {.box {color:red;}}
+
+@media #{$query}, screen {.box {color:red;}}
+
 @container (#{$feature}: #{$value}) {.box {color:red;}}

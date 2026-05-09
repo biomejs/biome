@@ -1,0 +1,15 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <input v-on:keyup.enter="submit" />
+  <input @keyup.esc="cancel" />
+  <input @click.once="submit" />
+  <input v-bind:value="value" />
+</template>
+
+```

@@ -41,6 +41,7 @@ TwBogusCandidate = SyntaxElement*
 TwBogusVariant = SyntaxElement*
 TwBogusModifier = SyntaxElement*
 TwBogusValue = SyntaxElement*
+CssBogusPropertyValue = SyntaxElement*
 
 // Reference:
 // https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/src/candidate.ts
@@ -74,7 +75,7 @@ TwArbitraryCandidate =
 	'['
 	property: 'tw_property'
 	':'
-	value: 'tw_value'
+	value: CssGenericComponentValueList
 	']'
 	modifier: AnyTwModifier?
 
@@ -145,7 +146,7 @@ TwNamedValue =
 //    ^^^^^^^^^
 TwArbitraryValue =
 	'['
-	value: 'tw_value'
+	value: CssGenericComponentValueList
 	']'
 
 // bg-(--brand-primary)
@@ -186,3 +187,103 @@ AnyTwDataAttributeValue =
 //	'='
 //	value: 'tw_value'
 //	']'
+
+CssGenericComponentValueList = AnyCssGenericComponentValue*
+
+AnyCssGenericComponentValue =
+	AnyCssValue
+	| CssGenericDelimiter
+
+CssGenericDelimiter =
+	value: (',' | '/' | ':' | '=' | '.')
+
+CssComponentValueList = AnyCssValue*
+
+AnyCssValue =
+	CssIdentifier
+	| CssDashedIdentifier
+	| CssString
+	| CssNumber
+	| AnyCssDimension
+	| CssPercentage
+	| CssRatio
+	| AnyCssFunction
+	| CssColor
+	| CssUnaryExpression
+	| CssBinaryExpression
+	| CssParenthesizedExpression
+
+CssIdentifier = 'ident'
+
+CssDashedIdentifier = 'ident'
+
+CssString = value: 'CSS_STRING_LITERAL'
+
+CssNumber = value: 'CSS_NUMBER_LITERAL'
+
+AnyCssDimension = CssRegularDimension | CssUnknownDimension
+
+CssRegularDimension =
+	value: 'CSS_NUMBER_LITERAL'
+	unit: 'ident'
+
+CssUnknownDimension =
+	value: 'CSS_NUMBER_LITERAL'
+	unit: 'ident'
+
+CssPercentage =
+	value: 'CSS_NUMBER_LITERAL'
+	'%'
+
+CssRatio =
+	left: CssNumber
+	'/'
+	right: CssNumber
+
+AnyCssFunction = CssFunction | CssUrlFunction
+
+CssFunction =
+	name: CssIdentifier
+	'('
+	parameters: CssParameterList
+	')'
+
+CssUrlFunction =
+	'url'
+	'('
+	value: AnyCssUrlValue?
+	')'
+
+AnyCssUrlValue =
+	CssUrlValueRaw
+	| CssString
+	| CssParameterList
+
+CssUrlValueRaw = value: 'CSS_URL_VALUE_RAW_LITERAL'
+
+CssParameterList = AnyCssExpression (',' AnyCssExpression)* ','?
+
+AnyCssExpression =
+	CssListOfComponentValuesExpression
+	| CssComponentValueList
+	| CssBinaryExpression
+	| CssUnaryExpression
+	| CssParenthesizedExpression
+
+CssListOfComponentValuesExpression = CssComponentValueList
+
+CssBinaryExpression =
+	left: AnyCssExpression
+	operator: ('+' | '-' | '*' | '/')
+	right: AnyCssExpression
+
+CssUnaryExpression =
+	operator: ('+' | '-' | '*')
+	argument: AnyCssValue
+
+CssParenthesizedExpression =
+	'('
+	expression: CssComponentValueList
+	')'
+
+CssColor = value: 'CSS_COLOR_LITERAL'

@@ -1,0 +1,172 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+class InvalidMembers {
+    method() {
+        console.log("missing this");
+    }
+
+    get value() {
+        return 1;
+    }
+
+    set value(next) {
+        consume(next);
+    }
+
+    nestedFunction() {
+        function inner() {
+            return this;
+        }
+
+        return inner;
+    }
+
+    nestedClass() {
+        class Inner {
+            method() {
+                return this;
+            }
+        }
+
+        return Inner;
+    }
+
+    ["computed"]() {
+        return 1;
+    }
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:3:5 lint/nursery/useThisInClassMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Expected this to be used by class method method.
+  
+    1 │ /* should generate diagnostics */
+    2 │ class InvalidMembers {
+  > 3 │     method() {
+      │     ^^^^^^
+    4 │         console.log("missing this");
+    5 │     }
+  
+  i Adding functions as class members can be a convenient way to organize code related to a class, but when those functions do not use instance state, it can be misleading to readers. Consider whether static or a module-level function would better communicate the intent of this code.
+  
+  i If this member does not depend on instance state, make it static or move it outside the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:9 lint/nursery/useThisInClassMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Expected this to be used by getter value.
+  
+    5 │     }
+    6 │ 
+  > 7 │     get value() {
+      │         ^^^^^
+    8 │         return 1;
+    9 │     }
+  
+  i Adding functions as class members can be a convenient way to organize code related to a class, but when those functions do not use instance state, it can be misleading to readers. Consider whether static or a module-level function would better communicate the intent of this code.
+  
+  i If this member does not depend on instance state, make it static or move it outside the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:9 lint/nursery/useThisInClassMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Expected this to be used by setter value.
+  
+     9 │     }
+    10 │ 
+  > 11 │     set value(next) {
+       │         ^^^^^
+    12 │         consume(next);
+    13 │     }
+  
+  i Adding functions as class members can be a convenient way to organize code related to a class, but when those functions do not use instance state, it can be misleading to readers. Consider whether static or a module-level function would better communicate the intent of this code.
+  
+  i If this member does not depend on instance state, make it static or move it outside the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:5 lint/nursery/useThisInClassMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Expected this to be used by class method nestedFunction.
+  
+    13 │     }
+    14 │ 
+  > 15 │     nestedFunction() {
+       │     ^^^^^^^^^^^^^^
+    16 │         function inner() {
+    17 │             return this;
+  
+  i Adding functions as class members can be a convenient way to organize code related to a class, but when those functions do not use instance state, it can be misleading to readers. Consider whether static or a module-level function would better communicate the intent of this code.
+  
+  i If this member does not depend on instance state, make it static or move it outside the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:5 lint/nursery/useThisInClassMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Expected this to be used by class method nestedClass.
+  
+    21 │     }
+    22 │ 
+  > 23 │     nestedClass() {
+       │     ^^^^^^^^^^^
+    24 │         class Inner {
+    25 │             method() {
+  
+  i Adding functions as class members can be a convenient way to organize code related to a class, but when those functions do not use instance state, it can be misleading to readers. Consider whether static or a module-level function would better communicate the intent of this code.
+  
+  i If this member does not depend on instance state, make it static or move it outside the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:33:5 lint/nursery/useThisInClassMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Expected this to be used by class method ["computed"].
+  
+    31 │     }
+    32 │ 
+  > 33 │     ["computed"]() {
+       │     ^^^^^^^^^^^^
+    34 │         return 1;
+    35 │     }
+  
+  i Adding functions as class members can be a convenient way to organize code related to a class, but when those functions do not use instance state, it can be misleading to readers. Consider whether static or a module-level function would better communicate the intent of this code.
+  
+  i If this member does not depend on instance state, make it static or move it outside the class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

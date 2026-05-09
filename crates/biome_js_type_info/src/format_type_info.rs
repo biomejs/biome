@@ -340,28 +340,33 @@ impl Format<FormatTypeContext> for TypeMember {
 }
 
 impl Format<FormatTypeContext> for TypeMemberKind {
-    fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
+    fn fmt(&self, formatter: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
         match self {
-            Self::CallSignature => write!(f, [token("()")]),
-            Self::Constructor => write!(f, [token("constructor")]),
-            Self::Getter(name) => {
+            Self::CallSignature | Self::ConstAssertedCallSignature => {
+                write!(formatter, [token("()")])
+            }
+            Self::Constructor | Self::ConstAssertedConstructor => {
+                write!(formatter, [token("constructor")])
+            }
+            Self::Getter(name) | Self::ConstAssertedGetter(name) => {
                 let quoted = std::format!("get \"{name}\"");
-                write!(f, [text(&quoted, TextSize::default())])
+                write!(formatter, [text(&quoted, TextSize::default())])
             }
-            Self::IndexSignature(ty) => {
-                write!(f, [token("["), ty, token("]")])
+            Self::IndexSignature(index_signature_type)
+            | Self::ConstAssertedIndexSignature(index_signature_type) => {
+                write!(formatter, [token("["), index_signature_type, token("]")])
             }
-            Self::Named(name) => {
+            Self::Named(name) | Self::ConstAssertedNamed(name) => {
                 let quoted = std::format!("\"{name}\"");
-                write!(f, [text(&quoted, TextSize::default())])
+                write!(formatter, [text(&quoted, TextSize::default())])
             }
-            Self::NamedOptional(name) => {
+            Self::NamedOptional(name) | Self::ConstAssertedNamedOptional(name) => {
                 let quoted = std::format!("\"{name}\"?");
-                write!(f, [text(&quoted, TextSize::default())])
+                write!(formatter, [text(&quoted, TextSize::default())])
             }
-            Self::NamedStatic(name) => {
+            Self::NamedStatic(name) | Self::ConstAssertedNamedStatic(name) => {
                 let quoted = std::format!("static \"{name}\"");
-                write!(f, [text(&quoted, TextSize::default())])
+                write!(formatter, [text(&quoted, TextSize::default())])
             }
         }
     }

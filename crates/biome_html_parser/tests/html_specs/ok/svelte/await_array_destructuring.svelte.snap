@@ -30,9 +30,9 @@ HtmlRoot {
                     html_literal_token: HTML_LITERAL@7..16 " promise " [] [],
                 },
                 then_clause: SvelteAwaitThenClause {
-                    then_token: THEN_KW@16..20 "then" [] [],
+                    then_token: THEN_KW@16..21 "then" [] [Whitespace(" ")],
                     name: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@20..45 " [first, second, ...rest]" [] [],
+                        html_literal_token: HTML_LITERAL@21..45 "[first, second, ...rest]" [] [],
                     },
                 },
                 catch_clause: missing (optional),
@@ -137,9 +137,9 @@ HtmlRoot {
         2: HTML_TEXT_EXPRESSION@7..16
           0: HTML_LITERAL@7..16 " promise " [] []
         3: SVELTE_AWAIT_THEN_CLAUSE@16..45
-          0: THEN_KW@16..20 "then" [] []
-          1: HTML_TEXT_EXPRESSION@20..45
-            0: HTML_LITERAL@20..45 " [first, second, ...rest]" [] []
+          0: THEN_KW@16..21 "then" [] [Whitespace(" ")]
+          1: HTML_TEXT_EXPRESSION@21..45
+            0: HTML_LITERAL@21..45 "[first, second, ...rest]" [] []
         4: (empty)
         5: R_CURLY@45..46 "}" [] []
         6: HTML_ELEMENT_LIST@46..121

@@ -214,8 +214,7 @@ impl Rule for UseSortedClasses {
             AnyClassStringLike::JsStringLiteralExpression(string_literal) => {
                 let is_double_quote = string_literal
                     .value_token()
-                    .map(|token| token.text_trimmed().starts_with('"'))
-                    .unwrap_or(ctx.preferred_quote().is_double());
+                    .map_or(ctx.preferred_quote().is_double(), |token| token.text_trimmed().starts_with('"'));
                 let replacement = js_string_literal_expression(if is_double_quote {
                     js_string_literal(state)
                 } else {
@@ -234,8 +233,7 @@ impl Rule for UseSortedClasses {
             AnyClassStringLike::JsxString(jsx_string_node) => {
                 let is_double_quote = jsx_string_node
                     .value_token()
-                    .map(|token| token.text_trimmed().starts_with('"'))
-                    .unwrap_or(ctx.preferred_jsx_quote().is_double());
+                    .map_or(ctx.preferred_jsx_quote().is_double(), |token| token.text_trimmed().starts_with('"'));
                 let replacement = jsx_string(if is_double_quote {
                     js_string_literal(state)
                 } else {

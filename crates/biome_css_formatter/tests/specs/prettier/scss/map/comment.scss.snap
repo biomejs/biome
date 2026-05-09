@@ -42,19 +42,15 @@ $map: (
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,21 +1,22 @@
+@@ -1,21 +1,20 @@
  $map: (
--  /* comment */ key1: value,
+   /* comment */ key1: value,
 -
-+  /* comment */
-+  key1: value,
    // comment
    key2: value,
 -
--  /* comment */ /* comment */ key3: value,
+   /* comment */ /* comment */ key3: value,
 -
-+  /* comment */ /* comment */
-+  key3: value,
    /* comment */
    key4: (
 -      key: value,
@@ -83,12 +79,10 @@ $map: (
 
 ```scss
 $map: (
-  /* comment */
-  key1: value,
+  /* comment */ key1: value,
   // comment
   key2: value,
-  /* comment */ /* comment */
-  key3: value,
+  /* comment */ /* comment */ key3: value,
   /* comment */
   key4: (
     key: value,

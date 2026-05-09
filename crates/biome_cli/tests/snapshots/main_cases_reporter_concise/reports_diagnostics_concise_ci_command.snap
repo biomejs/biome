@@ -76,7 +76,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-× index.ts:1:1: assist/source/organizeImports: The imports and exports are not sorted.
+× index.ts:1:1: assist/source/organizeImports: Sort these imports.
 ```
 
 ```block
@@ -108,7 +108,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-× main.ts:1:1: assist/source/organizeImports: The imports and exports are not sorted.
+× main.ts:1:1: assist/source/organizeImports: Sort these imports.
 ```
 
 ```block

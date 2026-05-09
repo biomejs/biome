@@ -15,14 +15,17 @@ import "./reset.css";
 ```
 bare-grouping-with-source.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Sort these imports.
   
   > 1 │ import "polyfill";
       │ ^^^^^^^^^^^^^^^^^^
-    2 │ import "./styles.css";
-    3 │ import { render } from "react-dom";
+  > 2 │ import "./styles.css";
+  > 3 │ import { render } from "react-dom";
+  > 4 │ import "./reset.css";
+      │ ^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
   
-  i Safe fix: Organize Imports (Biome)
+  i Safe fix: Organize imports and exports (Biome)
   
     1   │ - import·"polyfill";
       1 │ + import·"./reset.css";

@@ -1,0 +1,162 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```text
+[@supports(display:grid)]:grid [&:not(:first-child)]:mt-4 [&[data-active]]:bg-blue-500 hover:[&_p]:underline
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwArbitraryVariant {
+                    l_brack_token: L_BRACKET@0..1 "[" [] [],
+                    selector_token: TW_SELECTOR@1..24 "@supports(display:grid)" [] [],
+                    r_brack_token: R_BRACKET@24..25 "]" [] [],
+                },
+                COLON@25..26 ":" [] [],
+            ],
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@26..31 "grid" [] [Whitespace(" ")],
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwArbitraryVariant {
+                    l_brack_token: L_BRACKET@31..32 "[" [] [],
+                    selector_token: TW_SELECTOR@32..51 "&:not(:first-child)" [] [],
+                    r_brack_token: R_BRACKET@51..52 "]" [] [],
+                },
+                COLON@52..53 ":" [] [],
+            ],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@53..55 "mt" [] [],
+                minus_token: DASH@55..56 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@56..58 "4" [] [Whitespace(" ")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwArbitraryVariant {
+                    l_brack_token: L_BRACKET@58..59 "[" [] [],
+                    selector_token: TW_SELECTOR@59..73 "&[data-active]" [] [],
+                    r_brack_token: R_BRACKET@73..74 "]" [] [],
+                },
+                COLON@74..75 ":" [] [],
+            ],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@75..77 "bg" [] [],
+                minus_token: DASH@77..78 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@78..87 "blue-500" [] [Whitespace(" ")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwStaticVariant {
+                    base_token: TW_BASE@87..92 "hover" [] [],
+                },
+                COLON@92..93 ":" [] [],
+                TwArbitraryVariant {
+                    l_brack_token: L_BRACKET@93..94 "[" [] [],
+                    selector_token: TW_SELECTOR@94..97 "&_p" [] [],
+                    r_brack_token: R_BRACKET@97..98 "]" [] [],
+                },
+                COLON@98..99 ":" [] [],
+            ],
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@99..108 "underline" [] [],
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@108..109 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..109
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..108
+    0: TW_FULL_CANDIDATE@0..31
+      0: TW_VARIANT_LIST@0..26
+        0: TW_ARBITRARY_VARIANT@0..25
+          0: L_BRACKET@0..1 "[" [] []
+          1: TW_SELECTOR@1..24 "@supports(display:grid)" [] []
+          2: R_BRACKET@24..25 "]" [] []
+        1: COLON@25..26 ":" [] []
+      1: (empty)
+      2: TW_STATIC_CANDIDATE@26..31
+        0: TW_BASE@26..31 "grid" [] [Whitespace(" ")]
+      3: (empty)
+    1: TW_FULL_CANDIDATE@31..58
+      0: TW_VARIANT_LIST@31..53
+        0: TW_ARBITRARY_VARIANT@31..52
+          0: L_BRACKET@31..32 "[" [] []
+          1: TW_SELECTOR@32..51 "&:not(:first-child)" [] []
+          2: R_BRACKET@51..52 "]" [] []
+        1: COLON@52..53 ":" [] []
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@53..58
+        0: TW_BASE@53..55 "mt" [] []
+        1: DASH@55..56 "-" [] []
+        2: TW_NAMED_VALUE@56..58
+          0: TW_VALUE@56..58 "4" [] [Whitespace(" ")]
+        3: (empty)
+      3: (empty)
+    2: TW_FULL_CANDIDATE@58..87
+      0: TW_VARIANT_LIST@58..75
+        0: TW_ARBITRARY_VARIANT@58..74
+          0: L_BRACKET@58..59 "[" [] []
+          1: TW_SELECTOR@59..73 "&[data-active]" [] []
+          2: R_BRACKET@73..74 "]" [] []
+        1: COLON@74..75 ":" [] []
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@75..87
+        0: TW_BASE@75..77 "bg" [] []
+        1: DASH@77..78 "-" [] []
+        2: TW_NAMED_VALUE@78..87
+          0: TW_VALUE@78..87 "blue-500" [] [Whitespace(" ")]
+        3: (empty)
+      3: (empty)
+    3: TW_FULL_CANDIDATE@87..108
+      0: TW_VARIANT_LIST@87..99
+        0: TW_STATIC_VARIANT@87..92
+          0: TW_BASE@87..92 "hover" [] []
+        1: COLON@92..93 ":" [] []
+        2: TW_ARBITRARY_VARIANT@93..98
+          0: L_BRACKET@93..94 "[" [] []
+          1: TW_SELECTOR@94..97 "&_p" [] []
+          2: R_BRACKET@97..98 "]" [] []
+        3: COLON@98..99 ":" [] []
+      1: (empty)
+      2: TW_STATIC_CANDIDATE@99..108
+        0: TW_BASE@99..108 "underline" [] []
+      3: (empty)
+  2: EOF@108..109 "" [Newline("\n")] []
+
+```

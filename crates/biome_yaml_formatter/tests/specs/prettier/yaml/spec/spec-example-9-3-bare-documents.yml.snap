@@ -1,0 +1,47 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-9-3-bare-documents.yml
+---
+# Input
+
+```yml
+Bare
+document
+...
+# No document
+...
+|
+%!PS-Adobe-2.0 # Not the first line
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,7 @@
+ Bare
+ document
+----
++...
+ # No document
+----
++...
+ |
+-  %!PS-Adobe-2.0 # Not the first line
++%!PS-Adobe-2.0 # Not the first line
+```
+
+# Output
+
+```yml
+Bare
+document
+...
+# No document
+...
+|
+%!PS-Adobe-2.0 # Not the first line
+```

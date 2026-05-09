@@ -18,6 +18,10 @@ expression: unsorted.jsx
 {/* <Hello lastName="Smith" firstName="John"/>; */}
 
 
+// https://github.com/biomejs/biome/issues/9884
+// Both outer and a nested JSX-valued attribute have unsorted attributes.
+<Outer z="x" a={<Inner z={1} a={2} />} />;
+
 ```
 
 # Diagnostics
@@ -140,6 +144,50 @@ unsorted.jsx:10:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━
        10 │ + <Hello·booleanProp·firstName="John"·lastName="Smith"·/>;
     11 11 │   
     12 12 │   {/* <Hello lastName="Smith" firstName="John"/>; */}
+  
+
+```
+
+```
+unsorted.jsx:17:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    15 │ // https://github.com/biomejs/biome/issues/9884
+    16 │ // Both outer and a nested JSX-valued attribute have unsorted attributes.
+  > 17 │ <Outer z="x" a={<Inner z={1} a={2} />} />;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 
+  
+  i Safe fix: Sort the JSX props.
+  
+    15 15 │   // https://github.com/biomejs/biome/issues/9884
+    16 16 │   // Both outer and a nested JSX-valued attribute have unsorted attributes.
+    17    │ - <Outer·z="x"·a={<Inner·z={1}·a={2}·/>}·/>;
+       17 │ + <Outer·a={<Inner·z={1}·a={2}·/>}·z="x"·/>;
+    18 18 │   
+  
+
+```
+
+```
+unsorted.jsx:17:17 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted. 
+  
+    15 │ // https://github.com/biomejs/biome/issues/9884
+    16 │ // Both outer and a nested JSX-valued attribute have unsorted attributes.
+  > 17 │ <Outer z="x" a={<Inner z={1} a={2} />} />;
+       │                 ^^^^^^^^^^^^^^^^^^^^^
+    18 │ 
+  
+  i Safe fix: Sort the JSX props.
+  
+    15 15 │   // https://github.com/biomejs/biome/issues/9884
+    16 16 │   // Both outer and a nested JSX-valued attribute have unsorted attributes.
+    17    │ - <Outer·z="x"·a={<Inner·z={1}·a={2}·/>}·/>;
+       17 │ + <Outer·z="x"·a={<Inner·a={2}·z={1}·/>}·/>;
+    18 18 │   
   
 
 ```

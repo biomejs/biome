@@ -1,0 +1,46 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-6-10-comment-lines.yml
+---
+
+# Input
+
+```yml
+  # Comment
+   
+
+
+
+```
+
+
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -2,7 +2,3 @@
+ 
+ # Comment
+ 
+-# Comment
+-
+-# Comment
+-
+
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -1,7 +1 @@
+-[
+-  "# Comment",
+-  empty_line,
+-  "# Comment",
+-  empty_line,
+-  verbatim(["# Comment", empty_line, "# Comment", empty_line, ""])
+-]
+\ No newline at end of file
++["# Comment", empty_line, verbatim(["# Comment", empty_line, ""])]
+\ No newline at end of file
+
+```

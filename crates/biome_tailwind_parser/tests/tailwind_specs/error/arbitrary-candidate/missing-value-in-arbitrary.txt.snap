@@ -20,15 +20,26 @@ TwRoot {
         TwFullCandidate {
             variants: TwVariantList [],
             negative_token: missing (optional),
-            candidate: TwBogusCandidate {
-                items: [
-                    L_BRACKET@0..1 "[" [] [],
-                    TW_SELECTOR@1..7 "width:" [] [],
-                    R_BRACKET@7..9 "]" [] [Whitespace(" ")],
-                    TW_BASE@9..10 "w" [] [],
-                    DASH@10..11 "-" [] [],
-                    TW_VALUE@11..12 "5" [] [],
-                ],
+            candidate: TwArbitraryCandidate {
+                l_brack_token: L_BRACKET@0..1 "[" [] [],
+                property_token: TW_PROPERTY@1..6 "width" [] [],
+                colon_token: COLON@6..7 ":" [] [],
+                value: CssGenericComponentValueList [],
+                r_brack_token: R_BRACKET@7..9 "]" [] [Whitespace(" ")],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@9..10 "w" [] [],
+                minus_token: DASH@10..11 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@11..12 "5" [] [],
+                },
+                modifier: missing (optional),
             },
             excl_token: missing (optional),
         },
@@ -43,16 +54,26 @@ TwRoot {
 0: TW_ROOT@0..13
   0: (empty)
   1: TW_CANDIDATE_LIST@0..12
-    0: TW_FULL_CANDIDATE@0..12
+    0: TW_FULL_CANDIDATE@0..9
       0: TW_VARIANT_LIST@0..0
       1: (empty)
-      2: TW_BOGUS_CANDIDATE@0..12
+      2: TW_ARBITRARY_CANDIDATE@0..9
         0: L_BRACKET@0..1 "[" [] []
-        1: TW_SELECTOR@1..7 "width:" [] []
-        2: R_BRACKET@7..9 "]" [] [Whitespace(" ")]
-        3: TW_BASE@9..10 "w" [] []
-        4: DASH@10..11 "-" [] []
-        5: TW_VALUE@11..12 "5" [] []
+        1: TW_PROPERTY@1..6 "width" [] []
+        2: COLON@6..7 ":" [] []
+        3: CSS_GENERIC_COMPONENT_VALUE_LIST@7..7
+        4: R_BRACKET@7..9 "]" [] [Whitespace(" ")]
+        5: (empty)
+      3: (empty)
+    1: TW_FULL_CANDIDATE@9..12
+      0: TW_VARIANT_LIST@9..9
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@9..12
+        0: TW_BASE@9..10 "w" [] []
+        1: DASH@10..11 "-" [] []
+        2: TW_NAMED_VALUE@11..12
+          0: TW_VALUE@11..12 "5" [] []
+        3: (empty)
       3: (empty)
   2: EOF@12..13 "" [Newline("\n")] []
 
@@ -61,18 +82,18 @@ TwRoot {
 ## Diagnostics
 
 ```
-missing-value-in-arbitrary.txt:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+missing-value-in-arbitrary.txt:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a candidate but instead found '[width:] w-5'.
+  × Expected a value but instead found ']'.
   
   > 1 │ [width:] w-5
-      │ ^^^^^^^^^^^^
+      │        ^
     2 │ 
   
-  i Expected a candidate here.
+  i Expected a value here.
   
   > 1 │ [width:] w-5
-      │ ^^^^^^^^^^^^
+      │        ^
     2 │ 
   
 ```

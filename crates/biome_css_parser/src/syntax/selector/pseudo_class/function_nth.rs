@@ -1,6 +1,9 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
-use crate::syntax::parse_error::{expected_any_pseudo_class_nth, expected_number};
+use crate::syntax::parse_error::{
+    expected_any_pseudo_class_nth, expected_number, expected_selector,
+};
+use crate::syntax::scss::{is_at_scss_pseudo_class_nth, parse_scss_pseudo_class_nth};
 use crate::syntax::selector::{
     SelectorList, eat_or_recover_selector_function_close_token, recover_selector_function_parameter,
 };
@@ -64,16 +67,16 @@ pub(crate) fn parse_pseudo_class_function_nth(p: &mut CssParser) -> ParsedSyntax
 const PSEUDO_CLASS_FUNCTION_NTH_CLASS_IDENTIFIER_SET: TokenSet<CssSyntaxKind> =
     token_set![T![odd], T![even]];
 
-const PSEUDO_CLASS_FUNCTION_NTH_CLASS_SIGN_SET: TokenSet<CssSyntaxKind> = token_set![T![+], T![-]];
+pub(crate) const PSEUDO_CLASS_NTH_SIGN_SET: TokenSet<CssSyntaxKind> = token_set![T![+], T![-]];
 
 const PSEUDO_CLASS_FUNCTION_NTH_CLASS_SET: TokenSet<CssSyntaxKind> =
     PSEUDO_CLASS_FUNCTION_NTH_CLASS_IDENTIFIER_SET
-        .union(PSEUDO_CLASS_FUNCTION_NTH_CLASS_SIGN_SET)
+        .union(PSEUDO_CLASS_NTH_SIGN_SET)
         .union(token_set![T![n], CSS_DIMENSION_VALUE, CSS_NUMBER_LITERAL]);
 
 #[inline]
 fn is_at_pseudo_class_nth_selector(p: &mut CssParser) -> bool {
-    p.at_ts(PSEUDO_CLASS_FUNCTION_NTH_CLASS_SET)
+    is_at_scss_pseudo_class_nth(p) || p.at_ts(PSEUDO_CLASS_FUNCTION_NTH_CLASS_SET)
 }
 
 #[inline]
@@ -96,15 +99,16 @@ fn parse_pseudo_class_nth(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
+    if is_at_scss_pseudo_class_nth(p) {
+        return parse_scss_pseudo_class_nth(p);
+    }
+
     let m = p.start();
 
     let kind = if p.eat_ts(PSEUDO_CLASS_FUNCTION_NTH_CLASS_IDENTIFIER_SET) {
         CSS_PSEUDO_CLASS_NTH_IDENTIFIER
     } else {
-        p.eat_ts_with_context(
-            PSEUDO_CLASS_FUNCTION_NTH_CLASS_SIGN_SET,
-            CssLexContext::PseudoNthSelector,
-        );
+        p.eat_ts_with_context(PSEUDO_CLASS_NTH_SIGN_SET, CssLexContext::PseudoNthSelector);
 
         // `2n` will get lexed as a CSS_DIMENSION_VALUE first, and needs to be
         // re-cast to a CssNumber instead, like `2` would, then followed by the
@@ -116,11 +120,7 @@ fn parse_pseudo_class_nth(p: &mut CssParser) -> ParsedSyntax {
         match p.cur() {
             // Matches `2n` or `2n + 1`
             CSS_DIMENSION_VALUE => {
-                // Re-cast the value as a number literal and into a CssNumber
-                // to fit the Pseudo node.
-                let m = p.start();
-                p.bump_remap_with_context(CSS_NUMBER_LITERAL, CssLexContext::PseudoNthSelector);
-                m.complete(p, CSS_NUMBER);
+                parse_pseudo_class_nth_dimension_value(p).ok();
 
                 if p.eat_with_context(T![n], CssLexContext::PseudoNthSelector) {
                     parse_nth_offset(p).ok();
@@ -152,15 +152,27 @@ fn parse_pseudo_class_nth(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, kind))
 }
 
+/// Parses the number part of `2n` and leaves `n` for the caller.
+#[inline]
+pub(crate) fn parse_pseudo_class_nth_dimension_value(p: &mut CssParser) -> ParsedSyntax {
+    if !p.at(CSS_DIMENSION_VALUE) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump_remap_with_context(CSS_NUMBER_LITERAL, CssLexContext::PseudoNthSelector);
+    Present(m.complete(p, CSS_NUMBER))
+}
+
 #[inline]
 fn parse_nth_offset(p: &mut CssParser) -> ParsedSyntax {
-    if !p.at_ts(PSEUDO_CLASS_FUNCTION_NTH_CLASS_SIGN_SET) {
+    if !p.at_ts(PSEUDO_CLASS_NTH_SIGN_SET) {
         return Absent;
     }
 
     let m = p.start();
 
-    p.bump_ts(PSEUDO_CLASS_FUNCTION_NTH_CLASS_SIGN_SET);
+    p.bump_ts(PSEUDO_CLASS_NTH_SIGN_SET);
     parse_regular_number(p).or_add_diagnostic(p, expected_number);
 
     Present(m.complete(p, CSS_NTH_OFFSET))
@@ -175,6 +187,10 @@ fn parse_pseudo_class_of_nth_selector(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(OF_KW);
+
+    if p.at(T![')']) {
+        p.error(expected_selector(p, p.cur_range()));
+    }
 
     SelectorList::default()
         .with_end_kind_ts(token_set!(T![')']))

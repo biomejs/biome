@@ -1,0 +1,28 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/flow-sequence/props.yml
+---
+
+# Input
+
+```yml
+!!set &anchor [1]
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1 @@
+-!!set &anchor [1]
++!!set &anchor [1]
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+!!set &anchor [1]```

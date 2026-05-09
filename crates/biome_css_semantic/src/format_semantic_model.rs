@@ -77,8 +77,8 @@ impl Format<FormatSemanticModelContext> for SemanticModel {
     fn fmt(&self, f: &mut Formatter<FormatSemanticModelContext>) -> FormatResult<()> {
         let mut selectors: Vec<&Selector> = self
             .data
-            .rules_by_id
-            .values()
+            .all_rules
+            .iter()
             .flat_map(|rule| rule.selectors())
             .collect();
         selectors.sort_by_key(|sel| sel.range(&self.root()).start());

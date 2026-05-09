@@ -1,0 +1,1 @@
+[width:calc(100%_-_1rem)] [background-image:url(/img/mountains.jpg)] [color:rgb(0_0_0/0.5)] [grid-template-columns:repeat(2,_minmax(0,_1fr))]

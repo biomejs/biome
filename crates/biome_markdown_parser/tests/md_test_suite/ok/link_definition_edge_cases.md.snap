@@ -1,5 +1,6 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 192
 expression: snapshot
 ---
 
@@ -569,11 +570,8 @@ MdDocument {
         },
         MdParagraph {
             list: MdInlineItemList [
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@435..438 "   " [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@438..439 "\n" [] [],
+                MdHardLine {
+                    value_token: MD_HARD_LINE_LITERAL@435..439 "   \n" [] [],
                 },
             ],
             hard_line: missing (optional),
@@ -1011,10 +1009,8 @@ MdDocument {
       6: (empty)
     35: MD_PARAGRAPH@435..439
       0: MD_INLINE_ITEM_LIST@435..439
-        0: MD_TEXTUAL@435..438
-          0: MD_TEXTUAL_LITERAL@435..438 "   " [] []
-        1: MD_TEXTUAL@438..439
-          0: MD_TEXTUAL_LITERAL@438..439 "\n" [] []
+        0: MD_HARD_LINE@435..439
+          0: MD_HARD_LINE_LITERAL@435..439 "   \n" [] []
       1: (empty)
     36: MD_NEWLINE@439..440
       0: NEWLINE@439..440 "\n" [] []

@@ -53,14 +53,14 @@ MdDocument {
                             prefix: MdListMarkerPrefix {
                                 pre_marker_indent: MdIndentTokenList [],
                                 marker: MINUS@19..20 "-" [] [],
-                                post_marker_space_token: missing (optional),
+                                post_marker_space_token: MD_LIST_POST_MARKER_SPACE@20..21 " " [] [],
                                 content_indent: MdIndentTokenList [],
                             },
                             content: MdBlockList [
                                 MdParagraph {
                                     list: MdInlineItemList [
                                         MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@20..34 " nested bullet" [] [],
+                                            value_token: MD_TEXTUAL_LITERAL@21..34 "nested bullet" [] [],
                                         },
                                         MdTextual {
                                             value_token: MD_TEXTUAL_LITERAL@34..35 "\n" [] [],
@@ -106,14 +106,14 @@ MdDocument {
                             prefix: MdListMarkerPrefix {
                                 pre_marker_indent: MdIndentTokenList [],
                                 marker: MD_ORDERED_LIST_MARKER@55..57 "1." [] [],
-                                post_marker_space_token: missing (optional),
+                                post_marker_space_token: MD_LIST_POST_MARKER_SPACE@57..58 " " [] [],
                                 content_indent: MdIndentTokenList [],
                             },
                             content: MdBlockList [
                                 MdParagraph {
                                     list: MdInlineItemList [
                                         MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@57..72 " nested ordered" [] [],
+                                            value_token: MD_TEXTUAL_LITERAL@58..72 "nested ordered" [] [],
                                         },
                                         MdTextual {
                                             value_token: MD_TEXTUAL_LITERAL@72..73 "\n" [] [],
@@ -192,16 +192,16 @@ MdDocument {
         2: MD_BULLET_LIST_ITEM@19..35
           0: MD_BULLET_LIST@19..35
             0: MD_BULLET@19..35
-              0: MD_LIST_MARKER_PREFIX@19..20
+              0: MD_LIST_MARKER_PREFIX@19..21
                 0: MD_INDENT_TOKEN_LIST@19..19
                 1: MINUS@19..20 "-" [] []
-                2: (empty)
-                3: MD_INDENT_TOKEN_LIST@20..20
-              1: MD_BLOCK_LIST@20..35
-                0: MD_PARAGRAPH@20..35
-                  0: MD_INLINE_ITEM_LIST@20..35
-                    0: MD_TEXTUAL@20..34
-                      0: MD_TEXTUAL_LITERAL@20..34 " nested bullet" [] []
+                2: MD_LIST_POST_MARKER_SPACE@20..21 " " [] []
+                3: MD_INDENT_TOKEN_LIST@21..21
+              1: MD_BLOCK_LIST@21..35
+                0: MD_PARAGRAPH@21..35
+                  0: MD_INLINE_ITEM_LIST@21..35
+                    0: MD_TEXTUAL@21..34
+                      0: MD_TEXTUAL_LITERAL@21..34 "nested bullet" [] []
                     1: MD_TEXTUAL@34..35
                       0: MD_TEXTUAL_LITERAL@34..35 "\n" [] []
                   1: (empty)
@@ -227,16 +227,16 @@ MdDocument {
         2: MD_ORDERED_LIST_ITEM@55..73
           0: MD_BULLET_LIST@55..73
             0: MD_BULLET@55..73
-              0: MD_LIST_MARKER_PREFIX@55..57
+              0: MD_LIST_MARKER_PREFIX@55..58
                 0: MD_INDENT_TOKEN_LIST@55..55
                 1: MD_ORDERED_LIST_MARKER@55..57 "1." [] []
-                2: (empty)
-                3: MD_INDENT_TOKEN_LIST@57..57
-              1: MD_BLOCK_LIST@57..73
-                0: MD_PARAGRAPH@57..73
-                  0: MD_INLINE_ITEM_LIST@57..73
-                    0: MD_TEXTUAL@57..72
-                      0: MD_TEXTUAL_LITERAL@57..72 " nested ordered" [] []
+                2: MD_LIST_POST_MARKER_SPACE@57..58 " " [] []
+                3: MD_INDENT_TOKEN_LIST@58..58
+              1: MD_BLOCK_LIST@58..73
+                0: MD_PARAGRAPH@58..73
+                  0: MD_INLINE_ITEM_LIST@58..73
+                    0: MD_TEXTUAL@58..72
+                      0: MD_TEXTUAL_LITERAL@58..72 "nested ordered" [] []
                     1: MD_TEXTUAL@72..73
                       0: MD_TEXTUAL_LITERAL@72..73 "\n" [] []
                   1: (empty)

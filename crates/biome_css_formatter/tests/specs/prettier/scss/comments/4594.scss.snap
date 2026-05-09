@@ -52,31 +52,7 @@ $my-map: (
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,27 +1,25 @@
- .foo,
- // Comment
--.bar {
-+  .bar {
-   // Comment
-   color: red; // Comment
- }
- 
- $my-list:
--  "foo",
--  // Comment
-+  "foo", // Comment
-   "bar"; // Comment
- 
- $my-map: (
--  "foo": 1,
--  // Comment
--  "bar": 2,
--  // Comment
--  "buz": calc(1 + 2),
--  // Buz
-+  "foo": 1, // Comment
-+  "bar": 2, // Comment
-+  "buz": calc(1 + 2), // Buz
+@@ -20,8 +20,10 @@
    "baz": 4, // Baz
  );
  
@@ -89,7 +65,7 @@ $my-map: (
  [href]:active & {
    .tooltip {
      opacity: 1;
-@@ -33,7 +31,8 @@
+@@ -33,7 +35,8 @@
    "variables",
    // Comment
    "reset",
@@ -106,19 +82,23 @@ $my-map: (
 ```scss
 .foo,
 // Comment
-  .bar {
+.bar {
   // Comment
   color: red; // Comment
 }
 
 $my-list:
-  "foo", // Comment
+  "foo",
+  // Comment
   "bar"; // Comment
 
 $my-map: (
-  "foo": 1, // Comment
-  "bar": 2, // Comment
-  "buz": calc(1 + 2), // Buz
+  "foo": 1,
+  // Comment
+  "bar": 2,
+  // Comment
+  "buz": calc(1 + 2),
+  // Buz
   "baz": 4, // Baz
 );
 

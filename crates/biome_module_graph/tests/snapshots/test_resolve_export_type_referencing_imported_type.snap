@@ -104,7 +104,7 @@ Imports {
 
 ```
 PromisedResult  => BindingTypeData {
-  Types Module(0) TypeId(4),
+  Types Module(0) TypeId(3),
 }
 ```
 
@@ -115,12 +115,10 @@ Module TypeId(0) => bool: true
 
 Module TypeId(1) => bool: false
 
-Module TypeId(2) => Module(0) TypeId(0) | Module(0) TypeId(1)
-
-Module TypeId(3) => Object {
+Module TypeId(2) => Object {
   prototype: No prototype
-  members: ["result": Module(0) TypeId(2)]
+  members: ["result": boolean]
 }
 
-Module TypeId(4) => instanceof Promise<Module(0) TypeId(3)>
+Module TypeId(3) => instanceof Promise<Module(0) TypeId(2)>
 ```

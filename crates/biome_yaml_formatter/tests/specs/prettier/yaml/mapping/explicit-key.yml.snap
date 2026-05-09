@@ -1,0 +1,75 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/mapping/explicit-key.yml
+---
+# Input
+
+```yml
+? key1
+: value
+? key2
+: longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong
+? longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong
+: value
+? solongitshouldbreakbutitcannot_longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong
+: # Comment
+  foo: bar
+? multiline
+  scalar
+  key
+: value
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,10 +1,13 @@
+-key1: value
+-key2: longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong
+-longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong: value
+-solongitshouldbreakbutitcannot_longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong:
+-  # Comment
++? key1
++: value
++? key2
++: longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong
++? longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong
++: value
++? solongitshouldbreakbutitcannot_longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong
++: # Comment
+   foo: bar
+ ? multiline
+   scalar
+   key
+-: value
++: value
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+? key1
+: value
+? key2
+: longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong
+? longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong
+: value
+? solongitshouldbreakbutitcannot_longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong
+: # Comment
+  foo: bar
+? multiline
+  scalar
+  key
+: value```
+
+# Lines exceeding max width of 80 characters
+```
+    4: : longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong
+    5: ? longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong
+    7: ? solongitshouldbreakbutitcannot_longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong
+```

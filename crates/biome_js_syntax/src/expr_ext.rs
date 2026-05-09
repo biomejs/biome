@@ -7,12 +7,13 @@ use crate::{
     AnyJsObjectMemberName, AnyJsTemplateElement, AnyTsEnumMemberName, JsArrayExpression,
     JsArrayHole, JsAssignmentExpression, JsBinaryExpression, JsCallArgumentList, JsCallArguments,
     JsCallExpression, JsComputedMemberAssignment, JsComputedMemberExpression,
-    JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIfStatement,
-    JsLiteralMemberName, JsLogicalExpression, JsNewExpression, JsNumberLiteralExpression,
-    JsObjectExpression, JsPostUpdateExpression, JsPreUpdateExpression, JsReferenceIdentifier,
-    JsRegexLiteralExpression, JsStaticMemberExpression, JsStringLiteralExpression, JsSyntaxKind,
-    JsSyntaxNode, JsSyntaxToken, JsTemplateChunkElement, JsTemplateExpression, JsUnaryExpression,
-    JsWhileStatement, OperatorPrecedence, TsStringLiteralType, inner_string_text,
+    JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIdentifierExpression,
+    JsIfStatement, JsLiteralMemberName, JsLogicalExpression, JsNewExpression,
+    JsNumberLiteralExpression, JsObjectExpression, JsPostUpdateExpression, JsPreUpdateExpression,
+    JsReferenceIdentifier, JsRegexLiteralExpression, JsStaticMemberExpression,
+    JsStringLiteralExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsTemplateChunkElement,
+    JsTemplateExpression, JsUnaryExpression, JsWhileStatement, OperatorPrecedence,
+    TsStringLiteralType, inner_string_text,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, NodeOrToken, SyntaxNodeCast, SyntaxResult, TextRange,
@@ -770,6 +771,19 @@ impl AnyJsExpression {
         })
         .last()
         .unwrap_or(self)
+    }
+
+    pub fn as_any_global_identifier_expression(&self) -> Option<AnyPossibleGlobalIdentifier> {
+        match self {
+            Self::JsIdentifierExpression(expr) => Some(expr.clone().into()),
+            Self::JsComputedMemberExpression(expr) => {
+                Some(AnyJsMemberExpression::from(expr.clone()).into())
+            }
+            Self::JsStaticMemberExpression(expr) => {
+                Some(AnyJsMemberExpression::from(expr.clone()).into())
+            }
+            _ => None,
+        }
     }
 
     pub fn precedence(&self) -> SyntaxResult<OperatorPrecedence> {
@@ -1634,6 +1648,37 @@ impl AnyJsMemberExpression {
 }
 
 declare_node_union! {
+    pub AnyPossibleGlobalIdentifier = AnyJsMemberExpression | JsIdentifierExpression
+}
+
+impl AnyPossibleGlobalIdentifier {
+    pub fn as_js_reference_identifier(&self) -> Option<JsReferenceIdentifier> {
+        match self {
+            Self::AnyJsMemberExpression(_) => None,
+            Self::JsIdentifierExpression(identifier) => identifier.name().ok(),
+        }
+    }
+
+    pub fn as_any_js_member_expression(&self) -> Option<AnyJsMemberExpression> {
+        match self {
+            Self::AnyJsMemberExpression(member_expression) => Some(member_expression.clone()),
+            Self::JsIdentifierExpression(_) => None,
+        }
+    }
+}
+
+impl From<AnyPossibleGlobalIdentifier> for AnyJsExpression {
+    fn from(value: AnyPossibleGlobalIdentifier) -> Self {
+        match value {
+            AnyPossibleGlobalIdentifier::AnyJsMemberExpression(node) => node.into(),
+            AnyPossibleGlobalIdentifier::JsIdentifierExpression(expression) => {
+                Self::JsIdentifierExpression(expression)
+            }
+        }
+    }
+}
+
+declare_node_union! {
     pub AnyJsOptionalChainExpression = JsStaticMemberExpression | JsComputedMemberExpression | JsCallExpression
 }
 
@@ -1922,12 +1967,12 @@ impl AnyJsClassMemberName {
 /// ### Examples
 ///
 /// ```
-/// use biome_js_syntax::{AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression, global_identifier, T};
+/// use biome_js_syntax::{AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression, AnyPossibleGlobalIdentifier, global_identifier, T};
 /// use biome_js_factory::make;
 ///
 /// let math_reference = make::js_reference_identifier(make::ident("Math"));
 /// let math_id = make::js_identifier_expression(math_reference.clone());
-/// let math_id = AnyJsExpression::from(math_id);
+/// let math_id = AnyPossibleGlobalIdentifier::from(math_id);
 /// let (reference, name) = global_identifier(&math_id).unwrap();
 /// assert_eq!(name.text(), "Math");
 /// assert_eq!(reference, math_reference);
@@ -1940,11 +1985,13 @@ impl AnyJsClassMemberName {
 /// let math_name = make::js_name(math_ident_token);
 /// let static_member = make::js_static_member_expression(global_this_id.clone().into(), make::token(T![.]), math_name.into());
 /// let static_member = AnyJsExpression::from(static_member);
-/// let (reference, name) = global_identifier(&static_member).unwrap();
+/// let (reference, name) = global_identifier(&static_member.as_any_global_identifier_expression().unwrap()).unwrap();
 /// assert_eq!(name.text(), "Math");
 /// assert_eq!(reference, global_this_reference);
 /// ```
-pub fn global_identifier(expr: &AnyJsExpression) -> Option<(JsReferenceIdentifier, StaticValue)> {
+pub fn global_identifier(
+    expr: &AnyPossibleGlobalIdentifier,
+) -> Option<(JsReferenceIdentifier, StaticValue)> {
     if let Some(reference) = expr.as_js_reference_identifier() {
         let name = StaticValue::String(reference.value_token().ok()?);
         return Some((reference, name));

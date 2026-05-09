@@ -190,11 +190,10 @@ impl Rule for NoUselessEscapeInRegex {
                                     }
                                 }
                             }
-                            b'[' => {
-                                if has_v_flag {
+                            b'['
+                                if has_v_flag => {
                                     inner_class_count += 1;
                                 }
-                            }
                             b']' => {
                                 if has_v_flag && inner_class_count != 0 {
                                     inner_class_count -= 1;

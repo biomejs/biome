@@ -1,0 +1,35 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/mapping/common.yml
+---
+# Input
+
+```yml
+key1: value
+key2: longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,2 @@
+ key1: value
+-key2: longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong
++key2: longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+key1: value
+key2: longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong```
+
+# Lines exceeding max width of 80 characters
+```
+    2: key2: longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong
+```

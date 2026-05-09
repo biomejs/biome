@@ -19,6 +19,9 @@ use crate::syntax::scss::{
 use crate::syntax::selector::attribute::parse_attribute_selector;
 use crate::syntax::selector::nested_selector::NestedSelectorList;
 use crate::syntax::selector::pseudo_class::parse_pseudo_class_selector;
+pub(crate) use crate::syntax::selector::pseudo_class::{
+    PSEUDO_CLASS_NTH_SIGN_SET, parse_pseudo_class_nth_dimension_value,
+};
 use crate::syntax::selector::pseudo_element::parse_pseudo_element_selector;
 use crate::syntax::{
     CssSyntaxFeatures, is_at_identifier, is_nth_at_identifier,

@@ -21,9 +21,9 @@ HtmlRoot {
     html: HtmlElementList [
         SvelteConstBlock {
             sv_curly_at_token: SV_CURLY_AT@0..2 "{@" [] [],
-            const_token: CONST_KW@2..7 "const" [] [],
+            const_token: CONST_KW@2..8 "const" [] [Whitespace(" ")],
             expression: HtmlTextExpression {
-                html_literal_token: HTML_LITERAL@7..38 " area = box.width * box.height\n" [] [],
+                html_literal_token: HTML_LITERAL@8..38 "area = box.width * box.height\n" [] [],
             },
             r_curly_token: missing (required),
         },
@@ -42,9 +42,9 @@ HtmlRoot {
   3: HTML_ELEMENT_LIST@0..38
     0: SVELTE_CONST_BLOCK@0..38
       0: SV_CURLY_AT@0..2 "{@" [] []
-      1: CONST_KW@2..7 "const" [] []
-      2: HTML_TEXT_EXPRESSION@7..38
-        0: HTML_LITERAL@7..38 " area = box.width * box.height\n" [] []
+      1: CONST_KW@2..8 "const" [] [Whitespace(" ")]
+      2: HTML_TEXT_EXPRESSION@8..38
+        0: HTML_LITERAL@8..38 "area = box.width * box.height\n" [] []
       3: (empty)
   4: EOF@38..38 "" [] []
 

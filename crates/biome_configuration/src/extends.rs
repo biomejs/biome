@@ -7,7 +7,7 @@ use biome_deserialize_macros::Merge;
 use biome_diagnostics::Severity;
 use serde::{Deserialize, Serialize};
 
-/// A list of paths to other JSON files, used to extends the current configuration.
+/// A list of paths to other JSON files, used to extend the current configuration.
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, Merge)]
 #[serde(deny_unknown_fields, rename_all = "camelCase", untagged)]
 pub enum Extends {

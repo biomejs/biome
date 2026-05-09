@@ -1,0 +1,54 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/plain/force-singleline-in-mapping-value.yml
+---
+# Input
+
+```yml
+no-whitesapce: longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong
+
+whitespace: longlonglonglonglonglonglonglonglonglonglong longlonglonglonglonglonglonglonglonglonglong
+
+literal-newline: longlonglonglonglonglonglonglonglonglonglong
+  longlonglonglonglonglonglonglonglonglonglong
+
+newline: longlonglonglonglonglonglonglonglonglonglong
+
+  longlonglonglonglonglonglonglonglonglonglong
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -7,4 +7,4 @@
+ 
+ newline: longlonglonglonglonglonglonglonglonglonglong
+ 
+-  longlonglonglonglonglonglonglonglonglonglong
++  longlonglonglonglonglonglonglonglonglonglong
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+no-whitesapce: longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong
+
+whitespace: longlonglonglonglonglonglonglonglonglonglong longlonglonglonglonglonglonglonglonglonglong
+
+literal-newline: longlonglonglonglonglonglonglonglonglonglong
+  longlonglonglonglonglonglonglonglonglonglong
+
+newline: longlonglonglonglonglonglonglonglonglonglong
+
+  longlonglonglonglonglonglonglonglonglonglong```
+
+# Lines exceeding max width of 80 characters
+```
+    1: no-whitesapce: longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglong
+    3: whitespace: longlonglonglonglonglonglonglonglonglonglong longlonglonglonglonglonglonglonglonglonglong
+```

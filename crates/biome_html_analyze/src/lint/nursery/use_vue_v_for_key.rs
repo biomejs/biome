@@ -34,6 +34,9 @@ declare_lint_rule! {
     /// <li v-for="item in items" v-bind:key="item.id">{{ item }}</li>
     /// ```
     ///
+    /// Related rules:
+    /// - [`useVueValidVFor`](https://biomejs.dev/linter/rules/use-vue-valid-v-for/)
+    ///
     pub UseVueVForKey {
         version: "2.3.11",
         name: "useVueVForKey",

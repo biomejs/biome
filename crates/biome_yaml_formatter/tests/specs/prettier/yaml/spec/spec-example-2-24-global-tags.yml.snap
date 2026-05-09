@@ -1,0 +1,108 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-2-24-global-tags.yml
+---
+
+# Input
+
+```yml
+%TAG ! tag:clarkevans.com,2002:
+--- !shape
+  # Use the ! handle for presenting
+  # tag:clarkevans.com,2002:circle
+- !circle
+  center: &ORIGIN {x: 73, y: 129}
+  radius: 7
+- !line
+  start: *ORIGIN
+  finish: { x: 89, y: 102 }
+- !label
+  start: *ORIGIN
+  color: 0xFFEEBB
+  text: Pretty vector drawing.
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,10 +1,9 @@
+ %TAG ! tag:clarkevans.com,2002:
+----
+-!shape
+-# Use the ! handle for presenting
+-# tag:clarkevans.com,2002:circle
++--- !shape
++  # Use the ! handle for presenting
++  # tag:clarkevans.com,2002:circle
+ - !circle
+-  center: &ORIGIN { x: 73, y: 129 }
++  center: &ORIGIN {x: 73, y: 129}
+   radius: 7
+ - !line
+   start: *ORIGIN
+@@ -12,4 +11,4 @@
+ - !label
+   start: *ORIGIN
+   color: 0xFFEEBB
+-  text: Pretty vector drawing.
++  text: Pretty vector drawing.
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+%TAG ! tag:clarkevans.com,2002:
+--- !shape
+  # Use the ! handle for presenting
+  # tag:clarkevans.com,2002:circle
+- !circle
+  center: &ORIGIN {x: 73, y: 129}
+  radius: 7
+- !line
+  start: *ORIGIN
+  finish: { x: 89, y: 102 }
+- !label
+  start: *ORIGIN
+  color: 0xFFEEBB
+  text: Pretty vector drawing.```
+
+# Errors
+```
+spec-example-2-24-global-tags.yml:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `%`
+  
+  > 1 │ %TAG ! tag:clarkevans.com,2002:
+      │ ^
+    2 │ --- !shape
+    3 │   # Use the ! handle for presenting
+  
+spec-example-2-24-global-tags.yml:9:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `*`
+  
+     7 │   radius: 7
+     8 │ - !line
+   > 9 │   start: *ORIGIN
+       │          ^
+    10 │   finish: { x: 89, y: 102 }
+    11 │ - !label
+  
+spec-example-2-24-global-tags.yml:12:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `*`
+  
+    10 │   finish: { x: 89, y: 102 }
+    11 │ - !label
+  > 12 │   start: *ORIGIN
+       │          ^
+    13 │   color: 0xFFEEBB
+    14 │   text: Pretty vector drawing.
+  
+
+```

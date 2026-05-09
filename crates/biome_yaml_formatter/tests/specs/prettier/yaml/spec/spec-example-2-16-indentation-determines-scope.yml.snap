@@ -1,0 +1,42 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/spec/spec-example-2-16-indentation-determines-scope.yml
+---
+# Input
+
+```yml
+name: Mark McGwire
+accomplishment: >
+  Mark set a major league
+  home run record in 1998.
+stats: |
+  65 Home Runs
+  0.278 Batting Average
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -4,4 +4,4 @@
+   home run record in 1998.
+ stats: |
+   65 Home Runs
+-  0.278 Batting Average
++  0.278 Batting Average
+\ No newline at end of file
+```
+
+# Output
+
+```yml
+name: Mark McGwire
+accomplishment: >
+  Mark set a major league
+  home run record in 1998.
+stats: |
+  65 Home Runs
+  0.278 Batting Average```

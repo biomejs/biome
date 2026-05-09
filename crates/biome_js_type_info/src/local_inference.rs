@@ -46,6 +46,8 @@ use crate::{
     TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
 };
 
+const MAX_CONST_ASSERTION_DEPTH: usize = 50;
+
 impl TypeData {
     /// Applies the given `pattern` and returns the named bindings, and their
     /// associated types.
@@ -594,6 +596,32 @@ impl TypeData {
             AnyJsExpression::JsThisExpression(_) => Self::from(TypeofExpression::This(
                 TypeofThisOrSuperExpression::from_any_js_expression(scope_id, expr),
             )),
+            AnyJsExpression::TsAsExpression(expr) => {
+                let Ok(annotation) = expr.ty() else {
+                    return Self::unknown();
+                };
+                let Ok(inner) = expr.expression() else {
+                    return Self::unknown();
+                };
+                if is_const_reference_type(&annotation) {
+                    type_data_from_const_assertion_expression(resolver, scope_id, &inner)
+                } else {
+                    Self::unknown()
+                }
+            }
+            AnyJsExpression::TsTypeAssertionExpression(expr) => {
+                let Ok(annotation) = expr.ty() else {
+                    return Self::unknown();
+                };
+                let Ok(inner) = expr.expression() else {
+                    return Self::unknown();
+                };
+                if is_const_reference_type(&annotation) {
+                    type_data_from_const_assertion_expression(resolver, scope_id, &inner)
+                } else {
+                    Self::unknown()
+                }
+            }
             AnyJsExpression::JsUnaryExpression(expr) => {
                 Self::from_js_unary_expression(resolver, scope_id, expr)
             }
@@ -2071,12 +2099,21 @@ impl TypeMember {
                         .map(|name| TypeMemberKind::Named(name.into())),
                     _ => None,
                 })
-                .map(|kind| Self {
-                    kind,
-                    ty: member
-                        .value()
-                        .map(|value| resolver.reference_to_resolved_expression(scope_id, &value))
-                        .unwrap_or_default(),
+                .map(|kind| {
+                    let value = member.value().ok();
+                    let kind = if value.as_ref().is_some_and(expression_is_const_assertion) {
+                        kind.with_const_asserted()
+                    } else {
+                        kind
+                    };
+                    Self {
+                        kind,
+                        ty: value
+                            .map(|value| {
+                                resolver.reference_to_resolved_expression(scope_id, &value)
+                            })
+                            .unwrap_or_default(),
+                    }
                 }),
             AnyJsObjectMember::JsSetterObjectMember(_) => {
                 // TODO: Handle setters
@@ -2091,7 +2128,7 @@ impl TypeMember {
                     ty: resolver.reference_to_owned_data(TypeData::from(TypeofValue {
                         identifier: name,
                         ty: TypeReference::unknown(),
-                        scope_id: None,
+                        scope_id: Some(scope_id),
                     })),
                 }),
             AnyJsObjectMember::JsSpread(_) => {
@@ -2841,6 +2878,144 @@ fn type_from_function_body(
             TypeData::union_of(resolver, return_types)
         }
     }
+}
+
+/// Checks for TypeScript's special `const` assertion target.
+fn is_const_reference_type(type_annotation: &AnyTsType) -> bool {
+    let Some(reference_type) = type_annotation.as_ts_reference_type() else {
+        return false;
+    };
+
+    reference_type.type_arguments().is_none()
+        && reference_type.name().ok().is_some_and(|name| {
+            name.as_js_reference_identifier()
+                .and_then(|identifier| identifier.value_token().ok())
+                .is_some_and(|token| token.text_trimmed() == "const")
+        })
+}
+
+/// Recognizes direct `as const` and `<const>` assertions, allowing parentheses around them.
+fn expression_is_const_assertion(expression: &AnyJsExpression) -> bool {
+    let mut current = expression.clone();
+    loop {
+        match &current {
+            AnyJsExpression::TsAsExpression(expression) => {
+                return expression.ty().is_ok_and(|ty| is_const_reference_type(&ty));
+            }
+            AnyJsExpression::TsTypeAssertionExpression(expression) => {
+                return expression.ty().is_ok_and(|ty| is_const_reference_type(&ty));
+            }
+            AnyJsExpression::JsParenthesizedExpression(expression) => match expression.expression()
+            {
+                Ok(inner) => current = inner,
+                Err(_) => return false,
+            },
+            _ => return false,
+        }
+    }
+}
+
+/// Builds the type produced by a const assertion expression.
+fn type_data_from_const_assertion_expression(
+    resolver: &mut dyn TypeResolver,
+    scope_id: ScopeId,
+    expression: &AnyJsExpression,
+) -> TypeData {
+    let expression = expression.clone().omit_parentheses();
+    if let AnyJsExpression::JsUnaryExpression(unary) = &expression
+        && unary.operator().ok() == Some(JsUnaryOperator::Minus)
+        && let Ok(argument) = unary.argument()
+    {
+        match argument.omit_parentheses() {
+            AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsBigintLiteralExpression(literal),
+            ) => {
+                if let Some(text) = text_from_token(literal.value_token()) {
+                    return TypeData::Literal(Box::new(Literal::BigInt(format!("-{text}").into())));
+                }
+            }
+            AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsNumberLiteralExpression(literal),
+            ) => {
+                if let Some(text) = text_from_token(literal.value_token()) {
+                    return TypeData::Literal(Box::new(Literal::Number(NumberLiteral::new(
+                        format!("-{text}").into(),
+                    ))));
+                }
+            }
+            _ => {}
+        }
+    }
+
+    let inner_type = resolver
+        .resolve_expression(scope_id, &expression)
+        .into_owned();
+    apply_deep_const(resolver, inner_type)
+}
+
+/// Applies const assertion conversion to inferred tuple and object types.
+fn apply_deep_const(resolver: &mut dyn TypeResolver, inner_type: TypeData) -> TypeData {
+    apply_deep_const_inner(resolver, inner_type, 0)
+}
+
+/// Recursively applies `as const` to tuple elements and object members.
+fn apply_deep_const_inner(
+    resolver: &mut dyn TypeResolver,
+    inner_type: TypeData,
+    depth: usize,
+) -> TypeData {
+    if depth >= MAX_CONST_ASSERTION_DEPTH {
+        return inner_type;
+    }
+
+    match inner_type {
+        TypeData::Tuple(tuple) => {
+            let elements = tuple
+                .elements()
+                .iter()
+                .map(|element| TupleElementType {
+                    ty: apply_deep_const_reference(resolver, &element.ty, depth + 1),
+                    name: element.name.clone(),
+                    is_optional: element.is_optional,
+                    is_rest: element.is_rest,
+                })
+                .collect();
+            TypeData::Tuple(Box::new(Tuple(elements)))
+        }
+        TypeData::Object(object) => TypeData::Object(Box::new(Object {
+            prototype: object.prototype.clone(),
+            members: object
+                .members
+                .iter()
+                .map(|member| TypeMember {
+                    kind: member.kind.clone().with_const_asserted(),
+                    ty: apply_deep_const_reference(resolver, &member.ty, depth + 1),
+                })
+                .collect(),
+        })),
+        _ => inner_type,
+    }
+}
+
+/// Resolves a type reference, applies const assertion conversion, and stores the result.
+fn apply_deep_const_reference(
+    resolver: &mut dyn TypeResolver,
+    type_reference: &TypeReference,
+    depth: usize,
+) -> TypeReference {
+    if depth >= MAX_CONST_ASSERTION_DEPTH {
+        return type_reference.clone();
+    }
+
+    let Some(inner_type) = resolver
+        .resolve_and_get(type_reference)
+        .map(|resolved| resolved.to_data())
+    else {
+        return type_reference.clone();
+    };
+
+    let inner_type = apply_deep_const_inner(resolver, inner_type, depth);
+    resolver.reference_to_owned_data(inner_type)
 }
 
 #[inline]

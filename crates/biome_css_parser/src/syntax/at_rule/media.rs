@@ -3,6 +3,7 @@ use crate::parser::CssParser;
 use crate::syntax::at_rule::error::{AnyInParensChainParseRecovery, AnyInParensParseRecovery};
 use crate::syntax::at_rule::feature::{expected_any_query_feature, parse_any_query_feature};
 use crate::syntax::block::parse_conditional_block;
+use crate::syntax::scss::{is_at_scss_interpolation, parse_scss_regular_interpolation};
 use crate::syntax::util::skip_possible_tailwind_syntax;
 use crate::syntax::{
     is_at_identifier, is_at_metavariable, is_nth_at_identifier, parse_metavariable,
@@ -100,23 +101,72 @@ impl ParseSeparatedList for MediaQueryList {
 
 #[inline]
 pub(crate) fn is_at_any_media_query(p: &mut CssParser) -> bool {
-    is_at_media_type_query(p) || is_at_metavariable(p) || is_at_any_media_condition(p)
+    is_at_media_type_query(p)
+        || is_at_scss_media_query(p)
+        || is_at_metavariable(p)
+        || is_at_any_media_condition(p)
 }
 
+/// Parses one media query list item.
+///
+/// Examples:
+/// ```scss
+/// @media screen {}
+/// @media #{$query} {}
+/// ```
+///
+/// Docs: https://sass-lang.com/documentation/at-rules/css/#media
 #[inline]
 pub(crate) fn parse_any_media_query(p: &mut CssParser) -> ParsedSyntax {
     if is_at_media_type_query(p) {
         parse_any_media_type_query(p)
+    } else if is_at_scss_media_query(p) {
+        parse_scss_media_query(p)
     } else if is_at_metavariable(p) {
         parse_metavariable(p)
     } else if is_at_any_media_condition(p) {
-        let m = p.start();
-        // Guarded by `is_at_any_media_condition` above.
-        parse_any_media_condition(p).ok();
-        Present(m.complete(p, CSS_MEDIA_CONDITION_QUERY))
+        parse_any_media_condition_query(p)
     } else {
         Absent
     }
+}
+
+#[inline]
+fn parse_any_media_condition_query(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_any_media_condition(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    // Guarded by `is_at_any_media_condition` above.
+    parse_any_media_condition(p).ok();
+    Present(m.complete(p, CSS_MEDIA_CONDITION_QUERY))
+}
+
+#[inline]
+fn is_at_scss_media_query(p: &mut CssParser) -> bool {
+    is_at_scss_interpolation(p)
+}
+
+/// Parses a Sass interpolation as a complete media query.
+///
+/// Example:
+/// ```scss
+/// @media #{$query} {}
+/// ```
+///
+/// Docs: https://sass-lang.com/documentation/at-rules/css/#media
+#[inline]
+fn parse_scss_media_query(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_scss_media_query(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    // Guarded by `is_at_scss_media_query` above.
+    parse_scss_regular_interpolation(p).ok();
+
+    Present(m.complete(p, SCSS_MEDIA_QUERY))
 }
 
 #[inline]

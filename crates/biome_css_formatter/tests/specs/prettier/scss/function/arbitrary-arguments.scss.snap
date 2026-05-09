@@ -56,17 +56,7 @@ body {
 ```diff
 --- Prettier
 +++ Biome
-@@ -11,7 +11,8 @@
-   @debug meta.keywords($args);
-   // (string: #080, comment: #800, variable: $60b)
- 
--  @each $name, $color in meta.keywords($args) {
-+  @each $name,
-+  $color in meta.keywords($args) {
-     pre span.stx-#{$name} {
-       color: $color;
-     }
-@@ -36,6 +37,6 @@
+@@ -36,6 +36,6 @@
    background-color: rgba(50 50 0.5 50...);
    background-color: rgba(50 50 50 0.5...);
    // Input is not technically valid ( output is ), but still nice to know that the `.` gets dropped as it would for `50.`
@@ -92,8 +82,7 @@ body {
   @debug meta.keywords($args);
   // (string: #080, comment: #800, variable: $60b)
 
-  @each $name,
-  $color in meta.keywords($args) {
+  @each $name, $color in meta.keywords($args) {
     pre span.stx-#{$name} {
       color: $color;
     }
@@ -150,5 +139,5 @@ arbitrary-arguments.scss:39:40 parse ━━━━━━━━━━━━━━�
 
 # Lines exceeding max width of 80 characters
 ```
-   39:   // Input is not technically valid ( output is ), but still nice to know that the `.` gets dropped as it would for `50.`
+   38:   // Input is not technically valid ( output is ), but still nice to know that the `.` gets dropped as it would for `50.`
 ```

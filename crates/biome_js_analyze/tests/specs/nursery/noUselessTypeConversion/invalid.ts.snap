@@ -77,6 +77,9 @@ function reqNum(x: Required<{n?: number}>) { return Number(x.n); }
 function reqBig(x: Required<{b?: bigint}>) { return BigInt(x.b); }
 function roStr(x: Readonly<{s: string}>) { return String(x.s); }
 
+const wrappedStringContainer = { value: "wrapped" as const };
+String(wrappedStringContainer.value);
+
 ```
 
 # Diagnostics
@@ -903,6 +906,30 @@ invalid.ts:72:51 lint/nursery/noUselessTypeConversion ━━━━━━━━�
   > 72 │ function roStr(x: Readonly<{s: string}>) { return String(x.s); }
        │                                                   ^^^^^^
     73 │ 
+    74 │ const wrappedStringContainer = { value: "wrapped" as const };
+  
+  i This expression already evaluates to a string.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected string type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:75:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `String()` on a string value.
+  
+    74 │ const wrappedStringContainer = { value: "wrapped" as const };
+  > 75 │ String(wrappedStringContainer.value);
+       │ ^^^^^^
+    76 │ 
   
   i This expression already evaluates to a string.
   

@@ -177,10 +177,8 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
                 }
             }
         }
-        ExpectedOutcome::Fail => {
-            if parsed.diagnostics().is_empty() {
-                panic!("Failing test must have diagnostics");
-            }
+        ExpectedOutcome::Fail if parsed.diagnostics().is_empty() => {
+            panic!("Failing test must have diagnostics");
         }
         _ => {}
     }
@@ -471,6 +469,12 @@ pub fn quick_test() {
         "- outer\n  - nested\n  lazy line\nhello\n",
         "<ul>\n<li>outer\n<ul>\n<li>nested\nlazy line\nhello</li>\n</ul>\n</li>\n</ul>\n",
     );
+    // Fuzzer: lazy continuation in a loose nested list item
+    test_example(
+        30006,
+        "- outer\n  - nested\n  lazy line\n\n    indented\n",
+        "<ul>\n<li>outer\n<ul>\n<li>\n<p>nested\nlazy line</p>\n<p>indented</p>\n</li>\n</ul>\n</li>\n</ul>\n",
+    );
 }
 
 fn fuzz_test_example(num: u32, input: &str, expected: &str) {
@@ -557,5 +561,60 @@ fn fuzz_code_after_list_not_absorbed() {
         8,
         "* one\n* two\n```\ncode here\n```\n",
         "<ul>\n<li>one</li>\n<li>two</li>\n</ul>\n<pre><code>code here\n</code></pre>\n",
+    );
+}
+
+#[test]
+fn fuzz_nested_lazy_continuation_before_fence() {
+    fuzz_test_example(
+        9,
+        "* outer\n  * nested\n  lazy line\n```\ncode here\n```\n",
+        "<ul>\n<li>outer\n<ul>\n<li>nested\nlazy line</li>\n</ul>\n</li>\n</ul>\n<pre><code>code here\n</code></pre>\n",
+    );
+}
+
+#[test]
+fn fuzz_nested_lazy_continuation_before_link_reference() {
+    fuzz_test_example(
+        10,
+        "- outer\n  - nested\n  lazy line\n[valid]: /url\n",
+        "<ul>\n<li>outer\n<ul>\n<li>nested\nlazy line\n[valid]: /url</li>\n</ul>\n</li>\n</ul>\n",
+    );
+}
+
+#[test]
+fn fuzz_list_link_reference_before_dash_thematic_break_with_tabs() {
+    fuzz_test_example(
+        11,
+        "- [a]: /url\n\t---\n",
+        "<ul>\n<li>\n<hr />\n</li>\n</ul>\n",
+    );
+    fuzz_test_example(
+        12,
+        "1.  [a]: /url\n \t---\n",
+        "<ol>\n<li>\n<hr />\n</li>\n</ol>\n",
+    );
+}
+
+#[test]
+fn fuzz_list_link_reference_before_dash_thematic_break_with_tabs_non_break() {
+    fuzz_test_example(13, "- [a]: /url\n\t--x\n", "<ul>\n<li>--x</li>\n</ul>\n");
+}
+
+#[test]
+fn fuzz_quoted_list_link_reference_before_dash_thematic_break_with_tabs() {
+    fuzz_test_example(
+        14,
+        "> - [a]: /url\n> \t---\n",
+        "<blockquote>\n<ul>\n<li>\n<hr />\n</li>\n</ul>\n</blockquote>\n",
+    );
+}
+
+#[test]
+fn fuzz_quoted_list_link_reference_before_dash_thematic_break_with_tabs_non_break() {
+    fuzz_test_example(
+        15,
+        "> - [a]: /url\n> \t--x\n",
+        "<blockquote>\n<ul>\n<li>--x</li>\n</ul>\n</blockquote>\n",
     );
 }

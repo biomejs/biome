@@ -16,6 +16,76 @@ macro_rules! map_syntax_node {
     ($ node : expr , $ pattern : pat => $ body : expr) => {
         match $node {
             node => match $crate::TailwindSyntaxNode::kind(&node) {
+                $crate::TailwindSyntaxKind::CSS_BINARY_EXPRESSION => {
+                    let $pattern = unsafe { $crate::CssBinaryExpression::new_unchecked(node) };
+                    $body
+                }
+                $crate::TailwindSyntaxKind::CSS_COLOR => {
+                    let $pattern = unsafe { $crate::CssColor::new_unchecked(node) };
+                    $body
+                }
+                $crate::TailwindSyntaxKind::CSS_DASHED_IDENTIFIER => {
+                    let $pattern = unsafe { $crate::CssDashedIdentifier::new_unchecked(node) };
+                    $body
+                }
+                $crate::TailwindSyntaxKind::CSS_FUNCTION => {
+                    let $pattern = unsafe { $crate::CssFunction::new_unchecked(node) };
+                    $body
+                }
+                $crate::TailwindSyntaxKind::CSS_GENERIC_DELIMITER => {
+                    let $pattern = unsafe { $crate::CssGenericDelimiter::new_unchecked(node) };
+                    $body
+                }
+                $crate::TailwindSyntaxKind::CSS_IDENTIFIER => {
+                    let $pattern = unsafe { $crate::CssIdentifier::new_unchecked(node) };
+                    $body
+                }
+                $crate::TailwindSyntaxKind::CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION => {
+                    let $pattern =
+                        unsafe { $crate::CssListOfComponentValuesExpression::new_unchecked(node) };
+                    $body
+                }
+                $crate::TailwindSyntaxKind::CSS_NUMBER => {
+                    let $pattern = unsafe { $crate::CssNumber::new_unchecked(node) };
+                    $body
+                }
+                $crate::TailwindSyntaxKind::CSS_PARENTHESIZED_EXPRESSION => {
+                    let $pattern =
+                        unsafe { $crate::CssParenthesizedExpression::new_unchecked(node) };
+                    $body
+                }
+                $crate::TailwindSyntaxKind::CSS_PERCENTAGE => {
+                    let $pattern = unsafe { $crate::CssPercentage::new_unchecked(node) };
+                    $body
+                }
+                $crate::TailwindSyntaxKind::CSS_RATIO => {
+                    let $pattern = unsafe { $crate::CssRatio::new_unchecked(node) };
+                    $body
+                }
+                $crate::TailwindSyntaxKind::CSS_REGULAR_DIMENSION => {
+                    let $pattern = unsafe { $crate::CssRegularDimension::new_unchecked(node) };
+                    $body
+                }
+                $crate::TailwindSyntaxKind::CSS_STRING => {
+                    let $pattern = unsafe { $crate::CssString::new_unchecked(node) };
+                    $body
+                }
+                $crate::TailwindSyntaxKind::CSS_UNARY_EXPRESSION => {
+                    let $pattern = unsafe { $crate::CssUnaryExpression::new_unchecked(node) };
+                    $body
+                }
+                $crate::TailwindSyntaxKind::CSS_UNKNOWN_DIMENSION => {
+                    let $pattern = unsafe { $crate::CssUnknownDimension::new_unchecked(node) };
+                    $body
+                }
+                $crate::TailwindSyntaxKind::CSS_URL_FUNCTION => {
+                    let $pattern = unsafe { $crate::CssUrlFunction::new_unchecked(node) };
+                    $body
+                }
+                $crate::TailwindSyntaxKind::CSS_URL_VALUE_RAW => {
+                    let $pattern = unsafe { $crate::CssUrlValueRaw::new_unchecked(node) };
+                    $body
+                }
                 $crate::TailwindSyntaxKind::TW_ARBITRARY_CANDIDATE => {
                     let $pattern = unsafe { $crate::TwArbitraryCandidate::new_unchecked(node) };
                     $body
@@ -68,6 +138,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::TwStaticVariant::new_unchecked(node) };
                     $body
                 }
+                $crate::TailwindSyntaxKind::CSS_BOGUS_PROPERTY_VALUE => {
+                    let $pattern = unsafe { $crate::CssBogusPropertyValue::new_unchecked(node) };
+                    $body
+                }
                 $crate::TailwindSyntaxKind::TW_BOGUS => {
                     let $pattern = unsafe { $crate::TwBogus::new_unchecked(node) };
                     $body
@@ -86,6 +160,19 @@ macro_rules! map_syntax_node {
                 }
                 $crate::TailwindSyntaxKind::TW_BOGUS_VARIANT => {
                     let $pattern = unsafe { $crate::TwBogusVariant::new_unchecked(node) };
+                    $body
+                }
+                $crate::TailwindSyntaxKind::CSS_COMPONENT_VALUE_LIST => {
+                    let $pattern = unsafe { $crate::CssComponentValueList::new_unchecked(node) };
+                    $body
+                }
+                $crate::TailwindSyntaxKind::CSS_GENERIC_COMPONENT_VALUE_LIST => {
+                    let $pattern =
+                        unsafe { $crate::CssGenericComponentValueList::new_unchecked(node) };
+                    $body
+                }
+                $crate::TailwindSyntaxKind::CSS_PARAMETER_LIST => {
+                    let $pattern = unsafe { $crate::CssParameterList::new_unchecked(node) };
                     $body
                 }
                 $crate::TailwindSyntaxKind::TW_CANDIDATE_LIST => {

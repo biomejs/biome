@@ -8,8 +8,8 @@ use crate::syntax::value::attr::{is_at_attr_function, parse_attr_function};
 use crate::syntax::value::r#if::{is_at_if_function, parse_if_function};
 use crate::syntax::value::url::{is_at_url_function, parse_url_function_with_context};
 use crate::syntax::{
-    CssSyntaxFeatures, ValueParsingContext, ValueParsingMode, is_nth_at_identifier,
-    parse_regular_identifier,
+    CssSyntaxFeatures, FunctionCallContext, ValueParsingContext, ValueParsingMode,
+    is_nth_at_identifier, parse_regular_identifier,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
@@ -113,10 +113,25 @@ fn is_nth_at_function_with_context(
     n: usize,
     context: ValueParsingContext,
 ) -> bool {
-    is_nth_at_identifier(p, n) && p.nth_at(n + 1, T!['('])
+    let is_function_paren = match context.function_call_context() {
+        FunctionCallContext::LooseRecovery => p.nth_at(n + 1, T!['(']),
+        FunctionCallContext::SourceTight => is_nth_at_source_tight_l_paren(p, n + 1),
+    };
+
+    is_nth_at_identifier(p, n) && is_function_paren
         || (context.is_scss_exclusive_syntax_allowed()
+            // Sass module calls are always source-tight: `math.pow(...)`.
             && is_nth_at_scss_module_member_access(p, n)
-            && p.nth_at(n + 3, T!['(']))
+            && is_nth_at_source_tight_l_paren(p, n + 3))
+}
+
+/// Checks for `(` without source whitespace before it.
+///
+/// Example: `fn(...)` is a function head, but Sass treats `fn (...)` as an
+/// identifier followed by a parenthesized value.
+#[inline]
+pub(crate) fn is_nth_at_source_tight_l_paren(p: &mut CssParser, n: usize) -> bool {
+    p.nth_at(n, T!['(']) && !p.has_nth_preceding_whitespace(n) && !p.has_nth_preceding_line_break(n)
 }
 
 #[inline]
