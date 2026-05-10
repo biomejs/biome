@@ -23,14 +23,12 @@ TwRoot {
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@0..1 "w" [] [],
                 minus_token: DASH@1..2 "-" [] [],
-                value: TwRatioValue {
-                    numerator: TwNumberValue {
-                        value_token: TW_NUMBER@2..3 "3" [] [],
-                    },
-                    slash_token: SLASH@3..4 "/" [] [],
-                    denominator: TwNumberValue {
-                        value_token: TW_NUMBER@4..5 "4" [] [],
-                    },
+                value: TwBogusValue {
+                    items: [
+                        TW_NUMBER@2..3 "3" [] [],
+                        SLASH@3..4 "/" [] [],
+                        TW_NUMBER@4..5 "4" [] [],
+                    ],
                 },
                 modifier: missing (optional),
             },
@@ -53,12 +51,10 @@ TwRoot {
       2: TW_FUNCTIONAL_CANDIDATE@0..5
         0: TW_BASE@0..1 "w" [] []
         1: DASH@1..2 "-" [] []
-        2: TW_RATIO_VALUE@2..5
-          0: TW_NUMBER_VALUE@2..3
-            0: TW_NUMBER@2..3 "3" [] []
+        2: TW_BOGUS_VALUE@2..5
+          0: TW_NUMBER@2..3 "3" [] []
           1: SLASH@3..4 "/" [] []
-          2: TW_NUMBER_VALUE@4..5
-            0: TW_NUMBER@4..5 "4" [] []
+          2: TW_NUMBER@4..5 "4" [] []
         3: (empty)
       3: (empty)
   2: EOF@5..6 "" [Newline("\n")] []

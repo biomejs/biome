@@ -38,34 +38,16 @@ fn parse_named_value(p: &mut TailwindParser) -> ParsedSyntax {
 
 /// Parses a numeric value which can be either a number, a ratio of two numbers, or a percentage (a number followed by a % sign).
 fn parse_numeric_value(p: &mut TailwindParser) -> ParsedSyntax {
-    let m = p.start();
-    if !p.expect(TW_NUMBER) {
-        m.abandon(p);
+    if !p.at(TW_NUMBER) {
         return Absent;
     }
-
-    if p.at(T![%]) {
-        p.bump(T![%]);
+    let m = p.start();
+    p.bump(TW_NUMBER);
+    if p.eat(T![/]) {
+        p.expect(TW_NUMBER);
+        return Present(m.complete(p, TW_RATIO_VALUE));
+    } else if p.eat(T![%]) {
         return Present(m.complete(p, TW_PERCENTAGE_VALUE));
-    }
-
-    let number = m.complete(p, TW_NUMBER_VALUE);
-
-    if p.at(T![/]) {
-        let ratio = number.precede(p);
-        p.bump(T![/]);
-        parse_number_only(p).or_add_diagnostic(p, crate::syntax::parse_error::expected_value);
-        return Present(ratio.complete(p, TW_RATIO_VALUE));
-    }
-
-    Present(number)
-}
-
-fn parse_number_only(p: &mut TailwindParser) -> ParsedSyntax {
-    let m = p.start();
-    if !p.expect(TW_NUMBER) {
-        m.abandon(p);
-        return Absent;
     }
 
     Present(m.complete(p, TW_NUMBER_VALUE))

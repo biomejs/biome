@@ -160,9 +160,9 @@ TwPercentageValue =
 // w-3/4
 //   ^^^
 TwRatioValue =
-	numerator: TwNumberValue
+	numerator: 'tw_number'
 	'/'
-	denominator: TwNumberValue
+	denominator: 'tw_number'
 
 // bg-[#ff0000]
 //    ^^^^^^^^^
