@@ -15,6 +15,8 @@ on:
       - "rust-toolchain.toml"
       - "rustfmt.toml"
       - "deny.toml"
+      - ".github/workflows/pull_request.yml"
+      - ".github/workflows/release.yml"
 
 # Cancel jobs when the PR is updated
 concurrency:
@@ -118,6 +120,94 @@ jobs:
         run: |
           cd e2e-tests
           sh test-all.sh
+
+  smoke-test-binaries:
+    name: Smoke test ${{ matrix.code-target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: depot-windows-2022-16
+            target: x86_64-pc-windows-msvc
+            code-target: win32-x64
+          - os: depot-windows-2022-16
+            target: aarch64-pc-windows-msvc
+            code-target: win32-arm64
+          - os: depot-ubuntu-24.04-16
+            target: x86_64-unknown-linux-musl
+            code-target: linux-x64-musl
+          - os: depot-ubuntu-24.04-arm-16
+            target: aarch64-unknown-linux-musl
+            code-target: linux-arm64-musl
+          - os: depot-macos-14
+            target: x86_64-apple-darwin
+            code-target: darwin-x64
+          - os: depot-macos-14
+            target: aarch64-apple-darwin
+            code-target: darwin-arm64
+          - os: depot-ubuntu-24.04-16
+            target: x86_64-unknown-linux-gnu
+            code-target: linux-x64
+          - os: depot-ubuntu-24.04-arm-4
+            target: aarch64-unknown-linux-gnu
+            code-target: linux-arm64
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Install Rust target
+        run: rustup target add ${{ matrix.target }}
+      - name: Install musl toolchain
+        if: matrix.code-target == 'linux-x64-musl' || matrix.code-target == 'linux-arm64-musl'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y musl-tools
+      - name: Build binary
+        run: cargo build -p biome_cli --target ${{ matrix.target }}
+        env:
+          # Windows binaries can fail to build with a stack overflow error. This increases the stack size to 8MB to mitigate that.
+          # We do this because the alternative is to build a release binary, which takes significantly longer to build and is not necessary for a smoke test.
+          RUSTFLAGS: ${{ runner.os == 'Windows' && '-C link-arg=/STACK:8388608' || '' }}
+      - name: Copy CLI binary
+        if: runner.os == 'Windows'
+        run: |
+          mkdir dist
+          cp target/${{ matrix.target }}/debug/biome.exe ./dist/biome-${{ matrix.code-target }}.exe
+      - name: Copy CLI binary
+        if: runner.os != 'Windows'
+        run: |
+          mkdir dist
+          cp target/${{ matrix.target }}/debug/biome ./dist/biome-${{ matrix.code-target }}
+      - name: Smoke test binary (Windows)
+        if: matrix.target == 'x86_64-pc-windows-msvc'
+        shell: pwsh
+        run: .\dist\biome-${{ matrix.code-target }}.exe --version
+      - name: Smoke test binary (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          chmod +x ./dist/biome-${{ matrix.code-target }}
+          ./dist/biome-${{ matrix.code-target }} --version
+      - name: Upload win32-arm64 binary
+        if: matrix.target == 'aarch64-pc-windows-msvc'
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: smoke-test-win32-arm64
+          path: ./dist/biome-win32-arm64.exe
+          if-no-files-found: error
+
+  smoke-test-win32-arm64:
+    name: Smoke test win32-arm64
+    # Depot doesn't have Windows ARM runners.
+    runs-on: windows-11-arm
+    needs: smoke-test-binaries
+    steps:
+      - name: Download CLI artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: smoke-test-win32-arm64
+      - name: Run --version
+        shell: pwsh
+        run: .\biome-win32-arm64.exe --version
 
   documentation:
     name: Documentation
