@@ -79,6 +79,9 @@ impl Diagnostic {
         self.location.offset_by(offset);
         self.advices.offset_by(offset);
         self.verbose_advices.offset_by(offset);
+        if let Some(source) = &mut self.source {
+            source.offset_by(offset);
+        }
     }
 }
 
