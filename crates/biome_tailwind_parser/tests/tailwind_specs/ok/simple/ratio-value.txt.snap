@@ -1,0 +1,66 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```text
+w-3/4
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@0..1 "w" [] [],
+                minus_token: DASH@1..2 "-" [] [],
+                value: TwRatioValue {
+                    numerator: TwNumberValue {
+                        value_token: TW_NUMBER@2..3 "3" [] [],
+                    },
+                    slash_token: SLASH@3..4 "/" [] [],
+                    denominator: TwNumberValue {
+                        value_token: TW_NUMBER@4..5 "4" [] [],
+                    },
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@5..6 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..6
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..5
+    0: TW_FULL_CANDIDATE@0..5
+      0: TW_VARIANT_LIST@0..0
+      1: (empty)
+      2: TW_FUNCTIONAL_CANDIDATE@0..5
+        0: TW_BASE@0..1 "w" [] []
+        1: DASH@1..2 "-" [] []
+        2: TW_RATIO_VALUE@2..5
+          0: TW_NUMBER_VALUE@2..3
+            0: TW_NUMBER@2..3 "3" [] []
+          1: SLASH@3..4 "/" [] []
+          2: TW_NUMBER_VALUE@4..5
+            0: TW_NUMBER@4..5 "4" [] []
+        3: (empty)
+      3: (empty)
+  2: EOF@5..6 "" [Newline("\n")] []
+
+```

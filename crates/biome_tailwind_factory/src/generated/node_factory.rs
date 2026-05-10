@@ -402,6 +402,20 @@ pub fn tw_number_value(value_token: SyntaxToken) -> TwNumberValue {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn tw_ratio_value(
+    numerator: TwNumberValue,
+    slash_token: SyntaxToken,
+    denominator: TwNumberValue,
+) -> TwRatioValue {
+    TwRatioValue::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::TW_RATIO_VALUE,
+        [
+            Some(SyntaxElement::Node(numerator.into_syntax())),
+            Some(SyntaxElement::Token(slash_token)),
+            Some(SyntaxElement::Node(denominator.into_syntax())),
+        ],
+    ))
+}
 pub fn tw_root(candidates: TwCandidateList, eof_token: SyntaxToken) -> TwRootBuilder {
     TwRootBuilder {
         candidates,

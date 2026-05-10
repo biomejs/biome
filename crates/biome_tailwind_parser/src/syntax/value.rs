@@ -19,7 +19,7 @@ pub(crate) fn parse_value(p: &mut TailwindParser) -> ParsedSyntax {
         return parse_data_attribute(p);
     }
     if p.at(TW_NUMBER) {
-        return parse_number_value(p);
+        return parse_numeric_value(p);
     }
     parse_named_value(p)
 }
@@ -36,12 +36,26 @@ fn parse_named_value(p: &mut TailwindParser) -> ParsedSyntax {
     Present(m.complete(p, TW_NAMED_VALUE))
 }
 
-fn parse_number_value(p: &mut TailwindParser) -> ParsedSyntax {
-    let checkpoint = p.checkpoint();
+/// Parses a numeric value which can be either a number, a ratio of two numbers, or a percentage (a number followed by a % sign).
+fn parse_numeric_value(p: &mut TailwindParser) -> ParsedSyntax {
+    let Present(number) = parse_number_only(p) else {
+        return Absent;
+    };
+
+    if p.at(T![/]) {
+        let ratio = number.precede(p);
+        p.bump(T![/]);
+        parse_number_only(p).or_add_diagnostic(p, crate::syntax::parse_error::expected_value);
+        return Present(ratio.complete(p, TW_RATIO_VALUE));
+    }
+
+    Present(number)
+}
+
+fn parse_number_only(p: &mut TailwindParser) -> ParsedSyntax {
     let m = p.start();
     if !p.expect(TW_NUMBER) {
         m.abandon(p);
-        p.rewind(checkpoint);
         return Absent;
     }
 

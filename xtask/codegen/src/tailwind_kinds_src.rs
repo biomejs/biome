@@ -62,6 +62,7 @@ pub const TAILWIND_KINDS_SRC: KindsSrc = KindsSrc {
         "TW_FUNCTIONAL_VARIANT",
         "TW_NAMED_VALUE",
         "TW_NUMBER_VALUE",
+        "TW_RATIO_VALUE",
         "TW_ARBITRARY_VALUE",
         "TW_CSS_VARIABLE_VALUE",
         "TW_MODIFIER",

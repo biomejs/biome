@@ -1191,6 +1191,51 @@ pub struct TwNumberValueFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct TwRatioValue {
+    pub(crate) syntax: SyntaxNode,
+}
+impl TwRatioValue {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> TwRatioValueFields {
+        TwRatioValueFields {
+            numerator: self.numerator(),
+            slash_token: self.slash_token(),
+            denominator: self.denominator(),
+        }
+    }
+    pub fn numerator(&self) -> SyntaxResult<TwNumberValue> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn slash_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn denominator(&self) -> SyntaxResult<TwNumberValue> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for TwRatioValue {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct TwRatioValueFields {
+    pub numerator: SyntaxResult<TwNumberValue>,
+    pub slash_token: SyntaxResult<SyntaxToken>,
+    pub denominator: SyntaxResult<TwNumberValue>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TwRoot {
     pub(crate) syntax: SyntaxNode,
 }
@@ -1631,6 +1676,7 @@ pub enum AnyTwValue {
     TwDataAttribute(TwDataAttribute),
     TwNamedValue(TwNamedValue),
     TwNumberValue(TwNumberValue),
+    TwRatioValue(TwRatioValue),
 }
 impl AnyTwValue {
     pub fn as_tw_arbitrary_value(&self) -> Option<&TwArbitraryValue> {
@@ -1666,6 +1712,12 @@ impl AnyTwValue {
     pub fn as_tw_number_value(&self) -> Option<&TwNumberValue> {
         match &self {
             Self::TwNumberValue(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_tw_ratio_value(&self) -> Option<&TwRatioValue> {
+        match &self {
+            Self::TwRatioValue(item) => Some(item),
             _ => None,
         }
     }
@@ -3177,6 +3229,61 @@ impl From<TwNumberValue> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for TwRatioValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(TW_RATIO_VALUE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == TW_RATIO_VALUE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for TwRatioValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TwRatioValue")
+                .field("numerator", &support::DebugSyntaxResult(self.numerator()))
+                .field(
+                    "slash_token",
+                    &support::DebugSyntaxResult(self.slash_token()),
+                )
+                .field(
+                    "denominator",
+                    &support::DebugSyntaxResult(self.denominator()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TwRatioValue").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<TwRatioValue> for SyntaxNode {
+    fn from(n: TwRatioValue) -> Self {
+        n.syntax
+    }
+}
+impl From<TwRatioValue> for SyntaxElement {
+    fn from(n: TwRatioValue) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for TwRoot {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -4193,6 +4300,11 @@ impl From<TwNumberValue> for AnyTwValue {
         Self::TwNumberValue(node)
     }
 }
+impl From<TwRatioValue> for AnyTwValue {
+    fn from(node: TwRatioValue) -> Self {
+        Self::TwRatioValue(node)
+    }
+}
 impl AstNode for AnyTwValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = TwArbitraryValue::KIND_SET
@@ -4200,7 +4312,8 @@ impl AstNode for AnyTwValue {
         .union(TwCssVariableValue::KIND_SET)
         .union(TwDataAttribute::KIND_SET)
         .union(TwNamedValue::KIND_SET)
-        .union(TwNumberValue::KIND_SET);
+        .union(TwNumberValue::KIND_SET)
+        .union(TwRatioValue::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
@@ -4210,6 +4323,7 @@ impl AstNode for AnyTwValue {
                 | TW_DATA_ATTRIBUTE
                 | TW_NAMED_VALUE
                 | TW_NUMBER_VALUE
+                | TW_RATIO_VALUE
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -4220,6 +4334,7 @@ impl AstNode for AnyTwValue {
             TW_DATA_ATTRIBUTE => Self::TwDataAttribute(TwDataAttribute { syntax }),
             TW_NAMED_VALUE => Self::TwNamedValue(TwNamedValue { syntax }),
             TW_NUMBER_VALUE => Self::TwNumberValue(TwNumberValue { syntax }),
+            TW_RATIO_VALUE => Self::TwRatioValue(TwRatioValue { syntax }),
             _ => return None,
         };
         Some(res)
@@ -4232,6 +4347,7 @@ impl AstNode for AnyTwValue {
             Self::TwDataAttribute(it) => it.syntax(),
             Self::TwNamedValue(it) => it.syntax(),
             Self::TwNumberValue(it) => it.syntax(),
+            Self::TwRatioValue(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -4242,6 +4358,7 @@ impl AstNode for AnyTwValue {
             Self::TwDataAttribute(it) => it.into_syntax(),
             Self::TwNamedValue(it) => it.into_syntax(),
             Self::TwNumberValue(it) => it.into_syntax(),
+            Self::TwRatioValue(it) => it.into_syntax(),
         }
     }
 }
@@ -4254,6 +4371,7 @@ impl std::fmt::Debug for AnyTwValue {
             Self::TwDataAttribute(it) => std::fmt::Debug::fmt(it, f),
             Self::TwNamedValue(it) => std::fmt::Debug::fmt(it, f),
             Self::TwNumberValue(it) => std::fmt::Debug::fmt(it, f),
+            Self::TwRatioValue(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -4266,6 +4384,7 @@ impl From<AnyTwValue> for SyntaxNode {
             AnyTwValue::TwDataAttribute(it) => it.into_syntax(),
             AnyTwValue::TwNamedValue(it) => it.into_syntax(),
             AnyTwValue::TwNumberValue(it) => it.into_syntax(),
+            AnyTwValue::TwRatioValue(it) => it.into_syntax(),
         }
     }
 }
@@ -4571,6 +4690,11 @@ impl std::fmt::Display for TwNamedValue {
     }
 }
 impl std::fmt::Display for TwNumberValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for TwRatioValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
