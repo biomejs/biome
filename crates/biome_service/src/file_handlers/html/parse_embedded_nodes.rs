@@ -568,15 +568,14 @@ fn build_attribute_expression_candidate(
 /// Build an `EmbedCandidate::Frontmatter` from Astro's `---` block.
 fn build_astro_frontmatter_candidate(element: &AstroEmbeddedContent) -> Option<EmbedCandidate> {
     let content_token = element.content_token()?;
+    let content_range = content_token.text_trimmed_range();
 
     Some(EmbedCandidate::Frontmatter {
         content: EmbedContent {
             element_range: element.range(),
-            content_range: content_token.text_trimmed_range(),
-            content_offset: content_token.text_range().start(),
-            // Use full token text (including trivia) to match the untrimmed content_offset.
-            // The parser needs text and offset to be consistent.
-            text: content_token.token_text(),
+            content_range,
+            content_offset: content_range.start(),
+            text: content_token.token_text_trimmed(),
         },
     })
 }
