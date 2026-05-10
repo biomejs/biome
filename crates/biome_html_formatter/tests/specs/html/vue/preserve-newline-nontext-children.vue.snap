@@ -1,6 +1,5 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 249
 info: vue/preserve-newline-nontext-children.vue
 ---
 
@@ -86,6 +85,31 @@ info: vue/preserve-newline-nontext-children.vue
 	</template>
 </template>
 
+<template>
+	<span class="video-length">
+		{{ lengthDisplay }}
+	</span>
+	<span class="video-length">{{ lengthDisplay }}</span>
+</template>
+
+<template>
+	<span>
+		hello
+		world
+	</span>
+</template>
+
+<template>
+	<span>before {{ value }} after</span>
+</template>
+
+<template>
+	<span>
+		hello
+		<em>x</em>
+	</span>
+</template>
+
 ```
 
 
@@ -167,6 +191,28 @@ info: vue/preserve-newline-nontext-children.vue
 	<template #default>
 		<UserPanel />
 	</template>
+</template>
+
+<template>
+	<span class="video-length">
+		{{ lengthDisplay }}
+	</span>
+	<span class="video-length">{{ lengthDisplay }}</span>
+</template>
+
+<template>
+	<span> hello world </span>
+</template>
+
+<template>
+	<span>before {{ value }} after</span>
+</template>
+
+<template>
+	<span>
+		hello
+		<em>x</em>
+	</span>
 </template>
 
 ```
