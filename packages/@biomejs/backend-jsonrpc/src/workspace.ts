@@ -1159,6 +1159,10 @@ has syntax errors
 	 */
 	lineWidth?: LineWidth;
 	/**
+	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures.
+	 */
+	trailingCommas?: JsTrailingCommas;
+	/**
 	* Whether to add a trailing newline at the end of the file.
 
 Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
