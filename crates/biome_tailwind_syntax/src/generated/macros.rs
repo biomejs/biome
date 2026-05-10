@@ -134,10 +134,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::TwPercentageValue::new_unchecked(node) };
                     $body
                 }
-                $crate::TailwindSyntaxKind::TW_RATIO_VALUE => {
-                    let $pattern = unsafe { $crate::TwRatioValue::new_unchecked(node) };
-                    $body
-                }
                 $crate::TailwindSyntaxKind::TW_ROOT => {
                     let $pattern = unsafe { $crate::TwRoot::new_unchecked(node) };
                     $body

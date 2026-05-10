@@ -135,7 +135,6 @@ TwFunctionalVariant =
 AnyTwValue = TwNamedValue
 	| TwNumberValue
 	| TwPercentageValue
-	| TwRatioValue
 	| TwArbitraryValue
 	| TwCssVariableValue
 	| TwDataAttribute
@@ -156,13 +155,6 @@ TwNumberValue =
 TwPercentageValue =
 	value: 'tw_number'
 	'%'
-
-// w-3/4
-//   ^^^
-TwRatioValue =
-	numerator: 'tw_number'
-	'/'
-	denominator: 'tw_number'
 
 // bg-[#ff0000]
 //    ^^^^^^^^^

@@ -36,17 +36,14 @@ fn parse_named_value(p: &mut TailwindParser) -> ParsedSyntax {
     Present(m.complete(p, TW_NAMED_VALUE))
 }
 
-/// Parses a numeric value which can be either a number, a ratio of two numbers, or a percentage (a number followed by a % sign).
+/// Parses a numeric value which can be either a number or a percentage (a number followed by a % sign).
 fn parse_numeric_value(p: &mut TailwindParser) -> ParsedSyntax {
     if !p.at(TW_NUMBER) {
         return Absent;
     }
     let m = p.start();
     p.bump(TW_NUMBER);
-    if p.eat(T![/]) {
-        p.expect(TW_NUMBER);
-        return Present(m.complete(p, TW_RATIO_VALUE));
-    } else if p.eat(T![%]) {
+    if p.eat(T![%]) {
         return Present(m.complete(p, TW_PERCENTAGE_VALUE));
     }
 

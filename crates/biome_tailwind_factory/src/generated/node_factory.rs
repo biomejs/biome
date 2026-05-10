@@ -414,20 +414,6 @@ pub fn tw_percentage_value(
         ],
     ))
 }
-pub fn tw_ratio_value(
-    numerator_token: SyntaxToken,
-    slash_token: SyntaxToken,
-    denominator_token: SyntaxToken,
-) -> TwRatioValue {
-    TwRatioValue::unwrap_cast(SyntaxNode::new_detached(
-        TailwindSyntaxKind::TW_RATIO_VALUE,
-        [
-            Some(SyntaxElement::Token(numerator_token)),
-            Some(SyntaxElement::Token(slash_token)),
-            Some(SyntaxElement::Token(denominator_token)),
-        ],
-    ))
-}
 pub fn tw_root(candidates: TwCandidateList, eof_token: SyntaxToken) -> TwRootBuilder {
     TwRootBuilder {
         candidates,
