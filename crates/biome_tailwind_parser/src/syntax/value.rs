@@ -38,9 +38,18 @@ fn parse_named_value(p: &mut TailwindParser) -> ParsedSyntax {
 
 /// Parses a numeric value which can be either a number, a ratio of two numbers, or a percentage (a number followed by a % sign).
 fn parse_numeric_value(p: &mut TailwindParser) -> ParsedSyntax {
-    let Present(number) = parse_number_only(p) else {
+    let m = p.start();
+    if !p.expect(TW_NUMBER) {
+        m.abandon(p);
         return Absent;
-    };
+    }
+
+    if p.at(T![%]) {
+        p.bump(T![%]);
+        return Present(m.complete(p, TW_PERCENTAGE_VALUE));
+    }
+
+    let number = m.complete(p, TW_NUMBER_VALUE);
 
     if p.at(T![/]) {
         let ratio = number.precede(p);

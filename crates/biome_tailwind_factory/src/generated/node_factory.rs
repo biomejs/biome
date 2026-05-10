@@ -402,6 +402,18 @@ pub fn tw_number_value(value_token: SyntaxToken) -> TwNumberValue {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn tw_percentage_value(
+    value_token: SyntaxToken,
+    remainder_token: SyntaxToken,
+) -> TwPercentageValue {
+    TwPercentageValue::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::TW_PERCENTAGE_VALUE,
+        [
+            Some(SyntaxElement::Token(value_token)),
+            Some(SyntaxElement::Token(remainder_token)),
+        ],
+    ))
+}
 pub fn tw_ratio_value(
     numerator: TwNumberValue,
     slash_token: SyntaxToken,

@@ -134,6 +134,7 @@ TwFunctionalVariant =
 
 AnyTwValue = TwNamedValue
 	| TwNumberValue
+	| TwPercentageValue
 	| TwRatioValue
 	| TwArbitraryValue
 	| TwCssVariableValue
@@ -149,6 +150,12 @@ TwNamedValue =
 //   ^
 TwNumberValue =
 	value: 'tw_number'
+
+// progress-50%
+//          ^^^
+TwPercentageValue =
+	value: 'tw_number'
+	'%'
 
 // w-3/4
 //   ^^^

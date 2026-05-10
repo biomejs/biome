@@ -455,6 +455,20 @@ impl TwNumberValue {
         )
     }
 }
+impl TwPercentageValue {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_remainder_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+}
 impl TwRatioValue {
     pub fn with_numerator(self, element: TwNumberValue) -> Self {
         Self::unwrap_cast(

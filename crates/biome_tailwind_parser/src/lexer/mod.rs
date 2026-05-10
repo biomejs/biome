@@ -54,6 +54,7 @@ impl<'src> TailwindLexer<'src> {
             _ if self.current_kind == T![/] => self.consume_modifier(),
             COL => self.consume_byte(T![:]),
             MIN => self.consume_byte(T![-]),
+            PRC => self.consume_byte(T![%]),
             EXL => self.consume_byte(T![!]),
             SLH => self.consume_byte(T![/]),
             IDT | ZER | DIG => self.consume_base(),
@@ -81,6 +82,7 @@ impl<'src> TailwindLexer<'src> {
             _ if self.current_kind == T!['('] => self.consume_bracketed_thing(TW_VALUE, PNC),
             COL => self.consume_byte(T![:]),
             MIN => self.consume_byte(T![-]),
+            PRC => self.consume_byte(T![%]),
             EXL => self.consume_byte(T![!]),
             SLH => self.consume_byte(T![/]),
             IDT | ZER | DIG => self.consume_base(),
@@ -394,7 +396,7 @@ impl<'src> TailwindLexer<'src> {
         let mut numbers_only = true;
         while let Some(byte) = self.current_byte() {
             let dispatched = lookup_byte(byte);
-            if matches!(dispatched, WHS | COL | SLH | EXL | BTC | PNC) {
+            if matches!(dispatched, WHS | COL | SLH | EXL | BTC | PNC | PRC) {
                 break;
             }
             if !matches!(dispatched, ZER | DIG | PRD) {
@@ -437,7 +439,7 @@ impl<'src> TailwindLexer<'src> {
         while let Some(byte) = self.current_byte() {
             let dispatched = lookup_byte(byte);
             let char = self.current_char_unchecked();
-            if matches!(dispatched, WHS | EXL) {
+            if matches!(dispatched, WHS | EXL | PRC) {
                 break;
             }
             if !matches!(dispatched, ZER | DIG | PRD) {
