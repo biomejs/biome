@@ -27,6 +27,8 @@ export { a };
 const ASTRO_FILE_IMPORTS_BEFORE: &str = r#"---
 import { getLocale } from "astro:i18n";
 import { Code } from "astro:components";
+import "style.css";
+import { B, A } from "./util.js";
 ---
 <div></div>"#;
 
