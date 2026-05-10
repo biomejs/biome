@@ -126,6 +126,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::TwNamedValue::new_unchecked(node) };
                     $body
                 }
+                $crate::TailwindSyntaxKind::TW_NUMBER_VALUE => {
+                    let $pattern = unsafe { $crate::TwNumberValue::new_unchecked(node) };
+                    $body
+                }
                 $crate::TailwindSyntaxKind::TW_ROOT => {
                     let $pattern = unsafe { $crate::TwRoot::new_unchecked(node) };
                     $body

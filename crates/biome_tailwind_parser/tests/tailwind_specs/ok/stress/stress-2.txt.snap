@@ -97,8 +97,8 @@ TwRoot {
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@95..99 "size" [] [],
                 minus_token: DASH@99..100 "-" [] [],
-                value: TwNamedValue {
-                    value_token: TW_VALUE@100..102 "4" [] [Whitespace(" ")],
+                value: TwNumberValue {
+                    value_token: TW_NUMBER@100..102 "4" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
             },
@@ -158,8 +158,8 @@ TwRoot {
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@155..159 "ring" [] [],
                 minus_token: DASH@159..160 "-" [] [],
-                value: TwNamedValue {
-                    value_token: TW_VALUE@160..162 "2" [] [Whitespace(" ")],
+                value: TwNumberValue {
+                    value_token: TW_NUMBER@160..162 "2" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
             },
@@ -180,8 +180,8 @@ TwRoot {
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@176..187 "ring-offset" [] [],
                 minus_token: DASH@187..188 "-" [] [],
-                value: TwNamedValue {
-                    value_token: TW_VALUE@188..190 "2" [] [Whitespace(" ")],
+                value: TwNumberValue {
+                    value_token: TW_NUMBER@188..190 "2" [] [Whitespace(" ")],
                 },
                 modifier: missing (optional),
             },
@@ -216,8 +216,8 @@ TwRoot {
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@227..234 "opacity" [] [],
                 minus_token: DASH@234..235 "-" [] [],
-                value: TwNamedValue {
-                    value_token: TW_VALUE@235..237 "50" [] [],
+                value: TwNumberValue {
+                    value_token: TW_NUMBER@235..237 "50" [] [],
                 },
                 modifier: missing (optional),
             },
@@ -296,8 +296,8 @@ TwRoot {
       2: TW_FUNCTIONAL_CANDIDATE@95..102
         0: TW_BASE@95..99 "size" [] []
         1: DASH@99..100 "-" [] []
-        2: TW_NAMED_VALUE@100..102
-          0: TW_VALUE@100..102 "4" [] [Whitespace(" ")]
+        2: TW_NUMBER_VALUE@100..102
+          0: TW_NUMBER@100..102 "4" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
     6: TW_FULL_CANDIDATE@102..115
@@ -341,8 +341,8 @@ TwRoot {
       2: TW_FUNCTIONAL_CANDIDATE@155..162
         0: TW_BASE@155..159 "ring" [] []
         1: DASH@159..160 "-" [] []
-        2: TW_NAMED_VALUE@160..162
-          0: TW_VALUE@160..162 "2" [] [Whitespace(" ")]
+        2: TW_NUMBER_VALUE@160..162
+          0: TW_NUMBER@160..162 "2" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
     10: TW_FULL_CANDIDATE@162..190
@@ -357,8 +357,8 @@ TwRoot {
       2: TW_FUNCTIONAL_CANDIDATE@176..190
         0: TW_BASE@176..187 "ring-offset" [] []
         1: DASH@187..188 "-" [] []
-        2: TW_NAMED_VALUE@188..190
-          0: TW_VALUE@188..190 "2" [] [Whitespace(" ")]
+        2: TW_NUMBER_VALUE@188..190
+          0: TW_NUMBER@188..190 "2" [] [Whitespace(" ")]
         3: (empty)
       3: (empty)
     11: TW_FULL_CANDIDATE@190..218
@@ -383,8 +383,8 @@ TwRoot {
       2: TW_FUNCTIONAL_CANDIDATE@227..237
         0: TW_BASE@227..234 "opacity" [] []
         1: DASH@234..235 "-" [] []
-        2: TW_NAMED_VALUE@235..237
-          0: TW_VALUE@235..237 "50" [] []
+        2: TW_NUMBER_VALUE@235..237
+          0: TW_NUMBER@235..237 "50" [] []
         3: (empty)
       3: (empty)
   2: EOF@237..238 "" [Newline("\n")] []

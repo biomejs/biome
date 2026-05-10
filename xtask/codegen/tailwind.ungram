@@ -131,7 +131,9 @@ TwFunctionalVariant =
 	'-'
 	value: AnyTwValue
 
+
 AnyTwValue = TwNamedValue
+	| TwNumberValue
 	| TwArbitraryValue
 	| TwCssVariableValue
 	| TwDataAttribute
@@ -141,6 +143,11 @@ AnyTwValue = TwNamedValue
 //    ^^^^^^^
 TwNamedValue =
 	value: 'tw_value'
+
+// w-3
+//   ^
+TwNumberValue =
+	value: 'tw_number'
 
 // bg-[#ff0000]
 //    ^^^^^^^^^
@@ -177,6 +184,7 @@ TwDataAttribute =
 
 AnyTwDataAttributeValue =
 	TwNamedValue |
+	TwNumberValue |
 	TwArbitraryValue |
 	TwBogusValue
 

@@ -18,6 +18,9 @@ pub(crate) fn parse_value(p: &mut TailwindParser) -> ParsedSyntax {
     if p.at(T![data]) {
         return parse_data_attribute(p);
     }
+    if p.at(TW_NUMBER) {
+        return parse_number_value(p);
+    }
     parse_named_value(p)
 }
 
@@ -31,6 +34,18 @@ fn parse_named_value(p: &mut TailwindParser) -> ParsedSyntax {
     }
 
     Present(m.complete(p, TW_NAMED_VALUE))
+}
+
+fn parse_number_value(p: &mut TailwindParser) -> ParsedSyntax {
+    let checkpoint = p.checkpoint();
+    let m = p.start();
+    if !p.expect(TW_NUMBER) {
+        m.abandon(p);
+        p.rewind(checkpoint);
+        return Absent;
+    }
+
+    Present(m.complete(p, TW_NUMBER_VALUE))
 }
 
 fn parse_arbitrary_value(p: &mut TailwindParser) -> ParsedSyntax {

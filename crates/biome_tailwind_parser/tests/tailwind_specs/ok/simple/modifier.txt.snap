@@ -28,8 +28,8 @@ TwRoot {
                 },
                 modifier: TwModifier {
                     slash_token: SLASH@10..11 "/" [] [],
-                    value: TwNamedValue {
-                        value_token: TW_VALUE@11..13 "10" [] [],
+                    value: TwNumberValue {
+                        value_token: TW_NUMBER@11..13 "10" [] [],
                     },
                 },
             },
@@ -56,8 +56,8 @@ TwRoot {
           0: TW_VALUE@3..10 "primary" [] []
         3: TW_MODIFIER@10..13
           0: SLASH@10..11 "/" [] []
-          1: TW_NAMED_VALUE@11..13
-            0: TW_VALUE@11..13 "10" [] []
+          1: TW_NUMBER_VALUE@11..13
+            0: TW_NUMBER@11..13 "10" [] []
       3: (empty)
   2: EOF@13..14 "" [Newline("\n")] []
 
