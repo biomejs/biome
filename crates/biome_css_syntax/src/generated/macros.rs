@@ -1037,6 +1037,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::ScssIncludeAtRule::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::SCSS_INCLUDE_USING_CLAUSE => {
+                    let $pattern = unsafe { $crate::ScssIncludeUsingClause::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::SCSS_INTERPOLATED_IDENTIFIER => {
                     let $pattern =
                         unsafe { $crate::ScssInterpolatedIdentifier::new_unchecked(node) };
