@@ -1,5 +1,7 @@
 use crate::run_cli;
-use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, markup_to_string};
+use crate::snap_test::{
+    SnapshotPayload, assert_cli_snapshot, assert_file_contents, markup_to_string,
+};
 use biome_console::{BufferConsole, markup};
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
@@ -841,6 +843,114 @@ fn issue_7912() {
         console,
         result,
     ));
+}
+
+#[test]
+fn issue_10309_noop_lint_write_preserves_astro_frontmatter() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "experimentalFullSupportEnabled": true, "formatter": { "enabled": true } } }"#.as_bytes(),
+    );
+
+    // this test asserts that newlines don't get inserted in the beginning frontmatter erroneously.
+    let astro_file_path = Utf8Path::new("file.astro");
+    let source = r#"---
+            const title = "Hello World";
+---
+
+<html>
+  <head>
+            <title>{title}</title>
+  </head>
+  <body>
+            <h1>{title}</h1>
+  </body>
+</html>"#;
+    fs.insert(astro_file_path.into(), source.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--write",
+                "--only=suspicious/noDebugger",
+                astro_file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(&fs, astro_file_path, source);
+}
+
+#[test]
+fn issue_10309_lint_write_fix_preserves_astro_frontmatter_trivia() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "experimentalFullSupportEnabled": true, "formatter": { "enabled": true } } }"#.as_bytes(),
+    );
+
+    let astro_file_path = Utf8Path::new("file.astro");
+    fs.insert(
+        astro_file_path.into(),
+        r#"---
+            const title = "Hello World";
+            debugger;
+---
+
+<html>
+  <head>
+            <title>{title}</title>
+  </head>
+  <body>
+            <h1>{title}</h1>
+  </body>
+</html>"#
+            .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--write",
+                "--unsafe",
+                "--only=noDebugger",
+                astro_file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    // no newlines should be inserted at the start of the frontmatter.
+    assert_file_contents(
+        &fs,
+        astro_file_path,
+        r#"---
+            const title = "Hello World";
+---
+
+<html>
+  <head>
+            <title>{title}</title>
+  </head>
+  <body>
+            <h1>{title}</h1>
+  </body>
+</html>"#,
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
 }
 
 #[test]
