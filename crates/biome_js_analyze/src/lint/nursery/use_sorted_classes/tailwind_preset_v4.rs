@@ -49,21 +49,12 @@ pub enum ValueType {
 impl ValueType {
     pub fn matches(self, value: &str) -> bool {
         match self {
-            Self::Color => predicates::is_color(value),
-            Self::Length => predicates::is_length(value),
-            Self::Percentage => predicates::is_percentage(value),
             Self::Number => predicates::is_number(value),
-            Self::Integer => predicates::is_integer(value),
+            Self::Percentage => predicates::is_percentage(value),
             Self::Ratio => predicates::is_ratio(value),
-            Self::Angle => predicates::is_angle(value),
-            Self::Url => predicates::is_url(value),
-            Self::Position => predicates::is_position(value),
-            Self::BgSize => predicates::is_bg_size(value),
-            Self::LineWidth => predicates::is_line_width(value),
-            Self::Image => predicates::is_image(value),
-            Self::AbsoluteSize => predicates::is_absolute_size(value),
-            Self::RelativeSize => predicates::is_relative_size(value),
-            Self::Vector => predicates::is_vector(value),
+            // ArbitraryTyped variants are dispatched via parser node kinds
+            // (#10299), not predicate text scans.
+            _ => false,
         }
     }
 }
