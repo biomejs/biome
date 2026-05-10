@@ -1246,19 +1246,19 @@ impl TwRatioValue {
     }
     pub fn as_fields(&self) -> TwRatioValueFields {
         TwRatioValueFields {
-            numerator: self.numerator(),
+            numerator_token: self.numerator_token(),
             slash_token: self.slash_token(),
-            denominator: self.denominator(),
+            denominator_token: self.denominator_token(),
         }
     }
-    pub fn numerator(&self) -> SyntaxResult<TwNumberValue> {
-        support::required_node(&self.syntax, 0usize)
+    pub fn numerator_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
     }
     pub fn slash_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn denominator(&self) -> SyntaxResult<TwNumberValue> {
-        support::required_node(&self.syntax, 2usize)
+    pub fn denominator_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
     }
 }
 impl Serialize for TwRatioValue {
@@ -1271,9 +1271,9 @@ impl Serialize for TwRatioValue {
 }
 #[derive(Serialize)]
 pub struct TwRatioValueFields {
-    pub numerator: SyntaxResult<TwNumberValue>,
+    pub numerator_token: SyntaxResult<SyntaxToken>,
     pub slash_token: SyntaxResult<SyntaxToken>,
-    pub denominator: SyntaxResult<TwNumberValue>,
+    pub denominator_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TwRoot {
@@ -3358,14 +3358,17 @@ impl std::fmt::Debug for TwRatioValue {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("TwRatioValue")
-                .field("numerator", &support::DebugSyntaxResult(self.numerator()))
+                .field(
+                    "numerator_token",
+                    &support::DebugSyntaxResult(self.numerator_token()),
+                )
                 .field(
                     "slash_token",
                     &support::DebugSyntaxResult(self.slash_token()),
                 )
                 .field(
-                    "denominator",
-                    &support::DebugSyntaxResult(self.denominator()),
+                    "denominator_token",
+                    &support::DebugSyntaxResult(self.denominator_token()),
                 )
                 .finish()
         } else {

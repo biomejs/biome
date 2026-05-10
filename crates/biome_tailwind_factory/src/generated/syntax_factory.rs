@@ -852,7 +852,7 @@ impl SyntaxFactory for TailwindSyntaxFactory {
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && TwNumberValue::can_cast(element.kind())
+                    && element.kind() == TW_NUMBER
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -866,7 +866,7 @@ impl SyntaxFactory for TailwindSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && TwNumberValue::can_cast(element.kind())
+                    && element.kind() == TW_NUMBER
                 {
                     slots.mark_present();
                     current_element = elements.next();
