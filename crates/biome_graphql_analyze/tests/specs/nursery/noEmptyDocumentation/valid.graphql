@@ -1,0 +1,12 @@
+# should not generate diagnostics
+
+# Valid
+enum Valid1 {}
+
+"""
+Valid
+"""
+enum Valid2 {}
+
+"Valid"
+enum Valid3 {}

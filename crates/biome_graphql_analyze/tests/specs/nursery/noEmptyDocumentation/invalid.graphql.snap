@@ -1,0 +1,59 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalid.graphql
+---
+# Input
+```graphql
+# should generate diagnostics
+
+#
+enum Invalid1 {}
+
+"""
+"""
+enum Invalid2 {}
+
+""
+enum Invalid3 {}
+
+```
+
+# Diagnostics
+```
+invalid.graphql:3:1 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+    1 │ # should generate diagnostics
+    2 │ 
+  > 3 │ #
+      │ ^
+    4 │ enum Invalid1 {}
+    5 │ 
+  
+  i More empty documentation.
+  
+    4 │ enum Invalid1 {}
+    5 │ 
+  > 6 │ """
+      │ ^^^
+  > 7 │ """
+      │ ^^^
+    8 │ enum Invalid2 {}
+    9 │ 
+  
+  i More empty documentation.
+  
+     8 │ enum Invalid2 {}
+     9 │ 
+  > 10 │ ""
+       │ ^^
+    11 │ enum Invalid3 {}
+    12 │ 
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

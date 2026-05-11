@@ -1,0 +1,6 @@
+/* should not generate diagnostics */
+
+/* Valid */
+.valid {
+	display: flex;
+}

@@ -1,0 +1,42 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: invalid.jsonc
+---
+# Input
+```jsonc
+{
+  /**/
+  "name": "Jane Doe",
+  //
+  "age": 1
+}
+
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:3 lint/nursery/noEmptyDocumentation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected empty documentation.
+  
+    1 │ {
+  > 2 │   /**/
+      │   ^^^^
+    3 │   "name": "Jane Doe",
+    4 │   //
+  
+  i More empty documentation.
+  
+    2 │   /**/
+    3 │   "name": "Jane Doe",
+  > 4 │   //
+      │   ^^
+    5 │   "age": 1
+    6 │ }
+  
+  i Empty documentation provides no value. Remove them or add meaningful content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

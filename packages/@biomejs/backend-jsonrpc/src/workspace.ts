@@ -2138,6 +2138,11 @@ See https://biomejs.dev/linter/rules/no-duplicated-spread-props
 	 */
 	noDuplicatedSpreadProps?: NoDuplicatedSpreadPropsConfiguration;
 	/**
+	* Disallow empty documentation.
+See https://biomejs.dev/linter/rules/no-empty-documentation 
+	 */
+	noEmptyDocumentation?: NoEmptyDocumentationConfiguration;
+	/**
 	* Disallow empty keys in JSON objects.
 See https://biomejs.dev/linter/rules/no-empty-object-keys 
 	 */
@@ -4349,6 +4354,9 @@ export type NoDuplicateVariableNamesConfiguration =
 export type NoDuplicatedSpreadPropsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicatedSpreadPropsOptions;
+export type NoEmptyDocumentationConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoEmptyDocumentationOptions;
 export type NoEmptyObjectKeysConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoEmptyObjectKeysOptions;
@@ -6133,6 +6141,10 @@ export interface RuleWithNoDuplicatedSpreadPropsOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicatedSpreadPropsOptions;
 }
+export interface RuleWithNoEmptyDocumentationOptions {
+	level: RulePlainConfiguration;
+	options?: NoEmptyDocumentationOptions;
+}
 export interface RuleWithNoEmptyObjectKeysOptions {
 	level: RulePlainConfiguration;
 	options?: NoEmptyObjectKeysOptions;
@@ -7907,6 +7919,7 @@ export type NoDuplicateInputFieldNamesOptions = {};
 export type NoDuplicateSelectorsOptions = {};
 export type NoDuplicateVariableNamesOptions = {};
 export type NoDuplicatedSpreadPropsOptions = {};
+export type NoEmptyDocumentationOptions = {};
 export type NoEmptyObjectKeysOptions = {};
 export type NoEqualsToNullOptions = {};
 export interface NoExcessiveClassesPerFileOptions {
@@ -9189,6 +9202,7 @@ export type Category =
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noDuplicateVariableNames"
 	| "lint/nursery/noDuplicatedSpreadProps"
+	| "lint/nursery/noEmptyDocumentation"
 	| "lint/nursery/noEmptyObjectKeys"
 	| "lint/nursery/noEqualsToNull"
 	| "lint/nursery/noExcessiveClassesPerFile"

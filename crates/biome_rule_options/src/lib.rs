@@ -88,6 +88,7 @@ pub mod no_dynamic_namespace_import_access;
 pub mod no_empty_block;
 pub mod no_empty_block_statements;
 pub mod no_empty_character_class_in_regex;
+pub mod no_empty_documentation;
 pub mod no_empty_interface;
 pub mod no_empty_object_keys;
 pub mod no_empty_pattern;

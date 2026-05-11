@@ -1,0 +1,6 @@
+/* should generate diagnostics */
+
+/* */
+.invalid {
+	display: flex;
+}

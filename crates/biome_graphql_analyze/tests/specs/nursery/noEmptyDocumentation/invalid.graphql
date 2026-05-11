@@ -1,0 +1,11 @@
+# should generate diagnostics
+
+#
+enum Invalid1 {}
+
+"""
+"""
+enum Invalid2 {}
+
+""
+enum Invalid3 {}

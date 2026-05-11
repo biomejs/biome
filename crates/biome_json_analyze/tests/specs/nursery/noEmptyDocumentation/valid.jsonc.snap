@@ -1,0 +1,16 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: valid.jsonc
+---
+# Input
+```jsonc
+{
+  /*
+    Valid
+  */
+  "name": "Jane Doe",
+  // Valid
+  "age": 1
+}
+
+```

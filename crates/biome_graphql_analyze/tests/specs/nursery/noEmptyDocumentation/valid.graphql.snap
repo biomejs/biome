@@ -1,0 +1,20 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: valid.graphql
+---
+# Input
+```graphql
+# should not generate diagnostics
+
+# Valid
+enum Valid1 {}
+
+"""
+Valid
+"""
+enum Valid2 {}
+
+"Valid"
+enum Valid3 {}
+
+```
