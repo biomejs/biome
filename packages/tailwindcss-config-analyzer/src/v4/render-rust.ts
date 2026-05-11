@@ -30,8 +30,6 @@ const HEADER = `//! AUTO-GENERATED. DO NOT EDIT MANUALLY.
 
 use phf::{phf_map, phf_set};
 
-use super::predicates;
-
 use Branch::*;
 use Negative::*;
 `;
@@ -96,34 +94,16 @@ function camelToScreamingSnake(s: string): string {
 	return camelToSnake(s).toUpperCase();
 }
 
-// `NamedTyped` only carries Number/Percentage/Ratio in Tailwind v4. The
-// other variants are referenced from `ArbitraryTyped`, which sort_v4
-// does not yet route through, and once it does the parser nodes from
-// #10299 will replace any text scanning here.
-const NAMED_TYPED_TYPES = ["Number", "Percentage", "Ratio"] as const;
-
 function renderValueTypeEnum(): string {
 	const variants = VALUE_TYPES.map((v) => `    ${v},`).join("\n");
-	const matches = NAMED_TYPED_TYPES.map(
-		(v) =>
-			`            Self::${v} => predicates::is_${camelToSnake(v)}(value),`,
-	).join("\n");
 	return `// CSS value types (from infer-data-type.ts).
+// Matching is dispatched by the consumer on the parser node kind
+// (TwNumberValue / TwPercentageValue / TwModifier+number), not by
+// scanning value text — see sort_v4::resolve_branch.
 #[derive(Copy, Clone, PartialEq, Eq)]
 #[repr(u8)]
 pub enum ValueType {
 ${variants}
-}
-
-impl ValueType {
-    pub fn matches(self, value: &str) -> bool {
-        match self {
-${matches}
-            // ArbitraryTyped variants are dispatched via parser node kinds
-            // (#10299), not predicate text scans.
-            _ => false,
-        }
-    }
 }
 `;
 }

@@ -66,5 +66,17 @@
 	"bg-rainbow flex bg-red-500", // basename matches but value resolves to nothing → unknown
 	"foo bar baz",                // all unknown — output unchanged
 	"flex p-",                    // empty value after `-` → unknown
-	"myCustom flex p-4"
+	"myCustom flex p-4",
+
+	// ─── new value-kind dispatch (post-#10332) ─────────────────────
+	// TwNumberValue → NamedTyped(Number); TwPercentageValue →
+	// NamedTyped(Percentage); a numeric modifier on a numeric value
+	// is treated as a fraction when the entry has a Ratio branch.
+
+	"from-50% flex",              // TwPercentageValue → gradient-stop
+	"to-100% via-25% from-50%",   // three gradient stops, stable order within bucket
+	"flex w-1/2 w-1/3",           // two ratios share the same w branch, stable input order
+	"flex bg-red-500/50",         // color modifier — Unknown (TODO: opacity)
+	"flex text-lg/8",             // line-height modifier — Unknown (TODO: line-height)
+	"flex w-1/foo"                // value=Number, modifier=Named(non-numeric) → Unknown
 ]

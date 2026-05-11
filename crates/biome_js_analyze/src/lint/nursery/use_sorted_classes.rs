@@ -1,6 +1,5 @@
 mod class_info;
 pub mod class_lexer;
-mod predicates;
 mod presets;
 mod sort;
 mod sort_config;

@@ -20,12 +20,13 @@
 
 use phf::{phf_map, phf_set};
 
-use super::predicates;
-
 use Branch::*;
 use Negative::*;
 
 // CSS value types (from infer-data-type.ts).
+// Matching is dispatched by the consumer on the parser node kind
+// (TwNumberValue / TwPercentageValue / TwModifier+number), not by
+// scanning value text — see sort_v4::resolve_branch.
 #[derive(Copy, Clone, PartialEq, Eq)]
 #[repr(u8)]
 pub enum ValueType {
@@ -44,19 +45,6 @@ pub enum ValueType {
     AbsoluteSize,
     RelativeSize,
     Vector,
-}
-
-impl ValueType {
-    pub fn matches(self, value: &str) -> bool {
-        match self {
-            Self::Number => predicates::is_number(value),
-            Self::Percentage => predicates::is_percentage(value),
-            Self::Ratio => predicates::is_ratio(value),
-            // ArbitraryTyped variants are dispatched via parser node kinds
-            // (#10299), not predicate text scans.
-            _ => false,
-        }
-    }
 }
 
 // Theme namespaces (from default theme.css).

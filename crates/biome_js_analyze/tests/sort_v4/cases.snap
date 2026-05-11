@@ -49,7 +49,7 @@ input:  w-10 flex p-4
 sorted: flex w-10 p-4
 ---
 input:  w-1/2 flex p-4
-sorted: w-1/2 flex p-4
+sorted: flex w-1/2 p-4
 ---
 input:  w-full flex p-4
 sorted: w-full flex p-4
@@ -64,7 +64,7 @@ input:  aspect-video flex
 sorted: flex aspect-video
 ---
 input:  aspect-9/16 flex
-sorted: aspect-9/16 flex
+sorted: flex aspect-9/16
 ---
 input:  p-4 flex -mt-2
 sorted: -mt-2 flex p-4
@@ -104,3 +104,21 @@ sorted: p- flex
 ---
 input:  myCustom flex p-4
 sorted: myCustom flex p-4
+---
+input:  from-50% flex
+sorted: flex from-50%
+---
+input:  to-100% via-25% from-50%
+sorted: from-50% via-25% to-100%
+---
+input:  flex w-1/2 w-1/3
+sorted: flex w-1/2 w-1/3
+---
+input:  flex bg-red-500/50
+sorted: bg-red-500/50 flex
+---
+input:  flex text-lg/8
+sorted: text-lg/8 flex
+---
+input:  flex w-1/foo
+sorted: w-1/foo flex

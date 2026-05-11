@@ -1,10 +1,12 @@
 use std::cmp::Ordering;
 
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxNodeText};
-use biome_tailwind_syntax::{AnyTwCandidate, AnyTwFullCandidate, AnyTwValue, TwRoot};
+use biome_tailwind_syntax::{
+    AnyTwCandidate, AnyTwFullCandidate, AnyTwModifier, AnyTwValue, TwRoot,
+};
 
 use super::tailwind_preset_v4::{
-    Branch, FUNCTIONAL_UTILITIES, KEYWORD_POOL, Negative, STATIC_UTILITIES,
+    Branch, FUNCTIONAL_UTILITIES, KEYWORD_POOL, Negative, STATIC_UTILITIES, ValueType,
 };
 
 /// Sort the candidates of a parsed Tailwind class list and return the joined,
@@ -98,11 +100,6 @@ impl SortKey {
             }
 
             AnyTwCandidate::TwFunctionalCandidate(f) => {
-                // TODO: modifier (`bg-red-500/50`) — opacity/etc.
-                if f.modifier().is_some() {
-                    return Self::Unknown;
-                }
-
                 let Ok(base) = f.base_token() else {
                     return Self::Unknown;
                 };
@@ -129,23 +126,41 @@ impl SortKey {
                     return Self::Unknown;
                 };
 
-                match value {
-                    // TODO: ArbitraryTyped / Arbitrary branches (`bg-[#abc]`, `p-[10px]`).
-                    AnyTwValue::TwArbitraryValue(_) => Self::Unknown,
-                    // TODO: CSS variable values (`bg-(--my-color)`).
-                    AnyTwValue::TwCssVariableValue(_) => Self::Unknown,
-                    // TODO: data-attribute values inside utility (rare).
-                    AnyTwValue::TwDataAttribute(_) => Self::Unknown,
-                    AnyTwValue::TwBogusValue(_) => Self::Unknown,
+                // Only `n/m` fraction modifiers resolve here; see
+                // `is_fraction_modifier`. Color opacity, line-height,
+                // gradient interpolation, … are TODO.
+                let has_fraction_modifier = match f.modifier() {
+                    None => false,
+                    Some(m) if is_fraction_modifier(&value, &m, branches) => true,
+                    Some(_) => return Self::Unknown,
+                };
 
-                    AnyTwValue::TwNamedValue(named) => {
-                        let Ok(value_token) = named.value_token() else {
-                            return Self::Unknown;
-                        };
-                        resolve_branch(branches, value_token.text_trimmed(), registration_idx)
-                            .unwrap_or(Self::Unknown)
-                    }
-                }
+                let value_token = match &value {
+                    AnyTwValue::TwNamedValue(n) => n.value_token(),
+                    AnyTwValue::TwNumberValue(n) => n.value_token(),
+                    AnyTwValue::TwPercentageValue(p) => p.value_token(),
+                    // TODO: ArbitraryTyped / Arbitrary branches (`bg-[#abc]`, `p-[10px]`).
+                    AnyTwValue::TwArbitraryValue(_) => return Self::Unknown,
+                    // TODO: CSS variable values (`bg-(--my-color)`).
+                    AnyTwValue::TwCssVariableValue(_) => return Self::Unknown,
+                    // TODO: data-attribute values inside utility (rare).
+                    AnyTwValue::TwDataAttribute(_) => return Self::Unknown,
+                    AnyTwValue::TwBogusValue(_) => return Self::Unknown,
+                };
+                let Ok(value_token) = value_token else {
+                    return Self::Unknown;
+                };
+                let value_text = value_token.text_trimmed();
+
+                let kind = match (&value, has_fraction_modifier) {
+                    (AnyTwValue::TwNamedValue(_), false) => ValueKind::Named(value_text),
+                    (AnyTwValue::TwNumberValue(_), false) => ValueKind::Number(value_text),
+                    (AnyTwValue::TwNumberValue(_), true) => ValueKind::Ratio,
+                    (AnyTwValue::TwPercentageValue(_), false) => ValueKind::Percentage,
+                    _ => return Self::Unknown,
+                };
+
+                resolve_branch(branches, &kind, registration_idx).unwrap_or(Self::Unknown)
             }
         }
     }
@@ -179,20 +194,82 @@ fn compare(a: &SortKey, b: &SortKey) -> Ordering {
     }
 }
 
+/// Classified value for `resolve_branch`. Dispatching by parser node
+/// kind keeps `NamedTyped(Number)` from matching `red-500` and
+/// `NamedTyped(Ratio)` from firing without an `n/m` modifier.
+enum ValueKind<'a> {
+    Named(&'a str),
+    Number(&'a str),
+    Percentage,
+    Ratio,
+}
+
+/// Does this utility's branch list declare a `NamedTyped(Ratio)` slot?
+/// Used as the gate for fraction-aliased modifiers (`w-1/2` ↔ `w-[50%]`) —
+/// mirrors Tailwind's `supportsFractions` flag
+fn entry_has_ratio_branch(branches: &[Branch]) -> bool {
+    branches
+        .iter()
+        .any(|b| matches!(b, Branch::NamedTyped(ValueType::Ratio, _, _)))
+}
+
+/// `n/m` Tailwind fraction shorthand: the value is a bare number, the
+/// modifier is a bare number, and the utility actually accepts fractions.
+fn is_fraction_modifier(value: &AnyTwValue, modifier: &AnyTwModifier, branches: &[Branch]) -> bool {
+    let AnyTwModifier::TwModifier(m) = modifier else {
+        return false;
+    };
+    matches!(value, AnyTwValue::TwNumberValue(_))
+        && matches!(m.value(), Ok(AnyTwValue::TwNumberValue(_)))
+        && entry_has_ratio_branch(branches)
+}
+
 /// Walk a basename's branch list and return the first matching branch as
 /// a complete `SortKey::Known`. Branch order in the preset already
 /// reflects the resolution precedence we want
 /// (NamedKeyword → Named → NamedTyped → ArbitraryTyped → Arbitrary).
-fn resolve_branch(branches: &[Branch], value: &str, registration_idx: u16) -> Option<SortKey> {
+fn resolve_branch(
+    branches: &[Branch],
+    kind: &ValueKind<'_>,
+    registration_idx: u16,
+) -> Option<SortKey> {
     for &branch in branches {
         let (property_idx, property_count) = match branch {
-            Branch::Named(namespace, p, c) if namespace.keys().contains(value) => (p, c),
-            Branch::NamedKeyword(pool_idx, p, c)
-                if KEYWORD_POOL[usize::from(pool_idx)].contains(&value) =>
-            {
+            // Theme-namespace lookup (`text-lg` ↔ `--text-lg`). Both Named
+            // and Number kinds query it — users can register numeric
+            // theme keys like `--spacing-12`.
+            Branch::Named(namespace, p, c) => {
+                let text = match kind {
+                    ValueKind::Named(v) | ValueKind::Number(v) => *v,
+                    ValueKind::Percentage | ValueKind::Ratio => continue,
+                };
+                if !namespace.keys().contains(text) {
+                    continue;
+                }
                 (p, c)
             }
-            Branch::NamedTyped(value_type, p, c) if value_type.matches(value) => (p, c),
+            // Hard-coded keyword pool (`origin-top`, `accent-current`).
+            Branch::NamedKeyword(pool_idx, p, c) => {
+                let ValueKind::Named(text) = kind else {
+                    continue;
+                };
+                if !KEYWORD_POOL[usize::from(pool_idx)].contains(text) {
+                    continue;
+                }
+                (p, c)
+            }
+            Branch::NamedTyped(value_type, p, c) => {
+                let matched = matches!(
+                    (value_type, kind),
+                    (ValueType::Number, ValueKind::Number(_))
+                        | (ValueType::Percentage, ValueKind::Percentage)
+                        | (ValueType::Ratio, ValueKind::Ratio)
+                );
+                if !matched {
+                    continue;
+                }
+                (p, c)
+            }
             // ArbitraryTyped / Arbitrary only fire for bracketed arbitrary values,
             // which the caller filters out before reaching this loop.
             _ => continue,
@@ -211,8 +288,6 @@ mod tests {
     use super::*;
     use biome_tailwind_parser::parse_tailwind;
 
-    use super::super::tailwind_preset_v4::ValueType;
-
     fn known(property_idx: u16, property_count: u8, registration_idx: u16) -> SortKey {
         SortKey::Known {
             property_idx,
@@ -229,10 +304,7 @@ mod tests {
 
     #[test]
     fn compare_unknown_is_less_than_known() {
-        assert_eq!(
-            compare(&SortKey::Unknown, &known(5, 1, 0)),
-            Ordering::Less
-        );
+        assert_eq!(compare(&SortKey::Unknown, &known(5, 1, 0)), Ordering::Less);
         assert_eq!(
             compare(&known(5, 1, 0), &SortKey::Unknown),
             Ordering::Greater
@@ -285,7 +357,7 @@ mod tests {
             Branch::NamedTyped(ValueType::Number, 20, 1),
         ];
         assert_eq!(
-            resolve_branch(branches, "5", 99),
+            resolve_branch(branches, &ValueKind::Number("5"), 99),
             Some(known(10, 1, 99))
         );
     }
@@ -298,23 +370,45 @@ mod tests {
             Branch::ArbitraryTyped(ValueType::Number, 10, 1),
             Branch::Arbitrary(20, 1),
         ];
-        assert_eq!(resolve_branch(branches, "5", 99), None);
+        assert_eq!(resolve_branch(branches, &ValueKind::Number("5"), 99), None);
     }
 
     #[test]
     fn resolve_branch_passes_registration_idx_through() {
         let branches = &[Branch::NamedTyped(ValueType::Number, 1, 1)];
         assert_eq!(
-            resolve_branch(branches, "0", 42),
+            resolve_branch(branches, &ValueKind::Number("0"), 42),
             Some(known(1, 1, 42))
         );
     }
 
     #[test]
-    fn resolve_branch_returns_none_when_value_matches_no_branch() {
+    fn resolve_branch_returns_none_when_kind_does_not_match_value_type() {
+        // A NamedValue text like "abc" never satisfies NamedTyped(Number)
+        // because dispatch is by parser node kind, not text scanning.
         let branches = &[Branch::NamedTyped(ValueType::Number, 1, 1)];
-        // "abc" is not a number → no branch matches.
-        assert_eq!(resolve_branch(branches, "abc", 0), None);
+        assert_eq!(resolve_branch(branches, &ValueKind::Named("abc"), 0), None);
+    }
+
+    #[test]
+    fn resolve_branch_ratio_matches_ratio_typed_branch() {
+        let branches = &[Branch::NamedTyped(ValueType::Ratio, 7, 1)];
+        assert_eq!(
+            resolve_branch(branches, &ValueKind::Ratio, 11),
+            Some(known(7, 1, 11))
+        );
+    }
+
+    #[test]
+    fn resolve_branch_percentage_only_matches_percentage_typed_branch() {
+        let branches = &[
+            Branch::NamedTyped(ValueType::Number, 1, 1),
+            Branch::NamedTyped(ValueType::Percentage, 2, 1),
+        ];
+        assert_eq!(
+            resolve_branch(branches, &ValueKind::Percentage, 0),
+            Some(known(2, 1, 0))
+        );
     }
 
     // endregion: resolve_branch
@@ -333,4 +427,3 @@ mod tests {
 
     // endregion: sort_class_list edge cases
 }
-
