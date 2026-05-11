@@ -512,7 +512,7 @@ fn check_nullish_necessity(
     optional_chain_range: TextRange,
     ctx: &RuleContext<NoUnnecessaryConditions>,
 ) -> Option<IssueKind> {
-    // Literal fast-path (existing behavior)
+    // Only detect obvious literal cases that are never nullish
     match expr {
         AnyJsExpression::AnyJsLiteralExpression(literal_expr) => {
             match literal_expr {
@@ -564,7 +564,7 @@ fn check_optional_chain_necessity(
     optional_chain_range: TextRange,
     ctx: &RuleContext<NoUnnecessaryConditions>,
 ) -> Option<IssueKind> {
-    // Literal fast-path (existing behavior)
+    // Only detect obvious literal cases that are never nullish
     match expr {
         AnyJsExpression::AnyJsLiteralExpression(
             AnyJsLiteralExpression::JsBooleanLiteralExpression(_)
