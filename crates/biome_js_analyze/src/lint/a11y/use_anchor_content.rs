@@ -200,28 +200,22 @@ fn has_valid_anchor_content(node: &AnyJsxElement) -> bool {
 /// Handles self-closing (`<a />`), open/close (`<a></a>`), and parenthesized
 /// (`render={(<a />)}`) forms. Native HTML elements are not exempted.
 fn is_jsx_attribute_anchor(node: &AnyJsxElement) -> bool {
-    let mut current = node.syntax().parent();
-    loop {
-        let Some(parent) = current else {
-            return false;
-        };
-        if JsxExpressionAttributeValue::can_cast(parent.kind()) {
-            let attr_value = JsxExpressionAttributeValue::unwrap_cast(parent);
+    for ancestor in node.syntax().ancestors().skip(1) {
+        if let Some(attr_value) = JsxExpressionAttributeValue::cast(ancestor.clone()) {
             return is_component_attribute(&attr_value).unwrap_or(false);
         }
-        match parent.kind() {
+        match ancestor.kind() {
             // Walk up through transparent wrapper nodes:
             // - JsxElement wraps JsxOpeningElement
             // - JsxTagExpression wraps JSX elements used as JS expressions
             // - JsParenthesizedExpression for render={(<a />)}
             JsSyntaxKind::JSX_ELEMENT
             | JsSyntaxKind::JSX_TAG_EXPRESSION
-            | JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION => {
-                current = parent.parent();
-            }
+            | JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION => {}
             _ => return false,
         }
     }
+    false
 }
 
 /// Returns `Some(true)` when `attr_value` is an attribute of a custom JSX component (i.e. an
