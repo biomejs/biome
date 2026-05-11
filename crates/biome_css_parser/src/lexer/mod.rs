@@ -1068,6 +1068,7 @@ impl<'src> CssLexer<'src> {
             b"forward" => FORWARD_KW,
             b"hide" => HIDE_KW,
             b"include" => INCLUDE_KW,
+            b"using" => USING_KW,
             b"mixin" => MIXIN_KW,
             b"optional" => OPTIONAL_KW,
             b"while" => WHILE_KW,

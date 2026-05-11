@@ -396,6 +396,24 @@ pub fn tw_named_value(value_token: SyntaxToken) -> TwNamedValue {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn tw_number_value(value_token: SyntaxToken) -> TwNumberValue {
+    TwNumberValue::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::TW_NUMBER_VALUE,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn tw_percentage_value(
+    value_token: SyntaxToken,
+    remainder_token: SyntaxToken,
+) -> TwPercentageValue {
+    TwPercentageValue::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::TW_PERCENTAGE_VALUE,
+        [
+            Some(SyntaxElement::Token(value_token)),
+            Some(SyntaxElement::Token(remainder_token)),
+        ],
+    ))
+}
 pub fn tw_root(candidates: TwCandidateList, eof_token: SyntaxToken) -> TwRootBuilder {
     TwRootBuilder {
         candidates,

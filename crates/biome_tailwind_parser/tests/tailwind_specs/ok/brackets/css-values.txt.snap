@@ -369,8 +369,8 @@ TwRoot {
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@210..212 "mt" [] [],
                 minus_token: DASH@212..213 "-" [] [],
-                value: TwNamedValue {
-                    value_token: TW_VALUE@213..214 "2" [] [],
+                value: TwNumberValue {
+                    value_token: TW_NUMBER@213..214 "2" [] [],
                 },
                 modifier: missing (optional),
             },
@@ -644,8 +644,8 @@ TwRoot {
       2: TW_FUNCTIONAL_CANDIDATE@210..214
         0: TW_BASE@210..212 "mt" [] []
         1: DASH@212..213 "-" [] []
-        2: TW_NAMED_VALUE@213..214
-          0: TW_VALUE@213..214 "2" [] []
+        2: TW_NUMBER_VALUE@213..214
+          0: TW_NUMBER@213..214 "2" [] []
         3: (empty)
       3: (empty)
   2: EOF@214..215 "" [Newline("\n")] []

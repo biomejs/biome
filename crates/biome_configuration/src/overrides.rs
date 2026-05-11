@@ -12,6 +12,7 @@ use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, Expand, IndentStyle, IndentWidth,
     LineEnding, LineWidth, TrailingNewline,
 };
+use biome_js_formatter::context::trailing_commas::TrailingCommas;
 use biome_plugin_loader::Plugins;
 #[cfg(feature = "cli")]
 use bpaf::Bpaf;
@@ -188,6 +189,14 @@ pub struct OverrideFormatterConfiguration {
         bpaf(long("object-wrap"), argument("auto|always|never"))
     )]
     pub expand: Option<Expand>,
+
+    /// Print trailing commas wherever possible in multi-line comma-separated syntactic structures.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("trailing-commas"), argument("all|es5|none"))
+    )]
+    pub trailing_commas: Option<TrailingCommas>,
 
     /// Whether to add a trailing newline at the end of the file.
     ///

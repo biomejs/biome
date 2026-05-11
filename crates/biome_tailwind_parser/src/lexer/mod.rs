@@ -54,6 +54,7 @@ impl<'src> TailwindLexer<'src> {
             _ if self.current_kind == T![/] => self.consume_modifier(),
             COL => self.consume_byte(T![:]),
             MIN => self.consume_byte(T![-]),
+            PRC => self.consume_byte(T![%]),
             EXL => self.consume_byte(T![!]),
             SLH => self.consume_byte(T![/]),
             IDT | ZER | DIG => self.consume_base(),
@@ -81,6 +82,7 @@ impl<'src> TailwindLexer<'src> {
             _ if self.current_kind == T!['('] => self.consume_bracketed_thing(TW_VALUE, PNC),
             COL => self.consume_byte(T![:]),
             MIN => self.consume_byte(T![-]),
+            PRC => self.consume_byte(T![%]),
             EXL => self.consume_byte(T![!]),
             SLH => self.consume_byte(T![/]),
             IDT | ZER | DIG => self.consume_base(),
@@ -391,16 +393,20 @@ impl<'src> TailwindLexer<'src> {
     fn consume_named_value(&mut self) -> TailwindSyntaxKind {
         self.assert_current_char_boundary();
 
+        let mut numbers_only = true;
         while let Some(byte) = self.current_byte() {
             let dispatched = lookup_byte(byte);
-            if matches!(dispatched, WHS | COL | SLH | EXL | BTC | PNC) {
+            if matches!(dispatched, WHS | COL | SLH | EXL | BTC | PNC | PRC) {
                 break;
+            }
+            if !matches!(dispatched, ZER | DIG | PRD) {
+                numbers_only = false;
             }
             let char = self.current_char_unchecked();
             self.advance(char.len_utf8());
         }
 
-        TW_VALUE
+        if numbers_only { TW_NUMBER } else { TW_VALUE }
     }
 
     /// After seeing a '-', we usually lex a value. However, if the next bytes are "data"
@@ -429,17 +435,27 @@ impl<'src> TailwindLexer<'src> {
         self.assert_current_char_boundary();
 
         let mut empty = true;
+        let mut numbers_only = true;
         while let Some(byte) = self.current_byte() {
             let dispatched = lookup_byte(byte);
             let char = self.current_char_unchecked();
-            if matches!(dispatched, WHS | EXL) {
+            if matches!(dispatched, WHS | EXL | PRC) {
                 break;
+            }
+            if !matches!(dispatched, ZER | DIG | PRD) {
+                numbers_only = false;
             }
             self.advance(char.len_utf8());
             empty = false;
         }
 
-        if empty { ERROR_TOKEN } else { TW_VALUE }
+        if empty {
+            ERROR_TOKEN
+        } else if numbers_only {
+            TW_NUMBER
+        } else {
+            TW_VALUE
+        }
     }
 
     fn consume_bracketed_thing(

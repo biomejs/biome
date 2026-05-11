@@ -75,12 +75,13 @@ impl Diagnostic {
         }
     }
 
-    pub fn with_offset(mut self, offset: TextSize) -> Self {
-        self.location.span = self
-            .location
-            .span
-            .map(|span| TextRange::new(span.start() + offset, span.end() + offset));
-        self
+    pub fn offset_by(&mut self, offset: TextSize) {
+        self.location.offset_by(offset);
+        self.advices.offset_by(offset);
+        self.verbose_advices.offset_by(offset);
+        if let Some(source) = &mut self.source {
+            source.offset_by(offset);
+        }
     }
 }
 
@@ -148,6 +149,15 @@ struct Location {
     source_code: Option<String>,
 }
 
+impl Location {
+    /// Offset the location span by `offset`.
+    fn offset_by(&mut self, offset: TextSize) {
+        if let Some(span) = &mut self.span {
+            self.span = Some(TextRange::new(span.start() + offset, span.end() + offset));
+        }
+    }
+}
+
 impl From<super::Location<'_>> for Location {
     fn from(loc: super::Location<'_>) -> Self {
         Self {
@@ -173,6 +183,12 @@ impl Advices {
     fn new() -> Self {
         Self {
             advices: Vec::new(),
+        }
+    }
+
+    fn offset_by(&mut self, offset: TextSize) {
+        for advicde in &mut self.advices {
+            advicde.offset_by(offset);
         }
     }
 }
@@ -260,6 +276,24 @@ enum Advice {
     Backtrace(MarkupBuf, Backtrace),
     Command(String),
     Group(MarkupBuf, Advices),
+}
+
+impl Advice {
+    fn offset_by(&mut self, offset: TextSize) {
+        match self {
+            Self::Log(_, _)
+            | Self::List(_)
+            | Self::Backtrace(_, _)
+            | Self::Command(_)
+            | Self::Diff(_) => {}
+            Self::Frame(location) => {
+                location.offset_by(offset);
+            }
+            Self::Group(_, advices) => {
+                advices.offset_by(offset);
+            }
+        }
+    }
 }
 
 impl super::Advices for Advice {

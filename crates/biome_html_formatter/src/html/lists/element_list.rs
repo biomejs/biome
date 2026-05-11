@@ -193,8 +193,8 @@ use crate::{
 use biome_formatter::{FormatRuleWithOptions, GroupId, prelude::*};
 use biome_formatter::{format_args, write};
 use biome_html_syntax::{
-    AnyHtmlContent, AnyHtmlElement, HtmlClosingElement, HtmlClosingElementFields, HtmlElement,
-    HtmlElementList, HtmlRoot, HtmlSyntaxToken,
+    AnyHtmlContent, AnyHtmlElement, AnyHtmlTextExpression, HtmlClosingElement,
+    HtmlClosingElementFields, HtmlElement, HtmlElementList, HtmlRoot, HtmlSyntaxToken,
 };
 use biome_rowan::AstNode;
 
@@ -379,6 +379,12 @@ impl FormatHtmlElementList {
 
         // Trim trailing new lines from children
         let mut children = children;
+        let has_leading_newline = children
+            .first()
+            .is_some_and(|child| matches!(child, HtmlChild::Newline | HtmlChild::EmptyLine));
+        let had_trailing_newline = children
+            .last()
+            .is_some_and(|child| matches!(child, HtmlChild::Newline | HtmlChild::EmptyLine));
         if !self.is_container_whitespace_sensitive {
             while matches!(
                 children.last(),
@@ -436,6 +442,14 @@ impl FormatHtmlElementList {
                 force_multiline = true;
             }
 
+            if self.is_container_whitespace_sensitive
+                && has_leading_newline
+                && had_trailing_newline
+                && has_single_interpolation_child(&children)
+            {
+                force_multiline = true;
+            }
+
             if force_multiline {
                 write!(f, [expand_parent()])?;
             }
@@ -469,13 +483,21 @@ impl FormatHtmlElementList {
                 if self.is_container_whitespace_sensitive && child.is_any_whitespace() {
                     if is_first_child {
                         // Leading whitespace: becomes a space in flat mode
-                        write!(f, [soft_line_break_or_space()])?;
+                        if force_multiline {
+                            write!(f, [hard_line_break()])?;
+                        } else {
+                            write!(f, [soft_line_break_or_space()])?;
+                        }
                         is_first_child = false;
                         last = Some(child);
                         continue;
                     } else if is_last_child {
                         // Trailing whitespace: becomes a space in flat mode
-                        write!(f, [soft_line_break_or_space()])?;
+                        if force_multiline {
+                            write!(f, [hard_line_break()])?;
+                        } else {
+                            write!(f, [soft_line_break_or_space()])?;
+                        }
                         last = Some(child);
                         continue;
                     }
@@ -947,6 +969,22 @@ fn is_br_element(element: &AnyHtmlElement) -> bool {
     element
         .name()
         .is_some_and(|name| name.text().eq_ignore_ascii_case("br"))
+}
+
+fn has_single_interpolation_child(children: &[HtmlChild]) -> bool {
+    let mut meaningful_children = children.iter().filter(|child| !child.is_any_whitespace());
+
+    let Some(HtmlChild::NonText(AnyHtmlElement::AnyHtmlContent(
+        AnyHtmlContent::AnyHtmlTextExpression(
+            AnyHtmlTextExpression::HtmlDoubleTextExpression(_)
+            | AnyHtmlTextExpression::HtmlSingleTextExpression(_),
+        ),
+    ))) = meaningful_children.next()
+    else {
+        return false;
+    };
+
+    meaningful_children.next().is_none()
 }
 
 fn format_partial_closing_tag(
