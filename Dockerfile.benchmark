@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1@sha256:2780b5c3bab67f1f76c781860de469442999ed1a0d7992a5efdf2cffc0e3d769
-FROM rust:1.95.0-trixie@sha256:a9cfb755b33f5bb872610cbdb25da61f527416b28fc9c052bbce4bef93e7799a
+FROM rust:1.95.0-trixie@sha256:5b1e3484ddcd22a3738c0ec34a5e98bf19382eb295fb6db54295e62379119040
 WORKDIR /usr/src/
 
 # https://github.com/nodesource/distributions
