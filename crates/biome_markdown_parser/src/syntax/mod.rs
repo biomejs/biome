@@ -1058,9 +1058,9 @@ fn break_for_setext_after_inline_newline(
     false
 }
 
-/// Break the paragraph when the next line is a block interrupt at
-/// `required_indent`, or when a nested item's continuation drops to
-/// the parent's indent level (§5.2 ownership, depth >= 2).
+/// Break the paragraph when the next line starts a list-interrupting
+/// block, including sibling/parent list markers whose indent is below
+/// the current item's `required_indent` (CommonMark §5.2).
 fn break_for_list_interrupt_after_inline_newline(
     p: &mut MarkdownParser,
     required_indent: usize,
@@ -1070,12 +1070,20 @@ fn break_for_list_interrupt_after_inline_newline(
     }
 
     let indent = p.line_start_leading_indent();
-    if indent < required_indent {
+    if indent < required_indent && indent > p.state().list_item_marker_indent {
         return false;
     }
 
+    if indent < required_indent {
+        if !line_start_indent_contains_tab(p) {
+            return false;
+        }
+        return line_starts_with_list_marker_after_indent(p, indent);
+    }
+
+    let skip = indent.min(required_indent);
     p.lookahead(|p| {
-        p.skip_line_indent(required_indent);
+        p.skip_line_indent(skip);
         let prev_required = p.state().list_item_required_indent;
         with_virtual_line_start(p, p.cur_range().start(), |p| {
             p.state_mut().list_item_required_indent = 0;
@@ -1083,6 +1091,59 @@ fn break_for_list_interrupt_after_inline_newline(
             p.state_mut().list_item_required_indent = prev_required;
             breaks
         })
+    })
+}
+
+/// True if current `MD_TEXTUAL_LITERAL`'s leading space/tab run contains a tab.
+/// Gates tab-only dedent recovery in [`break_for_list_interrupt_after_inline_newline`].
+fn line_start_indent_contains_tab(p: &MarkdownParser) -> bool {
+    p.at(MD_TEXTUAL_LITERAL)
+        && p.cur_text()
+            .chars()
+            .take_while(|c| *c == ' ' || *c == '\t')
+            .any(|c| c == '\t')
+}
+
+/// Lookahead: after skipping `indent` columns of leading whitespace, is the next
+/// token a list marker (`-`, `*`, `+`, ordered) followed by whitespace or EOL?
+/// Handles raw marker tokens and markers still folded into `MD_TEXTUAL_LITERAL`
+/// / `MD_SETEXT_UNDERLINE_LITERAL`.
+fn line_starts_with_list_marker_after_indent(p: &mut MarkdownParser, indent: usize) -> bool {
+    p.lookahead(|p| {
+        p.skip_line_indent(indent);
+
+        if p.at(T![-]) || p.at(T![*]) || p.at(T![+]) {
+            p.bump(p.cur());
+            return marker_followed_by_whitespace_or_eol(p);
+        }
+
+        if p.at(MD_SETEXT_UNDERLINE_LITERAL) {
+            let trimmed = p.cur_text().trim_matches(|c| c == ' ' || c == '\t');
+            if trimmed != "-" {
+                return false;
+            }
+            p.bump_remap(T![-]);
+            return marker_followed_by_whitespace_or_eol(p);
+        }
+
+        if p.at(MD_ORDERED_LIST_MARKER) {
+            p.bump(MD_ORDERED_LIST_MARKER);
+            return marker_followed_by_whitespace_or_eol(p);
+        }
+
+        if !p.at(MD_TEXTUAL_LITERAL) {
+            return false;
+        }
+
+        let text = p.cur_text();
+        let marker_kind = match text {
+            "-" => T![-],
+            "*" => T![*],
+            "+" => T![+],
+            _ => return textual_starts_with_ordered_marker(text),
+        };
+        p.bump_remap(marker_kind);
+        marker_followed_by_whitespace_or_eol(p)
     })
 }
 
