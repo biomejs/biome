@@ -351,21 +351,33 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
     } else if at_bullet_list_item(p) {
         parse_bullet_list_item(p)
     } else if at_order_list_item(p) || at_order_list_item_textual(p) {
-        let forced = if !at_order_list_item(p) && at_order_list_item_textual(p) {
-            p.set_force_ordered_list_marker(true);
-            p.force_relex_regular();
-            true
-        } else {
-            false
-        };
-        let parsed = parse_order_list_item(p);
-        if forced {
-            p.set_force_ordered_list_marker(false);
-        }
-        if parsed.is_absent() {
+        // After a link reference definition with no intervening blank line,
+        // CommonMark treats the next line as paragraph continuation unless it
+        // begins a paragraph-interrupting block. Ordered lists with a starting
+        // number other than 1 cannot interrupt a paragraph (§5.2), so fall
+        // back to paragraph parsing.
+        if p.state().link_reference_definition_continuation
+            && p.state().list_nesting_depth == 0
+            && !is_ordered_list_starts_with_one(p)
+        {
             parse_paragraph(p)
         } else {
-            parsed
+            let forced = if !at_order_list_item(p) && at_order_list_item_textual(p) {
+                p.set_force_ordered_list_marker(true);
+                p.force_relex_regular();
+                true
+            } else {
+                false
+            };
+            let parsed = parse_order_list_item(p);
+            if forced {
+                p.set_force_ordered_list_marker(false);
+            }
+            if parsed.is_absent() {
+                parse_paragraph(p)
+            } else {
+                parsed
+            }
         }
     } else if at_html_block(p) {
         parse_html_block(p)
@@ -886,8 +898,40 @@ fn classify_quote_break_after_newline(
             let at_setext = p.at(MD_SETEXT_UNDERLINE_LITERAL)
                 || (p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break(p));
             if at_setext && underline_in_container {
-                QuoteBreakKind::SetextUnderline
-            } else if at_setext || at_block_interrupt(p) || textual_looks_like_list_marker(p) {
+                return QuoteBreakKind::SetextUnderline;
+            }
+            if at_setext || at_block_interrupt(p) || textual_looks_like_list_marker(p) {
+                return QuoteBreakKind::Other;
+            }
+            // Tab between `>` and a block-level marker (e.g. `> \t- nested`)
+            // leaves the marker token mid-line in the buffer, so the direct
+            // checks miss it. Only enter the lookahead retry when the current
+            // token is a whitespace-only textual run that contains a tab —
+            // otherwise the original checks above are authoritative and the
+            // retry would add lookahead overhead to every quote continuation.
+            let needs_ws_retry = p.at(MD_TEXTUAL_LITERAL) && {
+                let bytes = p.cur_text().as_bytes();
+                !bytes.is_empty()
+                    && bytes.iter().all(|b| matches!(b, b' ' | b'\t'))
+                    && bytes.contains(&b'\t')
+            };
+            if !needs_ws_retry {
+                return QuoteBreakKind::None;
+            }
+            let interrupts_after_ws = p.lookahead(|p| {
+                while p.at(MD_TEXTUAL_LITERAL) {
+                    let bytes = p.cur_text().as_bytes();
+                    if bytes.is_empty() || !bytes.iter().all(|b| matches!(b, b' ' | b'\t')) {
+                        break;
+                    }
+                    p.bump(MD_TEXTUAL_LITERAL);
+                }
+                with_virtual_line_start(p, p.cur_range().start(), |p| {
+                    p.force_relex_at_line_start();
+                    at_block_interrupt(p) || textual_looks_like_list_marker(p)
+                })
+            });
+            if interrupts_after_ws {
                 QuoteBreakKind::Other
             } else {
                 QuoteBreakKind::None
@@ -921,6 +965,48 @@ fn leading_indent_at_current(p: &mut MarkdownParser) -> usize {
             p.bump(MD_TEXTUAL_LITERAL);
         }
         indent
+    })
+}
+
+/// Returns `true` when the current (no-quote-prefix) line begins a block
+/// construct strict enough to end blockquote lazy continuation.
+///
+/// CommonMark distinguishes "paragraph interrupt" rules (e.g. ordered lists
+/// must start with `1` to interrupt a paragraph) from "begins a new block"
+/// rules used for laziness. An ordered list with start > 1 still *begins a
+/// new block*, so it terminates a lazily continued blockquote even though it
+/// would not interrupt a top-level paragraph.
+fn begins_blockquote_terminating_block(p: &mut MarkdownParser) -> bool {
+    use biome_markdown_syntax::MarkdownSyntaxKind::MD_ORDERED_LIST_MARKER;
+    // The lexer can split a line into a leading whitespace token followed by
+    // the marker token (e.g. `"  "` then `"2."`), so walk past whitespace-only
+    // `MD_TEXTUAL_LITERAL` tokens via a lookahead before testing the marker.
+    p.lookahead(|p| {
+        while p.at(MD_TEXTUAL_LITERAL) {
+            let bytes = p.cur_text().as_bytes();
+            if bytes.is_empty() || !bytes.iter().all(|b| matches!(b, b' ' | b'\t')) {
+                break;
+            }
+            p.bump(MD_TEXTUAL_LITERAL);
+        }
+        let text = if p.at(MD_TEXTUAL_LITERAL) || p.at(MD_ORDERED_LIST_MARKER) {
+            p.cur_text()
+        } else {
+            return false;
+        };
+        let trimmed = text.trim_start_matches([' ', '\t']);
+        if !crate::syntax::list::textual_starts_with_ordered_marker(trimmed) {
+            return false;
+        }
+        let digit_bytes = trimmed.as_bytes();
+        let digit_len = digit_bytes
+            .iter()
+            .take_while(|b| b.is_ascii_digit())
+            .count();
+        // `1.` / `1)` is handled by the paragraph-interrupt path. Only the
+        // start > 1 case needs the broader laziness rule here. Compare the
+        // borrowed digit prefix instead of allocating a String.
+        !(digit_len == 1 && digit_bytes[0] == b'1')
     })
 }
 
@@ -1195,6 +1281,14 @@ fn handle_line_continuation(
 ) -> InlineNewlineAction {
     let quote_depth = p.state().block_quote_depth;
     if break_for_quote_prefix_after_inline_newline(p, quote_depth) {
+        return InlineNewlineAction::Break;
+    }
+
+    // Blockquote lazy continuation is stricter than paragraph interrupt:
+    // a line that begins any new block construct (e.g. an ordered list with
+    // start > 1) ends the blockquote, even though such a line could not
+    // interrupt an active top-level paragraph.
+    if quote_depth > 0 && begins_blockquote_terminating_block(p) {
         return InlineNewlineAction::Break;
     }
 
@@ -1821,14 +1915,21 @@ fn textual_looks_like_list_marker(p: &mut MarkdownParser) -> bool {
 /// This prevents accidental list creation from wrapped lines like:
 /// "The number of windows is 14. The number of doors is 6."
 fn is_ordered_list_starts_with_one(p: &mut MarkdownParser) -> bool {
-    if !p.at(MD_ORDERED_LIST_MARKER) {
-        return false;
+    // Raw ordered list marker token: text is the full marker (e.g. "1.", "10.").
+    if p.at(MD_ORDERED_LIST_MARKER) {
+        let text = p.cur_text();
+        return text == "1." || text == "1)";
     }
-
-    // The marker text includes digits + delimiter (e.g., "1.", "2)", "10.")
-    // We want exactly "1." or "1)" - not "10.", "11.", etc.
-    let text = p.cur_text();
-    text == "1." || text == "1)"
+    // Textual ordered marker (e.g. inside an inline list source span): the
+    // lexer keeps the digits + delimiter inside MD_TEXTUAL_LITERAL. Accept
+    // an exact `1.` / `1)` prefix optionally followed by whitespace or EOL.
+    if p.at(MD_TEXTUAL_LITERAL) {
+        let text = p.cur_text();
+        if let Some(rest) = text.strip_prefix("1.").or_else(|| text.strip_prefix("1)")) {
+            return rest.is_empty() || rest.starts_with([' ', '\t']);
+        }
+    }
+    false
 }
 
 /// Check for a bullet list item at any valid top-level indent (0-3 spaces).

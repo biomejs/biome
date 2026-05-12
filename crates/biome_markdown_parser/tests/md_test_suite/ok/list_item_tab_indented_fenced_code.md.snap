@@ -1,0 +1,141 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+- item
+
+	```
+	code body
+	```
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@0..1 "-" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@1..2 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@2..6 "item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@6..7 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@7..8 "\n" [] [],
+                        },
+                        MdContinuationIndent {
+                            indent: MdIndentTokenList [
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@8..9 "\t" [] [],
+                                },
+                            ],
+                        },
+                        MdFencedCodeBlock {
+                            indent: MdIndentTokenList [],
+                            l_fence: TRIPLE_BACKTICK@9..12 "```" [] [],
+                            code_list: MdCodeNameList [],
+                            content: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@12..13 "\n" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@13..14 "\t" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@14..23 "code body" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@23..24 "\n" [] [],
+                                },
+                            ],
+                            r_fence_indent: MdIndentTokenList [
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@24..25 "\t" [] [],
+                                },
+                            ],
+                            r_fence: TRIPLE_BACKTICK@25..28 "```" [] [],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@28..29 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@29..29 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..29
+  0: (empty)
+  1: MD_BLOCK_LIST@0..29
+    0: MD_BULLET_LIST_ITEM@0..28
+      0: MD_BULLET_LIST@0..28
+        0: MD_BULLET@0..28
+          0: MD_LIST_MARKER_PREFIX@0..2
+            0: MD_INDENT_TOKEN_LIST@0..0
+            1: MINUS@0..1 "-" [] []
+            2: MD_LIST_POST_MARKER_SPACE@1..2 " " [] []
+            3: MD_INDENT_TOKEN_LIST@2..2
+          1: MD_BLOCK_LIST@2..28
+            0: MD_PARAGRAPH@2..7
+              0: MD_INLINE_ITEM_LIST@2..7
+                0: MD_TEXTUAL@2..6
+                  0: MD_TEXTUAL_LITERAL@2..6 "item" [] []
+                1: MD_TEXTUAL@6..7
+                  0: MD_TEXTUAL_LITERAL@6..7 "\n" [] []
+              1: (empty)
+            1: MD_NEWLINE@7..8
+              0: NEWLINE@7..8 "\n" [] []
+            2: MD_CONTINUATION_INDENT@8..9
+              0: MD_INDENT_TOKEN_LIST@8..9
+                0: MD_INDENT_TOKEN@8..9
+                  0: MD_INDENT_CHAR@8..9 "\t" [] []
+            3: MD_FENCED_CODE_BLOCK@9..28
+              0: MD_INDENT_TOKEN_LIST@9..9
+              1: TRIPLE_BACKTICK@9..12 "```" [] []
+              2: MD_CODE_NAME_LIST@12..12
+              3: MD_INLINE_ITEM_LIST@12..24
+                0: MD_TEXTUAL@12..13
+                  0: MD_TEXTUAL_LITERAL@12..13 "\n" [] []
+                1: MD_TEXTUAL@13..14
+                  0: MD_TEXTUAL_LITERAL@13..14 "\t" [] []
+                2: MD_TEXTUAL@14..23
+                  0: MD_TEXTUAL_LITERAL@14..23 "code body" [] []
+                3: MD_TEXTUAL@23..24
+                  0: MD_TEXTUAL_LITERAL@23..24 "\n" [] []
+              4: MD_INDENT_TOKEN_LIST@24..25
+                0: MD_INDENT_TOKEN@24..25
+                  0: MD_INDENT_CHAR@24..25 "\t" [] []
+              5: TRIPLE_BACKTICK@25..28 "```" [] []
+    1: MD_NEWLINE@28..29
+      0: NEWLINE@28..29 "\n" [] []
+  2: EOF@29..29 "" [] []
+
+```
