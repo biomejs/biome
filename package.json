@@ -15,7 +15,8 @@
   "license": "MIT OR Apache-2.0",
   "packageManager": "pnpm@11.1.1",
   "engines": {
-    "pnpm": "11.1.1"
+    "pnpm": "11.1.1",
+    "node": ">=22"
   },
   "type": "module",
   "devDependencies": {
