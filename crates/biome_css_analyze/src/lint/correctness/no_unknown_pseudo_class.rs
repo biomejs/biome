@@ -10,12 +10,12 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_css_syntax::{
-    CssBogusPseudoClass, CssFileSource, CssPageSelectorPseudo,
+    AnyCssSelectorIdentifier, CssBogusPseudoClass, CssFileSource, CssPageSelectorPseudo,
     CssPseudoClassFunctionCompoundSelector, CssPseudoClassFunctionCompoundSelectorList,
     CssPseudoClassFunctionIdentifier, CssPseudoClassFunctionNth,
     CssPseudoClassFunctionRelativeSelectorList, CssPseudoClassFunctionSelector,
     CssPseudoClassFunctionSelectorList, CssPseudoClassFunctionValueList, CssPseudoClassIdentifier,
-    CssPseudoElementSelector, CssSyntaxToken,
+    CssPseudoElementSelector, CssSyntaxToken, ScssInterpolatedPseudoClassFunction,
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange, declare_node_union};
@@ -105,6 +105,7 @@ declare_node_union! {
       | CssPseudoClassFunctionSelectorList
       | CssPseudoClassFunctionValueList
       | CssPseudoClassIdentifier
+      | ScssInterpolatedPseudoClassFunction
       | CssBogusPseudoClass
       | CssPageSelectorPseudo
 }
@@ -121,7 +122,10 @@ impl AnyPseudoLike {
             Self::CssPseudoClassFunctionSelector(selector) => selector.name(),
             Self::CssPseudoClassFunctionSelectorList(selector_list) => selector_list.name(),
             Self::CssPseudoClassFunctionValueList(func_value_list) => func_value_list.name(),
-            Self::CssPseudoClassIdentifier(ident) => ident.name(),
+            Self::CssPseudoClassIdentifier(ident) => {
+                return css_selector_identifier_token(ident.name().ok()?);
+            }
+            Self::ScssInterpolatedPseudoClassFunction(_) => return None,
             Self::CssPageSelectorPseudo(page_pseudo) => page_pseudo.selector(),
         };
 
@@ -131,6 +135,11 @@ impl AnyPseudoLike {
     fn name_range(&self) -> Option<TextRange> {
         self.name().map(|name| name.text_trimmed_range())
     }
+}
+
+fn css_selector_identifier_token(name: AnyCssSelectorIdentifier) -> Option<CssSyntaxToken> {
+    // `:foo-#{$name}` cannot be validated before Sass interpolation is resolved.
+    name.as_css_identifier()?.value_token().ok()
 }
 
 fn is_webkit_pseudo_class(node: &AnyPseudoLike) -> bool {

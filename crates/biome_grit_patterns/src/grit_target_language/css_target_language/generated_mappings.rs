@@ -325,6 +325,46 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
             .iter()
             .next(),
         "ScssInterpolatedNthValue" => lang::ScssInterpolatedNthValue::KIND_SET.iter().next(),
+        "ScssInterpolatedPseudoClassFunction" => {
+            lang::ScssInterpolatedPseudoClassFunction::KIND_SET
+                .iter()
+                .next()
+        }
+        "ScssInterpolatedPseudoClassNthArguments" => {
+            lang::ScssInterpolatedPseudoClassNthArguments::KIND_SET
+                .iter()
+                .next()
+        }
+        "ScssInterpolatedPseudoClassRelativeSelectorArguments" => {
+            lang::ScssInterpolatedPseudoClassRelativeSelectorArguments::KIND_SET
+                .iter()
+                .next()
+        }
+        "ScssInterpolatedPseudoClassSelectorArguments" => {
+            lang::ScssInterpolatedPseudoClassSelectorArguments::KIND_SET
+                .iter()
+                .next()
+        }
+        "ScssInterpolatedPseudoClassValueArguments" => {
+            lang::ScssInterpolatedPseudoClassValueArguments::KIND_SET
+                .iter()
+                .next()
+        }
+        "ScssInterpolatedPseudoElementFunction" => {
+            lang::ScssInterpolatedPseudoElementFunction::KIND_SET
+                .iter()
+                .next()
+        }
+        "ScssInterpolatedPseudoElementSelectorArguments" => {
+            lang::ScssInterpolatedPseudoElementSelectorArguments::KIND_SET
+                .iter()
+                .next()
+        }
+        "ScssInterpolatedPseudoElementValueArguments" => {
+            lang::ScssInterpolatedPseudoElementValueArguments::KIND_SET
+                .iter()
+                .next()
+        }
         "ScssInterpolatedString" => lang::ScssInterpolatedString::KIND_SET.iter().next(),
         "ScssInterpolatedValue" => lang::ScssInterpolatedValue::KIND_SET.iter().next(),
         "ScssInterpolation" => lang::ScssInterpolation::KIND_SET.iter().next(),
@@ -603,6 +643,14 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "ScssIncludeUsingClause" => &[("parameters", 1)],
         "ScssInterpolatedIdentifier" => &[("items", 0)],
         "ScssInterpolatedNthValue" => &[("items", 0)],
+        "ScssInterpolatedPseudoClassFunction" => &[("name", 0), ("arguments", 2)],
+        "ScssInterpolatedPseudoClassNthArguments" => &[("selector", 0)],
+        "ScssInterpolatedPseudoClassRelativeSelectorArguments" => &[("selectors", 0)],
+        "ScssInterpolatedPseudoClassSelectorArguments" => &[("selectors", 0)],
+        "ScssInterpolatedPseudoClassValueArguments" => &[("values", 0)],
+        "ScssInterpolatedPseudoElementFunction" => &[("name", 0), ("arguments", 2)],
+        "ScssInterpolatedPseudoElementSelectorArguments" => &[("selectors", 0)],
+        "ScssInterpolatedPseudoElementValueArguments" => &[("values", 0)],
         "ScssInterpolatedString" => &[("parts", 1)],
         "ScssInterpolatedValue" => &[("items", 0)],
         "ScssInterpolation" => &[("value", 2)],

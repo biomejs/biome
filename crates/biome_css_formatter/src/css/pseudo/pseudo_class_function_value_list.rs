@@ -18,10 +18,12 @@ impl FormatNodeRule<CssPseudoClassFunctionValueList> for FormatCssPseudoClassFun
             r_paren_token,
         } = node.as_fields();
 
+        let name = name?;
+
         write!(
             f,
             [
-                name.format()?
+                name.format()
                     .with_options(FormatCssIdentifierOptions::default().with_lowercasing()),
                 group(&format_args![
                     l_paren_token.format(),
