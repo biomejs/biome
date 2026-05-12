@@ -729,18 +729,21 @@ MdDocument {
                             ],
                             hard_line: missing (optional),
                         },
+                        MdContinuationIndent {
+                            indent: MdIndentTokenList [
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@712..713 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@713..714 " " [] [],
+                                },
+                            ],
+                        },
                         MdBulletListItem {
                             md_bullet_list: MdBulletList [
                                 MdBullet {
                                     prefix: MdListMarkerPrefix {
-                                        pre_marker_indent: MdIndentTokenList [
-                                            MdIndentToken {
-                                                md_indent_char_token: MD_INDENT_CHAR@712..713 " " [] [],
-                                            },
-                                            MdIndentToken {
-                                                md_indent_char_token: MD_INDENT_CHAR@713..714 " " [] [],
-                                            },
-                                        ],
+                                        pre_marker_indent: MdIndentTokenList [],
                                         marker: MINUS@714..715 "-" [] [],
                                         post_marker_space_token: MD_LIST_POST_MARKER_SPACE@715..716 " " [] [],
                                         content_indent: MdIndentTokenList [],
@@ -1316,15 +1319,17 @@ MdDocument {
                 1: MD_TEXTUAL@711..712
                   0: MD_TEXTUAL_LITERAL@711..712 "\n" [] []
               1: (empty)
-            1: MD_BULLET_LIST_ITEM@712..760
-              0: MD_BULLET_LIST@712..760
-                0: MD_BULLET@712..760
-                  0: MD_LIST_MARKER_PREFIX@712..716
-                    0: MD_INDENT_TOKEN_LIST@712..714
-                      0: MD_INDENT_TOKEN@712..713
-                        0: MD_INDENT_CHAR@712..713 " " [] []
-                      1: MD_INDENT_TOKEN@713..714
-                        0: MD_INDENT_CHAR@713..714 " " [] []
+            1: MD_CONTINUATION_INDENT@712..714
+              0: MD_INDENT_TOKEN_LIST@712..714
+                0: MD_INDENT_TOKEN@712..713
+                  0: MD_INDENT_CHAR@712..713 " " [] []
+                1: MD_INDENT_TOKEN@713..714
+                  0: MD_INDENT_CHAR@713..714 " " [] []
+            2: MD_BULLET_LIST_ITEM@714..760
+              0: MD_BULLET_LIST@714..760
+                0: MD_BULLET@714..760
+                  0: MD_LIST_MARKER_PREFIX@714..716
+                    0: MD_INDENT_TOKEN_LIST@714..714
                     1: MINUS@714..715 "-" [] []
                     2: MD_LIST_POST_MARKER_SPACE@715..716 " " [] []
                     3: MD_INDENT_TOKEN_LIST@716..716

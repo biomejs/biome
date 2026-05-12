@@ -295,6 +295,49 @@ function genTabBlankContinuation() {
 
 // #endregion
 
+// #region Content-column-aware nested list combinators — class of
+// issues surfaced by PR 10347 (sublist marker at exactly the outer
+// item's content column, pure spaces, no blank-line separator).
+
+function contentColumnFor(markerText, trailing) {
+  return markerText.length + trailing.length;
+}
+
+function genOrderedSublistAtContentColumn() {
+  const ordered = pick(["1.", "1)", "2.", "10.", "99."]);
+  const postSpace = pick([" ", "  "]);
+  const contentCol = contentColumnFor(ordered, postSpace);
+  const innerIndent = " ".repeat(contentCol);
+  const innerMarker = pick(["-", "*", "+", "1.", "2)"]);
+  const blankBefore = maybe(0.3) ? "\n" : "";
+  return `${ordered}${postSpace}outer\n${blankBefore}${innerIndent}${innerMarker} nested\n`;
+}
+
+function genNestedSublistBoundary() {
+  const outerMarker = pick(["-", "*", "+", "1.", "10."]);
+  const postSpace = " ";
+  const contentCol = contentColumnFor(outerMarker, postSpace);
+  const offset = pick([-1, 0, 1]);
+  const indentWidth = Math.max(0, contentCol + offset);
+  const innerIndent = " ".repeat(indentWidth);
+  const innerMarker = pick(["-", "*", "+", "1.", "2)"]);
+  return `${outerMarker}${postSpace}outer\n${innerIndent}${innerMarker} nested\n`;
+}
+
+function genQuotedSublistAtContentColumn() {
+  const ordered = pick(["1.", "2.", "10."]);
+  const postSpace = pick([" ", "  "]);
+  const contentCol = contentColumnFor(ordered, postSpace);
+  const innerIndent = " ".repeat(contentCol);
+  // Mix bullet and ordered (both 1. and non-1) inners so the whitespace-
+  // tolerant ordered-marker logic in syntax::list and syntax::mod is
+  // exercised inside a blockquote prefix.
+  const innerMarker = pick(["-", "*", "+", "1.", "1)", "2.", "2)", "10."]);
+  return `> ${ordered}${postSpace}quoted\n> ${innerIndent}${innerMarker} sub\n`;
+}
+
+// #endregion
+
 // #endregion
 
 // #region Document generator
@@ -331,6 +374,12 @@ const blockGenerators = [
   { fn: genTabAfterListMarker, weight: 3 },
   { fn: genDeepTabNesting, weight: 2 },
   { fn: genTabBlankContinuation, weight: 3 },
+  // Content-column-aware nested list combinators — class surfaced by
+  // PR 10347 (sublist marker at exactly the outer item's content
+  // column, pure spaces, no blank-line separator).
+  { fn: genOrderedSublistAtContentColumn, weight: 4 },
+  { fn: genNestedSublistBoundary, weight: 4 },
+  { fn: genQuotedSublistAtContentColumn, weight: 3 },
 ];
 
 const totalWeight = blockGenerators.reduce((sum, g) => sum + g.weight, 0);
