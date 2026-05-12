@@ -3,9 +3,10 @@ use crate::parser::CssParser;
 use crate::syntax::parse_error::{
     expected_any_pseudo_element, expected_identifier, expected_selector,
 };
+use crate::syntax::scss::parse_scss_interpolated_pseudo_element_function_arguments;
 use crate::syntax::selector::{
-    eat_or_recover_selector_function_close_token, parse_selector,
-    parse_selector_identifier_fragment, recover_selector_function_parameter,
+    eat_or_recover_selector_function_close_token, is_at_selector_identifier, parse_selector,
+    parse_selector_identifier, recover_selector_function_parameter,
 };
 use crate::syntax::{is_at_identifier, parse_custom_identifier, parse_regular_identifier};
 use biome_css_syntax::CssSyntaxKind::*;
@@ -31,7 +32,7 @@ pub(crate) fn parse_pseudo_element_selector(p: &mut CssParser) -> ParsedSyntax {
 }
 #[inline]
 pub(crate) fn parse_pseudo_element(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_identifier(p) {
+    if !is_at_selector_identifier(p) {
         return Absent;
     }
 
@@ -44,6 +45,37 @@ pub(crate) fn parse_pseudo_element(p: &mut CssParser) -> ParsedSyntax {
     } else {
         parse_pseudo_element_identifier(p)
     }
+}
+
+/// Parses a pseudo-element identifier.
+///
+/// Examples:
+/// ```scss
+/// ::marker
+/// ::foo-#{$name}
+/// ::foo-#{$name}(bar)
+/// ```
+#[inline]
+fn parse_pseudo_element_identifier(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_selector_identifier(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    let name = parse_selector_identifier(p);
+    let is_interpolated_name = name.kind(p) == Some(SCSS_INTERPOLATED_IDENTIFIER);
+    name.or_add_diagnostic(p, expected_identifier);
+
+    if is_interpolated_name && p.at(T!['(']) {
+        p.bump(T!['(']);
+        // `::#{$name}()` has no arguments; invalid non-empty bodies are reported by `)`.
+        parse_scss_interpolated_pseudo_element_function_arguments(p).ok();
+        p.expect(T![')']);
+
+        return Present(m.complete(p, SCSS_INTERPOLATED_PSEUDO_ELEMENT_FUNCTION));
+    }
+
+    Present(m.complete(p, CSS_PSEUDO_ELEMENT_IDENTIFIER))
 }
 
 #[inline]
@@ -92,7 +124,6 @@ pub(crate) fn parse_pseudo_element_function(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    // we don't need to check if the identifier is valid, because we already did that
     parse_regular_identifier(p).ok();
     p.bump(T!['(']);
 
@@ -180,15 +211,4 @@ pub(crate) fn parse_pseudo_element_function_selector(p: &mut CssParser) -> Parse
     };
 
     Present(m.complete(p, kind))
-}
-
-#[inline]
-pub(crate) fn parse_pseudo_element_identifier(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_identifier(p) {
-        return Absent;
-    }
-
-    let m = p.start();
-    parse_selector_identifier_fragment(p).or_add_diagnostic(p, expected_identifier);
-    Present(m.complete(p, CSS_PSEUDO_ELEMENT_IDENTIFIER))
 }

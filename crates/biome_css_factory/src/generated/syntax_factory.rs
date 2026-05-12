@@ -4274,7 +4274,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && CssIdentifier::can_cast(element.kind())
+                    && AnyCssSelectorIdentifier::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -4576,7 +4576,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && CssIdentifier::can_cast(element.kind())
+                    && AnyCssSelectorIdentifier::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -7257,6 +7257,206 @@ impl SyntaxFactory for CssSyntaxFactory {
                     );
                 }
                 slots.into_node(SCSS_INTERPOLATED_NTH_VALUE, children)
+            }
+            SCSS_INTERPOLATED_PSEUDO_CLASS_FUNCTION => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && ScssInterpolatedIdentifier::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['(']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AnyScssInterpolatedPseudoClassFunctionArguments::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![')']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SCSS_INTERPOLATED_PSEUDO_CLASS_FUNCTION.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SCSS_INTERPOLATED_PSEUDO_CLASS_FUNCTION, children)
+            }
+            SCSS_INTERPOLATED_PSEUDO_CLASS_NTH_ARGUMENTS => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && CssPseudoClassNthSelector::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SCSS_INTERPOLATED_PSEUDO_CLASS_NTH_ARGUMENTS.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SCSS_INTERPOLATED_PSEUDO_CLASS_NTH_ARGUMENTS, children)
+            }
+            SCSS_INTERPOLATED_PSEUDO_CLASS_RELATIVE_SELECTOR_ARGUMENTS => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && CssRelativeSelectorList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SCSS_INTERPOLATED_PSEUDO_CLASS_RELATIVE_SELECTOR_ARGUMENTS.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(
+                    SCSS_INTERPOLATED_PSEUDO_CLASS_RELATIVE_SELECTOR_ARGUMENTS,
+                    children,
+                )
+            }
+            SCSS_INTERPOLATED_PSEUDO_CLASS_SELECTOR_ARGUMENTS => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && CssSelectorList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SCSS_INTERPOLATED_PSEUDO_CLASS_SELECTOR_ARGUMENTS.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SCSS_INTERPOLATED_PSEUDO_CLASS_SELECTOR_ARGUMENTS, children)
+            }
+            SCSS_INTERPOLATED_PSEUDO_CLASS_VALUE_ARGUMENTS => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && CssPseudoValueList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SCSS_INTERPOLATED_PSEUDO_CLASS_VALUE_ARGUMENTS.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SCSS_INTERPOLATED_PSEUDO_CLASS_VALUE_ARGUMENTS, children)
+            }
+            SCSS_INTERPOLATED_PSEUDO_ELEMENT_FUNCTION => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && ScssInterpolatedIdentifier::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['(']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && AnyScssInterpolatedPseudoElementFunctionArguments::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![')']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SCSS_INTERPOLATED_PSEUDO_ELEMENT_FUNCTION.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SCSS_INTERPOLATED_PSEUDO_ELEMENT_FUNCTION, children)
+            }
+            SCSS_INTERPOLATED_PSEUDO_ELEMENT_SELECTOR_ARGUMENTS => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && CssSelectorList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SCSS_INTERPOLATED_PSEUDO_ELEMENT_SELECTOR_ARGUMENTS.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(
+                    SCSS_INTERPOLATED_PSEUDO_ELEMENT_SELECTOR_ARGUMENTS,
+                    children,
+                )
+            }
+            SCSS_INTERPOLATED_PSEUDO_ELEMENT_VALUE_ARGUMENTS => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && CssPseudoValueList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        SCSS_INTERPOLATED_PSEUDO_ELEMENT_VALUE_ARGUMENTS.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(SCSS_INTERPOLATED_PSEUDO_ELEMENT_VALUE_ARGUMENTS, children)
             }
             SCSS_INTERPOLATED_STRING => {
                 let mut elements = (&children).into_iter();

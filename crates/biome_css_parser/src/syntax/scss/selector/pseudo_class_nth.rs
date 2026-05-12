@@ -1,20 +1,17 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::CssSyntaxFeatures;
-use crate::syntax::parse_error::{expected_identifier, expected_number};
+use crate::syntax::parse_error::expected_number;
 use crate::syntax::parse_number;
 use crate::syntax::scss::{
-    is_at_scss_interpolation, is_nth_at_scss_interpolated_identifier, is_nth_at_scss_interpolation,
+    is_at_scss_interpolation, is_nth_at_scss_interpolation,
     parse_scss_interpolation_inner_expression, parse_scss_interpolation_prefix,
 };
-use crate::syntax::selector::{
-    PSEUDO_CLASS_NTH_SIGN_SET, parse_pseudo_class_nth_dimension_value,
-    parse_selector_custom_identifier,
-};
+use crate::syntax::selector::{PSEUDO_CLASS_NTH_SIGN_SET, parse_pseudo_class_nth_dimension_value};
 use biome_css_syntax::CssSyntaxKind::{
     CSS_BOGUS, CSS_DIMENSION_VALUE, CSS_NTH_OFFSET, CSS_NUMBER_LITERAL, CSS_PSEUDO_CLASS_NTH,
     CSS_PSEUDO_CLASS_NTH_NUMBER, SCSS_INTERPOLATED_NTH_VALUE,
-    SCSS_INTERPOLATED_NTH_VALUE_PART_LIST, SCSS_INTERPOLATION, SCSS_PLACEHOLDER_SELECTOR,
+    SCSS_INTERPOLATED_NTH_VALUE_PART_LIST, SCSS_INTERPOLATION,
 };
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseNodeList;
@@ -22,28 +19,6 @@ use biome_parser::parse_recovery::{RecoveryError, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
 use biome_parser::{CompletedMarker, Parser, SyntaxFeature};
-
-#[inline]
-pub(crate) fn is_nth_at_scss_placeholder_selector(p: &mut CssParser, n: usize) -> bool {
-    CssSyntaxFeatures::Scss.is_supported(p)
-        && p.nth_at(n, T![%])
-        && is_nth_at_scss_interpolated_identifier(p, n + 1)
-}
-
-/// Parses an SCSS placeholder selector such as `%toolbelt`.
-#[inline]
-pub(crate) fn parse_scss_placeholder_selector(p: &mut CssParser) -> ParsedSyntax {
-    if !is_nth_at_scss_placeholder_selector(p, 0) {
-        return Absent;
-    }
-
-    let m = p.start();
-
-    p.bump(T![%]);
-    parse_selector_custom_identifier(p).or_add_diagnostic(p, expected_identifier);
-
-    Present(m.complete(p, SCSS_PLACEHOLDER_SELECTOR))
-}
 
 #[inline]
 pub(crate) fn is_at_scss_pseudo_class_nth(p: &mut CssParser) -> bool {
@@ -123,7 +98,10 @@ fn is_at_scss_interpolated_nth_offset(p: &mut CssParser, n: usize) -> bool {
 }
 
 #[inline]
-fn is_nth_at_scss_pseudo_class_nth_value_with_interpolation(p: &mut CssParser, n: usize) -> bool {
+pub(super) fn is_nth_at_scss_pseudo_class_nth_value_with_interpolation(
+    p: &mut CssParser,
+    n: usize,
+) -> bool {
     is_nth_at_scss_interpolation(p, n) || is_nth_at_scss_number_interpolation(p, n)
 }
 

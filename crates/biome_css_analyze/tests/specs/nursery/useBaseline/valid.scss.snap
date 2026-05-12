@@ -1,0 +1,13 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+:foo-#{$name} { color: red; }
+:#{$name}-foo { color: red; }
+::foo-#{$name} { color: red; }
+::#{$name}-foo { color: red; }
+
+```

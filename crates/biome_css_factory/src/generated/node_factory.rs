@@ -2072,7 +2072,7 @@ pub fn css_pseudo_class_function_value_list(
         ],
     ))
 }
-pub fn css_pseudo_class_identifier(name: CssIdentifier) -> CssPseudoClassIdentifier {
+pub fn css_pseudo_class_identifier(name: AnyCssSelectorIdentifier) -> CssPseudoClassIdentifier {
     CssPseudoClassIdentifier::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PSEUDO_CLASS_IDENTIFIER,
         [Some(SyntaxElement::Node(name.into_syntax()))],
@@ -2252,7 +2252,7 @@ pub fn css_pseudo_element_function_selector(
         ],
     ))
 }
-pub fn css_pseudo_element_identifier(name: CssIdentifier) -> CssPseudoElementIdentifier {
+pub fn css_pseudo_element_identifier(name: AnyCssSelectorIdentifier) -> CssPseudoElementIdentifier {
     CssPseudoElementIdentifier::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PSEUDO_ELEMENT_IDENTIFIER,
         [Some(SyntaxElement::Node(name.into_syntax()))],
@@ -3612,6 +3612,132 @@ pub fn scss_interpolated_nth_value(
     ScssInterpolatedNthValue::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_INTERPOLATED_NTH_VALUE,
         [Some(SyntaxElement::Node(items.into_syntax()))],
+    ))
+}
+pub fn scss_interpolated_pseudo_class_function(
+    name: ScssInterpolatedIdentifier,
+    l_paren_token: SyntaxToken,
+    r_paren_token: SyntaxToken,
+) -> ScssInterpolatedPseudoClassFunctionBuilder {
+    ScssInterpolatedPseudoClassFunctionBuilder {
+        name,
+        l_paren_token,
+        r_paren_token,
+        arguments: None,
+    }
+}
+pub struct ScssInterpolatedPseudoClassFunctionBuilder {
+    name: ScssInterpolatedIdentifier,
+    l_paren_token: SyntaxToken,
+    r_paren_token: SyntaxToken,
+    arguments: Option<AnyScssInterpolatedPseudoClassFunctionArguments>,
+}
+impl ScssInterpolatedPseudoClassFunctionBuilder {
+    pub fn with_arguments(
+        mut self,
+        arguments: AnyScssInterpolatedPseudoClassFunctionArguments,
+    ) -> Self {
+        self.arguments = Some(arguments);
+        self
+    }
+    pub fn build(self) -> ScssInterpolatedPseudoClassFunction {
+        ScssInterpolatedPseudoClassFunction::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_INTERPOLATED_PSEUDO_CLASS_FUNCTION,
+            [
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                self.arguments
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+            ],
+        ))
+    }
+}
+pub fn scss_interpolated_pseudo_class_nth_arguments(
+    selector: CssPseudoClassNthSelector,
+) -> ScssInterpolatedPseudoClassNthArguments {
+    ScssInterpolatedPseudoClassNthArguments::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_INTERPOLATED_PSEUDO_CLASS_NTH_ARGUMENTS,
+        [Some(SyntaxElement::Node(selector.into_syntax()))],
+    ))
+}
+pub fn scss_interpolated_pseudo_class_relative_selector_arguments(
+    selectors: CssRelativeSelectorList,
+) -> ScssInterpolatedPseudoClassRelativeSelectorArguments {
+    ScssInterpolatedPseudoClassRelativeSelectorArguments::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_INTERPOLATED_PSEUDO_CLASS_RELATIVE_SELECTOR_ARGUMENTS,
+        [Some(SyntaxElement::Node(selectors.into_syntax()))],
+    ))
+}
+pub fn scss_interpolated_pseudo_class_selector_arguments(
+    selectors: CssSelectorList,
+) -> ScssInterpolatedPseudoClassSelectorArguments {
+    ScssInterpolatedPseudoClassSelectorArguments::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_INTERPOLATED_PSEUDO_CLASS_SELECTOR_ARGUMENTS,
+        [Some(SyntaxElement::Node(selectors.into_syntax()))],
+    ))
+}
+pub fn scss_interpolated_pseudo_class_value_arguments(
+    values: CssPseudoValueList,
+) -> ScssInterpolatedPseudoClassValueArguments {
+    ScssInterpolatedPseudoClassValueArguments::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_INTERPOLATED_PSEUDO_CLASS_VALUE_ARGUMENTS,
+        [Some(SyntaxElement::Node(values.into_syntax()))],
+    ))
+}
+pub fn scss_interpolated_pseudo_element_function(
+    name: ScssInterpolatedIdentifier,
+    l_paren_token: SyntaxToken,
+    r_paren_token: SyntaxToken,
+) -> ScssInterpolatedPseudoElementFunctionBuilder {
+    ScssInterpolatedPseudoElementFunctionBuilder {
+        name,
+        l_paren_token,
+        r_paren_token,
+        arguments: None,
+    }
+}
+pub struct ScssInterpolatedPseudoElementFunctionBuilder {
+    name: ScssInterpolatedIdentifier,
+    l_paren_token: SyntaxToken,
+    r_paren_token: SyntaxToken,
+    arguments: Option<AnyScssInterpolatedPseudoElementFunctionArguments>,
+}
+impl ScssInterpolatedPseudoElementFunctionBuilder {
+    pub fn with_arguments(
+        mut self,
+        arguments: AnyScssInterpolatedPseudoElementFunctionArguments,
+    ) -> Self {
+        self.arguments = Some(arguments);
+        self
+    }
+    pub fn build(self) -> ScssInterpolatedPseudoElementFunction {
+        ScssInterpolatedPseudoElementFunction::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_INTERPOLATED_PSEUDO_ELEMENT_FUNCTION,
+            [
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                self.arguments
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+            ],
+        ))
+    }
+}
+pub fn scss_interpolated_pseudo_element_selector_arguments(
+    selectors: CssSelectorList,
+) -> ScssInterpolatedPseudoElementSelectorArguments {
+    ScssInterpolatedPseudoElementSelectorArguments::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_INTERPOLATED_PSEUDO_ELEMENT_SELECTOR_ARGUMENTS,
+        [Some(SyntaxElement::Node(selectors.into_syntax()))],
+    ))
+}
+pub fn scss_interpolated_pseudo_element_value_arguments(
+    values: CssPseudoValueList,
+) -> ScssInterpolatedPseudoElementValueArguments {
+    ScssInterpolatedPseudoElementValueArguments::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_INTERPOLATED_PSEUDO_ELEMENT_VALUE_ARGUMENTS,
+        [Some(SyntaxElement::Node(values.into_syntax()))],
     ))
 }
 pub fn scss_interpolated_string(

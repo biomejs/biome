@@ -8,6 +8,8 @@ pub(crate) mod import_item;
 pub(crate) mod include_target;
 pub(crate) mod interpolated_identifier_part;
 pub(crate) mod interpolated_nth_value_part;
+pub(crate) mod interpolated_pseudo_class_function_arguments;
+pub(crate) mod interpolated_pseudo_element_function_arguments;
 pub(crate) mod interpolated_string_part;
 pub(crate) mod interpolated_value_part;
 pub(crate) mod module_configuration;
