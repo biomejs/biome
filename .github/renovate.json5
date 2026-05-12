@@ -63,6 +63,12 @@
     },
     {
       "minimumReleaseAge": "3 days",
+      "matchDepNames": [
+        "rust"
+      ]
+    },
+    {
+      "minimumReleaseAge": "3 days",
       "matchDepTypes": [
         "engines"
       ],
@@ -74,7 +80,6 @@
   ],
   "customManagers": [
     {
-      "minimumReleaseAge": "3 days",
       "customType": "regex",
       "managerFilePatterns": [
         "/(^|/)rust-toolchain\\.toml?$/"
